@@ -357,7 +357,7 @@ see, creating an enumeration node type is very easy: just subclass ``EnumNode``
 and set the ``alternatives`` field to a sequence of strings that will serve as
 names for the enumeration node values (also called *enumerators*).
 
-There is also the special ``token_node = True`` annotations, which both the
+There is also the special ``token_node = True`` annotation, which both the
 ``Number`` and ``Identifier`` classes have. This annotation specifies that
 these nodes don't hold any field but instead are used to materialize in the
 tree a single token. When compiling the grammar, Langkit will make sure that
