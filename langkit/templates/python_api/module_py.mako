@@ -1182,6 +1182,18 @@ class EnvRebindings(object):
         """
         self._c_value = c_value
 
+    @property
+    def _address(self):
+        if self._c_value:
+            # Create a dummy int* value so that we can get the pointed address
+            ptr = ctypes.cast(self._c_value, ctypes.POINTER(ctypes.c_int))
+            return ctypes.addressof(ptr.contents)
+        else:
+            return 0
+
+    def __repr__(self):
+        return '<EnvRebindings at {}>'.format(hex(self._address))
+
     class _c_type(ctypes.c_void_p):
         pass
 
