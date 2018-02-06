@@ -1188,7 +1188,7 @@ class EnvRebindings(object):
     @classmethod
     def _unwrap(cls, value):
         if value is None:
-            return 0
+            return None
         elif not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
         else:
