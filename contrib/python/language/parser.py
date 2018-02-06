@@ -281,31 +281,31 @@ class AndExpr(Expr):
     right = Field(type=T.Expr)
 
 
-class ShiftExpr(Expr):
-    left = Field(type=T.Expr)
-    op = Field(type=T.Op)
-    right = Field(type=T.Expr)
-
-
 class Op(PythonNode):
     token_node = True
 
 
-class ArithExpr(Expr):
+class BinOp(Expr):
     left = Field(type=T.Expr)
     op = Field(type=T.Op)
     right = Field(type=T.Expr)
+
+
+class ArithExpr(BinOp):
+    pass
+
+
+class Term(BinOp):
+    pass
+
+
+class ShiftExpr(BinOp):
+    pass
 
 
 class Factor(Expr):
     op = Field(type=T.Op)
     expr = Field(type=T.Expr)
-
-
-class Term(Expr):
-    left = Field(type=T.Expr)
-    op = Field(type=T.Op)
-    right = Field(type=T.Expr)
 
 
 class Power(Expr):
