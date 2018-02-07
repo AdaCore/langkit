@@ -1,0 +1,11 @@
+Comparing root nodes for rel_foo and rel_foo: True
+Comparing root nodes for rel_foo and abs_foo: True
+Comparing root nodes for rel_foo and rel_bar: False
+Comparing root nodes for abs_foo and rel_foo: True
+Comparing root nodes for abs_foo and abs_foo: True
+Comparing root nodes for abs_foo and rel_bar: False
+Comparing root nodes for rel_bar and rel_foo: False
+Comparing root nodes for rel_bar and abs_foo: False
+Comparing root nodes for rel_bar and rel_bar: True
+Done.
+Done
