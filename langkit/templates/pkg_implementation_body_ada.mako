@@ -2281,8 +2281,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
               (Main_Trace,
                "WARNING: Could not open file " & Basename (Unit));
 
-            Add_Diagnostic
-              (Exception_Message (Exc));
+            Add_Diagnostic (Exception_Message (Exc));
             return;
 
          when Lexer.Unknown_Charset =>
