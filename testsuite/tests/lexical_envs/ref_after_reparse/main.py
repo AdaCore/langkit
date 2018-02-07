@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 print('main.py: Running...')
 
 
+import os.path
 import sys
 
 import libfoolang
@@ -28,7 +29,7 @@ def Name_repr(self):
     return '<{} {} {}:{}>'.format(
         type(self).__name__,
         name_img(self),
-        self.unit.filename,
+        os.path.basename(self.unit.filename),
         self.sloc_range
     )
 for cls in [libfoolang.Decl, libfoolang.Using, libfoolang.Ref]:

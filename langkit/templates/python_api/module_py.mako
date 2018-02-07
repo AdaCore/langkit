@@ -412,7 +412,9 @@ class AnalysisUnit(object):
         return self.DiagnosticsList(self)
 
     def __repr__(self):
-        return '<AnalysisUnit {}>'.format(repr(self.filename))
+        return '<AnalysisUnit {}>'.format(repr(
+            os.path.basename(self.filename)
+        ))
 
     class _c_type(ctypes.c_void_p):
         pass

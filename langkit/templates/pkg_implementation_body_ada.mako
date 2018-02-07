@@ -16,6 +16,8 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
+with GNATCOLL.VFS;
+
 with Langkit_Support.Hashes;      use Langkit_Support.Hashes;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
@@ -940,12 +942,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function AST_Envs_Element_Image
      (Node  : ${root_node_type_name};
-      Short : Boolean := True) return Text_Type
-   is 
-     (if Short
-      then To_Text (To_String (Node.Unit.File_Name))
-           & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))))
-      else Node.Short_Image);
+      Short : Boolean := True) return Text_Type is
+   begin
+      if Short then
+         return To_Text (Basename (Node.Unit))
+           & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))));
+      else
+         return Node.Short_Image;
+      end if;
+   end AST_Envs_Element_Image;
 
    --------------------------
    -- Raise_Property_Error --
@@ -1839,7 +1844,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       function Trace_Image (Unit : Analysis_Unit) return String is
       begin
-         return "Analysis_Unit (""" & Get_Filename (Unit) & """)";
+         return "Analysis_Unit (""" & Basename (Unit) & """)";
       end Trace_Image;
 
       -----------------
@@ -1921,7 +1926,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             declare
                Result : constant String :=
                  (Node.Kind_Name & " "
-                  & Get_Filename (Node.Unit) & ":"
+                  & Basename (Node.Unit) & ":"
                   & Image (Node.Sloc_Range));
             begin
                return (if Decoration then "<" & Result & ">" else Result);
@@ -2136,6 +2141,25 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Recompute_Refd_Envs (Unit.AST_Root);
    end Reset_Envs;
 
+   --------------
+   -- Basename --
+   --------------
+
+   function Basename (Filename : String) return String is
+      use GNATCOLL.VFS;
+   begin
+      return +Create (+Filename).Base_Name;
+   end Basename;
+
+   --------------
+   -- Basename --
+   --------------
+
+   function Basename (Unit : Analysis_Unit) return String is
+   begin
+      return Basename (To_String (Unit.File_Name));
+   end Basename;
+
    ------------------
    -- Reset_Caches --
    ------------------
@@ -2145,7 +2169,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       if Unit.Cache_Version < Unit.Context.Cache_Version then
          Traces.Trace
            (Main_Trace,
-            "In reset caches for unit " & To_String (Unit.File_Name));
+            "In reset caches for unit " & Basename (Unit));
          Unit.Cache_Version := Unit.Context.Cache_Version;
          Reset_Envs (Unit);
          % if ctx.has_memoization:
@@ -2236,7 +2260,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end Add_Diagnostic;
 
    begin
-      Traces.Trace (Main_Trace, "Parsing unit " & To_String (Unit.File_Name));
+      Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
 
       Result.AST_Root := null;
 
@@ -2255,7 +2279,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
             Traces.Trace
               (Main_Trace,
-               "WARNING: Could not open file " & To_String (Unit.File_Name));
+               "WARNING: Could not open file " & Basename (Unit));
 
             Add_Diagnostic
               (Exception_Message (Exc));
@@ -2322,7 +2346,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       if Unit.Is_Env_Populated then
          Traces.Trace
            (Main_Trace,
-            "Updating unit after reparse: " & To_String (Unit.File_Name));
+            "Updating unit after reparse: " & Basename (Unit));
 
          --  Reset the flag so that Populate_Lexical_Env does its work
          Unit.Is_Env_Populated := False;

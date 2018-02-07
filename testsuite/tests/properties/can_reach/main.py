@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 print('main.py: Running...')
 
 
+import os.path
 import sys
 
 import libfoolang
@@ -30,7 +31,7 @@ u2_ex = u2.root
 
 def fmt_node(n):
     return ('None' if n is None else
-            '<{} {}:{}>'.format(n.kind_name, n.unit.filename,
+            '<{} {}:{}>'.format(n.kind_name, os.path.basename(n.unit.filename),
                                 n.sloc_range.start.line))
 
 

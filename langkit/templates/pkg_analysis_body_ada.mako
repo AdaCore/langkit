@@ -736,7 +736,7 @@ package body ${ada_lib_name}.Analysis is
    function Format_GNU_Diagnostic
      (Unit : Analysis_Unit; D : Diagnostic) return String
    is
-      Filename : constant String := Get_Filename (Unit);
+      Filename : constant String := Basename (Unit);
       Sloc     : constant Source_Location := Start_Sloc (D.Sloc_Range);
       Msg      : constant String :=
          Image

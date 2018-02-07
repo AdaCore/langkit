@@ -948,6 +948,12 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Holder for fields affected by an analysis unit reparse. This makes it
    --  possible to separate the "reparsing" and the "replace" steps.
 
+   function Basename (Filename : String) return String;
+   --  Return the base filename for String
+
+   function Basename (Unit : Analysis_Unit) return String;
+   --  Return the base filename for Unit
+
    procedure Reset_Caches (Context : Analysis_Context);
    --  Call Reset_Caches on all the units that Context contains. Note: this is
    --  is done lazily, just incrementing a version number.
