@@ -1,0 +1,14 @@
+<| Block 2:1-2:16 [main.txt:5:1] |> vs. <| Block 2:1-2:16 [main.txt:5:1] |>
+  identity check:   True
+  equality check:   True
+  inequality check: False
+<| Block 2:1-2:16 [main.txt:5:1] |> vs. <| Block 2:1-2:16 [main.txt:5:1] |>
+  identity check:   False
+  equality check:   True
+  inequality check: False
+<| Block 2:1-2:16 [main.txt:5:1] |> vs. <| Block 2:1-2:16 [main.txt:8:1] |>
+  identity check:   False
+  equality check:   False
+  inequality check: True
+main.py: Done.
+Done
