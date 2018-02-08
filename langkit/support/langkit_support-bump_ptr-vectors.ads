@@ -20,11 +20,10 @@ package Langkit_Support.Bump_Ptr.Vectors is
    subtype Index_Type is Positive;
 
    type Vector is private
-     with Iterable =>
-       (First       => First,
-        Next        => Next,
-        Has_Element => Has_Element,
-        Element     => Get);
+      with Iterable => (First       => First,
+                        Next        => Next,
+                        Has_Element => Has_Element,
+                        Element     => Get);
 
    type Cursor is private;
 
@@ -36,7 +35,7 @@ package Langkit_Support.Bump_Ptr.Vectors is
    --  Returns a newly created vector using P as it's pool storage
 
    function Length (Self : Vector) return Natural
-     with Inline;
+      with Inline;
    --  Return the Length of the vector, ie. the number of elements it contains
 
    function First_Index (Self : Vector) return Index_Type is
@@ -51,35 +50,34 @@ package Langkit_Support.Bump_Ptr.Vectors is
    --  if Self is empty.
 
    procedure Append (Self : in out Vector; Element : Element_Type)
-     with Inline;
+      with Inline;
    --  Appends Element to Self
 
    function Get (Self : Vector; C : Cursor) return Element_Type
-     with Inline;
+      with Inline;
    --  Get the element at Index
 
    function Get_At_Index (Self : Vector; I : Index_Type) return Element_Type
-     with
-       Inline,
-       Pre => I <= Last_Index (Self);
+      with Inline,
+           Pre => I <= Last_Index (Self);
    --  Get the element at Index
 
    function Get_Access (Self : Vector; C : Cursor) return Element_Access
-     with Inline;
+      with Inline;
    --  Get an access to the element at Index. The lifetime of the access is the
    --  one of the vector.
 
    function First (Self : Vector) return Cursor
-     with Inline;
+      with Inline;
    --  Return the first index, only used for the Iterable aspect
 
    function Next (Self : Vector; C : Cursor) return Cursor
-     with Inline;
+      with Inline;
    --  Given a vector and an index, return the next index. Only used for the
    --  iterable aspect.
 
    function Has_Element (Self : Vector; C : Cursor) return Boolean
-     with Inline;
+      with Inline;
    --  Given a vector and an index, return True if the index is in the vector
    --  range. Only used for the iterable aspect.
 
