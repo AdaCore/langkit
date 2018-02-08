@@ -96,7 +96,8 @@ package Langkit_Support.Adalog.Unify is
    ------------------
 
    function Equals
-     (L       : Left_Var.Var; R : Right_Var.Var;
+     (L       : Left_Var.Var;
+      R       : Right_Var.Var;
       L_Data  : Left_C_Data := No_L_Data;
       R_Data  : Right_C_Data := No_R_Data;
       Eq_Data : Equals_Data := No_Equals_Data)
