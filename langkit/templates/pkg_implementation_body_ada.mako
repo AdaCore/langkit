@@ -1030,6 +1030,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
         (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
    % endif
 
+   % if T.AnalysisUnitType.requires_hash_function:
+      function Hash (Unit : Analysis_Unit) return Hash_Type is
+        (Ada.Strings.Unbounded.Hash (Unit.File_Name));
+   % endif
+
    -------------
    -- Version --
    -------------

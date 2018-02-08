@@ -228,6 +228,10 @@ package ${ada_lib_name}.Analysis.Implementation is
       function Hash (Info : Entity_Info) return Hash_Type;
    % endif
 
+   % if T.AnalysisUnitType.requires_hash_function:
+      function Hash (Unit : Analysis_Unit) return Hash_Type;
+   % endif
+
    ------------------------------------------------------
    -- AST node derived types (incomplete declarations) --
    ------------------------------------------------------

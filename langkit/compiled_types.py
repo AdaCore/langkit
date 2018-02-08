@@ -2492,6 +2492,7 @@ def create_builtin_types():
         nullexpr='null',
         should_emit_array_type=True,
         null_allowed=True,
+        hashable=True,
     )
 
     CompiledType(
