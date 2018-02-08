@@ -1,0 +1,5 @@
+main.py: Running...
+a.txt -> <Example 1:1-1:8> from a.txt
+b.txt -> <Example 1:1-1:8> from b.txt
+main.py: Done.
+Done
