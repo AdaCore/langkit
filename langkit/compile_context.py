@@ -1490,6 +1490,8 @@ class CompileCtx(object):
             ('pkg_rewriting',       'Rewriting', True),
             # Unit for AST unparsing primitives
             ('pkg_unparsing',       'Unparsing', True),
+            # Unit for AST implementation of unparsing primitives
+            ('pkg_unparsing_impl',  'Unparsing.Implementation', True),
             # Unit for all parsers
             ('parsers/pkg_main',    'Analysis.Parsers', True),
             # Unit for the lexer
