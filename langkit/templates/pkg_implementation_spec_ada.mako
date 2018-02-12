@@ -71,6 +71,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Return the Node's child number Index. Index is a 1-based index. If it is
    --  out of bounds, a Constraint_Error is raised.
 
+   function Abstract_Text
+     (Node : access Abstract_Node_Type) return Text_Type is abstract;
+   --  Assuming Node is a token node, return the associated text
+
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
@@ -594,6 +598,9 @@ package ${ada_lib_name}.Analysis.Implementation is
    overriding function Abstract_Child
      (Node  : access ${root_node_value_type};
       Index : Positive) return Abstract_Node;
+
+   overriding function Abstract_Text
+     (Node : access ${root_node_value_type}) return Text_Type;
 
    function Pre_Env_Actions
      (Self                : access ${root_node_value_type}'Class;

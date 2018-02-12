@@ -2051,6 +2051,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Abstract_Node (${root_node_type_name}'(Node.Child (Index)));
    end Abstract_Child;
 
+   -------------------
+   -- Abstract_Text --
+   -------------------
+
+   overriding function Abstract_Text
+     (Node : access ${root_node_value_type}) return Text_Type is
+   begin
+      return Node.Text;
+   end Abstract_Text;
+
    ----------------------
    -- Reset_Logic_Vars --
    ----------------------
