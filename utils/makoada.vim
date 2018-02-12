@@ -35,7 +35,10 @@ syn keyword makoEnd contained endfor endwhile endif endtry enddef
 
 " Block rules
 syn region makoLine matchgroup=makoDelim start=#^\s*%# end=#$# keepend contains=@pythonTop,makoEnd
-syn region makoBlock matchgroup=makoDelim start=#<%!\?# end=#%># keepend contains=@pythonTop,makoEnd
+syn region makoBlock matchgroup=makoDelim start=#<%\s\?# end=#%># keepend contains=@pythonTop,makoEnd
+
+syn region makoCall matchgroup=makoDelim start=#<%\w*:\w*# end=#># keepend contains=@pythonTop,makoEnd
+syn region makoendCall matchgroup=makoDelim start=#<\/%\w*:\w*# end=#># keepend contains=@pythonTop,makoEnd
 
 " Variables
 syn region makoNested start="{" end="}" transparent display contained contains=makoNested,@pythonTop
