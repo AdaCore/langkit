@@ -388,4 +388,84 @@ package body ${ada_lib_name}.Rewriting is
       end case;
    end Abstract_Text;
 
+   ------------
+   -- Parent --
+   ------------
+
+   function Parent
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
+   begin
+      return Handle.Parent;
+   end Parent;
+
+   --------------------
+   -- Children_Count --
+   --------------------
+
+   function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
+   begin
+      return Handle.Abstract_Children_Count;
+   end Children_Count;
+
+   -----------
+   -- Child --
+   -----------
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive) return Node_Rewriting_Handle is
+   begin
+      --  If this handle represents an already existing node, make sure it is
+      --  expanded so we have a handle to return.
+      if Handle.Children.Kind = Unexpanded then
+         --  Only existing nodes can have an unexpanded handle, so Handle.Node
+         --  cannot be null.
+         Expand_Children (Handle);
+      end if;
+
+      --  Only regular nodes can have fields. As Index is checked to be
+      --  in-bounds in the pre-condition, we can assume here that the result
+      --  exists.
+      return Handle.Children.Vector.Element (Index);
+   end Child;
+
+   ---------------
+   -- Set_Child --
+   ---------------
+
+   procedure Set_Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive;
+      Child  : Node_Rewriting_Handle)
+   is
+   begin
+      --  If this handle represents an already existing node, make sure it is
+      --  expanded so that its children vector can be modified.
+      if Handle.Children.Kind = Unexpanded then
+         --  Only existing nodes can have an unexpanded handle, so Handle.Node
+         --  cannot be null.
+         Expand_Children (Handle);
+      end if;
+
+      --  Only regular nodes can have fields. As Index is checked to be
+      --  in-bounds in the pre-condition, we can assume here that we have an
+      --  Expanded_Regular children record.
+      declare
+         Child_Slot : Node_Rewriting_Handle renames
+            Handle.Children.Vector.Reference (Index);
+      begin
+         --  Untie the child to be replaced if it exists
+         if Child_Slot /= No_Node_Rewriting_Handle then
+            Child_Slot.Parent := No_Node_Rewriting_Handle;
+         end if;
+
+         --  Tie the new child if it exists
+         if Child /= No_Node_Rewriting_Handle then
+            Child.Parent := Handle;
+         end if;
+
+         Child_Slot := Child;
+      end;
+   end Set_Child;
+
 end ${ada_lib_name}.Rewriting;

@@ -78,6 +78,37 @@ package ${ada_lib_name}.Rewriting is
    --  Return the node which the given rewriting Handle relates to. This can
    --  be the null entity if this handle designates a new node.
 
+   function Parent
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Return a handle for the node that is the parent of Handle's node. This
+   --  is No_Rewriting_Handle for a node that is not tied to any tree yet.
+
+   function Children_Count (Handle : Node_Rewriting_Handle) return Natural
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Return the number of children the node represented by Handle has
+
+   function Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Node_Rewriting_Handle
+                  and then Index in 1 .. Children_Count (Handle);
+   --  Return a handle corresponding to the Index'th child of the node that
+   --  Handle represents. Index is 1-based.
+
+   procedure Set_Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive;
+      Child  : Node_Rewriting_Handle)
+      with Pre =>
+         Handle /= No_Node_Rewriting_Handle
+         and then Index in 1 .. Children_Count (Handle)
+         and then (Child = No_Node_Rewriting_Handle
+                   or else Parent (Child) = No_Node_Rewriting_Handle);
+   --  If Child is No_Rewriting_Node, untie the Handle's Index'th child to this
+   --  tree, so it can be attached to another one. Otherwise, Child must have
+   --  no parent as it will be tied to Handle's tree.
+
 private
    use Ada.Strings.Unbounded;
    use Ada.Strings.Wide_Wide_Unbounded;
