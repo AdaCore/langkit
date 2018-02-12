@@ -64,7 +64,7 @@ package ${ada_lib_name}.Analysis.Implementation is
      is abstract;
    --  Return the kind for Node
 
-   function Children_Count
+   function Abstract_Children_Count
      (Node : access Abstract_Node_Type) return Natural is abstract;
    --  Return the number of children that Node has
 
@@ -595,7 +595,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Kind
      (Node : access ${root_node_value_type}) return ${root_node_kind_name};
 
-   overriding function Children_Count
+   overriding function Abstract_Children_Count
      (Node : access ${root_node_value_type}) return Natural;
 
    overriding function Abstract_Child

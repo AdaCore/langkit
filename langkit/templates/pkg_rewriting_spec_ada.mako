@@ -184,7 +184,7 @@ private
    overriding function Kind
      (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name};
 
-   overriding function Children_Count
+   overriding function Abstract_Children_Count
      (Node : access Node_Rewriting_Handle_Type) return Natural;
 
    overriding function Abstract_Child

@@ -282,7 +282,7 @@ package body ${ada_lib_name}.Rewriting is
          else
             Children := (Kind => Expanded_Regular, Vector => <>);
             declare
-               Count : constant Natural := N.Children_Count;
+               Count : constant Natural := N.Abstract_Children_Count;
             begin
                Children.Vector.Reserve_Capacity
                  (Ada.Containers.Count_Type (Count));
@@ -334,19 +334,19 @@ package body ${ada_lib_name}.Rewriting is
       return Node.Kind;
    end Kind;
 
-   --------------------
-   -- Children_Count --
-   --------------------
+   -----------------------------
+   -- Abstract_Children_Count --
+   -----------------------------
 
-   overriding function Children_Count
+   overriding function Abstract_Children_Count
      (Node : access Node_Rewriting_Handle_Type) return Natural is
    begin
       return
         (case Node.Children.Kind is
-         when Unexpanded          => Node.Node.Children_Count,
+         when Unexpanded          => Node.Node.Abstract_Children_Count,
          when Expanded_Regular    => Natural (Node.Children.Vector.Length),
          when Expanded_Token_Node => 0);
-   end Children_Count;
+   end Abstract_Children_Count;
 
    --------------------
    -- Abstract_Child --

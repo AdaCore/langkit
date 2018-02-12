@@ -48,13 +48,13 @@
 
    % elif is_list(parser):
 
-      for I in 1 .. Node.Children_Count loop
+      for I in 1 .. Node.Abstract_Children_Count loop
          <% assert creates_node (parser.parser) %>
 
          Unparse_Dispatch (Node.Abstract_Child (I), Result);
 
          % if parser.sep:
-            if I < Node.Children_Count then
+            if I < Node.Abstract_Children_Count then
                ${emit_unparser_code (parser.sep, ast_el=ast_el)}
             end if;
          % endif
@@ -74,7 +74,7 @@
          ${emit_unparser_code(parser.parser, ast_el=ast_el)}
       % else:
          % if parser.get_type().is_list_type:
-         if ${ast_el}.Children_Count /= 0 then
+         if ${ast_el}.Abstract_Children_Count /= 0 then
          % else:
          if ${ast_el} /= null then
          % endif

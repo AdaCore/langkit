@@ -379,7 +379,7 @@
 
    function Children_Count
      (Node : ${root_entity.api_name}'Class) return Natural is begin
-      return Node.Node.Children_Count;
+      return Node.Node.Abstract_Children_Count;
    end Children_Count;
 
    -----------------------

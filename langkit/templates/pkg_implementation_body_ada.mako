@@ -456,7 +456,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       Node.Parent := ${root_node_type_name} (Parent);
 
-      for I in 1 .. Node.Children_Count loop
+      for I in 1 .. Node.Abstract_Children_Count loop
          Set_Parents (Node.Child (I), Node);
       end loop;
    end Set_Parents;
@@ -473,7 +473,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       Node.Free_Extensions;
       Node.Reset_Logic_Vars;
-      for I in 1 .. Node.Children_Count loop
+      for I in 1 .. Node.Abstract_Children_Count loop
          Destroy (Node.Child (I));
       end loop;
    end Destroy;
@@ -514,7 +514,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          --  must immediately stop processing the tree.
 
          if Status = Into then
-            for I in 1 .. Children_Count (Node) loop
+            for I in 1 .. Node.Abstract_Children_Count loop
                declare
                   Cur_Child : constant ${root_node_type_name} :=
                      Child (Node, I);
@@ -810,7 +810,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    is
       First : constant Integer
         := ${root_node_array.index_type()}'First;
-      Last  : constant Integer := First + Children_Count (Node) - 1;
+      Last  : constant Integer := First + Node.Abstract_Children_Count - 1;
    begin
       return A : ${root_node_array.api_name} (First .. Last)
       do
@@ -1148,7 +1148,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Last_Child_Index
      (Node : access ${root_node_value_type}'Class) return Natural
-   is (Node.Children_Count);
+   is (Node.Abstract_Children_Count);
 
    ---------------
    -- Get_Child --
@@ -1816,7 +1816,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Length
      (Node : access ${generic_list_value_type}'Class) return Natural
-   is (Node.Children_Count);
+   is (Node.Abstract_Children_Count);
 
    % if ctx.properties_logging:
 
@@ -2009,11 +2009,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return To_String (Kind_Names (Node.Kind));
    end Kind_Name;
 
-   --------------------
-   -- Children_Count --
-   --------------------
+   -----------------------------
+   -- Abstract_Children_Count --
+   -----------------------------
 
-   function Children_Count
+   function Abstract_Children_Count
      (Node : access ${root_node_value_type}) return Natural
    is
       C : Integer := Kind_To_Node_Children_Count (Node.Kind);
@@ -2028,7 +2028,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       else
          return C;
       end if;
-   end Children_Count;
+   end Abstract_Children_Count;
 
    ----------
    -- Kind --
@@ -2216,7 +2216,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             return;
          end if;
          Deactivate_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Node.Children_Count loop
+         for I in 1 .. Node.Abstract_Children_Count loop
             Deactivate_Refd_Envs (Node.Child (I));
          end loop;
       end Deactivate_Refd_Envs;
@@ -2232,7 +2232,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             return;
          end if;
          Recompute_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Node.Children_Count loop
+         for I in 1 .. Node.Abstract_Children_Count loop
             Recompute_Refd_Envs (Node.Child (I));
          end loop;
       end Recompute_Refd_Envs;
