@@ -128,9 +128,11 @@ package body ${ada_lib_name}.Rewriting is
          Result : constant Unit_Rewriting_Handle :=
             new Unit_Rewriting_Handle_Type'(Context_Handle => Context_Handle,
                                             Unit           => Unit,
+                                            Root           => <>,
                                             Nodes          => <>);
       begin
          Context_Handle.Units.Insert (Filename, Result);
+         Result.Root := Handle (Root (Unit));
          return Result;
       end;
    end Handle;

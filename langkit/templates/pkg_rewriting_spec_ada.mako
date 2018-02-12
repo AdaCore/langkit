@@ -122,6 +122,10 @@ private
       Unit : Analysis_Unit;
       --  Analysis unit this relates to
 
+      Root : Node_Rewriting_Handle;
+      --  Handle for the node that will become the root node of this analysis
+      --  unit.
+
       Nodes : Node_Maps.Map;
       --  Keep track of rewriting handles we create for base AST nodes that
       --  Unit owns.
