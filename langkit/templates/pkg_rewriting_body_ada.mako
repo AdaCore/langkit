@@ -19,14 +19,6 @@ package body ${ada_lib_name}.Rewriting is
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
      (Handle.Context);
 
-   function Convert is new Ada.Unchecked_Conversion
-     (AST_Node_Pointer, ${root_node_type_name});
-   function Convert is new Ada.Unchecked_Conversion
-     (${root_node_type_name}, AST_Node_Pointer);
-
-   function Hash (Node : AST_Node_Pointer) return Ada.Containers.Hash_Type is
-     (Hash (Convert (Node)));
-
    function Handle
      (Node : ${root_node_type_name}) return Node_Rewriting_Handle;
    --  Helper to implement the public "Handle" function, which works on public
@@ -160,7 +152,7 @@ package body ${ada_lib_name}.Rewriting is
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_entity.api_name} is
    begin
-      return Create (Convert (Handle.Node));
+      return Create (Handle.Node);
    end Node;
 
    ------------
@@ -177,10 +169,9 @@ package body ${ada_lib_name}.Rewriting is
       declare
          use Node_Maps;
 
-         N           : constant AST_Node_Pointer := Convert (Node);
          Unit_Handle : constant Unit_Rewriting_Handle :=
             Handle (Node.Get_Unit);
-         Cur         : constant Cursor := Unit_Handle.Nodes.Find (N);
+         Cur         : constant Cursor := Unit_Handle.Nodes.Find (Node);
       begin
          --  If we have already built a handle for this node, just return it
          if Cur /= No_Element then
@@ -191,7 +182,7 @@ package body ${ada_lib_name}.Rewriting is
          --  the handle we are supposed to return.
          elsif Node.Parent /= null then
             Expand_Children (Handle (Node.Parent), Unit_Handle);
-            return Element (Unit_Handle.Nodes.Find (N));
+            return Element (Unit_Handle.Nodes.Find (Node));
          end if;
 
          --  Otherwise, we are dealing with the root node: just create its
@@ -210,16 +201,15 @@ package body ${ada_lib_name}.Rewriting is
       Parent_Handle : Node_Rewriting_Handle)
       return Node_Rewriting_Handle
    is
-      N      : constant AST_Node_Pointer := Convert (Node);
       Result : constant Node_Rewriting_Handle :=
          new Node_Rewriting_Handle_Type'
            (Context_Handle => Unit_Handle.Context_Handle,
-            Node           => N,
+            Node           => Node,
             Parent         => Parent_Handle,
             Kind           => Node.Kind,
             Children       => Unexpanded_Children);
    begin
-      Unit_Handle.Nodes.Insert (N, Result);
+      Unit_Handle.Nodes.Insert (Node, Result);
       return Result;
    end Allocate;
 
@@ -241,7 +231,7 @@ package body ${ada_lib_name}.Rewriting is
       --  Otherwise, expand to the appropriate children form: token node or
       --  regular one.
       declare
-         N : constant ${root_node_type_name} := Convert (Node.Node);
+         N : constant ${root_node_type_name} := Node.Node;
       begin
          if N.Is_Token_Node then
             Children := (Kind => Expanded_Token_Node,

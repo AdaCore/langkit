@@ -6,9 +6,8 @@ private with Ada.Strings.Unbounded;
 private with Ada.Strings.Unbounded.Hash;
 private with Ada.Strings.Wide_Wide_Unbounded;
 
-private with System;
-
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+private with ${ada_lib_name}.Analysis.Implementation;
 
 package ${ada_lib_name}.Rewriting is
 
@@ -81,6 +80,8 @@ private
    use Ada.Strings.Unbounded;
    use Ada.Strings.Wide_Wide_Unbounded;
 
+   use ${ada_lib_name}.Analysis.Implementation;
+
    type Rewriting_Handle_Type;
    type Unit_Rewriting_Handle_Type;
    type Node_Rewriting_Handle_Type;
@@ -92,10 +93,6 @@ private
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle := null;
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle := null;
 
-   type AST_Node_Pointer is new System.Address;
-   function Hash (Node : AST_Node_Pointer) return Ada.Containers.Hash_Type;
-   --  Wrappers for bare AST nodes, to avoid circular dependencies
-
    package Unit_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
       Element_Type    => Unit_Rewriting_Handle,
@@ -103,9 +100,9 @@ private
       Equivalent_Keys => "=");
 
    package Node_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => AST_Node_Pointer,
+     (Key_Type        => ${root_node_type_name},
       Element_Type    => Node_Rewriting_Handle,
-      Hash            => Hash,
+      Hash            => Named_Hash,
       Equivalent_Keys => "=");
 
    type Rewriting_Handle_Type is record
@@ -162,7 +159,7 @@ private
       Context_Handle : Rewriting_Handle;
       --  Rewriting handle for the analysis context that owns Node
 
-      Node : AST_Node_Pointer;
+      Node : ${root_node_type_name};
       --  Bare AST node which this rewriting handle relates to
 
       Parent : Node_Rewriting_Handle;
