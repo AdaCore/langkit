@@ -5,6 +5,9 @@ with Ada.Unchecked_Deallocation;
 
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
+with ${ada_lib_name}.Unparsing.Implementation;
+use ${ada_lib_name}.Unparsing.Implementation;
 
 package body ${ada_lib_name}.Rewriting is
 
@@ -80,14 +83,55 @@ package body ${ada_lib_name}.Rewriting is
       --  Try to reparse all units that were potentially modified
       for Unit_Handle of Handle.Units loop
          declare
-            PU : constant Processed_Unit := new Processed_Unit_Record'
+            procedure Init_Parser
+              (Unit     : Analysis_Unit;
+               Read_BOM : Boolean;
+               Parser   : in out Parser_Type);
+            --  Callback for the call to Do_Parsing below
+
+            PU     : constant Processed_Unit := new Processed_Unit_Record'
               (Unit     => Unit_Handle.Unit,
                New_Data => <>);
+            Buffer : String_Access;
+
+            -----------------
+            -- Init_Parser --
+            -----------------
+
+            procedure Init_Parser
+              (Unit     : Analysis_Unit;
+               Read_BOM : Boolean;
+               Parser   : in out Parser_Type) is
+            begin
+               Init_Parser_From_Buffer
+                 (Buffer          => Buffer.all,
+                  Charset         => Get_Charset (Unit),
+                  Read_BOM        => Read_BOM,
+                  Unit            => PU.Unit,
+                  TDH             => Token_Data (PU.Unit),
+                  Symbol_Literals => Parsers.Symbol_Literal_Array_Access
+                    (Symbol_Literals (Context (PU.Unit))),
+                  With_Trivia     => True,
+                  Parser          => Parser);
+            end Init_Parser;
          begin
             Units.Append (PU);
-            --  TODO: unparse rewritten tree and call
-            --  Do_Parsing/Remove_Exiled_Entries on the result. If there is an
-            --  error, set Success to False and abort.
+
+            --  Reparse (i.e. unparse and then parse) this rewritten unit
+            Buffer := Unparse (Unit_Handle.Root, PU.Unit);
+            Do_Parsing
+              (Unit        => PU.Unit,
+               Read_BOM    => False,
+               Init_Parser => Init_Parser'Access,
+               Result      => PU.New_Data);
+            Free (Buffer);
+
+            --  If there is a parsing error, abort the rewriting process
+            if not PU.New_Data.Diagnostics.Is_Empty then
+               Success := False;
+               Destroy (PU.New_Data);
+               exit;
+            end if;
          end;
       end loop;
 
