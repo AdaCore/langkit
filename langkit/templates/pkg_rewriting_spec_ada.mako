@@ -169,6 +169,11 @@ private
       --  Rewriting handle for Node's parent, or No_Node_Rewriting_Handle if
       --  Node is a root node.
 
+      Kind : ${root_node_kind_name};
+      --  Kind for the node this handle represents. When Node is not null (i.e.
+      --  when this represents an already existing node, rather than a new
+      --  one), this must be equal to Node.Kind.
+
       Children : Node_Children;
       --  Lazily evaluated vector of children for the rewritten node
    end record;

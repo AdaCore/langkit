@@ -211,6 +211,7 @@ package body ${ada_lib_name}.Rewriting is
            (Context_Handle => Unit_Handle.Context_Handle,
             Node           => N,
             Parent         => Parent_Handle,
+            Kind           => Node.Kind,
             Children       => Unexpanded_Children);
    begin
       Unit_Handle.Nodes.Insert (N, Result);
