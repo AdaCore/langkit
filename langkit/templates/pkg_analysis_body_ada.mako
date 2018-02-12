@@ -266,7 +266,7 @@ package body ${ada_lib_name}.Analysis is
    function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean is
       use ${ada_lib_name}.Rewriting;
    begin
-      return Context.Rewriting_Handle /= No_Rewriting_Handle;
+      return Context.Rewriting_Handle /= No_Rewriting_Handle_Pointer;
    end Has_Rewriting_Handle;
 
    -----------------

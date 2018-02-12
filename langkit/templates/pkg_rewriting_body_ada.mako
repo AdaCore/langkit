@@ -8,8 +8,13 @@ use ${ada_lib_name}.Analysis.Implementation;
 
 package body ${ada_lib_name}.Rewriting is
 
+   function Convert is new Ada.Unchecked_Conversion
+     (Rewriting_Handle, Rewriting_Handle_Pointer);
+   function Convert is new Ada.Unchecked_Conversion
+     (Rewriting_Handle_Pointer, Rewriting_Handle);
+
    function Handle (Context : Analysis_Context) return Rewriting_Handle is
-     (Get_Rewriting_Handle (Context));
+     (Convert (Get_Rewriting_Handle (Context)));
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
      (Handle.Context);
@@ -55,7 +60,7 @@ package body ${ada_lib_name}.Rewriting is
         (Context => Context,
          Units   => <>);
    begin
-      Set_Rewriting_Handle (Context, Result);
+      Set_Rewriting_Handle (Context, Convert (Result));
       return Result;
    end Start_Rewriting;
 
@@ -283,7 +288,7 @@ package body ${ada_lib_name}.Rewriting is
       Free (Handle);
 
       --  Release the rewriting handle singleton for its context
-      Set_Rewriting_Handle (Ctx, Handle);
+      Set_Rewriting_Handle (Ctx, Convert (Handle));
    end Free_Handles;
 
 end ${ada_lib_name}.Rewriting;

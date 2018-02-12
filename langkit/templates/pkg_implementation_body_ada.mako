@@ -2636,7 +2636,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    function Get_Rewriting_Handle
-     (Context : Analysis_Context) return Rewriting_Handle is
+     (Context : Analysis_Context) return Rewriting_Handle_Pointer is
    begin
       return Context.Rewriting_Handle;
    end Get_Rewriting_Handle;
@@ -2646,7 +2646,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    procedure Set_Rewriting_Handle
-     (Context : Analysis_Context; Handle : Rewriting_Handle) is
+     (Context : Analysis_Context; Handle : Rewriting_Handle_Pointer) is
    begin
       Context.Rewriting_Handle := Handle;
    end Set_Rewriting_Handle;

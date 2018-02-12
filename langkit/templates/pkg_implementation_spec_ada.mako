@@ -41,7 +41,6 @@ with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Analysis.Parsers;  use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;             use ${ada_lib_name}.Lexer;
-with ${ada_lib_name}.Rewriting;         use ${ada_lib_name}.Rewriting;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 % if ctx.separate_properties:
@@ -52,6 +51,10 @@ use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis.Implementation is
+
+   type Rewriting_Handle_Pointer is new System.Address;
+   No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
+      Rewriting_Handle_Pointer (System.Null_Address);
 
    type Abstract_Node_Type is abstract tagged null record;
    type Abstract_Node is access all Abstract_Node_Type'Class;
@@ -896,8 +899,8 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  fashion. If an analysis unit's version number is strictly inferior to
       --  this, its memoization map should be cleared.
 
-      Rewriting_Handle : ${ada_lib_name}.Rewriting.Rewriting_Handle :=
-         No_Rewriting_Handle;
+      Rewriting_Handle : Rewriting_Handle_Pointer :=
+         No_Rewriting_Handle_Pointer;
    end record;
 
    type Analysis_Unit_Type is record
@@ -1049,11 +1052,11 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  the body.
 
    function Get_Rewriting_Handle
-     (Context : Analysis_Context) return Rewriting_Handle;
+     (Context : Analysis_Context) return Rewriting_Handle_Pointer;
    --  Return the Rewriting_Handle component of Context
 
    procedure Set_Rewriting_Handle
-     (Context : Analysis_Context; Handle : Rewriting_Handle);
+     (Context : Analysis_Context; Handle : Rewriting_Handle_Pointer);
    --  Set the Rewriting_Handle component of Context
 
 end ${ada_lib_name}.Analysis.Implementation;
