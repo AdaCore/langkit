@@ -44,11 +44,27 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Unit : Analysis_Unit)
       return String
    is
+      Result : String_Access := Unparse (Node, Unit);
+      R      : constant String := Result.all;
+   begin
+      Free (Result);
+      return R;
+   end Unparse;
+
+   -------------
+   -- Unparse --
+   -------------
+
+   function Unparse
+     (Node : access Abstract_Node_Type'Class;
+      Unit : Analysis_Unit)
+      return String_Access
+   is
       Buffer : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
    begin
       % if ctx.generate_unparser:
          if Node = null then
-            return "";
+            return (raise Program_Error with "cannot unparse null node");
          end if;
 
          Unparse_Dispatch (Node, Buffer);
@@ -56,7 +72,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
          --  them here.
          if Ada.Strings.Wide_Wide_Unbounded.Length (Buffer) = 0 then
-            return "";
+            return new String'("");
          end if;
 
          declare
@@ -74,24 +90,35 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                     Convention => Ada,
                     Address    => To_Convert_WWS'Address;
 
-            Result     : String (1 .. 4 * To_Convert_String'Length);
+            Output_Buffer : String_Access :=
+               new String (1 .. 4 * To_Convert_String'Length);
             --  Encodings should not take more than 4 bytes per code point, so
             --  this should be enough to hold the conversion.
 
             Input_Index  : Positive := To_Convert_String'First;
-            Output_Index : Positive := Result'First;
+            Output_Index : Positive := Output_Buffer'First;
          begin
             --  TODO??? Use GNATCOLL.Iconv to properly encode this wide wide
             --  string into a mere string using this unit's charset.
             Iconv
-              (State, To_Convert_String, Input_Index, Result, Output_Index,
-               Status);
+              (State, To_Convert_String, Input_Index, Output_Buffer.all,
+               Output_Index, Status);
             Iconv_Close (State);
             case Status is
                when Success => null;
                when others => raise Program_Error with "cannot encode result";
             end case;
-            return Result (Result'First .. Output_Index - 1);
+
+            declare
+               Result_Slice : String renames
+                  Output_Buffer (Output_Buffer'First ..  Output_Index - 1);
+               Result : constant String_Access :=
+                  new String (Result_Slice'Range);
+            begin
+               Result.all := Result_Slice;
+               Free (Output_Buffer);
+               return Result;
+            end;
          end;
 
       % else:
