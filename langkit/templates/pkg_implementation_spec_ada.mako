@@ -89,7 +89,7 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean;
 
    function Short_Image
-     (Node : access ${root_node_value_type}'Class) return Text_Type;
+     (Self : access ${root_node_value_type}'Class) return Text_Type;
    --  Return a short representation of the node, containing just the kind
    --  name and the sloc.
 

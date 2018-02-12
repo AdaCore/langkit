@@ -44,6 +44,31 @@ ${(exts.with_clauses(with_clauses + [
     if ctx.env_hook_subprogram else None)
 ]))}
 
+## Generate a dispatching case statement for the root node class. It will keep
+## all the node classes which pass the predicate 'pred'. The caller needs to
+## pass two def blocks, 'action', which takes the node kind as parameter, and
+## emits the action for each matched node kind, and 'default', taking no
+## parameter. and emitting the default action.
+<%def name="case_dispatch(pred)">
+   <%
+   node_types = list(reversed(filter(pred, ctx.astnode_types)))
+   concrete_types, _ = ctx.collapse_concrete_nodes(
+       ctx.root_grammar_class, node_types
+   )
+   concrete_mappings = zip(node_types, concrete_types)
+   %>
+
+   case Self.Kind is
+      % for node, subclasses in concrete_mappings:
+         % if subclasses:
+            when ${ctx.astnode_kind_set(subclasses)} =>
+            ${caller.action(node)}
+         % endif
+      % endfor
+      when others => ${caller.default()}
+   end case;
+</%def>
+
 package body ${ada_lib_name}.Analysis.Implementation is
 
    generic
@@ -315,26 +340,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
    is
    begin
-      <%
-         matchers = list(reversed([
-            n for n in ctx.astnode_types
-            if n.env_spec and not n.is_env_spec_inherited
-         ]))
-         matched_types, _ = ctx.collapse_concrete_nodes(
-            ctx.root_grammar_class, matchers
-         )
-      %>
-      case Self.Kind is
-         % for matcher, matched in zip(matchers, matched_types):
-            % if matched:
-               when ${ctx.astnode_kind_set(matched)} =>
-                  return ${matcher.name}_Pre_Env_Actions
-                    (${matcher.name} (Self),
-                     Bound_Env, Root_Env, Add_To_Env_Only);
-            % endif
-         % endfor
-         when others => return Null_Lexical_Env;
-      end case;
+
+      <%self:case_dispatch
+        pred="${lambda n: n.env_spec and not n.is_env_spec_inherited}">
+      <%def name="action(node)">
+         return ${node.name}_Pre_Env_Actions
+           (${node.name} (Self), Bound_Env, Root_Env, Add_To_Env_Only);
+      </%def>
+      <%def name="default()"> return Null_Lexical_Env; </%def>
+      </%self:case_dispatch>
+
    end Pre_Env_Actions;
 
    ----------------------
@@ -345,27 +360,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Self                : access ${root_node_value_type}'Class;
       Bound_Env, Root_Env : AST_Envs.Lexical_Env) is
    begin
-      <%
-         matchers = list(reversed([
-            n for n in ctx.astnode_types
-            if n.env_spec and
-               not n.is_env_spec_inherited
-               and n.env_spec.post_actions
-         ]))
-         matched_types, _ = ctx.collapse_concrete_nodes(
-            ctx.root_grammar_class, matchers
-         )
-      %>
-      case Self.Kind is
-         % for matcher, matched in zip(matchers, matched_types):
-            % if matched:
-               when ${ctx.astnode_kind_set(matched)} =>
-                  ${matcher.name}_Post_Env_Actions
-                    (${matcher.name} (Self), Bound_Env, Root_Env);
-            % endif
-         % endfor
-         when others => null;
-      end case;
+      <%self:case_dispatch pred="${lambda n: n.env_spec \
+                                   and not n.is_env_spec_inherited \
+                                   and n.env_spec.post_actions}">
+      <%def name="action(n)">
+         ${n.name}_Post_Env_Actions (${n.name} (Self), Bound_Env, Root_Env);
+      </%def>
+      <%def name="default()"> null; </%def>
+      </%self:case_dispatch>
    end Post_Env_Actions;
 
    ----------------
@@ -1049,29 +1051,18 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -----------------
 
    function Short_Image
-     (Node : access ${root_node_value_type}'Class) return Text_Type is
+     (Self : access ${root_node_value_type}'Class) return Text_Type is
    begin
-      <%
-         matchers = list(reversed([
-            n for n in ctx.astnode_types
-            if n.annotations.custom_short_image
-         ]))
-         matched_types, _ = ctx.collapse_concrete_nodes(
-            ctx.root_grammar_class, matchers
-         )
-      %>
-      case Node.Kind is
-         % for matcher, matched in zip(matchers, matched_types):
-            % if matched:
-               when ${ctx.astnode_kind_set(matched)} =>
-                  return ${matcher.name}_Short_Image
-                    (${matcher.name} (Node));
-            % endif
-         % endfor
-         when others =>
-            return "<" & To_Text (Node.Kind_Name)
-                   & " " & To_Text (Image (Node.Sloc_Range)) & ">";
-      end case;
+      <%self:case_dispatch
+         pred="${lambda n: n.annotations.custom_short_image}">
+      <%def name="action(node)">
+         return ${node.name}_Short_Image (${node.name} (Self));
+      </%def>
+      <%def name="default()">
+         return "<" & To_Text (Self.Kind_Name)
+                & " " & To_Text (Image (Self.Sloc_Range)) & ">";
+      </%def>
+      </%self:case_dispatch>
    end Short_Image;
 
    -------------

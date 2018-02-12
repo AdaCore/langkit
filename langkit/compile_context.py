@@ -2462,5 +2462,7 @@ class CompileCtx(object):
                                       severity=Severity.non_blocking_error)
 
     astnode_kind_set = langkit.utils.astnode_kind_set
+
     collapse_concrete_nodes = staticmethod(
-        langkit.utils.collapse_concrete_nodes)
+        langkit.utils.collapse_concrete_nodes
+    )
