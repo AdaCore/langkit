@@ -23,14 +23,14 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    % if ctx.generate_unparser:
       procedure Unparse_Dispatch
-        (Node   : access ${root_node_value_type}'Class;
+        (Node   : access Abstract_Node_Type'Class;
          Result : in out Unbounded_Wide_Wide_String);
       --  Dispatch over Node's kind and call the corresponding unparsing
       --  procedure.
 
       % for astnode in concrete_astnodes:
          procedure Unparse_${astnode.name}
-           (Node   : ${astnode.name};
+           (Node   : access Abstract_Node_Type'Class;
             Result : in out Unbounded_Wide_Wide_String);
       % endfor
    % endif
@@ -39,7 +39,11 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    -- Unparse --
    -------------
 
-   function Unparse (Node : ${root_node_type_name}) return String is
+   function Unparse
+     (Node : access Abstract_Node_Type'Class;
+      Unit : Analysis_Unit)
+      return String
+   is
       Buffer : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
    begin
       % if ctx.generate_unparser:
@@ -59,7 +63,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             use GNATCOLL.Iconv;
 
             State  : Iconv_T := Iconv_Open
-              (To_Code   => Get_Charset (Get_Unit (Node)),
+              (To_Code   => Get_Charset (Unit),
                From_Code => Internal_Charset);
             Status : Iconv_Result;
 
@@ -102,7 +106,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       ----------------------
 
       procedure Unparse_Dispatch
-        (Node   : access ${root_node_value_type}'Class;
+        (Node   : access Abstract_Node_Type'Class;
          Result : in out Unbounded_Wide_Wide_String) is
       begin
          % if not ctx.generate_unparser:
@@ -113,8 +117,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                % for astnode in ctx.astnode_types:
                   % if not astnode.abstract:
                      when ${astnode.ada_kind_name} =>
-                        Unparse_${astnode.name}
-                          (${astnode.name} (Node), Result);
+                        Unparse_${astnode.name} (Node, Result);
                   % endif
                % endfor
             end case;
@@ -123,7 +126,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
       % for astnode in concrete_astnodes:
          procedure Unparse_${astnode.name}
-           (Node   : ${astnode.name};
+           (Node   : access Abstract_Node_Type'Class;
             Result : in out Unbounded_Wide_Wide_String) is
          begin
             % if astnode.parser:

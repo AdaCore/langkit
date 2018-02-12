@@ -13,9 +13,15 @@
    --  In emit_toplevel_row(${parser}, ${node_type}, ${results})
    % for (subp, field) in results:
       % if field:
-      ${emit_unparser_code(subp, ast_el="Node.{}".format(field.name))}
+         declare
+            ${field.name} : constant Analysis.Implementation.Abstract_Node :=
+               Node.Abstract_Child (${field.index + 1});
+         begin
+            ${emit_unparser_code(subp, ast_el=str(field.name))}
+            pragma Unreferenced (${field.name});
+         end;
       % else:
-      ${emit_unparser_code(subp)}
+         ${emit_unparser_code(subp)}
       % endif
    % endfor
 </%def>
@@ -29,7 +35,7 @@
       end if;
 
    % elif node_type and node_type.is_token_node:
-      Append (Result, Node.Text);
+      Append (Result, Node.Abstract_Text);
       Append (Result, " ");
 
    % elif is_transform(parser):
@@ -42,13 +48,13 @@
 
    % elif is_list(parser):
 
-      for I in 1 .. Length (Node) loop
+      for I in 1 .. Node.Children_Count loop
          <% assert creates_node (parser.parser) %>
 
-         Unparse_Dispatch (Item (Node, I), Result);
+         Unparse_Dispatch (Node.Abstract_Child (I), Result);
 
          % if parser.sep:
-            if I < Length (Node) then
+            if I < Node.Children_Count then
                ${emit_unparser_code (parser.sep, ast_el=ast_el)}
             end if;
          % endif

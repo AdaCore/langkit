@@ -13,8 +13,10 @@ package body ${ada_lib_name}.Unparsing is
    -------------
 
    function Unparse (Node : ${root_entity.api_name}'Class) return String is
+      N : constant ${root_node_type_name} := Bare_Node (Node);
    begin
-      return Unparse (Bare_Node (Node));
+      return Unparse (Analysis.Implementation.Abstract_Node (N),
+                      Node.Get_Unit);
    end Unparse;
 
 end ${ada_lib_name}.Unparsing;
