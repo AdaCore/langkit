@@ -6,6 +6,8 @@ private with Ada.Strings.Unbounded;
 private with Ada.Strings.Unbounded.Hash;
 private with Ada.Strings.Wide_Wide_Unbounded;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 private with ${ada_lib_name}.Analysis.Implementation;
 
@@ -155,7 +157,7 @@ private
 
    Unexpanded_Children : constant Node_Children := (Kind => Unexpanded);
 
-   type Node_Rewriting_Handle_Type is record
+   type Node_Rewriting_Handle_Type is new Abstract_Node_Type with record
       Context_Handle : Rewriting_Handle;
       --  Rewriting handle for the analysis context that owns Node
 
@@ -174,5 +176,18 @@ private
       Children : Node_Children;
       --  Lazily evaluated vector of children for the rewritten node
    end record;
+
+   overriding function Kind
+     (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name};
+
+   overriding function Children_Count
+     (Node : access Node_Rewriting_Handle_Type) return Natural;
+
+   overriding function Abstract_Child
+     (Node  : access Node_Rewriting_Handle_Type;
+      Index : Positive) return Analysis.Implementation.Abstract_Node;
+
+   overriding function Abstract_Text
+     (Node : access Node_Rewriting_Handle_Type) return Text_Type;
 
 end ${ada_lib_name}.Rewriting;

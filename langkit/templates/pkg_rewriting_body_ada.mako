@@ -281,4 +281,69 @@ package body ${ada_lib_name}.Rewriting is
       Set_Rewriting_Handle (Ctx, Convert (Handle));
    end Free_Handles;
 
+   ----------
+   -- Kind --
+   ----------
+
+   overriding function Kind
+     (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name}
+   is
+   begin
+      return Node.Kind;
+   end Kind;
+
+   --------------------
+   -- Children_Count --
+   --------------------
+
+   overriding function Children_Count
+     (Node : access Node_Rewriting_Handle_Type) return Natural is
+   begin
+      return
+        (case Node.Children.Kind is
+         when Unexpanded          => Node.Node.Children_Count,
+         when Expanded_Regular    => Natural (Node.Children.Vector.Length),
+         when Expanded_Token_Node => 0);
+   end Children_Count;
+
+   --------------------
+   -- Abstract_Child --
+   --------------------
+
+   overriding function Abstract_Child
+     (Node  : access Node_Rewriting_Handle_Type;
+      Index : Positive) return Analysis.Implementation.Abstract_Node is
+   begin
+      return
+        (case Node.Children.Kind is
+         when Unexpanded          => Node.Node.Abstract_Child (Index),
+         when Expanded_Regular    =>
+            Analysis.Implementation.Abstract_Node
+              (Node.Children.Vector.Element (Index)),
+         when Expanded_Token_Node => null);
+   end Abstract_Child;
+
+   -------------------
+   -- Abstract_Text --
+   -------------------
+
+   overriding function Abstract_Text
+     (Node : access Node_Rewriting_Handle_Type) return Text_Type is
+   begin
+      case Node.Children.Kind is
+         when Unexpanded =>
+            if Is_Token_Node_Kind (Node.Kind) then
+               return Node.Node.Text;
+            else
+               raise Program_Error;
+            end if;
+
+         when Expanded_Regular =>
+            raise Program_Error;
+
+         when Expanded_Token_Node =>
+            return To_Wide_Wide_String (Node.Children.Text);
+      end case;
+   end Abstract_Text;
+
 end ${ada_lib_name}.Rewriting;
