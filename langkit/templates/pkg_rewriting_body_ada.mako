@@ -34,9 +34,7 @@ package body ${ada_lib_name}.Rewriting is
       return Node_Rewriting_Handle;
    --  Allocate a handle for Node and register it in Unit_Handle's map
 
-   procedure Expand_Children
-     (Node        : Node_Rewriting_Handle;
-      Unit_Handle : Unit_Rewriting_Handle);
+   procedure Expand_Children (Node : Node_Rewriting_Handle);
    --  If Node.Children.Expanded, do nothing. Otherwise, populate Node's list
    --  of Children to mimic the related bare AST node.
 
@@ -227,7 +225,7 @@ package body ${ada_lib_name}.Rewriting is
          --  its own handle, then expand its children. This last must create
          --  the handle we are supposed to return.
          elsif Node.Parent /= null then
-            Expand_Children (Handle (Node.Parent), Unit_Handle);
+            Expand_Children (Handle (Node.Parent));
             return Element (Unit_Handle.Nodes.Find (Node));
          end if;
 
@@ -263,10 +261,7 @@ package body ${ada_lib_name}.Rewriting is
    -- Expand_Children --
    ---------------------
 
-   procedure Expand_Children
-     (Node        : Node_Rewriting_Handle;
-      Unit_Handle : Unit_Rewriting_Handle)
-   is
+   procedure Expand_Children (Node : Node_Rewriting_Handle) is
       Children : Node_Children renames Node.Children;
    begin
       --  If this handle has already be expanded, there is nothing to do
@@ -277,7 +272,8 @@ package body ${ada_lib_name}.Rewriting is
       --  Otherwise, expand to the appropriate children form: token node or
       --  regular one.
       declare
-         N : constant ${root_node_type_name} := Node.Node;
+         N           : constant ${root_node_type_name} := Node.Node;
+         Unit_Handle : constant Unit_Rewriting_Handle := Handle (N.Get_Unit);
       begin
          if N.Is_Token_Node then
             Children := (Kind => Expanded_Token_Node,
