@@ -4,6 +4,7 @@ private with Ada.Containers.Hashed_Maps;
 private with Ada.Containers.Vectors;
 private with Ada.Strings.Unbounded;
 private with Ada.Strings.Unbounded.Hash;
+private with Ada.Strings.Wide_Wide_Unbounded;
 
 private with System;
 
@@ -78,6 +79,7 @@ package ${ada_lib_name}.Rewriting is
 
 private
    use Ada.Strings.Unbounded;
+   use Ada.Strings.Wide_Wide_Unbounded;
 
    type Rewriting_Handle_Type;
    type Unit_Rewriting_Handle_Type;
@@ -129,10 +131,24 @@ private
    package Node_Vectors is new Ada.Containers.Vectors
      (Positive, Node_Rewriting_Handle);
 
-   type Node_Children (Expanded : Boolean := False) is record
-      case Expanded is
-         when False => null;
-         when True  => Vector : Node_Vectors.Vector;
+   type Node_Children_Kind is (
+      Unexpanded,
+      --  Dummy node rewriting handle: children don't have their own handle yet
+
+      Expanded_Regular,
+      --  Expanded node rewriting handle: children have their own handle. Note
+      --  that this is for all but token nodes.
+
+      Expanded_Token_Node
+      --  Expanded node rewriting handle, specific for token nodes: there is no
+      --  children, only some associated text.
+   );
+
+   type Node_Children (Kind : Node_Children_Kind := Unexpanded) is record
+      case Kind is
+         when Unexpanded          => null;
+         when Expanded_Regular    => Vector : Node_Vectors.Vector;
+         when Expanded_Token_Node => Text   : Unbounded_Wide_Wide_String;
       end case;
    end record;
    --  Lazily evaluated vector of children for a Node_Rewriting_Handle.
@@ -140,7 +156,7 @@ private
    --  In order to avoid constructing the whole tree of Node_Rewriting_Handle
    --  for some analysis unit at once, we build them in a lazy fashion.
 
-   Unexpanded_Children : constant Node_Children := (Expanded => False);
+   Unexpanded_Children : constant Node_Children := (Kind => Unexpanded);
 
    type Node_Rewriting_Handle_Type is record
       Context_Handle : Rewriting_Handle;

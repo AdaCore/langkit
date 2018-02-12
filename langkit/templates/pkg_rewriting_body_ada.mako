@@ -227,19 +227,33 @@ package body ${ada_lib_name}.Rewriting is
    is
       Children : Node_Children renames Node.Children;
    begin
-      if Children.Expanded then
+      --  If this handle has already be expanded, there is nothing to do
+      if Children.Kind /= Unexpanded then
          return;
       end if;
 
-      Children := (Expanded => True, Vector => <>);
+      --  Otherwise, expand to the appropriate children form: token node or
+      --  regular one.
       declare
-         N     : constant ${root_node_type_name} := Convert (Node.Node);
-         Count : constant Natural := N.Children_Count;
+         N : constant ${root_node_type_name} := Convert (Node.Node);
       begin
-         Children.Vector.Reserve_Capacity (Ada.Containers.Count_Type (Count));
-         for I in 1 .. Count loop
-            Children.Vector.Append (Allocate (N.Child (I), Unit_Handle, Node));
-         end loop;
+         if N.Is_Token_Node then
+            Children := (Kind => Expanded_Token_Node,
+                         Text => To_Unbounded_Wide_Wide_String (N.Text));
+
+         else
+            Children := (Kind => Expanded_Regular, Vector => <>);
+            declare
+               Count : constant Natural := N.Children_Count;
+            begin
+               Children.Vector.Reserve_Capacity
+                 (Ada.Containers.Count_Type (Count));
+               for I in 1 .. Count loop
+                  Children.Vector.Append
+                    (Allocate (N.Child (I), Unit_Handle, Node));
+               end loop;
+            end;
+         end if;
       end;
    end Expand_Children;
 
