@@ -113,6 +113,16 @@ package ${ada_lib_name}.Rewriting is
    --  tree, so it can be attached to another one. Otherwise, Child must have
    --  no parent as it will be tied to Handle's tree.
 
+   procedure Set_Root
+     (Handle : Unit_Rewriting_Handle;
+      Root   : Node_Rewriting_Handle)
+      with Pre => Handle /= No_Unit_Rewriting_Handle
+                  and then (Root = No_Node_Rewriting_Handle
+                            or else not Tied (Root));
+   --  Set the root node for the unit Handle to Root. This unties the previous
+   --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
+   --  Root to Handle.
+
 private
    use Ada.Strings.Unbounded;
    use Ada.Strings.Wide_Wide_Unbounded;

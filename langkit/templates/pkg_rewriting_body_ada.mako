@@ -480,4 +480,22 @@ package body ${ada_lib_name}.Rewriting is
       end;
    end Set_Child;
 
+   --------------
+   -- Set_Root --
+   --------------
+
+   procedure Set_Root
+     (Handle : Unit_Rewriting_Handle;
+      Root   : Node_Rewriting_Handle) is
+   begin
+      if Handle.Root /= No_Node_Rewriting_Handle then
+         Handle.Root.Tied := False;
+      end if;
+
+      Handle.Root := Root;
+      if Root /= No_Node_Rewriting_Handle then
+         Root.Tied := True;
+      end if;
+   end Set_Root;
+
 end ${ada_lib_name}.Rewriting;
