@@ -251,6 +251,7 @@ package body ${ada_lib_name}.Rewriting is
             Node           => Node,
             Parent         => Parent_Handle,
             Kind           => Node.Kind,
+            Tied           => True,
             Children       => Unexpanded_Children);
    begin
       Unit_Handle.Nodes.Insert (Node, Result);
@@ -388,6 +389,15 @@ package body ${ada_lib_name}.Rewriting is
       end case;
    end Abstract_Text;
 
+   ----------
+   -- Tied --
+   ----------
+
+   function Tied (Handle : Node_Rewriting_Handle) return Boolean is
+   begin
+      return Handle.Tied;
+   end Tied;
+
    ------------
    -- Parent --
    ------------
@@ -457,11 +467,13 @@ package body ${ada_lib_name}.Rewriting is
          --  Untie the child to be replaced if it exists
          if Child_Slot /= No_Node_Rewriting_Handle then
             Child_Slot.Parent := No_Node_Rewriting_Handle;
+            Child_Slot.Tied := False;
          end if;
 
          --  Tie the new child if it exists
          if Child /= No_Node_Rewriting_Handle then
             Child.Parent := Handle;
+            Child.Tied := True;
          end if;
 
          Child_Slot := Child;

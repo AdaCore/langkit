@@ -78,6 +78,11 @@ package ${ada_lib_name}.Rewriting is
    --  Return the node which the given rewriting Handle relates to. This can
    --  be the null entity if this handle designates a new node.
 
+   function Tied (Handle : Node_Rewriting_Handle) return Boolean
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Return whether this node handle is tied to an analysis unit. If it is
+   --  not, it can be passed as the Child parameter to Set_Child.
+
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
       with Pre => Handle /= No_Node_Rewriting_Handle;
@@ -103,8 +108,7 @@ package ${ada_lib_name}.Rewriting is
       with Pre =>
          Handle /= No_Node_Rewriting_Handle
          and then Index in 1 .. Children_Count (Handle)
-         and then (Child = No_Node_Rewriting_Handle
-                   or else Parent (Child) = No_Node_Rewriting_Handle);
+         and then (Child = No_Node_Rewriting_Handle or else not Tied (Child));
    --  If Child is No_Rewriting_Node, untie the Handle's Index'th child to this
    --  tree, so it can be attached to another one. Otherwise, Child must have
    --  no parent as it will be tied to Handle's tree.
@@ -207,6 +211,10 @@ private
       --  Kind for the node this handle represents. When Node is not null (i.e.
       --  when this represents an already existing node, rather than a new
       --  one), this must be equal to Node.Kind.
+
+      Tied : Boolean;
+      --  Whether this node is tied to an analysis unit tree. It can be
+      --  assigned as a child to another node iff it is not tied.
 
       Children : Node_Children;
       --  Lazily evaluated vector of children for the rewritten node
