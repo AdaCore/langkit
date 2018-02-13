@@ -163,6 +163,25 @@ package ${ada_lib_name}.Rewriting is
    --  size of Children must match the number of children associated to the
    --  given Kind. Besides, all given children must not be tied.
 
+   ## Emit shortcuts for constructors of nodes that have fields
+
+   % for n in ctx.astnode_types:
+      % if not n.abstract and \
+            not n.is_token_node and \
+            not n.is_list_type and \
+            n.get_parse_fields():
+
+         function Create_${n.entity.api_name}
+           (Handle : Rewriting_Handle
+            % for f in n.get_parse_fields():
+               ; ${f.name} : Node_Rewriting_Handle
+            % endfor
+            ) return Node_Rewriting_Handle
+            with Pre => Handle /= No_Rewriting_Handle;
+
+      % endif
+   % endfor
+
 private
    use Ada.Strings.Unbounded;
    use Ada.Strings.Wide_Wide_Unbounded;

@@ -630,4 +630,26 @@ package body ${ada_lib_name}.Rewriting is
       return Result;
    end Create_Regular_Node;
 
+   % for n in ctx.astnode_types:
+      % if not n.abstract and \
+            not n.is_token_node and \
+            not n.is_list_type and \
+            n.get_parse_fields():
+
+         function Create_${n.entity.api_name}
+           (Handle : Rewriting_Handle
+            % for f in n.get_parse_fields():
+               ; ${f.name} : Node_Rewriting_Handle
+            % endfor
+            ) return Node_Rewriting_Handle is
+         begin
+            return Create_Regular_Node
+              (Handle, ${n.ada_kind_name},
+               (${', '.join('{} => {}'.format(i, f.name)
+                            for i, f in enumerate(n.get_parse_fields(), 1))}));
+         end;
+
+      % endif
+   % endfor
+
 end ${ada_lib_name}.Rewriting;
