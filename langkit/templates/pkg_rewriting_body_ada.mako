@@ -509,4 +509,51 @@ package body ${ada_lib_name}.Rewriting is
       end if;
    end Set_Root;
 
+   -----------
+   -- Clone --
+   -----------
+
+   function Clone
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
+   is
+      Result : Node_Rewriting_Handle;
+   begin
+      if Handle = No_Node_Rewriting_Handle then
+         return Handle;
+      end if;
+
+      --  Make sure the original handle is expanded so we can iterate on it
+      Expand_Children (Handle);
+
+      Result := new Node_Rewriting_Handle_Type'
+        (Context_Handle => Handle.Context_Handle,
+         Node           => Handle.Node,
+         Parent         => No_Node_Rewriting_Handle,
+         Kind           => Handle.Kind,
+         Tied           => False,
+         Children       => <>);
+      Nodes_Pools.Append (Handle.Context_Handle.New_Nodes, Result);
+
+      --  Recursively clone children
+      case Handle.Children.Kind is
+         when Unexpanded =>
+            raise Program_Error;
+
+         when Expanded_Token_Node =>
+            Result.Children := (Kind => Expanded_Token_Node,
+                                Text => Handle.Children.Text);
+
+         when Expanded_Regular =>
+            Result.Children := (Kind => Expanded_Regular, Vector => <>);
+            Result.Children.Vector.Reserve_Capacity
+              (Handle.Children.Vector.Length);
+            for I in 1 .. Handle.Children.Vector.Last_Index loop
+               Result.Children.Vector.Append
+                 (Clone (Handle.Children.Vector.Element (I)));
+            end loop;
+      end case;
+
+      return Result;
+   end Clone;
+
 end ${ada_lib_name}.Rewriting;

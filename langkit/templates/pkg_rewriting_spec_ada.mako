@@ -125,6 +125,11 @@ package ${ada_lib_name}.Rewriting is
    --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
    --  Root to Handle.
 
+   function Clone
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+   --  Create a clone of the Handle node tree. The result is not tied to any
+   --  analysis unit tree.
+
 private
    use Ada.Strings.Unbounded;
    use Ada.Strings.Wide_Wide_Unbounded;
