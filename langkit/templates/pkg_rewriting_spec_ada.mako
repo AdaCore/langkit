@@ -7,6 +7,8 @@ private with Ada.Strings.Unbounded.Hash;
 private with Ada.Strings.Wide_Wide_Unbounded;
 
 with Langkit_Support.Text; use Langkit_Support.Text;
+private with Langkit_Support.Bump_Ptr;
+private with Langkit_Support.Bump_Ptr.Vectors;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 private with ${ada_lib_name}.Analysis.Implementation;
@@ -127,6 +129,8 @@ private
    use Ada.Strings.Unbounded;
    use Ada.Strings.Wide_Wide_Unbounded;
 
+   use Langkit_Support.Bump_Ptr;
+
    use ${ada_lib_name}.Analysis.Implementation;
 
    type Rewriting_Handle_Type;
@@ -152,12 +156,21 @@ private
       Hash            => Named_Hash,
       Equivalent_Keys => "=");
 
+   package Nodes_Pools is new Langkit_Support.Bump_Ptr.Vectors
+     (Node_Rewriting_Handle);
+
    type Rewriting_Handle_Type is record
       Context : Analysis_Context;
       --  Analysis context this rewriting handle relates to
 
       Units : Unit_Maps.Map;
       --  Keep track of rewriting handles we create all units that Context owns
+
+      Pool      : Bump_Ptr_Pool;
+      New_Nodes : Nodes_Pools.Vector;
+      --  Keep track of all node rewriting handles that don't map to original
+      --  nodes, i.e. all nodes that were created during this rewriting
+      --  session.
    end record;
 
    type Unit_Rewriting_Handle_Type is record

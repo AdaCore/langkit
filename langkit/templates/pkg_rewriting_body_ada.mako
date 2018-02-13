@@ -50,9 +50,12 @@ package body ${ada_lib_name}.Rewriting is
      (Context : Analysis_Context) return Rewriting_Handle
    is
       Result : constant Rewriting_Handle := new Rewriting_Handle_Type'
-        (Context => Context,
-         Units   => <>);
+        (Context   => Context,
+         Units     => <>,
+         Pool      => Create,
+         New_Nodes => <>);
    begin
+      Result.New_Nodes := Nodes_Pools.Create (Result.Pool);
       Set_Rewriting_Handle (Context, Convert (Result));
       return Result;
    end Start_Rewriting;
@@ -318,6 +321,14 @@ package body ${ada_lib_name}.Rewriting is
          end loop;
          Free (Unit);
       end loop;
+      for Node of Handle.New_Nodes loop
+         declare
+            N : Node_Rewriting_Handle := Node;
+         begin
+            Free (N);
+         end;
+      end loop;
+      Free (Handle.Pool);
       Free (Handle);
 
       --  Release the rewriting handle singleton for its context
