@@ -5,7 +5,7 @@ with System.Assertions;
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
-procedure Main is
+procedure General_API is
    Buffer : constant String :=
      ("def a = 1" & ASCII.LF
       & "def b = (2 + a) + 3" & ASCII.LF
@@ -104,4 +104,4 @@ begin
    end if;
 
    Put_Line ("main.adb: Done.");
-end Main;
+end General_API;

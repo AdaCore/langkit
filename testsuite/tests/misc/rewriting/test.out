@@ -1,3 +1,4 @@
+== general_api.adb ==
 Try to get a unit rewriting handle out of a rewriting session...
    Got an assert failure
 Create a rewriting handle
@@ -8,4 +9,43 @@ Apply the rewriting
 Create a second rewriting handler
 Apply the rewriting
 main.adb: Done.
+
+== rewrite.adb ==
+Try assigning a child that is already tied to a tree...
+   Got an assert failure
+
+Replace the middle definition (b) with a clone of the last definition (c)
+DefList
+|  Def
+|  |name:
+|  |  Name: a
+|  |expr:
+|  |  Literal: 1
+|  Def
+|  |name:
+|  |  Name: c
+|  |expr:
+|  |  Plus
+|  |  |lhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: a
+|  |  |rhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: b
+|  Def
+|  |name:
+|  |  Name: c
+|  |expr:
+|  |  Plus
+|  |  |lhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: a
+|  |  |rhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: b
+main2.adb: Done.
 Done
