@@ -319,6 +319,9 @@ package ${ada_lib_name}.Analysis is
       % endif
    % endfor
 
+   function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean;
+   --  Return whether Kind corresponds to a token node
+
    -----------------------
    -- Lexical utilities --
    -----------------------

@@ -662,6 +662,15 @@ package body ${ada_lib_name}.Analysis is
       end loop;
    end PP_Trivia;
 
+   -------------------
+   -- Is_Token_Node --
+   -------------------
+
+   function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean is
+   begin
+      return Is_Token_Node_Kind (Kind);
+   end Is_Token_Node;
+
    --------------------------
    -- Populate_Lexical_Env --
    --------------------------
