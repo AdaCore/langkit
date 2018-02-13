@@ -30,6 +30,9 @@ package ${ada_lib_name}.Rewriting is
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle;
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle;
 
+   type Node_Rewriting_Handle_Array is
+      array (Positive range <>) of Node_Rewriting_Handle;
+
    function Handle (Context : Analysis_Context) return Rewriting_Handle;
    --  Return the rewriting handle associated to Context, or
    --  No_Rewriting_Handle if Context is not being rewritten.
@@ -129,6 +132,36 @@ package ${ada_lib_name}.Rewriting is
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
    --  Create a clone of the Handle node tree. The result is not tied to any
    --  analysis unit tree.
+
+   function Create_Node
+     (Handle : Rewriting_Handle;
+      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Rewriting_Handle;
+   --  Create a new node of the given Kind, with empty text (for token nodes)
+   --  or children (for regular nodes).
+
+   function Create_Token_Node
+     (Handle : Rewriting_Handle;
+      Kind   : ${root_node_kind_name};
+      Text   : Text_Type) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Rewriting_Handle
+                  and then Is_Token_Node (Kind);
+   --  Create a new token node with the given Kind and Text
+
+   function Create_Regular_Node
+     (Handle   : Rewriting_Handle;
+      Kind     : ${root_node_kind_name};
+      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Rewriting_Handle
+                  and then not Is_Token_Node (Kind)
+                  and then (for all C of Children =>
+                            C = No_Node_Rewriting_Handle or else not Tied (C));
+   --  Create a new regular node of the given Kind and assign it the given
+   --  Children.
+   --
+   --  Except for lists, which can have any number of children, the
+   --  size of Children must match the number of children associated to the
+   --  given Kind. Besides, all given children must not be tied.
 
 private
    use Ada.Strings.Unbounded;

@@ -6,6 +6,7 @@ with Ada.Unchecked_Deallocation;
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
+with ${ada_lib_name}.Introspection;    use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
 
@@ -555,5 +556,78 @@ package body ${ada_lib_name}.Rewriting is
 
       return Result;
    end Clone;
+
+   -----------------
+   -- Create_Node --
+   -----------------
+
+   function Create_Node
+     (Handle : Rewriting_Handle;
+      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle is
+   begin
+      if Is_Token_Node (Kind) then
+         return Create_Token_Node (Handle, Kind, "");
+      else
+         declare
+            Refs     : constant Field_Reference_Array := Fields (Kind);
+            Children : constant Node_Rewriting_Handle_Array (Refs'Range) :=
+               (others => No_Node_Rewriting_Handle);
+         begin
+            return Create_Regular_Node (Handle, Kind, Children);
+         end;
+      end if;
+   end Create_Node;
+
+   -----------------------
+   -- Create_Token_Node --
+   -----------------------
+
+   function Create_Token_Node
+     (Handle : Rewriting_Handle;
+      Kind   : ${root_node_kind_name};
+      Text   : Text_Type) return Node_Rewriting_Handle
+   is
+      Result : Node_Rewriting_Handle := new Node_Rewriting_Handle_Type'
+        (Context_Handle => Handle,
+         Node           => null,
+         Parent         => No_Node_Rewriting_Handle,
+         Kind           => Kind,
+         Tied           => False,
+         Children       => (Kind => Expanded_Token_Node,
+                            Text => To_Unbounded_Wide_Wide_String (Text)));
+   begin
+      Nodes_Pools.Append (Handle.New_Nodes, Result);
+      return Result;
+   end Create_Token_Node;
+
+   -------------------------
+   -- Create_Regular_Node --
+   -------------------------
+
+   function Create_Regular_Node
+     (Handle   : Rewriting_Handle;
+      Kind     : ${root_node_kind_name};
+      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
+   is
+      Result : Node_Rewriting_Handle := new Node_Rewriting_Handle_Type'
+        (Context_Handle => Handle,
+         Node           => null,
+         Parent         => No_Node_Rewriting_Handle,
+         Kind           => Kind,
+         Tied           => False,
+         Children       => (Kind   => Expanded_Regular,
+                            Vector => <>));
+   begin
+      Result.Children.Vector.Reserve_Capacity (Children'Length);
+      for C of Children loop
+         Result.Children.Vector.Append (C);
+         if C /= No_Node_Rewriting_Handle then
+            C.Parent := Result;
+            C.Tied := True;
+         end if;
+      end loop;
+      Nodes_Pools.Append (Handle.New_Nodes, Result);
+      return Result;
+   end Create_Regular_Node;
 
 end ${ada_lib_name}.Rewriting;
