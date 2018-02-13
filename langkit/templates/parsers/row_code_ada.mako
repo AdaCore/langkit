@@ -6,18 +6,16 @@ ${parser.pos_var} := ${parser.start_pos};
 
 ## This is the main body of the row, which is the concatenation of the code for
 ## each row part.
-% for subp in parser.parsers:
-
-<% code = subp.generate_code() %>
+% for subparser in parser.parsers:
 
 ## Parse the element
-${code}
+${subparser.generate_code()}
 
 ## If the parsing was successful then
-if ${subp.pos_var} /= No_Token_Index then
+if ${subparser.pos_var} /= No_Token_Index then
 
    ## Set current position to the out position of the parsed row element
-   ${parser.pos_var} := ${subp.pos_var};
+   ${parser.pos_var} := ${subparser.pos_var};
 
 else
    ## If the parsing was unsuccessful, then set the position accordingly
