@@ -29,11 +29,7 @@ project Gen is
     for Languages use ("Ada");
     for Source_Dirs use (".");
     for Object_Dir use "obj";
-    for Main use ("{main_source}");
-
-    package Builder is
-        for Executable ("{main_source}") use "main";
-    end Builder;
+    for Main use ({main_sources});
 
     package Compiler is
         for Default_Switches ("Ada") use
@@ -121,14 +117,19 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
                   warning_set=default_warning_set, properties_logging=False,
                   generate_unparser=False):
     """
-    Compile and emit code for `ctx` and build the generated library. Then, if
-    `py_script` is not None, run it with this library available. If `ada_main`
-    is not None, build it and run it, too.
+    Compile and emit code for `ctx` and build the generated library. Then,
+    execute the provided scripts/programs, if any.
 
     An exception is raised if any step fails (the script must return code 0).
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
         See emit_and_print_errors.
+    :param None|str py_script: If not None, name of the Python script to run
+        with the built library available.
+    :param None|str|list[str] ada_main: If not None, list of name of main
+        source files for Ada programs to build and run with the generated
+        library. If the input is a single string, consider it's a single mail
+        source file.
     :param WarningSet warning_set: Set of warnings to emit.
     :param bool properties_logging: Whether to enable properties logging in
         code generation.
@@ -187,13 +188,26 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         run(python_interpreter, py_script)
 
     if ada_main is not None:
-        # Generate a project file to build the given Ada main and then run the
-        # program.
+        if isinstance(ada_main, str):
+            ada_main = [ada_main]
+
+        # Generate a project file to build the given Ada main and then run
+        # the program.
         with open('gen.gpr', 'w') as f:
-            f.write(project_template.format(main_source=ada_main))
+            f.write(project_template.format(
+                main_sources=', '.join('"{}"'.format(m) for m in ada_main)
+            ))
         run('gprbuild', '-Pgen', '-q', '-p',
             '-XLIBRARY_TYPE=relocatable', '-XXMLADA_BUILD=relocatable')
-        run(os.path.join('obj', 'main'))
+
+        for i, m in enumerate(ada_main):
+            assert m.endswith('.adb')
+            if i > 0:
+                print('')
+            if len(ada_main) > 1:
+                print('== {} =='.format(m))
+            sys.stdout.flush()
+            run(os.path.join('obj', m[:-4]))
 
 
 def reset_langkit():
