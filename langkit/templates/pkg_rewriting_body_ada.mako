@@ -61,6 +61,15 @@ package body ${ada_lib_name}.Rewriting is
       return Result;
    end Start_Rewriting;
 
+   ---------------------
+   -- Abort_Rewriting --
+   ---------------------
+
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle) is
+   begin
+      Free_Handles (Handle);
+   end Abort_Rewriting;
+
    -----------
    -- Apply --
    -----------

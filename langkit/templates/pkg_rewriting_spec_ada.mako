@@ -62,6 +62,11 @@ package ${ada_lib_name}.Rewriting is
    --  will raise an Existing_Rewriting_Handle_Error exception if Context
    --  already has a living rewriting session.
 
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle)
+      with Pre  => Handle /= No_Rewriting_Handle,
+           Post => Handle = No_Rewriting_Handle;
+   --  Discard all modifications registered in Handle and close Handle
+
    function Apply (Handle : in out Rewriting_Handle) return Boolean
       with Pre  => Handle /= No_Rewriting_Handle,
            Post => (if Apply'Result
