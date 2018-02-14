@@ -88,17 +88,17 @@ package body ${ada_lib_name}.Analysis.Parsers is
      (Filename, Charset : String;
       Read_BOM          : Boolean;
       Unit              : Analysis_Unit;
-      Parser            : in out Parser_Type)
-   is
-      TDH : Token_Data_Handler_Access renames Token_Data (Unit);
+      TDH               : Token_Data_Handler_Access;
+      Symbol_Literals   : Symbol_Literal_Array_Access;
+      With_Trivia       : Boolean;
+      Parser            : in out Parser_Type) is
    begin
       Reset (Parser);
       Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all,
-                         Parser.Diagnostics, Unit.Context.With_Trivia);
+                         Parser.Diagnostics, With_Trivia);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
-      Parser.Symbol_Literals :=
-         Unit.Context.Symbol_Literals'Unrestricted_Access;
+      Parser.Symbol_Literals := Symbol_Literals;
    end Init_Parser_From_File;
 
    -----------------------------
@@ -109,17 +109,17 @@ package body ${ada_lib_name}.Analysis.Parsers is
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       Unit            : Analysis_Unit;
-      Parser          : in out Parser_Type)
-   is
-      TDH : Token_Data_Handler_Access renames Token_Data (Unit);
+      TDH             : Token_Data_Handler_Access;
+      Symbol_Literals : Symbol_Literal_Array_Access;
+      With_Trivia     : Boolean;
+      Parser          : in out Parser_Type) is
    begin
       Reset (Parser);
       Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all,
-                       Parser.Diagnostics, Unit.Context.With_Trivia);
+                       Parser.Diagnostics, With_Trivia);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
-      Parser.Symbol_Literals :=
-         Unit.Context.Symbol_Literals'Unrestricted_Access;
+      Parser.Symbol_Literals := Symbol_Literals;
    end Init_Parser_From_Buffer;
 
    ---------------------------
