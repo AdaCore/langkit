@@ -506,6 +506,16 @@ package body ${ada_lib_name}.Rewriting is
       return Handle.Children.Vector.Element (Index);
    end Child;
 
+   ----------
+   -- Root --
+   ----------
+
+   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
+   is
+   begin
+      return Handle.Root;
+   end Root;
+
    ---------------
    -- Set_Child --
    ---------------

@@ -133,6 +133,11 @@ package ${ada_lib_name}.Rewriting is
    --  Return a handle corresponding to the Index'th child of the node that
    --  Handle represents. Index is 1-based.
 
+   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Unit_Rewriting_Handle;
+   --  Return the node handle corresponding to the root of the unit which
+   --  Handle designates.
+
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
