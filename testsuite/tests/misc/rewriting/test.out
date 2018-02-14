@@ -80,4 +80,9 @@ DefList
 |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  Name: c
 rewrite.adb: Done.
+
+== iter_units.adb ==
+Rewritten unit a.txt: def a = 11 
+Rewritten unit b.txt: def b = 22 
+iter_units.adb: Done.
 Done
