@@ -81,6 +81,21 @@ DefList
 |  |  |  |  |  |  |  Name: c
 rewrite.adb: Done.
 
+== rewrite_lists.adb ==
+Applying the diff...
+DefList
+|  Def
+|  |name:
+|  |  Name: a
+|  |expr:
+|  |  Literal: 1
+|  Def
+|  |name:
+|  |  Name: c
+|  |expr:
+|  |  Literal: 3
+rewrite_lists.adb: Done.
+
 == iter_units.adb ==
 Rewritten unit a.txt: def a = 11 
 Rewritten unit b.txt: def b = 22 
