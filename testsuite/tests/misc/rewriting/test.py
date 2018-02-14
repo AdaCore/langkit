@@ -62,6 +62,7 @@ g.add_rules(
 build_and_run(g, ada_main=['general_api.adb',
                            'rewrite.adb',
                            'rewrite_lists.adb',
-                           'iter_units.adb'],
+                           'iter_units.adb',
+                           'apply_error.adb'],
               generate_unparser=True)
 print('Done')

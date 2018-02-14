@@ -75,7 +75,7 @@ package body ${ada_lib_name}.Rewriting is
    -- Apply --
    -----------
 
-   function Apply (Handle : in out Rewriting_Handle) return Boolean is
+   function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
 
       type Processed_Unit_Record is record
          Unit     : Analysis_Unit;
@@ -88,8 +88,8 @@ package body ${ada_lib_name}.Rewriting is
       package Processed_Unit_Vectors is new Ada.Containers.Vectors
         (Positive, Processed_Unit);
 
-      Units   : Processed_Unit_Vectors.Vector;
-      Success : Boolean := True;
+      Units  : Processed_Unit_Vectors.Vector;
+      Result : Apply_Result := (Success => True);
 
    begin
       --  Try to reparse all units that were potentially modified
@@ -140,7 +140,10 @@ package body ${ada_lib_name}.Rewriting is
 
             --  If there is a parsing error, abort the rewriting process
             if not PU.New_Data.Diagnostics.Is_Empty then
-               Success := False;
+               Result := (Success     => False,
+                          Unit        => PU.Unit,
+                          Diagnostics => <>);
+               Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
                exit;
             end if;
@@ -149,7 +152,7 @@ package body ${ada_lib_name}.Rewriting is
 
       --  If all reparsing went fine, actually replace the AST nodes all over
       --  the context and free all resources associated to Handle.
-      if Success then
+      if Result.Success then
          for PU of Units loop
             Update_After_Reparse (PU.Unit, PU.New_Data);
          end loop;
@@ -160,7 +163,7 @@ package body ${ada_lib_name}.Rewriting is
       for PU of Units loop
          Free (PU);
       end loop;
-      return Success;
+      return Result;
    end Apply;
 
    ------------------

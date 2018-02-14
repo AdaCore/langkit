@@ -5,6 +5,8 @@ with System.Assertions;
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
+with Process_Apply;
+
 procedure General_API is
    Buffer : constant String :=
      ("def a = 1" & ASCII.LF
@@ -82,12 +84,9 @@ begin
    pragma Unreferenced (UH);
 
    Put_Line ("Apply the rewriting");
-   if not Apply (RH) then
-      --  We don't expect any failure as we did not do any modification to
-      --  trees!
-      raise Program_Error;
+   Process_Apply (RH);
 
-   elsif Handle (Ctx) /= No_Rewriting_Handle then
+   if Handle (Ctx) /= No_Rewriting_Handle then
       raise Program_Error;
    end if;
 
@@ -97,11 +96,7 @@ begin
    Put_Line ("Create a second rewriting handler");
    RH := Start_Rewriting (Ctx);
    Put_Line ("Apply the rewriting");
-   if not Apply (RH) then
-      --  We don't expect any failure as we did not do any modification to
-      --  trees!
-      raise Program_Error;
-   end if;
+   Process_Apply (RH);
 
    Put_Line ("main.adb: Done.");
 end General_API;

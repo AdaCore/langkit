@@ -6,7 +6,8 @@ private with Ada.Strings.Unbounded;
 private with Ada.Strings.Unbounded.Hash;
 private with Ada.Strings.Wide_Wide_Unbounded;
 
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 private with Langkit_Support.Bump_Ptr;
 private with Langkit_Support.Bump_Ptr.Vectors;
 
@@ -67,14 +68,28 @@ package ${ada_lib_name}.Rewriting is
            Post => Handle = No_Rewriting_Handle;
    --  Discard all modifications registered in Handle and close Handle
 
-   function Apply (Handle : in out Rewriting_Handle) return Boolean
+   type Apply_Result (Success : Boolean := True) is record
+      case Success is
+         when False =>
+            Unit : Analysis_Unit;
+            --  Reference to the analysis unit that was being processed when
+            --  the error occurred.
+
+            Diagnostics : Diagnostics_Vectors.Vector;
+            --  Corresponding list of error messages
+         when True => null;
+      end case;
+   end record;
+
+   function Apply (Handle : in out Rewriting_Handle) return Apply_Result
       with Pre  => Handle /= No_Rewriting_Handle,
-           Post => (if Apply'Result
+           Post => (if Apply'Result.Success
                     then Handle = No_Rewriting_Handle
                     else Handle = Handle'Old);
    --  Apply all modifications to Handle's analysis context. If that worked,
-   --  close Handle and return True. Otherwise, reparsing did not work, so keep
-   --  Handle and its Context unchanged and return False.
+   --  close Handle and return (Success => True). Otherwise, reparsing did not
+   --  work, so keep Handle and its Context unchanged and return details about
+   --  the error that happened.
 
    function Unit_Handles
      (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array

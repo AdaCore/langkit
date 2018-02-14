@@ -100,4 +100,10 @@ rewrite_lists.adb: Done.
 Rewritten unit a.txt: def a = 11 
 Rewritten unit b.txt: def b = 22 
 iter_units.adb: Done.
+
+== apply_error.adb ==
+Could not apply diff on the main.txt unit:
+  1:5: Expected Identifier, got Number
+def 1 = a 
+apply_error.adb: Done.
 Done

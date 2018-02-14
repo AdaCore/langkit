@@ -2,10 +2,11 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with System.Assertions;
 
-with Langkit_Support.Text;     use Langkit_Support.Text;
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
+
+with Process_Apply;
 
 procedure Rewrite is
    Buffer : constant String :=
@@ -126,11 +127,7 @@ begin
 
    New_Line;
    Put_Line ("Applying the diff...");
-   if not Apply (RH) then
-      Put_Line ("Could not parse the following:");
-      Put_Line (Image (Unparse (N)));
-      raise Program_Error;
-   end if;
+   Process_Apply (RH);
 
    Root (U).Print (Show_Slocs => False);
 
