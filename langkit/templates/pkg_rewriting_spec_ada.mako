@@ -30,6 +30,9 @@ package ${ada_lib_name}.Rewriting is
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle;
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle;
 
+   type Unit_Rewriting_Handle_Array is
+      array (Positive range <>) of Unit_Rewriting_Handle;
+
    type Node_Rewriting_Handle_Array is
       array (Positive range <>) of Node_Rewriting_Handle;
 
@@ -67,6 +70,12 @@ package ${ada_lib_name}.Rewriting is
    --  Apply all modifications to Handle's analysis context. If that worked,
    --  close Handle and return True. Otherwise, reparsing did not work, so keep
    --  Handle and its Context unchanged and return False.
+
+   function Unit_Handles
+     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
+      with Pre => Handle /= No_Rewriting_Handle;
+   --  Return the list of unit rewriting handles in the given context handle
+   --  for units that the Apply primitive will modify.
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
       with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;

@@ -153,6 +153,24 @@ package body ${ada_lib_name}.Rewriting is
       return Success;
    end Apply;
 
+   ------------------
+   -- Unit_Handles --
+   ------------------
+
+   function Unit_Handles
+     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
+   is
+      Count  : constant Natural := Natural (Handle.Units.Length);
+      Result : Unit_Rewriting_Handle_Array (1 .. Count);
+      I      : Positive := 1;
+   begin
+      for Unit of Handle.Units loop
+         Result (I) := Unit;
+         I := I + 1;
+      end loop;
+      return Result;
+   end Unit_Handles;
+
    ------------
    -- Handle --
    ------------
