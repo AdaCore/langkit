@@ -671,6 +671,17 @@ package body ${ada_lib_name}.Analysis is
       return Is_Token_Node_Kind (Kind);
    end Is_Token_Node;
 
+   ------------------
+   -- Is_List_Node --
+   ------------------
+
+   function Is_List_Node (Kind : ${root_node_kind_name}) return Boolean is
+   begin
+      return ${('Kind in {}'.format(ctx.generic_list_type.ada_kind_range_name)
+                if ctx.generic_list_type.concrete_subclasses else
+                'False')};
+   end Is_List_Node;
+
    --------------------------
    -- Populate_Lexical_Env --
    --------------------------

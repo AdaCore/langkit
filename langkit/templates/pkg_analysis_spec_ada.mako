@@ -322,6 +322,9 @@ package ${ada_lib_name}.Analysis is
    function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean;
    --  Return whether Kind corresponds to a token node
 
+   function Is_List_Node (Kind : ${root_node_kind_name}) return Boolean;
+   --  Return whether Kind corresponds to a list node
+
    -----------------------
    -- Lexical utilities --
    -----------------------
