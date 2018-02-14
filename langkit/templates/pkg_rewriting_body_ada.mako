@@ -35,9 +35,10 @@ package body ${ada_lib_name}.Rewriting is
       return Node_Rewriting_Handle;
    --  Allocate a handle for Node and register it in Unit_Handle's map
 
-   procedure Expand_Children (Node : Node_Rewriting_Handle);
-   --  If Node.Children.Expanded, do nothing. Otherwise, populate Node's list
-   --  of Children to mimic the related bare AST node.
+   procedure Expand_Children (Node : Node_Rewriting_Handle)
+      with Pre => Node /= No_Node_Rewriting_Handle;
+   --  If Node.Children.Kind is Unexpanded, populate Node's list of Children to
+   --  mimic the related bare AST node. Otherwise, do nothing.
 
    procedure Free_Handles (Handle : in out Rewriting_Handle);
    --  Free all resources tied to Handle. This also releases the rewriting
@@ -538,11 +539,7 @@ package body ${ada_lib_name}.Rewriting is
    begin
       --  If this handle represents an already existing node, make sure it is
       --  expanded so that its children vector can be modified.
-      if Handle.Children.Kind = Unexpanded then
-         --  Only existing nodes can have an unexpanded handle, so Handle.Node
-         --  cannot be null.
-         Expand_Children (Handle);
-      end if;
+      Expand_Children (Handle);
 
       --  Only regular nodes can have fields. As Index is checked to be
       --  in-bounds in the pre-condition, we can assume here that we have an
