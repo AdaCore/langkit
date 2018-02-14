@@ -71,10 +71,6 @@ package body ${ada_lib_name}.Analysis is
    procedure Free is new Ada.Unchecked_Deallocation
      (Analysis_Unit_Type, Analysis_Unit);
 
-   procedure Update_Charset (Unit : Analysis_Unit; Charset : String);
-   --  If Charset is an empty string, do nothing. Otherwise, update
-   --  Unit.Charset field to Charset.
-
    function Normalize_Unit_Filename
      (Filename : String) return Unbounded_String;
    --  Try to return a canonical filename. This is used to have an
@@ -104,17 +100,6 @@ package body ${ada_lib_name}.Analysis is
    function Create_Symbol_Literals
      (Symbols : Symbol_Table) return Symbol_Literal_Array;
    --  Create pre-computed symbol literals in Symbols and return them
-
-   --------------------
-   -- Update_Charset --
-   --------------------
-
-   procedure Update_Charset (Unit : Analysis_Unit; Charset : String) is
-   begin
-      if Charset'Length /= 0 then
-         Unit.Charset := To_Unbounded_String (Charset);
-      end if;
-   end Update_Charset;
 
    ------------
    -- Create --
@@ -577,21 +562,10 @@ package body ${ada_lib_name}.Analysis is
      (Unit    : Analysis_Unit;
       Charset : String := "")
    is
-      procedure Init_Parser
-        (Unit     : Analysis_Unit;
-         Read_BOM : Boolean;
-         Parser   : in out Parser_Type) is
-      begin
-         Init_Parser_From_File
-           (To_String (Unit.File_Name), To_String (Unit.Charset), Read_BOM,
-            Unit, Parser);
-      end Init_Parser;
-
-      Reparsed : Reparsed_Unit;
+      Dummy : constant Analysis_Unit := Get_From_File
+        (Unit.Context, To_String (Unit.File_Name), Charset, Reparse => True);
    begin
-      Update_Charset (Unit, Charset);
-      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access, Reparsed);
-      Update_After_Reparse (Unit, Reparsed);
+      null;
    end Reparse;
 
    -------------
@@ -603,22 +577,10 @@ package body ${ada_lib_name}.Analysis is
       Charset : String := "";
       Buffer  : String)
    is
-      procedure Init_Parser
-        (Unit     : Analysis_Unit;
-         Read_BOM : Boolean;
-         Parser   : in out Parser_Type)
-      is
-      begin
-         Init_Parser_From_Buffer
-           (Buffer, To_String (Unit.Charset), Read_BOM, Unit, Parser);
-      end Init_Parser;
-
-      Reparsed : Reparsed_Unit;
+      Dummy : constant Analysis_Unit := Get_From_Buffer
+        (Unit.Context, To_String (Unit.File_Name), Charset, Buffer);
    begin
-      Update_Charset (Unit, Charset);
-      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access, Reparsed);
-      Unit.Charset := To_Unbounded_String (Charset);
-      Update_After_Reparse (Unit, Reparsed);
+      null;
    end Reparse;
 
    -------------
