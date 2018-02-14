@@ -164,6 +164,39 @@ package ${ada_lib_name}.Rewriting is
    --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
    --  Root to Handle.
 
+   procedure Insert_Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive;
+      Child  : Node_Rewriting_Handle)
+      with Pre  => Handle /= No_Node_Rewriting_Handle
+                   and then Is_List_Node (Kind (Handle))
+                   and then Index <= Children_Count (Handle) + 1
+                   and then (Child = No_Node_Rewriting_Handle
+                             or else not Tied (Child)),
+           Post => Rewriting.Child (Handle, Index) = Child;
+   --  Assuming Handle refers to a list node, insert the given Child node to be
+   --  in the children list at the given index.
+
+   procedure Append_Child
+     (Handle : Node_Rewriting_Handle;
+      Child  : Node_Rewriting_Handle)
+      with Pre  => Handle /= No_Node_Rewriting_Handle
+                   and then Is_List_Node (Kind (Handle))
+                   and then (Child = No_Node_Rewriting_Handle
+                             or else not Tied (Child)),
+           Post => Rewriting.Child (Handle, Children_Count (Handle)) = Child;
+   --  Assuming Handle refers to a list node, append the given Child node to
+   --  the children list.
+
+   procedure Remove_Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive)
+      with Pre  => Handle /= No_Node_Rewriting_Handle
+                   and then Is_List_Node (Kind (Handle))
+                   and then Index in 1 .. Children_Count (Handle);
+   --  Assuming Handle refers to a list node, remove the child at the given
+   --  Index from the children list.
+
    function Clone
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
    --  Create a clone of the Handle node tree. The result is not tied to any

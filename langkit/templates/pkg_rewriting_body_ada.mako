@@ -585,6 +585,47 @@ package body ${ada_lib_name}.Rewriting is
       end if;
    end Set_Root;
 
+   ------------------
+   -- Insert_Child --
+   ------------------
+
+   procedure Insert_Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive;
+      Child  : Node_Rewriting_Handle) is
+   begin
+      --  First, just create room for the new node and let Set_Child take care
+      --  of tiding Child to Handle's tree.
+      Expand_Children (Handle);
+      Handle.Children.Vector.Insert (Index, No_Node_Rewriting_Handle);
+      Set_Child (Handle, Index, Child);
+   end Insert_Child;
+
+   ------------------
+   -- Append_Child --
+   ------------------
+
+   procedure Append_Child
+     (Handle : Node_Rewriting_Handle;
+      Child  : Node_Rewriting_Handle) is
+   begin
+      Insert_Child (Handle, Children_Count (Handle) + 1, Child);
+   end Append_Child;
+
+   ------------------
+   -- Remove_Child --
+   ------------------
+
+   procedure Remove_Child
+     (Handle : Node_Rewriting_Handle;
+      Index  : Positive) is
+   begin
+      --  First, let Set_Child take care of untiding the child to remove, and
+      --  then actually remove the corresponding children list slot.
+      Set_Child (Handle, Index, No_Node_Rewriting_Handle);
+      Handle.Children.Vector.Delete (Index);
+   end Remove_Child;
+
    -----------
    -- Clone --
    -----------
