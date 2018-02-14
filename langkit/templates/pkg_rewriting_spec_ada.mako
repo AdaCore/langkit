@@ -110,6 +110,10 @@ package ${ada_lib_name}.Rewriting is
    --  Turn the given rewritten node Handles designates into text. This is the
    --  text that is used in Apply in order to re-create an analysis unit.
 
+   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Return the kind corresponding to Handle's node
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean
       with Pre => Handle /= No_Node_Rewriting_Handle;
    --  Return whether this node handle is tied to an analysis unit. If it is

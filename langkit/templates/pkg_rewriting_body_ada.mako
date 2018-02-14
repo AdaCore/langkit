@@ -457,6 +457,16 @@ package body ${ada_lib_name}.Rewriting is
    end Abstract_Text;
 
    ----------
+   -- Kind --
+   ----------
+
+   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
+   is
+   begin
+      return Handle.Kind;
+   end Kind;
+
+   ----------
    -- Tied --
    ----------
 
