@@ -201,6 +201,16 @@ package body ${ada_lib_name}.Rewriting is
       end;
    end Handle;
 
+   ----------
+   -- Unit --
+   ----------
+
+   function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
+   is
+   begin
+      return Handle.Unit;
+   end Unit;
+
    ------------
    -- Handle --
    ------------

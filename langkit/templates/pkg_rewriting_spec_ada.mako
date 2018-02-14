@@ -81,6 +81,10 @@ package ${ada_lib_name}.Rewriting is
       with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;
    --  Return the rewriting handle corresponding to Unit
 
+   function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
+      with Pre => Handle /= No_Unit_Rewriting_Handle;
+   --  Return the unit corresponding to Handle
+
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle
       with Pre => Handle (Context (Get_Unit (Node))) /= No_Rewriting_Handle;
