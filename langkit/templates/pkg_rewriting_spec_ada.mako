@@ -83,6 +83,10 @@ package ${ada_lib_name}.Rewriting is
    --  Return the node which the given rewriting Handle relates to. This can
    --  be the null entity if this handle designates a new node.
 
+   function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Return a handle for the rewriting context to which Handle belongs
+
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type
       with Pre => Handle /= No_Node_Rewriting_Handle;
    --  Turn the given rewritten node Handles designates into text. This is the

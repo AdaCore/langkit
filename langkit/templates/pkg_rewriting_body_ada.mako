@@ -204,6 +204,15 @@ package body ${ada_lib_name}.Rewriting is
    end Node;
 
    -------------
+   -- Context --
+   -------------
+
+   function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle is
+   begin
+      return Handle.Context_Handle;
+   end Context;
+
+   -------------
    -- Unparse --
    -------------
 
