@@ -391,16 +391,16 @@ package body ${ada_lib_name}.Rewriting is
       Set_Rewriting_Handle (Ctx, Convert (Handle));
    end Free_Handles;
 
-   ----------
-   -- Kind --
-   ----------
+   -------------------
+   -- Abstract_Kind --
+   -------------------
 
-   overriding function Kind
+   overriding function Abstract_Kind
      (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name}
    is
    begin
       return Node.Kind;
-   end Kind;
+   end Abstract_Kind;
 
    -----------------------------
    -- Abstract_Children_Count --

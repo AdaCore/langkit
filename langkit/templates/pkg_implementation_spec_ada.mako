@@ -59,7 +59,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    type Abstract_Node_Type is abstract tagged null record;
    type Abstract_Node is access all Abstract_Node_Type'Class;
 
-   function Kind
+   function Abstract_Kind
      (Node : access Abstract_Node_Type) return ${root_node_kind_name}
      is abstract;
    --  Return the kind for Node
@@ -592,7 +592,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       Last_Attempted_Child : Integer := -1;
    end record;
 
-   function Kind
+   overriding function Abstract_Kind
      (Node : access ${root_node_value_type}) return ${root_node_kind_name};
 
    overriding function Abstract_Children_Count

@@ -147,7 +147,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             pragma Unreferenced (Node, Result);
             raise Program_Error with "Unparsed not generated";
          % else:
-            case Node.Kind is
+            case Node.Abstract_Kind is
                % for astnode in ctx.astnode_types:
                   % if not astnode.abstract:
                      when ${astnode.ada_kind_name} =>

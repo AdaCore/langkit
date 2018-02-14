@@ -369,7 +369,7 @@ private
       --  Lazily evaluated vector of children for the rewritten node
    end record;
 
-   overriding function Kind
+   overriding function Abstract_Kind
      (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name};
 
    overriding function Abstract_Children_Count

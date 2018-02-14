@@ -2030,15 +2030,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
    end Abstract_Children_Count;
 
-   ----------
-   -- Kind --
-   ----------
+   -------------------
+   -- Abstract_Kind --
+   -------------------
 
-   overriding function Kind
+   overriding function Abstract_Kind
      (Node : access ${root_node_value_type}) return ${root_node_kind_name} is
    begin
       return Node.Kind;
-   end Kind;
+   end Abstract_Kind;
 
    --------------------
    -- Abstract_Child --
