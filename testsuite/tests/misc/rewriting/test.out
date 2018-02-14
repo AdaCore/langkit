@@ -15,7 +15,44 @@ Try assigning a child that is already tied to a tree...
    Got an assert failure
 
 Replace the middle definition (b) with a clone of the last definition (c)
+
+Swap first and fourth defs
+
+Replace the expression of the fifth definition
+
+Applying the diff...
 DefList
+|  Def
+|  |name:
+|  |  Name: d
+|  |expr:
+|  |  Literal: 4
+|  Def
+|  |name:
+|  |  Name: c
+|  |expr:
+|  |  Plus
+|  |  |lhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: a
+|  |  |rhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: b
+|  Def
+|  |name:
+|  |  Name: c
+|  |expr:
+|  |  Plus
+|  |  |lhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: a
+|  |  |rhs:
+|  |  |  Ref
+|  |  |  |name:
+|  |  |  |  Name: b
 |  Def
 |  |name:
 |  |  Name: a
@@ -23,29 +60,24 @@ DefList
 |  |  Literal: 1
 |  Def
 |  |name:
-|  |  Name: c
+|  |  Name: e
 |  |expr:
-|  |  Plus
-|  |  |lhs:
-|  |  |  Ref
-|  |  |  |name:
-|  |  |  |  Name: a
-|  |  |rhs:
-|  |  |  Ref
-|  |  |  |name:
-|  |  |  |  Name: b
-|  Def
-|  |name:
-|  |  Name: c
-|  |expr:
-|  |  Plus
-|  |  |lhs:
-|  |  |  Ref
-|  |  |  |name:
-|  |  |  |  Name: a
-|  |  |rhs:
-|  |  |  Ref
-|  |  |  |name:
-|  |  |  |  Name: b
-main2.adb: Done.
+|  |  ParentExpr
+|  |  |expr:
+|  |  |  Plus
+|  |  |  |lhs:
+|  |  |  |  Ref
+|  |  |  |  |name:
+|  |  |  |  |  Name: d
+|  |  |  |rhs:
+|  |  |  |  ParentExpr
+|  |  |  |  |expr:
+|  |  |  |  |  Plus
+|  |  |  |  |  |lhs:
+|  |  |  |  |  |  Literal: 5
+|  |  |  |  |  |rhs:
+|  |  |  |  |  |  Ref
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Name: c
+rewrite.adb: Done.
 Done
