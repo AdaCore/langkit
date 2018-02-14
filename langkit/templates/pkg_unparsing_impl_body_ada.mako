@@ -60,6 +60,65 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Unit : Analysis_Unit)
       return String_Access
    is
+      Buffer : constant Text_Type := Unparse (Node);
+   begin
+      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
+      --  them here.
+      if Buffer'Length = 0 then
+         return new String'("");
+      end if;
+
+      declare
+         use GNATCOLL.Iconv;
+
+         State  : Iconv_T := Iconv_Open
+           (To_Code   => Get_Charset (Unit),
+            From_Code => Internal_Charset);
+         Status : Iconv_Result;
+
+         To_Convert_String : constant String (1 .. 4 * Buffer'Length)
+            with Import     => True,
+                 Convention => Ada,
+                 Address    => Buffer'Address;
+
+         Output_Buffer : String_Access :=
+            new String (1 .. 4 * To_Convert_String'Length);
+         --  Encodings should not take more than 4 bytes per code point, so
+         --  this should be enough to hold the conversion.
+
+         Input_Index  : Positive := To_Convert_String'First;
+         Output_Index : Positive := Output_Buffer'First;
+      begin
+         --  TODO??? Use GNATCOLL.Iconv to properly encode this wide wide
+         --  string into a mere string using this unit's charset.
+         Iconv
+           (State, To_Convert_String, Input_Index, Output_Buffer.all,
+            Output_Index, Status);
+         Iconv_Close (State);
+         case Status is
+            when Success => null;
+            when others => raise Program_Error with "cannot encode result";
+         end case;
+
+         declare
+            Result_Slice : String renames
+               Output_Buffer (Output_Buffer'First ..  Output_Index - 1);
+            Result : constant String_Access :=
+               new String (Result_Slice'Range);
+         begin
+            Result.all := Result_Slice;
+            Free (Output_Buffer);
+            return Result;
+         end;
+      end;
+   end Unparse;
+
+   -------------
+   -- Unparse --
+   -------------
+
+   function Unparse (Node : access Abstract_Node_Type'Class) return Text_Type
+   is
       Buffer : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
    begin
       % if ctx.generate_unparser:
@@ -68,59 +127,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          end if;
 
          Unparse_Dispatch (Node, Buffer);
-
-         --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
-         --  them here.
-         if Ada.Strings.Wide_Wide_Unbounded.Length (Buffer) = 0 then
-            return new String'("");
-         end if;
-
-         declare
-            use GNATCOLL.Iconv;
-
-            State  : Iconv_T := Iconv_Open
-              (To_Code   => Get_Charset (Unit),
-               From_Code => Internal_Charset);
-            Status : Iconv_Result;
-
-            To_Convert_WWS    : constant Wide_Wide_String :=
-               Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (Buffer);
-            To_Convert_String : constant String (1 .. 4 * To_Convert_WWS'Length)
-               with Import     => True,
-                    Convention => Ada,
-                    Address    => To_Convert_WWS'Address;
-
-            Output_Buffer : String_Access :=
-               new String (1 .. 4 * To_Convert_String'Length);
-            --  Encodings should not take more than 4 bytes per code point, so
-            --  this should be enough to hold the conversion.
-
-            Input_Index  : Positive := To_Convert_String'First;
-            Output_Index : Positive := Output_Buffer'First;
-         begin
-            --  TODO??? Use GNATCOLL.Iconv to properly encode this wide wide
-            --  string into a mere string using this unit's charset.
-            Iconv
-              (State, To_Convert_String, Input_Index, Output_Buffer.all,
-               Output_Index, Status);
-            Iconv_Close (State);
-            case Status is
-               when Success => null;
-               when others => raise Program_Error with "cannot encode result";
-            end case;
-
-            declare
-               Result_Slice : String renames
-                  Output_Buffer (Output_Buffer'First ..  Output_Index - 1);
-               Result : constant String_Access :=
-                  new String (Result_Slice'Range);
-            begin
-               Result.all := Result_Slice;
-               Free (Output_Buffer);
-               return Result;
-            end;
-         end;
-
+         return To_Wide_Wide_String (Buffer);
       % else:
          return (raise Program_Error with "Unparsed not generated");
       % endif
