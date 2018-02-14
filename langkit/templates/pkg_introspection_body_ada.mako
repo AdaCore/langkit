@@ -9,12 +9,12 @@ package body ${ada_lib_name}.Introspection is
 
    Field_Indexes : constant array (Field_Reference) of Natural := (
       ${(', '.join('{} => {}'.format(f.introspection_enum_literal,
-                                     f.index)
+                                     f.index + 1)
                    for f in ctx.sorted_parse_fields)
          if ctx.sorted_parse_fields else '1 .. 0 => 0')}
    );
-   --  For each field reference, provide the corresponding field index in AST
-   --  nodes.
+   --  For each field reference, provide the corresponding 1-based field index
+   --  in AST nodes.
 
    ----------------
    -- Field_Name --

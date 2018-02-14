@@ -22,7 +22,7 @@ package ${ada_lib_name}.Introspection is
    --  Return a lower-case name for Field
 
    function Index (Field : Field_Reference) return Positive;
-   --  Return the index in AST nodes to access the given --  Field
+   --  Return the index in AST nodes to access the given Field
 
    function Field_Reference_From_Index
      (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference;
