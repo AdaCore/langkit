@@ -37,6 +37,10 @@ package ${ada_lib_name}.Rewriting is
    type Node_Rewriting_Handle_Array is
       array (Positive range <>) of Node_Rewriting_Handle;
 
+   -----------------------
+   -- Context rewriting --
+   -----------------------
+
    function Handle (Context : Analysis_Context) return Rewriting_Handle;
    --  Return the rewriting handle associated to Context, or
    --  No_Rewriting_Handle if Context is not being rewritten.
@@ -97,6 +101,10 @@ package ${ada_lib_name}.Rewriting is
    --  Return the list of unit rewriting handles in the given context handle
    --  for units that the Apply primitive will modify.
 
+   --------------------
+   -- Unit rewriting --
+   --------------------
+
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
       with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;
    --  Return the rewriting handle corresponding to Unit
@@ -104,6 +112,25 @@ package ${ada_lib_name}.Rewriting is
    function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
       with Pre => Handle /= No_Unit_Rewriting_Handle;
    --  Return the unit corresponding to Handle
+
+   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
+      with Pre => Handle /= No_Unit_Rewriting_Handle;
+   --  Return the node handle corresponding to the root of the unit which
+   --  Handle designates.
+
+   procedure Set_Root
+     (Handle : Unit_Rewriting_Handle;
+      Root   : Node_Rewriting_Handle)
+      with Pre => Handle /= No_Unit_Rewriting_Handle
+                  and then (Root = No_Node_Rewriting_Handle
+                            or else not Tied (Root));
+   --  Set the root node for the unit Handle to Root. This unties the previous
+   --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
+   --  Root to Handle.
+
+   --------------------
+   -- Node rewriting --
+   --------------------
 
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle
@@ -152,11 +179,6 @@ package ${ada_lib_name}.Rewriting is
    --  Return a handle corresponding to the Index'th child of the node that
    --  Handle represents. Index is 1-based.
 
-   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Unit_Rewriting_Handle;
-   --  Return the node handle corresponding to the root of the unit which
-   --  Handle designates.
-
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
@@ -169,15 +191,9 @@ package ${ada_lib_name}.Rewriting is
    --  tree, so it can be attached to another one. Otherwise, Child must have
    --  no parent as it will be tied to Handle's tree.
 
-   procedure Set_Root
-     (Handle : Unit_Rewriting_Handle;
-      Root   : Node_Rewriting_Handle)
-      with Pre => Handle /= No_Unit_Rewriting_Handle
-                  and then (Root = No_Node_Rewriting_Handle
-                            or else not Tied (Root));
-   --  Set the root node for the unit Handle to Root. This unties the previous
-   --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
-   --  Root to Handle.
+   -------------------------
+   -- List node rewriting --
+   -------------------------
 
    procedure Insert_Child
      (Handle : Node_Rewriting_Handle;
@@ -211,6 +227,10 @@ package ${ada_lib_name}.Rewriting is
                    and then Index in 1 .. Children_Count (Handle);
    --  Assuming Handle refers to a list node, remove the child at the given
    --  Index from the children list.
+
+   -------------------
+   -- Node creation --
+   -------------------
 
    function Clone
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
@@ -246,6 +266,10 @@ package ${ada_lib_name}.Rewriting is
    --  Except for lists, which can have any number of children, the
    --  size of Children must match the number of children associated to the
    --  given Kind. Besides, all given children must not be tied.
+
+   -----------------------------
+   -- Node creation shortcuts --
+   -----------------------------
 
    ## Emit shortcuts for constructors of nodes that have fields
 
