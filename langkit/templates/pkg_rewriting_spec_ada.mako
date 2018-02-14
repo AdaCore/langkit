@@ -83,6 +83,11 @@ package ${ada_lib_name}.Rewriting is
    --  Return the node which the given rewriting Handle relates to. This can
    --  be the null entity if this handle designates a new node.
 
+   function Unparse (Handle : Node_Rewriting_Handle) return Text_Type
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Turn the given rewritten node Handles designates into text. This is the
+   --  text that is used in Apply in order to re-create an analysis unit.
+
    function Tied (Handle : Node_Rewriting_Handle) return Boolean
       with Pre => Handle /= No_Node_Rewriting_Handle;
    --  Return whether this node handle is tied to an analysis unit. If it is

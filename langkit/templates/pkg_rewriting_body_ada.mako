@@ -203,6 +203,15 @@ package body ${ada_lib_name}.Rewriting is
       return Create (Handle.Node);
    end Node;
 
+   -------------
+   -- Unparse --
+   -------------
+
+   function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
+   begin
+      return Unparsing.Implementation.Unparse (Handle);
+   end Unparse;
+
    ------------
    -- Handle --
    ------------
