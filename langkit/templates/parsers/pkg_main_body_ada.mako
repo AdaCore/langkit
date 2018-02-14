@@ -97,10 +97,8 @@ package body ${ada_lib_name}.Analysis.Parsers is
                          Parser.Diagnostics, Unit.Context.With_Trivia);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
-      % if ctx.symbol_literals:
       Parser.Symbol_Literals :=
          Unit.Context.Symbol_Literals'Unrestricted_Access;
-      % endif
    end Init_Parser_From_File;
 
    -----------------------------
@@ -120,10 +118,8 @@ package body ${ada_lib_name}.Analysis.Parsers is
                        Parser.Diagnostics, Unit.Context.With_Trivia);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
-      % if ctx.symbol_literals:
       Parser.Symbol_Literals :=
          Unit.Context.Symbol_Literals'Unrestricted_Access;
-      % endif
    end Init_Parser_From_Buffer;
 
    ---------------------------

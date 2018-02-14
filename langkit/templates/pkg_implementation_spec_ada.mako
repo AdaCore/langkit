@@ -827,21 +827,25 @@ package ${ada_lib_name}.Analysis.Implementation is
       Hash            => Ada.Strings.Unbounded.Hash,
       Equivalent_Keys => "=");
 
-   % if ctx.symbol_literals:
-      type Symbol_Literal_Type is (
-         <%
-            sym_items = ctx.sorted_symbol_literals
-            last_i = len(sym_items) - 1
-         %>
-         % for i, (sym, name) in enumerate(sym_items):
-            ${name}${',' if i < last_i else ''}
-            --  ${sym}
-         % endfor
-      );
+   type Symbol_Literal_Type is
+      % if ctx.symbol_literals:
+         (
+            <%
+               sym_items = ctx.sorted_symbol_literals
+               last_i = len(sym_items) - 1
+            %>
+            % for i, (sym, name) in enumerate(sym_items):
+               ${name}${',' if i < last_i else ''}
+               --  ${sym}
+            % endfor
+         )
+      % else:
+         new Integer range 1 .. 0
+      % endif
+   ;
 
-      type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
-      type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
-   % endif
+   type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
+   type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
 
    type Analysis_Context_Type is record
       Ref_Count : Natural;
@@ -863,10 +867,8 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Object to translate unit names to file names
       % endif
 
-      % if ctx.symbol_literals:
       Symbol_Literals : Symbol_Literal_Array;
       --  List of pre-computed symbols in the Symbols table
-      % endif
 
       Parser : Parser_Type;
       --  Main parser type. TODO: If we want to parse in several tasks, we'll

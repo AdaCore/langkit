@@ -101,11 +101,9 @@ package body ${ada_lib_name}.Analysis is
    --  using Init_Parser to either parse from a file or from a buffer. Return
    --  the resulting analysis unit.
 
-   % if ctx.symbol_literals:
-      function Create_Symbol_Literals
-        (Symbols : Symbol_Table) return Symbol_Literal_Array;
-      --  Create pre-computed symbol literals in Symbols and return them
-   % endif
+   function Create_Symbol_Literals
+     (Symbols : Symbol_Table) return Symbol_Literal_Array;
+   --  Create pre-computed symbol literals in Symbols and return them
 
    --------------------
    -- Update_Charset --
@@ -156,9 +154,7 @@ package body ${ada_lib_name}.Analysis is
          Unit_Provider => P,
          % endif
 
-         % if ctx.symbol_literals:
          Symbol_Literals => Create_Symbol_Literals (Symbols),
-         % endif
 
          Parser => <>,
 
@@ -172,27 +168,30 @@ package body ${ada_lib_name}.Analysis is
       return Context;
    end Create;
 
-   % if ctx.symbol_literals:
+   % for sym, name in ctx.sorted_symbol_literals:
+      Text_${name} : aliased constant Text_Type := ${string_repr(sym)};
+   % endfor
 
-      % for sym, name in ctx.sorted_symbol_literals:
-         Text_${name} : aliased constant Text_Type := ${string_repr(sym)};
-      % endfor
-
-      Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
-      (
+   Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
+   (
+      % if ctx.symbol_literals:
          ${(', '.join("{name} => Text_{name}'Access".format(name=name)
                       for sym, name in ctx.sorted_symbol_literals))}
-      );
+      % else:
+         1 .. 0 => <>
+      % endif
+   );
 
-      ----------------------------
-      -- Create_Symbol_Literals --
-      ----------------------------
+   ----------------------------
+   -- Create_Symbol_Literals --
+   ----------------------------
 
-      function Create_Symbol_Literals
-        (Symbols : Symbol_Table) return Symbol_Literal_Array
-      is
-         Result : Symbol_Literal_Array;
-      begin
+   function Create_Symbol_Literals
+     (Symbols : Symbol_Table) return Symbol_Literal_Array
+   is
+      Result : Symbol_Literal_Array;
+   begin
+      % if ctx.symbol_literals:
          for Literal in Symbol_Literal_Type'Range loop
             declare
                Raw_Text : Text_Type renames
@@ -214,8 +213,10 @@ package body ${ada_lib_name}.Analysis is
             end;
          end loop;
          return Result;
-      end Create_Symbol_Literals;
-   % endif
+      % else:
+         return (1 .. 0 => <>);
+      % endif
+   end Create_Symbol_Literals;
 
    -------------
    -- Inc_Ref --

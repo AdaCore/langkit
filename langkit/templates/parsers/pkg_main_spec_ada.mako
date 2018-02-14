@@ -29,10 +29,8 @@ package ${ada_lib_name}.Analysis.Parsers is
    end record;
 
    type Parsed_Node is access all Implementation.${root_node_value_type}'Class;
-   % if ctx.symbol_literals:
-      type Symbol_Literal_Array_Access is
-         access all Implementation.Symbol_Literal_Array;
-   % endif
+   type Symbol_Literal_Array_Access is
+      access all Implementation.Symbol_Literal_Array;
 
    type Parser_Private_Part is private;
 
@@ -43,10 +41,7 @@ package ${ada_lib_name}.Analysis.Parsers is
       Unit            : Analysis_Unit;
       TDH             : Token_Data_Handler_Access;
       Mem_Pool        : Bump_Ptr_Pool;
-      % if ctx.symbol_literals:
       Symbol_Literals : Symbol_Literal_Array_Access;
-      % endif
-
       Private_Part    : Parser_Private_Part;
    end record;
 
