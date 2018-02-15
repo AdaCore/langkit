@@ -122,6 +122,25 @@ package body ${ada_lib_name}.Analysis.Parsers is
       Parser.Symbol_Literals := Symbol_Literals;
    end Init_Parser_From_Buffer;
 
+   -----------------------------
+   -- Init_Parser_From_Buffer --
+   -----------------------------
+
+   procedure Init_Parser_From_Buffer
+     (Buffer          : Text_Type;
+      Unit            : Analysis_Unit;
+      TDH             : Token_Data_Handler_Access;
+      Symbol_Literals : Symbol_Literal_Array_Access;
+      With_Trivia     : Boolean;
+      Parser          : in out Parser_Type) is
+   begin
+      Reset (Parser);
+      Lex_From_Buffer (Buffer, TDH.all, Parser.Diagnostics, With_Trivia);
+      Parser.Unit := Unit;
+      Parser.TDH := TDH;
+      Parser.Symbol_Literals := Symbol_Literals;
+   end Init_Parser_From_Buffer;
+
    ---------------------------
    -- Process_Parsing_Error --
    ---------------------------

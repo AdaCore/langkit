@@ -75,6 +75,20 @@ package ${ada_lib_name}.Analysis.Parsers is
    --  This can raise Lexer.Unknown_Charset or Lexer.Invalid_Input exceptions
    --  if the lexer has trouble decoding the input.
 
+   procedure Init_Parser_From_Buffer
+     (Buffer          : Text_Type;
+      Unit            : Analysis_Unit;
+      TDH             : Token_Data_Handler_Access;
+      Symbol_Literals : Symbol_Literal_Array_Access;
+      With_Trivia     : Boolean;
+      Parser          : in out Parser_Type);
+   --  Init a parser to parse the source in Buffer, decoding it using
+   --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
+   --  into TDH.
+   --
+   --  This can raise Lexer.Unknown_Charset or Lexer.Invalid_Input exceptions
+   --  if the lexer has trouble decoding the input.
+
    function Parse
      (Parser         : in out Parser_Type;
       Check_Complete : Boolean := True;
