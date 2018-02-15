@@ -860,6 +860,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Create a new special analysis unit, i.e. a unit that is not registered
    --  in Context's unit map.
 
+   function Templates_Unit (Context : Analysis_Context) return Analysis_Unit;
+   --  Return the analysis unit to be used to parse tree rewriting templates.
+   --  This creates it if it does not exists yet.
+
    type Analysis_Context_Type is record
       Ref_Count : Natural;
       Units_Map : Units_Maps.Map;
@@ -908,6 +912,12 @@ package ${ada_lib_name}.Analysis.Implementation is
 
       Rewriting_Handle : Rewriting_Handle_Pointer :=
          No_Rewriting_Handle_Pointer;
+      --  Rewriting handle for this context's current rewriting session.
+      --  No_Rewriting_Handle_Pointer if there is no such session currently.
+
+      Templates_Unit : Analysis_Unit := No_Analysis_Unit;
+      --  Special analysis unit used only as a containing unit to parse
+      --  templates in the context of tree rewriting.
    end record;
 
    type Analysis_Unit_Type is record

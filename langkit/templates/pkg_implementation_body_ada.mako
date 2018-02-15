@@ -2163,6 +2163,22 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Unit;
    end Create_Special_Unit;
 
+   --------------------
+   -- Templates_Unit --
+   --------------------
+
+   function Templates_Unit (Context : Analysis_Context) return Analysis_Unit is
+   begin
+      if Context.Templates_Unit = No_Analysis_Unit then
+         Context.Templates_Unit := Create_Special_Unit
+           (Context  => Context,
+            Filename => Null_Unbounded_String,
+            Charset  => To_Unbounded_String (Default_Charset),
+            Rule     => ${Name.from_lower(ctx.main_rule_name)}_Rule);
+      end if;
+      return Context.Templates_Unit;
+   end Templates_Unit;
+
    --------------------------
    -- Register_Destroyable --
    --------------------------

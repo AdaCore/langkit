@@ -147,7 +147,8 @@ package body ${ada_lib_name}.Analysis is
          In_Populate_Lexical_Env => False,
          Cache_Version => <>,
 
-         Rewriting_Handle => <>);
+         Rewriting_Handle => <>,
+         Templates_Unit => <>);
 
       Initialize (Context.Parser);
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
@@ -526,6 +527,7 @@ package body ${ada_lib_name}.Analysis is
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
+      Dec_Ref (Context.Templates_Unit);
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
       Destroy (Context.Parser);
@@ -600,6 +602,10 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Destroy (Unit : in out Analysis_Unit) is
    begin
+      if Unit = No_Analysis_Unit then
+         return;
+      end if;
+
       Unit.Exiled_Entries.Destroy;
       Unit.Foreign_Nodes.Destroy;
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
