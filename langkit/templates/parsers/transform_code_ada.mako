@@ -4,6 +4,14 @@
 
 ${parser.parser.generate_code()}
 
+## If this parser is part of a no_backtrack hierarchy, then we want to
+## recover.
+% if parser.no_backtrack:
+if ${parser.pos_var} = No_Token_Index and then ${parser.no_backtrack} then
+   ${parser.pos_var} := Parser.Last_Fail.Pos;
+end if;
+% endif
+
 if ${parser.pos_var} /= No_Token_Index then
 
    ## Create the transform wrapper node
@@ -18,8 +26,10 @@ if ${parser.pos_var} /= No_Token_Index then
    ##     after this parser runs.
    ## If they are equal then we know that this parser consumed no token. As a
    ## result, the result must be a ghost node, i.e. with no token_end.
+
    ${parser.res_var}.Unit := Parser.Unit;
    ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
+
    ${parser.res_var}.Token_End_Index :=
      (if ${parser.pos_var} = ${parser.start_pos}
       then No_Token_Index

@@ -105,7 +105,7 @@
          Unparse_Dispatch (${ast_el}, Result);
       end if;
 
-   % elif is_null(parser):
+   % elif is_null(parser) or is_nobt(parser):
    % elif is_row(parser):
 
       % for subp in parser.children():

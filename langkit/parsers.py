@@ -134,6 +134,7 @@ def render(*args, **kwargs):
         'is_list':      type_check_instance(List),
         'is_opt':       type_check_instance(Opt),
         'is_null':      type_check_instance(Null),
+        'is_nobt':      type_check_instance(NoBacktrack),
         'is_extract':   type_check_instance(_Extract),
         'is_class':     inspect.isclass,
         'ctx':          get_context(),
@@ -348,6 +349,19 @@ class Parser(object):
         self.grammar = None
         self.is_root = False
         self._name = names.Name("")
+        self.no_backtrack = None
+        """
+        :type: VarDef
+
+        If this variable is set, it indicates that this parser is part of a
+        no_backtrack hierarchy, indicating that if there is a failure, the
+        parsers should not try to backtrack, but instead return a failure node.
+
+        When compiling the parsers, we will check existence of this variable to
+        know if there is a possibility of not backtracing. At runtime, parsers
+        will check the value of this variable to know if they should backtrack
+        or not.
+        """
 
     def traverse_create_vars(self, start_pos):
         """
@@ -363,6 +377,28 @@ class Parser(object):
         for c in self.children():
             c.traverse_create_vars(children_start_pos)
         self.create_vars_after(children_start_pos)
+
+    def traverse_nobacktrack(self):
+        """
+        This method will traverse the parser hierarchy and set the no_backtrack
+        variable if necessary, indicating which parsers should not backtrack.
+        """
+        if isinstance(self, NoBacktrack):
+            self.no_backtrack = VarDef('nobt', T.BoolType)
+
+        for c in self.children():
+            nobt = c.traverse_nobacktrack()
+            # Or parsers are a stop point for nobacktrack
+
+            if nobt and not isinstance(self, Or):
+                check_source_language(
+                    self.no_backtrack is None,
+                    "Extraneous no backtrack annotation. Only one per parser "
+                    "hierarchy allowed"
+                )
+                self.no_backtrack = nobt
+
+        return self.no_backtrack
 
     def create_vars_after(self, start_pos):
         """
@@ -558,6 +594,9 @@ class Parser(object):
 
         with add_var_context() as var_context:
             pos_var = VarDef("pos", T.TokenType, create=False)
+
+            # Compute no_backtrack information for this parser
+            self.traverse_nobacktrack()
             self.traverse_create_vars(pos_var)
             t_env = {'parser': self,
                      'code': self.generate_code(),
@@ -1446,6 +1485,43 @@ class Predicate(Parser):
         )
 
         return self.render('predicate_code_ada')
+
+
+class NoBacktrack(Parser):
+    """
+    An instance of this parser will indicate that no backtrack should happen in
+    the parser hierarchy from now on. The semantics are similar to those of the
+    cut operator, however, instead of using it to fail early and optimize
+    performance, in this case we use it to provide error recovery.
+
+    NOTE: It could eventually be used in a special "no error recovery" mode to
+    fail early, if this is ever needed.
+    """
+
+    def discard(self):
+        return True
+
+    def children(self):
+        return []
+
+    def _is_left_recursive(self, rule_name):
+        return False
+
+    def __repr__(self):
+        return "NoBacktrack"
+
+    def create_vars_after(self, start_pos):
+        self.pos_var = start_pos
+
+    def generate_code(self):
+        # Generated code only consists of setting the no_backtrack variable to
+        # True, so that other parsers know that from now on they should not
+        # backtrack.
+        return "{} := True;".format(self.no_backtrack)
+
+    def get_type(self):
+        # A NoBacktrack parser never yields a concrete result itself
+        return None
 
 
 # This part of the file contains experiments toward automatic generation of
