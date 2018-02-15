@@ -585,6 +585,8 @@ class Parser(object):
         Return generated code for this parser into the global context.
 
         Subclasses must override this method.
+
+        :rtype: str
         """
         raise NotImplementedError()
 
