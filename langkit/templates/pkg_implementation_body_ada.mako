@@ -1296,6 +1296,25 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean
    is (Node.Token_End_Index = No_Token_Index);
 
+   -------------------
+   -- Is_Incomplete --
+   -------------------
+
+   function Is_Incomplete
+     (Node : access ${root_node_value_type}'Class) return Boolean
+   is
+      LGC : ${root_node_type_name};
+   begin
+     if Is_List_Node (Node.Kind) then
+        LGC := (if Node.Last_Child_Index /= 0
+                then Node.Child (Node.Last_Child_Index)
+                else null);
+        return LGC /= null and then LGC.Is_Incomplete;
+      else
+         return Node.Last_Attempted_Child > -1;
+      end if;
+   end;
+
    ------------------
    -- Is_Synthetic --
    ------------------
