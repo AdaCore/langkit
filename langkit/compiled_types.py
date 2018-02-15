@@ -2482,7 +2482,7 @@ def create_enum_node_types(cls):
 
 def create_builtin_types():
     """
-    Create CompiledType instances for all buil-tin types. This will
+    Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeMetaclass.
     """
     CompiledType(
