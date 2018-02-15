@@ -60,6 +60,7 @@ g.add_rules(
             Literal(Token.Number))
 )
 build_and_run(g, ada_main=['general_api.adb',
+                           'revert.adb',
                            'rewrite.adb',
                            'rewrite_lists.adb',
                            'iter_units.adb',
