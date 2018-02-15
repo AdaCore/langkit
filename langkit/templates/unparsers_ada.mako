@@ -113,6 +113,6 @@
       % endfor
 
    %else:
-      <% raise NotImplementedError('Not handled parser: {}'.format(parser)) %>
+      <% raise NotImplementedError('Parser not handled: {}'.format(parser)) %>
    % endif
 </%def>
