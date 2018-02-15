@@ -104,6 +104,11 @@ package Langkit_Support.Token_Data_Handlers is
    --  Free all the resources allocated to TDH. After then, one must call
    --  Initialize again in order to use the TDH.
 
+   procedure Move (Destination, Source : in out Token_Data_Handler);
+   --  Move data from the Source handler to the Destination one. All data in
+   --  Destination is overriden, so call Free on it first. Source is reset to
+   --  null.
+
    function Get_Token
      (TDH   : Token_Data_Handler;
       Index : Token_Index) return Token_Data_Type

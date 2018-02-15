@@ -54,6 +54,16 @@ package body Langkit_Support.Token_Data_Handlers is
       TDH.Symbols := No_Symbol_Table;
    end Free;
 
+   ----------
+   -- Move --
+   ----------
+
+   procedure Move (Destination, Source : in out Token_Data_Handler) is
+   begin
+      Destination := Source;
+      Initialize (Source, No_Symbol_Table);
+   end Move;
+
    --------------------------
    -- Internal_Get_Trivias --
    --------------------------
