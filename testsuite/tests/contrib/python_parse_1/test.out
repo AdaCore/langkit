@@ -18,9 +18,9 @@ FileNode[1:1-7:1]
 |  |  |  |  |  |default_value: <null>
 |  |  |  |  |  SingleParam[2:13-2:14]
 |  |  |  |  |  |is_varargs:
-|  |  |  |  |  |  VarArgsFlagAbsent[2:13-2:13]
+|  |  |  |  |  |  VarArgsFlagAbsent[2:12-2:12]
 |  |  |  |  |  |is_kwargs:
-|  |  |  |  |  |  KwArgsFlagAbsent[2:13-2:13]
+|  |  |  |  |  |  KwArgsFlagAbsent[2:12-2:12]
 |  |  |  |  |  |name:
 |  |  |  |  |  |  Id[2:13-2:14]: b
 |  |  |  |  |  |default_value: <null>

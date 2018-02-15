@@ -101,6 +101,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Destroy (Env : in out Lexical_Env_Access);
 
+   function Snaps_At_Start
+     (Self : access ${root_node_value_type}'Class) return Boolean;
+
+   function Snaps_At_End
+     (Self : access ${root_node_value_type}'Class) return Boolean;
+
    -------------------
    -- Is_Token_Node --
    -------------------
@@ -599,51 +605,56 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class;
       Snap : Boolean := False) return Source_Location_Range
    is
-      TDH                  : Token_Data_Handler renames
-         Convert (Node.Unit).TDH;
-      Sloc_Start, Sloc_End : Source_Location;
+      pragma Unreferenced (Snap);
+
+      type Token_Anchor is (T_Start, T_End);
+      type Token_Pos is record
+         Pos    : Token_Index;
+         Anchor : Token_Anchor;
+      end record;
+
+      TDH : Token_Data_Handler renames Convert (Node.Unit).TDH;
+      Token_Start, Token_End : Token_Pos;
 
       function Get
-        (Index : Token_Index) return Lexer.Token_Data_Type is
+        (Index : Token_Index) return Lexer.Token_Data_Type
+      is
         (Get_Token (TDH, Index));
+
+      function Sloc
+        (T : Token_Pos) return Source_Location
+      is
+        (if T.Anchor = T_Start
+         then Start_Sloc (Get (T.Pos).Sloc_Range)
+         else End_Sloc (Get (T.Pos).Sloc_Range));
 
    begin
       if Node.Is_Synthetic then
          return Sloc_Range (Node.Parent);
       end if;
 
-      --  Snapping: We'll go one token before the start token, and one token
-      --  after the end token, and the sloc range will extend from the end of
-      --  the start token to the start of the end token, including any
-      --  whitespace and trivia that might be surrounding the node.
-      --
-      --  TODO: Only nodes we're gonna try to snap are nodes with default
-      --  anchors. However, we can make the logic more specific, eg:
-      --
-      --  * If the start anchor is beginning, then snap the start sloc.
-      --
-      --  * If the end anchor is ending, then snap the end sloc.
-      --
-      --  This way composite cases can work too.
-
-      if Snap then
-         declare
-            Tok_Start : constant Token_Index :=
-              Token_Index'Max (Node.Token_Start_Index - 1, 0);
-            Tok_End : constant Token_Index :=
-              Token_Index'Min (Node.Token_End_Index + 1, Last_Token (TDH));
-         begin
-            Sloc_Start := End_Sloc (Get (Tok_Start).Sloc_Range);
-            Sloc_End := Start_Sloc (Get (Tok_End).Sloc_Range);
-         end;
+      if Node.Is_Ghost then
+         Token_Start := (if Node.Token_Start_Index = 1
+                         then (1, T_Start)
+                         else (Node.Token_Start_Index - 1, T_End));
+         Token_End := Token_Start;
       else
-         Sloc_Start := Start_Sloc (Get (Node.Token_Start_Index).Sloc_Range);
-         Sloc_End :=
-           (if Node.Token_End_Index /= No_Token_Index
-            then End_Sloc (Get (Node.Token_End_Index).Sloc_Range)
-            else Start_Sloc (Get (Node.Token_Start_Index).Sloc_Range));
+         Token_Start := (Node.Token_Start_Index, T_Start);
+         Token_End := (Node.Token_End_Index, T_End);
       end if;
-      return Make_Range (Sloc_Start, Sloc_End);
+
+      if Snaps_At_Start (Node)
+         and then not Node.Is_Ghost
+         and then Token_Start.Pos /= 1
+      then
+         Token_Start := (Token_Start.Pos - 1, T_End);
+      end if;
+
+      if Snaps_At_End (Node) and then Token_End.Pos /= Last_Token (TDH) then
+         Token_End := (Token_End.Pos + 1, T_Start);
+      end if;
+
+      return Make_Range (Sloc (Token_Start), Sloc (Token_End));
    end Sloc_Range;
 
    ------------
@@ -1064,6 +1075,40 @@ package body ${ada_lib_name}.Analysis.Implementation is
       </%def>
       </%self:case_dispatch>
    end Short_Image;
+
+   --------------------
+   -- Snaps_At_Start --
+   --------------------
+
+   function Snaps_At_Start
+     (Self : access ${root_node_value_type}'Class) return Boolean is
+   begin
+      <%self:case_dispatch pred="${lambda n: n.snaps_at_start}">
+      <%def name="action(node)">
+         return True;
+      </%def>
+      <%def name="default()">
+         return False;
+      </%def>
+      </%self:case_dispatch>
+   end Snaps_At_Start;
+
+   ------------------
+   -- Snaps_At_End --
+   ------------------
+
+   function Snaps_At_End
+     (Self : access ${root_node_value_type}'Class) return Boolean is
+   begin
+      <%self:case_dispatch pred="${lambda n: n.snaps_at_end}">
+      <%def name="action(node)">
+         return True;
+      </%def>
+      <%def name="default()">
+         return Self.Is_Incomplete;
+      </%def>
+      </%self:case_dispatch>
+   end Snaps_At_End;
 
    -------------
    -- Parents --

@@ -2303,6 +2303,34 @@ class ASTNodeType(BaseStructType):
             )),
         ]
 
+    def snaps(self, anchor_end):
+        """
+        Whether this node type snaps. To see what this means, see Annotations
+        documentation.
+        """
+        from langkit.parsers import _Transform
+
+        if not self.parser:
+            return False
+
+        i = -1 if anchor_end else 0
+
+        return self.annotations.snaps or (
+            isinstance(self.parser, _Transform)
+            and self.parser.parser.parsers
+            and self.parser.parser.parsers[i].get_type()
+            and self.parser.parser.parsers[i].get_type().is_ast_node
+            and self.parser.parser.parsers[i].get_type().snaps(anchor_end)
+        )
+
+    @property
+    def snaps_at_start(self):
+        return self.snaps(False)
+
+    @property
+    def snaps_at_end(self):
+        return self.snaps(True)
+
 
 # We tag the ASTNodeType class as abstract here, because of the circular
 # dependency between the @abstract decorator and the ASTNodeType class, which

@@ -302,7 +302,7 @@ inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 class Annotations(object):
     def __init__(self, repr_name=None, generic_list_type=None,
                  warn_on_node=None, rebindable=False,
-                 custom_short_image=False):
+                 custom_short_image=False, snaps=False):
         """
         Constructor for a node's annotations.
 
@@ -318,12 +318,17 @@ class Annotations(object):
             declaration and the definition of a function called
             `[NODE_NAME]_Short_Image` that takes the node in argument and that
             returns a `Text_Type` value.
+        :param bool snaps: Whether this node's SLOCs are supposed to snap or
+            not. Snapping designates the behavior where the start SLOC will be
+            anchored to the previous token's end SLOC rather than the node's
+            first token start SLOC, and conversely for the end SLOC.
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
         self._warn_on_node = warn_on_node
         self._rebindable = rebindable
         self.custom_short_image = custom_short_image
+        self._snaps = snaps
 
     @inherited_annotation
     def warn_on_node(self):
@@ -363,6 +368,10 @@ class Annotations(object):
         """
         bn = self.node.base
         return bn.annotations if bn else None
+
+    @inherited_annotation
+    def snaps(self):
+        return self._snaps
 
 
 class _ASTNodeMetaclass(type):
