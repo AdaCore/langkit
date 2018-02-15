@@ -99,6 +99,13 @@ class VarDef(object):
         """
         return [self.name, self.type][i]
 
+    def __str__(self):
+        """
+        Helper, expand var defs to their name when converted to strings,
+        allows easy use of VarDef instances in code generation.
+        """
+        return str(self.name)
+
     def __unicode__(self):
         """
         Helper, expand var defs to their name when converted to strings,
