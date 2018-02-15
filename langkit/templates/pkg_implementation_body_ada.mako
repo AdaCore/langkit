@@ -1202,6 +1202,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Put ("[" & Image (Node.Sloc_Range) & "]");
       end if;
 
+      if Node.Is_Incomplete then
+         Put (" <<INCOMPLETE>>");
+      end if;
+
       if Is_Token_Node_Kind (Node.Kind) then
          Put_Line (": " & Image (Node.Text));
       elsif Node.all not in ${generic_list_value_type}'Class then
