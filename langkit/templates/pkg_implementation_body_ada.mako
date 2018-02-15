@@ -2268,7 +2268,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------------
 
    procedure Do_Parsing
-     (Unit        : Analysis_Unit;
+     (Context     : Analysis_Context;
+      Unit        : Analysis_Unit;
       Read_BOM    : Boolean;
       Init_Parser :
         access procedure (Unit     : Analysis_Unit;
@@ -2280,6 +2281,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
       procedure Add_Diagnostic (Message : String);
       --  Helper to add a sloc-less diagnostic to Unit
 
+      procedure Check_Unit;
+      --  Raise a Program_Error if Unit is No_Analysis_Unit
+
       --------------------
       -- Add_Diagnostic --
       --------------------
@@ -2290,8 +2294,24 @@ package body ${ada_lib_name}.Analysis.Implementation is
                  To_Text (Message));
       end Add_Diagnostic;
 
+      ----------------
+      -- Check_Unit --
+      ----------------
+
+      procedure Check_Unit is
+      begin
+         if Unit = No_Analysis_Unit then
+            raise Program_Error with
+               "Init_Parser raised an error while Unit was No_Analysis_Unit";
+         end if;
+      end Check_Unit;
+
+      Unit_Name : constant String := (if Unit = No_Analysis_Unit
+                                      then Basename (Unit)
+                                      else "<anonymous>");
+
    begin
-      Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
+      Traces.Trace (Main_Trace, "Parsing unit " & Unit_Name);
 
       Result.AST_Root := null;
 
@@ -2302,25 +2322,28 @@ package body ${ada_lib_name}.Analysis.Implementation is
       declare
          use Ada.Exceptions;
       begin
-         Init_Parser (Unit, Read_BOM, Unit.Context.Parser);
+         Init_Parser (Unit, Read_BOM, Context.Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
             --  return a unit anyway with diagnostics indicating what happens.
 
             Traces.Trace
-              (Main_Trace,
-               "WARNING: Could not open file " & Basename (Unit));
+              (Main_Trace, "WARNING: Could not open file " & Unit_Name);
 
+            Check_Unit;
             Add_Diagnostic (Exception_Message (Exc));
             return;
 
          when Lexer.Unknown_Charset =>
+            Check_Unit;
             Add_Diagnostic
               ("Unknown charset """ & To_String (Unit.Charset) & """");
             return;
 
          when Lexer.Invalid_Input =>
+            Check_Unit;
+
             --  TODO??? Tell where (as a source location) we failed to decode
             --  the input.
             Add_Diagnostic
@@ -2333,11 +2356,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  get.
 
       Result.AST_Mem_Pool := Create;
-      Unit.Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
+      Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
 
       Result.AST_Root := ${root_node_type_name}
         (Parse (Unit.Context.Parser, Rule => Unit.Rule));
-      Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
+      Result.Diagnostics.Append (Context.Parser.Diagnostics);
    end Do_Parsing;
 
    --------------------------
