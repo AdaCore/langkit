@@ -1461,14 +1461,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------------------
 
    function Previous_Sibling
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name}
+     (Node : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity
    is
       N : constant Positive := Child_Index (Node) + 1;
    begin
       return (if N = 1
-              then null
-              else Node.Parent.Child (N - 1));
+              then No_Entity
+              else (Node.Parent.Child (N - 1), E_Info));
    end Previous_Sibling;
 
    ------------------
@@ -1476,13 +1476,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ------------------
 
    function Next_Sibling
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name}
+     (Node : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity
    is
-      N : constant Positive := Child_Index (Node) + 1;
+      Ret : constant ${root_node_type_name} := 
+        Node.Parent.Child (Child_Index (Node) + 1);
    begin
       --  If Node is the last sibling, then Child will return null
-      return Node.Parent.Child (N + 1);
+      return (if Ret /= null then (Ret, E_Info) else No_Entity);
    end Next_Sibling;
 
    ## Env metadata's body
@@ -1653,28 +1654,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Dec_Ref (Bare_Children);
       return Result;
    end Children;
-
-   ----------------------
-   -- Previous_Sibling --
-   ----------------------
-
-   function Previous_Sibling
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
-   begin
-      return (Node.Previous_Sibling, E_Info);
-   end Previous_Sibling;
-
-   ------------------
-   -- Next_Sibling --
-   ------------------
-
-   function Next_Sibling
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
-   begin
-      return (Node.Next_Sibling, E_Info);
-   end Next_Sibling;
 
    ## Generate the bodies of the root grammar class properties
    % for prop in T.root_node.get_properties(include_inherited=False):

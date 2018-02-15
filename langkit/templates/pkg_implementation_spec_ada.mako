@@ -410,16 +410,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       return Natural;
    --  Return the 0-based index for Node in its parent's children
 
-   function Previous_Sibling
-     (Node : access ${root_node_value_type}'Class)
-      return ${root_node_type_name};
-   --  Return the Node's previous sibling in the tree, if there is such a node
-
-   function Next_Sibling
-     (Node : access ${root_node_value_type}'Class)
-      return ${root_node_type_name};
-   --  Return the Node's next sibling in the tree, if there is such a node
-
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------
