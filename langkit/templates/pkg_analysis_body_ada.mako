@@ -348,7 +348,7 @@ package body ${ada_lib_name}.Analysis is
          declare
             Reparsed : Reparsed_Unit;
          begin
-            Do_Parsing (Context, Unit, Read_BOM, Init_Parser, Reparsed);
+            Do_Parsing (Unit, Read_BOM, Init_Parser, Reparsed);
             Update_After_Reparse (Unit, Reparsed);
          end;
       end if;

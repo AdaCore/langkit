@@ -1004,21 +1004,14 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Referenced, Unit : Analysis_Unit) return Boolean;
 
    procedure Do_Parsing
-     (Context     : Analysis_Context;
-      Unit        : Analysis_Unit;
+     (Unit        : Analysis_Unit;
       Read_BOM    : Boolean;
-      Init_Parser :
-        access procedure (Unit     : Analysis_Unit;
-                          Read_BOM : Boolean;
-                          Parser   : in out Parser_Type);
+      Init_Parser : access procedure (Unit     : Analysis_Unit;
+                                      Read_BOM : Boolean;
+                                      Parser   : in out Parser_Type);
       Result      : out Reparsed_Unit);
    --  Parse text for Unit using Init_Parser and store the result in Result.
    --  This leaves Unit unchanged.
-   --
-   --  Note that this supports parsing with no analysis unit: just pass
-   --  No_Analysis_Unit as the Unit argument. However in this case, Init_Parser
-   --  must not raise any error, i.e. it should work on an already decoded
-   --  buffer.
 
    procedure Update_After_Reparse
      (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit);
