@@ -76,6 +76,16 @@ package body ${ada_lib_name}.Lexer is
    --  extra null character at the end of the buffer. See the Quex_*_Characters
    --  constants above.
 
+   procedure Lex_From_Buffer_Helper
+     (Decoded_Buffer : Text_Access;
+      Source_First   : Positive;
+      Source_Last    : Natural;
+      TDH            : in out Token_Data_Handler;
+      Diagnostics    : in out Diagnostics_Vectors.Vector;
+      With_Trivia    : Boolean);
+   --  Helper for Lex_From_* functions. Buffer must be a buffer allocated to
+   --  fullfil Quex's needs: see the Quex_*_Characters constants above.
+
    function Lexer_From_Buffer (Buffer  : System.Address;
                                Length  : size_t)
                                return Lexer_Type
@@ -391,6 +401,36 @@ package body ${ada_lib_name}.Lexer is
    procedure Process_All_Tokens_With_Trivia is new Process_All_Tokens (True);
    procedure Process_All_Tokens_No_Trivia is new Process_All_Tokens (False);
 
+   ----------------------------
+   -- Lex_From_Buffer_Helper --
+   ----------------------------
+
+   procedure Lex_From_Buffer_Helper
+     (Decoded_Buffer : Text_Access;
+      Source_First   : Positive;
+      Source_Last    : Natural;
+      TDH            : in out Token_Data_Handler;
+      Diagnostics    : in out Diagnostics_Vectors.Vector;
+      With_Trivia    : Boolean)
+   is
+      Lexer : Lexer_Type := Lexer_From_Buffer
+        (Decoded_Buffer.all'Address,
+         size_t (Source_Last - Source_First + 1));
+   begin
+
+      --  In the case we are reparsing an analysis unit, we want to get rid of
+      --  the tokens from the old one.
+
+      Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
+
+      if With_Trivia then
+         Process_All_Tokens_With_Trivia (Lexer, TDH, Diagnostics);
+      else
+         Process_All_Tokens_No_Trivia (Lexer, TDH, Diagnostics);
+      end if;
+      Free_Lexer (Lexer);
+   end Lex_From_Buffer_Helper;
+
    -----------------------
    -- Lex_From_Filename --
    -----------------------
@@ -442,25 +482,11 @@ package body ${ada_lib_name}.Lexer is
       Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
-      Lexer          : Lexer_Type;
    begin
       Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First,
                      Source_Last);
-      Lexer := Lexer_From_Buffer
-        (Decoded_Buffer.all'Address,
-         size_t (Source_Last - Source_First + 1));
-
-      --  In the case we are reparsing an analysis unit, we want to get rid of
-      --  the tokens from the old one.
-
-      Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
-
-      if With_Trivia then
-         Process_All_Tokens_With_Trivia (Lexer, TDH, Diagnostics);
-      else
-         Process_All_Tokens_No_Trivia (Lexer, TDH, Diagnostics);
-      end if;
-      Free_Lexer (Lexer);
+      Lex_From_Buffer_Helper (Decoded_Buffer, Source_First, Source_Last, TDH,
+                              Diagnostics, With_Trivia);
    end Lex_From_Buffer;
 
    -------------------
