@@ -91,8 +91,7 @@ package body ${ada_lib_name}.Analysis is
         access procedure (Unit     : Analysis_Unit;
                           Read_BOM : Boolean;
                           Parser   : in out Parser_Type);
-      Rule              : Grammar_Rule)
-      return Analysis_Unit;
+      Rule              : Grammar_Rule) return Analysis_Unit;
    --  Helper for Get_From_File and Get_From_Buffer: do all the common work
    --  using Init_Parser to either parse from a file or from a buffer. Return
    --  the resulting analysis unit.
@@ -303,8 +302,7 @@ package body ${ada_lib_name}.Analysis is
         access procedure (Unit     : Analysis_Unit;
                           Read_BOM : Boolean;
                           Parser   : in out Parser_Type);
-      Rule              : Grammar_Rule)
-      return Analysis_Unit
+      Rule              : Grammar_Rule) return Analysis_Unit
    is
       use Units_Maps;
 
