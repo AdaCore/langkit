@@ -768,8 +768,6 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    package Exiled_Entry_Vectors is new Langkit_Support.Vectors (Exiled_Entry);
 
-   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access;
-
    procedure Register_Destroyable
      (Unit : Analysis_Unit; Node : ${root_node_type_name});
    --  Helper for synthetized nodes. We cannot used the generic
@@ -840,6 +838,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
    type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
 
+   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access;
+   function Symbol_Literals
+     (Context : Analysis_Context) return Symbol_Literal_Array_Access;
+
    type Analysis_Context_Type is record
       Ref_Count : Natural;
       Units_Map : Units_Maps.Map;
@@ -860,7 +862,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Object to translate unit names to file names
       % endif
 
-      Symbol_Literals : Symbol_Literal_Array;
+      Symbol_Literals : aliased Symbol_Literal_Array;
       --  List of pre-computed symbols in the Symbols table
 
       Parser : Parser_Type;

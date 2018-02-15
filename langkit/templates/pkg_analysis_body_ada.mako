@@ -388,7 +388,8 @@ package body ${ada_lib_name}.Analysis is
          Init_Parser_From_File
            (Filename, To_String (Unit.Charset), Read_BOM, Unit,
             Token_Data (Unit),
-            Unit.Context.Symbol_Literals'Unrestricted_Access,
+            Parsers.Symbol_Literal_Array_Access
+              (Symbol_Literals (Unit.Context)),
             Context.With_Trivia, Parser);
       end Init_Parser;
    begin
@@ -416,7 +417,8 @@ package body ${ada_lib_name}.Analysis is
          Init_Parser_From_Buffer
            (Buffer, To_String (Unit.Charset), Read_BOM, Unit,
             Token_Data (Unit),
-            Unit.Context.Symbol_Literals'Unrestricted_Access,
+            Parsers.Symbol_Literal_Array_Access
+              (Symbol_Literals (Unit.Context)),
             Context.With_Trivia, Parser);
       end Init_Parser;
    begin

@@ -2105,6 +2105,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
    is (Unit.TDH'Access);
 
+   ---------------------
+   -- Symbol_Literals --
+   ---------------------
+
+   function Symbol_Literals
+     (Context : Analysis_Context) return Symbol_Literal_Array_Access
+   is
+   begin
+      return Context.Symbol_Literals'Access;
+   end Symbol_Literals;
+
    --------------------------
    -- Register_Destroyable --
    --------------------------
