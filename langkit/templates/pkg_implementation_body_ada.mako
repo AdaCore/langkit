@@ -2361,9 +2361,36 @@ package body ${ada_lib_name}.Analysis.Implementation is
                           Parser   : in out Parser_Type);
       Result      : out Reparsed_Unit)
    is
+      Unit_TDH : constant Token_Data_Handler_Access := Token_Data (Unit);
+
+      Saved_TDH : Token_Data_Handler;
+      --  Holder to save tokens data in Unit.
+      --
+      --  By design, parsing is required to bind the nodes it creates to an
+      --  analysis unit. However, this procedure is supposed to preserve the
+      --  Unit itself and return its parsing result in Result.
+      --
+      --  In order to implement this, we first move "old" token data in this
+      --  variable, then we do parsing. Only then, we can move "new" token data
+      --  from the unit to Result, and restore the "old" token data to Unit.
+      --  This last step is what Rotate_TDH (see below) is above.
+
+      procedure Rotate_TDH;
+      --  Move token data from Unit to Result and restore data in Saved_TDH to
+      --  Unit.
 
       procedure Add_Diagnostic (Message : String);
       --  Helper to add a sloc-less diagnostic to Unit
+
+      ----------------
+      -- Rotate_TDH --
+      ----------------
+
+      procedure Rotate_TDH is
+      begin
+         Move (Result.TDH, Unit_TDH.all);
+         Move (Unit_TDH.all, Saved_TDH);
+      end Rotate_TDH;
 
       --------------------
       -- Add_Diagnostic --
@@ -2379,6 +2406,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
 
       Result.AST_Root := null;
+
+      Move (Saved_TDH, Unit_TDH.all);
+      Initialize (Unit_TDH.all, Saved_TDH.Symbols);
 
       --  This is where lexing occurs, so this is where we get most "setup"
       --  issues: missing input file, bad charset, etc. If we have such an
@@ -2398,11 +2428,13 @@ package body ${ada_lib_name}.Analysis.Implementation is
                "WARNING: Could not open file " & Basename (Unit));
 
             Add_Diagnostic (Exception_Message (Exc));
+            Rotate_TDH;
             return;
 
          when Lexer.Unknown_Charset =>
             Add_Diagnostic
               ("Unknown charset """ & To_String (Unit.Charset) & """");
+            Rotate_TDH;
             return;
 
          when Lexer.Invalid_Input =>
@@ -2411,6 +2443,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             Add_Diagnostic
               ("Could not decode source as """ & To_String (Unit.Charset)
                & """");
+            Rotate_TDH;
             return;
       end;
 
@@ -2423,6 +2456,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Result.AST_Root := ${root_node_type_name}
         (Parse (Unit.Context.Parser, Rule => Unit.Rule));
       Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
+      Rotate_TDH;
    end Do_Parsing;
 
    --------------------------
@@ -2435,6 +2469,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  Replace Unit's diagnostics by Reparsed's
       Unit.Diagnostics := Reparsed.Diagnostics;
       Reparsed.Diagnostics.Clear;
+
+      --  Likewise for token data
+      Free (Unit.TDH);
+      Move (Unit.TDH, Reparsed.TDH);
 
       --  As (re-)loading a unit can change how any AST node property in the
       --  whole analysis context behaves, we have to invalidate caches. This is
