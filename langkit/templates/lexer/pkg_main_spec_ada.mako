@@ -73,11 +73,19 @@ package ${ada_lib_name}.Lexer is
       TDH             : in out Token_Data_Handler;
       Diagnostics     : in out Diagnostics_Vectors.Vector;
       With_Trivia     : Boolean);
-   --  Likewise, but extract tokens from an in-memory buffer.
+   --  Likewise, but extract tokens from an undecoded in-memory buffer.
    --
    --  Raise an Unknown_Charset exception if the requested charset is unknown.
    --  Raise an Invalid_Input exception if Filename's content cannot be decoded
    --  using the given Charset.
+
+   procedure Lex_From_Buffer
+     (Buffer      : Text_Type;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector;
+      With_Trivia : Boolean);
+   --  Likewise, but extract tokens from an in-memory buffer. This never raises
+   --  exceptions.
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}

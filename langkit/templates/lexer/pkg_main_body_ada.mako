@@ -489,6 +489,26 @@ package body ${ada_lib_name}.Lexer is
                               Diagnostics, With_Trivia);
    end Lex_From_Buffer;
 
+   ---------------------
+   -- Lex_From_Buffer --
+   ---------------------
+
+   procedure Lex_From_Buffer
+     (Buffer      : Text_Type;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector;
+      With_Trivia : Boolean)
+   is
+      Decoded_Buffer : Text_Access := new Text_Type
+        (1 .. Buffer'Length + Quex_Extra_Characters);
+      Source_First  : constant Positive := 1 + Quex_Leading_Characters;
+      Source_Last   : constant Positive := Source_First + Buffer'Length - 1;
+   begin
+      Decoded_Buffer.all (Source_First .. Source_Last) := Buffer;
+      Lex_From_Buffer_Helper (Decoded_Buffer, Source_First, Source_Last, TDH,
+                              Diagnostics, With_Trivia);
+   end Lex_From_Buffer;
+
    -------------------
    -- Decode_Buffer --
    -------------------
