@@ -2126,6 +2126,43 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Context.Symbol_Literals'Access;
    end Symbol_Literals;
 
+   -------------------------
+   -- Create_Special_Unit --
+   -------------------------
+
+   function Create_Special_Unit
+     (Context           : Analysis_Context;
+      Filename, Charset : Unbounded_String;
+      Rule              : Grammar_Rule) return Analysis_Unit
+   is
+      Unit : constant Analysis_Unit := new Analysis_Unit_Type'
+        (Context           => Context,
+         Ref_Count         => 1,
+         AST_Root          => null,
+         File_Name         => Filename,
+         Charset           => Charset,
+         TDH               => <>,
+         Diagnostics       => <>,
+         Is_Env_Populated  => False,
+         Rule              => Rule,
+         AST_Mem_Pool      => No_Pool,
+         Destroyables      => Destroyable_Vectors.Empty_Vector,
+         Referenced_Units  => <>,
+         Exiled_Entries    => Exiled_Entry_Vectors.Empty_Vector,
+         Foreign_Nodes     =>
+            ${root_node_type_name}_Vectors.Empty_Vector,
+         Rebindings        => Env_Rebindings_Vectors.Empty_Vector,
+         Cache_Version     => <>,
+         Unit_Version      => <>
+         % if ctx.has_memoization:
+         , Memoization_Map => <>
+         % endif
+      );
+   begin
+      Initialize (Unit.TDH, Context.Symbols);
+      return Unit;
+   end Create_Special_Unit;
+
    --------------------------
    -- Register_Destroyable --
    --------------------------

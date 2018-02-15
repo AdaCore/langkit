@@ -276,31 +276,9 @@ package body ${ada_lib_name}.Analysis is
       Filename, Charset : Unbounded_String;
       Rule              : Grammar_Rule) return Analysis_Unit
    is
-      Unit  : Analysis_Unit := new Analysis_Unit_Type'
-        (Context                 => Context,
-         Ref_Count               => 1,
-         AST_Root                => null,
-         File_Name               => Filename,
-         Charset                 => Charset,
-         TDH                     => <>,
-         Diagnostics             => <>,
-         Is_Env_Populated        => False,
-         Rule                    => Rule,
-         AST_Mem_Pool            => No_Pool,
-         Destroyables            => Destroyable_Vectors.Empty_Vector,
-         Referenced_Units        => <>,
-         Exiled_Entries          => Exiled_Entry_Vectors.Empty_Vector,
-         Foreign_Nodes           =>
-            ${root_node_type_name}_Vectors.Empty_Vector,
-         Rebindings              => Env_Rebindings_Vectors.Empty_Vector,
-         Cache_Version           => <>,
-         Unit_Version            => <>
-         % if ctx.has_memoization:
-         , Memoization_Map   => <>
-         % endif
-      );
+      Unit : constant Analysis_Unit := Create_Special_Unit
+        (Context, Filename, Charset, Rule);
    begin
-      Initialize (Unit.TDH, Context.Symbols);
       Context.Units_Map.Insert (Filename, Unit);
       return Unit;
    end Create_Unit;

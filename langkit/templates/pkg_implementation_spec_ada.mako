@@ -853,6 +853,13 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Symbol_Literals
      (Context : Analysis_Context) return Symbol_Literal_Array_Access;
 
+   function Create_Special_Unit
+     (Context           : Analysis_Context;
+      Filename, Charset : Unbounded_String;
+      Rule              : Grammar_Rule) return Analysis_Unit;
+   --  Create a new special analysis unit, i.e. a unit that is not registered
+   --  in Context's unit map.
+
    type Analysis_Context_Type is record
       Ref_Count : Natural;
       Units_Map : Units_Maps.Map;
