@@ -434,14 +434,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Lookup_Internal
      (Node : ${root_node_type_name};
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_node_type_name};
+      Sloc : Source_Location) return ${root_node_type_name};
    procedure Lookup_Relative
      (Node       : ${root_node_type_name};
       Sloc       : Source_Location;
       Position   : out Relative_Position;
-      Node_Found : out ${root_node_type_name};
-      Snap       : Boolean := False);
+      Node_Found : out ${root_node_type_name});
    --  Implementation helpers for the looking up process
 
    -----------------
@@ -602,11 +600,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------------
 
    function Sloc_Range
-     (Node : access ${root_node_value_type}'Class;
-      Snap : Boolean := False) return Source_Location_Range
+     (Node : access ${root_node_value_type}'Class) return Source_Location_Range
    is
-      pragma Unreferenced (Snap);
-
       type Token_Anchor is (T_Start, T_End);
       type Token_Pos is record
          Pos    : Token_Index;
@@ -661,9 +656,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Lookup --
    ------------
 
-   function Lookup (Node : access ${root_node_value_type}'Class;
-                    Sloc : Source_Location;
-                    Snap : Boolean := False) return ${root_node_type_name}
+   function Lookup
+     (Node : access ${root_node_value_type}'Class;
+      Sloc : Source_Location) return ${root_node_type_name}
    is
       Position : Relative_Position;
       Result   : ${root_node_type_name};
@@ -673,7 +668,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
 
       Lookup_Relative
-        (${root_node_type_name} (Node), Sloc, Position, Result, Snap);
+        (${root_node_type_name} (Node), Sloc, Position, Result);
       return Result;
    end Lookup;
 
@@ -683,12 +678,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Lookup_Internal
      (Node : ${root_node_type_name};
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_node_type_name}
+      Sloc : Source_Location) return ${root_node_type_name}
    is
       --  For this implementation helper (i.e. internal primitive), we can
       --  assume that all lookups fall into this node's sloc range.
-      pragma Assert (Compare (Sloc_Range (Node, Snap), Sloc) = Inside);
+      pragma Assert (Compare (Sloc_Range (Node), Sloc) = Inside);
 
       Children : constant ${root_node_array.api_name} := Node.Children;
       Pos      : Relative_Position;
@@ -703,7 +697,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          --  second child node, etc.
 
          if Child /= null then
-            Lookup_Relative (Child, Sloc, Pos, Result, Snap);
+            Lookup_Relative (Child, Sloc, Pos, Result);
             case Pos is
                when Before =>
                    --  If this is the first node, Sloc is before it, so we can
@@ -732,11 +726,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Compare --
    -------------
 
-   function Compare (Node : access ${root_node_value_type}'Class;
-                     Sloc : Source_Location;
-                     Snap : Boolean := False) return Relative_Position is
+   function Compare
+     (Node : access ${root_node_value_type}'Class;
+      Sloc : Source_Location) return Relative_Position is
    begin
-      return Compare (Sloc_Range (Node, Snap), Sloc);
+      return Compare (Sloc_Range (Node), Sloc);
    end Compare;
 
    ---------------------
@@ -747,15 +741,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node       : ${root_node_type_name};
       Sloc       : Source_Location;
       Position   : out Relative_Position;
-      Node_Found : out ${root_node_type_name};
-      Snap       : Boolean := False)
+      Node_Found : out ${root_node_type_name})
    is
       Result : constant Relative_Position :=
-        Compare (Node, Sloc, Snap);
+        Compare (Node, Sloc);
    begin
       Position := Result;
       Node_Found := (if Result = Inside
-                     then Lookup_Internal (Node, Sloc, Snap)
+                     then Lookup_Internal (Node, Sloc)
                      else null);
    end Lookup_Relative;
 

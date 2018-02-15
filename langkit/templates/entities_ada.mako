@@ -173,30 +173,21 @@
    ----------------------------------------
 
    function Sloc_Range
-     (Node : ${root_entity.api_name}'Class;
-      Snap : Boolean := False) return Source_Location_Range;
+     (Node : ${root_entity.api_name}'Class) return Source_Location_Range;
    --  Return the source location range corresponding to the set of tokens from
    --  which Node was parsed.
-   --
-   --  TODO??? Document the Snap formal.
 
    function Compare
      (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return Relative_Position;
-   --  Compare Sloc to the sloc range of Node.
-   --
-   --  TODO??? Document the Snap formal.
+      Sloc : Source_Location) return Relative_Position;
+   --  Compare Sloc to the sloc range of Node
 
    pragma Warnings (Off, "defined after private extension");
    function Lookup
      (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_entity.api_name};
+      Sloc : Source_Location) return ${root_entity.api_name};
    --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
    --  it, or null if no such node was found.
-   --
-   --  TODO??? Document the Snap formal.
    pragma Warnings (On, "defined after private extension");
 
    -----------------------
@@ -444,10 +435,9 @@
    ----------------
 
    function Sloc_Range
-     (Node : ${root_entity.api_name}'Class;
-      Snap : Boolean := False) return Source_Location_Range is
+     (Node : ${root_entity.api_name}'Class) return Source_Location_Range is
    begin
-      return Node.Node.Sloc_Range (Snap);
+      return Node.Node.Sloc_Range;
    end Sloc_Range;
 
    -------------
@@ -456,10 +446,9 @@
 
    function Compare
      (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return Relative_Position is
+      Sloc : Source_Location) return Relative_Position is
    begin
-      return Node.Node.Compare (Sloc, Snap);
+      return Node.Node.Compare (Sloc);
    end Compare;
 
    ------------
@@ -468,10 +457,9 @@
 
    function Lookup
      (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_entity.api_name} is
+      Sloc : Source_Location) return ${root_entity.api_name} is
    begin
-      return (Node.Node.Lookup (Sloc, Snap), No_Public_Entity_Info);
+      return (Node.Node.Lookup (Sloc), No_Public_Entity_Info);
    end Lookup;
 
    ----------
