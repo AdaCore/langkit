@@ -9,6 +9,7 @@ ${parser.parser.generate_code()}
 % if parser.no_backtrack:
 if ${parser.pos_var} = No_Token_Index and then ${parser.no_backtrack} then
    ${parser.pos_var} := Parser.Last_Fail.Pos;
+   ${parser.has_failed_var} := True;
 end if;
 % endif
 
@@ -34,16 +35,26 @@ if ${parser.pos_var} /= No_Token_Index then
      (if ${parser.pos_var} = ${parser.start_pos}
       then No_Token_Index
       else ${parser.pos_var} - 1);
+   <% fields_n_args = zip(parser.get_type().get_parse_fields(), args) %>
 
-   % for field, arg in zip(parser.get_type().get_parse_fields(), args):
+   % for i, (field, arg) in enumerate(fields_n_args):
       ## Set children fields into the created node
       ${parser.res_var}.${field.name} :=
-         % if field.type.is_ast_node:
-            ${field.type.storage_type_name} (${arg});
-         % else:
-            ${arg};
-         % endif
+         ${field.type.storage_type_name} (${arg});
+
+      if ${arg} /= null and then ${arg}.Is_Incomplete then
+         ${parser.res_var}.Last_Attempted_Child := 0;
+      elsif ${arg} /= null and then not ${arg}.Is_Ghost then
+         ${parser.res_var}.Last_Attempted_Child := -1;
+      end if;
    % endfor
+
+   % if parser.no_backtrack:
+   if ${parser.has_failed_var} then
+      ${parser.res_var}.Last_Attempted_Child :=
+        ${parser.parser.progress_var if is_row(parser.parser) else 1};
+   end if;
+   % endif
 
 end if;
 

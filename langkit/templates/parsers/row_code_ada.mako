@@ -6,10 +6,14 @@ ${parser.pos_var} := ${parser.start_pos};
 
 ## This is the main body of the row, which is the concatenation of the code for
 ## each row part.
-% for subparser in parser.parsers:
+% for num, subparser in enumerate(parser.parsers, 1):
 
 ## Parse the element
 ${subparser.generate_code()}
+
+% if parser.progress_var:
+${parser.progress_var} := ${num};
+% endif
 
 ## If the parsing was successful then
 if ${subparser.pos_var} /= No_Token_Index then

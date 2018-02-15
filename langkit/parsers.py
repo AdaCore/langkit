@@ -918,6 +918,22 @@ class _Row(Parser):
         # method) while no wrapper has been assigned.
         self.typ = None
 
+        self.containing_transform = None
+        """
+        :type: _Transform
+        If the containing parser is a Transform parser, and has no_backtrack to
+        True, we want to track the progress of the Row. This variable is used
+        to keep the containing transform parser if there is one.
+        """
+
+        self.progress_var = None
+        """
+        :type: VarDef
+
+        If there is a containing_transform parser, this will be initialized to
+        the progress var.
+        """
+
     def discard(self):
         return all(p.discard() for p in self.parsers)
 
@@ -936,6 +952,12 @@ class _Row(Parser):
     def create_vars_after(self, pos_var):
         self.subresults = [p.res_var if not p.discard() else None
                            for p in self.parsers]
+
+        # Create the progress variable if there is a containing transform in
+        # no_backtrack mode.
+        if (self.containing_transform
+                and self.containing_transform.no_backtrack):
+            self.progress_var = VarDef('row_progress', T.LongType)
 
     def generate_code(self):
         return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))
@@ -1323,7 +1345,15 @@ class _Transform(Parser):
                 or typ.is_ast_node)
 
         self.parser = parser
+        self.parser.containing_transform = self
         self.typ = typ
+        self.has_failed_var = None
+        """
+        :type: VarDef
+
+        If this transform is in a no_backtrack hierarchy, we will use this var
+        to keep track of whether the transform has failed or not.
+        """
 
     def children(self):
         return [self.parser]
@@ -1383,6 +1413,8 @@ class _Transform(Parser):
 
     def create_vars_after(self, start_pos):
         self.init_vars(self.parser.pos_var)
+        if self.no_backtrack:
+            self.has_failed_var = VarDef('transform_has_failed', T.BoolType)
 
     def generate_code(self):
         return self.render(

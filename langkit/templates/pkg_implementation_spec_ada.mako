@@ -589,6 +589,8 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Kind for this node. This must reflect the object tag
 
       ${astnode_types.node_fields(T.root_node, emit_null=False)}
+
+      Last_Attempted_Child : Integer := -1;
    end record;
 
    function Kind
