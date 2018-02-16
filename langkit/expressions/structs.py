@@ -619,11 +619,10 @@ class FieldAccess(AbstractExpression):
                 ret = str(self.node_data.name)
                 args.insert(0, ('Node', prefix))
 
-                if args:
-                    ret += ' ({})'.format(', '.join(
-                        '{} => {}'.format(name, value)
-                        for name, value in args
-                    ))
+                ret += ' ({})'.format(', '.join(
+                    '{} => {}'.format(name, value)
+                    for name, value in args
+                ))
 
             else:
                 # If we reach this point, we know that we are accessing a
