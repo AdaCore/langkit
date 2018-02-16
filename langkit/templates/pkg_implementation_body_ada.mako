@@ -1038,7 +1038,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    % if T.AnalysisUnitType.requires_hash_function:
       function Hash (Unit : Analysis_Unit) return Hash_Type is
-        (Ada.Strings.Unbounded.Hash (Unit.File_Name));
+        (GNATCOLL.VFS.Full_Name_Hash (Unit.File_Name));
    % endif
 
    -------------
