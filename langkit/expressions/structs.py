@@ -593,8 +593,9 @@ class FieldAccess(AbstractExpression):
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
 
-                # Create a collection of name => expression for parameters
-                args = [
+                # Create a collection of name => expression for parameters.
+                # First argument is the node itself.
+                args = [('Node', prefix)] + [
                     (formal.name, actual.render_expr())
                     for actual, formal in zip(
                         self.arguments, self.node_data.natural_arguments
@@ -617,7 +618,6 @@ class FieldAccess(AbstractExpression):
                                      einfo_expr))
 
                 ret = str(self.node_data.name)
-                args.insert(0, ('Node', prefix))
 
                 ret += ' ({})'.format(', '.join(
                     '{} => {}'.format(name, value)
