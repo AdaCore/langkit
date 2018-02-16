@@ -2179,6 +2179,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Context.Templates_Unit;
    end Templates_Unit;
 
+   --------------
+   -- Set_Rule --
+   --------------
+
+   procedure Set_Rule (Unit : Analysis_Unit; Rule : Grammar_Rule) is
+   begin
+      Unit.Rule := Rule;
+   end Set_Rule;
+
    --------------------------
    -- Register_Destroyable --
    --------------------------

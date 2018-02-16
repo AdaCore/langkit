@@ -864,6 +864,8 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Return the analysis unit to be used to parse tree rewriting templates.
    --  This creates it if it does not exists yet.
 
+   procedure Set_Rule (Unit : Analysis_Unit; Rule : Grammar_Rule);
+
    type Analysis_Context_Type is record
       Ref_Count : Natural;
       Units_Map : Units_Maps.Map;
