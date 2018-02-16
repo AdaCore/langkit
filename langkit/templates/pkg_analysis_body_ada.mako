@@ -19,7 +19,7 @@ with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Traces;
-with GNATCOLL.VFS;
+with GNATCOLL.VFS; use GNATCOLL.VFS;
 
 % if not ctx.separate_properties:
    with Langkit_Support.Array_Utils;
@@ -71,16 +71,12 @@ package body ${ada_lib_name}.Analysis is
    procedure Free is new Ada.Unchecked_Deallocation
      (Analysis_Unit_Type, Analysis_Unit);
 
-   function Normalize_Unit_Filename
-     (Filename : String) return Unbounded_String;
-   --  Try to return a canonical filename. This is used to have an
-   --  as-unique-as-possible analysis unit identifier.
-
    function Create_Unit
-     (Context           : Analysis_Context;
-      Filename, Charset : Unbounded_String;
-      Rule              : Grammar_Rule) return Analysis_Unit
-      with Pre => not Has_Unit (Context, To_String (Filename));
+     (Context             : Analysis_Context;
+      Normalized_Filename : GNATCOLL.VFS.Virtual_File;
+      Charset             : String;
+      Rule                : Grammar_Rule) return Analysis_Unit
+      with Pre => not Has_Unit (Context, +Normalized_Filename.Full_Name);
    --  Create a new analysis unit and register it in Context
 
    function Get_Unit
@@ -246,19 +242,6 @@ package body ${ada_lib_name}.Analysis is
       Context.Logic_Resolution_Timeout := Timeout;
    end Set_Logic_Resolution_Timeout;
 
-   -----------------------------
-   -- Normalize_Unit_Filename --
-   -----------------------------
-
-   function Normalize_Unit_Filename
-     (Filename : String) return Unbounded_String
-   is
-      use GNATCOLL.VFS;
-   begin
-      return To_Unbounded_String (+Full_Name (Create_From_Base (+Filename),
-                                              Normalize => True));
-   end Normalize_Unit_Filename;
-
    --------------------------
    -- Has_Rewriting_Handle --
    --------------------------
@@ -273,14 +256,15 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function Create_Unit
-     (Context           : Analysis_Context;
-      Filename, Charset : Unbounded_String;
-      Rule              : Grammar_Rule) return Analysis_Unit
+     (Context             : Analysis_Context;
+      Normalized_Filename : GNATCOLL.VFS.Virtual_File;
+      Charset             : String;
+      Rule                : Grammar_Rule) return Analysis_Unit
    is
       Unit : constant Analysis_Unit := Create_Special_Unit
-        (Context, Filename, Charset, Rule);
+        (Context, Normalized_Filename, Charset, Rule);
    begin
-      Context.Units_Map.Insert (Filename, Unit);
+      Context.Units_Map.Insert (Normalized_Filename, Unit);
       return Unit;
    end Create_Unit;
 
@@ -300,10 +284,11 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Canon_Filename : constant Unbounded_String :=
-         Normalize_Unit_Filename (Filename);
+      Normalized_Filename : constant GNATCOLL.VFS.Virtual_File :=
+         Normalized_Unit_Filename (Filename);
 
-      Cur     : constant Cursor := Context.Units_Map.Find (Canon_Filename);
+      Cur     : constant Cursor :=
+         Context.Units_Map.Find (Normalized_Filename);
       Created : constant Boolean := Cur = No_Element;
       Unit    : Analysis_Unit;
 
@@ -330,7 +315,8 @@ package body ${ada_lib_name}.Analysis is
       --  Create the Analysis_Unit if needed
 
       if Created then
-         Unit := Create_Unit (Context, Canon_Filename, Actual_Charset, Rule);
+         Unit := Create_Unit
+           (Context, Normalized_Filename, To_String (Actual_Charset), Rule);
       else
          Unit := Element (Cur);
       end if;
@@ -359,7 +345,7 @@ package body ${ada_lib_name}.Analysis is
       Unit_Filename : String) return Boolean is
    begin
       return Context.Units_Map.Contains
-        (Normalize_Unit_Filename (Unit_Filename));
+        (Normalized_Unit_Filename (Unit_Filename));
    end Has_Unit;
 
    -------------------
@@ -460,15 +446,15 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Canon_Filename : constant Unbounded_String :=
-         Normalize_Unit_Filename (Filename);
-      Cur            : constant Cursor :=
-         Context.Units_Map.Find (Canon_Filename);
+      Normalized_Filename : constant GNATCOLL.VFS.Virtual_File :=
+         Normalized_Unit_Filename (Filename);
+      Cur                 : constant Cursor :=
+         Context.Units_Map.Find (Normalized_Filename);
    begin
       if Cur = No_Element then
          declare
             Unit : constant Analysis_Unit := Create_Unit
-              (Context, Canon_Filename, To_Unbounded_String (Charset), Rule);
+              (Context, Normalized_Filename, Charset, Rule);
             Msg  : constant Text_Type := To_Text (Error);
          begin
             Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
@@ -489,7 +475,7 @@ package body ${ada_lib_name}.Analysis is
       use Units_Maps;
 
       Cur : Cursor := Context.Units_Map.Find
-        (Normalize_Unit_Filename (File_Name));
+        (Normalized_Unit_Filename (File_Name));
    begin
       if Cur = No_Element then
          raise Constraint_Error with "No such analysis unit";
@@ -576,7 +562,7 @@ package body ${ada_lib_name}.Analysis is
       Charset : String := "")
    is
       Dummy : constant Analysis_Unit := Get_From_File
-        (Unit.Context, To_String (Unit.File_Name), Charset, Reparse => True);
+        (Unit.Context, +Unit.File_Name.Full_Name, Charset, Reparse => True);
    begin
       null;
    end Reparse;
@@ -591,7 +577,7 @@ package body ${ada_lib_name}.Analysis is
       Buffer  : String)
    is
       Dummy : constant Analysis_Unit := Get_From_Buffer
-        (Unit.Context, To_String (Unit.File_Name), Charset, Buffer);
+        (Unit.Context, +Unit.File_Name.Full_Name, Charset, Buffer);
    begin
       null;
    end Reparse;
@@ -827,7 +813,7 @@ package body ${ada_lib_name}.Analysis is
    ------------------
 
    function Get_Filename (Unit : Analysis_Unit) return String is
-     (To_String (Unit.File_Name));
+     (+Unit.File_Name.Full_Name);
 
    -----------------
    -- Get_Charset --

@@ -2131,16 +2131,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -------------------------
 
    function Create_Special_Unit
-     (Context           : Analysis_Context;
-      Filename, Charset : Unbounded_String;
-      Rule              : Grammar_Rule) return Analysis_Unit
+     (Context             : Analysis_Context;
+      Normalized_Filename : GNATCOLL.VFS.Virtual_File;
+      Charset             : String;
+      Rule                : Grammar_Rule) return Analysis_Unit
    is
       Unit : constant Analysis_Unit := new Analysis_Unit_Type'
         (Context           => Context,
          Ref_Count         => 1,
          AST_Root          => null,
-         File_Name         => Filename,
-         Charset           => Charset,
+         File_Name         => Normalized_Filename,
+         Charset           => To_Unbounded_String (Charset),
          TDH               => <>,
          Diagnostics       => <>,
          Is_Env_Populated  => False,
@@ -2171,10 +2172,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
    begin
       if Context.Templates_Unit = No_Analysis_Unit then
          Context.Templates_Unit := Create_Special_Unit
-           (Context  => Context,
-            Filename => Null_Unbounded_String,
-            Charset  => To_Unbounded_String (Default_Charset),
-            Rule     => ${Name.from_lower(ctx.main_rule_name)}_Rule);
+           (Context             => Context,
+            Normalized_Filename => GNATCOLL.VFS.No_File,
+            Charset             => Default_Charset,
+            Rule                =>
+               ${Name.from_lower(ctx.main_rule_name)}_Rule);
       end if;
       return Context.Templates_Unit;
    end Templates_Unit;
@@ -2187,6 +2189,19 @@ package body ${ada_lib_name}.Analysis.Implementation is
    begin
       Unit.Rule := Rule;
    end Set_Rule;
+
+   ------------------------------
+   -- Normalized_Unit_Filename --
+   ------------------------------
+
+   function Normalized_Unit_Filename
+     (Filename : String) return GNATCOLL.VFS.Virtual_File is
+      use GNATCOLL.VFS;
+   begin
+      return Create
+        (Create_From_Base (+Filename).Full_Name,
+         Normalize => True);
+   end Normalized_Unit_Filename;
 
    --------------------------
    -- Register_Destroyable --
@@ -2334,8 +2349,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------
 
    function Basename (Unit : Analysis_Unit) return String is
+      use GNATCOLL.VFS;
    begin
-      return Basename (To_String (Unit.File_Name));
+      return +Unit.File_Name.Base_Name;
    end Basename;
 
    ------------------

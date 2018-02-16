@@ -13,10 +13,9 @@
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
 %>
 
-with Ada.Containers;             use Ada.Containers;
+with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
-with Ada.Strings.Unbounded.Hash;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with System;
@@ -24,6 +23,7 @@ with System;
 % if ctx.properties_logging:
    with GNATCOLL.Traces;
 % endif
+with GNATCOLL.VFS;
 
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
@@ -825,10 +825,10 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Analysis_Unit, null);
 
    package Units_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Unbounded_String,
+     (Key_Type        => GNATCOLL.VFS.Virtual_File,
       Element_Type    => Analysis_Unit,
-      Hash            => Ada.Strings.Unbounded.Hash,
-      Equivalent_Keys => "=");
+      Hash            => GNATCOLL.VFS.Full_Name_Hash,
+      Equivalent_Keys => GNATCOLL.VFS."=");
 
    type Symbol_Literal_Type is
       % if ctx.symbol_literals:
@@ -855,9 +855,10 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Context : Analysis_Context) return Symbol_Literal_Array_Access;
 
    function Create_Special_Unit
-     (Context           : Analysis_Context;
-      Filename, Charset : Unbounded_String;
-      Rule              : Grammar_Rule) return Analysis_Unit;
+     (Context             : Analysis_Context;
+      Normalized_Filename : GNATCOLL.VFS.Virtual_File;
+      Charset             : String;
+      Rule                : Grammar_Rule) return Analysis_Unit;
    --  Create a new special analysis unit, i.e. a unit that is not registered
    --  in Context's unit map.
 
@@ -866,6 +867,11 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  This creates it if it does not exists yet.
 
    procedure Set_Rule (Unit : Analysis_Unit; Rule : Grammar_Rule);
+
+   function Normalized_Unit_Filename
+     (Filename : String) return GNATCOLL.VFS.Virtual_File;
+   --  Try to return a canonical filename. This is used to have an
+   --  as-unique-as-possible analysis unit identifier.
 
    type Analysis_Context_Type is record
       Ref_Count : Natural;
@@ -933,7 +939,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
       AST_Root : ${root_node_type_name};
 
-      File_Name : Unbounded_String;
+      File_Name : GNATCOLL.VFS.Virtual_File;
       --  The originating name for this analysis unit. This should be set even
       --  if the analysis unit was parsed from a buffer.
 
