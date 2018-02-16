@@ -617,9 +617,15 @@ class FieldAccess(AbstractExpression):
                         args.append((str(PropertyDef.entity_info_name),
                                      einfo_expr))
 
-                ret = str(self.node_data.name)
+                # Use a fully qualified name for properties so that they don't
+                # clash with local variables.
+                call_name = "{}.Analysis.Implementation.{}".format(
+                    get_context().ada_api_settings.lib_name,
+                    str(self.node_data.name)
+                )
 
-                ret += ' ({})'.format(', '.join(
+                # Build the call
+                ret = '{} ({})'.format(call_name, ', '.join(
                     '{} => {}'.format(name, value)
                     for name, value in args
                 ))
