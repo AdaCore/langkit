@@ -987,6 +987,9 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Holder for fields affected by an analysis unit reparse. This makes it
    --  possible to separate the "reparsing" and the "replace" steps.
 
+   procedure Destroy (Reparsed : in out Reparsed_Unit);
+   --  Free all resources in Reparsed
+
    function Basename (Filename : String) return String;
    --  Return the base filename for String
 

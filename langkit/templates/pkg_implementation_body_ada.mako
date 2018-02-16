@@ -2245,6 +2245,18 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Recompute_Refd_Envs (Unit.AST_Root);
    end Reset_Envs;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Reparsed : in out Reparsed_Unit) is
+   begin
+      Free (Reparsed.TDH);
+      Reparsed.Diagnostics := Diagnostics_Vectors.Empty_Vector;
+      Free (Reparsed.AST_Mem_Pool);
+      Reparsed.AST_Root := null;
+   end Destroy;
+
    --------------
    -- Basename --
    --------------
