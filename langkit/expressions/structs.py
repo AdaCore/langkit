@@ -487,7 +487,11 @@ class FieldAccess(AbstractExpression):
             )
 
             self.node_data = node_data
+
+            # Keep the original node data for debugging purposes
             self.original_node_data = node_data
+
+            # If this is a property call, take the root property
             if self.node_data.is_property:
                 self.node_data = self.node_data.root_property
 
