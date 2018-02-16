@@ -752,12 +752,6 @@ class ${root_astnode_name}(object):
         return self._kind_name
 
     @property
-    def is_ghost(self):
-        ${py_doc('langkit.node_is_ghost', 8)}
-        node = self._unwrap(self)
-        return bool(_node_is_ghost(ctypes.byref(node)))
-
-    @property
     def is_token_node(self):
         ${py_doc('langkit.node_is_token_node', 8)}
         node = self._unwrap(self)
@@ -1411,10 +1405,6 @@ _node_kind = _import_func(
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
     [ctypes.c_int], _text
-)
-_node_is_ghost = _import_func(
-    '${capi.get_name("node_is_ghost")}',
-    [ctypes.POINTER(${c_entity})], ctypes.c_int
 )
 _node_is_token_node = _import_func(
     '${capi.get_name("node_is_token_node")}',

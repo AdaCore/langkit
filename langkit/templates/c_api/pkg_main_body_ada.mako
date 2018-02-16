@@ -566,17 +566,6 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
-   function ${capi.get_name('node_is_ghost')}
-     (Node : ${entity_type}_Ptr) return int is
-   begin
-      Clear_Last_Exception;
-      return Boolean'Pos (Node.El.Is_Ghost);
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end;
-
    function ${capi.get_name('is_token_node')}
      (Node : ${entity_type}_Ptr) return int is
    begin

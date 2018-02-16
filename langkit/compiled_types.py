@@ -2307,6 +2307,16 @@ class ASTNodeType(BaseStructType):
                 warn_on_unused=False,
                 doc='Returns the analysis unit owning this node'
             )),
+            ('is_ghost', PropertyDef(
+                expr=None, prefix=None, type=T.BoolType, public=True,
+                external=True, uses_entity_info=False, uses_envs=False,
+                warn_on_unused=False,
+                doc="""
+                Return whether the node is a ghost node. In other words, return
+                False if it correspondins to a real chain of tokens in the
+                source, True otherwise.
+                """
+            )),
         ]
 
     def snaps(self, anchor_end):

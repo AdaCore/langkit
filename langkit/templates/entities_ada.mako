@@ -72,9 +72,6 @@
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String;
    --  Return the concrete kind for Node
 
-   function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean;
-   ${ada_doc('langkit.node_is_ghost', 3)}
-
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
 
@@ -331,15 +328,6 @@
    begin
       return Node.Node.Kind_Name;
    end Kind_Name;
-
-   --------------
-   -- Is_Ghost --
-   --------------
-
-   function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean is
-   begin
-      return Node.Node.Is_Ghost;
-   end Is_Ghost;
 
    % for e in ctx.entity_types:
 

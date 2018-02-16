@@ -292,10 +292,6 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return String;
    --  Return the concrete kind for Node
 
-   function Is_Ghost
-     (Node : access ${root_node_value_type}'Class) return Boolean;
-   ${ada_doc('langkit.node_is_ghost', 3)}
-
    -------------------------------
    -- Tree traversal operations --
    -------------------------------
