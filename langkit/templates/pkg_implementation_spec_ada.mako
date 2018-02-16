@@ -288,6 +288,12 @@ package ${ada_lib_name}.Analysis.Implementation is
          Decoration : Boolean := True) return String;
    % endif
 
+   function Is_Incomplete
+     (Node : access ${root_node_value_type}'Class) return Boolean;
+   --  Returns whether this node is incomplete or not.  Incomplete nodes are a
+   --  result of the parsing of a node failing as a result of a NoBacktrack
+   --  parser annotation.
+
    function Kind_Name
      (Node : access ${root_node_value_type}'Class) return String;
    --  Return the concrete kind for Node
