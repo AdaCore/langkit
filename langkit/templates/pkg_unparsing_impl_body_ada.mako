@@ -12,11 +12,6 @@ with GNATCOLL.Iconv;
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 
-% if ctx.separate_properties:
-with ${ada_lib_name}.Analysis.Properties;
-use ${ada_lib_name}.Analysis.Properties;
-% endif
-
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
