@@ -579,6 +579,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  both tokens are inclusive, i.e. they both belong to this node.
 
       Extensions : Extension_Vectors.Vector;
+      --  See documentation for the "Extensions" section above
 
       Self_Env : Lexical_Env;
       --  Hold the environment this node defines, or the parent environment
