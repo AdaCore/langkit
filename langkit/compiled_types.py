@@ -2297,9 +2297,9 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.BoolType, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,
                 warn_on_unused=False,
-                doc='Returns whether this node is incomplete or not. '
-                'Incomplete nodes are a result of the parsing of a node '
-                'failing as a result of a NoBacktrack parser annotation'
+                doc='Return whether this node is incomplete or not. Incomplete'
+                    ' nodes are a result of the parsing of a node failing as a'
+                    ' result of a NoBacktrack parser annotation.'
             )),
         ]
 
