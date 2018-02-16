@@ -413,22 +413,6 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          return 0;
    end;
 
-   function ${capi.get_name('node_unit')}
-     (Node : ${entity_type}_Ptr) return ${analysis_unit_type} is
-   begin
-      Clear_Last_Exception;
-
-      declare
-         U : constant Analysis_Unit := Get_Unit (Node.El);
-      begin
-         return Wrap (U);
-      end;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return ${analysis_unit_type} (System.Null_Address);
-   end;
-
    function ${capi.get_name("unit_incref")}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type} is
    begin

@@ -286,7 +286,7 @@ package body ${ada_lib_name}.Rewriting is
          use Node_Maps;
 
          Unit_Handle : constant Unit_Rewriting_Handle :=
-            Handle (Node.Get_Unit);
+            Handle (Node.Unit);
          Cur         : constant Cursor := Unit_Handle.Nodes.Find (Node);
       begin
          --  If we have already built a handle for this node, just return it
@@ -351,7 +351,7 @@ package body ${ada_lib_name}.Rewriting is
       --  regular one.
       declare
          N           : constant ${root_node_type_name} := Node.Node;
-         Unit_Handle : constant Unit_Rewriting_Handle := Handle (N.Get_Unit);
+         Unit_Handle : constant Unit_Rewriting_Handle := Handle (N.Unit);
       begin
          if N.Is_Token_Node then
             Children := (Kind => Expanded_Token_Node,

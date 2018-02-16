@@ -419,15 +419,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Is_Referenced_From (Referenced_Node.Unit, Base_Node.Unit);
    end Is_Visible_From;
 
-   --------------
-   -- Get_Unit --
-   --------------
+   ----------
+   -- Unit --
+   ----------
 
-   function Get_Unit
+   function Unit
      (Node : access ${root_node_value_type}'Class) return Analysis_Unit is
    begin
       return Node.Unit;
-   end Get_Unit;
+   end Unit;
 
    ${array_types.body(T.LexicalEnvType.array)}
    ${array_types.body(T.root_node.entity.array)}
@@ -2077,15 +2077,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
       ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
    end Reset_Logic_Vars;
 
-   --------------
-   -- Get_Unit --
-   --------------
+   ----------
+   -- Unit --
+   ----------
 
-   function Get_Unit
+   function Unit
      (Node : ${root_entity.api_name}'Class) return Analysis_Unit is
    begin
-      return Node.Node.Get_Unit;
-   end Get_Unit;
+      return Node.Node.Unit;
+   end Unit;
 
    ----------------
    -- Token_Data --

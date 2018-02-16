@@ -16,6 +16,6 @@ if u.diagnostics:
     sys.exit(1)
 
 for node in [u.root, u.root[0]]:
-    print('{}.unit = {}'.format(node, node.p_unit))
+    print('{}.unit = {}'.format(node, node.p_node_unit))
 
 print('main.py: Done.')

@@ -296,11 +296,6 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean;
    ${ada_doc('langkit.node_is_ghost', 3)}
 
-   function Get_Unit
-     (Node : access ${root_node_value_type}'Class)
-      return Analysis_Unit;
-   ${ada_doc('langkit.node_unit', 3)}
-
    -------------------------------
    -- Tree traversal operations --
    -------------------------------

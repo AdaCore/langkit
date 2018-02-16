@@ -313,9 +313,6 @@ base_langkit_docs = {
     'langkit.unit_root': """
         Return the root AST node for this unit, or ${null} if there is none.
     """,
-    'langkit.node_unit': """
-        Return the unit that owns an AST node.
-    """,
     'langkit.unit_first_token': """
         Return a reference to the first token scanned in this unit.
     """,

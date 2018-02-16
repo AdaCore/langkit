@@ -14,7 +14,7 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    unit = Property(
+    node_unit = Property(
         Self.cast(T.Name).then(lambda n: n.unit),
         public=True
     )

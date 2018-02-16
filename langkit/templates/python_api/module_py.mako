@@ -747,12 +747,6 @@ class ${root_astnode_name}(object):
         return hash(self._id_tuple)
 
     @property
-    def unit(self):
-        ${py_doc('langkit.node_unit', 8)}
-        node = self._unwrap(self)
-        return AnalysisUnit(_node_unit(ctypes.byref(node)))
-
-    @property
     def kind_name(self):
         ${py_doc('langkit.node_kind', 8)}
         return self._kind_name
@@ -1377,10 +1371,6 @@ _unit_diagnostic = _import_func(
     '${capi.get_name("unit_diagnostic")}',
     [AnalysisUnit._c_type, ctypes.c_uint, ctypes.POINTER(Diagnostic._c_type)],
     ctypes.c_int
-)
-_node_unit = _import_func(
-    '${capi.get_name("node_unit")}',
-    [ctypes.POINTER(${c_entity})], AnalysisUnit._c_type
 )
 _unit_incref = _import_func(
     '${capi.get_name("unit_incref")}',

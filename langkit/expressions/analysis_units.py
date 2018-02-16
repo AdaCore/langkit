@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit import names
 from langkit.compiled_types import T
-from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, PropertyDef,
     auto_attr, auto_attr_custom, construct
@@ -17,36 +16,6 @@ UnitBody = AbstractVariable(
     names.Name('Unit_Body'),
     type=T.AnalysisUnitKind
 )
-
-
-@auto_attr
-def unit(self, node):
-    """
-    Return the analysis unit that owns `node`.
-
-    :param AbstractExpression node: Node for which we want the embedding
-        analysis unit.
-    :rtype: ResolvedExpression
-    """
-    node_expr = construct(node)
-
-    # Automatically extract AST nodes from entities
-    if node_expr.type.is_entity_type:
-        node_expr = FieldAccessExpr(node_expr, 'El', node_expr.type.el_type,
-                                    do_explicit_incref=True)
-
-    # Make sure that in the end, the prefix is an AST node
-    check_source_language(
-        node_expr.type.is_ast_node,
-        'The "unit" field is available only for AST nodes; instead we have'
-        ' here a {}'.format(node_expr.type.name.lower)
-    )
-
-    # From the point of view of properties, analysis units are not ref-counted,
-    # so we must not inc-ref here.
-    return FieldAccessExpr(node_expr, 'Unit', T.AnalysisUnitType,
-                           do_explicit_incref=False,
-                           abstract_expr=self)
 
 
 @auto_attr

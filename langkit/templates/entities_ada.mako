@@ -75,10 +75,6 @@
    function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean;
    ${ada_doc('langkit.node_is_ghost', 3)}
 
-   function Get_Unit
-     (Node : ${root_entity.api_name}'Class) return Analysis_Unit;
-   ${ada_doc('langkit.node_unit', 3)}
-
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
 
@@ -344,16 +340,6 @@
    begin
       return Node.Node.Is_Ghost;
    end Is_Ghost;
-
-   --------------
-   -- Get_Unit --
-   --------------
-
-   function Get_Unit
-     (Node : ${root_entity.api_name}'Class) return Analysis_Unit is
-   begin
-      return Node.Node.Get_Unit;
-   end Get_Unit;
 
    % for e in ctx.entity_types:
 

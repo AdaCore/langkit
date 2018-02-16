@@ -304,13 +304,6 @@ package ${ada_lib_name}.Analysis.Implementation.C is
            External_name => "${capi.get_name('unit_diagnostic')}";
    ${ada_c_doc('langkit.unit_diagnostic', 3)}
 
-   function ${capi.get_name('node_unit')}
-     (Node : ${entity_type}_Ptr) return ${analysis_unit_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('node_unit')}";
-   ${ada_c_doc('langkit.node_unit', 3)}
-
    function ${capi.get_name('unit_incref')}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
       with Export        => True,
