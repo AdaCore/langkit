@@ -30,9 +30,16 @@ package body ${ada_lib_name}.Rewriting is
 
    function Allocate
      (Node          : ${root_node_type_name};
+      Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
-      return Node_Rewriting_Handle;
+      return Node_Rewriting_Handle
+      with Pre =>
+         Context /= No_Rewriting_Handle
+         and then (Unit_Handle = No_Unit_Rewriting_Handle
+                   or else Unit_Handle.Context_Handle = Context)
+         and then (Parent_Handle = No_Node_Rewriting_Handle
+                   or else Parent_Handle.Context_Handle = Context);
    --  Allocate a handle for Node and register it in Unit_Handle's map
 
    procedure Expand_Children (Node : Node_Rewriting_Handle)
@@ -294,7 +301,8 @@ package body ${ada_lib_name}.Rewriting is
 
          --  Otherwise, we are dealing with the root node: just create its
          --  rewriting handle.
-         return Allocate (Node, Unit_Handle, No_Node_Rewriting_Handle);
+         return Allocate (Node, Unit_Handle.Context_Handle, Unit_Handle,
+                          No_Node_Rewriting_Handle);
       end;
    end Handle;
 
@@ -304,20 +312,24 @@ package body ${ada_lib_name}.Rewriting is
 
    function Allocate
      (Node          : ${root_node_type_name};
+      Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
       return Node_Rewriting_Handle
    is
+      Tied   : constant Boolean := Unit_Handle /= No_Unit_Rewriting_Handle;
       Result : constant Node_Rewriting_Handle :=
          new Node_Rewriting_Handle_Type'
-           (Context_Handle => Unit_Handle.Context_Handle,
+           (Context_Handle => Context,
             Node           => Node,
             Parent         => Parent_Handle,
             Kind           => Node.Kind,
-            Tied           => True,
+            Tied           => Tied,
             Children       => Unexpanded_Children);
    begin
-      Unit_Handle.Nodes.Insert (Node, Result);
+      if Tied then
+         Unit_Handle.Nodes.Insert (Node, Result);
+      end if;
       return Result;
    end Allocate;
 
@@ -352,7 +364,8 @@ package body ${ada_lib_name}.Rewriting is
                  (Ada.Containers.Count_Type (Count));
                for I in 1 .. Count loop
                   Children.Vector.Append
-                    (Allocate (N.Child (I), Unit_Handle, Node));
+                    (Allocate (N.Child (I), Unit_Handle.Context_Handle,
+                               Unit_Handle, Node));
                end loop;
             end;
          end if;
