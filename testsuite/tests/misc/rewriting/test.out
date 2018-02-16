@@ -155,4 +155,55 @@ Could not apply diff on the main.txt unit:
   1:5: Expected Identifier, got Number
 def 1 = a 
 apply_error.adb: Done.
+
+== templates.adb ==
+Test various template instantiation errors...
+* standalone {
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_FORMAT_ERROR
+* trailing standalone {
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_FORMAT_ERROR
+* standalone }
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_FORMAT_ERROR
+* too many args (1)
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_ARGS_ERROR
+* too many args (2)
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_ARGS_ERROR
+* missing args (0)
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_ARGS_ERROR
+* missing args (1)
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_ARGS_ERROR
+* cannot reparse
+  Got a LIBFOOLANG.REWRITING.TEMPLATE_INSTANTIATION_ERROR
+
+Use templates to create trees of node rewriting handles...
+
+Applying the diff...
+DefList
+|  Def
+|  |name:
+|  |  Name: a
+|  |expr:
+|  |  Literal: 1
+|  Def
+|  |name:
+|  |  Name: b
+|  |expr:
+|  |  ParentExpr
+|  |  |expr:
+|  |  |  Plus
+|  |  |  |lhs:
+|  |  |  |  Ref
+|  |  |  |  |name:
+|  |  |  |  |  Name: b
+|  |  |  |rhs:
+|  |  |  |  ParentExpr
+|  |  |  |  |expr:
+|  |  |  |  |  Plus
+|  |  |  |  |  |lhs:
+|  |  |  |  |  |  Ref
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Name: a
+|  |  |  |  |  |rhs:
+|  |  |  |  |  |  Literal: 3
+templates.adb: Done.
 Done
