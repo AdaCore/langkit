@@ -7,6 +7,8 @@ with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Introspection;    use ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Lexer;            use ${ada_lib_name}.Lexer;
+use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
 
@@ -758,6 +760,204 @@ package body ${ada_lib_name}.Rewriting is
       Nodes_Pools.Append (Handle.New_Nodes, Result);
       return Result;
    end Create_Regular_Node;
+
+   --------------------------
+   -- Create_From_Template --
+   --------------------------
+
+   function Create_From_Template
+     (Handle    : Rewriting_Handle;
+      Template  : Text_Type;
+      Arguments : Node_Rewriting_Handle_Array;
+      Rule      : Grammar_Rule) return Node_Rewriting_Handle
+   is
+      type State_Type is (
+         Default,
+         --  Default state: no meta character being processed
+
+         Open_Brace,
+         --  The previous character is a open brace: the current one
+         --  determines what it means.
+
+         Close_Brace
+         --  The previous character is a closing brace: the current one must be
+         --  another closing brace.
+      );
+
+      Buffer   : Unbounded_Wide_Wide_String;
+      State    : State_Type := Default;
+      Next_Arg : Positive := Arguments'First;
+   begin
+      --  Interpret the template looping over its characters with a state
+      --  machine.
+      for C of Template loop
+         case State is
+         when Default =>
+            case C is
+            when '{' =>
+               State := Open_Brace;
+            when '}' =>
+               State := Close_Brace;
+            when others =>
+               Append (Buffer, C);
+            end case;
+
+         when Open_Brace =>
+            case C is
+            when '{' =>
+               State := Default;
+               Append (Buffer, C);
+            when '}' =>
+               State := Default;
+               if Next_Arg in Arguments'Range then
+                  declare
+                     Unparsed_Arg : constant Wide_Wide_String :=
+                        Rewriting.Unparse (Arguments (Next_Arg));
+                  begin
+                     Next_Arg := Next_Arg + 1;
+                     Append (Buffer, Unparsed_Arg);
+                  end;
+               else
+                  raise Template_Args_Error with
+                     "not enough arguments provided";
+               end if;
+            when others =>
+               raise Template_Format_Error with
+                  "standalone ""{"" character";
+            end case;
+
+         when Close_Brace =>
+            case C is
+            when '}' =>
+               State := Default;
+               Append (Buffer, C);
+            when others =>
+               raise Template_Format_Error with
+                  "standalone ""}"" character";
+            end case;
+         end case;
+      end loop;
+
+      --  Make sure that there is no standalone metacharacter at the end of the
+      --  template.
+      case State is
+         when Default => null;
+         when Open_Brace =>
+            raise Template_Format_Error with "standalone ""{"" character";
+         when Close_Brace =>
+            raise Template_Format_Error with "standalone ""}"" character";
+      end case;
+
+      --  Make sure all given arguments were consumed
+      if Next_Arg in Arguments'Range then
+         raise Template_Args_Error with "too many arguments provided";
+      end if;
+
+      --  Now parse the resulting buffer and create the corresponding tree of
+      --  nodes.
+      declare
+         Context  : constant Analysis_Context := Rewriting.Context (Handle);
+         Unit     : constant Analysis_Unit := Templates_Unit (Context);
+         Reparsed : Reparsed_Unit;
+
+         procedure Init_Parser
+           (Unit     : Analysis_Unit;
+            Read_BOM : Boolean;
+            Parser   : in out Parser_Type);
+         --  Callback for Do_Parsing
+
+         function Transform
+           (Node   : ${root_node_type_name};
+            Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle;
+         --  Turn a node from the Reparsed unit into a recursively expanded
+         --  node rewriting handle.
+
+         -----------------
+         -- Init_Parser --
+         -----------------
+
+         procedure Init_Parser
+           (Unit     : Analysis_Unit;
+            Read_BOM : Boolean;
+            Parser   : in out Parser_Type)
+         is
+            pragma Unreferenced (Read_BOM);
+         begin
+            Init_Parser_From_Buffer
+              (To_Wide_Wide_String (Buffer),
+               Unit, Token_Data (Unit),
+               Analysis.Parsers.Symbol_Literal_Array_Access
+                 (Symbol_Literals (Context)),
+               With_Trivia => True, Parser => Parser);
+         end Init_Parser;
+
+         ---------------
+         -- Transform --
+         ---------------
+
+         function Transform
+           (Node   : ${root_node_type_name};
+            Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle
+         is
+            Result : Node_Rewriting_Handle;
+         begin
+            if Node = null then
+               return No_Node_Rewriting_Handle;
+            end if;
+
+            --  Allocate the handle for Node, and don't forget to remove the
+            --  backlink to Node itself as it exists only temporarily for
+            --  template instantiation.
+            Result := Allocate (Node, Handle, No_Unit_Rewriting_Handle,
+                                Parent);
+            Result.Node := null;
+
+            if Node.Is_Token_Node then
+               declare
+                  Index : constant Natural := Natural (Node.Token_Start_Index);
+                  Data  : constant Lexer.Token_Data_Type :=
+                     Reparsed.TDH.Tokens.Get (Index);
+                  Text      : constant Text_Type := Reparsed.TDH.Source_Buffer
+                    (Data.Source_First .. Data.Source_Last);
+               begin
+                  Result.Children :=
+                    (Kind => Expanded_Token_Node,
+                     Text => To_Unbounded_Wide_Wide_String (Text));
+               end;
+
+            else
+               declare
+                  Count : constant Natural := Node.Abstract_Children_Count;
+               begin
+                  Result.Children := (Kind => Expanded_Regular, Vector => <>);
+                  Result.Children.Vector.Reserve_Capacity
+                    (Ada.Containers.Count_Type (Count));
+                  for I in 1 .. Count loop
+                     Result.Children.Vector.Append
+                       (Transform (Node.Child (I), Result));
+                  end loop;
+               end;
+            end if;
+            return Result;
+         end Transform;
+
+      begin
+         Set_Rule (Unit, Rule);
+         Do_Parsing (Unit, False, Init_Parser'Access, Reparsed);
+         if not Reparsed.Diagnostics.Is_Empty then
+            Destroy (Reparsed);
+            raise Template_Instantiation_Error;
+         end if;
+
+         declare
+            Result : constant Node_Rewriting_Handle :=
+               Transform (Reparsed.AST_Root, No_Node_Rewriting_Handle);
+         begin
+            Destroy (Reparsed);
+            return Result;
+         end;
+      end;
+   end Create_From_Template;
 
    % for n in ctx.astnode_types:
       % if not n.abstract and \

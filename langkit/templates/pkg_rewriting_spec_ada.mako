@@ -267,6 +267,52 @@ package ${ada_lib_name}.Rewriting is
    --  size of Children must match the number of children associated to the
    --  given Kind. Besides, all given children must not be tied.
 
+   ---------------
+   -- Templates --
+   ---------------
+
+   --  Templating is a way to create trees of node rewriting handles. It is
+   --  intended to be more convenient than calling node constructors for each
+   --  individual node in a tree.
+   --
+   --  A template is text that represents source code, including zero or
+   --  multiple holes (stray "{}").
+   --
+   --  Create a tree of new nodes from a template is called instantiating a
+   --  template: just call Create_From_Template, passing to it the template
+   --  itself, a sequence of nodes (the template arguments) to fill the
+   --  template holes and a grammar rule to parse the resulting source code.
+   --  This will unparse given nodes to replace holes in the template text, and
+   --  then parse the resulting source code in order to create a tree of node
+   --  rewriting handles.
+   --
+   --  In order not to interfer with the template DSL, stray "{" and "}"
+   --  characters in the source code must be doubled: for instance "{{"
+   --  represent "{" in the source code to be parsed.
+
+   Template_Format_Error : exception;
+   --  Exception raised when a template has an invalid syntax, such as badly
+   --  formatted holes.
+
+   Template_Args_Error : exception;
+   --  Exception raised when the provided arguments for a template don't match
+   --  what the template expects.
+
+   Template_Instantiation_Error : exception;
+   --  Exception raised when the instantiation of a template cannot be parsed
+
+   function Create_From_Template
+     (Handle    : Rewriting_Handle;
+      Template  : Text_Type;
+      Arguments : Node_Rewriting_Handle_Array;
+      Rule      : Grammar_Rule) return Node_Rewriting_Handle
+      with Pre => (for all A of Arguments =>
+                   A = No_Node_Rewriting_Handle
+                   or else Rewriting.Context (A) = Handle);
+   --  Create a tree of new nodes from the given Template string, filling holes
+   --  in it with nodes in Arguments and parsed according to the given grammar
+   --  Rule.
+
    -----------------------------
    -- Node creation shortcuts --
    -----------------------------
