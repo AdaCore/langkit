@@ -451,7 +451,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : Analysis_Unit := Unwrap (Unit);
       begin
          Dec_Ref (U);
       end;

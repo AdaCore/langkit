@@ -219,7 +219,7 @@ package ${ada_lib_name}.Analysis is
    procedure Inc_Ref (Unit : Analysis_Unit);
    ${ada_doc('langkit.unit_incref', 3)}
 
-   procedure Dec_Ref (Unit : Analysis_Unit);
+   procedure Dec_Ref (Unit : in out Analysis_Unit);
    ${ada_doc('langkit.unit_decref', 3)}
 
    function Get_Context (Unit : Analysis_Unit) return Analysis_Context;

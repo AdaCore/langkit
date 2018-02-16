@@ -63,7 +63,7 @@ package body ${ada_lib_name}.Analysis is
 
    use AST_Envs;
 
-   procedure Destroy (Unit : Analysis_Unit);
+   procedure Destroy (Unit : in out Analysis_Unit);
 
    procedure Free is new Ada.Unchecked_Deallocation
      (Analysis_Context_Type, Analysis_Context);
@@ -506,7 +506,7 @@ package body ${ada_lib_name}.Analysis is
       --  independently.
 
       declare
-         Unit : constant Analysis_Unit := Element (Cur);
+         Unit : Analysis_Unit := Element (Cur);
       begin
          --  As unloading a unit can change how any AST node property in the
          --  whole analysis context behaves, we have to invalidate caches. This
@@ -552,8 +552,11 @@ package body ${ada_lib_name}.Analysis is
    -- Dec_Ref --
    -------------
 
-   procedure Dec_Ref (Unit : Analysis_Unit) is
+   procedure Dec_Ref (Unit : in out Analysis_Unit) is
    begin
+      if Unit = No_Analysis_Unit then
+         return;
+      end if;
       Unit.Ref_Count := Unit.Ref_Count - 1;
       if Unit.Ref_Count = 0 then
          Destroy (Unit);
@@ -593,8 +596,7 @@ package body ${ada_lib_name}.Analysis is
    -- Destroy --
    -------------
 
-   procedure Destroy (Unit : Analysis_Unit) is
-      Unit_Var : Analysis_Unit := Unit;
+   procedure Destroy (Unit : in out Analysis_Unit) is
    begin
       Unit.Exiled_Entries.Destroy;
       Unit.Foreign_Nodes.Destroy;
@@ -617,7 +619,7 @@ package body ${ada_lib_name}.Analysis is
          D.Destroy (D.Object);
       end loop;
       Destroyable_Vectors.Destroy (Unit.Destroyables);
-      Free (Unit_Var);
+      Free (Unit);
    end Destroy;
 
    -----------
