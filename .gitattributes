@@ -7,3 +7,4 @@ langkit/adalog/src/*.ads no-precommit-check
 testsuite/tests/*/*/*.adb no-precommit-check
 testsuite/tests/*/*/*.ads no-precommit-check
 *.py no-precommit-check
+*.mako no-precommit-check
