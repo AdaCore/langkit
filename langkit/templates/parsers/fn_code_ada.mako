@@ -45,6 +45,14 @@ begin
        Set (${memo}, False, ${parser.res_var}, Pos, Mem_Pos);
 
        <<Try_Again>>
+
+      ## Reinit variables that need it
+      % for var in var_context:
+      % if var.reinit:
+      ${var.name} := ${var.type.storage_nullexpr};
+      % endif
+      % endfor
+
    % endif
 
    ---------------------------

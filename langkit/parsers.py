@@ -84,9 +84,14 @@ class VarDef(object):
             will be generated. If false, it is considered that the definition
             is done in the template, so the name used is the name passed, and
             the variable won't be added to the context.
+
+        :param bool reinit: If true, the variable will be reinitialized to null
+            expr if variable occurs in a left recursive parser, and left
+            recursion is triggered.
         """
 
         self.type = type
+        self.reinit = reinit
 
         # Add this variable to the current var context
         if create:
