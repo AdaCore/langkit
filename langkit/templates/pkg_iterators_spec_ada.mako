@@ -84,8 +84,8 @@ package ${ada_lib_name}.Iterators is
      (Root      : ${root_entity.api_name}'Class;
       Predicate : ${root_entity.api_name}_Predicate)
       return ${root_entity.api_name};
-   --  Return the first found AST node under Root (included) that satisfies the
-   --  Pred, or return null if there is no such node.
+   --  Return the first node found under Root (included) that satisfies the
+   --  given Predicate. Return a null node if there is no such node.
 
    type ${root_entity.api_name}_Kind_Filter is
       new ${root_entity.api_name}_Predicate_Type with
