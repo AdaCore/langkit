@@ -75,6 +75,25 @@ package body ${ada_lib_name}.Iterators is
       end return;
    end Find;
 
+   ----------------
+   -- Find_First --
+   ----------------
+
+   function Find_First
+     (Root      : ${root_entity.api_name}'Class;
+      Predicate : access function (N : ${root_entity.api_name}) return Boolean)
+      return ${root_entity.api_name}
+   is
+      I      : Local_Find_Iterator := Find (Root, Predicate);
+      Result : ${root_entity.api_name};
+      Ignore : Boolean;
+   begin
+      if not I.Next (Result) then
+         Result := No_${root_entity.api_name};
+      end if;
+      return Result;
+   end Find_First;
+
    ----------
    -- Find --
    ----------
