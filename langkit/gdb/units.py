@@ -1,13 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-try:
-    from gnatdbg.strings import UnboundedString
-except ImportError:
-    fetch_unbounded_string = None
-else:
-    fetch_unbounded_string = (
-        lambda value: UnboundedString(value).get_string()
-    )
+from langkit.gdb.utils import dereference_fat_array_ptr
 
 
 class AnalysisUnit(object):
@@ -20,5 +13,10 @@ class AnalysisUnit(object):
 
     @property
     def filename(self):
-        return (fetch_unbounded_string(self.value['file_name'])
-                if fetch_unbounded_string else None)
+        virtual_file = self.value['file_name']
+        vf_record = virtual_file['value'].dereference()
+        v = dereference_fat_array_ptr(vf_record['full'])
+        # TODO: replace the call to eval below with a call to the .string()
+        # method. This does not work as of today because of a GDB bug: see
+        # R219-011.
+        return eval(str(v))

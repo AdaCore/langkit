@@ -93,3 +93,15 @@ def adaify_name(context, name):
     chunks = name.split('__')
     return '.'.join(Name.from_lower(c).camel_with_underscores
                     for c in chunks)
+
+
+def dereference_fat_array_ptr(fat_ptr):
+    """
+    Dereference an array reference materialized as a fat pointer.
+    """
+    lower_bound = int(fat_ptr['P_BOUNDS']['LB0'])
+    upper_bound = int(fat_ptr['P_BOUNDS']['UB0'])
+    array_ptr = fat_ptr['P_ARRAY']
+    element_type = array_ptr.type.target().target()
+    array_ptr_type = element_type.array(lower_bound, upper_bound).pointer()
+    return array_ptr.cast(array_ptr_type).dereference()
