@@ -104,12 +104,10 @@ package body ${ada_lib_name}.Iterators is
       Predicate : ${root_entity.api_name}_Predicate)
       return ${root_entity.api_name}
    is
-      I             : Find_Iterator := Find (Root, Predicate);
-      Result, Dummy : ${root_entity.api_name};
-      Ignore        : Boolean;
+      I      : Find_Iterator := Find (Root, Predicate);
+      Result : ${root_entity.api_name};
+      Ignore : Boolean;
    begin
-      Ignore := Next (I.Traverse_It, Dummy);
-      --  Ignore first result
       if not I.Next (Result) then
          Result := No_${root_entity.api_name};
       end if;
