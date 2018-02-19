@@ -70,6 +70,9 @@ package body ${ada_lib_name}.Analysis.Parsers is
    --  the parsing failed (Parser.Current_Pos = No_Token_Index), append
    --  corresponding diagnostics to Parser.Diagnostics, do nothing instead.
 
+   procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type);
+   --  Add a diagnostic for the last fail position of the parser
+
    function Get_Parse_List (Parser : Parser_Type) return Free_Parse_List;
    --  Get a free parse list, or allocate one if there is no free parse list in
    --  Parser. When done with the result, the caller must invoke
@@ -141,37 +144,39 @@ package body ${ada_lib_name}.Analysis.Parsers is
       Parser.Symbol_Literals := Symbol_Literals;
    end Init_Parser_From_Buffer;
 
+   ------------------------------
+   -- Add_Last_Fail_Diagnostic --
+   ------------------------------
+
+   procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type)
+   is
+      Last_Token : Lexer.Token_Data_Type renames
+         Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
+      D : constant Diagnostic :=
+        (if Parser.Last_Fail.Kind = Token_Fail then
+          Create (Last_Token.Sloc_Range, To_Text
+            ("Expected "
+             & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
+             & ", got "
+             & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)))
+         else
+           Create (Last_Token.Sloc_Range,
+                   To_Text (Parser.Last_Fail.Custom_Message.all)));
+   begin
+      Parser.Diagnostics.Append (D);
+   end Add_Last_Fail_Diagnostic;
+
    ---------------------------
    -- Process_Parsing_Error --
    ---------------------------
 
    procedure Process_Parsing_Error
      (Parser         : in out Parser_Type;
-      Check_Complete : Boolean := True)
-   is
-
-      procedure Add_Last_Fail_Diagnostic is
-         Last_Token : Lexer.Token_Data_Type renames
-            Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
-         D : constant Diagnostic :=
-           (if Parser.Last_Fail.Kind = Token_Fail then
-             Create (Last_Token.Sloc_Range, To_Text
-               ("Expected "
-                & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
-                & ", got "
-                & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)))
-            else
-              Create (Last_Token.Sloc_Range,
-                      To_Text (Parser.Last_Fail.Custom_Message.all)));
-      begin
-         Parser.Diagnostics.Append (D);
-      end Add_Last_Fail_Diagnostic;
-
+      Check_Complete : Boolean := True) is
    begin
 
       if Parser.Current_Pos = No_Token_Index then
-
-         Add_Last_Fail_Diagnostic;
+         Add_Last_Fail_Diagnostic (Parser);
       elsif Check_Complete
         and then Parser.Current_Pos /= Last_Token (Parser.TDH.all)
       then
@@ -192,7 +197,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
          --  Else, the last fail pos is further down the line, and we want to
          --  have the diagnostic of what exactly failed.
          else
-            Add_Last_Fail_Diagnostic;
+            Add_Last_Fail_Diagnostic (Parser);
          end if;
       end if;
 
