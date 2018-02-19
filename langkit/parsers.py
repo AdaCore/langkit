@@ -399,7 +399,7 @@ class Parser(object):
         variable if necessary, indicating which parsers should not backtrack.
         """
         if isinstance(self, NoBacktrack):
-            self.no_backtrack = VarDef('nobt', T.BoolType)
+            self.no_backtrack = VarDef('nobt', T.BoolType, reinit=True)
 
         for c in self.children():
             nobt = c.traverse_nobacktrack()
