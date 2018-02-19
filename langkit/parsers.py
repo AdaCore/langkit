@@ -67,15 +67,25 @@ class VarDef(object):
     """
     Holder object for a variable in parsers. Creating an instance of vardef
     requires a context to exist already.
-
-    If `create` is true, the variable will be automatically added to the
-    current variable context when created, and an unique name will be
-    generated. If `create` is false, it is considered that the definition is
-    done in the template, so the name used is the name passed, and the variable
-    won't be added to the context.
     """
 
-    def __init__(self, base_name, type, create=True):
+    def __init__(self, base_name, type, create=True, reinit=False):
+        """
+        Creates a VarDef.
+
+        :param str base_name: The string used as base for the name of the
+            variable. A number will be appended in order to make the variable
+            unique.
+
+        :param CompiledType type: The type of the variable.
+
+        :param bool create: If true, the variable will be automatically added
+            to the current variable context when created, and an unique name
+            will be generated. If false, it is considered that the definition
+            is done in the template, so the name used is the name passed, and
+            the variable won't be added to the context.
+        """
+
         self.type = type
 
         # Add this variable to the current var context
