@@ -2297,7 +2297,7 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.AnalysisUnitType, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,
                 warn_on_unused=False,
-                doc='Returns the analysis unit owning this node'
+                doc='Return the analysis unit owning this node.'
             )),
             ('is_ghost', PropertyDef(
                 expr=None, prefix=None, type=T.BoolType, public=True,
