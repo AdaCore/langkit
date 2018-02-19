@@ -363,7 +363,7 @@ package ${ada_lib_name}.Analysis.Implementation is
                                return Visit_Status)
       return Visit_Status;
    --  Given the parent node for a subtree, traverse all syntactic nodes of
-   --  this tree, calling the given function on each node in pre order (ie.
+   --  this tree, calling the given function on each node in prefix order (i.e.
    --  top-down). The order of traversing subtrees follows the order of
    --  declaration of the corresponding attributes in the grammar. The
    --  traversal is controlled as follows by the result returned by Visit:
