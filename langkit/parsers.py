@@ -1752,11 +1752,18 @@ def unparser_struct_eq(parsers, toplevel=True):
         # For those parser kinds, we only need to check that their lists of
         # children are equivalent.
         if typ in (_Row, _Transform, List, Opt):
-            children_lists = [p.children() for p in parsers]
+
+            # We skip NoBacktrack parsers in structural comparison because they
+            # have no effect on unparsing.
+            children_lists = [[subp for subp in p.children()
+                               if not isinstance(subp, NoBacktrack)]
+                              for p in parsers]
+
             return is_same(len(c) for c in children_lists) and all(
                 unparser_struct_eq(c, False)
                 for c in zip(*children_lists)
             )
+
         # For Tok, we want to check that the parsed token is the same
         elif typ == _Token:
             return is_same(p.val for p in parsers)
