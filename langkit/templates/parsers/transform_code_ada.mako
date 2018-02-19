@@ -53,7 +53,14 @@ if ${parser.pos_var} /= No_Token_Index then
    if ${parser.has_failed_var} then
       ${parser.res_var}.Last_Attempted_Child :=
         ${parser.parser.progress_var if is_row(parser.parser) else 1};
+
+        Append (Parser.Diagnostics,
+                Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
+                To_Text ("Cannot parse <${parser.name}>"));
+
+        Add_Last_Fail_Diagnostic (Parser);
    end if;
+
    % endif
 
 end if;
