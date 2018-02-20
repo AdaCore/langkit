@@ -383,6 +383,10 @@ class AddToEnv(EnvAction):
                     'Entity resolver properties must have no dynamically'
                     ' bound variable'
                 )
+                check_source_language(
+                    not self.resolver.natural_arguments,
+                    'Entity resolver properties must have no argument'
+                )
 
     def create_internal_properties(self, env_spec):
         self.mappings_prop = env_spec.create_internal_property(
