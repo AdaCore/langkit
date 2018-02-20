@@ -63,4 +63,6 @@ def run(name, prop):
 run('Bad return type', Property(Self.node_env.get('foo')))
 run('Has dynamic variable', Property(Self.node_env.get('foo').at(0),
                                      dynamic_vars=[Env]))
+run('Has arguments', Property(lambda i=T.LongType:
+                              Self.node_env.get('foo').at(i)))
 print('Done')
