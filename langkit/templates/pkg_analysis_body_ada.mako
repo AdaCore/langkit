@@ -698,6 +698,10 @@ package body ${ada_lib_name}.Analysis is
       if Unit.AST_Root = null then
          return;
       end if;
+
+      Traces.Trace (Main_Trace, "Populating lexical envs for unit: "
+                                & Basename (Unit));
+
       Unit.Context.In_Populate_Lexical_Env := True;
       declare
          Has_Errors : constant Boolean := Populate_Lexical_Env
