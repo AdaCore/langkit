@@ -2089,6 +2089,16 @@ class CompileCtx(object):
                 wrapper_props.add(prop)
                 prop.abstract = False
 
+                # If at least one property this dispatcher calls uses entity
+                # info, then we must consider that the dispatcher itself uses
+                # it (same for using environments). We must do this by hand
+                # since by the time we run this expansion pass, these
+                # attributes are already initialized by propagation through the
+                # callgraph.
+                prop._uses_entity_info = any(p.uses_entity_info
+                                             for p in prop_set)
+                prop._uses_envs = any(p.uses_envs for p in prop_set)
+
                 with prop.bind(bind_dynamic_vars=True), \
                         Self.bind_type(prop.struct):
                     outer_scope = prop.get_scope()
