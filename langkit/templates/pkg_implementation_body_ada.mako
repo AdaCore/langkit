@@ -2553,10 +2553,18 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Unit.AST_Mem_Pool := Reparsed.AST_Mem_Pool;
       Reparsed.AST_Mem_Pool := No_Pool;
 
+      Update_Lexical_Envs_After_Reparse (Unit);
+   end Update_After_Reparse;
+
+   ---------------------------------------
+   -- Update_Lexical_Envs_After_Reparse --
+   ---------------------------------------
+
+   procedure Update_Lexical_Envs_After_Reparse (Unit : Analysis_Unit) is
+   begin
       if Unit.Is_Env_Populated then
-         Traces.Trace
-           (Main_Trace,
-            "Updating unit after reparse: " & Basename (Unit));
+         Traces.Trace (Main_Trace, "Updating lex env data after reparse for"
+                                   & " unit: " & Basename (Unit));
 
          --  Reset the flag so that Populate_Lexical_Env does its work
          Unit.Is_Env_Populated := False;
@@ -2575,7 +2583,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          --  be re-rooted.
          Reroot_Foreign_Nodes (Unit);
       end if;
-   end Update_After_Reparse;
+   end Update_Lexical_Envs_After_Reparse;
 
    ---------------------------
    -- Remove_Exiled_Entries --
