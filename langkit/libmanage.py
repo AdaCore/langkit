@@ -531,7 +531,7 @@ class ManageScript(object):
             # points to the code that must be fixed. Otherwise, point to the
             # top-most stack frame that does not belong to Langkit.
             if e.args and e.args[0] == 'invalid syntax':
-                loc = Location(e.filename, e.lineno, "")
+                loc = Location(e.filename, e.lineno)
             else:
                 loc = extract_library_location(traceback.extract_tb(tb))
             with Context("", loc, "recovery"):
