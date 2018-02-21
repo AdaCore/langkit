@@ -78,7 +78,7 @@ class Location(object):
     Holder for a location in the source code.
     """
 
-    def __init__(self, file, line, text):
+    def __init__(self, file, line, text=""):
         self.file = file
         self.line = line
         self.text = text
