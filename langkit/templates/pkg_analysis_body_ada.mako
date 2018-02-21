@@ -141,6 +141,7 @@ package body ${ada_lib_name}.Analysis is
          Discard_Errors_In_Populate_Lexical_Env => <>,
          Logic_Resolution_Timeout => <>,
          In_Populate_Lexical_Env => False,
+         Populate_Lexical_Env_Queue => <>,
          Cache_Version => <>,
 
          Rewriting_Handle => <>,
@@ -683,9 +684,20 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
+      Context : constant Analysis_Context := Unit.Context;
+
       Saved_In_Populate_Lexical_Env : constant Boolean :=
          Unit.Context.In_Populate_Lexical_Env;
    begin
+      --  If there are several analysis units for which lexical envs must be
+      --  re-created, go through them now. Check the In_Populate_Lexical_Env
+      --  flag to avoid infinite recursion.
+      if not Context.Populate_Lexical_Env_Queue.Is_Empty
+         and then not Context.In_Populate_Lexical_Env
+      then
+         Flush_Populate_Lexical_Env_Queue (Context);
+      end if;
+
       --  TODO??? Handle env invalidation when reparsing a unit and when a
       --  previous call raised a Property_Error.
       if Unit.Is_Env_Populated then

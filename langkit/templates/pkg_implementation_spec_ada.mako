@@ -15,6 +15,7 @@
 
 with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Ordered_Sets;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
@@ -756,6 +757,11 @@ package ${ada_lib_name}.Analysis.Implementation is
      % endif
    % endfor
 
+   function "<" (Left, Right : Analysis_Unit) return Boolean;
+
+   package Analysis_Unit_Ordered_Sets is new Ada.Containers.Ordered_Sets
+     (Element_Type => Analysis_Unit);
+
    type Exiled_Entry is record
       Env  : Lexical_Env;
       Key  : Symbol_Type;
@@ -907,6 +913,10 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  When it's on, we must not use the memoization map as the hash of
       --  lexical environment changes when their content changes.
 
+      Populate_Lexical_Env_Queue : Analysis_Unit_Ordered_Sets.Set;
+      --  Queue of analysis units for which we must run Populate_Lexical_Env
+      --  before starting executing any property that uses environments.
+
       Logic_Resolution_Timeout : Natural := 100_000;
       --  If zero, inefficient. Otherwise, designates the maximal number of
       --  steps allowed in the resolution of logic equations before
@@ -1057,14 +1067,14 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Parse text for Unit using Init_Parser and store the result in Result.
    --  This leaves Unit unchanged.
 
+   procedure Flush_Populate_Lexical_Env_Queue (Context : Analysis_Context);
+   --  Update lexical environment data related to all units in the populate
+   --  lexical env queue, then clear this queue.
+
    procedure Update_After_Reparse
      (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit);
    --  Update Unit's AST from Reparsed and update stale lexical environment
    --  data after the reparsing of Unit.
-
-   procedure Update_Lexical_Envs_After_Reparse (Unit : Analysis_Unit);
-   --  Update Unit's stale lexical environment data after the reparsing of
-   --  Unit. This also update data for all units that depend on Unit.
 
    procedure Destroy_Unit_Destroyables (Unit : Analysis_Unit);
    --  Destroy all destroyables objects in Unit and clear this list in Unit
@@ -1073,8 +1083,17 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Remove lexical environment entries that reference some of Unit's nodes,
    --  in lexical environments it does not own.
 
-   procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit);
-   --  Re-create entries for nodes that are keyed in one of Unit's lexical envs
+   procedure Extract_Foreign_Nodes
+     (Unit          : Analysis_Unit;
+      Foreign_Nodes : in out ${root_node_type_name}_Vectors.Vector);
+   --  Collect from Unit all the foreign nodes that belong to an analysis unit
+   --  which is not in the populate lexical env queue, appending them to
+   --  Foreign_Nodes. Clear Unit.Foreign_Nodes afterwards.
+
+   procedure Reroot_Foreign_Node (Node : access ${root_node_value_type}'Class);
+   --  Re-create the lexical env entry for Node. This is to be used in
+   --  Flush_Populate_Lexical_Env_Queue, after reparsing removed the target
+   --  lexical environment.
 
    procedure Destroy_Rebindings
      (Rebindings : access Env_Rebindings_Vectors.Vector);
