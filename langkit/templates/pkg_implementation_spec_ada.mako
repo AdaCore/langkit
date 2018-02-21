@@ -767,6 +767,18 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    package Exiled_Entry_Vectors is new Langkit_Support.Vectors (Exiled_Entry);
 
+   type Foreign_Node_Entry is record
+      Node : ${root_node_type_name};
+      --  The foreign node that has been added to an analysis unit's lexical
+      --  environment.
+
+      Unit : Analysis_Unit;
+      --  Analysis unit that owns Node
+   end record;
+
+   package Foreign_Node_Entry_Vectors is new Langkit_Support.Vectors
+     (Foreign_Node_Entry);
+
    procedure Register_Destroyable
      (Unit : Analysis_Unit; Node : ${root_node_type_name});
    --  Helper for synthetized nodes. We cannot used the generic
@@ -968,7 +980,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  that records the target environment, the AST node and the
       --  corresponding symbol.
 
-      Foreign_Nodes : ${root_node_type_name}_Vectors.Vector;
+      Foreign_Nodes : Foreign_Node_Entry_Vectors.Vector;
       --  This unit owns a set of lexical environments. This vector contains
       --  the list of AST nodes that were added to these environments and that
       --  come from other units.

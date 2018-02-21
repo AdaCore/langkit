@@ -270,7 +270,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
                --  Add Val to the list of foreign nodes that Env's unit
                --  contains, so that when that unit is reparsed, we can call
                --  Add_To_Env again on those nodes.
-               Env.Env.Node.Unit.Foreign_Nodes.Append (Mapping.F_Val);
+               Env.Env.Node.Unit.Foreign_Nodes.Append
+                 ((Mapping.F_Val, Self.Unit));
             end if;
          end if;
       end Add_To_Env;
@@ -2130,7 +2131,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Referenced_Units  => <>,
          Exiled_Entries    => Exiled_Entry_Vectors.Empty_Vector,
          Foreign_Nodes     =>
-            ${root_node_type_name}_Vectors.Empty_Vector,
+            Foreign_Node_Entry_Vectors.Empty_Vector,
          Rebindings        => Env_Rebindings_Vectors.Empty_Vector,
          Cache_Version     => <>,
          Unit_Version      => <>
@@ -2601,12 +2602,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
          --  our nodes).
          if El.Env.Env.Node /= null then
             declare
-               Foreign_Nodes : ${root_node_type_name}_Vectors.Vector renames
+               Foreign_Nodes : Foreign_Node_Entry_Vectors.Vector renames
                   El.Env.Env.Node.Unit.Foreign_Nodes;
                Current       : Positive := Foreign_Nodes.First_Index;
             begin
                while Current <= Foreign_Nodes.Last_Index loop
-                  if Foreign_Nodes.Get (Current) = El.Node then
+                  if Foreign_Nodes.Get (Current).Node = El.Node then
                      Foreign_Nodes.Pop (Current);
                   else
                      Current := Current + 1;
@@ -2624,7 +2625,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit) is
-      Els : constant ${root_node_type_name}_Vectors.Elements_Array :=
+      Els : constant Foreign_Node_Entry_Vectors.Elements_Array :=
          Unit.Foreign_Nodes.To_Array;
    begin
       --  Make the Foreign_Nodes vector empty as the partial
@@ -2643,7 +2644,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             Current        : Positive := Exiled_Entries.First_Index;
          begin
             while Current <= Exiled_Entries.Last_Index loop
-               if Exiled_Entries.Get (Current).Node = El then
+               if Exiled_Entries.Get (Current).Node = El.Node then
                   Exiled_Entries.Pop (Current);
                else
                   Current := Current + 1;
@@ -2657,9 +2658,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
          declare
             Root_Scope : Lexical_Env renames Unit.Context.Root_Scope;
             Env        : constant Lexical_Env :=
-               El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
+               El.Node.Pre_Env_Actions (El.Node.Self_Env, Root_Scope, True);
          begin
-            El.Post_Env_Actions (Env, Root_Scope);
+            El.Node.Post_Env_Actions (Env, Root_Scope);
          end;
       end loop;
    end Reroot_Foreign_Nodes;
