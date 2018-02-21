@@ -781,7 +781,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    procedure Register_Destroyable
      (Unit : Analysis_Unit; Node : ${root_node_type_name});
-   --  Helper for synthetized nodes. We cannot used the generic
+   --  Helper for synthetized nodes. We cannot use the generic
    --  Register_Destroyable because the root AST node is an abstract types, so
    --  this is implemented using the untyped (using System.Address)
    --  implementation helper.
