@@ -1,0 +1,36 @@
+--  vim: ft=ada
+
+function P_Referenced_Unit_Or_Error
+  (Node     : access Bare_Name_Type'Class;
+   Or_Error : Boolean)
+   return Analysis_Unit
+is
+   Ctx       : constant Analysis_Context := Node.Unit.Context;
+   Unit_Name : String := Image (Node.Text);
+begin
+   for C of Unit_Name loop
+      if C = '.' then
+         C := '-';
+      end if;
+   end loop;
+
+   declare
+      Filename : constant String := Unit_Name & ".txt";
+      Unit     : constant Analysis_Unit :=
+        (if Or_Error and then not Has_Unit (Ctx, Filename)
+         then No_Analysis_Unit
+         else Get_From_File (Ctx, Filename));
+   begin
+      if Or_Error and then not Has_Unit (Ctx, Filename) then
+         return No_Analysis_Unit;
+      else
+         declare
+            Unit : constant Analysis_Unit := Get_From_File (Ctx, Filename);
+         begin
+            Reference_Unit (From => Node.Unit, Referenced => Unit);
+            Populate_Lexical_Env (Unit);
+            return Unit;
+         end;
+      end if;
+   end;
+end P_Referenced_Unit_Or_Error;
