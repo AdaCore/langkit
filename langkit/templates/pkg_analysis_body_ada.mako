@@ -609,9 +609,7 @@ package body ${ada_lib_name}.Analysis is
 
       Free (Unit.TDH);
       Free (Unit.AST_Mem_Pool);
-      for D of Unit.Destroyables loop
-         D.Destroy (D.Object);
-      end loop;
+      Destroy_Unit_Destroyables (Unit);
       Destroyable_Vectors.Destroy (Unit.Destroyables);
       Free (Unit);
    end Destroy;

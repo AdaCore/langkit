@@ -1066,6 +1066,9 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Update Unit's stale lexical environment data after the reparsing of
    --  Unit. This also update data for all units that depend on Unit.
 
+   procedure Destroy_Unit_Destroyables (Unit : Analysis_Unit);
+   --  Destroy all destroyables objects in Unit and clear this list in Unit
+
    procedure Remove_Exiled_Entries (Unit : Analysis_Unit);
    --  Remove lexical environment entries that reference some of Unit's nodes,
    --  in lexical environments it does not own.

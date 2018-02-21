@@ -2557,6 +2557,18 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Update_Lexical_Envs_After_Reparse (Unit);
    end Update_After_Reparse;
 
+   -------------------------------
+   -- Destroy_Unit_Destroyables --
+   -------------------------------
+
+   procedure Destroy_Unit_Destroyables (Unit : Analysis_Unit) is
+   begin
+      for D of Unit.Destroyables loop
+         D.Destroy (D.Object);
+      end loop;
+      Destroyable_Vectors.Clear (Unit.Destroyables);
+   end Destroy_Unit_Destroyables;
+
    ---------------------------------------
    -- Update_Lexical_Envs_After_Reparse --
    ---------------------------------------
