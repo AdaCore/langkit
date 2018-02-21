@@ -728,7 +728,6 @@ class CompileCtx(object):
         return sorted(
             name
             for name, parser in self.grammar.rules.items()
-            if parser.get_type().is_ast_node
         )
 
     def create_enum_node_classes(self):
