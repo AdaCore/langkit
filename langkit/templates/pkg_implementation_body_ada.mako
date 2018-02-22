@@ -879,11 +879,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Bound_Env : Lexical_Env) return Boolean;
       --  Do the lexical env population on Node and recurse on its children
 
-      procedure Default_Initialize
-        (Node : access ${root_node_value_type}'Class);
-      --  If Node.Self_Env is left null, initialize it to Empty_Env. Recurse on
-      --  children.
-
       -----------------------
       -- Populate_Internal --
       -----------------------
@@ -914,32 +909,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
             Node.Post_Env_Actions (Initial_Env, Root_Env);
          exception
             when Property_Error =>
-               Default_Initialize (Node);
                return True;
          end;
 
          return Result;
       end Populate_Internal;
-
-      ------------------------
-      -- Default_Initialize --
-      ------------------------
-
-      procedure Default_Initialize
-        (Node : access ${root_node_value_type}'Class) is
-      begin
-         if Node = null then
-            return;
-         end if;
-
-         if Node.Self_Env.Env = null then
-            Node.Self_Env := Empty_Env;
-         end if;
-
-         for C of ${root_node_array.api_name}'(Children (Node)) loop
-            Default_Initialize (C);
-         end loop;
-      end Default_Initialize;
 
       Env : AST_Envs.Lexical_Env := Root_Env;
    begin
