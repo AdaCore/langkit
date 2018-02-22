@@ -48,6 +48,7 @@ ${parser.res_var} := ${list_type.name}_Alloc.Alloc (Parser.Mem_Pool);
 ${parser.res_var}.Kind := ${list_type.ada_kind_name};
 ${parser.res_var}.Unit := Parser.Unit;
 ${parser.res_var}.Count := ${parser.tmplist}.Nodes.Length;
+${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
 
 declare
    Vec : ${T.root_node.array.pkg_vector}.Vector renames

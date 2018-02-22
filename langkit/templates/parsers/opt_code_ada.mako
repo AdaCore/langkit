@@ -23,6 +23,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
          ${parser.res_var}.Unit := Parser.Unit;
          ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
          ${parser.res_var}.Token_End_Index := No_Token_Index;
+         ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
       % endif
     % elif parser_type and parser_type.is_list_type:
         ${parser.parser.res_var} :=
@@ -34,6 +35,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
            Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, 0);
         ${parser.parser.res_var}.Token_Start_Index := ${parser.start_pos} - 1;
         ${parser.parser.res_var}.Token_End_Index := No_Token_Index;
+         ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
     % elif parser_type:
         ${parser.parser.res_var} :=
            ${parser_type.storage_nullexpr};
@@ -60,6 +62,7 @@ else
       ${parser.res_var}.Unit := Parser.Unit;
       ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
       ${parser.res_var}.Token_End_Index := No_Token_Index;
+      ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
    % endif
 % endif
 

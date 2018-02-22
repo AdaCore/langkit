@@ -11,6 +11,7 @@
    ${parser.res_var}.Token_Start_Index
      := Token_Index'Max (1, ${parser.start_pos} - 1);
    ${parser.res_var}.Token_End_Index := No_Token_Index;
+   ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
 
 % else:
    ${parser.res_var} := ${parser.get_type().storage_nullexpr};

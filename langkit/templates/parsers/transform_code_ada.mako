@@ -30,6 +30,7 @@ if ${parser.pos_var} /= No_Token_Index then
 
    ${parser.res_var}.Unit := Parser.Unit;
    ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
+   ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
 
    ${parser.res_var}.Token_End_Index :=
      (if ${parser.pos_var} = ${parser.start_pos}
