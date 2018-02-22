@@ -219,20 +219,26 @@ class Grammar(object):
                 ):
                     self.the_call = call
 
-        the_call = GetTheCall()
-        with open(loc.file) as f:
-            file_ast = ast.parse(f.read(), f.name)
-            the_call.visit(file_ast)
+        # Rules added internally (DontSkip rules for example) might not have a
+        # location. So test loc first.
+        if loc:
+            the_call = GetTheCall()
+            with open(loc.file) as f:
+                file_ast = ast.parse(f.read(), f.name)
+                the_call.visit(file_ast)
 
-        # We're gonna use the keyword arguments to find back the precise line
-        # where the rule was declared.
-        keywords = {kw.arg: kw.value for kw in the_call.the_call.keywords}
+            # We're gonna use the keyword arguments to find back the precise
+            # line where the rule was declared.
+            keywords = {kw.arg: kw.value for kw in the_call.the_call.keywords}
 
         for name, rule in kwargs.items():
             rule = resolve(rule)
             rule.set_name(names.Name.from_lower(name))
             rule.set_grammar(self)
-            rule.set_location(Location(loc.file, keywords[name].lineno, ""))
+
+            if loc:
+                rule.set_location(Location(loc.file, keywords[name].lineno))
+
             rule.is_root = True
 
             with Context(
