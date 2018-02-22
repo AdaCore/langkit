@@ -878,6 +878,15 @@ def Pick(*parsers):
 
     If there are multiple significant sub-results, raises an error.
     """
+    return _pick_impl(parsers)
+
+
+def _pick_impl(parsers, no_checks=False):
+    """
+    Implementation helper for Pick. Behaves the same as the public Pick
+    implementation, except that if there are several parsers generating a node,
+    it will just pick the first one.
+    """
     location = extract_library_location()
     parsers = [resolve(p) for p in parsers if p]
     pick_parser_idx = -1
@@ -886,7 +895,7 @@ def Pick(*parsers):
             continue
         with Context("", location):
             check_source_language(
-                pick_parser_idx == -1,
+                no_checks or pick_parser_idx == -1,
                 "Pick parser can have only one sub-parser that is not a token",
                 Severity.non_blocking_error
             )
