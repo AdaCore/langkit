@@ -721,8 +721,6 @@ class CompileCtx(object):
         """
         Return a sorted list of names for user-available grammar rules.
 
-        This list contains all rules that return AST nodes.
-
         :rtype: list[str]
         """
         return sorted(
