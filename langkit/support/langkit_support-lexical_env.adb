@@ -630,7 +630,7 @@ package body Langkit_Support.Lexical_Env is
       use Lookup_Cache_Maps;
 
    begin
-      if Self in Null_Lexical_Env | Empty_Env then
+      if Self in Empty_Env then
          return Empty_Lookup_Result_Array;
       end if;
 
