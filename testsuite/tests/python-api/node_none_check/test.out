@@ -1,0 +1,4 @@
+bool(<ExampleList 1:1-1:16>) = True
+bool(<Example 1:1-1:8>) = True
+main.py: Done.
+Done
