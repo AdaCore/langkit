@@ -856,6 +856,9 @@ class Or(Parser):
     def generate_code(self):
         return self.render('or_code_ada', exit_label=gen_name("Exit_Or"))
 
+    def discard(self):
+        return all(p.discard() for p in self.parsers)
+
 
 def always_make_progress(parser):
     """
