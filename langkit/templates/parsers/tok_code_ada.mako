@@ -14,8 +14,6 @@ begin
       % if parser.matches_symbol:
       or else T.Symbol /= Parser.Symbol_Literals
         (${ctx.symbol_literals[parser.match_text]})
-      % elif parser.match_text:
-      or else Text (Parser.TDH.all, T) /= "${parser.match_text}"
       % endif
    then
        ## If the result is not the one we expect, set pos to error
