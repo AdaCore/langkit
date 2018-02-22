@@ -991,8 +991,8 @@ def always_make_progress(parser):
 
 def Pick(*parsers):
     """
-    Parser that scans a sequence of sub-parsers, remove tokens and ignored sub
-    parsers, and extract the only significant sub-result.
+    Parser that scans a sequence of sub-parsers, remove tokens and ignored
+    sub-parsers, and extract the only significant sub-result.
 
     If there are multiple significant sub-results, raises an error.
     """
@@ -1001,9 +1001,11 @@ def Pick(*parsers):
 
 def _pick_impl(parsers, no_checks=False):
     """
-    Implementation helper for Pick. Behaves the same as the public Pick
-    implementation, except that if there are several parsers generating a node,
-    it will just pick the first one.
+    Return a parser to scan a sequence of sub-parsers, removing tokens and
+    ignored sub-parsers and extracting the only significant sub-result.
+
+    :param bool no_checks: If left to false, check that only one parser in
+        `parsers` generates an node. Otherwise, don't do this check.
     """
     location = extract_library_location()
     parsers = [resolve(p) for p in parsers if p]
