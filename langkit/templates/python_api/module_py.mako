@@ -790,6 +790,16 @@ class ${root_astnode_name}(object):
                         ctypes.byref(result))
         return ${root_astnode_name}._wrap(result)
 
+    def __nonzero__(self):
+        """
+        Return always True so that checking a node against None can be done as
+        simply as::
+
+            if node:
+                ...
+        """
+        return True
+
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
         node = self._unwrap(self)
