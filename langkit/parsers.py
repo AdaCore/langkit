@@ -144,6 +144,7 @@ def render(*args, **kwargs):
     return compiled_types.make_renderer().update({
         'is_tok':       type_check_instance(_Token),
         'is_row':       type_check_instance(_Row),
+        'is_dontskip':  type_check_instance(DontSkip),
         'is_defer':     type_check_instance(Defer),
         'is_transform': type_check_instance(_Transform),
         'is_list':      type_check_instance(List),
@@ -386,6 +387,12 @@ class Parser(object):
         or not.
         """
 
+        self.is_dont_skip_parser = False
+        """
+        Whether this parser is a parser generated as part of a DontSkip parser,
+        to scan the input to see if input should be skipped or not.
+        """
+
     def traverse_create_vars(self, start_pos):
         """
         This method will traverse the parser tree and create variables for
@@ -400,6 +407,31 @@ class Parser(object):
         for c in self.children():
             c.traverse_create_vars(children_start_pos)
         self.create_vars_after(children_start_pos)
+
+    def traverse_dontskip(self, grammar):
+        """
+        Traverse the parser, looking for DontSkip parsers. When finding one,
+        create a dedicated separate rule for the parsers that should not be
+        skipped, so that we can store references to those parsers as function
+        pointers.
+        """
+        if isinstance(self, DontSkip):
+            # The purpose of the parsers passed as argument to dont_skip is not
+            # to actually generate a node, but to see if we can parse the
+            # sequence or not. So we'll generate a fake stub node, and pick it.
+            self.dontskip_parser = _pick_impl(
+                [Null(get_context().root_grammar_class)]
+                + list(self.dontskip_parsers),
+                True
+            )
+            self.dontskip_parser.is_dont_skip_parser = True
+            grammar.add_rules(**{
+                gen_name('dontskip_{}'.format(self.name)).lower:
+                self.dontskip_parser
+            })
+
+        for c in self.children():
+            c.traverse_dontskip(grammar)
 
     def traverse_nobacktrack(self):
         """
@@ -687,6 +719,18 @@ class Parser(object):
         for sym in self.symbol_literals:
             context.add_symbol_literal(sym)
 
+    def dont_skip(self, *parsers):
+        """
+        Syntax sugar allowing to write::
+
+            rule.dont_skip(Or("end", "begin"))
+
+        Rather than::
+
+            DontSkip(rule, Or("end", "begin"))
+        """
+        return DontSkip(self, *parsers)
+
 
 class _Token(Parser):
     """
@@ -772,6 +816,80 @@ class _Token(Parser):
     @property
     def symbol_literals(self):
         return {self.match_text} if self.matches_symbol else set()
+
+
+class Skip(Parser):
+    """
+    This recovery parser will skip any token and produce a node from it,
+    generating an error along the way.
+
+    Note that if you use that in any kind of List, this will wreck your parser
+    if you don't use the associated DontSkip parser in a parent parser.
+    """
+
+    def __init__(self, dest_node):
+        """
+        :param CompiledType dest_node: The node type to create.
+        """
+        Parser.__init__(self)
+        self.dest_node = dest_node
+        self.dest_node_parser = dest_node()
+
+    def children(self):
+        return [self.dest_node_parser]
+
+    def generate_code(self):
+        return self.render('skip_code_ada', exit_label=gen_name("Exit_Or"))
+
+    def get_type(self):
+        return resolve_type(self.dest_node)
+
+    def create_vars_after(self, start_pos):
+        self.init_vars(res_var=self.dest_node_parser.res_var)
+        self.dummy_node = VarDef('skip_dummy', T.root_node)
+
+    def _is_left_recursive(self, rule_name):
+        return False
+
+
+class DontSkip(Parser):
+    """
+    This is used in the following way::
+
+        parser.dont_skip(other_parser)
+
+    This means that in the scope of ``parser``, if a skip parser occurs, it
+    will first run ``other_parser``, and if ``other_parser`` is successful,
+    then skip will fail (eg. not skip anything).
+    """
+
+    def __init__(self, subparser, *dontskip_parsers):
+        Parser.__init__(self)
+        self.subparser = subparser
+        self.dontskip_parsers = dontskip_parsers
+
+    def children(self):
+        return [self.subparser]
+
+    def generate_code(self):
+        return """
+        Parser.Private_Part.Dont_Skip.Append
+          ({dontskip_parser_fn}'Access);
+        {subparser_code}
+        Parser.Private_Part.Dont_Skip.Delete_Last;
+        """.format(
+            subparser_code=self.subparser.generate_code(),
+            dontskip_parser_fn=self.dontskip_parser.gen_fn_name
+        )
+
+    def get_type(self):
+        return self.subparser.get_type()
+
+    def create_vars_after(self, start_pos):
+        self.init_vars(self.subparser.pos_var, self.subparser.res_var)
+
+    def _is_left_recursive(self, rule_name):
+        return self.subparser._is_left_recursive(rule_name)
 
 
 class Or(Parser):
@@ -1666,15 +1784,22 @@ class NodeToParsersPass(object):
         Map every AST node type to the set of parsers that return this type.
         """
 
-        def compute_internal(parser):
-            if creates_node(parser, follow_refs=False):
-                if isinstance(parser, Opt) and parser._booleanize:
-                    for alt in parser.get_type()._alternatives:
-                        self.nodes_to_rules[alt].append(parser)
+        # Skip parsers generated for DontSkip. They don't generate any nodes,
+        # so are not interesting in that context.
+        if parser.is_dont_skip_parser:
+            return
 
-                self.nodes_to_rules[parser.get_type()].append(parser)
+        def compute_internal(p):
+            # We never register Skip parsers because we will register the
+            # nested Transform.
+            if creates_node(p, follow_refs=False) and not isinstance(p, Skip):
+                if isinstance(p, Opt) and p._booleanize:
+                    for alt in p.get_type()._alternatives:
+                        self.nodes_to_rules[alt].append(p)
 
-            for c in parser.children():
+                self.nodes_to_rules[p.get_type()].append(p)
+
+            for c in p.children():
                 compute_internal(c)
 
         if not creates_node(parser):
@@ -1727,6 +1852,7 @@ def creates_node(p, follow_refs=True):
 
     return (
         isinstance(p, _Transform)
+        or isinstance(p, Skip)
         or isinstance(p, List)
         or (isinstance(p, Opt) and issubtype(p._booleanize, EnumNode))
     )
@@ -1744,8 +1870,10 @@ def unparser_struct_eq(parsers, toplevel=True):
     :param bool toplevel: Recursion helper.
     :rtype: bool
     """
-    # Make sure we can iterate multiple times on the input list of parsers
-    parsers = list(parsers)
+    def unwrap(p):
+        return p.subparser if isinstance(p, DontSkip) else p
+
+    parsers = [unwrap(p) for p in parsers if not isinstance(p, Null)]
 
     Log.log('unparser_eq_impl', 'parsers: {}'.format(parsers))
 
@@ -1754,14 +1882,6 @@ def unparser_struct_eq(parsers, toplevel=True):
         return True
 
     parsers_types = set(type(p) for p in parsers)
-
-    # First, if there are Null parsers in the lot, we can safely ignore them,
-    # and run the algorithm on the remaining parsers.
-    if Null in parsers_types:
-        # As we just filter parsers in the recursive calls, we must not pass
-        # toplevel=False.
-        return unparser_struct_eq(p for p in parsers
-                                  if not isinstance(p, Null))
 
     # If all parsers are of the same kind, let's see if they're structurally
     # equivalent.

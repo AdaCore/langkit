@@ -728,6 +728,7 @@ class CompileCtx(object):
         return sorted(
             name
             for name, parser in self.grammar.rules.items()
+            if not parser.is_dont_skip_parser
         )
 
     def create_enum_node_classes(self):
@@ -1336,6 +1337,9 @@ class CompileCtx(object):
                        CompileCtx.create_enum_node_classes),
             GrammarRulePass('compute fields types',
                             lambda p: p.compute_fields_types()),
+
+            GrammarRulePass('Compute dont skip rules',
+                            lambda p: p.traverse_dontskip(self.grammar)),
 
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.

@@ -116,6 +116,9 @@
          ${emit_unparser_code(subp, ast_el=ast_el)}
       % endfor
 
+   % elif is_dontskip(parser):
+      ${emit_unparser_code(parser.subparser, ast_el=ast_el)}
+
    %else:
       <% raise NotImplementedError('Parser not handled: {}'.format(parser)) %>
    % endif

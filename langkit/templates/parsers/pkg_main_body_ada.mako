@@ -1,5 +1,6 @@
 ## vim: filetype=makoada
 
+with Ada.Containers.Vectors;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -40,6 +41,14 @@ package body ${ada_lib_name}.Analysis.Parsers is
    pragma Warnings (On, "is not referenced");
    pragma Warnings (On, "possible aliasing problem for type");
 
+   type Dontskip_Parser_Function
+   is access function (Parser : in out Parser_Type;
+                       Pos    : Token_Index)
+     return ${ctx.root_grammar_class.storage_type_name};
+
+   package Dont_Skip_Fn_Vectors
+   is new Ada.Containers.Vectors (Natural, Dontskip_Parser_Function);
+
    type Free_Parse_List_Record;
    type Free_Parse_List is access all Free_Parse_List_Record;
    --  Cache of temporary lists of AST nodes used in List parsers
@@ -56,6 +65,8 @@ package body ${ada_lib_name}.Analysis.Parsers is
       <% ret_type = parser.get_type().storage_type_name %>
       ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
       % endfor
+
+      Dont_Skip : Dont_Skip_Fn_Vectors.Vector;
    end record;
 
    % for parser in ctx.generated_parsers:
