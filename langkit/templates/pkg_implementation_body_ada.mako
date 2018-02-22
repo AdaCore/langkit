@@ -153,7 +153,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function "<" (Left, Right : Analysis_Unit) return Boolean is
       use GNATCOLL.VFS;
    begin
-      return Left.File_Name.Full_Name < Right.File_Name.Full_Name;
+      return Left.File_Name < Right.File_Name;
    end "<";
 
    % if ctx.has_memoization:
