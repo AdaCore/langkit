@@ -89,6 +89,10 @@ begin
    Reparse (Unit_C);
    Resolve;
 
+   Put_Line ("Performing resolution after removing b.txt...");
+   Remove (Ctx, "b.txt");
+   Resolve;
+
    Destroy (Ctx);
    Put_Line ("main.adb: Done.");
 end Main;
