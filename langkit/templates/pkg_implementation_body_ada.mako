@@ -2100,7 +2100,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Charset             : String;
       Rule                : Grammar_Rule) return Analysis_Unit
    is
-      Unit : constant Analysis_Unit := new Analysis_Unit_Type'
+      Unit : Analysis_Unit := new Analysis_Unit_Type'
         (Context           => Context,
          Ref_Count         => 1,
          AST_Root          => null,
@@ -2596,9 +2596,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Destroy_Unit_Destroyables (Unit);
       end loop;
 
-      --  Recreate the lexical env structure for queued units
+      --  Recreate the lexical env structure for queued units, unless they were
+      --- removed.
       for Unit of Context.Populate_Lexical_Env_Queue loop
-         Populate_Lexical_Env (Unit);
+         if Context.Units.Contains (Unit.File_Name) then
+            Populate_Lexical_Env (Unit);
+         end if;
       end loop;
 
       --  Reroot all foreign nodes

@@ -880,8 +880,17 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    type Analysis_Context_Type is record
       Ref_Count : Natural;
-      Units     : Units_Maps.Map;
-      Symbols   : Symbol_Table;
+
+      Units : Units_Maps.Map;
+      --  Collection of analysis units loaded in this context
+
+      Removed_Units : Units_Maps.Map;
+      --  Collection of analysis unit that were loaded and then removed in this
+      --  context. We need to keep allocated Analysis_Unit_Type records around
+      --  to keep the PLE updating mechanism memory-safe.
+
+      Symbols : Symbol_Table;
+      --  Symbol table used in this whole context
 
       Charset : Unbounded_String;
       --  Default charset to use in analysis units

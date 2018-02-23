@@ -120,15 +120,16 @@ package body ${ada_lib_name}.Analysis is
       Context        : Analysis_Context;
    begin
       Context := new Analysis_Context_Type'
-        (Ref_Count   => 1,
-         Units       => <>,
-         Symbols     => Symbols,
-         Charset     => To_Unbounded_String (Actual_Charset),
-         With_Trivia => With_Trivia,
-         Root_Scope  => AST_Envs.Create
-                          (Parent => AST_Envs.No_Env_Getter,
-                           Node   => null,
-                           Owner  => No_Analysis_Unit),
+        (Ref_Count     => 1,
+         Units         => <>,
+         Removed_Units => <>,
+         Symbols       => Symbols,
+         Charset       => To_Unbounded_String (Actual_Charset),
+         With_Trivia   => With_Trivia,
+         Root_Scope    => AST_Envs.Create
+                            (Parent => AST_Envs.No_Env_Getter,
+                             Node   => null,
+                             Owner  => No_Analysis_Unit),
 
          % if ctx.default_unit_provider:
          Unit_Provider => P,
@@ -262,9 +263,19 @@ package body ${ada_lib_name}.Analysis is
       Charset             : String;
       Rule                : Grammar_Rule) return Analysis_Unit
    is
-      Unit : constant Analysis_Unit := Create_Special_Unit
-        (Context, Normalized_Filename, Charset, Rule);
+      use Units_Maps;
+
+      Cur  : Cursor := Context.Removed_Units.Find
+        (Normalized_Filename);
+      Unit : Analysis_Unit;
    begin
+      if Cur = No_Element then
+         Unit := Create_Special_Unit
+           (Context, Normalized_Filename, Charset, Rule);
+      else
+         Unit := Element (Cur);
+         Context.Removed_Units.Delete (Cur);
+      end if;
       Context.Units.Insert (Normalized_Filename, Unit);
       return Unit;
    end Create_Unit;
@@ -473,9 +484,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Remove (Context : Analysis_Context; File_Name : String) is
       use Units_Maps;
 
-      Cur  : Cursor := Context.Units.Find
+      Cur      : Cursor := Context.Units.Find
         (Normalized_Unit_Filename (File_Name));
-      Unit : Analysis_Unit;
+      Unit     : Analysis_Unit;
+      Reparsed : Reparsed_Unit;
    begin
       if Cur = No_Element then
          raise Constraint_Error with "No such analysis unit";
@@ -484,22 +496,15 @@ package body ${ada_lib_name}.Analysis is
       Unit := Element (Cur);
       Traces.Trace (Main_Trace, "Removing unit: " & Basename (Unit));
 
-      --  We remove the corresponding analysis unit from this context but
-      --  users could keep references on it, so make sure it can live
-      --  independently.
+      --  Do as if we just reparsed Unit with minimal data, to get rid of all
+      --  its parsing data. This will schedule a lexical enviroment cleanup.
+      Initialize (Reparsed.TDH, Context.Symbols);
+      Update_After_Reparse (Unit, Reparsed);
 
-      --  As unloading a unit can change how any AST node property in the
-      --  whole analysis context behaves, we have to invalidate caches. This
-      --  is likely overkill, but kill all caches here as it's easy to do.
-      Reset_Caches (Unit.Context);
-
-      --  Remove all lexical environment artifacts from this analysis unit
-      Remove_Exiled_Entries (Unit);
-
-      Unit.Context := null;
-      Dec_Ref (Unit);
-
+      --  Move the unit to the set of removed units so the unit handle still
+      --  points to valid memory. We will re-use it if we reparse this unit.
       Context.Units.Delete (Cur);
+      Context.Removed_Units.Insert (Unit.File_Name, Unit);
    end Remove;
 
    -------------
@@ -509,6 +514,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Destroy (Context : in out Analysis_Context) is
    begin
       for Unit of Context.Units loop
+         Unit.Context := null;
+         Dec_Ref (Unit);
+      end loop;
+      for Unit of Context.Removed_Units loop
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
