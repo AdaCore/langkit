@@ -475,31 +475,31 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Cur : Cursor := Context.Units_Map.Find
+      Cur  : Cursor := Context.Units_Map.Find
         (Normalized_Unit_Filename (File_Name));
+      Unit : Analysis_Unit;
    begin
       if Cur = No_Element then
          raise Constraint_Error with "No such analysis unit";
       end if;
 
+      Unit := Element (Cur);
+      Traces.Trace (Main_Trace, "Removing unit: " & Basename (Unit));
+
       --  We remove the corresponding analysis unit from this context but
       --  users could keep references on it, so make sure it can live
       --  independently.
 
-      declare
-         Unit : Analysis_Unit := Element (Cur);
-      begin
-         --  As unloading a unit can change how any AST node property in the
-         --  whole analysis context behaves, we have to invalidate caches. This
-         --  is likely overkill, but kill all caches here as it's easy to do.
-         Reset_Caches (Unit.Context);
+      --  As unloading a unit can change how any AST node property in the
+      --  whole analysis context behaves, we have to invalidate caches. This
+      --  is likely overkill, but kill all caches here as it's easy to do.
+      Reset_Caches (Unit.Context);
 
-         --  Remove all lexical environment artifacts from this analysis unit
-         Remove_Exiled_Entries (Unit);
+      --  Remove all lexical environment artifacts from this analysis unit
+      Remove_Exiled_Entries (Unit);
 
-         Unit.Context := null;
-         Dec_Ref (Unit);
-      end;
+      Unit.Context := null;
+      Dec_Ref (Unit);
 
       Context.Units_Map.Delete (Cur);
    end Remove;
