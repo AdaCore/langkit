@@ -870,9 +870,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    function Populate_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env) return Boolean
+     (Node : access ${root_node_value_type}'Class) return Boolean
    is
+
+      Context  : constant Analysis_Context := Node.Unit.Context;
+      Root_Env : constant Lexical_Env := Context.Root_Scope;
 
       function Populate_Internal
         (Node      : access ${root_node_value_type}'Class;
@@ -915,16 +917,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
          return Result;
       end Populate_Internal;
 
-      Env : AST_Envs.Lexical_Env := Root_Env;
    begin
 
       --  If we reach this point, one caller is supposed to have set the
       --  following flag.
-      if not Node.Unit.Context.In_Populate_Lexical_Env then
+      if not Context.In_Populate_Lexical_Env then
          raise Program_Error;
       end if;
 
-      return Populate_Internal (Node, Env);
+      return Populate_Internal (Node, Root_Env);
    end Populate_Lexical_Env;
 
    ----------------------------

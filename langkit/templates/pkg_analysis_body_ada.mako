@@ -723,9 +723,7 @@ package body ${ada_lib_name}.Analysis is
                                 & Basename (Unit));
 
       Context.In_Populate_Lexical_Env := True;
-      Has_Errors :=
-        (Populate_Lexical_Env (Unit.AST_Root, Context.Root_Scope)
-         or else Has_Errors);
+      Has_Errors := Populate_Lexical_Env (Unit.AST_Root) or else Has_Errors;
       Context.In_Populate_Lexical_Env :=
          Saved_In_Populate_Lexical_Env;
 
