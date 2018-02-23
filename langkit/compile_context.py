@@ -660,6 +660,13 @@ class CompileCtx(object):
         :type: list[langkit.compiled_types.Field]
         """
 
+        self.subunit_root = None
+        """
+        Node to be used as the sub-analysis unit root, if any.
+
+        :type: ASTNodeType|None
+        """
+
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False):
         """
         Add a WITH clause for `to_pkg` in the `source_kind` part of the
@@ -803,6 +810,70 @@ class CompileCtx(object):
         # We need a hash function for the metadata structure as the
         # Langkit_Support.Lexical_Env generic package requires it.
         T.env_md.require_hash_function()
+
+    def check_subunit_root(self):
+        """
+        Check that if the "subunit_root" node annotation is used, it is valid.
+        """
+        # Locate the subunit root (if any), checking that we at most one such
+        # node annotation.
+        for n in self.astnode_types:
+            if not n.annotations.subunit_root:
+                continue
+
+            with n.diagnostic_context:
+                if self.subunit_root:
+                    check_source_language(
+                        False, 'Only one sub-unit root is allowed: {}'
+                               .format(self.subunit_root.dsl_name)
+                    )
+                check_source_language(
+                    not n.subclasses,
+                    'No node can derive from subunit roots: here we have'
+                    ' {}'.format(', '.join(c.dsl_name for c in n.subclasses))
+                )
+                check_source_language(
+                    not n.synthetic,
+                    'Synthetic nodes cannot be sub-unit roots'
+                )
+                self.subunit_root = n
+
+        if self.subunit_root is None:
+            return
+
+        # Now check that the only way to get a subunit root is as a child of a
+        # list node that is itself the root of a tree.
+        main_rule = self.grammar.get_rule(self.grammar.main_rule_name)
+        main_rule_type = main_rule.get_type()
+        with main_rule.diagnostic_context:
+            check_source_language(
+                main_rule_type.is_list_type
+                and main_rule_type.element_type == self.subunit_root,
+                'The main parsing rule must return lists of sub-unit roots'
+                ' ({}.list) but here it returns {} nodes'
+                .format(self.subunit_root.dsl_name, main_rule_type.dsl_name)
+            )
+        with main_rule_type.diagnostic_context:
+            check_source_language(
+                main_rule_type.is_root_list_type
+                and not main_rule_type.subclasses,
+                'Lists of sub-unit roots cannot be subclassed'
+            )
+
+        for n in self.astnode_types:
+            for f in n.get_parse_fields():
+                with f.diagnostic_context:
+                    check_source_language(
+                        main_rule_type not in f._types_from_parser,
+                        '{} cannot appear anywhere in trees except as a root'
+                        ' node'.format(main_rule_type.dsl_name)
+                    )
+                    check_source_language(
+                        self.subunit_root not in f._types_from_parser,
+                        '{} cannot appear anywhere in trees except as a child'
+                        ' of {} nodes'.format(self.subunit_root.dsl_name,
+                                              main_rule_type.dsl_name)
+                    )
 
     def check_concrete_subclasses(self, astnode):
         """
@@ -1342,6 +1413,7 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
+            GlobalPass('check subunit root', CompileCtx.check_subunit_root),
             ASTNodePass('validate AST node fields',
                         lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),
