@@ -1,0 +1,33 @@
+= multiple =
+File "test.py", line 17, in Example2
+    Error: Only one sub-unit root is allowed: Example1
+
+= derived =
+File "test.py", line 31, in Example
+    Error: No node can derive from subunit roots: here we have DerivedExample
+
+= synthetic =
+File "test.py", line 52, in SyntheticNode
+    Error: Synthetic nodes cannot be sub-unit roots
+
+= bad_main_rule_1 =
+File "test.py", line 69, In definition of grammar rule main_rule
+    Error: The main parsing rule must return lists of sub-unit roots (Example.list) but here it returns Example nodes
+
+= bad_main_rule_2 =
+File "test.py", line 85, In definition of grammar rule main_rule
+    Error: The main parsing rule must return lists of sub-unit roots (Example.list) but here it returns ExampleWrapper.list nodes
+
+= non_root_list =
+File "test.py", line 96, in Subunit.fields
+    Error: Subunit.list cannot appear anywhere in trees except as a root node
+
+= multiple_lists =
+File "test.py", line 111, in ListOfExample
+    Error: Lists of sub-unit roots cannot be subclassed
+
+= subunit_root_field =
+File "test.py", line 127, in Example.child
+    Error: Example cannot appear anywhere in trees except as a child of Example.list nodes
+
+Done
