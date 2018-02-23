@@ -97,11 +97,13 @@ begin
    % if property.uses_envs:
       if Node /= null then
          Reset_Caches (Node.Unit);
-      end if;
-   % endif
 
-   % if property.is_public and property.uses_envs:
-      Populate_Lexical_Env (Node.Unit);
+         ## And if it is also public, we need to ensure that lexical
+         ## environments are populated before executing the property itself.
+         % if property.is_public:
+            Populate_Lexical_Env (Node.Unit);
+         % endif
+      end if;
    % endif
 
    % if property.memoized:
