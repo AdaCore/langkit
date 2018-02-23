@@ -880,7 +880,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    type Analysis_Context_Type is record
       Ref_Count : Natural;
-      Units_Map : Units_Maps.Map;
+      Units     : Units_Maps.Map;
       Symbols   : Symbol_Table;
 
       Charset : Unbounded_String;

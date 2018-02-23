@@ -2227,7 +2227,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  all version numbers from analysis units.
       if Context.Cache_Version = Natural'Last then
          Context.Cache_Version := 1;
-         for Unit of Context.Units_Map loop
+         for Unit of Context.Units loop
             Unit.Cache_Version := 0;
          end loop;
       else

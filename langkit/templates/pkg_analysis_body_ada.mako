@@ -121,7 +121,7 @@ package body ${ada_lib_name}.Analysis is
    begin
       Context := new Analysis_Context_Type'
         (Ref_Count   => 1,
-         Units_Map   => <>,
+         Units       => <>,
          Symbols     => Symbols,
          Charset     => To_Unbounded_String (Actual_Charset),
          With_Trivia => With_Trivia,
@@ -265,7 +265,7 @@ package body ${ada_lib_name}.Analysis is
       Unit : constant Analysis_Unit := Create_Special_Unit
         (Context, Normalized_Filename, Charset, Rule);
    begin
-      Context.Units_Map.Insert (Normalized_Filename, Unit);
+      Context.Units.Insert (Normalized_Filename, Unit);
       return Unit;
    end Create_Unit;
 
@@ -289,7 +289,7 @@ package body ${ada_lib_name}.Analysis is
          Normalized_Unit_Filename (Filename);
 
       Cur     : constant Cursor :=
-         Context.Units_Map.Find (Normalized_Filename);
+         Context.Units.Find (Normalized_Filename);
       Created : constant Boolean := Cur = No_Element;
       Unit    : Analysis_Unit;
 
@@ -345,7 +345,7 @@ package body ${ada_lib_name}.Analysis is
      (Context       : Analysis_Context;
       Unit_Filename : String) return Boolean is
    begin
-      return Context.Units_Map.Contains
+      return Context.Units.Contains
         (Normalized_Unit_Filename (Unit_Filename));
    end Has_Unit;
 
@@ -450,7 +450,7 @@ package body ${ada_lib_name}.Analysis is
       Normalized_Filename : constant GNATCOLL.VFS.Virtual_File :=
          Normalized_Unit_Filename (Filename);
       Cur                 : constant Cursor :=
-         Context.Units_Map.Find (Normalized_Filename);
+         Context.Units.Find (Normalized_Filename);
    begin
       if Cur = No_Element then
          declare
@@ -475,7 +475,7 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Cur  : Cursor := Context.Units_Map.Find
+      Cur  : Cursor := Context.Units.Find
         (Normalized_Unit_Filename (File_Name));
       Unit : Analysis_Unit;
    begin
@@ -501,7 +501,7 @@ package body ${ada_lib_name}.Analysis is
       Unit.Context := null;
       Dec_Ref (Unit);
 
-      Context.Units_Map.Delete (Cur);
+      Context.Units.Delete (Cur);
    end Remove;
 
    -------------
@@ -510,7 +510,7 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Destroy (Context : in out Analysis_Context) is
    begin
-      for Unit of Context.Units_Map loop
+      for Unit of Context.Units loop
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
