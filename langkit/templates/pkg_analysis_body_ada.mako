@@ -693,6 +693,9 @@ package body ${ada_lib_name}.Analysis is
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
       Context : constant Analysis_Context := Unit.Context;
 
+      Has_Errors : Boolean := False;
+      --  Whether at least one Property_Error occurred during this PLE pass
+
       Saved_In_Populate_Lexical_Env : constant Boolean :=
          Unit.Context.In_Populate_Lexical_Env;
    begin
@@ -719,20 +722,18 @@ package body ${ada_lib_name}.Analysis is
       Traces.Trace (Main_Trace, "Populating lexical envs for unit: "
                                 & Basename (Unit));
 
-      Unit.Context.In_Populate_Lexical_Env := True;
-      declare
-         Has_Errors : constant Boolean := Populate_Lexical_Env
-           (Unit.AST_Root, Unit.Context.Root_Scope);
-      begin
-         Unit.Context.In_Populate_Lexical_Env :=
-            Saved_In_Populate_Lexical_Env;
-         if Has_Errors
-            and then not Unit.Context.Discard_Errors_In_Populate_Lexical_Env
-         then
-            raise Property_Error with
-               "errors occurred in Populate_Lexical_Env";
-         end if;
-      end;
+      Context.In_Populate_Lexical_Env := True;
+      Has_Errors :=
+        (Populate_Lexical_Env (Unit.AST_Root, Context.Root_Scope)
+         or else Has_Errors);
+      Context.In_Populate_Lexical_Env :=
+         Saved_In_Populate_Lexical_Env;
+
+      if Has_Errors and then not Context.Discard_Errors_In_Populate_Lexical_Env
+      then
+         raise Property_Error with
+            "errors occurred in Populate_Lexical_Env";
+      end if;
    end Populate_Lexical_Env;
 
    ---------------------
