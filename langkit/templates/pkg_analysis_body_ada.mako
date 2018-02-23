@@ -470,9 +470,7 @@ package body ${ada_lib_name}.Analysis is
    -- Remove --
    ------------
 
-   procedure Remove (Context   : Analysis_Context;
-                     File_Name : String)
-   is
+   procedure Remove (Context : Analysis_Context; File_Name : String) is
       use Units_Maps;
 
       Cur  : Cursor := Context.Units.Find
