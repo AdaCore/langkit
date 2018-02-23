@@ -918,10 +918,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end Populate_Internal;
 
    begin
-
       --  If we reach this point, one caller is supposed to have set the
-      --  following flag.
-      if not Context.In_Populate_Lexical_Env then
+      --  following flag, i.e. this must be called only in the context of the
+      --  Populate_Lexical_Env procedure working on analysis units. Besides,
+      --  this is intended to be called on the root node only.
+      if not Context.In_Populate_Lexical_Env or else Node.Parent /= null then
          raise Program_Error;
       end if;
 
