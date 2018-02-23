@@ -723,7 +723,21 @@ package body ${ada_lib_name}.Analysis is
                                 & Basename (Unit));
 
       Context.In_Populate_Lexical_Env := True;
-      Has_Errors := Populate_Lexical_Env (Unit.AST_Root) or else Has_Errors;
+
+      % if ctx.subunit_root:
+         if Unit.AST_Root /= null
+            and then Unit.AST_Root.Kind
+                     = ${ctx.subunit_root.list.ada_kind_name}
+         then
+            for I in 1 .. Unit.AST_Root.Abstract_Children_Count loop
+               Has_Errors := Populate_Lexical_Env (Unit.AST_Root.Child (I))
+                             or else Has_Errors;
+            end loop;
+         end if;
+      % else:
+         Has_Errors := Populate_Lexical_Env (Unit.AST_Root);
+      % endif
+
       Context.In_Populate_Lexical_Env :=
          Saved_In_Populate_Lexical_Env;
 

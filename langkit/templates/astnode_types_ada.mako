@@ -159,6 +159,12 @@
                := ${f.type.storage_nullexpr};
             ${ada_doc(f, 12)}
        % endfor
+
+       % if cls == ctx.subunit_root:
+         Is_Env_Populated : Boolean := False;
+         --  Whether this subunit root was processed by Populate_Lexical_Env
+       % endif
+
        ${exts.include_extension(ext)}
    % elif emit_null:
       null;

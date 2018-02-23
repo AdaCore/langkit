@@ -920,11 +920,48 @@ package body ${ada_lib_name}.Analysis.Implementation is
    begin
       --  If we reach this point, one caller is supposed to have set the
       --  following flag, i.e. this must be called only in the context of the
-      --  Populate_Lexical_Env procedure working on analysis units. Besides,
-      --  this is intended to be called on the root node only.
-      if not Context.In_Populate_Lexical_Env or else Node.Parent /= null then
+      --  Populate_Lexical_Env procedure working on analysis units.
+      if not Context.In_Populate_Lexical_Env then
          raise Program_Error;
       end if;
+
+      % if ctx.subunit_root:
+         --  This is intended to be called on sub-unit roots only
+         if Node.Kind /= ${ctx.subunit_root.ada_kind_name} then
+            raise Program_Error;
+         end if;
+
+         --  If PLE has not run on the unit that owns this sub-unit yet, do a
+         --  full run, which will in the end trigger the PLE on this sub-unit.
+         --  We do this so that as soon as PLE is required on a sub-unit, the
+         --  whole unit end up with its lexical environments populated.
+         if not Node.Unit.Is_Env_Populated then
+            begin
+               Populate_Lexical_Env (Node.Unit);
+            exception
+               when Property_Error =>
+                  return True;
+            end;
+            return False;
+         end if;
+
+         --  Do nothing if its lexical envs have already been populated
+         declare
+            Subunit : constant ${ctx.subunit_root.name} :=
+               ${ctx.subunit_root.name} (Node);
+         begin
+            if Subunit.Is_Env_Populated then
+               return False;
+            end if;
+            Subunit.Is_Env_Populated := True;
+         end;
+
+      % else:
+         --  This is intended to be called on the root node only
+         if Node.Parent /= null then
+            raise Program_Error;
+         end if;
+      % endif
 
       return Populate_Internal (Node, Root_Env);
    end Populate_Lexical_Env;
