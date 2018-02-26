@@ -858,6 +858,9 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Symbol_Literals
      (Context : Analysis_Context) return Symbol_Literal_Array_Access;
 
+   function Lookup_Symbol
+     (Context : Analysis_Context; Symbol : Text_Type) return Symbol_Type;
+
    function Create_Special_Unit
      (Context             : Analysis_Context;
       Normalized_Filename : GNATCOLL.VFS.Virtual_File;

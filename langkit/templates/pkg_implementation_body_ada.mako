@@ -2133,6 +2133,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Context.Symbol_Literals'Access;
    end Symbol_Literals;
 
+   -------------------
+   -- Lookup_Symbol --
+   -------------------
+
+   function Lookup_Symbol
+     (Context : Analysis_Context; Symbol : Text_Type) return Symbol_Type is
+   begin
+      return Find (Context.Symbols, Symbol);
+   end Lookup_Symbol;
+
    -------------------------
    -- Create_Special_Unit --
    -------------------------
