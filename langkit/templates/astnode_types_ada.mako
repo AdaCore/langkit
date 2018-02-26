@@ -354,6 +354,8 @@
          Transitive_Parent => ${add_env.transitive_parent},
          Owner             => Self.Unit);
 
+      Initial_Env := Self.Self_Env;
+
       Register_Destroyable (Self.Unit, Self.Self_Env.Env);
 
    </%def>

@@ -903,6 +903,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
          begin
             Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
 
+            if Initial_Env /= Null_Lexical_Env then
+               Node.Self_Env := Initial_Env;
+            end if;
+
             --  Call recursively on children
             for C of ${root_node_array.api_name}'(Children (Node)) loop
                Result := Populate_Internal (C, Node.Self_Env) or else Result;
