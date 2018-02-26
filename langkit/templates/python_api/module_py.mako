@@ -848,8 +848,8 @@ class ${root_astnode_name}(object):
         """
         Dump the sub-tree to a string in a human-readable format.
         """
-        import cStringIO
-        output = cStringIO.StringIO()
+        import StringIO
+        output = StringIO.StringIO()
         self.dump(file=output)
         ret = output.getvalue()
         output.close()
