@@ -841,38 +841,33 @@ class CompileCtx(object):
         if self.subunit_root is None:
             return
 
-        # Now check that the only way to get a subunit root is as a child of a
-        # list node that is itself the root of a tree.
-        main_rule = self.grammar.get_rule(self.grammar.main_rule_name)
-        main_rule_type = main_rule.get_type()
-        with main_rule.diagnostic_context:
-            check_source_language(
-                main_rule_type.is_list_type
-                and main_rule_type.element_type == self.subunit_root,
-                'The main parsing rule must return lists of sub-unit roots'
-                ' ({}.list) but here it returns {} nodes'
-                .format(self.subunit_root.dsl_name, main_rule_type.dsl_name)
-            )
-        with main_rule_type.diagnostic_context:
-            check_source_language(
-                main_rule_type.is_root_list_type
-                and not main_rule_type.subclasses,
-                'Lists of sub-unit roots cannot be subclassed'
-            )
+        check_source_language(
+            self.subunit_root in self.list_types,
+            'At least one parser must create lists of sub-unit roots'
+        )
+        subunit_root_list = self.subunit_root.list
 
+        # Check that there is no subclass for lists of sub-unit roots
+        for subcls in subunit_root_list.subclasses:
+            with subcls.diagnostic_context:
+                check_source_language(False, 'Lists of sub-unit roots'
+                                             ' cannot be subclassed')
+
+        # Finally, check that the only way to get a subunit root is as a child
+        # of a list node that is itself the root of a tree.
         for n in self.astnode_types:
             for f in n.get_parse_fields():
                 with f.diagnostic_context:
                     check_source_language(
-                        main_rule_type not in f._types_from_parser,
+                        subunit_root_list not in f._types_from_parser,
                         '{} cannot appear anywhere in trees except as a root'
-                        ' node'.format(main_rule_type.dsl_name)
+                        ' node'.format(subunit_root_list.dsl_name)
                     )
                     check_source_language(
                         self.subunit_root not in f._types_from_parser,
                         '{} cannot appear anywhere in trees except as a child'
                         ' of {} nodes'.format(self.subunit_root.dsl_name,
-                                              main_rule_type.dsl_name)
+                                              subunit_root_list.dsl_name)
                     )
 
     def check_concrete_subclasses(self, astnode):
