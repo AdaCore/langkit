@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 
+import langkit.compile_context
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledTypeMetaclass, create_builtin_types
 from langkit.diagnostics import DiagnosticError, WarningSet
@@ -233,3 +234,4 @@ def reset_langkit():
     _EnumNodeMetaclass.reset()
 
     reset_memoized()
+    langkit.compile_context.compile_ctx = None
