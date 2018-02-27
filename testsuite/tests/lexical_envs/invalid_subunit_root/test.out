@@ -11,23 +11,22 @@ File "test.py", line 52, in SyntheticNode
     Error: Synthetic nodes cannot be sub-unit roots
 
 = bad_main_rule_1 =
-File "test.py", line 69, In definition of grammar rule main_rule
-    Error: The main parsing rule must return lists of sub-unit roots (Example.list) but here it returns Example nodes
+File "test.py", line 66, in ExampleWrapper.example
+    Error: Example.list cannot appear anywhere in trees except as a root node
 
 = bad_main_rule_2 =
-File "test.py", line 85, In definition of grammar rule main_rule
-    Error: The main parsing rule must return lists of sub-unit roots (Example.list) but here it returns ExampleWrapper.list nodes
+Error: At least one parser must create lists of sub-unit roots
 
 = non_root_list =
-File "test.py", line 96, in Subunit.fields
+File "test.py", line 99, in Subunit.fields
     Error: Subunit.list cannot appear anywhere in trees except as a root node
 
 = multiple_lists =
-File "test.py", line 111, in ListOfExample
+File "test.py", line 114, in ListOfExample
     Error: Lists of sub-unit roots cannot be subclassed
 
 = subunit_root_field =
-File "test.py", line 127, in Example.child
+File "test.py", line 130, in Example.child
     Error: Example cannot appear anywhere in trees except as a child of Example.list nodes
 
 Done

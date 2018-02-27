@@ -62,11 +62,14 @@ def construct_bad_main_rule_1():
     class FooNode(ASTNode):
         pass
 
+    class ExampleWrapper(FooNode):
+        example = Field()
+
     class Example(FooNode):
         annotations = Annotations(subunit_root=True)
 
     grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Example('example'))
+    grammar.add_rules(main_rule=ExampleWrapper(List(Example('example'))))
     return grammar
 
 
@@ -132,14 +135,16 @@ def construct_subunit_root_field():
     return grammar
 
 
-for constructor in (construct_multiple,
-                    construct_derived,
-                    construct_synthetic,
-                    construct_bad_main_rule_1,
-                    construct_bad_main_rule_2,
-                    construct_non_root_list,
-                    construct_multiple_lists,
-                    construct_subunit_root_field):
+for constructor in (
+    construct_multiple,
+    construct_derived,
+    construct_synthetic,
+    construct_bad_main_rule_1,
+    construct_bad_main_rule_2,
+    construct_non_root_list,
+    construct_multiple_lists,
+    construct_subunit_root_field
+):
     print('= {} ='.format(constructor.__name__[10:]))
     grammar = constructor()
     emit_and_print_errors(grammar)
