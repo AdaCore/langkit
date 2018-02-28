@@ -6,7 +6,7 @@ from itertools import count
 import types
 
 from langkit import names
-from langkit.compiled_types import ArrayType, get_context
+from langkit.compiled_types import get_context
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
@@ -828,11 +828,14 @@ class Concat(AbstractExpression):
         array_1 = construct(self.array_1)
         array_2 = construct(self.array_2)
 
-        # TODO: We don't use the type param to construct because construct will
-        # try to cast arrays to the base array type. Would be better if
-        # construct handled that correctly.
-        check_type(array_1.type, ArrayType)
-        check_type(array_2.type, ArrayType)
+        def check_array(typ):
+            check_source_language(
+                typ.is_array_type,
+                "Expected array type, got {}".format(typ.dsl_name)
+            )
+
+        check_array(array_1.type)
+        check_array(array_2.type)
 
         check_multiple([
             (array_1.type == array_2.type,
