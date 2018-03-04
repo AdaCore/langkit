@@ -1612,14 +1612,30 @@ package body ${ada_lib_name}.Analysis.Implementation is
          nodes_adding_env = [
             n for n in ctx.astnode_types
             if n.env_spec and
-               not n.is_env_spec_inherited and
+               not n.abstract and
                n.env_spec.adds_env
+         ]
+
+         nodes_not_adding_env = [
+            n for n in ctx.astnode_types
+            if n.env_spec and
+               not n.abstract and
+               not n.env_spec.adds_env
          ]
       %>
       Base_Env : Lexical_Env :=
          % if nodes_adding_env:
             (if Node.Kind in
-               ${' | '.join(n.ada_kind_range_name for n in nodes_adding_env)}
+               ${' | '.join(n.ada_kind_name for n in nodes_adding_env)}
+
+               % if nodes_not_adding_env:
+               ## Env specs might be overriden, so node kind that don't add
+               ## envs might be derived from one that do, so we need to
+               ## blacklist concrete nodes that we know are not adding envs.
+               and then Node.Kind not in
+               ${' | '.join(n.ada_kind_name
+                            for n in nodes_not_adding_env)}
+               % endif
              then AST_Envs.Get_Env (Node.Self_Env.Env.Parent)
              else Node.Self_Env)
          % else:
