@@ -123,6 +123,7 @@ package body ${ada_lib_name}.Analysis is
         (Ref_Count     => 1,
          Units         => <>,
          Removed_Units => <>,
+         Filenames     => <>,
          Symbols       => Symbols,
          Charset       => To_Unbounded_String (Actual_Charset),
          With_Trivia   => With_Trivia,
@@ -297,7 +298,7 @@ package body ${ada_lib_name}.Analysis is
       use Units_Maps;
 
       Normalized_Filename : constant GNATCOLL.VFS.Virtual_File :=
-         Normalized_Unit_Filename (Filename);
+         Normalized_Unit_Filename (Context, Filename);
 
       Cur     : constant Cursor :=
          Context.Units.Find (Normalized_Filename);
@@ -357,7 +358,7 @@ package body ${ada_lib_name}.Analysis is
       Unit_Filename : String) return Boolean is
    begin
       return Context.Units.Contains
-        (Normalized_Unit_Filename (Unit_Filename));
+        (Normalized_Unit_Filename (Context, Unit_Filename));
    end Has_Unit;
 
    -------------------
@@ -459,7 +460,7 @@ package body ${ada_lib_name}.Analysis is
       use Units_Maps;
 
       Normalized_Filename : constant GNATCOLL.VFS.Virtual_File :=
-         Normalized_Unit_Filename (Filename);
+         Normalized_Unit_Filename (Context, Filename);
       Cur                 : constant Cursor :=
          Context.Units.Find (Normalized_Filename);
    begin
@@ -485,7 +486,7 @@ package body ${ada_lib_name}.Analysis is
       use Units_Maps;
 
       Cur      : Cursor := Context.Units.Find
-        (Normalized_Unit_Filename (File_Name));
+        (Normalized_Unit_Filename (Context, File_Name));
       Unit     : Analysis_Unit;
       Reparsed : Reparsed_Unit;
    begin

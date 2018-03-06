@@ -2214,12 +2214,26 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ------------------------------
 
    function Normalized_Unit_Filename
-     (Filename : String) return GNATCOLL.VFS.Virtual_File is
+     (Context : Analysis_Context; Filename : String)
+      return GNATCOLL.VFS.Virtual_File
+   is
       use GNATCOLL.VFS;
+      use Virtual_File_Maps;
+      Key : constant Unbounded_String := To_Unbounded_String (Filename);
+      Cur : Cursor := Context.Filenames.Find (Key);
    begin
-      return Create
-        (Create_From_Base (+Filename).Full_Name,
-         Normalize => True);
+      if Cur = No_Element then
+         declare
+            F : constant Virtual_File := Create
+              (Create_From_Base (+Filename).Full_Name,
+               Normalize => True);
+         begin
+            Context.Filenames.Insert (Key, F);
+            return F;
+         end;
+      else
+         return Element (Cur);
+      end if;
    end Normalized_Unit_Filename;
 
    --------------------------

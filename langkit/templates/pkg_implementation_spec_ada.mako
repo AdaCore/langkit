@@ -17,6 +17,7 @@ with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Sets;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Deallocation;
 
 with System;
@@ -875,8 +876,16 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    procedure Set_Rule (Unit : Analysis_Unit; Rule : Grammar_Rule);
 
+   package Virtual_File_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => GNATCOLL.VFS.Virtual_File,
+      Equivalent_Keys => "=",
+      "="             => GNATCOLL.VFS."=",
+      Hash            => Ada.Strings.Unbounded.Hash);
+
    function Normalized_Unit_Filename
-     (Filename : String) return GNATCOLL.VFS.Virtual_File;
+     (Context : Analysis_Context; Filename : String)
+      return GNATCOLL.VFS.Virtual_File;
    --  Try to return a canonical filename. This is used to have an
    --  as-unique-as-possible analysis unit identifier.
 
@@ -890,6 +899,11 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Collection of analysis unit that were loaded and then removed in this
       --  context. We need to keep allocated Analysis_Unit_Type records around
       --  to keep the PLE updating mechanism memory-safe.
+
+      Filenames : Virtual_File_Maps.Map;
+      --  Cache for GNATCOLL.VFS.Virtual_File we create for String filenames.
+      --  Re-using older Virtual_File values is useful as this reduces the need
+      --  to normalize paths, which is a costly operation.
 
       Symbols : Symbol_Table;
       --  Symbol table used in this whole context
