@@ -128,7 +128,8 @@ ADA_SPEC = "spec"
 ADA_BODY = "body"
 
 
-def write_ada_file(out_dir, source_kind, qual_name, content):
+def write_ada_file(out_dir, source_kind, qual_name, content,
+                   strip_white_lines=False):
     """
     Helper to write an Ada file.
 
@@ -140,10 +141,20 @@ def write_ada_file(out_dir, source_kind, qual_name, content):
         as a list of Name components.
     :param str content: The source content to write to the file.
     """
+    import re
+
+    r = re.compile(r'^\s*$')
     assert source_kind in (ADA_SPEC, ADA_BODY)
     file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
                                'ads' if source_kind == ADA_SPEC else 'adb')
     file_path = os.path.join(out_dir, file_name)
+
+    if strip_white_lines:
+        new_content = []
+        for l in content.splitlines():
+            if not r.match(l):
+                new_content.append(l)
+        content = "\n".join(new_content)
 
     # TODO: no tool is able to pretty-print a single Ada source file
     write_source_file(file_path, content)
@@ -1322,7 +1333,8 @@ class CompileCtx(object):
                             kind
                         ),
                         with_clauses=with_clauses,
-                    )
+                    ),
+                    strip_white_lines=(kind == ADA_BODY)
                 )
 
     @property
