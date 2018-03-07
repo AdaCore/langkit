@@ -404,14 +404,21 @@ package ${ada_lib_name}.Analysis is
                         Next        => Next_Token,
                         Has_Element => Has_Element,
                         Element     => Element);
-   --  This type allows iteration on a range of tokens
+   --  Allow iteration on a range of tokens corresponding to a node
 
    function First_Token (Self : Token_Iterator) return Token_Type;
+   --  Return the first token corresponding to the node
+
    function Next_Token
      (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
+   --  Return the token that follows Tok in the token stream
+
    function Has_Element
      (Self : Token_Iterator; Tok : Token_Type) return Boolean;
+   --  Return if Tok is in Self's iteration range
+
    function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
+   --  Identity function: helper for the Iterable aspect
 
    -----------------------
    -- Enumeration types --
