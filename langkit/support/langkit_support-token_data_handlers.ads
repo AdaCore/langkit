@@ -38,7 +38,7 @@ package Langkit_Support.Token_Data_Handlers is
       .. Token_Vectors.Index_Type'Last;
    --  Although we cannot use anything else than Natural as Token_Vectors
    --  indexes, this type will be used outside this package so that typing
-   --  helps us fining index misuses.
+   --  helps us finding index misuses.
 
    No_Token_Index    : constant Token_Index := Token_Index'First;
    First_Token_Index : constant Token_Index := Token_Index'First + 1;
