@@ -111,6 +111,16 @@ package body ${ada_lib_name}.Lexer is
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range (Token : Token_Data_Type) return Source_Location_Range
+   is
+   begin
+      return Token.Sloc_Range;
+   end Sloc_Range;
+
    ------------------------
    -- Process_All_Tokens --
    ------------------------

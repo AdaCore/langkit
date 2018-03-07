@@ -43,6 +43,8 @@ package ${ada_lib_name}.Lexer is
       --  exclusive.
    end record;
 
+   function Sloc_Range (Token : Token_Data_Type) return Source_Location_Range;
+
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
      (Token_Data_Type);
    use Token_Data_Handlers;

@@ -1,10 +1,15 @@
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
 generic
    type Token_Data_Type is private;
+   with function Sloc_Range
+     (Token : Token_Data_Type) return Source_Location_Range is <>;
 package Langkit_Support.Token_Data_Handlers is
+
+   pragma Unreferenced (Sloc_Range);
 
    --  Trivias are tokens that are not to be taken into account during parsing,
    --  and are marked as so in the lexer definition. Conceptually, we want
