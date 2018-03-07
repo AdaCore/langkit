@@ -103,6 +103,26 @@ package body Langkit_Support.Token_Data_Handlers is
       return Token_Index_Vectors.Empty_Array;
    end Internal_Get_Trivias;
 
+   ---------------
+   -- Get_Token --
+   ---------------
+
+   function Get_Token
+     (TDH   : Token_Data_Handler;
+      Index : Token_Index) return Token_Data_Type is
+   begin
+      return Token_Vectors.Get (TDH.Tokens, Natural (Index));
+   end Get_Token;
+
+   ----------------
+   -- Last_Token --
+   ----------------
+
+   function Last_Token (TDH : Token_Data_Handler) return Token_Index is
+   begin
+      return Token_Index (Token_Vectors.Last_Index (TDH.Tokens));
+   end Last_Token;
+
    -----------------
    -- Get_Trivias --
    -----------------

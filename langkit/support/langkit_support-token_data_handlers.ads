@@ -111,13 +111,11 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Get_Token
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Data_Type
-   is
-     (Token_Vectors.Get (TDH.Tokens, Natural (Index)));
+      Index : Token_Index) return Token_Data_Type;
+   --  Return data for the token at the given Index in TDH
 
-   function Last_Token (TDH : Token_Data_Handler) return Token_Index
-   is
-     (Token_Index (Token_Vectors.Last_Index (TDH.Tokens)));
+   function Last_Token (TDH : Token_Data_Handler) return Token_Index;
+   --  Return the index of the last token in TDH
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
