@@ -682,6 +682,6 @@ package ${ada_lib_name}.Analysis.Implementation.C is
       % endif
    % endfor
 
-   pragma Warnings (Off, "possible aliasing problem for type");
+   pragma Warnings (On, "possible aliasing problem for type");
 
 end ${ada_lib_name}.Analysis.Implementation.C;
