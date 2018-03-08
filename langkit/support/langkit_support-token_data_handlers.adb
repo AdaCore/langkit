@@ -497,6 +497,19 @@ package body Langkit_Support.Token_Data_Handlers is
       end;
    end Lookup_Token;
 
+   ----------
+   -- Data --
+   ----------
+
+   function Data
+     (Token : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler) return Token_Data_Type is
+   begin
+      return (if Token.Trivia = No_Token_Index
+              then TDH.Tokens.Get (Natural (Token.Token))
+              else TDH.Trivias.Get (Natural (Token.Trivia)).T);
+   end Data;
+
    -----------------
    -- Get_Trivias --
    -----------------

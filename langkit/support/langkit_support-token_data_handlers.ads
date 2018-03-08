@@ -186,6 +186,11 @@ package Langkit_Support.Token_Data_Handlers is
    --  falls after the last token, return the last token. If there is no token
    --  in TDH, return No_Token_Or_Trivia_Index.
 
+   function Data
+     (Token : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler) return Token_Data_Type;
+   --  Return the data associated to Token in TDH
+
    function Get_Trivias
      (TDH   : Token_Data_Handler;
       Index : Token_Index) return Token_Index_Vectors.Elements_Array;
