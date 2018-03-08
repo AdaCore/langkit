@@ -4,6 +4,72 @@ package body Langkit_Support.Token_Data_Handlers is
      (TDH   : Token_Data_Handler;
       Index : Token_Index) return Token_Index_Vectors.Elements_Array;
 
+   generic
+      type Key_Type is private;
+      --  Type of the value used to sort vector elements
+
+      type Element_Type is private;
+      --  Type for vector elements
+
+      Small_Vector_Capacity : Natural := 0;
+      with package Element_Vectors is new Langkit_Support.Vectors
+        (Element_Type, Small_Vector_Capacity);
+
+      with function Compare
+         (K : Key_Type; E_Index : Positive; E : Element_Type)
+          return Relative_Position is <>;
+      --  Tell where K is with respect to E (E_Index is the index of E in the
+      --  vector).
+   function Floor
+     (K : Key_Type; Vector : Element_Vectors.Vector) return Natural;
+   --  Assuming that Vector contains a sorted sequence of elements, return the
+   --  element index for which K is either inside or right after. If K actualls
+   --  points right before the first Vector element, return the index of the
+   --  first element.
+
+   -----------
+   -- Floor --
+   -----------
+
+   function Floor
+     (K : Key_Type; Vector : Element_Vectors.Vector) return Natural
+   is
+      Before, After : Natural;
+   begin
+      if Vector.Is_Empty then
+         return 0;
+      end if;
+
+      Before := Vector.First_Index;
+      After  := Vector.Last_Index;
+      while Before < After loop
+         declare
+            Last_Step : constant Boolean := Before + 1 = After;
+            Middle    : constant Natural := (After + Before) / 2;
+         begin
+            case Compare (K, Middle, Vector.Get (Middle)) is
+               when Slocs.Before =>
+                  After := Middle;
+               when Slocs.Inside =>
+                  return Middle;
+               when Slocs.After =>
+                  Before := Middle;
+            end case;
+
+            if Last_Step then
+               case Compare (K, After, Vector.Get (After)) is
+                  when Slocs.Before =>
+                     return Before;
+                  when Slocs.Inside | Slocs.After =>
+                     return After;
+               end case;
+            end if;
+         end;
+      end loop;
+
+      return Before;
+   end Floor;
+
    ----------------
    -- Initialize --
    ----------------
@@ -122,6 +188,72 @@ package body Langkit_Support.Token_Data_Handlers is
    begin
       return Token_Index (Token_Vectors.Last_Index (TDH.Tokens));
    end Last_Token;
+
+   --------------------
+   -- Previous_Token --
+   --------------------
+
+   function Previous_Token
+     (Trivia : Token_Index; TDH : Token_Data_Handler) return Token_Index
+   is
+
+      function Compare
+        (Key_Trivia    : Token_Index;
+         Element_Index : Positive;
+         Element       : Integer) return Relative_Position;
+
+      -------------
+      -- Compare --
+      -------------
+
+      function Compare
+        (Key_Trivia    : Token_Index;
+         Element_Index : Positive;
+         Element       : Integer) return Relative_Position
+      is
+      begin
+         --  Index can be zero if the corresponding token is not followed by
+         --  any trivia. In this case, rely on the sloc to compare them.
+         if Element = 0 then
+            declare
+               Key_Start_Sloc : constant Source_Location := Start_Sloc
+                 (Sloc_Range (TDH.Trivias.Get (Natural (Key_Trivia)).T));
+            begin
+               return Compare
+                 (Sloc_Range (TDH.Tokens.Get (Element_Index - 1)),
+                  Key_Start_Sloc);
+            end;
+         end if;
+
+         declare
+            Designated_Trivia : constant Natural :=
+               TDH.Tokens_To_Trivias.Get (Element);
+         begin
+            if Designated_Trivia < Natural (Key_Trivia) then
+               return After;
+            elsif Designated_Trivia > Natural (Key_Trivia) then
+               return Before;
+            else
+               return Inside;
+            end if;
+         end;
+      end Compare;
+
+      function Token_Floor is new Floor
+        (Key_Type        => Token_Index,
+         Element_Type    => Integer,
+         Element_Vectors => Integer_Vectors);
+
+   begin
+      --  Perform a binary search over Tokens_To_Trivias to find the index of
+      --  the Token that precedes Trivia.
+
+      return Token_Index (Token_Floor (Trivia, TDH.Tokens_To_Trivias) - 1);
+      --  Token_Floor deals with indexes for the Tokens_To_Trivia vector, so
+      --  they corresponding to token indexes, but off by one (token index 1
+      --  corresponding to Tokens_To_Trivia index 2, ...). Hence the X-1
+      --  operation when returning.
+   end Previous_Token;
 
    -----------------
    -- Get_Trivias --

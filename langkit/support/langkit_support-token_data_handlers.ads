@@ -9,8 +9,6 @@ generic
      (Token : Token_Data_Type) return Source_Location_Range is <>;
 package Langkit_Support.Token_Data_Handlers is
 
-   pragma Unreferenced (Sloc_Range);
-
    --  Trivias are tokens that are not to be taken into account during parsing,
    --  and are marked as so in the lexer definition. Conceptually, we want
    --  to keep a (potentially empty) list of trivias for each token, which
@@ -121,6 +119,11 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Last_Token (TDH : Token_Data_Handler) return Token_Index;
    --  Return the index of the last token in TDH
+
+   function Previous_Token
+     (Trivia : Token_Index; TDH : Token_Data_Handler) return Token_Index;
+   --  Given a trivia index in TDH, return the index of the token that precedes
+   --  it. Return No_Token_Index for a leading trivia.
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
