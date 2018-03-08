@@ -841,6 +841,29 @@ package body ${ada_lib_name}.Analysis is
    function Trivia_Count (Unit : Analysis_Unit) return Natural is
      (Unit.TDH.Trivias.Length);
 
+   ------------------
+   -- Lookup_Token --
+   ------------------
+
+   function Lookup_Token
+     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Type
+   is
+      use Token_Data_Handlers;
+      Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
+   begin
+      if Result.Index = No_Token_Index then
+         return No_Token;
+
+      elsif Result.Is_Trivia then
+         return (Unit.TDH'Access,
+                 Previous_Token (Result.Index, Unit.TDH),
+                 Result.Index);
+
+      else
+         return (Unit.TDH'Access, Result.Index, No_Token_Index);
+      end if;
+   end Lookup_Token;
+
    -----------------
    -- Get_Context --
    -----------------

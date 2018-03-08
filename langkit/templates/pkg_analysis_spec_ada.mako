@@ -284,6 +284,10 @@ package ${ada_lib_name}.Analysis is
    function Trivia_Count (Unit : Analysis_Unit) return Natural;
    ${ada_doc('langkit.unit_trivia_count', 3)}
 
+   function Lookup_Token
+     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Type;
+   ${ada_doc('langkit.unit_lookup_token', 3)}
+
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 

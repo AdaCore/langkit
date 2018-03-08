@@ -255,6 +255,74 @@ package body Langkit_Support.Token_Data_Handlers is
       --  operation when returning.
    end Previous_Token;
 
+   ------------------
+   -- Lookup_Token --
+   ------------------
+
+   function Lookup_Token
+     (TDH : Token_Data_Handler; Sloc : Source_Location)
+      return Token_Or_Trivia_Index
+   is
+
+      function Compare
+        (Sloc  : Source_Location;
+         Index : Positive;
+         Token : Token_Data_Type) return Relative_Position
+      is (Compare (Sloc_Range (Token), Sloc));
+
+      function Compare
+        (Sloc   : Source_Location;
+         Index  : Positive;
+         Trivia : Trivia_Node) return Relative_Position
+      is (Compare (Sloc_Range (Trivia.T), Sloc));
+
+      function Token_Floor is new Floor
+        (Key_Type        => Source_Location,
+         Element_Type    => Token_Data_Type,
+         Element_Vectors => Token_Vectors);
+      function Trivia_Floor is new Floor
+        (Key_Type        => Source_Location,
+         Element_Type    => Trivia_Node,
+         Element_Vectors => Trivia_Vectors);
+
+      --  Look for a candidate token and a candidate trivia, then take the one
+      --  that is the closest to Sloc.
+
+      Token  : constant Natural := Token_Floor (Sloc, TDH.Tokens);
+      Trivia : constant Natural := Trivia_Floor (Sloc, TDH.Trivias);
+
+      function Result_From_Token return Token_Or_Trivia_Index is
+        ((Token_Index (Token), False));
+      function Result_From_Trivia return Token_Or_Trivia_Index is
+        ((Token_Index (Trivia), True));
+
+   begin
+      if Trivia = 0 then
+         return Result_From_Token;
+      elsif Token = 0 then
+         return Result_From_Trivia;
+      end if;
+
+      declare
+         function SS (Token : Token_Data_Type) return Source_Location is
+           (Start_Sloc (Sloc_Range (Token)));
+
+         Tok_Sloc  : constant Source_Location := SS (TDH.Tokens.Get (Token));
+         Triv_Sloc : constant Source_Location :=
+            SS (TDH.Trivias.Get (Trivia).T);
+      begin
+         if Tok_Sloc < Triv_Sloc then
+            if Sloc < Triv_Sloc then
+               return Result_From_Token;
+            end if;
+         elsif Tok_Sloc < Sloc or else Tok_Sloc = Sloc then
+            return Result_From_Token;
+         end if;
+
+         return Result_From_Trivia;
+      end;
+   end Lookup_Token;
+
    -----------------
    -- Get_Trivias --
    -----------------

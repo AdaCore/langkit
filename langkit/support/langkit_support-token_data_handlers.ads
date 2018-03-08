@@ -41,6 +41,14 @@ package Langkit_Support.Token_Data_Handlers is
    No_Token_Index    : constant Token_Index := Token_Index'First;
    First_Token_Index : constant Token_Index := Token_Index'First + 1;
 
+   type Token_Or_Trivia_Index is record
+      Index     : Token_Index;
+      Is_Trivia : Boolean;
+   end record;
+
+   No_Token_Or_Trivia_Index : constant Token_Or_Trivia_Index :=
+     (No_Token_Index, False);
+
    package Token_Index_Vectors is new Langkit_Support.Vectors
      (Element_Type => Token_Index);
 
@@ -124,6 +132,19 @@ package Langkit_Support.Token_Data_Handlers is
      (Trivia : Token_Index; TDH : Token_Data_Handler) return Token_Index;
    --  Given a trivia index in TDH, return the index of the token that precedes
    --  it. Return No_Token_Index for a leading trivia.
+
+   function Lookup_Token
+     (TDH : Token_Data_Handler; Sloc : Source_Location)
+      return Token_Or_Trivia_Index;
+   --  Look for a token in TDH that contains the given source location.
+   --
+   --  We consider here both regular tokens and trivia as "tokens", both making
+   --  a logically continuous stream of token/trivia.
+   --
+   --  If Sloc falls before the first token, return the first token. If this
+   --  falls between two tokens, return the token that appears before. If this
+   --  falls after the last token, return the last token. If there is no token
+   --  in TDH, return No_Token_Or_Trivia_Index.
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
