@@ -223,24 +223,27 @@ package body ${ada_lib_name}.Lexer is
             ## Token id is part of the class of token types for which we want to
             ## internalize the text.
             when ${' | '.join(with_symbol_actions)} =>
-               declare
-                  Bounded_Text : Text_Type (1 .. Natural (Token.Text_Length))
-                     with Address => Token.Text;
+               if TDH.Symbols /= No_Symbol_Table then
+                  declare
+                     Bounded_Text : Text_Type
+                       (1 .. Natural (Token.Text_Length))
+                        with Address => Token.Text;
 
-                  Symbol_Res : constant Symbolization_Result :=
-                     % if ctx.symbol_canonicalizer:
-                        ${ctx.symbol_canonicalizer.fqn} (Bounded_Text);
-                     % else:
-                        Create_Symbol (Bounded_Text);
-                     % endif
-               begin
-                  if Symbol_Res.Success then
-                     Symbol := Find (TDH.Symbols, Symbol_Res.Symbol);
-                  else
-                     Append (Diagnostics, Sloc_Range,
-                             Symbol_Res.Error_Message);
-                  end if;
-               end;
+                     Symbol_Res : constant Symbolization_Result :=
+                        % if ctx.symbol_canonicalizer:
+                           ${ctx.symbol_canonicalizer.fqn} (Bounded_Text);
+                        % else:
+                           Create_Symbol (Bounded_Text);
+                        % endif
+                  begin
+                     if Symbol_Res.Success then
+                        Symbol := Find (TDH.Symbols, Symbol_Res.Symbol);
+                     else
+                        Append (Diagnostics, Sloc_Range,
+                                Symbol_Res.Error_Message);
+                     end if;
+                  end;
+               end if;
          % endif
 
          % if with_trivia_actions:

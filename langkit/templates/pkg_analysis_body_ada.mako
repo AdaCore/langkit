@@ -96,6 +96,11 @@ package body ${ada_lib_name}.Analysis is
      (Symbols : Symbol_Table) return Symbol_Literal_Array;
    --  Create pre-computed symbol literals in Symbols and return them
 
+   function Wrap
+     (Index : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler_Access)
+      return Token_Type;
+
    ------------
    -- Create --
    ------------
@@ -851,17 +856,7 @@ package body ${ada_lib_name}.Analysis is
       use Token_Data_Handlers;
       Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
    begin
-      if Result.Index = No_Token_Index then
-         return No_Token;
-
-      elsif Result.Is_Trivia then
-         return (Unit.TDH'Access,
-                 Previous_Token (Result.Index, Unit.TDH),
-                 Result.Index);
-
-      else
-         return (Unit.TDH'Access, Result.Index, No_Token_Index);
-      end if;
+      return Wrap (Result, Unit.TDH'Access);
    end Lookup_Token;
 
    -----------------
@@ -903,11 +898,12 @@ package body ${ada_lib_name}.Analysis is
          return (if Length (TDH.Tokens) = 0
                  then No_Token
                  else (TDH,
-                       Token_Index (First_Index (TDH.Tokens)),
-                       No_Token_Index));
+                       (Token_Index (First_Index (TDH.Tokens)),
+                        No_Token_Index)));
 
       else
-         return (TDH, No_Token_Index, Token_Index (First_Index (TDH.Trivias)));
+         return (TDH, (No_Token_Index,
+                       Token_Index (First_Index (TDH.Trivias))));
       end if;
    end First_Token;
 
@@ -927,11 +923,12 @@ package body ${ada_lib_name}.Analysis is
          return (if Length (TDH.Tokens) = 0
                  then No_Token
                  else (TDH,
-                       Token_Index (Last_Index (TDH.Tokens)),
-                       No_Token_Index));
+                       (Token_Index (Last_Index (TDH.Tokens)),
+                        No_Token_Index)));
 
       else
-         return (TDH, No_Token_Index, Token_Index (First_Index (TDH.Trivias)));
+         return (TDH, (No_Token_Index,
+                       Token_Index (First_Index (TDH.Trivias))));
       end if;
    end Last_Token;
 
@@ -942,11 +939,11 @@ package body ${ada_lib_name}.Analysis is
    function "<" (Left, Right : Token_Type) return Boolean is
       pragma Assert (Left.TDH = Right.TDH);
    begin
-      if Left.Token < Right.Token then
+      if Left.Index.Token < Right.Index.Token then
          return True;
 
-      elsif Left.Token = Right.Token then
-         return Left.Trivia < Right.Trivia;
+      elsif Left.Index.Token = Right.Index.Token then
+         return Left.Index.Trivia < Right.Index.Trivia;
 
       else
          return False;
@@ -954,67 +951,28 @@ package body ${ada_lib_name}.Analysis is
    end "<";
 
    ----------
+   -- Wrap --
+   ----------
+
+   function Wrap
+     (Index : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler_Access)
+      return Token_Type is
+   begin
+      return (if Index = No_Token_Or_Trivia_Index
+              then No_Token
+              else (TDH, Index));
+   end;
+
+   ----------
    -- Next --
    ----------
 
    function Next (Token : Token_Type) return Token_Type is
    begin
-      if Token.TDH = null then
-         return No_Token;
-      end if;
-
-      declare
-         use Token_Vectors, Trivia_Vectors,
-             Token_Data_Handlers.Integer_Vectors;
-         TDH : Token_Data_Handler renames Token.TDH.all;
-
-         function Next_Token return Token_Type is
-           (if Token.Token < Token_Index (Last_Index (TDH.Tokens))
-            then (Token.TDH, Token.Token + 1, No_Token_Index)
-            else No_Token);
-         --  Return a reference to the next token (not trivia) or No_Token if
-         --  Token was the last one.
-
-      begin
-         if Token.Trivia /= No_Token_Index then
-            --  Token is a reference to a trivia: take the next trivia if it
-            --  exists, or escalate to the next token otherwise.
-
-            declare
-               Tr : constant Trivia_Node :=
-                  Get (TDH.Trivias, Natural (Token.Trivia));
-            begin
-               return (if Tr.Has_Next
-                       then (Token.TDH, Token.Token, Token.Trivia + 1)
-                       else Next_Token);
-            end;
-
-         else
-            --  Thanks to the guard above, we cannot get to the declare block
-            --  for the No_Token case, so if Token does not refers to a trivia,
-            --  it must be a token.
-
-            pragma Assert (Token.Token /= No_Token_Index);
-
-            --  If there is no trivia, just go to the next token
-
-            if Length (TDH.Tokens_To_Trivias) = 0 then
-               return Next_Token;
-            end if;
-
-            --  If this token has trivia, return a reference to the first one,
-            --  otherwise get the next token.
-
-            declare
-               Tr_Index : constant Token_Index := Token_Index
-                 (Get (TDH.Tokens_To_Trivias, Natural (Token.Token) + 1));
-            begin
-               return (if Tr_Index = No_Token_Index
-                       then Next_Token
-                       else (Token.TDH, Token.Token, Tr_Index));
-            end;
-         end if;
-      end;
+      return (if Token.TDH = null
+              then No_Token
+              else Wrap (Next (Token.Index, Token.TDH.all), Token.TDH));
    end Next;
 
    --------------
@@ -1023,73 +981,9 @@ package body ${ada_lib_name}.Analysis is
 
    function Previous (Token : Token_Type) return Token_Type is
    begin
-      if Token.TDH = null then
-         return No_Token;
-      end if;
-
-      declare
-         use Trivia_Vectors, Token_Data_Handlers.Integer_Vectors;
-         TDH : Token_Data_Handler renames Token.TDH.all;
-      begin
-         if Token.Trivia = No_Token_Index then
-            --  Token is a regular token, so the previous token is either the
-            --  last trivia of the previous regular token, either the previous
-            --  regular token itself.
-            declare
-               Prev_Trivia : Token_Index;
-            begin
-               --  Get the index of the trivia that is right bofre Token (if
-               --  any).
-               if Length (TDH.Tokens_To_Trivias) = 0 then
-                  Prev_Trivia := No_Token_Index;
-
-               else
-                  Prev_Trivia := Token_Index
-                    (Get (TDH.Tokens_To_Trivias, Natural (Token.Token)));
-                  while Prev_Trivia /= No_Token_Index
-                           and then
-                        Get (TDH.Trivias, Natural (Prev_Trivia)).Has_Next
-                  loop
-                     Prev_Trivia := Prev_Trivia + 1;
-                  end loop;
-               end if;
-
-               --  If there is no such trivia and Token was the first one, then
-               --  this was the start of the token stream: no previous token.
-               if Prev_Trivia = No_Token_Index
-                  and then Token.Token <= First_Token_Index
-               then
-                  return No_Token;
-               else
-                  return (Token.TDH, Token.Token - 1, Prev_Trivia);
-               end if;
-            end;
-
-         --  Past this point: Token is known to be a trivia
-
-         elsif Token.Trivia = First_Token_Index then
-            --  This is the first trivia for some token, so the previous token
-            --  cannot be a trivia.
-            return (if Token.Token = No_Token_Index
-                    then No_Token
-                    else (Token.TDH, Token.Token, No_Token_Index));
-
-         elsif Token.Token = No_Token_Index then
-            --  This is a leading trivia and not the first one, so the previous
-            --  token has to be a trivia.
-            return (Token.TDH, No_Token_Index, Token.Trivia - 1);
-
-         --  Past this point: Token is known to be a trivia *and* it is not a
-         --  leading trivia.
-
-         else
-            return (Token.TDH,
-                    Token.Token,
-                    (if Get (TDH.Trivias, Natural (Token.Trivia - 1)).Has_Next
-                     then Token.Trivia - 1
-                     else No_Token_Index));
-         end if;
-      end;
+      return (if Token.TDH = null
+              then No_Token
+              else Wrap (Previous (Token.Index, Token.TDH.all), Token.TDH));
    end Previous;
 
    ----------------
@@ -1101,12 +995,12 @@ package body ${ada_lib_name}.Analysis is
          Token_Data_Handlers.Token_Vectors.Element_Access;
 
       Token_Data : constant Token_Data_Reference :=
-        (if Token.Trivia = No_Token_Index
+        (if Token.Index.Trivia = No_Token_Index
          then Token_Data_Reference
-           (Token.TDH.Tokens.Get_Access (Natural (Token.Token)))
+           (Token.TDH.Tokens.Get_Access (Natural (Token.Index.Token)))
          else Token_Data_Reference'
            (Token.TDH.Trivias.Get_Access
-              (Natural (Token.Trivia) - 1).T'Access));
+              (Natural (Token.Index.Trivia) - 1).T'Access));
    begin
       return Force_Symbol (Token.TDH.all, Token_Data.all);
    end Get_Symbol;
@@ -1132,7 +1026,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Has_Element
      (Self : Token_Iterator; Tok : Token_Type) return Boolean
-   is (Tok.Token <= Self.Last);
+   is (Tok.Index.Token <= Self.Last);
 
    -------------
    -- Element --
@@ -1146,9 +1040,9 @@ package body ${ada_lib_name}.Analysis is
    --------------
 
    function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type is
-     (if T.Trivia = No_Token_Index
-      then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
-      else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
+     (if T.Index.Trivia = No_Token_Index
+      then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Index.Token))
+      else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Index.Trivia)).T);
 
    ----------
    -- Data --
@@ -1214,9 +1108,9 @@ package body ${ada_lib_name}.Analysis is
 
    function Index (Token : Token_Type) return Token_Index is
    begin
-      return (if Token.Trivia = No_Token_Index
-              then Token.Token
-              else Token.Trivia);
+      return (if Token.Index.Trivia = No_Token_Index
+              then Token.Index.Token
+              else Token.Index.Trivia);
    end Index;
 
    -----------

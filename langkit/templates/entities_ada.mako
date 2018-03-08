@@ -580,8 +580,7 @@
             for D of Get_Trivias (TDH, I) loop
                Ret_Vec.Append ((Kind   => Trivia,
                                 Trivia => (TDH    => TDH'Access,
-                                           Token  => I,
-                                           Trivia => D)));
+                                           Index => (I, D))));
             end loop;
          end loop;
       end Append_Trivias;

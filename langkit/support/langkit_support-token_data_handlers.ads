@@ -42,12 +42,26 @@ package Langkit_Support.Token_Data_Handlers is
    First_Token_Index : constant Token_Index := Token_Index'First + 1;
 
    type Token_Or_Trivia_Index is record
-      Index     : Token_Index;
-      Is_Trivia : Boolean;
+      Token, Trivia : Token_Index;
+      --  Indices that identify what this refers to.
+      --
+      --  * If this references a token, then Token is the corresponding index
+      --    in TDH.Tokens and Trivia is No_Token_Index.
+      --
+      --  * If this references a trivia that comes before the first token,
+      --    Token is No_Token_Index while Trivia is the corresponding index in
+      --    TDH.Trivias.
+      --
+      --  * If this references a trivia that comes after some token, Token is
+      --    the index for this token and Trivia is the corresponding index for
+      --    this trivia.
+      --
+      --  * If this references no token, both Token and Trivia are
+      --    No_Token_Index.
    end record;
 
    No_Token_Or_Trivia_Index : constant Token_Or_Trivia_Index :=
-     (No_Token_Index, False);
+     (No_Token_Index, No_Token_Index);
 
    package Token_Index_Vectors is new Langkit_Support.Vectors
      (Element_Type => Token_Index);
@@ -127,6 +141,22 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Last_Token (TDH : Token_Data_Handler) return Token_Index;
    --  Return the index of the last token in TDH
+
+   function Next
+     (Token : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler) return Token_Or_Trivia_Index;
+   --  Return the element that follows Token in the logical sequence of
+   --  tokens/trivias that TDH holds. This just returns
+   --  No_Token_Or_Trivia_Index if Token is No_Token_Or_Trivia_Index or if it
+   --  is the last sequence item.
+
+   function Previous
+     (Token : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler) return Token_Or_Trivia_Index;
+   --  Return the element that precedes Token in the logical sequence of
+   --  tokens/trivias that TDH holds. This just returns
+   --  No_Token_Or_Trivia_Index if Token is No_Token_Or_Trivia_Index or if it
+   --  is the first sequence item.
 
    function Previous_Token
      (Trivia : Token_Index; TDH : Token_Data_Handler) return Token_Index;

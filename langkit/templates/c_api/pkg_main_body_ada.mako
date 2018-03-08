@@ -1145,8 +1145,8 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          K : Token_Kind := D.Kind;
       begin
          return (Token_Data   => Convert (Token.TDH),
-                 Token_Index  => int (Token.Token),
-                 Trivia_Index => int (Token.Trivia),
+                 Token_Index  => int (Token.Index.Token),
+                 Trivia_Index => int (Token.Index.Trivia),
                  Kind         => K'Enum_Rep,
                  Text         => Wrap
                    (Text_Cst_Access (Token.TDH.Source_Buffer),
@@ -1180,9 +1180,9 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    begin
       return (if Token.Token_Data = Null_Address
               then No_Token
-              else (TDH    => Convert (Token.Token_Data),
-                    Token  => Token_Index (Token.Token_Index),
-                    Trivia => Token_Index (Token.Trivia_Index)));
+              else (TDH   => Convert (Token.Token_Data),
+                    Index => (Token  => Token_Index (Token.Token_Index),
+                              Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;
 
    ${array_types.body(T.root_node.array)}

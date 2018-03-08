@@ -1350,12 +1350,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
          raise Property_Error with
            ("Cannot associate a token and a node from different analysis"
             & " units");
-      elsif Token.Trivia /= No_Token_Index then
+      elsif Token.Index.Trivia /= No_Token_Index then
          raise Property_Error with
            ("A node cannot hold trivia");
       end if;
 
-      return Token.Token;
+      return Token.Index.Token;
    end Stored_Token;
 
    --------------
@@ -1424,10 +1424,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Raw_Data : Lexer.Token_Data_Type) return Analysis.Token_Data_Type is
    begin
       return (Kind          => Raw_Data.Kind,
-              Is_Trivia     => Token.Trivia /= No_Token_Index,
-              Index         => (if Token.Trivia = No_Token_Index
-                                then Token.Token
-                                else Token.Trivia),
+              Is_Trivia     => Token.Index.Trivia /= No_Token_Index,
+              Index         => (if Token.Index.Trivia = No_Token_Index
+                                then Token.Index.Token
+                                else Token.Index.Trivia),
               Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
               Source_First  => Raw_Data.Source_First,
               Source_Last   => Raw_Data.Source_Last,
@@ -1445,8 +1445,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (if Index = No_Token_Index
       then No_Token
       else (TDH    => Token_Data (Node.Unit),
-            Token  => Index,
-            Trivia => No_Token_Index));
+            Index  => (Index, No_Token_Index)));
 
    -------------
    -- Is_Null --

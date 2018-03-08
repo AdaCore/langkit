@@ -510,28 +510,14 @@ private
    -----------------------------------
 
    type Token_Type is record
-      TDH           : Token_Data_Handler_Access;
+      TDH : Token_Data_Handler_Access;
       --  Token data handler that owns this token
 
-      Token, Trivia : Token_Index;
-      --  Indices that identify what this token refers to.
-      --
-      --  * If this references a token, then Token is the corresponding index
-      --    in TDH.Tokens and Trivia is No_Token_Index.
-      --
-      --  * If this references a trivia that comes before the first token,
-      --    Token is No_Token_Index while Trivia is the corresponding index in
-      --    TDH.Trivias.
-      --
-      --  * If this references a trivia that comes after some token, Token is
-      --    the index for this token and Trivia is the corresponding index for
-      --    this trivia.
-      --
-      --  * If this references no token, both Token and Trivia are
-      --    No_Token_Index.
+      Index : Token_Or_Trivia_Index;
+      --  Identifier for the trivia or the token this refers to
    end record;
 
-   No_Token : constant Token_Type := (null, No_Token_Index, No_Token_Index);
+   No_Token : constant Token_Type := (null, No_Token_Or_Trivia_Index);
 
    type Token_Data_Type is record
       Kind          : Token_Kind;
