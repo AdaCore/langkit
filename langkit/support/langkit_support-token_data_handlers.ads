@@ -47,12 +47,12 @@ package Langkit_Support.Token_Data_Handlers is
      (Element_Type => Token_Index);
 
    type Token_Data_Handler is record
-      Source_Buffer     : Text_Access;
+      Source_Buffer : Text_Access;
       --  The whole source buffer. It belongs to this token data handler, and
       --  will be deallocated along with it.
 
-      Source_First      : Positive;
-      Source_Last       : Natural;
+      Source_First : Positive;
+      Source_Last  : Natural;
       --  Actual bounds in Source_Buffer for the source text.
       --
       --  Because of Quex's hackish way of working, Source_Buffer actually has
@@ -60,10 +60,10 @@ package Langkit_Support.Token_Data_Handlers is
       --  elements, at the beginning and at the end of Source_Buffer don't
       --  actually belong to the sources.
 
-      Tokens            : Token_Vectors.Vector;
+      Tokens : Token_Vectors.Vector;
       --  Sequence of tokens in the same order as found in the source file
 
-      Trivias           : Trivia_Vectors.Vector;
+      Trivias : Trivia_Vectors.Vector;
       --  Sequence of trivia in the same order as found in the source file.
       --  Trivia are stored in a way that is related to the neighbor tokens:
       --
@@ -86,7 +86,7 @@ package Langkit_Support.Token_Data_Handlers is
       --  token, then the second entry stands for the trivia that come after
       --  the first token, and so on.
 
-      Symbols           : Symbol_Table;
+      Symbols : Symbol_Table;
    end record;
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
