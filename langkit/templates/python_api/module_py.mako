@@ -394,6 +394,14 @@ class AnalysisUnit(object):
         ${py_doc('langkit.unit_trivia_count', 8)}
         return _unit_trivia_count(self._c_value)
 
+    def lookup_token(self, sloc):
+        ${py_doc('langkit.unit_lookup_token', 8)}
+        unit = AnalysisUnit._unwrap(self)
+        _sloc = Sloc._c_type._unwrap(sloc)
+        tok = Token()
+        _unit_lookup_token(unit, ctypes.byref(_sloc), ctypes.byref(tok))
+        return tok._wrap()
+
     def iter_tokens(self):
         """
         Return an iterator that yields all the tokens in this unit.
@@ -1362,6 +1370,13 @@ _unit_token_count = _import_func(
 _unit_trivia_count = _import_func(
     "${capi.get_name('unit_trivia_count')}",
     [AnalysisUnit._c_type], ctypes.c_int
+)
+_unit_lookup_token = _import_func(
+    "${capi.get_name('unit_lookup_token')}",
+    [AnalysisUnit._c_type,
+     ctypes.POINTER(Sloc._c_type),
+     ctypes.POINTER(Token)],
+    None
 )
 _unit_filename = _import_func(
     "${capi.get_name('unit_filename')}",

@@ -280,6 +280,15 @@ package ${ada_lib_name}.Analysis.Implementation.C is
            External_Name => "${capi.get_name('unit_trivia_count')}";
    ${ada_c_doc('langkit.unit_trivia_count', 3)}
 
+   procedure ${capi.get_name('unit_lookup_token')}
+     (Unit   : ${analysis_unit_type};
+      Sloc   : access ${sloc_type};
+      Result : access ${token_type})
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name('unit_lookup_token')}";
+   ${ada_c_doc('langkit.unit_lookup_token', 3)}
+
    function ${capi.get_name('unit_filename')}
      (Unit : ${analysis_unit_type})
       return chars_ptr

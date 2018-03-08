@@ -351,6 +351,25 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          return -1;
    end;
 
+   procedure ${capi.get_name('unit_lookup_token')}
+     (Unit   : ${analysis_unit_type};
+      Sloc   : access ${sloc_type};
+      Result : access ${token_type}) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         U   : constant Analysis_Unit := Unwrap (Unit);
+         S   : constant Source_Location := Unwrap (Sloc.all);
+         Tok : constant Token_Type := Lookup_Token (U, S);
+      begin
+         Result.all := Wrap (Tok);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    function ${capi.get_name('unit_filename')}
      (Unit : ${analysis_unit_type}) return chars_ptr is
    begin
