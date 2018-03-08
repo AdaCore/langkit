@@ -20,5 +20,5 @@ class Example(FooNode):
 
 g = Grammar('main_rule')
 g.add_rules(main_rule=List(Example('example')))
-build_and_run(g, ada_main='main.adb')
+build_and_run(g, py_script='main.py', ada_main='main.adb')
 print('Done')
