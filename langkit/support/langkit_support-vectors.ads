@@ -43,6 +43,9 @@ package Langkit_Support.Vectors is
 
    type Element_Access is not null access all Element_Type;
 
+   function Is_Empty (Self : Vector) return Boolean;
+   --  Return whether Self is an empty vector
+
    procedure Append (Self : in out Vector; Element : Element_Type)
      with Inline;
    --  Appends Element to Self

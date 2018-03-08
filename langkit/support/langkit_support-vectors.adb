@@ -9,6 +9,15 @@ package body Langkit_Support.Vectors is
 
    El_Size : constant size_t := Elements_Array'Component_Size / Storage_Unit;
 
+   --------------
+   -- Is_Empty --
+   --------------
+
+   function Is_Empty (Self : Vector) return Boolean is
+   begin
+      return Self.Size = 0;
+   end Is_Empty;
+
    -------------
    -- Reserve --
    -------------
