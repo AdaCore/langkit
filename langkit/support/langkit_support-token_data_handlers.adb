@@ -189,6 +189,49 @@ package body Langkit_Support.Token_Data_Handlers is
       return Token_Index (Token_Vectors.Last_Index (TDH.Tokens));
    end Last_Token;
 
+   ---------------------------
+   -- First_Token_Or_Trivia --
+   ---------------------------
+
+   function First_Token_Or_Trivia
+     (TDH : Token_Data_Handler) return Token_Or_Trivia_Index is
+   begin
+      if TDH.Tokens_To_Trivias.Is_Empty
+         or else TDH.Tokens_To_Trivias.First_Element
+                 = Integer (No_Token_Index)
+      then
+         --  There is no leading trivia: return the first token
+
+         return (if TDH.Tokens.Is_Empty
+                 then No_Token_Or_Trivia_Index
+                 else (Token_Index (TDH.Tokens.First_Index), No_Token_Index));
+
+      else
+         return (No_Token_Index, Token_Index (TDH.Tokens.First_Index));
+      end if;
+   end First_Token_Or_Trivia;
+
+   --------------------------
+   -- Last_Token_Or_Trivia --
+   --------------------------
+
+   function Last_Token_Or_Trivia
+     (TDH : Token_Data_Handler) return Token_Or_Trivia_Index is
+   begin
+      if TDH.Tokens_To_Trivias.Is_Empty
+         or else TDH.Tokens_To_Trivias.Last_Element = Integer (No_Token_Index)
+      then
+         --  There is no trailing trivia: return the last token
+
+         return (if TDH.Tokens.Is_Empty
+                 then No_Token_Or_Trivia_Index
+                 else (Token_Index (TDH.Tokens.Last_Index), No_Token_Index));
+
+      else
+         return (No_Token_Index, Token_Index (TDH.Trivias.First_Index));
+      end if;
+   end Last_Token_Or_Trivia;
+
    ----------
    -- Next --
    ----------

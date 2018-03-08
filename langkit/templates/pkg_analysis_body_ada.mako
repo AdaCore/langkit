@@ -823,14 +823,14 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function First_Token (Unit : Analysis_Unit) return Token_Type is
-     (First_Token (Unit.TDH'Access));
+     (Wrap (First_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
 
    ----------------
    -- Last_Token --
    ----------------
 
    function Last_Token (Unit : Analysis_Unit) return Token_Type is
-     (Last_Token (Unit.TDH'Access));
+     (Wrap (Last_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
 
    -----------------
    -- Token_Count --
@@ -881,56 +881,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       return To_String (Unit.Charset);
    end Get_Charset;
-
-   -----------------
-   -- First_Token --
-   -----------------
-
-   function First_Token (TDH : Token_Data_Handler_Access) return Token_Type is
-      use Token_Vectors, Trivia_Vectors, Token_Data_Handlers.Integer_Vectors;
-   begin
-      if Length (TDH.Tokens_To_Trivias) = 0
-         or else (First_Element (TDH.Tokens_To_Trivias)
-                  = Integer (No_Token_Index))
-      then
-         --  There is no leading trivia: return the first token
-
-         return (if Length (TDH.Tokens) = 0
-                 then No_Token
-                 else (TDH,
-                       (Token_Index (First_Index (TDH.Tokens)),
-                        No_Token_Index)));
-
-      else
-         return (TDH, (No_Token_Index,
-                       Token_Index (First_Index (TDH.Trivias))));
-      end if;
-   end First_Token;
-
-   ----------------
-   -- Last_Token --
-   ----------------
-
-   function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type is
-      use Token_Vectors, Trivia_Vectors, Token_Data_Handlers.Integer_Vectors;
-   begin
-      if Length (TDH.Tokens_To_Trivias) = 0
-           or else
-         Last_Element (TDH.Tokens_To_Trivias) = Integer (No_Token_Index)
-      then
-         --  There is no trailing trivia: return the last token
-
-         return (if Length (TDH.Tokens) = 0
-                 then No_Token
-                 else (TDH,
-                       (Token_Index (Last_Index (TDH.Tokens)),
-                        No_Token_Index)));
-
-      else
-         return (TDH, (No_Token_Index,
-                       Token_Index (First_Index (TDH.Trivias))));
-      end if;
-   end Last_Token;
 
    ---------
    -- "<" --

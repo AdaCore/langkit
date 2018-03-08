@@ -540,12 +540,6 @@ private
       --  See documenation for the Sloc_Range accessor
    end record;
 
-   function First_Token (TDH : Token_Data_Handler_Access) return Token_Type;
-   --  Internal helper. Return a reference to the first token in TDH.
-
-   function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type;
-   --  Internal helper. Return a reference to the last token in TDH.
-
    --------------------------------
    -- Token Iterator (internals) --
    --------------------------------

@@ -142,6 +142,16 @@ package Langkit_Support.Token_Data_Handlers is
    function Last_Token (TDH : Token_Data_Handler) return Token_Index;
    --  Return the index of the last token in TDH
 
+   function First_Token_Or_Trivia
+     (TDH : Token_Data_Handler) return Token_Or_Trivia_Index;
+   --  Return the first element in the logical sequence of tokens/trivias in
+   --  TDH.
+
+   function Last_Token_Or_Trivia
+     (TDH : Token_Data_Handler) return Token_Or_Trivia_Index;
+   --  Return the last element in the logical sequence of tokens/trivias in
+   --  TDH.
+
    function Next
      (Token : Token_Or_Trivia_Index;
       TDH   : Token_Data_Handler) return Token_Or_Trivia_Index;
