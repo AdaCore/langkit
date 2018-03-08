@@ -1344,9 +1344,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Stored_Token
      (Node  : access ${root_node_value_type}'Class;
-      Token : Token_Type)
-      return Token_Index
-   is
+      Token : Token_Type) return Token_Index is
    begin
       if Convert (Node.Unit).TDH'Access /= Token.TDH then
          raise Property_Error with
