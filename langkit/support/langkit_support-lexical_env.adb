@@ -1630,7 +1630,7 @@ package body Langkit_Support.Lexical_Env is
          Append (Result, "<null>" & ASCII.LF);
       end if;
 
-      while E /= Null_Lexical_Env loop
+      while E /= Empty_Env loop
          declare
             Id_Str : constant String := '@' & Stripped_Image (Id);
          begin
