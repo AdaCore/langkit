@@ -656,8 +656,8 @@ package body Langkit_Support.Lexical_Env is
                   Combine (Self.Env.Default_MD, Metadata);
             begin
                for E of Self.Env.Grouped_Envs.all loop
-                  Local_Results.Concat (Get_Internal
-                    (E, Key, Recursive, Rebindings, MD));
+                  Local_Results.Concat
+                    (Get_Internal (E, Key, Recursive, Rebindings, MD));
                end loop;
             end;
             Traces.Decrease_Indent (Me);
