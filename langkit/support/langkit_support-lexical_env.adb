@@ -639,7 +639,8 @@ package body Langkit_Support.Lexical_Env is
          Traces.Trace
            (Me, "Get_Internal env="
             & Lexical_Env_Image (Self, Dump_Content => False)
-            & " key = " & Image (Key.all));
+            & " key = " & Image (Key.all)
+            & " recursive = " & Boolean'Image (Recursive));
       end if;
 
       case Self.Kind is
