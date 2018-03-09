@@ -160,6 +160,7 @@ package body Langkit_Support.Lexical_Env is
 
                   if not Is_Stale (Self.Env) then
                      Inc_Ref (Self.Env);
+                     Self.Computed := True;
                      return Self.Env;
                   end if;
 
