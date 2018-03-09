@@ -764,20 +764,22 @@ package body Langkit_Support.Lexical_Env is
 
       --  Phase 4: Get elements in non transitive referenced envs
 
-      if Has_Trace then
-         Traces.Trace
-           (Me, "Recursing on non transitive referenced environments");
-         Traces.Increase_Indent (Me);
-      end if;
-      for I in Self.Env.Referenced_Envs.First_Index
-            .. Self.Env.Referenced_Envs.Last_Index
-      loop
-         if not Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
-            Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+      if Recursive then
+         if Has_Trace then
+            Traces.Trace
+              (Me, "Recursing on non transitive referenced environments");
+            Traces.Increase_Indent (Me);
          end if;
-      end loop;
-      if Has_Trace then
-         Traces.Decrease_Indent (Me);
+         for I in Self.Env.Referenced_Envs.First_Index
+           .. Self.Env.Referenced_Envs.Last_Index
+         loop
+            if not Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
+               Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+            end if;
+         end loop;
+         if Has_Trace then
+            Traces.Decrease_Indent (Me);
+         end if;
       end if;
 
       Dec_Ref (Env);
