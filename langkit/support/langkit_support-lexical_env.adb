@@ -1763,6 +1763,11 @@ package body Langkit_Support.Lexical_Env is
    begin
       if Self.Owner /= No_Unit then
          return Get_Version (Self.Owner) > Self.Version;
+      elsif Self = Empty_Env then
+         --  Empty_Env is always stale, because since it is not linked to any
+         --  unit, we have no way to know if it is stale or not. TODO: Maybe we
+         --  should forbid its use in referenced envs.
+         return True;
       end if;
 
       case Self.Kind is
