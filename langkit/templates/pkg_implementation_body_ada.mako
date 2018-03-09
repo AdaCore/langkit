@@ -937,9 +937,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --
       --  We do this so that as soon as PLE is required on a sub-unit: the
       --  whole unit end up with its lexical environments populated.
-      if not Context.In_Populate_Lexical_Env
-         or else not Node.Unit.Is_Env_Populated
-      then
+      if not Context.In_Populate_Lexical_Env then
          begin
             Populate_Lexical_Env (Node.Unit);
             return False;
