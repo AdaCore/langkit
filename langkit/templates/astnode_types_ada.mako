@@ -316,22 +316,30 @@
    </%def>
 
    <%def name="emit_ref_env(ref_env)">
-      declare
-         Ref_Env_Nodes : ${ref_env.nodes_property.type.name} :=
-            ${call_prop(ref_env.nodes_property)};
+      % if ref_env.cond_prop:
+      if ${call_prop(ref_env.cond_prop)} then
+      % endif
 
-         Env : Lexical_Env :=
-           ${(call_prop(ref_env.dest_env_prop)
-              if ref_env.dest_env_prop else "Self.Self_Env")};
-      begin
-         Ref_Env
-           (${root_node_type_name} (Self),
-            Env,
-            Ref_Env_Nodes,
-            ${ref_env.resolver.name}'Access,
-            ${ref_env.transitive});
-         Dec_Ref (Ref_Env_Nodes);
-      end;
+         declare
+            Ref_Env_Nodes : ${ref_env.nodes_property.type.name} :=
+               ${call_prop(ref_env.nodes_property)};
+
+            Env : Lexical_Env :=
+              ${(call_prop(ref_env.dest_env_prop)
+                 if ref_env.dest_env_prop else "Self.Self_Env")};
+         begin
+            Ref_Env
+              (${root_node_type_name} (Self),
+               Env,
+               Ref_Env_Nodes,
+               ${ref_env.resolver.name}'Access,
+               ${ref_env.transitive});
+            Dec_Ref (Ref_Env_Nodes);
+         end;
+
+      % if ref_env.cond_prop:
+      end if;
+      % endif
    </%def>
 
    <%def name="emit_add_env(add_env)">

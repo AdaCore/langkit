@@ -47,7 +47,7 @@ def add_env(no_parent=False, transitive_parent=False):
     return AddEnv(no_parent, transitive_parent)
 
 
-def reference(nodes, through, transitive=False, dest_env=None):
+def reference(nodes, through, transitive=False, dest_env=None, cond=None):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
@@ -56,10 +56,13 @@ def reference(nodes, through, transitive=False, dest_env=None):
     :param PropertyDef through: A property reference.
     :param AbstractExpression|None dest_env: If passed, the destination
         environment for this reference.
+    :param AbstractExpression|None cond: If passed, an expression evaluating to
+        a boolean condition. If False, reference won't be made and the others
+        expressions won't be evaluated.
 
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes, transitive, dest_env=dest_env)
+    return RefEnvs(through, nodes, transitive, dest_env=dest_env, cond=cond)
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -409,7 +412,7 @@ class RefEnvs(EnvAction):
     """
 
     def __init__(self, resolver, nodes_expr, transitive=False,
-                 dest_env=None):
+                 dest_env=None, cond=None):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -453,6 +456,8 @@ class RefEnvs(EnvAction):
 
         self.dest_env = dest_env
 
+        self.cond = cond
+
     def create_internal_properties(self, env_spec):
         """
         Create the property that returns the list of nodes to resolve into
@@ -464,6 +469,10 @@ class RefEnvs(EnvAction):
 
         self.dest_env_prop = env_spec.create_internal_property(
             'Env_Dest', self.dest_env, T.LexicalEnvType
+        )
+
+        self.cond_prop = env_spec.create_internal_property(
+            'Ref_Cond', self.cond, T.BoolType
         )
 
     def check(self):
