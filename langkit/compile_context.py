@@ -19,6 +19,7 @@ from distutils.spawn import find_executable
 from glob import glob
 import os
 from os import path
+import re
 from StringIO import StringIO
 import subprocess
 import sys
@@ -42,6 +43,9 @@ from langkit.utils import Colors, printcol, topological_sort
 
 
 compile_ctx = None
+
+
+WHITE_LINE_RE = re.compile(r'^\s*$')
 
 
 def get_context(or_none=False):
@@ -140,10 +144,9 @@ def write_ada_file(out_dir, source_kind, qual_name, content,
     :param list[names.Name] qual_name: The qualified name of the Ada spec/body,
         as a list of Name components.
     :param str content: The source content to write to the file.
+    :param bool strip_white_lines: If true, omit lines that are either empty or
+        that contain only indentation.
     """
-    import re
-
-    r = re.compile(r'^\s*$')
     assert source_kind in (ADA_SPEC, ADA_BODY)
     file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
                                'ads' if source_kind == ADA_SPEC else 'adb')
@@ -152,9 +155,9 @@ def write_ada_file(out_dir, source_kind, qual_name, content,
     if strip_white_lines:
         new_content = []
         for l in content.splitlines():
-            if not r.match(l):
+            if not WHITE_LINE_RE.match(l):
                 new_content.append(l)
-        content = "\n".join(new_content)
+        content = '\n'.join(new_content)
 
     # TODO: no tool is able to pretty-print a single Ada source file
     write_source_file(file_path, content)
