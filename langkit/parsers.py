@@ -871,6 +871,9 @@ class DontSkip(Parser):
         self.subparser = subparser
         self.dontskip_parsers = dontskip_parsers
 
+    def __repr__(self):
+        return 'DontSkip({}, {})'.format(self.subparser, self.dontskip_parsers)
+
     def children(self):
         return [self.subparser]
 
