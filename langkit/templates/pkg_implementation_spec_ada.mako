@@ -1035,9 +1035,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       Unit_Version : Natural := 0;
       --  Version for this particular unit. This will be incremented every time
       --  a reparse occurs.
-
-      Envs_Dirty   : Boolean := False;
-      --  Flag used to know if envs should be reset after PLE or not
    end record;
 
    type Reparsed_Unit is record

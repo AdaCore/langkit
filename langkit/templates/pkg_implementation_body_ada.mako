@@ -2186,8 +2186,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             Foreign_Node_Entry_Vectors.Empty_Vector,
          Rebindings        => Env_Rebindings_Vectors.Empty_Vector,
          Cache_Version     => <>,
-         Unit_Version      => <>,
-         Envs_Dirty        => False
+         Unit_Version      => <>
          % if ctx.has_memoization:
          , Memoization_Map => <>
          % endif
@@ -2362,18 +2361,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end Recompute_Refd_Envs;
 
    begin
-      --  Referenced envs are not ever allowed to change *during* a
-      --  populate lexical env phase. However, we do marks envs as dirty so
-      --  that they will be reset as soon as somebody does a request outside of
-      --  PLE.
-      if Unit.Context.In_Populate_Lexical_Env then
-         Unit.Envs_Dirty := True;
-         return;
-      end if;
-
-      Unit.Envs_Dirty := False;
-
-      Traces.Trace (Main_Trace, "Reset Envs for unit " & Basename (Unit));
       --  First pass will deactivate every referenced envs that Unit possesses
       Deactivate_Refd_Envs (Unit.AST_Root);
 
@@ -2419,9 +2406,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Reset_Caches (Unit : Analysis_Unit) is
    begin
-      if Unit.Cache_Version < Unit.Context.Cache_Version
-         or else Unit.Envs_Dirty
-      then
+      if Unit.Cache_Version < Unit.Context.Cache_Version then
          Traces.Trace
            (Main_Trace,
             "In reset caches for unit " & Basename (Unit));
