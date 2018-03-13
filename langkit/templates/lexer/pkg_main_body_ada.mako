@@ -33,9 +33,9 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 
 package body ${ada_lib_name}.Lexer is
 
-   Quex_Leading_Characters : constant := 2;
+   Quex_Leading_Characters  : constant := 2;
    Quex_Trailing_Characters : constant := 1;
-   Quex_Extra_Characters : constant :=
+   Quex_Extra_Characters    : constant :=
       Quex_Leading_Characters + Quex_Trailing_Characters;
    --  Quex requires its input buffer to have two leading reserved bytes and
    --  one trailing. These are not part of the true payload, but must be
