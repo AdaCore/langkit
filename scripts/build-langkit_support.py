@@ -70,6 +70,10 @@ def main():
         default='dev',
         help='Selects a preset for build options'
     )
+    build_parser.add_argument(
+        '--gargs',
+        help='Additional arguments to pass to GPRbuild'
+    )
     build_parser.set_defaults(cmd='build-langkit-support')
 
     # Install
@@ -93,6 +97,9 @@ def main():
         argv.append('--disable-shared')
 
     argv.append(args.cmd)
+    if args.cmd == 'build-langkit-support':
+        if args.gargs:
+            argv.append('--gargs={}'.format(args.gargs))
     if args.cmd == 'install-langkit-support':
         argv.append(getattr(args, 'install-dir'))
 
