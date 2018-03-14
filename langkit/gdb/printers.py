@@ -349,7 +349,7 @@ class LexicalEnvPrinter(BasePrinter):
             array = array_ptr.cast(element_type.array(lower_bound,
                                                       upper_bound))
             for i in range(lower_bound, upper_bound + 1):
-                e = array[lower_bound]
+                e = array[i]
                 yield (str(i), e)
 
         elif env.kind == 'rebound':
