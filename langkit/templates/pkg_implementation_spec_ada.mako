@@ -1051,9 +1051,8 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Basename (Unit : Analysis_Unit) return String;
    --  Return the base filename for Unit
 
-   procedure Reset_Caches (Context : Analysis_Context);
-   --  Call Reset_Caches on all the units that Context contains. Note: this is
-   --  is done lazily, just incrementing a version number.
+   procedure Invalidate_Caches (Context : Analysis_Context);
+   --  Invalidate all caches (memoization and envs)
 
    procedure Reset_Caches (Unit : Analysis_Unit);
    --  Destroy Unit's memoization cache. This resets Unit's version number to

@@ -2299,11 +2299,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Node.Node;
    end Bare_Node;
 
-   ------------------
-   -- Reset_Caches --
-   ------------------
+   -----------------------
+   -- Invalidate_Caches --
+   -----------------------
 
-   procedure Reset_Caches (Context : Analysis_Context) is
+   procedure Invalidate_Caches (Context : Analysis_Context) is
    begin
       --  Increase Context's version number. If we are about to overflow, reset
       --  all version numbers from analysis units.
@@ -2315,7 +2315,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       else
          Context.Cache_Version := Context.Cache_Version + 1;
       end if;
-   end Reset_Caches;
+   end Invalidate_Caches;
 
    ------------------
    --  Reset_Envs  --
@@ -2601,7 +2601,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  As (re-)loading a unit can change how any AST node property in the
       --  whole analysis context behaves, we have to invalidate caches. This is
       --  likely overkill, but kill all caches here as it's easy to do.
-      Reset_Caches (Unit.Context);
+      Invalidate_Caches (Unit.Context);
 
       --  Reparsing will invalidate all lexical environments related to this
       --  unit, so destroy all related rebindings as well. This browses AST
