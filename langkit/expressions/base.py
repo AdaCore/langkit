@@ -1520,10 +1520,10 @@ class IntegerLiteralExpr(BindableLiteralExpr):
         )
 
     def render_private_ada_constant(self):
-        return str(self.literal)
+        return str(self.value)
 
     def render_public_ada_constant(self):
-        return str(self.literal)
+        return str(self.value)
 
     def render_python_constant(self):
         return str(self.value)
