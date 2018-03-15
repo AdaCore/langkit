@@ -12,7 +12,7 @@ from langkit.expressions.utils import array_aggr, assign_var
 
 
 @attr_call('get')
-def get(env, symbol, recursive=True):
+def get(env, symbol, recursive=True, from_node=None):
     """
     Perform a lexical environment lookup. Look for nodes that are associated to
     the given `symbol` in the `env` lexical environment.
@@ -20,37 +20,18 @@ def get(env, symbol, recursive=True):
     If `recursive` is true (the default), do a recursive lookup in parent
     environments and referenced ones. Otherwise, only look into `env`.
     """
-    return EnvGet(env, symbol, recursive=recursive)
-
-
-@attr_call('get_sequential')
-def get_sequential(env, symbol, sequential_from, recursive=True):
-    """
-    Like :dsl:`get`, but do a sequential lookup: discard AST nodes that belong
-    to the same unit as the `sequential_from` node and that appear before it.
-    """
-    return EnvGet(env, symbol, sequential=True,
-                  sequential_from=sequential_from, recursive=recursive)
+    return EnvGet(env, symbol, recursive=recursive,
+                  sequential_from=from_node)
 
 
 @attr_call('get_first')
-def get_first(env, symbol, recursive=True):
+def get_first(env, symbol, recursive=True, from_node=None):
     """
     Like :dsl:`get`, but only return the first entity found, or a null entity
     if no entity is found.
     """
-    return EnvGet(env, symbol, recursive=recursive, only_first=True)
-
-
-@attr_call('get_first_sequential')
-def get_first_sequential(env, symbol, sequential_from, recursive=True):
-    """
-    Like :dsl:`get_sequential`, but only return the first entity found, or a
-    null entity if no entity is found.
-    """
-    return EnvGet(env, symbol, sequential=True,
-                  sequential_from=sequential_from, recursive=recursive,
-                  only_first=True)
+    return EnvGet(env, symbol, recursive=recursive, only_first=True,
+                  sequential_from=from_node)
 
 
 class EnvGet(AbstractExpression):
@@ -60,12 +41,11 @@ class EnvGet(AbstractExpression):
 
     class Expr(ComputingExpr):
         def __init__(self, env_expr, key_expr, recursive_expr,
-                     sequential=False, sequential_from=None,
+                     sequential_from=None,
                      only_first=False, abstract_expr=None):
             self.env_expr = env_expr
             self.key_expr = key_expr
             self.recursive_expr = recursive_expr
-            self.sequential = sequential
             self.sequential_from = sequential_from
 
             self.static_type = (
@@ -121,7 +101,7 @@ class EnvGet(AbstractExpression):
                 'sequential_from': self.sequential_from,
             }
 
-    def __init__(self, env, symbol, sequential=False, sequential_from=Self,
+    def __init__(self, env, symbol, sequential_from=Self,
                  recursive=True, only_first=False):
         """
         :param AbstractExpression env: Expression that will yield the env to
@@ -129,8 +109,6 @@ class EnvGet(AbstractExpression):
         :param AbstractExpression|str symbol: Expression that will yield the
             symbol to use as a key on the env, or a string to turn into a
             symbol.
-        :param bool sequential: Whether resolution needs to be sequential or
-            not.
         :param AbstractExpression sequential_from: If resolution needs to be
             sequential, must be an expression to use as the reference node.
         :param AbstractExpression recursive: Expression that must return a
@@ -146,7 +124,6 @@ class EnvGet(AbstractExpression):
 
         self.env = env
         self.symbol = symbol
-        self.sequential = sequential
         self.sequential_from = sequential_from
         self.recursive = recursive
         self.only_first = only_first
@@ -171,11 +148,11 @@ class EnvGet(AbstractExpression):
         )
 
         from_expr = (construct(self.sequential_from, T.root_node)
-                     if self.sequential else None)
+                     if self.sequential_from is not None else None)
 
         recursive_expr = construct(self.recursive, T.BoolType)
 
-        return EnvGet.Expr(env_expr, sym_expr, recursive_expr, self.sequential,
+        return EnvGet.Expr(env_expr, sym_expr, recursive_expr,
                            from_expr, self.only_first,
                            abstract_expr=self)
 
