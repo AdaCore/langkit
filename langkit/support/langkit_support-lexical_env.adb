@@ -966,19 +966,18 @@ package body Langkit_Support.Lexical_Env is
             return Empty_Env;
          when others =>
             declare
-               subtype Grouped_Envs is
-                  Langkit_Support.Lexical_Env.Lexical_Env_Array;
                G_Envs : constant Lexical_Env_Array_Access :=
-                  new Grouped_Envs'(Grouped_Envs (Envs));
+                  new Lexical_Env_Array'(Envs);
             begin
                for E of Envs loop
                   Inc_Ref (E);
                end loop;
-               return Wrap (new Lexical_Env_Type'
-                             (Kind         => Grouped,
-                              Ref_Count    => <>,
-                              Grouped_Envs => G_Envs,
-                              Default_MD   => With_Md));
+               return Wrap
+                 (new Lexical_Env_Type'
+                    (Kind         => Grouped,
+                     Ref_Count    => <>,
+                     Grouped_Envs => G_Envs,
+                     Default_MD   => With_Md));
             end;
       end case;
    end Group;

@@ -20,8 +20,6 @@ procedure Main is
    B        : constant Lexical_Env :=
       Create (No_Env_Getter, 'B', Owner => True);
 
-   type Env_Array is array (Positive range <>) of Lexical_Env;
-   function Group is new Support.Envs.Group (Positive, Env_Array);
    Grouped : constant Lexical_Env := Group ((A, B));
 begin
    Add (A_Parent, Key_X, '1');

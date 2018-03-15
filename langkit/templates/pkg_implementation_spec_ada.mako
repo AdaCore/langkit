@@ -682,10 +682,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Simple getter that raises Property_Error on out-of-bound accesses.
    --  Useful for code generation.
 
-   function Group is new AST_Envs.Group
-     (Index_Type        => Positive,
-      Lexical_Env_Array => ${T.LexicalEnvType.array.api_name});
-
    function Group
      (Envs   : ${T.LexicalEnvType.array.name};
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name};

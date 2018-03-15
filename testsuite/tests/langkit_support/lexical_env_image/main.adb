@@ -37,7 +37,6 @@ procedure Main is
    Orphaned_1 : constant Lexical_Env := Orphan (Prim_B);
    Orphaned_2 : constant Lexical_Env := Orphan (Orphaned_1);
 
-   function Group is new Envs.Group (Positive, Lexical_Env_Array);
    Grouped: constant Lexical_Env :=
       Group ((Orphaned_1, Orphaned_2), (I => 1));
 

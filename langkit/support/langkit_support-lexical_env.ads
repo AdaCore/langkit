@@ -164,6 +164,8 @@ package Langkit_Support.Lexical_Env is
 
    Null_Lexical_Env : constant Lexical_Env := (null, 0, Primary, No_Unit, 0);
 
+   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
+
    type Lexical_Env_Resolver is access
      function (Ref : Entity) return Lexical_Env;
    --  Callback type for the lazy referenced env resolution mechanism
@@ -427,9 +429,6 @@ package Langkit_Support.Lexical_Env is
    function Env_Node (Self : Lexical_Env) return Element_T;
    --  Return the element node associated to Self, if any
 
-   generic
-      type Index_Type is range <>;
-      type Lexical_Env_Array is array (Index_Type range <>) of Lexical_Env;
    function Group
      (Envs    : Lexical_Env_Array;
       With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env;
@@ -602,7 +601,6 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Env_Rebindings_Pools.Map, Env_Rebindings_Pool);
 
-   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
    type Lexical_Env_Array_Access is access all Lexical_Env_Array;
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Lexical_Env_Array, Lexical_Env_Array_Access);

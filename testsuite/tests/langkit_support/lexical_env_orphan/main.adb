@@ -43,9 +43,6 @@ begin
    Put_Line (Get (Orphaned, Key_B));
 
    declare
-      type Env_Array is array (Positive range <>) of Lexical_Env;
-      function Group is new Support.Envs.Group (Positive, Env_Array);
-
       Transitive_Child : constant Lexical_Env :=
          Create (Simple_Env_Getter (Root), 'C', True, True);
 
