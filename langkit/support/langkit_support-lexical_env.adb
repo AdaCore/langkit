@@ -968,7 +968,7 @@ package body Langkit_Support.Lexical_Env is
       --  potential grouped envs.
 
       function Already_Has (E : Lexical_Env) return Boolean;
-      --  Returns whether the results already contain E.
+      --  Returns whether the results already contain E
 
       -----------------
       -- Already_Has --

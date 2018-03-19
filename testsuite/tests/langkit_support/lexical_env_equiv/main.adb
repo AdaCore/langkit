@@ -65,13 +65,15 @@ begin
    --    * they contain the same number of environment;
    --    * these environments are equivalent two by two;
    --    * the attached metadata is the same.
+   --  Additionally the Group primitive performs flattening and only keeps one
+   --  of each env.
    pragma Assert (Grouped_1 /= Grouped_2);
    pragma Assert (Grouped_1 /= Grouped_3);
    pragma Assert (Grouped_1 /= Grouped_4);
    pragma Assert (Grouped_1 /= Grouped_5);
    pragma Assert (Equivalent (Grouped_1, Grouped_2));
    pragma Assert (not Equivalent (Grouped_1, Grouped_3));
-   pragma Assert (not Equivalent (Grouped_1, Grouped_4));
+   pragma Assert (Equivalent (Grouped_1, Grouped_4));
    pragma Assert (not Equivalent (Grouped_1, Grouped_5));
 
    --  Two rebound environments are equivalent iff:
