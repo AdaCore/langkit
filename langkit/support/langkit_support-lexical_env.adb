@@ -959,27 +959,67 @@ package body Langkit_Support.Lexical_Env is
 
    function Group
      (Envs    : Lexical_Env_Array;
-      With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env is
-   begin
-      case Envs'Length is
-         when 0 =>
-            return Empty_Env;
-         when others =>
-            declare
-               G_Envs : constant Lexical_Env_Array_Access :=
-                  new Lexical_Env_Array'(Envs);
-            begin
-               for E of Envs loop
-                  Inc_Ref (E);
+      With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env
+   is
+      V : Lexical_Env_Vectors.Vector;
+
+      procedure Append_Envs (E : Lexical_Env);
+      --  Append envs from E to the envs vector. This takes care of flattening
+      --  potential grouped envs.
+
+      function Already_Has (E : Lexical_Env) return Boolean;
+      --  Returns whether the results already contain E.
+
+      -----------------
+      -- Already_Has --
+      -----------------
+
+      function Already_Has (E : Lexical_Env) return Boolean is
+      begin
+         for El of V loop
+            if Equivalent (El, E) then
+               return True;
+            end if;
+         end loop;
+         return False;
+      end Already_Has;
+
+      -----------------
+      -- Append_Envs --
+      -----------------
+
+      procedure Append_Envs (E : Lexical_Env) is
+      begin
+         case E.Kind is
+            --  Flatten grouped envs
+            when Grouped =>
+               for C of E.Env.Grouped_Envs.all loop
+                  Inc_Ref (C);
+                  Append_Envs (C);
                end loop;
-               return Wrap
-                 (new Lexical_Env_Type'
-                    (Kind         => Grouped,
-                     Ref_Count    => <>,
-                     Grouped_Envs => G_Envs,
-                     Default_MD   => With_Md));
-            end;
-      end case;
+            when others =>
+               Inc_Ref (E);
+               if not Already_Has (E) then
+                  V.Append (E);
+               end if;
+         end case;
+      end Append_Envs;
+   begin
+      if Envs'Length = 0 then
+         return Empty_Env;
+      end if;
+
+      for E of Envs loop
+         Append_Envs (E);
+      end loop;
+
+      return Wrap
+        (new Lexical_Env_Type'
+           (Kind         => Grouped,
+            Ref_Count    => <>,
+            Grouped_Envs =>
+               new Lexical_Env_Array'(Lexical_Env_Array (V.To_Array)),
+            Default_MD   => With_Md));
    end Group;
 
    ----------------
