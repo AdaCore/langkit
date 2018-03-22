@@ -439,15 +439,15 @@ package body Langkit_Support.Token_Data_Handlers is
    is
 
       function Compare
-        (Sloc  : Source_Location;
-         Index : Positive;
-         Token : Token_Data_Type) return Relative_Position
+        (Sloc        : Source_Location;
+         Dummy_Index : Positive;
+         Token       : Token_Data_Type) return Relative_Position
       is (Compare (Sloc_Range (Token), Sloc));
 
       function Compare
-        (Sloc   : Source_Location;
-         Index  : Positive;
-         Trivia : Trivia_Node) return Relative_Position
+        (Sloc        : Source_Location;
+         Dummy_Index : Positive;
+         Trivia      : Trivia_Node) return Relative_Position
       is (Compare (Sloc_Range (Trivia.T), Sloc));
 
       function Token_Floor is new Floor

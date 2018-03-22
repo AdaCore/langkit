@@ -185,4 +185,23 @@ package body Langkit_Support.Bump_Ptr.Vectors is
       return C.Chunk /= null and then C.Index_In_Chunk <= C.Chunk.Length;
    end Has_Element;
 
+   -----------------
+   -- First_Index --
+   -----------------
+
+   function First_Index (Self : Vector) return Index_Type is
+      pragma Unreferenced (Self);
+   begin
+      return Index_Type'First;
+   end First_Index;
+
+   ----------------
+   -- Last_Index --
+   ----------------
+
+   function Last_Index (Self : Vector) return Integer is
+   begin
+      return Index_Type'First + Length (Self) - 1;
+   end Last_Index;
+
 end Langkit_Support.Bump_Ptr.Vectors;

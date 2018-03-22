@@ -10,11 +10,9 @@ package Langkit_Support.Adalog.Pure_Relations is
    --------------------
 
    type False_Relation_Rec is null record;
-   function Apply (Self : in out False_Relation_Rec) return Solving_State is
-     (Unsatisfied);
+   function Apply (Self : in out False_Relation_Rec) return Solving_State;
    procedure Free (Self : in out False_Relation_Rec) is null;
-   function Custom_Image (Self : False_Relation_Rec) return String
-   is ("<False>");
+   function Custom_Image (Self : False_Relation_Rec) return String;
    package False_Relation is new Pure_Relation (Ty => False_Relation_Rec);
 
    function False_Rel return Relation
@@ -25,11 +23,9 @@ package Langkit_Support.Adalog.Pure_Relations is
    -------------------
 
    type True_Relation_Rec is null record;
-   function Apply (Self : in out True_Relation_Rec) return Solving_State is
-     (Satisfied);
+   function Apply (Self : in out True_Relation_Rec) return Solving_State;
    procedure Free (Self : in out True_Relation_Rec) is null;
-   function Custom_Image (Self : True_Relation_Rec) return String
-   is ("<True>");
+   function Custom_Image (Self : True_Relation_Rec) return String;
 
    package True_Relation is new Pure_Relation (Ty => True_Relation_Rec);
 

@@ -16,13 +16,14 @@ package Langkit_Support.Adalog.Refcounted_Eq_Same is
    No_Data : constant Dummy_Convert_Data := (null record);
 
    function Convert
-     (C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
+     (Dummy_C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
    is (From) with Inline;
 
    type Dummy_Equals_Data is null record;
    No_Equals_Data : constant Dummy_Equals_Data := (null record);
 
-   function Equals (Data : Dummy_Equals_Data; L, R : LR_Type) return Boolean
+   function Equals
+     (Dummy_Data : Dummy_Equals_Data; L, R : LR_Type) return Boolean
    is (L = R);
 
    package Refcounted_Impl is new Unify

@@ -38,13 +38,11 @@ package Langkit_Support.Bump_Ptr.Vectors is
       with Inline;
    --  Return the Length of the vector, ie. the number of elements it contains
 
-   function First_Index (Self : Vector) return Index_Type is
-     (Index_Type'First)
-      with Inline;
+   function First_Index (Self : Vector) return Index_Type
+     with Inline;
    --  Return the index of the first element in Self
 
-   function Last_Index (Self : Vector) return Integer is
-     (Index_Type'First + Length (Self) - 1)
+   function Last_Index (Self : Vector) return Integer
       with Inline;
    --  Return the index of the last element in Self, or First_Index (Self) - 1
    --  if Self is empty.

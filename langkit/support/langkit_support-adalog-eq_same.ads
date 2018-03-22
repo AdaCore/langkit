@@ -32,7 +32,8 @@ package Langkit_Support.Adalog.Eq_Same is
    type Dummy_Equals_Data is null record;
    No_Equals_Data : constant Dummy_Equals_Data := (null record);
 
-   function Equals (Data : Dummy_Equals_Data; L, R : LR_Type) return Boolean
+   function Equals
+     (Dummy_Data : Dummy_Equals_Data; L, R : LR_Type) return Boolean
    is (L = R);
 
    package Raw_Impl is new Unify
