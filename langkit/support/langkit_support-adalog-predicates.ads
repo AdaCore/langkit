@@ -104,7 +104,7 @@ package Langkit_Support.Adalog.Predicates is
       function Call (Self : Predicate_Holder; L : El_Type) return Boolean
       is (Self.Pred.all (L));
 
-      function Image (Self : Predicate_Holder) return String is ("");
+      function Image (Dummy_Self : Predicate_Holder) return String is ("");
 
       package Internal_Pred is new Predicate (El_Type, Var, Predicate_Holder);
 
