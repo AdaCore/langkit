@@ -994,12 +994,11 @@ package body Langkit_Support.Lexical_Env is
             --  Flatten grouped envs
             when Grouped =>
                for C of E.Env.Grouped_Envs.all loop
-                  Inc_Ref (C);
                   Append_Envs (C);
                end loop;
             when others =>
-               Inc_Ref (E);
                if not Already_Has (E) then
+                  Inc_Ref (E);
                   V.Append (E);
                end if;
          end case;
@@ -1013,13 +1012,16 @@ package body Langkit_Support.Lexical_Env is
          Append_Envs (E);
       end loop;
 
-      return Wrap
+      return L : constant Lexical_Env := Wrap
         (new Lexical_Env_Type'
            (Kind         => Grouped,
             Ref_Count    => <>,
             Grouped_Envs =>
                new Lexical_Env_Array'(Lexical_Env_Array (V.To_Array)),
-            Default_MD   => With_Md));
+            Default_MD   => With_Md))
+      do
+         Lexical_Env_Vectors.Destroy (V);
+      end return;
    end Group;
 
    ----------------
