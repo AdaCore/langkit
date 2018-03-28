@@ -98,6 +98,7 @@ def main():
 
     argv.append(args.cmd)
     if args.cmd == 'build-langkit-support':
+        argv.append('--build-mode={}'.format(args.build_mode))
         if args.gargs:
             argv.append('--gargs={}'.format(args.gargs))
     if args.cmd == 'install-langkit-support':
