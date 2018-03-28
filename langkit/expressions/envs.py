@@ -19,6 +19,9 @@ def get(env, symbol, recursive=True, from_node=None):
 
     If `recursive` is true (the default), do a recursive lookup in parent
     environments and referenced ones. Otherwise, only look into `env`.
+
+    If `from_node` is not None, do a sequential lookup: discard AST nodes that
+    belong to the same unit as `from_node` node and that appear before it.
     """
     return EnvGet(env, symbol, recursive=recursive,
                   sequential_from=from_node)
