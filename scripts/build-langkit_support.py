@@ -93,7 +93,9 @@ def main():
         argv.append('--disable-shared')
 
     argv.append(args.cmd)
-    if args.cmd == 'install-langkit-support':
+    if args.cmd == 'build-langkit-support':
+        argv.append('--build-mode={}'.format(args.build_mode))
+    elif args.cmd == 'install-langkit-support':
         argv.append(getattr(args, 'install-dir'))
 
     m.run(argv)
