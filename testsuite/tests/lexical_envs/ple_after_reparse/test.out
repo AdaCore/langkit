@@ -16,8 +16,8 @@ Starting resolution...
 [MAIN_TRACE] In reset caches for unit a.txt
 [MAIN_TRACE] Flushing the populate lexical env queue
    [MAIN_TRACE] Remove exiled entries and extract foreign nodes for: a.txt
-   [MAIN_TRACE] Populating lexical envs for unit: a.txt
    [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
+   [MAIN_TRACE] Populating lexical envs for unit: a.txt
    <Var a.txt:4:4-4:10> -> <Scope b.txt:1:1-3:2>
    <Var a.txt:5:4-5:13> -> <Var b.txt:2:4-2:10>
    <Var a.txt:6:4-6:15> -> <Var b-c.txt:2:4-2:10>
@@ -28,10 +28,11 @@ Starting resolution...
 [MAIN_TRACE] In reset caches for unit a.txt
 [MAIN_TRACE] Flushing the populate lexical env queue
    [MAIN_TRACE] Remove exiled entries and extract foreign nodes for: b.txt
-   [MAIN_TRACE] Populating lexical envs for unit: b.txt
-   [MAIN_TRACE] In reset caches for unit b.txt
    [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
-   [MAIN_TRACE] In reset caches for unit b-c.txt
+      [MAIN_TRACE] Rerooting: <Scope 1:1-3:2> (from b-c.txt)
+      [MAIN_TRACE] In reset caches for unit b-c.txt
+      [MAIN_TRACE] Populating lexical envs for unit: b.txt
+      [MAIN_TRACE] In reset caches for unit b.txt
    <Var a.txt:4:4-4:10> -> <Scope b.txt:1:1-3:2>
    <Var a.txt:5:4-5:13> -> <Var b.txt:2:4-2:10>
    <Var a.txt:6:4-6:15> -> <Var b-c.txt:2:4-2:10>
@@ -42,9 +43,9 @@ Starting resolution...
 [MAIN_TRACE] In reset caches for unit a.txt
 [MAIN_TRACE] Flushing the populate lexical env queue
    [MAIN_TRACE] Remove exiled entries and extract foreign nodes for: b-c.txt
+   [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
    [MAIN_TRACE] Populating lexical envs for unit: b-c.txt
    [MAIN_TRACE] In reset caches for unit b-c.txt
-   [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
    <Var a.txt:4:4-4:10> -> <Scope b.txt:1:1-3:2>
    <Var a.txt:5:4-5:13> -> <Var b.txt:2:4-2:10>
    <Var a.txt:6:4-6:15> -> <Var b-c.txt:2:4-2:10>
@@ -57,11 +58,11 @@ Starting resolution...
 [MAIN_TRACE] Flushing the populate lexical env queue
    [MAIN_TRACE] Remove exiled entries and extract foreign nodes for: b-c.txt
    [MAIN_TRACE] Remove exiled entries and extract foreign nodes for: b.txt
+   [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
    [MAIN_TRACE] Populating lexical envs for unit: b-c.txt
    [MAIN_TRACE] In reset caches for unit b-c.txt
    [MAIN_TRACE] Populating lexical envs for unit: b.txt
    [MAIN_TRACE] In reset caches for unit b.txt
-   [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
    <Var a.txt:4:4-4:10> -> <Scope b.txt:1:1-3:2>
    <Var a.txt:5:4-5:13> -> <Var b.txt:2:4-2:10>
    <Var a.txt:6:4-6:15> -> <Var b-c.txt:2:4-2:10>
@@ -73,10 +74,11 @@ Starting resolution...
 [MAIN_TRACE] Flushing the populate lexical env queue
    [MAIN_TRACE] Remove exiled entries and extract foreign nodes for: b.txt
    [MAIN_TRACE] Reroot foreign nodes (PLE queue flush)
-   [MAIN_TRACE] In reset caches for unit b-c.txt
-   [MAIN_TRACE] Parsing unit b.txt
-   [MAIN_TRACE] Populating lexical envs for unit: b.txt
-   [MAIN_TRACE] In reset caches for unit b.txt
+      [MAIN_TRACE] Rerooting: <Scope 1:1-3:2> (from b-c.txt)
+      [MAIN_TRACE] In reset caches for unit b-c.txt
+      [MAIN_TRACE] Parsing unit b.txt
+      [MAIN_TRACE] Populating lexical envs for unit: b.txt
+      [MAIN_TRACE] In reset caches for unit b.txt
 [MAIN_TRACE] In reset caches for unit a.txt
    <Var a.txt:4:4-4:10> -> <Scope b.txt:1:1-3:2>
    <Var a.txt:5:4-5:13> -> <Var b.txt:2:4-2:10>

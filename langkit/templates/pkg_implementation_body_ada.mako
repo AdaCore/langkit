@@ -2676,18 +2676,30 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Destroy_Unit_Destroyables (Unit);
       end loop;
 
+      --  Reroot all foreign nodes. Do this before we re-run PLE on queued
+      --  units so that we get a chance to run PLE in dependency order.
+      Traces.Trace (Main_Trace, "Reroot foreign nodes (PLE queue flush)");
+      Traces.Increase_Indent (Main_Trace);
+      for FN of Foreign_Nodes loop
+         declare
+            use GNATCOLL.VFS;
+
+            Node_Image : constant String := Image (FN.Short_Image);
+            Unit_Name  : constant String := +FN.Unit.File_Name.Base_Name;
+         begin
+            Traces.Trace (Main_Trace, "Rerooting: " & Node_Image
+                                      & " (from " & Unit_Name & ")");
+         end;
+         Reroot_Foreign_Node (FN);
+      end loop;
+      Traces.Decrease_Indent (Main_Trace);
+
       --  Recreate the lexical env structure for queued units, unless they were
       --- removed.
       for Unit of Context.Populate_Lexical_Env_Queue loop
          if Context.Units.Contains (Unit.File_Name) then
             Populate_Lexical_Env (Unit);
          end if;
-      end loop;
-
-      --  Reroot all foreign nodes
-      Traces.Trace (Main_Trace, "Reroot foreign nodes (PLE queue flush)");
-      for FN of Foreign_Nodes loop
-         Reroot_Foreign_Node (FN);
       end loop;
 
       Foreign_Nodes.Destroy;
