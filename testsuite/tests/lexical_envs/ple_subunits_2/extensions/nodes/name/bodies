@@ -1,0 +1,40 @@
+--  vim: ft=ada
+
+function P_Referenced_Unit_Or_Error
+  (Node     : access Bare_Name_Type'Class;
+   Or_Error : Boolean)
+   return Analysis_Unit
+is
+   Ctx            : constant Analysis_Context := Node.Unit.Context;
+
+   AB : constant Symbol_Type_Array :=
+     (Lookup_Symbol (Ctx, "a"), Lookup_Symbol (Ctx, "b"));
+   ABCD : constant Symbol_Type_Array :=
+     (Lookup_Symbol (Ctx, "a"), Lookup_Symbol (Ctx, "b"),
+      Lookup_Symbol (Ctx, "c"), Lookup_Symbol (Ctx, "d"));
+
+   Requested_Name : Symbol_Type_Array_Access := Node.P_Symbols;
+   Root           : constant Bare_Foo_Node :=
+     (if Requested_Name.Items in AB | ABCD
+      then Get_From_File (Ctx, "source2.txt").AST_Root
+      else Get_From_File (Ctx, "source1.txt").AST_Root);
+   Has_Errors     : Boolean := False;
+begin
+   for I in 1 .. Root.Abstract_Children_Count loop
+      declare
+         S  : constant Bare_Scope := Bare_Scope (Root.Child (I));
+         SN : constant Bare_Name := S.F_Name;
+         N  : Symbol_Type_Array_Access := SN.P_Symbols;
+      begin
+         if N.Items = Requested_Name.Items then
+            Has_Errors := S.Populate_Lexical_Env or else Has_Errors;
+         end if;
+         Dec_Ref (N);
+      end;
+   end loop;
+   Dec_Ref (Requested_Name);
+   if Has_Errors then
+      raise Property_Error;
+   end if;
+   return Root.Unit;
+end P_Referenced_Unit_Or_Error;
