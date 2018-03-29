@@ -160,9 +160,9 @@
             ${ada_doc(f, 12)}
        % endfor
 
-       % if cls == ctx.subunit_root:
+       % if cls == ctx.ple_unit_root:
          Is_Env_Populated : Boolean := False;
-         --  Whether this subunit root was processed by Populate_Lexical_Env
+         --  Whether this PLE unit root was processed by Populate_Lexical_Env
        % endif
 
        ${exts.include_extension(ext)}

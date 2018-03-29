@@ -12,10 +12,10 @@ def construct_multiple():
         pass
 
     class Example1(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     class Example2(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(main_rule=Or(Example1('example', ','),
@@ -29,7 +29,7 @@ def construct_derived():
         pass
 
     class Example(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     class DerivedExample(Example):
         pass
@@ -50,7 +50,7 @@ def construct_synthetic():
 
     @synthetic
     class SyntheticNode(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(main_rule=Example('example'))
@@ -66,7 +66,7 @@ def construct_bad_main_rule_1():
         example = Field()
 
     class Example(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(main_rule=ExampleWrapper(List(Example('example'))))
@@ -82,7 +82,7 @@ def construct_bad_main_rule_2():
         example = Field()
 
     class Example(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(main_rule=List(ExampleWrapper(Example('example'))))
@@ -95,7 +95,7 @@ def construct_non_root_list():
         pass
 
     class Subunit(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
         fields = Field()
 
     grammar = Grammar('main_rule')
@@ -109,7 +109,7 @@ def construct_multiple_lists():
         pass
 
     class Example(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
 
     class ListOfExample(Example.list):
         pass
@@ -120,13 +120,13 @@ def construct_multiple_lists():
     return grammar
 
 
-def construct_subunit_root_field():
+def construct_ple_unit_root_field():
 
     class FooNode(ASTNode):
         pass
 
     class Example(FooNode):
-        annotations = Annotations(subunit_root=True)
+        annotations = Annotations(ple_unit_root=True)
         child = Field()
 
     grammar = Grammar('main_rule')
@@ -143,7 +143,7 @@ for constructor in (
     construct_bad_main_rule_2,
     construct_non_root_list,
     construct_multiple_lists,
-    construct_subunit_root_field
+    construct_ple_unit_root_field
 ):
     print('= {} ='.format(constructor.__name__[10:]))
     grammar = constructor()

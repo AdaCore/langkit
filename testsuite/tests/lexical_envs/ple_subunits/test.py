@@ -1,5 +1,5 @@
 """
-Test that thanks to the sub-unit mechanism, the PLE pass can process sub-units
+Test that thanks to the PLE unit mechanism, the PLE pass can process PLE units
 in an arbitrary order, so that first nodes in the top-level list can use
 lexical environments created by list items that appear later.
 """
@@ -76,7 +76,7 @@ class Scope(FooNode):
     deps = Field()
     defs = Field()
 
-    annotations = Annotations(subunit_root=True)
+    annotations = Annotations(ple_unit_root=True)
 
     @langkit_property()
     def initial_env():

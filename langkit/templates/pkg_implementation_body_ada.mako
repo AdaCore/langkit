@@ -922,9 +922,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end Populate_Internal;
 
    begin
-      % if ctx.subunit_root:
-         --  This is intended to be called on sub-unit roots only
-         if Node.Kind /= ${ctx.subunit_root.ada_kind_name} then
+      % if ctx.ple_unit_root:
+         --  This is intended to be called on PLE unit roots only
+         if Node.Kind /= ${ctx.ple_unit_root.ada_kind_name} then
             raise Program_Error;
          end if;
       % endif
@@ -932,10 +932,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  This function is meant to be called during an existing PLE pass. If
       --  if is called outside of this context, run the PLE pass on Node's
       --  analysis unit. Likewise, if PLE has not run on the unit that owns
-      --  this sub-unit yet, do a full run, which will in the end trigger the
-      --  PLE on this sub-unit.
+      --  this PLE unit yet, do a full run, which will in the end trigger the
+      --  PLE on this PLE unit.
       --
-      --  We do this so that as soon as PLE is required on a sub-unit: the
+      --  We do this so that as soon as PLE is required on a PLE unit: the
       --  whole unit end up with its lexical environments populated.
       if not Context.In_Populate_Lexical_Env then
          begin
@@ -947,17 +947,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
          end;
       end if;
 
-      % if ctx.subunit_root:
+      % if ctx.ple_unit_root:
          --  Do nothing if its lexical envs have already been populated for
          --  this node.
          declare
-            Subunit : constant ${ctx.subunit_root.name} :=
-               ${ctx.subunit_root.name} (Node);
+            PLE_Unit_Root : constant ${ctx.ple_unit_root.name} :=
+               ${ctx.ple_unit_root.name} (Node);
          begin
-            if Subunit.Is_Env_Populated then
+            if PLE_Unit_Root.Is_Env_Populated then
                return False;
             end if;
-            Subunit.Is_Env_Populated := True;
+            PLE_Unit_Root.Is_Env_Populated := True;
          end;
 
       % else:

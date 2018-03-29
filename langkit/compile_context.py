@@ -674,9 +674,9 @@ class CompileCtx(object):
         :type: list[langkit.compiled_types.Field]
         """
 
-        self.subunit_root = None
+        self.ple_unit_root = None
         """
-        Node to be used as the sub-analysis unit root, if any.
+        Node to be used as the PLE unit root, if any.
 
         :type: ASTNodeType|None
         """
@@ -825,63 +825,63 @@ class CompileCtx(object):
         # Langkit_Support.Lexical_Env generic package requires it.
         T.env_md.require_hash_function()
 
-    def check_subunit_root(self):
+    def check_ple_unit_root(self):
         """
-        Check that if the "subunit_root" node annotation is used, it is valid.
+        Check that if the "ple_unit_root" node annotation is used, it is valid.
         """
-        # Locate the subunit root (if any), checking that we at most one such
+        # Locate the PLE_unit root (if any), checking that we at most one such
         # node annotation.
         for n in self.astnode_types:
-            if not n.annotations.subunit_root:
+            if not n.annotations.ple_unit_root:
                 continue
 
             with n.diagnostic_context:
-                if self.subunit_root:
+                if self.ple_unit_root:
                     check_source_language(
-                        False, 'Only one sub-unit root is allowed: {}'
-                               .format(self.subunit_root.dsl_name)
+                        False, 'Only one PLE unit root is allowed: {}'
+                               .format(self.ple_unit_root.dsl_name)
                     )
                 check_source_language(
                     not n.subclasses,
-                    'No node can derive from subunit roots: here we have'
+                    'No node can derive from PLE unit roots: here we have'
                     ' {}'.format(', '.join(c.dsl_name for c in n.subclasses))
                 )
                 check_source_language(
                     not n.synthetic,
-                    'Synthetic nodes cannot be sub-unit roots'
+                    'Synthetic nodes cannot be PLE unit roots'
                 )
-                self.subunit_root = n
+                self.ple_unit_root = n
 
-        if self.subunit_root is None:
+        if self.ple_unit_root is None:
             return
 
         check_source_language(
-            self.subunit_root in self.list_types,
-            'At least one parser must create lists of sub-unit roots'
+            self.ple_unit_root in self.list_types,
+            'At least one parser must create lists of PLE unit roots'
         )
-        subunit_root_list = self.subunit_root.list
+        ple_unit_root_list = self.ple_unit_root.list
 
-        # Check that there is no subclass for lists of sub-unit roots
-        for subcls in subunit_root_list.subclasses:
+        # Check that there is no subclass for lists of PLE unit roots
+        for subcls in ple_unit_root_list.subclasses:
             with subcls.diagnostic_context:
-                check_source_language(False, 'Lists of sub-unit roots'
+                check_source_language(False, 'Lists of PLE unit roots'
                                              ' cannot be subclassed')
 
-        # Finally, check that the only way to get a subunit root is as a child
+        # Finally, check that the only way to get a PLE unit root is as a child
         # of a list node that is itself the root of a tree.
         for n in self.astnode_types:
             for f in n.get_parse_fields():
                 with f.diagnostic_context:
                     check_source_language(
-                        subunit_root_list not in f._types_from_parser,
+                        ple_unit_root_list not in f._types_from_parser,
                         '{} cannot appear anywhere in trees except as a root'
-                        ' node'.format(subunit_root_list.dsl_name)
+                        ' node'.format(ple_unit_root_list.dsl_name)
                     )
                     check_source_language(
-                        self.subunit_root not in f._types_from_parser,
+                        self.ple_unit_root not in f._types_from_parser,
                         '{} cannot appear anywhere in trees except as a child'
-                        ' of {} nodes'.format(self.subunit_root.dsl_name,
-                                              subunit_root_list.dsl_name)
+                        ' of {} nodes'.format(self.ple_unit_root.dsl_name,
+                                              ple_unit_root_list.dsl_name)
                     )
 
     def check_concrete_subclasses(self, astnode):
@@ -1423,7 +1423,7 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
-            GlobalPass('check subunit root', CompileCtx.check_subunit_root),
+            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
             ASTNodePass('validate AST node fields',
                         lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),

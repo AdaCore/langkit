@@ -730,18 +730,19 @@ package body ${ada_lib_name}.Analysis is
 
       Context.In_Populate_Lexical_Env := True;
 
-      % if ctx.subunit_root:
+      % if ctx.ple_unit_root:
          if Unit.AST_Root /= null then
-            --  If the tree root is a list of sub-units, populate envs for each
+            --  If the tree root is a list of PLE units, populate envs for each
             --  one of them.
-            if Unit.AST_Root.Kind = ${ctx.subunit_root.list.ada_kind_name} then
+            if Unit.AST_Root.Kind = ${ctx.ple_unit_root.list.ada_kind_name}
+            then
                for I in 1 .. Unit.AST_Root.Abstract_Children_Count loop
                   Has_Errors := Populate_Lexical_Env (Unit.AST_Root.Child (I))
                                 or else Has_Errors;
                end loop;
 
-            --  Otherwise, populate envs only if the root is a sub-unit itself
-            elsif Unit.AST_Root.Kind = ${ctx.subunit_root.ada_kind_name} then
+            --  Otherwise, populate envs only if the root is a PLE unit itself
+            elsif Unit.AST_Root.Kind = ${ctx.ple_unit_root.ada_kind_name} then
                Has_Errors := Populate_Lexical_Env (Unit.AST_Root);
             end if;
          end if;
