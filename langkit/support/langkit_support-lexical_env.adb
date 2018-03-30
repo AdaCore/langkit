@@ -721,8 +721,8 @@ package body Langkit_Support.Lexical_Env is
       if not Get_Elements (Env) and then Env /= Self then
          --  Getting the elements in Self (env before extract rebinding) should
          --  still have the proper env rebindings, so we do Get_Elements in the
-         --  context of Old rebindings. TODO ??? This code is kludgy ugly.
-         --  There might be a better way, for example, passing rebindings to
+         --  context of Old rebindings. TODO??? This code is kludgy ugly. There
+         --  might be a better way, for example, passing rebindings to
          --  Get_Elements explicitly.
          declare
             Tmp : Env_Rebindings;
