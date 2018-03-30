@@ -520,8 +520,10 @@ class AbstractExpression(Frozable):
             elif isinstance(obj, (dict)):
                 for v in obj.items():
                     explore(v, fn)
-            elif (not isinstance(obj, (PropertyDef, TypeRepo.Defer)) and
-                    hasattr(obj, 'prepare')):
+            elif isinstance(obj, TypeRepo.Defer):
+                obj = obj.get()
+                return explore(obj, fn) or obj
+            elif not isinstance(obj, PropertyDef) and hasattr(obj, 'prepare'):
                 explore(obj.prepare(), fn)
 
         ret = self
