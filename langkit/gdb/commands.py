@@ -85,7 +85,7 @@ class StatePrinter(object):
     property.
     """
 
-    ellipsis_limit = 50
+    ellipsis_limit = 80
 
     def __init__(self, context, with_ellipsis=True, with_locs=False,
                  var_name=None):
