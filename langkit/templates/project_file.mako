@@ -49,8 +49,9 @@ library project ${lib_name} is
       "${lib_name.lower()}-unparsing.ads",
       "${lib_name.lower()}-unparsing-implementation.adb",
       "${lib_name.lower()}-unparsing-implementation.ads",
-      % for path in ctx.additional_source_files:
-      "${os_path.basename(path)}",
+      % for path in sorted(os_path.basename(p) \
+                           for p in ctx.additional_source_files):
+      "${path}",
       % endfor
       "gdb.c",
       "quex_interface.c",
