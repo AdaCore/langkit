@@ -715,12 +715,23 @@ package body Langkit_Support.Lexical_Env is
       --  rebindings.
 
       Current_Rebindings := Rebindings;
-      Env := Extract_Rebinding (Current_Rebindings, Self);
 
       --  Phase 1: Get elements in own env if there are any
-
+      Env := Extract_Rebinding (Current_Rebindings, Self);
       if not Get_Elements (Env) and then Env /= Self then
-         Dummy := Get_Elements (Self);
+         --  Getting the elements in Self (env before extract rebinding) should
+         --  still have the proper env rebindings, so we do Get_Elements in the
+         --  context of Old rebindings. TODO ??? This code is kludgy ugly.
+         --  There might be a better way, for example, passing rebindings to
+         --  Get_Elements explicitly.
+         declare
+            Tmp : Env_Rebindings;
+         begin
+            Tmp := Current_Rebindings;
+            Current_Rebindings := Rebindings;
+            Dummy := Get_Elements (Self);
+            Current_Rebindings := Tmp;
+         end;
       end if;
 
       --  Phase 2: Get elements in transitive referenced envs
