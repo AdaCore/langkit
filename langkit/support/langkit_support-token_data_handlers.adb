@@ -385,6 +385,7 @@ package body Langkit_Support.Token_Data_Handlers is
          Element_Index : Positive;
          Element       : Integer) return Relative_Position
       is
+         Triv_Index : constant Natural := Natural (Key_Trivia);
       begin
          --  Index can be zero if the corresponding token is not followed by
          --  any trivia. In this case, rely on the sloc to compare them.
@@ -400,18 +401,13 @@ package body Langkit_Support.Token_Data_Handlers is
             end;
          end if;
 
-         declare
-            Designated_Trivia : constant Natural :=
-               TDH.Tokens_To_Trivias.Get (Element);
-         begin
-            if Designated_Trivia < Natural (Key_Trivia) then
-               return After;
-            elsif Designated_Trivia > Natural (Key_Trivia) then
-               return Before;
-            else
-               return Inside;
-            end if;
-         end;
+         if Element < Triv_Index then
+            return After;
+         elsif Element > Triv_Index then
+            return Before;
+         else
+            return Inside;
+         end if;
       end Compare;
 
       function Token_Floor is new Floor
