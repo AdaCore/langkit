@@ -8,18 +8,14 @@ from langkit.parsers import Grammar, Or
 from utils import emit_and_print_errors
 
 
-env = DynamicVariable('env', LexicalEnvType)
-dyn_node = DynamicVariable('dyn_node', T.BazNode)
-
-
 def run(name, eq_prop):
     """
     Emit and print the errors we get for the below grammar with "expr" as
     a property in BarNode.
     """
 
-    for dynvar in [env, dyn_node]:
-        dynvar.unfreeze()
+    env = DynamicVariable('env', LexicalEnvType)
+    dyn_node = DynamicVariable('dyn_node', T.BazNode)
 
     print('== {} =='.format(name))
 
