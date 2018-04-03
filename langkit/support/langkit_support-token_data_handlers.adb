@@ -390,12 +390,13 @@ package body Langkit_Support.Token_Data_Handlers is
          --  any trivia. In this case, rely on the sloc to compare them.
          if Element = 0 then
             declare
+               Triv_Index     : constant Natural := Natural (Key_Trivia);
+               Tok_Index      : constant Natural := Element_Index - 1;
                Key_Start_Sloc : constant Source_Location := Start_Sloc
-                 (Sloc_Range (TDH.Trivias.Get (Natural (Key_Trivia)).T));
+                 (Sloc_Range (TDH.Trivias.Get (Triv_Index).T));
             begin
                return Compare
-                 (Sloc_Range (TDH.Tokens.Get (Element_Index - 1)),
-                  Key_Start_Sloc);
+                 (Sloc_Range (TDH.Tokens.Get (Tok_Index)), Key_Start_Sloc);
             end;
          end if;
 
