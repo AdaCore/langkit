@@ -10,8 +10,9 @@ procedure Main is
    procedure Test (Filename : String);
 
    procedure Test (Filename : String) is
-      U        : constant Analysis_Unit := Get_From_File (Ctx, Filename);
-      Last_Tok : constant Token_Data_Type := Data (Last_Token (U));
+      U            : constant Analysis_Unit := Get_From_File (Ctx, Filename);
+      Last_Tok     : constant Token_Data_Type := Data (Last_Token (U));
+      Previous_Tok : Token_Type := No_Token;
    begin
       Put_Line ("= " & Filename & " =");
       for Line in 1 .. Sloc_Range (Last_Tok).End_Line loop
@@ -22,6 +23,19 @@ procedure Main is
             Put_Line ("  " & Image (Sloc)
                       & " -> [" & Image (Sloc_Range (Data (Token))) & "] "
                       & Text (Token));
+            if Line > 1 then
+               if Previous_Tok = Token then
+                  Put_Line ("    Same as previous token");
+               else
+                  if Next (Previous_Tok) /= Token then
+                     Put_Line ("    Next (Previous_Tok) does not match");
+                  end if;
+                  if Previous (Token) /= Previous_Tok then
+                     Put_Line ("    Previous (Token) does not match");
+                  end if;
+               end if;
+            end if;
+            Previous_Tok := Token;
          end;
       end loop;
       New_Line;
@@ -32,6 +46,7 @@ begin
    Test ("trailing_trivia.txt");
    Test ("no_trivia.txt");
    Test ("no_token.txt");
+   Test ("r403_028.txt");
 
    Put_Line ("main.adb: Done.");
 end Main;
