@@ -491,44 +491,47 @@ class AbstractExpression(Frozable):
 
         passes = [
             (prepare_pass, True),
-            (lambda expr: expr.expand_underscores_2(), False)
+            (lambda expr: expr.expand_underscores_2() or expr, False)
         ]
 
-        def explore(obj, fn, pre=True):
+        def expand(obj, fn, pre=True):
             """
-            Traversal function. Will traverse the object graph, and call fn on
-            every object that is an AbstractExpression. If fn returns a new
-            AbstractExpression, it will replace the old one in the tree.
+            Traverse the `obj` object graph and call `fn` on every object that
+            is an AbstractExpression. If `fn` returns a new AbstractExpression,
+            it will replace the old one in the tree. Return the expanded
+            expression, which can be `obj` after mutation.
 
-            :param obj: The object to visit.
-            :param fn: The fn to apply.
-            :param pre: Whether to explore tree before or after calling fn.
+            :param obj: Object to visit.
+            :param fn: Function to apply.
+            :param pre: True to call `fn` before traversing the graph, False to
+                call it after.
             """
-            if isinstance(obj, AbstractExpression):
-                if pre:
-                    obj = fn(obj) or obj
+            is_abstract_expr = isinstance(obj, AbstractExpression)
+            if is_abstract_expr or getattr(obj, '_traverse_in_prepare', False):
+                if is_abstract_expr and pre:
+                    obj = fn(obj)
                 for k, v in obj.__dict__.items():
-                    new_v = explore(v, fn)
-                    if new_v:
-                        obj.__dict__[k] = new_v
-                if not pre:
-                    obj = fn(obj) or obj
+                    obj.__dict__[k] = expand(v, fn)
+                if is_abstract_expr and not pre:
+                    obj = fn(obj)
                 return obj
+
             elif isinstance(obj, (list, tuple)):
-                for v in obj:
-                    explore(v, fn)
-            elif isinstance(obj, (dict)):
-                for v in obj.items():
-                    explore(v, fn)
+                obj_type = type(obj)
+                return obj_type(expand(v, fn) for v in obj)
+
+            elif isinstance(obj, dict):
+                return {k: expand(v, fn) for k, v in obj.items()}
+
             elif isinstance(obj, TypeRepo.Defer):
-                obj = obj.get()
-                return explore(obj, fn) or obj
-            elif not isinstance(obj, PropertyDef) and hasattr(obj, 'prepare'):
-                explore(obj.prepare(), fn)
+                return expand(obj.get(), fn)
+
+            else:
+                return obj
 
         ret = self
         for p, order in passes:
-            ret = explore(ret, p, order) or ret
+            ret = expand(ret, p, order)
         return ret
 
     def construct(self):

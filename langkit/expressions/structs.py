@@ -368,12 +368,11 @@ class FieldAccess(AbstractExpression):
         mapping of argument names (str) to AbstractExpression.
         """
 
+        _traverse_in_prepare = True
+
         def __init__(self, args, kwargs):
             self.args = args
             self.kwargs = kwargs
-
-        def prepare(self):
-            return (self.args, self.kwargs)
 
         def associate(self, prop):
             """
