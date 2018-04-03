@@ -468,7 +468,7 @@ package body Langkit_Support.Token_Data_Handlers is
       function Result_From_Token return Token_Or_Trivia_Index is
         ((Token_Index (Token), No_Token_Index));
       function Result_From_Trivia return Token_Or_Trivia_Index is
-        ((Previous_Token (Token_Index (Token), TDH), Token_Index (Trivia)));
+        ((Previous_Token (Token_Index (Trivia), TDH), Token_Index (Trivia)));
 
    begin
       if Trivia = 0 then
