@@ -23,7 +23,7 @@ package body Langkit_Support.Token_Data_Handlers is
    function Floor
      (K : Key_Type; Vector : Element_Vectors.Vector) return Natural;
    --  Assuming that Vector contains a sorted sequence of elements, return the
-   --  element index for which K is either inside or right after. If K actualls
+   --  element index for which K is either inside or right after. If K actuals
    --  points right before the first Vector element, return the index of the
    --  first element.
 
@@ -424,7 +424,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
       return Token_Index (Token_Floor (Trivia, TDH.Tokens_To_Trivias) - 1);
       --  Token_Floor deals with indexes for the Tokens_To_Trivia vector, so
-      --  they corresponding to token indexes, but off by one (token index 1
+      --  their corresponding to token indexes, but off by one (token index 1
       --  corresponding to Tokens_To_Trivia index 2, ...). Hence the X-1
       --  operation when returning.
    end Previous_Token;
