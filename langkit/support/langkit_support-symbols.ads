@@ -11,6 +11,7 @@ package Langkit_Support.Symbols is
 
    type Symbol_Type is new Text_Cst_Access;
 
+   function Image (S : Symbol_Type) return Text_Type;
    function Image
      (S : Symbol_Type; With_Quotes : Boolean := False) return String;
 

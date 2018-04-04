@@ -12,6 +12,15 @@ package body Langkit_Support.Symbols is
    -- Image --
    -----------
 
+   function Image (S : Symbol_Type) return Text_Type is
+   begin
+      return S.all;
+   end Image;
+
+   -----------
+   -- Image --
+   -----------
+
    function Image
      (S : Symbol_Type; With_Quotes : Boolean := False) return String is
    begin
