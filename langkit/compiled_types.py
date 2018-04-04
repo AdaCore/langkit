@@ -578,7 +578,7 @@ class CompiledType(object):
         :rtype: str
         """
         if self._nullexpr is None:
-            raise not_implemented_error(self, self.nullexpr)
+            raise not_implemented_error(self, type(self).nullexpr)
         else:
             return self._nullexpr
 
@@ -593,7 +593,7 @@ class CompiledType(object):
         :rtype: str
         """
         if self._py_nullexpr is None:
-            raise not_implemented_error(self, self.py_nullexpr)
+            raise not_implemented_error(self, type(self).py_nullexpr)
         else:
             return self._py_nullexpr
 
@@ -756,7 +756,7 @@ class LogicVarType(CompiledType):
         return "{}'Unrestricted_Access".format(base_expr)
 
     def convert_to_storage_expr(self, node_expr, base_expr):
-        raise not_implemented_error(self, self.convert_to_storage_expr)
+        raise not_implemented_error(self, type(self.convert_to_storage_expr))
 
 
 class EnvRebindingsType(CompiledType):
