@@ -182,6 +182,8 @@ def not_implemented_error(self_or_cls, method):  # no-code-coverage
     :rtype: NotImplementedError
     """
     cls = self_or_cls if inspect.isclass(self_or_cls) else type(self_or_cls)
+    if isinstance(method, property):
+        method = method.fget
     return NotImplementedError('{} must override method {}'.format(
         cls.__name__, method.__name__
     ))
