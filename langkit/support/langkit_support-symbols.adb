@@ -8,6 +8,16 @@ package body Langkit_Support.Symbols is
    procedure Deallocate is new Ada.Unchecked_Deallocation
      (Sets.Set, Symbol_Table);
 
+   -----------
+   -- Image --
+   -----------
+
+   function Image
+     (S : Symbol_Type; With_Quotes : Boolean := False) return String is
+   begin
+      return Image (S.all, With_Quotes);
+   end Image;
+
    ------------
    -- Create --
    ------------
