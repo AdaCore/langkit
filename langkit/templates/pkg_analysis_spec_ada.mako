@@ -106,7 +106,7 @@ package ${ada_lib_name}.Analysis is
 
    type Unit_Provider_Interface is limited interface;
    type Unit_Provider_Access is
-      access Unit_Provider_Interface'Class;
+      access all Unit_Provider_Interface'Class;
    type Unit_Provider_Access_Cst is
       access constant Unit_Provider_Interface'Class;
    ${ada_doc('langkit.unit_provider_type', 3)}
