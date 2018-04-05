@@ -1,14 +1,29 @@
 ## vim: filetype=makoada
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 
 package ${ada_lib_name}.Unparsing.Implementation is
+
+   type Unparsing_Buffer is limited record
+      Content : Unbounded_Wide_Wide_String;
+      --  Append-only text buffer for the unparsed tree
+
+      Last_Sloc : Source_Location := (1, 1);
+      --  Source location of the next character to append to Content
+   end record;
+
+   procedure Append
+     (Buffer : in out Unparsing_Buffer; Char : Wide_Wide_Character);
+   procedure Append (Buffer : in out Unparsing_Buffer; Text : Text_Type);
+   --  Append text to Buffer, updating Buffer.Last_Sloc accordingly
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;

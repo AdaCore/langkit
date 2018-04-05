@@ -5,8 +5,6 @@
 <% concrete_astnodes = [astnode for astnode in ctx.astnode_types
                         if not astnode.abstract] %>
 
-with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
-
 with GNATCOLL.Iconv;
 
 with ${ada_lib_name}.Analysis.Implementation;
@@ -16,11 +14,16 @@ with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
 
+   procedure Update_Sloc
+     (Sloc : in out Source_Location; Char : Wide_Wide_Character);
+   --  Update Sloc as if it represented a cursor that move right-wards after
+   --  inserting Char to a buffer.
+
    % if ctx.generate_unparser:
       procedure Unparse_Dispatch
         (Node                : access Abstract_Node_Type'Class;
          Preserve_Formatting : Boolean;
-         Result              : in out Unbounded_Wide_Wide_String);
+         Result              : in out Unparsing_Buffer);
       --  Dispatch over Node's kind and call the corresponding unparsing
       --  procedure.
 
@@ -28,9 +31,49 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          procedure Unparse_${astnode.name}
            (Node                : access Abstract_Node_Type'Class;
             Preserve_Formatting : Boolean;
-            Result              : in out Unbounded_Wide_Wide_String);
+            Result              : in out Unparsing_Buffer);
       % endfor
    % endif
+
+   -----------------
+   -- Update_Sloc --
+   -----------------
+
+   procedure Update_Sloc
+     (Sloc : in out Source_Location; Char : Wide_Wide_Character) is
+   begin
+      --  TODO??? Handle tabs
+
+      if Wide_Wide_Character'Pos (Char) = Character'Pos (ASCII.LF) then
+         Sloc.Line := Sloc.Line + 1;
+         Sloc.Column := 1;
+      else
+         Sloc.Column := Sloc.Column + 1;
+      end if;
+   end Update_Sloc;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append
+     (Buffer : in out Unparsing_Buffer; Char : Wide_Wide_Character) is
+   begin
+      Update_Sloc (Buffer.Last_Sloc, Char);
+      Append (Buffer.Content, Char);
+   end Append;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (Buffer : in out Unparsing_Buffer; Text : Text_Type) is
+   begin
+      for C of Text loop
+         Update_Sloc (Buffer.Last_Sloc, C);
+      end loop;
+      Append (Buffer.Content, Text);
+   end Append;
 
    -------------
    -- Unparse --
@@ -118,7 +161,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
      (Node                : access Abstract_Node_Type'Class;
       Preserve_Formatting : Boolean) return Text_Type
    is
-      Buffer : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+      Buffer : Unparsing_Buffer;
    begin
       % if ctx.generate_unparser:
          if Node = null then
@@ -126,7 +169,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          end if;
 
          Unparse_Dispatch (Node, Preserve_Formatting, Buffer);
-         return To_Wide_Wide_String (Buffer);
+         return To_Wide_Wide_String (Buffer.Content);
       % else:
          return (raise Program_Error with "Unparser not generated");
       % endif
@@ -141,7 +184,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       procedure Unparse_Dispatch
         (Node                : access Abstract_Node_Type'Class;
          Preserve_Formatting : Boolean;
-         Result              : in out Unbounded_Wide_Wide_String) is
+         Result              : in out Unparsing_Buffer) is
       begin
          case Node.Abstract_Kind is
             % for astnode in ctx.astnode_types:
@@ -158,7 +201,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          procedure Unparse_${astnode.name}
            (Node                : access Abstract_Node_Type'Class;
             Preserve_Formatting : Boolean;
-            Result              : in out Unbounded_Wide_Wide_String)
+            Result              : in out Unparsing_Buffer)
          is
          begin
             % if astnode.parser:
