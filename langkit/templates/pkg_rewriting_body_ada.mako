@@ -483,6 +483,17 @@ package body ${ada_lib_name}.Rewriting is
       end case;
    end Abstract_Text;
 
+   -----------------------------
+   -- Abstract_Rewritten_Node --
+   -----------------------------
+
+   overriding function Abstract_Rewritten_Node
+     (Node : access Node_Rewriting_Handle_Type) return ${root_node_type_name}
+  is
+   begin
+      return Node.Node;
+   end Abstract_Rewritten_Node;
+
    ----------
    -- Kind --
    ----------

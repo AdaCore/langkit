@@ -54,6 +54,15 @@ ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis.Implementation is
 
+   type ${root_node_value_type};
+   --  This "by-value" type is public to expose the fact that the various
+   --  AST nodes are a hierarchy of tagged types, but it is not intended to be
+   --  used directly, hence the "_Type" suffix. Please use instead the
+   --  class-wide types such at the one below.
+
+   type ${root_node_type_name} is access all ${root_node_value_type}'Class;
+   --  Most generic AST node type
+
    type Rewriting_Handle_Pointer is new System.Address;
    No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
       Rewriting_Handle_Pointer (System.Null_Address);
@@ -80,20 +89,17 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access Abstract_Node_Type) return Text_Type is abstract;
    --  Assuming Node is a token node, return the associated text
 
+   function Abstract_Rewritten_Node
+     (Node : access Abstract_Node_Type)
+      return ${root_node_type_name} is abstract;
+   --  If Node is a rewritten node, return the original node (i.e. of which
+   --  Node is a rewritten version). Return null otherwise.
+
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
            ("Properties", GNATCOLL.Traces.On, Stream => "&1");
    % endif
-
-   type ${root_node_value_type};
-   --  This "by-value" type is public to expose the fact that the various
-   --  AST nodes are a hierarchy of tagged types, but it is not intended to be
-   --  used directly, hence the "_Type" suffix. Please use instead the
-   --  class-wide types such at the one below.
-
-   type ${root_node_type_name} is access all ${root_node_value_type}'Class;
-   --  Most generic AST node type
 
    function Is_Null
      (Node : access ${root_node_value_type}'Class) return Boolean;
@@ -594,6 +600,9 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    overriding function Abstract_Text
      (Node : access ${root_node_value_type}) return Text_Type;
+
+   overriding function Abstract_Rewritten_Node
+     (Node : access ${root_node_value_type}) return ${root_node_type_name};
 
    function Pre_Env_Actions
      (Self                : access ${root_node_value_type}'Class;

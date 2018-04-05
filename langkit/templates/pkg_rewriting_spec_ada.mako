@@ -472,4 +472,7 @@ private
    overriding function Abstract_Text
      (Node : access Node_Rewriting_Handle_Type) return Text_Type;
 
+   overriding function Abstract_Rewritten_Node
+     (Node : access Node_Rewriting_Handle_Type) return ${root_node_type_name};
+
 end ${ada_lib_name}.Rewriting;
