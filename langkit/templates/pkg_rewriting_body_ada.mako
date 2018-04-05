@@ -145,7 +145,8 @@ package body ${ada_lib_name}.Rewriting is
             Units.Append (PU);
 
             --  Reparse (i.e. unparse and then parse) this rewritten unit
-            Buffer := Unparse (Unit_Handle.Root, PU.Unit);
+            Buffer := Unparse (Unit_Handle.Root, PU.Unit,
+                               Preserve_Formatting => True);
             Do_Parsing
               (Unit        => PU.Unit,
                Read_BOM    => False,
@@ -274,7 +275,8 @@ package body ${ada_lib_name}.Rewriting is
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      return Unparsing.Implementation.Unparse (Handle);
+      return Unparsing.Implementation.Unparse
+        (Handle, Preserve_Formatting => True);
    end Unparse;
 
    ------------

@@ -22,7 +22,8 @@ package body ${ada_lib_name}.Unparsing is
    begin
       return Unparse
         (Analysis.Implementation.Abstract_Node (N),
-         Unit (Node));
+         Unit (Node),
+         Preserve_Formatting => False);
    end Unparse;
 
 end ${ada_lib_name}.Unparsing;

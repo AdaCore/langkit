@@ -31,7 +31,7 @@
 
    % if not node_type and creates_node(parser):
       if ${ast_el} /= null then
-         Unparse_Dispatch (${ast_el}, Result);
+         Unparse_Dispatch (${ast_el}, Preserve_Formatting, Result);
       end if;
 
    % elif node_type and node_type.is_token_node:
@@ -51,7 +51,8 @@
       for I in 1 .. Node.Abstract_Children_Count loop
          <% assert creates_node (parser.parser) %>
 
-         Unparse_Dispatch (Node.Abstract_Child (I), Result);
+         Unparse_Dispatch
+           (Node.Abstract_Child (I), Preserve_Formatting, Result);
 
          % if parser.sep:
             if I < Node.Abstract_Children_Count then
@@ -106,7 +107,7 @@
    % elif creates_node(parser):
 
       if ${ast_el} /= null then
-         Unparse_Dispatch (${ast_el}, Result);
+         Unparse_Dispatch (${ast_el}, Preserve_Formatting, Result);
       end if;
 
    % elif is_null(parser) or is_nobt(parser):
