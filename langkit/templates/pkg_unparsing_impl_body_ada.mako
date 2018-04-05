@@ -138,19 +138,14 @@ package body ${ada_lib_name}.Unparsing.Implementation is
         (Node   : access Abstract_Node_Type'Class;
          Result : in out Unbounded_Wide_Wide_String) is
       begin
-         % if not ctx.generate_unparser:
-            pragma Unreferenced (Node, Result);
-            raise Program_Error with "Unparsed not generated";
-         % else:
-            case Node.Abstract_Kind is
-               % for astnode in ctx.astnode_types:
-                  % if not astnode.abstract:
-                     when ${astnode.ada_kind_name} =>
-                        Unparse_${astnode.name} (Node, Result);
-                  % endif
-               % endfor
-            end case;
-         % endif
+         case Node.Abstract_Kind is
+            % for astnode in ctx.astnode_types:
+               % if not astnode.abstract:
+                  when ${astnode.ada_kind_name} =>
+                     Unparse_${astnode.name} (Node, Result);
+               % endif
+            % endfor
+         end case;
       end Unparse_Dispatch;
 
       % for astnode in concrete_astnodes:
