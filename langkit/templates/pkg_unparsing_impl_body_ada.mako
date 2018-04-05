@@ -124,7 +124,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          Unparse_Dispatch (Node, Buffer);
          return To_Wide_Wide_String (Buffer);
       % else:
-         return (raise Program_Error with "Unparsed not generated");
+         return (raise Program_Error with "Unparser not generated");
       % endif
    end Unparse;
 
