@@ -74,7 +74,8 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
 
 
 def emit_and_print_errors(grammar, lexer=None,
-                          warning_set=default_warning_set):
+                          warning_set=default_warning_set,
+                          generate_unparser=False):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
@@ -85,6 +86,8 @@ def emit_and_print_errors(grammar, lexer=None,
 
     :param WarningSet warning_set: Set of warnings to emit.
 
+    :param bool generate_unparser: Whether to generate unparser.
+
     :rtype: bool
     """
 
@@ -94,7 +97,8 @@ def emit_and_print_errors(grammar, lexer=None,
 
     try:
         ctx = prepare_context(grammar, lexer, warning_set)
-        ctx.emit('build', generate_lexer=False)
+        ctx.emit('build', generate_lexer=False,
+                 generate_unparser=generate_unparser)
         # ... and tell about how it went
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
