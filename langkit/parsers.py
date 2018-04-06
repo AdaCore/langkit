@@ -237,7 +237,7 @@ class Grammar(object):
             rule.set_name(names.Name.from_lower(name))
             rule.set_grammar(self)
 
-            if loc:
+            if loc and name in keywords:
                 rule.set_location(Location(loc.file, keywords[name].lineno))
 
             rule.is_root = True
