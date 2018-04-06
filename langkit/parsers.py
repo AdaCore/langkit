@@ -367,7 +367,12 @@ class Parser(object):
     """
 
     def __init__(self):
-        self.location = None
+        # Get the location of the place where this parser is created. This will
+        # likely be overriden in Grammar.add_rules with a more precise
+        # location if we can find the keyword argument in Python source code,
+        # but if it is not, we have a degraded more.
+        self.location = extract_library_location()
+
         self._mod = None
         self.gen_fn_name = gen_name(self.base_name)
         self.grammar = None
