@@ -74,11 +74,13 @@
       % if parser._is_error:
          ${emit_unparser_code(parser.parser, ast_el=ast_el)}
       % else:
-         % if parser.get_type().is_list_type:
-         if ${ast_el}.Abstract_Children_Count /= 0 then
-         % else:
-         if ${ast_el} /= null then
-         % endif
+         if
+            % if parser.get_type().is_list_type:
+               ${ast_el}.Abstract_Children_Count /= 0
+            % else:
+               ${ast_el} /= null
+            % endif
+         then
             ${emit_unparser_code(parser.parser, ast_el=ast_el)}
          end if;
       % endif
