@@ -1741,13 +1741,18 @@ class NodeToParsersPass(object):
         Abort unparsers generation. Emit a warning to inform users with the
         given message.
         """
+        ctx = get_context()
+
+        extra_info = (
+            '\nFor more information, enable the the unparser_eq trace.'
+            if ctx.generate_unparser else ''
+        )
         WarningSet.unparser_bad_grammar.warn_if(
             True,
-            '{} This prevents the generation of an automatic unparser.'
-            '\nFor more information, enable the the unparser_eq'
-            ' trace'.format(message)
+            '{} This prevents the generation of an automatic unparser.{}'
+            .format(message, extra_info)
         )
-        get_context().generate_unparser = False
+        ctx.generate_unparser = False
 
     def check_nodes_to_rules(self, ctx):
         """
