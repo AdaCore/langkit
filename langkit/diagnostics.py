@@ -290,14 +290,20 @@ def check_source_language(predicate, message, severity=Severity.error,
         to be false.
     """
     severity = assert_type(severity, Severity)
+    indent = ' ' * 4
 
     if not predicate:
+        message_lines = message.splitlines()
+        message = '\n'.join(
+            message_lines[:1] + [indent + line for line in message_lines[1:]]
+        )
+
         if Diagnostics.style != DiagnosticStyle.default:
-            print("{}: {}".format(get_parsable_location(), message))
+            print('{}: {}'.format(get_parsable_location(), message))
         else:
             print_context()
-            print("{}{}: {}".format(
-                "    " if context_stack else '',
+            print('{}{}: {}'.format(
+                indent if context_stack else '',
                 format_severity(severity),
                 message
             ))
