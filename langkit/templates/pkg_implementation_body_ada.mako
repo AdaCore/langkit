@@ -1396,8 +1396,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -----------------
 
    function Token_Start
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Type
+     (Node : access ${root_node_value_type}'Class) return Token_Type
    is (Node.Token (Node.Token_Start_Index));
 
    ---------------
@@ -1405,8 +1404,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ---------------
 
    function Token_End
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Type
+     (Node : access ${root_node_value_type}'Class) return Token_Type
    is
      (if Node.Token_End_Index = No_Token_Index
       then Node.Token_Start
