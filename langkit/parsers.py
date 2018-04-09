@@ -841,7 +841,7 @@ class Skip(Parser):
         self.dest_node_parser = dest_node()
 
     def __repr__(self):
-        return 'Skip({})'.format(self.dest_node)
+        return 'Skip({})'.format(node_name(self.dest_node))
 
     def children(self):
         return [self.dest_node_parser]
