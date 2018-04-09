@@ -1398,7 +1398,7 @@ class CompileCtx(object):
         from langkit.compiled_types import CompiledTypeMetaclass
         from langkit.parsers import Parser, NodeToParsersPass
 
-        node_to_parsers = NodeToParsersPass()
+        node_to_parsers = NodeToParsersPass(self)
 
         self.root_grammar_class = CompiledTypeMetaclass.root_grammar_class
 
