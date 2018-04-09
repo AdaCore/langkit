@@ -1763,6 +1763,9 @@ class NodeToParsersPass(object):
         if parser.is_dont_skip_parser:
             return
 
+        def append(node, parser):
+            self.nodes_to_rules[node].append(parser)
+
         def compute_internal(p):
 
             # Reject parsing constructs that get in the way of sound unparsers
@@ -1770,14 +1773,18 @@ class NodeToParsersPass(object):
                 self.abort_unparser('Or() does more that just creating a'
                                     ' node.')
 
-            # We never register Skip parsers because we will register the
-            # nested Transform.
-            if creates_node(p, follow_refs=False) and not isinstance(p, Skip):
-                if isinstance(p, Opt) and p._booleanize:
-                    for alt in p.get_type()._alternatives:
-                        self.nodes_to_rules[alt].append(p)
+            # Skip parsers create nodes out of thin air in reaction to a
+            # parsing error, so unparser logics must ignore them.
+            if isinstance(p, Skip):
+                pass
 
-                self.nodes_to_rules[p.get_type()].append(p)
+            elif isinstance(p, Opt) and p._booleanize:
+                for alt in p.get_type()._alternatives:
+                    append(alt, p)
+                append(p.get_type(), p)
+
+            elif isinstance(p, (List, _Transform)):
+                append(p.get_type(), p)
 
             for c in p.children():
                 compute_internal(c)
@@ -1832,7 +1839,7 @@ class NodeToParsersPass(object):
             Log.log('unparser_canonical', node.name, node.parser)
 
 
-def creates_node(p, follow_refs=True):
+def creates_node(p):
     """
     Return true on parsers that create a node directly, or are just a reference
     to one or several parsers that creates nodes, without additional parsing
@@ -1845,27 +1852,25 @@ def creates_node(p, follow_refs=True):
         Pick(";", "lol", c)    # <- False
 
     :param Parser p: Parser to analyze.
-    :param bool follow_refs: Whether to recurse on sub-parsers and dereference
-        Defer parsers.
     """
     from langkit.dsl import EnumNode
     from langkit.lexer import LexerToken
 
-    if isinstance(p, Or) and follow_refs:
+    if isinstance(p, Or):
         return all(creates_node(c) for c in p.children())
 
-    if isinstance(p, Defer) and follow_refs:
+    if isinstance(p, Defer):
         return p.get_type().is_ast_node
 
-    if isinstance(p, Opt) and follow_refs and creates_node(p.parser):
+    if isinstance(p, Opt) and creates_node(p.parser):
         return True
 
-    if isinstance(p, Predicate) and follow_refs:
+    if isinstance(p, Predicate):
         return creates_node(p.parser)
 
     # As a special case, if "p" parses a node followed by a termination token,
     # then consider it just creates a node.
-    if isinstance(p, _Extract) and follow_refs:
+    if isinstance(p, _Extract):
         if len(p.parser.parsers) != 2:
             return False
         node, term = p.parser.parsers
