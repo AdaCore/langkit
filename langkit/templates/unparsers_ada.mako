@@ -39,12 +39,8 @@
       Append (Result, " ");
 
    % elif is_transform(parser):
-
-      % if is_row(parser.parser):
-         ${emit_toplevel_row(parser.parser, node_type)}
-      % else:
-         ${emit_unparser_code(parser.parser)}
-      % endif
+      <% assert is_row(parser.parser) %>
+      ${emit_toplevel_row(parser.parser, node_type)}
 
    % elif is_list(parser):
 
@@ -106,13 +102,8 @@
 
       Append (Result, " ");
 
-   % elif creates_node(parser):
-
-      if ${ast_el} /= null then
-         Unparse_Dispatch (${ast_el}, Preserve_Formatting, Result);
-      end if;
-
    % elif is_null(parser) or is_nobt(parser):
+
    % elif is_row(parser):
 
       % for subp in parser.children():
