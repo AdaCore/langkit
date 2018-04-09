@@ -1,0 +1,16 @@
+== Pick in Or ==
+File "test.py", line 48, In definition of grammar rule main_rule
+    Warning: Or() does more that just creating a node. This prevents the generation of an automatic unparser.
+    For more information, enable the the unparser_eq trace.
+Code generation was successful
+
+== Pick in Opt ==
+Code generation was successful
+
+== Toplevel rule loses information ==
+File "test.py", line 60, In definition of grammar rule main_rule
+    Warning: 'main_rule' toplevel rule loses information. This prevents the generation of an automatic unparser.
+    For more information, enable the the unparser_eq trace.
+Code generation was successful
+
+Done
