@@ -93,7 +93,8 @@ package ${ada_lib_name}.Lexer is
    ${ada_doc('langkit.token_kind_name', 3)}
 
    function Token_Kind_Literal (Token_Id : Token_Kind) return String;
-   --  Return the literal corresponding to this token kind
+   --  Return the canonical literal corresponding to this token kind, or an
+   --  empty string if this token has no literal.
 
    function Token_Error_Image (Token_Id : Token_Kind) return String;
    --  Return a string repr of token kind suitable in error messages
