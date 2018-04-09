@@ -1808,6 +1808,12 @@ class NodeToParsersPass(object):
             return
 
         def compute_internal(p):
+
+            # Reject parsing constructs that get in the way of sound unparsers
+            if isinstance(p, Or) and not creates_node(p):
+                self.abort_unparser('Or() does more that just creating a'
+                                    ' node.')
+
             # We never register Skip parsers because we will register the
             # nested Transform.
             if creates_node(p, follow_refs=False) and not isinstance(p, Skip):
