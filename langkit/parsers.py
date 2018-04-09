@@ -1489,12 +1489,7 @@ class _Transform(Parser):
         return self.parser._is_left_recursive(rule_name)
 
     def __repr__(self):
-        return "Transform({0}, {1})".format(
-            self.parser,
-            '<Defer>'
-            if isinstance(self.typ, T.Defer) else
-            self.typ.dsl_name
-        )
+        return "Transform({0}, {1})".format(self.parser, node_name(self.typ))
 
     def __init__(self, parser, typ):
         """
@@ -1979,3 +1974,18 @@ def find_canonical_parser(parsers):
 
     nulls, no_nulls = split(has_null, parsers)
     return no_nulls[0] if no_nulls else nulls[0]
+
+
+def node_name(node):
+    from langkit.dsl import ASTNode
+
+    if isinstance(node, T.Defer):
+        node = node.get()
+
+    if issubtype(node, ASTNode):
+        return node._name.camel
+
+    assert isinstance(node, ASTNodeType), (
+        'Unexpected node type: {}'.format(repr(node))
+    )
+    return node.dsl_name
