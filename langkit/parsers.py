@@ -1728,7 +1728,8 @@ class NodeToParsersPass(object):
     AST type.
     """
 
-    def __init__(self):
+    def __init__(self, context):
+        self.context = context
         self.nodes_to_rules = defaultdict(list)
 
     def abort_unparser(self, message):
@@ -1736,18 +1737,56 @@ class NodeToParsersPass(object):
         Abort unparsers generation. Emit a warning to inform users with the
         given message.
         """
-        ctx = get_context()
-
         extra_info = (
             '\nFor more information, enable the the unparser_eq trace.'
-            if ctx.generate_unparser else ''
+            if self.context.generate_unparser else ''
         )
         WarningSet.unparser_bad_grammar.warn_if(
             True,
             '{} This prevents the generation of an automatic unparser.{}'
             .format(message, extra_info)
         )
-        ctx.generate_unparser = False
+        self.context.generate_unparser = False
+
+    def compute(self, parser):
+        """
+        Map every AST node type to the set of parsers that return this type.
+
+        Also abort the generation of unparsers if the grammar contain
+        parsing constructs we don't support with unparsers.
+
+        :param Parser parser: Parser combinator to analyze.
+        """
+
+        # Skip parsers generated for DontSkip. They don't generate any nodes,
+        # so are not interesting in that context.
+        if parser.is_dont_skip_parser:
+            return
+
+        def compute_internal(p):
+
+            # Reject parsing constructs that get in the way of sound unparsers
+            if isinstance(p, Or) and not creates_node(p):
+                self.abort_unparser('Or() does more that just creating a'
+                                    ' node.')
+
+            # We never register Skip parsers because we will register the
+            # nested Transform.
+            if creates_node(p, follow_refs=False) and not isinstance(p, Skip):
+                if isinstance(p, Opt) and p._booleanize:
+                    for alt in p.get_type()._alternatives:
+                        self.nodes_to_rules[alt].append(p)
+
+                self.nodes_to_rules[p.get_type()].append(p)
+
+            for c in p.children():
+                compute_internal(c)
+
+        if not creates_node(parser):
+            self.abort_unparser("'{}' toplevel rule loses information.".format(
+                parser.name
+            ))
+        compute_internal(parser)
 
     def check_nodes_to_rules(self, ctx):
         """
@@ -1791,41 +1830,6 @@ class NodeToParsersPass(object):
                 return
             node.parser = find_canonical_parser(parsers)
             Log.log('unparser_canonical', node.name, node.parser)
-
-    def compute(self, parser):
-        """
-        Map every AST node type to the set of parsers that return this type.
-        """
-
-        # Skip parsers generated for DontSkip. They don't generate any nodes,
-        # so are not interesting in that context.
-        if parser.is_dont_skip_parser:
-            return
-
-        def compute_internal(p):
-
-            # Reject parsing constructs that get in the way of sound unparsers
-            if isinstance(p, Or) and not creates_node(p):
-                self.abort_unparser('Or() does more that just creating a'
-                                    ' node.')
-
-            # We never register Skip parsers because we will register the
-            # nested Transform.
-            if creates_node(p, follow_refs=False) and not isinstance(p, Skip):
-                if isinstance(p, Opt) and p._booleanize:
-                    for alt in p.get_type()._alternatives:
-                        self.nodes_to_rules[alt].append(p)
-
-                self.nodes_to_rules[p.get_type()].append(p)
-
-            for c in p.children():
-                compute_internal(c)
-
-        if not creates_node(parser):
-            self.abort_unparser("'{}' toplevel rule loses information.".format(
-                parser.name
-            ))
-        compute_internal(parser)
 
 
 def creates_node(p, follow_refs=True):
@@ -1926,11 +1930,13 @@ def unparser_struct_eq(parsers, toplevel=True):
         # For Tok, we want to check that the parsed token is the same
         elif typ == _Token:
             return is_same(p.val for p in parsers)
+
         # For _Extract, structural equality involves comparing the sub-parser
         # and the extracted index.
         elif typ == _Extract:
             return (unparser_struct_eq(p.parser for p in parsers)
                     and is_same(p.index for p in parsers))
+
         # Defer and Or will be handled by the same logic we use when the kind
         # of parser is not unique.
         elif typ in (Defer, Or):
