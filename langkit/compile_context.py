@@ -1396,7 +1396,8 @@ class CompileCtx(object):
         assert self.grammar, "Set grammar before compiling"
 
         from langkit.compiled_types import CompiledTypeMetaclass
-        from langkit.parsers import Parser, NodeToParsersPass
+        from langkit.parsers import Parser
+        from langkit.unparsers import NodeToParsersPass
 
         node_to_parsers = NodeToParsersPass(self)
 
