@@ -704,6 +704,8 @@ class _EnumNodeMetaclass(type):
         dct['_fields'] = fields
         dct['_alternatives'] = alts
         dct['_qualifier'] = qualifier
+        if qualifier:
+            dct['_alt_present'], dct['_alt_absent'] = alts
 
         # Make Alternative instances available as EnumNode class attributes for
         # a convenient way to create parsers for them.
@@ -760,6 +762,14 @@ class EnumNode(BaseStruct):
     "absent".
 
     :type: bool
+    """
+
+    _alt_present = None
+    _alt_absent = None
+    """
+    If ``_qualifier`` is true, direct references to both alternatives.
+
+    :type: EnumNode.Alternative
     """
 
     class Alternative(object):
