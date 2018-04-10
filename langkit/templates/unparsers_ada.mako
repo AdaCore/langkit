@@ -73,7 +73,7 @@
       end loop;
 
    % elif is_opt(parser) and parser._booleanize and node_type:
-      % if str(node_type.name).endswith("Present"):
+      % if node_type is parser._booleanize._alt_present.type:
       ${emit_unparser_code(parser.parser, ast_el=ast_el)}
       % endif
 
