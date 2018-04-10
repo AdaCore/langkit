@@ -5,14 +5,17 @@ Generation of automatic unparsers for Langkit grammars.
 """
 
 from collections import defaultdict
+import itertools
 from StringIO import StringIO
 import sys
 
 from funcy import split
 
+from langkit.common import string_repr
 from langkit.compiled_types import get_context
 from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import LexerToken
+import langkit.names as names
 from langkit.parsers import (
     Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Predicate, Skip,
     _Extract, _Row, _Token, _Transform
@@ -94,6 +97,9 @@ class TokenUnparser(Unparser):
     Unparser for a token. The token text must be known.
     """
 
+    # Internal counter to generate unique variable names
+    _counter = itertools.count(0)
+
     def __init__(self, token, match_text=None):
         """
         :param langkit.lexer.TokenAction token: Kind for the token to unparse.
@@ -104,6 +110,8 @@ class TokenUnparser(Unparser):
         assert (token.matcher is None) == bool(match_text)
         self.token = token
         self.match_text = match_text
+
+        self._var_name = None
 
     @classmethod
     def from_parser(cls, parser):
@@ -157,6 +165,15 @@ class TokenUnparser(Unparser):
                      if self.match_text else
                      self.token.matcher.to_match)
 
+    @property
+    def string_repr(self):
+        """
+        Return an Ada string literal for the text to emit this token.
+
+        :rtype: str
+        """
+        return string_repr(self.dumps())
+
     # Comparing tokens is done through
     # ``TokenSequenceUnparser.check_equivalence``, which is already good at
     # providing context for users in diagnostics, so deliberately not
@@ -165,11 +182,27 @@ class TokenUnparser(Unparser):
     def __repr__(self):
         return 'Token {}'.format(repr(self.dumps()))
 
+    @property
+    def var_name(self):
+        """
+        Name of the variable to hold this sequence of tokens in code
+        generation.
+
+        :rtype: names.Name
+        """
+        if self._var_name is None:
+            self._var_name = names.Name('Token_Unparser_{}'
+                                        .format(next(self._counter)))
+        return self._var_name
+
 
 class TokenSequenceUnparser(Unparser):
     """
     Sequence of token unparsers.
     """
+
+    # Internal counter to generate unique variable names
+    _counter = itertools.count(0)
 
     def __init__(self, init_tokens=None):
         """
@@ -177,6 +210,8 @@ class TokenSequenceUnparser(Unparser):
             to start with.
         """
         self.tokens = list(init_tokens or [])
+
+        self._var_name = None
 
     def _dump(self, stream):
         stream.write(' '.join(t.dumps() for t in self.tokens))
@@ -221,6 +256,22 @@ class TokenSequenceUnparser(Unparser):
             '\nand:'
             '\n  {}'.format(sequence_name, self.dumps(), other.dumps())
         )
+
+    @property
+    def var_name(self):
+        """
+        Name of the variable to hold this sequence of tokens in code
+        generation.
+
+        :rtype: names.Name
+        """
+        if not self.tokens:
+            return names.Name('Empty_Token_Sequence')
+
+        if self._var_name is None:
+            self._var_name = names.Name('Token_Sequence_{}'
+                                        .format(next(self._counter)))
+        return self._var_name
 
 
 class NodeUnparser(Unparser):
@@ -562,6 +613,16 @@ class RegularNodeUnparser(NodeUnparser):
 
         :type: TokenSequenceUnparser
         """
+
+    @property
+    def fields_unparser_var_name(self):
+        """
+        Return the name of the variable in code generation to store the
+        unparsing table for fields.
+        """
+        return (self.node.name + names.Name('Fields_Unparser_List')
+                if self.field_unparsers else
+                names.Name('Empty_Field_Unparser_List'))
 
     @property
     def zip_fields(self):

@@ -223,4 +223,99 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    % endif
 
+   % if ctx.generate_unparser:
+
+      ## Emit constants for token unparsers and token sequence unparsers
+
+      % for tok in ctx.unparsers.sorted_token_unparsers:
+         ${tok.var_name} : aliased constant Token_Unparser := \
+           (${tok.token.ada_name}, \
+            ${("new Text_Type'({})".format(tok.string_repr)
+               if tok.match_text else 'null')});
+      % endfor
+
+      % for tok_seq in ctx.unparsers.token_sequence_unparsers:
+         % if tok_seq:
+            ${tok_seq.var_name} : aliased constant Token_Sequence := \
+              (${', '.join(
+                  '{} => {}'.format(i, tok.var_name)
+                  for i, tok in enumerate(tok_seq.tokens, 1))});
+         % endif
+      % endfor
+
+      ## Emit constants for lists of field unparsers
+
+      % for node in ctx.astnode_types:
+         % if is_regular_node_unparser(node.unparser) \
+              and node.unparser.field_unparsers:
+
+            <%
+               unparser_list = node.unparser.zip_fields
+               field_unparsers = [
+                  ('{} => Empty_Field_Unparser'.format(i)
+                   if not f.pre_tokens and not f.post_tokens else
+                   "{} => ({}'Access, {}'Access)".format(
+                        i, f.pre_tokens.var_name, f.post_tokens.var_name))
+                  for i, (f, _) in enumerate(unparser_list, 1)
+               ]
+               inter_tokens = [
+                  "{} => {}'Access".format(i, tok_seq.var_name)
+                  for i, (_, tok_seq) in enumerate(unparser_list, 1)
+               ]
+            %>
+
+            ${node.unparser.fields_unparser_var_name} \
+               : aliased constant Field_Unparser_List \
+               := (N => ${len(unparser_list)},
+                   Field_Unparsers => (${', '.join(field_unparsers)}),
+                   Inter_Tokens => (${', '.join(inter_tokens)}));
+         % endif
+      % endfor
+
+      ## Finally, emit the unparsing table for nodes themselves
+
+      Node_Unparsers_Array : aliased constant Node_Unparser_Map := (
+         % for i, node in enumerate(ctx.astnode_types, 1):
+            % if not node.abstract:
+               <% unparser = node.unparser %>
+
+               ${node.ada_kind_name} => ( \
+                  % if is_regular_node_unparser(unparser):
+                     Kind            => Regular,
+                     Pre_Tokens      => \
+                        ${unparser.pre_tokens.var_name}'Access,
+                     Field_Unparsers => \
+                        ${unparser.fields_unparser_var_name}'Access,
+                     Post_Tokens     => \
+                        ${unparser.post_tokens.var_name}'Access
+
+                  % elif is_list_node_unparser(unparser):
+                     Kind          => List, \
+                     Has_Separator => ${unparser.separator is not None}, \
+                     Separator     => ${('<>' if unparser.separator is None else
+                                         unparser.separator.var_name)}
+
+                  % elif is_token_node_unparser(unparser):
+                     Kind => Token
+
+                  % else:
+                     ## This node is synthetic, so it cannot be unparsed:
+                     ## provide a dummy entry.
+                     <% assert ((node.abstract or node.synthetic) and
+                                unparser is None), (
+                        'Unexpected unparser for {}: {}'.format(
+                           node.dsl_name, unparser
+                        )
+                     ) %>
+                     Kind => Token
+                  % endif
+               )${',' if i < len(ctx.astnode_types) else ''}
+            % endif
+         % endfor
+      );
+   % endif
+
+begin
+   Node_Unparsers := ${("Node_Unparsers_Array'Access"
+                        if ctx.generate_unparser else 'null')};
 end ${ada_lib_name}.Unparsing.Implementation;
