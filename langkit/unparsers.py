@@ -16,6 +16,10 @@ from langkit.parsers import (
 from langkit.utils import Log, is_same, issubtype
 
 
+def unwrap_dont_skip(parser):
+    return parser.subparser if isinstance(parser, DontSkip) else parser
+
+
 class NodeToParsersPass(object):
     """
     This pass computes the correspondence between AST node types and parsers.
@@ -192,10 +196,7 @@ def unparser_struct_eq(parsers, toplevel=True):
     :param bool toplevel: Recursion helper.
     :rtype: bool
     """
-    def unwrap(p):
-        return p.subparser if isinstance(p, DontSkip) else p
-
-    parsers = [unwrap(p) for p in parsers if not isinstance(p, Null)]
+    parsers = [unwrap_dont_skip(p) for p in parsers if not isinstance(p, Null)]
 
     Log.log('unparser_eq_impl', 'parsers: {}'.format(parsers))
 
