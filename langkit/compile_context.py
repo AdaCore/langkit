@@ -1474,6 +1474,8 @@ class CompileCtx(object):
                         astnode.warn_imprecise_field_type_annotations()),
             GlobalPass('log node parsers correspondence',
                        self.unparsers.check_nodes_to_rules),
+            GlobalPass('finalize unparsers code generation',
+                       self.unparsers.finalize),
 
             StopPipeline('check only', disabled=not check_only),
 
