@@ -831,13 +831,7 @@ class Unparsers(object):
                 WarningSet.unused_node_type.warn_if(
                     node_type not in self.nodes_to_rules.keys() and
                     not node_type.abstract and
-                    not node_type.synthetic and
-                    # We don't warn for base list types if they're not used,
-                    # because the user has no way to mark them as abstract.
-                    not (
-                        node_type.is_list_type and
-                        node_type.element_type.list == node_type
-                    ),
+                    not node_type.synthetic,
                     '{} has no parser, and is marked neither abstract nor'
                     ' synthetic'.format(node_type.name)
                 )

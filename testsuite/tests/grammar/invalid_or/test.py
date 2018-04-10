@@ -1,22 +1,19 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode
+from langkit.dsl import ASTNode, has_abstract_list
 from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
 from utils import emit_and_print_errors
 
 
+@has_abstract_list
 class Element(ASTNode):
     pass
 
 
 class Sequence(Element.list):
     pass
-
-
-class Atom(Element):
-    token_node = True
 
 
 grammar = Grammar('main_rule')

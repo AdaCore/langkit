@@ -4,13 +4,14 @@ Test that Symbol bindings in the Python API are properly working.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, T
+from langkit.dsl import ASTNode, T, has_abstract_list
 from langkit.expressions import Entity, Property, langkit_property
 from langkit.parsers import Grammar, List, Or
 
 from utils import build_and_run
 
 
+@has_abstract_list
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
