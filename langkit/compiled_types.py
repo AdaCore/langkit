@@ -1822,6 +1822,13 @@ class ASTNodeType(BaseStructType):
         :type: Parser
         """
 
+        self.unparser = None
+        """
+        Unparser for this node. Computed during the NodesToParsers pass.
+
+        :type: langkit.unparsers.NodeUnparser
+        """
+
         self.is_enum_node = is_enum_node
         self.is_bool_node = is_bool_node
         self.is_token_node = is_token_node
