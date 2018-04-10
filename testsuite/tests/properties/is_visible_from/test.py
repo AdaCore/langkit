@@ -5,7 +5,7 @@ invalid input.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, T
+from langkit.dsl import ASTNode, BoolType, T, has_abstract_list
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import EmptyEnv, If, New, Self, Var, langkit_property
 from langkit.parsers import Grammar, List
@@ -23,6 +23,7 @@ class FooNode(ASTNode):
         return arg1.is_visible_from(arg2)
 
 
+@has_abstract_list
 class Name(FooNode):
     token_node = True
 

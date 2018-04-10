@@ -1,12 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode
+from langkit.dsl import ASTNode, has_abstract_list
 from langkit.parsers import Grammar, List, Or, Pick
 
 from lexer_example import Token
 from utils import build_and_run
 
 
+@has_abstract_list
 class FooNode(ASTNode):
     pass
 
