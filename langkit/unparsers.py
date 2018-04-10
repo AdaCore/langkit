@@ -74,9 +74,8 @@ class NodeToParsersPass(object):
                 pass
 
             elif isinstance(p, Opt) and p._booleanize:
-                for alt in p.get_type()._alternatives:
-                    append(alt, p)
-                append(p.get_type(), p)
+                for alt in p._booleanize._alternatives:
+                    append(alt.type, p)
 
             elif isinstance(p, (List, _Transform)):
                 append(p.get_type(), p)
