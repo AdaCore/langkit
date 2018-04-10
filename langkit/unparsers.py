@@ -5,19 +5,588 @@ Generation of automatic unparsers for Langkit grammars.
 """
 
 from collections import defaultdict
+from StringIO import StringIO
+import sys
 
 from funcy import split
 
-from langkit.diagnostics import WarningSet
+from langkit.diagnostics import WarningSet, check_source_language
+from langkit.lexer import LexerToken
 from langkit.parsers import (
     Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Predicate, Skip,
     _Extract, _Row, _Token, _Transform
 )
-from langkit.utils import Log, is_same, issubtype
+from langkit.utils import Log, is_same, issubtype, not_implemented_error
 
 
 def unwrap_dont_skip(parser):
     return parser.subparser if isinstance(parser, DontSkip) else parser
+
+
+def repr_token(token):
+    """
+    Return a human-friendly name for this token parser.
+
+    :param _Token token: Token parser to represent. Note that it must either
+        match some specific text, or the corresponding token kind must be a
+        literal.
+    :rtype: str
+    """
+    if token is None:
+        return '<none>'
+    elif token.match_text:
+        return token.match_text
+    else:
+        assert token.val.matcher.to_match
+        return token.val.matcher.to_match
+
+
+def repr_token_sequence(tokens):
+    """
+    Return a human-friendly reprentation for a list of token parsers.
+
+    :param list[_Token] tokens: List of tokens to represent. Each token must
+        fit for a call to ``repr_token``.
+    :rtype: str
+    """
+    return ' '.join(repr_token(t) for t in tokens)
+
+
+def equivalent_token(tok1, tok2):
+    """
+    Return whether `tok1` and `tok2` are equivalent token parsers.
+
+    Both token parsers must satisfy ``repr_token``'s precondition.
+
+    :type _Token: tok1
+    :type _Token: tok2
+    :rtype: bool
+    """
+    if tok1 is None or tok2 is None:
+        return tok1 is tok2
+    return repr_token(tok1) == repr_token(tok2)
+
+
+def check_token_sequence_consistency(tok_seq_name, seq1, seq2):
+    """
+    Emit a user diagnostic if `seq1` and `seq2` are not equivalent sequences of
+    tokens.
+
+    All token parsers must satisfy ``repr_token``'s precondition.
+
+    :param str tok_seq_name: Name of the token sequences to compare, used in
+        the diagnostic label.
+    :type seq1: list[_Token]
+    :type seq2: list[_Token]
+    """
+    check_source_language(
+        len(seq1) == len(seq2) and
+        all(equivalent_token(tok1, tok2)
+            for tok1, tok2 in zip(seq1, seq2)),
+
+        'Inconsistent {}:'
+        '\n  {}'
+        '\nand:'
+        '\n  {}'.format(tok_seq_name,
+                        repr_token_sequence(seq1),
+                        repr_token_sequence(seq2))
+    )
+
+
+class Unparser(object):
+    """
+    Abstract class for unparsers.
+    """
+
+    def dump(self, stream=None):
+        """
+        Print a debug representation of this unparser to the ``stream`` file.
+
+        :param file|None stream: Stream to emit debug representation to.
+            ``sys.stdout`` is used if left to None.
+        """
+        stream = stream or sys.stdout
+        self._dump(stream)
+
+    def dumps(self):
+        """
+        Return a debug representation of this unparser.
+
+        :rtype: str
+        """
+        result = StringIO()
+        self.dump(result)
+        return result.getvalue()
+
+    def _dump(self, stream):
+        """
+        Concrete subclasses must override this to implement the dump method.
+        """
+        raise not_implemented_error(self, type(self)._dump)
+
+    def combine(self, other):
+        """
+        Return an unparser that combines `self` and `other`.
+
+        Both are assumed to be of the same type. If both contain contradictory
+        information, emit a user error.
+
+        :param Unparser other: Unparser to combine with ``self``. Must be an
+            other instance of self's type.
+        :rtype: Unparser
+        """
+        assert isinstance(other, type(self)), (
+            'Incompatible unparsers:\n{}\n... and...\n{}'.format(
+                self.dumps(), other.dumps()
+            )
+        )
+        return self._combine(other)
+
+    def _combine(self, other):
+        """
+        Concrete subclasses must override this to implement the combine method.
+        """
+        raise not_implemented_error(self, type(self)._combine)
+
+
+class NodeUnparser(Unparser):
+    """
+    Base class for parse node unparsers.
+    """
+
+    @staticmethod
+    def from_parser(node, parser):
+        """
+        Given a parser that creates a specific type of parse node, return the
+        corresponding unparser. Emit a user diagnostic if this transformation
+        cannot be made.
+
+        :param ASTNodeType node: Parse node that `parser` emits.
+        :param Parser parser: Parser for which we want to create an unparser.
+        :rtype: NodeUnparser
+        """
+        assert not node.abstract and not node.synthetic, (
+            'Invalid unparser request for {}'.format(node.dsl_name)
+        )
+        parser = unwrap_dont_skip(parser)
+
+        with parser.diagnostic_context:
+            if node.is_token_node:
+                check_source_language(
+                    isinstance(parser, _Transform),
+                    'Unsupported token node parser for unparsers generation:'
+                    ' {}'.format(parser)
+                )
+                return TokenNodeUnparser(node)
+
+            if isinstance(parser, _Transform):
+                result = RegularNodeUnparser(node)
+
+                assert isinstance(parser.parser, _Row)
+                subparsers = parser.parser.parsers
+                next_field = 0
+
+                # Analyze subparser to split the parsed sequence of tokens into
+                # pre-tokens, parsed fields, token sequences between parse
+                # fields, and post-tokens.
+                for i, subp in enumerate(subparsers):
+                    if subp.discard():
+                        if next_field == 0:
+                            tok_seq = result.pre_tokens
+                        elif next_field < len(result.field_unparsers):
+                            tok_seq = result.inter_tokens[next_field - 1]
+                        else:
+                            tok_seq = result.post_tokens
+                        NodeUnparser._emit_to_token_sequence(subp, tok_seq)
+                    else:
+                        NodeUnparser._emit_to_field_unparser(
+                            subp, result.field_unparsers[next_field]
+                        )
+                        next_field += 1
+
+                return result
+
+            if isinstance(parser, List):
+                return ListNodeUnparser(node, parser.sep)
+
+            if isinstance(parser, Opt):
+                if parser._booleanize:
+                    # This is a special parser: when the subparser succeeds,
+                    # the "present" alternative is created to hold its result,
+                    # otherwise the "absent" alternative is created (and no
+                    # token are consumed).
+                    #
+                    # So in both cases, we create an unparser, but we emit
+                    # tokens only for the "present" alternative.
+                    result = RegularNodeUnparser(node)
+                    if node is parser._booleanize._alt_present.type:
+                        NodeUnparser._emit_to_token_sequence(parser.parser,
+                                                             result.pre_tokens)
+                    return result
+
+                else:
+                    return NodeUnparser.from_parser(node, parser.parser)
+
+            if isinstance(parser, Null):
+                return NullNodeUnparser(node)
+
+            check_source_language(
+                False,
+                'Unsupported parser for unparsers generation: {}'.format(
+                    parser
+                )
+            )
+
+    @staticmethod
+    def _split_extract(parser):
+        """
+        Split ``_Extract`` parsers into three parts: a sequence of pre-tokens,
+        the node parser in the middle, and a sequence of post-tokens.
+
+        :param _Extract parser: _Extract parser to split.
+        :rtype: (list[_Tokens], Parser, list[_Tokens])
+        """
+        assert isinstance(parser, _Extract)
+        assert isinstance(parser.parser, _Row)
+        subparsers = parser.parser.parsers
+        index = parser.index
+
+        pre_toks = []
+        for pre_parser in subparsers[:index]:
+            NodeUnparser._emit_to_token_sequence(pre_parser, pre_toks)
+
+        node_parser = subparsers[parser.index]
+
+        post_toks = []
+        for post_parser in subparsers[index + 1:]:
+            NodeUnparser._emit_to_token_sequence(post_parser, post_toks)
+
+        return (pre_toks, node_parser, post_toks)
+
+    @staticmethod
+    def _emit_to_token_sequence(parser, token_sequence):
+        """
+        Turn the given parser into a sequence of tokens.
+
+        Emit a user diagnostic if ``parser`` is a parser that does not parse
+        exactly a constant sequence of tokens.
+
+        :param Parser parser: Parser to analyze.
+        :param list[_Token] token_sequence: List into which this appends the
+            sequence of tokens.
+        """
+        parser = unwrap_dont_skip(parser)
+
+        if isinstance(parser, _Row):
+            for subparser in parser.parsers:
+                NodeUnparser._emit_to_token_sequence(subparser, token_sequence)
+
+        elif isinstance(parser, _Token):
+            assert parser.match_text or parser.val.matcher
+            token_sequence.append(parser)
+
+        elif isinstance(parser, Opt) and parser._is_error:
+            NodeUnparser._emit_to_token_sequence(parser.parser, token_sequence)
+
+        elif isinstance(parser, (DontSkip, NoBacktrack)):
+            pass
+
+        else:
+            check_source_language(
+                False,
+                'Static sequence of tokens expected, but got: {}'.format(
+                    parser
+                )
+            )
+
+    @staticmethod
+    def _emit_to_field_unparser(parser, field_unparser):
+        """
+        Considering ``field_unparser`` as a field unparser we are in the
+        process of elaborating, extract information from the given ``parser``
+        to complete it.
+
+        If ``parser`` is anything else than a Null parser, set
+        ``field_unparser.always_absent`` to True.
+
+        Emit a user diagnostic if ``parser`` is too complex for this analysis.
+
+        :param Parser parser: Parser to analyze.
+        :param FieldUnparser field_unparser: Field unparser to complete.
+        """
+        parser = unwrap_dont_skip(parser)
+
+        # As all fields are nodes, previous validation passes made sure that
+        # `parser` yields a parse node (potentially a null one).
+
+        if isinstance(parser, (Defer, List, Null, _Transform)):
+            # Field parsing goes directly to node creation, so there is no
+            # pre/post sequences of tokens.
+            field_unparser.always_absent = (field_unparser.always_absent and
+                                            isinstance(parser, Null))
+
+        elif isinstance(parser, Opt):
+            if not parser._booleanize:
+                field_unparser.always_absent = False
+                NodeUnparser._emit_to_field_unparser(parser.parser,
+                                                     field_unparser)
+
+        elif isinstance(parser, Or):
+            # Just check that all subparsers create nodes, and thus that there
+            # is nothing specific to do here: the unparser will just recurse on
+            # this field.
+            field_unparser.always_absent = False
+            for subparser in parser.parsers:
+                if not isinstance(subparser, Defer):
+                    NodeUnparser.from_parser(subparser.get_type(), subparser)
+
+        elif isinstance(parser, _Extract):
+            field_unparser.always_absent = False
+            pre_toks, node_parser, post_toks = NodeUnparser._split_extract(
+                parser)
+
+            field_unparser.pre_tokens = field_unparser.pre_tokens + pre_toks
+            field_unparser.post_tokens = post_toks + field_unparser.post_tokens
+            NodeUnparser._emit_to_field_unparser(node_parser, field_unparser)
+
+        else:
+            check_source_language(
+                False, 'Unsupported parser for node field: {}' .format(parser))
+
+
+class NullNodeUnparser(NodeUnparser):
+    """
+    Dummy node unparser, used when we try to build an unparser from a parser
+    that takes no token and returns a null parse node.
+    """
+
+    def __init__(self, node):
+        self.node = node
+
+    def _dump(self, stream):
+        stream.write('Unparser for {}: null\n'.format(self.node.dsl_name))
+
+    # Null unparsers are not supposed to be combined with others, so
+    # deliberately not overriding the "_combine" method.
+
+
+class FieldUnparser(Unparser):
+    """
+    Unparser for a node field.
+    """
+
+    def __init__(self, node, field):
+        """
+        :param ASTNodeType node: The node for which we create this field
+            unparser. Because of node inheritance, this can be different than
+            `field.struct`.
+        :param Field field: Parse field that this unparser handles.
+        """
+        self.node = node
+        self.field = field
+
+        self.always_absent = True
+        """
+        Whether this is a dummy entry, i.e. we created it from a Null parser.
+
+        :type: bool
+        """
+
+        self.pre_tokens = []
+        """
+        Sequence of tokens that precedes this field during (un)parsing.
+
+        :type: list[_Token]
+        """
+
+        self.post_tokens = []
+        """
+        Sequence of tokens that follows this field during (un)parsing.
+
+        :type: list[_Token]
+        """
+
+    def _dump(self, stream):
+        stream.write('   if {}: {} [field] {}\n'.format(
+            self.field.qualname,
+            repr_token_sequence(self.pre_tokens),
+            repr_token_sequence(self.post_tokens),
+        ))
+
+    def _combine(self, other):
+        assert other.node == self.node
+        assert other.field == self.field
+
+        if self.always_absent:
+            return other
+        elif other.always_absent:
+            return self
+        else:
+            check_token_sequence_consistency(
+                'prefix tokens for {}'.format(self.field.qualname),
+                self.pre_tokens, other.pre_tokens
+            )
+            check_token_sequence_consistency(
+                'postfix tokens for {}'.format(self.field.qualname),
+                self.post_tokens, other.post_tokens
+            )
+            return self
+
+
+class RegularNodeUnparser(NodeUnparser):
+    """
+    Unparser for "regular" nodes.
+
+    In this context, "regular" means that this node can hahve fields: it's not
+    a list and it's not a token node.
+    """
+
+    def __init__(self, node):
+        """
+        :param ASTNodeType node: Parse node that this unparser handles.
+        """
+        self.node = node
+
+        parse_fields = self.node.get_parse_fields()
+
+        self.pre_tokens = []
+        """
+        Sequence of tokens that precedes this field during (un)parsing.
+
+        :type: list[_Token]
+        """
+
+        self.field_unparsers = [FieldUnparser(node, field)
+                                for field in parse_fields]
+        """
+        List of field unparsers corresponding to this node's parse fields.
+
+        :type: list[FieldUnparser]
+        """
+
+        self.inter_tokens = [[] for _ in range(len(parse_fields) - 1)]
+        """
+        List of token sequences, corresponding to tokens that appear between
+        parse fields. Token sequence at index N materializes tokes that appear
+        between between fields N-1 and N.
+
+        :type: list[list[_Token]]
+        """
+
+        self.post_tokens = []
+        """
+        Sequence of tokens that follows this field during (un)parsing.
+
+        :type: list[_Token]
+        """
+
+    @property
+    def zip_fields(self):
+        """
+        Zipped list of field unparsers and inter-field token sequences.
+
+        :rtype: list[(FieldUnparser, list[_Token])]
+        """
+        return zip(self.field_unparsers, [[]] + self.inter_tokens)
+
+    def _dump(self, stream):
+        stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
+        if self.pre_tokens:
+            stream.write('   pre: {}\n'.format(
+                repr_token_sequence(self.pre_tokens)))
+        for field_unparser, inter_tokens in self.zip_fields:
+            stream.write('\n')
+            if inter_tokens:
+                stream.write('   tokens: {}\n'.format(
+                    repr_token_sequence(inter_tokens)))
+            field_unparser.dump(stream)
+        if self.field_unparsers:
+            stream.write('\n')
+        if self.post_tokens:
+            stream.write('   post: {}\n'.format(
+                repr_token_sequence(self.post_tokens)))
+
+    def _combine(self, other):
+        assert self.node == other.node
+        assert len(self.field_unparsers) == len(other.field_unparsers)
+        assert len(self.inter_tokens) == len(other.inter_tokens)
+
+        check_token_sequence_consistency(
+            'prefix tokens for {}'.format(self.node.dsl_name),
+            self.pre_tokens, other.pre_tokens
+        )
+
+        for i, (self_inter, other_inter) in enumerate(
+                zip(self.inter_tokens, other.inter_tokens)
+        ):
+            field = self.field_unparsers[i].field
+            check_token_sequence_consistency(
+                'tokens after {}'.format(field.qualname),
+                self_inter, other_inter
+            )
+
+        result = RegularNodeUnparser(self.node)
+        result.pre_tokens = self.pre_tokens
+        result.post_tokens = self.post_tokens
+        result.inter_tokens = self.inter_tokens
+        result.field_unparsers = [
+            self_fu.combine(other_fu)
+            for self_fu, other_fu in zip(self.field_unparsers,
+                                         other.field_unparsers)
+        ]
+        return result
+
+
+class ListNodeUnparser(NodeUnparser):
+    """
+    Unparser for list nodes.
+    """
+
+    def __init__(self, node, separator):
+        """
+        :param ASTNodeType node: Parse node that this unparser handles.
+        :param Parser|None separator: Parser for the separator token, or None
+            if this list allows no separator.
+        """
+        self.node = node
+        self.separator = separator
+
+    def _dump(self, stream):
+        stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
+        if self.separator:
+            stream.write('   separator: {}\n'.format(
+                repr_token(self.separator)))
+
+    def _combine(self, other):
+        assert self.node == other.node
+        check_source_language(
+            'Inconsistent separation token for {}: {} and {}'.format(
+                self.node.dsl_name,
+                repr_token(self.separator),
+                repr_token(other.separator)
+            ),
+            equivalent_token(self.separator, other.separator)
+        )
+        return self
+
+
+class TokenNodeUnparser(NodeUnparser):
+    """
+    Unparser for token nodes.
+    """
+
+    def __init__(self, node):
+        """
+        :param ASTNodeType node: Parse node that this unparser handles.
+        """
+        self.node = node
+
+    def _dump(self, stream):
+        stream.write('Unparser for {}\n'.format(self.node.dsl_name))
+
+    def _combine(self, other):
+        assert self.node == other.node
+        return self
 
 
 class NodeToParsersPass(object):
@@ -30,6 +599,14 @@ class NodeToParsersPass(object):
     def __init__(self, context):
         self.context = context
         self.nodes_to_rules = defaultdict(list)
+
+        self.unparsers = defaultdict(list)
+        """
+        Map instead each node to the corresponding list of unparsers.
+        Unparsers are built from parsers that create these nodes.
+
+        :type: dict[ASTNodeType, list[NodeUnparser]]
+        """
 
     def abort_unparser(self, message):
         """
@@ -51,6 +628,9 @@ class NodeToParsersPass(object):
         """
         Map every AST node type to the set of parsers that return this type.
 
+        If unparsers are requested, compute unparsers for all node-constructing
+        sub-parsers in ``parser``.
+
         Also abort the generation of unparsers if the grammar contain
         parsing constructs we don't support with unparsers.
 
@@ -64,14 +644,12 @@ class NodeToParsersPass(object):
 
         def append(node, parser):
             self.nodes_to_rules[node].append(parser)
+            if self.context.generate_unparser:
+                self.unparsers[node].append(
+                    NodeUnparser.from_parser(node, parser)
+                )
 
-        def compute_internal(p):
-
-            # Reject parsing constructs that get in the way of sound unparsers
-            if isinstance(p, Or) and not creates_node(p):
-                self.abort_unparser('Or() does more that just creating a'
-                                    ' node.')
-
+        def compute_internal(p, toplevel=True):
             # Skip parsers create nodes out of thin air in reaction to a
             # parsing error, so unparser logics must ignore them.
             if isinstance(p, Skip):
@@ -80,24 +658,48 @@ class NodeToParsersPass(object):
             elif isinstance(p, Opt) and p._booleanize:
                 for alt in p._booleanize._alternatives:
                     append(alt.type, p)
+                toplevel = False
 
             elif isinstance(p, (List, _Transform)):
                 append(p.get_type(), p)
+                toplevel = False
+
+            elif isinstance(p, (Null, Or)):
+                pass
+
+            elif isinstance(p, _Extract):
+                assert isinstance(p.parser, _Row)
+                subparsers = p.parser.parsers
+
+                # Reject information loss at the top level. As a special case,
+                # allow that top-level "p" parses a node followed by a
+                # termination token.
+                check_source_language(
+                    not self.context.generate_unparser or
+                    not toplevel or
+                    (len(p.parser.parsers) == 2 and
+                        isinstance(subparsers[1], _Token) and
+                        subparsers[1]._val == LexerToken.Termination),
+                    'Top-level information loss prevents unparsers generation'
+                )
 
             for c in p.children():
-                compute_internal(c)
+                compute_internal(c, toplevel)
 
+        compute_internal(parser)
         if not creates_node(parser):
             self.abort_unparser("'{}' toplevel rule loses information.".format(
                 parser.name
             ))
-        compute_internal(parser)
 
     def check_nodes_to_rules(self, ctx):
         """
         Check the results of the compute pass, to see if every node type only
         has one non ambiguous way of being unparsed, and assign a canonical
         representation to every node type.
+
+        Combine all unparsers for each node, checking their consistency, and
+        attach the result as ``node.unparser``.
         """
         from langkit.compiled_types import CompiledTypeMetaclass
 
@@ -135,6 +737,31 @@ class NodeToParsersPass(object):
                 return
             node.parser = find_canonical_parser(parsers)
             Log.log('unparser_canonical', node.name, node.parser)
+
+        # Combine all unparsers for each node, checking that they are
+        # consistent. Iterate on all nodes first to get deterministic
+        # iteration.
+        for node in self.context.astnode_types:
+            unparsers = self.unparsers[node]
+            if not unparsers:
+                continue
+
+            # TODO: previous validation passes are supposed to ensure the
+            # assertion that follows, right?
+            unparsers = [u for u in unparsers
+                         if not isinstance(u, NullNodeUnparser)]
+            assert unparsers, ('No non-null unparser for non-synthetic node:'
+                               ' {}'.format(node.dsl_name))
+
+            combined = unparsers.pop(0)
+            for unparser in unparsers:
+                combined = combined.combine(unparser)
+                assert type(unparser) == type(combined), (
+                    'Incompatible unparsers:\n{}\n... and...\n{}'.format(
+                        combined.dumps(), unparser.dumps()
+                    )
+                )
+            node.unparser = combined
 
 
 def creates_node(p):

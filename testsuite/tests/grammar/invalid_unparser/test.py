@@ -6,7 +6,7 @@ properly detected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
-from langkit.parsers import Grammar, Opt, Or, Pick
+from langkit.parsers import Grammar, Or, Pick
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -51,13 +51,7 @@ run(
     )
 )
 run(
-    'Pick in Opt',
-    main_rule=lambda T, g: T.Root(Opt(g.item)),
-    item=lambda T, g: Or(T.Identifier(Token.Identifier),
-                         T.Number(Token.Number)),
-)
-run(
-    'Toplevel rule loses information',
+    'Toplevel Pick',
     main_rule=lambda T, g: Pick('example', T.Root(g.item)),
     item=lambda T, g: Or(T.Identifier(Token.Identifier),
                          T.Number(Token.Number)),
