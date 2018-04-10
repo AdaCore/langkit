@@ -23,40 +23,6 @@ def unwrap_dont_skip(parser):
     return parser.subparser if isinstance(parser, DontSkip) else parser
 
 
-def repr_token_sequence(tokens):
-    """
-    Return a human-friendly reprentation for a list of token parsers.
-
-    :param list[TokenUnparser] tokens: List of tokens to represent.
-    :rtype: str
-    """
-    return ' '.join(t.dumps() for t in tokens)
-
-
-def check_token_sequence_consistency(tok_seq_name, seq1, seq2):
-    """
-    Emit a user diagnostic if `seq1` and `seq2` are not equivalent sequences of
-    tokens.
-
-    :param str tok_seq_name: Name of the token sequences to compare, used in
-        the diagnostic label.
-    :type seq1: list[TokenUnparser]
-    :type seq2: list[TokenUnparser]
-    """
-    check_source_language(
-        len(seq1) == len(seq2) and
-        all(TokenUnparser.equivalent(tok1, tok2)
-            for tok1, tok2 in zip(seq1, seq2)),
-
-        'Inconsistent {}:'
-        '\n  {}'
-        '\nand:'
-        '\n  {}'.format(tok_seq_name,
-                        repr_token_sequence(seq1),
-                        repr_token_sequence(seq2))
-    )
-
-
 class Unparser(object):
     """
     Abstract class for unparsers.
@@ -171,12 +137,70 @@ class TokenUnparser(Unparser):
                      if self.match_text else
                      self.token.matcher.to_match)
 
-    # Comparing tokens is done through ``check_token_sequence_consistency``,
-    # which is already good at providing context for users in diagnostics, so
-    # deliberately not overriding the "_combine" method.
+    # Comparing tokens is done through
+    # ``TokenSequenceUnparser.check_equivalence``, which is already good at
+    # providing context for users in diagnostics, so deliberately not
+    # overriding the "_combine" method.
 
     def __repr__(self):
         return 'Token {}'.format(repr(self.dumps()))
+
+
+class TokenSequenceUnparser(Unparser):
+    """
+    Sequence of token unparsers.
+    """
+
+    def __init__(self, init_tokens=None):
+        """
+        :param TokenSequenceUnparser|None init_tokens: Optional list of tokens
+            to start with.
+        """
+        self.tokens = list(init_tokens or [])
+
+    def _dump(self, stream):
+        stream.write(' '.join(t.dumps() for t in self.tokens))
+
+    def __len__(self):
+        return len(self.tokens)
+
+    def __add__(self, other):
+        """
+        Return a new token sequence unparser that is the concatenation of
+        ``self`` and ``other``.
+
+        :type other: TokenSequenceUnparser
+        :rtype: TokenSequenceUnparser
+        """
+        return TokenSequenceUnparser(self.tokens + other.tokens)
+
+    def append(self, token):
+        """
+        Append a token to this sequence.
+
+        :param TokenUnparser token: Token unparser to append.
+        """
+        self.tokens.append(token)
+
+    def check_equivalence(self, sequence_name, other):
+        """
+        Emit a user diagnostic if `self` and `other` are not equivalent
+        sequences of token unparsers.
+
+        :param str sequence_name: Name of the token sequences to compare, used
+            in the diagnostic label.
+        :param TokenSequenceUnparser other: Sequence to compare to ``self``.
+        """
+        check_source_language(
+            len(self.tokens) == len(other.tokens) and
+            all(TokenUnparser.equivalent(tok1, tok2)
+                for tok1, tok2 in zip(self.tokens, other.tokens)),
+
+            'Inconsistent {}:'
+            '\n  {}'
+            '\nand:'
+            '\n  {}'.format(sequence_name, self.dumps(), other.dumps())
+        )
 
 
 class NodeUnparser(Unparser):
@@ -277,7 +301,7 @@ class NodeUnparser(Unparser):
         the node parser in the middle, and a sequence of post-tokens.
 
         :param _Extract parser: _Extract parser to split.
-        :rtype: (list[TokenUnparser], Parser, list[TokenUnparser])
+        :rtype: (TokenSequenceUnparser, Parser, TokenSequenceUnparser)
         """
         assert isinstance(parser, _Extract)
         assert isinstance(parser.parser, _Row)
@@ -294,7 +318,9 @@ class NodeUnparser(Unparser):
         for post_parser in subparsers[index + 1:]:
             NodeUnparser._emit_to_token_sequence(post_parser, post_toks)
 
-        return (pre_toks, node_parser, post_toks)
+        return (TokenSequenceUnparser(pre_toks),
+                node_parser,
+                TokenSequenceUnparser(post_toks))
 
     @staticmethod
     def _emit_to_token_sequence(parser, token_sequence):
@@ -305,8 +331,8 @@ class NodeUnparser(Unparser):
         exactly a constant sequence of tokens.
 
         :param Parser parser: Parser to analyze.
-        :param list[TokenUnparser] token_sequence: List into which this appends
-            the sequence of tokens.
+        :param TokenSequenceUnparser token_sequence: List into which this
+            appends the sequence of tokens.
         """
         parser = unwrap_dont_skip(parser)
 
@@ -424,25 +450,25 @@ class FieldUnparser(Unparser):
         :type: bool
         """
 
-        self.pre_tokens = []
+        self.pre_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that precedes this field during (un)parsing.
 
-        :type: list[TokenUnparser]
+        :type: TokenSequenceUnparser
         """
 
-        self.post_tokens = []
+        self.post_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that follows this field during (un)parsing.
 
-        :type: list[TokenUnparser]
+        :type: TokenSequenceUnparser
         """
 
     def _dump(self, stream):
         stream.write('   if {}: {} [field] {}\n'.format(
             self.field.qualname,
-            repr_token_sequence(self.pre_tokens),
-            repr_token_sequence(self.post_tokens),
+            self.pre_tokens.dumps(),
+            self.post_tokens.dumps(),
         ))
 
     def _combine(self, other):
@@ -454,13 +480,13 @@ class FieldUnparser(Unparser):
         elif other.always_absent:
             return self
         else:
-            check_token_sequence_consistency(
+            self.pre_tokens.check_equivalence(
                 'prefix tokens for {}'.format(self.field.qualname),
-                self.pre_tokens, other.pre_tokens
+                other.pre_tokens
             )
-            check_token_sequence_consistency(
+            self.post_tokens.check_equivalence(
                 'postfix tokens for {}'.format(self.field.qualname),
-                self.post_tokens, other.post_tokens
+                other.post_tokens
             )
             return self
 
@@ -481,11 +507,11 @@ class RegularNodeUnparser(NodeUnparser):
 
         parse_fields = self.node.get_parse_fields()
 
-        self.pre_tokens = []
+        self.pre_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that precedes this field during (un)parsing.
 
-        :type: list[TokenUnparser]
+        :type: TokenSequenceUnparser
         """
 
         self.field_unparsers = [FieldUnparser(node, field)
@@ -496,20 +522,21 @@ class RegularNodeUnparser(NodeUnparser):
         :type: list[FieldUnparser]
         """
 
-        self.inter_tokens = [[] for _ in range(len(parse_fields) - 1)]
+        self.inter_tokens = [TokenSequenceUnparser()
+                             for _ in range(len(parse_fields) - 1)]
         """
         List of token sequences, corresponding to tokens that appear between
         parse fields. Token sequence at index N materializes tokes that appear
         between between fields N-1 and N.
 
-        :type: list[list[TokenUnparser]]
+        :type: list[TokenSequenceUnparser]
         """
 
-        self.post_tokens = []
+        self.post_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that follows this field during (un)parsing.
 
-        :type: list[TokenUnparser]
+        :type: TokenSequenceUnparser
         """
 
     @property
@@ -517,44 +544,42 @@ class RegularNodeUnparser(NodeUnparser):
         """
         Zipped list of field unparsers and inter-field token sequences.
 
-        :rtype: list[(FieldUnparser, list[TokenUnparser])]
+        :rtype: list[(FieldUnparser, TokenSequenceUnparser)]
         """
-        return zip(self.field_unparsers, [[]] + self.inter_tokens)
+        return zip(self.field_unparsers,
+                   [TokenSequenceUnparser()] + self.inter_tokens)
 
     def _dump(self, stream):
         stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
         if self.pre_tokens:
-            stream.write('   pre: {}\n'.format(
-                repr_token_sequence(self.pre_tokens)))
+            stream.write('   pre: {}\n'.format(self.pre_tokens.dumps()))
         for field_unparser, inter_tokens in self.zip_fields:
             stream.write('\n')
             if inter_tokens:
-                stream.write('   tokens: {}\n'.format(
-                    repr_token_sequence(inter_tokens)))
+                stream.write('   tokens: {}\n'.format(inter_tokens.dumps()))
             field_unparser.dump(stream)
         if self.field_unparsers:
             stream.write('\n')
         if self.post_tokens:
-            stream.write('   post: {}\n'.format(
-                repr_token_sequence(self.post_tokens)))
+            stream.write('   post: {}\n'.format(self.post_tokens.dumps()))
 
     def _combine(self, other):
         assert self.node == other.node
         assert len(self.field_unparsers) == len(other.field_unparsers)
         assert len(self.inter_tokens) == len(other.inter_tokens)
 
-        check_token_sequence_consistency(
+        self.pre_tokens.check_equivalence(
             'prefix tokens for {}'.format(self.node.dsl_name),
-            self.pre_tokens, other.pre_tokens
+            other.pre_tokens
         )
 
         for i, (self_inter, other_inter) in enumerate(
                 zip(self.inter_tokens, other.inter_tokens)
         ):
             field = self.field_unparsers[i].field
-            check_token_sequence_consistency(
+            self_inter.check_equivalence(
                 'tokens after {}'.format(field.qualname),
-                self_inter, other_inter
+                other_inter
             )
 
         result = RegularNodeUnparser(self.node)
