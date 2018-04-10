@@ -10,6 +10,7 @@ import sys
 
 from funcy import split
 
+from langkit.compiled_types import get_context
 from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import LexerToken
 from langkit.parsers import (
@@ -78,6 +79,15 @@ class Unparser(object):
         """
         raise not_implemented_error(self, type(self)._combine)
 
+    def collect(self, unparsers):
+        """
+        Traverse all unparsers in ``self`` (in prefix order) and register the
+        various unparsers that need to be collected in ``unparsers``.
+
+        :param Unparsers unparsers: Collection of unparsers to complete.
+        """
+        raise not_implemented_error(self, type(self).collect)
+
 
 class TokenUnparser(Unparser):
     """
@@ -106,9 +116,19 @@ class TokenUnparser(Unparser):
         """
         if parser is None:
             return None
+
         assert isinstance(parser, _Token)
+        token = parser.val
         match_text = parser.match_text or None
-        return cls(parser.val, match_text)
+
+        unparsers = get_context().unparsers
+        key = (token, match_text)
+        try:
+            return unparsers.token_unparsers[key]
+        except KeyError:
+            result = cls(token, match_text)
+            unparsers.token_unparsers[key] = result
+            return result
 
     @staticmethod
     def equivalent(token1, token2):
@@ -490,6 +510,10 @@ class FieldUnparser(Unparser):
             )
             return self
 
+    def collect(self, unparsers):
+        unparsers.token_sequence_unparsers.extend((self.pre_tokens,
+                                                   self.post_tokens))
+
 
 class RegularNodeUnparser(NodeUnparser):
     """
@@ -593,6 +617,15 @@ class RegularNodeUnparser(NodeUnparser):
         ]
         return result
 
+    def collect(self, unparsers):
+        tok_seq_list = unparsers.token_sequence_unparsers
+
+        tok_seq_list.append(self.pre_tokens)
+        for field_unparser, inter_tokens in self.zip_fields:
+            field_unparser.collect(unparsers)
+            tok_seq_list.append(inter_tokens)
+        tok_seq_list.append(self.post_tokens)
+
 
 class ListNodeUnparser(NodeUnparser):
     """
@@ -625,6 +658,9 @@ class ListNodeUnparser(NodeUnparser):
         )
         return self
 
+    def collect(self, unparsers):
+        pass
+
 
 class TokenNodeUnparser(NodeUnparser):
     """
@@ -643,6 +679,9 @@ class TokenNodeUnparser(NodeUnparser):
     def _combine(self, other):
         assert self.node == other.node
         return self
+
+    def collect(self, unparsers):
+        pass
 
 
 class Unparsers(object):
@@ -665,6 +704,30 @@ class Unparsers(object):
 
         :type: dict[ASTNodeType, list[NodeUnparser]]
         """
+
+        self.token_unparsers = {}
+        """
+        Cache for created token unparsers. This avoids the emission of the same
+        token unparser constant over and over in generated code.
+
+        :type: dict[(langkit.lexer.TokenAction, str|None), TokenUnparser]
+        """
+
+        self.token_sequence_unparsers = []
+        """
+        List of all token sequence unparsers in the unparsing tables. Computed
+        at the end of finalization to retain only the final ones.
+
+        :type: list[TokenSequenceUnparser]
+        """
+
+    @property
+    def sorted_token_unparsers(self):
+        """
+        List of all token unparsers. Order is consistent across runs.
+        """
+        return sorted(self.token_unparsers.values(),
+                      key=lambda t: t.dumps())
 
     def abort_unparser(self, message):
         """
@@ -825,6 +888,7 @@ class Unparsers(object):
                     )
                 )
             node.unparser = combined
+            node.unparser.collect(self)
 
 
 def creates_node(p):
