@@ -1272,6 +1272,9 @@ class CompileCtx(object):
         if warnings:
             self.warnings = warnings
 
+        from langkit.unparsers import Unparsers
+        self.unparsers = Unparsers(self)
+
         if self.generate_unparser:
             self.warnings.enable(self.warnings.unparser_bad_grammar)
 
@@ -1397,9 +1400,6 @@ class CompileCtx(object):
 
         from langkit.compiled_types import CompiledTypeMetaclass
         from langkit.parsers import Parser
-        from langkit.unparsers import NodeToParsersPass
-
-        node_to_parsers = NodeToParsersPass(self)
 
         self.root_grammar_class = CompiledTypeMetaclass.root_grammar_class
 
@@ -1468,12 +1468,12 @@ class CompileCtx(object):
             errors_checkpoint_pass,
 
             GrammarRulePass('compute nodes parsers correspondence',
-                            node_to_parsers.compute),
+                            self.unparsers.compute),
             ASTNodePass('warn imprecise field type annotations',
                         lambda _, astnode:
                         astnode.warn_imprecise_field_type_annotations()),
-            GlobalPass('log node parsers correspondence ',
-                       node_to_parsers.check_nodes_to_rules),
+            GlobalPass('log node parsers correspondence',
+                       self.unparsers.check_nodes_to_rules),
 
             StopPipeline('check only', disabled=not check_only),
 

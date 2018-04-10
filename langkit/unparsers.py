@@ -645,15 +645,17 @@ class TokenNodeUnparser(NodeUnparser):
         return self
 
 
-class NodeToParsersPass(object):
+class Unparsers(object):
     """
-    This pass computes the correspondence between AST node types and parsers.
+    Holder for the creation of unparsing tables.
+
     The end goal is to have one and only one non-ambiguous rule to unparse an
     AST type.
     """
 
     def __init__(self, context):
         self.context = context
+
         self.nodes_to_rules = defaultdict(list)
 
         self.unparsers = defaultdict(list)
