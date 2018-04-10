@@ -23,48 +23,14 @@ def unwrap_dont_skip(parser):
     return parser.subparser if isinstance(parser, DontSkip) else parser
 
 
-def repr_token(token):
-    """
-    Return a human-friendly name for this token parser.
-
-    :param _Token token: Token parser to represent. Note that it must either
-        match some specific text, or the corresponding token kind must be a
-        literal.
-    :rtype: str
-    """
-    if token is None:
-        return '<none>'
-    elif token.match_text:
-        return token.match_text
-    else:
-        assert token.val.matcher.to_match
-        return token.val.matcher.to_match
-
-
 def repr_token_sequence(tokens):
     """
     Return a human-friendly reprentation for a list of token parsers.
 
-    :param list[_Token] tokens: List of tokens to represent. Each token must
-        fit for a call to ``repr_token``.
+    :param list[TokenUnparser] tokens: List of tokens to represent.
     :rtype: str
     """
-    return ' '.join(repr_token(t) for t in tokens)
-
-
-def equivalent_token(tok1, tok2):
-    """
-    Return whether `tok1` and `tok2` are equivalent token parsers.
-
-    Both token parsers must satisfy ``repr_token``'s precondition.
-
-    :type _Token: tok1
-    :type _Token: tok2
-    :rtype: bool
-    """
-    if tok1 is None or tok2 is None:
-        return tok1 is tok2
-    return repr_token(tok1) == repr_token(tok2)
+    return ' '.join(t.dumps() for t in tokens)
 
 
 def check_token_sequence_consistency(tok_seq_name, seq1, seq2):
@@ -72,16 +38,14 @@ def check_token_sequence_consistency(tok_seq_name, seq1, seq2):
     Emit a user diagnostic if `seq1` and `seq2` are not equivalent sequences of
     tokens.
 
-    All token parsers must satisfy ``repr_token``'s precondition.
-
     :param str tok_seq_name: Name of the token sequences to compare, used in
         the diagnostic label.
-    :type seq1: list[_Token]
-    :type seq2: list[_Token]
+    :type seq1: list[TokenUnparser]
+    :type seq2: list[TokenUnparser]
     """
     check_source_language(
         len(seq1) == len(seq2) and
-        all(equivalent_token(tok1, tok2)
+        all(TokenUnparser.equivalent(tok1, tok2)
             for tok1, tok2 in zip(seq1, seq2)),
 
         'Inconsistent {}:'
@@ -149,6 +113,72 @@ class Unparser(object):
         raise not_implemented_error(self, type(self)._combine)
 
 
+class TokenUnparser(Unparser):
+    """
+    Unparser for a token. The token text must be known.
+    """
+
+    def __init__(self, token, match_text=None):
+        """
+        :param langkit.lexer.TokenAction token: Kind for the token to unparse.
+        :param str|None match_text: If there is no literal corresponding to
+            ``token``, this must be a string used for unparsing. Otherwise,
+            this must be None.
+        """
+        assert (token.matcher is None) == bool(match_text)
+        self.token = token
+        self.match_text = match_text
+
+    @classmethod
+    def from_parser(cls, parser):
+        """
+        Create a token unparser out of a parser, assumed to parse a token.
+        If ``parser`` is None, return None.
+
+        :param _Token|None parser: Token parser to analyze.
+        :rtype: TokenUnparser|None
+        """
+        if parser is None:
+            return None
+        assert isinstance(parser, _Token)
+        match_text = parser.match_text or None
+        return cls(parser.val, match_text)
+
+    @staticmethod
+    def equivalent(token1, token2):
+        """
+        Return whether `token1` and `token2` are equivalent tokens.
+
+        :type TokenUnparser: token1
+        :type TokenUnparser: token2
+        :rtype: bool
+        """
+        if token1 is None or token2 is None:
+            return token1 is token2
+        return token1.dumps() == token2.dumps()
+
+    @staticmethod
+    def dump_or_none(token):
+        """
+        Return ``token.dumps()`` unless it is None.
+
+        :rtype: str
+        """
+        return '<none>' if token is None else token.dumps()
+
+    def _dump(self, stream):
+        stream.write(self.match_text
+                     if self.match_text else
+                     self.token.matcher.to_match)
+
+    # Comparing tokens is done through ``check_token_sequence_consistency``,
+    # which is already good at providing context for users in diagnostics, so
+    # deliberately not overriding the "_combine" method.
+
+    def __repr__(self):
+        return 'Token {}'.format(repr(self.dumps()))
+
+
 class NodeUnparser(Unparser):
     """
     Base class for parse node unparsers.
@@ -207,7 +237,10 @@ class NodeUnparser(Unparser):
                 return result
 
             if isinstance(parser, List):
-                return ListNodeUnparser(node, parser.sep)
+                return ListNodeUnparser(
+                    node,
+                    TokenUnparser.from_parser(parser.sep)
+                )
 
             if isinstance(parser, Opt):
                 if parser._booleanize:
@@ -244,7 +277,7 @@ class NodeUnparser(Unparser):
         the node parser in the middle, and a sequence of post-tokens.
 
         :param _Extract parser: _Extract parser to split.
-        :rtype: (list[_Tokens], Parser, list[_Tokens])
+        :rtype: (list[TokenUnparser], Parser, list[TokenUnparser])
         """
         assert isinstance(parser, _Extract)
         assert isinstance(parser.parser, _Row)
@@ -272,8 +305,8 @@ class NodeUnparser(Unparser):
         exactly a constant sequence of tokens.
 
         :param Parser parser: Parser to analyze.
-        :param list[_Token] token_sequence: List into which this appends the
-            sequence of tokens.
+        :param list[TokenUnparser] token_sequence: List into which this appends
+            the sequence of tokens.
         """
         parser = unwrap_dont_skip(parser)
 
@@ -282,8 +315,7 @@ class NodeUnparser(Unparser):
                 NodeUnparser._emit_to_token_sequence(subparser, token_sequence)
 
         elif isinstance(parser, _Token):
-            assert parser.match_text or parser.val.matcher
-            token_sequence.append(parser)
+            token_sequence.append(TokenUnparser.from_parser(parser))
 
         elif isinstance(parser, Opt) and parser._is_error:
             NodeUnparser._emit_to_token_sequence(parser.parser, token_sequence)
@@ -396,14 +428,14 @@ class FieldUnparser(Unparser):
         """
         Sequence of tokens that precedes this field during (un)parsing.
 
-        :type: list[_Token]
+        :type: list[TokenUnparser]
         """
 
         self.post_tokens = []
         """
         Sequence of tokens that follows this field during (un)parsing.
 
-        :type: list[_Token]
+        :type: list[TokenUnparser]
         """
 
     def _dump(self, stream):
@@ -453,7 +485,7 @@ class RegularNodeUnparser(NodeUnparser):
         """
         Sequence of tokens that precedes this field during (un)parsing.
 
-        :type: list[_Token]
+        :type: list[TokenUnparser]
         """
 
         self.field_unparsers = [FieldUnparser(node, field)
@@ -470,14 +502,14 @@ class RegularNodeUnparser(NodeUnparser):
         parse fields. Token sequence at index N materializes tokes that appear
         between between fields N-1 and N.
 
-        :type: list[list[_Token]]
+        :type: list[list[TokenUnparser]]
         """
 
         self.post_tokens = []
         """
         Sequence of tokens that follows this field during (un)parsing.
 
-        :type: list[_Token]
+        :type: list[TokenUnparser]
         """
 
     @property
@@ -485,7 +517,7 @@ class RegularNodeUnparser(NodeUnparser):
         """
         Zipped list of field unparsers and inter-field token sequences.
 
-        :rtype: list[(FieldUnparser, list[_Token])]
+        :rtype: list[(FieldUnparser, list[TokenUnparser])]
         """
         return zip(self.field_unparsers, [[]] + self.inter_tokens)
 
@@ -545,8 +577,8 @@ class ListNodeUnparser(NodeUnparser):
     def __init__(self, node, separator):
         """
         :param ASTNodeType node: Parse node that this unparser handles.
-        :param Parser|None separator: Parser for the separator token, or None
-            if this list allows no separator.
+        :param TokenUnparser|None separator: Unparser for the separator token,
+            or None if this list allows no separator.
         """
         self.node = node
         self.separator = separator
@@ -554,18 +586,17 @@ class ListNodeUnparser(NodeUnparser):
     def _dump(self, stream):
         stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
         if self.separator:
-            stream.write('   separator: {}\n'.format(
-                repr_token(self.separator)))
+            stream.write('   separator: {}\n'.format(self.separator.dumps()))
 
     def _combine(self, other):
         assert self.node == other.node
         check_source_language(
             'Inconsistent separation token for {}: {} and {}'.format(
                 self.node.dsl_name,
-                repr_token(self.separator),
-                repr_token(other.separator)
+                TokenUnparser.dump_or_none(self.separator),
+                TokenUnparser.dump_or_none(other.separator)
             ),
-            equivalent_token(self.separator, other.separator)
+            TokenUnparser.equivalent(self.separator, other.separator)
         )
         return self
 
