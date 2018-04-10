@@ -796,6 +796,11 @@ class Unparsers(object):
             node.parser = find_canonical_parser(parsers)
             Log.log('unparser_canonical', node.name, node.parser)
 
+    def finalize(self, context):
+        """
+        Pass to finalize the preparation of unparsers code generation.
+        """
+
         # Combine all unparsers for each node, checking that they are
         # consistent. Iterate on all nodes first to get deterministic
         # iteration.
