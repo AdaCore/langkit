@@ -19,21 +19,21 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  Update Sloc as if it represented a cursor that move right-wards after
    --  inserting Char to a buffer.
 
-   % if ctx.generate_unparser:
-      procedure Unparse_Dispatch
-        (Node                : access Abstract_Node_Type'Class;
-         Preserve_Formatting : Boolean;
-         Result              : in out Unparsing_Buffer);
-      --  Dispatch over Node's kind and call the corresponding unparsing
-      --  procedure.
+   procedure Unparse_Node
+     (Node                : access Abstract_Node_Type'Class;
+      Preserve_Formatting : Boolean;
+      Result              : in out Unparsing_Buffer);
+   --  Using the Node_Unparsers unparsing tables, unparse the given Node
 
-      % for astnode in concrete_astnodes:
-         procedure Unparse_${astnode.name}
-           (Node                : access Abstract_Node_Type'Class;
-            Preserve_Formatting : Boolean;
-            Result              : in out Unparsing_Buffer);
-      % endfor
-   % endif
+   procedure Unparse_Token
+     (Unparser : Token_Unparser;
+      Result   : in out Unparsing_Buffer);
+   --  Using the Unparser unparsing table, unparse a token
+
+   procedure Unparse_Token_Sequence
+     (Unparser : Token_Sequence_Access;
+      Result   : in out Unparsing_Buffer);
+   --  Using the Unparser unparsing table, unparse a sequence of tokens
 
    -----------------
    -- Update_Sloc --
@@ -168,60 +168,107 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             return (raise Program_Error with "cannot unparse null node");
          end if;
 
-         Unparse_Dispatch (Node, Preserve_Formatting, Buffer);
+         Unparse_Node (Node, Preserve_Formatting, Buffer);
          return To_Wide_Wide_String (Buffer.Content);
       % else:
          return (raise Program_Error with "Unparser not generated");
       % endif
    end Unparse;
 
-   % if ctx.generate_unparser:
+   ------------------
+   -- Unparse_Node --
+   ------------------
 
-      ----------------------
-      -- Unparse_Dispatch --
-      ----------------------
+   procedure Unparse_Node
+     (Node                : access Abstract_Node_Type'Class;
+      Preserve_Formatting : Boolean;
+      Result              : in out Unparsing_Buffer)
+   is
+      Unparser : Node_Unparser renames Node_Unparsers (Node.Abstract_Kind);
+   begin
+      case Unparser.Kind is
+         when Regular =>
+            Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
+            declare
+               U : Field_Unparser_List renames Unparser.Field_Unparsers.all;
+            begin
+               for I in 1 .. U.N loop
+                  declare
+                     F     : Field_Unparser renames U.Field_Unparsers (I);
+                     T     : Token_Sequence_Access renames U.Inter_Tokens (I);
+                     Child : constant Analysis.Implementation.Abstract_Node :=
+                        Node.Abstract_Child (I);
+                  begin
+                     Unparse_Token_Sequence (T, Result);
+                     if Child /= null
+                        and then (not F.Empty_List_Is_Absent
+                                  or else Child.Abstract_Children_Count > 0)
+                     then
+                        Unparse_Token_Sequence (F.Pre_Tokens, Result);
+                        Unparse_Node (Child, Preserve_Formatting, Result);
+                        Unparse_Token_Sequence (F.Post_Tokens, Result);
+                     end if;
+                  end;
+               end loop;
+            end;
+            Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
 
-      procedure Unparse_Dispatch
-        (Node                : access Abstract_Node_Type'Class;
-         Preserve_Formatting : Boolean;
-         Result              : in out Unparsing_Buffer) is
-      begin
-         case Node.Abstract_Kind is
-            % for astnode in ctx.astnode_types:
-               % if not astnode.abstract:
-                  when ${astnode.ada_kind_name} =>
-                     Unparse_${astnode.name}
-                       (Node, Preserve_Formatting, Result);
-               % endif
-            % endfor
-         end case;
-      end Unparse_Dispatch;
+         when List =>
+            declare
+               Count : constant Natural := Node.Abstract_Children_Count;
+            begin
+               for I in 1 .. Count loop
+                  Unparse_Node (Node.Abstract_Child (I),
+                                Preserve_Formatting,
+                                Result);
 
-      % for astnode in concrete_astnodes:
-         procedure Unparse_${astnode.name}
-           (Node                : access Abstract_Node_Type'Class;
-            Preserve_Formatting : Boolean;
-            Result              : in out Unparsing_Buffer)
-         is
+                  if I < Count and then Unparser.Has_Separator then
+                     Unparse_Token (Unparser.Separator, Result);
+                  end if;
+               end loop;
+            end;
+
+         when Token =>
+            Append (Result, Node.Abstract_Text);
+            Append (Result, " ");
+      end case;
+   end Unparse_Node;
+
+   -------------------
+   -- Unparse_Token --
+   -------------------
+
+   procedure Unparse_Token
+     (Unparser : Token_Unparser;
+      Result   : in out Unparsing_Buffer)
+   is
+   begin
+      if Unparser.Text /= null then
+         Append (Result, Unparser.Text.all);
+      else
+         declare
+            Literal : constant Text_Type := Token_Kind_Literal (Unparser.Kind);
          begin
-            % if astnode.parser:
-               ${unparsers.emit_unparser_code(astnode.parser, astnode, 'Node')}
-            % endif
+            pragma Assert (Literal'Length > 0);
+            Append (Result, Literal);
+         end;
+      end if;
+      Append (Result, " ");
+   end Unparse_Token;
 
-            ## Just in case this unparser emits nothing, provide a null
-            ## statement to yield legal Ada code.
-            null;
+   ----------------------------
+   -- Unparse_Token_Sequence --
+   ----------------------------
 
-            ## Maybe the above will generate references to the Node, Result and
-            ## Preserve_Formatting arguments, but maybe not (and that's fine).
-            ## To avoid "unreferenced" warnings, let's use this pragma. And to
-            ## avoid "referenced in spite of pragma Unreferenced" warnings, put
-            ## this pragma at the end of the procedure.
-            pragma Unreferenced (Node, Result, Preserve_Formatting);
-         end Unparse_${astnode.name};
-      % endfor
-
-   % endif
+   procedure Unparse_Token_Sequence
+     (Unparser : Token_Sequence_Access;
+      Result   : in out Unparsing_Buffer)
+   is
+   begin
+      for U of Unparser.all loop
+         Unparse_Token (U, Result);
+      end loop;
+   end Unparse_Token_Sequence;
 
    % if ctx.generate_unparser:
 
