@@ -214,7 +214,10 @@ class TokenSequenceUnparser(Unparser):
         self._var_name = None
 
     def _dump(self, stream):
-        stream.write(' '.join(t.dumps() for t in self.tokens))
+        if self.tokens:
+            stream.write(' '.join(t.dumps() for t in self.tokens))
+        else:
+            stream.write('<no token>')
 
     def __len__(self):
         return len(self.tokens)
