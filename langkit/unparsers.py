@@ -305,31 +305,7 @@ class NodeUnparser(Unparser):
                 return TokenNodeUnparser(node)
 
             if isinstance(parser, _Transform):
-                result = RegularNodeUnparser(node)
-
-                assert isinstance(parser.parser, _Row)
-                subparsers = parser.parser.parsers
-                next_field = 0
-
-                # Analyze subparser to split the parsed sequence of tokens into
-                # pre-tokens, parsed fields, token sequences between parse
-                # fields, and post-tokens.
-                for i, subp in enumerate(subparsers):
-                    if subp.discard():
-                        if next_field == 0:
-                            tok_seq = result.pre_tokens
-                        elif next_field < len(result.field_unparsers):
-                            tok_seq = result.inter_tokens[next_field - 1]
-                        else:
-                            tok_seq = result.post_tokens
-                        NodeUnparser._emit_to_token_sequence(subp, tok_seq)
-                    else:
-                        NodeUnparser._emit_to_field_unparser(
-                            subp, result.field_unparsers[next_field]
-                        )
-                        next_field += 1
-
-                return result
+                return NodeUnparser._from_transform_parser(node, parser)
 
             if isinstance(parser, List):
                 return ListNodeUnparser(
@@ -364,6 +340,67 @@ class NodeUnparser(Unparser):
                     parser
                 )
             )
+
+    @staticmethod
+    def _from_transform_parser(node, parser):
+        """
+        Helper for _from_parser. Turn the given _Transform parser into a
+        RegularNodeUnparser instance.
+
+        :param ASTNodeType node: Parse node that `parser` emits.
+        :param Parser parser: Parser for which we want to create an unparser.
+        :rtype: NodeUnparser
+        """
+        assert isinstance(parser, _Transform)
+        assert isinstance(parser.parser, _Row)
+
+        result = RegularNodeUnparser(node)
+        subparsers = parser.parser.parsers
+        next_field = 0
+
+        def surrounding_inter_tokens():
+            """
+            Considering the next field to process, return a tuple that contains
+            the token sequence that precedes it, and the token sequence that
+            succeeds it.
+
+            :rtype: (TokenSequenceUnparser, TokenSequenceUnparser|None)
+            """
+            if next_field == 0:
+                pre_tokens = result.pre_tokens
+                post_tokens = (result.inter_tokens[0]
+                               if len(result.field_unparsers) > 1 else
+                               result.post_tokens)
+
+            elif next_field < len(result.field_unparsers):
+                pre_tokens = result.inter_tokens[next_field - 1]
+                post_tokens = (result.inter_tokens[next_field]
+                               if next_field < len(result.inter_tokens) else
+                               result.post_tokens)
+
+            else:
+                assert next_field == len(result.field_unparsers)
+                pre_tokens = result.post_tokens
+                post_tokens = None
+
+            return (pre_tokens, post_tokens)
+
+        # Analyze subparser to split the parsed sequence of tokens into
+        # pre-tokens, parsed fields, token sequences between parse fields, and
+        # post-tokens.
+        for i, subp in enumerate(subparsers):
+            if subp.discard():
+                tok_seq, _ = surrounding_inter_tokens()
+                NodeUnparser._emit_to_token_sequence(subp, tok_seq)
+            else:
+                pre_tokens, post_tokens = surrounding_inter_tokens()
+                NodeUnparser._emit_to_field_unparser(
+                    subp, result.field_unparsers[next_field],
+                    pre_tokens, post_tokens
+                )
+                next_field += 1
+
+        return result
 
     @staticmethod
     def _split_extract(parser):
@@ -429,11 +466,13 @@ class NodeUnparser(Unparser):
             )
 
     @staticmethod
-    def _emit_to_field_unparser(parser, field_unparser):
+    def _emit_to_field_unparser(parser, field_unparser, pre_tokens,
+                                post_tokens):
         """
         Considering ``field_unparser`` as a field unparser we are in the
-        process of elaborating, extract information from the given ``parser``
-        to complete it.
+        process of elaborating, and ``pre_tokens`` and ``post_tokens`` as the
+        token sequences that surround this field, extract information from the
+        given ``parser`` to complete them.
 
         If ``parser`` is anything else than a Null parser, set
         ``field_unparser.always_absent`` to True.
@@ -442,6 +481,13 @@ class NodeUnparser(Unparser):
 
         :param Parser parser: Parser to analyze.
         :param FieldUnparser field_unparser: Field unparser to complete.
+        :param TokenSequenceUnparser pre_tokens: Token sequences to contain the
+            list of tokens that appear before the field, whether or not the
+            field is present. Tokens are inserted at the end of this sequence.
+        :param TokenSequenceUnparser post_tokens: Token sequences to contain
+            the list of tokens that appear after the field, whether or not the
+            field is present. Tokens are inserted at the beginning of this
+            sequence.
         """
         parser = unwrap_dont_skip(parser)
 
@@ -456,11 +502,25 @@ class NodeUnparser(Unparser):
 
         elif isinstance(parser, Opt):
             if not parser._booleanize:
+                # Because we are in an Opt parser, we now know that this field
+                # is optionnal, so it can be absent.
                 field_unparser.always_absent = False
                 field_unparser.empty_list_is_absent = (parser.get_type()
                                                        .is_list_type)
-                NodeUnparser._emit_to_field_unparser(parser.parser,
-                                                     field_unparser)
+
+                # Starting from here, tokens to be unparsed in
+                # ``parser.parser`` must be unparsed iff the field is present,
+                # so respectively prepend and append token sequences in the
+                # recursion to the field unparser itself.
+                pre_tokens = TokenSequenceUnparser()
+                post_tokens = TokenSequenceUnparser()
+                NodeUnparser._emit_to_field_unparser(
+                    parser.parser, field_unparser, pre_tokens, post_tokens
+                )
+                field_unparser.pre_tokens = (pre_tokens +
+                                             field_unparser.pre_tokens)
+                field_unparser.post_tokens = (field_unparser.post_tokens +
+                                              post_tokens)
 
         elif isinstance(parser, Or):
             # Just check that all subparsers create nodes, and thus that there
@@ -476,9 +536,14 @@ class NodeUnparser(Unparser):
             pre_toks, node_parser, post_toks = NodeUnparser._split_extract(
                 parser)
 
-            field_unparser.pre_tokens = field_unparser.pre_tokens + pre_toks
-            field_unparser.post_tokens = post_toks + field_unparser.post_tokens
-            NodeUnparser._emit_to_field_unparser(node_parser, field_unparser)
+            # Pre and post-tokens from this _Extract parser appear whether or
+            # not the parsed field is present, so they go in ``pre_tokens`` and
+            # ``post_tokens``, not in the field unparser itself.
+            pre_tokens.tokens = pre_tokens.tokens + pre_toks.tokens
+            post_tokens.tokens = post_toks.tokens + post_tokens.tokens
+            NodeUnparser._emit_to_field_unparser(
+                node_parser, field_unparser, pre_tokens, post_tokens
+            )
 
         else:
             check_source_language(
