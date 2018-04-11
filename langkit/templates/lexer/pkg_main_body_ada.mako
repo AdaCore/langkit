@@ -661,10 +661,11 @@ package body ${ada_lib_name}.Lexer is
    <% already_seen_set = set() %>
 
    % for lit, tok in ctx.lexer.literals_map.items():
-      % if tok.ada_name not in already_seen_set:
-       ${tok.ada_name} => new Text_Type'("${lit}")
-       <% already_seen_set.add(tok.ada_name) %>
-           ,
+      ## It's more user-friendly to represent the newline token by name rather
+      ## than by escape sequence in user messages.
+      % if tok.ada_name not in already_seen_set and lit != '\\n':
+         ${tok.ada_name} => new Text_Type'("${lit}"),
+         <% already_seen_set.add(tok.ada_name) %>
       % endif
    % endfor
       others => new Text_Type'("")
