@@ -254,8 +254,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                field_unparsers = [
                   ('{} => Empty_Field_Unparser'.format(i)
                    if not f.pre_tokens and not f.post_tokens else
-                   "{} => ({}'Access, {}'Access)".format(
-                        i, f.pre_tokens.var_name, f.post_tokens.var_name))
+                   "{} => ({}'Access, {}'Access, {})".format(
+                        i, f.pre_tokens.var_name, f.post_tokens.var_name,
+                        f.empty_list_is_absent))
                   for i, (f, _) in enumerate(unparser_list, 1)
                ]
                inter_tokens = [
