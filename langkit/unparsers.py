@@ -9,18 +9,16 @@ import itertools
 from StringIO import StringIO
 import sys
 
-from funcy import split
-
 from langkit.common import string_repr
 from langkit.compiled_types import get_context
 from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import LexerToken
 import langkit.names as names
 from langkit.parsers import (
-    Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Predicate, Skip,
-    _Extract, _Row, _Token, _Transform
+    Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Skip, _Extract, _Row,
+    _Token, _Transform
 )
-from langkit.utils import Log, is_same, issubtype, not_implemented_error
+from langkit.utils import not_implemented_error
 
 
 def unwrap_dont_skip(parser):
@@ -995,10 +993,6 @@ class Unparsers(object):
                 compute_internal(c, toplevel)
 
         compute_internal(parser)
-        if not creates_node(parser):
-            self.abort_unparser("'{}' toplevel rule loses information.".format(
-                parser.name
-            ))
 
     def check_nodes_to_rules(self, ctx):
         """
@@ -1022,23 +1016,6 @@ class Unparsers(object):
                     '{} has no parser, and is marked neither abstract nor'
                     ' synthetic'.format(node_type.name)
                 )
-
-        # Exit early if unparser generation was not requested
-        if not ctx.generate_unparser:
-            return
-
-        for node, parsers in self.nodes_to_rules.items():
-            # Check that all parsers are structurally equivalent, then consider
-            # only the canonical one to generate the unparser.
-            if not unparser_struct_eq(parsers):
-                self.abort_unparser(
-                    'Node {} is parsed in different incompatible ways.'.format(
-                        node.name
-                    )
-                )
-                return
-            node.parser = find_canonical_parser(parsers)
-            Log.log('unparser_canonical', node.name, node.parser)
 
     def finalize(self, context):
         """
@@ -1072,148 +1049,3 @@ class Unparsers(object):
             node.unparser.collect(self)
 
         self.token_sequence_unparsers.finalize()
-
-
-def creates_node(p):
-    """
-    Return true on parsers that create a node directly, or are just a reference
-    to one or several parsers that creates nodes, without additional parsing
-    involved.
-
-    For example::
-        Node(..)               # <- True
-        Or(a, b, c)            # <- True if a b & c creates_node
-        _Row(a, b, c)          # <- False
-        Pick(";", "lol", c)    # <- False
-
-    :param Parser p: Parser to analyze.
-    """
-    from langkit.dsl import EnumNode
-    from langkit.lexer import LexerToken
-
-    if isinstance(p, Or):
-        return all(creates_node(c) for c in p.children())
-
-    if isinstance(p, Defer):
-        return p.get_type().is_ast_node
-
-    if isinstance(p, Opt) and creates_node(p.parser):
-        return True
-
-    if isinstance(p, Predicate):
-        return creates_node(p.parser)
-
-    # As a special case, if "p" parses a node followed by a termination token,
-    # then consider it just creates a node.
-    if isinstance(p, _Extract):
-        if len(p.parser.parsers) != 2:
-            return False
-        node, term = p.parser.parsers
-        return (creates_node(node) and
-                isinstance(term, _Token) and
-                term._val == LexerToken.Termination)
-
-    return (
-        isinstance(p, _Transform)
-        or isinstance(p, Skip)
-        or isinstance(p, List)
-        or (isinstance(p, Opt) and issubtype(p._booleanize, EnumNode))
-    )
-
-
-@Log.recursive
-@Log.log_return('unparser_eq_impl')
-def unparser_struct_eq(parsers, toplevel=True):
-    """
-    Determine if all given parsers are structurally equal with regards to
-    unparsing.
-
-    :param list[Parser] parsers: List of parsers to compare. Must contain at
-        least one parser.
-    :param bool toplevel: Recursion helper.
-    :rtype: bool
-    """
-    parsers = [unwrap_dont_skip(p) for p in parsers if not isinstance(p, Null)]
-
-    Log.log('unparser_eq_impl', 'parsers: {}'.format(parsers))
-
-    # If there is only one parser, the result is obviously True
-    if len(parsers) == 1:
-        return True
-
-    parsers_types = set(type(p) for p in parsers)
-
-    # If all parsers are of the same kind, let's see if they're structurally
-    # equivalent.
-    if len(parsers_types) == 1:
-        # "typ" is the only parser kind we have in "parsers"
-        typ = parsers_types.pop()
-
-        # For those parser kinds, we only need to check that their lists of
-        # children are equivalent.
-        if typ in (_Row, _Transform, List, Opt):
-
-            # We skip NoBacktrack parsers in structural comparison because they
-            # have no effect on unparsing.
-            children_lists = [[subp for subp in p.children()
-                               if not isinstance(subp, NoBacktrack)]
-                              for p in parsers]
-
-            return is_same(len(c) for c in children_lists) and all(
-                unparser_struct_eq(c, False)
-                for c in zip(*children_lists)
-            )
-
-        # For Tok, we want to check that the parsed token is the same
-        elif typ == _Token:
-            return is_same(p.val for p in parsers)
-
-        # For _Extract, structural equality involves comparing the sub-parser
-        # and the extracted index.
-        elif typ == _Extract:
-            return (unparser_struct_eq(p.parser for p in parsers)
-                    and is_same(p.index for p in parsers))
-
-        # Defer and Or will be handled by the same logic we use when the kind
-        # of parser is not unique.
-        elif typ in (Defer, Or):
-            pass
-        else:
-            raise NotImplementedError('Parser type not handled')
-
-    # If we fall down here, either:
-    # 1. There are more than one parser kind.
-    # 2. The kind is one of those not handled by the block of code above (Or
-    #    and Defer).
-
-    # We will use a specific logic for sub-parsers (toplevel=False): if they
-    # all create nodes directly, without adding additional parser logic, then
-    # their uniqueness is already checked because we call unparser_struct_eq on
-    # all of those.
-    if not toplevel:
-        resolved_parsers = [p.parser if isinstance(p, Defer) else p
-                            for p in parsers]
-        return all(creates_node(p) for p in resolved_parsers)
-
-    return False
-
-
-def find_canonical_parser(parsers):
-    """
-    From a list of parsers corresponding to the same node type, return the one
-    that will be used to emit the unparser, which is considered the canonical
-    one for unparsing.
-
-    :param list[parsers] parsers: List of parsers to analyze.
-    :rtype: Parser
-    """
-    def has_null(parser):
-        """
-        Return whether `parser` is a Null or recursivery has a Null children
-        parser.
-        """
-        return isinstance(parser, Null) or any(has_null(c)
-                                               for c in parser.children())
-
-    nulls, no_nulls = split(has_null, parsers)
-    return no_nulls[0] if no_nulls else nulls[0]
