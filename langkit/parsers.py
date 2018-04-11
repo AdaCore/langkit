@@ -141,7 +141,7 @@ class GeneratedParser(object):
 
 def render(*args, **kwargs):
     from langkit.unparsers import (
-        ListNodeUnparser, RegularNodeUnparser, TokenNodeUnparser, creates_node
+        ListNodeUnparser, RegularNodeUnparser, TokenNodeUnparser
     )
 
     return compiled_types.make_renderer().update({
@@ -161,7 +161,6 @@ def render(*args, **kwargs):
         'is_regular_node_unparser': type_check_instance(RegularNodeUnparser),
         'is_list_node_unparser': type_check_instance(ListNodeUnparser),
         'is_token_node_unparser': type_check_instance(TokenNodeUnparser),
-        'creates_node': creates_node,
     }).render(*args, **kwargs)
 
 

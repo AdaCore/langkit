@@ -1814,14 +1814,6 @@ class ASTNodeType(BaseStructType):
                 is_abstract=True
             )
 
-        self.parser = None
-        """
-        Canonical parser for this ASTNodeType. Determined during the
-        NodesToParsers pass.
-
-        :type: Parser
-        """
-
         self.unparser = None
         """
         Unparser for this node. Computed during the NodesToParsers pass.
