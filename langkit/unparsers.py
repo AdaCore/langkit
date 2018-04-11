@@ -85,7 +85,8 @@ class Unparser(object):
     def collect(self, unparsers):
         """
         Traverse all unparsers in ``self`` (in prefix order) and register the
-        various unparsers that need to be collected in ``unparsers``.
+        various unparsers that need to be collected in ``unparsers``. This
+        de-duplicates token sequence unparsers.
 
         :param Unparsers unparsers: Collection of unparsers to complete.
         """
@@ -201,9 +202,6 @@ class TokenSequenceUnparser(Unparser):
     Sequence of token unparsers.
     """
 
-    # Internal counter to generate unique variable names
-    _counter = itertools.count(0)
-
     def __init__(self, init_tokens=None):
         """
         :param TokenSequenceUnparser|None init_tokens: Optional list of tokens
@@ -211,6 +209,7 @@ class TokenSequenceUnparser(Unparser):
         """
         self.tokens = list(init_tokens or [])
 
+        self._serial_number = None
         self._var_name = None
 
     def _dump(self, stream):
@@ -272,8 +271,9 @@ class TokenSequenceUnparser(Unparser):
             return names.Name('Empty_Token_Sequence')
 
         if self._var_name is None:
+            assert self._serial_number is not None
             self._var_name = names.Name('Token_Sequence_{}'
-                                        .format(next(self._counter)))
+                                        .format(self._serial_number))
         return self._var_name
 
 
@@ -642,8 +642,9 @@ class FieldUnparser(Unparser):
             return self
 
     def collect(self, unparsers):
-        unparsers.token_sequence_unparsers.extend((self.pre_tokens,
-                                                   self.post_tokens))
+        tok_seq_pool = unparsers.token_sequence_unparsers
+        self.pre_tokens = tok_seq_pool.get_unique(self.pre_tokens)
+        self.post_tokens = tok_seq_pool.get_unique(self.post_tokens)
 
 
 class RegularNodeUnparser(NodeUnparser):
@@ -759,13 +760,17 @@ class RegularNodeUnparser(NodeUnparser):
         return result
 
     def collect(self, unparsers):
-        tok_seq_list = unparsers.token_sequence_unparsers
+        tok_seq_pool = unparsers.token_sequence_unparsers
 
-        tok_seq_list.append(self.pre_tokens)
-        for field_unparser, inter_tokens in self.zip_fields:
+        self.pre_tokens = tok_seq_pool.get_unique(self.pre_tokens)
+
+        for field_unparser in self.field_unparsers:
             field_unparser.collect(unparsers)
-            tok_seq_list.append(inter_tokens)
-        tok_seq_list.append(self.post_tokens)
+
+        self.inter_tokens = [tok_seq_pool.get_unique(tok_seq)
+                             for tok_seq in self.inter_tokens]
+
+        self.post_tokens = tok_seq_pool.get_unique(self.post_tokens)
 
 
 class ListNodeUnparser(NodeUnparser):
@@ -825,6 +830,46 @@ class TokenNodeUnparser(NodeUnparser):
         pass
 
 
+class TokenSequenceUnparserPool(object):
+    """
+    Helper to help removing redundant token sequence unparsers.
+    """
+
+    def __init__(self):
+        self.pool = {}
+        """
+        :type: dict[list[TokenUnparser], TokenSequenceUnparser]
+        """
+
+        self.sorted = None
+
+    def __len__(self):
+        return len(self.pool)
+
+    def __getitem__(self, index):
+        return self.sorted[index]
+
+    def get_unique(self, token_seq):
+        assert self.sorted is None
+        key = tuple(token_seq.tokens)
+        try:
+            return self.pool[key]
+        except KeyError:
+            self.pool[key] = token_seq
+            return token_seq
+
+    def finalize(self):
+        self.sorted = sorted(
+            self.pool.values(),
+            key=lambda tok_seq: tuple(t.string_repr for t in tok_seq.tokens),
+        )
+
+        # Assign a unique identification number to token sequences for code
+        # generation.
+        for i, tok_seq in enumerate(self.sorted):
+            tok_seq._serial_number = i
+
+
 class Unparsers(object):
     """
     Holder for the creation of unparsing tables.
@@ -854,12 +899,13 @@ class Unparsers(object):
         :type: dict[(langkit.lexer.TokenAction, str|None), TokenUnparser]
         """
 
-        self.token_sequence_unparsers = []
+        self.token_sequence_unparsers = TokenSequenceUnparserPool()
         """
-        List of all token sequence unparsers in the unparsing tables. Computed
-        at the end of finalization to retain only the final ones.
+        Pool of all token sequence unparsers in the unparsing tables. Computed
+        at the end of finalization to retain only the final ones
+        (de-duplicated).
 
-        :type: list[TokenSequenceUnparser]
+        :type: TokenSequenceUnparserPool
         """
 
     @property
@@ -1024,6 +1070,8 @@ class Unparsers(object):
                 )
             node.unparser = combined
             node.unparser.collect(self)
+
+        self.token_sequence_unparsers.finalize()
 
 
 def creates_node(p):
