@@ -2329,20 +2329,36 @@ class ASTNodeType(BaseStructType):
             end, otherwise return whether it snaps at the beginning.
         :rtype: bool
         """
-        from langkit.parsers import _Transform
+        from langkit.unparsers import RegularNodeUnparser
 
-        if not self.parser:
-            return False
-
+        unparser = self.unparser
         i = -1 if anchor_end else 0
 
-        return self.annotations.snaps or (
-            isinstance(self.parser, _Transform)
-            and self.parser.parser.parsers
-            and self.parser.parser.parsers[i].get_type()
-            and self.parser.parser.parsers[i].get_type().is_ast_node
-            and self.parser.parser.parsers[i].get_type().snaps(anchor_end)
-        )
+        # Unless this node is specifically tagged as snapping, consider it does
+        # not snap as soon as it has no unparser (which happens when unparsers
+        # are disabled or for abstract nodes) or when it's a list or a token
+        # node.
+        if self.annotations.snaps:
+            return True
+        if unparser is None or not isinstance(unparser, RegularNodeUnparser):
+            return False
+
+        # This is a regular node with no specific "snaps" annotation, so it
+        # snaps if the (un)parser has no leading/training token (optional or
+        # not) and if the node for the first/last field snaps itself.
+        #
+        # And by default, nodes without fields don't snap.
+        if not unparser.field_unparsers:
+            return False
+        field_unparser = unparser.field_unparsers[i]
+
+        anchor_node_tokens = (unparser.post_tokens
+                              if anchor_end else unparser.pre_tokens)
+        field_node_tokens = (field_unparser.post_tokens
+                             if anchor_end else field_unparser.pre_tokens)
+        return (not anchor_node_tokens and
+                not field_node_tokens and
+                field_unparser.field.type.snaps(anchor_end))
 
     @property
     def snaps_at_start(self):
