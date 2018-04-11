@@ -2320,8 +2320,14 @@ class ASTNodeType(BaseStructType):
 
     def snaps(self, anchor_end):
         """
-        Whether this node type snaps. To see what this means, see Annotations
-        documentation.
+        Whether this node type snaps. To see what this means, see
+        langkit.dsl.Annotations documentation.
+
+        Note that no node snaps if unparsers are not requested.
+
+        :param bool anchor_end: If true, return whether this node snaps at the
+            end, otherwise return whether it snaps at the beginning.
+        :rtype: bool
         """
         from langkit.parsers import _Transform
 
