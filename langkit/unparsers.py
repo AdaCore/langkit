@@ -457,6 +457,8 @@ class NodeUnparser(Unparser):
         elif isinstance(parser, Opt):
             if not parser._booleanize:
                 field_unparser.always_absent = False
+                field_unparser.empty_list_is_absent = (parser.get_type()
+                                                       .is_list_type)
                 NodeUnparser._emit_to_field_unparser(parser.parser,
                                                      field_unparser)
 
@@ -521,6 +523,14 @@ class FieldUnparser(Unparser):
         :type: bool
         """
 
+        self.empty_list_is_absent = False
+        """
+        Whether this field is to be considered as absent when it is an empty
+        list node.
+
+        :type: bool
+        """
+
         self.pre_tokens = TokenSequenceUnparser()
         """
         Sequence of tokens that precedes this field during (un)parsing.
@@ -536,6 +546,8 @@ class FieldUnparser(Unparser):
         """
 
     def _dump(self, stream):
+        if self.empty_list_is_absent:
+            stream.write('   [empty_list_is_absent]\n')
         stream.write('   if {}: {} [field] {}\n'.format(
             self.field.qualname,
             self.pre_tokens.dumps(),

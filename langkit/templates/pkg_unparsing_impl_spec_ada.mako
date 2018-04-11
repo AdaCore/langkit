@@ -79,12 +79,16 @@ package ${ada_lib_name}.Unparsing.Implementation is
    type Field_Unparser is record
       Pre_Tokens, Post_Tokens : Token_Sequence_Access;
       --  Lists of tokens to emit before, and after unparsing some node field
+
+      Empty_List_Is_Absent : Boolean;
+      --  Whether this field is to be considered as absent when it is an empty
+      --  list node.
    end record;
 
    type Field_Unparser_Array is array (Positive range <>) of Field_Unparser;
 
    Empty_Field_Unparser : aliased constant Field_Unparser :=
-     (Empty_Token_Sequence'Access, Empty_Token_Sequence'Access);
+     (Empty_Token_Sequence'Access, Empty_Token_Sequence'Access, False);
 
    type Field_Unparser_List (N : Natural) is record
       Field_Unparsers : Field_Unparser_Array (1 .. N);
