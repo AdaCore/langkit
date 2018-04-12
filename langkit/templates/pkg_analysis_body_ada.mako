@@ -1048,6 +1048,15 @@ package body ${ada_lib_name}.Analysis is
    -- Is_Trivia --
    ---------------
 
+   function Is_Trivia (Token : Token_Type) return Boolean is
+   begin
+      return Token.Index.Trivia /= No_Token_Index;
+   end Is_Trivia;
+
+   ---------------
+   -- Is_Trivia --
+   ---------------
+
    function Is_Trivia (Token_Data : Token_Data_Type) return Boolean is
    begin
       return Token_Data.Is_Trivia;
