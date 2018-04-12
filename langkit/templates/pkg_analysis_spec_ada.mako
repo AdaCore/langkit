@@ -383,6 +383,9 @@ package ${ada_lib_name}.Analysis is
    function Kind (Token_Data : Token_Data_Type) return Token_Kind;
    ${ada_doc('langkit.token_kind', 3)}
 
+   function Is_Trivia (Token : Token_Type) return Boolean;
+   ${ada_doc('langkit.token_is_trivia', 3)}
+
    function Is_Trivia (Token_Data : Token_Data_Type) return Boolean;
    ${ada_doc('langkit.token_is_trivia', 3)}
 
