@@ -14,6 +14,12 @@ with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
 
+   function Field_Present
+     (Node     : access Abstract_Node_Type'Class;
+      Unparser : Field_Unparser) return Boolean;
+   --  Return whether the given field is to be considered present according to
+   --  the given field unparser.
+
    procedure Update_Sloc
      (Sloc : in out Source_Location; Char : Wide_Wide_Character);
    --  Update Sloc as if it represented a cursor that move right-wards after
@@ -25,6 +31,13 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Result              : in out Unparsing_Buffer);
    --  Using the Node_Unparsers unparsing tables, unparse the given Node
 
+   procedure Unparse_Regular_Node
+     (Node           : access Abstract_Node_Type'Class;
+      Unparser       : Node_Unparser;
+      Rewritten_Node : ${root_node_type_name};
+      Result         : in out Unparsing_Buffer);
+   --  Helper for Unparse_Node, focuses on regular nodes
+
    procedure Unparse_Token
      (Unparser : Token_Unparser;
       Result   : in out Unparsing_Buffer);
@@ -34,6 +47,19 @@ package body ${ada_lib_name}.Unparsing.Implementation is
      (Unparser : Token_Sequence_Access;
       Result   : in out Unparsing_Buffer);
    --  Using the Unparser unparsing table, unparse a sequence of tokens
+
+   -------------------
+   -- Field_Present --
+   -------------------
+
+   function Field_Present
+     (Node     : access Abstract_Node_Type'Class;
+      Unparser : Field_Unparser) return Boolean is
+   begin
+      return (Node /= null
+              and then (not Unparser.Empty_List_Is_Absent
+                        or else Node.Abstract_Children_Count > 0));
+   end Field_Present;
 
    -----------------
    -- Update_Sloc --
@@ -185,33 +211,15 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Result              : in out Unparsing_Buffer)
    is
       Unparser : Node_Unparser renames Node_Unparsers (Node.Abstract_Kind);
+
+      Rewritten_Node : constant ${root_node_type_name} :=
+        (if Preserve_Formatting
+         then Node.Abstract_Rewritten_Node
+         else null);
    begin
       case Unparser.Kind is
          when Regular =>
-            Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
-            declare
-               U : Field_Unparser_List renames Unparser.Field_Unparsers.all;
-            begin
-               for I in 1 .. U.N loop
-                  declare
-                     F     : Field_Unparser renames U.Field_Unparsers (I);
-                     T     : Token_Sequence_Access renames U.Inter_Tokens (I);
-                     Child : constant Analysis.Implementation.Abstract_Node :=
-                        Node.Abstract_Child (I);
-                  begin
-                     Unparse_Token_Sequence (T, Result);
-                     if Child /= null
-                        and then (not F.Empty_List_Is_Absent
-                                  or else Child.Abstract_Children_Count > 0)
-                     then
-                        Unparse_Token_Sequence (F.Pre_Tokens, Result);
-                        Unparse_Node (Child, Preserve_Formatting, Result);
-                        Unparse_Token_Sequence (F.Post_Tokens, Result);
-                     end if;
-                  end;
-               end loop;
-            end;
-            Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
+            Unparse_Regular_Node (Node, Unparser, Rewritten_Node, Result);
 
          when List =>
             declare
@@ -233,6 +241,46 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             Append (Result, " ");
       end case;
    end Unparse_Node;
+
+   --------------------------
+   -- Unparse_Regular_Node --
+   --------------------------
+
+   procedure Unparse_Regular_Node
+     (Node           : access Abstract_Node_Type'Class;
+      Unparser       : Node_Unparser;
+      Rewritten_Node : ${root_node_type_name};
+      Result         : in out Unparsing_Buffer)
+   is
+      Token_Cursor : Token_Type := No_Token;
+   begin
+      --  Unparse tokens that precede the first field
+      Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
+
+      --  Unparse Node's fields, and the tokens between them
+      declare
+         U : Field_Unparser_List renames Unparser.Field_Unparsers.all;
+      begin
+         for I in 1 .. U.N loop
+            declare
+               F     : Field_Unparser renames U.Field_Unparsers (I);
+               T     : Token_Sequence_Access renames U.Inter_Tokens (I);
+               Child : constant Analysis.Implementation.Abstract_Node :=
+                  Node.Abstract_Child (I);
+            begin
+               Unparse_Token_Sequence (T, Result);
+               if Field_Present (Child, F) then
+                  Unparse_Token_Sequence (F.Pre_Tokens, Result);
+                  Unparse_Node (Child, Rewritten_Node /= null, Result);
+                  Unparse_Token_Sequence (F.Post_Tokens, Result);
+               end if;
+            end;
+         end loop;
+      end;
+
+      --  Unparse tokens that suceed to the last field
+      Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
+   end Unparse_Regular_Node;
 
    -------------------
    -- Unparse_Token --
