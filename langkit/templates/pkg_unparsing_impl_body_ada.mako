@@ -14,6 +14,10 @@ with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
 
+   subtype Abstract_Node is Analysis.Implementation.Abstract_Node;
+   --  Subtype to avoid visibility conflict with an Abstract_Node type coming
+   --  from the Analysis package.
+
    function Field_Present
      (Node     : access Abstract_Node_Type'Class;
       Unparser : Field_Unparser) return Boolean;
@@ -265,8 +269,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             declare
                F     : Field_Unparser renames U.Field_Unparsers (I);
                T     : Token_Sequence_Access renames U.Inter_Tokens (I);
-               Child : constant Analysis.Implementation.Abstract_Node :=
-                  Node.Abstract_Child (I);
+               Child : constant Abstract_Node := Node.Abstract_Child (I);
             begin
                Unparse_Token_Sequence (T, Result);
                if Field_Present (Child, F) then
