@@ -11,12 +11,81 @@ with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
 
    subtype Abstract_Node is Analysis.Implementation.Abstract_Node;
    --  Subtype to avoid visibility conflict with an Abstract_Node type coming
    --  from the Analysis package.
+
+   --  The "template" data structures below are helpers for the original
+   --  source code formatting preservation algorithms. A template can be
+   --  thought as the instantiation of an unparser from an original AST node.
+   --  It captures actual sequences of tokens.
+
+   type Token_Sequence_Template (Present : Boolean := False) is record
+      case Present is
+         when False => null;
+         when True =>
+            First, Last : Token_Type;
+      end case;
+   end record;
+   --  Captured sequence of tokens
+
+   subtype Present_Token_Sequence_Template is Token_Sequence_Template (True);
+
+   function Create_Token_Sequence
+     (First, Last : Token_Type) return Present_Token_Sequence_Template
+      with Pre => First /= No_Token and then Last /= No_Token;
+   --  Create a present sequence of tokens from the given token range
+
+   function Create_Token_Sequence
+     (Unparser    : Token_Sequence_Access;
+      First_Token : in out Token_Type) return Present_Token_Sequence_Template
+      with Pre => First_Token /= No_Token;
+   --  Create a present sequence of tokens starting from First_Token and
+   --  containing the same number of tokens as indicated in Unparser. Before
+   --  returning, this updates First_Token to point at the first token that
+   --  appear after the sequence.
+
+   type Token_Sequence_Template_Array is
+      array (Positive range <>) of Present_Token_Sequence_Template;
+
+   type Field_Template (Present : Boolean := False) is record
+      case Present is
+         when False => null;
+         when True =>
+            Pre_Tokens, Post_Tokens : Token_Sequence_Template (Present);
+      end case;
+   end record;
+   --  Captured sequences of tokens before and after a node field. This is the
+   --  instantiation of Field_Unparser.
+
+   type Field_Template_Array is array (Positive range <>) of Field_Template;
+
+   type Regular_Node_Template (Present : Boolean; Count : Natural) is record
+      case Present is
+         when False => null;
+         when True =>
+            Pre_Tokens   : Present_Token_Sequence_Template;
+            Fields       : Field_Template_Array (1 .. Count);
+            Inter_Tokens : Token_Sequence_Template_Array (1 .. Count);
+            Post_Tokens  : Present_Token_Sequence_Template;
+      end case;
+   end record;
+   --  Captured sequences of tokens corresponding to a regular node. This is
+   --  the instantiation of Regular_Node_Unparser.
+
+   function Extract_Regular_Node_Template
+     (Unparser       : Node_Unparser;
+      Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template;
+   --  Return the regular node template corresponding to the instatiation of
+   --  Rewritten_Node according to Unparser.
+   --
+   --  This is an absent template if Rewritten_Node is null. Likewise, returned
+   --  field templates are absent if the corresponding Rewritten_Node children
+   --  are absent.
 
    function Field_Present
      (Node     : access Abstract_Node_Type'Class;
@@ -51,6 +120,129 @@ package body ${ada_lib_name}.Unparsing.Implementation is
      (Unparser : Token_Sequence_Access;
       Result   : in out Unparsing_Buffer);
    --  Using the Unparser unparsing table, unparse a sequence of tokens
+
+   function Relative_Token
+     (Token : Token_Type; Offset : Integer) return Token_Type with
+      Pre => Token /= No_Token
+             and then not Is_Trivia (Token)
+             and then
+               Token_Index (Integer (Token_Indexes (Token).Token) + Offset)
+               in First_Token_Index .. Last_Token (Token_Data (Token).all),
+      Post => Relative_Token'Result /= No_Token;
+   --  Considering only tokens that are not trivia and assuming Token is at
+   --  index I, return the token that is at index I + Offset.
+
+   procedure Append_Tokens
+     (Result                  : in out Unparsing_Buffer;
+      First_Token, Last_Token : Token_Type);
+   --  Emit to Result the sequence of tokens from First_Token to Last_Token.
+   --  Trivias that appear between tokens in the sequence to emit are emitted
+   --  as well.
+
+   procedure Append_Tokens
+     (Result   : in out Unparsing_Buffer;
+      Template : Token_Sequence_Template);
+   --  Emit to Result the sequence of tokens in Template, or do nothing if the
+   --  template is absent.
+
+   ---------------------------
+   -- Create_Token_Sequence --
+   ---------------------------
+
+   function Create_Token_Sequence
+     (First, Last : Token_Type) return Present_Token_Sequence_Template is
+   begin
+      return (Present => True, First => First, Last => Last);
+   end Create_Token_Sequence;
+
+   ---------------------------
+   -- Create_Token_Sequence --
+   ---------------------------
+
+   function Create_Token_Sequence
+     (Unparser    : Token_Sequence_Access;
+      First_Token : in out Token_Type) return Present_Token_Sequence_Template
+   is
+      Result : Present_Token_Sequence_Template;
+   begin
+      Result.First := First_Token;
+      Result.Last := Relative_Token (First_Token, Unparser'Length - 1);
+      First_Token := Relative_Token (Result.Last, 1);
+      return Result;
+   end Create_Token_Sequence;
+
+   -----------------------------------
+   -- Extract_Regular_Node_Template --
+   -----------------------------------
+
+   function Extract_Regular_Node_Template
+     (Unparser       : Node_Unparser;
+      Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template
+   is
+      Result     : Regular_Node_Template (True, Unparser.Field_Unparsers.N);
+      Next_Token : Token_Type;
+   begin
+      if Rewritten_Node = null then
+         return (Present => False, Count => 0);
+      end if;
+
+      Next_Token := Token_Start (Rewritten_Node);
+
+      --  Recover tokens that precede the first field from the rewritten node
+      Result.Pre_Tokens := Create_Token_Sequence
+        (Unparser.Pre_Tokens, Next_Token);
+
+      --  For each field, recover the tokens that surround the field itself,
+      --  but only if both the original node and the one to unparse are
+      --  present.
+      for I in 1 .. Rewritten_Node.Abstract_Children_Count loop
+         declare
+            U     : Field_Unparser_List renames Unparser.Field_Unparsers.all;
+            F     : Field_Unparser renames U.Field_Unparsers (I);
+            T     : Token_Sequence_Access renames U.Inter_Tokens (I);
+            FT    : Field_Template renames Result.Fields (I);
+
+            Rewritten_Child : constant ${root_node_type_name} :=
+               Rewritten_Node.Child (I);
+            R_Child         : constant Abstract_Node :=
+               Abstract_Node (Rewritten_Child);
+         begin
+            Result.Inter_Tokens (I) :=
+              (if I = 1
+               then (Present => False)
+               else Create_Token_Sequence (T, Next_Token));
+
+            if Field_Present (R_Child, F) then
+               FT := (Present => True, others => <>);
+
+               --  Pre_Tokens is the sequence that starts at Next_Token and
+               --  whose length is the one the unparser gives.
+               FT.Pre_Tokens :=
+                  Create_Token_Sequence (F.Pre_Tokens, Next_Token);
+
+               --  Post_Tokens is the sequence that starts right after the last
+               --  token of the node field, also sized from the unparser.
+               --  Beware of ghost nodes, which own to token.
+               Next_Token :=
+                 (if Rewritten_Child.Is_Ghost
+                  then Token_Start (Rewritten_Child)
+                  else Relative_Token (Token_End (Rewritten_Child), 1));
+               FT.Post_Tokens :=
+                  Create_Token_Sequence (F.Post_Tokens, Next_Token);
+
+            else
+               FT := (Present => False);
+            end if;
+         end;
+      end loop;
+
+      --  Recover tokens that succeed to the first field from the rewritten
+      --  node.
+      Result.Post_Tokens :=
+         Create_Token_Sequence (Unparser.Post_Tokens, Next_Token);
+
+      return Result;
+   end Extract_Regular_Node_Template;
 
    -------------------
    -- Field_Present --
@@ -256,10 +448,17 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer)
    is
-      Token_Cursor : Token_Type := No_Token;
+      Template : constant Regular_Node_Template :=
+         Extract_Regular_Node_Template (Unparser, Rewritten_Node);
    begin
-      --  Unparse tokens that precede the first field
-      Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
+      --  Unparse tokens that precede the first field. Re-use original ones if
+      --  available.
+      if Template.Present then
+         Append_Tokens (Result, Template.Pre_Tokens);
+         Append (Result, " ");
+      else
+         Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
+      end if;
 
       --  Unparse Node's fields, and the tokens between them
       declare
@@ -268,21 +467,46 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          for I in 1 .. U.N loop
             declare
                F     : Field_Unparser renames U.Field_Unparsers (I);
-               T     : Token_Sequence_Access renames U.Inter_Tokens (I);
                Child : constant Abstract_Node := Node.Abstract_Child (I);
             begin
-               Unparse_Token_Sequence (T, Result);
+               --  First unparse tokens that appear unconditionally between
+               --  fields.
+               if Template.Present then
+                  Append_Tokens (Result, Template.Inter_Tokens (I));
+                  Append (Result, " ");
+               else
+                  Unparse_Token_Sequence (U.Inter_Tokens (I), Result);
+               end if;
+
+               --  Then unparse the field itself
                if Field_Present (Child, F) then
-                  Unparse_Token_Sequence (F.Pre_Tokens, Result);
-                  Unparse_Node (Child, Rewritten_Node /= null, Result);
-                  Unparse_Token_Sequence (F.Post_Tokens, Result);
+                  if Template.Present and then Template.Fields (I).Present then
+                     Append_Tokens (Result, Template.Fields (I).Pre_Tokens);
+                     Append (Result, " ");
+
+                     Unparse_Node (Child, Rewritten_Node /= null, Result);
+
+                     Append_Tokens (Result, Template.Fields (I).Post_Tokens);
+                     Append (Result, " ");
+
+                  else
+                     Unparse_Token_Sequence (F.Pre_Tokens, Result);
+                     Unparse_Node (Child, Rewritten_Node /= null, Result);
+                     Unparse_Token_Sequence (F.Post_Tokens, Result);
+                  end if;
                end if;
             end;
          end loop;
       end;
 
-      --  Unparse tokens that suceed to the last field
-      Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
+      --  Unparse tokens that suceed to the last field. Re-use original ones if
+      --  available.
+      if Template.Present then
+         Append_Tokens (Result, Template.Post_Tokens);
+         Append (Result, " ");
+      else
+         Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
+      end if;
    end Unparse_Regular_Node;
 
    -------------------
@@ -319,6 +543,65 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          Unparse_Token (U, Result);
       end loop;
    end Unparse_Token_Sequence;
+
+   --------------------
+   -- Relative_Token --
+   --------------------
+
+   function Relative_Token
+     (Token : Token_Type; Offset : Integer) return Token_Type
+   is
+      Current_Token  : Token_Type := Token;
+      Current_Offset : Integer := 0;
+   begin
+      if Offset < 0 then
+         while Current_Offset > Offset loop
+            Current_Token := Previous (Current_Token);
+            if not Is_Trivia (Current_Token) then
+               Current_Offset := Current_Offset - 1;
+            end if;
+         end loop;
+
+      else
+         while Current_Offset < Offset loop
+            Current_Token := Next (Current_Token);
+            if not Is_Trivia (Current_Token) then
+               Current_Offset := Current_Offset + 1;
+            end if;
+         end loop;
+      end if;
+
+      return Current_Token;
+   end Relative_Token;
+
+   -------------------
+   -- Append_Tokens --
+   -------------------
+
+   procedure Append_Tokens
+     (Result                  : in out Unparsing_Buffer;
+      First_Token, Last_Token : Token_Type) is
+   begin
+      if First_Token = No_Token and then Last_Token = No_Token then
+         return;
+      end if;
+      pragma Assert (First_Token /= No_Token and then Last_Token /= No_Token);
+      Append (Result, Text (First_Token, Last_Token));
+   end Append_Tokens;
+
+   -------------------
+   -- Append_Tokens --
+   -------------------
+
+   procedure Append_Tokens
+     (Result   : in out Unparsing_Buffer;
+      Template : Token_Sequence_Template)
+   is
+   begin
+      if Template.Present then
+         Append_Tokens (Result, Template.First, Template.Last);
+      end if;
+   end Append_Tokens;
 
    % if ctx.generate_unparser:
 
