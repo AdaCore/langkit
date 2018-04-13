@@ -2304,7 +2304,7 @@ class ASTNodeType(BaseStructType):
                 warn_on_unused=False,
                 doc="""
                 Return whether the node is a ghost node. In other words, return
-                False if it correspondins to a real chain of tokens in the
+                False if it corresponds to a real chain of tokens in the
                 source, True otherwise.
                 """
             )),
