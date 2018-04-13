@@ -313,8 +313,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    procedure Unparse_Token_Sequence
      (Unparser : Token_Sequence_Access;
-      Result   : in out Unparsing_Buffer)
-   is
+      Result   : in out Unparsing_Buffer) is
    begin
       for U of Unparser.all loop
          Unparse_Token (U, Result);
