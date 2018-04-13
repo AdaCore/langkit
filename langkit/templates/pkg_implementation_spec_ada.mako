@@ -742,6 +742,13 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Property_Error if Node and Token don't belong to the same analysis unit
    --  or if Token is actually a Trivia.
 
+   function Token_Data (Token : Token_Type) return Token_Data_Handler_Access;
+   --  Return the token data handler referenced by Token, or null if it is
+   --  No_Token.
+
+   function Token_Indexes (Token : Token_Type) return Token_Or_Trivia_Index;
+   --  Return the index corresponding to this token
+
    function Is_Synthetic
      (Node : access ${root_node_value_type}'Class) return Boolean;
    --  Returns whether the node is a synthetic node, i.e. whether it was

@@ -1356,6 +1356,24 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Token.Index.Token;
    end Stored_Token;
 
+   ----------------
+   -- Token_Data --
+   ----------------
+
+   function Token_Data (Token : Token_Type) return Token_Data_Handler_Access is
+   begin
+      return Token.TDH;
+   end Token_Data;
+
+   -------------------
+   -- Token_Indexes --
+   -------------------
+
+   function Token_Indexes (Token : Token_Type) return Token_Or_Trivia_Index is
+   begin
+      return Token.Index;
+   end Token_Indexes;
+
    --------------
    -- Is_Ghost --
    --------------
