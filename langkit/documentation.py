@@ -132,8 +132,8 @@ base_langkit_docs = {
         Exception that is raised when an error occurs while evaluating any
         ${'function' if lang == 'ada' else 'AST node method'}
         whose name starts with
-        "${'P_' if lang == 'ada' else 'p_'}". This is the only exceptions that
-        such functions can raise.
+        ``${'P_' if lang == 'ada' else 'p_'}``. This is the only exceptions
+        that such functions can raise.
     """,
 
     #
