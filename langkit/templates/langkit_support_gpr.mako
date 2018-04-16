@@ -9,7 +9,7 @@ library project Langkit_Support is
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
    Library_Kind_Param : Library_Kind_Type :=
-     external ("LIBRARY_TYPE", "relocatable");
+     external ("LIBRARY_TYPE", "static");
 
    for Languages use ("Ada");
    for Library_Name use "langkit_support";
