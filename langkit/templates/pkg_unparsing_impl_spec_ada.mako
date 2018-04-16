@@ -26,6 +26,10 @@ package ${ada_lib_name}.Unparsing.Implementation is
    procedure Append (Buffer : in out Unparsing_Buffer; Text : Text_Type);
    --  Append text to Buffer, updating Buffer.Last_Sloc accordingly
 
+   procedure Ensure_Trailing_Whitespace (Buffer : in out Unparsing_Buffer);
+   --  Add a whitespace to Buffer if it does not ends with one already. Do
+   --  nothing otherwise, or if Buffer is empty.
+
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
       Unit                : Analysis_Unit;
