@@ -36,11 +36,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    subtype Present_Token_Sequence_Template is Token_Sequence_Template (True);
 
    function Create_Token_Sequence
-     (First, Last : Token_Type) return Present_Token_Sequence_Template
-      with Pre => First /= No_Token and then Last /= No_Token;
-   --  Create a present sequence of tokens from the given token range
-
-   function Create_Token_Sequence
      (Unparser    : Token_Sequence_Access;
       First_Token : in out Token_Type) return Present_Token_Sequence_Template
       with Pre => First_Token /= No_Token;
@@ -144,16 +139,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Template : Token_Sequence_Template);
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
-
-   ---------------------------
-   -- Create_Token_Sequence --
-   ---------------------------
-
-   function Create_Token_Sequence
-     (First, Last : Token_Type) return Present_Token_Sequence_Template is
-   begin
-      return (Present => True, First => First, Last => Last);
-   end Create_Token_Sequence;
 
    ---------------------------
    -- Create_Token_Sequence --
