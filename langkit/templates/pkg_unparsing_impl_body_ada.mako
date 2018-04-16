@@ -297,6 +297,22 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Append (Buffer.Content, Text);
    end Append;
 
+   --------------------------------
+   -- Ensure_Trailing_Whitespace --
+   --------------------------------
+
+   procedure Ensure_Trailing_Whitespace (Buffer : in out Unparsing_Buffer) is
+   begin
+      if Length (Buffer.Content) = 0
+         or else Element (Buffer.Content, Length (Buffer.Content))
+                 in ' ' | Chars.LF | Chars.HT
+      then
+         return;
+      end if;
+
+      Append (Buffer, ' ');
+   end Ensure_Trailing_Whitespace;
+
    -------------
    -- Unparse --
    -------------
@@ -427,14 +443,15 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                                 Result);
 
                   if I < Count and then Unparser.Has_Separator then
+                     Ensure_Trailing_Whitespace (Result);
                      Unparse_Token (Unparser.Separator, Result);
                   end if;
                end loop;
             end;
 
          when Token =>
+            Ensure_Trailing_Whitespace (Result);
             Append (Result, Node.Abstract_Text);
-            Append (Result, " ");
       end case;
    end Unparse_Node;
 
@@ -455,7 +472,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       --  available.
       if Template.Present then
          Append_Tokens (Result, Template.Pre_Tokens);
-         Append (Result, " ");
       else
          Unparse_Token_Sequence (Unparser.Pre_Tokens, Result);
       end if;
@@ -473,7 +489,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                --  fields.
                if Template.Present then
                   Append_Tokens (Result, Template.Inter_Tokens (I));
-                  Append (Result, " ");
                else
                   Unparse_Token_Sequence (U.Inter_Tokens (I), Result);
                end if;
@@ -482,12 +497,8 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                if Field_Present (Child, F) then
                   if Template.Present and then Template.Fields (I).Present then
                      Append_Tokens (Result, Template.Fields (I).Pre_Tokens);
-                     Append (Result, " ");
-
                      Unparse_Node (Child, Rewritten_Node /= null, Result);
-
                      Append_Tokens (Result, Template.Fields (I).Post_Tokens);
-                     Append (Result, " ");
 
                   else
                      Unparse_Token_Sequence (F.Pre_Tokens, Result);
@@ -503,7 +514,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       --  available.
       if Template.Present then
          Append_Tokens (Result, Template.Post_Tokens);
-         Append (Result, " ");
       else
          Unparse_Token_Sequence (Unparser.Post_Tokens, Result);
       end if;
@@ -515,9 +525,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    procedure Unparse_Token
      (Unparser : Token_Unparser;
-      Result   : in out Unparsing_Buffer)
-   is
+      Result   : in out Unparsing_Buffer) is
    begin
+      Ensure_Trailing_Whitespace (Result);
       if Unparser.Text /= null then
          Append (Result, Unparser.Text.all);
       else
@@ -528,7 +538,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             Append (Result, Literal);
          end;
       end if;
-      Append (Result, " ");
    end Unparse_Token;
 
    ----------------------------
@@ -586,6 +595,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          return;
       end if;
       pragma Assert (First_Token /= No_Token and then Last_Token /= No_Token);
+      Ensure_Trailing_Whitespace (Result);
       Append (Result, Text (First_Token, Last_Token));
    end Append_Tokens;
 
