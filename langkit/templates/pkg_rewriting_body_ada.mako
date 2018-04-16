@@ -542,11 +542,7 @@ package body ${ada_lib_name}.Rewriting is
    begin
       --  If this handle represents an already existing node, make sure it is
       --  expanded so we have a handle to return.
-      if Handle.Children.Kind = Unexpanded then
-         --  Only existing nodes can have an unexpanded handle, so Handle.Node
-         --  cannot be null.
-         Expand_Children (Handle);
-      end if;
+      Expand_Children (Handle);
 
       --  Only regular nodes can have fields. As Index is checked to be
       --  in-bounds in the pre-condition, we can assume here that the result
