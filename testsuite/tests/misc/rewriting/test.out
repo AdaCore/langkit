@@ -206,4 +206,13 @@ DefList
 |  |  |  |  |  |rhs:
 |  |  |  |  |  |  Literal: 3
 templates.adb: Done.
+
+== preserve_formatting.adb ==
+Running the double text substitution...
+
+Applying the diff...
+
+Quoting source buffer for rewritten unit...
+def   aa  =  11   def   bb  =  (      (      11  +  (      22  +  33    )    )  +     aa      )
+preserve_formatting.adb: Done.
 Done
