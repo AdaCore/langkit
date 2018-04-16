@@ -65,6 +65,7 @@ build_and_run(g, ada_main=['general_api.adb',
                            'rewrite_lists.adb',
                            'iter_units.adb',
                            'apply_error.adb',
-                           'templates.adb'],
+                           'templates.adb',
+                           'preserve_formatting.adb'],
               generate_unparser=True)
 print('Done')
