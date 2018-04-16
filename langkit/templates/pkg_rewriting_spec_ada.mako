@@ -196,6 +196,16 @@ package ${ada_lib_name}.Rewriting is
    --  tree, so it can be attached to another one. Otherwise, Child must have
    --  no parent as it will be tied to Handle's tree.
 
+   function Text (Handle : Node_Rewriting_Handle) return Text_Type
+      with Pre => Handle /= No_Node_Rewriting_Handle
+                  and then Is_Token_Node (Kind (Handle));
+   --  Return the text associated to the given token node
+
+   procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type)
+      with Pre => Handle /= No_Node_Rewriting_Handle
+                  and then Is_Token_Node (Kind (Handle));
+   --  Override text associated to the given token node
+
    -------------------------
    -- List node rewriting --
    -------------------------

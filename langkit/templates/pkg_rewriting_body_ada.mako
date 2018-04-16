@@ -597,6 +597,34 @@ package body ${ada_lib_name}.Rewriting is
       end;
    end Set_Child;
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Handle : Node_Rewriting_Handle) return Text_Type is
+   begin
+      case Handle.Children.Kind is
+         when Unexpanded =>
+            return Text (Handle.Node);
+         when Expanded_Regular =>
+            return (raise Program_Error);
+         when Expanded_Token_Node =>
+            return To_Wide_Wide_String (Handle.Children.Text);
+      end case;
+   end Text;
+
+   --------------
+   -- Set_Text --
+   --------------
+
+   procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type) is
+   begin
+      --  Make sure Handle is expanded so we have a Text field to override
+      Expand_Children (Handle);
+
+      Handle.Children.Text := To_Unbounded_Wide_Wide_String (Text);
+   end Set_Text;
+
    --------------
    -- Set_Root --
    --------------
