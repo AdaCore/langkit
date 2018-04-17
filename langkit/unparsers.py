@@ -298,29 +298,7 @@ class NodeUnparser(Unparser):
 
         with parser.diagnostic_context:
             if node.is_token_node:
-                accepted = True
-                if isinstance(parser, _Transform):
-                    # All _Transform parsers contain a _Row subparser
-                    assert isinstance(parser.parser, _Row)
-
-                    # Previous validation passes ensure that parsers for token
-                    # nodes parse exactly one token, so the assertion below
-                    # should stand.
-                    subparsers = parser.parser.parsers
-                    assert len(subparsers) == 1
-
-                    accepted = isinstance(subparsers[0], _Token)
-
-                else:
-                    accepted = False
-
-                check_source_language(
-                    accepted,
-                    'Unsupported token node parser for unparsers generation,'
-                    ' only direct token parsers are accepted: {}'
-                    .format(parser)
-                )
-                return TokenNodeUnparser(node)
+                return NodeUnparser._from_token_node_parser(node, parser)
 
             if isinstance(parser, _Transform):
                 return NodeUnparser._from_transform_parser(node, parser)
@@ -419,6 +397,54 @@ class NodeUnparser(Unparser):
                 next_field += 1
 
         return result
+
+    @staticmethod
+    def _from_token_node_parser(node, parser):
+        """
+        Helper for _from_parser. Assuming ``node`` is a token node, turn the
+        given ``parser`` into a TokenNodeUnparser instance.
+
+        :param ASTNodeType node: Parse node that `parser` emits.
+        :param Parser parser: Parser for which we want to create an unparser.
+        :rtype: RegularNodeUnparser
+        """
+        assert node.is_token_node
+
+        accepted = True
+        if isinstance(parser, _Transform):
+            # All _Transform parsers contain a _Row subparser
+            assert isinstance(parser.parser, _Row)
+
+            # Previous validation passes ensure that parsers for token nodes
+            # parse exactly one token, so the assertion below should stand.
+            subparsers = parser.parser.parsers
+            assert len(subparsers) == 1
+
+            token_parser = subparsers[0]
+            accepted = isinstance(token_parser, _Token)
+
+            if accepted:
+                token_kind = token_parser.val
+                if node.token_kind not in (None, token_kind):
+                    check_source_language(
+                        False,
+                        'The {} token node can be associated to only one token'
+                        ' kind: here we have {}, but we already had {}'.format(
+                            node.dsl_name, token_kind.dsl_name,
+                            node.token_kind.dsl_name
+                        )
+                    )
+                node.token_kind = token_kind
+
+        else:
+            accepted = False
+
+        check_source_language(
+            accepted,
+            'Unsupported token node parser for unparsers generation, only'
+            ' direct token parsers are accepted: {}'.format(parser)
+        )
+        return TokenNodeUnparser(node)
 
     @staticmethod
     def _split_extract(parser):

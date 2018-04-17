@@ -1825,6 +1825,15 @@ class ASTNodeType(BaseStructType):
         self.is_bool_node = is_bool_node
         self.is_token_node = is_token_node
 
+        self.token_kind = None
+        """
+        If this is a token node and if unparser generation is enabled, this
+        must reference the only token kind that this node can be associated to.
+        Must be None otherwise.
+
+        :type: langkit.lexer.TokenAction|None
+        """
+
         # Make sure we have one entity type for each AST node type
         entity_type = self.entity
         del entity_type
