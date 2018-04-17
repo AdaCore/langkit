@@ -108,7 +108,11 @@ class TokenAction(Action):
         self._index = next(TokenAction._counter)
 
         self.name = None
-        ":type: names.Name"
+        """
+        Name user associated to this token.
+
+        :type: names.Name
+        """
 
         self.lexer = None
         self.start_ignore_layout = start_ignore_layout
@@ -140,6 +144,16 @@ class TokenAction(Action):
         """
         from langkit.parsers import _Token
         return _Token(self, *args, **kwargs)
+
+    @property
+    def dsl_name(self):
+        """
+        Name for this token as it appears in the DSL. To be used in
+        diagnostics.
+
+        :rtype: str
+        """
+        return self.name.camel
 
     @property
     def base_name(self):
@@ -241,6 +255,7 @@ class LexerToken(object):
     def add_tokens(self, klass):
         for fld_name, fld_value in klass.__dict__.items():
             if isinstance(fld_value, TokenAction):
+                assert fld_value.name is None
                 fld_value.name = Name.from_camel(fld_name)
                 self.fields.append(fld_value)
 
