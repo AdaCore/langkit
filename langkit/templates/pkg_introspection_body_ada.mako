@@ -120,4 +120,33 @@ package body ${ada_lib_name}.Introspection is
       % endif
    end Fields;
 
+   ---------------------
+   -- Token_Node_Kind --
+   ---------------------
+
+   function Token_Node_Kind
+     (Kind : ${root_node_kind_name}) return Token_Kind
+   is
+      <% token_nodes = [n for n in ctx.astnode_types
+                        if not n.abstract and n.is_token_node] %>
+   begin
+      % if ctx.generate_unparser:
+         case Kind is
+            % for n in token_nodes:
+               when ${n.ada_kind_name} =>
+                  return ${n.token_kind.ada_name};
+            % endfor
+
+            when others =>
+               --  Kind is not a token node, and thus the precondition does not
+               --  hold.
+               return (raise Program_Error);
+         end case;
+
+      % else:
+         pragma Unreferenced (Kind);
+         return (raise Program_Error);
+      % endif
+   end Token_Node_Kind;
+
 end ${ada_lib_name}.Introspection;
