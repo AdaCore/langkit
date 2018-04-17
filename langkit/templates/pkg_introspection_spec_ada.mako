@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 
 package ${ada_lib_name}.Introspection is
 
@@ -35,5 +36,15 @@ package ${ada_lib_name}.Introspection is
    function Fields
      (Kind : ${root_node_kind_name}) return Field_Reference_Array;
    --  Return the list of fields that AST nodes of the given Kind have
+
+   function Token_Node_Kind
+     (Kind : ${root_node_kind_name}) return Token_Kind
+      with Pre => Is_Token_Node (Kind);
+   --  Return the token kind corresponding to the given token node kind
+   % if not ctx.generate_unparser:
+   --
+   --  As unparser are not generated, this always raises a Program_Error
+   --  exception.
+   % endif
 
 end ${ada_lib_name}.Introspection;
