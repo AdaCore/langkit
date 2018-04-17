@@ -576,7 +576,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
      (Result                  : in out Unparsing_Buffer;
       First_Token, Last_Token : Token_Type) is
    begin
-      if First_Token = No_Token and then Last_Token = No_Token then
+      if (First_Token = No_Token and then Last_Token = No_Token)
+         or else Last_Token < First_Token
+      then
          return;
       end if;
       pragma Assert (First_Token /= No_Token and then Last_Token /= No_Token);

@@ -146,8 +146,8 @@ DefList
 rewrite_lists.adb: Done.
 
 == iter_units.adb ==
-Rewritten unit a.txt: def a = 11 
-Rewritten unit b.txt: def b = 22 
+Rewritten unit a.txt: def a = 11
+Rewritten unit b.txt: def b = 22
 iter_units.adb: Done.
 
 == apply_error.adb ==
