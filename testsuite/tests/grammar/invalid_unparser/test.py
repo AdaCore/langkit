@@ -56,4 +56,23 @@ run(
     item=lambda T, g: Or(T.Identifier(Token.Identifier),
                          T.Number(Token.Number)),
 )
+run(
+    'Several token kinds for token node (1)',
+    main_rule=lambda T, g: T.Root(
+        Or(
+            T.Identifier(Token.Identifier() | Token.Example()),
+            T.Number(Token.Number)
+        )
+    )
+)
+run(
+    'Several token kinds for token node (2)',
+    main_rule=lambda T, g: T.Root(
+        Or(
+            T.Identifier(Token.Identifier),
+            T.Identifier(Token.Example),
+            T.Number(Token.Number)
+        )
+    )
+)
 print('Done')

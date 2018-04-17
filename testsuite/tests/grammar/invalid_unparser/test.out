@@ -7,4 +7,14 @@ File "test.py", line 49, In definition of grammar rule main_rule
 File "test.py", line 55, In definition of grammar rule main_rule
     Error: Top-level information loss prevents unparsers generation
 
+== Several token kinds for token node (1) ==
+File "test.py", line 64, In definition of grammar rule main_rule
+  line 63, In definition of grammar rule main_rule
+    Error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Transform(Row(Or(Token(<WithSymbol Identifier>), Token(<WithText Example>))), Identifier)
+
+== Several token kinds for token node (2) ==
+File "test.py", line 74, In definition of grammar rule main_rule
+  line 73, In definition of grammar rule main_rule
+    Error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+
 Done
