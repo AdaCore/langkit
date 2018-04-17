@@ -9,8 +9,8 @@ with GNATCOLL.Iconv;
 
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
-
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Lexer;         use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
@@ -274,12 +274,16 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    -- Append --
    ------------
 
-   procedure Append (Buffer : in out Unparsing_Buffer; Text : Text_Type) is
+   procedure Append
+     (Buffer : in out Unparsing_Buffer;
+      Kind   : Token_Kind;
+      Text   : Text_Type) is
    begin
       for C of Text loop
          Update_Sloc (Buffer.Last_Sloc, C);
       end loop;
       Append (Buffer.Content, Text);
+      Buffer.Last_Token := Kind;
    end Append;
 
    --------------------------------
@@ -407,7 +411,8 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
-      Unparser : Node_Unparser renames Node_Unparsers (Node.Abstract_Kind);
+      Kind     : constant ${root_node_kind_name} := Node.Abstract_Kind;
+      Unparser : Node_Unparser renames Node_Unparsers (Kind);
 
       Rewritten_Node : constant ${root_node_type_name} :=
         (if Preserve_Formatting
@@ -436,7 +441,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
          when Token =>
             Ensure_Trailing_Whitespace (Result);
-            Append (Result, Node.Abstract_Text);
+            Append (Result, Token_Node_Kind (Kind), Node.Abstract_Text);
       end case;
    end Unparse_Node;
 
@@ -514,13 +519,13 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    begin
       Ensure_Trailing_Whitespace (Result);
       if Unparser.Text /= null then
-         Append (Result, Unparser.Text.all);
+         Append (Result, Unparser.Kind, Unparser.Text.all);
       else
          declare
             Literal : constant Text_Type := Token_Kind_Literal (Unparser.Kind);
          begin
             pragma Assert (Literal'Length > 0);
-            Append (Result, Literal);
+            Append (Result, Unparser.Kind, Literal);
          end;
       end if;
    end Unparse_Token;
@@ -583,7 +588,8 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       end if;
       pragma Assert (First_Token /= No_Token and then Last_Token /= No_Token);
       Ensure_Trailing_Whitespace (Result);
-      Append (Result, Text (First_Token, Last_Token));
+      Append
+        (Result, Kind (Data (Last_Token)), Text (First_Token, Last_Token));
    end Append_Tokens;
 
    -------------------

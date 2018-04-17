@@ -19,12 +19,22 @@ package ${ada_lib_name}.Unparsing.Implementation is
 
       Last_Sloc : Source_Location := (1, 1);
       --  Source location of the next character to append to Content
+
+      Last_Token : Token_Kind;
+      --  If Content is not emply, kind of the last token/trivia that was
+      --  unparsed. Undefined otherwise.
    end record;
 
    procedure Append
      (Buffer : in out Unparsing_Buffer; Char : Wide_Wide_Character);
-   procedure Append (Buffer : in out Unparsing_Buffer; Text : Text_Type);
-   --  Append text to Buffer, updating Buffer.Last_Sloc accordingly
+
+   procedure Append
+     (Buffer : in out Unparsing_Buffer;
+      Kind   : Token_Kind;
+      Text   : Text_Type)
+      with Pre => Text'Length > 0;
+   --  Append Text, to unparse the given token Kind, to Buffer, updating
+   --  Buffer.Last_Sloc and Buffer.Last_Token accordingly.
 
    procedure Ensure_Trailing_Whitespace (Buffer : in out Unparsing_Buffer);
    --  Add a whitespace to Buffer if it does not ends with one already. Do
