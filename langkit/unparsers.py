@@ -298,10 +298,27 @@ class NodeUnparser(Unparser):
 
         with parser.diagnostic_context:
             if node.is_token_node:
+                accepted = True
+                if isinstance(parser, _Transform):
+                    # All _Transform parsers contain a _Row subparser
+                    assert isinstance(parser.parser, _Row)
+
+                    # Previous validation passes ensure that parsers for token
+                    # nodes parse exactly one token, so the assertion below
+                    # should stand.
+                    subparsers = parser.parser.parsers
+                    assert len(subparsers) == 1
+
+                    accepted = isinstance(subparsers[0], _Token)
+
+                else:
+                    accepted = False
+
                 check_source_language(
-                    isinstance(parser, _Transform),
-                    'Unsupported token node parser for unparsers generation:'
-                    ' {}'.format(parser)
+                    accepted,
+                    'Unsupported token node parser for unparsers generation,'
+                    ' only direct token parsers are accepted: {}'
+                    .format(parser)
                 )
                 return TokenNodeUnparser(node)
 
