@@ -5,7 +5,8 @@ from itertools import count
 import re
 
 from langkit.compile_context import get_context
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import (Context, check_source_language,
+                                 extract_library_location)
 from langkit.names import Name
 from langkit.template_utils import common_renderer
 
@@ -225,6 +226,40 @@ class WithSymbol(TokenAction):
         return "=> {}(Lexeme);".format(self.quex_name)
 
 
+class TokenFamily(object):
+    """
+    Set of tokens.
+
+    All token families must form a partition on the set of tokens for a given
+    lexer. They can then be used to define spacing rules for unparsing.
+    """
+
+    def __init__(self, *tokens):
+        """
+        :type tokens: list[TokenAction]
+        """
+        self.location = extract_library_location()
+        self.tokens = set(tokens)
+
+        self.name = None
+        """
+        Name for this family. Filled in LexerToken's constructor.
+
+        :type: names.Name
+        """
+
+    @property
+    def dsl_name(self):
+        return self.name.camel
+
+    @property
+    def diagnostic_context(self):
+        return Context(
+            'In definition of token family {}'.format(self.dsl_name),
+            self.location
+        )
+
+
 class LexerToken(object):
     """
     Base class from which your token class must derive. Every member needs to
@@ -253,15 +288,26 @@ class LexerToken(object):
         :type: list[TokenAction]
         """
 
+        self.token_families = []
+        """
+        :type: list[TokenFamily]
+        """
+
         for c in inspect.getmro(self.__class__):
             self.add_tokens(c)
 
     def add_tokens(self, klass):
         for fld_name, fld_value in klass.__dict__.items():
             if isinstance(fld_value, TokenAction):
-                assert fld_value.name is None
-                fld_value.name = Name.from_camel(fld_name)
-                self.tokens.append(fld_value)
+                dest_list = self.tokens
+            elif isinstance(fld_value, TokenFamily):
+                dest_list = self.token_families
+            else:
+                continue
+
+            assert fld_value.name is None
+            fld_value.name = Name.from_camel(fld_name)
+            dest_list.append(fld_value)
 
     def __iter__(self):
         return (fld for fld in self.tokens)
@@ -515,6 +561,46 @@ class Lexer(object):
         Shortcut to get a TokenAction stored in self.tokens.
         """
         return getattr(self.tokens, attr)
+
+    def check_token_families(self, context):
+        """
+        Pass that checks that either there are no defined token families, or
+        that they form a partition of existing tokens.
+        """
+        def format_token_list(tokens):
+            return ', '.join(sorted(
+                t.dsl_name if isinstance(t, TokenAction) else str(t)
+                for t in tokens
+            ))
+
+        all_tokens = set(self.tokens)
+        seen_tokens = set()
+
+        for family in self.tokens.token_families:
+            with family.diagnostic_context:
+                not_tokens = family.tokens - all_tokens
+                check_source_language(
+                    not not_tokens,
+                    'Invalid tokens: {}'.format(format_token_list(not_tokens))
+                )
+
+                already_seen_tokens = seen_tokens & family.tokens
+                check_source_language(
+                    not already_seen_tokens,
+                    'Tokens must belong to one family exclusively: {}'
+                    .format(format_token_list(already_seen_tokens))
+                )
+
+                seen_tokens.update(family.tokens)
+
+        # Create a token family to host all tokens that are not associated with
+        # a specific token family.
+        default_family = TokenFamily(*list(all_tokens - seen_tokens))
+        default_family.name = Name('Default_Family')
+        self.tokens.token_families.append(default_family)
+
+        # Sort token families by name to ensure code generation determinism
+        self.tokens.token_families.sort(key=lambda tf: tf.name)
 
 
 class Literal(Matcher):
