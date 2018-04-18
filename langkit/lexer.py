@@ -179,7 +179,8 @@ class TokenAction(Action):
         return "{}{}".format(pfx, self.base_name.upper)
 
     def __repr__(self):
-        return '<{} {}>'.format(type(self).__name__, self.name.camel or '???')
+        return '<{} {}>'.format(type(self).__name__,
+                                self.name.camel if self.name else '???')
 
 
 class WithText(TokenAction):
