@@ -1406,6 +1406,8 @@ class CompileCtx(object):
         pass_manager = PassManager()
         pass_manager.add(
             MajorStepPass('Compiling the grammar'),
+            GlobalPass('check token families',
+                       self.lexer.check_token_families),
             GlobalPass('check main parsing rule',
                        self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',
