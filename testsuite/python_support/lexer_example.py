@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.lexer import (
-    Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText,
-    WithTrivia
+    Eof, Ignore, Lexer, LexerToken, Literal, Pattern, TokenFamily, WithSymbol,
+    WithText, WithTrivia
 )
 
 
@@ -26,6 +26,12 @@ class Token(LexerToken):
     Identifier = WithSymbol()
 
     Comment = WithTrivia()
+
+    Alphanumericals = TokenFamily(Def, Error, Example, Null, Number,
+                                  Identifier)
+    Punctuation = TokenFamily(Comma, Dot, Semicolon, LPar, RPar, LBrace,
+                              RBrace, Equal, Plus)
+    Comments = TokenFamily(Comment)
 
 
 foo_lexer = Lexer(Token)
