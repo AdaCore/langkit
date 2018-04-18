@@ -248,7 +248,11 @@ class LexerToken(object):
             self.__class__.Dedent = WithText()
             self.__class__.Newline = WithText()
 
-        self.fields = []
+        self.tokens = []
+        """
+        :type: list[TokenAction]
+        """
+
         for c in inspect.getmro(self.__class__):
             self.add_tokens(c)
 
@@ -257,13 +261,13 @@ class LexerToken(object):
             if isinstance(fld_value, TokenAction):
                 assert fld_value.name is None
                 fld_value.name = Name.from_camel(fld_name)
-                self.fields.append(fld_value)
+                self.tokens.append(fld_value)
 
     def __iter__(self):
-        return (fld for fld in self.fields)
+        return (fld for fld in self.tokens)
 
     def __len__(self):
-        return len(self.fields)
+        return len(self.tokens)
 
 
 class Patterns(object):
