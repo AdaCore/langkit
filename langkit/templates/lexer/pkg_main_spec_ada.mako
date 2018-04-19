@@ -20,6 +20,9 @@ package ${ada_lib_name}.Lexer is
       ${',\n'.join(t.ada_name for t in tokens)}
    );
 
+   type Token_Family is
+     (${', '.join(tf.ada_name for tf in lexer.tokens.token_families)});
+
    % if lexer.track_indent:
    type Indent_Kind is (Indent, Dedent, Nodent, None);
    % endif
@@ -132,5 +135,10 @@ package ${ada_lib_name}.Lexer is
 
    function Internal_Charset return String;
    --  Return the charset used to store text internally
+
+   Token_Kind_To_Family : array (Token_Kind) of Token_Family :=
+     (${', '.join('{} => {}'.format(t.ada_name,
+                                     lexer.tokens.token_to_family[t].ada_name)
+                   for t in tokens)});
 
 end ${ada_lib_name}.Lexer;
