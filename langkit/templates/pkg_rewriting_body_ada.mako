@@ -373,9 +373,15 @@ package body ${ada_lib_name}.Rewriting is
                Children.Vector.Reserve_Capacity
                  (Ada.Containers.Count_Type (Count));
                for I in 1 .. Count loop
-                  Children.Vector.Append
-                    (Allocate (N.Child (I), Unit_Handle.Context_Handle,
-                               Unit_Handle, Node));
+                  declare
+                     Child : constant ${root_node_type_name} := N.Child (I);
+                  begin
+                     Children.Vector.Append
+                       ((if Child = null
+                         then null
+                         else Allocate (Child, Unit_Handle.Context_Handle,
+                                        Unit_Handle, Node)));
+                  end;
                end loop;
             end;
          end if;
