@@ -106,7 +106,8 @@ def write_source_file(file_path, source):
     :rtype: bool
     """
     context = get_context()
-    if context.cache.is_stale(file_path, source):
+    if (not os.path.exists(file_path) or
+            context.cache.is_stale(file_path, source)):
         if context.verbosity.debug:
             printcol('Rewriting stale source: {}'.format(file_path),
                      Colors.OKBLUE)
