@@ -398,6 +398,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          Unparse_Node (Node, Preserve_Formatting, Buffer);
          return To_Wide_Wide_String (Buffer.Content);
       % else:
+         pragma Unreferenced (Buffer);
          return (raise Program_Error with "Unparser not generated");
       % endif
    end Unparse;
