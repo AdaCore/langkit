@@ -254,6 +254,10 @@ class TokenFamily(object):
         return self.name.camel
 
     @property
+    def ada_name(self):
+        return self.name.camel_with_underscores
+
+    @property
     def diagnostic_context(self):
         return Context(
             'In definition of token family {}'.format(self.dsl_name),
@@ -292,6 +296,11 @@ class LexerToken(object):
         self.token_families = []
         """
         :type: list[TokenFamily]
+        """
+
+        self.token_to_family = {}
+        """
+        :type: dict[TokenAction, TokenFamily]
         """
 
         for c in inspect.getmro(self.__class__):
@@ -607,6 +616,11 @@ class Lexer(object):
 
         # Sort token families by name to ensure code generation determinism
         self.tokens.token_families.sort(key=lambda tf: tf.name)
+
+        # Make it easy to get the family a token belongs to
+        for tf in self.tokens.token_families:
+            for t in tf.tokens:
+                self.tokens.token_to_family[t] = tf
 
 
 class Literal(Matcher):
