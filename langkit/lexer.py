@@ -306,8 +306,13 @@ class LexerToken(object):
             else:
                 continue
 
-            assert fld_value.name is None
-            fld_value.name = Name.from_camel(fld_name)
+            # Several items here are shared: for example, the
+            # LexerToken.LexingFailure instance can be used in two different
+            # lexers, so we can't assume its name is always None. Just accept
+            # when it has already the expected name.
+            name = Name.from_camel(fld_name)
+            assert fld_value.name in (None, name)
+            fld_value.name = name
             dest_list.append(fld_value)
 
     def __iter__(self):
