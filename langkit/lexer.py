@@ -463,6 +463,13 @@ class Lexer(object):
         :type: set[(TokenFamily, TokenFamily)]
         """
 
+        self.newline_after = set()
+        """
+        Set of tokens after which unparsing must emit a line break.
+
+        :type: set[TokenAction]
+        """
+
     def add_patterns(self, *patterns):
         """
         Add the list of named patterns to the lexer's internal patterns. A
@@ -546,6 +553,15 @@ class Lexer(object):
         """
         for tf1, tf2 in token_family_couples:
             self.spacing_table[tf1][tf2] = True
+
+    def add_newline_after(self, *tokens):
+        """
+        Add mandatory line break emission during unparsing after the given
+        tokens.
+
+        :type tokens: list[TokenAction]
+        """
+        self.newline_after.update(tokens)
 
     def emit(self):
         """

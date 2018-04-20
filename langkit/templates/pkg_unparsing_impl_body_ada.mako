@@ -715,6 +715,12 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  given their respective families TF1 and TF2, the following is true:
    --  Token_Spacing_Table (TF1, TF2).
 
+   Token_Newline_Table : array (Token_Kind) of Boolean :=
+     (${', '.join('{} => {}'.format(t.ada_name, t in ctx.lexer.newline_after)
+                  for t in ctx.lexer.sorted_tokens)});
+   --  A line break must be append during unparsing after a token T iff
+   --  Token_Newline_Table (T) is true.
+
 begin
    Node_Unparsers := ${("Node_Unparsers_Array'Access"
                         if ctx.generate_unparser else 'null')};
