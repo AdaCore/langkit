@@ -36,9 +36,11 @@ package ${ada_lib_name}.Unparsing.Implementation is
    --  Append Text, to unparse the given token Kind, to Buffer, updating
    --  Buffer.Last_Sloc and Buffer.Last_Token accordingly.
 
-   procedure Ensure_Trailing_Whitespace (Buffer : in out Unparsing_Buffer);
-   --  Add a whitespace to Buffer if it does not ends with one already. Do
-   --  nothing otherwise, or if Buffer is empty.
+   procedure Apply_Spacing_Rules
+     (Buffer     : in out Unparsing_Buffer;
+      Next_Token : Token_Kind);
+   --  Add a whitespace or a newline to buffer if mandated by spacing rules
+   --  given the next token to emit.
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
