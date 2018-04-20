@@ -146,14 +146,14 @@ DefList
 rewrite_lists.adb: Done.
 
 == iter_units.adb ==
-Rewritten unit a.txt: def a = 11
-Rewritten unit b.txt: def b = 22
+Rewritten unit a.txt: def a=11
+Rewritten unit b.txt: def b=22
 iter_units.adb: Done.
 
 == apply_error.adb ==
 Could not apply diff on the main.txt unit:
   1:5: Expected Identifier, got Number
-def 1 = a
+def 1=a
 apply_error.adb: Done.
 
 == templates.adb ==
@@ -213,6 +213,6 @@ Running the double text substitution...
 Applying the diff...
 
 Quoting source buffer for rewritten unit...
-def aa = 11 def bb = ( ( 11 + ( 22 + 33 ) ) + aa )
+def aa=11 def bb=((11+(22+33))+aa)
 preserve_formatting.adb: Done.
 Done

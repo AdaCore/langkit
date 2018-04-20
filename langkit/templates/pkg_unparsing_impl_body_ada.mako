@@ -140,6 +140,32 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
 
+   ## Emit the table to indicate spacing rules between tokens. Use "Lexer."
+   ## qualified names for token kinds and token families to avoid conflicts
+   ## with node names from "Analysis.".
+
+   Token_Spacing_Table : array (Token_Family, Token_Family) of Boolean :=
+      <%
+         token_families = ctx.lexer.tokens.token_families
+         spacing_table = ctx.lexer.spacing_table
+      %>
+      (${', '.join(
+         'Lexer.{} => ({})'.format(tf1.ada_name, ', '.join(
+            'Lexer.{} => {}'.format(tf2.ada_name, spacing_table[tf1][tf2])
+            for tf2 in token_families
+         ))
+         for tf1 in token_families)});
+   --  A space must be inserted between two consecutive tokens T1 and T2 iff
+   --  given their respective families TF1 and TF2, the following is true:
+   --  Token_Spacing_Table (TF1, TF2).
+
+   Token_Newline_Table : array (Token_Kind) of Boolean :=
+     (${', '.join('Lexer.{} => {}'.format(t.ada_name,
+                                          t in ctx.lexer.newline_after)
+                  for t in ctx.lexer.sorted_tokens)});
+   --  A line break must be append during unparsing after a token T iff
+   --  Token_Newline_Table (T) is true.
+
    ---------------------------
    -- Create_Token_Sequence --
    ---------------------------
@@ -286,21 +312,27 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Buffer.Last_Token := Kind;
    end Append;
 
-   --------------------------------
-   -- Ensure_Trailing_Whitespace --
-   --------------------------------
+   -------------------------
+   -- Apply_Spacing_Rules --
+   -------------------------
 
-   procedure Ensure_Trailing_Whitespace (Buffer : in out Unparsing_Buffer) is
+   procedure Apply_Spacing_Rules
+     (Buffer     : in out Unparsing_Buffer;
+      Next_Token : Token_Kind) is
    begin
-      if Length (Buffer.Content) = 0
-         or else Element (Buffer.Content, Length (Buffer.Content))
-                 in ' ' | Chars.LF | Chars.HT
-      then
-         return;
-      end if;
+      if Length (Buffer.Content) = 0 then
+         null;
 
-      Append (Buffer, ' ');
-   end Ensure_Trailing_Whitespace;
+      elsif Token_Newline_Table (Buffer.Last_Token) then
+         Append (Buffer, Chars.LF);
+
+      elsif Token_Spacing_Table
+        (Token_Kind_To_Family (Buffer.Last_Token),
+         Token_Kind_To_Family (Next_Token))
+      then
+         Append (Buffer, ' ');
+      end if;
+   end Apply_Spacing_Rules;
 
    -------------
    -- Unparse --
@@ -434,15 +466,18 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                                 Result);
 
                   if I < Count and then Unparser.Has_Separator then
-                     Ensure_Trailing_Whitespace (Result);
                      Unparse_Token (Unparser.Separator, Result);
                   end if;
                end loop;
             end;
 
          when Token =>
-            Ensure_Trailing_Whitespace (Result);
-            Append (Result, Token_Node_Kind (Kind), Node.Abstract_Text);
+            declare
+               Tok_Kind : constant Token_Kind := Token_Node_Kind (Kind);
+            begin
+               Apply_Spacing_Rules (Result, Tok_Kind);
+               Append (Result, Tok_Kind, Node.Abstract_Text);
+            end;
       end case;
    end Unparse_Node;
 
@@ -518,7 +553,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
      (Unparser : Token_Unparser;
       Result   : in out Unparsing_Buffer) is
    begin
-      Ensure_Trailing_Whitespace (Result);
+      Apply_Spacing_Rules (Result, Unparser.Kind);
       if Unparser.Text /= null then
          Append (Result, Unparser.Kind, Unparser.Text.all);
       else
@@ -588,7 +623,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          return;
       end if;
       pragma Assert (First_Token /= No_Token and then Last_Token /= No_Token);
-      Ensure_Trailing_Whitespace (Result);
+      Apply_Spacing_Rules (Result, Kind (Data (First_Token)));
       Append
         (Result, Kind (Data (Last_Token)), Text (First_Token, Last_Token));
    end Append_Tokens;
@@ -699,27 +734,6 @@ package body ${ada_lib_name}.Unparsing.Implementation is
          % endfor
       );
    % endif
-
-   ## Emit the table to indicate spacing rules between tokens
-   Token_Spacing_Table : array (Token_Family, Token_Family) of Boolean :=
-      <%
-         token_families = ctx.lexer.tokens.token_families
-         spacing_table = ctx.lexer.spacing_table
-      %>
-      (${', '.join(
-         '{} => ({})'.format(tf1.ada_name, ', '.join(
-            str(spacing_table[tf1][tf2]) for tf2 in token_families
-         ))
-         for tf1 in token_families)});
-   --  A space must be inserted between two consecutive tokens T1 and T2 iff
-   --  given their respective families TF1 and TF2, the following is true:
-   --  Token_Spacing_Table (TF1, TF2).
-
-   Token_Newline_Table : array (Token_Kind) of Boolean :=
-     (${', '.join('{} => {}'.format(t.ada_name, t in ctx.lexer.newline_after)
-                  for t in ctx.lexer.sorted_tokens)});
-   --  A line break must be append during unparsing after a token T iff
-   --  Token_Newline_Table (T) is true.
 
 begin
    Node_Unparsers := ${("Node_Unparsers_Array'Access"
