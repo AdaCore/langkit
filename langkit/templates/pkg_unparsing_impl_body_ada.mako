@@ -700,6 +700,21 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       );
    % endif
 
+   ## Emit the table to indicate spacing rules between tokens
+   Token_Spacing_Table : array (Token_Family, Token_Family) of Boolean :=
+      <%
+         token_families = ctx.lexer.tokens.token_families
+         spacing_table = ctx.lexer.spacing_table
+      %>
+      (${', '.join(
+         '{} => ({})'.format(tf1.ada_name, ', '.join(
+            str(spacing_table[tf1][tf2]) for tf2 in token_families
+         ))
+         for tf1 in token_families)});
+   --  A space must be inserted between two consecutive tokens T1 and T2 iff
+   --  given their respective families TF1 and TF2, the following is true:
+   --  Token_Spacing_Table (TF1, TF2).
+
 begin
    Node_Unparsers := ${("Node_Unparsers_Array'Access"
                         if ctx.generate_unparser else 'null')};
