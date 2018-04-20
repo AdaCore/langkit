@@ -59,3 +59,5 @@ foo_lexer.add_rules(
 
     (Pattern('#(.?)+'), Token.Comment),
 )
+foo_lexer.add_spacing((Token.Alphanumericals, Token.Alphanumericals))
+foo_lexer.add_newline_after(Token.Comment)
