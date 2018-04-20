@@ -452,6 +452,17 @@ class Lexer(object):
                 (Literal(r'\n'), self.tokens.Newline),
             )
 
+        self.spacing_table = defaultdict(lambda: defaultdict(lambda: False))
+        """
+        Nested mapping that indicates whether two tokens must be separated by a
+        space during unparsing.
+
+        A space must be inserted between two token T1 and T2 iff
+        ``spacing_rules[T1.family][T2.family]`` is true.
+
+        :type: set[(TokenFamily, TokenFamily)]
+        """
+
     def add_patterns(self, *patterns):
         """
         Add the list of named patterns to the lexer's internal patterns. A
@@ -522,6 +533,19 @@ class Lexer(object):
                 self.literals_map[m.to_match] = a
 
                 a.matcher = m
+
+    def add_spacing(self, *token_family_couples):
+        """
+        Add mandatory spacing rules for the given couples of token families.
+
+        For each given token families TF1 and TF2, state that during unparsing,
+        a token that belongs to TF1 must be followed by space when a token that
+        belongs to TF2 comes next. By default, no space is inserted.
+
+        :type token_family_couples: list[(TokenFamily, TokenFamily)]
+        """
+        for tf1, tf2 in token_family_couples:
+            self.spacing_table[tf1][tf2] = True
 
     def emit(self):
         """
