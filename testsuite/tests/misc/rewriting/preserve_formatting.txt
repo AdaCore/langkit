@@ -1,8 +1,12 @@
+# First comment
 def a =
+   # Middle "a" comment
    1
+# Post "a" comment
 
 def b =
    ((1
      + (2
         + 3))
     + a)
+# Trailing comment
