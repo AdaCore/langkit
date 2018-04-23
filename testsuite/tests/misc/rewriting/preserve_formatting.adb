@@ -71,7 +71,7 @@ begin
    New_Line;
    Put_Line ("Quoting source buffer for rewritten unit...");
    declare
-      Buffer       : constant Text_Type := Root (U).Text;
+      Buffer       : constant Text_Type := Text (U);
       Buffer_Bytes : String (1 .. Buffer'Length * 4)
          with Import  => True,
               Address => Buffer'Address;
