@@ -847,6 +847,15 @@ package body ${ada_lib_name}.Analysis is
    function Trivia_Count (Unit : Analysis_Unit) return Natural is
      (Unit.TDH.Trivias.Length);
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Unit : Analysis_Unit) return Text_Type is
+   begin
+      return Text (First_Token (Unit), Last_Token (Unit));
+   end Text;
+
    ------------------
    -- Lookup_Token --
    ------------------
