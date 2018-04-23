@@ -12,7 +12,7 @@ procedure Revert is
       & "def d = 4" & ASCII.LF
       & "def e = 5" & ASCII.LF);
 
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create (With_Trivia => True);
    U   : constant Analysis_Unit := Get_From_Buffer
      (Ctx, "main.txt", Buffer => Buffer);
 
