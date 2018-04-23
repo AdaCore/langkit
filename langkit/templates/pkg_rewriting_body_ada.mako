@@ -146,7 +146,8 @@ package body ${ada_lib_name}.Rewriting is
 
             --  Reparse (i.e. unparse and then parse) this rewritten unit
             Buffer := Unparse (Unit_Handle.Root, PU.Unit,
-                               Preserve_Formatting => True);
+                               Preserve_Formatting => True,
+                               As_Unit             => True);
             Do_Parsing
               (Unit        => PU.Unit,
                Read_BOM    => False,

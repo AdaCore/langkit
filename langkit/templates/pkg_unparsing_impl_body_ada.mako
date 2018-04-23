@@ -132,9 +132,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  index I, return the token that is at index I + Offset.
 
    function Last_Trivia (Token : Token_Type) return Token_Type
-      with Pre => Token /= No_Token and then not Is_Trivia (Token);
-   --  If Token is followed by a sequence of trivias, return the last of them.
-   --  Otherwise, return Token itself.
+      with Pre => Token /= No_Token;
+   --  If Token (which can be a token or a trivia) is followed by a sequence of
+   --  trivias, return the last of them. Otherwise, return Token itself.
 
    procedure Append_Tokens
      (Result                  : in out Unparsing_Buffer;
@@ -352,9 +352,11 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
       Unit                : Analysis_Unit;
-      Preserve_Formatting : Boolean) return String
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return String
    is
-      Result : String_Access := Unparse (Node, Unit, Preserve_Formatting);
+      Result : String_Access :=
+         Unparse (Node, Unit, Preserve_Formatting, As_Unit);
       R      : constant String := Result.all;
    begin
       Free (Result);
@@ -368,7 +370,8 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
       Unit                : Analysis_Unit;
-      Preserve_Formatting : Boolean) return String_Access
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return String_Access
    is
       use Ada.Strings.Wide_Wide_Unbounded.Aux;
 
@@ -379,7 +382,21 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Length        : Natural;
       --  Buffer internals, to avoid costly buffer copies
    begin
+
+      --  Unparse Node, and the leading trivia if we are unparsing the unit as
+      --  a whole.
+      if As_Unit then
+         declare
+            First : constant Token_Type := First_Token (Unit);
+         begin
+            if Is_Trivia (First) then
+               Append_Tokens (Buffer, First, Last_Trivia (First),
+                              With_Trailing_Trivia => False);
+            end if;
+         end;
+      end if;
       Unparse_Node (Node, Preserve_Formatting, Buffer);
+
       Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
