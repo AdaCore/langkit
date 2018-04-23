@@ -29,7 +29,7 @@ procedure General_API is
          Put_Line ("   Got an assert failure");
    end Try;
 
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create (With_Trivia => True);
    U   : constant Analysis_Unit := Get_From_Buffer
      (Ctx, "main.txt", Buffer => Buffer);
    RH  : Rewriting_Handle;
