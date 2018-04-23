@@ -5,6 +5,10 @@
 <% concrete_astnodes = [astnode for astnode in ctx.astnode_types
                         if not astnode.abstract] %>
 
+pragma Warnings (Off, "internal");
+with Ada.Strings.Wide_Wide_Unbounded.Aux;
+pragma Warnings (On, "internal");
+
 with GNATCOLL.Iconv;
 
 with ${ada_lib_name}.Analysis.Implementation;
@@ -366,11 +370,21 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Unit                : Analysis_Unit;
       Preserve_Formatting : Boolean) return String_Access
    is
-      Buffer : constant Text_Type := Unparse (Node, Preserve_Formatting);
+      use Ada.Strings.Wide_Wide_Unbounded.Aux;
+
+      Buffer        : Unparsing_Buffer;
+      --  Buffer to store the result of unparsing as text
+
+      Buffer_Access : Big_Wide_Wide_String_Access;
+      Length        : Natural;
+      --  Buffer internals, to avoid costly buffer copies
    begin
+      Unparse_Node (Node, Preserve_Formatting, Buffer);
+      Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
+
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
       --  them here.
-      if Buffer'Length = 0 then
+      if Length = 0 then
          return new String'("");
       end if;
 
@@ -382,10 +396,10 @@ package body ${ada_lib_name}.Unparsing.Implementation is
             From_Code => Internal_Charset);
          Status : Iconv_Result;
 
-         To_Convert_String : constant String (1 .. 4 * Buffer'Length)
+         To_Convert_String : constant String (1 .. 4 * Length)
             with Import     => True,
                  Convention => Ada,
-                 Address    => Buffer'Address;
+                 Address    => Buffer_Access.all'Address;
 
          Output_Buffer : String_Access :=
             new String (1 .. 4 * To_Convert_String'Length);
