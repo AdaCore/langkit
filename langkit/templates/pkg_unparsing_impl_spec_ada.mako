@@ -45,18 +45,24 @@ package ${ada_lib_name}.Unparsing.Implementation is
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
       Unit                : Analysis_Unit;
-      Preserve_Formatting : Boolean) return String;
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return String;
    --  Turn the Node tree into a string that can be re-parsed to yield the same
    --  tree (source locations excepted). The encoding used is the same as the
    --  one that was used to parse Node's analysis unit.
    --
    --  If Preserve_Formatting is true, use token/trivia information when
    --  available to preserve original source code formatting.
+   --
+   --  If As_Unit is true, consider that Node is the root of Unit in order to
+   --  preserve the formatting of leading/trailing tokens/trivia. Note that
+   --  this has no effect unless Preserve_Formatting itself is true.
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
       Unit                : Analysis_Unit;
-      Preserve_Formatting : Boolean) return String_Access;
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return String_Access;
    --  Likewise, but return a string access. Callers must deallocate the result
    --  when done with it.
 
