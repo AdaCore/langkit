@@ -284,6 +284,9 @@ package ${ada_lib_name}.Analysis is
    function Trivia_Count (Unit : Analysis_Unit) return Natural;
    ${ada_doc('langkit.unit_trivia_count', 3)}
 
+   function Text (Unit : Analysis_Unit) return Text_Type;
+   ${ada_doc('langkit.unit_text', 3)}
+
    function Lookup_Token
      (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Type;
    ${ada_doc('langkit.unit_lookup_token', 3)}

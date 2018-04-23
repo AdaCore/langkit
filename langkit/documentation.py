@@ -326,6 +326,9 @@ base_langkit_docs = {
         Return the number of trivias in this unit. This is 0 for units that
         were parsed with trivia analysis disabled.
     """,
+    'langkit.unit_text': """
+        Return the source buffer associated to this unit.
+    """,
     'langkit.unit_lookup_token': """
         Look for a token in this unit that contains the given source location.
         If this falls before the first token, return the first token. If this
