@@ -7,9 +7,12 @@
 
 
 struct Lexer {
-      QUEX_TYPE_ANALYZER quex_lexer;
-      void *buffer;
-      quex_Token buffer_tk;
+    QUEX_TYPE_ANALYZER quex_lexer;
+    void *buffer;
+    quex_Token buffer_tk;
+
+    /* Kind for the previous token (excluding trivia).  */
+    uint16_t prev_id;
 };
 
 static void
@@ -59,6 +62,21 @@ ${capi.get_name("next_token")}(Lexer* lexer, struct token* tok) {
     tok->start_column = lexer->buffer_tk._column_n;
     tok->end_column = lexer->buffer_tk.end_column;
     tok->offset = lexer->buffer_tk.offset;
+
+    /* Update the prev_id field, but only if we just got a token (not a
+       trivia).  */
+    switch (tok->id) {
+        % for token in ctx.lexer.sorted_tokens:
+            % if token.is_trivia:
+                case ${token.quex_name}:
+            % endif
+        % endfor
+        break;
+
+    default:
+        lexer->prev_id = tok->id;
+        break;
+    }
 
     return tok->id != 0;
 }
