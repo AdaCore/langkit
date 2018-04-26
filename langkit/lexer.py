@@ -88,6 +88,8 @@ class TokenAction(Action):
     # which allows us to get the declaration order of token enum kinds.
     _counter = iter(count(0))
 
+    is_trivia = False
+
     def __init__(self, start_ignore_layout=False, end_ignore_layout=False):
         """
         Create a new token action. This is meant to be called on subclasses of
@@ -208,7 +210,7 @@ class WithTrivia(WithText):
             # String tokens will keep the associated text when lexed
             StringLiteral = WithText()
     """
-    pass
+    is_trivia = True
 
 
 class WithSymbol(TokenAction):
