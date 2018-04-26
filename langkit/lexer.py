@@ -5,10 +5,10 @@ from itertools import count
 import re
 
 from langkit.compile_context import get_context
+from langkit.compiled_types import render
 from langkit.diagnostics import (Context, check_source_language,
                                  extract_library_location)
 from langkit.names import Name
-from langkit.template_utils import common_renderer
 
 
 class Matcher(object):
@@ -573,7 +573,7 @@ class Lexer(object):
 
         :rtype: str
         """
-        return common_renderer.render(
+        return render(
             "lexer/quex_lexer_spec",
             tokens=self.tokens,
             patterns=self.__patterns,
@@ -831,7 +831,7 @@ class Case(RuleAssoc):
             self.default_alt = alts[-1]
 
         def render(self, lexer):
-            return common_renderer.render(
+            return render(
                 "lexer/case_action",
                 alts=self.alts,
                 default_alt=self.default_alt,
