@@ -146,8 +146,8 @@ DefList
 rewrite_lists.adb: Done.
 
 == iter_units.adb ==
-Rewritten unit a.txt: def a=11
-Rewritten unit b.txt: def b=22
+Rewritten unit a.txt: def a = 11
+Rewritten unit b.txt: def b = 22
 iter_units.adb: Done.
 
 == apply_error.adb ==
@@ -214,10 +214,17 @@ Applying the diff...
 
 Quoting source buffer for rewritten unit...
 # First comment
-def aa=
+def aa =
    # Middle "a" comment
-11# Post "a" comment
-def bb=((11+(22+33))+aa)
+   11
+# Post "a" comment
+
+def bb =
+   ((11
+     + (22
+        + 33))
+    + aa)
 # Trailing comment
+
 preserve_formatting.adb: Done.
 Done
