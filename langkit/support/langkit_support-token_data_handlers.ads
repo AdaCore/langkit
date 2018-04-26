@@ -153,20 +153,22 @@ package Langkit_Support.Token_Data_Handlers is
    --  TDH.
 
    function Next
-     (Token : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler) return Token_Or_Trivia_Index;
+     (Token          : Token_Or_Trivia_Index;
+      TDH            : Token_Data_Handler;
+      Exclude_Trivia : Boolean := False) return Token_Or_Trivia_Index;
    --  Return the element that follows Token in the logical sequence of
-   --  tokens/trivias that TDH holds. This just returns
-   --  No_Token_Or_Trivia_Index if Token is No_Token_Or_Trivia_Index or if it
-   --  is the last sequence item.
+   --  tokens/trivias that TDH holds. If Exclude_Trivia is true, look for
+   --  tokens only. This just returns No_Token_Or_Trivia_Index if Token is
+   --  No_Token_Or_Trivia_Index or if it is the last sequence item.
 
    function Previous
-     (Token : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler) return Token_Or_Trivia_Index;
+     (Token          : Token_Or_Trivia_Index;
+      TDH            : Token_Data_Handler;
+      Exclude_Trivia : Boolean := False) return Token_Or_Trivia_Index;
    --  Return the element that precedes Token in the logical sequence of
-   --  tokens/trivias that TDH holds. This just returns
-   --  No_Token_Or_Trivia_Index if Token is No_Token_Or_Trivia_Index or if it
-   --  is the first sequence item.
+   --  tokens/trivias that TDH holds. If Exclude_Trivia is true, look for
+   --  tokens only. This just returns No_Token_Or_Trivia_Index if Token is
+   --  No_Token_Or_Trivia_Index or if it is the first sequence item.
 
    function Previous_Token
      (Trivia : Token_Index; TDH : Token_Data_Handler) return Token_Index;
