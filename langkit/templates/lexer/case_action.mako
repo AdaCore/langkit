@@ -2,7 +2,7 @@
 
 
 {
-    switch (me->token->last_id) {
+    switch (${capi.get_name('lexer_prev_token')}(me)) {
         % for alt in alts:
             % for tok in alt.prev_token_cond:
                case ${tok.quex_name}:

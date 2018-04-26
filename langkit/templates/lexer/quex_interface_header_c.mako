@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include "quex_lexer.h"
+
 
 struct token {
     /* Kind for this token (identifier, keyword, ...). */
@@ -26,8 +28,10 @@ struct token {
     uint32_t offset;
 };
 
-
 typedef struct Lexer Lexer;
+
+uint16_t
+${capi.get_name('lexer_prev_token')}(QUEX_TYPE_ANALYZER *quex_lexer);
 
 Lexer*
 ${capi.get_name('lexer_from_buffer')}(uint32_t *buffer, size_t length);

@@ -15,6 +15,13 @@ struct Lexer {
     uint16_t prev_id;
 };
 
+
+uint16_t
+${capi.get_name('lexer_prev_token')}(QUEX_TYPE_ANALYZER *quex_lexer)
+{
+   return ((struct Lexer *) quex_lexer)->prev_id;
+}
+
 static void
 init_lexer(Lexer *lexer) {
     QUEX_NAME(token_p_set)(&lexer->quex_lexer, &lexer->buffer_tk);
