@@ -28,8 +28,12 @@ package Langkit_Support.Text is
          Wide_Wide_Character'Val (Character'Pos (ASCII.NUL));
       LF : constant Character_Type :=
          Wide_Wide_Character'Val (Character'Pos (ASCII.LF));
+      CR : constant Character_Type :=
+         Wide_Wide_Character'Val (Character'Pos (ASCII.CR));
       HT : constant Character_Type :=
          Wide_Wide_Character'Val (Character'Pos (ASCII.HT));
+      FF : constant Character_Type :=
+         Wide_Wide_Character'Val (Character'Pos (ASCII.FF));
       ESC : constant Character_Type :=
          Wide_Wide_Character'Val (Character'Pos (ASCII.ESC));
    end Chars;
