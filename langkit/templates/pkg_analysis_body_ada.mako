@@ -928,22 +928,28 @@ package body ${ada_lib_name}.Analysis is
    -- Next --
    ----------
 
-   function Next (Token : Token_Type) return Token_Type is
+   function Next
+     (Token          : Token_Type;
+      Exclude_Trivia : Boolean := False) return Token_Type is
    begin
       return (if Token.TDH = null
               then No_Token
-              else Wrap (Next (Token.Index, Token.TDH.all), Token.TDH));
+              else Wrap (Next (Token.Index, Token.TDH.all,
+                               Exclude_Trivia), Token.TDH));
    end Next;
 
    --------------
    -- Previous --
    --------------
 
-   function Previous (Token : Token_Type) return Token_Type is
+   function Previous
+     (Token          : Token_Type;
+      Exclude_Trivia : Boolean := False) return Token_Type is
    begin
       return (if Token.TDH = null
               then No_Token
-              else Wrap (Previous (Token.Index, Token.TDH.all), Token.TDH));
+              else Wrap (Previous (Token.Index, Token.TDH.all,
+                                   Exclude_Trivia), Token.TDH));
    end Previous;
 
    ----------------

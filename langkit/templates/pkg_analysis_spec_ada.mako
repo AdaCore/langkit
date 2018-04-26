@@ -355,10 +355,14 @@ package ${ada_lib_name}.Analysis is
    --  Assuming Left and Right belong to the same analysis unit, return whether
    --  Left came before Right in the source file.
 
-   function Next (Token : Token_Type) return Token_Type;
+   function Next
+     (Token          : Token_Type;
+      Exclude_Trivia : Boolean := False) return Token_Type;
    ${ada_doc('langkit.token_next', 3)}
 
-   function Previous (Token : Token_Type) return Token_Type;
+   function Previous
+     (Token          : Token_Type;
+      Exclude_Trivia : Boolean := False) return Token_Type;
    ${ada_doc('langkit.token_previous', 3)}
 
    function Data (Token : Token_Type) return Token_Data_Type;
