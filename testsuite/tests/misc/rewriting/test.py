@@ -5,7 +5,7 @@ Test that basic rewriting API usage behaves as expected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, abstract
-from langkit.parsers import Grammar, List, Or
+from langkit.parsers import Grammar, List, Opt, Or
 
 from lexer_example import Token
 from utils import build_and_run
@@ -21,6 +21,7 @@ class Name(FooNode):
 
 class Def(FooNode):
     name = Field()
+    args = Field()
     expr = Field()
 
 
@@ -52,7 +53,9 @@ g.add_rules(
 
     name=Name(Token.Identifier),
 
-    def_rule=Def('def', g.name, '=', g.expr),
+    def_rule=Def('def', g.name,
+                 Opt('(', List(g.name, sep=','), ')'),
+                 '=', g.expr),
 
     expr=Or(Plus(g.expr, '+', g.expr),
             ParentExpr('(', g.expr, ')'),

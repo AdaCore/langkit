@@ -23,6 +23,7 @@ procedure Rewrite_Lists is
    begin
       return Create_Def (RH,
                          Create_Token_Node (RH, Foo_Name, Name),
+                         No_Node_Rewriting_Handle,
                          Create_Token_Node (RH, Foo_Literal, Lit));
    end Create_Def;
 
