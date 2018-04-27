@@ -15,6 +15,7 @@ begin
    Append_Child
      (N, Create_Def
            (RH, Create_Token_Node (RH, Foo_Literal, "1"),
+                No_Node_Rewriting_Handle,
                 Create_Token_Node (RH, Foo_Name, "a")));
    Process_Apply (RH, Abort_On_Error => False);
 

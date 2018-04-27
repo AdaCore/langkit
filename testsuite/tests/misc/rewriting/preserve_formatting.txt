@@ -4,9 +4,10 @@ def a =
    1
 # Post "a" comment
 
-def b =
+def b (x, # Separator comment
+       y) =
    ((1
      + (2
         + 3))
-    + a)
+    + (x + y))
 # Trailing comment
