@@ -77,7 +77,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  the instantiation of Regular_Node_Unparser.
 
    function Extract_Regular_Node_Template
-     (Unparser       : Node_Unparser;
+     (Unparser       : Regular_Node_Unparser;
       Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template;
    --  Return the regular node template corresponding to the instatiation of
    --  Rewritten_Node according to Unparser.
@@ -105,7 +105,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    procedure Unparse_Regular_Node
      (Node           : access Abstract_Node_Type'Class;
-      Unparser       : Node_Unparser;
+      Unparser       : Regular_Node_Unparser;
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
@@ -198,7 +198,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    -----------------------------------
 
    function Extract_Regular_Node_Template
-     (Unparser       : Node_Unparser;
+     (Unparser       : Regular_Node_Unparser;
       Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template
    is
       Result     : Regular_Node_Template (True, Unparser.Field_Unparsers.N);
@@ -539,7 +539,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    procedure Unparse_Regular_Node
      (Node           : access Abstract_Node_Type'Class;
-      Unparser       : Node_Unparser;
+      Unparser       : Regular_Node_Unparser;
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer)
    is

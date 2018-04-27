@@ -159,6 +159,10 @@ package ${ada_lib_name}.Unparsing.Implementation is
    end record;
    --  Unparsing descriptor for a non-abstract and non-synthetic node
 
+   subtype Regular_Node_Unparser is Node_Unparser (Regular);
+   subtype List_Node_Unparser is Node_Unparser (List);
+   subtype Token_Node_Unparser is Node_Unparser (Token);
+
    type Node_Unparser_Map is array (${root_node_kind_name}) of Node_Unparser;
    type Node_Unparser_Map_Access is access constant Node_Unparser_Map;
 
