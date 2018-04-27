@@ -26,6 +26,7 @@ static void
 init_lexer(Lexer *lexer) {
     QUEX_NAME(token_p_set)(&lexer->quex_lexer, &lexer->buffer_tk);
     memset (&lexer->buffer_tk, 0, sizeof (lexer->buffer_tk));
+    lexer->prev_id = 0;
 }
 
 Lexer*
