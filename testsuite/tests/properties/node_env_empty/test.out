@@ -1,0 +1,6 @@
+main.py: Running...
+def_node = <Decl 1:1-1:10>
+a_node = <Name 1:5-1:6>
+def_node.p_lookup(a_node) = None
+main.py: Done.
+Done
