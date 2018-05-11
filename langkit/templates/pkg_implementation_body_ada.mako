@@ -1623,6 +1623,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
       E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
    is
       <%
+         ## Env specs might be overriden, so node kind that don't add envs
+         ## might be derived from one that do. Thus, we need to blacklist
+         ## concrete nodes that we know are not adding envs.
          nodes_adding_env = [
             n for n in ctx.astnode_types
             if n.env_spec and
@@ -1637,26 +1640,50 @@ package body ${ada_lib_name}.Analysis.Implementation is
                not n.env_spec.adds_env
          ]
       %>
-      Base_Env : Lexical_Env :=
+
+      function Get_Base_Env return Lexical_Env;
+      --  Return the environment that we need to rebind before returning
+
+      ------------------
+      -- Get_Base_Env --
+      ------------------
+
+      function Get_Base_Env return Lexical_Env is
+      begin
          % if nodes_adding_env:
-            (if Node.Kind in
+            if Node.Kind in
                ${' | '.join(n.ada_kind_name for n in nodes_adding_env)}
 
                % if nodes_not_adding_env:
-               ## Env specs might be overriden, so node kind that don't add
-               ## envs might be derived from one that do, so we need to
-               ## blacklist concrete nodes that we know are not adding envs.
                and then Node.Kind not in
                ${' | '.join(n.ada_kind_name
                             for n in nodes_not_adding_env)}
                % endif
-             then AST_Envs.Get_Env (Node.Self_Env.Env.Parent)
-             else Node.Self_Env)
+            then
+               declare
+                  Parent : constant Lexical_Env :=
+                     AST_Envs.Get_Env (Node.Self_Env.Env.Parent);
+               begin
+                  --  If Node is the root scope or the empty environment,
+                  --  Parent can be a wrapper around the null node. Turn this
+                  --  into the Empty_Env, as null envs are erroneous values in
+                  --  properties.
+                  return (if Parent.Env = null
+                          then Empty_Env
+                          else Parent);
+               end;
+
+            else
+               return Node.Self_Env;
+            end if;
+
          % else:
-            Node.Self_Env
+            return Node.Self_Env;
          % endif
-      ;
-      Result : constant Lexical_Env := Rebind_Env (Base_Env, E_Info);
+      end Get_Base_Env;
+
+      Base_Env : Lexical_Env := Get_Base_Env;
+      Result   : constant Lexical_Env := Rebind_Env (Base_Env, E_Info);
    begin
       Dec_Ref (Base_Env);
       return Result;
