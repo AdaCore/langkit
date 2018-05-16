@@ -492,7 +492,8 @@ class Then(AbstractExpression):
             self.expr,
             lambda cls: (cls.is_ptr or
                          cls.is_struct_type or
-                         cls.is_lexical_env_type),
+                         cls.is_lexical_env_type,
+                         cls.is_bool_type),
             'Invalid prefix type for .then: {expr_type}'
         )
         self.var_expr.set_type(expr.type)
