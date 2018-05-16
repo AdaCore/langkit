@@ -478,6 +478,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    Null_Logic_Equation : constant Logic_Equation := null;
 
    % if ctx.properties_logging:
+      function Trace_Image (K : Unit_Kind) return String;
       function Trace_Image (B : Boolean) return String;
       function Trace_Image (I : Integer) return String;
       function Trace_Image (S : Symbol_Type) return String;

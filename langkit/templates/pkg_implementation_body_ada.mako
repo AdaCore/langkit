@@ -1985,6 +1985,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
          return "<LogicVariable>";
       end Trace_Image;
 
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (K : Unit_Kind) return String is
+      begin
+         return K'Image;
+      end Trace_Image;
+
    % endif
 
    % for struct_type in no_builtins(ctx.struct_types):
