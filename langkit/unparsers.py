@@ -16,13 +16,18 @@ from langkit.lexer import LexerToken
 import langkit.names as names
 from langkit.parsers import (
     Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Skip, _Extract, _Row,
-    _Token, _Transform
+    _Token, _Transform, Predicate
 )
 from langkit.utils import not_implemented_error
 
 
-def unwrap_dont_skip(parser):
-    return parser.subparser if isinstance(parser, DontSkip) else parser
+def unwrap(parser):
+    if isinstance(parser, DontSkip):
+        return parser.subparser
+    elif isinstance(parser, Predicate):
+        return parser.parser
+    else:
+        return parser
 
 
 class Unparser(object):
@@ -294,7 +299,7 @@ class NodeUnparser(Unparser):
         assert not node.abstract and not node.synthetic, (
             'Invalid unparser request for {}'.format(node.dsl_name)
         )
-        parser = unwrap_dont_skip(parser)
+        parser = unwrap(parser)
 
         with parser.diagnostic_context:
             if node.is_token_node:
@@ -486,7 +491,7 @@ class NodeUnparser(Unparser):
         :param TokenSequenceUnparser token_sequence: List into which this
             appends the sequence of tokens.
         """
-        parser = unwrap_dont_skip(parser)
+        parser = unwrap(parser)
 
         if isinstance(parser, _Row):
             for subparser in parser.parsers:
@@ -533,7 +538,7 @@ class NodeUnparser(Unparser):
             field is present. Tokens are inserted at the beginning of this
             sequence.
         """
-        parser = unwrap_dont_skip(parser)
+        parser = unwrap(parser)
 
         # As all fields are nodes, previous validation passes made sure that
         # `parser` yields a parse node (potentially a null one).
