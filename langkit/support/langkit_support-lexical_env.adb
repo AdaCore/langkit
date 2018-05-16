@@ -562,7 +562,7 @@ package body Langkit_Support.Lexical_Env is
       procedure Get_Refd_Elements (Self : in out Referenced_Env) is
          Env        : Lexical_Env;
       begin
-         --  Don't follow the reference environment if either:
+         --  Don't follow the referenced environment if either:
          --   * the node from which this reference starts cannot reach From;
          --   * the node that created this environment reference is a parent of
          --     From.
