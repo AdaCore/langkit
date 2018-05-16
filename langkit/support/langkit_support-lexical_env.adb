@@ -10,6 +10,12 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Env is
 
+   function Has_Lookup_Cache (Dummy : Lexical_Env) return Boolean
+   is
+     (Activate_Lookup_Cache);
+   --  Function to allow fine grained (by env) cache activation. Not used at
+   --  the moment.
+
    function Is_Lookup_Cache_Valid (Env : Lexical_Env) return Boolean
       with Pre => Env.Kind = Primary;
    --  Return whether Env's lookup cache is valid. This will check every
@@ -672,7 +678,7 @@ package body Langkit_Support.Lexical_Env is
 
       --  At this point, we know that Self is a primary lexical environment
 
-      if Recursive then
+      if Has_Lookup_Cache (Self) and then Recursive then
 
          if not Is_Lookup_Cache_Valid (Self) then
             Reset_Lookup_Cache (Self);
@@ -789,7 +795,7 @@ package body Langkit_Support.Lexical_Env is
 
       Dec_Ref (Env);
 
-      if Recursive then
+      if Has_Lookup_Cache (Self) and then Recursive then
          declare
             Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
          begin

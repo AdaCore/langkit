@@ -67,6 +67,8 @@ generic
 
 package Langkit_Support.Lexical_Env is
 
+   Activate_Lookup_Cache : Boolean := True;
+
    pragma Suppress (Container_Checks);
    --  Remove container checks for standard containers
 
