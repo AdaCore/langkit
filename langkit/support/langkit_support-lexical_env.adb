@@ -1185,7 +1185,9 @@ package body Langkit_Support.Lexical_Env is
                      Return_Env := R.New_Env;
 
                      --  Extracted rebinding *must* be the last one
-                     pragma Assert (R = Rebindings);
+                     if R /= Rebindings then
+                        Raise_Property_Error ("Incorrect rebindings");
+                     end if;
                      exit;
                   end if;
                end;
