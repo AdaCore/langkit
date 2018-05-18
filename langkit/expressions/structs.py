@@ -842,14 +842,15 @@ class IsA(AbstractExpression):
             super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            target = ('{}.El.all'
-                      if self.expr.type.is_entity_type else
-                      '{}.all').format(self.expr.render_expr())
-            result_expr = '{} in {}'.format(
-                target,
-                ' | '.join(
-                    "{}_Type'Class".format(a.name.camel_with_underscores)
-                    for a in self.astnodes
+            target = ('{}.El' if self.expr.type.is_entity_type
+                      else '{}').format(self.expr.render_expr())
+            result_expr = (
+                '{target} /= null \nand then {target}.all in {nodes}'.format(
+                    target=target,
+                    nodes=' | '.join(
+                        "{}_Type'Class".format(a.name.camel_with_underscores)
+                        for a in self.astnodes
+                    )
                 )
             )
             return '{}\n{}'.format(

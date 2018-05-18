@@ -120,7 +120,7 @@ package body Langkit_Support.Lexical_Env is
    function Dyn_Env_Getter
      (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter is
    begin
-      return Env_Getter'(True, Null_Lexical_Env, Node, Resolver, False);
+      return Env_Getter'(True, Null_Lexical_Env, Node, Resolver);
    end Dyn_Env_Getter;
 
    -------------
@@ -132,7 +132,6 @@ package body Langkit_Support.Lexical_Env is
    begin
       case Self.Dynamic is
          when True =>
-            Self.Computed := False;
             Env := Get_Env (Self);
 
             --  Get_Env returns an ownership share for the returned reference,
@@ -150,30 +149,28 @@ package body Langkit_Support.Lexical_Env is
    function Get_Env (Self : in out Env_Getter) return Lexical_Env is
    begin
       if Self.Dynamic then
-         if not Self.Computed then
-            declare
-               R : constant Lexical_Env_Resolver := Self.Resolver;
-               E : constant Entity :=
-                 (El => Self.Node, Info => No_Entity_Info);
-            begin
 
-               if Self.Env /= Null_Lexical_Env then
+         if Self.Env /= Null_Lexical_Env then
 
-                  if not Is_Stale (Self.Env) then
-                     Inc_Ref (Self.Env);
-                     return Self.Env;
-                  end if;
+            if not Is_Stale (Self.Env) then
+               Inc_Ref (Self.Env);
+               return Self.Env;
+            end if;
 
-                  Dec_Ref (Self.Env);
-               end if;
-
-               --  We use the share returned by the resolver, so no need for
-               --  inc ref here.
-               Self.Env := R.all (E);
-
-               Self.Computed := True;
-            end;
+            Dec_Ref (Self.Env);
          end if;
+
+         declare
+            R : constant Lexical_Env_Resolver := Self.Resolver;
+            E : constant Entity :=
+              (El => Self.Node, Info => No_Entity_Info);
+         begin
+
+            --  We use the share returned by the resolver, so no need for
+            --  inc ref here.
+            Self.Env := R.all (E);
+
+         end;
       end if;
 
       --  Inc ref for the returned value
@@ -1188,7 +1185,9 @@ package body Langkit_Support.Lexical_Env is
                      Return_Env := R.New_Env;
 
                      --  Extracted rebinding *must* be the last one
-                     pragma Assert (R = Rebindings);
+                     if R /= Rebindings then
+                        Raise_Property_Error ("Incorrect rebindings");
+                     end if;
                      exit;
                   end if;
                end;
@@ -1777,10 +1776,6 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Self.Env.Lookup_Cache_Valid := False;
-
-      if Self.Env.Parent.Dynamic then
-         Self.Env.Parent.Computed := False;
-      end if;
 
       for I in Self.Env.Referenced_Envs.First_Index
             .. Self.Env.Referenced_Envs.Last_Index
