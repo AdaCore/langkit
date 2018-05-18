@@ -187,9 +187,6 @@ package Langkit_Support.Lexical_Env is
             Resolver : Lexical_Env_Resolver;
             --  Data and callable to resolve this getter
 
-            Computed : Boolean := False;
-            --  Whether the Env member contains the resolved environment
-
          when False =>
             null;
       end case;
