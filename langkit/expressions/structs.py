@@ -286,9 +286,14 @@ class New(AbstractExpression):
 
         check_source_language(
             self.struct_type.is_base_struct_type,
-            "Invalid type, expected struct type or AST node, got {}".format(
+            'Invalid type, expected struct type or AST node, got {}'.format(
                 self.struct_type.dsl_name
             )
+        )
+        check_source_language(
+            not self.struct_type.is_ast_node
+            or self.struct_type.synthetic,
+            'Synthetized AST nodes must be annotated as synthetic'
         )
 
     def construct(self):

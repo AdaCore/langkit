@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, T
+from langkit.dsl import ASTNode, T, synthetic
 from langkit.expressions import New, Property
 from langkit.parsers import Grammar, List, Pick
 
@@ -22,9 +22,11 @@ def run(name, prop_fn, prop_memoized):
     class Literal(FooNode):
         token_node = True
 
+    @synthetic
     class EmptyNode(FooNode):
         pass
 
+    @synthetic
     class LiteralList(Literal.list):
         prop = Property(prop_fn(), memoized=prop_memoized)
 
@@ -32,7 +34,7 @@ def run(name, prop_fn, prop_memoized):
     grammar.add_rules(
         main_rule=grammar.list_rule,
         list_rule=Pick(
-            '(', List(grammar.list_item, sep=',', cls=LiteralList), ')'
+            '(', List(grammar.list_item, sep=','), ')'
         ),
         list_item=Literal(Token.Number),
     )
@@ -40,6 +42,7 @@ def run(name, prop_fn, prop_memoized):
     print('')
 
 
-run("Not memoized", lambda: New(T.EmptyNode), False)
-run("List synthetization", lambda: New(T.LiteralList), True)
+run('Not memoized', lambda: New(T.EmptyNode), False)
+run('List synthetization', lambda: New(T.LiteralList), True)
+run('Not synthetic', lambda: New(T.Literal), True)
 print('Done')
