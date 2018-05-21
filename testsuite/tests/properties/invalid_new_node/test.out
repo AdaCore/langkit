@@ -1,11 +1,15 @@
 == Not memoized ==
-File "test.py", line 29, in LiteralList.prop
-  line 43, in New expression
+File "test.py", line 31, in LiteralList.prop
+  line 45, in New expression
     Error: Node synthetization can only happen inside a memoized property
 
 == List synthetization ==
-File "test.py", line 29, in LiteralList.prop
-  line 44, in New expression
+File "test.py", line 31, in LiteralList.prop
+  line 46, in New expression
     Error: List node synthetization is not supported for now
+
+== Not synthetic ==
+File "test.py", line 31, in LiteralList.prop
+    Error: Synthetized AST nodes must be annotated as synthetic
 
 Done
