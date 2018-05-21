@@ -92,10 +92,8 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env) is
    begin
-
-      for C in Self.Env.Lookup_Cache.Iterate loop
-         Self.Env.Lookup_Cache.Reference (C).Elements.Destroy;
-         Self.Env.Lookup_Cache.Reference (C).State := None;
+      for C of Self.Env.Lookup_Cache loop
+         C.Elements.Destroy;
       end loop;
 
       Self.Env.Lookup_Cache.Clear;
