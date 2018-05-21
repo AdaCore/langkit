@@ -13,8 +13,8 @@ package body Langkit_Support.Lexical_Env is
    function Has_Lookup_Cache (Dummy : Lexical_Env) return Boolean
    is
      (Activate_Lookup_Cache);
-   --  Function to allow fine grained (by env) cache activation. Not used at
-   --  the moment.
+   --  Whether lookup cache is enabled for the given lexical environment.
+   --  Note that for now, this is only a global setting (not per env).
 
    function Is_Lookup_Cache_Valid (Env : Lexical_Env) return Boolean
       with Pre => Env.Kind = Primary;
