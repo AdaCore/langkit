@@ -22,12 +22,19 @@ from langkit.utils import not_implemented_error
 
 
 def unwrap(parser):
-    if isinstance(parser, DontSkip):
-        return parser.subparser
-    elif isinstance(parser, Predicate):
-        return parser.parser
-    else:
-        return parser
+    """
+    Strip DontSkip and Predicate parser layers.
+
+    :type parser: Parser
+    :rtype: Parser
+    """
+    while True:
+        if isinstance(parser, DontSkip):
+            parser = parser.subparser
+        elif isinstance(parser, Predicate):
+            parser = parser.parser
+        else:
+            return parser
 
 
 class Unparser(object):
