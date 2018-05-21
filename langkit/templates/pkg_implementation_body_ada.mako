@@ -1991,7 +1991,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       function Trace_Image (K : Unit_Kind) return String is
       begin
-         return K'Image;
+         return Unit_Kind'Image (K);
       end Trace_Image;
 
    % endif
