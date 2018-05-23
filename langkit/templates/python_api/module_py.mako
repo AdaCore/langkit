@@ -738,12 +738,13 @@ class ${root_astnode_name}(object):
 
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self, node_c_value, metadata, rebindings):
+    def __init__(self, c_value, node_c_value, metadata, rebindings):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
         part of the parsing of an analysis unit.
         """
+        self._c_value = c_value
         self._node_c_value = node_c_value
         self._metadata = metadata
         self._rebindings = rebindings
@@ -1056,7 +1057,8 @@ class ${root_astnode_name}(object):
         c_entity = ${c_entity}()
         c_entity.el = c_value.el
         kind = _node_kind(ctypes.byref(c_entity))
-        return _kind_to_astnode_cls[kind](node_c_value, metadata, rebindings)
+        return _kind_to_astnode_cls[kind](c_value, node_c_value, metadata,
+                                          rebindings)
 
     @classmethod
     def _unwrap(cls, py_value):
@@ -1072,10 +1074,7 @@ class ${root_astnode_name}(object):
         elif not isinstance(py_value, ${root_astnode_name}):
             _raise_type_error(${repr(root_astnode_name)}, py_value)
         else:
-            result = ${c_entity}()
-            result.el = py_value._node_c_value
-            result.info = py_value._unwrap_einfo
-            return result
+            return py_value._c_value
 
     @property
     def _unwrap_einfo(self):
