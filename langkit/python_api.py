@@ -51,7 +51,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
             (T.AnalysisUnitKind, lambda _: '_unit_kind_to_str[{}]'),
-            (ct.ASTNodeType, lambda _: '_ASTNodeExtension.get_or_create({})'),
+            (ct.ASTNodeType, lambda _: '{}'),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 ct.T.root_node.kwless_raw_name.camel
             )),
@@ -87,7 +87,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({})'),
             (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
-            (ct.ASTNodeType, lambda _: '_ASTNodeExtension.unwrap({})'),
+            (ct.ASTNodeType, lambda _: '{}'),
             (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
                 ct.T.root_node.kwless_raw_name.camel
             )),
@@ -129,7 +129,8 @@ class PythonAPISettings(AbstractAPISettings):
             (T.SymbolType, lambda _: wrapped_type('text')),
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (T.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
-            (ct.ASTNodeType, lambda _: '_ASTNodeExtension.c_type'),
+            (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
+                ct.T.root_node.kwless_raw_name.camel)),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(self.array_wrapper(cls))),
             (ct.EntityType, lambda _: '{}._c_type'.format(
