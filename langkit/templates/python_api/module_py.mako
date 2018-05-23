@@ -19,7 +19,7 @@ from __future__ import (absolute_import, division, print_function,
 
 <%
     root_astnode_name = T.root_node.kwless_raw_name.camel
-    c_node = '_ASTNodeExtension.c_type'
+    c_node = '{}._node_c_type'.format(root_astnode_name)
     c_entity = '{}._c_type'.format(root_entity.name.camel)
 %>
 
@@ -738,13 +738,13 @@ class ${root_astnode_name}(object):
 
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self, node_ext, metadata, rebindings):
+    def __init__(self, node_c_value, metadata, rebindings):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
         part of the parsing of an analysis unit.
         """
-        self._node_ext = node_ext
+        self._node_c_value = node_c_value
         self._metadata = metadata
         self._rebindings = rebindings
 
@@ -757,7 +757,7 @@ class ${root_astnode_name}(object):
 
     @property
     def _id_tuple(self):
-        return (self._node_ext, self._metadata, self._rebindings)
+        return (self._node_c_value, self._metadata, self._rebindings)
 
     def __eq__(self, other):
         return (isinstance(other, ${root_astnode_name}) and
@@ -1035,14 +1035,17 @@ class ${root_astnode_name}(object):
         """
         return isinstance(self, tuple(types))
 
+    class _node_c_type(_hashable_void_p):
+        pass
+
     @classmethod
     def _wrap(cls, c_value):
         """
         Internal helper to wrap a low-level entity value into an instance of
         the the appropriate high-level Python wrapper subclass.
         """
-        node_ext = _ASTNodeExtension.get_or_create(c_value.el)
-        if node_ext is None:
+        node_c_value = c_value.el
+        if not node_c_value:
             return None
 
         metadata = ${pyapi.wrap_value('c_value.info.md', T.env_md)}
@@ -1051,9 +1054,9 @@ class ${root_astnode_name}(object):
 
         # Pick the right subclass to materialize this node in Python
         c_entity = ${c_entity}()
-        c_entity.el = node_ext.c_handle
+        c_entity.el = c_value.el
         kind = _node_kind(ctypes.byref(c_entity))
-        return _kind_to_astnode_cls[kind](node_ext, metadata, rebindings)
+        return _kind_to_astnode_cls[kind](node_c_value, metadata, rebindings)
 
     @classmethod
     def _unwrap(cls, py_value):
@@ -1070,7 +1073,7 @@ class ${root_astnode_name}(object):
             _raise_type_error(${repr(root_astnode_name)}, py_value)
         else:
             result = ${c_entity}()
-            result.el = py_value._node_ext.c_handle
+            result.el = py_value._node_c_value
             result.info = py_value._unwrap_einfo
             return result
 
@@ -1160,35 +1163,6 @@ class _Extension(object):
             return None
         assert isinstance(value, cls)
         return value.c_handle
-
-
-class _ASTNodeExtension(_Extension):
-
-    class c_type(_hashable_void_p):
-        pass
-
-    @classmethod
-    def lookup(cls, c_handle):
-        return _node_extension(c_handle, _node_extension_id, _node_ext_dtor_c)
-
-
-def _node_ext_dtor_py(c_node, c_pyobj):
-    """
-    Callback for extension upon ${root_astnode_name} destruction: free the
-    reference for the Python wrapper.
-    """
-    # At this point, c_pyobj is a System.Address in Ada that has been decoded
-    # by ctypes.c_void_p as a "long" Python object. We used to try to convert
-    # it into a ctypes.py_object with::
-    #
-    #   ctypes.py_object(c_pyobj)
-    #
-    # but this was wrong: the result was a reference to the long object itself,
-    # not to the object whose address was stored in the long. And this led to
-    # random memory issues with the call to Py_DecRef... Actual casting is the
-    # way to go.
-    c_pyobj = ctypes.cast(c_pyobj, ctypes.py_object)
-    ctypes.pythonapi.Py_DecRef(c_pyobj)
 
 
 ## TODO: use the _Extension mechanism for env rebindings
@@ -1501,15 +1475,6 @@ _register_extension = _import_func(
     '${capi.get_name("register_extension")}',
     [ctypes.c_char_p], ctypes.c_uint
 )
-_node_extension_destructor = ctypes.CFUNCTYPE(
-    ctypes.c_void_p,
-    ${c_node}, ctypes.c_void_p
-)
-_node_extension = _import_func(
-    '${capi.get_name("node_extension")}',
-    [${c_node}, ctypes.c_uint, _node_extension_destructor],
-    ctypes.POINTER(ctypes.c_void_p)
-)
 
 % if ctx.default_unit_provider:
 # Unit providers
@@ -1573,10 +1538,6 @@ _kind_to_astnode_cls = {
         % endif
     % endfor
 }
-
-
-_node_ext_dtor_c = _node_extension_destructor(_node_ext_dtor_py)
-_node_extension_id = _register_extension('python_api_astnode_wrapper')
 
 
 def _field_address(struct, field_name):
