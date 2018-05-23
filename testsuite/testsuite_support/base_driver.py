@@ -80,8 +80,7 @@ class BaseDriver(TestDriver):
                 self.test_env.get('expect_failure', [])
             )
         except ValueError as exc:
-            raise SetupError('Invalid "expect_failure_condition entry: {}'
-                             .format(exc))
+            raise SetupError('Invalid "expect_failure" entry: {}'.format(exc))
 
         # Determine whether we do have an expected failure
         self.expect_failure_comment = expect_failure_matcher.matches()
