@@ -1074,10 +1074,7 @@ class ${root_astnode_name}(object):
 
     @property
     def _unwrap_einfo(self):
-        result = ${pyapi.type_internal_name(T.entity_info)}()
-        result.md = Metadata._unwrap(self._metadata)
-        result.rebindings = EnvRebindings._unwrap(self._rebindings)
-        return result
+        return self._c_value.info
 
     def _eval_field(self, c_result, c_accessor, *c_args):
         """
