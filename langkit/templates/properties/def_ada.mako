@@ -153,7 +153,7 @@ begin
                   Properties_Traces.Decrease_Indent;
                % endif
                ${gdb_memoization_return()}
-               raise Property_Error;
+               raise Property_Error with "Memoized error";
 
             else
                Property_Result := Mmz_Val.As_${property.type.name};
@@ -212,6 +212,7 @@ begin
    return Property_Result;
 
 % if property.vars.root_scope.has_refcounted_vars(True) or \
+     property.memoized or \
      ctx.properties_logging:
    exception
       when Property_Error =>
@@ -226,7 +227,7 @@ begin
             if not Node.Unit.Context.In_Populate_Lexical_Env then
             % endif
 
-               Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+               Mmz_Map.Replace_Element (Mmz_Cur, (Kind => Mmz_Property_Error));
 
             % if not property.memoize_in_populate:
             end if;
