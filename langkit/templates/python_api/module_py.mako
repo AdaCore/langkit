@@ -753,6 +753,13 @@ class ${root_astnode_name}(object):
 
         self._rebindings = rebindings
 
+        self._getitem_cache = {}
+        """
+        Cache for the __getitem__ override.
+
+        :type: dict[int, ${root_astnode_name}]
+        """
+
     @property
     def metadata(self):
         if self._metadata is None:
@@ -851,13 +858,18 @@ class ${root_astnode_name}(object):
         if key < 0:
             key += len(self)
 
+        if key in self._getitem_cache:
+            return self._getitem_cache[key]
+
         node = self._unwrap(self)
         result = ${c_entity}()
         success = _node_child(ctypes.byref(node), key, ctypes.byref(result))
         if not success:
             raise IndexError('child index out of range')
         else:
-            return ${root_astnode_name}._wrap(result)
+            result = ${root_astnode_name}._wrap(result)
+            self._getitem_cache[key] = result
+            return result
 
     def iter_fields(self):
         """
