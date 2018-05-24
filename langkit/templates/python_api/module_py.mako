@@ -1068,9 +1068,7 @@ class ${root_astnode_name}(object):
         type.
         """
         if py_value is None:
-            result = ${c_entity}()
-            result.el = None
-            return result
+            return ${c_entity}._null_value
         elif not isinstance(py_value, ${root_astnode_name}):
             _raise_type_error(${repr(root_astnode_name)}, py_value)
         else:
@@ -1255,6 +1253,11 @@ ${struct_types.decl(struct_type)}
 #
 # Low-level binding - Second part
 #
+
+# For performance, allocate a single C API entity for all uses of null
+# entities.
+${c_entity}._null_value = ${c_entity}()
+${c_entity}._null_value.el = None
 
 ${array_types.base_decl()}
 ${array_types.decl(T.root_node.array)}
