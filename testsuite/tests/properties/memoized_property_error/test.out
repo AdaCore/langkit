@@ -1,0 +1,15 @@
+Calling P_Prop1...
+Got an exception!
+LIBFOOLANG.ANALYSIS.PROPERTY_ERROR: Explicit error 1
+Got an exception!
+LIBFOOLANG.ANALYSIS.PROPERTY_ERROR: Memoized error
+Got an exception!
+LIBFOOLANG.ANALYSIS.PROPERTY_ERROR: Memoized error
+Calling P_Prop2...
+Got an exception!
+LIBFOOLANG.ANALYSIS.PROPERTY_ERROR: Explicit error 2
+Got an exception!
+LIBFOOLANG.ANALYSIS.PROPERTY_ERROR: Memoized error
+Got an exception!
+LIBFOOLANG.ANALYSIS.PROPERTY_ERROR: Memoized error
+Done
