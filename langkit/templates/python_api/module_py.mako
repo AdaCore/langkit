@@ -1054,9 +1054,7 @@ class ${root_astnode_name}(object):
                                          T.EnvRebindingsType))}
 
         # Pick the right subclass to materialize this node in Python
-        c_entity = ${c_entity}()
-        c_entity.el = c_value.el
-        kind = _node_kind(ctypes.byref(c_entity))
+        kind = _node_kind(ctypes.byref(c_value))
         return _kind_to_astnode_cls[kind](c_value, node_c_value, metadata,
                                           rebindings)
 
