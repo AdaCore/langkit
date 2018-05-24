@@ -738,7 +738,7 @@ class ${root_astnode_name}(object):
 
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self, c_value, node_c_value, metadata, rebindings):
+    def __init__(self, c_value, node_c_value, rebindings):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
@@ -746,11 +746,18 @@ class ${root_astnode_name}(object):
         """
         self._c_value = c_value
         self._node_c_value = node_c_value
-        self._metadata = metadata
+
+        # For performance, don't unwrap metadata until it's necessary: see the
+        # "metadata" property.
+        self._metadata = None
+
         self._rebindings = rebindings
 
     @property
     def metadata(self):
+        if self._metadata is None:
+            self._metadata = ${pyapi.wrap_value('self._c_value.info.md',
+                                                T.env_md)}
         return self._metadata
 
     def __del__(self):
@@ -758,7 +765,7 @@ class ${root_astnode_name}(object):
 
     @property
     def _id_tuple(self):
-        return (self._node_c_value, self._metadata, self._rebindings)
+        return (self._node_c_value, self.metadata, self._rebindings)
 
     def __eq__(self, other):
         return (isinstance(other, ${root_astnode_name}) and
@@ -1049,14 +1056,12 @@ class ${root_astnode_name}(object):
         if not node_c_value:
             return None
 
-        metadata = ${pyapi.wrap_value('c_value.info.md', T.env_md)}
         rebindings = ${(pyapi.wrap_value('c_value.info.rebindings',
                                          T.EnvRebindingsType))}
 
         # Pick the right subclass to materialize this node in Python
         kind = _node_kind(ctypes.byref(c_value))
-        return _kind_to_astnode_cls[kind](c_value, node_c_value, metadata,
-                                          rebindings)
+        return _kind_to_astnode_cls[kind](c_value, node_c_value, rebindings)
 
     @classmethod
     def _unwrap(cls, py_value):
