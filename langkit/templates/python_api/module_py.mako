@@ -968,6 +968,8 @@ class ${root_astnode_name}(object):
             key that has the specified value, then the child is kept.
         :type kwargs: dict[str, Any]
         """
+        # Create a "pred" function to use as the node filter during the
+        # traversal.
         if isinstance(ast_type_or_pred, type):
             sought_type = ast_type_or_pred
             pred = lambda node: isinstance(node, sought_type)
@@ -978,6 +980,10 @@ class ${root_astnode_name}(object):
             pred = ast_type_or_pred
 
         def match(left, right):
+            """
+            :param left: Node child to match.
+            :param right: Matcher, coming from ``kwargs``.
+            """
             if left is None:
                 return
             if hasattr(left, "match"):
@@ -985,17 +991,20 @@ class ${root_astnode_name}(object):
             else:
                 return left == right
 
-        for child in self:
-            if child is not None:
-                if pred(child):
-                    if not kwargs:
-                        yield child
-                    elif all([match(getattr(child, key, None), val)
-                              for key, val in kwargs.items()]):
-                        yield child
-                for c in child.finditer(pred, **kwargs):
-                    if c is not None:
-                        yield c
+        def helper(node):
+            for child in node:
+                if child is not None:
+                    if pred(child):
+                        if not kwargs:
+                            yield child
+                        elif all([match(getattr(child, key, None), val)
+                                  for key, val in kwargs.items()]):
+                            yield child
+                    for c in helper(child):
+                        if c is not None:
+                            yield c
+
+        return helper(self)
 
     def __repr__(self):
         return self.short_image
