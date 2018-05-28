@@ -77,6 +77,20 @@ def construct_compile_time_known(expr, *args, **kwargs):
     return result
 
 
+def match_default_values(left, right):
+    """
+    Return whether the given optional default values are identical.
+
+    :type left: None|ResolvedExpression
+    :type right: None|ResolvedExpression
+    :rtype: bool
+    """
+    if left is None or right is None:
+        return left == right
+    else:
+        return left.ir_dump == right.ir_dump
+
+
 def expand_abstract_fn(fn):
     """
     Expand a function used to describe a Langkit properties into an
@@ -3401,7 +3415,7 @@ class PropertyDef(AbstractNodeData):
                     val = arg.default_value
                     base_val = base_arg.default_value
                     check_source_language(
-                        val.ir_dump == base_val.ir_dump,
+                        match_default_values(val, base_val),
                         'Argument "{}" does not have the same default value'
                         ' ({}) as in base property ({})'.format(
                             arg.name, val, base_val
