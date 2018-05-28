@@ -60,6 +60,23 @@ def unsugar(expr, ignore_errors=False):
     return expr
 
 
+def construct_compile_time_known(expr, *args, **kwargs):
+    """
+    Construct a expression and check that it is a compile-time known constant.
+    This takes the same parameters as ``construct``.
+
+    :type expr: AbstractExpression
+    :rtype: ResolvedExpression
+    """
+    result = construct(expr, *args, **kwargs)
+    check_source_language(
+        isinstance(result, BindableLiteralExpr),
+        'Default value must be a compile-time known constant'
+        ' (got {})'.format(expr)
+    )
+    return result
+
+
 def expand_abstract_fn(fn):
     """
     Expand a function used to describe a Langkit properties into an
@@ -116,12 +133,7 @@ def expand_abstract_fn(fn):
         # Only check that the expression is valid: we'll re-generate one tree
         # of resolved expression per call site.
         if default_value is not None:
-            defval_expr = construct(default_value, type_ref)
-            check_source_language(
-                isinstance(defval_expr, BindableLiteralExpr),
-                'Default value must be a compile-time known constant'
-                ' (got {})'.format(default_value)
-            )
+            construct_compile_time_known(default_value, type_ref)
 
         fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
                                      default_value=default_value))
