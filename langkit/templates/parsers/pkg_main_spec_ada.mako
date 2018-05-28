@@ -18,13 +18,19 @@ package ${ada_lib_name}.Analysis.Parsers is
    type Fail_Info_Kind is (Token_Fail, Custom_Fail);
 
    type Fail_Info (Kind : Fail_Info_Kind := Token_Fail) is record
-      Pos               : Token_Index := No_Token_Index;
+      Pos : Token_Index := No_Token_Index;
+      --  Index for the first token on which parsing failed
+
       case Kind is
-      when Token_Fail =>
-         Expected_Token_Id : Token_Kind;
-         Found_Token_Id    : Token_Kind;
-      when Custom_Fail =>
-         Custom_Message    : Cst_String;
+         when Token_Fail =>
+            Expected_Token_Id : Token_Kind;
+            Found_Token_Id    : Token_Kind;
+            --  In case of token mismatch, indicate what was expected and what
+            --  we found instead.
+
+         when Custom_Fail =>
+            Custom_Message : Cst_String;
+            --  Custom error message for parsing failure
       end case;
    end record;
 
