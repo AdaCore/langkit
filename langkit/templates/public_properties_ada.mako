@@ -12,7 +12,7 @@
       ${"'Class" if arg.type.is_entity_type else ''}
 
       % if arg.default_value is not None:
-         := ${arg.default_value.construct().render_public_ada_constant()}
+         := ${arg.default_value.render_public_ada_constant()}
       % endif
    % endfor
   ) return ${(property.type.api_name)}

@@ -130,10 +130,11 @@ def expand_abstract_fn(fn):
             ' (got {})'.format(kw, type_ref)
         )
 
-        # Only check that the expression is valid: we'll re-generate one tree
-        # of resolved expression per call site.
+        # Make sure that, if present, the default value is a compile-time known
+        # constant.
         if default_value is not None:
-            construct_compile_time_known(default_value, type_ref)
+            default_value = construct_compile_time_known(default_value,
+                                                         type_ref)
 
         fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
                                      default_value=default_value))
@@ -3397,13 +3398,13 @@ class PropertyDef(AbstractNodeData):
 
                 # Then check that if there is a default value, it is the same
                 if arg.default_value is not None:
-                    val = construct(arg.default_value)
-                    base_val = construct(base_arg.default_value)
+                    val = arg.default_value
+                    base_val = base_arg.default_value
                     check_source_language(
                         val.ir_dump == base_val.ir_dump,
                         'Argument "{}" does not have the same default value'
                         ' ({}) as in base property ({})'.format(
-                            arg.name, arg.default_value, base_arg.default_value
+                            arg.name, val, base_val
                         )
                     )
 

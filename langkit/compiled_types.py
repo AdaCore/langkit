@@ -823,14 +823,10 @@ class Argument(object):
         :param bool is_artificial: Whether the argument was automatically
             created by Langkit, i.e. the language specification did not mention
             it.
-        :param AbstractExpression|None default_value: If None, there is no
-            default value associated to this argument. Otherwise, it must be an
-            abstract expression that can be evaluated at all call sites for the
-            corresponding property; callers that don't provide a value for this
-            argument will actually use this default value. While, from a
-            language design point of view, this makes this argument an
-            "optional" one, this is unrelated to the `is_optional` argument
-            above, which is a code generation detail.
+        :param ResolvedExpression|None default_value: If None, there is no
+            default value associated to this argument. Otherwise, it must be a
+            compile-time known resolved expression to be used when generating
+            code for the corresponding property argument.
         :param AbstractVariable|None abstract_var: For properties only. If
             provided, use it as the abstract variable to reference this
             argument. If not provided, an AbstractVariable instance is

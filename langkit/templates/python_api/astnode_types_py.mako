@@ -48,8 +48,7 @@
             (a.name.lower
              if a.default_value is None else
              '{}={}'.format(a.name.lower,
-                            a.default_value.construct()
-                            .render_python_constant()))
+                            a.default_value.render_python_constant()))
             for a in field.arguments
         ]
     %>
