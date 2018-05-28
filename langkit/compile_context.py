@@ -1089,6 +1089,8 @@ class CompileCtx(object):
         Check that all private properties are actually used: if one is not,
         it is useless, so emit a warning for it.
         """
+        from langkit.expressions import resolve_property
+        from langkit.parsers import Predicate
 
         forwards_strict, _ = self.properties_callgraphs()
 
@@ -1100,7 +1102,20 @@ class CompileCtx(object):
             forwards[root].update(c.root_property for c in called)
 
         # Compute the set of properties that are transitively called by a
-        # public property. Assume that internal properties are used.
+        # public property or by Predicate parsers in the grammar. Assume that
+        # internal properties are used.
+
+        # First compute the set of properties called by Predicate parsers
+        called_by_grammar = set()
+
+        def visit_parser(parser):
+            if isinstance(parser, Predicate):
+                called_by_grammar.add(resolve_property(parser.property_ref))
+            for child in parser.children():
+                visit_parser(child)
+
+        for rule in self.grammar.rules.values():
+            visit_parser(rule)
 
         # The first is for strict analysis while the second one simplifies
         # properties to their root.
@@ -1109,6 +1124,7 @@ class CompileCtx(object):
 
         def compute_reachable(reachable_set, forward_map):
             queue = {p for p in forward_map if p.is_public or p.is_internal}
+            queue.update(called_by_grammar)
 
             # Don't forget to tag properties used as entity/env resolvers as
             # reachable.
