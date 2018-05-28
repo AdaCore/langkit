@@ -15,6 +15,10 @@ package ${ada_lib_name}.Analysis.Parsers is
 
    type Cst_String is access constant String;
 
+   Generic_Parsing_Error_Message : aliased constant String := "Syntax error";
+   Generic_Parsing_Error_Message_Access : constant Cst_String :=
+      Generic_Parsing_Error_Message'Access;
+
    type Fail_Info_Kind is (Token_Fail, Custom_Fail);
 
    type Fail_Info (Kind : Fail_Info_Kind := Token_Fail) is record

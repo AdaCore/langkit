@@ -12,6 +12,15 @@ then
 else
     ${parser.pos_var} := No_Token_Index;
     ${parser.res_var} := null;
+
+    ## Document this failure so we can have a diagnostic at the end of
+    ## parsing.
+    if Parser.Last_Fail.Pos <= ${parser.start_pos} then
+       Parser.Last_Fail :=
+         (Kind           => Custom_Fail,
+          Pos            => ${parser.start_pos},
+          Custom_Message => Generic_Parsing_Error_Message_Access);
+    end if;
 end if;
 
 --  End predicate_code
