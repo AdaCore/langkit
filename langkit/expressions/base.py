@@ -1977,6 +1977,17 @@ class DynamicVariable(AbstractVariable):
     def __repr__(self):
         return '<DynamicVariable {}>'.format(self.argument_name.lower)
 
+    @property
+    def _id_tuple(self):
+        return (self.argument_name, self.type)
+
+    def __eq__(self, other):
+        return (isinstance(other, DynamicVariable) and
+                self._id_tuple == other._id_tuple)
+
+    def __hash__(self):
+        return hash(self._id_tuple)
+
     @staticmethod
     def check_call_bindings(prop, context_msg):
         """
