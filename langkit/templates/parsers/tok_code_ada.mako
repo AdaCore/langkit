@@ -23,10 +23,10 @@ begin
        ## parsing.
        if Parser.Last_Fail.Pos <= ${parser.start_pos} then
           Parser.Last_Fail :=
-            (Kind => Token_Fail,
-             Pos => ${parser.start_pos},
+            (Kind              => Token_Fail,
+             Pos               => ${parser.start_pos},
              Expected_Token_Id => ${token_kind},
-             Found_Token_Id => T.Kind);
+             Found_Token_Id    => T.Kind);
        end if;
    else
       ## We don't want to increment the position if we are matching the
