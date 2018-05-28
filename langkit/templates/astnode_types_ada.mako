@@ -94,14 +94,12 @@
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
-   % if field.type.is_ast_node:
-      % if field.type.is_bool_node:
-         function ${field.name} (Node : ${type_name}'Class) return Boolean;
+   % if field.type.is_bool_node:
+      function ${field.name} (Node : ${type_name}'Class) return Boolean;
 
-      % elif field.type.is_enum_node:
-         function ${field.name}
-           (Node : ${type_name}'Class) return ${field.type.ada_kind_name};
-      % endif
+   % elif field.type.is_enum_node:
+      function ${field.name}
+        (Node : ${type_name}'Class) return ${field.type.ada_kind_name};
    % endif
 </%def>
 
