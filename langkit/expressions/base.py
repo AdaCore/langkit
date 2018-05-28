@@ -2762,11 +2762,17 @@ class PropertyDef(AbstractNodeData):
             scheme with current langkit capabilities in which the parser
             generate the right types for the functionality you want.
 
-        :param None|list[DynamicVariable] dynamic_vars: List of dynamically
-            bound variables for this property. If left to None, inherit from
-            the overriden property, or the empty list if these is no property
-            to override. Just like `public`, it must always be consistent with
-            base classes.
+        :param dynamic_vars: List of dynamically bound variables for this
+            property. The list can either contain dynamic variables, or a tuple
+            (DynamicVariable, AbstractExpression) to provide default values.
+
+            If left to None, inherit from the overriden property, or the empty
+            list if these is no property to override. Just like `public`, it
+            must always be consistent with base classes.
+        :type dynamic_vars:
+            None
+            |list[DynamicVariable
+                  |(DynamicVariable,AbstractExpression)]
 
         :param bool memoized: Whether this property must be memoized. Disabled
             by default.
@@ -2885,7 +2891,34 @@ class PropertyDef(AbstractNodeData):
 
         assert not self.abstract_runtime_check or self.abstract
 
-        self._dynamic_vars = dynamic_vars
+        if dynamic_vars is None:
+            self._dynamic_vars = None
+            self._dynamic_vars_default_values = None
+        else:
+            self._dynamic_vars = []
+            self._dynamic_vars_default_values = []
+            for dv in dynamic_vars:
+                if isinstance(dv, tuple):
+                    check_source_language(
+                        len(dv) == 2 and
+                        isinstance(dv[0], DynamicVariable),
+                        'Invalid specification for dynamic variable with'
+                        ' default value'
+                    )
+                    dyn_var, default = dv
+                    default = unsugar(default)
+                    default.prepare()
+                    default = construct_compile_time_known(default,
+                                                           dyn_var.type)
+
+                else:
+                    check_source_language(
+                        isinstance(dv, DynamicVariable),
+                        'Invalid specification for dynamic variable'
+                    )
+                    dyn_var, default = dv, None
+                self._dynamic_vars.append(dyn_var)
+                self._dynamic_vars_default_values.append(default)
 
         self.overriding_properties = set()
         """
@@ -3327,20 +3360,27 @@ class PropertyDef(AbstractNodeData):
 
             # Likewise for dynamically bound variables
             self_dynvars = self._dynamic_vars
+            self_dynvars_defaults = self._dynamic_vars_default_values
             base_dynvars = self.base_property.dynamic_vars
+            base_dynvars_defaults = (self.base_property
+                                     ._dynamic_vars_default_values)
             if self_dynvars is not None:
                 # Don't use the equality operator on DynamicVariable, as it
                 # returns a new AbstractExpression.
                 check_source_language(
                     len(self_dynvars) == len(base_dynvars)
                     and all(sd is bd
-                            for sd, bd in zip(self_dynvars, base_dynvars)),
+                            for sd, bd in zip(self_dynvars, base_dynvars))
+                    and all(match_default_values(sd, bd)
+                            for sd, bd in zip(self_dynvars_defaults,
+                                              base_dynvars_defaults)),
                     'Requested set of dynamically bound variables is not'
                     ' consistent with the property to override: {}'.format(
                         self.base_property.qualname
                     )
                 )
             self._dynamic_vars = base_dynvars
+            self._dynamic_vars_default_values = base_dynvars_defaults
 
             # We then want to check the consistency of type annotations if they
             # exist.
@@ -3429,6 +3469,7 @@ class PropertyDef(AbstractNodeData):
             self._is_public = bool(self._is_public)
             if self._dynamic_vars is None:
                 self._dynamic_vars = []
+                self._dynamic_vars_default_values = []
 
         self._original_is_public = self.is_public
 
@@ -3485,9 +3526,11 @@ class PropertyDef(AbstractNodeData):
         """
         Append arguments for each dynamic variable in this property.
         """
-        for dynvar in self._dynamic_vars:
+        for dynvar, default in zip(self._dynamic_vars,
+                                   self._dynamic_vars_default_values):
             self._add_argument(dynvar.argument_name, dynvar.type,
-                               is_artificial=True, abstract_var=dynvar)
+                               is_artificial=True, default_value=default,
+                               abstract_var=dynvar)
 
     @property
     @memoized
