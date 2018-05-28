@@ -513,9 +513,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    -- Root AST node properties --
    ------------------------------
 
-   % for prop in T.root_node.get_properties( \
-         include_inherited=False, \
-         predicate=lambda f: f.is_public):
+   % for prop in T.root_node.get_properties(include_inherited=False):
       ${prop.prop_decl}
    % endfor
 

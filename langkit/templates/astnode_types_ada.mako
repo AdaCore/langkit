@@ -188,20 +188,11 @@
    % endfor
 
    ## Properties
-   % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=lambda f: f.is_public):
+   % for prop in cls.get_properties(include_inherited=False):
       ${prop.prop_decl}
    % endfor
 
    ${exts.include_extension(ext)}
-
-   ## Private dispatching properties
-   % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=lambda f: f.is_private):
-      % if prop.dispatching:
-         ${prop.prop_decl}
-      % endif
-   % endfor
 
    % if not cls.is_env_spec_inherited:
 
@@ -224,25 +215,11 @@
 <%def name="body_decl(cls)">
 
    <%
-      props = cls.get_properties(
-         include_inherited=False,
-         predicate=lambda f: f.is_private and not f.dispatching
-      )
       untyped_wrappers = cls.get_properties(
          include_inherited=False,
          predicate=lambda f: f.requires_untyped_wrapper
       )
    %>
-
-   % if props:
-      --
-      --  Private and non-dispatching primitives for ${cls.name}
-      --
-
-      % for prop in props:
-         ${prop.prop_decl}
-      % endfor
-   % endif
 
    % if untyped_wrappers:
       --
