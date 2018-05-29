@@ -307,7 +307,7 @@ class Grammar(object):
             if isinstance(parser, Defer):
                 visit_rule(parser.name)
 
-            for sub_parser in parser.children():
+            for sub_parser in parser.children:
                 visit_parser(sub_parser)
 
         def visit_rule(rule_name):
@@ -415,7 +415,7 @@ class Parser(object):
         """
         self.start_pos = start_pos
         children_start_pos = self.create_vars_before() or start_pos
-        for c in self.children():
+        for c in self.children:
             c.traverse_create_vars(children_start_pos)
         self.create_vars_after(children_start_pos)
 
@@ -441,7 +441,7 @@ class Parser(object):
                 self.dontskip_parser
             })
 
-        for c in self.children():
+        for c in self.children:
             c.traverse_dontskip(grammar)
 
     def traverse_nobacktrack(self):
@@ -452,7 +452,7 @@ class Parser(object):
         if isinstance(self, NoBacktrack):
             self.no_backtrack = VarDef('nobt', T.BoolType, reinit=True)
 
-        for c in self.children():
+        for c in self.children:
             nobt = c.traverse_nobacktrack()
             # Or parsers are a stop point for nobacktrack
 
@@ -561,7 +561,7 @@ class Parser(object):
         :type location: langkit.diagnostics.Location
         """
         self.location = location
-        for c in self.children():
+        for c in self.children:
             c.set_location(self.location)
 
     @property
@@ -579,7 +579,7 @@ class Parser(object):
 
         :param Grammar grammar: The grammar instance.
         """
-        for c in self.children():
+        for c in self.children:
             c.set_grammar(grammar)
         self.grammar = grammar
 
@@ -591,7 +591,7 @@ class Parser(object):
         :param names.Name name: The name to include in the name of this parser
             tree.
         """
-        for c in self.children():
+        for c in self.children:
             if not c._name and not isinstance(c, Defer):
                 c.set_name(name)
 
@@ -620,6 +620,7 @@ class Parser(object):
         """
         return False
 
+    @property
     def children(self):
         """
         Parsers are combined to create new and more complex parsers.  They make
@@ -636,7 +637,7 @@ class Parser(object):
         This method recurses over child parsers.  Parser subclasses must
         override this method if they contribute to fields typing.
         """
-        for child in self.children():
+        for child in self.children:
             child.compute_fields_types()
 
     def compile(self):
@@ -716,7 +717,7 @@ class Parser(object):
         :rtype: set[str]
         """
         result = set()
-        for child in self.children():
+        for child in self.children:
             result.update(child.symbol_literals)
         return result
 
@@ -748,6 +749,7 @@ class _Token(Parser):
     Parser that matches a specific token.
     """
 
+    @property
     def children(self):
         return []
 
@@ -849,6 +851,7 @@ class Skip(Parser):
     def __repr__(self):
         return 'Skip({})'.format(node_name(self.dest_node))
 
+    @property
     def children(self):
         return [self.dest_node_parser]
 
@@ -885,6 +888,7 @@ class DontSkip(Parser):
     def __repr__(self):
         return 'DontSkip({}, {})'.format(self.subparser, self.dontskip_parsers)
 
+    @property
     def children(self):
         return [self.subparser]
 
@@ -940,6 +944,7 @@ class Or(Parser):
     def can_parse_token_node(self):
         return all(p.can_parse_token_node for p in self.parsers)
 
+    @property
     def children(self):
         return self.parsers
 
@@ -1109,6 +1114,7 @@ class _Row(Parser):
     def discard(self):
         return all(p.discard() for p in self.parsers)
 
+    @property
     def children(self):
         return self.parsers
 
@@ -1190,6 +1196,7 @@ class List(Parser):
         self.empty_valid = opts.get('empty_valid', False)
         self.list_cls = opts.get('list_cls', None)
 
+    @property
     def children(self):
         return keep([self.parser, self.sep])
 
@@ -1327,6 +1334,7 @@ class Opt(Parser):
         assert self._booleanize
         return resolve_type(self._booleanize)
 
+    @property
     def children(self):
         return [self.parser]
 
@@ -1374,6 +1382,7 @@ class _Extract(Parser):
         self.index = index
         assert isinstance(self.parser, _Row)
 
+    @property
     def children(self):
         return [self.parser]
 
@@ -1409,6 +1418,7 @@ class Discard(Parser):
         parser = resolve(parser)
         self.parser = parser
 
+    @property
     def children(self):
         return [self.parser]
 
@@ -1428,6 +1438,7 @@ class Defer(Parser):
     Stub parser used to implement forward references.
     """
 
+    @property
     def children(self):
         # We don't resolve the Defer's pointed parser here, because that would
         # transform the parser tree into a graph.
@@ -1522,6 +1533,7 @@ class _Transform(Parser):
         to keep track of whether the transform has failed or not.
         """
 
+    @property
     def children(self):
         return [self.parser]
 
@@ -1606,6 +1618,7 @@ class Null(Parser):
         Parser.__init__(self)
         self.typ = result_type
 
+    @property
     def children(self):
         return []
 
@@ -1662,6 +1675,7 @@ class Predicate(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
+    @property
     def children(self):
         return [self.parser]
 
@@ -1700,6 +1714,7 @@ class NoBacktrack(Parser):
     def discard(self):
         return True
 
+    @property
     def children(self):
         return []
 

@@ -1044,7 +1044,7 @@ class Unparsers(object):
                     'Top-level information loss prevents unparsers generation'
                 )
 
-            for c in p.children():
+            for c in p.children:
                 compute_internal(c, toplevel)
 
         compute_internal(parser)

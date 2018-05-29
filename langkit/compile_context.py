@@ -1111,7 +1111,7 @@ class CompileCtx(object):
         def visit_parser(parser):
             if isinstance(parser, Predicate):
                 called_by_grammar.add(resolve_property(parser.property_ref))
-            for child in parser.children():
+            for child in parser.children:
                 visit_parser(child)
 
         for rule in self.grammar.rules.values():
