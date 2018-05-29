@@ -3,6 +3,7 @@
 <%namespace name="exts" file="extensions.mako" />
 
 with "gnatcoll";
+with "gnatcoll_gmp";
 with "gnatcoll_iconv";
 with "langkit_support";
 

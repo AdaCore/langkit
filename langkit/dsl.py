@@ -961,3 +961,10 @@ class TokenType(_BuiltinType):
     Type for token values, as found in an analysis unit's token data handler.
     """
     _name = names.Name('Token_Type')
+
+
+class BigIntegerType(_BuiltinType):
+    """
+    Type for integers of arbitrary precision.
+    """
+    _name = names.Name('Big_Integer_Type')
