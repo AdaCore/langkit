@@ -2701,6 +2701,7 @@ def create_builtin_types():
         # See below: symbols are represented in the C API as text records
         is_ada_record=True,
         c_type_name='text',
+        hashable=True,
     )
 
     # It may not be the most efficient way to pass arbitrarily large integers
