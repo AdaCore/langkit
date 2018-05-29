@@ -1821,7 +1821,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             return
             (if Ent.Info.Rebindings /= null
              then "<| "
-             & Node_Image (Node_Image'First + 1 .. Node_Image'Last -1) & " "
+             & Node_Image (Node_Image'First + 1 .. Node_Image'Last - 1) & " "
              & AST_Envs.Image (Ent.Info.Rebindings) & " |>"
              else Node_Image);
          end;
