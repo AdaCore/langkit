@@ -25,6 +25,7 @@ with System;
 % if ctx.properties_logging:
    with GNATCOLL.Traces;
 % endif
+with GNATCOLL.GMP.Integers;
 with GNATCOLL.VFS;
 
 with Langkit_Support.Adalog.Abstract_Relation;
@@ -260,6 +261,23 @@ package ${ada_lib_name}.Analysis.Implementation is
    % if T.AnalysisUnitType.requires_hash_function:
       function Hash (Unit : Analysis_Unit) return Hash_Type;
    % endif
+
+   --------------------------
+   -- Big integers wrapper --
+   --------------------------
+
+   type Big_Integer_Record is limited record
+      Value     : GNATCOLL.GMP.Integers.Big_Integer;
+      Ref_Count : Natural;
+   end record;
+
+   type Big_Integer_Type is access all Big_Integer_Record;
+
+   function Create
+     (Image : String; Base : Integer := 10) return Big_Integer_Type;
+
+   procedure Inc_Ref (Big_Int : Big_Integer_Type);
+   procedure Dec_Ref (Big_Int : in out Big_Integer_Type);
 
    ------------------------------------------------------
    -- AST node derived types (incomplete declarations) --

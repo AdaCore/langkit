@@ -2650,6 +2650,11 @@ def create_builtin_types():
         c_type_name='text',
     )
 
+    CompiledType('BigIntegerType',
+                 type_repo_name='BigIntegerType',
+                 is_refcounted=True,
+                 c_type_name='mpz_t')
+
 
 class TypeRepo(object):
     """

@@ -1069,6 +1069,51 @@ package body ${ada_lib_name}.Analysis.Implementation is
         (GNATCOLL.VFS.Full_Name_Hash (Unit.File_Name));
    % endif
 
+   --------------------------
+   -- Big integers wrapper --
+   --------------------------
+
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+     (Image : String; Base : Integer := 10) return Big_Integer_Type
+   is
+      use GNATCOLL.GMP;
+      use GNATCOLL.GMP.Integers;
+   begin
+      return new Big_Integer_Record'(Value     => Make (Image, Int (Base)),
+                                     Ref_Count => 1);
+   end Create;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Big_Int : Big_Integer_Type) is
+   begin
+      Big_Int.Ref_Count := Big_Int.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Big_Int : in out Big_Integer_Type) is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (Big_Integer_Record, Big_Integer_Type);
+   begin
+      if Big_Int = null then
+         return;
+      end if;
+
+      Big_Int.Ref_Count := Big_Int.Ref_Count - 1;
+      if Big_Int.Ref_Count = 0 then
+         Destroy (Big_Int);
+      end if;
+   end Dec_Ref;
+
    -------------
    -- Version --
    -------------
