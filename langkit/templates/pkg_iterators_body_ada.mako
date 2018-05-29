@@ -1,10 +1,5 @@
 ## vim: filetype=makoada
 
-% if ctx.separate_properties:
-   with ${ada_lib_name}.Analysis.Properties;
-   use ${ada_lib_name}.Analysis.Properties;
-% endif
-
 package body ${ada_lib_name}.Iterators is
 
    --------------

@@ -16,10 +16,6 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with ${ada_lib_name}.Analysis;  use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Init;      use ${ada_lib_name}.Init;
 with ${ada_lib_name}.Unparsing; use ${ada_lib_name}.Unparsing;
-% if ctx.separate_properties:
-with ${ada_lib_name}.Analysis.Properties;
-use ${ada_lib_name}.Analysis.Properties;
-% endif
 
 procedure Parse is
 

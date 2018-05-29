@@ -45,11 +45,6 @@ with ${ada_lib_name}.Analysis.Parsers;  use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;             use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
-% if ctx.separate_properties:
-   with ${ada_lib_name}.Analysis.Properties;
-   use ${ada_lib_name}.Analysis.Properties;
-% endif
-
 ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis.Implementation is

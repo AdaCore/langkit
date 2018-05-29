@@ -14,11 +14,6 @@ private with Langkit_Support.Bump_Ptr.Vectors;
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 private with ${ada_lib_name}.Analysis.Implementation;
 
-% if ctx.separate_properties:
-   with ${ada_lib_name}.Analysis.Properties;
-   use ${ada_lib_name}.Analysis.Properties;
-% endif
-
 package ${ada_lib_name}.Rewriting is
 
    type Rewriting_Handle is private;
