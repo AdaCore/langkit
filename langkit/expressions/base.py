@@ -3112,7 +3112,7 @@ class PropertyDef(AbstractNodeData):
         return resolve_type(self.constructed_expr.type)
 
     def _add_argument(self, name, type, is_artificial=False,
-                      abstract_var=None):
+                      default_value=None, abstract_var=None):
         """
         Helper to add an argument to this property.
 
@@ -3120,6 +3120,7 @@ class PropertyDef(AbstractNodeData):
         constructor for parameters documentation.
         """
         self.arguments.append(Argument(name, type, is_artificial=is_artificial,
+                                       default_value=default_value,
                                        abstract_var=abstract_var))
 
     @property
