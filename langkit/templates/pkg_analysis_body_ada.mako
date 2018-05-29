@@ -9,9 +9,7 @@
 
 with Ada.Containers;             use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-% if not ctx.separate_properties:
 with Ada.Containers.Vectors;
-% endif
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                use Ada.Text_IO;
@@ -21,10 +19,7 @@ with Ada.Unchecked_Deallocation;
 with GNATCOLL.Traces;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-% if not ctx.separate_properties:
-   with Langkit_Support.Array_Utils;
-% endif
-
+with Langkit_Support.Array_Utils;
 with Langkit_Support.Images; use Langkit_Support.Images;
 with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
 with Langkit_Support.Text;   use Langkit_Support.Text;
@@ -46,11 +41,6 @@ with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
-
-% if ctx.separate_properties:
-   with ${ada_lib_name}.Analysis.Properties;
-   use ${ada_lib_name}.Analysis.Properties;
-% endif
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.default_unit_provider.unit_fqn, False)
@@ -1262,8 +1252,6 @@ package body ${ada_lib_name}.Analysis is
    function Image (Value : Boolean) return String
    is (if Value then "True" else "False");
 
-   % if not ctx.separate_properties:
-      ${entities.bodies()}
-   % endif
+   ${entities.bodies()}
 
 end ${ada_lib_name}.Analysis;

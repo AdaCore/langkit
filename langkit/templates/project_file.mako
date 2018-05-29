@@ -32,8 +32,6 @@ library project ${lib_name} is
       "${lib_name.lower()}-analysis-implementation-c.ads",
       "${lib_name.lower()}-analysis-parsers.adb",
       "${lib_name.lower()}-analysis-parsers.ads",
-      "${lib_name.lower()}-analysis-properties.adb",
-      "${lib_name.lower()}-analysis-properties.ads",
       "${lib_name.lower()}-debug.adb",
       "${lib_name.lower()}-debug.ads",
       "${lib_name.lower()}-init.adb",

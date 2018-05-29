@@ -90,9 +90,7 @@ package ${ada_lib_name}.Analysis is
       No_${e.api_name} : constant ${e.api_name};
    % endfor
 
-   % if not ctx.separate_properties:
-      ${entities.decls1()}
-   % endif
+   ${entities.decls1()}
 
    --------------------
    -- Unit providers --
@@ -405,9 +403,7 @@ package ${ada_lib_name}.Analysis is
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
-   % if not ctx.separate_properties:
-      ${entities.decls2()}
-   % endif
+   ${entities.decls2()}
 
    --------------------
    -- Token Iterator --
@@ -450,9 +446,7 @@ package ${ada_lib_name}.Analysis is
       % endif
    % endfor
 
-   % if not ctx.separate_properties:
-      ${entities.decls3()}
-   % endif
+   ${entities.decls3()}
 
 private
 

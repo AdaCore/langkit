@@ -6,11 +6,6 @@ use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
 
-% if ctx.separate_properties:
-   with ${ada_lib_name}.Analysis.Properties;
-   use ${ada_lib_name}.Analysis.Properties;
-% endif
-
 package body ${ada_lib_name}.Unparsing is
 
    -------------

@@ -1229,7 +1229,7 @@ class CompileCtx(object):
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
              warnings=None, generate_unparser=False, properties_logging=False,
-             separate_properties=False, generate_astdoc=True):
+             generate_astdoc=True):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1269,10 +1269,6 @@ class CompileCtx(object):
         :param bool propeties_logging: Whether to instrument properties code to
             do logging.
 
-        :param bool separate_properties: Whether to generate public properties
-            in a separate package. This is a development helper only, to make
-            builds faster with GNAT.
-
         :param bool generate_astdoc: Whether to generate the HTML documentation
             for AST nodes, their fields and their properties.
         """
@@ -1284,7 +1280,6 @@ class CompileCtx(object):
         self.no_property_checks = no_property_checks
         self.generate_unparser = generate_unparser
         self.properties_logging = properties_logging
-        self.separate_properties = separate_properties
         self.generate_astdoc = generate_astdoc
         if warnings:
             self.warnings = warnings
@@ -1603,11 +1598,6 @@ class CompileCtx(object):
             ('lexer/pkg_main',      'Lexer', True),
             # Unit for debug helpers
             ('pkg_debug',           'Debug', True),
-
-            # Temporary unit for separate properties. Generate this package in
-            # all cases so that we don't have to do special cases in user
-            # sources that must work with both flavors of generated libraries.
-            ('pkg_properties', 'Analysis.Properties', True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:

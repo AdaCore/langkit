@@ -341,12 +341,6 @@ class ManageScript(object):
             help='Instrument properties code to do logging.'
         )
         subparser.add_argument(
-            '--separate-properties', dest='separate_properties',
-            action='store_true',
-            help='Generate public properties in a separate package. This is a'
-                 ' development helper only, to make builds faster with GNAT.'
-        )
-        subparser.add_argument(
             '--no-astdoc', '-D', dest='no_astdoc',
             action='store_true',
             help='Do not generate the HTML documentation for AST nodes, their'
@@ -618,7 +612,6 @@ class ManageScript(object):
                           no_property_checks=args.no_property_checks,
                           generate_unparser=args.generate_unparser,
                           properties_logging=args.enabled_properties_logging,
-                          separate_properties=args.separate_properties,
                           generate_astdoc=not args.no_astdoc)
 
         if args.check_only:
