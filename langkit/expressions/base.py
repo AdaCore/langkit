@@ -3462,10 +3462,6 @@ class PropertyDef(AbstractNodeData):
             )
 
         # Add dynamically bound variables as arguments
-        check_source_language(
-            self.is_private or not self._dynamic_vars,
-            'A public property cannot have dynamically bound variables'
-        )
         self.build_dynamic_var_arguments()
 
         # At this point, we assume the list of argument has reached its final
