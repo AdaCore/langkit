@@ -804,39 +804,48 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Node_Unparsers_Array : aliased constant Node_Unparser_Map := (
          % for i, node in enumerate(ctx.astnode_types, 1):
             % if not node.abstract:
-               <% unparser = node.unparser %>
+               <%
+                  unparser = node.unparser
+                  fields = []
 
-               ${node.ada_kind_name} => ( \
-                  % if is_regular_node_unparser(unparser):
-                     Kind            => Regular,
-                     Pre_Tokens      => \
-                        ${unparser.pre_tokens.var_name}'Access,
-                     Field_Unparsers => \
-                        ${unparser.fields_unparser_var_name}'Access,
-                     Post_Tokens     => \
-                        ${unparser.post_tokens.var_name}'Access
+                  if is_regular_node_unparser(unparser):
+                     fields += [
+                        ('Kind', 'Regular'),
+                        ('Pre_Tokens', "{}'Access".format(
+                           unparser.pre_tokens.var_name)),
+                        ('Field_Unparsers', "{}'Access".format(
+                           unparser.fields_unparser_var_name)),
+                        ('Post_Tokens', "{}'Access".format(
+                           unparser.post_tokens.var_name)),
+                     ]
 
-                  % elif is_list_node_unparser(unparser):
-                     Kind          => List, \
-                     Has_Separator => ${unparser.separator is not None}, \
-                     Separator     => ${('<>' if unparser.separator is None else
-                                         unparser.separator.var_name)}
+                  elif is_list_node_unparser(unparser):
+                     fields += [
+                        ('Kind', 'List'),
+                        ('Has_Separator', unparser.separator is not None),
+                        ('Separator',
+                         ('<>' if unparser.separator is None else
+                          unparser.separator.var_name)),
+                     ]
 
-                  % elif is_token_node_unparser(unparser):
-                     Kind => Token
+                  elif is_token_node_unparser(unparser):
+                     fields += [('Kind', 'Token')]
 
-                  % else:
+                  else:
                      ## This node is synthetic, so it cannot be unparsed:
                      ## provide a dummy entry.
-                     <% assert ((node.abstract or node.synthetic) and
-                                unparser is None), (
-                        'Unexpected unparser for {}: {}'.format(
-                           node.dsl_name, unparser
-                        )
-                     ) %>
-                     Kind => Token
-                  % endif
-               )${',' if i < len(ctx.astnode_types) else ''}
+                     assert (
+                        (node.abstract or node.synthetic) and
+                        unparser is None
+                     ), ('Unexpected unparser for {}: {}'
+                         .format(node.dsl_name, unparser))
+                     fields += [('Kind', 'Token')]
+               %>
+
+               ${node.ada_kind_name} => (${
+                  ', '.join('{} => {}'.format(name, value)
+                            for name, value in fields)
+               })${',' if i < len(ctx.astnode_types) else ''}
             % endif
          % endfor
       );

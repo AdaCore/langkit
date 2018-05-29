@@ -88,16 +88,17 @@ library project ${lib_name} is
       --
       --  As for style diagnostics:
       --    * check the casing of attributes (a);
-      --    * check double spaces before comments (b);
+      --    * check double spaces before comments (c);
       --    * check the casing of keywords (k);
       --    * check the casing of entities in Standard (n);
       --    * check the casing of pragmas (p);
       --    * check the casing of references is the same as the casing of the
-      --      corresponding defining identifiers (r).
+      --      corresponding defining identifiers (r);
+      --    * check the token spacing (t).
 
       Common_Ada_Cargs := ();
       case Enable_Warnings is
-         when "true" => Common_Ada_Cargs := ("-gnatwaCKMR", "-gnatyacknpr");
+         when "true" => Common_Ada_Cargs := ("-gnatwaCKMR", "-gnatyacknprt");
          when others => null;
       end case;
 
