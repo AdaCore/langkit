@@ -4,7 +4,7 @@
 
 <%def name="public_prototype(property)">
   (${property.self_arg_name} : ${property.struct.entity.api_name}'Class
-   % for arg in property.natural_arguments:
+   % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.api_name}
 
       ## Make entity arguments class-wide so that 1) these property wrappers
@@ -36,7 +36,7 @@
          # Build the list of arguments to pass to the property. Unwrap
          # arguments if needed.
 
-         for arg in property.natural_arguments:
+         for arg in property.arguments:
             if arg.type.is_entity_type:
                actual = (
                   '({type} ({name}.Node), Convert ({name}.E_Info))'.format(
