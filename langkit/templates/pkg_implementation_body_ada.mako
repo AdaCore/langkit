@@ -1115,6 +1115,19 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Result;
    end Create;
 
+   ----------------
+   -- To_Integer --
+   ----------------
+
+   function To_Integer (Big_Int : Big_Integer_Type) return Integer is
+      Image : constant String := Big_Int.Value.Image;
+   begin
+      return Integer'Value (Image);
+   exception
+      when Constraint_Error =>
+         raise Property_Error with "out of range big integer";
+   end To_Integer;
+
    -------------
    -- Inc_Ref --
    -------------
