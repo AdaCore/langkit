@@ -4538,6 +4538,17 @@ class BigInteger(AbstractExpression):
         return BigInteger.Expr(expr, abstract_expr=self)
 
 
+@auto_attr
+def as_int(self, expr):
+    """
+    Convert a big integer into a regular integer. This raises a PropertyError
+    if the big integer is out of range.
+    """
+    big_int_expr = construct(expr, T.BigIntegerType)
+    return CallExpr('Small_Int', 'To_Integer', T.LongType, [big_int_expr],
+                    abstract_expr=self)
+
+
 class Arithmetic(AbstractExpression):
     """
     Arithmetic abstract expression. Used for emission of simple operator
