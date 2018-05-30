@@ -1129,6 +1129,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
    end Dec_Ref;
 
+   ----------------
+   -- Equivalent --
+   ----------------
+
+   function Equivalent (Left, Right : Big_Integer_Type) return Boolean is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Left.Value = Right.Value;
+   end Equivalent;
+
    ---------
    -- "+" --
    ---------

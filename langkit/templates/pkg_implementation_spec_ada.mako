@@ -281,6 +281,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    procedure Inc_Ref (Big_Int : Big_Integer_Type);
    procedure Dec_Ref (Big_Int : in out Big_Integer_Type);
 
+   function Equivalent (Left, Right : Big_Integer_Type) return Boolean;
    function "+" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
 
