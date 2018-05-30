@@ -36,6 +36,10 @@ class Identifier(FooNode):
 class Expr(FooNode):
     evaluate = AbstractProperty(type=BigIntegerType, public=True)
 
+    @langkit_property(public=True)
+    def evaluate_as_int():
+        return Self.evaluate.as_int
+
 
 class Literal(Expr):
     token_node = True
