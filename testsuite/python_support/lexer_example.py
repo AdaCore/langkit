@@ -21,6 +21,7 @@ class Token(LexerToken):
     RBrace = WithText()
     Equal = WithText()
     Plus = WithText()
+    Minus = WithText()
 
     Number = WithText()
     Identifier = WithSymbol()
@@ -54,6 +55,7 @@ foo_lexer.add_rules(
     (Literal('}'),           Token.RBrace),
     (Literal('='),           Token.Equal),
     (Literal('+'),           Token.Plus),
+    (Literal('-'),           Token.Minus),
 
     (Pattern('[0-9]+'),      Token.Number),
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),

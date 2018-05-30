@@ -12,6 +12,10 @@ ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer('main.txt', """
 def a = 10000000000000000000000000000000
 def b = a + 1
+def c = b - 1
+
+def d = a = b
+def e = a = c
 """)
 if u.diagnostics:
     for d in u.diagnostics:
