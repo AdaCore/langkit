@@ -105,6 +105,10 @@ base_langkit_docs = {
     'langkit.text_type.length': """
         Size of the string (in characters).
     """,
+    'langkit.big_integer_type': """
+        Arbitrary large integer represented in base 10 a a UTF-32 string
+        (native endianness).
+    """,
     'langkit.diagnostic_type': """
         Analysis unit diagnostics.
     """,

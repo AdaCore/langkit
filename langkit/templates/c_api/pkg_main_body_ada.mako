@@ -992,6 +992,29 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
                     Is_Allocated => 0));
    end Wrap;
 
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap (Big_Int : Big_Integer_Type) return ${big_integer_type} is
+      Img : constant String := Big_Int.Value.Image;
+   begin
+      return ${big_integer_type} (Wrap_Alloc (To_Text (Img)));
+   end Wrap;
+
+   ------------
+   -- Unwrap --
+   ------------
+
+   function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type is
+      As_Text   : Text_Type (1 .. Integer (Big_Int.Length))
+         with Import  => True,
+              Address => Big_Int.Chars;
+      As_String : constant String := Image (As_Text);
+   begin
+      return Create (As_String);
+   end Unwrap;
+
    procedure ${capi.get_name('destroy_text')} (T : access ${text_type}) is
    begin
       Clear_Last_Exception;

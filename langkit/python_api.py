@@ -68,6 +68,7 @@ class PythonAPISettings(AbstractAPISettings):
                 inc_ref
             )),
             (T.EnvRebindingsType, lambda _: 'EnvRebindings._wrap({})'),
+            (T.BigIntegerType, lambda _: '_big_integer._wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (wrapping): {}'.format(type)
@@ -101,6 +102,7 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (T.SymbolType, lambda _: '_text._unwrap({})'),
             (T.EnvRebindingsType, lambda _: 'EnvRebindings._unwrap({})'),
+            (T.BigIntegerType, lambda _: '_big_integer._unwrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
@@ -138,6 +140,7 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.StructType, lambda _:
                 '{}._c_type'.format(type.name.camel)),
+            (T.BigIntegerType, lambda _: '_big_integer'),
         ])
 
     def array_wrapper(self, array_type):

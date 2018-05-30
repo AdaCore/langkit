@@ -110,6 +110,7 @@ def make_renderer(base_renderer=None):
             'sloc_range_type':
                 T.SourceLocationRange.c_type(capi).name,
             'text_type':             CAPIType(capi, 'text').name,
+            'big_integer_type':      CAPIType(capi, 'big_integer').name,
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
         })
@@ -508,6 +509,15 @@ class CompiledType(object):
         :rtype: bool
         """
         return self == T.TokenType
+
+    @property
+    def is_big_integer_type(self):
+        """
+        Return whether this is a big integer type.
+
+        :rtype: bool
+        """
+        return self == T.BigIntegerType
 
     @property
     def element_type(self):
@@ -2650,10 +2660,16 @@ def create_builtin_types():
         c_type_name='text',
     )
 
+    # It may not be the most efficient way to pass arbitrarily large integers
+    # between Ada, C and Python, but for simplicity (and code reuse), we
+    # currently hold them as their UTF-32 (text) representation.
     CompiledType('BigIntegerType',
                  type_repo_name='BigIntegerType',
+                 exposed=True,
                  is_refcounted=True,
-                 c_type_name='mpz_t')
+                 is_ada_record=True,
+                 c_type_name='big_integer',
+                 api_name='BigInteger')
 
 
 class TypeRepo(object):

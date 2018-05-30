@@ -70,6 +70,9 @@ package ${ada_lib_name}.Analysis.Implementation.C is
      with Convention => C;
    ${ada_c_doc('langkit.text_type', 3)}
 
+   type ${big_integer_type} is new ${text_type};
+   ${ada_c_doc('langkit.big_integer_type', 3)}
+
    type ${token_type} is record
       Token_Data                : System.Address;
       Token_Index, Trivia_Index : int;
@@ -631,6 +634,9 @@ package ${ada_lib_name}.Analysis.Implementation.C is
      (Wrap (Text_Cst_Access (T)));
    function Wrap (T : Symbol_Type) return ${text_type} is
      (Wrap (Text_Cst_Access (T)));
+
+   function Wrap (Big_Int : Big_Integer_Type) return ${big_integer_type};
+   function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type;
 
    function Unwrap
      (Unit : Analysis_Unit; Text : ${text_type}) return Symbol_Type;

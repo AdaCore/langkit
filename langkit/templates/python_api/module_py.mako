@@ -151,6 +151,19 @@ class _text(ctypes.Structure):
         _destroy_text(ctypes.byref(self))
 
 
+class _big_integer(_text):
+
+    @classmethod
+    def _unwrap(cls, value):
+        if not isinstance(value, (int, long)):
+            _raise_type_error('int or long', value)
+
+        return super(_big_integer, cls)._unwrap(str(value))
+
+    def _wrap(self):
+        return int(super(_big_integer, self)._wrap())
+
+
 % if ctx.default_unit_provider:
 ${py_doc('langkit.unit_kind_type')}
 _str_to_unit_kind = {
