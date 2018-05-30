@@ -1,5 +1,8 @@
 main.py: Running...
 a evaluates to 10000000000000000000000000000000
 b evaluates to 10000000000000000000000000000001
+c evaluates to 10000000000000000000000000000000
+d evaluates to 0
+e evaluates to 1
 main.py: Done.
 Done

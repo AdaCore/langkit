@@ -7,7 +7,8 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, BigIntegerType, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import (
-    AbstractProperty, ExternalProperty, New, Self, langkit_property
+    AbstractProperty, BigInteger, ExternalProperty, If, New, Self,
+    langkit_property
 )
 from langkit.parsers import Grammar, List, Or
 
@@ -60,13 +61,34 @@ class Plus(Expr):
         return Self.left.evaluate + Self.right.evaluate
 
 
+class Minus(Expr):
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
+
+    @langkit_property()
+    def evaluate():
+        return Self.left.evaluate - Self.right.evaluate
+
+
+class Equal(Expr):
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
+
+    @langkit_property()
+    def evaluate():
+        return BigInteger(If(Self.left.evaluate == Self.right.evaluate, 1, 0))
+
+
 g = Grammar('main_rule')
 g.add_rules(
     main_rule=List(g.decl),
     decl=Decl('def', g.name, '=', g.expr),
 
-    expr=Or(Plus(g.atom, '+', g.expr),
-            g.atom),
+    expr=Or(g.op, g.atom),
+
+    op=Or(Plus(g.atom, '+', g.expr),
+          Minus(g.atom, '-', g.expr),
+          Equal(g.atom, '=', g.expr)),
 
     atom=Or(g.ref, g.literal),
     ref=Ref(g.name),
