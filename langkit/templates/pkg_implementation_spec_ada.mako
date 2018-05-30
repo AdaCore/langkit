@@ -279,6 +279,9 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Big_Int : GNATCOLL.GMP.Integers.Big_Integer) return Big_Integer_Type;
    function Create (Int : Integer) return Big_Integer_Type;
 
+   No_Big_Integer : constant Big_Integer_Type := new Big_Integer_Record'
+     (Value => <>, Ref_Count => 1);
+
    function To_Integer (Big_Int : Big_Integer_Type) return Integer;
    --  Convert Big_Int into a regular integer, raising a Property_Error if it
    --  is out of range.
