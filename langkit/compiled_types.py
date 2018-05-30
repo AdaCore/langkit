@@ -202,7 +202,7 @@ class CompiledType(object):
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
                  nullexpr=None, py_nullexpr=None, element_type=None,
                  hashable=False, has_equivalent_function=False,
-                 type_repo_name=None):
+                 type_repo_name=None, api_name=None):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -279,9 +279,15 @@ class CompiledType(object):
 
         :param str|None type_repo_name: Name to use for registration in
             TypeRepo. The camel-case of "name" is used if left to None.
+
+        :param names.Name|str|None api_name: If not None, must be the name of
+            the type to use in the public Ada API. Strings are interpreted as
+            camel case.
     """
         if isinstance(name, str):
             name = names.Name.from_camel(name)
+        if isinstance(api_name, str):
+            api_name = names.Name.from_camel(api_name)
 
         self._name = name
         self.location = location
@@ -303,6 +309,7 @@ class CompiledType(object):
         self.hashable = hashable
         self._has_equivalent_function = has_equivalent_function
         self._requires_hash_function = False
+        self._api_name = api_name
 
         type_repo_name = type_repo_name or name.camel
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
@@ -371,7 +378,7 @@ class CompiledType(object):
 
         :rtype: names.Name
         """
-        return self.name
+        return self.name if self._api_name is None else self._api_name
 
     @property
     def dsl_name(self):
