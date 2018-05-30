@@ -1,10 +1,11 @@
 main.py: Running...
-a evaluates to 10000000000000000000000000000000
-b evaluates to 10000000000000000000000000000001
-c evaluates to 10000000000000000000000000000000
-d evaluates to 0
-e evaluates to 1
-f evaluates to 1
-g evaluates to 0
+a0 evaluates to 2 (2)
+a evaluates to 10000000000000000000000000000000 (<too big>)
+b evaluates to 10000000000000000000000000000001 (<too big>)
+c evaluates to 10000000000000000000000000000000 (<too big>)
+d evaluates to 0 (0)
+e evaluates to 1 (1)
+f evaluates to 1 (1)
+g evaluates to 0 (0)
 main.py: Done.
 Done
