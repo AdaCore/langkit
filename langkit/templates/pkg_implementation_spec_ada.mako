@@ -277,6 +277,7 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Image : String; Base : Integer := 10) return Big_Integer_Type;
    function Create
      (Big_Int : GNATCOLL.GMP.Integers.Big_Integer) return Big_Integer_Type;
+   function Create (Int : Integer) return Big_Integer_Type;
 
    procedure Inc_Ref (Big_Int : Big_Integer_Type);
    procedure Dec_Ref (Big_Int : in out Big_Integer_Type);

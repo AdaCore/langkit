@@ -4513,6 +4513,31 @@ class NullCheckExpr(ResolvedExpression):
         return '<NullCheckExpr>'
 
 
+@dsl_document
+class BigInteger(AbstractExpression):
+    """
+    Turn an integer value into a big integer one.
+    """
+
+    class Expr(CallExpr):
+        def __init__(self, expr, abstract_expr=None):
+            super(BigInteger.Expr, self).__init__(
+                'Big_Int', 'Create', T.BigIntegerType,
+                [expr], abstract_expr=abstract_expr
+            )
+
+        def __repr__(self):
+            return '<BigInteger.Expr {}>'.format(self.expr)
+
+    def __init__(self, expr):
+        super(BigInteger, self).__init__()
+        self.expr = expr
+
+    def construct(self):
+        expr = construct(self.expr, T.LongType)
+        return BigInteger.Expr(expr, abstract_expr=self)
+
+
 class Arithmetic(AbstractExpression):
     """
     Arithmetic abstract expression. Used for emission of simple operator
