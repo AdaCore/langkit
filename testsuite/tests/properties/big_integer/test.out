@@ -4,5 +4,7 @@ b evaluates to 10000000000000000000000000000001
 c evaluates to 10000000000000000000000000000000
 d evaluates to 0
 e evaluates to 1
+f evaluates to 1
+g evaluates to 0
 main.py: Done.
 Done
