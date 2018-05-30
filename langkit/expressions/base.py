@@ -4547,7 +4547,7 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (T.SymbolType, T.LongType),
+            l.type in T.LongType,
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 
