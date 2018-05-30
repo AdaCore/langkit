@@ -2666,6 +2666,7 @@ def create_builtin_types():
     CompiledType('BigIntegerType',
                  type_repo_name='BigIntegerType',
                  exposed=True,
+                 nullexpr='No_Big_Integer',
                  is_refcounted=True,
                  has_equivalent_function=True,
                  is_ada_record=True,

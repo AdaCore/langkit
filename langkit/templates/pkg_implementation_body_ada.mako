@@ -3134,4 +3134,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Context.Rewriting_Handle := Handle;
    end Set_Rewriting_Handle;
 
+begin
+   No_Big_Integer.Value.Set (0);
 end ${ada_lib_name}.Analysis.Implementation;
