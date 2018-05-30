@@ -1153,6 +1153,46 @@ package body ${ada_lib_name}.Analysis.Implementation is
    end Equivalent;
 
    ---------
+   -- "<" --
+   ---------
+
+   function "<" (Left, Right : Big_Integer_Type) return Boolean is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Left.Value < Right.Value;
+   end "<";
+
+   ----------
+   -- "<=" --
+   ----------
+
+   function "<=" (Left, Right : Big_Integer_Type) return Boolean is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Left.Value <= Right.Value;
+   end "<=";
+
+   ---------
+   -- ">" --
+   ---------
+
+   function ">" (Left, Right : Big_Integer_Type) return Boolean is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Left.Value > Right.Value;
+   end ">";
+
+   ----------
+   -- ">=" --
+   ----------
+
+   function ">=" (Left, Right : Big_Integer_Type) return Boolean is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Left.Value >= Right.Value;
+   end ">=";
+
+   ---------
    -- "+" --
    ---------
 
