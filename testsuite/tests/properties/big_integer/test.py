@@ -79,6 +79,15 @@ class Equal(Expr):
         return BigInteger(If(Self.left.evaluate == Self.right.evaluate, 1, 0))
 
 
+class LessThan(Expr):
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
+
+    @langkit_property()
+    def evaluate():
+        return BigInteger(If(Self.left.evaluate < Self.right.evaluate, 1, 0))
+
+
 g = Grammar('main_rule')
 g.add_rules(
     main_rule=List(g.decl),
@@ -88,7 +97,8 @@ g.add_rules(
 
     op=Or(Plus(g.atom, '+', g.expr),
           Minus(g.atom, '-', g.expr),
-          Equal(g.atom, '=', g.expr)),
+          Equal(g.atom, '=', g.expr),
+          LessThan(g.atom, '<', g.expr)),
 
     atom=Or(g.ref, g.literal),
     ref=Ref(g.name),

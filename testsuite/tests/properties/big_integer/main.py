@@ -16,6 +16,8 @@ def c = b - 1
 
 def d = a = b
 def e = a = c
+def f = a < b
+def g = a < c
 """)
 if u.diagnostics:
     for d in u.diagnostics:

@@ -22,6 +22,7 @@ class Token(LexerToken):
     Equal = WithText()
     Plus = WithText()
     Minus = WithText()
+    LessThan = WithText()
 
     Number = WithText()
     Identifier = WithSymbol()
@@ -56,6 +57,7 @@ foo_lexer.add_rules(
     (Literal('='),           Token.Equal),
     (Literal('+'),           Token.Plus),
     (Literal('-'),           Token.Minus),
+    (Literal('<'),           Token.LessThan),
 
     (Pattern('[0-9]+'),      Token.Number),
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
