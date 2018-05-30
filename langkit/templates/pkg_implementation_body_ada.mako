@@ -1129,6 +1129,26 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
    end Dec_Ref;
 
+   ---------
+   -- "+" --
+   ---------
+
+   function "+" (Left, Right : Big_Integer_Type) return Big_Integer_Type is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Create (Left.Value + Right.Value);
+   end "+";
+
+   ---------
+   -- "-" --
+   ---------
+
+   function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type is
+      use type GNATCOLL.GMP.Integers.Big_Integer;
+   begin
+      return Create (Left.Value - Right.Value);
+   end "-";
+
    -------------
    -- Version --
    -------------

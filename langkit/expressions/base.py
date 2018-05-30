@@ -4547,11 +4547,11 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in T.LongType,
+            l.type in (T.LongType, T.BigIntegerType),
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 
-        return BasicExpr('Arith_Result', '({} %s {})' % self.op, T.LongType,
+        return BasicExpr('Arith_Result', '({} %s {})' % self.op, l.type,
                          [l, r],
                          abstract_expr=self)
 
