@@ -70,6 +70,9 @@
                     unwrap_code.append('{}.Items := {};'.format(actual,
                                                                 arg.name))
 
+            elif arg.type.is_big_integer_type:
+                actual = 'Create ({})'.format(arg.name)
+
             else:
                 actual = str(arg.name)
 
@@ -110,8 +113,15 @@
                  wrapped_result = 'Property_Result.Items'
              wrap_code.append('Dec_Ref (Property_Result);')
 
+         elif property.type.is_big_integer_type:
+             wrapped_result = None
+             wrap_code.extend([
+                 'Result.Set (Property_Result.Value);',
+                 'Dec_Ref (Property_Result);'
+             ])
+
          else:
-            wrapped_result = 'Property_Result'
+             wrapped_result = 'Property_Result'
       %>
 
       % for name, typ in local_vars:
@@ -128,8 +138,10 @@
          ${'({})'.format(', '.join(actuals)) if actuals else ''};
 
       % if wrap_code:
-         return Result : ${property.type.api_name} := ${wrapped_result}
-         do
+         return Result : ${property.type.api_name} ${(
+            ':= {}'.format(wrapped_result)
+            if wrapped_result else ''
+         )} do
             % for chunk in wrap_code:
                ${chunk}
             % endfor

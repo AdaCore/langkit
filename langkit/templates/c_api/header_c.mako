@@ -74,6 +74,9 @@ typedef struct {
     int is_allocated;
 } ${text_type};
 
+${c_doc('langkit.big_integer_type')}
+typedef ${text_type} ${big_integer_type};
+
 ${c_doc('langkit.token_kind')}
 typedef enum {
    <% lexer = ctx.lexer %>

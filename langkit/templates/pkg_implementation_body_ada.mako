@@ -1087,6 +1087,21 @@ package body ${ada_lib_name}.Analysis.Implementation is
                                      Ref_Count => 1);
    end Create;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+     (Big_Int : GNATCOLL.GMP.Integers.Big_Integer) return Big_Integer_Type
+   is
+      Result : constant Big_Integer_Type :=
+         new Big_Integer_Record'(Value     => <>,
+                                 Ref_Count => 1);
+   begin
+      Result.Value.Set (Big_Int);
+      return Result;
+   end Create;
+
    -------------
    -- Inc_Ref --
    -------------

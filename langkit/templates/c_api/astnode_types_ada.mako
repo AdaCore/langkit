@@ -79,6 +79,8 @@
                Token (Node, Token_Index ({arg_ref}.Index))
             % elif arg.type.is_symbol_type:
                Unwrap (Unwrapped_Node.Unit, ${arg_ref})
+            % elif arg.type.is_big_integer_type:
+               Unwrap (${arg_ref})
             % elif simple_wrapping(arg.type):
                Unwrap (${arg_ref})
             % else:
@@ -154,12 +156,19 @@
                    Wrap (Result)
                % elif field.type.is_symbol_type:
                    Wrap (Result)
+               % elif field.type.is_big_integer_type:
+                   Wrap (Result)
                % elif simple_wrapping(field.type):
                    Wrap (Result)
                % else:
                    Result
                % endif
             ;
+
+            % if field.type.is_big_integer_type:
+               Dec_Ref (Result);
+            % endif
+
             return 1;
          exception
             when Exc : Property_Error =>

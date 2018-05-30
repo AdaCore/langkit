@@ -19,6 +19,8 @@ with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
+with GNATCOLL.GMP.Integers;
+
 limited private with ${ada_lib_name}.Analysis.Implementation;
 
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
@@ -71,6 +73,8 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.token_type', 3)}
 
    No_Token : constant Token_Type;
+
+   subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
 
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
 
