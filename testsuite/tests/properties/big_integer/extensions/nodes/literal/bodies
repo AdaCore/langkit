@@ -1,0 +1,7 @@
+--  vim: ft=ada
+
+overriding function P_Evaluate
+  (Node : access Bare_Literal_Type) return Big_Integer_Type is
+begin
+   return Create (Image (Node.Text));
+end P_Evaluate;

@@ -1,0 +1,78 @@
+"""
+Test that big integers work as expected in the DSL.
+"""
+
+from __future__ import absolute_import, division, print_function
+
+from langkit.dsl import ASTNode, BigIntegerType, Field, T, abstract
+from langkit.envs import EnvSpec, add_to_env
+from langkit.expressions import (
+    AbstractProperty, ExternalProperty, New, Self, langkit_property
+)
+from langkit.parsers import Grammar, List, Or
+
+from lexer_example import Token
+from utils import build_and_run
+
+
+class FooNode(ASTNode):
+    pass
+
+
+class Decl(FooNode):
+    name = Field(type=T.Identifier)
+    expr_tree = Field(type=T.Expr)
+
+    env_spec = EnvSpec(add_to_env(
+        New(T.env_assoc, key=Self.name.symbol, val=Self)))
+
+
+class Identifier(FooNode):
+    token_node = True
+
+
+@abstract
+class Expr(FooNode):
+    evaluate = AbstractProperty(type=BigIntegerType, public=True)
+
+
+class Literal(Expr):
+    token_node = True
+
+    evaluate = ExternalProperty(uses_entity_info=False, uses_envs=False)
+
+
+class Ref(Expr):
+    name = Field()
+
+    @langkit_property()
+    def evaluate():
+        return (Self.node_env.get_first(Self.name.symbol)
+                .cast(T.Decl).expr_tree.evaluate)
+
+
+class Plus(Expr):
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
+
+    @langkit_property()
+    def evaluate():
+        return Self.left.evaluate + Self.right.evaluate
+
+
+g = Grammar('main_rule')
+g.add_rules(
+    main_rule=List(g.decl),
+    decl=Decl('def', g.name, '=', g.expr),
+
+    expr=Or(Plus(g.atom, '+', g.expr),
+            g.atom),
+
+    atom=Or(g.ref, g.literal),
+    ref=Ref(g.name),
+
+    name=Identifier(Token.Identifier),
+    literal=Literal(Token.Number),
+)
+build_and_run(g, 'main.py')
+print('Done')
