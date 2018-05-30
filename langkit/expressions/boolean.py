@@ -272,8 +272,9 @@ class OrderingTest(AbstractExpression):
         :rtype: OrderingTest.Expr
         """
         return OrderingTest.Expr(self.operator, *[
-            construct(e, T.LongType,
-                      "Comparisons only work on scalars, not {expr_type}")
+            construct(e, lambda t: t in (T.LongType, T.BigIntegerType),
+                      'Comparisons only work on {} and {}, not {{expr_type}}'
+                      .format(T.LongType.dsl_name, T.BigIntegerType.dsl_name))
             for e in (self.lhs, self.rhs)
         ])
 
