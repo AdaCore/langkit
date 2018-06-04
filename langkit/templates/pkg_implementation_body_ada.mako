@@ -1632,8 +1632,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -----------------
 
    function Child_Index
-     (Node : access ${root_node_value_type}'Class)
-      return Natural
+     (Node : access ${root_node_value_type}'Class) return Natural
    is
       N : ${root_node_type_name} := null;
    begin
