@@ -1134,7 +1134,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Inc_Ref (Big_Int : Big_Integer_Type) is
    begin
-      Big_Int.Ref_Count := Big_Int.Ref_Count + 1;
+      if Big_Int.Ref_Count /= -1 then
+         Big_Int.Ref_Count := Big_Int.Ref_Count + 1;
+      end if;
    end Inc_Ref;
 
    -------------
@@ -1145,7 +1147,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       procedure Destroy is new Ada.Unchecked_Deallocation
         (Big_Integer_Record, Big_Integer_Type);
    begin
-      if Big_Int = null then
+      if Big_Int = null or else Big_Int.Ref_Count = -1 then
          return;
       end if;
 
