@@ -368,6 +368,10 @@ package body ${ada_lib_name}.Rewriting is
          Parent         => Parent_Handle,
          Kind           => Kind,
          Tied           => Tied,
+         Root_Of        =>
+           (if Tied and then Parent_Handle = No_Node_Rewriting_Handle
+            then Unit_Handle
+            else No_Unit_Rewriting_Handle),
          Children       => Unexpanded_Children);
    end Allocate;
 
@@ -484,7 +488,9 @@ package body ${ada_lib_name}.Rewriting is
       if Handle /= No_Node_Rewriting_Handle then
          Handle.Parent := Parent;
          Handle.Tied := True;
-         pragma Unreferenced (Unit);
+         if Parent = No_Node_Rewriting_Handle then
+            Handle.Root_Of := Unit;
+         end if;
       end if;
    end Tie;
 
@@ -497,6 +503,7 @@ package body ${ada_lib_name}.Rewriting is
       if Handle /= No_Node_Rewriting_Handle then
          Handle.Parent := No_Node_Rewriting_Handle;
          Handle.Tied := False;
+         Handle.Root_Of := No_Unit_Rewriting_Handle;
       end if;
    end Untie;
 
