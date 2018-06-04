@@ -1,6 +1,7 @@
 ## vim: ft=makoada
 
 with "gnatcoll";
+with "gnatcoll_iconv";
 
 library project Langkit_Support is
 

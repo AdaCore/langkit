@@ -1,8 +1,24 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
 with Interfaces; use Interfaces;
+with System;
+
+with GNATCOLL.Iconv;
 
 package body Langkit_Support.Text is
+
+   ------------------
+   -- Text_Charset --
+   ------------------
+
+   function Text_Charset return String is
+      use GNATCOLL.Iconv, System;
+   begin
+      if Default_Bit_Order = Low_Order_First then
+         return UTF32LE;
+      else
+         return UTF32BE;
+      end if;
+   end Text_Charset;
 
    -------------
    -- To_Text --
