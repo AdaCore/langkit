@@ -37,6 +37,19 @@ package body ${ada_lib_name}.Rewriting is
    --  entities type.
 
    function Allocate
+     (Kind          : ${root_node_kind_name};
+      Context       : Rewriting_Handle;
+      Unit_Handle   : Unit_Rewriting_Handle;
+      Parent_Handle : Node_Rewriting_Handle)
+      return Node_Rewriting_Handle
+      with Pre =>
+         Context /= No_Rewriting_Handle
+         and then (Unit_Handle = No_Unit_Rewriting_Handle
+                   or else Unit_Handle.Context_Handle = Context)
+         and then (Parent_Handle = No_Node_Rewriting_Handle
+                   or else Parent_Handle.Context_Handle = Context);
+
+   function Allocate
      (Node          : ${root_node_type_name};
       Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
@@ -341,23 +354,39 @@ package body ${ada_lib_name}.Rewriting is
    --------------
 
    function Allocate
+     (Kind          : ${root_node_kind_name};
+      Context       : Rewriting_Handle;
+      Unit_Handle   : Unit_Rewriting_Handle;
+      Parent_Handle : Node_Rewriting_Handle)
+      return Node_Rewriting_Handle
+   is
+      Tied : constant Boolean := Unit_Handle /= No_Unit_Rewriting_Handle;
+   begin
+      return new Node_Rewriting_Handle_Type'
+        (Context_Handle => Context,
+         Node           => null,
+         Parent         => Parent_Handle,
+         Kind           => Kind,
+         Tied           => Tied,
+         Children       => Unexpanded_Children);
+   end Allocate;
+
+   --------------
+   -- Allocate --
+   --------------
+
+   function Allocate
      (Node          : ${root_node_type_name};
       Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
       return Node_Rewriting_Handle
    is
-      Tied   : constant Boolean := Unit_Handle /= No_Unit_Rewriting_Handle;
-      Result : constant Node_Rewriting_Handle :=
-         new Node_Rewriting_Handle_Type'
-           (Context_Handle => Context,
-            Node           => Node,
-            Parent         => Parent_Handle,
-            Kind           => Node.Kind,
-            Tied           => Tied,
-            Children       => Unexpanded_Children);
+      Result : constant Node_Rewriting_Handle := Allocate
+        (Node.Kind, Context, Unit_Handle, Parent_Handle);
    begin
-      if Tied then
+      Result.Node := Node;
+      if Result.Tied then
          Unit_Handle.Nodes.Insert (Node, Result);
       end if;
       return Result;
@@ -742,13 +771,8 @@ package body ${ada_lib_name}.Rewriting is
       --  Make sure the original handle is expanded so we can iterate on it
       Expand_Children (Handle);
 
-      Result := new Node_Rewriting_Handle_Type'
-        (Context_Handle => Handle.Context_Handle,
-         Node           => Handle.Node,
-         Parent         => No_Node_Rewriting_Handle,
-         Kind           => Handle.Kind,
-         Tied           => False,
-         Children       => <>);
+      Result := Allocate (Handle.Node, Handle.Context_Handle,
+                          No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
       Nodes_Pools.Append (Handle.Context_Handle.New_Nodes, Result);
 
       --  Recursively clone children
@@ -803,15 +827,11 @@ package body ${ada_lib_name}.Rewriting is
       Kind   : ${root_node_kind_name};
       Text   : Text_Type) return Node_Rewriting_Handle
    is
-      Result : Node_Rewriting_Handle := new Node_Rewriting_Handle_Type'
-        (Context_Handle => Handle,
-         Node           => null,
-         Parent         => No_Node_Rewriting_Handle,
-         Kind           => Kind,
-         Tied           => False,
-         Children       => (Kind => Expanded_Token_Node,
-                            Text => To_Unbounded_Wide_Wide_String (Text)));
+      Result : constant Node_Rewriting_Handle := Allocate
+        (Kind, Handle, No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
    begin
+      Result.Children := (Kind => Expanded_Token_Node,
+                          Text => To_Unbounded_Wide_Wide_String (Text));
       Nodes_Pools.Append (Handle.New_Nodes, Result);
       return Result;
    end Create_Token_Node;
@@ -825,15 +845,11 @@ package body ${ada_lib_name}.Rewriting is
       Kind     : ${root_node_kind_name};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
    is
-      Result : Node_Rewriting_Handle := new Node_Rewriting_Handle_Type'
-        (Context_Handle => Handle,
-         Node           => null,
-         Parent         => No_Node_Rewriting_Handle,
-         Kind           => Kind,
-         Tied           => False,
-         Children       => (Kind   => Expanded_Regular,
-                            Vector => <>));
+      Result : Node_Rewriting_Handle := Allocate
+        (Kind, Handle, No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
    begin
+      Result.Children := (Kind   => Expanded_Regular,
+                          Vector => <>);
       Result.Children.Vector.Reserve_Capacity (Children'Length);
       for C of Children loop
          Result.Children.Vector.Append (C);
