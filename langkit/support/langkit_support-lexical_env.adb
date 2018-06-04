@@ -561,7 +561,9 @@ package body Langkit_Support.Lexical_Env is
       -----------------------
 
       procedure Get_Refd_Elements (Self : in out Referenced_Env) is
-         Env        : Lexical_Env;
+         Env : Lexical_Env := Empty_Env;
+         --  Make sure this holds a valid environment at all times so that the
+         --  exception handler below can always call Dec_Ref on it.
       begin
          --  Don't follow the referenced environment if either:
          --   * the node from which this reference starts cannot reach From;
