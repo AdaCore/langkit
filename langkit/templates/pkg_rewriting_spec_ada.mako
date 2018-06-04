@@ -460,6 +460,11 @@ private
       --  Whether this node is tied to an analysis unit tree. It can be
       --  assigned as a child to another node iff it is not tied.
 
+      Root_Of : Unit_Rewriting_Handle;
+      --  If the node this handle represents is the root of a rewritten unit,
+      --  this references this unit. No_Unit_Rewriting_Handle in all other
+      --  cases.
+
       Children : Node_Children;
       --  Lazily evaluated vector of children for the rewritten node
    end record;
