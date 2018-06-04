@@ -1,11 +1,8 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with GNATCOLL.Iconv;
-
 with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
-with Libfoolang.Lexer;     use Libfoolang.Lexer;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
 with Process_Apply;
@@ -70,16 +67,7 @@ begin
 
    New_Line;
    Put_Line ("Quoting source buffer for rewritten unit...");
-   declare
-      Buffer       : constant Text_Type := Text (U);
-      Buffer_Bytes : String (1 .. Buffer'Length * 4)
-         with Import  => True,
-              Address => Buffer'Address;
-   begin
-      Put_Line (GNATCOLL.Iconv.Iconv (Input     => Buffer_Bytes,
-                                      To_Code   => GNATCOLL.Iconv.ASCII,
-                                      From_Code => Internal_Charset));
-   end;
+   Put_Line (Transcode (Text (U), "ASCII"));
 
    Put_Line ("preserve_formatting.adb: Done.");
 end Preserve_Formatting;
