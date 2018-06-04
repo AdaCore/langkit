@@ -59,6 +59,25 @@ package body ${ada_lib_name}.Rewriting is
    --  Free all resources tied to Handle. This also releases the rewriting
    --  handle singleton in Handle's Context.
 
+   procedure Tie
+     (Handle, Parent : Node_Rewriting_Handle;
+      Unit           : Unit_Rewriting_Handle)
+      with Pre =>
+        (Handle = No_Node_Rewriting_Handle or else not Tied (Handle))
+         and then (if Parent = No_Node_Rewriting_Handle
+                   then Unit /= No_Unit_Rewriting_Handle
+                   else Unit = No_Unit_Rewriting_Handle);
+   --  Tie the node represented by handle so that either:
+   --
+   --    * it is the root of Unit (Parent is null);
+   --    * it is a child of Parent (Unit is null).
+   --
+   --  Do nothing if Handle is null.
+
+   procedure Untie (Handle : Node_Rewriting_Handle)
+      with Pre => Handle = No_Node_Rewriting_Handle or else Tied (Handle);
+   --  Untie the node represented by Handle. Do nothing if Handle is null.
+
    ---------------------
    -- Start_Rewriting --
    ---------------------
@@ -425,6 +444,33 @@ package body ${ada_lib_name}.Rewriting is
       Set_Rewriting_Handle (Ctx, Convert (Handle));
    end Free_Handles;
 
+   ---------
+   -- Tie --
+   ---------
+
+   procedure Tie
+     (Handle, Parent : Node_Rewriting_Handle;
+      Unit           : Unit_Rewriting_Handle) is
+   begin
+      if Handle /= No_Node_Rewriting_Handle then
+         Handle.Parent := Parent;
+         Handle.Tied := True;
+         pragma Unreferenced (Unit);
+      end if;
+   end Tie;
+
+   -----------
+   -- Untie --
+   -----------
+
+   procedure Untie (Handle : Node_Rewriting_Handle) is
+   begin
+      if Handle /= No_Node_Rewriting_Handle then
+         Handle.Parent := No_Node_Rewriting_Handle;
+         Handle.Tied := False;
+      end if;
+   end Untie;
+
    -------------------
    -- Abstract_Kind --
    -------------------
@@ -589,16 +635,10 @@ package body ${ada_lib_name}.Rewriting is
             Handle.Children.Vector.Reference (Index);
       begin
          --  Untie the child to be replaced if it exists
-         if Child_Slot /= No_Node_Rewriting_Handle then
-            Child_Slot.Parent := No_Node_Rewriting_Handle;
-            Child_Slot.Tied := False;
-         end if;
+         Untie (Child_Slot);
 
          --  Tie the new child if it exists
-         if Child /= No_Node_Rewriting_Handle then
-            Child.Parent := Handle;
-            Child.Tied := True;
-         end if;
+         Tie (Child, Handle, No_Unit_Rewriting_Handle);
 
          Child_Slot := Child;
       end;
@@ -640,14 +680,9 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Unit_Rewriting_Handle;
       Root   : Node_Rewriting_Handle) is
    begin
-      if Handle.Root /= No_Node_Rewriting_Handle then
-         Handle.Root.Tied := False;
-      end if;
-
+      Untie (Handle.Root);
       Handle.Root := Root;
-      if Root /= No_Node_Rewriting_Handle then
-         Root.Tied := True;
-      end if;
+      Tie (Root, No_Node_Rewriting_Handle, Handle);
    end Set_Root;
 
    ------------------
@@ -803,8 +838,7 @@ package body ${ada_lib_name}.Rewriting is
       for C of Children loop
          Result.Children.Vector.Append (C);
          if C /= No_Node_Rewriting_Handle then
-            C.Parent := Result;
-            C.Tied := True;
+            Tie (C, Result, No_Unit_Rewriting_Handle);
          end if;
       end loop;
       Nodes_Pools.Append (Handle.New_Nodes, Result);
