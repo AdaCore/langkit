@@ -194,10 +194,14 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    is
       Result : Present_Token_Sequence_Template;
    begin
-      Result.First := First_Token;
-      Result.Last := Relative_Token (First_Token, Unparser'Length - 1);
-      First_Token := Relative_Token (Result.Last, 1);
-      return Result;
+      if Unparser'Length = 0 then
+         return (Present => True, First => No_Token, Last => No_Token);
+      else
+         Result.First := First_Token;
+         Result.Last := Relative_Token (First_Token, Unparser'Length - 1);
+         First_Token := Relative_Token (Result.Last, 1);
+         return Result;
+      end if;
    end Create_Token_Sequence;
 
    -----------------------------------
