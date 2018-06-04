@@ -268,7 +268,9 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    type Big_Integer_Record is limited record
       Value     : GNATCOLL.GMP.Integers.Big_Integer;
-      Ref_Count : Natural;
+      Ref_Count : Integer;
+      --  Number of owners. When it drops to 0, this record can be destroyed.
+      --  If -1, this is a static big integer: Inc_Ref and Dec_Ref are no-ops.
    end record;
 
    type Big_Integer_Type is access all Big_Integer_Record;
@@ -280,7 +282,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Create (Int : Integer) return Big_Integer_Type;
 
    No_Big_Integer : constant Big_Integer_Type := new Big_Integer_Record'
-     (Value => <>, Ref_Count => 1);
+     (Value => <>, Ref_Count => -1);
 
    function To_Integer (Big_Int : Big_Integer_Type) return Integer;
    --  Convert Big_Int into a regular integer, raising a Property_Error if it
