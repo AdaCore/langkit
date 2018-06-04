@@ -201,6 +201,16 @@ package ${ada_lib_name}.Rewriting is
                   and then Is_Token_Node (Kind (Handle));
    --  Override text associated to the given token node
 
+   procedure Replace (Handle, New_Node : Node_Rewriting_Handle)
+      with Pre =>
+         Handle /= No_Node_Rewriting_Handle
+         and then Tied (Handle)
+         and then (New_Node = No_Node_Rewriting_Handle
+                   or else not Tied (New_Node));
+   --  If Handle is the root of an analysis unit, untie it and set New_Node as
+   --  its new root. Otherwise, replace Handle with New_Node in Handle's parent
+   --  node.
+
    -------------------------
    -- List node rewriting --
    -------------------------
