@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with System.Assertions;
 
+with Langkit_Support.Text;     use Langkit_Support.Text;
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
@@ -18,6 +19,13 @@ procedure Rewrite is
 
    procedure Try (Label : String; Proc : access procedure);
 
+   function Create_Def
+     (Name : Text_Type;
+      Expr : Node_Rewriting_Handle)
+      return Node_Rewriting_Handle;
+
+   procedure Check_Diagnostics (U : Analysis_Unit);
+
    ---------
    -- Try --
    ---------
@@ -32,22 +40,50 @@ procedure Rewrite is
          Put_Line ("   Got an assert failure");
    end Try;
 
+   -----------------------
+   -- Check_Diagnostics --
+   -----------------------
+
+   procedure Check_Diagnostics (U : Analysis_Unit) is
+   begin
+      if Has_Diagnostics (U) then
+         Put_Line ("Errors in " & Get_Filename (U) & ":");
+         for D of Diagnostics (U) loop
+            Put_Line (Format_GNU_Diagnostic (U, D));
+         end loop;
+         return;
+      end if;
+   end Check_Diagnostics;
+
    Ctx : constant Analysis_Context := Create (With_Trivia => True);
-   U   : constant Analysis_Unit := Get_From_Buffer
-     (Ctx, "main.txt", Buffer => Buffer);
+   U1  : constant Analysis_Unit := Get_From_Buffer
+     (Ctx, "u1.txt", Buffer => Buffer);
+   U2  : constant Analysis_Unit := Get_From_Buffer
+     (Ctx, "u2.txt", Buffer => "def z = 100");
    RH  : Rewriting_Handle;
    N   : Node_Rewriting_Handle;
+
+   ----------------
+   -- Create_Def --
+   ----------------
+
+   function Create_Def
+     (Name : Text_Type;
+      Expr : Node_Rewriting_Handle)
+      return Node_Rewriting_Handle
+   is
+      Name_Node : constant Node_Rewriting_Handle :=
+         Create_Token_Node (RH, Foo_Name, Name);
+   begin
+      return Create_Def (RH, Name_Node, No_Node_Rewriting_Handle, Expr);
+   end Create_Def;
+
 begin
-   if Has_Diagnostics (U) then
-      Put_Line ("Errors:");
-      for D of Diagnostics (U) loop
-         Put_Line (Format_GNU_Diagnostic (U, D));
-      end loop;
-      return;
-   end if;
+   Check_Diagnostics (U1);
+   Check_Diagnostics (U2);
 
    RH := Start_Rewriting (Ctx);
-   N := Handle (Root (U));
+   N := Handle (Root (U1));
 
    declare
       procedure Proc;
@@ -126,10 +162,32 @@ begin
    end;
 
    New_Line;
+   Put_Line ("Replace the root of unit 2");
+   declare
+      New_Root : constant Node_Rewriting_Handle :=
+         Create_Node (RH, Foo_Def_List);
+      Expr_1   : constant Node_Rewriting_Handle :=
+         Create_Token_Node (RH, Foo_Literal, "111");
+      Expr_2   : constant Node_Rewriting_Handle :=
+         Create_Token_Node (RH, Foo_Literal, "222");
+   begin
+      Append_Child (New_Root, Create_Def ("zz", Expr_1));
+      Append_Child (New_Root, Create_Def ("yy", Expr_2));
+      Replace (Expr_2, Create_Token_Node (RH, Foo_Literal, "333"));
+      Replace (Handle (Root (U2)), New_Root);
+   end;
+
+   New_Line;
    Put_Line ("Applying the diff...");
    Process_Apply (RH);
 
-   Root (U).Print (Show_Slocs => False);
+   New_Line;
+   Put_Line ("u1.txt:");
+   Root (U1).Print (Show_Slocs => False);
+
+   New_Line;
+   Put_Line ("u2.txt:");
+   Root (U2).Print (Show_Slocs => False);
 
    Put_Line ("rewrite.adb: Done.");
 end Rewrite;
