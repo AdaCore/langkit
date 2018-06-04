@@ -8,6 +8,9 @@ package Langkit_Support.Text is
    --  which is not a subtype of String, makes it obvious when conversions are
    --  needed.
 
+   function Text_Charset return String;
+   --  Return the name of the charset used to encode Text_Type values
+
    function To_Text (S : String) return Text_Type;
    --  Convenience converter for pure ASCII strings. Raise a Constraint_Error
    --  if a non-ASCII character is met.

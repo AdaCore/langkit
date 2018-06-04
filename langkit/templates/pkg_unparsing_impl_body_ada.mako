@@ -421,7 +421,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
          State  : Iconv_T := Iconv_Open
            (To_Code   => Get_Charset (Unit),
-            From_Code => Internal_Charset);
+            From_Code => Text_Charset);
          Status : Iconv_Result;
 
          To_Convert_String : constant String (1 .. 4 * Length)

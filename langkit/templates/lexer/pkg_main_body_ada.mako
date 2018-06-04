@@ -595,7 +595,7 @@ package body ${ada_lib_name}.Lexer is
             then BOM_Kind_To_Charset (BOM).all
             else Charset);
       begin
-         State := Iconv_Open (Internal_Charset, Actual_Charset);
+         State := Iconv_Open (Text_Charset, Actual_Charset);
       exception
          when Unsupported_Conversion =>
             Free (Result);
@@ -727,19 +727,5 @@ package body ${ada_lib_name}.Lexer is
       end if;
       return T.Symbol;
    end Force_Symbol;
-
-   ----------------------
-   -- Internal_Charset --
-   ----------------------
-
-   function Internal_Charset return String is
-      use GNATCOLL.Iconv, System;
-   begin
-      if Default_Bit_Order = Low_Order_First then
-         return UTF32LE;
-      else
-         return UTF32BE;
-      end if;
-   end Internal_Charset;
 
 end ${ada_lib_name}.Lexer;

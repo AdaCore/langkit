@@ -133,9 +133,6 @@ package ${ada_lib_name}.Lexer is
    --  If T has a symbol, return it. Otherwise, force its symbolization and
    --  return the symbol.
 
-   function Internal_Charset return String;
-   --  Return the charset used to store text internally
-
    Token_Kind_To_Family : array (Token_Kind) of Token_Family :=
      (${', '.join('{} => {}'.format(t.ada_name,
                                      lexer.tokens.token_to_family[t].ada_name)
