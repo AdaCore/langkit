@@ -721,6 +721,39 @@ package body ${ada_lib_name}.Rewriting is
       Tie (Root, No_Node_Rewriting_Handle, Handle);
    end Set_Root;
 
+   -------------
+   -- Replace --
+   -------------
+
+   procedure Replace (Handle, New_Node : Node_Rewriting_Handle) is
+   begin
+      if Handle = New_Node then
+         return;
+      end if;
+
+      if Handle.Root_Of = No_Unit_Rewriting_Handle then
+         --  If Handle is not the root node of its owning unit, go replace it
+         --  in its parent's children list.
+         declare
+            Parent : Node_Rewriting_Handle renames Handle.Parent;
+            Index  : Natural := 0;
+         begin
+            for I in 1 .. Children_Count (Parent) loop
+               if Child (Parent, I) = Handle then
+                  Index := I;
+                  exit;
+               end if;
+            end loop;
+            pragma Assert (Index > 0);
+            Set_Child (Parent, Index, New_Node);
+         end;
+
+      else
+         --  Otherwise, replace it as a root node
+         Set_Root (Handle.Root_Of, New_Node);
+      end if;
+   end Replace;
+
    ------------------
    -- Insert_Child --
    ------------------
