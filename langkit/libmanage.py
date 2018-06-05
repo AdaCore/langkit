@@ -842,7 +842,7 @@ class ManageScript(object):
         for fpath in [
             os.path.join('include', lib_name + '.h'),
             os.path.join('share', lib_name, 'ast-types.html'),
-            os.path.join('python', lib_name + '.py'),
+            os.path.join('python', lib_name, '__init__.py'),
         ]:
             build_path = self.dirs.build_dir(fpath)
             install_path = self.dirs.install_dir(fpath)
