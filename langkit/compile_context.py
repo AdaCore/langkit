@@ -1734,6 +1734,10 @@ class CompileCtx(object):
         :param str python_path: The directory in which the Python module will
             be generated.
         """
+        package_dir = os.path.join(python_path,
+                                   self.python_api_settings.module_name)
+        if not os.path.isdir(package_dir):
+            os.mkdir(package_dir)
 
         def strip_white_lines(code):
             tree = ast.parse(code)
@@ -1781,8 +1785,6 @@ class CompileCtx(object):
                 )
                 return code
 
-        module_filename = "{}.py".format(self.python_api_settings.module_name)
-
         with names.camel:
             code = self.render_template(
                 "python_api/module_py",
@@ -1798,7 +1800,7 @@ class CompileCtx(object):
             except SyntaxError as exc:
                 pp_code = code
 
-            write_source_file(os.path.join(python_path, module_filename),
+            write_source_file(os.path.join(package_dir, '__init__.py'),
                               pp_code)
             if exc:
                 raise exc
