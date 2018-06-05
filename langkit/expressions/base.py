@@ -4537,6 +4537,9 @@ class BigInteger(AbstractExpression):
         expr = construct(self.expr, T.LongType)
         return BigInteger.Expr(expr, abstract_expr=self)
 
+    def __repr__(self):
+        return '<BigInteger {}>'.format(self.expr)
+
 
 @auto_attr
 def as_int(self, expr):
