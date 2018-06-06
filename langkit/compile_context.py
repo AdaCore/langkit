@@ -1650,8 +1650,13 @@ class CompileCtx(object):
                     module_name=self.python_api_settings.module_name
                 )
             )
-
             os.chmod(playground_file, 0o775)
+
+            setup_py_file = os.path.join(file_root, 'python', 'setup.py')
+            write_source_file(
+                setup_py_file,
+                self.render_template('python_api/setup_py')
+            )
 
         # Emit GDB helpers initialization script
         gdbinit_path = os.path.join(file_root, 'gdbinit.py')
