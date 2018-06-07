@@ -144,6 +144,9 @@ package ${ada_lib_name}.Analysis is
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
+   function Has_With_Trivia (Context : Analysis_Context) return Boolean;
+   --  Return whether Context keeps trivia when parsing units
+
    procedure Inc_Ref (Context : Analysis_Context);
    ${ada_doc('langkit.context_incref', 3)}
 
