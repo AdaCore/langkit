@@ -1,5 +1,5 @@
 main.py: Starting...
-<Token Example u'example' at 6:1-6:8>
+<Token Comment u'# A' at 2:1-2:4>
 main.py: Done.
 
 = leading_trivia.txt =

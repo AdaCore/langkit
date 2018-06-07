@@ -230,7 +230,7 @@ class AnalysisContext(object):
 
     def __init__(self,
                  charset=None,
-                 with_trivia=False,
+                 with_trivia=True,
 % if ctx.default_unit_provider:
                  unit_provider=None,
 % endif

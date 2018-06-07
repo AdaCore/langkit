@@ -137,7 +137,7 @@ package ${ada_lib_name}.Analysis is
 
    function Create
      (Charset     : String := Default_Charset;
-      With_Trivia : Boolean := False
+      With_Trivia : Boolean := True
       % if ctx.default_unit_provider:
          ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif
