@@ -199,6 +199,15 @@ package body ${ada_lib_name}.Analysis is
       % endif
    end Create_Symbol_Literals;
 
+   ---------------------
+   -- Has_With_Trivia --
+   ---------------------
+
+   function Has_With_Trivia (Context : Analysis_Context) return Boolean is
+   begin
+      return Context.With_Trivia;
+   end Has_With_Trivia;
+
    -------------
    -- Inc_Ref --
    -------------
