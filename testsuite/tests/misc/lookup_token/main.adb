@@ -5,7 +5,7 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 procedure Main is
-   Ctx : constant Analysis_Context := Create (With_Trivia => True);
+   Ctx : constant Analysis_Context := Create;
 
    procedure Test (Filename : String);
 

@@ -7,7 +7,7 @@ with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 with Process_Apply;
 
 procedure Rewrite_Lists is
-   Ctx : constant Analysis_Context := Create (With_Trivia => True);
+   Ctx : constant Analysis_Context := Create;
    U   : constant Analysis_Unit :=
       Get_From_Buffer (Ctx, "main.txt", Buffer => "");
    RH  : Rewriting_Handle := Start_Rewriting (Ctx);
