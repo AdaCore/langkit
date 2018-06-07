@@ -53,6 +53,7 @@ package ${ada_lib_name}.Rewriting is
      (Context : Analysis_Context) return Rewriting_Handle
      with Pre  => Handle (Context) = No_Rewriting_Handle,
           Post => Handle (Context) /= No_Rewriting_Handle
+                  and then Has_With_Trivia (Context)
                   and then Start_Rewriting'Result = Handle (Context)
                   and then ${ada_lib_name}.Rewriting.Context
                              (Start_Rewriting'Result) = Context;
