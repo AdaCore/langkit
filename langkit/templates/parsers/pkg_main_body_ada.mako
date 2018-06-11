@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 with Ada.Containers.Vectors;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -105,11 +106,16 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH               : Token_Data_Handler_Access;
       Symbol_Literals   : Symbol_Literal_Array_Access;
       With_Trivia       : Boolean;
-      Parser            : in out Parser_Type) is
+      Parser            : in out Parser_Type)
+   is
+      Input : constant Lexer_Input :=
+        (Kind     => File,
+         Charset  => To_Unbounded_String (Charset),
+         Read_BOM => Read_BOM,
+         Filename => To_Unbounded_String (Filename));
    begin
       Reset (Parser);
-      Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all,
-                         Parser.Diagnostics, With_Trivia);
+      Extract_Tokens (Input, With_Trivia, TDH.all, Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       Parser.Symbol_Literals := Symbol_Literals;
@@ -126,11 +132,16 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH             : Token_Data_Handler_Access;
       Symbol_Literals : Symbol_Literal_Array_Access;
       With_Trivia     : Boolean;
-      Parser          : in out Parser_Type) is
+      Parser          : in out Parser_Type)
+   is
+      Input : constant Lexer_Input :=
+        (Kind     => Bytes_Buffer,
+         Charset  => To_Unbounded_String (Charset),
+         Read_BOM => Read_BOM,
+         Bytes    => Buffer'Unrestricted_Access);
    begin
       Reset (Parser);
-      Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all,
-                       Parser.Diagnostics, With_Trivia);
+      Extract_Tokens (Input, With_Trivia, TDH.all, Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       Parser.Symbol_Literals := Symbol_Literals;
@@ -146,10 +157,14 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH             : Token_Data_Handler_Access;
       Symbol_Literals : Symbol_Literal_Array_Access;
       With_Trivia     : Boolean;
-      Parser          : in out Parser_Type) is
+      Parser          : in out Parser_Type)
+   is
+      Input : constant Lexer_Input :=
+        (Kind => Text_Buffer,
+         Text => Buffer'Unrestricted_Access);
    begin
       Reset (Parser);
-      Lex_From_Buffer (Buffer, TDH.all, Parser.Diagnostics, With_Trivia);
+      Extract_Tokens (Input, With_Trivia, TDH.all, Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       Parser.Symbol_Literals := Symbol_Literals;

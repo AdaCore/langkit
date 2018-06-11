@@ -1,4 +1,5 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO;           use Ada.Text_IO;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
@@ -17,13 +18,14 @@ procedure Main is
    Tok         : Token_Or_Trivia_Index;
 
 begin
-   Lex_From_Buffer
-     (Buffer      => Buffer,
-      Charset     => "ascii",
-      Read_BOM    => True,
+   Extract_Tokens
+     (Input => (Kind => Bytes_Buffer,
+                Charset => To_Unbounded_String ("ascii"),
+                Read_BOM => True,
+                Bytes => Buffer'Unrestricted_Access),
+      With_Trivia => True,
       TDH         => TDH,
-      Diagnostics => Diagnostics,
-      With_Trivia => True);
+      Diagnostics => Diagnostics);
 
    Tok := First_Token_Or_Trivia (TDH);
    while Tok /= No_Token_Or_Trivia_Index loop
