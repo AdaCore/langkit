@@ -380,14 +380,19 @@ package body ${ada_lib_name}.Analysis is
       procedure Init_Parser
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean;
-         Parser   : in out Parser_Type) is
+         Parser   : in out Parser_Type)
+      is
+         Input : constant Lexer_Input :=
+           (Kind     => File,
+            Charset  => Unit.Charset,
+            Read_BOM => Read_BOM,
+            Filename => To_Unbounded_String (Filename));
       begin
-         Init_Parser_From_File
-           (Filename, To_String (Unit.Charset), Read_BOM, Unit,
-            Token_Data (Unit),
+         Init_Parser
+           (Input, Context.With_Trivia, Unit, Token_Data (Unit),
             Parsers.Symbol_Literal_Array_Access
               (Symbol_Literals (Unit.Context)),
-            Context.With_Trivia, Parser);
+            Parser);
       end Init_Parser;
    begin
       return Get_Unit
@@ -409,14 +414,19 @@ package body ${ada_lib_name}.Analysis is
       procedure Init_Parser
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean;
-         Parser   : in out Parser_Type) is
+         Parser   : in out Parser_Type)
+      is
+         Input : constant Lexer_Input :=
+           (Kind     => Bytes_Buffer,
+            Charset  => Unit.Charset,
+            Read_BOM => Read_BOM,
+            Bytes    => Buffer'Unrestricted_Access);
       begin
-         Init_Parser_From_Buffer
-           (Buffer, To_String (Unit.Charset), Read_BOM, Unit,
-            Token_Data (Unit),
+         Init_Parser
+           (Input, Context.With_Trivia, Unit, Token_Data (Unit),
             Parsers.Symbol_Literal_Array_Access
               (Symbol_Literals (Unit.Context)),
-            Context.With_Trivia, Parser);
+            Parser);
       end Init_Parser;
    begin
       return Get_Unit (Context, Filename, Charset, True, Init_Parser'Access,

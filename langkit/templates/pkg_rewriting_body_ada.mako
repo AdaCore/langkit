@@ -160,18 +160,19 @@ package body ${ada_lib_name}.Rewriting is
             procedure Init_Parser
               (Unit     : Analysis_Unit;
                Read_BOM : Boolean;
-               Parser   : in out Parser_Type) is
+               Parser   : in out Parser_Type)
+            is
+               Input : constant Lexer_Input :=
+                 (Kind     => Bytes_Buffer,
+                  Charset  => To_Unbounded_String (Get_Charset (Unit)),
+                  Read_BOM => Read_BOM,
+                  Bytes    => Buffer);
             begin
-               Init_Parser_From_Buffer
-                 (Buffer          => Buffer.all,
-                  Charset         => Get_Charset (Unit),
-                  Read_BOM        => Read_BOM,
-                  Unit            => PU.Unit,
-                  TDH             => Token_Data (PU.Unit),
-                  Symbol_Literals => Parsers.Symbol_Literal_Array_Access
+               Init_Parser
+                 (Input, True, PU.Unit, Token_Data (PU.Unit),
+                  Parsers.Symbol_Literal_Array_Access
                     (Symbol_Literals (Context (PU.Unit))),
-                  With_Trivia     => True,
-                  Parser          => Parser);
+                  Parser);
             end Init_Parser;
          begin
             Units.Append (PU);
@@ -1022,13 +1023,16 @@ package body ${ada_lib_name}.Rewriting is
             Parser   : in out Parser_Type)
          is
             pragma Unreferenced (Read_BOM);
+            Text  : constant Text_Type := To_Wide_Wide_String (Buffer);
+            Input : constant Lexer_Input :=
+              (Kind => Text_Buffer,
+               Text => Text'Unrestricted_Access);
          begin
-            Init_Parser_From_Buffer
-              (To_Wide_Wide_String (Buffer),
-               Unit, Token_Data (Unit),
+            Init_Parser
+              (Input, True, Unit, Token_Data (Unit),
                Analysis.Parsers.Symbol_Literal_Array_Access
                  (Symbol_Literals (Context)),
-               With_Trivia => True, Parser => Parser);
+               Parser);
          end Init_Parser;
 
          ---------------
