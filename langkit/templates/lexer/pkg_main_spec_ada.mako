@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
@@ -59,38 +61,46 @@ package ${ada_lib_name}.Lexer is
    --  Raised by Lex_From_* functions when the input contains an invalid byte
    --  sequence.
 
-   procedure Lex_From_Filename
-     (Filename, Charset : String;
-      Read_BOM          : Boolean;
-      TDH               : in out Token_Data_Handler;
-      Diagnostics       : in out Diagnostics_Vectors.Vector;
-      With_Trivia       : Boolean);
-   --  Extract tokens out of Filename and store them into TDH.
-   --
-   --  Raise a Name_Error exception if the file could not be open. Raise an
-   --  Unknown_Charset exception if the requested charset is unknown. Raise an
-   --  Invalid_Input exception if Filename's content cannot be decoded using
-   --  the given Charset.
+   type Lexer_Input_Kind is (File, Bytes_Buffer, Text_Buffer);
 
-   procedure Lex_From_Buffer
-     (Buffer, Charset : String;
-      Read_BOM        : Boolean;
-      TDH             : in out Token_Data_Handler;
-      Diagnostics     : in out Diagnostics_Vectors.Vector;
-      With_Trivia     : Boolean);
-   --  Likewise, but extract tokens from an undecoded in-memory buffer.
-   --
-   --  Raise an Unknown_Charset exception if the requested charset is unknown.
-   --  Raise an Invalid_Input exception if Filename's content cannot be decoded
-   --  using the given Charset.
+   type Lexer_Input (Kind : Lexer_Input_Kind) is record
+      case Kind is
+      when File | Bytes_Buffer =>
+         Charset : Unbounded_String;
+         --  Name of the charset to use in order to decode the input source
 
-   procedure Lex_From_Buffer
-     (Buffer      : Text_Type;
+         Read_BOM : Boolean;
+         --  Whether the lexer should look for an optional Byte Order Mark
+
+         case Kind is
+         when File =>
+            Filename : Unbounded_String;
+            --  Name of the file to read
+
+         when Bytes_Buffer =>
+            Bytes : String_Access;
+            --  Source buffer to read
+
+         when others => null;
+         end case;
+
+      when Text_Buffer =>
+         Text : Text_Access;
+         --  Source buffer to read
+      end case;
+   end record;
+
+   procedure Extract_Tokens
+     (Input       : Lexer_Input;
+      With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
-      Diagnostics : in out Diagnostics_Vectors.Vector;
-      With_Trivia : Boolean);
-   --  Likewise, but extract tokens from an in-memory buffer. This never raises
-   --  exceptions.
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+   --  Extract tokens out of the given Input and store them into TDH.
+   --
+   --  Raise a Name_Error exception if this involves reading a file that can
+   --  not be open. Raise an Unknown_Charset exception if the requested
+   --  charset is unknown. Raise an Invalid_Input exception if the source
+   --  cannot be decoded using the given Charset.
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}

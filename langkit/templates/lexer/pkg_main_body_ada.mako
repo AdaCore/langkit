@@ -76,15 +76,24 @@ package body ${ada_lib_name}.Lexer is
    --  extra null character at the end of the buffer. See the Quex_*_Characters
    --  constants above.
 
-   procedure Lex_From_Buffer_Helper
+   procedure Extract_Tokens_From_Text_Buffer
      (Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
+      With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
-      Diagnostics    : in out Diagnostics_Vectors.Vector;
-      With_Trivia    : Boolean);
-   --  Helper for Lex_From_* functions. Buffer must be a buffer allocated to
-   --  fullfil Quex's needs: see the Quex_*_Characters constants above.
+      Diagnostics    : in out Diagnostics_Vectors.Vector);
+   --  Helper for the Extract_Tokens* procedures. Buffer must be a buffer
+   --  allocated to fullfil Quex's needs: see the Quex_*_Characters constants
+   --  above.
+
+   procedure Extract_Tokens_From_Bytes_Buffer
+     (Buffer, Charset : String;
+      Read_BOM        : Boolean;
+      With_Trivia     : Boolean;
+      TDH             : in out Token_Data_Handler;
+      Diagnostics     : in out Diagnostics_Vectors.Vector);
+   --  Helper for the Extract_Token procedure
 
    function Lexer_From_Buffer (Buffer  : System.Address;
                                Length  : size_t)
@@ -418,13 +427,13 @@ package body ${ada_lib_name}.Lexer is
    -- Lex_From_Buffer_Helper --
    ----------------------------
 
-   procedure Lex_From_Buffer_Helper
+   procedure Extract_Tokens_From_Text_Buffer
      (Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
+      With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
-      Diagnostics    : in out Diagnostics_Vectors.Vector;
-      With_Trivia    : Boolean)
+      Diagnostics    : in out Diagnostics_Vectors.Vector)
    is
       Lexer : Lexer_Type := Lexer_From_Buffer
         (Decoded_Buffer.all'Address,
@@ -442,55 +451,18 @@ package body ${ada_lib_name}.Lexer is
          Process_All_Tokens_No_Trivia (Lexer, TDH, Diagnostics);
       end if;
       Free_Lexer (Lexer);
-   end Lex_From_Buffer_Helper;
+   end Extract_Tokens_From_Text_Buffer;
 
-   -----------------------
-   -- Lex_From_Filename --
-   -----------------------
+   --------------------------------------
+   -- Extract_Tokens_From_Bytes_Buffer --
+   --------------------------------------
 
-   procedure Lex_From_Filename
-     (Filename, Charset : String;
-      Read_BOM          : Boolean;
-      TDH               : in out Token_Data_Handler;
-      Diagnostics       : in out Diagnostics_Vectors.Vector;
-      With_Trivia       : Boolean)
-   is
-      --  The following call to Open_Read may fail with a Name_Error exception:
-      --  just let it propagate to the caller as there is no resource to
-      --  release yet here.
-
-      File        : Mapped_File := Open_Read (Filename);
-
-      Region      : Mapped_Region := Read (File);
-      Buffer_Addr : constant System.Address := Data (Region).all'Address;
-
-      Buffer      : String (1 .. Last (Region));
-      for Buffer'Address use Buffer_Addr;
-
-   begin
-      begin
-         Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH, Diagnostics,
-                          With_Trivia);
-      exception
-         when Unknown_Charset | Invalid_Input =>
-            Free (Region);
-            Close (File);
-            raise;
-      end;
-      Free (Region);
-      Close (File);
-   end Lex_From_Filename;
-
-   ---------------------
-   -- Lex_From_Buffer --
-   ---------------------
-
-   procedure Lex_From_Buffer
+   procedure Extract_Tokens_From_Bytes_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
+      With_Trivia     : Boolean;
       TDH             : in out Token_Data_Handler;
-      Diagnostics     : in out Diagnostics_Vectors.Vector;
-      With_Trivia     : Boolean)
+      Diagnostics     : in out Diagnostics_Vectors.Vector)
    is
       Decoded_Buffer : Text_Access;
       Source_First   : Positive;
@@ -498,29 +470,72 @@ package body ${ada_lib_name}.Lexer is
    begin
       Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First,
                      Source_Last);
-      Lex_From_Buffer_Helper (Decoded_Buffer, Source_First, Source_Last, TDH,
-                              Diagnostics, With_Trivia);
-   end Lex_From_Buffer;
+      Extract_Tokens_From_Text_Buffer
+        (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
+         Diagnostics);
+   end Extract_Tokens_From_Bytes_Buffer;
 
-   ---------------------
-   -- Lex_From_Buffer --
-   ---------------------
+   --------------------
+   -- Extract_Tokens --
+   --------------------
 
-   procedure Lex_From_Buffer
-     (Buffer      : Text_Type;
+   procedure Extract_Tokens
+     (Input       : Lexer_Input;
+      With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
-      Diagnostics : in out Diagnostics_Vectors.Vector;
-      With_Trivia : Boolean)
-   is
-      Decoded_Buffer : Text_Access := new Text_Type
-        (1 .. Buffer'Length + Quex_Extra_Characters);
-      Source_First  : constant Positive := 1 + Quex_Leading_Characters;
-      Source_Last   : constant Positive := Source_First + Buffer'Length - 1;
+      Diagnostics : in out Diagnostics_Vectors.Vector) is
    begin
-      Decoded_Buffer.all (Source_First .. Source_Last) := Buffer;
-      Lex_From_Buffer_Helper (Decoded_Buffer, Source_First, Source_Last, TDH,
-                              Diagnostics, With_Trivia);
-   end Lex_From_Buffer;
+      case Input.Kind is
+         when File =>
+            declare
+               --  The following call to Open_Read may fail with a Name_Error
+               --  exception: just let it propagate to the caller as there is
+               --  no resource to release yet here.
+
+               File : Mapped_File := Open_Read (To_String (Input.Filename));
+
+               Region      : Mapped_Region := Read (File);
+               Buffer_Addr : constant System.Address :=
+                  Data (Region).all'Address;
+
+               Buffer : String (1 .. Last (Region))
+                  with Import  => True,
+                       Address => Buffer_Addr;
+            begin
+               Extract_Tokens_From_Bytes_Buffer
+                 (Buffer, To_String (Input.Charset), Input.Read_BOM,
+                  With_Trivia, TDH, Diagnostics);
+               Free (Region);
+               Close (File);
+            exception
+               when Unknown_Charset | Invalid_Input =>
+                  Free (Region);
+                  Close (File);
+                  raise;
+            end;
+
+         when Bytes_Buffer =>
+            Extract_Tokens_From_Bytes_Buffer
+              (Input.Bytes.all, To_String (Input.Charset), Input.Read_BOM,
+               With_Trivia, TDH, Diagnostics);
+
+         when Text_Buffer =>
+            declare
+               Decoded_Buffer : Text_Access := new Text_Type
+                 (1 .. Input.Text.all'Length + Quex_Extra_Characters);
+               Source_First  : constant Positive :=
+                  1 + Quex_Leading_Characters;
+               Source_Last   : constant Positive :=
+                  Source_First + Input.Text.all'Length - 1;
+            begin
+               Decoded_Buffer.all (Source_First .. Source_Last) :=
+                  Input.Text.all;
+               Extract_Tokens_From_Text_Buffer
+                 (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
+                  Diagnostics);
+            end;
+      end case;
+   end Extract_Tokens;
 
    -------------------
    -- Decode_Buffer --
