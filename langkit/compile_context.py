@@ -19,7 +19,6 @@ from distutils.spawn import find_executable
 from glob import glob
 import os
 from os import path
-import re
 from StringIO import StringIO
 import subprocess
 import sys
@@ -43,9 +42,6 @@ from langkit.utils import Colors, printcol, topological_sort
 
 
 compile_ctx = None
-
-
-WHITE_LINE_RE = re.compile(r'^\s*$')
 
 
 def get_context(or_none=False):
@@ -133,8 +129,7 @@ ADA_SPEC = "spec"
 ADA_BODY = "body"
 
 
-def write_ada_file(out_dir, source_kind, qual_name, content,
-                   strip_white_lines=False):
+def write_ada_file(out_dir, source_kind, qual_name, content):
     """
     Helper to write an Ada file.
 
@@ -145,20 +140,17 @@ def write_ada_file(out_dir, source_kind, qual_name, content,
     :param list[names.Name] qual_name: The qualified name of the Ada spec/body,
         as a list of Name components.
     :param str content: The source content to write to the file.
-    :param bool strip_white_lines: If true, omit lines that are either empty or
-        that contain only indentation.
     """
     assert source_kind in (ADA_SPEC, ADA_BODY)
     file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
                                'ads' if source_kind == ADA_SPEC else 'adb')
     file_path = os.path.join(out_dir, file_name)
 
-    if strip_white_lines:
-        new_content = []
-        for l in content.splitlines():
-            if not WHITE_LINE_RE.match(l):
-                new_content.append(l)
-        content = '\n'.join(new_content)
+    # If there are too many lines, which triggers obscure debug info bugs,
+    # strip empty lines.
+    lines = content.splitlines()
+    if len(lines) > 200000:
+        content = '\n'.join(l for l in lines if l.strip())
 
     # TODO: no tool is able to pretty-print a single Ada source file
     write_source_file(file_path, content)
@@ -1351,8 +1343,7 @@ class CompileCtx(object):
                             kind
                         ),
                         with_clauses=with_clauses,
-                    ),
-                    strip_white_lines=(kind == ADA_BODY)
+                    )
                 )
 
     @property
