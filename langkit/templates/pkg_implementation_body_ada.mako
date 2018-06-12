@@ -2749,6 +2749,22 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  This is where lexing occurs, so this is where we get most "setup"
       --  issues: missing input file, bad charset, etc. If we have such an
       --  error, catch it, turn it into diagnostics and abort parsing.
+      --
+      --  As it is quite common, first check if the file is readable: if not,
+      --  don't bother opening it and directly emit a diagnostic. This avoid
+      --  pointless exceptions which harm debugging.
+
+      if Input.Kind = File and then not Input.Filename.Is_Readable then
+         declare
+            Name : constant String := Basename (Unit);
+         begin
+            Traces.Trace
+              (Main_Trace, "WARNING: File is not readable: " & Name);
+            Add_Diagnostic ("Cannot read " & Name);
+            Rotate_TDH;
+            return;
+         end;
+      end if;
 
       declare
          use Ada.Exceptions;
