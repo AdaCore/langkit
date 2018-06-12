@@ -40,12 +40,38 @@ _so_ext = {
     'darwin': 'dylib',
 }.get(sys.platform, 'so')
 
+# Loading the shared library here is quite involved as we want to support
+# Python packages that embed all the required shared libraries: if we can
+# find the shared library in the package directory, import it from there
+# directly.
+
+# Directory that contains this __init__.py module
 _self_path = os.path.dirname(os.path.abspath(__file__))
+
+# Base and full names for the shared library to load. Full name assumes the
+# shared lib is in the package directory.
 _c_lib_name = 'lib${c_api.shared_object_basename}.{}'.format(_so_ext)
 _c_lib_path = os.path.join(_self_path, _c_lib_name)
-if not os.path.exists(_c_lib_path):
+
+# If we can find the shared lirbray in the package directory, load it from
+# here, otherwise let the dynamic loader find it in the environment. On
+# Windows, there is no RPATH trick, so we need to temporarily alter the PATH
+# environment variable in order to import the whole closure of DLLs.
+_old_env_path = None
+if os.path.exists(_c_lib_path):
+    if sys.platform == 'win32':
+        _old_env_path = os.environ['PATH']
+        os.environ['PATH'] = '{}{}{}'.format(_self_path, os.path.pathsep,
+                                             os.environ['PATH'])
+else:
     _c_lib_path = _c_lib_name
+
+# Finally load the library
 _c_lib = ctypes.cdll.LoadLibrary(_c_lib_path)
+
+# Restore the PATH environment variable if we altered it
+if _old_env_path is not None:
+    os.environ['PATH'] = _old_env_path
 
 
 def _import_func(name, argtypes, restype, exc_wrap=True):
