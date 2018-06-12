@@ -3137,7 +3137,7 @@ class PropertyDef(AbstractNodeData):
     @property
     def type(self):
         """
-        Returns the type of the underlying expression after resolution.
+        Return the type of the underlying expression after resolution.
 
         :rtype: langkit.compiled_types.CompiledType
         """
