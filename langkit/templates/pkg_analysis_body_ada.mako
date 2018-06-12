@@ -317,6 +317,10 @@ package body ${ada_lib_name}.Analysis is
          Actual_Charset := Context.Charset;
       end if;
 
+      if Refined_Input.Kind = File then
+         Refined_Input.Filename := Normalized_Filename;
+      end if;
+
       if Refined_Input.Kind in File | Bytes_Buffer then
          Refined_Input.Charset := Actual_Charset;
 
@@ -380,7 +384,7 @@ package body ${ada_lib_name}.Analysis is
         (Kind     => File,
          Charset  => <>,
          Read_BOM => False,
-         Filename => To_Unbounded_String (Filename));
+         Filename => <>);
    begin
       return Get_Unit (Context, Filename, Charset, Reparse, Input, Rule);
    end Get_From_File;

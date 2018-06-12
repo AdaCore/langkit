@@ -488,11 +488,13 @@ package body ${ada_lib_name}.Lexer is
       case Input.Kind is
          when File =>
             declare
+               use GNATCOLL.VFS;
+
                --  The following call to Open_Read may fail with a Name_Error
                --  exception: just let it propagate to the caller as there is
                --  no resource to release yet here.
 
-               File : Mapped_File := Open_Read (To_String (Input.Filename));
+               File : Mapped_File := Open_Read (+Input.Filename.Full_Name.all);
 
                Region      : Mapped_Region := Read (File);
                Buffer_Addr : constant System.Address :=

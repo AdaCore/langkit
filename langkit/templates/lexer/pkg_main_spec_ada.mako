@@ -2,6 +2,8 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
+with GNATCOLL.VFS;
+
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
@@ -74,7 +76,7 @@ package ${ada_lib_name}.Lexer is
 
          case Kind is
          when File =>
-            Filename : Unbounded_String;
+            Filename : GNATCOLL.VFS.Virtual_File;
             --  Name of the file to read
 
          when Bytes_Buffer =>
