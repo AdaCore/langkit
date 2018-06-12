@@ -1,0 +1,8 @@
+File "test.py", line 20, in Example.as_rettype
+    Error: return type is LexicalEnv, which is forbidden in public API
+File "test.py", line 25, in Example.as_arg
+    Error: "env" argument is LexicalEnv, which is forbidden in public API
+File "test.py", line 29, in Example.as_dynvar
+    Error: "env" dynamic variable is LexicalEnv, which is forbidden in public API
+
+Done
