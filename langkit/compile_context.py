@@ -2044,6 +2044,11 @@ class CompileCtx(object):
             for arg in f.natural_arguments:
                 expose(arg.type, f, '"{}" argument'.format(arg.dsl_name),
                        [f.qualname])
+            if f.is_property:
+                for dv in f.dynamic_vars:
+                    expose(dv.type, f,
+                           '"{}" dynamic variable'.format(dv.dsl_name),
+                           [f.qualname])
 
     def lower_properties_dispatching(self):
         """
