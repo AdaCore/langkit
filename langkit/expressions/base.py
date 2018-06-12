@@ -1929,6 +1929,16 @@ class DynamicVariable(AbstractVariable):
         self.argument_name = names.Name.from_lower(name)
         super(DynamicVariable, self).__init__(None, type)
 
+    @property
+    def dsl_name(self):
+        """
+        Name of the dynamic variable as it appears in the DSL. To be used in
+        diagnostics.
+
+        :rtype: str
+        """
+        return self.argument_name.lower
+
     def is_accepted_in(self, prop):
         """
         Return whether `self` is accepted as an optional argument in the given
