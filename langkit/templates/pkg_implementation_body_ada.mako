@@ -2694,14 +2694,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------------
 
    procedure Do_Parsing
-     (Unit        : Analysis_Unit;
-      Read_BOM    : Boolean;
-      Init_Parser :
-        access procedure (Unit     : Analysis_Unit;
-                          Read_BOM : Boolean;
-                          Parser   : in out Parser_Type);
-      Result      : out Reparsed_Unit)
+     (Unit : Analysis_Unit; Input : Lexer_Input; Result : out Reparsed_Unit)
    is
+      Context  : constant Analysis_Context := Unit.Context;
       Unit_TDH : constant Token_Data_Handler_Access := Token_Data (Unit);
 
       Saved_TDH : Token_Data_Handler;
@@ -2758,7 +2753,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
       declare
          use Ada.Exceptions;
       begin
-         Init_Parser (Unit, Read_BOM, Unit.Context.Parser);
+         Init_Parser
+           (Input, Context.With_Trivia, Unit, Unit_TDH,
+            Parsers.Symbol_Literal_Array_Access (Symbol_Literals (Context)),
+            Unit.Context.Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:

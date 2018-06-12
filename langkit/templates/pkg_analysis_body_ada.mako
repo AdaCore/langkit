@@ -73,14 +73,10 @@ package body ${ada_lib_name}.Analysis is
      (Context           : Analysis_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Init_Parser       :
-        access procedure (Unit     : Analysis_Unit;
-                          Read_BOM : Boolean;
-                          Parser   : in out Parser_Type);
+      Input             : Lexer_Input;
       Rule              : Grammar_Rule) return Analysis_Unit;
-   --  Helper for Get_From_File and Get_From_Buffer: do all the common work
-   --  using Init_Parser to either parse from a file or from a buffer. Return
-   --  the resulting analysis unit.
+   --  Helper for Get_From_File and Get_From_Buffer. Return the resulting
+   --  analysis unit.
 
    function Create_Symbol_Literals
      (Symbols : Symbol_Table) return Symbol_Literal_Array;
@@ -293,10 +289,7 @@ package body ${ada_lib_name}.Analysis is
      (Context           : Analysis_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Init_Parser       :
-        access procedure (Unit     : Analysis_Unit;
-                          Read_BOM : Boolean;
-                          Parser   : in out Parser_Type);
+      Input             : Lexer_Input;
       Rule              : Grammar_Rule) return Analysis_Unit
    is
       use Units_Maps;
@@ -309,16 +302,11 @@ package body ${ada_lib_name}.Analysis is
       Created : constant Boolean := Cur = No_Element;
       Unit    : Analysis_Unit;
 
-      Read_BOM : constant Boolean := Charset'Length = 0;
-      --  Unless the caller requested a specific charset for this unit, allow
-      --  the lexer to automatically discover the source file encoding before
-      --  defaulting to the context-specific one. We do this trying to match a
-      --  byte order mark.
-
       Actual_Charset : Unbounded_String;
+      Refined_Input  : Lexer_Input := Input;
 
    begin
-      --  Determine which encoding to use.  The parameter comes first, then the
+      --  Determine which encoding to use. The parameter comes first, then the
       --  unit-specific default, then the context-specific one.
 
       if Charset'Length /= 0 then
@@ -327,6 +315,17 @@ package body ${ada_lib_name}.Analysis is
          Actual_Charset := Element (Cur).Charset;
       else
          Actual_Charset := Context.Charset;
+      end if;
+
+      if Refined_Input.Kind in File | Bytes_Buffer then
+         Refined_Input.Charset := Actual_Charset;
+
+         --  Unless the caller requested a specific charset for this unit,
+         --  allow the lexer to automatically discover the source file encoding
+         --  before defaulting to the context-specific one. We do this trying
+         --  to match a byte order mark.
+
+         Refined_Input.Read_BOM := Charset'Length = 0;
       end if;
 
       --  Create the Analysis_Unit if needed
@@ -345,7 +344,7 @@ package body ${ada_lib_name}.Analysis is
          declare
             Reparsed : Reparsed_Unit;
          begin
-            Do_Parsing (Unit, Read_BOM, Init_Parser, Reparsed);
+            Do_Parsing (Unit, Refined_Input, Reparsed);
             Update_After_Reparse (Unit, Reparsed);
          end;
       end if;
@@ -377,26 +376,13 @@ package body ${ada_lib_name}.Analysis is
       Rule     : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule) return Analysis_Unit
    is
-      procedure Init_Parser
-        (Unit     : Analysis_Unit;
-         Read_BOM : Boolean;
-         Parser   : in out Parser_Type)
-      is
-         Input : constant Lexer_Input :=
-           (Kind     => File,
-            Charset  => Unit.Charset,
-            Read_BOM => Read_BOM,
-            Filename => To_Unbounded_String (Filename));
-      begin
-         Init_Parser
-           (Input, Context.With_Trivia, Unit, Token_Data (Unit),
-            Parsers.Symbol_Literal_Array_Access
-              (Symbol_Literals (Unit.Context)),
-            Parser);
-      end Init_Parser;
+      Input : constant Lexer_Input :=
+        (Kind     => File,
+         Charset  => <>,
+         Read_BOM => False,
+         Filename => To_Unbounded_String (Filename));
    begin
-      return Get_Unit
-        (Context, Filename, Charset, Reparse, Init_Parser'Access, Rule);
+      return Get_Unit (Context, Filename, Charset, Reparse, Input, Rule);
    end Get_From_File;
 
    ---------------------
@@ -411,26 +397,13 @@ package body ${ada_lib_name}.Analysis is
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule) return Analysis_Unit
    is
-      procedure Init_Parser
-        (Unit     : Analysis_Unit;
-         Read_BOM : Boolean;
-         Parser   : in out Parser_Type)
-      is
-         Input : constant Lexer_Input :=
-           (Kind     => Bytes_Buffer,
-            Charset  => Unit.Charset,
-            Read_BOM => Read_BOM,
-            Bytes    => Buffer'Unrestricted_Access);
-      begin
-         Init_Parser
-           (Input, Context.With_Trivia, Unit, Token_Data (Unit),
-            Parsers.Symbol_Literal_Array_Access
-              (Symbol_Literals (Unit.Context)),
-            Parser);
-      end Init_Parser;
+      Input : constant Lexer_Input :=
+        (Kind     => Bytes_Buffer,
+         Charset  => <>,
+         Read_BOM => False,
+         Bytes    => Buffer'Unrestricted_Access);
    begin
-      return Get_Unit (Context, Filename, Charset, True, Init_Parser'Access,
-                       Rule);
+      return Get_Unit (Context, Filename, Charset, True, Input, Rule);
    end Get_From_Buffer;
 
    % if ctx.default_unit_provider:

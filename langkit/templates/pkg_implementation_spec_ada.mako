@@ -1127,14 +1127,9 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Referenced, Unit : Analysis_Unit) return Boolean;
 
    procedure Do_Parsing
-     (Unit        : Analysis_Unit;
-      Read_BOM    : Boolean;
-      Init_Parser : access procedure (Unit     : Analysis_Unit;
-                                      Read_BOM : Boolean;
-                                      Parser   : in out Parser_Type);
-      Result      : out Reparsed_Unit);
-   --  Parse text for Unit using Init_Parser and store the result in Result.
-   --  This leaves Unit unchanged.
+     (Unit : Analysis_Unit; Input : Lexer_Input; Result : out Reparsed_Unit);
+   --  Parse text for Unit using Input and store the result in Result. This
+   --  leaves Unit unchanged.
 
    procedure Flush_Populate_Lexical_Env_Queue (Context : Analysis_Context);
    --  Update lexical environment data related to all units in the populate

@@ -5,9 +5,8 @@ with Ada.Unchecked_Deallocation;
 
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
-with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
-with ${ada_lib_name}.Introspection;    use ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;            use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Lexer;         use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
@@ -142,51 +141,23 @@ package body ${ada_lib_name}.Rewriting is
       --  Try to reparse all units that were potentially modified
       for Unit_Handle of Handle.Units loop
          declare
-            procedure Init_Parser
-              (Unit     : Analysis_Unit;
-               Read_BOM : Boolean;
-               Parser   : in out Parser_Type);
-            --  Callback for the call to Do_Parsing below
-
-            PU     : constant Processed_Unit := new Processed_Unit_Record'
+            PU    : constant Processed_Unit := new Processed_Unit_Record'
               (Unit     => Unit_Handle.Unit,
                New_Data => <>);
-            Buffer : String_Access;
-
-            -----------------
-            -- Init_Parser --
-            -----------------
-
-            procedure Init_Parser
-              (Unit     : Analysis_Unit;
-               Read_BOM : Boolean;
-               Parser   : in out Parser_Type)
-            is
-               Input : constant Lexer_Input :=
-                 (Kind     => Bytes_Buffer,
-                  Charset  => To_Unbounded_String (Get_Charset (Unit)),
-                  Read_BOM => Read_BOM,
-                  Bytes    => Buffer);
-            begin
-               Init_Parser
-                 (Input, True, PU.Unit, Token_Data (PU.Unit),
-                  Parsers.Symbol_Literal_Array_Access
-                    (Symbol_Literals (Context (PU.Unit))),
-                  Parser);
-            end Init_Parser;
+            Input : Lexer_Input :=
+              (Kind     => Bytes_Buffer,
+               Charset  => <>,
+               Read_BOM => False,
+               Bytes    => null);
          begin
             Units.Append (PU);
 
             --  Reparse (i.e. unparse and then parse) this rewritten unit
-            Buffer := Unparse (Unit_Handle.Root, PU.Unit,
-                               Preserve_Formatting => True,
-                               As_Unit             => True);
-            Do_Parsing
-              (Unit        => PU.Unit,
-               Read_BOM    => False,
-               Init_Parser => Init_Parser'Access,
-               Result      => PU.New_Data);
-            Free (Buffer);
+            Input.Bytes := Unparse (Unit_Handle.Root, PU.Unit,
+                                    Preserve_Formatting => True,
+                                    As_Unit             => True);
+            Do_Parsing (PU.Unit, Input, PU.New_Data);
+            Free (Input.Bytes);
 
             --  If there is a parsing error, abort the rewriting process
             if not PU.New_Data.Diagnostics.Is_Empty then
@@ -1000,40 +971,16 @@ package body ${ada_lib_name}.Rewriting is
          Context  : constant Analysis_Context := Rewriting.Context (Handle);
          Unit     : constant Analysis_Unit := Templates_Unit (Context);
          Reparsed : Reparsed_Unit;
-
-         procedure Init_Parser
-           (Unit     : Analysis_Unit;
-            Read_BOM : Boolean;
-            Parser   : in out Parser_Type);
-         --  Callback for Do_Parsing
+         Text     : constant Text_Type := To_Wide_Wide_String (Buffer);
+         Input    : constant Lexer_Input :=
+           (Kind => Text_Buffer,
+            Text => Text'Unrestricted_Access);
 
          function Transform
            (Node   : ${root_node_type_name};
             Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle;
          --  Turn a node from the Reparsed unit into a recursively expanded
          --  node rewriting handle.
-
-         -----------------
-         -- Init_Parser --
-         -----------------
-
-         procedure Init_Parser
-           (Unit     : Analysis_Unit;
-            Read_BOM : Boolean;
-            Parser   : in out Parser_Type)
-         is
-            pragma Unreferenced (Read_BOM);
-            Text  : constant Text_Type := To_Wide_Wide_String (Buffer);
-            Input : constant Lexer_Input :=
-              (Kind => Text_Buffer,
-               Text => Text'Unrestricted_Access);
-         begin
-            Init_Parser
-              (Input, True, Unit, Token_Data (Unit),
-               Analysis.Parsers.Symbol_Literal_Array_Access
-                 (Symbol_Literals (Context)),
-               Parser);
-         end Init_Parser;
 
          ---------------
          -- Transform --
@@ -1087,7 +1034,7 @@ package body ${ada_lib_name}.Rewriting is
 
       begin
          Set_Rule (Unit, Rule);
-         Do_Parsing (Unit, False, Init_Parser'Access, Reparsed);
+         Do_Parsing (Unit, Input, Reparsed);
          if not Reparsed.Diagnostics.Is_Empty then
             Destroy (Reparsed);
             raise Template_Instantiation_Error;
