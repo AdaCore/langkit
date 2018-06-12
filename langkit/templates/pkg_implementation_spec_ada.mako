@@ -5,7 +5,6 @@
 <%namespace name="exts"              file="extensions.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
-<%namespace name="public_properties" file="public_properties_ada.mako" />
 <%namespace name="memoization"       file="memoization_ada.mako" />
 
 <%
