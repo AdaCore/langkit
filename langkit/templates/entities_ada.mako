@@ -1,7 +1,8 @@
 ## vim: filetype=makoada
 
 <%namespace name="astnode_types"     file="astnode_types_ada.mako" />
-<%namespace name="public_properties" file="public_properties_ada.mako" />
+<%namespace name="public_properties"
+            file="properties/public_wrappers_ada.mako" />
 
 <%def name="decls1()">
 
