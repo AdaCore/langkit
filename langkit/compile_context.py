@@ -818,6 +818,10 @@ class CompileCtx(object):
         # Langkit_Support.Lexical_Env generic package requires it.
         T.env_md.require_hash_function()
 
+        # We expose a hash function for public entities, so we must generate
+        # the underlying required helpers.
+        T.entity.require_hash_function()
+
     def check_ple_unit_root(self):
         """
         Check that if the "ple_unit_root" node annotation is used, it is valid.
