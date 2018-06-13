@@ -261,6 +261,8 @@ package ${ada_lib_name}.Analysis.Implementation is
       function Hash (Unit : Analysis_Unit) return Hash_Type;
    % endif
 
+   ${struct_types.decl_hash(T.entity)}
+
    --------------------------
    -- Big integers wrapper --
    --------------------------
