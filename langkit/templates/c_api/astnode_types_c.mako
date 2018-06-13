@@ -13,15 +13,13 @@ extern int ${accessor_name}(
     ${entity_type} *node,
 
     % for arg in field.arguments:
-        <% type_name = arg.type.c_type(capi).name %>
+        <% type_name = arg.public_type.c_type(capi).name %>
         ${('const {}*'.format(type_name)
-           if arg.type.is_ada_record else type_name)}
+           if arg.public_type.is_ada_record else type_name)}
         ${arg.name},
     % endfor
 
-    ${(entity_type
-       if field.type.is_ast_node else
-       field.c_type_or_error(capi).name)} *value_p
+    ${field.c_type_or_error(capi).name} *value_p
 );
 
 </%def>
