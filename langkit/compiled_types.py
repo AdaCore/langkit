@@ -861,6 +861,35 @@ class Argument(object):
         return self.var.type
 
     @property
+    def public_type(self):
+        """
+        Return the type to use when exposing this argument in public APIs.
+
+        :rtype: CompiledType
+        """
+        return self.type.entity if self.type.is_ast_node else self.type
+
+    @property
+    def public_default_value(self):
+        """
+        Assuming this argument has a default value, return the default value to
+        use in public APIs, according to the type exposed in public.
+
+        :rtype: ResolvedExpression
+        """
+        from langkit.expressions import NullExpr
+
+        assert self.default_value is not None
+
+        if not self.type.is_ast_node:
+            return self.default_value
+
+        if isinstance(self.default_value, NullExpr):
+            return NullExpr(self.public_type)
+        else:
+            assert False, 'Unsupported default value'
+
+    @property
     def dsl_name(self):
         return self.name.lower
 
@@ -1034,6 +1063,15 @@ class AbstractNodeData(object):
         """
         raise not_implemented_error(self, type(self).type)
 
+    @property
+    def public_type(self):
+        """
+        Return the type to use when exposing this field in public APIs.
+
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        return self.type.entity if self.type.is_ast_node else self.type
+
     @type.setter
     def type(self, type):
         raise not_implemented_error(self, type(self).type)
@@ -1045,7 +1083,7 @@ class AbstractNodeData(object):
         :rtype: CAPIType
         """
         with self.diagnostic_context:
-            return self.type.c_type(capi)
+            return self.public_type.c_type(capi)
 
     def _prefixed_name(self, name):
         """

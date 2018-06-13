@@ -10,15 +10,12 @@
      (Node : ${entity_type}_Ptr;
 
       % for arg in field.arguments:
-         ${arg.name} : ${'access constant ' if arg.type.is_ada_record else ''}
-                       ${arg.type.c_type(capi).name};
+         ${arg.name} :
+            ${'access constant' if arg.public_type.is_ada_record else ''}
+            ${arg.public_type.c_type(capi).name};
       % endfor
 
-      Value_P : access ${(
-         entity_type
-         if field.type.is_ast_node else
-         field.type.c_type(capi).name
-      )}) return int
+      Value_P : access ${field.public_type.c_type(capi).name}) return int
 </%def>
 
 <%def name="accessor_decl(field)">
@@ -67,7 +64,7 @@
             % elif arg.type.is_analysis_unit_kind:
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
-               ${arg.type.name} (Unwrap (${arg_ref}))
+               ${arg.type.name} (${arg_ref}.El)
             % elif arg.type.is_entity_type:
                (if ${arg_ref}.El = null
                 then ${arg.type.nullexpr}

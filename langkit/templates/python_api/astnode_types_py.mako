@@ -11,19 +11,21 @@
         <%
             # Expression to create a holder for the C result
             c_result_constructor = '{}()'.format(
-                pyapi.type_internal_name(field.type),
+                pyapi.type_internal_name(field.public_type),
             )
 
             # Expression for the C value for field evaluation
-            explicit_args = [pyapi.unwrap_value(arg.name.lower, arg.type)
-                             for arg in field.arguments]
+            explicit_args = [
+                pyapi.unwrap_value(arg.name.lower, arg.public_type)
+                for arg in field.arguments
+            ]
             eval_args = [c_result_constructor, c_accessor] + explicit_args
             c_result = 'self._eval_field({})'.format(', '.join(eval_args))
 
             # What comes next is the unwrapping of this C result for the
             # caller.
         %>
-        result = ${pyapi.wrap_value(c_result, field.type)}
+        result = ${pyapi.wrap_value(c_result, field.public_type)}
         % endif
 
 </%def>
