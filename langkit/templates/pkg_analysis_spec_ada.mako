@@ -7,6 +7,7 @@
 
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
+with Ada.Containers;
 with Ada.Unchecked_Deallocation;
 
 with System;

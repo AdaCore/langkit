@@ -26,6 +26,10 @@
    function Image (Node : ${root_entity.api_name}'Class) return String;
    --  Like Short_Image, also including its rebinding metadata
 
+   function Hash
+     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type;
+   --  Generic hash function, to be used for nodes as keys in hash tables
+
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
       function As_${e.el_type.kwless_raw_name}
@@ -288,6 +292,18 @@
 
    function Image (Node : ${root_entity.api_name}'Class) return String is
      (Image (Image (Node)));
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash
+     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type
+   is
+      N : constant ${root_entity.name} := (Node.Node, Convert (Node.E_Info));
+   begin
+      return Hash (N);
+   end Hash;
 
    -----------------------
    -- Entity converters --
