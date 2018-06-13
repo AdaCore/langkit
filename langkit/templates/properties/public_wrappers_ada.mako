@@ -15,7 +15,7 @@
          := ${arg.public_default_value.render_public_ada_constant()}
       % endif
    % endfor
-  ) return ${(property.type.api_name)}
+  ) return ${(property.public_type.api_name)}
 </%def>
 
 <%def name="decl(property)">
@@ -95,6 +95,10 @@
                  )
              )
 
+         elif property.type.is_ast_node:
+            wrapped_result = ('({} (Property_Result), No_Public_Entity_Info)'
+                              .format(root_node_type_name))
+
          elif property.type.is_array_type:
              if property.type.element_type.is_entity_type:
                  entity_type = property.type.element_type.name
@@ -142,7 +146,7 @@
          ${'({})'.format(', '.join(actuals)) if actuals else ''};
 
       % if wrap_code:
-         return Result : ${property.type.api_name} ${(
+         return Result : ${property.public_type.api_name} ${(
             ':= {}'.format(wrapped_result)
             if wrapped_result else ''
          )} do
