@@ -1069,6 +1069,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
         (GNATCOLL.VFS.Full_Name_Hash (Unit.File_Name));
    % endif
 
+   ${struct_types.body_hash(T.entity)}
+
    --------------------------
    -- Big integers wrapper --
    --------------------------
