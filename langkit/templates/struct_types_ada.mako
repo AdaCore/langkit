@@ -53,9 +53,7 @@
       function Equivalent (L, R : ${cls.name}) return Boolean;
    % endif
 
-   % if cls.requires_hash_function:
-      function Hash (R : ${cls.name}) return Hash_Type;
-   % endif
+   ${decl_hash(cls)}
 
    % if ctx.properties_logging:
       function Trace_Image (R : ${cls.name}) return String;
@@ -134,32 +132,7 @@
 
    % endif
 
-   % if cls.requires_hash_function:
-
-      ----------
-      -- Hash --
-      ----------
-
-      function Hash (R : ${cls.name}) return Hash_Type is
-      begin
-         <%
-            fields = cls.get_fields()
-
-            def field_hash(f):
-               return 'Hash (R.{})'.format(f.name)
-         %>
-         % if len(fields) == 0:
-            return Initial_Hash;
-         % elif len(fields) == 1:
-            return ${field_hash(fields[0])};
-         % elif len(fields) == 2:
-            return Combine
-              (${field_hash(fields[0])}, ${field_hash(fields[1])});
-         % else:
-            return Combine ((${', '.join(field_hash(f) for f in fields)}));
-         % endif
-      end Hash;
-   % endif
+   ${body_hash(cls)}
 
    % if ctx.properties_logging:
       -----------------
@@ -189,4 +162,39 @@
       end Trace_Image;
    % endif
 
+</%def>
+
+<%def name="decl_hash(cls)">
+   % if cls.requires_hash_function:
+      function Hash (R : ${cls.name}) return Hash_Type;
+   % endif
+</%def>
+
+<%def name="body_hash(cls)">
+   % if cls.requires_hash_function:
+
+      ----------
+      -- Hash --
+      ----------
+
+      function Hash (R : ${cls.name}) return Hash_Type is
+      begin
+         <%
+            fields = cls.get_fields()
+
+            def field_hash(f):
+               return 'Hash (R.{})'.format(f.name)
+         %>
+         % if len(fields) == 0:
+            return Initial_Hash;
+         % elif len(fields) == 1:
+            return ${field_hash(fields[0])};
+         % elif len(fields) == 2:
+            return Combine
+              (${field_hash(fields[0])}, ${field_hash(fields[1])});
+         % else:
+            return Combine ((${', '.join(field_hash(f) for f in fields)}));
+         % endif
+      end Hash;
+   % endif
 </%def>
