@@ -1777,6 +1777,11 @@ class ASTNodeType(BaseStructType):
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
+
+            # Even though bare node types are not exposed, we allow them in
+            # public APIs and will (un)wrap them as entities automatically.
+            exposed=True,
+
             is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
             element_type=element_type, hashable=True,
             type_repo_name=self.raw_name.camel
