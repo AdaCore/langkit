@@ -176,7 +176,7 @@ package ${ada_lib_name}.Analysis is
       Rule     : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
-      with Pre => not Has_Rewriting_Handle (Context);
+      with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_file', 3)}
 
    function Get_From_Buffer
@@ -204,7 +204,7 @@ package ${ada_lib_name}.Analysis is
       Charset     : String := "";
       Reparse     : Boolean := False)
       return Analysis_Unit
-      with Pre => not Has_Rewriting_Handle (Context);
+      with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
    function Get_With_Error
