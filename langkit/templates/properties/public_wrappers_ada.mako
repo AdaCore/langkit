@@ -5,14 +5,14 @@
 <%def name="public_prototype(property)">
   (${property.self_arg_name} : ${property.struct.entity.api_name}'Class
    % for arg in property.arguments:
-      ; ${arg.name} : ${arg.type.api_name}
+      ; ${arg.name} : ${arg.public_type.api_name}
 
       ## Make entity arguments class-wide so that 1) these property wrappers
       ## are not primitives and 2) we can give them default values.
-      ${"'Class" if arg.type.is_entity_type else ''}
+      ${"'Class" if arg.public_type.is_entity_type else ''}
 
       % if arg.default_value is not None:
-         := ${arg.default_value.render_public_ada_constant()}
+         := ${arg.public_default_value.render_public_ada_constant()}
       % endif
    % endfor
   ) return ${(property.type.api_name)}
@@ -43,6 +43,10 @@
                      type=arg.type.el_type.name,
                      name=arg.name
                ))
+
+            elif arg.type.is_ast_node:
+               actual = '{type} ({name}.Node)'.format(type=arg.type.name,
+                                                      name=arg.name)
 
             elif arg.type.is_array_type:
                 # We need to allocate our special record type to pass it to the
