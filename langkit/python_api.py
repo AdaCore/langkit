@@ -59,6 +59,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.SymbolType, lambda _: '{}._wrap()'),
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
+            (T.CharacterType, lambda _: 'unichr({{}}{})'.format(value_suffix)),
             (ct.ArrayType, lambda cls: '{}({{}}, inc_ref={})'.format(
                 self.array_wrapper(type),
                 inc_ref
@@ -94,6 +95,7 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (T.BoolType, lambda _: 'bool({})'),
             (T.LongType, lambda _: 'int({})'),
+            (T.CharacterType, lambda _: 'ord({})'),
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
                 self.array_wrapper(cls)
             )),
@@ -126,6 +128,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.BoolType, lambda _: ctype_type('c_uint8')),
             (T.LongType, lambda _: ctype_type('c_int')),
+            (T.CharacterType, lambda _: ctype_type('c_uint32')),
             (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
             (T.TokenType, lambda _: 'Token'),
             (T.SymbolType, lambda _: wrapped_type('text')),

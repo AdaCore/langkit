@@ -2730,7 +2730,7 @@ def create_builtin_types():
                  type_repo_name='CharacterType',
                  exposed=True,
                  nullexpr="Chars.NUL",
-                 c_type_name='Unsigned_32',
+                 c_type_name='uint32_t',
                  external=True,
                  api_name='CharacterType')
 
