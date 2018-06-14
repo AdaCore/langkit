@@ -1561,6 +1561,28 @@ class IntegerLiteralExpr(BindableLiteralExpr):
         return str(self.value)
 
 
+class CharacterLiteralExpr(BindableLiteralExpr):
+
+    def __init__(self, value, abstract_expr=None):
+        self.value = value
+        assert len(self.value) == 1
+
+        self.ada_value = "Character_Type'Val ({})".format(ord(self.value))
+
+        super(CharacterLiteralExpr, self).__init__(
+            self.ada_value, T.CharacterType, abstract_expr=abstract_expr
+        )
+
+    def render_private_ada_constant(self):
+        return self.ada_value
+
+    def render_public_ada_constant(self):
+        return self.ada_value
+
+    def render_python_constant(self):
+        return repr(self.value)
+
+
 class NullExpr(BindableLiteralExpr):
     """
     Resolved expression for the null expression corresponding to some type.
@@ -4030,6 +4052,30 @@ class Literal(AbstractExpression):
 
     def __repr__(self):
         return '<Literal {}>'.format(self.literal)
+
+
+@dsl_document
+class CharacterLiteral(AbstractExpression):
+    """
+    Literal for a single Unicode character.
+    """
+
+    def __init__(self, literal):
+        super(CharacterLiteral, self).__init__()
+        self.literal = (literal
+                        if isinstance(str, unicode) else
+                        unicode(literal))
+        check_source_language(
+            len(self.literal) == 1,
+            'Character literal must be a 1-element string (got {} elements'
+            ' here)'.format(len(self.literal))
+        )
+
+    def construct(self):
+        return CharacterLiteralExpr(self.literal, abstract_expr=self)
+
+    def __repr__(self):
+        return '<CharacterLiteral {}>'.format(repr(self.literal))
 
 
 def aggregate_expr(type, assocs):
