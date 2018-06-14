@@ -105,6 +105,7 @@ package ${ada_lib_name}.Analysis.Implementation.C is
    type ${exception_type}_Ptr is access ${exception_type};
 
    type ${bool_type} is new Unsigned_8;
+   subtype uint32_t is Unsigned_32;
 
    procedure Free (Address : System.Address)
      with Export        => True,

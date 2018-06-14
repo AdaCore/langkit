@@ -59,6 +59,8 @@
                ${arg_ref} /= 0
             % elif arg.type.is_long_type:
                Integer (${arg_ref})
+            % elif arg.type.is_character_type:
+               Character_Type'Val (${arg_ref})
             % elif arg.type.is_analysis_unit_type:
                Unwrap (${arg_ref})
             % elif arg.type.is_analysis_unit_kind:
@@ -139,6 +141,8 @@
                    ${bool_type} (Boolean'Pos (Result))
                % elif field.type.is_long_type:
                    int (Result)
+               % elif field.type.is_character_type:
+                   Character_Type'Pos (Result)
                % elif field.type.is_analysis_unit_type:
                    Wrap (Result)
                % elif field.type.is_analysis_unit_kind:
