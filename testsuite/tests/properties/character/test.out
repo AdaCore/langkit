@@ -1,0 +1,13 @@
+main.py: Running...
+.get_a() = u'a'
+.get_eacute() = u'\xe9'
+.identity(u'a') = u'a'
+.identity(u'\u03c0') = u'\u03c0'
+Trying to evaluate .identity(1)
+   ... got a TypeError: ord() expected string of length 1, but int found
+Trying to evaluate .identity('aa')
+   ... got a TypeError: ord() expected a character, but string of length 2 found
+Trying to evaluate .identity(u'aa')
+   ... got a TypeError: ord() expected a character, but string of length 2 found
+main.py: Done.
+Done
