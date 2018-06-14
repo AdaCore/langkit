@@ -2299,7 +2299,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    overriding function Abstract_Rewritten_Node
      (Node : access ${root_node_value_type}) return ${root_node_type_name} is
    begin
-      return null;
+      return ${root_node_type_name} (Node);
    end Abstract_Rewritten_Node;
 
    ----------------------
