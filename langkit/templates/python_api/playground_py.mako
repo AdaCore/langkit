@@ -29,24 +29,40 @@ Enjoy!
 
 
 class Playground(object):
+    """
+    Base class to regroup logic for the playground. We use a class so that
+    specific languages implementations can add specific arguments and
+    processing by overriding:
+
+    - add_arguments to add arguments to the argparse.Parser instance
+
+    - create_unit_provider to return a custom unit provider to be used by the
+      AnalysisContext.
+    """
 
     def __init__(self):
         self.parser = argparse.ArgumentParser(
             description="${module_name} playground. Analyze files passed "
             "as arguments."
         )
-
-    def create_arg_parser(self):
         self.parser.add_argument('files', nargs='+', help='Files')
         self.parser.add_argument(
             '-i', '--input-script', type=str, default='',
             help="Script to execute when playground has loaded the units"
         )
 
-    def process_args(self):
+    def add_arguments(self):
+        """
+        Hook for subclasses to add arguments to self.parser. Default
+        implementation does nothing.
+        """
         pass
 
     def create_unit_provider(self):
+        """
+        Hook for subclasses to return a custom unit provider.
+        Default implementation returns None.
+        """
         return None
 
     def process_file(self, file_name):
@@ -54,9 +70,8 @@ class Playground(object):
         return u
 
     def main(self):
-        self.create_arg_parser()
+        self.add_arguments()
         self.args = self.parser.parse_args()
-        self.process_args()
         self.ctx = ${module_name}.AnalysisContext(
             'utf-8', with_trivia=True,
             unit_provider=self.create_unit_provider()
