@@ -568,9 +568,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  We implement array types as discriminated records so that binding to C
    --  can be done without copy.
 
-   --  TODO??? This is likely to change in the near future: we would like to
-   --  have here pure Ada arrays instead.
-
    % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type.should_emit_array_type:
    ${array_types.public_decl(array_type)}
