@@ -33,7 +33,10 @@ except TypeError as exc:
     res_bad_array = '<TypeError: {}>'.format(exc)
 print('u.root.p_count(u.root.p_all_items) = {}'.format(res_bad_array))
 
-res_array = u.root.p_count(u.root.p_example_items)
+example_items = u.root.p_example_items
+print('u.root.p_example_items = {}'.format(example_items))
+
+res_array = u.root.p_count(example_items)
 print('u.root.p_count(u.root.p_example_items) = {}'.format(res_array))
 
 print('main.py: Done.')
