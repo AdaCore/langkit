@@ -2,6 +2,7 @@ main.py: Running...
 u.root.p_count(None) = <TypeError: EntityArray instance expected, got <type 'NoneType'> instead>
 u.root.p_count(42) = <TypeError: EntityArray instance expected, got <type 'int'> instead>
 u.root.p_count(u.root.p_all_items) = 3
+u.root.p_example_items = <EntityArray [<Example 1:1-1:8>, <Example 1:14-1:21>]>
 u.root.p_count(u.root.p_example_items) = 2
 main.py: Done.
 Done
