@@ -502,6 +502,15 @@ class CompiledType(object):
         return self == T.CharacterType
 
     @property
+    def is_string_type(self):
+        """
+        Return whether this is an array of character type.
+
+        :rtype: bool
+        """
+        return self == T.CharacterType.array
+
+    @property
     def is_symbol_type(self):
         """
         Return whether this is a symbol type.
@@ -2463,6 +2472,12 @@ class ArrayType(CompiledType):
         else:
             CompiledTypeMetaclass.pending_array_types.append(self)
 
+        # Text_Type is always defined, since it comes from
+        # Langkit_Support.Text. To avoid discrepancies in code generation,
+        # consider it is always exposed.
+        if element_type.is_character_type:
+            self._exposed = True
+
     @property
     def name(self):
         return self.element_type.name + names.Name('Array_Access')
@@ -2474,7 +2489,9 @@ class ArrayType(CompiledType):
         for public types (such as booleans, integers, analysis units, etc.) but
         we have a different one for "wrapped" types, such as entities.
         """
-        return self.element_type.api_name + names.Name('Array')
+        return (names.Name('Text_Type')
+                if self.is_string_type else
+                self.element_type.api_name + names.Name('Array'))
 
     @property
     def dsl_name(self):
@@ -2487,7 +2504,9 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type.name + names.Name('Array')
+        return (self.api_name
+                if self.is_string_type else
+                self.element_type.name + names.Name('Array'))
 
     @property
     def pointed(self):
@@ -2897,6 +2916,13 @@ class TypeRepo(object):
             [('key', UserField(type=T.SymbolType)),
              ('val', UserField(type=self.defer_root_node))]
         )
+
+    @property
+    def StringType(self):
+        """
+        Shortcut for CharacterType.array.
+        """
+        return self.CharacterType.array
 
 
 def resolve_type(typeref):

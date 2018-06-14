@@ -1,8 +1,12 @@
 ## vim: filetype=makoada
 
 <%def name="public_api_decl(cls)">
-   type ${cls.api_name} is
-      array (Positive range <>) of ${cls.element_type.api_name};
+   ## We expose arrays of characters as Langkit_Support.Text.Text_Type, so we
+   ## should not declare another type for them.
+   % if not cls.element_type.is_character_type:
+      type ${cls.api_name} is
+         array (Positive range <>) of ${cls.element_type.api_name};
+   % endif
 </%def>
 
 <%def name="public_incomplete_decl(cls)">
@@ -228,17 +232,22 @@
       -----------------
 
       function Trace_Image (A : ${cls.name}) return String is
-         Result : Unbounded_String;
-      begin
-         Append (Result, "[");
-         for I in A.Items'Range loop
-            if I > A.Items'First then
-               Append (Result, ", ");
-            end if;
-            Append (Result, Trace_Image (A.Items (I)));
-         end loop;
-         Append (Result, "]");
-         return To_String (Result);
+         % if cls.is_string_type:
+            begin
+               return Image (A.Items);
+         % else:
+               Result : Unbounded_String;
+            begin
+               Append (Result, "[");
+               for I in A.Items'Range loop
+                  if I > A.Items'First then
+                     Append (Result, ", ");
+                  end if;
+                  Append (Result, Trace_Image (A.Items (I)));
+               end loop;
+               Append (Result, "]");
+               return To_String (Result);
+         % endif
       end Trace_Image;
    % endif
 
