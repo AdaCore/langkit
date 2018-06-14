@@ -493,6 +493,15 @@ class CompiledType(object):
         return self == T.LongType
 
     @property
+    def is_character_type(self):
+        """
+        Return whether this is a character type.
+
+        :rtype: bool
+        """
+        return self == T.CharacterType
+
+    @property
     def is_symbol_type(self):
         """
         Return whether this is a symbol type.
@@ -2716,6 +2725,14 @@ def create_builtin_types():
                  is_ada_record=True,
                  c_type_name='big_integer',
                  api_name='BigInteger')
+
+    CompiledType('CharacterType',
+                 type_repo_name='CharacterType',
+                 exposed=True,
+                 nullexpr="Chars.NUL",
+                 c_type_name='Unsigned_32',
+                 external=True,
+                 api_name='CharacterType')
 
 
 class TypeRepo(object):
