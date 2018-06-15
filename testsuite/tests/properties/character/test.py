@@ -5,7 +5,8 @@ Test that the Character type works as expected in generated APIs.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
-from langkit.expressions import CharacterLiteral, langkit_property
+from langkit.expressions import (ArrayLiteral, CharacterLiteral,
+                                 langkit_property)
 from langkit.parsers import Grammar
 
 from utils import build_and_run
@@ -28,6 +29,10 @@ class Example(FooNode):
     @langkit_property(public=True)
     def identity(c=T.CharacterType):
         return c
+
+    @langkit_property(public=True)
+    def double(c=T.CharacterType):
+        return ArrayLiteral([c, c], T.CharacterType)
 
 
 foo_grammar = Grammar('main_rule')
