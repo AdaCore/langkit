@@ -87,6 +87,25 @@ class ${type_name}(_BaseArray):
         return ${(pyapi.wrap_value('item', element_type, from_field_access=True,
                                    inc_ref=True))}
 
+    ## If this is a string type, override wrapping to return native unicode
+    ## instances.
+    % if cls.is_string_type:
+    @classmethod
+    def _wrap(cls, c_value, inc_ref=False):
+        # Reinterpret this array of uint32_t values as the equivalent array of
+        # characters, then decode it using the appropriate UTF-32 encoding.
+        chars = ctypes.cast(ctypes.pointer(c_value.contents.items),
+                            ctypes.POINTER(ctypes.c_char))
+        result = chars[:4 * c_value.contents.n].decode(_text.encoding)
+
+        if not inc_ref:
+            # In this case, we are given an ownership share: as we just created
+            # a copy for the result, give up this share before returning.
+            cls._dec_ref(c_value)
+
+        return result
+    % endif
+
     _c_element_type = ${c_element_type}
 
     class _c_struct(ctypes.Structure):
