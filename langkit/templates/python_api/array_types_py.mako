@@ -56,6 +56,10 @@ class _BaseArray(object):
         else:
             return value._c_value
 
+    @classmethod
+    def _wrap(cls, c_value, inc_ref=False):
+        return cls(c_value, inc_ref)
+
     @staticmethod
     def _unwrap_item(item):
         raise NotImplementedError()
