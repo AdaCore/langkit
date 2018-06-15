@@ -60,7 +60,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (T.CharacterType, lambda _: 'unichr({{}}{})'.format(value_suffix)),
-            (ct.ArrayType, lambda cls: '{}({{}}, inc_ref={})'.format(
+            (ct.ArrayType, lambda cls: '{}._wrap({{}}, inc_ref={})'.format(
                 self.array_wrapper(type),
                 inc_ref
             )),
