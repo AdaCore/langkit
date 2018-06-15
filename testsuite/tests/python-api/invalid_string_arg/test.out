@@ -1,0 +1,5 @@
+File "test.py", line 23, in Example.identity1
+    Error: String arguments in public properties are not supported at the moment
+File "test.py", line 26, in Example.identity2
+    Error: String arguments in public properties are not supported at the moment
+Done
