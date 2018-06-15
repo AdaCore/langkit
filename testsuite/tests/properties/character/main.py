@@ -31,4 +31,7 @@ for obj in (1, 'aa', u'aa'):
     else:
         print('   ... got no exception')
 
+print(".double(u'a') = {}".format(repr(n.p_double('a'))))
+print(".double(u'\\u03c0') = {}".format(repr(n.p_double(u'\u03c0'))))
+
 print('main.py: Done.')

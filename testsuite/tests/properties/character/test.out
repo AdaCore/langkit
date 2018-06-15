@@ -9,5 +9,7 @@ Trying to evaluate .identity('aa')
    ... got a TypeError: ord() expected a character, but string of length 2 found
 Trying to evaluate .identity(u'aa')
    ... got a TypeError: ord() expected a character, but string of length 2 found
+.double(u'a') = u'aa'
+.double(u'\u03c0') = u'\u03c0\u03c0'
 main.py: Done.
 Done
