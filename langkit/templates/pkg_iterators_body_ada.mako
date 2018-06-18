@@ -38,7 +38,7 @@ package body ${ada_lib_name}.Iterators is
    is
    begin
       while Next (It.Traverse_It, Element) loop
-         if It.Predicate (Element) then
+         if It.Predicate = null or else It.Predicate (Element) then
             return True;
          end if;
       end loop;
@@ -51,7 +51,8 @@ package body ${ada_lib_name}.Iterators is
 
    function Find
      (Root      : ${root_entity.api_name}'Class;
-      Predicate : access function (N : ${root_entity.api_name}) return Boolean)
+      Predicate :
+        access function (N : ${root_entity.api_name}) return Boolean := null)
      return Local_Find_Iterator
    is
       Dummy  : ${root_entity.api_name};
@@ -76,7 +77,8 @@ package body ${ada_lib_name}.Iterators is
 
    function Find_First
      (Root      : ${root_entity.api_name}'Class;
-      Predicate : access function (N : ${root_entity.api_name}) return Boolean)
+      Predicate :
+        access function (N : ${root_entity.api_name}) return Boolean := null)
       return ${root_entity.api_name}
    is
       I      : Local_Find_Iterator := Find (Root, Predicate);
