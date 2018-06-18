@@ -68,14 +68,16 @@ package ${ada_lib_name}.Iterators is
 
    function Find
      (Root      : ${root_entity.api_name}'Class;
-      Predicate : access function (N : ${root_entity.api_name}) return Boolean)
+      Predicate :
+        access function (N : ${root_entity.api_name}) return Boolean := null)
       return Local_Find_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) that
    --  satisfy the Predicate predicate.
 
    function Find_First
      (Root      : ${root_entity.api_name}'Class;
-      Predicate : access function (N : ${root_entity.api_name}) return Boolean)
+      Predicate :
+        access function (N : ${root_entity.api_name}) return Boolean := null)
       return ${root_entity.api_name};
    --  Return the first node found under Root (included) that satisfies the
    --  given Predicate. Return a null node if there is no such node.
