@@ -5,14 +5,15 @@ with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
-with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Symbols;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
-package body ${ada_lib_name}.Analysis.Parsers is
+package body ${ada_lib_name}.Parsers is
+   use all type Langkit_Support.Symbols.Symbol_Type;
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
@@ -101,7 +102,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    procedure Init_Parser
      (Input           : Lexer_Input;
       With_Trivia     : Boolean;
-      Unit            : Analysis_Unit;
+      Unit            : access Implementation.Analysis_Unit_Type;
       TDH             : Token_Data_Handler_Access;
       Symbol_Literals : Symbol_Literal_Array_Access;
       Parser          : in out Parser_Type) is
@@ -289,4 +290,4 @@ package body ${ada_lib_name}.Analysis.Parsers is
       List := null;
    end Release_Parse_List;
 
-end ${ada_lib_name}.Analysis.Parsers;
+end ${ada_lib_name}.Parsers;

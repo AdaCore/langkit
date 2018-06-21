@@ -1500,7 +1500,7 @@ class BindableLiteralExpr(LiteralExpr):
     def render_private_ada_constant(self):
         """
         Assuming this expression is a valid constant, return Ada code to
-        materialize it in the private API ($.Analysis.Implementation).
+        materialize it in the private API ($.Implementation).
 
         :rtype: str
         """

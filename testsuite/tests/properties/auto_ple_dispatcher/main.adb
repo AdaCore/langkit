@@ -3,6 +3,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 with GNATCOLL.Traces;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
+with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
    Ctx : Analysis_Context := Create;

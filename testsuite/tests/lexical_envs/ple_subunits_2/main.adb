@@ -6,6 +6,7 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
+with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
    Ctx    : Analysis_Context := Create;

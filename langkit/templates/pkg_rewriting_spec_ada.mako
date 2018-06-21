@@ -12,7 +12,8 @@ private with Langkit_Support.Bump_Ptr;
 private with Langkit_Support.Bump_Ptr.Vectors;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
-private with ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
+private with ${ada_lib_name}.Implementation;
 
 package ${ada_lib_name}.Rewriting is
 
@@ -363,7 +364,7 @@ private
 
    use Langkit_Support.Bump_Ptr;
 
-   use ${ada_lib_name}.Analysis.Implementation;
+   use ${ada_lib_name}.Implementation;
 
    type Rewriting_Handle_Type;
    type Unit_Rewriting_Handle_Type;
@@ -488,7 +489,7 @@ private
 
    overriding function Abstract_Child
      (Node  : access Node_Rewriting_Handle_Type;
-      Index : Positive) return Analysis.Implementation.Abstract_Node;
+      Index : Positive) return Implementation.Abstract_Node;
 
    overriding function Abstract_Text
      (Node : access Node_Rewriting_Handle_Type) return Text_Type;

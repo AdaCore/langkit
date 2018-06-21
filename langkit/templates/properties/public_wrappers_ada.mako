@@ -77,6 +77,9 @@
             elif arg.type.is_big_integer_type:
                 actual = 'Create ({})'.format(arg.name)
 
+            elif arg.type.is_analysis_unit_type:
+                actual = 'Internal_Unit ({})'.format(arg.name)
+
             else:
                 actual = str(arg.name)
 
@@ -118,7 +121,9 @@
                      "end loop;",
                  ])
              else:
-                 wrapped_result = 'Property_Result.Items'
+                 wrapped_result = '{} (Property_Result.Items)'.format(
+                     property.type.api_name
+                 )
              wrap_code.append('Dec_Ref (Property_Result);')
 
          elif property.type.is_big_integer_type:
@@ -127,6 +132,9 @@
                  'Result.Set (Property_Result.Value);',
                  'Dec_Ref (Property_Result);'
              ])
+
+         elif property.type.is_analysis_unit_type:
+             wrapped_result = 'Analysis_Unit (Property_Result)'
 
          else:
              wrapped_result = 'Property_Result'

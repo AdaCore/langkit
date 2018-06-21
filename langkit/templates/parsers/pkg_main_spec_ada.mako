@@ -3,15 +3,15 @@
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
-limited with ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Common;    use ${ada_lib_name}.Common;
+limited with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
 
-package ${ada_lib_name}.Analysis.Parsers is
+package ${ada_lib_name}.Parsers is
 
    type Cst_String is access constant String;
 
@@ -48,7 +48,7 @@ package ${ada_lib_name}.Analysis.Parsers is
       Current_Pos     : Token_Index := First_Token_Index;
       Last_Fail       : Fail_Info;
       Diagnostics     : Diagnostics_Vectors.Vector;
-      Unit            : Analysis_Unit;
+      Unit            : access Implementation.Analysis_Unit_Type;
       TDH             : Token_Data_Handler_Access;
       Mem_Pool        : Bump_Ptr_Pool;
       Symbol_Literals : Symbol_Literal_Array_Access;
@@ -58,7 +58,7 @@ package ${ada_lib_name}.Analysis.Parsers is
    procedure Init_Parser
      (Input           : Lexer_Input;
       With_Trivia     : Boolean;
-      Unit            : Analysis_Unit;
+      Unit            : access Implementation.Analysis_Unit_Type;
       TDH             : Token_Data_Handler_Access;
       Symbol_Literals : Symbol_Literal_Array_Access;
       Parser          : in out Parser_Type);
@@ -96,4 +96,4 @@ private
    type Parser_Private_Part_Type;
    type Parser_Private_Part is access all Parser_Private_Part_Type;
 
-end ${ada_lib_name}.Analysis.Parsers;
+end ${ada_lib_name}.Parsers;

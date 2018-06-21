@@ -3,13 +3,15 @@
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
-with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;         use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
+
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
+
 
 package body ${ada_lib_name}.Rewriting is
 
@@ -25,7 +27,7 @@ package body ${ada_lib_name}.Rewriting is
    pragma Warnings (On, "possible aliasing problem for type");
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle is
-     (Convert (Get_Rewriting_Handle (Context)));
+     (Convert (Get_Rewriting_Handle (Bare_Context (Context))));
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
      (Handle.Context);
@@ -104,7 +106,7 @@ package body ${ada_lib_name}.Rewriting is
          New_Nodes => <>);
    begin
       Result.New_Nodes := Nodes_Pools.Create (Result.Pool);
-      Set_Rewriting_Handle (Context, Convert (Result));
+      Set_Rewriting_Handle (Bare_Context (Context), Convert (Result));
       return Result;
    end Start_Rewriting;
 
@@ -124,7 +126,7 @@ package body ${ada_lib_name}.Rewriting is
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
 
       type Processed_Unit_Record is record
-         Unit     : Analysis_Unit;
+         Unit     : Internal_Unit;
          New_Data : Reparsed_Unit;
       end record;
       type Processed_Unit is access Processed_Unit_Record;
@@ -142,7 +144,7 @@ package body ${ada_lib_name}.Rewriting is
       for Unit_Handle of Handle.Units loop
          declare
             PU    : constant Processed_Unit := new Processed_Unit_Record'
-              (Unit     => Unit_Handle.Unit,
+              (Unit     => Bare_Unit (Unit_Handle.Unit),
                New_Data => <>);
             Input : Lexer_Input :=
               (Kind     => Bytes_Buffer,
@@ -162,7 +164,7 @@ package body ${ada_lib_name}.Rewriting is
             --  If there is a parsing error, abort the rewriting process
             if not PU.New_Data.Diagnostics.Is_Empty then
                Result := (Success     => False,
-                          Unit        => PU.Unit,
+                          Unit        => To_Unit (PU.Unit),
                           Diagnostics => <>);
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
@@ -262,7 +264,7 @@ package body ${ada_lib_name}.Rewriting is
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_entity.api_name} is
    begin
-      return Create (Handle.Node);
+      return Create_Entity (Handle.Node);
    end Node;
 
    -------------
@@ -299,7 +301,7 @@ package body ${ada_lib_name}.Rewriting is
          use Node_Maps;
 
          Unit_Handle : constant Unit_Rewriting_Handle :=
-            Handle (Node.Unit);
+            Handle (To_Unit (Node.Unit));
          Cur         : constant Cursor := Unit_Handle.Nodes.Find (Node);
       begin
          --  If we have already built a handle for this node, just return it
@@ -384,7 +386,8 @@ package body ${ada_lib_name}.Rewriting is
       --  regular one.
       declare
          N           : constant ${root_node_type_name} := Node.Node;
-         Unit_Handle : constant Unit_Rewriting_Handle := Handle (N.Unit);
+         Unit_Handle : constant Unit_Rewriting_Handle :=
+            Handle (To_Unit (N.Unit));
       begin
          if N.Is_Token_Node then
             Children := (Kind => Expanded_Token_Node,
@@ -446,7 +449,7 @@ package body ${ada_lib_name}.Rewriting is
       Free (Handle);
 
       --  Release the rewriting handle singleton for its context
-      Set_Rewriting_Handle (Ctx, Convert (Handle));
+      Set_Rewriting_Handle (Bare_Context (Ctx), Convert (Handle));
    end Free_Handles;
 
    ---------
@@ -510,13 +513,13 @@ package body ${ada_lib_name}.Rewriting is
 
    overriding function Abstract_Child
      (Node  : access Node_Rewriting_Handle_Type;
-      Index : Positive) return Analysis.Implementation.Abstract_Node is
+      Index : Positive) return Implementation.Abstract_Node is
    begin
       return
         (case Node.Children.Kind is
          when Unexpanded          => Node.Node.Abstract_Child (Index),
          when Expanded_Regular    =>
-            Analysis.Implementation.Abstract_Node
+            Implementation.Abstract_Node
               (Node.Children.Vector.Element (Index)),
          when Expanded_Token_Node => null);
    end Abstract_Child;
@@ -530,7 +533,7 @@ package body ${ada_lib_name}.Rewriting is
    begin
       case Node.Children.Kind is
          when Unexpanded =>
-            if Is_Token_Node_Kind (Node.Kind) then
+            if Is_Token_Node (Node.Kind) then
                return Node.Node.Text;
             else
                raise Program_Error;
@@ -968,8 +971,9 @@ package body ${ada_lib_name}.Rewriting is
       --  Now parse the resulting buffer and create the corresponding tree of
       --  nodes.
       declare
-         Context  : constant Analysis_Context := Rewriting.Context (Handle);
-         Unit     : constant Analysis_Unit := Templates_Unit (Context);
+         Context  : constant Internal_Context := Bare_Context
+           (Rewriting.Context (Handle));
+         Unit     : constant Internal_Unit := Templates_Unit (Context);
          Reparsed : Reparsed_Unit;
          Text     : constant Text_Type := To_Wide_Wide_String (Buffer);
          Input    : constant Lexer_Input :=

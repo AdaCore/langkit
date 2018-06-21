@@ -41,9 +41,6 @@
 
 <%def name="decls2()">
 
-   type Child_Or_Trivia is (Child, Trivia);
-   --  Discriminator for the Child_Record type
-
    type Child_Record (Kind : Child_Or_Trivia := Child) is record
       case Kind is
          when Child =>
@@ -132,9 +129,6 @@
    --  Return the Index'th child of Node, or null if Node has no such child
    pragma Warnings (On, "defined after private extension");
 
-   type Visit_Status is (Into, Over, Stop);
-   --  Helper type to control the AST node traversal process. See Traverse.
-
    function Traverse
      (Node  : ${root_entity.api_name}'Class;
       Visit : access function (Node : ${root_entity.api_name}'Class)
@@ -199,9 +193,6 @@
    function Text (Node : ${root_entity.api_name}'Class) return String;
    --  Overload to get the source buffer slice as a string
 
-   --  TODO??? Bind Children_With_Trivia (changing the Node type in
-   --  Child_Record).
-
    function Token_Range
      (Node : ${root_entity.api_name}'Class) return Token_Iterator;
    --  Return an iterator on the range of tokens encompassed by Node
@@ -239,11 +230,6 @@
      (Public_Entity_Info, Entity_Info);
    function Convert is new Ada.Unchecked_Conversion
      (Entity_Info, Public_Entity_Info);
-
-   package Node_Arrays is new Langkit_Support.Array_Utils
-     (${root_entity.api_name},
-      Positive,
-      ${root_entity.array.api_name});
 
    -------------
    -- Is_Null --
@@ -471,9 +457,6 @@
       return Image (Text (Node));
    end Text;
 
-   --  TODO??? Bind Children_With_Trivia (changing the Node type in
-   --  Child_Record).
-
    -----------------
    -- Token_Range --
    -----------------
@@ -580,64 +563,24 @@
    function Children_With_Trivia
      (Node : ${root_entity.api_name}'Class) return Children_Array
    is
-      package Children_Vectors is new Ada.Containers.Vectors
-        (Positive, Child_Record);
-      use Children_Vectors;
-
-      Ret_Vec : Vector;
-      TDH     : Token_Data_Handler renames Node.Node.Unit.TDH;
-
-      procedure Append_Trivias (First, Last : Token_Index);
-      --  Append all the trivias of tokens between indices First and Last to
-      --  the returned vector.
-
-      procedure Append_Trivias (First, Last : Token_Index) is
-      begin
-         for I in First .. Last loop
-            for D of Get_Trivias (TDH, I) loop
-               Ret_Vec.Append ((Kind   => Trivia,
-                                Trivia => (TDH    => TDH'Access,
-                                           Index => (I, D))));
-            end loop;
-         end loop;
-      end Append_Trivias;
-
-      function Filter_Children
-        (N : ${root_entity.api_name}) return Boolean
-      is
-         --  Get rid of null nodes
-        (not Is_Null (N)
-         --  Get rid of nodes with no real existence in the source code
-         and then not Is_Ghost (N));
-
-      First_Child : constant Positive := 1;
-      N_Children  : constant ${root_entity.array.api_name} :=
-         Node_Arrays.Filter (Children (Node), Filter_Children'Access);
+      Bare_Result : constant Bare_Children_Array :=
+         Children_With_Trivia (Bare_Node (Node));
+      Result      : Children_Array (Bare_Result'Range);
    begin
-      if N_Children'Length > 0
-        and then (Node.Node.Token_Start_Index
-                    /= N_Children (First_Child).Node.Token_Start_Index)
-      then
-         Append_Trivias (Node.Node.Token_Start_Index,
-                         N_Children (First_Child).Node.Token_Start_Index - 1);
-      end if;
-
-      for I in N_Children'Range loop
-         Ret_Vec.Append (Child_Record'(Child, N_Children (I)));
-         Append_Trivias (N_Children (I).Node.Token_End_Index,
-                         (if I = N_Children'Last
-                          then Node.Node.Token_End_Index - 1
-                          else N_Children (I + 1).Node.Token_Start_Index - 1));
+      for I in Bare_Result'Range loop
+         declare
+            BR : Bare_Child_Record renames Bare_Result (I);
+            R  : Child_Record renames Result (I);
+         begin
+            case BR.Kind is
+               when Child =>
+                  R := (Child, Create_Entity (BR.Node));
+               when Trivia =>
+                  R := (Trivia, BR.Trivia);
+            end case;
+         end;
       end loop;
-
-      declare
-         A : Children_Array (1 .. Natural (Ret_Vec.Length));
-      begin
-         for I in A'Range loop
-            A (I) := Ret_Vec.Element (I);
-         end loop;
-         return A;
-      end;
+      return Result;
    end Children_With_Trivia;
 
 </%def>

@@ -5,6 +5,7 @@ with GNATCOLL.VFS; use GNATCOLL.VFS;
 
 with Langkit_Support.Text;     use Langkit_Support.Text;
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
+with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 with Libfoolang.Rewriting;     use Libfoolang.Rewriting;
 

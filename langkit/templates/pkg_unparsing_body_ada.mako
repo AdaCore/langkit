@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Implementation;
+use ${ada_lib_name}.Implementation;
 
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
@@ -16,8 +16,8 @@ package body ${ada_lib_name}.Unparsing is
       N : constant ${root_node_type_name} := Bare_Node (Node);
    begin
       return Unparse
-        (Analysis.Implementation.Abstract_Node (N),
-         Unit (Node),
+        (${ada_lib_name}.Implementation.Abstract_Node (N),
+         Bare_Node (Node).Unit,
          Preserve_Formatting => False,
          As_Unit             => False);
    end Unparse;

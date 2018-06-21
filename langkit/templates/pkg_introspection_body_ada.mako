@@ -2,8 +2,8 @@
 
 <% list_kind_range = ctx.generic_list_type.ada_kind_range_name %>
 
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Implementation;
+use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 

@@ -10,15 +10,17 @@
 <% root_node_array = T.root_node.array %>
 
 with Ada.Containers;                  use Ada.Containers;
+with Ada.Containers.Vectors;
 with Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with GNATCOLL.VFS;
+with GNATCOLL.Traces;
 
-with Langkit_Support.Hashes;      use Langkit_Support.Hashes;
+with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
+with Langkit_Support.Images;  use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -38,6 +40,7 @@ pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Lexer;
 
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Introspection;
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False)
@@ -69,19 +72,23 @@ ${(exts.with_clauses(with_clauses + [
    end case;
 </%def>
 
-package body ${ada_lib_name}.Analysis.Implementation is
+package body ${ada_lib_name}.Implementation is
+
+   function Wrap
+     (Index : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler_Access) return Token_Type;
 
    generic
       type T (<>) is limited private;
       type T_Access is access all T;
       with procedure Destroy (Object : in out T_Access);
    procedure Register_Destroyable_Gen
-     (Unit : Analysis_Unit; Object : T_Access);
+     (Unit : Internal_Unit; Object : T_Access);
    --  Generic procedure to register an object so that it is automatically
    --  destroyed when Unit is destroyed.
 
    procedure Register_Destroyable_Helper
-     (Unit    : Analysis_Unit;
+     (Unit    : Internal_Unit;
       Object  : System.Address;
       Destroy : Destroy_Procedure);
    --  Common underlying implementation for Register_Destroyable_Gen
@@ -92,13 +99,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
    --  strings in the equation if in debug mode.
 
-   function Convert is new Ada.Unchecked_Conversion
-     (Entity_Info, Public_Entity_Info);
-
-   type Internal_Analysis_Unit is access all Analysis_Unit_Type;
-   function Convert is new Ada.Unchecked_Conversion
-     (Analysis_Unit, Internal_Analysis_Unit);
-
    procedure Destroy (Env : in out Lexical_Env_Access);
 
    function Snaps_At_Start
@@ -106,6 +106,884 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Snaps_At_End
      (Self : access ${root_node_value_type}'Class) return Boolean;
+
+   --  Those maps are used to give unique ids to lexical envs while pretty
+   --  printing them.
+
+   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Lexical_Env, Integer, Hash, "=");
+
+   type Dump_Lexical_Env_State is record
+      Env_Ids : Address_To_Id_Maps.Map;
+      --  Mapping: Lexical_Env -> Integer, used to remember which unique Ids we
+      --  assigned to the lexical environments we found.
+
+      Next_Id : Positive := 1;
+      --  Id to assign to the next unknown lexical environment
+
+      Root_Env : Lexical_Env;
+      --  Lexical environment we consider a root (this is the Root_Scope from
+      --  the current analysis context), or null if unknown.
+   end record;
+   --  Holder for the state of lexical environment dumpers
+
+   function Get_Env_Id
+     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
+   --  If E is known, return its unique Id from State. Otherwise, assign it a
+   --  new unique Id and return it.
+
+   function Create_Symbol_Literals
+     (Symbols : Symbol_Table) return Symbol_Literal_Array;
+   --  Create pre-computed symbol literals in Symbols and return them
+
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap
+     (Index : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler_Access) return Token_Type is
+   begin
+      return (if Index = No_Token_Or_Trivia_Index
+              then No_Token
+              else (TDH, Index));
+   end;
+
+   ----------------
+   -- Get_Env_Id --
+   ----------------
+
+   function Get_Env_Id
+     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String
+   is
+      C        : Address_To_Id_Maps.Cursor;
+      Inserted : Boolean;
+   begin
+      if E = Null_Lexical_Env then
+         return "$null";
+
+      elsif E = State.Root_Env then
+         --  Insert root env with a special Id so that we only print it once
+         State.Env_Ids.Insert (E, -1, C, Inserted);
+         return "$root";
+      end if;
+
+      State.Env_Ids.Insert (E, State.Next_Id, C, Inserted);
+      if Inserted then
+         State.Next_Id := State.Next_Id + 1;
+      end if;
+
+      return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
+   end Get_Env_Id;
+
+   % for sym, name in ctx.sorted_symbol_literals:
+      Text_${name} : aliased constant Text_Type := ${string_repr(sym)};
+   % endfor
+
+   Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
+   (
+      % if ctx.symbol_literals:
+         ${(', '.join("{name} => Text_{name}'Access".format(name=name)
+                      for sym, name in ctx.sorted_symbol_literals))}
+      % else:
+         1 .. 0 => <>
+      % endif
+   );
+
+   ----------------------------
+   -- Create_Symbol_Literals --
+   ----------------------------
+
+   function Create_Symbol_Literals
+     (Symbols : Symbol_Table) return Symbol_Literal_Array
+   is
+      Result : Symbol_Literal_Array;
+   begin
+      % if ctx.symbol_literals:
+         for Literal in Symbol_Literal_Type'Range loop
+            declare
+               Raw_Text : Text_Type renames
+                  Symbol_Literals_Text (Literal).all;
+               Symbol   : constant Symbolization_Result :=
+                  % if ctx.symbol_canonicalizer:
+                     ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
+                  % else:
+                     Create_Symbol (Raw_Text)
+                  % endif
+               ;
+            begin
+               if Symbol.Success then
+                  Result (Literal) := Find (Symbols, Symbol.Symbol);
+               else
+                  raise Program_Error with
+                    "Cannot canonicalize symbol literal: " & Image (Raw_Text);
+               end if;
+            end;
+         end loop;
+         return Result;
+      % else:
+         return (1 .. 0 => <>);
+      % endif
+   end Create_Symbol_Literals;
+
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+     (Charset     : String;
+      With_Trivia : Boolean
+      % if ctx.default_unit_provider:
+         ; Unit_Provider : Internal_Unit_Provider_Access_Cst
+      % endif
+     ) return Internal_Context
+   is
+      Actual_Charset : constant String :=
+        (if Charset = "" then Default_Charset else Charset);
+      Symbols        : constant Symbol_Table := Create;
+      Context        : Internal_Context;
+   begin
+      Context := new Analysis_Context_Type'
+        (Ref_Count     => 1,
+         Units         => <>,
+         Removed_Units => <>,
+         Filenames     => <>,
+         Symbols       => Symbols,
+         Charset       => To_Unbounded_String (Actual_Charset),
+         With_Trivia   => With_Trivia,
+         Root_Scope    => AST_Envs.Create
+                            (Parent => AST_Envs.No_Env_Getter,
+                             Node   => null,
+                             Owner  => No_Analysis_Unit),
+
+         % if ctx.default_unit_provider:
+         Unit_Provider => Unit_Provider,
+         % endif
+
+         Symbol_Literals => Create_Symbol_Literals (Symbols),
+
+         Parser => <>,
+
+         Discard_Errors_In_Populate_Lexical_Env => <>,
+         Logic_Resolution_Timeout => <>,
+         In_Populate_Lexical_Env => False,
+         Populate_Lexical_Env_Queue => <>,
+         Cache_Version => <>,
+
+         Rewriting_Handle => <>,
+         Templates_Unit => <>);
+
+      Initialize (Context.Parser);
+      ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
+      return Context;
+   end Create;
+
+   ---------------------
+   -- Has_With_Trivia --
+   ---------------------
+
+   function Has_With_Trivia (Context : Internal_Context) return Boolean is
+   begin
+      return Context.With_Trivia;
+   end Has_With_Trivia;
+
+   --------------------------------------------
+   -- Discard_Errors_In_Populate_Lexical_Env --
+   --------------------------------------------
+
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Internal_Context; Discard : Boolean) is
+   begin
+      Context.Discard_Errors_In_Populate_Lexical_Env := Discard;
+   end Discard_Errors_In_Populate_Lexical_Env;
+
+   ----------------------------------
+   -- Set_Logic_Resolution_Timeout --
+   ----------------------------------
+
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Internal_Context; Timeout : Natural) is
+   begin
+      Context.Logic_Resolution_Timeout := Timeout;
+   end Set_Logic_Resolution_Timeout;
+
+   --------------------------
+   -- Has_Rewriting_Handle --
+   --------------------------
+
+   function Has_Rewriting_Handle (Context : Internal_Context) return Boolean is
+   begin
+      return Context.Rewriting_Handle /= No_Rewriting_Handle_Pointer;
+   end Has_Rewriting_Handle;
+
+   -----------------
+   -- Create_Unit --
+   -----------------
+
+   function Create_Unit
+     (Context             : Internal_Context;
+      Normalized_Filename : Virtual_File;
+      Charset             : String;
+      Rule                : Grammar_Rule) return Internal_Unit
+   is
+      use Units_Maps;
+
+      Cur  : Cursor := Context.Removed_Units.Find
+        (Normalized_Filename);
+      Unit : Internal_Unit;
+   begin
+      if Cur = No_Element then
+         Unit := Create_Special_Unit
+           (Context, Normalized_Filename, Charset, Rule);
+      else
+         Unit := Element (Cur);
+         Context.Removed_Units.Delete (Cur);
+      end if;
+      Context.Units.Insert (Normalized_Filename, Unit);
+      return Unit;
+   end Create_Unit;
+
+   --------------
+   -- Get_Unit --
+   --------------
+
+   function Get_Unit
+     (Context           : Internal_Context;
+      Filename, Charset : String;
+      Reparse           : Boolean;
+      Input             : Lexer_Input;
+      Rule              : Grammar_Rule) return Internal_Unit
+   is
+      use Units_Maps;
+
+      Normalized_Filename : constant GNATCOLL.VFS.Virtual_File :=
+         Normalized_Unit_Filename (Context, Filename);
+
+      Cur     : constant Cursor :=
+         Context.Units.Find (Normalized_Filename);
+      Created : constant Boolean := Cur = No_Element;
+      Unit    : Internal_Unit;
+
+      Actual_Charset : Unbounded_String;
+      Refined_Input  : Lexer_Input := Input;
+
+   begin
+      --  Determine which encoding to use. The parameter comes first, then the
+      --  unit-specific default, then the context-specific one.
+
+      if Charset'Length /= 0 then
+         Actual_Charset := To_Unbounded_String (Charset);
+      elsif not Created then
+         Actual_Charset := Element (Cur).Charset;
+      else
+         Actual_Charset := Context.Charset;
+      end if;
+
+      if Refined_Input.Kind = File then
+         Refined_Input.Filename := Normalized_Filename;
+      end if;
+
+      if Refined_Input.Kind in File | Bytes_Buffer then
+         Refined_Input.Charset := Actual_Charset;
+
+         --  Unless the caller requested a specific charset for this unit,
+         --  allow the lexer to automatically discover the source file encoding
+         --  before defaulting to the context-specific one. We do this trying
+         --  to match a byte order mark.
+
+         Refined_Input.Read_BOM := Charset'Length = 0;
+      end if;
+
+      --  Create the Internal_Unit if needed
+
+      if Created then
+         Unit := Create_Unit
+           (Context, Normalized_Filename, To_String (Actual_Charset), Rule);
+      else
+         Unit := Element (Cur);
+      end if;
+      Unit.Charset := Actual_Charset;
+
+      --  (Re)parse it if needed
+
+      if Created or else Reparse then
+         declare
+            Reparsed : Reparsed_Unit;
+         begin
+            Do_Parsing (Unit, Refined_Input, Reparsed);
+            Update_After_Reparse (Unit, Reparsed);
+         end;
+      end if;
+
+      return Unit;
+   end Get_Unit;
+
+   --------------
+   -- Has_Unit --
+   --------------
+
+   function Has_Unit
+     (Context       : Internal_Context;
+      Unit_Filename : String) return Boolean is
+   begin
+      return Context.Units.Contains
+        (Normalized_Unit_Filename (Context, Unit_Filename));
+   end Has_Unit;
+
+   -------------------
+   -- Get_From_File --
+   -------------------
+
+   function Get_From_File
+     (Context  : Internal_Context;
+      Filename : String;
+      Charset  : String;
+      Reparse  : Boolean;
+      Rule     : Grammar_Rule) return Internal_Unit
+   is
+      Input : constant Lexer_Input :=
+        (Kind     => File,
+         Charset  => <>,
+         Read_BOM => False,
+         Filename => <>);
+   begin
+      return Get_Unit (Context, Filename, Charset, Reparse, Input, Rule);
+   end Get_From_File;
+
+   ---------------------
+   -- Get_From_Buffer --
+   ---------------------
+
+   function Get_From_Buffer
+     (Context  : Internal_Context;
+      Filename : String;
+      Charset  : String;
+      Buffer   : String;
+      Rule     : Grammar_Rule) return Internal_Unit
+   is
+      Input : constant Lexer_Input :=
+        (Kind     => Bytes_Buffer,
+         Charset  => <>,
+         Read_BOM => False,
+         Bytes    => Buffer'Unrestricted_Access);
+   begin
+      return Get_Unit (Context, Filename, Charset, True, Input, Rule);
+   end Get_From_Buffer;
+
+   % if ctx.default_unit_provider:
+
+   -----------------------
+   -- Get_From_Provider --
+   -----------------------
+
+   function Get_From_Provider
+     (Context : Internal_Context;
+      Name    : Text_Type;
+      Kind    : Unit_Kind;
+      Charset : String;
+      Reparse : Boolean) return Internal_Unit is
+   begin
+      return Context.Unit_Provider.Get_Unit
+        (Context, Name, Kind, Charset, Reparse);
+
+   exception
+      when Property_Error =>
+         raise Invalid_Unit_Name_Error with
+            "Invalid unit name: " & Image (Name, With_Quotes => True)
+            & " (" & Unit_Kind'Image (Kind) & ")";
+   end Get_From_Provider;
+
+   -------------------
+   -- Unit_Provider --
+   -------------------
+
+   function Unit_Provider
+     (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst
+   is (Context.Unit_Provider);
+
+   % endif
+
+   --------------------
+   -- Get_With_Error --
+   --------------------
+
+   function Get_With_Error
+     (Context  : Internal_Context;
+      Filename : String;
+      Error    : String;
+      Charset  : String;
+      Rule     : Grammar_Rule) return Internal_Unit
+   is
+      use Units_Maps;
+
+      Normalized_Filename : constant Virtual_File :=
+         Normalized_Unit_Filename (Context, Filename);
+      Cur                 : constant Cursor :=
+         Context.Units.Find (Normalized_Filename);
+   begin
+      if Cur = No_Element then
+         declare
+            Unit : constant Internal_Unit := Create_Unit
+              (Context, Normalized_Filename, Charset, Rule);
+            Msg  : constant Text_Type := To_Text (Error);
+         begin
+            Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
+            return Unit;
+         end;
+      else
+         return Element (Cur);
+      end if;
+   end Get_With_Error;
+
+   ------------
+   -- Remove --
+   ------------
+
+   procedure Remove (Context : Internal_Context; File_Name : String) is
+      use Units_Maps;
+
+      Cur      : Cursor := Context.Units.Find
+        (Normalized_Unit_Filename (Context, File_Name));
+      Unit     : Internal_Unit;
+      Reparsed : Reparsed_Unit;
+   begin
+      if Cur = No_Element then
+         raise Constraint_Error with "No such analysis unit";
+      end if;
+
+      Unit := Element (Cur);
+      GNATCOLL.Traces.Trace (Main_Trace, "Removing unit: " & Basename (Unit));
+
+      --  Do as if we just reparsed Unit with minimal data, to get rid of all
+      --  its parsing data. This will schedule a lexical enviroment cleanup.
+      Initialize (Reparsed.TDH, Context.Symbols);
+      Update_After_Reparse (Unit, Reparsed);
+
+      --  Move the unit to the set of removed units so the unit handle still
+      --  points to valid memory. We will re-use it if we reparse this unit.
+      Context.Units.Delete (Cur);
+      Context.Removed_Units.Insert (Unit.File_Name, Unit);
+   end Remove;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Context : Internal_Context) is
+   begin
+      Context.Ref_Count := Context.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Context : in out Internal_Context) is
+   begin
+      Context.Ref_Count := Context.Ref_Count - 1;
+      if Context.Ref_Count = 0 then
+         Destroy (Context);
+      end if;
+   end Dec_Ref;
+
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Context : in out Internal_Context) is
+   begin
+      for Unit of Context.Units loop
+         Unit.Context := null;
+         Dec_Ref (Unit);
+      end loop;
+      for Unit of Context.Removed_Units loop
+         Unit.Context := null;
+         Dec_Ref (Unit);
+      end loop;
+      Dec_Ref (Context.Templates_Unit);
+      AST_Envs.Destroy (Context.Root_Scope);
+      Destroy (Context.Symbols);
+      Destroy (Context.Parser);
+      Free (Context);
+   end Destroy;
+
+   -------------
+   -- Context --
+   -------------
+
+   function Context (Unit : Internal_Unit) return Internal_Context is
+   begin
+      return Unit.Context;
+   end Context;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Unit : Internal_Unit) is
+   begin
+      Unit.Ref_Count := Unit.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Unit : in out Internal_Unit) is
+   begin
+      if Unit = No_Analysis_Unit then
+         return;
+      end if;
+      Unit.Ref_Count := Unit.Ref_Count - 1;
+      if Unit.Ref_Count = 0 then
+         Destroy (Unit);
+      end if;
+   end Dec_Ref;
+
+   -------------
+   -- Reparse --
+   -------------
+
+   procedure Reparse (Unit : Internal_Unit; Charset : String) is
+      Dummy : constant Internal_Unit := Get_From_File
+        (Unit.Context, +Unit.File_Name.Full_Name, Charset,
+         Reparse => True,
+         Rule    => Unit.Rule);
+   begin
+      null;
+   end Reparse;
+
+   -------------
+   -- Reparse --
+   -------------
+
+   procedure Reparse (Unit : Internal_Unit; Charset : String; Buffer : String)
+   is
+      Dummy : constant Internal_Unit := Get_From_Buffer
+        (Unit.Context, +Unit.File_Name.Full_Name, Charset, Buffer, Unit.Rule);
+   begin
+      null;
+   end Reparse;
+
+   --------------------------
+   -- Populate_Lexical_Env --
+   --------------------------
+
+   procedure Populate_Lexical_Env (Unit : Internal_Unit) is
+      Context : constant Internal_Context := Unit.Context;
+
+      Has_Errors : Boolean := False;
+      --  Whether at least one Property_Error occurred during this PLE pass
+
+      Saved_In_Populate_Lexical_Env : constant Boolean :=
+         Unit.Context.In_Populate_Lexical_Env;
+   begin
+      --  If there are several analysis units for which lexical envs must be
+      --  re-created, go through them now. Check the In_Populate_Lexical_Env
+      --  flag to avoid infinite recursion.
+      if not Context.Populate_Lexical_Env_Queue.Is_Empty
+         and then not Context.In_Populate_Lexical_Env
+      then
+         Flush_Populate_Lexical_Env_Queue (Context);
+      end if;
+
+      --  TODO??? Handle env invalidation when reparsing a unit and when a
+      --  previous call raised a Property_Error.
+      if Unit.Is_Env_Populated then
+         return;
+      end if;
+      Unit.Is_Env_Populated := True;
+
+      if Unit.AST_Root = null then
+         return;
+      end if;
+
+      GNATCOLL.Traces.Trace (Main_Trace, "Populating lexical envs for unit: "
+                                         & Basename (Unit));
+
+      Context.In_Populate_Lexical_Env := True;
+
+      % if ctx.ple_unit_root:
+         if Unit.AST_Root /= null then
+            --  If the tree root is a list of PLE units, populate envs for each
+            --  one of them.
+            if Unit.AST_Root.Kind = ${ctx.ple_unit_root.list.ada_kind_name}
+            then
+               for I in 1 .. Unit.AST_Root.Abstract_Children_Count loop
+                  Has_Errors := Populate_Lexical_Env (Unit.AST_Root.Child (I))
+                                or else Has_Errors;
+               end loop;
+
+            --  Otherwise, populate envs only if the root is a PLE unit itself
+            elsif Unit.AST_Root.Kind = ${ctx.ple_unit_root.ada_kind_name} then
+               Has_Errors := Populate_Lexical_Env (Unit.AST_Root);
+            end if;
+         end if;
+      % else:
+         Has_Errors := Populate_Lexical_Env (Unit.AST_Root);
+      % endif
+
+      Context.In_Populate_Lexical_Env :=
+         Saved_In_Populate_Lexical_Env;
+
+      if Has_Errors and then not Context.Discard_Errors_In_Populate_Lexical_Env
+      then
+         raise Property_Error with
+            "errors occurred in Populate_Lexical_Env";
+      end if;
+   end Populate_Lexical_Env;
+
+   ------------------
+   -- Get_Filename --
+   ------------------
+
+   function Get_Filename (Unit : Internal_Unit) return String is
+     (+Unit.File_Name.Full_Name);
+
+   -----------------
+   -- Get_Charset --
+   -----------------
+
+   function Get_Charset (Unit : Internal_Unit) return String is
+   begin
+      return To_String (Unit.Charset);
+   end Get_Charset;
+
+   ---------------------
+   -- Has_Diagnostics --
+   ---------------------
+
+   function Has_Diagnostics (Unit : Internal_Unit) return Boolean is
+   begin
+      return not Unit.Diagnostics.Is_Empty;
+   end Has_Diagnostics;
+
+   -----------------
+   -- Diagnostics --
+   -----------------
+
+   function Diagnostics (Unit : Internal_Unit) return Diagnostics_Array is
+      Result : Diagnostics_Array (1 .. Natural (Unit.Diagnostics.Length));
+      I      : Natural := 1;
+   begin
+      for D of Unit.Diagnostics loop
+         Result (I) := D;
+         I := I + 1;
+      end loop;
+      return Result;
+   end Diagnostics;
+
+   ---------------------------
+   -- Format_GNU_Diagnostic --
+   ---------------------------
+
+   function Format_GNU_Diagnostic
+     (Unit : Internal_Unit; D : Diagnostic) return String
+   is
+      Filename : constant String := Basename (Unit);
+      Sloc     : constant Source_Location := Start_Sloc (D.Sloc_Range);
+      Msg      : constant String :=
+         Image
+           (Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (D.Message));
+   begin
+      return (Filename
+              & (if Sloc = No_Source_Location then "" else ":" & Image (Sloc))
+              & ": " & Msg);
+   end Format_GNU_Diagnostic;
+
+   ----------
+   -- Root --
+   ----------
+
+   function Root (Unit : Internal_Unit) return ${root_node_type_name} is
+     (Unit.AST_Root);
+
+   -----------------
+   -- First_Token --
+   -----------------
+
+   function First_Token (Unit : Internal_Unit) return Token_Type is
+     (Wrap (First_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
+
+   ----------------
+   -- Last_Token --
+   ----------------
+
+   function Last_Token (Unit : Internal_Unit) return Token_Type is
+     (Wrap (Last_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
+
+   -----------------
+   -- Token_Count --
+   -----------------
+
+   function Token_Count (Unit : Internal_Unit) return Natural is
+     (Unit.TDH.Tokens.Length);
+
+   ------------------
+   -- Trivia_Count --
+   ------------------
+
+   function Trivia_Count (Unit : Internal_Unit) return Natural is
+     (Unit.TDH.Trivias.Length);
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Unit : Internal_Unit) return Text_Type is
+   begin
+      return Text (First_Token (Unit), Last_Token (Unit));
+   end Text;
+
+   ------------------
+   -- Lookup_Token --
+   ------------------
+
+   function Lookup_Token
+     (Unit : Internal_Unit; Sloc : Source_Location) return Token_Type
+   is
+      use Token_Data_Handlers;
+      Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
+   begin
+      return Wrap (Result, Unit.TDH'Access);
+   end Lookup_Token;
+
+   ----------------------
+   -- Dump_Lexical_Env --
+   ----------------------
+
+   procedure Dump_Lexical_Env (Unit : Internal_Unit) is
+      Node     : constant ${root_node_type_name} := Unit.AST_Root;
+      Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
+      State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
+
+      --------------------------
+      -- Explore_Parent_Chain --
+      --------------------------
+
+      procedure Explore_Parent_Chain (Env : Lexical_Env) is
+      begin
+         if Env /= Null_Lexical_Env then
+            Dump_One_Lexical_Env
+              (Env, Get_Env_Id (Env, State),
+               Get_Env_Id (AST_Envs.Get_Env (Env.Env.Parent), State));
+            Explore_Parent_Chain (AST_Envs.Get_Env (Env.Env.Parent));
+         end if;
+      end Explore_Parent_Chain;
+
+      --------------
+      -- Internal --
+      --------------
+
+      procedure Internal (Current : ${root_node_type_name}) is
+         Explore_Parent : Boolean := False;
+         Env, Parent    : Lexical_Env;
+      begin
+         if Current = null then
+            return;
+         end if;
+
+         --  We only dump environments that we haven't dumped before. This way
+         --  we'll only dump environments at the site of their creation, and
+         --  not in any subsequent link. We use the Env_Ids map to check which
+         --  envs we have already seen or not.
+         if not State.Env_Ids.Contains (Current.Self_Env) then
+            Env := Current.Self_Env;
+            Parent := AST_Envs.Get_Env (Env.Env.Parent);
+            Explore_Parent := not State.Env_Ids.Contains (Parent);
+
+            Dump_One_Lexical_Env
+              (Env, Get_Env_Id (Env, State), Get_Env_Id (Parent, State));
+
+            if Explore_Parent then
+               Explore_Parent_Chain (Parent);
+            end if;
+         end if;
+
+         for Child of ${root_node_array.array_type_name}'(Children (Current))
+         loop
+            Internal (Child);
+         end loop;
+      end Internal;
+      --  This procedure implements the main recursive logic of dumping the
+      --  environments.
+   begin
+      Internal (${root_node_type_name} (Node));
+   end Dump_Lexical_Env;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print (Unit : Internal_Unit; Show_Slocs : Boolean) is
+   begin
+      if Unit.AST_Root = null then
+         Put_Line ("<empty analysis unit>");
+      else
+         Unit.AST_Root.Print (Show_Slocs);
+      end if;
+   end Print;
+
+   ---------------
+   -- PP_Trivia --
+   ---------------
+
+   procedure PP_Trivia (Unit : Internal_Unit) is
+
+      procedure Process (Trivia : Token_Index) is
+         Data : constant Lexer.Token_Data_Type :=
+            Unit.TDH.Trivias.Get (Natural (Trivia)).T;
+      begin
+         Put_Line (Image (Text (Unit.TDH, Data)));
+      end Process;
+
+      Last_Token : constant Token_Index :=
+         Token_Index (Token_Vectors.Last_Index (Unit.TDH.Tokens) - 1);
+      --  Index for the last token in Unit excluding the Termination token
+      --  (hence the -1).
+   begin
+      for Tok of Get_Leading_Trivias (Unit.TDH) loop
+         Process (Tok);
+      end loop;
+
+      PP_Trivia (Unit.AST_Root);
+
+      for Tok of Get_Trivias (Unit.TDH, Last_Token) loop
+         Process (Tok);
+      end loop;
+   end PP_Trivia;
+
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Unit : in out Internal_Unit) is
+   begin
+      if Unit = No_Analysis_Unit then
+         return;
+      end if;
+
+      Unit.Exiled_Entries.Destroy;
+      Unit.Foreign_Nodes.Destroy;
+      Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
+
+      % if ctx.has_memoization:
+         Destroy (Unit.Memoization_Map);
+      % endif
+
+      Destroy_Rebindings (Unit.Rebindings'Access);
+      Unit.Rebindings.Destroy;
+
+      if Unit.AST_Root /= null then
+         Destroy (Unit.AST_Root);
+      end if;
+
+      Free (Unit.TDH);
+      Free (Unit.AST_Mem_Pool);
+      Destroy_Unit_Destroyables (Unit);
+      Destroyable_Vectors.Destroy (Unit.Destroyables);
+      Free (Unit);
+   end Destroy;
 
    -------------------
    -- Is_Token_Node --
@@ -115,7 +993,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean
    is
    begin
-      return Is_Token_Node_Kind (Node.Kind);
+      return Is_Token_Node (Node.Kind);
    end Is_Token_Node;
 
    ------------------------------
@@ -123,7 +1001,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ------------------------------
 
    procedure Register_Destroyable_Gen
-     (Unit : Analysis_Unit; Object : T_Access)
+     (Unit : Internal_Unit; Object : T_Access)
    is
       function Convert is new Ada.Unchecked_Conversion
         (System.Address, Destroy_Procedure);
@@ -150,8 +1028,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- "<" --
    ---------
 
-   function "<" (Left, Right : Analysis_Unit) return Boolean is
-      use GNATCOLL.VFS;
+   function "<" (Left, Right : Internal_Unit) return Boolean is
    begin
       return Left.File_Name < Right.File_Name;
    end "<";
@@ -433,7 +1310,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------
 
    function Unit
-     (Node : access ${root_node_value_type}'Class) return Analysis_Unit is
+     (Node : access ${root_node_value_type}'Class) return Internal_Unit is
    begin
       return Node.Unit;
    end Unit;
@@ -617,7 +1494,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Anchor : Token_Anchor;
       end record;
 
-      TDH : Token_Data_Handler renames Convert (Node.Unit).TDH;
+      TDH                    : Token_Data_Handler renames Node.Unit.TDH;
       Token_Start, Token_End : Token_Pos;
 
       function Get
@@ -693,7 +1570,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  assume that all lookups fall into this node's sloc range.
       pragma Assert (Compare (Sloc_Range (Node), Sloc) = Inside);
 
-      Children : constant ${root_node_array.api_name} := Node.Children;
+      Children : constant ${root_node_array.array_type_name} := Node.Children;
       Pos      : Relative_Position;
       Result   : ${root_node_type_name};
    begin
@@ -815,13 +1692,13 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.api_name}
+     return ${root_node_array.array_type_name}
    is
       First : constant Integer
         := ${root_node_array.index_type()}'First;
       Last  : constant Integer := First + Node.Abstract_Children_Count - 1;
    begin
-      return A : ${root_node_array.api_name} (First .. Last)
+      return A : ${root_node_array.array_type_name} (First .. Last)
       do
          for I in First .. Last loop
             A (I) := Child (Node, I);
@@ -833,7 +1710,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.name}
    is
-      C : ${root_node_array.api_name} := Children (Node);
+      C : ${root_node_array.array_type_name} := Children (Node);
    begin
       return Ret : ${root_node_array.name} := Create (C'Length) do
          Ret.Items := C;
@@ -849,11 +1726,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Line_Prefix : String := "")
    is
       Children_Prefix : constant String := Line_Prefix & "|  ";
-      N               : constant ${root_entity.api_name} :=
-        (Node, No_Public_Entity_Info);
    begin
       Put_Line (Line_Prefix & Kind_Name (Node));
-      for C of Children_With_Trivia (N) loop
+      for C of Children_With_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
                Put_Line (Children_Prefix & Text (C.Trivia));
@@ -871,7 +1746,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean
    is
 
-      Context  : constant Analysis_Context := Node.Unit.Context;
+      Context  : constant Internal_Context := Node.Unit.Context;
       Root_Env : constant Lexical_Env := Context.Root_Scope;
 
       function Populate_Internal
@@ -906,7 +1781,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
             end if;
 
             --  Call recursively on children
-            for C of ${root_node_array.api_name}'(Children (Node)) loop
+            for C of ${root_node_array.array_type_name}'(Children (Node)) loop
                Result := Populate_Internal (C, Node.Self_Env) or else Result;
             end loop;
 
@@ -984,19 +1859,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
    end AST_Envs_Element_Image;
 
-   --------------------------
-   -- Raise_Property_Error --
-   --------------------------
-
-   procedure Raise_Property_Error (Message : String := "") is
-   begin
-      if Message'Length = 0 then
-         raise Property_Error;
-      else
-         raise Property_Error with Message;
-      end if;
-   end Raise_Property_Error;
-
    -------------------
    -- Is_Rebindable --
    -------------------
@@ -1026,7 +1888,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
         (System.Address, Env_Rebindings);
       pragma Warnings (Off, "possible aliasing problem for type");
    begin
-      Convert (Node.Unit).Rebindings.Append (Convert (Rebinding));
+      Node.Unit.Rebindings.Append (Convert (Rebinding));
    end Register_Rebinding;
 
    --------------------
@@ -1063,8 +1925,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % endif
 
    % if T.AnalysisUnitType.requires_hash_function:
-      function Hash (Unit : Analysis_Unit) return Hash_Type is
-        (GNATCOLL.VFS.Full_Name_Hash (Unit.File_Name));
+      function Hash (Unit : Internal_Unit) return Hash_Type is
+        (Full_Name_Hash (Unit.File_Name));
    % endif
 
    ${struct_types.body_hash(T.entity)}
@@ -1231,7 +2093,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Version --
    -------------
 
-   function Version (Unit : Analysis_Unit) return Natural is
+   function Version (Unit : Internal_Unit) return Natural is
    begin
       return Unit.Unit_Version;
    end Version;
@@ -1430,7 +2292,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Put (" <<INCOMPLETE>>");
       end if;
 
-      if Is_Token_Node_Kind (Node.Kind) then
+      if Is_Token_Node (Node.Kind) then
          Put_Line (": " & Image (Node.Text));
       elsif Node.all not in ${generic_list_value_type}'Class then
          New_Line;
@@ -1502,7 +2364,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node  : access ${root_node_value_type}'Class;
       Token : Token_Type) return Token_Index is
    begin
-      if Convert (Node.Unit).TDH'Access /= Token.TDH then
+      if Node.Unit.TDH'Access /= Token.TDH then
          raise Property_Error with
            ("Cannot associate a token and a node from different analysis"
             & " units");
@@ -1531,6 +2393,99 @@ package body ${ada_lib_name}.Analysis.Implementation is
    begin
       return Token.Index;
    end Token_Indexes;
+
+   --------------------------
+   -- Children_With_Trivia --
+   --------------------------
+
+   function Children_With_Trivia
+     (Node : access ${root_node_value_type}'Class) return Bare_Children_Array
+   is
+      package Children_Vectors is new Ada.Containers.Vectors
+        (Positive, Bare_Child_Record);
+      use Children_Vectors;
+
+      Ret_Vec : Vector;
+      TDH     : Token_Data_Handler renames Node.Unit.TDH;
+
+      procedure Append_Trivias (First, Last : Token_Index);
+      --  Append all the trivias of tokens between indices First and Last to
+      --  the returned vector.
+
+      function Filter_Children
+        (Parent : access ${root_node_value_type}'Class)
+         return ${root_node_array.array_type_name};
+      --  Return an array for all children in Parent that are not null and that
+      --  aren't ghost nodes.
+
+      --------------------
+      -- Append_Trivias --
+      --------------------
+
+      procedure Append_Trivias (First, Last : Token_Index) is
+      begin
+         for I in First .. Last loop
+            for D of Get_Trivias (TDH, I) loop
+               Ret_Vec.Append ((Kind   => Trivia,
+                                Trivia => (TDH    => TDH'Access,
+                                           Index => (I, D))));
+            end loop;
+         end loop;
+      end Append_Trivias;
+
+      ---------------------
+      -- Filter_Children --
+      ---------------------
+
+      function Filter_Children
+        (Parent : access ${root_node_value_type}'Class)
+         return ${root_node_array.array_type_name}
+      is
+         Children : constant ${root_node_array.array_type_name} :=
+            Parent.Children;
+         Result   : ${root_node_array.array_type_name} (Children'Range);
+         Next     : Integer := Result'First;
+      begin
+         for I in Children'Range loop
+            --  Get rid of null nodes and of nodes with no real existence in
+            --  the source code.
+            if Children (I) /= null and then not Children (I).Is_Ghost then
+               Result (Next) := Children (I);
+               Next := Next + 1;
+            end if;
+         end loop;
+         return Result (Result'First .. Next - 1);
+      end Filter_Children;
+
+      First_Child : constant Positive := 1;
+      N_Children  : constant ${root_node_array.array_type_name} :=
+         Filter_Children (Node);
+   begin
+      if N_Children'Length > 0
+        and then (Node.Token_Start_Index
+                    /= N_Children (First_Child).Token_Start_Index)
+      then
+         Append_Trivias (Node.Token_Start_Index,
+                         N_Children (First_Child).Token_Start_Index - 1);
+      end if;
+
+      for I in N_Children'Range loop
+         Ret_Vec.Append (Bare_Child_Record'(Child, N_Children (I)));
+         Append_Trivias (N_Children (I).Token_End_Index,
+                         (if I = N_Children'Last
+                          then Node.Token_End_Index - 1
+                          else N_Children (I + 1).Token_Start_Index - 1));
+      end loop;
+
+      declare
+         A : Bare_Children_Array (1 .. Natural (Ret_Vec.Length));
+      begin
+         for I in A'Range loop
+            A (I) := Ret_Vec.Element (I);
+         end loop;
+         return A;
+      end;
+   end Children_With_Trivia;
 
    --------------
    -- Is_Ghost --
@@ -1585,26 +2540,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (if Node.Token_End_Index = No_Token_Index
       then Node.Token_Start
       else Node.Token (Node.Token_End_Index));
-
-   -------------
-   -- Convert --
-   -------------
-
-   function Convert
-     (TDH      : Token_Data_Handler;
-      Token    : Token_Type;
-      Raw_Data : Lexer.Token_Data_Type) return Analysis.Token_Data_Type is
-   begin
-      return (Kind          => Raw_Data.Kind,
-              Is_Trivia     => Token.Index.Trivia /= No_Token_Index,
-              Index         => (if Token.Index.Trivia = No_Token_Index
-                                then Token.Index.Token
-                                else Token.Index.Trivia),
-              Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
-              Source_First  => Raw_Data.Source_First,
-              Source_Last   => Raw_Data.Source_Last,
-              Sloc_Range    => Raw_Data.Sloc_Range);
-   end Convert;
 
    -----------
    -- Token --
@@ -1958,7 +2893,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
               )
       %>
       ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
-      for Child of ${root_node_array.api_name}'(Children (Node)) loop
+      for Child of ${root_node_array.array_type_name}'(Children (Node)) loop
          if Child /= null then
             Assign_Names_To_Logic_Vars (Child);
          end if;
@@ -2119,9 +3054,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
       -- Trace_Image --
       -----------------
 
-      function Trace_Image (Unit : Analysis_Unit) return String is
+      function Trace_Image (Unit : Internal_Unit) return String is
       begin
-         return "Analysis_Unit (""" & Basename (Unit) & """)";
+         return "Internal_Unit (""" & Basename (Unit) & """)";
       end Trace_Image;
 
       -----------------
@@ -2337,40 +3272,19 @@ package body ${ada_lib_name}.Analysis.Implementation is
       ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
    end Reset_Logic_Vars;
 
-   ----------
-   -- Unit --
-   ----------
-
-   function Unit
-     (Node : ${root_entity.api_name}'Class) return Analysis_Unit is
-   begin
-      return Node.Node.Unit;
-   end Unit;
-
    ----------------
    -- Token_Data --
    ----------------
 
-   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
+   function Token_Data (Unit : Internal_Unit) return Token_Data_Handler_Access
    is (Unit.TDH'Access);
-
-   ---------------------
-   -- Symbol_Literals --
-   ---------------------
-
-   function Symbol_Literals
-     (Context : Analysis_Context) return Symbol_Literal_Array_Access
-   is
-   begin
-      return Context.Symbol_Literals'Access;
-   end Symbol_Literals;
 
    -------------------
    -- Lookup_Symbol --
    -------------------
 
    function Lookup_Symbol
-     (Context : Analysis_Context; Symbol : Text_Type) return Symbol_Type is
+     (Context : Internal_Context; Symbol : Text_Type) return Symbol_Type is
    begin
       return Find (Context.Symbols, Symbol);
    end Lookup_Symbol;
@@ -2380,12 +3294,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -------------------------
 
    function Create_Special_Unit
-     (Context             : Analysis_Context;
-      Normalized_Filename : GNATCOLL.VFS.Virtual_File;
+     (Context             : Internal_Context;
+      Normalized_Filename : Virtual_File;
       Charset             : String;
-      Rule                : Grammar_Rule) return Analysis_Unit
+      Rule                : Grammar_Rule) return Internal_Unit
    is
-      Unit : Analysis_Unit := new Analysis_Unit_Type'
+      Unit : Internal_Unit := new Analysis_Unit_Type'
         (Context           => Context,
          Ref_Count         => 1,
          AST_Root          => null,
@@ -2417,12 +3331,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Templates_Unit --
    --------------------
 
-   function Templates_Unit (Context : Analysis_Context) return Analysis_Unit is
+   function Templates_Unit (Context : Internal_Context) return Internal_Unit is
    begin
       if Context.Templates_Unit = No_Analysis_Unit then
          Context.Templates_Unit := Create_Special_Unit
            (Context             => Context,
-            Normalized_Filename => GNATCOLL.VFS.No_File,
+            Normalized_Filename => No_File,
             Charset             => Default_Charset,
             Rule                =>
                ${Name.from_lower(ctx.main_rule_name)}_Rule);
@@ -2434,7 +3348,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Set_Rule --
    --------------
 
-   procedure Set_Rule (Unit : Analysis_Unit; Rule : Grammar_Rule) is
+   procedure Set_Rule (Unit : Internal_Unit; Rule : Grammar_Rule) is
    begin
       Unit.Rule := Rule;
    end Set_Rule;
@@ -2444,10 +3358,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ------------------------------
 
    function Normalized_Unit_Filename
-     (Context : Analysis_Context; Filename : String)
-      return GNATCOLL.VFS.Virtual_File
+     (Context : Internal_Context; Filename : String) return Virtual_File
    is
-      use GNATCOLL.VFS;
       use Virtual_File_Maps;
       Key : constant Unbounded_String := To_Unbounded_String (Filename);
       Cur : Cursor := Context.Filenames.Find (Key);
@@ -2471,7 +3383,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    procedure Register_Destroyable_Helper
-     (Unit    : Analysis_Unit;
+     (Unit    : Internal_Unit;
       Object  : System.Address;
       Destroy : Destroy_Procedure)
    is
@@ -2484,7 +3396,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    procedure Register_Destroyable
-     (Unit : Analysis_Unit; Node : ${root_node_type_name})
+     (Unit : Internal_Unit; Node : ${root_node_type_name})
    is
       procedure Helper is new Register_Destroyable_Gen
         (${root_node_value_type}'Class,
@@ -2494,33 +3406,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Helper (Unit, Node);
    end Register_Destroyable;
 
-   ------------
-   -- Create --
-   ------------
-
-   function Create
-     (Node   : ${root_node_type_name};
-      E_Info : Entity_Info := No_Entity_Info) return ${root_entity.api_name}
-   is
-   begin
-      return (Node, Convert (E_Info));
-   end Create;
-
-   ---------------
-   -- Bare_Node --
-   ---------------
-
-   function Bare_Node
-     (Node : ${root_entity.api_name}'Class) return ${root_node_type_name} is
-   begin
-      return Node.Node;
-   end Bare_Node;
-
    -----------------------
    -- Invalidate_Caches --
    -----------------------
 
-   procedure Invalidate_Caches (Context : Analysis_Context) is
+   procedure Invalidate_Caches (Context : Internal_Context) is
    begin
       --  Increase Context's version number. If we are about to overflow, reset
       --  all version numbers from analysis units.
@@ -2538,7 +3428,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --  Reset_Envs  --
    ------------------
 
-   procedure Reset_Envs (Unit : Analysis_Unit) is
+   procedure Reset_Envs (Unit : Internal_Unit) is
 
       procedure Deactivate_Refd_Envs
         (Node : access ${root_node_value_type}'Class);
@@ -2602,7 +3492,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------
 
    function Basename (Filename : String) return String is
-      use GNATCOLL.VFS;
    begin
       return +Create (+Filename).Base_Name;
    end Basename;
@@ -2611,8 +3500,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Basename --
    --------------
 
-   function Basename (Unit : Analysis_Unit) return String is
-      use GNATCOLL.VFS;
+   function Basename (Unit : Internal_Unit) return String is
    begin
       return +Unit.File_Name.Base_Name;
    end Basename;
@@ -2621,12 +3509,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Reset_Caches --
    ------------------
 
-   procedure Reset_Caches (Unit : Analysis_Unit) is
+   procedure Reset_Caches (Unit : Internal_Unit) is
    begin
       if Unit.Cache_Version < Unit.Context.Cache_Version then
-         Traces.Trace
-           (Main_Trace,
-            "In reset caches for unit " & Basename (Unit));
+         GNATCOLL.Traces.Trace
+           (Main_Trace, "In reset caches for unit " & Basename (Unit));
          Unit.Cache_Version := Unit.Context.Cache_Version;
          Reset_Envs (Unit);
          % if ctx.has_memoization:
@@ -2642,7 +3529,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       ----------------------------
 
       function Lookup_Memoization_Map
-        (Unit   : Analysis_Unit;
+        (Unit   : Internal_Unit;
          Key    : in out Mmz_Key;
          Cursor : out Memoization_Maps.Cursor) return Boolean
       is
@@ -2667,7 +3554,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Reference_Unit --
    --------------------
 
-   procedure Reference_Unit (From, Referenced : Analysis_Unit) is
+   procedure Reference_Unit (From, Referenced : Internal_Unit) is
       Dummy : Boolean;
    begin
       Dummy := Analysis_Unit_Sets.Add (From.Referenced_Units, Referenced);
@@ -2678,7 +3565,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ------------------------
 
    function Is_Referenced_From
-     (Referenced, Unit : Analysis_Unit) return Boolean is
+     (Referenced, Unit : Internal_Unit) return Boolean is
    begin
       if Unit = null or else Referenced = null then
          return False;
@@ -2694,9 +3581,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------------
 
    procedure Do_Parsing
-     (Unit : Analysis_Unit; Input : Lexer_Input; Result : out Reparsed_Unit)
+     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit)
    is
-      Context  : constant Analysis_Context := Unit.Context;
+      Context  : constant Internal_Context := Unit.Context;
       Unit_TDH : constant Token_Data_Handler_Access := Token_Data (Unit);
 
       Saved_TDH : Token_Data_Handler;
@@ -2739,7 +3626,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end Add_Diagnostic;
 
    begin
-      Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
+      GNATCOLL.Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
 
       Result.AST_Root := null;
 
@@ -2758,7 +3645,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          declare
             Name : constant String := Basename (Unit);
          begin
-            Traces.Trace
+            GNATCOLL.Traces.Trace
               (Main_Trace, "WARNING: File is not readable: " & Name);
             Add_Diagnostic ("Cannot read " & Name);
             Rotate_TDH;
@@ -2771,14 +3658,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
       begin
          Init_Parser
            (Input, Context.With_Trivia, Unit, Unit_TDH,
-            Parsers.Symbol_Literal_Array_Access (Symbol_Literals (Context)),
+            Context.Symbol_Literals'Access,
             Unit.Context.Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
             --  return a unit anyway with diagnostics indicating what happens.
 
-            Traces.Trace
+            GNATCOLL.Traces.Trace
               (Main_Trace,
                "WARNING: Could not open file " & Basename (Unit));
 
@@ -2819,7 +3706,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    procedure Update_After_Reparse
-     (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit) is
+     (Unit : Internal_Unit; Reparsed : in out Reparsed_Unit) is
    begin
       --  Replace Unit's diagnostics by Reparsed's
       Unit.Diagnostics := Reparsed.Diagnostics;
@@ -2862,7 +3749,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Destroy_Unit_Destroyables --
    -------------------------------
 
-   procedure Destroy_Unit_Destroyables (Unit : Analysis_Unit) is
+   procedure Destroy_Unit_Destroyables (Unit : Internal_Unit) is
    begin
       for D of Unit.Destroyables loop
          D.Destroy (D.Object);
@@ -2874,19 +3761,20 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Flush_Populate_Lexical_Env_Queue --
    --------------------------------------
 
-   procedure Flush_Populate_Lexical_Env_Queue (Context : Analysis_Context) is
+   procedure Flush_Populate_Lexical_Env_Queue (Context : Internal_Context) is
       Foreign_Nodes : ${root_node_type_name}_Vectors.Vector :=
          ${root_node_type_name}_Vectors.Empty_Vector;
    begin
-      Traces.Trace (Main_Trace, "Flushing the populate lexical env queue");
-      Traces.Increase_Indent (Main_Trace);
+      GNATCOLL.Traces.Trace
+        (Main_Trace, "Flushing the populate lexical env queue");
+      GNATCOLL.Traces.Increase_Indent (Main_Trace);
       Context.In_Populate_Lexical_Env := True;
 
       --  Remove traces of queued units in other units' lexical environments
       --  and collect information about other units' nodes in queued units'
       --  lexical environments.
       for Unit of Context.Populate_Lexical_Env_Queue loop
-         Traces.Trace
+         GNATCOLL.Traces.Trace
            (Main_Trace, "Remove exiled entries and extract foreign nodes for: "
                         & Basename (Unit));
 
@@ -2911,21 +3799,20 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       --  Reroot all foreign nodes. Do this before we re-run PLE on queued
       --  units so that we get a chance to run PLE in dependency order.
-      Traces.Trace (Main_Trace, "Reroot foreign nodes (PLE queue flush)");
-      Traces.Increase_Indent (Main_Trace);
+      GNATCOLL.Traces.Trace
+        (Main_Trace, "Reroot foreign nodes (PLE queue flush)");
+      GNATCOLL.Traces.Increase_Indent (Main_Trace);
       for FN of Foreign_Nodes loop
          declare
-            use GNATCOLL.VFS;
-
             Node_Image : constant String := Image (FN.Short_Image);
             Unit_Name  : constant String := +FN.Unit.File_Name.Base_Name;
          begin
-            Traces.Trace (Main_Trace, "Rerooting: " & Node_Image
-                                      & " (from " & Unit_Name & ")");
+            GNATCOLL.Traces.Trace (Main_Trace, "Rerooting: " & Node_Image
+                                               & " (from " & Unit_Name & ")");
          end;
          Reroot_Foreign_Node (FN);
       end loop;
-      Traces.Decrease_Indent (Main_Trace);
+      GNATCOLL.Traces.Decrease_Indent (Main_Trace);
 
       --  Recreate the lexical env structure for queued units, unless they were
       --- removed.
@@ -2938,14 +3825,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Foreign_Nodes.Destroy;
       Context.Populate_Lexical_Env_Queue.Clear;
       Context.In_Populate_Lexical_Env := False;
-      Traces.Decrease_Indent (Main_Trace);
+      GNATCOLL.Traces.Decrease_Indent (Main_Trace);
    end Flush_Populate_Lexical_Env_Queue;
 
    ---------------------------
    -- Remove_Exiled_Entries --
    ---------------------------
 
-   procedure Remove_Exiled_Entries (Unit : Analysis_Unit) is
+   procedure Remove_Exiled_Entries (Unit : Internal_Unit) is
    begin
       for EE of Unit.Exiled_Entries loop
          if EE.Env.Owner = No_Analysis_Unit
@@ -2983,7 +3870,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ---------------------------
 
    procedure Extract_Foreign_Nodes
-     (Unit          : Analysis_Unit;
+     (Unit          : Internal_Unit;
       Foreign_Nodes : in out ${root_node_type_name}_Vectors.Vector) is
    begin
       for FN of Unit.Foreign_Nodes loop
@@ -3014,7 +3901,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Reroot_Foreign_Node (Node : access ${root_node_value_type}'Class)
    is
-      Unit : constant Analysis_Unit := Node.Unit;
+      Unit : constant Internal_Unit := Node.Unit;
    begin
 
       --  First, filter the exiled entries in foreign units so that they don't
@@ -3134,7 +4021,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    function Get_Rewriting_Handle
-     (Context : Analysis_Context) return Rewriting_Handle_Pointer is
+     (Context : Internal_Context) return Rewriting_Handle_Pointer is
    begin
       return Context.Rewriting_Handle;
    end Get_Rewriting_Handle;
@@ -3144,11 +4031,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------
 
    procedure Set_Rewriting_Handle
-     (Context : Analysis_Context; Handle : Rewriting_Handle_Pointer) is
+     (Context : Internal_Context; Handle : Rewriting_Handle_Pointer) is
    begin
       Context.Rewriting_Handle := Handle;
    end Set_Rewriting_Handle;
 
 begin
    No_Big_Integer.Value.Set (0);
-end ${ada_lib_name}.Analysis.Implementation;
+end ${ada_lib_name}.Implementation;

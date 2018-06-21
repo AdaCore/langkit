@@ -203,7 +203,7 @@ class CompiledType(object):
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
                  nullexpr=None, py_nullexpr=None, element_type=None,
                  hashable=False, has_equivalent_function=False,
-                 type_repo_name=None, api_name=None):
+                 type_repo_name=None, api_name=None, dsl_name=None):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -284,6 +284,9 @@ class CompiledType(object):
         :param names.Name|str|None api_name: If not None, must be the name of
             the type to use in the public Ada API. Strings are interpreted as
             camel case.
+
+        :param str|None dsl_name: If provided, name used to represent this type
+            at the DSL level. Useful to format diagnostics.
     """
         if isinstance(name, str):
             name = names.Name.from_camel(name)
@@ -311,6 +314,7 @@ class CompiledType(object):
         self._has_equivalent_function = has_equivalent_function
         self._requires_hash_function = False
         self._api_name = api_name
+        self._dsl_name = dsl_name
 
         type_repo_name = type_repo_name or name.camel
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
@@ -388,7 +392,7 @@ class CompiledType(object):
 
         :rtype: str
         """
-        return self.name.camel
+        return self._dsl_name or self.name.camel
 
     def __repr__(self):
         return '<CompiledType {}>'.format(self.name.camel)
@@ -1802,7 +1806,9 @@ class ASTNodeType(BaseStructType):
 
             is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
             element_type=element_type, hashable=True,
-            type_repo_name=self.raw_name.camel
+            type_repo_name=self.raw_name.camel,
+
+            dsl_name=dsl_name or self.raw_name.camel
         )
         self._base = base
         self.is_root_node = is_root
@@ -1911,12 +1917,6 @@ class ASTNodeType(BaseStructType):
         # Make sure we have one entity type for each AST node type
         entity_type = self.entity
         del entity_type
-
-        self._dsl_name = dsl_name
-
-    @property
-    def dsl_name(self):
-        return self._dsl_name or self.raw_name.camel
 
     def repr_name(self):
         """
@@ -2506,7 +2506,9 @@ class ArrayType(CompiledType):
         """
         return (self.api_name
                 if self.is_string_type else
-                self.element_type.name + names.Name('Array'))
+                (names.Name('Internal') +
+                    self.element_type.name +
+                    names.Name('Array')))
 
     @property
     def pointed(self):
@@ -2644,13 +2646,16 @@ def create_builtin_types():
     automatically register them in the current CompiledTypeMetaclass.
     """
     CompiledType(
-        'AnalysisUnit',
+        'InternalUnit',
         type_repo_name='AnalysisUnitType',
         exposed=True,
         nullexpr='null',
         should_emit_array_type=True,
         null_allowed=True,
         hashable=True,
+        c_type_name='analysis_unit',
+        api_name='AnalysisUnit',
+        dsl_name='AnalysisUnitType',
     )
 
     CompiledType(

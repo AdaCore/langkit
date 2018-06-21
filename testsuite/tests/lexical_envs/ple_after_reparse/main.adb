@@ -6,6 +6,7 @@ with GNATCOLL.VFS; use GNATCOLL.VFS;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
+with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
    Ctx    : Analysis_Context := Create;
