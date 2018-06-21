@@ -20,6 +20,9 @@ with Interfaces.C.Strings; use Interfaces.C.Strings;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
+
 ${exts.with_clauses(with_clauses)}
 
 --  This package defines data types and subprograms to provide the
@@ -29,7 +32,7 @@ ${exts.with_clauses(with_clauses)}
 --  use this package. Please refer to the C header if you want to use the C
 --  API.
 
-package ${ada_lib_name}.Analysis.Implementation.C is
+package ${ada_lib_name}.Implementation.C is
 
    type ${analysis_context_type} is new System.Address;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
@@ -640,7 +643,7 @@ package ${ada_lib_name}.Analysis.Implementation.C is
    function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type;
 
    function Unwrap
-     (Unit : Analysis_Unit; Text : ${text_type}) return Symbol_Type;
+     (Unit : Internal_Unit; Text : ${text_type}) return Symbol_Type;
 
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access
@@ -654,14 +657,14 @@ package ${ada_lib_name}.Analysis.Implementation.C is
    pragma Warnings (Off, "possible aliasing problem for type");
 
    function Wrap is new Ada.Unchecked_Conversion
-     (Analysis_Context, ${analysis_context_type});
+     (Internal_Context, ${analysis_context_type});
    function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_context_type}, Analysis_Context);
+     (${analysis_context_type}, Internal_Context);
 
    function Wrap is new Ada.Unchecked_Conversion
-     (Analysis_Unit, ${analysis_unit_type});
+     (Internal_Unit, ${analysis_unit_type});
    function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_unit_type}, Analysis_Unit);
+     (${analysis_unit_type}, Internal_Unit);
 
    function Wrap is new Ada.Unchecked_Conversion
      (${root_node_type_name}, ${node_type});
@@ -700,4 +703,4 @@ package ${ada_lib_name}.Analysis.Implementation.C is
 
    pragma Warnings (On, "possible aliasing problem for type");
 
-end ${ada_lib_name}.Analysis.Implementation.C;
+end ${ada_lib_name}.Implementation.C;

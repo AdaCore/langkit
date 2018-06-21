@@ -623,7 +623,7 @@ class FieldAccess(AbstractExpression):
 
                 # Use a fully qualified name for properties so that they don't
                 # clash with local variables.
-                call_name = "{}.Analysis.Implementation.{}".format(
+                call_name = "{}.Implementation.{}".format(
                     get_context().ada_api_settings.lib_name,
                     str(self.node_data.name)
                 )

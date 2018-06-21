@@ -3,9 +3,9 @@
 function P_Referenced_Unit_Or_Error
   (Node     : access Bare_Name_Type'Class;
    Or_Error : Boolean)
-   return Analysis_Unit
+   return Internal_Unit
 is
-   Ctx       : constant Analysis_Context := Node.Unit.Context;
+   Ctx       : constant Internal_Context := Node.Unit.Context;
    Unit_Name : String := Image (Node.Text);
 begin
    for C of Unit_Name loop
@@ -16,16 +16,17 @@ begin
 
    declare
       Filename : constant String := Unit_Name & ".txt";
-      Unit     : constant Analysis_Unit :=
+      Unit     : constant Internal_Unit :=
         (if Or_Error and then not Has_Unit (Ctx, Filename)
          then No_Analysis_Unit
-         else Get_From_File (Ctx, Filename));
+         else Get_From_File (Ctx, Filename, "", False, Default_Grammar_Rule));
    begin
       if Or_Error and then not Has_Unit (Ctx, Filename) then
          return No_Analysis_Unit;
       else
          declare
-            Unit : constant Analysis_Unit := Get_From_File (Ctx, Filename);
+            Unit : constant Internal_Unit := Get_From_File
+              (Ctx, Filename, "", False, Default_Grammar_Rule);
          begin
             Reference_Unit (From => Node.Unit, Referenced => Unit);
             Populate_Lexical_Env (Unit);

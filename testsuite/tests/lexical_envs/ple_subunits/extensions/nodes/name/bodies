@@ -3,7 +3,7 @@
 function P_Referenced_Unit_Or_Error
   (Node     : access Bare_Name_Type'Class;
    Or_Error : Boolean)
-   return Analysis_Unit
+   return Internal_Unit
 is
    Root           : constant Bare_Foo_Node := Node.Unit.AST_Root;
    Requested_Name : Symbol_Type_Array_Access := Node.P_Symbols;

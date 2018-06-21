@@ -88,7 +88,7 @@ class Context(object):
     def implname(self, suffix):
         """
         Return the C-style symbol name to use for an Ada entity in the
-        $.Analysis.Implementation package.
+        $.Implementation package.
 
         :param str suffix: Name suffix. For instance: "my_type_name".
         :rtype: str

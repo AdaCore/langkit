@@ -1,10 +1,12 @@
 --  vim: ft=ada
 
 function P_Designated_Unit
-  (Node : access Bare_Name_Type'Class) return Analysis_Unit
+  (Node : access Bare_Name_Type'Class) return Internal_Unit
 is
     Filename : constant String := Image (Node.Text) & ".txt";
-    Context  : constant Analysis_Context := Node.Unit.Context;
+    Context  : constant Internal_Context := Node.Unit.Context;
 begin
-    return Get_From_File (Context, Filename);
+    return Get_From_File (Context, Filename, Default_Charset,
+                          Reparse => False,
+                          Rule    => Default_Grammar_Rule);
 end P_Designated_Unit;

@@ -6,10 +6,9 @@ with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
-with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 
 package ${ada_lib_name}.Unparsing.Implementation is
 
@@ -44,7 +43,7 @@ package ${ada_lib_name}.Unparsing.Implementation is
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
-      Unit                : Analysis_Unit;
+      Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String;
    --  Turn the Node tree into a string that can be re-parsed to yield the same
@@ -60,7 +59,7 @@ package ${ada_lib_name}.Unparsing.Implementation is
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
-      Unit                : Analysis_Unit;
+      Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String_Access;
    --  Likewise, but return a string access. Callers must deallocate the result

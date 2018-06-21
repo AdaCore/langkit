@@ -1573,10 +1573,12 @@ class CompileCtx(object):
             ('pkg_main',            '', False),
             # Unit for initialization primitives
             ('pkg_init',            'Init', True),
+            # Unit for declarations used by Analysis and Implementation
+            ('pkg_common',          'Common', True),
             # Unit for public analysis primitives
             ('pkg_analysis',        'Analysis', True),
             # Unit for implementation of analysis primitives
-            ('pkg_implementation',  'Analysis.Implementation', True),
+            ('pkg_implementation',  'Implementation', True),
             # Unit for AST introspection
             ('pkg_introspection',   'Introspection', True),
             # Unit for AST node iteration primitives
@@ -1588,7 +1590,7 @@ class CompileCtx(object):
             # Unit for AST implementation of unparsing primitives
             ('pkg_unparsing_impl',  'Unparsing.Implementation', True),
             # Unit for all parsers
-            ('parsers/pkg_main',    'Analysis.Parsers', True),
+            ('parsers/pkg_main',    'Parsers', True),
             # Unit for the lexer
             ('lexer/pkg_main',      'Lexer', True),
             # Unit for debug helpers
@@ -1724,7 +1726,7 @@ class CompileCtx(object):
 
         self.write_ada_module(
             src_path, "c_api/pkg_main",
-            [names.Name(n) for n in 'Analysis.Implementation.C'.split('.')]
+            [names.Name(n) for n in 'Implementation.C'.split('.')]
         )
 
     def emit_python_api(self, python_path):

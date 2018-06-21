@@ -26,9 +26,12 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 
-${exts.with_clauses(with_clauses)}
+${(exts.with_clauses(with_clauses))}
 
-package body ${ada_lib_name}.Analysis.Implementation.C is
+package body ${ada_lib_name}.Implementation.C is
+
+   --  Avoid hiding from $.Lexer
+   subtype Token_Data_Type is Common.Token_Data_Type;
 
 % if ctx.default_unit_provider:
    type C_Unit_Provider_Type is
@@ -101,16 +104,21 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
             else Value (Charset));
 
          % if ctx.default_unit_provider:
-         U : Unit_Provider_Access_Cst :=
+         Provider          : constant Unit_Provider_Access_Cst :=
             Unit_Provider_Access_Cst (Unwrap (Unit_Provider));
          % endif
 
-      begin
-         return Wrap (Create (C, With_Trivia /= 0
+         Context      : constant Analysis_Context := Create
+           (Charset     => C,
+            With_Trivia => With_Trivia /= 0
             % if ctx.default_unit_provider:
-            , U
+            , Unit_Provider => Provider
             % endif
-         ));
+            );
+         Internal_Ctx : constant Internal_Context := Bare_Context (Context);
+
+      begin
+         return Wrap (Internal_Ctx);
       end;
    exception
       when Exc : others =>
@@ -122,7 +130,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
      (Context : ${analysis_context_type})
       return ${analysis_context_type}
    is
-      C : constant Analysis_Context := Unwrap (Context);
+      C : constant Internal_Context := Unwrap (Context);
    begin
       Inc_Ref (C);
       return Context;
@@ -131,7 +139,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    procedure ${capi.get_name('context_decref')}
      (Context : ${analysis_context_type})
    is
-      C : Analysis_Context := Unwrap (Context);
+      C : Internal_Context := Unwrap (Context);
    begin
       Dec_Ref (C);
    end;
@@ -140,7 +148,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
      (Context : ${analysis_context_type};
       Discard : int)
    is
-      C : Analysis_Context := Unwrap (Context);
+      C : Internal_Context := Unwrap (Context);
    begin
       Discard_Errors_In_Populate_Lexical_Env (C, Discard /= 0);
    end;
@@ -152,7 +160,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         C : Analysis_Context := Unwrap (Context);
+         C : Internal_Context := Unwrap (Context);
       begin
          Destroy (C);
       end;
@@ -169,12 +177,13 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Ctx  : constant Analysis_Context := Unwrap (Context);
-         Unit : constant Analysis_Unit := Get_From_File
+         Ctx  : constant Internal_Context := Unwrap (Context);
+         Unit : constant Internal_Unit := Get_From_File
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
-            Reparse /= 0);
+            Reparse /= 0,
+            ${Name.from_lower(ctx.main_rule_name)}_Rule);
       begin
          return Wrap (Unit);
       end;
@@ -193,8 +202,8 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Ctx : constant Analysis_Context := Unwrap (Context);
-         Unit : Analysis_Unit;
+         Ctx : constant Internal_Context := Unwrap (Context);
+         Unit : Internal_Unit;
 
          Buffer_Str : String (1 .. Positive (Buffer_Size));
          for Buffer_Str'Address use Convert (Buffer);
@@ -203,7 +212,8 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
-            Buffer_Str);
+            Buffer_Str,
+            ${Name.from_lower(ctx.main_rule_name)}_Rule);
          return Wrap (Unit);
       end;
    exception
@@ -227,8 +237,8 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
                with Import  => True,
                     Address => Name.Chars;
 
-            Ctx  : constant Analysis_Context := Unwrap (Context);
-            Unit : constant Analysis_Unit := Get_From_Provider
+            Ctx  : constant Internal_Context := Unwrap (Context);
+            Unit : constant Internal_Unit := Get_From_Provider
               (Ctx,
                Text_Name,
                Unwrap (Kind),
@@ -253,7 +263,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Ctx : constant Analysis_Context := Unwrap (Context);
+         Ctx : constant Internal_Context := Unwrap (Context);
       begin
          begin
             Remove (Ctx, Value (Filename));
@@ -276,7 +286,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          Result_P.all := (U.AST_Root, No_Entity_Info);
       end;
@@ -292,7 +302,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
          T : constant Token_Type := First_Token (U);
       begin
          Token.all := Wrap (T);
@@ -309,7 +319,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
          T : constant Token_Type := Last_Token (U);
       begin
          Token.all := Wrap (T);
@@ -325,7 +335,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          return int (Token_Count (U));
       end;
@@ -341,7 +351,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          return int (Trivia_Count (U));
       end;
@@ -359,7 +369,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U   : constant Analysis_Unit := Unwrap (Unit);
+         U   : constant Internal_Unit := Unwrap (Unit);
          S   : constant Source_Location := Unwrap (Sloc.all);
          Tok : constant Token_Type := Lookup_Token (U, S);
       begin
@@ -376,7 +386,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          return New_String (Get_Filename (U));
       end;
@@ -392,7 +402,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          return unsigned (U.Diagnostics.Length);
       end;
@@ -411,7 +421,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          if N < unsigned (U.Diagnostics.Length) then
             declare
@@ -438,7 +448,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          Inc_Ref (U);
          return Unit;
@@ -454,7 +464,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : Analysis_Unit := Unwrap (Unit);
+         U : Internal_Unit := Unwrap (Unit);
       begin
          Dec_Ref (U);
       end;
@@ -469,7 +479,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          return Wrap (U.Context);
       end;
@@ -485,7 +495,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          Reparse (U, Value_Or_Empty (Charset));
       end;
@@ -503,7 +513,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
          Buffer_Str : String (1 .. Positive (Buffer_Size));
          for Buffer_Str'Address use Convert (Buffer);
       begin
@@ -520,7 +530,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := Unwrap (Unit);
+         U : constant Internal_Unit := Unwrap (Unit);
       begin
          Populate_Lexical_Env (U);
       exception
@@ -954,7 +964,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    ------------
 
    function Unwrap
-     (Unit : Analysis_Unit; Text : ${text_type}) return Symbol_Type
+     (Unit : Internal_Unit; Text : ${text_type}) return Symbol_Type
    is
       T : Text_Type (1 .. Natural (Text.Length));
       for T'Address use Text.Chars;
@@ -1098,9 +1108,9 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Name     : Text_Type;
       Kind     : Unit_Kind) return String
    is
-      Name_Access : Text_Access := Name'Unrestricted_Access;
+      Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
 
-      C_Result    : chars_ptr := Provider.Get_Unit_Filename_Func
+      C_Result : chars_ptr := Provider.Get_Unit_Filename_Func
         (Provider.Data, Wrap (Name_Access), Wrap (Kind));
    begin
       if C_Result = Null_Ptr then
@@ -1127,20 +1137,22 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Charset  : String := "";
       Reparse  : Boolean := False) return Analysis_Unit
    is
-      Name_Access : Text_Access := Name'Unrestricted_Access;
+      Ctx         : constant ${analysis_context_type} :=
+         Wrap (Bare_Context (Context));
+      Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
       C_Charset   : chars_ptr := (if Charset'Length = 0
-                                   then Null_Ptr
-                                   else New_String (Charset));
+                                  then Null_Ptr
+                                  else New_String (Charset));
 
       C_Result    : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
-        (Provider.Data, Wrap (Context), Wrap (Name_Access), Wrap (Kind),
+        (Provider.Data, Ctx, Wrap (Name_Access), Wrap (Kind),
          C_Charset, Boolean'Pos (Reparse));
    begin
       Free (C_Charset);
       if C_Result = ${analysis_unit_type} (System.Null_Address) then
          raise Property_Error with "invalid AST node for unit name";
       end if;
-      return Unwrap (C_Result);
+      return To_Unit (Unwrap (C_Result));
    end Get_Unit;
 
    ${exts.include_extension(
@@ -1236,4 +1248,4 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       % endif
    % endfor
 
-end ${ada_lib_name}.Analysis.Implementation.C;
+end ${ada_lib_name}.Implementation.C;

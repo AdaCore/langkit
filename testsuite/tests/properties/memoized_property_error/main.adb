@@ -4,6 +4,7 @@ with Ada.Text_IO;    use Ada.Text_IO;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
+with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
    Ctx          : Analysis_Context := Create;

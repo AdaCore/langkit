@@ -11,15 +11,15 @@ pragma Warnings (On, "internal");
 
 with GNATCOLL.Iconv;
 
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
-with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;         use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 package body ${ada_lib_name}.Unparsing.Implementation is
 
-   subtype Abstract_Node is Analysis.Implementation.Abstract_Node;
+   subtype Abstract_Node is ${ada_lib_name}.Implementation.Abstract_Node;
    --  Subtype to avoid visibility conflict with an Abstract_Node type coming
    --  from the Analysis package.
 
@@ -362,7 +362,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
-      Unit                : Analysis_Unit;
+      Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String
    is
@@ -380,7 +380,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    function Unparse
      (Node                : access Abstract_Node_Type'Class;
-      Unit                : Analysis_Unit;
+      Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String_Access
    is

@@ -18,14 +18,11 @@
 
    <% elt_type = cls.element_type.name %>
 
-   ## If this array type is exposed in the public API, it is declared there, so
-   ## no need to re-declare it here. There is one exception to this rule: if
-   ## the element type itself is exposed, but as a different type (for instance
-   ## entities), then we need a separate type.
-   % if not cls._exposed or cls.array_type_name != cls.api_name:
-      type ${cls.array_type_name} is
-         array (Positive range <>) of ${cls.element_type.name};
+   % if not cls.element_type.is_character_type:
+   type ${cls.array_type_name} is
+      array (Positive range <>) of ${cls.element_type.name};
    % endif
+
    type ${cls.pointed} (N : Natural) is record
       Ref_Count : Positive;
       Items     : ${cls.array_type_name} (1 .. N);

@@ -7,6 +7,7 @@ with Langkit_Support.Iterators;
 with Langkit_Support.Tree_Traversal_Iterator;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 --  This package provides an interface to work with iterators on AST node
 --  sequences.

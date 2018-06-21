@@ -7,8 +7,8 @@ with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
-with ${ada_lib_name}.Analysis.Implementation;
-use ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Implementation;
+use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
