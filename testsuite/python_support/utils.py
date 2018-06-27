@@ -64,9 +64,7 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
     os.mkdir('build')
 
     # Try to emit code
-    ctx = CompileCtx(lang_name='Foo',
-                     lexer=lexer,
-                     grammar=grammar)
+    ctx = CompileCtx(lang_name='Foo', lexer=lexer, grammar=grammar)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -164,8 +162,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     if properties_logging:
         argv.append('--enable-properties-logging')
-    if pretty_print:
-        argv.append('--pretty-print')
+    if not pretty_print:
+        argv.append('--no-pretty-print')
     if generate_unparser:
         argv.append('--generate-unparser')
     m.run(argv)

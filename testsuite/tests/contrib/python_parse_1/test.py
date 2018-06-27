@@ -16,7 +16,7 @@ import sys
 LK_PYTHON_LIB_DIR = P.join(os.environ['LANGKIT_ROOT_DIR'], 'contrib', 'python')
 
 o = subprocess.check_output(
-    [sys.executable, P.join(LK_PYTHON_LIB_DIR, 'manage.py'), 'make'],
+    [sys.executable, P.join(LK_PYTHON_LIB_DIR, 'manage.py'), 'make', '-P'],
     # CWD is the lib's directory so that lib is generated in the lib's dir, not
     # in the test dir.
     cwd=LK_PYTHON_LIB_DIR
