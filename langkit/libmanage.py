@@ -965,12 +965,13 @@ class ManageScript(object):
             )
         self.setup_environment(add_path)
 
-    def check_call(self, args, name, argv, env=None):
+    def check_call(self, args, name, argv, env=None, abort_on_error=True):
         """
         Log and run a command with a derived environment.
 
-        If the command exits with an error status code, exit ourselves with a
-        status code and a proper error message.
+        Return True if the command completes with success. Otherwise, emit an
+        error message and, if `abort_on_error` is true, exit with an error
+        status code.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
@@ -979,6 +980,8 @@ class ManageScript(object):
         :param list[str] argv: Arguments for the command to run.
         :param dict[str, str]|None env: Environment to use for the command to
             run. If None, use self.derived_env().
+        :param bool abort_on_error: If the command stops with an error, exit
+            ourselves.
         """
         self.log_exec(args, argv)
         if env is None:
@@ -990,14 +993,18 @@ class ManageScript(object):
                 '{color}{name} failed:{reset}'
                 ' error while running {argv}:'
                 '\n    {exc}'.format(
-                    color=Colors.FAIL,
+                    color=Colors.FAIL if abort_on_error else Colors.WARNING,
                     name=name,
                     reset=Colors.ENDC,
                     argv=' '.join(argv),
                     exc=exc
                 )
             )
-            sys.exit(1)
+            if abort_on_error:
+                sys.exit(1)
+            else:
+                return False
+        return True
 
     def log_exec(self, args, argv):
         """
