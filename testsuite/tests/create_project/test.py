@@ -23,6 +23,6 @@ create_project_py = os.path.join(
 manage_py = os.path.join('mylang', 'manage.py')
 
 python(create_project_py, 'Mylang')
-python(manage_py, '-vnone', 'make')
+python(manage_py, '-vnone', 'make', '-P')
 
 print('Done')

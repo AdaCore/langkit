@@ -297,8 +297,8 @@ class ManageScript(object):
         :type subparser: argparse.ArgumentParser
         """
         subparser.add_argument(
-            '--pretty-print', '-p', action='store_true',
-            help='Pretty-print generated source code.'
+            '--no-pretty-print', '-P', action='store_true',
+            help='Do not try to pretty-print generated source code.'
         )
         subparser.add_argument(
             '--annotate-fields-types', action='store_true',
@@ -555,7 +555,8 @@ class ManageScript(object):
 
         # Context needs to know if we want to pretty print the generated
         # code or not.
-        self.context.pretty_print = getattr(parsed_args, 'pretty_print', False)
+        self.context.pretty_print = not getattr(parsed_args, 'no_pretty_print',
+                                                False)
 
     def do_generate(self, args):
         """
@@ -569,10 +570,17 @@ class ManageScript(object):
             """
             Helper function to pretty-print files from a GPR project.
             """
+
+            # In general, don't abort if we can't find gnatpp or if gnatpp
+            # crashes: at worst sources will not be pretty-printed, which is
+            # not a big deal. `check_call` will emit warnings in this case.
+
             if self.verbosity.debug:
-                self.check_call(args, 'Show pp path', ['which', 'gnatpp'])
+                self.check_call(args, 'Show pp path', ['which', 'gnatpp'],
+                                abort_on_error=False)
                 self.check_call(args, 'Show pp version',
-                                ['gnatpp', '--version'])
+                                ['gnatpp', '--version'],
+                                abort_on_error=False)
 
             argv = [
                 'gnatpp', '-P{}'.format(project_file), '-rnb',
@@ -584,7 +592,8 @@ class ManageScript(object):
             self.check_call(
                 args, 'Pretty-printing',
                 argv + self.gpr_scenario_vars(args, 'prod', 'relocatable')
-                + glob.glob(glob_pattern)
+                + glob.glob(glob_pattern),
+                abort_on_error=False
             )
 
         self.log_info(
@@ -620,7 +629,7 @@ class ManageScript(object):
         if not args.no_langkit_support:
             self.do_generate_langkit_support(args)
 
-        if getattr(args, 'pretty_print', False):
+        if not getattr(args, 'no_pretty_print', False):
             self.log_info("Pretty-printing sources for Libadalang...",
                           Colors.HEADER)
             gnatpp(
