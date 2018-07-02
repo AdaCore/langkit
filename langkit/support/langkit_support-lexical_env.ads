@@ -285,12 +285,26 @@ package Langkit_Support.Lexical_Env is
    -- Referenced environments --
    -----------------------------
 
+   type Ref_Kind is (Transitive, Prioritary, Normal);
+   --  Kind for a referenced env. Can be any of:
+   --
+   --  * transitive: The reference is transitive, eg. it will be explored in
+   --    every case (whether the lookup is recursive or not). It will be
+   --    explored before parent environments.
+   --
+   --  * prioritary: The reference is non transitive, eg. it will be
+   --    explored only if the lookup on the env is recursive. It will be
+   --    explored before parent environments.
+   --
+   --  * normal: The reference is non transitive, eg. it will be explored
+   --    only if the lookup on the env is recursive. It will be explored
+   --    after parent environments.
+
    type Refd_Env_State is (Active, Inactive);
 
    type Referenced_Env is record
-      Is_Transitive : Boolean := False;
-      --  Whether this reference is transitive. This changes the behavior of
-      --  the Get lookup operation.
+      Kind : Ref_Kind := Normal;
+      --  Kind for this referenced env.
 
       Getter        : Env_Getter;
       --  Closure to fetch the environment that is referenced
@@ -351,7 +365,7 @@ package Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
       Resolver        : Lexical_Env_Resolver;
-      Transitive      : Boolean := False)
+      Kind            : Ref_Kind := Normal)
       with Pre => Self.Kind = Primary;
    --  Add a dynamic reference from Self to the lexical environment computed
    --  calling Resolver on Referenced_From. This makes the content of this
@@ -368,7 +382,7 @@ package Langkit_Support.Lexical_Env is
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
-      Transitive   : Boolean := False)
+      Kind         : Ref_Kind := Normal)
       with Pre => Self.Kind = Primary;
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
