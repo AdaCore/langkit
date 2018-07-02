@@ -308,7 +308,7 @@
                Env,
                Ref_Env_Nodes,
                ${ref_env.resolver.name}'Access,
-               ${ref_env.transitive});
+               ${ref_env.kind.value});
             Dec_Ref (Ref_Env_Nodes);
          end;
 

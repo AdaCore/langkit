@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+from enum import Enum
 from funcy import split_by
 from itertools import count
 
@@ -47,13 +48,37 @@ def add_env(no_parent=False, transitive_parent=False):
     return AddEnv(no_parent, transitive_parent)
 
 
-def reference(nodes, through, transitive=False, dest_env=None, cond=None):
+class RefKind(Enum):
+    """
+    Represents the kind of a referenced env. Here are the different kinds:
+
+    * transitive: The reference is transitive, eg. it will be explored in every
+      case (whether the lookup is recursive or not). It will be explored
+      *before* parent environments.
+
+    * prioritary: The reference is non transitive, eg. it will be explored only
+      if the lookup on the env is recursive. It will be explored *before*
+      parent environments.
+
+    * normal: The reference is non transitive, eg. it will be explored only
+      if the lookup on the env is recursive. It will be explored *after*
+      parent environments.
+    """
+    transitive = "Transitive"
+    prioritary = "Prioritary"
+    normal = "Normal"
+
+
+def reference(nodes, through,
+              kind=RefKind.normal, dest_env=None, cond=None):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
 
     :param AbstractExpression nodes: An expression that yields a list of nodes.
     :param PropertyDef through: A property reference.
+
+    :param RefKind kind: Kind of reference.
     :param AbstractExpression|None dest_env: If passed, the destination
         environment for this reference.
     :param AbstractExpression|None cond: If passed, an expression evaluating to
@@ -62,7 +87,7 @@ def reference(nodes, through, transitive=False, dest_env=None, cond=None):
 
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes, transitive, dest_env=dest_env, cond=cond)
+    return RefEnvs(through, nodes, kind, dest_env=dest_env, cond=cond)
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -411,8 +436,8 @@ class RefEnvs(EnvAction):
     Couple of a property and an expression to evaluate referenced envs.
     """
 
-    def __init__(self, resolver, nodes_expr, transitive=False,
-                 dest_env=None, cond=None):
+    def __init__(self, resolver, nodes_expr,
+                 kind=RefKind.normal, dest_env=None, cond=None):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -425,7 +450,7 @@ class RefEnvs(EnvAction):
             (explicit or implicit) appart from Self, and that returns a lexical
             environment.
 
-        :param bool transitive: Whether this reference is transitive or not.
+        :param RefKind kind: Kind of reference.
 
         :param AbstractExpression|None dest_env: Optional expression
             designating the destination env.
@@ -452,7 +477,7 @@ class RefEnvs(EnvAction):
         resolver. It is None before the property is built.
         """
 
-        self.transitive = transitive
+        self.kind = kind
 
         self.dest_env = dest_env
 

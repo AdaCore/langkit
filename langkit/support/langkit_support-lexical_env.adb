@@ -426,10 +426,10 @@ package body Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
       Resolver        : Lexical_Env_Resolver;
-      Transitive      : Boolean := False)
+      Kind            : Ref_Kind := Normal)
    is
       Refd_Env : Referenced_Env :=
-        (Transitive,
+        (Kind,
          Dyn_Env_Getter (Resolver, Referenced_From),
          False, Inactive);
    begin
@@ -449,10 +449,10 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
-      Transitive   : Boolean := False)
+      Kind         : Ref_Kind := Normal)
    is
       Ref : constant Referenced_Env :=
-        (Transitive, Simple_Env_Getter (To_Reference), False, Active);
+        (Kind, Simple_Env_Getter (To_Reference), False, Active);
    begin
       if Self = Empty_Env then
          return;
@@ -571,7 +571,7 @@ package body Langkit_Support.Lexical_Env is
          --     From.
 
          if (not Recursive
-             and then not Self.Is_Transitive)
+             and then Self.Kind /= Transitive)
            or else Self.Being_Visited
            or else Self.State = Inactive
          then
@@ -585,9 +585,9 @@ package body Langkit_Support.Lexical_Env is
             Refd_Results : constant Lookup_Result_Array :=
               Get_Internal
                 (Env, Key,
-                 Recursive  => Recursive and Self.Is_Transitive,
+                 Recursive  => Recursive and Self.Kind = Transitive,
                  Rebindings =>
-                   (if Self.Is_Transitive
+                   (if Self.Kind = Transitive
                     then Current_Rebindings
                     else Shed_Rebindings (Env, Current_Rebindings)),
                  Metadata   => Metadata);
@@ -732,12 +732,14 @@ package body Langkit_Support.Lexical_Env is
          end;
       end if;
 
-      --  Phase 2: Get elements in transitive referenced envs
+      --  Phase 2: Get elements in transitive and prioritary referenced envs
 
       for I in Self.Env.Referenced_Envs.First_Index
             .. Self.Env.Referenced_Envs.Last_Index
       loop
-         if Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
+         if Self.Env.Referenced_Envs.Get_Access (I).Kind
+           in Transitive | Prioritary
+         then
             Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
          end if;
       end loop;
@@ -770,7 +772,7 @@ package body Langkit_Support.Lexical_Env is
          end;
       end if;
 
-      --  Phase 4: Get elements in non transitive referenced envs
+      --  Phase 4: Get elements in normal referenced envs
 
       if Recursive then
          if Has_Trace then
@@ -778,13 +780,17 @@ package body Langkit_Support.Lexical_Env is
               (Me, "Recursing on non transitive referenced environments");
             Traces.Increase_Indent (Me);
          end if;
+
          for I in Self.Env.Referenced_Envs.First_Index
            .. Self.Env.Referenced_Envs.Last_Index
          loop
-            if not Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
+            if Self.Env.Referenced_Envs.Get_Access (I).Kind
+              not in Transitive | Prioritary
+            then
                Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
             end if;
          end loop;
+
          if Has_Trace then
             Traces.Decrease_Indent (Me);
          end if;
@@ -1406,8 +1412,7 @@ package body Langkit_Support.Lexical_Env is
 
       function Hash (Ref : Referenced_Env) return Hash_Type is
       begin
-         return Combine ((Boolean'Pos (Ref.Is_Transitive),
-                          Hash (Ref.Getter)));
+         return Combine ((Ref_Kind'Pos (Ref.Kind), Hash (Ref.Getter)));
       end Hash;
 
       ----------
