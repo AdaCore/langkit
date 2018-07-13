@@ -52,15 +52,15 @@ class RefKind(Enum):
     """
     Represents the kind of a referenced env. Here are the different kinds:
 
-    * transitive: The reference is transitive, eg. it will be explored in every
-      case (whether the lookup is recursive or not). It will be explored
+    * transitive: The reference is transitive, e.g. it will be explored in
+      every case (whether the lookup is recursive or not). It will be explored
       *before* parent environments.
 
-    * prioritary: The reference is non transitive, eg. it will be explored only
-      if the lookup on the env is recursive. It will be explored *before*
+    * prioritary: The reference is non transitive, e.g. it will be explored
+      only if the lookup on the env is recursive. It will be explored *before*
       parent environments.
 
-    * normal: The reference is non transitive, eg. it will be explored only
+    * normal: The reference is non transitive, e.g. it will be explored only
       if the lookup on the env is recursive. It will be explored *after*
       parent environments.
     """

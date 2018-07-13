@@ -288,32 +288,32 @@ package Langkit_Support.Lexical_Env is
    type Ref_Kind is (Transitive, Prioritary, Normal);
    --  Kind for a referenced env. Can be any of:
    --
-   --  * transitive: The reference is transitive, eg. it will be explored in
+   --  * Transitive: The reference is transitive, e.g. it will be explored in
    --    every case (whether the lookup is recursive or not). It will be
-   --    explored before parent environments.
+   --    explored *before* parent environments.
    --
-   --  * prioritary: The reference is non transitive, eg. it will be
+   --  * Prioritary: The reference is non transitive, e.g. it will be
    --    explored only if the lookup on the env is recursive. It will be
-   --    explored before parent environments.
+   --    explored *before* parent environments.
    --
-   --  * normal: The reference is non transitive, eg. it will be explored
+   --  * Normal: The reference is non transitive, e.g. it will be explored
    --    only if the lookup on the env is recursive. It will be explored
-   --    after parent environments.
+   --    *after* parent environments.
 
    type Refd_Env_State is (Active, Inactive);
 
    type Referenced_Env is record
       Kind : Ref_Kind := Normal;
-      --  Kind for this referenced env.
+      --  Kind for this referenced env
 
-      Getter        : Env_Getter;
+      Getter : Env_Getter;
       --  Closure to fetch the environment that is referenced
 
       Being_Visited : Boolean;
       --  Flag set to true when Referenced_Env is being visited. Used as a
       --  recursion guard. WARNING: Not thread safe.
 
-      State         : Refd_Env_State := Inactive;
+      State : Refd_Env_State := Inactive;
       --  State of the referenced env, whether active or inactive
    end record;
    --  Represents a referenced env
