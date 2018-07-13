@@ -2813,7 +2813,9 @@ class PropertyDef(AbstractNodeData):
             property or its callers even when it is unsafe to do so, for
             instance when using equation resolution constructs, which are
             memoization-unfriendly as they use side-effects. This should be
-            used when the side is contained inside the call to this property.
+            used when the side-effect is contained inside the call to this
+            property (i.e. when the property is pure from the point of view of
+            callers).
 
         :param bool memoize_in_populate: Whether to memoize the property during
             the populate lexical environment pass. It is disabled by default as
