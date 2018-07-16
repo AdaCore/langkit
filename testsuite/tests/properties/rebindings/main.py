@@ -11,7 +11,7 @@ def def_repr(n):
         n.p_name,
         n.sloc_range
     )
-libfoolang.Def.__repr__ = def_repr
+libfoolang.DefNode.__repr__ = def_repr
 
 
 def process(index, n):

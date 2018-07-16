@@ -24,14 +24,14 @@ class Name(FooNode):
 
 
 @abstract
-class Def(FooNode):
+class DefNode(FooNode):
     name = AbstractProperty(T.SymbolType, public=True)
     env_spec = EnvSpec(add_to_env(mappings=New(T.env_assoc,
                                                key=Self.name,
                                                val=Self)))
 
 
-class Block(Def):
+class Block(DefNode):
     params = Field(type=T.Params)
     name_field = Field(type=T.Name)
     vars = Field(type=T.BlockVar.list)
@@ -58,7 +58,7 @@ class Block(Def):
 
 
 @has_abstract_list
-class Param(Def):
+class Param(DefNode):
     name_field = Field(type=T.Name)
     name = Property(Self.name_field.symbol)
 
@@ -67,7 +67,7 @@ class Params(Param.list):
     env_spec = EnvSpec(add_env())
 
 
-class BlockVar(Def):
+class BlockVar(DefNode):
     name_field = Field(type=T.Name)
     name = Property(Self.name_field.symbol)
 
