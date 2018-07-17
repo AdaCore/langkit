@@ -357,53 +357,17 @@ private
    -- AST nodes (internal) --
    --------------------------
 
-   <% md_fields = T.env_md.get_fields() %>
-
-   type Public_Metadata is
-      % if md_fields:
-         record
-            % for f in md_fields:
-               % if f.type.is_bool_type:
-                  ${f.name} : Boolean := False;
-               % elif f.type.is_ast_node:
-                  ${f.name} : System.Address := System.Null_Address;
-               % else:
-                  <% assert False %>
-               % endif
-            % endfor
-         end record
-            with Convention => C;
-      % else:
-         null record
-            with Convention => C;
-      % endif;
-
-   No_Public_Metadata : constant Public_Metadata :=
-      % if md_fields:
-         (others => <>);
-      % else:
-         (null record);
-      % endif
-
-   type Public_Entity_Info is record
-      MD         : Public_Metadata;
-      Rebindings : System.Address;
-   end record;
-
-   No_Public_Entity_Info : constant Public_Entity_Info :=
-     (No_Public_Metadata, System.Null_Address);
-
    % for e in ctx.entity_types:
       % if e.is_root_type:
          type ${e.api_name} is tagged record
-            Node   : access Implementation.${root_node_value_type}'Class;
-            E_Info : Public_Entity_Info;
+            Node   : Implementation.${root_node_type_name};
+            E_Info : Implementation.AST_Envs.Entity_Info;
          end record;
       % else:
          type ${e.api_name} is new ${e.base.api_name} with null record;
       % endif
       No_${e.api_name} : constant ${e.api_name} :=
-        (null, No_Public_Entity_Info);
+        (null, Implementation.AST_Envs.No_Entity_Info);
    % endfor
 
    --------------------------------

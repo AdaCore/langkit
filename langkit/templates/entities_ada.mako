@@ -226,11 +226,6 @@
 
 <%def name="bodies()">
 
-   function Convert is new Ada.Unchecked_Conversion
-     (Public_Entity_Info, Entity_Info);
-   function Convert is new Ada.Unchecked_Conversion
-     (Entity_Info, Public_Entity_Info);
-
    -------------
    -- Is_Null --
    -------------
@@ -270,7 +265,7 @@
    -----------
 
    function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
-     (Image (${T.entity.name}'(Node.Node, Convert (Node.E_Info))));
+     (Image (${T.entity.name}'(Node.Node, Node.E_Info)));
 
    -----------
    -- Image --
@@ -286,7 +281,7 @@
    function Hash
      (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type
    is
-      N : constant ${root_entity.name} := (Node.Node, Convert (Node.E_Info));
+      N : constant ${root_entity.name} := (Node.Node, Node.E_Info);
    begin
       return Hash (N);
    end Hash;
@@ -436,7 +431,7 @@
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location) return ${root_entity.api_name} is
    begin
-      return (Node.Node.Lookup (Sloc), No_Public_Entity_Info);
+      return Create_Entity (Node.Node.Lookup (Sloc));
    end Lookup;
 
    ----------
@@ -502,7 +497,7 @@
               return Visit_Status)
      return Visit_Status
    is
-      E_Info : constant Public_Entity_Info := Node.E_Info;
+      E_Info : constant Entity_Info := Node.E_Info;
 
       -------------
       -- Wrapper --
@@ -512,7 +507,7 @@
         (Node : access ${root_node_value_type}'Class) return Visit_Status
       is
          Public_Node : constant ${root_entity.api_name} :=
-           (${root_node_type_name} (Node), E_Info);
+           Create_Entity (${root_node_type_name} (Node), E_Info);
       begin
          return Visit (Public_Node);
       end Wrapper;

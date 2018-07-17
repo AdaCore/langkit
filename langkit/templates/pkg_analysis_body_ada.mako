@@ -384,7 +384,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Root (Unit : Analysis_Unit) return ${root_entity.api_name} is
    begin
-      return (Root (Internal_Unit (Unit)), No_Public_Entity_Info);
+      return Create_Entity (Root (Internal_Unit (Unit)));
    end Root;
 
    -----------------
@@ -533,9 +533,9 @@ package body ${ada_lib_name}.Analysis is
      (Node   : Implementation.${root_node_type_name};
       E_Info : Implementation.AST_Envs.Entity_Info
         := Implementation.AST_Envs.No_Entity_Info)
-   return ${root_entity.api_name} is
+       return ${root_entity.api_name} is
    begin
-      return (Node, Convert (E_Info));
+      return (Node, E_Info);
    end Create_Entity;
 
    ---------------
