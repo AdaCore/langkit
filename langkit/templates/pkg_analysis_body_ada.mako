@@ -259,9 +259,9 @@ package body ${ada_lib_name}.Analysis is
    -- Remove --
    ------------
 
-   procedure Remove (Context : Analysis_Context; File_Name : String) is
+   procedure Remove (Context : Analysis_Context; Filename : String) is
    begin
-      Remove (Internal_Context (Context), File_Name);
+      Remove (Internal_Context (Context), Filename);
    end Remove;
 
    -------------
