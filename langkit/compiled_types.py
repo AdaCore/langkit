@@ -2532,7 +2532,7 @@ class ArrayType(CompiledType):
                 not self.element_type.emit_c_type):
             return T.entity.array.c_type(c_api_settings)
         else:
-            return CAPIType(c_api_settings, self.array_type_name)
+            return CAPIType(c_api_settings, self.api_name)
 
     def index_type(self):
         """
@@ -2558,7 +2558,7 @@ class ArrayType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.array_type_name + names.Name('Inc_Ref'))
+        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
 
     def c_dec_ref(self, capi):
         """
@@ -2567,7 +2567,7 @@ class ArrayType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.array_type_name + names.Name('Dec_Ref'))
+        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
 
     @property
     def emit_c_type(self):

@@ -69,12 +69,11 @@ class _BaseArray(object):
 <%def name="decl(cls)">
 
 <%
-   type_name = cls.array_type_name.camel
    element_type = cls.element_type
    c_element_type = pyapi.type_internal_name(element_type)
 %>
 
-class ${type_name}(_BaseArray):
+class ${cls.api_name.camel}(_BaseArray):
     """
     Wrapper class for arrays of ${cls.element_type.name}.
 
