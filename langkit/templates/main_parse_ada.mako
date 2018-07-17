@@ -33,7 +33,7 @@ procedure Parse is
       new String'("${ctx.main_rule_name}");
    Charset     : aliased GNAT.Strings.String_Access :=
       new String'("iso-8859-1");
-   File_Name   : aliased GNAT.Strings.String_Access;
+   Filename    : aliased GNAT.Strings.String_Access;
    File_List   : aliased GNAT.Strings.String_Access;
    Print_Envs  : aliased Boolean;
    Count_Nodes : aliased Boolean;
@@ -48,7 +48,7 @@ procedure Parse is
    procedure Process_Lookups (Node : ${root_entity.api_name}'Class);
    procedure Process_Node (Res : ${root_entity.api_name}'Class);
    procedure Parse_Input;
-   procedure Process_File (File_Name : String; Ctx : in out Analysis_Context);
+   procedure Process_File (Filename : String; Ctx : in out Analysis_Context);
 
    --------------
    -- Get_Rule --
@@ -166,14 +166,14 @@ procedure Parse is
    -- Process_File --
    ------------------
 
-   procedure Process_File (File_Name : String; Ctx : in out Analysis_Context)
+   procedure Process_File (Filename : String; Ctx : in out Analysis_Context)
    is
       Unit         : Analysis_Unit;
       Time_Before  : constant Time := Clock;
       Time_After   : Time;
       AST          : ${root_entity.api_name};
    begin
-      Unit := Get_From_File (Ctx, File_Name, "", True, Rule => Get_Rule);
+      Unit := Get_From_File (Ctx, Filename, "", True, Rule => Get_Rule);
       AST := Root (Unit);
       Time_After := Clock;
 
@@ -274,7 +274,7 @@ begin
      (Config, Hide_Slocs'Access, "--hide-slocs",
       Help   => "When printing the tree, hide source locations");
    Define_Switch
-     (Config, File_Name'Access, "-f:", "--file-name:",
+     (Config, Filename'Access, "-f:", "--file-name:",
       Help   => "Parse file");
    Define_Switch
      (Config, File_List'Access, "-F:", "--file-list:",
@@ -309,13 +309,13 @@ begin
          Destroy (Ctx);
       end;
 
-   elsif File_Name.all'Length /= 0 then
+   elsif Filename.all'Length /= 0 then
       declare
          Ctx : Analysis_Context :=
            Create (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Register_Lookups;
-         Process_File (File_Name.all, Ctx);
+         Process_File (Filename.all, Ctx);
          Destroy (Ctx);
       end;
 
@@ -340,6 +340,6 @@ begin
    GNAT.Strings.Free (Rule_Name);
    GNAT.Strings.Free (Charset);
    GNAT.Strings.Free (File_List);
-   GNAT.Strings.Free (File_Name);
+   GNAT.Strings.Free (Filename);
    Free (Config);
 end Parse;

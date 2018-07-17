@@ -1042,7 +1042,7 @@ package ${ada_lib_name}.Implementation is
 
       AST_Root : ${root_node_type_name};
 
-      File_Name : GNATCOLL.VFS.Virtual_File;
+      Filename : GNATCOLL.VFS.Virtual_File;
       --  The originating name for this analysis unit. This should be set even
       --  if the analysis unit was parsed from a buffer.
 
@@ -1219,7 +1219,7 @@ package ${ada_lib_name}.Implementation is
    --  Implementation for Analysis.Unit_Provider
    % endif
 
-   procedure Remove (Context : Internal_Context; File_Name : String)
+   procedure Remove (Context : Internal_Context; Filename : String)
       with Pre => not Has_Rewriting_Handle (Context);
    --  Implementation for Analysis.Remove
 

@@ -539,11 +539,11 @@ package body ${ada_lib_name}.Implementation is
    -- Remove --
    ------------
 
-   procedure Remove (Context : Internal_Context; File_Name : String) is
+   procedure Remove (Context : Internal_Context; Filename : String) is
       use Units_Maps;
 
       Cur      : Cursor := Context.Units.Find
-        (Normalized_Unit_Filename (Context, File_Name));
+        (Normalized_Unit_Filename (Context, Filename));
       Unit     : Internal_Unit;
       Reparsed : Reparsed_Unit;
    begin
@@ -562,7 +562,7 @@ package body ${ada_lib_name}.Implementation is
       --  Move the unit to the set of removed units so the unit handle still
       --  points to valid memory. We will re-use it if we reparse this unit.
       Context.Units.Delete (Cur);
-      Context.Removed_Units.Insert (Unit.File_Name, Unit);
+      Context.Removed_Units.Insert (Unit.Filename, Unit);
    end Remove;
 
    -------------
@@ -646,7 +646,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Reparse (Unit : Internal_Unit; Charset : String) is
       Dummy : constant Internal_Unit := Get_From_File
-        (Unit.Context, +Unit.File_Name.Full_Name, Charset,
+        (Unit.Context, +Unit.Filename.Full_Name, Charset,
          Reparse => True,
          Rule    => Unit.Rule);
    begin
@@ -660,7 +660,7 @@ package body ${ada_lib_name}.Implementation is
    procedure Reparse (Unit : Internal_Unit; Charset : String; Buffer : String)
    is
       Dummy : constant Internal_Unit := Get_From_Buffer
-        (Unit.Context, +Unit.File_Name.Full_Name, Charset, Buffer, Unit.Rule);
+        (Unit.Context, +Unit.Filename.Full_Name, Charset, Buffer, Unit.Rule);
    begin
       null;
    end Reparse;
@@ -738,7 +738,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Get_Filename (Unit : Internal_Unit) return String is
-     (+Unit.File_Name.Full_Name);
+     (+Unit.Filename.Full_Name);
 
    -----------------
    -- Get_Charset --
@@ -1030,7 +1030,7 @@ package body ${ada_lib_name}.Implementation is
 
    function "<" (Left, Right : Internal_Unit) return Boolean is
    begin
-      return Left.File_Name < Right.File_Name;
+      return Left.Filename < Right.Filename;
    end "<";
 
    % if ctx.has_memoization:
@@ -1926,7 +1926,7 @@ package body ${ada_lib_name}.Implementation is
 
    % if T.AnalysisUnitType.requires_hash_function:
       function Hash (Unit : Internal_Unit) return Hash_Type is
-        (Full_Name_Hash (Unit.File_Name));
+        (Full_Name_Hash (Unit.Filename));
    % endif
 
    ${struct_types.body_hash(T.entity)}
@@ -3303,7 +3303,7 @@ package body ${ada_lib_name}.Implementation is
         (Context           => Context,
          Ref_Count         => 1,
          AST_Root          => null,
-         File_Name         => Normalized_Filename,
+         Filename          => Normalized_Filename,
          Charset           => To_Unbounded_String (Charset),
          TDH               => <>,
          Diagnostics       => <>,
@@ -3502,7 +3502,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Basename (Unit : Internal_Unit) return String is
    begin
-      return +Unit.File_Name.Base_Name;
+      return +Unit.Filename.Base_Name;
    end Basename;
 
    ------------------
@@ -3805,7 +3805,7 @@ package body ${ada_lib_name}.Implementation is
       for FN of Foreign_Nodes loop
          declare
             Node_Image : constant String := Image (FN.Short_Image);
-            Unit_Name  : constant String := +FN.Unit.File_Name.Base_Name;
+            Unit_Name  : constant String := +FN.Unit.Filename.Base_Name;
          begin
             GNATCOLL.Traces.Trace (Main_Trace, "Rerooting: " & Node_Image
                                                & " (from " & Unit_Name & ")");
@@ -3817,7 +3817,7 @@ package body ${ada_lib_name}.Implementation is
       --  Recreate the lexical env structure for queued units, unless they were
       --- removed.
       for Unit of Context.Populate_Lexical_Env_Queue loop
-         if Context.Units.Contains (Unit.File_Name) then
+         if Context.Units.Contains (Unit.Filename) then
             Populate_Lexical_Env (Unit);
          end if;
       end loop;
