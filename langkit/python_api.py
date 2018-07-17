@@ -149,4 +149,4 @@ class PythonAPISettings(AbstractAPISettings):
     def array_wrapper(self, array_type):
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
-                array_type).array_type_name.camel
+                array_type).api_name.camel
