@@ -39,7 +39,7 @@
          for arg in property.arguments:
             if arg.type.is_entity_type:
                actual = (
-                  '({type} ({name}.Node), Convert ({name}.E_Info))'.format(
+                  '({type} ({name}.Node), {name}.E_Info)'.format(
                      type=arg.type.el_type.name,
                      name=arg.name
                ))
@@ -63,7 +63,7 @@
                         "for I in {arg}'Range loop"
                         "   {actual}.Items (I) :="
                         "      ({typ} ({arg} (I).Node),"
-                        "       Convert ({arg} (I).E_Info));".format(
+                        "       {arg} (I).E_Info);".format(
                             actual=actual,
                             arg=arg.name,
                             typ=arg.type.element_type.el_type.name,
@@ -86,20 +86,18 @@
             actuals.append(actual)
 
          if property.uses_entity_info:
-             actuals.append('E_Info => Convert ({}.E_Info)'.format(self_arg))
+             actuals.append('E_Info => {}.E_Info'.format(self_arg))
 
          ## Wrap the result, if needed
 
          if property.type.is_entity_type:
              wrapped_result = (
                  '({} (Property_Result.El),'
-                 ' Convert (Property_Result.Info))'.format(
-                     root_node_type_name
-                 )
+                 ' Property_Result.Info)'.format(root_node_type_name)
              )
 
          elif property.type.is_ast_node:
-            wrapped_result = ('({} (Property_Result), No_Public_Entity_Info)'
+            wrapped_result = ('({} (Property_Result), No_Entity_Info)'
                               .format(root_node_type_name))
 
          elif property.type.is_array_type:
@@ -114,7 +112,7 @@
                      "         Property_Result.Items (I);",
                      "   begin",
                      "      Result (I) :=",
-                     "         ({} (Item.El), Convert (Item.Info));".format(
+                     "         ({} (Item.El), Item.Info);".format(
                          root_node_type_name
                      ),
                      "   end;",
