@@ -9,8 +9,7 @@ with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
-with ${ada_lib_name}.Analysis.Converters;
-use ${ada_lib_name}.Analysis.Converters;
+with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
 
@@ -29,7 +28,7 @@ package body ${ada_lib_name}.Rewriting is
    pragma Warnings (On, "possible aliasing problem for type");
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle is
-     (Convert (Get_Rewriting_Handle (Bare_Context (Context))));
+     (Convert (Get_Rewriting_Handle (Unwrap_Context (Context))));
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
      (Handle.Context);
@@ -108,7 +107,7 @@ package body ${ada_lib_name}.Rewriting is
          New_Nodes => <>);
    begin
       Result.New_Nodes := Nodes_Pools.Create (Result.Pool);
-      Set_Rewriting_Handle (Bare_Context (Context), Convert (Result));
+      Set_Rewriting_Handle (Unwrap_Context (Context), Convert (Result));
       return Result;
    end Start_Rewriting;
 
@@ -146,7 +145,7 @@ package body ${ada_lib_name}.Rewriting is
       for Unit_Handle of Handle.Units loop
          declare
             PU    : constant Processed_Unit := new Processed_Unit_Record'
-              (Unit     => Bare_Unit (Unit_Handle.Unit),
+              (Unit     => Unwrap_Unit (Unit_Handle.Unit),
                New_Data => <>);
             Input : Lexer_Input :=
               (Kind     => Bytes_Buffer,
@@ -166,7 +165,7 @@ package body ${ada_lib_name}.Rewriting is
             --  If there is a parsing error, abort the rewriting process
             if not PU.New_Data.Diagnostics.Is_Empty then
                Result := (Success     => False,
-                          Unit        => To_Unit (PU.Unit),
+                          Unit        => Wrap_Unit (PU.Unit),
                           Diagnostics => <>);
                Result.Diagnostics.Move (PU.New_Data.Diagnostics);
                Destroy (PU.New_Data);
@@ -256,7 +255,7 @@ package body ${ada_lib_name}.Rewriting is
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle is
    begin
-      return Handle (Bare_Node (Node));
+      return Handle (Unwrap_Node (Node));
    end Handle;
 
    ----------
@@ -266,7 +265,7 @@ package body ${ada_lib_name}.Rewriting is
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_entity.api_name} is
    begin
-      return Create_Entity (Handle.Node);
+      return Wrap_Node (Handle.Node);
    end Node;
 
    -------------
@@ -303,7 +302,7 @@ package body ${ada_lib_name}.Rewriting is
          use Node_Maps;
 
          Unit_Handle : constant Unit_Rewriting_Handle :=
-            Handle (To_Unit (Node.Unit));
+            Handle (Wrap_Unit (Node.Unit));
          Cur         : constant Cursor := Unit_Handle.Nodes.Find (Node);
       begin
          --  If we have already built a handle for this node, just return it
@@ -389,7 +388,7 @@ package body ${ada_lib_name}.Rewriting is
       declare
          N           : constant ${root_node_type_name} := Node.Node;
          Unit_Handle : constant Unit_Rewriting_Handle :=
-            Handle (To_Unit (N.Unit));
+            Handle (Wrap_Unit (N.Unit));
       begin
          if N.Is_Token_Node then
             Children := (Kind => Expanded_Token_Node,
@@ -451,7 +450,7 @@ package body ${ada_lib_name}.Rewriting is
       Free (Handle);
 
       --  Release the rewriting handle singleton for its context
-      Set_Rewriting_Handle (Bare_Context (Ctx), Convert (Handle));
+      Set_Rewriting_Handle (Unwrap_Context (Ctx), Convert (Handle));
    end Free_Handles;
 
    ---------
@@ -973,7 +972,7 @@ package body ${ada_lib_name}.Rewriting is
       --  Now parse the resulting buffer and create the corresponding tree of
       --  nodes.
       declare
-         Context  : constant Internal_Context := Bare_Context
+         Context  : constant Internal_Context := Unwrap_Context
            (Rewriting.Context (Handle));
          Unit     : constant Internal_Unit := Templates_Unit (Context);
          Reparsed : Reparsed_Unit;

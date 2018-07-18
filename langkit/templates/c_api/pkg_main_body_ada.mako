@@ -23,10 +23,9 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
-with ${ada_lib_name}.Analysis.Converters;
-use ${ada_lib_name}.Analysis.Converters;
-with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses))}
 
@@ -117,7 +116,7 @@ package body ${ada_lib_name}.Implementation.C is
             , Unit_Provider => Provider
             % endif
             );
-         Internal_Ctx : constant Internal_Context := Bare_Context (Context);
+         Internal_Ctx : constant Internal_Context := Unwrap_Context (Context);
 
       begin
          return Wrap (Internal_Ctx);
@@ -1140,7 +1139,7 @@ package body ${ada_lib_name}.Implementation.C is
       Reparse  : Boolean := False) return Analysis_Unit
    is
       Ctx         : constant ${analysis_context_type} :=
-         Wrap (Bare_Context (Context));
+         Wrap (Unwrap_Context (Context));
       Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
       C_Charset   : chars_ptr := (if Charset'Length = 0
                                   then Null_Ptr
@@ -1154,7 +1153,7 @@ package body ${ada_lib_name}.Implementation.C is
       if C_Result = ${analysis_unit_type} (System.Null_Address) then
          raise Property_Error with "invalid AST node for unit name";
       end if;
-      return To_Unit (Unwrap (C_Result));
+      return Wrap_Unit (Unwrap (C_Result));
    end Get_Unit;
 
    ${exts.include_extension(
