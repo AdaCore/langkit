@@ -82,88 +82,86 @@ package ${ada_lib_name}.Common is
    -----------------------
 
    ## TODO PUBLIC API: Put this in ${lib_name}.Parsing. Why do we have two
-   ## token types? Clarify the names (Token_Type should probably be named
-   ## Token_Ref or something).
+   ## token types?
 
-   type Token_Type is record
+   type Token_Reference is record
       TDH : Token_Data_Handler_Access;
       --  Token data handler that owns this token
 
       Index : Token_Or_Trivia_Index;
       --  Identifier for the trivia or the token this refers to
    end record;
-   ${ada_doc('langkit.token_type', 3)}
+   ${ada_doc('langkit.token_reference_type', 3)}
 
-   No_Token : constant Token_Type := (null, No_Token_Or_Trivia_Index);
+   No_Token : constant Token_Reference := (null, No_Token_Or_Trivia_Index);
 
    type Token_Data_Type is record
-      Kind          : Token_Kind;
+      Kind : Token_Kind;
       --  See documentation for the Kind accessor
 
-      Is_Trivia     : Boolean;
+      Is_Trivia : Boolean;
       --  See documentation for the Is_Trivia accessor
 
-      Index         : Token_Index;
+      Index : Token_Index;
       --  See documentation for the Index accessor
 
       Source_Buffer : Text_Cst_Access;
       --  Text for the original source file
 
-      Source_First  : Positive;
-      Source_Last   : Natural;
+      Source_First : Positive;
+      Source_Last  : Natural;
       --  Bounds in Source_Buffer for the text corresponding to this token
 
-      Sloc_Range    : Source_Location_Range;
+      Sloc_Range : Source_Location_Range;
       --  See documenation for the Sloc_Range accessor
    end record;
 
-
-   function "<" (Left, Right : Token_Type) return Boolean;
+   function "<" (Left, Right : Token_Reference) return Boolean;
    --  Assuming Left and Right belong to the same analysis unit, return whether
    --  Left came before Right in the source file.
 
    function Next
-     (Token          : Token_Type;
-      Exclude_Trivia : Boolean := False) return Token_Type;
+     (Token          : Token_Reference;
+      Exclude_Trivia : Boolean := False) return Token_Reference;
    ${ada_doc('langkit.token_next', 3)}
 
    function Previous
-     (Token          : Token_Type;
-      Exclude_Trivia : Boolean := False) return Token_Type;
+     (Token          : Token_Reference;
+      Exclude_Trivia : Boolean := False) return Token_Reference;
    ${ada_doc('langkit.token_previous', 3)}
 
-   function Data (Token : Token_Type) return Token_Data_Type;
+   function Data (Token : Token_Reference) return Token_Data_Type;
    --  Return the data associated to T
 
-   function Is_Equivalent (L, R : Token_Type) return Boolean;
+   function Is_Equivalent (L, R : Token_Reference) return Boolean;
    ${ada_doc('langkit.token_is_equivalent', 3)}
 
-   function Image (Token : Token_Type) return String;
+   function Image (Token : Token_Reference) return String;
    --  Debug helper: return a human-readable text to represent a token
 
-   function Text (Token : Token_Type) return Text_Type;
+   function Text (Token : Token_Reference) return Text_Type;
    --  Return the text of the token as Text_Type
 
-   function Text (Token : Token_Type) return String;
+   function Text (Token : Token_Reference) return String;
    --  Return the text of the token as String
 
-   function Text (First, Last : Token_Type) return Text_Type;
+   function Text (First, Last : Token_Reference) return Text_Type;
    ${ada_doc('langkit.token_range_text', 3)}
 
-   function Get_Symbol (Token : Token_Type) return Symbol_Type;
+   function Get_Symbol (Token : Token_Reference) return Symbol_Type;
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol.
 
    function Kind (Token_Data : Token_Data_Type) return Token_Kind;
    ${ada_doc('langkit.token_kind', 3)}
 
-   function Is_Trivia (Token : Token_Type) return Boolean;
+   function Is_Trivia (Token : Token_Reference) return Boolean;
    ${ada_doc('langkit.token_is_trivia', 3)}
 
    function Is_Trivia (Token_Data : Token_Data_Type) return Boolean;
    ${ada_doc('langkit.token_is_trivia', 3)}
 
-   function Index (Token : Token_Type) return Token_Index;
+   function Index (Token : Token_Reference) return Token_Index;
    function Index (Token_Data : Token_Data_Type) return Token_Index;
    ${ada_doc('langkit.token_index', 3)}
 
@@ -174,7 +172,7 @@ package ${ada_lib_name}.Common is
 
    function Convert
      (TDH      : Token_Data_Handler;
-      Token    : Token_Type;
+      Token    : Token_Reference;
       Raw_Data : Lexer.Token_Data_Type) return Common.Token_Data_Type;
    --  Turn data from TDH and Raw_Data into a user-ready token data record
 
@@ -187,7 +185,7 @@ package ${ada_lib_name}.Common is
    Invalid_Unit_Name_Error : exception;
    ${ada_doc('langkit.invalid_unit_name_error', 3)}
 
-   function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type;
+   function Raw_Data (T : Token_Reference) return Lexer.Token_Data_Type;
    --  Return the raw token data for T
 
    procedure Raise_Property_Error (Message : String := "");

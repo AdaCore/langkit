@@ -608,7 +608,7 @@ class Diagnostic(object):
 
 
 class Token(ctypes.Structure):
-    ${py_doc('langkit.token_type', 4)}
+    ${py_doc('langkit.token_reference_type', 4)}
 
     _fields_ = [('_token_data',   _hashable_void_p),
                 ('_token_index',  ctypes.c_int),

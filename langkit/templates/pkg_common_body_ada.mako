@@ -5,7 +5,7 @@ package body ${ada_lib_name}.Common is
    function Wrap
      (Index : Token_Or_Trivia_Index;
       TDH   : Token_Data_Handler_Access)
-      return Token_Type;
+      return Token_Reference;
 
    Is_Token_Node_Kind : constant array (${root_node_kind_name}) of Boolean :=
      (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_token_node)
@@ -37,7 +37,7 @@ package body ${ada_lib_name}.Common is
    -- "<" --
    ---------
 
-   function "<" (Left, Right : Token_Type) return Boolean is
+   function "<" (Left, Right : Token_Reference) return Boolean is
       pragma Assert (Left.TDH = Right.TDH);
    begin
       if Left.Index.Token < Right.Index.Token then
@@ -56,8 +56,8 @@ package body ${ada_lib_name}.Common is
    ----------
 
    function Next
-     (Token          : Token_Type;
-      Exclude_Trivia : Boolean := False) return Token_Type is
+     (Token          : Token_Reference;
+      Exclude_Trivia : Boolean := False) return Token_Reference is
    begin
       return (if Token.TDH = null
               then No_Token
@@ -70,8 +70,8 @@ package body ${ada_lib_name}.Common is
    --------------
 
    function Previous
-     (Token          : Token_Type;
-      Exclude_Trivia : Boolean := False) return Token_Type is
+     (Token          : Token_Reference;
+      Exclude_Trivia : Boolean := False) return Token_Reference is
    begin
       return (if Token.TDH = null
               then No_Token
@@ -83,7 +83,7 @@ package body ${ada_lib_name}.Common is
    -- Get_Symbol --
    ----------------
 
-   function Get_Symbol (Token : Token_Type) return Symbol_Type is
+   function Get_Symbol (Token : Token_Reference) return Symbol_Type is
       subtype Token_Data_Reference is
          Token_Data_Handlers.Token_Vectors.Element_Access;
 
@@ -102,7 +102,7 @@ package body ${ada_lib_name}.Common is
    -- Data --
    ----------
 
-   function Data (Token : Token_Type) return Token_Data_Type is
+   function Data (Token : Token_Reference) return Token_Data_Type is
    begin
       return Convert (Token.TDH.all, Token, Raw_Data (Token));
    end Data;
@@ -111,7 +111,7 @@ package body ${ada_lib_name}.Common is
    -- Text --
    ----------
 
-   function Text (Token : Token_Type) return Text_Type is
+   function Text (Token : Token_Reference) return Text_Type is
       RD : constant Lexer.Token_Data_Type := Raw_Data (Token);
    begin
       return Token.TDH.Source_Buffer (RD.Source_First .. RD.Source_Last);
@@ -121,7 +121,7 @@ package body ${ada_lib_name}.Common is
    -- Text --
    ----------
 
-   function Text (First, Last : Token_Type) return Text_Type is
+   function Text (First, Last : Token_Reference) return Text_Type is
       FD : constant Token_Data_Type := Data (First);
       LD : constant Token_Data_Type := Data (Last);
    begin
@@ -135,7 +135,7 @@ package body ${ada_lib_name}.Common is
    -- Text --
    ----------
 
-   function Text (Token : Token_Type) return String
+   function Text (Token : Token_Reference) return String
    is (Image (Text (Token)));
 
    ----------
@@ -151,7 +151,7 @@ package body ${ada_lib_name}.Common is
    -- Is_Trivia --
    ---------------
 
-   function Is_Trivia (Token : Token_Type) return Boolean is
+   function Is_Trivia (Token : Token_Reference) return Boolean is
    begin
       return Token.Index.Trivia /= No_Token_Index;
    end Is_Trivia;
@@ -169,7 +169,7 @@ package body ${ada_lib_name}.Common is
    -- Index --
    -----------
 
-   function Index (Token : Token_Type) return Token_Index is
+   function Index (Token : Token_Reference) return Token_Index is
    begin
       return (if Token.Index.Trivia = No_Token_Index
               then Token.Index.Token
@@ -200,7 +200,7 @@ package body ${ada_lib_name}.Common is
    -- Is_Equivalent --
    -------------------
 
-   function Is_Equivalent (L, R : Token_Type) return Boolean is
+   function Is_Equivalent (L, R : Token_Reference) return Boolean is
       DL : constant Token_Data_Type := Data (L);
       DR : constant Token_Data_Type := Data (R);
       TL : constant Text_Type := Text (L);
@@ -213,7 +213,7 @@ package body ${ada_lib_name}.Common is
    -- Image --
    -----------
 
-   function Image (Token : Token_Type) return String is
+   function Image (Token : Token_Reference) return String is
       D : constant Token_Data_Type := Data (Token);
    begin
       return ("<Token Kind=" & Token_Kind_Name (D.Kind) &
@@ -224,7 +224,7 @@ package body ${ada_lib_name}.Common is
    -- Raw_Data --
    --------------
 
-   function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type is
+   function Raw_Data (T : Token_Reference) return Lexer.Token_Data_Type is
      (if T.Index.Trivia = No_Token_Index
       then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Index.Token))
       else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Index.Trivia)).T);
@@ -236,7 +236,7 @@ package body ${ada_lib_name}.Common is
    function Wrap
      (Index : Token_Or_Trivia_Index;
       TDH   : Token_Data_Handler_Access)
-      return Token_Type is
+      return Token_Reference is
    begin
       return (if Index = No_Token_Or_Trivia_Index
               then No_Token
@@ -249,7 +249,7 @@ package body ${ada_lib_name}.Common is
 
    function Convert
      (TDH      : Token_Data_Handler;
-      Token    : Token_Type;
+      Token    : Token_Reference;
       Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type is
    begin
       return (Kind          => Raw_Data.Kind,

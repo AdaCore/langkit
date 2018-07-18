@@ -761,23 +761,25 @@ package ${ada_lib_name}.Implementation is
 
    function Token
      (Node  : access ${root_node_value_type}'Class;
-      Index : Token_Index) return Token_Type;
+      Index : Token_Index) return Token_Reference;
    --  Helper for properties. This is used to turn token indexes as stored in
-   --  AST nodes into Token_Type values.
+   --  AST nodes into Token_Reference values.
 
    function Stored_Token
      (Node  : access ${root_node_value_type}'Class;
-      Token : Token_Type) return Token_Index;
-   --  Helper for properties. This is used to turn a Token_Type value into a
-   --  Token_Index value that can be stored as a field in Node. This raises a
+      Token : Token_Reference) return Token_Index;
+   --  Helper for properties. This is used to turn a Token_Reference value into
+   --  a Token_Index value that can be stored as a field in Node. This raises a
    --  Property_Error if Node and Token don't belong to the same analysis unit
    --  or if Token is actually a Trivia.
 
-   function Token_Data (Token : Token_Type) return Token_Data_Handler_Access;
+   function Token_Data
+     (Token : Token_Reference) return Token_Data_Handler_Access;
    --  Return the token data handler referenced by Token, or null if it is
    --  No_Token.
 
-   function Token_Indexes (Token : Token_Type) return Token_Or_Trivia_Index;
+   function Token_Indexes
+     (Token : Token_Reference) return Token_Or_Trivia_Index;
    --  Return the index corresponding to this token
 
    type Bare_Child_Record (Kind : Child_Or_Trivia := Child) is record
@@ -785,7 +787,7 @@ package ${ada_lib_name}.Implementation is
          when Child =>
             Node : ${root_node_type_name};
          when Trivia =>
-            Trivia : Token_Type;
+            Trivia : Token_Reference;
       end case;
    end record;
    --  Variant that holds either an node or a token
@@ -1279,10 +1281,10 @@ package ${ada_lib_name}.Implementation is
    function Root (Unit : Internal_Unit) return ${root_node_type_name};
    --  Implementation for Analysis.Root
 
-   function First_Token (Unit : Internal_Unit) return Token_Type;
+   function First_Token (Unit : Internal_Unit) return Token_Reference;
    --  Implementation for Analysis.First_Token
 
-   function Last_Token (Unit : Internal_Unit) return Token_Type;
+   function Last_Token (Unit : Internal_Unit) return Token_Reference;
    --  Implementation for Analysis.Last_Token
 
    function Token_Count (Unit : Internal_Unit) return Natural;
@@ -1295,7 +1297,7 @@ package ${ada_lib_name}.Implementation is
    --  Implementation for Analysis.Text
 
    function Lookup_Token
-     (Unit : Internal_Unit; Sloc : Source_Location) return Token_Type;
+     (Unit : Internal_Unit; Sloc : Source_Location) return Token_Reference;
    --  Implementation for Analysis.Lookup_Token
 
    procedure Dump_Lexical_Env (Unit : Internal_Unit);

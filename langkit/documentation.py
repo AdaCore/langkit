@@ -93,7 +93,7 @@ base_langkit_docs = {
     'langkit.token_kind': """
         Kind for this token.
     """,
-    'langkit.token_type': """
+    'langkit.token_reference_type': """
         Reference to a token in an analysis unit.
     """,
     'langkit.text_type': """

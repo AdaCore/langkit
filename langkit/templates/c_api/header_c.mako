@@ -86,7 +86,7 @@ typedef enum {
    % endfor
 } ${token_kind};
 
-${c_doc('langkit.token_type')}
+${c_doc('langkit.token_reference_type')}
 typedef struct {
     /* Private data associated to this token or NULL if this designates no
        token.  */

@@ -267,10 +267,10 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_root', 3)}
    pragma Warnings (On, "defined after private extension");
 
-   function First_Token (Unit : Analysis_Unit) return Token_Type;
+   function First_Token (Unit : Analysis_Unit) return Token_Reference;
    ${ada_doc('langkit.unit_first_token', 3)}
 
-   function Last_Token (Unit : Analysis_Unit) return Token_Type;
+   function Last_Token (Unit : Analysis_Unit) return Token_Reference;
    ${ada_doc('langkit.unit_last_token', 3)}
 
    function Token_Count (Unit : Analysis_Unit) return Natural;
@@ -283,7 +283,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_text', 3)}
 
    function Lookup_Token
-     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Type;
+     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Reference;
    ${ada_doc('langkit.unit_lookup_token', 3)}
 
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
@@ -306,7 +306,7 @@ package ${ada_lib_name}.Analysis is
          when Child =>
             Node : ${root_entity.api_name};
          when Trivia =>
-            Trivia : Token_Type;
+            Trivia : Token_Reference;
       end case;
    end record;
    --  Variant that holds either an AST node or a token
@@ -348,18 +348,19 @@ package ${ada_lib_name}.Analysis is
                         Element     => Element);
    --  Allow iteration on a range of tokens corresponding to a node
 
-   function First_Token (Self : Token_Iterator) return Token_Type;
+   function First_Token (Self : Token_Iterator) return Token_Reference;
    --  Return the first token corresponding to the node
 
    function Next_Token
-     (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
+     (Self : Token_Iterator; Tok : Token_Reference) return Token_Reference;
    --  Return the token that follows Tok in the token stream
 
    function Has_Element
-     (Self : Token_Iterator; Tok : Token_Type) return Boolean;
+     (Self : Token_Iterator; Tok : Token_Reference) return Boolean;
    --  Return if Tok is in Self's iteration range
 
-   function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
+   function Element
+     (Self : Token_Iterator; Tok : Token_Reference) return Token_Reference;
    --  Identity function: helper for the Iterable aspect
 
    -------------------------
