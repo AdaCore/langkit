@@ -2,8 +2,9 @@
 
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="entities"      file="entities_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
+<%namespace name="public_properties"
+            file="properties/public_wrappers_ada.mako" />
 
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
@@ -16,8 +17,7 @@ with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
---  TODO??? Turn the following into a PRIVATE WITH
-with ${ada_lib_name}.Implementation;
+private with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Common;     use ${ada_lib_name}.Common;
 
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
@@ -64,7 +64,36 @@ package ${ada_lib_name}.Analysis is
       No_${e.api_name} : constant ${e.api_name};
    % endfor
 
-   ${entities.decls1()}
+   function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
+   ${ada_doc('langkit.node_is_null', 3)}
+
+   function Is_Token_Node
+     (Node : ${root_entity.api_name}'Class) return Boolean;
+   ${ada_doc('langkit.node_is_token_node', 3)}
+
+   function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
+   --  Return whether L and R designate the same entity
+
+   function Short_Image
+     (Node : ${root_entity.api_name}'Class) return Text_Type;
+   function Short_Image (Node : ${root_entity.api_name}'Class) return String;
+   --  Return a short string describing Node, or "None" if Node.Is_Null is
+   --  true.
+
+   function Image (Node : ${root_entity.api_name}'Class) return Text_Type;
+   function Image (Node : ${root_entity.api_name}'Class) return String;
+   --  Like Short_Image, also including its rebinding metadata
+
+   function Hash
+     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type;
+   --  Generic hash function, to be used for nodes as keys in hash tables
+
+   pragma Warnings (Off, "defined after private extension");
+   % for e in ctx.entity_types:
+      function As_${e.el_type.kwless_raw_name}
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
+   % endfor
+   pragma Warnings (On, "defined after private extension");
 
    --------------------
    -- Unit providers --
@@ -272,7 +301,25 @@ package ${ada_lib_name}.Analysis is
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias
 
-   ${entities.decls2()}
+   type Child_Record (Kind : Child_Or_Trivia := Child) is record
+      case Kind is
+         when Child =>
+            Node : ${root_entity.api_name};
+         when Trivia =>
+            Trivia : Token_Type;
+      end case;
+   end record;
+   --  Variant that holds either an AST node or a token
+
+   type Children_Array is array (Positive range <>) of Child_Record;
+
+   function Children_With_Trivia
+     (Node : ${root_entity.api_name}'Class) return Children_Array;
+   --  Return the children of this node interleaved with Trivia token nodes, so
+   --  that:
+   --  - Every trivia contained between Node.Start_Token and Node.End_Token - 1
+   --    will be part of the returned array;
+   --  - Nodes and trivias will be lexically ordered.
 
    -----------------------
    -- Enumeration types --
@@ -315,7 +362,162 @@ package ${ada_lib_name}.Analysis is
    function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
    --  Identity function: helper for the Iterable aspect
 
-   ${entities.decls3()}
+   -------------------------
+   -- AST Node primitives --
+   -------------------------
+
+   function Kind
+     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name};
+   function Kind_Name (Node : ${root_entity.api_name}'Class) return String;
+   --  Return the concrete kind for Node
+
+   pragma Warnings (Off, "defined after private extension");
+   % for e in ctx.entity_types:
+
+      % for f in e.el_type.get_parse_fields( \
+         include_inherited=False, \
+         predicate=lambda f: f.is_public, \
+      ):
+         ${astnode_types.field_decl(f)}
+      % endfor
+
+      % for p in e.el_type.get_properties( \
+         include_inherited=False, \
+         predicate=lambda p: p.is_public and not p.overriding \
+      ):
+         ${public_properties.decl(p)}
+      % endfor
+
+   % endfor
+   pragma Warnings (On, "defined after private extension");
+
+   -------------------------------
+   -- Tree traversal operations --
+   -------------------------------
+
+   function Children_Count
+     (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the number of children Node has
+
+   function First_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the index of the first child Node has
+
+   function Last_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the index of the last child Node has, or 0 if there is no child
+
+   pragma Warnings (Off, "defined after private extension");
+   procedure Get_Child
+     (Node            : ${root_entity.api_name}'Class;
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_entity.api_name});
+   --  Return the Index'th child of node, storing it into Result.
+   --
+   --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
+   --  such a child: if not (i.e. Index is out-of-bounds), the content
+   --  of Result is undefined.
+
+   function Child
+     (Node  : ${root_entity.api_name}'Class;
+      Index : Positive)
+      return ${root_entity.api_name};
+   --  Return the Index'th child of Node, or null if Node has no such child
+   pragma Warnings (On, "defined after private extension");
+
+   function Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+                               return Visit_Status)
+     return Visit_Status;
+   --  Given the parent node for a subtree, traverse all syntactic nodes of
+   --  this tree, calling the given function on each node in prefix order (i.e.
+   --  top-down). The order of traversing subtrees follows the order of
+   --  declaration of the corresponding attributes in the grammar. The
+   --  traversal is controlled as follows by the result returned by Visit:
+   --
+   --     Into   The traversal continues normally with the syntactic
+   --            children of the node just processed.
+   --
+   --     Over   The children of the node just processed are skipped and
+   --            excluded from the traversal, but otherwise processing
+   --            continues elsewhere in the tree.
+   --
+   --     Stop   The entire traversal is immediately abandoned, and the
+   --            original call to Traverse returns Stop.
+
+   procedure Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+                               return Visit_Status);
+   --  This is the same as Traverse function except that no result is returned
+   --  i.e. the Traverse function is called and the result is simply discarded.
+
+   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the 0-based index for Node in its parent's children
+
+   ----------------------------------------
+   -- Source location-related operations --
+   ----------------------------------------
+
+   function Sloc_Range
+     (Node : ${root_entity.api_name}'Class) return Source_Location_Range;
+   --  Return the source location range corresponding to the set of tokens from
+   --  which Node was parsed.
+
+   function Compare
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location) return Relative_Position;
+   --  Compare Sloc to the sloc range of Node
+
+   pragma Warnings (Off, "defined after private extension");
+   function Lookup
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location) return ${root_entity.api_name};
+   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
+   --  it, or null if no such node was found.
+   pragma Warnings (On, "defined after private extension");
+
+   -----------------------
+   -- Lexical utilities --
+   -----------------------
+
+   function Text (Node : ${root_entity.api_name}'Class) return Text_Type;
+   --  Shortcut to get the source buffer slice corresponding to the text that
+   --  spans between the first and last tokens of an AST node.
+
+   function Text (Node : ${root_entity.api_name}'Class) return String;
+   --  Overload to get the source buffer slice as a string
+
+   function Token_Range
+     (Node : ${root_entity.api_name}'Class) return Token_Iterator;
+   --  Return an iterator on the range of tokens encompassed by Node
+
+   -------------------
+   -- Debug helpers --
+   -------------------
+
+   procedure Print
+     (Node        : ${root_entity.api_name}'Class;
+      Show_Slocs  : Boolean := True;
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output Node and all its children.
+   --
+   --  If Show_Slocs, include AST nodes' source locations in the output.
+   --
+   --  Line_Prefix is prepended to each output line.
+
+   procedure PP_Trivia
+     (Node        : ${root_entity.api_name}'Class;
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output Node and all its children along
+   --  with the trivia associated to them. Line_Prefix is prepended to each
+   --  output line.
+
+   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class);
+   --  Debug helper: Assign names to every logical variable in the root node,
+   --  so that we can trace logical variables.
 
 private
 
