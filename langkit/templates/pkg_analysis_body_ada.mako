@@ -1,8 +1,10 @@
 ## vim: filetype=makoada
 
-<%namespace name="entities"   file="entities_ada.mako" />
-<%namespace name="exts"       file="extensions.mako" />
-<%namespace name="list_types" file="list_types_ada.mako" />
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="exts"          file="extensions.mako" />
+<%namespace name="list_types"    file="list_types_ada.mako" />
+<%namespace name="public_properties"
+            file="properties/public_wrappers_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
@@ -495,7 +497,357 @@ package body ${ada_lib_name}.Analysis is
    function Image (Value : Boolean) return String
    is (if Value then "True" else "False");
 
-   ${entities.bodies()}
+   -------------
+   -- Is_Null --
+   -------------
+
+   function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
+     (Node.Node = null);
+
+   -------------------
+   -- Is_Token_Node --
+   -------------------
+
+   function Is_Token_Node (Node : ${root_entity.api_name}'Class) return Boolean
+   is (Node.Node.Is_Token_Node);
+
+   ---------
+   -- "=" --
+   ---------
+
+   function "=" (L, R : ${root_entity.api_name}'Class) return Boolean is
+   begin
+      return L.Node = R.Node and then L.E_Info = R.E_Info;
+   end "=";
+
+   -----------------
+   -- Short_Image --
+   -----------------
+
+   function Short_Image
+     (Node : ${root_entity.api_name}'Class) return Text_Type
+   is (if Is_Null (Node) then "None" else Node.Node.Short_Image);
+
+   function Short_Image (Node : ${root_entity.api_name}'Class) return String is
+     (Image (Short_Image (Node)));
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
+     (Image (${T.entity.name}'(Node.Node, Node.E_Info)));
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Node : ${root_entity.api_name}'Class) return String is
+     (Image (Image (Node)));
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash
+     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type
+   is
+      N : constant ${root_entity.name} := (Node.Node, Node.E_Info);
+   begin
+      return Hash (N);
+   end Hash;
+
+   -----------------------
+   -- Entity converters --
+   -----------------------
+
+   % for e in ctx.entity_types:
+      function As_${e.el_type.kwless_raw_name}
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name} is
+      begin
+         if Node.Node = null then
+            return No_${e.api_name};
+         elsif Node.Node.all in ${e.el_type.value_type_name()}'Class then
+            return (Node => Node.Node, E_Info => Node.E_Info);
+         else
+            raise Constraint_Error with "Invalid type conversion";
+         end if;
+      end;
+   % endfor
+
+   -----------------------
+   -- Entity primitives --
+   -----------------------
+
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind
+     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name} is
+   begin
+      return Node.Node.Kind;
+   end Kind;
+
+   ---------------
+   -- Kind_Name --
+   ---------------
+
+   function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
+   begin
+      return Node.Node.Kind_Name;
+   end Kind_Name;
+
+   % for e in ctx.entity_types:
+
+      % for f in e.el_type.get_parse_fields( \
+         include_inherited=False, \
+         predicate=lambda f: f.is_public \
+      ):
+         ${astnode_types.field_body(f)}
+      % endfor
+
+      % for p in e.el_type.get_properties( \
+         include_inherited=False, \
+         predicate=lambda p: p.is_public and not p.overriding \
+      ):
+         ${public_properties.body(p)}
+      % endfor
+
+   % endfor
+
+   --------------------
+   -- Children_Count --
+   --------------------
+
+   function Children_Count
+     (Node : ${root_entity.api_name}'Class) return Natural is begin
+      return Node.Node.Abstract_Children_Count;
+   end Children_Count;
+
+   -----------------------
+   -- First_Child_Index --
+   -----------------------
+
+   function First_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural is
+   begin
+      return Node.Node.First_Child_Index;
+   end First_Child_Index;
+
+   ----------------------
+   -- Last_Child_Index --
+   ----------------------
+
+   function Last_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural is
+   begin
+      return Node.Node.Last_Child_Index;
+   end Last_Child_Index;
+
+   ---------------
+   -- Get_Child --
+   ---------------
+
+   procedure Get_Child
+     (Node            : ${root_entity.api_name}'Class;
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_entity.api_name})
+   is
+      N : ${root_node_type_name};
+   begin
+      Node.Node.Get_Child (Index, Index_In_Bounds, N);
+      Result := (N, Node.E_Info);
+   end Get_Child;
+
+   -----------
+   -- Child --
+   -----------
+
+   function Child
+     (Node  : ${root_entity.api_name}'Class;
+      Index : Positive) return ${root_entity.api_name}
+   is
+   begin
+      return (Node.Node.Child (Index), Node.E_Info);
+   end Child;
+
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range
+     (Node : ${root_entity.api_name}'Class) return Source_Location_Range is
+   begin
+      return Node.Node.Sloc_Range;
+   end Sloc_Range;
+
+   -------------
+   -- Compare --
+   -------------
+
+   function Compare
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location) return Relative_Position is
+   begin
+      return Node.Node.Compare (Sloc);
+   end Compare;
+
+   ------------
+   -- Lookup --
+   ------------
+
+   function Lookup
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location) return ${root_entity.api_name} is
+   begin
+      return Create_Entity (Node.Node.Lookup (Sloc));
+   end Lookup;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
+   begin
+      return Text (Token_Start (Node), Token_End (Node));
+   end Text;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Node : ${root_entity.api_name}'Class) return String is
+   begin
+      return Image (Text (Node));
+   end Text;
+
+   -----------------
+   -- Token_Range --
+   -----------------
+
+   function Token_Range
+     (Node : ${root_entity.api_name}'Class)
+      return Token_Iterator is
+   begin
+      return Token_Iterator'(As_${T.root_node.kwless_raw_name} (Node),
+                             Node.Node.Token_End_Index);
+   end Token_Range;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Node        : ${root_entity.api_name}'Class;
+      Show_Slocs  : Boolean := True;
+      Line_Prefix : String := "") is
+   begin
+      Node.Node.Print (Show_Slocs, Line_Prefix);
+   end Print;
+
+   ---------------
+   -- PP_Trivia --
+   ---------------
+
+   procedure PP_Trivia
+     (Node        : ${root_entity.api_name}'Class;
+      Line_Prefix : String := "") is
+   begin
+      Node.Node.PP_Trivia (Line_Prefix);
+   end PP_Trivia;
+
+   --------------
+   -- Traverse --
+   --------------
+
+   function Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+              return Visit_Status)
+     return Visit_Status
+   is
+      E_Info : constant Entity_Info := Node.E_Info;
+
+      -------------
+      -- Wrapper --
+      -------------
+
+      function Wrapper
+        (Node : access ${root_node_value_type}'Class) return Visit_Status
+      is
+         Public_Node : constant ${root_entity.api_name} :=
+           Create_Entity (${root_node_type_name} (Node), E_Info);
+      begin
+         return Visit (Public_Node);
+      end Wrapper;
+
+   begin
+      return Node.Node.Traverse (Wrapper'Access);
+   end Traverse;
+
+   --------------
+   -- Traverse --
+   --------------
+
+   procedure Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+                               return Visit_Status)
+   is
+      Result_Status : Visit_Status;
+      pragma Unreferenced (Result_Status);
+   begin
+      Result_Status := Traverse (Node, Visit);
+   end Traverse;
+
+   -----------------
+   -- Child_Index --
+   -----------------
+
+   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural
+   is
+   begin
+      return Node.Node.Child_Index;
+   end Child_Index;
+
+   --------------------------------
+   -- Assign_Names_To_Logic_Vars --
+   --------------------------------
+
+   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
+   is
+   begin
+      Assign_Names_To_Logic_Vars (Node.Node);
+   end Assign_Names_To_Logic_Vars;
+
+   --------------------------
+   -- Children_With_Trivia --
+   --------------------------
+
+   function Children_With_Trivia
+     (Node : ${root_entity.api_name}'Class) return Children_Array
+   is
+      Bare_Result : constant Bare_Children_Array :=
+         Children_With_Trivia (Bare_Node (Node));
+      Result      : Children_Array (Bare_Result'Range);
+   begin
+      for I in Bare_Result'Range loop
+         declare
+            BR : Bare_Child_Record renames Bare_Result (I);
+            R  : Child_Record renames Result (I);
+         begin
+            case BR.Kind is
+               when Child =>
+                  R := (Child, Create_Entity (BR.Node));
+               when Trivia =>
+                  R := (Trivia, BR.Trivia);
+            end case;
+         end;
+      end loop;
+      return Result;
+   end Children_With_Trivia;
 
    -----------------
    -- First_Token --
