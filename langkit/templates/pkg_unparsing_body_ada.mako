@@ -3,6 +3,8 @@
 with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
 
+with ${ada_lib_name}.Analysis.Converters;
+use ${ada_lib_name}.Analysis.Converters;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
 

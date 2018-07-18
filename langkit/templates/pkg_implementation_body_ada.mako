@@ -38,10 +38,12 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Analysis.Converters;
+use ${ada_lib_name}.Analysis.Converters;
+with ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer;
 
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
-with ${ada_lib_name}.Introspection;
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False)
     if ctx.env_hook_subprogram else None)

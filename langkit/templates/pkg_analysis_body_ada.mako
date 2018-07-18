@@ -29,6 +29,8 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
+with ${ada_lib_name}.Analysis.Converters;
+use ${ada_lib_name}.Analysis.Converters;
 with ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
@@ -524,30 +526,5 @@ package body ${ada_lib_name}.Analysis is
 
    function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type
    is (Tok);
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create_Entity
-     (Node   : Implementation.${root_node_type_name};
-      E_Info : Implementation.AST_Envs.Entity_Info
-        := Implementation.AST_Envs.No_Entity_Info)
-       return ${root_entity.api_name} is
-   begin
-      return (Node, E_Info);
-   end Create_Entity;
-
-   ---------------
-   -- Bare_Node --
-   ---------------
-
-   function Bare_Node
-     (Node : ${root_entity.api_name}'Class)
-   return Implementation.${root_node_type_name}
-   is
-   begin
-      return Node.Node;
-   end Bare_Node;
 
 end ${ada_lib_name}.Analysis;

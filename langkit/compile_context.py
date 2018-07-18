@@ -1570,31 +1570,33 @@ class CompileCtx(object):
 
         ada_modules = [
             # Top (pure) package
-            ('pkg_main',            '', False),
+            ('pkg_main', '', False),
             # Unit for initialization primitives
-            ('pkg_init',            'Init', True),
+            ('pkg_init', 'Init', True),
             # Unit for declarations used by Analysis and Implementation
-            ('pkg_common',          'Common', True),
+            ('pkg_common', 'Common', True),
             # Unit for public analysis primitives
-            ('pkg_analysis',        'Analysis', True),
+            ('pkg_analysis', 'Analysis', True),
+            # Unit for converters between public and implementation types
+            ('pkg_analysis_converters', 'Analysis.Converters', True),
             # Unit for implementation of analysis primitives
-            ('pkg_implementation',  'Implementation', True),
+            ('pkg_implementation', 'Implementation', True),
             # Unit for AST introspection
-            ('pkg_introspection',   'Introspection', True),
+            ('pkg_introspection', 'Introspection', True),
             # Unit for AST node iteration primitives
-            ('pkg_iterators',       'Iterators', True),
+            ('pkg_iterators', 'Iterators', True),
             # Unit for AST rewriting primitives
-            ('pkg_rewriting',       'Rewriting', True),
+            ('pkg_rewriting', 'Rewriting', True),
             # Unit for AST unparsing primitives
-            ('pkg_unparsing',       'Unparsing', True),
+            ('pkg_unparsing', 'Unparsing', True),
             # Unit for AST implementation of unparsing primitives
-            ('pkg_unparsing_impl',  'Unparsing.Implementation', True),
+            ('pkg_unparsing_impl', 'Unparsing.Implementation', True),
             # Unit for all parsers
-            ('parsers/pkg_main',    'Parsers', True),
+            ('parsers/pkg_main', 'Parsers', True),
             # Unit for the lexer
-            ('lexer/pkg_main',      'Lexer', True),
+            ('lexer/pkg_main', 'Lexer', True),
             # Unit for debug helpers
-            ('pkg_debug',           'Debug', True),
+            ('pkg_debug', 'Debug', True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:
