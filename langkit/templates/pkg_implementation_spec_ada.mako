@@ -48,6 +48,10 @@ with ${ada_lib_name}.Common;     use ${ada_lib_name}.Common;
 
 ${exts.with_clauses(with_clauses)}
 
+--  Internal package: low-level primitives to implement public types and
+--  operations in ${ada_lib_name}.Analysis. Plesae don't use this package
+--  directly.
+
 package ${ada_lib_name}.Implementation is
 
    type Analysis_Context_Type;

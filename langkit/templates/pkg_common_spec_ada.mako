@@ -10,12 +10,16 @@ use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
 
+--  This package provides types and functions used in the whole ${ada_lib_name}
+--  package tree.
+
 package ${ada_lib_name}.Common is
 
    Main_Trace : constant GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create ("Main_Trace", GNATCOLL.Traces.From_Config);
 
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
+   --  Default charset to use when creating analysis contexts
 
    type Grammar_Rule is (
       % for i, name in enumerate(ctx.user_rule_names):
@@ -29,6 +33,7 @@ package ${ada_lib_name}.Common is
 
    Default_Grammar_Rule : constant Grammar_Rule :=
       ${Name.from_lower(ctx.main_rule_name)}_Rule;
+   --  Default grammar rule to use when parsing analysis units
 
    subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
 
@@ -66,7 +71,8 @@ package ${ada_lib_name}.Common is
    --  Return whether Kind corresponds to a list node
 
    type Visit_Status is (Into, Over, Stop);
-   --  Helper type to control the AST node traversal process. See Traverse.
+   --  Helper type to control the AST node traversal process. See the
+   --  ${ada_lib_name}.Analysis.Traverse function.
 
    type Unit_Kind is (Unit_Specification, Unit_Body);
    ${ada_doc('langkit.unit_kind_type', 3)}

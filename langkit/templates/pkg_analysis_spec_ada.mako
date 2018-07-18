@@ -29,8 +29,8 @@ ${exts.with_clauses(with_clauses)}
 --  analysis units.
 --
 --  This is the entry point to parse and process a unit: first create an
---  analysis context with Create, then get analysis units out of it using
---  Get_From_File and/or Get_From_Buffer.
+--  analysis context with Create, then get analysis units out of it using the
+--  Get_From_* functions.
 
 package ${ada_lib_name}.Analysis is
 

@@ -25,12 +25,9 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 ${exts.with_clauses(with_clauses)}
 
---  This package defines data types and subprograms to provide the
---  implementation of the exported C API for analysis primitives.
---
---  Unless one wants to deal with C code, it is very likely that one needs to
---  use this package. Please refer to the C header if you want to use the C
---  API.
+--  Internal package: defines data types and subprograms to provide the
+--  implementation of the exported C API (see the corresponding C header file).
+--  Please don't use this package directly.
 
 package ${ada_lib_name}.Implementation.C is
 
