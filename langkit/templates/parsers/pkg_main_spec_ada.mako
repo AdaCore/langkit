@@ -8,8 +8,8 @@ limited with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
---  This package provides types and primitives to parse buffers and files and
---  get AST out of them.
+--  Internal package to provide types and primitives to parse buffers and files
+--  and get AST out of them. Plesae don't use this package directly.
 
 package ${ada_lib_name}.Parsers is
 

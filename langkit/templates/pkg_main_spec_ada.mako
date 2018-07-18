@@ -6,5 +6,8 @@ package ${ada_lib_name} is
    ## appropriate.
    Version      : constant String := "dev";
    Current_Year : constant String := "1";
-private
+
+   --  ${ada_lib_name}'s main entry point is the ${ada_lib_name}.Analysis
+   --  package.
+
 end;
