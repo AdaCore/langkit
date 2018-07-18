@@ -151,6 +151,15 @@ package body ${ada_lib_name}.Analysis is
    end Set_Logic_Resolution_Timeout;
 
    --------------------------
+   -- Disable_Lookup_Cache --
+   --------------------------
+
+   procedure Disable_Lookup_Cache (Disable : Boolean := True) is
+   begin
+      Implementation.AST_Envs.Activate_Lookup_Cache := not Disable;
+   end Disable_Lookup_Cache;
+
+   --------------------------
    -- Has_Rewriting_Handle --
    --------------------------
 
