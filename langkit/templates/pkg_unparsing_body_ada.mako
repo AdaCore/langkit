@@ -4,8 +4,8 @@ with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
 
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Unparsing.Implementation;
-use ${ada_lib_name}.Unparsing.Implementation;
+with ${ada_lib_name}.Unparsing_Implementation;
+use ${ada_lib_name}.Unparsing_Implementation;
 
 package body ${ada_lib_name}.Unparsing is
 

@@ -49,8 +49,8 @@ library project ${lib_name} is
       "${lib_name.lower()}-rewriting.ads",
       "${lib_name.lower()}-unparsing.adb",
       "${lib_name.lower()}-unparsing.ads",
-      "${lib_name.lower()}-unparsing-implementation.adb",
-      "${lib_name.lower()}-unparsing-implementation.ads",
+      "${lib_name.lower()}-unparsing_implementation.adb",
+      "${lib_name.lower()}-unparsing_implementation.ads",
       % for path in sorted(os_path.basename(p) \
                            for p in ctx.additional_source_files):
       "${path}",
