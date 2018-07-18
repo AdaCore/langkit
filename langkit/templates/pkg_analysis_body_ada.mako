@@ -31,8 +31,7 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
-with ${ada_lib_name}.Analysis.Converters;
-use ${ada_lib_name}.Analysis.Converters;
+with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
@@ -397,7 +396,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Root (Unit : Analysis_Unit) return ${root_entity.api_name} is
    begin
-      return Create_Entity (Root (Internal_Unit (Unit)));
+      return Wrap_Node (Root (Internal_Unit (Unit)));
    end Root;
 
    -----------------
@@ -668,7 +667,7 @@ package body ${ada_lib_name}.Analysis is
       N : ${root_node_type_name};
    begin
       Node.Internal.El.Get_Child (Index, Index_In_Bounds, N);
-      Result := Create_Entity (N, Node.Internal.Info);
+      Result := Wrap_Node (N, Node.Internal.Info);
    end Get_Child;
 
    -----------
@@ -680,8 +679,7 @@ package body ${ada_lib_name}.Analysis is
       Index : Positive) return ${root_entity.api_name}
    is
    begin
-      return Create_Entity
-        (Node.Internal.El.Child (Index), Node.Internal.Info);
+      return Wrap_Node (Node.Internal.El.Child (Index), Node.Internal.Info);
    end Child;
 
    ----------------
@@ -713,7 +711,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location) return ${root_entity.api_name} is
    begin
-      return Create_Entity (Node.Internal.El.Lookup (Sloc));
+      return Wrap_Node (Node.Internal.El.Lookup (Sloc));
    end Lookup;
 
    ----------
@@ -787,7 +785,7 @@ package body ${ada_lib_name}.Analysis is
         (Node : access ${root_node_value_type}'Class) return Visit_Status
       is
          Public_Node : constant ${root_entity.api_name} :=
-           Create_Entity (${root_node_type_name} (Node), Info);
+           Wrap_Node (${root_node_type_name} (Node), Info);
       begin
          return Visit (Public_Node);
       end Wrapper;
@@ -839,7 +837,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Children_Array
    is
       Bare_Result : constant Bare_Children_Array :=
-         Children_With_Trivia (Bare_Node (Node));
+         Children_With_Trivia (Unwrap_Node (Node));
       Result      : Children_Array (Bare_Result'Range);
    begin
       for I in Bare_Result'Range loop
@@ -849,7 +847,7 @@ package body ${ada_lib_name}.Analysis is
          begin
             case BR.Kind is
                when Child =>
-                  R := (Child, Create_Entity (BR.Node));
+                  R := (Child, Wrap_Node (BR.Node));
                when Trivia =>
                   R := (Trivia, BR.Trivia);
             end case;
@@ -889,4 +887,37 @@ package body ${ada_lib_name}.Analysis is
      (Self : Token_Iterator; Tok : Token_Reference) return Token_Reference
    is (Tok);
 
+   ----------------------------------------------------
+   -- Soft links for public/internal type converters --
+   ----------------------------------------------------
+
+   function Wrap_Context (Context : Internal_Context) return Analysis_Context
+   is (Analysis_Context (Context));
+
+   function Unwrap_Context (Context : Analysis_Context) return Internal_Context
+   is (Internal_Context (Context));
+
+   function Wrap_Unit (Unit : Internal_Unit) return Analysis_Unit
+   is (Analysis_Unit (Unit));
+
+   function Unwrap_Unit (Unit : Analysis_Unit) return Internal_Unit
+   is (Internal_Unit (Unit));
+
+   function Wrap_Node
+     (Node : access ${root_node_value_type}'Class;
+      Info : AST_Envs.Entity_Info := AST_Envs.No_Entity_Info)
+      return ${root_entity.api_name}
+   is ((Internal => (Node, Info)));
+
+   function Unwrap_Node
+     (Node : ${root_entity.api_name}'Class) return ${root_node_type_name}
+   is (Node.Internal.El);
+
+begin
+   Converters.Wrap_Context := Wrap_Context'Access;
+   Converters.Unwrap_Context := Unwrap_Context'Access;
+   Converters.Wrap_Unit := Wrap_Unit'Access;
+   Converters.Unwrap_Unit := Unwrap_Unit'Access;
+   Converters.Wrap_Node := Wrap_Node'Access;
+   Converters.Unwrap_Node := Unwrap_Node'Access;
 end ${ada_lib_name}.Analysis;

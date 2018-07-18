@@ -1578,7 +1578,7 @@ class CompileCtx(object):
             # Unit for public analysis primitives
             ('pkg_analysis', 'Analysis', True),
             # Unit for converters between public and implementation types
-            ('pkg_analysis_converters', 'Analysis.Converters', True),
+            ('pkg_converters', 'Converters', False),
             # Unit for implementation of analysis primitives
             ('pkg_implementation', 'Implementation', True),
             # Unit for AST introspection
