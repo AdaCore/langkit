@@ -148,6 +148,10 @@ package ${ada_lib_name}.Analysis is
      (Context : Analysis_Context; Timeout : Natural);
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
+   procedure Disable_Lookup_Cache (Disable : Boolean := True);
+   --  If Disable is true, disable the use of caches in lexical environment
+   --  lookups. Otherwise, activate it.
+
    function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean;
    --  Return whether Context has a rewriting handler (see
    --  ${ada_lib_name}.Rewriting), i.e. whether it is in the process of
