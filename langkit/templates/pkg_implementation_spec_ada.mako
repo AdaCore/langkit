@@ -52,7 +52,7 @@ ${exts.with_clauses(with_clauses)}
 --  operations in ${ada_lib_name}.Analysis. Plesae don't use this package
 --  directly.
 
-package ${ada_lib_name}.Implementation is
+private package ${ada_lib_name}.Implementation is
 
    type Analysis_Context_Type;
    type Internal_Context is access all Analysis_Context_Type;

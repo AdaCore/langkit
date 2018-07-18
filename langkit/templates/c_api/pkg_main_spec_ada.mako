@@ -29,7 +29,7 @@ ${exts.with_clauses(with_clauses)}
 --  implementation of the exported C API (see the corresponding C header file).
 --  Please don't use this package directly.
 
-package ${ada_lib_name}.Implementation.C is
+private package ${ada_lib_name}.Implementation.C is
 
    type ${analysis_context_type} is new System.Address;
    ${ada_c_doc('langkit.analysis_context_type', 3)}

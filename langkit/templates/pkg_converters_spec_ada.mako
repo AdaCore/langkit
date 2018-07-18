@@ -6,7 +6,7 @@ with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 --  Internal package: provide implementation helpers to switch between public
 --  types and implementation ones.
 
-package ${ada_lib_name}.Converters is
+private package ${ada_lib_name}.Converters is
 
    type Context_Wrapper is access function
      (Context : Internal_Context) return Analysis_Context;

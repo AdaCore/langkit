@@ -12,7 +12,7 @@ use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
-package ${ada_lib_name}.Debug is
+private package ${ada_lib_name}.Debug is
 
    procedure PN (Node : ${root_node_type_name});
    --  "Print Node".  Shortcut for Put_Line (Node.Short_Image). This is useful

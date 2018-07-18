@@ -11,7 +11,7 @@ use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 --  Internal package to provide types and primitives to parse buffers and files
 --  and get AST out of them. Plesae don't use this package directly.
 
-package ${ada_lib_name}.Parsers is
+private package ${ada_lib_name}.Parsers is
 
    type Cst_String is access constant String;
 
