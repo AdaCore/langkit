@@ -78,7 +78,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Wrap
      (Index : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler_Access) return Token_Type;
+      TDH   : Token_Data_Handler_Access) return Token_Reference;
 
    generic
       type T (<>) is limited private;
@@ -144,7 +144,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Wrap
      (Index : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler_Access) return Token_Type is
+      TDH   : Token_Data_Handler_Access) return Token_Reference is
    begin
       return (if Index = No_Token_Or_Trivia_Index
               then No_Token
@@ -804,14 +804,14 @@ package body ${ada_lib_name}.Implementation is
    -- First_Token --
    -----------------
 
-   function First_Token (Unit : Internal_Unit) return Token_Type is
+   function First_Token (Unit : Internal_Unit) return Token_Reference is
      (Wrap (First_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
 
    ----------------
    -- Last_Token --
    ----------------
 
-   function Last_Token (Unit : Internal_Unit) return Token_Type is
+   function Last_Token (Unit : Internal_Unit) return Token_Reference is
      (Wrap (Last_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
 
    -----------------
@@ -842,7 +842,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Lookup_Token
-     (Unit : Internal_Unit; Sloc : Source_Location) return Token_Type
+     (Unit : Internal_Unit; Sloc : Source_Location) return Token_Reference
    is
       use Token_Data_Handlers;
       Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
@@ -1281,8 +1281,9 @@ package body ${ada_lib_name}.Implementation is
    function Text
      (Node : access ${root_node_value_type}'Class) return Text_Type
    is
-      Start_T : constant Token_Type := Node.Token (Node.Token_Start_Index);
-      End_T   : constant Token_Type := Node.Token (Node.Token_End_Index);
+      Start_T : constant Token_Reference :=
+         Node.Token (Node.Token_Start_Index);
+      End_T   : constant Token_Reference := Node.Token (Node.Token_End_Index);
    begin
       return Text (Start_T, End_T);
    end Text;
@@ -2364,7 +2365,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Stored_Token
      (Node  : access ${root_node_value_type}'Class;
-      Token : Token_Type) return Token_Index is
+      Token : Token_Reference) return Token_Index is
    begin
       if Node.Unit.TDH'Access /= Token.TDH then
          raise Property_Error with
@@ -2382,7 +2383,8 @@ package body ${ada_lib_name}.Implementation is
    -- Token_Data --
    ----------------
 
-   function Token_Data (Token : Token_Type) return Token_Data_Handler_Access is
+   function Token_Data
+     (Token : Token_Reference) return Token_Data_Handler_Access is
    begin
       return Token.TDH;
    end Token_Data;
@@ -2391,7 +2393,8 @@ package body ${ada_lib_name}.Implementation is
    -- Token_Indexes --
    -------------------
 
-   function Token_Indexes (Token : Token_Type) return Token_Or_Trivia_Index is
+   function Token_Indexes
+     (Token : Token_Reference) return Token_Or_Trivia_Index is
    begin
       return Token.Index;
    end Token_Indexes;
@@ -2529,7 +2532,7 @@ package body ${ada_lib_name}.Implementation is
    -----------------
 
    function Token_Start
-     (Node : access ${root_node_value_type}'Class) return Token_Type
+     (Node : access ${root_node_value_type}'Class) return Token_Reference
    is (Node.Token (Node.Token_Start_Index));
 
    ---------------
@@ -2537,7 +2540,7 @@ package body ${ada_lib_name}.Implementation is
    ---------------
 
    function Token_End
-     (Node : access ${root_node_value_type}'Class) return Token_Type
+     (Node : access ${root_node_value_type}'Class) return Token_Reference
    is
      (if Node.Token_End_Index = No_Token_Index
       then Node.Token_Start
@@ -2549,7 +2552,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Token
      (Node  : access ${root_node_value_type}'Class;
-      Index : Token_Index) return Token_Type
+      Index : Token_Index) return Token_Reference
    is
      (if Index = No_Token_Index
       then No_Token

@@ -82,7 +82,7 @@ package ${ada_lib_name}.Implementation.C is
       Sloc_Range                : ${sloc_range_type};
    end record
      with Convention => C;
-   ${ada_c_doc('langkit.token_type', 3)}
+   ${ada_c_doc('langkit.token_reference_type', 3)}
 
    type ${diagnostic_type} is record
       Sloc_Range : ${sloc_range_type};
@@ -668,8 +668,8 @@ package ${ada_lib_name}.Implementation.C is
    function Unwrap is new Ada.Unchecked_Conversion
      (${node_type}, ${root_node_type_name});
 
-   function Wrap (Token : Token_Type) return ${token_type};
-   function Unwrap (Token : ${token_type}) return Token_Type;
+   function Wrap (Token : Token_Reference) return ${token_type};
+   function Unwrap (Token : ${token_type}) return Token_Reference;
 
 % if ctx.default_unit_provider:
    function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is

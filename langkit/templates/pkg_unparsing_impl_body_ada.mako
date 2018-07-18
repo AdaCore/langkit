@@ -32,7 +32,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       case Present is
          when False => null;
          when True =>
-            First, Last : Token_Type;
+            First, Last : Token_Reference;
       end case;
    end record;
    --  Captured sequence of tokens
@@ -41,7 +41,8 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    function Create_Token_Sequence
      (Unparser    : Token_Sequence_Access;
-      First_Token : in out Token_Type) return Present_Token_Sequence_Template
+      First_Token : in out Token_Reference)
+      return Present_Token_Sequence_Template
       with Pre => First_Token /= No_Token;
    --  Create a present sequence of tokens starting from First_Token and
    --  containing the same number of tokens as indicated in Unparser. Before
@@ -128,7 +129,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  Using the Unparser unparsing table, unparse a sequence of tokens
 
    function Relative_Token
-     (Token : Token_Type; Offset : Integer) return Token_Type with
+     (Token : Token_Reference; Offset : Integer) return Token_Reference with
       Pre => Token /= No_Token
              and then not Is_Trivia (Token)
              and then
@@ -138,14 +139,14 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --  Considering only tokens that are not trivia and assuming Token is at
    --  index I, return the token that is at index I + Offset.
 
-   function Last_Trivia (Token : Token_Type) return Token_Type
+   function Last_Trivia (Token : Token_Reference) return Token_Reference
       with Pre => Token /= No_Token;
    --  If Token (which can be a token or a trivia) is followed by a sequence of
    --  trivias, return the last of them. Otherwise, return Token itself.
 
    procedure Append_Tokens
      (Result                  : in out Unparsing_Buffer;
-      First_Token, Last_Token : Token_Type;
+      First_Token, Last_Token : Token_Reference;
       With_Trailing_Trivia    : Boolean := True);
    --  Emit to Result the sequence of tokens from First_Token to Last_Token.
    --  Trivias that appear between tokens in the sequence to emit are emitted
@@ -190,7 +191,8 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    function Create_Token_Sequence
      (Unparser    : Token_Sequence_Access;
-      First_Token : in out Token_Type) return Present_Token_Sequence_Template
+      First_Token : in out Token_Reference)
+      return Present_Token_Sequence_Template
    is
       Result : Present_Token_Sequence_Template;
    begin
@@ -213,7 +215,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template
    is
       Result     : Regular_Node_Template (True, Unparser.Field_Unparsers.N);
-      Next_Token : Token_Type;
+      Next_Token : Token_Reference;
    begin
       if Rewritten_Node = null then
          return (Present => False, Count => 0);
@@ -398,7 +400,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       --  a whole.
       if As_Unit then
          declare
-            First : constant Token_Type := First_Token (Unit);
+            First : constant Token_Reference := First_Token (Unit);
          begin
             if Is_Trivia (First) then
                Append_Tokens (Buffer, First, Last_Trivia (First),
@@ -520,9 +522,10 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                --  that comes after.
                if Rewritten_Node /= null then
                   declare
-                     Token     : constant Token_Type :=
+                     Token     : constant Token_Reference :=
                         Rewritten_Node.Token_End;
-                     Last_Triv : constant Token_Type := Last_Trivia (Token);
+                     Last_Triv : constant Token_Reference :=
+                        Last_Trivia (Token);
                   begin
                      Append_Tokens (Result, Next (Token), Last_Triv,
                                     With_Trailing_Trivia => False);
@@ -619,7 +622,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
                declare
                   R_Child : constant ${root_node_type_name} :=
                      Rewritten_Node.Child (I);
-                  Tok : constant Token_Type :=
+                  Tok : constant Token_Reference :=
                      Relative_Token (Token_Start (R_Child), -1);
                begin
                   Append_Tokens (Result, Tok, Tok);
@@ -672,9 +675,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    --------------------
 
    function Relative_Token
-     (Token : Token_Type; Offset : Integer) return Token_Type
+     (Token : Token_Reference; Offset : Integer) return Token_Reference
    is
-      Current_Token  : Token_Type := Token;
+      Current_Token  : Token_Reference := Token;
       Current_Offset : Integer := 0;
    begin
       if Offset < 0 then
@@ -701,9 +704,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
    -- Last_Trivia --
    -----------------
 
-   function Last_Trivia (Token : Token_Type) return Token_Type is
-      Result : Token_Type := Token;
-      Cur    : Token_Type := Next (Token);
+   function Last_Trivia (Token : Token_Reference) return Token_Reference is
+      Result : Token_Reference := Token;
+      Cur    : Token_Reference := Next (Token);
    begin
       --  Move Last to the last trivia that comes before the next token
       while Cur /= No_Token and then Is_Trivia (Cur) loop
@@ -719,7 +722,7 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 
    procedure Append_Tokens
      (Result                  : in out Unparsing_Buffer;
-      First_Token, Last_Token : Token_Type;
+      First_Token, Last_Token : Token_Reference;
       With_Trailing_Trivia    : Boolean := True) is
    begin
       if (First_Token = No_Token and then Last_Token = No_Token)
@@ -731,9 +734,9 @@ package body ${ada_lib_name}.Unparsing.Implementation is
       Apply_Spacing_Rules (Result, Kind (Data (First_Token)));
 
       declare
-         Last : constant Token_Type := (if With_Trailing_Trivia
-                                        then Last_Trivia (Last_Token)
-                                        else Last_Token);
+         Last : constant Token_Reference := (if With_Trailing_Trivia
+                                            then Last_Trivia (Last_Token)
+                                            else Last_Token);
       begin
          Append (Result, Kind (Data (Last)), Text (First_Token, Last));
       end;

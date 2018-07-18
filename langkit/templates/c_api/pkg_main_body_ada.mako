@@ -305,7 +305,7 @@ package body ${ada_lib_name}.Implementation.C is
 
       declare
          U : constant Internal_Unit := Unwrap (Unit);
-         T : constant Token_Type := First_Token (U);
+         T : constant Token_Reference := First_Token (U);
       begin
          Token.all := Wrap (T);
       end;
@@ -322,7 +322,7 @@ package body ${ada_lib_name}.Implementation.C is
 
       declare
          U : constant Internal_Unit := Unwrap (Unit);
-         T : constant Token_Type := Last_Token (U);
+         T : constant Token_Reference := Last_Token (U);
       begin
          Token.all := Wrap (T);
       end;
@@ -373,7 +373,7 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          U   : constant Internal_Unit := Unwrap (Unit);
          S   : constant Source_Location := Unwrap (Sloc.all);
-         Tok : constant Token_Type := Lookup_Token (U, S);
+         Tok : constant Token_Reference := Lookup_Token (U, S);
       begin
          Result.all := Wrap (Tok);
       end;
@@ -876,8 +876,8 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         T  : constant Token_Type := Unwrap (Token);
-         NT : constant Token_Type := Next (T);
+         T  : constant Token_Reference := Unwrap (Token);
+         NT : constant Token_Reference := Next (T);
       begin
          Next_Token.all := Wrap (NT);
       end;
@@ -893,8 +893,8 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         T  : constant Token_Type := Unwrap (Token);
-         PT : constant Token_Type := Previous (T);
+         T  : constant Token_Reference := Unwrap (Token);
+         PT : constant Token_Reference := Previous (T);
       begin
          Previous_Token.all := Wrap (PT);
       end;
@@ -935,8 +935,8 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
          declare
-         L  : constant Token_Type := Unwrap (Left);
-         R  : constant Token_Type := Unwrap (Right);
+         L  : constant Token_Reference := Unwrap (Left);
+         R  : constant Token_Reference := Unwrap (Right);
       begin
          return ${bool_type} (Boolean'Pos (Is_Equivalent (L, R)));
       end;
@@ -1166,7 +1166,7 @@ package body ${ada_lib_name}.Implementation.C is
    -- Wrap --
    ----------
 
-   function Wrap (Token : Token_Type) return ${token_type} is
+   function Wrap (Token : Token_Reference) return ${token_type} is
       function Convert is new Ada.Unchecked_Conversion
         (Token_Data_Handler_Access, System.Address);
    begin
@@ -1197,7 +1197,7 @@ package body ${ada_lib_name}.Implementation.C is
    -- Unwrap --
    ------------
 
-   function Unwrap (Token : ${token_type}) return Token_Type is
+   function Unwrap (Token : ${token_type}) return Token_Reference is
       use System;
 
       --  The following unchecked conversion makes it possible to restore the

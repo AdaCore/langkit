@@ -824,7 +824,7 @@ class TokenType(CompiledType):
 
     def __init__(self):
         super(TokenType, self).__init__(
-            name='TokenType',
+            name='TokenReference',
             type_repo_name='TokenType',
             exposed=True,
             is_ptr=False,

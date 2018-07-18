@@ -395,7 +395,7 @@ package body ${ada_lib_name}.Analysis is
    -- First_Token --
    -----------------
 
-   function First_Token (Unit : Analysis_Unit) return Token_Type is
+   function First_Token (Unit : Analysis_Unit) return Token_Reference is
    begin
       return First_Token (Internal_Unit (Unit));
    end First_Token;
@@ -404,7 +404,7 @@ package body ${ada_lib_name}.Analysis is
    -- Last_Token --
    ----------------
 
-   function Last_Token (Unit : Analysis_Unit) return Token_Type is
+   function Last_Token (Unit : Analysis_Unit) return Token_Reference is
    begin
       return Last_Token (Internal_Unit (Unit));
    end Last_Token;
@@ -441,7 +441,7 @@ package body ${ada_lib_name}.Analysis is
    ------------------
 
    function Lookup_Token
-     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Type is
+     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Reference is
    begin
       return Lookup_Token (Internal_Unit (Unit), Sloc);
    end Lookup_Token;
@@ -853,7 +853,7 @@ package body ${ada_lib_name}.Analysis is
    -- First_Token --
    -----------------
 
-   function First_Token (Self : Token_Iterator) return Token_Type
+   function First_Token (Self : Token_Iterator) return Token_Reference
    is (Token_Start (Self.Node));
 
    ----------------
@@ -861,7 +861,7 @@ package body ${ada_lib_name}.Analysis is
    ----------------
 
    function Next_Token
-     (Self : Token_Iterator; Tok : Token_Type) return Token_Type
+     (Self : Token_Iterator; Tok : Token_Reference) return Token_Reference
    is (Next (Tok));
 
    -----------------
@@ -869,14 +869,15 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function Has_Element
-     (Self : Token_Iterator; Tok : Token_Type) return Boolean
+     (Self : Token_Iterator; Tok : Token_Reference) return Boolean
    is (Tok.Index.Token <= Self.Last);
 
    -------------
    -- Element --
    -------------
 
-   function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type
+   function Element
+     (Self : Token_Iterator; Tok : Token_Reference) return Token_Reference
    is (Tok);
 
 end ${ada_lib_name}.Analysis;

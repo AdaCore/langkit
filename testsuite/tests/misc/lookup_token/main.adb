@@ -13,13 +13,13 @@ procedure Main is
    procedure Test (Filename : String) is
       U            : constant Analysis_Unit := Get_From_File (Ctx, Filename);
       Last_Tok     : constant Token_Data_Type := Data (Last_Token (U));
-      Previous_Tok : Token_Type := No_Token;
+      Previous_Tok : Token_Reference := No_Token;
    begin
       Put_Line ("= " & Filename & " =");
       for Line in 1 .. Sloc_Range (Last_Tok).End_Line loop
          declare
             Sloc  : constant Source_Location := (Line, 1);
-            Token : constant Token_Type := Lookup_Token (U, Sloc);
+            Token : constant Token_Reference := Lookup_Token (U, Sloc);
          begin
             Put_Line ("  " & Image (Sloc)
                       & " -> [" & Image (Sloc_Range (Data (Token))) & "] "
