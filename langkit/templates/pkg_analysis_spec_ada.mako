@@ -10,8 +10,6 @@
 with Ada.Containers;
 with Ada.Unchecked_Deallocation;
 
-with System;
-
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
@@ -319,32 +317,6 @@ package ${ada_lib_name}.Analysis is
 
    ${entities.decls3()}
 
-   --  TODO??? Hide these from the public API
-
-   pragma Warnings (Off, "defined after private extension");
-   function Create_Entity
-     (Node   : Implementation.${root_node_type_name};
-      E_Info : Implementation.AST_Envs.Entity_Info
-        := Implementation.AST_Envs.No_Entity_Info)
-   return ${root_entity.api_name};
-   pragma Warnings (On, "defined after private extension");
-
-   function Bare_Node
-     (Node : ${root_entity.api_name}'Class)
-      return Implementation.${root_node_type_name};
-
-   function To_Unit
-     (Unit : Implementation.Internal_Unit) return Analysis_Unit;
-
-   function To_Context
-     (Context : Implementation.Internal_Context) return Analysis_Context;
-
-   function Bare_Context
-     (Context : Analysis_Context) return Implementation.Internal_Context;
-
-   function Bare_Unit
-     (Unit : Analysis_Unit) return Implementation.Internal_Unit;
-
 private
 
    type Analysis_Context is access all Implementation.Analysis_Context_Type;
@@ -378,25 +350,5 @@ private
       Node : ${root_entity.api_name};
       Last : Token_Index;
    end record;
-
-   function To_Unit
-     (Unit : Implementation.Internal_Unit) return Analysis_Unit
-   is
-     (Analysis_Unit (Unit));
-
-   function To_Context
-     (Context : Implementation.Internal_Context) return Analysis_Context
-   is
-     (Analysis_Context (Context));
-
-   function Bare_Context
-     (Context : Analysis_Context) return Implementation.Internal_Context
-   is
-     (Implementation.Internal_Context (Context));
-
-   function Bare_Unit
-     (Unit : Analysis_Unit) return Implementation.Internal_Unit
-   is
-     (Implementation.Internal_Unit (Unit));
 
 end ${ada_lib_name}.Analysis;

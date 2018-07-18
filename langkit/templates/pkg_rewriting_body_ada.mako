@@ -9,6 +9,8 @@ with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
+with ${ada_lib_name}.Analysis.Converters;
+use ${ada_lib_name}.Analysis.Converters;
 with ${ada_lib_name}.Unparsing.Implementation;
 use ${ada_lib_name}.Unparsing.Implementation;
 
