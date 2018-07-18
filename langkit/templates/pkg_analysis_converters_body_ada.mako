@@ -12,7 +12,7 @@ package body ${ada_lib_name}.Analysis.Converters is
         := Implementation.AST_Envs.No_Entity_Info)
       return ${root_entity.api_name} is
    begin
-      return (Node, E_Info);
+      return (Internal => (Node, E_Info));
    end Create_Entity;
 
    ---------------
@@ -23,7 +23,7 @@ package body ${ada_lib_name}.Analysis.Converters is
      (Node : ${root_entity.api_name}'Class)
       return Implementation.${root_node_type_name} is
    begin
-      return Node.Node;
+      return Node.Internal.El;
    end Bare_Node;
 
    -------------

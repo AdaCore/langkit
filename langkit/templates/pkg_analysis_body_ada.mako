@@ -511,14 +511,14 @@ package body ${ada_lib_name}.Analysis is
    -------------
 
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
-     (Node.Node = null);
+     (Node.Internal.El = null);
 
    -------------------
    -- Is_Token_Node --
    -------------------
 
    function Is_Token_Node (Node : ${root_entity.api_name}'Class) return Boolean
-   is (Node.Node.Is_Token_Node);
+   is (Node.Internal.El.Is_Token_Node);
 
    ---------
    -- "=" --
@@ -526,7 +526,7 @@ package body ${ada_lib_name}.Analysis is
 
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean is
    begin
-      return L.Node = R.Node and then L.E_Info = R.E_Info;
+      return L.Internal = R.Internal;
    end "=";
 
    -----------------
@@ -535,35 +535,33 @@ package body ${ada_lib_name}.Analysis is
 
    function Short_Image
      (Node : ${root_entity.api_name}'Class) return Text_Type
-   is (if Is_Null (Node) then "None" else Node.Node.Short_Image);
+   is (if Node.Is_Null then "None" else Node.Internal.El.Short_Image);
 
    function Short_Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Short_Image (Node)));
+     (Image (Node.Short_Image));
 
    -----------
    -- Image --
    -----------
 
    function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
-     (Image (${T.entity.name}'(Node.Node, Node.E_Info)));
+     (Image (Node.Internal));
 
    -----------
    -- Image --
    -----------
 
    function Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Image (Node)));
+     (Image (Node.Image));
 
    ----------
    -- Hash --
    ----------
 
    function Hash
-     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type
-   is
-      N : constant ${root_entity.name} := (Node.Node, Node.E_Info);
+     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type is
    begin
-      return Hash (N);
+      return Hash (Node.Internal);
    end Hash;
 
    -----------------------
@@ -572,12 +570,14 @@ package body ${ada_lib_name}.Analysis is
 
    % for e in ctx.entity_types:
       function As_${e.el_type.kwless_raw_name}
-        (Node : ${root_entity.api_name}'Class) return ${e.api_name} is
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name}
+      is
+         N : constant ${root_node_type_name} := Node.Internal.El;
       begin
-         if Node.Node = null then
+         if N = null then
             return No_${e.api_name};
-         elsif Node.Node.all in ${e.el_type.value_type_name()}'Class then
-            return (Node => Node.Node, E_Info => Node.E_Info);
+         elsif N.all in ${e.el_type.value_type_name()}'Class then
+            return (Internal => (El => N, Info => Node.Internal.Info));
          else
             raise Constraint_Error with "Invalid type conversion";
          end if;
@@ -595,7 +595,7 @@ package body ${ada_lib_name}.Analysis is
    function Kind
      (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name} is
    begin
-      return Node.Node.Kind;
+      return Node.Internal.El.Kind;
    end Kind;
 
    ---------------
@@ -604,7 +604,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
    begin
-      return Node.Node.Kind_Name;
+      return Node.Internal.El.Kind_Name;
    end Kind_Name;
 
    % for e in ctx.entity_types:
@@ -630,8 +630,9 @@ package body ${ada_lib_name}.Analysis is
    --------------------
 
    function Children_Count
-     (Node : ${root_entity.api_name}'Class) return Natural is begin
-      return Node.Node.Abstract_Children_Count;
+     (Node : ${root_entity.api_name}'Class) return Natural is
+   begin
+      return Node.Internal.El.Abstract_Children_Count;
    end Children_Count;
 
    -----------------------
@@ -641,7 +642,7 @@ package body ${ada_lib_name}.Analysis is
    function First_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
-      return Node.Node.First_Child_Index;
+      return Node.Internal.El.First_Child_Index;
    end First_Child_Index;
 
    ----------------------
@@ -651,7 +652,7 @@ package body ${ada_lib_name}.Analysis is
    function Last_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
-      return Node.Node.Last_Child_Index;
+      return Node.Internal.El.Last_Child_Index;
    end Last_Child_Index;
 
    ---------------
@@ -666,8 +667,8 @@ package body ${ada_lib_name}.Analysis is
    is
       N : ${root_node_type_name};
    begin
-      Node.Node.Get_Child (Index, Index_In_Bounds, N);
-      Result := (N, Node.E_Info);
+      Node.Internal.El.Get_Child (Index, Index_In_Bounds, N);
+      Result := Create_Entity (N, Node.Internal.Info);
    end Get_Child;
 
    -----------
@@ -679,7 +680,8 @@ package body ${ada_lib_name}.Analysis is
       Index : Positive) return ${root_entity.api_name}
    is
    begin
-      return (Node.Node.Child (Index), Node.E_Info);
+      return Create_Entity
+        (Node.Internal.El.Child (Index), Node.Internal.Info);
    end Child;
 
    ----------------
@@ -689,7 +691,7 @@ package body ${ada_lib_name}.Analysis is
    function Sloc_Range
      (Node : ${root_entity.api_name}'Class) return Source_Location_Range is
    begin
-      return Node.Node.Sloc_Range;
+      return Node.Internal.El.Sloc_Range;
    end Sloc_Range;
 
    -------------
@@ -700,7 +702,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location) return Relative_Position is
    begin
-      return Node.Node.Compare (Sloc);
+      return Node.Internal.El.Compare (Sloc);
    end Compare;
 
    ------------
@@ -711,7 +713,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location) return ${root_entity.api_name} is
    begin
-      return Create_Entity (Node.Node.Lookup (Sloc));
+      return Create_Entity (Node.Internal.El.Lookup (Sloc));
    end Lookup;
 
    ----------
@@ -720,7 +722,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
-      return Text (Token_Start (Node), Token_End (Node));
+      return Text (Node.Token_Start, Node.Token_End);
    end Text;
 
    ----------
@@ -729,7 +731,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Text (Node : ${root_entity.api_name}'Class) return String is
    begin
-      return Image (Text (Node));
+      return Image (Node.Text);
    end Text;
 
    -----------------
@@ -737,11 +739,10 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function Token_Range
-     (Node : ${root_entity.api_name}'Class)
-      return Token_Iterator is
+     (Node : ${root_entity.api_name}'Class) return Token_Iterator is
    begin
-      return Token_Iterator'(As_${T.root_node.kwless_raw_name} (Node),
-                             Node.Node.Token_End_Index);
+      return Token_Iterator'(Node.As_${T.root_node.kwless_raw_name},
+                             Node.Internal.El.Token_End_Index);
    end Token_Range;
 
    -----------
@@ -753,7 +754,7 @@ package body ${ada_lib_name}.Analysis is
       Show_Slocs  : Boolean := True;
       Line_Prefix : String := "") is
    begin
-      Node.Node.Print (Show_Slocs, Line_Prefix);
+      Node.Internal.El.Print (Show_Slocs, Line_Prefix);
    end Print;
 
    ---------------
@@ -761,10 +762,9 @@ package body ${ada_lib_name}.Analysis is
    ---------------
 
    procedure PP_Trivia
-     (Node        : ${root_entity.api_name}'Class;
-      Line_Prefix : String := "") is
+     (Node : ${root_entity.api_name}'Class; Line_Prefix : String := "") is
    begin
-      Node.Node.PP_Trivia (Line_Prefix);
+      Node.Internal.El.PP_Trivia (Line_Prefix);
    end PP_Trivia;
 
    --------------
@@ -775,9 +775,9 @@ package body ${ada_lib_name}.Analysis is
      (Node  : ${root_entity.api_name}'Class;
       Visit : access function (Node : ${root_entity.api_name}'Class)
               return Visit_Status)
-     return Visit_Status
+      return Visit_Status
    is
-      E_Info : constant Entity_Info := Node.E_Info;
+      Info : constant Entity_Info := Node.Internal.Info;
 
       -------------
       -- Wrapper --
@@ -787,13 +787,13 @@ package body ${ada_lib_name}.Analysis is
         (Node : access ${root_node_value_type}'Class) return Visit_Status
       is
          Public_Node : constant ${root_entity.api_name} :=
-           Create_Entity (${root_node_type_name} (Node), E_Info);
+           Create_Entity (${root_node_type_name} (Node), Info);
       begin
          return Visit (Public_Node);
       end Wrapper;
 
    begin
-      return Node.Node.Traverse (Wrapper'Access);
+      return Node.Internal.El.Traverse (Wrapper'Access);
    end Traverse;
 
    --------------
@@ -818,7 +818,7 @@ package body ${ada_lib_name}.Analysis is
    function Child_Index (Node : ${root_entity.api_name}'Class) return Natural
    is
    begin
-      return Node.Node.Child_Index;
+      return Node.Internal.El.Child_Index;
    end Child_Index;
 
    --------------------------------
@@ -828,7 +828,7 @@ package body ${ada_lib_name}.Analysis is
    procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
    is
    begin
-      Assign_Names_To_Logic_Vars (Node.Node);
+      Assign_Names_To_Logic_Vars (Node.Internal.El);
    end Assign_Names_To_Logic_Vars;
 
    --------------------------
