@@ -10,7 +10,7 @@ with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 
-package ${ada_lib_name}.Unparsing.Implementation is
+private package ${ada_lib_name}.Unparsing_Implementation is
 
    type Unparsing_Buffer is limited record
       Content : Unbounded_Wide_Wide_String;
@@ -171,4 +171,4 @@ package ${ada_lib_name}.Unparsing.Implementation is
    ## TODO??? how can we make this constant without exposing the underlying
    ## array?
 
-end ${ada_lib_name}.Unparsing.Implementation;
+end ${ada_lib_name}.Unparsing_Implementation;

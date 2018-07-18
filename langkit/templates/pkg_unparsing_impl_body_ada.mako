@@ -17,7 +17,7 @@ with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
-package body ${ada_lib_name}.Unparsing.Implementation is
+package body ${ada_lib_name}.Unparsing_Implementation is
 
    subtype Abstract_Node is ${ada_lib_name}.Implementation.Abstract_Node;
    --  Subtype to avoid visibility conflict with an Abstract_Node type coming
@@ -861,4 +861,4 @@ package body ${ada_lib_name}.Unparsing.Implementation is
 begin
    Node_Unparsers := ${("Node_Unparsers_Array'Access"
                         if ctx.generate_unparser else 'null')};
-end ${ada_lib_name}.Unparsing.Implementation;
+end ${ada_lib_name}.Unparsing_Implementation;

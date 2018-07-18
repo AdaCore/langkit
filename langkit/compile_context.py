@@ -1590,7 +1590,7 @@ class CompileCtx(object):
             # Unit for AST unparsing primitives
             ('pkg_unparsing', 'Unparsing', True),
             # Unit for AST implementation of unparsing primitives
-            ('pkg_unparsing_impl', 'Unparsing.Implementation', True),
+            ('pkg_unparsing_impl', 'Unparsing_Implementation', True),
             # Unit for all parsers
             ('parsers/pkg_main', 'Parsers', True),
             # Unit for the lexer
