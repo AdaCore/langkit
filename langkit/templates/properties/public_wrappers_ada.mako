@@ -31,7 +31,8 @@
          local_vars = []
          unwrap_code = []
          wrap_code = []
-         actuals = ['{} ({}.Node)'.format(property.struct.name, self_arg)]
+         actuals = ['{} ({}.Internal.El)'
+                    .format(property.struct.name, self_arg)]
 
          # Build the list of arguments to pass to the property. Unwrap
          # arguments if needed.
@@ -39,14 +40,15 @@
          for arg in property.arguments:
             if arg.type.is_entity_type:
                actual = (
-                  '({type} ({name}.Node), {name}.E_Info)'.format(
-                     type=arg.type.el_type.name,
-                     name=arg.name
-               ))
+                  '({type} ({name}.Internal.El), {name}.Internal.Info)'
+                  .format(type=arg.type.el_type.name, name=arg.name)
+               )
 
             elif arg.type.is_ast_node:
-               actual = '{type} ({name}.Node)'.format(type=arg.type.name,
-                                                      name=arg.name)
+               actual = '{type} ({name}.Internal.El)'.format(
+                  type=arg.type.name,
+                  name=arg.name
+               )
 
             elif arg.type.is_array_type:
                 # We need to allocate our special record type to pass it to the
@@ -62,8 +64,8 @@
                     unwrap_code.extend([
                         "for I in {arg}'Range loop"
                         "   {actual}.Items (I) :="
-                        "      ({typ} ({arg} (I).Node),"
-                        "       {arg} (I).E_Info);".format(
+                        "      ({typ} ({arg} (I).Internal.El),"
+                        "       {arg} (I).Internal.Info);".format(
                             actual=actual,
                             arg=arg.name,
                             typ=arg.type.element_type.el_type.name,
@@ -86,19 +88,21 @@
             actuals.append(actual)
 
          if property.uses_entity_info:
-             actuals.append('E_Info => {}.E_Info'.format(self_arg))
+             actuals.append('E_Info => {}.Internal.Info'.format(self_arg))
 
          ## Wrap the result, if needed
 
          if property.type.is_entity_type:
              wrapped_result = (
-                 '({} (Property_Result.El),'
-                 ' Property_Result.Info)'.format(root_node_type_name)
+                 '(Internal => ({} (Property_Result.El),'
+                 ' Property_Result.Info))'.format(root_node_type_name)
              )
 
          elif property.type.is_ast_node:
-            wrapped_result = ('({} (Property_Result), No_Entity_Info)'
-                              .format(root_node_type_name))
+            wrapped_result = (
+               '(Internal => ({} (Property_Result), No_Entity_Info))'
+               .format(root_node_type_name)
+            )
 
          elif property.type.is_array_type:
              if property.type.element_type.is_entity_type:
@@ -112,9 +116,8 @@
                      "         Property_Result.Items (I);",
                      "   begin",
                      "      Result (I) :=",
-                     "         ({} (Item.El), Item.Info);".format(
-                         root_node_type_name
-                     ),
+                     "         (Internal => ({} (Item.El), Item.Info));"
+                     .format(root_node_type_name),
                      "   end;",
                      "end loop;",
                  ])

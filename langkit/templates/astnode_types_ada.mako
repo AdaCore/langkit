@@ -114,7 +114,7 @@
    function ${field.name}
      (Node : ${type_name}'Class) return ${ret_type.api_name}
    is
-      Self   : constant ${bare_type} := ${bare_type} (Node.Node);
+      Self   : constant ${bare_type} := ${bare_type} (Node.Internal.El);
       Result : constant ${field.type.name} := ${(
           field.type.extract_from_storage_expr(
               node_expr='Self',
@@ -123,14 +123,16 @@
       )};
    begin
       % if field.type.is_ast_node:
-         return (${root_node_type_name} (Result), Node.E_Info);
+         return (Internal => (${root_node_type_name} (Result),
+                              Node.Internal.Info));
       % else:
          return Result;
       % endif
    end ${field.name};
 
    % if field.type.is_ast_node:
-      <% field_expr = '{} (Node.Node).{}'.format(bare_type, field.name) %>
+      <% field_expr = ('{} (Node.Internal.El).{}'
+                       .format(bare_type, field.name)) %>
 
       % if field.type.is_bool_node:
          function ${field.name} (Node : ${type_name}'Class) return Boolean
