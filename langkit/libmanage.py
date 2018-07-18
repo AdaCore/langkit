@@ -584,7 +584,7 @@ class ManageScript(object):
 
             argv = [
                 'gnatpp', '-P{}'.format(project_file), '-rnb',
-                '--insert-blank-lines', '--syntax-only'
+                '--insert-blank-lines', '--syntax-only', '--eol=lf'
             ]
             if self.verbosity.debug:
                 argv.append('-v')
