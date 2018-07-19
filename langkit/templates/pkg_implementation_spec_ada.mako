@@ -235,6 +235,14 @@ private package ${ada_lib_name}.Implementation is
      (El : ${root_node_type_name}; Info : Entity_Info)
       return Entity;
 
+   function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
+   --  Hash function to use in the public API. It's like the regular one, but
+   --  disregards metadata.
+
+   function Compare_Entity (Left, Right : ${root_entity.name}) return Boolean;
+   --  Equality function to use in the public API. It's like the regular one,
+   --  but disregards metadata.
+
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
    ${array_types.public_incomplete_decl(T.LexicalEnvType.array)}

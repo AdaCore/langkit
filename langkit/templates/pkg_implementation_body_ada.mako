@@ -2929,6 +2929,26 @@ package body ${ada_lib_name}.Implementation is
       return (El => El, Info => Info);
     end Create;
 
+   -----------------
+   -- Hash_Entity --
+   -----------------
+
+   function Hash_Entity (Self : ${root_entity.name}) return Hash_Type is
+   begin
+      return Combine (Hash (Self.El), Hash (Self.Info.Rebindings));
+   end Hash_Entity;
+
+   --------------------
+   -- Compare_Entity --
+   --------------------
+
+   function Compare_Entity (Left, Right : ${root_entity.name}) return Boolean
+   is
+   begin
+      return (Left.El = Right.El
+              and then Left.Info.Rebindings = Right.Info.Rebindings);
+   end Compare_Entity;
+
    procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name});
    --  Helper for the Register_Destroyable above
 
