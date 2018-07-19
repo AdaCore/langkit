@@ -1185,14 +1185,16 @@ package body ${ada_lib_name}.Implementation.C is
          D : constant Token_Data_Type := Data (Token);
          K : constant Token_Kind := Kind (D);
 
+         Index : constant Token_Or_Trivia_Index := Get_Token_Index (Token);
+
          Source_Buffer : Text_Cst_Access;
          First         : Positive;
          Last          : Natural;
       begin
          Extract_Token_Text (D, Source_Buffer, First, Last);
-         return (Token_Data   => Convert (Token.TDH),
-                 Token_Index  => int (Token.Index.Token),
-                 Trivia_Index => int (Token.Index.Trivia),
+         return (Token_Data   => Convert (Get_Token_TDH (Token)),
+                 Token_Index  => int (Index.Token),
+                 Trivia_Index => int (Index.Trivia),
                  Kind         => K'Enum_Rep,
                  Text         => Wrap (Source_Buffer, First, Last),
                  Sloc_Range   => Wrap (Sloc_Range (D)));
@@ -1223,9 +1225,10 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       return (if Token.Token_Data = Null_Address
               then No_Token
-              else (TDH   => Convert (Token.Token_Data),
-                    Index => (Token  => Token_Index (Token.Token_Index),
-                              Trivia => Token_Index (Token.Trivia_Index))));
+              else Wrap_Token_Reference
+                     (Convert (Token.Token_Data),
+                      (Token  => Token_Index (Token.Token_Index),
+                       Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;
 
    ${array_types.body(T.root_node.array)}

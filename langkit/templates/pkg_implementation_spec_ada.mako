@@ -773,15 +773,6 @@ private package ${ada_lib_name}.Implementation is
    --  Property_Error if Node and Token don't belong to the same analysis unit
    --  or if Token is actually a Trivia.
 
-   function Token_Data
-     (Token : Token_Reference) return Token_Data_Handler_Access;
-   --  Return the token data handler referenced by Token, or null if it is
-   --  No_Token.
-
-   function Token_Indexes
-     (Token : Token_Reference) return Token_Or_Trivia_Index;
-   --  Return the index corresponding to this token
-
    type Bare_Child_Record (Kind : Child_Or_Trivia := Child) is record
       case Kind is
          when Child =>

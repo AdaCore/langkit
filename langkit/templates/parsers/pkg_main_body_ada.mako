@@ -8,6 +8,7 @@ with Langkit_Support.Packrat;
 with Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
+with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>

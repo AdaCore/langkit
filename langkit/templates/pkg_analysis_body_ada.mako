@@ -877,7 +877,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Has_Element
      (Self : Token_Iterator; Tok : Token_Reference) return Boolean
-   is (Tok.Index.Token <= Self.Last);
+   is (Get_Token_Index (Tok).Token <= Self.Last);
 
    -------------
    -- Element --

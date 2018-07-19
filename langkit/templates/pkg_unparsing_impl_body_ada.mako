@@ -13,6 +13,7 @@ with GNATCOLL.Iconv;
 
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
@@ -133,8 +134,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Pre => Token /= No_Token
              and then not Is_Trivia (Token)
              and then
-               Token_Index (Integer (Token_Indexes (Token).Token) + Offset)
-               in First_Token_Index .. Last_Token (Token_Data (Token).all),
+               Token_Index (Integer (Get_Token_Index (Token).Token) + Offset)
+               in First_Token_Index .. Last_Token (Get_Token_TDH (Token).all),
       Post => Relative_Token'Result /= No_Token;
    --  Considering only tokens that are not trivia and assuming Token is at
    --  index I, return the token that is at index I + Offset.
