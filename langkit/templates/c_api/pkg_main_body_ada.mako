@@ -911,14 +911,19 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          FD : constant Token_Data_Type := Data (Unwrap (First));
          LD : constant Token_Data_Type := Data (Unwrap (Last));
+
+         First_Source_Buffer, Last_Source_Buffer : Text_Cst_Access;
+         First_Index, Ignored_First              : Positive;
+         Last_Index, Ignored_Last                : Natural;
       begin
-         if First.Token_Data /= Last.Token_Data then
+         Extract_Token_Text
+           (FD, First_Source_Buffer, First_Index, Ignored_Last);
+         Extract_Token_Text
+           (LD, Last_Source_Buffer, Ignored_First, Last_Index);
+         if First_Source_Buffer /= Last_Source_Buffer then
             return 0;
          end if;
-         Text.all := Wrap
-           (FD.Source_Buffer,
-            Positive (FD.Source_First),
-            Natural (LD.Source_Last));
+         Text.all := Wrap (First_Source_Buffer, First_Index, Last_Index);
          return 1;
       end;
    exception
@@ -1178,17 +1183,19 @@ package body ${ada_lib_name}.Implementation.C is
 
       declare
          D : constant Token_Data_Type := Data (Token);
-         K : Token_Kind := D.Kind;
+         K : constant Token_Kind := Kind (D);
+
+         Source_Buffer : Text_Cst_Access;
+         First         : Positive;
+         Last          : Natural;
       begin
+         Extract_Token_Text (D, Source_Buffer, First, Last);
          return (Token_Data   => Convert (Token.TDH),
                  Token_Index  => int (Token.Index.Token),
                  Trivia_Index => int (Token.Index.Trivia),
                  Kind         => K'Enum_Rep,
-                 Text         => Wrap
-                   (Text_Cst_Access (Token.TDH.Source_Buffer),
-                    D.Source_First,
-                    D.Source_Last),
-                 Sloc_Range   => Wrap (D.Sloc_Range));
+                 Text         => Wrap (Source_Buffer, First, Last),
+                 Sloc_Range   => Wrap (Sloc_Range (D)));
       end;
    end Wrap;
 

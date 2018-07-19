@@ -95,26 +95,7 @@ package ${ada_lib_name}.Common is
 
    No_Token : constant Token_Reference := (null, No_Token_Or_Trivia_Index);
 
-   type Token_Data_Type is record
-      Kind : Token_Kind;
-      --  See documentation for the Kind accessor
-
-      Is_Trivia : Boolean;
-      --  See documentation for the Is_Trivia accessor
-
-      Index : Token_Index;
-      --  See documentation for the Index accessor
-
-      Source_Buffer : Text_Cst_Access;
-      --  Text for the original source file
-
-      Source_First : Positive;
-      Source_Last  : Natural;
-      --  Bounds in Source_Buffer for the text corresponding to this token
-
-      Sloc_Range : Source_Location_Range;
-      --  See documenation for the Sloc_Range accessor
-   end record;
+   type Token_Data_Type is private;
 
    function "<" (Left, Right : Token_Reference) return Boolean;
    --  Assuming Left and Right belong to the same analysis unit, return whether
@@ -190,5 +171,28 @@ package ${ada_lib_name}.Common is
 
    procedure Raise_Property_Error (Message : String := "");
    --  Raise a Property_Error with the given Message
+
+private
+
+   type Token_Data_Type is record
+      Kind : Token_Kind;
+      --  See documentation for the Kind accessor
+
+      Is_Trivia : Boolean;
+      --  See documentation for the Is_Trivia accessor
+
+      Index : Token_Index;
+      --  See documentation for the Index accessor
+
+      Source_Buffer : Text_Cst_Access;
+      --  Text for the original source file
+
+      Source_First : Positive;
+      Source_Last  : Natural;
+      --  Bounds in Source_Buffer for the text corresponding to this token
+
+      Sloc_Range : Source_Location_Range;
+      --  See documenation for the Sloc_Range accessor
+   end record;
 
 end ${ada_lib_name}.Common;
