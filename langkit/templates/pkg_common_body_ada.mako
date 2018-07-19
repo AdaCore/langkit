@@ -4,16 +4,25 @@ with ${ada_lib_name}.Converters;
 
 package body ${ada_lib_name}.Common is
 
-   function Wrap
-     (Index : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler_Access)
-      return Token_Reference;
-
    Is_Token_Node_Kind : constant array (${root_node_kind_name}) of Boolean :=
      (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_token_node)
                   for n in ctx.astnode_types if not n.abstract)});
    --  For each node kind, return whether it is a node that contains only a
    --  single token.
+
+   function Wrap_Token_Reference
+     (TDH   : Token_Data_Handler_Access;
+      Index : Token_Or_Trivia_Index) return Token_Reference;
+   function Get_Token_TDH
+     (Token : Token_Reference) return Token_Data_Handler_Access;
+   function Get_Token_Index
+     (Token : Token_Reference) return Token_Or_Trivia_Index;
+   procedure Extract_Token_Text
+     (Token         : Token_Data_Type;
+      Source_Buffer : out Text_Cst_Access;
+      First         : out Positive;
+      Last          : out Natural);
+   --  Implementations for converters soft-links
 
    -------------------
    -- Is_Token_Node --
@@ -63,8 +72,9 @@ package body ${ada_lib_name}.Common is
    begin
       return (if Token.TDH = null
               then No_Token
-              else Wrap (Next (Token.Index, Token.TDH.all,
-                               Exclude_Trivia), Token.TDH));
+              else Wrap_Token_Reference (Token.TDH,
+                                         Next (Token.Index, Token.TDH.all,
+                                               Exclude_Trivia)));
    end Next;
 
    --------------
@@ -75,10 +85,12 @@ package body ${ada_lib_name}.Common is
      (Token          : Token_Reference;
       Exclude_Trivia : Boolean := False) return Token_Reference is
    begin
-      return (if Token.TDH = null
-              then No_Token
-              else Wrap (Previous (Token.Index, Token.TDH.all,
-                                   Exclude_Trivia), Token.TDH));
+      return
+        (if Token.TDH = null
+         then No_Token
+         else Wrap_Token_Reference (Token.TDH,
+                                    Previous (Token.Index, Token.TDH.all,
+                                              Exclude_Trivia)));
    end Previous;
 
    ----------------
@@ -231,20 +243,6 @@ package body ${ada_lib_name}.Common is
       then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Index.Token))
       else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Index.Trivia)).T);
 
-   ----------
-   -- Wrap --
-   ----------
-
-   function Wrap
-     (Index : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler_Access)
-      return Token_Reference is
-   begin
-      return (if Index = No_Token_Or_Trivia_Index
-              then No_Token
-              else (TDH, Index));
-   end;
-
    -------------
    -- Convert --
    -------------
@@ -278,6 +276,39 @@ package body ${ada_lib_name}.Common is
       end if;
    end Raise_Property_Error;
 
+   --------------------------
+   -- Wrap_Token_Reference --
+   --------------------------
+
+   function Wrap_Token_Reference
+     (TDH   : Token_Data_Handler_Access;
+      Index : Token_Or_Trivia_Index) return Token_Reference is
+   begin
+      return (if Index = No_Token_Or_Trivia_Index
+              then No_Token
+              else (TDH, Index));
+   end Wrap_Token_Reference;
+
+   -------------------
+   -- Get_Token_TDH --
+   -------------------
+
+   function Get_Token_TDH
+     (Token : Token_Reference) return Token_Data_Handler_Access is
+   begin
+      return Token.TDH;
+   end Get_Token_TDH;
+
+   ---------------------
+   -- Get_Token_Index --
+   ---------------------
+
+   function Get_Token_Index
+     (Token : Token_Reference) return Token_Or_Trivia_Index is
+   begin
+      return Token.Index;
+   end Get_Token_Index;
+
    ------------------------
    -- Extract_Token_Text --
    ------------------------
@@ -294,5 +325,8 @@ package body ${ada_lib_name}.Common is
    end Extract_Token_Text;
 
 begin
+   Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
+   Converters.Get_Token_TDH := Get_Token_TDH'Access;
+   Converters.Get_Token_Index := Get_Token_Index'Access;
    Converters.Extract_Token_Text := Extract_Token_Text'Access;
 end ${ada_lib_name}.Common;

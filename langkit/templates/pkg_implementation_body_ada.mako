@@ -75,10 +75,6 @@ ${(exts.with_clauses(with_clauses + [
 
 package body ${ada_lib_name}.Implementation is
 
-   function Wrap
-     (Index : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler_Access) return Token_Reference;
-
    generic
       type T (<>) is limited private;
       type T_Access is access all T;
@@ -136,19 +132,6 @@ package body ${ada_lib_name}.Implementation is
    function Create_Symbol_Literals
      (Symbols : Symbol_Table) return Symbol_Literal_Array;
    --  Create pre-computed symbol literals in Symbols and return them
-
-   ----------
-   -- Wrap --
-   ----------
-
-   function Wrap
-     (Index : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler_Access) return Token_Reference is
-   begin
-      return (if Index = No_Token_Or_Trivia_Index
-              then No_Token
-              else (TDH, Index));
-   end;
 
    ----------------
    -- Get_Env_Id --
@@ -804,14 +787,15 @@ package body ${ada_lib_name}.Implementation is
    -----------------
 
    function First_Token (Unit : Internal_Unit) return Token_Reference is
-     (Wrap (First_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
+     (Wrap_Token_Reference (Unit.TDH'Access,
+                            First_Token_Or_Trivia (Unit.TDH)));
 
    ----------------
    -- Last_Token --
    ----------------
 
    function Last_Token (Unit : Internal_Unit) return Token_Reference is
-     (Wrap (Last_Token_Or_Trivia (Unit.TDH), Unit.TDH'Access));
+     (Wrap_Token_Reference (Unit.TDH'Access, Last_Token_Or_Trivia (Unit.TDH)));
 
    -----------------
    -- Token_Count --
@@ -846,7 +830,7 @@ package body ${ada_lib_name}.Implementation is
       use Token_Data_Handlers;
       Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
    begin
-      return Wrap (Result, Unit.TDH'Access);
+      return Wrap_Token_Reference (Unit.TDH'Access, Result);
    end Lookup_Token;
 
    ----------------------
@@ -2364,39 +2348,21 @@ package body ${ada_lib_name}.Implementation is
 
    function Stored_Token
      (Node  : access ${root_node_value_type}'Class;
-      Token : Token_Reference) return Token_Index is
+      Token : Token_Reference) return Token_Index
+   is
+      Index : constant Token_Or_Trivia_Index := Get_Token_Index (Token);
    begin
-      if Node.Unit.TDH'Access /= Token.TDH then
+      if Node.Unit.TDH'Access /= Get_Token_TDH (Token) then
          raise Property_Error with
            ("Cannot associate a token and a node from different analysis"
             & " units");
-      elsif Token.Index.Trivia /= No_Token_Index then
+      elsif Index.Trivia /= No_Token_Index then
          raise Property_Error with
            ("A node cannot hold trivia");
       end if;
 
-      return Token.Index.Token;
+      return Index.Token;
    end Stored_Token;
-
-   ----------------
-   -- Token_Data --
-   ----------------
-
-   function Token_Data
-     (Token : Token_Reference) return Token_Data_Handler_Access is
-   begin
-      return Token.TDH;
-   end Token_Data;
-
-   -------------------
-   -- Token_Indexes --
-   -------------------
-
-   function Token_Indexes
-     (Token : Token_Reference) return Token_Or_Trivia_Index is
-   begin
-      return Token.Index;
-   end Token_Indexes;
 
    --------------------------
    -- Children_With_Trivia --
@@ -2430,9 +2396,9 @@ package body ${ada_lib_name}.Implementation is
       begin
          for I in First .. Last loop
             for D of Get_Trivias (TDH, I) loop
-               Ret_Vec.Append ((Kind   => Trivia,
-                                Trivia => (TDH    => TDH'Access,
-                                           Index => (I, D))));
+               Ret_Vec.Append
+                 ((Kind   => Trivia,
+                   Trivia => Wrap_Token_Reference (TDH'Access, (I, D))));
             end loop;
          end loop;
       end Append_Trivias;
@@ -2553,10 +2519,7 @@ package body ${ada_lib_name}.Implementation is
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index) return Token_Reference
    is
-     (if Index = No_Token_Index
-      then No_Token
-      else (TDH    => Token_Data (Node.Unit),
-            Index  => (Index, No_Token_Index)));
+     (Wrap_Token_Reference (Token_Data (Node.Unit), (Index, No_Token_Index)));
 
    -------------
    -- Is_Null --

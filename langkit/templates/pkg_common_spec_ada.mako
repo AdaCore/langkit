@@ -1,10 +1,10 @@
 ## vim: filetype=makoada
 
-with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
-with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
-with Langkit_Support.Text;   use Langkit_Support.Text;
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
-with ${ada_lib_name}.Lexer;       use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 with GNATCOLL.GMP.Integers;
@@ -81,19 +81,10 @@ package ${ada_lib_name}.Common is
    -- Lexical utilities --
    -----------------------
 
-   ## TODO PUBLIC API: Put this in ${lib_name}.Parsing. Why do we have two
-   ## token types?
-
-   type Token_Reference is record
-      TDH : Token_Data_Handler_Access;
-      --  Token data handler that owns this token
-
-      Index : Token_Or_Trivia_Index;
-      --  Identifier for the trivia or the token this refers to
-   end record;
+   type Token_Reference is private;
    ${ada_doc('langkit.token_reference_type', 3)}
 
-   No_Token : constant Token_Reference := (null, No_Token_Or_Trivia_Index);
+   No_Token : constant Token_Reference;
 
    type Token_Data_Type is private;
 
@@ -173,6 +164,16 @@ package ${ada_lib_name}.Common is
    --  Raise a Property_Error with the given Message
 
 private
+
+   type Token_Reference is record
+      TDH : Token_Data_Handler_Access;
+      --  Token data handler that owns this token
+
+      Index : Token_Or_Trivia_Index;
+      --  Identifier for the trivia or the token this refers to
+   end record;
+
+   No_Token : constant Token_Reference := (null, No_Token_Or_Trivia_Index);
 
    type Token_Data_Type is record
       Kind : Token_Kind;
