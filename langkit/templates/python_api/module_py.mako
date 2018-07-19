@@ -822,7 +822,7 @@ class ${root_astnode_name}(object):
 
     @property
     def _id_tuple(self):
-        return (self._node_c_value, self.metadata, self._rebindings)
+        return (self._node_c_value, self._rebindings)
 
     def __eq__(self, other):
         return (isinstance(other, ${root_astnode_name}) and

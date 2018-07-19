@@ -525,7 +525,7 @@ package body ${ada_lib_name}.Analysis is
 
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean is
    begin
-      return L.Internal = R.Internal;
+      return Compare_Entity (L.Internal, R.Internal);
    end "=";
 
    -----------------
@@ -560,7 +560,7 @@ package body ${ada_lib_name}.Analysis is
    function Hash
      (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type is
    begin
-      return Hash (Node.Internal);
+      return Hash_Entity (Node.Internal);
    end Hash;
 
    -----------------------
