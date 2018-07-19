@@ -1,6 +1,9 @@
 ## vim: filetype=makoada
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with ${ada_lib_name}.Analysis;       use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 
 --  Internal package: provide implementation helpers to switch between public
@@ -33,5 +36,12 @@ private package ${ada_lib_name}.Converters is
    type Node_Unwrapper is access function
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
    Unwrap_Node : Node_Unwrapper;
+
+   type Token_Text_Extractor is access procedure
+     (Token         : Token_Data_Type;
+      Source_Buffer : out Text_Cst_Access;
+      First         : out Positive;
+      Last          : out Natural);
+   Extract_Token_Text : Token_Text_Extractor;
 
 end ${ada_lib_name}.Converters;

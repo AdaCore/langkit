@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+with ${ada_lib_name}.Converters;
+
 package body ${ada_lib_name}.Common is
 
    function Wrap
@@ -276,4 +278,21 @@ package body ${ada_lib_name}.Common is
       end if;
    end Raise_Property_Error;
 
+   ------------------------
+   -- Extract_Token_Text --
+   ------------------------
+
+   procedure Extract_Token_Text
+     (Token         : Token_Data_Type;
+      Source_Buffer : out Text_Cst_Access;
+      First         : out Positive;
+      Last          : out Natural) is
+   begin
+      Source_Buffer := Token.Source_Buffer;
+      First := Token.Source_First;
+      Last := Token.Source_Last;
+   end Extract_Token_Text;
+
+begin
+   Converters.Extract_Token_Text := Extract_Token_Text'Access;
 end ${ada_lib_name}.Common;
