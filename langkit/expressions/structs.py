@@ -40,7 +40,7 @@ class Cast(AbstractExpression):
             :type do_raise: bool
 
             :param bool unsafe: If true, elide the type check before doing the
-                caste. This is used to avoid noisy and useless type checks in
+                cast. This is used to avoid noisy and useless type checks in
                 generated code: these checks would fail only because of a bug
                 in the code generator.
             :param AbstractExpression|None abstract_expr: See
