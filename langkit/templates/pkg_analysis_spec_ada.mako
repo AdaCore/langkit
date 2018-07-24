@@ -54,10 +54,11 @@ package ${ada_lib_name}.Analysis is
 
    % for e in ctx.entity_types:
       % if e.is_root_type:
-         type ${e.api_name} is tagged private;
+      type ${e.api_name} is tagged private;
       % else:
-         type ${e.api_name} is new ${e.base.api_name} with private;
+      type ${e.api_name} is new ${e.base.api_name} with private;
       % endif
+      ${ada_doc(e.astnode, 6)}
    % endfor
 
    % for e in ctx.entity_types:
