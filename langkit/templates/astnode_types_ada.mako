@@ -4,11 +4,8 @@
 <%namespace name="prop_helpers" file="properties/helpers.mako" />
 
 <%def name="public_incomplete_decl(cls)">
-
    type ${cls.value_type_name()};
    type ${cls.name} is access all ${cls.value_type_name()}'Class;
-   ${ada_doc(cls, 3)}
-
 </%def>
 
 <%def name="logic_helpers()">
