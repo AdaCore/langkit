@@ -245,17 +245,17 @@ private package ${ada_lib_name}.Implementation is
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
-   ${array_types.public_incomplete_decl(T.LexicalEnvType.array)}
-   ${array_types.public_decl(T.LexicalEnvType.array)}
+   ${array_types.incomplete_decl(T.LexicalEnvType.array)}
+   ${array_types.decl(T.LexicalEnvType.array)}
 
    ## See ASTNodeType.entity
-   ${array_types.public_incomplete_decl(T.root_node.entity.array)}
-   ${array_types.public_decl(T.root_node.entity.array)}
+   ${array_types.incomplete_decl(T.root_node.entity.array)}
+   ${array_types.decl(T.root_node.entity.array)}
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
-   ${array_types.public_incomplete_decl(root_node_array)}
-   ${array_types.public_decl(root_node_array)}
+   ${array_types.incomplete_decl(root_node_array)}
+   ${array_types.decl(root_node_array)}
 
    ## Generate Hash functions for "built-in types" if need be
    % if T.BoolType.requires_hash_function:
@@ -554,7 +554,7 @@ private package ${ada_lib_name}.Implementation is
 
    % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type.should_emit_array_type:
-   ${array_types.public_incomplete_decl(array_type)}
+   ${array_types.incomplete_decl(array_type)}
    % endif
    % endfor
 
@@ -583,7 +583,7 @@ private package ${ada_lib_name}.Implementation is
 
    % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type.should_emit_array_type:
-   ${array_types.public_decl(array_type)}
+   ${array_types.decl(array_type)}
    % endif
    % endfor
 
@@ -744,10 +744,6 @@ private package ${ada_lib_name}.Implementation is
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
    --  Implementation helper to free the extensions associatde to Node
 
-   ${array_types.private_decl(T.LexicalEnvType.array)}
-   ${array_types.private_decl(T.root_node.entity.array)}
-   ${array_types.private_decl(root_node_array)}
-
    package ${T.root_node.array.pkg_vector} is
       new Langkit_Support.Vectors (${T.root_node.name});
 
@@ -801,12 +797,6 @@ private package ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean;
    --  Returns whether the node is a synthetic node, i.e. whether it was
    --  generated for semantic analysis instead of parsing.
-
-   % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.private_decl(array_type)}
-   % endif
-   % endfor
 
    % for astnode in no_builtins(ctx.astnode_types):
      % if astnode.is_root_list_type:
