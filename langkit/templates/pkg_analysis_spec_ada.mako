@@ -326,12 +326,6 @@ package ${ada_lib_name}.Analysis is
    --    will be part of the returned array;
    --  - Nodes and trivias will be lexically ordered.
 
-   -----------------------
-   -- Enumeration types --
-   -----------------------
-
-   function Image (Value : Boolean) return String;
-
    -----------------
    -- Array types --
    -----------------

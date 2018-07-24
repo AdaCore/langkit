@@ -498,13 +498,6 @@ package body ${ada_lib_name}.Analysis is
      (Context (Unit));
    --  TODO??? Remove this, Context already does the job
 
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Value : Boolean) return String
-   is (if Value then "True" else "False");
-
    -------------
    -- Is_Null --
    -------------
