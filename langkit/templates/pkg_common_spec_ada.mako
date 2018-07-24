@@ -148,7 +148,7 @@ package ${ada_lib_name}.Common is
    function Convert
      (TDH      : Token_Data_Handler;
       Token    : Token_Reference;
-      Raw_Data : Lexer.Token_Data_Type) return Common.Token_Data_Type;
+      Raw_Data : Stored_Token_Data) return Token_Data_Type;
    --  Turn data from TDH and Raw_Data into a user-ready token data record
 
    type Child_Or_Trivia is (Child, Trivia);
@@ -160,7 +160,7 @@ package ${ada_lib_name}.Common is
    Invalid_Unit_Name_Error : exception;
    ${ada_doc('langkit.invalid_unit_name_error', 3)}
 
-   function Raw_Data (T : Token_Reference) return Lexer.Token_Data_Type;
+   function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for T
 
    procedure Raise_Property_Error (Message : String := "");

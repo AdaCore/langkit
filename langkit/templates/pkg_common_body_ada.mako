@@ -126,7 +126,7 @@ package body ${ada_lib_name}.Common is
    ----------
 
    function Text (Token : Token_Reference) return Text_Type is
-      RD : constant Lexer.Token_Data_Type := Raw_Data (Token);
+      RD : constant Stored_Token_Data := Raw_Data (Token);
    begin
       return Token.TDH.Source_Buffer (RD.Source_First .. RD.Source_Last);
    end Text;
@@ -238,7 +238,7 @@ package body ${ada_lib_name}.Common is
    -- Raw_Data --
    --------------
 
-   function Raw_Data (T : Token_Reference) return Lexer.Token_Data_Type is
+   function Raw_Data (T : Token_Reference) return Stored_Token_Data is
      (if T.Index.Trivia = No_Token_Index
       then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Index.Token))
       else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Index.Trivia)).T);
@@ -250,7 +250,7 @@ package body ${ada_lib_name}.Common is
    function Convert
      (TDH      : Token_Data_Handler;
       Token    : Token_Reference;
-      Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type is
+      Raw_Data : Stored_Token_Data) return Token_Data_Type is
    begin
       return (Kind          => Raw_Data.Kind,
               Is_Trivia     => Token.Index.Trivia /= No_Token_Index,

@@ -1011,7 +1011,7 @@ package body ${ada_lib_name}.Rewriting is
             if Node.Is_Token_Node then
                declare
                   Index : constant Natural := Natural (Node.Token_Start_Index);
-                  Data  : constant Lexer.Token_Data_Type :=
+                  Data  : constant Stored_Token_Data :=
                      Reparsed.TDH.Tokens.Get (Index);
                   Text      : constant Text_Type := Reparsed.TDH.Source_Buffer
                     (Data.Source_First .. Data.Source_Last);
