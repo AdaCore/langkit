@@ -121,7 +121,7 @@ package body ${ada_lib_name}.Parsers is
 
    procedure Add_Last_Fail_Diagnostic (Parser : in out Parser_Type)
    is
-      Last_Token : Lexer.Token_Data_Type renames
+      Last_Token : Stored_Token_Data renames
          Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
       D : constant Diagnostic :=
         (if Parser.Last_Fail.Kind = Token_Fail then
@@ -156,7 +156,7 @@ package body ${ada_lib_name}.Parsers is
          --  have some garbage afterwards.
          if Parser.Current_Pos >= Parser.Last_Fail.Pos then
             declare
-               First_Garbage_Token : Lexer.Token_Data_Type renames
+               First_Garbage_Token : Stored_Token_Data renames
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
             begin
                Append (Parser.Diagnostics, First_Garbage_Token.Sloc_Range,

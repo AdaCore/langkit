@@ -47,7 +47,7 @@ package body ${ada_lib_name}.Debug is
 
       else
          declare
-            D : constant Lexer.Token_Data_Type := TDH.Tokens.Get (Index);
+            D : constant Stored_Token_Data := TDH.Tokens.Get (Index);
          begin
             Put (Token_Kind_Name (D.Kind));
             Put (" " & Image (Text (TDH.all, D), With_Quotes => True));

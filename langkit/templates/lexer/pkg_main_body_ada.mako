@@ -124,7 +124,7 @@ package body ${ada_lib_name}.Lexer is
    -- Sloc_Range --
    ----------------
 
-   function Sloc_Range (Token : Token_Data_Type) return Source_Location_Range
+   function Sloc_Range (Token : Stored_Token_Data) return Source_Location_Range
    is
    begin
       return Token.Sloc_Range;
@@ -356,7 +356,7 @@ package body ${ada_lib_name}.Lexer is
             and then Token_Id /= ${lexer.Newline.ada_name}
          then
             declare
-               T : Token_Data_Type :=
+               T : Stored_Token_Data :=
                  (Kind         => <>,
                   Source_First => Source_First + 1,
                   Source_Last  => Source_First,
@@ -720,7 +720,7 @@ package body ${ada_lib_name}.Lexer is
 
    function Force_Symbol
      (TDH : Token_Data_Handler;
-      T   : in out Token_Data_Type) return Symbol_Type is
+      T   : in out Stored_Token_Data) return Symbol_Type is
    begin
       if T.Symbol = null then
          declare

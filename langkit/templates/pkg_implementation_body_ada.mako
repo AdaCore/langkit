@@ -916,7 +916,7 @@ package body ${ada_lib_name}.Implementation is
    procedure PP_Trivia (Unit : Internal_Unit) is
 
       procedure Process (Trivia : Token_Index) is
-         Data : constant Lexer.Token_Data_Type :=
+         Data : constant Stored_Token_Data :=
             Unit.TDH.Trivias.Get (Natural (Trivia)).T;
       begin
          Put_Line (Image (Text (Unit.TDH, Data)));
@@ -1483,14 +1483,10 @@ package body ${ada_lib_name}.Implementation is
       TDH                    : Token_Data_Handler renames Node.Unit.TDH;
       Token_Start, Token_End : Token_Pos;
 
-      function Get
-        (Index : Token_Index) return Lexer.Token_Data_Type
-      is
+      function Get (Index : Token_Index) return Stored_Token_Data is
         (Get_Token (TDH, Index));
 
-      function Sloc
-        (T : Token_Pos) return Source_Location
-      is
+      function Sloc (T : Token_Pos) return Source_Location is
         (if T.Anchor = T_Start
          then Start_Sloc (Get (T.Pos).Sloc_Range)
          else End_Sloc (Get (T.Pos).Sloc_Range));

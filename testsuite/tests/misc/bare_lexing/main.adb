@@ -30,7 +30,7 @@ begin
    Tok := First_Token_Or_Trivia (TDH);
    while Tok /= No_Token_Or_Trivia_Index loop
       declare
-         Token_Data : constant Token_Data_Type := Data (Tok, TDH);
+         Token_Data : constant Stored_Token_Data := Data (Tok, TDH);
       begin
          Put_Line (Image (Token_Data.Sloc_Range)
                    & " " & Token_Kind'Image (Token_Data.Kind)

@@ -31,7 +31,7 @@ package ${ada_lib_name}.Lexer is
    type Indent_Kind is (Indent, Dedent, Nodent, None);
    % endif
 
-   type Token_Data_Type is record
+   type Stored_Token_Data is record
       Kind : Token_Kind;
       --  Kind for this token
 
@@ -49,11 +49,14 @@ package ${ada_lib_name}.Lexer is
       --  Source location range for this token. Note that the end bound is
       --  exclusive.
    end record;
+   --  Holder for per-token data to be stored in the token data handler
 
-   function Sloc_Range (Token : Token_Data_Type) return Source_Location_Range;
+   function Sloc_Range
+     (Token : Stored_Token_Data) return Source_Location_Range;
+   --  Helper for the generic package instantiation below
 
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
-     (Token_Data_Type);
+     (Stored_Token_Data, Sloc_Range);
    use Token_Data_Handlers;
 
    Unknown_Charset : exception;
@@ -116,13 +119,13 @@ package ${ada_lib_name}.Lexer is
 
    function Text
      (TDH : Token_Data_Handler;
-      T   : Token_Data_Type) return Text_Type
+      T   : Stored_Token_Data) return Text_Type
    is (TDH.Source_Buffer.all (T.Source_First .. T.Source_Last));
    --  Return the text associated to T, a token that belongs to TDH
 
    function Image
      (TDH : Token_Data_Handler;
-      T   : Token_Data_Type) return String
+      T   : Stored_Token_Data) return String
    is (Image (Text (TDH, T)));
    --  Debug helper: return a human-readable representation of T, a token that
    --  belongs to TDH.
@@ -141,7 +144,7 @@ package ${ada_lib_name}.Lexer is
 
    function Force_Symbol
      (TDH : Token_Data_Handler;
-      T   : in out Token_Data_Type) return Symbol_Type;
+      T   : in out Stored_Token_Data) return Symbol_Type;
    --  If T has a symbol, return it. Otherwise, force its symbolization and
    --  return the symbol.
 
