@@ -167,8 +167,8 @@ private package ${ada_lib_name}.Implementation is
    --  The following types and operations are implementation details we did not
    --  manage yet to put in a private part. Please don't use them.
 
-   ${struct_types.public_incomplete_decl(T.env_md)}
-   ${struct_types.public_decl(T.env_md)}
+   ${struct_types.incomplete_decl(T.env_md)}
+   ${struct_types.decl(T.env_md)}
 
    function Combine
      (L, R : ${T.env_md.name}) return ${T.env_md.name};
@@ -545,7 +545,7 @@ private package ${ada_lib_name}.Implementation is
    -----------------------------------------------
 
    % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.public_incomplete_decl(struct_type)}
+   ${struct_types.incomplete_decl(struct_type)}
    % endfor
 
    -------------------------------------------
@@ -571,7 +571,7 @@ private package ${ada_lib_name}.Implementation is
    -----------------------------------------
 
    % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.public_decl(struct_type)}
+   ${struct_types.decl(struct_type)}
    % endfor
 
    -----------------
