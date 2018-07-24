@@ -27,6 +27,8 @@ library project ${lib_name} is
      ("${lib_name.lower()}.ads",
       "${lib_name.lower()}-analysis.adb",
       "${lib_name.lower()}-analysis.ads",
+      "${lib_name.lower()}-c.ads",
+      "${lib_name.lower()}-c.adb",
       "${lib_name.lower()}-common.ads",
       "${lib_name.lower()}-common.adb",
       "${lib_name.lower()}-converters.ads",
