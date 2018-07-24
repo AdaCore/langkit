@@ -150,8 +150,8 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
    procedure Disable_Lookup_Cache (Disable : Boolean := True);
-   --  If Disable is true, disable the use of caches in lexical environment
-   --  lookups. Otherwise, activate it.
+   --  Debug helper: if Disable is true, disable the use of caches in lexical
+   --  environment lookups. Otherwise, activate it.
 
    function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean;
    --  Return whether Context has a rewriting handler (see
@@ -162,7 +162,7 @@ package ${ada_lib_name}.Analysis is
    function Has_Unit
      (Context       : Analysis_Context;
       Unit_Filename : String) return Boolean;
-   --  Returns whether Context contains a unit correponding to Unit_Filename
+   --  Return whether Context contains a unit correponding to Unit_Filename
 
    function Get_From_File
      (Context  : Analysis_Context;
@@ -295,7 +295,7 @@ package ${ada_lib_name}.Analysis is
    --  Debug helper: output the lexical envs for given analysis unit
 
    procedure Trigger_Envs_Debug (Is_Active : Boolean);
-   --  Activate debug traces for lexical envs lookups
+   --  Debug helper: activate debug traces for lexical envs lookups
 
    procedure Print (Unit : Analysis_Unit; Show_Slocs : Boolean := True);
    --  Debug helper: output the AST and eventual diagnostic for this unit on

@@ -187,7 +187,7 @@ base_langkit_docs = {
         Populate_Lexical_Env should be discarded. They are by default.
     """,
     'langkit.context_set_logic_resolution_timeout': """
-        If Timoout is greater than zero, set a timeout for the resolution of
+        If Timeout is greater than zero, set a timeout for the resolution of
         logic equations. The unit is the number of steps in ANY/ALL relations.
         If Timeout is zero, disable the timeout. By default, the timeout is
         100,000 steps.
