@@ -523,9 +523,10 @@ base_langkit_docs = {
         for the corresponding interface.
     """,
     'langkit.unit_provider_type': """
-        Interface type for an object that can turn an analysis unit reference
-        represented as an AST node into a file name. This is used get
-        inter-unit analysis working.
+        Interface to fetch analysis units from a name and a unit kind.
+
+        This is used to make the semantic analysis able to switch from one
+        analysis units to another.
     """,
     'langkit.unit_provider_get_unit_filename': """
         Return the filename corresponding to the given unit name/unit kind.
@@ -537,7 +538,7 @@ base_langkit_docs = {
         if Name is not a valid unit name.
     """,
     'langkit.unit_provider_get_unit_from_name': """
-        Fetch and return the analysis unit referenced by the input unit name.
+        Fetch and return the analysis unit referenced by the given unit name.
         % if lang == 'ada':
             Raise a Property_Error
         % else:
