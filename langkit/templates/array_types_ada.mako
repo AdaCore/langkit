@@ -9,12 +9,12 @@
    % endif
 </%def>
 
-<%def name="public_incomplete_decl(cls)">
+<%def name="incomplete_decl(cls)">
    type ${cls.pointed};
    type ${cls.name} is access all ${cls.pointed};
 </%def>
 
-<%def name="public_decl(cls)">
+<%def name="decl(cls)">
 
    <% elt_type = cls.element_type.name %>
 
@@ -64,9 +64,6 @@
       function Trace_Image (A : ${cls.name}) return String;
    % endif
 
-</%def>
-
-<%def name="private_decl(cls)">
   procedure Free is new Ada.Unchecked_Deallocation
     (${cls.pointed}, ${cls.name});
 </%def>
