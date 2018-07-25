@@ -89,13 +89,6 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type;
    --  Generic hash function, to be used for nodes as keys in hash tables
 
-   pragma Warnings (Off, "defined after private extension");
-   % for e in ctx.entity_types:
-      function As_${e.el_type.kwless_raw_name}
-        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
-   % endfor
-   pragma Warnings (On, "defined after private extension");
-
    --------------------
    -- Unit providers --
    --------------------
@@ -518,6 +511,13 @@ package ${ada_lib_name}.Analysis is
    procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class);
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.
+
+   pragma Warnings (Off, "defined after private extension");
+   % for e in ctx.entity_types:
+      function As_${e.el_type.kwless_raw_name}
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
+   % endfor
+   pragma Warnings (On, "defined after private extension");
 
 private
 
