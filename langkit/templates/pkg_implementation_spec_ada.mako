@@ -953,7 +953,7 @@ private package ${ada_lib_name}.Implementation is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Unit_Provider'Class, Internal_Unit_Provider_Access);
 
-   type Analysis_Context_Type is record
+   type Analysis_Context_Type is limited record
       Ref_Count : Natural;
 
       Units : Units_Maps.Map;
@@ -1027,7 +1027,7 @@ private package ${ada_lib_name}.Implementation is
       --  templates in the context of tree rewriting.
    end record;
 
-   type Analysis_Unit_Type is record
+   type Analysis_Unit_Type is limited record
       Context : Internal_Context;
       --  The owning context for this analysis unit
 
