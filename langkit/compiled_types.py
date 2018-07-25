@@ -121,11 +121,11 @@ def render(*args, **kwargs):
     return make_renderer().render(*args, **kwargs)
 
 
-class CompiledTypeMetaclass(object):
+class CompiledTypeRepo(object):
     """
-    Metaclass for every compiled type. This is used to have a comprehensive
-    list of every compiled type instance, so that you can use a TypeRepo
-    instance to refer to any compiled type.
+    Namespace class: Repository for every compiled type. This is used to have a
+    comprehensive list of every compiled type instance, so that you can use a
+    TypeRepo instance to refer to any compiled type.
     """
 
     type_dict = {}
@@ -317,7 +317,7 @@ class CompiledType(object):
         self._dsl_name = dsl_name
 
         type_repo_name = type_repo_name or name.camel
-        CompiledTypeMetaclass.type_dict[type_repo_name] = self
+        CompiledTypeRepo.type_dict[type_repo_name] = self
 
     @property
     def has_equivalent_function(self):
@@ -1574,7 +1574,7 @@ class StructType(BaseStructType):
             **kwargs
         )
         self._init_fields(fields)
-        CompiledTypeMetaclass.struct_types.append(self)
+        CompiledTypeRepo.struct_types.append(self)
 
     def add_as_memoization_key(self, context):
         super(StructType, self).add_as_memoization_key(context)
@@ -1609,8 +1609,8 @@ class StructType(BaseStructType):
             # Entitiy info and the root node's entity type is not emitted per
             # se, because it is a generic instantiation from
             # Langkit_Support.Lexical_Env.
-            CompiledTypeMetaclass.root_grammar_class.entity_info(),
-            CompiledTypeMetaclass.root_grammar_class.entity,
+            CompiledTypeRepo.root_grammar_class.entity_info(),
+            CompiledTypeRepo.root_grammar_class.entity,
         )
 
     def c_inc_ref(self, capi):
@@ -1816,10 +1816,10 @@ class ASTNodeType(BaseStructType):
         self.is_root_list_type = is_root_list
         self.is_list = is_list
 
-        # Register this new subclass where appropriate in CompiledTypeMetaclass
+        # Register this new subclass where appropriate in CompiledTypeRepo
         if is_root:
-            CompiledTypeMetaclass.root_grammar_class = self
-        CompiledTypeMetaclass.astnode_types.append(self)
+            CompiledTypeRepo.root_grammar_class = self
+        CompiledTypeRepo.astnode_types.append(self)
 
         # Now we have an official root node type, we can create its builtin
         # fields.
@@ -1939,8 +1939,8 @@ class ASTNodeType(BaseStructType):
         return self in (
             # The root grammar class and the generic list types are emitted
             # separately from the others.
-            CompiledTypeMetaclass.root_grammar_class,
-            CompiledTypeMetaclass.root_grammar_class.generic_list_type,
+            CompiledTypeRepo.root_grammar_class,
+            CompiledTypeRepo.root_grammar_class.generic_list_type,
         )
 
     def set_types(self, types):
@@ -2187,7 +2187,7 @@ class ASTNodeType(BaseStructType):
         result = ASTNodeType(
             name=self.kwless_raw_name + names.Name('List'),
             location=None, doc=None,
-            base=CompiledTypeMetaclass.root_grammar_class.generic_list_type,
+            base=CompiledTypeRepo.root_grammar_class.generic_list_type,
             fields=[], element_type=self,
             dsl_name='{}.list'.format(self.dsl_name)
         )
@@ -2196,7 +2196,7 @@ class ASTNodeType(BaseStructType):
         if ctx:
             ctx.list_types.add(result._element_type)
         else:
-            CompiledTypeMetaclass.pending_list_types.append(result)
+            CompiledTypeRepo.pending_list_types.append(result)
 
         return result
 
@@ -2208,8 +2208,8 @@ class ASTNodeType(BaseStructType):
         # This is manual memoization. It is necessary because memoization does
         # not play well with class method when we want the memoization to be
         # common to the whole class hierarchy.
-        if not CompiledTypeMetaclass.entity_info:
-            CompiledTypeMetaclass.entity_info = StructType(
+        if not CompiledTypeRepo.entity_info:
+            CompiledTypeRepo.entity_info = StructType(
                 names.Name('Entity_Info'), None, None,
                 [
                     (names.Name('MD'), BuiltinField(
@@ -2224,7 +2224,7 @@ class ASTNodeType(BaseStructType):
                                                 doc=""))
                 ],
             )
-        return CompiledTypeMetaclass.entity_info
+        return CompiledTypeRepo.entity_info
 
     @property
     @memoized
@@ -2290,7 +2290,7 @@ class ASTNodeType(BaseStructType):
         """
         Return properties available for all AST nodes.
 
-        Note that CompiledTypeMetaclass.root_grammar_class must be defined
+        Note that CompiledTypeRepo.root_grammar_class must be defined
         first.
 
         :rtype: list[(str, AbstractNodeData)]
@@ -2470,7 +2470,7 @@ class ArrayType(CompiledType):
         if ctx:
             ctx.array_types.add(self)
         else:
-            CompiledTypeMetaclass.pending_array_types.append(self)
+            CompiledTypeRepo.pending_array_types.append(self)
 
         # Text_Type is always defined, since it comes from
         # Langkit_Support.Text. To avoid discrepancies in code generation,
@@ -2643,7 +2643,7 @@ def create_enum_node_types(cls):
 def create_builtin_types():
     """
     Create CompiledType instances for all built-in types. This will
-    automatically register them in the current CompiledTypeMetaclass.
+    automatically register them in the current CompiledTypeRepo.
     """
     CompiledType(
         'InternalUnit',
@@ -2841,7 +2841,7 @@ class TypeRepo(object):
 
         :param str type_name: The name of the rule.
         """
-        type_dict = CompiledTypeMetaclass.type_dict
+        type_dict = CompiledTypeRepo.type_dict
 
         def resolve():
             try:
@@ -2872,7 +2872,7 @@ class TypeRepo(object):
         Shortcut to get the root AST node.
         :rtype: ASTNodeType
         """
-        result = CompiledTypeMetaclass.root_grammar_class
+        result = CompiledTypeRepo.root_grammar_class
         assert result
         return result
 
@@ -2886,8 +2886,8 @@ class TypeRepo(object):
         Shortcut to get the lexical environment metadata type.
         :rtype: StructType
         """
-        assert CompiledTypeMetaclass.env_metadata is not None
-        return CompiledTypeMetaclass.env_metadata
+        assert CompiledTypeRepo.env_metadata is not None
+        return CompiledTypeRepo.env_metadata
 
     @property
     def defer_env_md(self):
@@ -2899,7 +2899,7 @@ class TypeRepo(object):
         Shortcut to get the entity information type.
         :rtype: StructType
         """
-        return CompiledTypeMetaclass.root_grammar_class.entity_info()
+        return CompiledTypeRepo.root_grammar_class.entity_info()
 
     @property
     def entity(self):

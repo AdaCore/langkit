@@ -1058,11 +1058,11 @@ class Unparsers(object):
         Combine all unparsers for each node, checking their consistency, and
         attach the result as ``node.unparser``.
         """
-        from langkit.compiled_types import CompiledTypeMetaclass
+        from langkit.compiled_types import CompiledTypeRepo
 
         # Check if every non-abstract non-synthetic node has a corresponding
         # parser.
-        for node_type in CompiledTypeMetaclass.astnode_types:
+        for node_type in CompiledTypeRepo.astnode_types:
             with node_type.diagnostic_context:
                 WarningSet.unused_node_type.warn_if(
                     node_type not in self.nodes_to_rules.keys() and

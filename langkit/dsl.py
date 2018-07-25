@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, CompiledTypeMetaclass, Field as _Field,
+    ASTNodeType, AbstractNodeData, CompiledTypeRepo, Field as _Field,
     StructType, UserField as _UserField, T
 )
 from langkit.diagnostics import (
@@ -883,7 +883,7 @@ class _BuiltinType(DSLType):
 
     @classmethod
     def _resolve(cls):
-        return CompiledTypeMetaclass.type_dict[cls._name.camel]
+        return CompiledTypeRepo.type_dict[cls._name.camel]
 
 
 class AnalysisUnitKind(_BuiltinType):
