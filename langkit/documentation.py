@@ -710,28 +710,6 @@ def split_paragraphs(text):
     return paragraphs
 
 
-def _render(ctx, entity, lang):
-    """
-    Render a documentation template.
-
-    :param langkit.compile_context.CompileContext: Context for the rendering.
-    :param entity: Name for the entity to document, or entity to document.
-    :type entity: str|compiled_types.CompiledType
-    :rtype: str
-    """
-    template_ctx = dict()
-    template_ctx['ctx'] = ctx
-    template_ctx['capi'] = ctx.c_api_settings
-    template_ctx['null'] = null_names[lang]
-    template_ctx['TODO'] = todo_markers[lang]
-
-    if isinstance(entity, str):
-        text = ctx.documentations[entity].render(**template_ctx)
-    else:
-        text = entity.doc
-    return text
-
-
 def get_available_width(indent_level, width=None):
     """
     Return the number of available columns on source code lines.
@@ -850,14 +828,27 @@ def create_doc_printer(lang, formatter):
 
     def func(entity, column=0, lang=lang):
         """
-        :type entity: str|compiled_types.CompiledType
-        :type column: int
+        :param str|compiled_types.CompiledType entity: Name for the entity to
+            document, or entity to document.
+        :param int column: Indentation level for the result.
+        :param str lang: Language for the documentation.
+        :rtype: str
         """
 
         from langkit.compile_context import get_context
         ctx = get_context()
 
-        doc = _render(ctx, entity, lang)
+        template_ctx = dict()
+        template_ctx['ctx'] = get_context()
+        template_ctx['capi'] = ctx.c_api_settings
+        template_ctx['null'] = null_names[lang]
+        template_ctx['TODO'] = todo_markers[lang]
+
+        if isinstance(entity, str):
+            doc = ctx.documentations[entity].render(**template_ctx)
+        else:
+            doc = entity.doc
+
         return formatter(doc, column) if doc else ''
 
     func.__name__ = b'{}_doc'.format(lang)
