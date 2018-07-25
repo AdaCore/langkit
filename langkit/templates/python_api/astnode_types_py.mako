@@ -58,7 +58,7 @@
     @property
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
-        ${py_doc(field, 8)}
+        ${py_doc(field, 8, rtype=field.type)}
 
         ## If this field/property takes no argument, use the cache
         <% field_name = repr(field.name.lower) %>
