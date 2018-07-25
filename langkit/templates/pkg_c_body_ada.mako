@@ -7,6 +7,17 @@ with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.C is
 
+   --  The following conversions are used only at the interface between Ada and
+   --  C (i.e. as parameters and return types for C entry points) for access
+   --  types.  All read/writes for the pointed values are made through the
+   --  access values and never through the System.Address values.  Thus, strict
+   --  aliasing issues should not arise for these.
+   --
+   --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
+   --       Optimization-and-Strict-Aliasing.html>.
+
+   pragma Warnings (Off, "possible aliasing problem for type");
+
    function "+" is new Ada.Unchecked_Conversion
      (Internal_Context, System.Address);
    function "+" is new Ada.Unchecked_Conversion
@@ -16,6 +27,8 @@ package body ${ada_lib_name}.C is
      (Internal_Unit, System.Address);
    function "+" is new Ada.Unchecked_Conversion
      (System.Address, Internal_Unit);
+
+   pragma Warnings (On, "possible aliasing problem for type");
 
    ---------------
    -- C_Context --
