@@ -710,7 +710,7 @@ def split_paragraphs(text):
     return paragraphs
 
 
-def _render(ctx, entity, **kwargs):
+def _render(ctx, entity, lang, **kwargs):
     """
     Render a documentation template.
 
@@ -722,13 +722,12 @@ def _render(ctx, entity, **kwargs):
         language.
     :rtype: str
     """
-    if isinstance(entity, str):
-        kwargs['ctx'] = ctx
-        kwargs['capi'] = ctx.c_api_settings
+    kwargs['ctx'] = ctx
+    kwargs['capi'] = ctx.c_api_settings
+    kwargs['null'] = null_names[lang]
+    kwargs['TODO'] = todo_markers[lang]
 
-        lang = kwargs['lang']
-        kwargs['null'] = null_names[lang]
-        kwargs['TODO'] = todo_markers[lang]
+    if isinstance(entity, str):
         text = ctx.documentations[entity].render(**kwargs)
     else:
         text = entity.doc
@@ -851,7 +850,7 @@ def create_doc_printer(lang, formatter):
     :rtype: function
     """
 
-    def func(entity, column=0, **kwargs):
+    def func(entity, column=0, lang=lang, **kwargs):
         """
         :type entity: str|compiled_types.CompiledType
         :type column: int
@@ -860,10 +859,7 @@ def create_doc_printer(lang, formatter):
         from langkit.compile_context import get_context
         ctx = get_context()
 
-        # Tell _render for which binding we are generating documentation
-        kwargs.setdefault('lang', lang)
-
-        doc = _render(ctx, entity, **kwargs)
+        doc = _render(ctx, entity, lang, **kwargs)
         return formatter(doc, column) if doc else ''
 
     func.__name__ = b'{}_doc'.format(lang)
