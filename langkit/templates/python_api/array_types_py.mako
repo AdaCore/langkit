@@ -73,7 +73,7 @@ class _BaseArray(object):
    c_element_type = pyapi.type_internal_name(element_type)
 %>
 
-class ${cls.api_name.camel}(_BaseArray):
+class ${pyapi.type_public_name(cls)}(_BaseArray):
     """
     Wrapper class for arrays of ${cls.element_type.name}.
 

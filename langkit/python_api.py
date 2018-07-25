@@ -150,3 +150,27 @@ class PythonAPISettings(AbstractAPISettings):
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
                 array_type).api_name.camel
+
+    def type_public_name(self, type):
+        """
+        Python specific helper. Return the public API name for a given
+        CompiledType instance.
+
+        :param CompiledType type: The type for which we want to get the name.
+        :rtype: str
+        """
+        return dispatch_on_type(type, [
+            (T.BoolType, lambda _: 'bool'),
+            (T.LongType, lambda _: 'int'),
+            (T.CharacterType, lambda _: 'unicode'),
+            (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
+            (T.TokenType, lambda _: 'Token'),
+            (T.SymbolType, lambda _: 'unicode'),
+            (ct.ASTNodeType, lambda t: t.kwless_raw_name.camel),
+            (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
+            (ct.ArrayType, lambda t: t.api_name),
+            (T.AnalysisUnitType, lambda t: t.api_name),
+            (ct.StructType, lambda _: type.name.camel),
+            (T.AnalysisUnitKind, lambda _: 'str'),
+            (T.BigIntegerType, lambda _: 'long'),
+        ])
