@@ -8,8 +8,10 @@
       ; ${arg.name} : ${arg.public_type.api_name}
 
       ## Make entity arguments class-wide so that 1) these property wrappers
-      ## are not primitives and 2) we can give them default values.
-      ${"'Class" if arg.public_type.is_entity_type else ''}
+      ## are not primitives and 2) we can give them default values. Likewise
+      ## for analysis units.
+      ${"'Class" if (arg.public_type.is_entity_type or
+                     arg.public_type.is_analysis_unit_type) else ''}
 
       % if arg.default_value is not None:
          := ${arg.public_default_value.render_public_ada_constant()}

@@ -88,7 +88,7 @@ package body ${ada_lib_name}.Analysis is
                            then ${ctx.default_unit_provider.fqn}
                            else Unit_Provider));
       % endif
-      Result         : constant Internal_Context := Create
+      Result : constant Internal_Context := Create
         (Charset,
          With_Trivia
          % if ctx.default_unit_provider:
@@ -103,7 +103,8 @@ package body ${ada_lib_name}.Analysis is
    -- Has_With_Trivia --
    ---------------------
 
-   function Has_With_Trivia (Context : Analysis_Context) return Boolean is
+   function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean
+   is
    begin
       return Has_With_Trivia (Unwrap_Context (Context));
    end Has_With_Trivia;
@@ -112,7 +113,7 @@ package body ${ada_lib_name}.Analysis is
    -- Inc_Ref --
    -------------
 
-   procedure Inc_Ref (Context : Analysis_Context) is
+   procedure Inc_Ref (Context : Analysis_Context'Class) is
    begin
       Inc_Ref (Unwrap_Context (Context));
    end Inc_Ref;
@@ -133,7 +134,7 @@ package body ${ada_lib_name}.Analysis is
    --------------------------------------------
 
    procedure Discard_Errors_In_Populate_Lexical_Env
-     (Context : Analysis_Context; Discard : Boolean) is
+     (Context : Analysis_Context'Class; Discard : Boolean) is
    begin
       Discard_Errors_In_Populate_Lexical_Env
         (Unwrap_Context (Context), Discard);
@@ -144,7 +145,7 @@ package body ${ada_lib_name}.Analysis is
    ----------------------------------
 
    procedure Set_Logic_Resolution_Timeout
-     (Context : Analysis_Context; Timeout : Natural) is
+     (Context : Analysis_Context'Class; Timeout : Natural) is
    begin
       Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
    end Set_Logic_Resolution_Timeout;
@@ -162,7 +163,8 @@ package body ${ada_lib_name}.Analysis is
    -- Has_Rewriting_Handle --
    --------------------------
 
-   function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean is
+   function Has_Rewriting_Handle
+     (Context : Analysis_Context'Class) return Boolean is
    begin
       return Has_Rewriting_Handle (Unwrap_Context (Context));
    end Has_Rewriting_Handle;
@@ -172,7 +174,7 @@ package body ${ada_lib_name}.Analysis is
    --------------
 
    function Has_Unit
-     (Context       : Analysis_Context;
+     (Context       : Analysis_Context'Class;
       Unit_Filename : String) return Boolean is
    begin
       return Has_Unit (Unwrap_Context (Context), Unit_Filename);
@@ -183,7 +185,7 @@ package body ${ada_lib_name}.Analysis is
    -------------------
 
    function Get_From_File
-     (Context  : Analysis_Context;
+     (Context  : Analysis_Context'Class;
       Filename : String;
       Charset  : String := "";
       Reparse  : Boolean := False;
@@ -199,7 +201,7 @@ package body ${ada_lib_name}.Analysis is
    ---------------------
 
    function Get_From_Buffer
-     (Context  : Analysis_Context;
+     (Context  : Analysis_Context'Class;
       Filename : String;
       Charset  : String := "";
       Buffer   : String;
@@ -215,7 +217,7 @@ package body ${ada_lib_name}.Analysis is
    --------------------
 
    function Get_With_Error
-     (Context  : Analysis_Context;
+     (Context  : Analysis_Context'Class;
       Filename : String;
       Error    : String;
       Charset  : String := "";
@@ -235,7 +237,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------------
 
    function Get_From_Provider
-     (Context : Analysis_Context;
+     (Context : Analysis_Context'Class;
       Name    : Text_Type;
       Kind    : Unit_Kind;
       Charset : String := "";
@@ -251,7 +253,7 @@ package body ${ada_lib_name}.Analysis is
    -------------------
 
    function Unit_Provider
-     (Context : Analysis_Context) return Unit_Provider_Access_Cst
+     (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst
    is
       Provider : constant Internal_Unit_Provider_Access_Cst :=
          Unit_Provider (Unwrap_Context (Context));
@@ -271,7 +273,7 @@ package body ${ada_lib_name}.Analysis is
    -- Remove --
    ------------
 
-   procedure Remove (Context : Analysis_Context; Filename : String) is
+   procedure Remove (Context : Analysis_Context'Class; Filename : String) is
    begin
       Remove (Unwrap_Context (Context), Filename);
    end Remove;
@@ -291,7 +293,7 @@ package body ${ada_lib_name}.Analysis is
    -- Context --
    -------------
 
-   function Context (Unit : Analysis_Unit) return Analysis_Context is
+   function Context (Unit : Analysis_Unit'Class) return Analysis_Context is
    begin
       return Wrap_Context (Context (Unwrap_Unit (Unit)));
    end Context;
@@ -300,7 +302,7 @@ package body ${ada_lib_name}.Analysis is
    -- Inc_Ref --
    -------------
 
-   procedure Inc_Ref (Unit : Analysis_Unit) is
+   procedure Inc_Ref (Unit : Analysis_Unit'Class) is
    begin
       Inc_Ref (Unwrap_Unit (Unit));
    end Inc_Ref;
@@ -309,18 +311,20 @@ package body ${ada_lib_name}.Analysis is
    -- Dec_Ref --
    -------------
 
-   procedure Dec_Ref (Unit : in out Analysis_Unit) is
+   procedure Dec_Ref (Unit : in out Analysis_Unit'Class) is
       U : Internal_Unit := Unwrap_Unit (Unit);
    begin
       Dec_Ref (U);
-      Unit := Wrap_Unit (U);
+      if U = null then
+         Unit.Internal := null;
+      end if;
    end Dec_Ref;
 
    -------------
    -- Reparse --
    -------------
 
-   procedure Reparse (Unit : Analysis_Unit; Charset : String := "") is
+   procedure Reparse (Unit : Analysis_Unit'Class; Charset : String := "") is
    begin
       Reparse (Unwrap_Unit (Unit), Charset);
    end Reparse;
@@ -330,7 +334,7 @@ package body ${ada_lib_name}.Analysis is
    -------------
 
    procedure Reparse
-     (Unit : Analysis_Unit; Charset : String := ""; Buffer  : String) is
+     (Unit : Analysis_Unit'Class; Charset : String := ""; Buffer  : String) is
    begin
       Reparse (Unwrap_Unit (Unit), Charset, Buffer);
    end Reparse;
@@ -339,7 +343,7 @@ package body ${ada_lib_name}.Analysis is
    -- Populate_Lexical_Env --
    --------------------------
 
-   procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
+   procedure Populate_Lexical_Env (Unit : Analysis_Unit'Class) is
    begin
       Populate_Lexical_Env (Unwrap_Unit (Unit));
    end Populate_Lexical_Env;
@@ -348,7 +352,7 @@ package body ${ada_lib_name}.Analysis is
    -- Get_Filename --
    ------------------
 
-   function Get_Filename (Unit : Analysis_Unit) return String is
+   function Get_Filename (Unit : Analysis_Unit'Class) return String is
    begin
       return Get_Filename (Unwrap_Unit (Unit));
    end Get_Filename;
@@ -357,7 +361,7 @@ package body ${ada_lib_name}.Analysis is
    -- Get_Charset --
    -----------------
 
-   function Get_Charset (Unit : Analysis_Unit) return String is
+   function Get_Charset (Unit : Analysis_Unit'Class) return String is
    begin
       return Get_Charset (Unwrap_Unit (Unit));
    end Get_Charset;
@@ -366,7 +370,7 @@ package body ${ada_lib_name}.Analysis is
    -- Has_Diagnostics --
    ---------------------
 
-   function Has_Diagnostics (Unit : Analysis_Unit) return Boolean is
+   function Has_Diagnostics (Unit : Analysis_Unit'Class) return Boolean is
    begin
       return Has_Diagnostics (Unwrap_Unit (Unit));
    end Has_Diagnostics;
@@ -375,7 +379,8 @@ package body ${ada_lib_name}.Analysis is
    -- Diagnostics --
    -----------------
 
-   function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array is
+   function Diagnostics (Unit : Analysis_Unit'Class) return Diagnostics_Array
+   is
    begin
       return Diagnostics (Unwrap_Unit (Unit));
    end Diagnostics;
@@ -385,7 +390,7 @@ package body ${ada_lib_name}.Analysis is
    ---------------------------
 
    function Format_GNU_Diagnostic
-     (Unit : Analysis_Unit; D : Diagnostic) return String is
+     (Unit : Analysis_Unit'Class; D : Diagnostic) return String is
    begin
       return Format_GNU_Diagnostic (Unwrap_Unit (Unit), D);
    end Format_GNU_Diagnostic;
@@ -394,7 +399,7 @@ package body ${ada_lib_name}.Analysis is
    -- Root --
    ----------
 
-   function Root (Unit : Analysis_Unit) return ${root_entity.api_name} is
+   function Root (Unit : Analysis_Unit'Class) return ${root_entity.api_name} is
    begin
       return Wrap_Node (Root (Unwrap_Unit (Unit)));
    end Root;
@@ -403,7 +408,7 @@ package body ${ada_lib_name}.Analysis is
    -- First_Token --
    -----------------
 
-   function First_Token (Unit : Analysis_Unit) return Token_Reference is
+   function First_Token (Unit : Analysis_Unit'Class) return Token_Reference is
    begin
       return First_Token (Unwrap_Unit (Unit));
    end First_Token;
@@ -412,7 +417,7 @@ package body ${ada_lib_name}.Analysis is
    -- Last_Token --
    ----------------
 
-   function Last_Token (Unit : Analysis_Unit) return Token_Reference is
+   function Last_Token (Unit : Analysis_Unit'Class) return Token_Reference is
    begin
       return Last_Token (Unwrap_Unit (Unit));
    end Last_Token;
@@ -421,7 +426,7 @@ package body ${ada_lib_name}.Analysis is
    -- Token_Count --
    -----------------
 
-   function Token_Count (Unit : Analysis_Unit) return Natural is
+   function Token_Count (Unit : Analysis_Unit'Class) return Natural is
    begin
       return Token_Count (Unwrap_Unit (Unit));
    end Token_Count;
@@ -430,7 +435,7 @@ package body ${ada_lib_name}.Analysis is
    -- Trivia_Count --
    ------------------
 
-   function Trivia_Count (Unit : Analysis_Unit) return Natural is
+   function Trivia_Count (Unit : Analysis_Unit'Class) return Natural is
    begin
       return Trivia_Count (Unwrap_Unit (Unit));
    end Trivia_Count;
@@ -439,7 +444,7 @@ package body ${ada_lib_name}.Analysis is
    -- Text --
    ----------
 
-   function Text (Unit : Analysis_Unit) return Text_Type is
+   function Text (Unit : Analysis_Unit'Class) return Text_Type is
    begin
       return Text (Unwrap_Unit (Unit));
    end Text;
@@ -449,7 +454,8 @@ package body ${ada_lib_name}.Analysis is
    ------------------
 
    function Lookup_Token
-     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Reference is
+     (Unit : Analysis_Unit'Class; Sloc : Source_Location)
+      return Token_Reference is
    begin
       return Lookup_Token (Unwrap_Unit (Unit), Sloc);
    end Lookup_Token;
@@ -458,7 +464,7 @@ package body ${ada_lib_name}.Analysis is
    -- Dump_Lexical_Env --
    ----------------------
 
-   procedure Dump_Lexical_Env (Unit : Analysis_Unit) is
+   procedure Dump_Lexical_Env (Unit : Analysis_Unit'Class) is
    begin
       Dump_Lexical_Env (Unwrap_Unit (Unit));
    end Dump_Lexical_Env;
@@ -476,7 +482,8 @@ package body ${ada_lib_name}.Analysis is
    -- Print --
    -----------
 
-   procedure Print (Unit : Analysis_Unit; Show_Slocs : Boolean := True) is
+   procedure Print (Unit : Analysis_Unit'Class; Show_Slocs : Boolean := True)
+   is
    begin
       Print (Unwrap_Unit (Unit), Show_Slocs);
    end Print;
@@ -485,7 +492,7 @@ package body ${ada_lib_name}.Analysis is
    -- PP_Trivia --
    ---------------
 
-   procedure PP_Trivia (Unit : Analysis_Unit) is
+   procedure PP_Trivia (Unit : Analysis_Unit'Class) is
    begin
       PP_Trivia (Unwrap_Unit (Unit));
    end PP_Trivia;
@@ -494,7 +501,7 @@ package body ${ada_lib_name}.Analysis is
    -- Get_Context --
    -----------------
 
-   function Get_Context (Unit : Analysis_Unit) return Analysis_Context is
+   function Get_Context (Unit : Analysis_Unit'Class) return Analysis_Context is
      (Context (Unit));
    --  TODO??? Remove this, Context already does the job
 
@@ -885,16 +892,17 @@ package body ${ada_lib_name}.Analysis is
    ----------------------------------------------------
 
    function Wrap_Context (Context : Internal_Context) return Analysis_Context
-   is (Analysis_Context (Context));
+   is ((Internal => Internal_Context_Access (Context)));
 
-   function Unwrap_Context (Context : Analysis_Context) return Internal_Context
-   is (Internal_Context (Context));
+   function Unwrap_Context
+     (Context : Analysis_Context'Class) return Internal_Context
+   is (Internal_Context (Context.Internal));
 
    function Wrap_Unit (Unit : Internal_Unit) return Analysis_Unit
-   is (Analysis_Unit (Unit));
+   is ((Internal => Internal_Unit_Access (Unit)));
 
-   function Unwrap_Unit (Unit : Analysis_Unit) return Internal_Unit
-   is (Internal_Unit (Unit));
+   function Unwrap_Unit (Unit : Analysis_Unit'Class) return Internal_Unit
+   is (Internal_Unit (Unit.Internal));
 
    function Wrap_Node
      (Node : access ${root_node_value_type}'Class;

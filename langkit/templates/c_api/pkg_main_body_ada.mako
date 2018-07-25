@@ -54,11 +54,11 @@ package body ${ada_lib_name}.Implementation.C is
 
    overriding function Get_Unit
      (Provider : C_Unit_Provider_Type;
-      Context  : Analysis_Context;
+      Context  : Analysis_Context'Class;
       Name     : Text_Type;
       Kind     : Unit_Kind;
       Charset  : String := "";
-      Reparse  : Boolean := False) return Analysis_Unit;
+      Reparse  : Boolean := False) return Analysis_Unit'Class;
 % endif
 
    function Value_Or_Empty (S : chars_ptr) return String
@@ -1137,11 +1137,11 @@ package body ${ada_lib_name}.Implementation.C is
 
    overriding function Get_Unit
      (Provider : C_Unit_Provider_Type;
-      Context  : Analysis_Context;
+      Context  : Analysis_Context'Class;
       Name     : Text_Type;
       Kind     : Unit_Kind;
       Charset  : String := "";
-      Reparse  : Boolean := False) return Analysis_Unit
+      Reparse  : Boolean := False) return Analysis_Unit'Class
    is
       Ctx         : constant ${analysis_context_type} :=
          Wrap (Unwrap_Context (Context));
