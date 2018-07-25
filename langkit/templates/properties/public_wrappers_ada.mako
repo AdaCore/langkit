@@ -80,7 +80,7 @@
                 actual = 'Create ({})'.format(arg.name)
 
             elif arg.type.is_analysis_unit_type:
-                actual = 'Internal_Unit ({})'.format(arg.name)
+                actual = 'Unwrap_Unit ({})'.format(arg.name)
 
             else:
                 actual = str(arg.name)
@@ -135,7 +135,7 @@
              ])
 
          elif property.type.is_analysis_unit_type:
-             wrapped_result = 'Analysis_Unit (Property_Result)'
+             wrapped_result = 'Wrap_Unit (Property_Result)'
 
          else:
              wrapped_result = 'Property_Result'
