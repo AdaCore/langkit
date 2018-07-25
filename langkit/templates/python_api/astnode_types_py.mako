@@ -39,7 +39,7 @@
         # Python expression that yield a tuple that contains the names for all
         # fields that "cls" inherits.
         parent_fields = (
-            '{}._field_names'.format(parent_cls.kwless_raw_name.camel)
+            '{}._field_names'.format(pyapi.type_public_name(parent_cls))
             if parent_cls else '()'
         )
     %>
@@ -86,7 +86,7 @@
     )
 
     % if not cls.abstract:
-    _kind_name = ${repr(cls.kwless_raw_name.camel)}
+    _kind_name = ${repr(pyapi.type_public_name(cls))}
     % endif
 
     % if cls.is_list_type:
@@ -96,7 +96,7 @@
 
 <%def name="decl(cls)">
 
-class ${cls.kwless_raw_name.camel}(${cls.base.kwless_raw_name.camel}):
+class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):
     ${py_doc(cls, 4)}
 ${subclass_decls(cls)}
 
