@@ -221,16 +221,13 @@ package ${ada_lib_name}.Analysis is
    ------------------------------
 
    function Context (Unit : Analysis_Unit'Class) return Analysis_Context;
-   --  Return the analysis context that owns Unit
+   ${ada_doc('langkit.unit_context', 3)}
 
    procedure Inc_Ref (Unit : Analysis_Unit'Class);
    ${ada_doc('langkit.unit_incref', 3)}
 
    procedure Dec_Ref (Unit : in out Analysis_Unit'Class);
    ${ada_doc('langkit.unit_decref', 3)}
-
-   function Get_Context (Unit : Analysis_Unit'Class) return Analysis_Context;
-   ${ada_doc('langkit.unit_context', 3)}
 
    procedure Reparse (Unit : Analysis_Unit'Class; Charset : String := "");
    ${ada_doc('langkit.unit_reparse_file', 3)}
