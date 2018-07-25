@@ -710,25 +710,23 @@ def split_paragraphs(text):
     return paragraphs
 
 
-def _render(ctx, entity, lang, **kwargs):
+def _render(ctx, entity, lang):
     """
     Render a documentation template.
 
     :param langkit.compile_context.CompileContext: Context for the rendering.
     :param entity: Name for the entity to document, or entity to document.
     :type entity: str|compiled_types.CompiledType
-    :param dict kwargs: Additional parameters to pass to the Mako template
-        rendering. Must at least contain a "lang" entry to specify the binding
-        language.
     :rtype: str
     """
-    kwargs['ctx'] = ctx
-    kwargs['capi'] = ctx.c_api_settings
-    kwargs['null'] = null_names[lang]
-    kwargs['TODO'] = todo_markers[lang]
+    template_ctx = dict()
+    template_ctx['ctx'] = ctx
+    template_ctx['capi'] = ctx.c_api_settings
+    template_ctx['null'] = null_names[lang]
+    template_ctx['TODO'] = todo_markers[lang]
 
     if isinstance(entity, str):
-        text = ctx.documentations[entity].render(**kwargs)
+        text = ctx.documentations[entity].render(**template_ctx)
     else:
         text = entity.doc
     return text
@@ -850,7 +848,7 @@ def create_doc_printer(lang, formatter):
     :rtype: function
     """
 
-    def func(entity, column=0, lang=lang, **kwargs):
+    def func(entity, column=0, lang=lang):
         """
         :type entity: str|compiled_types.CompiledType
         :type column: int
@@ -859,7 +857,7 @@ def create_doc_printer(lang, formatter):
         from langkit.compile_context import get_context
         ctx = get_context()
 
-        doc = _render(ctx, entity, lang, **kwargs)
+        doc = _render(ctx, entity, lang)
         return formatter(doc, column) if doc else ''
 
     func.__name__ = b'{}_doc'.format(lang)
@@ -882,11 +880,11 @@ c_doc = create_doc_printer('c', format_c)
 py_doc = create_doc_printer('python', format_python)
 
 
-def ada_c_doc(entity, column=0, **kwargs):
+def ada_c_doc(entity, column=0):
     """
     Shortcut to render documentation for a C entity with an Ada doc syntax.
 
     :type entity: str|compiled_types.CompiledType
     :type column: int
     """
-    return ada_doc(entity, column, lang='c', **kwargs)
+    return ada_doc(entity, column, lang='c')
