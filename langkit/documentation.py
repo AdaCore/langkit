@@ -793,7 +793,7 @@ def format_c(text, column):
     return '\n{}'.format(' ' * column).join(lines)
 
 
-def format_python(text, column):
+def format_python(text, column, rtype=None):
     """
     Format some text as Python docstring.
 
@@ -801,6 +801,11 @@ def format_python(text, column):
     :param int column: Indentation level for the result.
     :rtype: str
     """
+    from langkit.compile_context import get_context
+
+    if text == '' and rtype is None:
+        return ''
+
     available_width = get_available_width(column)
     indent = ' ' * column
     lines = ['"""']
@@ -811,27 +816,42 @@ def format_python(text, column):
                                   drop_whitespace=True):
             lines.append(indent + line)
 
+    if rtype:
+        if len(lines) > 1:
+            lines.append("")
+        lines.append("{}:rtype: {}".format(
+            indent,
+            get_context().python_api_settings.type_public_name(rtype)
+        ))
+
     lines.append(indent + '"""')
     return '\n'.join(lines)
 
 
-def create_doc_printer(lang, formatter):
+def create_doc_printer(lang, formatter, process_empty=False):
     """
     Return a function that prints documentation.
 
     :param str lang: The default language for which we generate documentation.
+
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
     :type formatter: (str, int) -> str
+
+    :param bool process_empty: Whether to still call the formatter to create a
+        docstring if the documentation is empty.
+
     :rtype: function
     """
 
-    def func(entity, column=0, lang=lang):
+    def func(entity, column=0, lang=lang, **kwargs):
         """
         :param str|compiled_types.CompiledType entity: Name for the entity to
             document, or entity to document.
         :param int column: Indentation level for the result.
         :param str lang: Language for the documentation.
+        :param kwargs: Parameters to be passed to the specific formatter.
+
         :rtype: str
         """
 
@@ -847,9 +867,9 @@ def create_doc_printer(lang, formatter):
         if isinstance(entity, str):
             doc = ctx.documentations[entity].render(**template_ctx)
         else:
-            doc = entity.doc
+            doc = entity.doc or ''
 
-        return formatter(doc, column) if doc else ''
+        return formatter(doc, column, **kwargs) if doc or process_empty else ''
 
     func.__name__ = b'{}_doc'.format(lang)
     return func
@@ -868,7 +888,7 @@ def create_doc_printer(lang, formatter):
 
 ada_doc = create_doc_printer('ada', format_ada)
 c_doc = create_doc_printer('c', format_c)
-py_doc = create_doc_printer('python', format_python)
+py_doc = create_doc_printer('python', format_python, process_empty=True)
 
 
 def ada_c_doc(entity, column=0):
