@@ -48,7 +48,7 @@ procedure Parse is
    procedure Process_Lookups (Node : ${root_entity.api_name}'Class);
    procedure Process_Node (Res : ${root_entity.api_name}'Class);
    procedure Parse_Input;
-   procedure Process_File (Filename : String; Ctx : in out Analysis_Context);
+   procedure Process_File (Filename : String; Ctx : Analysis_Context);
 
    --------------
    -- Get_Rule --
@@ -139,7 +139,8 @@ procedure Parse is
       Input_Str_Ptr    : Big_String_Access;
       Input_Str_Length : Natural;
 
-      Ctx  : Analysis_Context := Create (With_Trivia => Do_Print_Trivia);
+      Ctx  : constant Analysis_Context :=
+         Create (With_Trivia => Do_Print_Trivia);
       Unit : Analysis_Unit;
    begin
       Get_String (Input_Str, Input_Str_Ptr, Input_Str_Length);
@@ -159,14 +160,13 @@ procedure Parse is
       --  Error recovery may make the parser return something even on error:
       --  process it anyway.
       Process_Node (Root (Unit));
-      Destroy (Ctx);
    end Parse_Input;
 
    ------------------
    -- Process_File --
    ------------------
 
-   procedure Process_File (Filename : String; Ctx : in out Analysis_Context)
+   procedure Process_File (Filename : String; Ctx : Analysis_Context)
    is
       Unit         : Analysis_Unit;
       Time_Before  : constant Time := Clock;
