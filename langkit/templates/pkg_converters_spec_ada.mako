@@ -18,7 +18,7 @@ private package ${ada_lib_name}.Converters is
    Wrap_Context : Context_Wrapper;
 
    type Context_Unwrapper is access function
-     (Context : Analysis_Context) return Internal_Context;
+     (Context : Analysis_Context'Class) return Internal_Context;
    Unwrap_Context : Context_Unwrapper;
 
    type Unit_Wrapper is access function
@@ -26,7 +26,7 @@ private package ${ada_lib_name}.Converters is
    Wrap_Unit : Unit_Wrapper;
 
    type Unit_Unwrapper is access function
-     (Unit : Analysis_Unit) return Internal_Unit;
+     (Unit : Analysis_Unit'Class) return Internal_Unit;
    Unwrap_Unit : Unit_Unwrapper;
 
    type Node_Wrapper is access function

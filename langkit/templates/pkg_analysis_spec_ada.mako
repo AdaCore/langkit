@@ -34,10 +34,10 @@ ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis is
 
-   type Analysis_Context is private;
+   type Analysis_Context is tagged private;
    ${ada_doc('langkit.analysis_context_type', 3)}
 
-   type Analysis_Unit is private;
+   type Analysis_Unit is tagged private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
    No_Analysis_Unit : constant Analysis_Unit;
@@ -108,11 +108,11 @@ package ${ada_lib_name}.Analysis is
 
    function Get_Unit
      (Provider    : Unit_Provider_Interface;
-      Context     : Analysis_Context;
+      Context     : Analysis_Context'Class;
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False) return Analysis_Unit is abstract;
+      Reparse     : Boolean := False) return Analysis_Unit'Class is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
 
    procedure Destroy is new Ada.Unchecked_Deallocation
@@ -131,34 +131,35 @@ package ${ada_lib_name}.Analysis is
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
-   function Has_With_Trivia (Context : Analysis_Context) return Boolean;
+   function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean;
    --  Return whether Context keeps trivia when parsing units
 
    procedure Discard_Errors_In_Populate_Lexical_Env
-     (Context : Analysis_Context; Discard : Boolean);
+     (Context : Analysis_Context'Class; Discard : Boolean);
    ${ada_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
 
    procedure Set_Logic_Resolution_Timeout
-     (Context : Analysis_Context; Timeout : Natural);
+     (Context : Analysis_Context'Class; Timeout : Natural);
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
    procedure Disable_Lookup_Cache (Disable : Boolean := True);
    --  Debug helper: if Disable is true, disable the use of caches in lexical
    --  environment lookups. Otherwise, activate it.
 
-   function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean;
+   function Has_Rewriting_Handle
+     (Context : Analysis_Context'Class) return Boolean;
    --  Return whether Context has a rewriting handler (see
    --  ${ada_lib_name}.Rewriting), i.e. whether it is in the process of
    --  rewriting. If true, this means that the set of currently loaded analysis
    --  units is frozen until the rewriting process is done.
 
    function Has_Unit
-     (Context       : Analysis_Context;
+     (Context       : Analysis_Context'Class;
       Unit_Filename : String) return Boolean;
    --  Return whether Context contains a unit correponding to Unit_Filename
 
    function Get_From_File
-     (Context  : Analysis_Context;
+     (Context  : Analysis_Context'Class;
       Filename : String;
       Charset  : String := "";
       Reparse  : Boolean := False;
@@ -167,7 +168,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.get_unit_from_file', 3)}
 
    function Get_From_Buffer
-     (Context  : Analysis_Context;
+     (Context  : Analysis_Context'Class;
       Filename : String;
       Charset  : String := "";
       Buffer   : String;
@@ -176,7 +177,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
    function Get_With_Error
-     (Context  : Analysis_Context;
+     (Context  : Analysis_Context'Class;
       Filename : String;
       Error    : String;
       Charset  : String := "";
@@ -188,7 +189,7 @@ package ${ada_lib_name}.Analysis is
    % if ctx.default_unit_provider:
 
    function Get_From_Provider
-     (Context : Analysis_Context;
+     (Context : Analysis_Context'Class;
       Name    : Text_Type;
       Kind    : Unit_Kind;
       Charset : String := "";
@@ -197,15 +198,15 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
    function Unit_Provider
-     (Context : Analysis_Context) return Unit_Provider_Access_Cst;
+     (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst;
    --  Object to translate unit names to file names
    % endif
 
-   procedure Remove (Context : Analysis_Context; Filename : String)
+   procedure Remove (Context : Analysis_Context'Class; Filename : String)
       with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.remove_unit', 3)}
 
-   procedure Inc_Ref (Context : Analysis_Context);
+   procedure Inc_Ref (Context : Analysis_Context'Class);
    ${ada_doc('langkit.context_incref', 3)}
 
    procedure Dec_Ref (Context : in out Analysis_Context);
@@ -219,84 +220,85 @@ package ${ada_lib_name}.Analysis is
    -- Analysis unit primitives --
    ------------------------------
 
-   function Context (Unit : Analysis_Unit) return Analysis_Context;
+   function Context (Unit : Analysis_Unit'Class) return Analysis_Context;
    --  Return the analysis context that owns Unit
 
-   procedure Inc_Ref (Unit : Analysis_Unit);
+   procedure Inc_Ref (Unit : Analysis_Unit'Class);
    ${ada_doc('langkit.unit_incref', 3)}
 
-   procedure Dec_Ref (Unit : in out Analysis_Unit);
+   procedure Dec_Ref (Unit : in out Analysis_Unit'Class);
    ${ada_doc('langkit.unit_decref', 3)}
 
-   function Get_Context (Unit : Analysis_Unit) return Analysis_Context;
+   function Get_Context (Unit : Analysis_Unit'Class) return Analysis_Context;
    ${ada_doc('langkit.unit_context', 3)}
 
-   procedure Reparse (Unit : Analysis_Unit; Charset : String := "");
+   procedure Reparse (Unit : Analysis_Unit'Class; Charset : String := "");
    ${ada_doc('langkit.unit_reparse_file', 3)}
 
    procedure Reparse
-     (Unit    : Analysis_Unit;
+     (Unit    : Analysis_Unit'Class;
       Charset : String := "";
       Buffer  : String);
    ${ada_doc('langkit.unit_reparse_buffer', 3)}
 
-   procedure Populate_Lexical_Env (Unit : Analysis_Unit);
+   procedure Populate_Lexical_Env (Unit : Analysis_Unit'Class);
    ${ada_doc('langkit.unit_populate_lexical_env', 3)}
 
-   function Get_Filename (Unit : Analysis_Unit) return String;
+   function Get_Filename (Unit : Analysis_Unit'Class) return String;
    ${ada_doc('langkit.unit_filename', 3)}
 
-   function Get_Charset (Unit : Analysis_Unit) return String;
+   function Get_Charset (Unit : Analysis_Unit'Class) return String;
    --  Return the charset that was used to parse Unit
 
-   function Has_Diagnostics (Unit : Analysis_Unit) return Boolean;
+   function Has_Diagnostics (Unit : Analysis_Unit'Class) return Boolean;
    ${ada_doc('langkit.unit_has_diagnostics', 3)}
 
-   function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array;
+   function Diagnostics (Unit : Analysis_Unit'Class) return Diagnostics_Array;
    ${ada_doc('langkit.unit_diagnostics', 3)}
 
    function Format_GNU_Diagnostic
-     (Unit : Analysis_Unit; D : Diagnostic) return String;
+     (Unit : Analysis_Unit'Class; D : Diagnostic) return String;
    --  Format a diagnostic in a GNU fashion. See
    --  <https://www.gnu.org/prep/standards/html_node/Errors.html>.
 
    pragma Warnings (Off, "defined after private extension");
-   function Root (Unit : Analysis_Unit) return ${root_entity.api_name};
+   function Root (Unit : Analysis_Unit'Class) return ${root_entity.api_name};
    ${ada_doc('langkit.unit_root', 3)}
    pragma Warnings (On, "defined after private extension");
 
-   function First_Token (Unit : Analysis_Unit) return Token_Reference;
+   function First_Token (Unit : Analysis_Unit'Class) return Token_Reference;
    ${ada_doc('langkit.unit_first_token', 3)}
 
-   function Last_Token (Unit : Analysis_Unit) return Token_Reference;
+   function Last_Token (Unit : Analysis_Unit'Class) return Token_Reference;
    ${ada_doc('langkit.unit_last_token', 3)}
 
-   function Token_Count (Unit : Analysis_Unit) return Natural;
+   function Token_Count (Unit : Analysis_Unit'Class) return Natural;
    ${ada_doc('langkit.unit_token_count', 3)}
 
-   function Trivia_Count (Unit : Analysis_Unit) return Natural;
+   function Trivia_Count (Unit : Analysis_Unit'Class) return Natural;
    ${ada_doc('langkit.unit_trivia_count', 3)}
 
-   function Text (Unit : Analysis_Unit) return Text_Type;
+   function Text (Unit : Analysis_Unit'Class) return Text_Type;
    ${ada_doc('langkit.unit_text', 3)}
 
    function Lookup_Token
-     (Unit : Analysis_Unit; Sloc : Source_Location) return Token_Reference;
+     (Unit : Analysis_Unit'Class; Sloc : Source_Location)
+      return Token_Reference;
    ${ada_doc('langkit.unit_lookup_token', 3)}
 
-   procedure Dump_Lexical_Env (Unit : Analysis_Unit);
+   procedure Dump_Lexical_Env (Unit : Analysis_Unit'Class);
    --  Debug helper: output the lexical envs for given analysis unit
 
    procedure Trigger_Envs_Debug (Is_Active : Boolean);
    --  Debug helper: activate debug traces for lexical envs lookups
 
-   procedure Print (Unit : Analysis_Unit; Show_Slocs : Boolean := True);
+   procedure Print (Unit : Analysis_Unit'Class; Show_Slocs : Boolean := True);
    --  Debug helper: output the AST and eventual diagnostic for this unit on
    --  standard output.
    --
    --  If Show_Slocs, include AST nodes' source locations in the output.
 
-   procedure PP_Trivia (Unit : Analysis_Unit);
+   procedure PP_Trivia (Unit : Analysis_Unit'Class);
    --  Debug helper: output a minimal AST with mixed trivias
 
    type Child_Record (Kind : Child_Or_Trivia := Child) is record
@@ -521,11 +523,21 @@ package ${ada_lib_name}.Analysis is
 
 private
 
-   type Analysis_Context is access all Implementation.Analysis_Context_Type;
-   type Analysis_Unit is access all Implementation.Analysis_Unit_Type;
+   type Internal_Context_Access is
+      access all Implementation.Analysis_Context_Type;
+   type Internal_Unit_Access is
+      access all Implementation.Analysis_Unit_Type;
 
-   No_Analysis_Unit    : constant Analysis_Unit := null;
-   No_Analysis_Context : constant Analysis_Context := null;
+   type Analysis_Context is tagged record
+      Internal : Internal_Context_Access;
+   end record;
+
+   type Analysis_Unit is tagged record
+      Internal : Internal_Unit_Access;
+   end record;
+
+   No_Analysis_Unit    : constant Analysis_Unit := (Internal => null);
+   No_Analysis_Context : constant Analysis_Context := (Internal => null);
 
    --------------------------
    -- AST nodes (internal) --
