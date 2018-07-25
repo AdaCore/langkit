@@ -497,14 +497,6 @@ package body ${ada_lib_name}.Analysis is
       PP_Trivia (Unwrap_Unit (Unit));
    end PP_Trivia;
 
-   -----------------
-   -- Get_Context --
-   -----------------
-
-   function Get_Context (Unit : Analysis_Unit'Class) return Analysis_Context is
-     (Context (Unit));
-   --  TODO??? Remove this, Context already does the job
-
    -------------
    -- Is_Null --
    -------------
