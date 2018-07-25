@@ -757,7 +757,7 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import CompiledTypeMetaclass, StructType, T
+        from langkit.compiled_types import CompiledTypeRepo, StructType, T
         from langkit.dsl import _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -771,24 +771,24 @@ class CompileCtx(object):
         # If the language spec provided no env metadata struct, create a
         # default one.
         if user_env_md is None:
-            CompiledTypeMetaclass.env_metadata = StructType(
+            CompiledTypeRepo.env_metadata = StructType(
                 names.Name('Metadata'), None, None, []
             )
         else:
-            CompiledTypeMetaclass.env_metadata = user_env_md
-        self.check_env_metadata(CompiledTypeMetaclass.env_metadata)
+            CompiledTypeRepo.env_metadata = user_env_md
+        self.check_env_metadata(CompiledTypeRepo.env_metadata)
 
-        # Get the list of ASTNodeType instances from CompiledTypeMetaclass
-        entity = CompiledTypeMetaclass.root_grammar_class.entity
+        # Get the list of ASTNodeType instances from CompiledTypeRepo
+        entity = CompiledTypeRepo.root_grammar_class.entity
 
-        self.astnode_types = list(CompiledTypeMetaclass.astnode_types)
+        self.astnode_types = list(CompiledTypeRepo.astnode_types)
         self.list_types.update(
-            t.element_type for t in CompiledTypeMetaclass.pending_list_types
+            t.element_type for t in CompiledTypeRepo.pending_list_types
         )
-        self.array_types.update(CompiledTypeMetaclass.pending_array_types)
+        self.array_types.update(CompiledTypeRepo.pending_array_types)
 
         self.generic_list_type = self.root_grammar_class.generic_list_type
-        self.env_metadata = CompiledTypeMetaclass.env_metadata
+        self.env_metadata = CompiledTypeRepo.env_metadata
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
@@ -1352,7 +1352,7 @@ class CompileCtx(object):
 
     @property
     def struct_types(self):
-        from langkit.compiled_types import CompiledTypeMetaclass
+        from langkit.compiled_types import CompiledTypeRepo
 
         def dependencies(struct_type):
             """
@@ -1367,7 +1367,7 @@ class CompileCtx(object):
                 result.add(struct_type.el_type.base.entity)
             return result
 
-        struct_types = CompiledTypeMetaclass.struct_types
+        struct_types = CompiledTypeRepo.struct_types
 
         if self._struct_types:
             assert (
@@ -1405,10 +1405,10 @@ class CompileCtx(object):
 
         assert self.grammar, "Set grammar before compiling"
 
-        from langkit.compiled_types import CompiledTypeMetaclass
+        from langkit.compiled_types import CompiledTypeRepo
         from langkit.parsers import Parser
 
-        self.root_grammar_class = CompiledTypeMetaclass.root_grammar_class
+        self.root_grammar_class = CompiledTypeRepo.root_grammar_class
 
         pass_manager = PassManager()
         pass_manager.add(
