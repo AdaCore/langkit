@@ -709,9 +709,14 @@ class ManageScript(object):
             build. By default, GPRbuild builds them all, so this arguments
             makes it possible to build only a subset of them.
         """
-        base_argv = ['gprbuild', '-p',
-                     '-j{}'.format(args.jobs),
-                     '-P{}'.format(project_file)]
+        base_argv = [
+            'gprbuild', '-p', '-j{}'.format(args.jobs),
+            '-P{}'.format(project_file),
+
+            # Prevent GPRbuild from adding RPATH to links, as paths will not be
+            # valid once generated programs/libraries are installed.
+            '-R'
+        ]
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
         elif args.verbosity == Verbosity('debug'):
