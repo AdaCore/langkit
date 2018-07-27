@@ -92,7 +92,7 @@ package body ${ada_lib_name}.Analysis is
         (Charset,
          With_Trivia
          % if ctx.default_unit_provider:
-            , Internal_Unit_Provider_Access_Cst (P)
+            , P
          % endif
          );
    begin
