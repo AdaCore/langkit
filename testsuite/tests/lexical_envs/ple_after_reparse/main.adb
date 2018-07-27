@@ -9,7 +9,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx    : Analysis_Context := Create;
+   Ctx    : constant Analysis_Context := Create;
    Unit_A : constant Analysis_Unit := Get_From_File (Ctx, "a.txt");
    Unit_B : constant Analysis_Unit := Get_From_File (Ctx, "b.txt");
    Unit_C : constant Analysis_Unit := Get_From_File (Ctx, "b-c.txt");
@@ -94,6 +94,5 @@ begin
    Remove (Ctx, "b.txt");
    Resolve;
 
-   Destroy (Ctx);
    Put_Line ("main.adb: Done.");
 end Main;

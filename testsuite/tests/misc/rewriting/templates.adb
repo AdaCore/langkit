@@ -17,7 +17,7 @@ procedure Templates is
      ("def a = 1" & ASCII.LF
       & "def b = (2 + a) + 3" & ASCII.LF);
 
-   Ctx : Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create;
    U   : constant Analysis_Unit := Get_From_Buffer
      (Ctx, "main.txt", Buffer => Buffer);
    RH  : Rewriting_Handle := Start_Rewriting (Ctx);
@@ -99,6 +99,5 @@ begin
 
    Root (U).Print (Show_Slocs => False);
 
-   Destroy (Ctx);
    Put_Line ("templates.adb: Done.");
 end Templates;

@@ -119,6 +119,9 @@ package body ${ada_lib_name}.Implementation.C is
          Internal_Ctx : constant Internal_Context := Unwrap_Context (Context);
 
       begin
+         --  Create a new ownership share for the result since the one Context
+         --  owns will disappear once we return.
+         Inc_Ref (Internal_Ctx);
          return Wrap (Internal_Ctx);
       end;
    exception

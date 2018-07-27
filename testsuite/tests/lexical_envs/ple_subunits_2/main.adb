@@ -9,7 +9,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx    : Analysis_Context := Create;
+   Ctx    : constant Analysis_Context := Create;
    Unit_1 : constant Analysis_Unit := Get_From_File (Ctx, "source1.txt");
    Unit_2 : constant Analysis_Unit := Get_From_File (Ctx, "source2.txt");
    Units  : constant array (Positive range <>) of Analysis_Unit :=
@@ -102,6 +102,5 @@ begin
    Reparse (Unit_2);
    Resolve;
 
-   Destroy (Ctx);
    Put_Line ("Done.");
 end Main;

@@ -7,7 +7,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx          : Analysis_Context := Create;
+   Ctx          : constant Analysis_Context := Create;
    Unit         : constant Analysis_Unit :=
       Get_From_Buffer (Ctx, "foo.txt", Buffer => "example");
    Example_Node : Example;
@@ -48,6 +48,4 @@ begin
             Put_Line (Exception_Name (Exc) & ": " & Exception_Message (Exc));
       end;
    end loop;
-
-   Destroy (Ctx);
 end Main;

@@ -6,7 +6,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx : Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create;
    U   : constant Analysis_Unit := Get_From_Buffer
      (Ctx, "foo.txt",
       Buffer =>
@@ -57,6 +57,5 @@ begin
       null;
    end;
 
-   Destroy (Ctx);
    Put_Line ("main.adb: Done.");
 end Main;

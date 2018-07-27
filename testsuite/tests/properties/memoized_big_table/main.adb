@@ -5,7 +5,7 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 procedure Main is
-   Ctx  : Analysis_Context := Create;
+   Ctx  : constant Analysis_Context := Create;
    Unit : constant Analysis_Unit :=
       Get_From_Buffer (Ctx, "foo.txt", Buffer => "example");
    Node : constant Example := Root (Unit).As_Example;
@@ -31,6 +31,4 @@ begin
 
    --  ... then let the destructor do its magic. This is where the crash used
    --  to happen.
-
-   Destroy (Ctx);
 end Main;
