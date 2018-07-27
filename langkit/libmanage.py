@@ -398,6 +398,15 @@ class ManageScript(object):
             '--disable-all-mains', action='store_true',
             help='Do not build any main program.'
         )
+        subparser.add_argument(
+            '--with-rpath', action='store_true', dest='with_rpath',
+            default=True,
+            help='Build libraries with run path options (by default)'
+        )
+        subparser.add_argument(
+            '--without-rpath', action='store_false', dest='with_rpath',
+            help='Do not build libraries with run path options'
+        )
 
     def create_context(self, args):
         """
@@ -712,11 +721,13 @@ class ManageScript(object):
         base_argv = [
             'gprbuild', '-p', '-j{}'.format(args.jobs),
             '-P{}'.format(project_file),
-
-            # Prevent GPRbuild from adding RPATH to links, as paths will not be
-            # valid once generated programs/libraries are installed.
-            '-R'
         ]
+
+        if is_library and not args.with_rpath:
+            # Prevent GPRbuild from adding RPATH to links, as paths will not be
+            # valid once generated libraries are installed.
+            base_argv.append('-R')
+
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
         elif args.verbosity == Verbosity('debug'):
