@@ -585,7 +585,9 @@ class ArrayPrettyPrinter(BasePrinter):
                 or value.type.target().code != gdb.TYPE_CODE_STRUCT):
             return False
 
-        return bool(cls.element_typename(value.type.target().name, context))
+        struct_typename = value.type.target().name
+        return bool(struct_typename and
+                    cls.element_typename(struct_typename, context))
 
     def display_hint(self):
         return 'array'
