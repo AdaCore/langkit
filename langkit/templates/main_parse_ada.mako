@@ -292,8 +292,8 @@ begin
 
    if File_List.all'Length /= 0 then
       declare
-         F : File_Type;
-         Ctx : Analysis_Context :=
+         F   : File_Type;
+         Ctx : constant Analysis_Context :=
            Create (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Open (F, In_File, File_List.all);
@@ -306,17 +306,15 @@ begin
             end;
          end loop;
          Close (F);
-         Destroy (Ctx);
       end;
 
    elsif Filename.all'Length /= 0 then
       declare
-         Ctx : Analysis_Context :=
+         Ctx : constant Analysis_Context :=
            Create (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Register_Lookups;
          Process_File (Filename.all, Ctx);
-         Destroy (Ctx);
       end;
 
    else

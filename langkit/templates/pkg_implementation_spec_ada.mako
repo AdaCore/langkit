@@ -1219,10 +1219,12 @@ private package ${ada_lib_name}.Implementation is
    --  Implementation for Analysis.Remove
 
    procedure Inc_Ref (Context : Internal_Context);
-   --  Implementation for Analysis.Inc_Ref
+   --  Increment the ref-count of Context. This does nothing if Context is
+   --  null.
 
    procedure Dec_Ref (Context : in out Internal_Context);
-   --  Implementation for Analysis.Dec_Ref
+   --  Decrement the ref-count of Context, destroying it if the ref-count
+   --  reaches zero. This does nothing if Context is null.
 
    procedure Destroy (Context : in out Internal_Context)
       with Pre => not Has_Rewriting_Handle (Context);

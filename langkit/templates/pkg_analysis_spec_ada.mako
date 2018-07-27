@@ -9,6 +9,7 @@
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Containers;
+private with Ada.Finalization;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
@@ -205,16 +206,6 @@ package ${ada_lib_name}.Analysis is
    procedure Remove (Context : Analysis_Context'Class; Filename : String)
       with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.remove_unit', 3)}
-
-   procedure Inc_Ref (Context : Analysis_Context'Class);
-   ${ada_doc('langkit.context_incref', 3)}
-
-   procedure Dec_Ref (Context : in out Analysis_Context);
-   ${ada_doc('langkit.context_decref', 3)}
-
-   procedure Destroy (Context : in out Analysis_Context)
-      with Pre => not Has_Rewriting_Handle (Context);
-   ${ada_doc('langkit.destroy_context', 3)}
 
    ------------------------------
    -- Analysis unit primitives --
@@ -525,16 +516,21 @@ private
    type Internal_Unit_Access is
       access all Implementation.Analysis_Unit_Type;
 
-   type Analysis_Context is tagged record
+   type Analysis_Context is new Ada.Finalization.Controlled with record
       Internal : Internal_Context_Access;
    end record;
+
+   overriding procedure Initialize (Context : in out Analysis_Context);
+   overriding procedure Adjust (Context : in out Analysis_Context);
+   overriding procedure Finalize (Context : in out Analysis_Context);
 
    type Analysis_Unit is tagged record
       Internal : Internal_Unit_Access;
    end record;
 
    No_Analysis_Unit    : constant Analysis_Unit := (Internal => null);
-   No_Analysis_Context : constant Analysis_Context := (Internal => null);
+   No_Analysis_Context : constant Analysis_Context :=
+     (Ada.Finalization.Controlled with Internal => null);
 
    --------------------------
    -- AST nodes (internal) --

@@ -8,7 +8,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx    : Analysis_Context := Create;
+   Ctx  : constant Analysis_Context := Create;
    Unit : constant Analysis_Unit := Get_From_File (Ctx, "main.txt");
 
    function Visit (Node : Foo_Node'Class) return Visit_Status;
@@ -55,5 +55,4 @@ begin
    for D of Diagnostics (Unit) loop
       Put_Line (Format_GNU_Diagnostic (Unit, D));
    end loop;
-   Destroy (Ctx);
 end Main;

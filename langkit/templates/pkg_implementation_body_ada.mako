@@ -555,7 +555,9 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Inc_Ref (Context : Internal_Context) is
    begin
-      Context.Ref_Count := Context.Ref_Count + 1;
+      if Context /= null then
+         Context.Ref_Count := Context.Ref_Count + 1;
+      end if;
    end Inc_Ref;
 
    -------------
@@ -564,9 +566,11 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Dec_Ref (Context : in out Internal_Context) is
    begin
-      Context.Ref_Count := Context.Ref_Count - 1;
-      if Context.Ref_Count = 0 then
-         Destroy (Context);
+      if Context /= null then
+         Context.Ref_Count := Context.Ref_Count - 1;
+         if Context.Ref_Count = 0 then
+            Destroy (Context);
+         end if;
       end if;
    end Dec_Ref;
 

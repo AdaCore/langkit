@@ -111,7 +111,7 @@ package body ${ada_lib_name}.Analysis is
                            then ${ctx.default_unit_provider.fqn}
                            else Unit_Provider));
       % endif
-      Result : constant Internal_Context := Create
+      Result : Internal_Context := Create
         (Charset,
          With_Trivia
          % if ctx.default_unit_provider:
@@ -119,7 +119,12 @@ package body ${ada_lib_name}.Analysis is
          % endif
          );
    begin
-      return Wrap_Context (Result);
+      return Context : constant Analysis_Context := Wrap_Context (Result)
+      do
+         --  Result has one ownership share and the call to Wrap_Context
+         --  creates a new one, so don't forget to dec-ref before returning.
+         Dec_Ref (Result);
+      end return;
    end Create;
 
    ---------------------
@@ -131,26 +136,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       return Has_With_Trivia (Unwrap_Context (Context));
    end Has_With_Trivia;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Context : Analysis_Context'Class) is
-   begin
-      Inc_Ref (Unwrap_Context (Context));
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Context : in out Analysis_Context) is
-      C : Internal_Context := Unwrap_Context (Context);
-   begin
-      Dec_Ref (C);
-      Context := Wrap_Context (C);
-   end Dec_Ref;
 
    --------------------------------------------
    -- Discard_Errors_In_Populate_Lexical_Env --
@@ -300,17 +285,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       Remove (Unwrap_Context (Context), Filename);
    end Remove;
-
-   -------------
-   -- Destroy --
-   -------------
-
-   procedure Destroy (Context : in out Analysis_Context) is
-      C : Internal_Context := Unwrap_Context (Context);
-   begin
-      Destroy (C);
-      Context := Wrap_Context (C);
-   end Destroy;
 
    -------------
    -- Context --
@@ -902,28 +876,100 @@ package body ${ada_lib_name}.Analysis is
      (Self : Token_Iterator; Tok : Token_Reference) return Token_Reference
    is (Tok);
 
+   ----------------
+   -- Initialize --
+   ----------------
+
+   overriding procedure Initialize (Context : in out Analysis_Context) is
+   begin
+      Context.Internal := null;
+   end Initialize;
+
+   ------------
+   -- Adjust --
+   ------------
+
+   overriding procedure Adjust (Context : in out Analysis_Context) is
+   begin
+      Inc_Ref (Unwrap_Context (Context));
+   end Adjust;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Context : in out Analysis_Context) is
+      Ctx : Internal_Context := Unwrap_Context (Context);
+   begin
+      Dec_Ref (Ctx);
+      Context.Internal := null;
+   end Finalize;
+
    ----------------------------------------------------
    -- Soft links for public/internal type converters --
    ----------------------------------------------------
 
+   function Wrap_Context (Context : Internal_Context) return Analysis_Context;
+   function Unwrap_Context
+     (Context : Analysis_Context'Class) return Internal_Context;
+
+   function Wrap_Unit (Unit : Internal_Unit) return Analysis_Unit;
+   function Unwrap_Unit (Unit : Analysis_Unit'Class) return Internal_Unit;
+
+   function Wrap_Node
+     (Node : access ${root_node_value_type}'Class;
+      Info : AST_Envs.Entity_Info := AST_Envs.No_Entity_Info)
+      return ${root_entity.api_name};
+   function Unwrap_Node
+     (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
+
+   ------------------
+   -- Wrap_Context --
+   ------------------
+
    function Wrap_Context (Context : Internal_Context) return Analysis_Context
-   is ((Internal => Internal_Context_Access (Context)));
+   is
+   begin
+      Inc_Ref (Context);
+      return (Ada.Finalization.Controlled with
+              Internal => Internal_Context_Access (Context));
+   end Wrap_Context;
+
+   --------------------
+   -- Unwrap_Context --
+   --------------------
 
    function Unwrap_Context
      (Context : Analysis_Context'Class) return Internal_Context
    is (Internal_Context (Context.Internal));
 
+   ---------------
+   -- Wrap_Unit --
+   ---------------
+
    function Wrap_Unit (Unit : Internal_Unit) return Analysis_Unit
    is ((Internal => Internal_Unit_Access (Unit)));
 
+   -----------------
+   -- Unwrap_Unit --
+   -----------------
+
    function Unwrap_Unit (Unit : Analysis_Unit'Class) return Internal_Unit
    is (Internal_Unit (Unit.Internal));
+
+   ---------------
+   -- Wrap_Node --
+   ---------------
 
    function Wrap_Node
      (Node : access ${root_node_value_type}'Class;
       Info : AST_Envs.Entity_Info := AST_Envs.No_Entity_Info)
       return ${root_entity.api_name}
    is ((Internal => (Node, Info)));
+
+   -----------------
+   -- Unwrap_Node --
+   -----------------
 
    function Unwrap_Node
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name}
