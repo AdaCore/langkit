@@ -218,7 +218,7 @@ package body ${ada_lib_name}.Implementation is
      (Charset     : String;
       With_Trivia : Boolean
       % if ctx.default_unit_provider:
-         ; Unit_Provider : Internal_Unit_Provider_Access_Cst
+         ; Unit_Provider : Internal_Unit_Provider_Access
       % endif
      ) return Internal_Context
    is
@@ -483,7 +483,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Unit_Provider
      (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst
-   is (Context.Unit_Provider);
+   is (Internal_Unit_Provider_Access_Cst (Context.Unit_Provider));
 
    % endif
 
@@ -588,6 +588,9 @@ package body ${ada_lib_name}.Implementation is
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
       Destroy (Context.Parser);
+      % if ctx.default_unit_provider:
+         Destroy (Context.Unit_Provider);
+      % endif
       Free (Context);
    end Destroy;
 

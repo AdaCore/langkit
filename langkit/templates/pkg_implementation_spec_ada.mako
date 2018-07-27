@@ -983,7 +983,7 @@ private package ${ada_lib_name}.Implementation is
       --  to resolve cross file references.
 
       % if ctx.default_unit_provider:
-      Unit_Provider : Internal_Unit_Provider_Access_Cst;
+      Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
       % endif
 
@@ -1131,7 +1131,7 @@ private package ${ada_lib_name}.Implementation is
      (Charset     : String;
       With_Trivia : Boolean
       % if ctx.default_unit_provider:
-         ; Unit_Provider : Internal_Unit_Provider_Access_Cst
+         ; Unit_Provider : Internal_Unit_Provider_Access
       % endif
      ) return Internal_Context;
    --  Implementation for Analysis.Create
