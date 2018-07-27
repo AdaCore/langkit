@@ -526,11 +526,17 @@ private
 
    type Analysis_Unit is tagged record
       Internal : Internal_Unit_Access;
+
+      Context : Analysis_Context;
+      --  Keep a reference to the owning context so that the context lives as
+      --  long as there is at least one reference to one of its units.
    end record;
 
-   No_Analysis_Unit    : constant Analysis_Unit := (Internal => null);
    No_Analysis_Context : constant Analysis_Context :=
      (Ada.Finalization.Controlled with Internal => null);
+   No_Analysis_Unit    : constant Analysis_Unit :=
+     (Internal => null,
+      Context  => (Ada.Finalization.Controlled with Internal => null));
 
    --------------------------
    -- AST nodes (internal) --
