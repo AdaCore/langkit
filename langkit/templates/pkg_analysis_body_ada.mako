@@ -55,8 +55,28 @@ package body ${ada_lib_name}.Analysis is
    overriding function Get_Unit_Filename
      (Provider : Unit_Provider_Wrapper;
       Name     : Text_Type;
+      Kind     : Unit_Kind) return String;
+   overriding function Get_Unit
+     (Provider    : Unit_Provider_Wrapper;
+      Context     : Internal_Context;
+      Name        : Text_Type;
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False) return Internal_Unit;
+
+   -----------------------
+   -- Get_Unit_Filename --
+   -----------------------
+
+   overriding function Get_Unit_Filename
+     (Provider : Unit_Provider_Wrapper;
+      Name     : Text_Type;
       Kind     : Unit_Kind) return String
    is (Provider.Internal.Get_Unit_Filename (Name, Kind));
+
+   --------------
+   -- Get_Unit --
+   --------------
 
    overriding function Get_Unit
      (Provider    : Unit_Provider_Wrapper;
@@ -65,9 +85,12 @@ package body ${ada_lib_name}.Analysis is
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit
-   is (Unwrap_Unit (Provider.Internal.Get_Unit (Wrap_Context (Context),
-                                                Name, Kind, Charset,
-                                                Reparse)));
+   is
+      Ctx : constant Analysis_Context := Wrap_Context (Context);
+   begin
+      return Unwrap_Unit (Provider.Internal.Get_Unit
+        (Ctx, Name, Kind, Charset, Reparse));
+   end Get_Unit;
 
    ------------
    -- Create --
