@@ -1,4 +1,5 @@
 with Ada.Containers; use Ada.Containers;
+with Ada.Unchecked_Deallocation;
 
 with System;
 
@@ -47,5 +48,8 @@ package Support is
       Register_Rebinding   => Register_Rebinding);
 
    procedure Put_Line (Elements : Envs.Entity_Array);
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Envs.Env_Rebindings_Type, Envs.Env_Rebindings);
 
 end Support;

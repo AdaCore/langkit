@@ -13,14 +13,12 @@ procedure Main is
    Symbols : Symbol_Table := Create;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
-   A_Parent : constant Lexical_Env :=
-      Create (No_Env_Getter, 'P', Owner => True);
-   A        : constant Lexical_Env :=
-      Create (Simple_Env_Getter (A_Parent), 'A', Owner => True);
-   B        : constant Lexical_Env :=
-      Create (No_Env_Getter, 'B', Owner => True);
+   A_Parent : Lexical_Env := Create (No_Env_Getter, 'P', Owner => True);
+   A        : Lexical_Env := Create (Simple_Env_Getter (A_Parent), 'A',
+                                     Owner => True);
+   B        : Lexical_Env := Create (No_Env_Getter, 'B', Owner => True);
 
-   Grouped : constant Lexical_Env := Group ((A, B));
+   Grouped : Lexical_Env := Group ((A, B));
 begin
    Add (A_Parent, Key_X, '1');
    Add (A, Key_X, '2');
@@ -31,4 +29,9 @@ begin
 
    Put_Line ("Looking in Grouped (Recursive => False):");
    Put_Line (Get (Grouped, Key_X, Recursive => False));
+
+   Dec_Ref (Grouped);
+   Destroy (A_Parent);
+   Destroy (A);
+   Destroy (B);
 end Main;

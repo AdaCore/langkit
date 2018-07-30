@@ -15,17 +15,14 @@ procedure Main is
    Key_A   : constant Symbol_Type := Find (Symbols, "A");
    Key_B   : constant Symbol_Type := Find (Symbols, "B");
 
-   Old_Env : constant Lexical_Env :=
-      Create (No_Env_Getter, 'O', Owner => True);
-   New_Env : constant Lexical_Env :=
-      Create (No_Env_Getter, 'N', Owner => True);
-   Rebindings : constant Env_Rebindings := Append (null, Old_Env, New_Env);
+   Old_Env : Lexical_Env := Create (No_Env_Getter, 'O', Owner => True);
+   New_Env : Lexical_Env := Create (No_Env_Getter, 'N', Owner => True);
+   Rebindings : Env_Rebindings := Append (null, Old_Env, New_Env);
 
-   Root     : constant Lexical_Env :=
-      Create (No_Env_Getter, 'R', Owner => True);
-   Child    : constant Lexical_Env :=
-      Create (Simple_Env_Getter (Root), 'C', Owner => True);
-   Orphaned : constant Lexical_Env := Orphan (Child);
+   Root     : Lexical_Env := Create (No_Env_Getter, 'R', Owner => True);
+   Child    : Lexical_Env := Create (Simple_Env_Getter (Root), 'C',
+                                     Owner => True);
+   Orphaned : Lexical_Env := Orphan (Child);
 begin
    Add (Root, Key_A, '1');
    Add (Child, Key_B, '2');
@@ -43,17 +40,12 @@ begin
    Put_Line (Get (Orphaned, Key_B));
 
    declare
-      Transitive_Child : constant Lexical_Env :=
+      Transitive_Child : Lexical_Env :=
          Create (Simple_Env_Getter (Root), 'C', True, True);
 
-      Grouped : constant Lexical_Env :=
-         Group ((Root, Child));
-
-      Rebound_TC : constant Lexical_Env :=
-         Rebind_Env (Transitive_Child, Rebindings);
-
-      Rebound_OK : constant Lexical_Env :=
-         Rebind_Env (Child, Rebindings);
+      Grouped    : Lexical_Env := Group ((Root, Child));
+      Rebound_TC : Lexical_Env := Rebind_Env (Transitive_Child, Rebindings);
+      Rebound_OK : Lexical_Env := Rebind_Env (Child, Rebindings);
 
       E : Lexical_Env;
    begin
@@ -62,6 +54,7 @@ begin
       begin
          E := Orphan (Transitive_Child);
          Put_Line ("  No error raised");
+         Dec_Ref (E);
       exception
          when Exc : Property_Error =>
             Put_Line ("  Got a property error: " & Exception_Message (Exc));
@@ -71,6 +64,7 @@ begin
       begin
          E := Orphan (Grouped);
          Put_Line ("  No error raised");
+         Dec_Ref (E);
       exception
          when Exc : Property_Error =>
             Put_Line ("  Got a property error: " & Exception_Message (Exc));
@@ -80,6 +74,7 @@ begin
       begin
          E := Orphan (Rebound_TC);
          Put_Line ("  No error raised");
+         Dec_Ref (E);
       exception
          when Exc : Property_Error =>
             Put_Line ("  Got a property error: " & Exception_Message (Exc));
@@ -90,10 +85,27 @@ begin
       begin
          E := Orphan (Rebound_OK);
          Put_Line ("  No error raised");
+         Dec_Ref (E);
       exception
          when Exc : Property_Error =>
             Put_Line ("  Got a property error: " & Exception_Message (Exc));
       end;
 
+      Dec_Ref (Grouped);
+      Dec_Ref (Rebound_TC);
+      Dec_Ref (Rebound_OK);
+
+      Destroy (Transitive_Child);
    end;
+
+   Dec_Ref (Orphaned);
+
+   Destroy (Old_Env);
+   Destroy (New_Env);
+   Destroy (Rebindings);
+
+   Destroy (Root);
+   Destroy (Child);
+
+   Destroy (Symbols);
 end Main;

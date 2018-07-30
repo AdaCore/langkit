@@ -13,40 +13,49 @@ procedure Main is
 
    function "+" (S : String) return String_Access is (new String'(S));
 
+   Name_Old_Env_1 : String_Access := +"Old_Env_1";
+   Name_New_Env_1 : String_Access := +"New_Env_1";
+   Name_Old_Env_2 : String_Access := +"Old_Env_2";
+   Name_New_Env_2 : String_Access := +"New_Env_2";
+   Name_Prim_A    : String_Access := +"Prim_A";
+   Name_Prim_B    : String_Access := +"Prim_B";
+   Name_Item_X1   : String_Access := +"Item(X1)";
+   Name_Item_X2   : String_Access := +"Item(X2)";
+   Name_Item_Y1   : String_Access := +"Item(Y1)";
+   Name_Item_Y2   : String_Access := +"Item(Y2)";
+
    Symbols : Symbol_Table := Create;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
    Key_Y   : constant Symbol_Type := Find (Symbols, "Y");
 
    Old_Env_1 : Lexical_Env := Create
-     (No_Env_Getter, +"Old_Env_1", Owner => True);
+     (No_Env_Getter, Name_Old_Env_1, Owner => True);
    New_Env_1 : Lexical_Env := Create
-     (No_Env_Getter, +"New_Env_1", Owner => True);
+     (No_Env_Getter, Name_New_Env_1, Owner => True);
    Old_Env_2 : Lexical_Env := Create
-     (No_Env_Getter, +"Old_Env_2", Owner => True);
+     (No_Env_Getter, Name_Old_Env_2, Owner => True);
    New_Env_2 : Lexical_Env := Create
-     (No_Env_Getter, +"New_Env_2", Owner => True);
+     (No_Env_Getter, Name_New_Env_2, Owner => True);
 
-   R1 : constant Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
-   R2 : constant Env_Rebindings := Append (R1, Old_Env_2, New_Env_2);
+   R1 : Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
+   R2 : Env_Rebindings := Append (R1, Old_Env_2, New_Env_2);
 
-   Prim_A : Lexical_Env := Create
-     (No_Env_Getter, +"Prim_A", Owner => True);
-   Prim_B : Lexical_Env := Create
-     (Simple_Env_Getter (Prim_A), +"Prim_B", Owner => True);
+   Prim_A : Lexical_Env := Create (No_Env_Getter, Name_Prim_A, Owner => True);
+   Prim_B : Lexical_Env := Create (Simple_Env_Getter (Prim_A), Name_Prim_B,
+                                   Owner => True);
 
-   Orphaned_1 : constant Lexical_Env := Orphan (Prim_B);
-   Orphaned_2 : constant Lexical_Env := Orphan (Orphaned_1);
+   Orphaned_1 : Lexical_Env := Orphan (Prim_B);
+   Orphaned_2 : Lexical_Env := Orphan (Orphaned_1);
 
-   Grouped: constant Lexical_Env :=
-      Group ((Orphaned_1, Orphaned_2), (I => 1));
+   Grouped: Lexical_Env := Group ((Orphaned_1, Orphaned_2), (I => 1));
 
-   Rebound : constant Lexical_Env := Rebind_Env (Prim_B, R2);
+   Rebound : Lexical_Env := Rebind_Env (Prim_B, R2);
 
 begin
-   Add (Prim_A, Key_X, +"Item(X1)");
-   Add (Prim_A, Key_X, +"Item(X2)");
-   Add (Prim_A, Key_Y, +"Item(Y1)");
-   Add (Prim_B, Key_Y, +"Item(Y2)");
+   Add (Prim_A, Key_X, Name_Item_X1);
+   Add (Prim_A, Key_X, Name_Item_X2);
+   Add (Prim_A, Key_Y, Name_Item_Y1);
+   Add (Prim_B, Key_Y, Name_Item_Y2);
 
    Put (Lexical_Env_Image (Prim_A));
    Put (Lexical_Env_Image (Prim_B));
@@ -57,6 +66,36 @@ begin
    Put (Lexical_Env_Image (Grouped));
    New_Line;
    Put (Lexical_Env_Image (Rebound));
+
+   Dec_Ref (Orphaned_1);
+   Dec_Ref (Orphaned_2);
+   Dec_Ref (Grouped);
+   Dec_Ref (Rebound);
+
+   Destroy (Old_Env_1);
+   Destroy (New_Env_1);
+   Destroy (Old_Env_2);
+   Destroy (New_Env_2);
+
+   Destroy (Prim_A);
+   Destroy (Prim_B);
+
+   R1.Children.Destroy;
+   Destroy (R1);
+   Destroy (R2);
+
+   Destroy (Symbols);
+
+   Destroy(Name_Old_Env_1);
+   Destroy(Name_New_Env_1);
+   Destroy(Name_Old_Env_2);
+   Destroy(Name_New_Env_2);
+   Destroy(Name_Prim_A);
+   Destroy(Name_Prim_B);
+   Destroy(Name_Item_X1);
+   Destroy(Name_Item_X2);
+   Destroy(Name_Item_Y1);
+   Destroy(Name_Item_Y2);
 
    New_Line;
    Put_Line ("Done.");

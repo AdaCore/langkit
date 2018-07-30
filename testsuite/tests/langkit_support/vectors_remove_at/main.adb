@@ -53,4 +53,6 @@ begin
       V.Remove_At (1);
    end loop;
    Put (V);
+
+   V.Destroy;
 end Main;

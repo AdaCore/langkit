@@ -24,26 +24,24 @@ procedure Main is
    Prim_B : Lexical_Env := Wrap (new Lexical_Env_Type'
      (Kind => Primary, Node => 'B', others => <>));
 
-   Orphaned_A1 : constant Lexical_Env := Orphan (Prim_A);
-   Orphaned_A2 : constant Lexical_Env := Orphan (Prim_A);
-   Orphaned_B  : constant Lexical_Env := Orphan (Prim_B);
+   Orphaned_A1 : Lexical_Env := Orphan (Prim_A);
+   Orphaned_A2 : Lexical_Env := Orphan (Prim_A);
+   Orphaned_B  : Lexical_Env := Orphan (Prim_B);
 
-   Grouped_1 : constant Lexical_Env := Group ((Orphaned_A1, Orphaned_B));
-   Grouped_2 : constant Lexical_Env := Group ((Orphaned_A1, Orphaned_B));
-   Grouped_3 : constant Lexical_Env := Group ((Orphaned_B, Orphaned_A1));
-   Grouped_4 : constant Lexical_Env :=
-      Group ((Orphaned_A1, Orphaned_B, Orphaned_A1));
-   Grouped_5 : constant Lexical_Env :=
-      Group ((Orphaned_A1, Orphaned_B), (I => 1));
+   Grouped_1 : Lexical_Env := Group ((Orphaned_A1, Orphaned_B));
+   Grouped_2 : Lexical_Env := Group ((Orphaned_A1, Orphaned_B));
+   Grouped_3 : Lexical_Env := Group ((Orphaned_B, Orphaned_A1));
+   Grouped_4 : Lexical_Env := Group ((Orphaned_A1, Orphaned_B, Orphaned_A1));
+   Grouped_5 : Lexical_Env := Group ((Orphaned_A1, Orphaned_B), (I => 1));
 
-   R1 : constant Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
-   R2 : constant Env_Rebindings := Append (null, Old_Env_2, New_Env_2);
+   R1 : Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
+   R2 : Env_Rebindings := Append (null, Old_Env_2, New_Env_2);
    pragma Assert (R1 /= R2);
 
-   Rebound_A1X : constant Lexical_Env := Rebind_Env (Prim_A, R1);
-   Rebound_A1Y : constant Lexical_Env := Rebind_Env (Prim_A, R1);
-   Rebound_A2  : constant Lexical_Env := Rebind_Env (Prim_A, R2);
-   Rebound_B   : constant Lexical_Env := Rebind_Env (Prim_B, R1);
+   Rebound_A1X : Lexical_Env := Rebind_Env (Prim_A, R1);
+   Rebound_A1Y : Lexical_Env := Rebind_Env (Prim_A, R1);
+   Rebound_A2  : Lexical_Env := Rebind_Env (Prim_A, R2);
+   Rebound_B   : Lexical_Env := Rebind_Env (Prim_B, R1);
 
 begin
    --  Two primary environments are considered different unless it's actually
@@ -83,4 +81,30 @@ begin
    pragma Assert (Equivalent (Rebound_A1X, Rebound_A1Y));
    pragma Assert (not Equivalent (Rebound_A1X, Rebound_A2));
    pragma Assert (not Equivalent (Rebound_A1X, Rebound_B));
+
+   Dec_Ref (Orphaned_A1);
+   Dec_Ref (Orphaned_A2);
+   Dec_Ref (Orphaned_B);
+
+   Dec_Ref (Grouped_1);
+   Dec_Ref (Grouped_2);
+   Dec_Ref (Grouped_3);
+   Dec_Ref (Grouped_4);
+   Dec_Ref (Grouped_5);
+
+   Dec_Ref (Rebound_A1X);
+   Dec_Ref (Rebound_A1Y);
+   Dec_Ref (Rebound_A2);
+   Dec_Ref (Rebound_B);
+
+   Destroy (Old_Env_1);
+   Destroy (New_Env_1);
+   Destroy (Old_Env_2);
+   Destroy (New_Env_2);
+
+   Destroy (Prim_A);
+   Destroy (Prim_B);
+
+   Destroy (R1);
+   Destroy (R2);
 end Main;
