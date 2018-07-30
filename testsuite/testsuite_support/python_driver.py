@@ -4,6 +4,7 @@ import os
 import os.path
 import sys
 
+import testsuite_support
 from testsuite_support.base_driver import BaseDriver, catch_test_errors
 
 
@@ -22,6 +23,12 @@ class PythonDriver(BaseDriver):
         # Make the common Python modules available from the testcase script
         self.add_path(b'PYTHONPATH', self.support_dir)
         self.add_path(b'PYTHONPATH', self.langkit_root_dir)
+        self.add_path(
+            b'PYTHONPATH',
+            os.path.dirname(os.path.dirname(
+                os.path.abspath(testsuite_support.__file__)
+            ))
+        )
 
     @catch_test_errors
     def run(self):
@@ -52,6 +59,9 @@ class PythonDriver(BaseDriver):
             derived_env['COVERAGE_FILE'] = self.coverage_file('coverage')
         else:
             argv = [sys.executable]
+
+        if self.valgrind_enabled:
+            derived_env['VALGRIND_ENABLED'] = '1'
 
         self.run_and_check(argv + ['test.py'], derived_env)
 

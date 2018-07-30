@@ -43,6 +43,11 @@ class Testsuite(BaseTestsuite):
                  ' GNATcoverage.'
         )
 
+        self.main.add_option(
+            '--valgrind', action='store_true',
+            help='Run tests with Valgrind to check memory issues.'
+        )
+
         #
         # Convenience options for developpers
         #
