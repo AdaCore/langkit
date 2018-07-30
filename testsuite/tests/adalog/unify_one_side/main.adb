@@ -16,12 +16,16 @@ procedure Main is
    Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
    Relations : array (Positive range <>) of Relation :=
-     ((Member (X, (6, 9)) and Member (Y, (9, 16))
-       and Square (X, 3) and Square (4, Y)),
+     (+Logic_All ((+Member (X, (6, 9)),
+                   +Member (Y, (9, 16)),
+                   +Square (X, 3),
+                   +Square (4, Y))),
 
-      Member (Y, (2, 3)) and Square (X, 4),
+      +"and" (+Member (Y, (2, 3)), +Square (X, 4)),
 
-      Is_Even (X) and Square (X, 3) and Square (X, Y));
+      +Logic_All ((+Is_Even (X),
+                   +Square (X, 3),
+                   +Square (X, Y))));
 begin
    X.Dbg_Name := new String'("X");
    Y.Dbg_Name := new String'("Y");
@@ -42,9 +46,11 @@ begin
             Put_Line ("No solution found");
          end if;
       end;
-      Free_Relation_Tree (R);
    end loop;
 
    Destroy (X.all);
    Destroy (Y.all);
+   Free (X);
+   Free (Y);
+   Release_Relations;
 end Main;

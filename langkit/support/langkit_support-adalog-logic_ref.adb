@@ -1,5 +1,3 @@
-with Ada.Unchecked_Deallocation;
-
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Logic_Ref is

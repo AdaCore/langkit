@@ -1,22 +1,25 @@
 package body Langkit_Support.Adalog.Main_Support is
 
-   ------------------------
-   -- Free_Relation_Tree --
-   ------------------------
+   ---------
+   -- "+" --
+   ---------
 
-   procedure Free_Relation_Tree (R : in out Relation) is
-      Var : Relation;
+   function "+" (R : Relation) return Relation is
    begin
-      for C of R.Children loop
-         Var := C;
-         Free_Relation_Tree (Var);
-         while Var /= null and then Var.Ref_Count > 1 loop
-            Dec_Ref (Var);
-         end loop;
+      Relations.Append (R);
+      return R;
+   end "+";
+
+   -----------------------
+   -- Release_Relations --
+   -----------------------
+
+   procedure Release_Relations is
+   begin
+      for R of Relations loop
+         Dec_Ref (R);
       end loop;
-      Var := R;
-      Dec_Ref (Var);
-      R := null;
-   end Free_Relation_Tree;
+      Relations := Relation_Vectors.Empty_Vector;
+   end Release_Relations;
 
 end Langkit_Support.Adalog.Main_Support;

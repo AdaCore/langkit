@@ -12,15 +12,18 @@ with Support; use Support;
 procedure Main is
    use Eq_Int, Eq_Int.Raw_Impl, Eq_Int.Refs;
 
-   X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
    Relations : array (Positive range <>) of Relation :=
-     (Member (X, (1, 2)) and Member (Y, (2, 3)) and Equals (X, Y),
-      Member (X, (1, 2)) and Equals (X, Y),
-      Member (X, (1, 2)) and Equals (Y, X),
-      Member (X, (1, 2)) and Is_Even (Y) and Equals (X, Y),
-      Member (Y, (1, 2)) and Is_Even (X) and Equals (X, Y));
+     (+"and" (+Member (X, (1, 2)),
+              +"and" (+Member (Y, (2, 3)), +Equals (X, Y))),
+      +"and" (+Member (X, (1, 2)), +Equals (X, Y)),
+      +"and" (+Member (X, (1, 2)), +Equals (Y, X)),
+      +"and" (+Member (X, (1, 2)),
+              +"and" (+Is_Even (Y), +Equals (X, Y))),
+      +"and" (+Member (Y, (1, 2)),
+              +"and" (+Is_Even (X), +Equals (X, Y))));
 begin
    X.Dbg_Name := new String'("X");
    Y.Dbg_Name := new String'("Y");
@@ -41,9 +44,11 @@ begin
             Put_Line ("No solution found");
          end if;
       end;
-      Free_Relation_Tree (R);
    end loop;
 
    Destroy (X.all);
    Destroy (Y.all);
+   Free (X);
+   Free (Y);
+   Release_Relations;
 end Main;

@@ -19,11 +19,11 @@ procedure Main is
 
    use Eq_Int; use Eq_Int.Raw_Impl;
 
-   X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
    R3 : Relation :=
-     (Support.Pred_Int.Create (X, Pred'(others => <>))
-      and Member (X, (1, 2, 3, 4, 5, 6)));
+     +(+Support.Pred_Int.Create (X, Pred'(others => <>))
+       and (+Member (X, (1, 2, 3, 4, 5, 6))));
 
    Discard : Boolean;
 
@@ -33,5 +33,6 @@ begin
    while Solve (R3) loop
       Put_Line ("X =" & Get_Value (X)'Img);
    end loop;
-   Free_Relation_Tree (R3);
+   Free (X);
+   Release_Relations;
 end Main;
