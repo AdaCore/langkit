@@ -32,8 +32,8 @@ class DebugInfo(object):
         """
         :type: str|None
 
-        Absolute path for the "$-analysis.adb" file, or None if we haven't
-        found it.
+        Absolute path for the "$-implementation.adb" file, or None if we
+        haven't found it.
         """
 
         self.properties = []
@@ -51,7 +51,7 @@ class DebugInfo(object):
     @classmethod
     def parse(cls, context):
         """
-        Try to parse the $-analysis.adb source file to extract mapping
+        Try to parse the $-implementation.adb source file to extract mapping
         information from its GDB helpers directives. Print error messages on
         standard output if anything goes wrong, but always return a DebugInfo
         instance anyway.
@@ -61,10 +61,10 @@ class DebugInfo(object):
 
         result = cls(context)
 
-        # Look for the "$-analysis.adb" file using some symbol that is supposed
-        # to be defined there.
+        # Look for the "$-implementation.adb" file using some symbol that is
+        # supposed to be defined there.
         has_unit_sym = gdb.lookup_global_symbol(
-            '{}__analysis__implementation__is_null'.format(context.lib_name)
+            '{}__implementation__is_null'.format(context.lib_name)
         )
         if not has_unit_sym:
             return result
@@ -87,7 +87,7 @@ class DebugInfo(object):
         and fill self according to it. Raise a ParseError if anything goes
         wrong.
 
-        :param file f: Readable file for the $-analysis.adb source file.
+        :param file f: Readable file for the $-implementation.adb source file.
         :rtype: None
         """
         self.properties = []
@@ -291,7 +291,7 @@ class DSLLocation(object):
 
 class LineRange(object):
     """
-    Range of lines in the $-analysis.adb source file.
+    Range of lines in the $-implementation.adb source file.
     """
 
     def __init__(self, first_line, last_line):

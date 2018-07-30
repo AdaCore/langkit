@@ -36,7 +36,7 @@ class Context(object):
         record names, as GDB will see them, to user-friendly ASTNode names.
         """
         return {
-            '{}__analysis__implementation__bare_{}_type'.format(
+            '{}__implementation__bare_{}_type'.format(
                 self.lib_name, name.lower()
             ): Name.from_camel_with_underscores(name)
             for name in self.astnode_names
@@ -48,11 +48,11 @@ class Context(object):
         corresponding entity records.
         """
         return {
-            '{}__analysis__implementation__entity_{}'.format(
+            '{}__implementation__entity_{}'.format(
                 self.lib_name,
                 Name.from_camel_with_underscores(name).lower
             ) for name in self.astnode_names
-        } | {'{}__analysis__implementation__ast_envs__entity'
+        } | {'{}__implementation__ast_envs__entity'
              .format(self.lib_name)}
 
     def decode_state(self, frame=None):
@@ -72,12 +72,12 @@ class Context(object):
     @property
     def analysis_prefix(self):
         """
-        Return the prefix for symbols defined in the $.Analysis unit. For
-        instance: "libfoolang__analysis__".
+        Return the prefix for symbols defined in the $.Implementation unit. For
+        instance: "libfoolang__implementation__".
 
         :rtype: str
         """
-        return '{}__analysis__implementation__'.format(self.lib_name)
+        return '{}__implementation__'.format(self.lib_name)
 
     def reparse_debug_info(self):
         """
@@ -93,4 +93,4 @@ class Context(object):
         :param str suffix: Name suffix. For instance: "my_type_name".
         :rtype: str
         """
-        return '{}__analysis__implementation__{}'.format(self.lib_name, suffix)
+        return '{}__implementation__{}'.format(self.lib_name, suffix)
