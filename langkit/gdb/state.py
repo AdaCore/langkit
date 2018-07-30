@@ -5,8 +5,8 @@ from collections import OrderedDict
 
 def analysis_line_no(context, frame):
     """
-    If the given frame is in the $-analysis.adb file, return its currently
-    executed line number. Return None otherwise.
+    If the given frame is in the $-implementation.adb file, return its
+    currently executed line number. Return None otherwise.
 
     :type frame: gdb.Frame
     :rtype: int|None
