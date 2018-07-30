@@ -13,7 +13,7 @@ class AnalysisUnit(object):
 
     @property
     def filename(self):
-        virtual_file = self.value['file_name']
+        virtual_file = self.value['filename']
         vf_record = virtual_file['value'].dereference()
         v = dereference_fat_array_ptr(vf_record['full'])
         # TODO: replace the call to eval below with a call to the .string()
