@@ -21,34 +21,37 @@ procedure Main is
        else "<undefined>"));
 
    Relations : array (Positive range <>) of Relation :=
-     (Equals (X, Y) and Member (X, (1, 2, 3)),
+     (+"and" (+Equals (X, Y), +Member (X, (1, 2, 3))),
       --  Simple dynamic scheduling: the second relation must be evaluated
       --  before the first one.
 
-      Member (X, (1, 2, 3))
-      and (Member (X, (10, 20)) or Is_Even (Y))
-      and Member (Y, (1, 3, 5, 10)),
+      +"and" (+Member (X, (1, 2, 3)),
+              +"and" (+"or" (+Member (X, (10, 20)),
+                             +Is_Even (Y)),
+                      +Member (Y, (1, 3, 5, 10)))),
       --  The second AND relation (OR) cannot be evaluated completely, but it
       --  makes progress.
 
-      Is_Even (Y) and Member (X, (1, 2, 3)),
+      +"and" (+Is_Even (Y), +Member (X, (1, 2, 3))),
       --  Unsolvable equation: nothing provides a value for Y, but the equation
       --  still makes progress.
 
-      Is_Even (Y) and Is_Even (X),
+      +"and" (+Is_Even (Y), +Is_Even (X)),
       --  Likewise, but the equation makes no progress at all
 
-      Is_Even (Y) or Member (X, (1, 2)),
+      +"or" (+Is_Even (Y), +Member (X, (1, 2))),
       --  Likewise, but for ANY relations
 
-      Is_Even (X) or Is_Even (Y),
+      +"or" (+Is_Even (X), +Is_Even (Y)),
 
-      Is_Even (X) or (Member (X, (1, 2, 3)) and Is_Even (Y)),
+      +"or" (+Is_Even (X),
+             +"and" (+Member (X, (1, 2, 3)),
+                     +Is_Even (Y))),
 
-      Member (X, (1, 2, 3))
-      and Is_Even (Y)
-      and Member (X, (1 => 2))
-      and Equals (X, Y)
+      +"and" (+Member (X, (1, 2, 3)),
+              +"and" (+Is_Even (Y),
+                      +"and" (+Member (X, (1 => 2)),
+                              +Equals (X, Y))))
       --  Make sure that back-tracking, which happens for the second Member,
       --  properly resets the state so that the second evaluation of this
       --  second Member actually checks something. Without a proper reset, this
@@ -80,9 +83,11 @@ begin
          when Langkit_Support.Adalog.Early_Binding_Error =>
             Put_Line ("Got an Early_Binding_Error exception");
       end;
-      Free_Relation_Tree (R);
    end loop;
 
    Destroy (X.all);
    Destroy (Y.all);
+   Free (X);
+   Free (Y);
+   Release_Relations;
 end Main;

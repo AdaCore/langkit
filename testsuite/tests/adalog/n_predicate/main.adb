@@ -20,12 +20,11 @@ procedure Main is
 
    use Eq_Int; use Eq_Int.Raw_Impl;
 
-   X, Y    : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-
-   R3      : Relation :=
-     Pred_2.Create (X, Y, Pred'(others => <>))
-     and Member (X, (1, 2, 3, 4, 5, 6))
-     and Member (Y, (1, 2, 3, 4, 5, 6));
+   X, Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   R3   : Relation :=
+     +"and" (+Pred_2.Create (X, Y, Pred'(others => <>)),
+             +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
+                     +Member (Y, (1, 2, 3, 4, 5, 6))));
 
    Discard : Boolean;
 
@@ -36,5 +35,7 @@ begin
       Put_Line ("X =" & Get_Value (X)'Img);
       Put_Line ("Y =" & Get_Value (Y)'Img);
    end loop;
-   Free_Relation_Tree (R3);
+   Free (X);
+   Free (Y);
+   Release_Relations;
 end Main;

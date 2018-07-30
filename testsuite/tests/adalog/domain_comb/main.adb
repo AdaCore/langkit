@@ -17,12 +17,14 @@ procedure Main is
    use Eq_Int; use Eq_Int.Raw_Impl; use Eq_Int.Refs;
 begin
    declare
-      X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Member (X, (3, 4, 5));
+      X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+      R : Relation := +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
+                              +Member (X, (3, 4, 5)));
    begin
       while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img);
       end loop;
-      Free_Relation_Tree (R);
+      Free (X);
    end;
+   Release_Relations;
 end Main;

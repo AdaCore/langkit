@@ -16,11 +16,12 @@ use Langkit_Support.Adalog.Pure_Relations;
 procedure Main is
    use Eq_Int; use Eq_Int.Raw_Impl; use Eq_Int.Refs;
 
-   X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and True_Rel;
+   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   R : Relation := +(+Member (X, (1, 2, 3, 4, 5, 6)) and (+True_Rel));
 begin
    while Solve (R) loop
       Put_Line ("X =" & Get_Value (X)'Img);
    end loop;
-   Free_Relation_Tree (R);
+   Free (X);
+   Release_Relations;
 end Main;

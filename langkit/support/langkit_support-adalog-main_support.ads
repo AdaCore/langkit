@@ -1,5 +1,7 @@
 --  Provide common support material for unit tests
 
+with Ada.Containers.Vectors;
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Eq_Same;
@@ -12,18 +14,17 @@ package Langkit_Support.Adalog.Main_Support is
    package Eq_Int is new Eq_Same (Integer);
    package Pred_Int is new Dyn_Predicate (Integer, Eq_Int.Refs.Raw_Logic_Var);
 
-   procedure Free_Relation_Tree (R : in out Relation);
-   --  Most of the time in testcases, we build relation trees in a single
-   --  expression::
-   --
-   --    Create (Create (...), Create (...), ...).
-   --
-   --  As creation yields an ownership share for the result and create one
-   --  ownership share per argument, all relation nodes except the root one get
-   --  a ref-count of 2 at least. And so calling Dec_Ref (...) on the root
-   --  relation is not enough to get everything free'd.
-   --
-   --  This procedure decrements the ref-count of all relations but the root
-   --  one once and then calls Dec_Ref on the root one.
+   function "+" (R : Relation) return Relation;
+   --  Register R and return it. This is used to keep track of allocated
+   --  relations in testcases.
+
+   procedure Release_Relations;
+   --  Decrement the ref-count of all relations registered with "+"
+
+private
+
+   package Relation_Vectors is new Ada.Containers.Vectors
+     (Positive, Relation);
+   Relations : Relation_Vectors.Vector;
 
 end Langkit_Support.Adalog.Main_Support;

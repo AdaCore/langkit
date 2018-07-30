@@ -15,29 +15,37 @@ with Support; use Support;
 
 procedure Main is
    use Eq_Int; use Eq_Int.Raw_Impl; use Eq_Int.Refs;
+
 begin
    declare
-      X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Square (X, Y);
+      X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+      Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+      R : Relation :=
+         +((+Member (X, (1, 2, 3, 4, 5, 6)))
+           and (+Square (X, Y)));
    begin
       while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
-      Free_Relation_Tree (R);
+      Free (X);
+      Free (Y);
    end;
 
    declare
-      X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+      X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+      Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-      R : Relation := Member (X, (1, 2, 3, 4, 5, 6))
-                      and Square (X, Y) and Equals (Y, 36);
+      R : Relation :=
+         +(+(+Member (X, (1, 2, 3, 4, 5, 6))
+           and (+Square (X, Y)))
+           and (+Equals (Y, 36)));
    begin
       while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
-      Free_Relation_Tree (R);
+      Free (X);
+      Free (Y);
    end;
 
+   Release_Relations;
 end Main;

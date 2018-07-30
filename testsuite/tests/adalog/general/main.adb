@@ -22,16 +22,16 @@ procedure Main is
 
    use Eq_Int; use Eq_Int.Raw_Impl;
 
-   X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
    D : Dummy_Data;
 
    R3 : Relation :=
-     (Member (X, (1, 2, 3, 4, 5, 6))
-      and Bind.Create (X, Y, D, Support.No_Data)
-      and Pred_Int.Create (X, Is_Even'Unrestricted_Access)
-      and Member (Y, (12, 18)));
+     +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
+             +"and" (+Bind.Create (X, Y, D, Support.No_Data),
+                     +"and" (+Pred_Int.Create (X, Is_Even'Unrestricted_Access),
+                             +Member (Y, (12, 18)))));
 
    Discard : Boolean;
 
@@ -41,5 +41,7 @@ begin
    while Solve (R3) loop
       Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
    end loop;
-   Free_Relation_Tree (R3);
+   Free (X);
+   Free (Y);
+   Release_Relations;
 end Main;

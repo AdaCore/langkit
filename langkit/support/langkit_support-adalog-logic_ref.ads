@@ -1,4 +1,5 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Adalog.Logic_Var;
 
@@ -78,6 +79,8 @@ package Langkit_Support.Adalog.Logic_Ref is
 
    function Image (Self : Raw_Var) return String is
      (Image (Self.all));
+
+   procedure Free is new Ada.Unchecked_Deallocation (Var, Raw_Var);
 
    ------------------------------------
    -- Formal packages instantiations --
