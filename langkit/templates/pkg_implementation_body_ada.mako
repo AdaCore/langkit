@@ -691,6 +691,7 @@ package body ${ada_lib_name}.Implementation is
 
       GNATCOLL.Traces.Trace (Main_Trace, "Populating lexical envs for unit: "
                                          & Basename (Unit));
+      GNATCOLL.Traces.Increase_Indent (Main_Trace);
 
       Context.In_Populate_Lexical_Env := True;
 
@@ -717,6 +718,7 @@ package body ${ada_lib_name}.Implementation is
       Context.In_Populate_Lexical_Env :=
          Saved_In_Populate_Lexical_Env;
 
+      GNATCOLL.Traces.Decrease_Indent (Main_Trace);
       if Has_Errors and then not Context.Discard_Errors_In_Populate_Lexical_Env
       then
          raise Property_Error with
