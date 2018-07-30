@@ -1098,11 +1098,14 @@ package body Langkit_Support.Lexical_Env is
             end loop;
             Self.Env.Referenced_Envs.Destroy;
 
-            --  Release the internal map
-            for Elts of Self.Env.Map.all loop
-               Internal_Map_Element_Vectors.Destroy (Elts);
-            end loop;
-            Destroy (Self.Env.Map);
+            --  Release the internal map. Don't assume it was allocated, as
+            --  it's convenient for testing not to allocate it.
+            if Self.Env.Map /= null then
+               for Elts of Self.Env.Map.all loop
+                  Internal_Map_Element_Vectors.Destroy (Elts);
+               end loop;
+               Destroy (Self.Env.Map);
+            end if;
 
             --  Release the lookup cache
             Reset_Lookup_Cache (Self);
