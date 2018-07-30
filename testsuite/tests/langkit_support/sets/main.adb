@@ -24,4 +24,6 @@ begin
    pragma Assert (Add (Int_Set, 22));
    pragma Assert (Has (Int_Set, 22));
    pragma Assert (Remove (Int_Set, 22));
+
+   Destroy (Int_Set);
 end Main;

@@ -1,4 +1,5 @@
 with Ada.Containers; use Ada.Containers;
+with Ada.Unchecked_Deallocation;
 
 with System;
 
@@ -8,6 +9,7 @@ with Langkit_Support.Text; use Langkit_Support.Text;
 package Support is
 
    type String_Access is access all String;
+   procedure Destroy is new Ada.Unchecked_Deallocation (String, String_Access);
 
    type Metadata is record
       I : Integer;
@@ -49,5 +51,8 @@ package Support is
       Is_Rebindable        => Is_Rebindable,
       Element_Image        => Element_Image,
       Register_Rebinding   => Register_Rebinding);
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Envs.Env_Rebindings_Type, Envs.Env_Rebindings);
 
 end Support;
