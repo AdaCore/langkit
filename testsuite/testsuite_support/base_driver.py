@@ -20,6 +20,7 @@ if not with_gnatpython:
 
 
 from testsuite_support import discriminants
+from testsuite_support.valgrind import valgrind_cmd
 
 
 class SetupError(Exception):
@@ -179,6 +180,10 @@ class BaseDriver(TestDriver):
             self.test_env['test_name'] + '.' + ext
         )
 
+    @property
+    def valgrind_enabled(self):
+        return self.global_env['options'].valgrind
+
     #
     # Tear up helpers
     #
@@ -247,7 +252,8 @@ class BaseDriver(TestDriver):
     # Run helpers
     #
 
-    def run_and_check(self, argv, env=None, for_coverage=False):
+    def run_and_check(self, argv, env=None, for_coverage=False,
+                      memcheck=False):
         """
         Run a subprocess with `argv` and check it completes with status code 0.
 
@@ -259,12 +265,19 @@ class BaseDriver(TestDriver):
             pass to the subprocess.
         :param bool for_coverage: If true and if coverage is enabled, produce a
             trace file.
+        :param bool memcheck: If true and if Valgrind runs are requested, run
+            this process under Valgrind. If there are memory issues, they be
+            reported on the testcase output and the process will return
+            non-zero.
         """
         program = argv[0]
 
         if for_coverage and self.coverage_enabled:
             trace_file = self.coverage_file('trace')
             argv = ['gnatcov', 'run', '-o', trace_file] + argv
+
+        if memcheck and self.valgrind_enabled:
+            argv = valgrind_cmd(argv)
 
         p = Run(argv, cwd=self.working_dir(),
                 timeout=self.TIMEOUT,

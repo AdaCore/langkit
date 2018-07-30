@@ -14,6 +14,8 @@ from langkit.expressions import Entity, Self
 from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
 
+from testsuite_support.valgrind import valgrind_cmd
+
 
 default_warning_set = WarningSet()
 
@@ -210,7 +212,10 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             if len(ada_main) > 1:
                 print('== {} =='.format(m))
             sys.stdout.flush()
-            run(os.path.join('obj', m[:-4]))
+            argv = [os.path.join('obj', m[:-4])]
+            if os.environ.get('VALGRIND_ENABLED'):
+                argv = valgrind_cmd(argv)
+            run(*argv)
 
 
 def reset_langkit():
