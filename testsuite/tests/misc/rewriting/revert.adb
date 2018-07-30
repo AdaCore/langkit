@@ -35,5 +35,6 @@ begin
    --  still available.
    Root (U).Print;
 
+   Abort_Rewriting (RH);
    Put_Line ("revert.adb: Done.");
 end Revert;

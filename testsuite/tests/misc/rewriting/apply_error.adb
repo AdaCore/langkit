@@ -20,5 +20,6 @@ begin
                 Create_Token_Node (RH, Foo_Name, "a")));
    Process_Apply (RH, Abort_On_Error => False);
 
+   Abort_Rewriting (RH);
    Put_Line ("apply_error.adb: Done.");
 end Apply_Error;
