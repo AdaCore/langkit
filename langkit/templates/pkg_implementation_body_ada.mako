@@ -262,6 +262,16 @@ package body ${ada_lib_name}.Implementation is
       return Context;
    end Create;
 
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Context : Internal_Context) return Hash_Type is
+      function H is new Hash_Access (Analysis_Context_Type, Internal_Context);
+   begin
+      return H (Context);
+   end Hash;
+
    ---------------------
    -- Has_With_Trivia --
    ---------------------
@@ -606,6 +616,16 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Unit.Context;
    end Context;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Unit : Internal_Unit) return Hash_Type is
+      function H is new Hash_Access (Analysis_Unit_Type, Internal_Unit);
+   begin
+      return H (Unit);
+   end Hash;
 
    -------------
    -- Inc_Ref --
@@ -1913,11 +1933,6 @@ package body ${ada_lib_name}.Implementation is
    % if T.entity_info.requires_hash_function:
       function Hash (Info : Entity_Info) return Hash_Type is
         (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
-   % endif
-
-   % if T.AnalysisUnitType.requires_hash_function:
-      function Hash (Unit : Internal_Unit) return Hash_Type is
-        (Full_Name_Hash (Unit.Filename));
    % endif
 
    ${struct_types.body_hash(T.entity)}

@@ -127,6 +127,16 @@ package body ${ada_lib_name}.Analysis is
       end return;
    end Create;
 
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type
+   is
+   begin
+      return Hash (Unwrap_Context (Context));
+   end Hash;
+
    ---------------------
    -- Has_With_Trivia --
    ---------------------
@@ -294,6 +304,16 @@ package body ${ada_lib_name}.Analysis is
    begin
       return Wrap_Context (Context (Unwrap_Unit (Unit)));
    end Context;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Unit : Analysis_Unit) return Ada.Containers.Hash_Type
+   is
+   begin
+      return Hash (Unwrap_Unit (Unit));
+   end Hash;
 
    -------------
    -- Inc_Ref --
