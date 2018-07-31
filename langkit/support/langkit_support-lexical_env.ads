@@ -6,9 +6,10 @@ with System;
 
 with GNATCOLL.Traces;
 
-with Langkit_Support.Hashes; use Langkit_Support.Hashes;
+with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Types;   use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 --  This package implements a scoped lexical environment data structure that
@@ -32,7 +33,7 @@ with Langkit_Support.Vectors;
 generic
    type Unit_T is private;
    No_Unit : Unit_T;
-   with function Get_Version (Unit : Unit_T) return Natural;
+   with function Get_Version (Unit : Unit_T) return Version_Number;
    --  Unit is passed solely for the Get_Version function, that is used in
    --  cache invalidation.
 
@@ -158,7 +159,7 @@ package Langkit_Support.Lexical_Env is
       Owner : Unit_T := No_Unit;
       --  Unit that owns this lexical environment
 
-      Version : Natural := 0;
+      Version : Version_Number := 0;
       --  Version of the unit when this reference was made. Used to determine
       --  whether this reference is valid or not.
    end record;

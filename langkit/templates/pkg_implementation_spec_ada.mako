@@ -39,6 +39,7 @@ with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
+with Langkit_Support.Types;       use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Parsers;     use ${ada_lib_name}.Parsers;
@@ -210,7 +211,7 @@ private package ${ada_lib_name}.Implementation is
 
    No_Analysis_Unit : constant Internal_Unit := null;
 
-   function Version (Unit : Internal_Unit) return Natural;
+   function Version (Unit : Internal_Unit) return Version_Number;
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.
 
@@ -1093,7 +1094,7 @@ private package ${ada_lib_name}.Implementation is
       Cache_Version : Natural := 0;
       --  See the eponym field in Analysis_Context_Type
 
-      Unit_Version : Natural := 0;
+      Unit_Version : Version_Number := 0;
       --  Version for this particular unit. This will be incremented every time
       --  a reparse occurs.
    end record;
