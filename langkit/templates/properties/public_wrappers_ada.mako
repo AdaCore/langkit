@@ -94,17 +94,20 @@
 
          ## Wrap the result, if needed
 
+         def wrap_node(node_expr, einfo_expr, node_type):
+             result = 'Wrap_Node ({}, {})'.format(node_expr, einfo_expr)
+             if not node_type.is_root_node:
+                 result = '{}.As_{}'.format(result, node_type.entity.api_name)
+             return result
+
          if property.type.is_entity_type:
-             wrapped_result = (
-                 '(Internal => ({} (Property_Result.El),'
-                 ' Property_Result.Info))'.format(root_node_type_name)
-             )
+             wrapped_result = wrap_node('Property_Result.El',
+                                        'Property_Result.Info',
+                                        property.type.astnode)
 
          elif property.type.is_ast_node:
-            wrapped_result = (
-               '(Internal => ({} (Property_Result), No_Entity_Info))'
-               .format(root_node_type_name)
-            )
+             wrapped_result = wrap_node('Property_Result', 'No_Entity_Info',
+                                        property.type)
 
          elif property.type.is_array_type:
              if property.type.element_type.is_entity_type:
@@ -117,9 +120,10 @@
                      "      Item : {} renames".format(entity_type),
                      "         Property_Result.Items (I);",
                      "   begin",
-                     "      Result (I) :=",
-                     "         (Internal => ({} (Item.El), Item.Info));"
-                     .format(root_node_type_name),
+                     "      Result (I) := {};".format(wrap_node(
+                         'Item.El', 'Item.Info',
+                         property.type.element_type.astnode
+                     )),
                      "   end;",
                      "end loop;",
                  ])
