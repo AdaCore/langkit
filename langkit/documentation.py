@@ -774,6 +774,9 @@ def format_c(text, column):
     :param int column: Indentation level for the result.
     :rtype str:
     """
+    if not text:
+        return ''
+
     available_width = get_available_width(column)
     lines = []
     for i, paragraph in enumerate(split_paragraphs(text)):
@@ -830,7 +833,7 @@ def format_python(text, column, rtype=None):
     return '\n'.join(lines)
 
 
-def create_doc_printer(lang, formatter, process_empty=False):
+def create_doc_printer(lang, formatter):
     """
     Return a function that prints documentation.
 
@@ -839,9 +842,6 @@ def create_doc_printer(lang, formatter, process_empty=False):
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
     :type formatter: (str, int) -> str
-
-    :param bool process_empty: Whether to still call the formatter to create a
-        docstring if the documentation is empty.
 
     :rtype: function
     """
@@ -871,7 +871,7 @@ def create_doc_printer(lang, formatter, process_empty=False):
         else:
             doc = entity.doc or ''
 
-        return formatter(doc, column, **kwargs) if doc or process_empty else ''
+        return formatter(doc, column, **kwargs)
 
     func.__name__ = b'{}_doc'.format(lang)
     return func
@@ -890,7 +890,7 @@ def create_doc_printer(lang, formatter, process_empty=False):
 
 ada_doc = create_doc_printer('ada', format_ada)
 c_doc = create_doc_printer('c', format_c)
-py_doc = create_doc_printer('python', format_python, process_empty=True)
+py_doc = create_doc_printer('python', format_python)
 
 
 def ada_c_doc(entity, column=0):
