@@ -4,7 +4,8 @@ with Ada.Unchecked_Deallocation;
 with System;
 
 with Langkit_Support.Lexical_Env;
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Types; use Langkit_Support.Types;
 
 package Support is
 
@@ -33,7 +34,7 @@ package Support is
    procedure Register_Rebinding
      (Node : String_Access; Rebinding : System.Address) is null;
 
-   function Get_Version (B : Boolean) return Natural is (0);
+   function Get_Version (B : Boolean) return Version_Number is (0);
 
    package Envs is new Langkit_Support.Lexical_Env
      (Unit_T               => Boolean,

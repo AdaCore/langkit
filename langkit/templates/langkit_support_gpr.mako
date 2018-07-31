@@ -47,6 +47,7 @@ library project Langkit_Support is
       "Langkit_Support.Symbols",
       "Langkit_Support.Text",
       "Langkit_Support.Token_Data_Handlers",
+      "Langkit_Support.Types",
       "Langkit_Support.Tree_Traversal_Iterator",
       "Langkit_Support.Vectors");
 

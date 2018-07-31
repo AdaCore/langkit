@@ -2099,7 +2099,7 @@ package body ${ada_lib_name}.Implementation is
    -- Version --
    -------------
 
-   function Version (Unit : Internal_Unit) return Natural is
+   function Version (Unit : Internal_Unit) return Version_Number is
    begin
       return Unit.Unit_Version;
    end Version;
