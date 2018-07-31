@@ -182,6 +182,9 @@ base_langkit_docs = {
         Decrease the reference count to an analysis context. Destruction
         happens when the ref-count reaches 0.
     """,
+    'langkit.context_hash': """
+        Return a hash for this context, to be used in hash tables.
+    """,
     'langkit.context_discard_errors_in_populate_lexical_env': """
         Debug helper. Set whether Property_Error exceptions raised in
         Populate_Lexical_Env should be discarded. They are by default.
@@ -289,6 +292,21 @@ base_langkit_docs = {
         % endif
     """,
 
+    'langkit.unit_context': """
+        Return the context that owns this unit.
+    """,
+    'langkit.unit_hash': """
+        Return a hash for this unit, to be used in hash tables.
+    """,
+    'langkit.unit_incref': """
+        Increase the reference count to an analysis unit.
+        % if lang == 'c':
+            Return the reference for convenience.
+        % endif
+    """,
+    'langkit.unit_decref': """
+        Decrease the reference count to an analysis unit.
+    """,
     'langkit.unit_reparse_file': """
         Reparse an analysis unit from the associated file. If Charset is empty
         or ${null}, use the last charset successfuly used for this unit,
@@ -360,18 +378,6 @@ base_langkit_docs = {
     """,
     'langkit.unit_diagnostics': """
         Return an array that contains the diagnostics associated to this unit.
-    """,
-    'langkit.unit_incref': """
-        Increase the reference count to an analysis unit.
-        % if lang == 'c':
-            Return the reference for convenience.
-        % endif
-    """,
-    'langkit.unit_decref': """
-        Decrease the reference count to an analysis unit.
-    """,
-    'langkit.unit_context': """
-        Return the context that owns this unit.
     """,
 
     'langkit.unit_populate_lexical_env': """

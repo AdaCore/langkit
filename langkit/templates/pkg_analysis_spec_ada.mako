@@ -132,6 +132,9 @@ package ${ada_lib_name}.Analysis is
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
+   function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
+   ${ada_doc('langkit.context_hash', 3)}
+
    function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean;
    --  Return whether Context keeps trivia when parsing units
 
@@ -213,6 +216,9 @@ package ${ada_lib_name}.Analysis is
 
    function Context (Unit : Analysis_Unit'Class) return Analysis_Context;
    ${ada_doc('langkit.unit_context', 3)}
+
+   function Hash (Unit : Analysis_Unit) return Ada.Containers.Hash_Type;
+   ${ada_doc('langkit.unit_hash', 3)}
 
    procedure Inc_Ref (Unit : Analysis_Unit'Class);
    ${ada_doc('langkit.unit_incref', 3)}

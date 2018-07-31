@@ -270,10 +270,6 @@ private package ${ada_lib_name}.Implementation is
       function Hash (Info : Entity_Info) return Hash_Type;
    % endif
 
-   % if T.AnalysisUnitType.requires_hash_function:
-      function Hash (Unit : Internal_Unit) return Hash_Type;
-   % endif
-
    ${struct_types.decl_hash(T.entity)}
 
    --------------------------
@@ -1136,6 +1132,9 @@ private package ${ada_lib_name}.Implementation is
      ) return Internal_Context;
    --  Implementation for Analysis.Create
 
+   function Hash (Context : Internal_Context) return Hash_Type;
+   --  Implementation for Analysis.Hash
+
    function Has_With_Trivia (Context : Internal_Context) return Boolean;
    --  Implementation for Analysis.Has_With_Trivia
 
@@ -1236,6 +1235,9 @@ private package ${ada_lib_name}.Implementation is
 
    function Context (Unit : Internal_Unit) return Internal_Context;
    --  Implementation for Analysis.Context
+
+   function Hash (Unit : Internal_Unit) return Hash_Type;
+   --  Implementation for Analysis.Hash
 
    procedure Inc_Ref (Unit : Internal_Unit);
    --  Implementation for Analysis.Inc_Ref
