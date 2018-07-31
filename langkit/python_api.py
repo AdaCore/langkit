@@ -163,7 +163,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: 'bool'),
             (T.LongType, lambda _: 'int'),
             (T.CharacterType, lambda _: 'unicode'),
-            (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
+            (T.EnvRebindingsType, lambda _: 'EnvRebindings'),
             (T.TokenType, lambda _: 'Token'),
             (T.SymbolType, lambda _: 'unicode'),
             (ct.ASTNodeType, lambda t: t.kwless_raw_name.camel),
@@ -172,5 +172,5 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitType, lambda t: t.api_name),
             (ct.StructType, lambda _: type.name.camel),
             (T.AnalysisUnitKind, lambda _: 'str'),
-            (T.BigIntegerType, lambda _: 'long'),
+            (T.BigIntegerType, lambda _: 'int'),
         ])
