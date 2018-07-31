@@ -1022,6 +1022,9 @@ private package ${ada_lib_name}.Implementation is
       Templates_Unit : Internal_Unit := No_Analysis_Unit;
       --  Special analysis unit used only as a containing unit to parse
       --  templates in the context of tree rewriting.
+
+      Serial_Number : Version_Number;
+      --  Serial number that is unique to this analysis context instance
    end record;
 
    type Analysis_Unit_Type is limited record

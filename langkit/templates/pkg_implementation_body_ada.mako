@@ -75,6 +75,9 @@ ${(exts.with_clauses(with_clauses + [
 
 package body ${ada_lib_name}.Implementation is
 
+   Next_Context_Serial_Number : Version_Number := 0;
+   --  Serial number to use for the next analysis context to create
+
    generic
       type T (<>) is limited private;
       type T_Access is access all T;
@@ -255,8 +258,11 @@ package body ${ada_lib_name}.Implementation is
          Cache_Version => <>,
 
          Rewriting_Handle => <>,
-         Templates_Unit => <>);
+         Templates_Unit => <>,
 
+         Serial_Number => Next_Context_Serial_Number);
+
+      Next_Context_Serial_Number := Next_Context_Serial_Number + 1;
       Initialize (Context.Parser);
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
       return Context;
