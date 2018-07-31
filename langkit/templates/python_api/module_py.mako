@@ -1109,6 +1109,18 @@ class ${root_astnode_name}(object):
         """
         return isinstance(self, tuple(types))
 
+    def cast(self, typ):
+        """
+        Fluent interface style method. Returns self, raises an error if self is
+        not of type ``typ``.
+
+        :type typ: () -> T
+        :rtype: T
+
+        """
+        assert isinstance(self, typ)
+        return self
+
     class _node_c_type(_hashable_void_p):
         pass
 
