@@ -562,16 +562,6 @@ package body ${ada_lib_name}.Analysis is
    function Image (Node : ${root_entity.api_name}'Class) return String is
      (Image (Node.Image));
 
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash
-     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type is
-   begin
-      return Hash_Entity (Node.Internal);
-   end Hash;
-
    -----------------------
    -- Entity converters --
    -----------------------
@@ -595,6 +585,16 @@ package body ${ada_lib_name}.Analysis is
    -----------------------
    -- Entity primitives --
    -----------------------
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash
+     (Node : ${root_entity.api_name}) return Ada.Containers.Hash_Type is
+   begin
+      return Hash_Entity (Node.Internal);
+   end Hash;
 
    ----------
    -- Kind --

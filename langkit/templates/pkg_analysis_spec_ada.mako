@@ -86,10 +86,6 @@ package ${ada_lib_name}.Analysis is
    function Image (Node : ${root_entity.api_name}'Class) return String;
    --  Like Short_Image, also including its rebinding metadata
 
-   function Hash
-     (Node : ${root_entity.api_name}'Class) return Ada.Containers.Hash_Type;
-   --  Generic hash function, to be used for nodes as keys in hash tables
-
    --------------------
    -- Unit providers --
    --------------------
@@ -513,6 +509,10 @@ package ${ada_lib_name}.Analysis is
       function As_${e.el_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
    % endfor
+
+   function Hash
+     (Node : ${root_entity.api_name}) return Ada.Containers.Hash_Type;
+   --  Generic hash function, to be used for nodes as keys in hash tables
    pragma Warnings (On, "defined after private extension");
 
 private
