@@ -218,22 +218,21 @@ private package ${ada_lib_name}.Implementation is
      (Unit_T               => Internal_Unit,
       No_Unit              => No_Analysis_Unit,
       Get_Version          => Version,
-      Element_T            => ${root_node_type_name},
-      Element_Metadata     => ${T.env_md.name},
-      No_Element           => null,
+      Node_Type            => ${root_node_type_name},
+      Node_Metadata        => ${T.env_md.name},
+      No_Node              => null,
       Empty_Metadata       => No_Metadata,
-      Element_Hash         => Named_Hash,
+      Node_Hash            => Named_Hash,
       Metadata_Hash        => Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
-      Element_Image        => AST_Envs_Element_Image,
+      Node_Image           => AST_Envs_Element_Image,
       Register_Rebinding   => Register_Rebinding);
 
    use AST_Envs;
 
    function Create
-     (El : ${root_node_type_name}; Info : Entity_Info)
-      return Entity;
+     (Node : ${root_node_type_name}; Info : Entity_Info) return Entity;
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
    --  Hash function to use in the public API. It's like the regular one, but

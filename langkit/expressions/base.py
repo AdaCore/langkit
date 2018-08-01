@@ -1287,7 +1287,7 @@ class ResolvedExpression(object):
         saved = SavedExpr('Saved', self)
         return (
             saved,
-            FieldAccess.Expr(saved.result_var_expr, fields['el'], []),
+            FieldAccess.Expr(saved.result_var_expr, fields['node'], []),
             FieldAccess.Expr(saved.result_var_expr, fields['info'], []),
         )
 
@@ -2217,7 +2217,7 @@ class GetSymbol(AbstractExpression):
     def construct(self):
         node = construct(self.node_expr)
         if node.type.is_entity_type:
-            node = FieldAccessExpr(node, 'El', node.type.astnode,
+            node = FieldAccessExpr(node, 'Node', node.type.astnode,
                                    do_explicit_incref=False)
         check_source_language(
             node.type.is_ast_node,

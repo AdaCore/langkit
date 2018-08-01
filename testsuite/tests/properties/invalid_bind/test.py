@@ -47,7 +47,7 @@ def run(name, eq_prop):
 
         @langkit_property(warn_on_unused=False, dynamic_vars=[dyn_node])
         def prop4(other=T.BazNode.entity):
-            return other.el == dyn_node
+            return other.node == dyn_node
 
         @langkit_property(warn_on_unused=False)
         def prop_a(other=T.BazNode.entity):

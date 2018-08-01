@@ -1130,7 +1130,7 @@ class ${root_astnode_name}(object):
         Internal helper to wrap a low-level entity value into an instance of
         the the appropriate high-level Python wrapper subclass.
         """
-        node_c_value = c_value.el
+        node_c_value = c_value.node
         if not node_c_value:
             return None
 
@@ -1335,7 +1335,7 @@ ${struct_types.decl(struct_type)}
 # For performance, allocate a single C API entity for all uses of null
 # entities.
 ${c_entity}._null_value = ${c_entity}()
-${c_entity}._null_value.el = None
+${c_entity}._null_value.node = None
 
 ${array_types.base_decl()}
 ${array_types.decl(T.root_node.array)}

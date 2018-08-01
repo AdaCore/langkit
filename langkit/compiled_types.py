@@ -1659,7 +1659,7 @@ class EntityType(StructType):
 
         super(EntityType, self).__init__(
             name, None, None,
-            [('el', BuiltinField(self.astnode, doc='The stored AST node')),
+            [('node', BuiltinField(self.astnode, doc='The stored AST node')),
              ('info', BuiltinField(self.astnode.entity_info(),
                                    access_needs_incref=True,
                                    doc='Entity info for this node'))],

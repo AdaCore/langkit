@@ -25,7 +25,7 @@ class FooNode(ASTNode):
     cast_null_node = Property(Self.null_node.cast(T.Name), public=True)
 
     match_null_node = Property(
-        Self.null_node.el.match(
+        Self.null_node.node.match(
             lambda l=T.Literal: l,
             lambda n=T.Name: n,
             lambda others: others

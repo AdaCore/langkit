@@ -33,7 +33,7 @@ package body Langkit_Support.Lexical_Env is
                    then Get_Version (Owner) else 0)));
 
    function OK_For_Rebindings (Self : Lexical_Env) return Boolean is
-     (Self.Kind = Primary and then Env_Node (Self) /= No_Element);
+     (Self.Kind = Primary and then Env_Node (Self) /= No_Node);
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
@@ -64,7 +64,7 @@ package body Langkit_Support.Lexical_Env is
       Key           : Symbol_Type;
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
-      Metadata      : Element_Metadata := Empty_Metadata)
+      Metadata      : Node_Metadata := Empty_Metadata)
       return Lookup_Result_Array;
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
@@ -116,7 +116,7 @@ package body Langkit_Support.Lexical_Env is
    --------------------
 
    function Dyn_Env_Getter
-     (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter is
+     (Resolver : Lexical_Env_Resolver; Node : Node_Type) return Env_Getter is
    begin
       return Env_Getter'(True, Null_Lexical_Env, Node, Resolver);
    end Dyn_Env_Getter;
@@ -161,7 +161,7 @@ package body Langkit_Support.Lexical_Env is
          declare
             R : constant Lexical_Env_Resolver := Self.Resolver;
             E : constant Entity :=
-              (El => Self.Node, Info => No_Entity_Info);
+              (Node => Self.Node, Info => No_Entity_Info);
          begin
 
             --  We use the share returned by the resolver, so no need for
@@ -306,11 +306,10 @@ package body Langkit_Support.Lexical_Env is
    -- Create --
    ------------
 
-   function Create (El : Element_T; MD : Element_Metadata) return Entity is
+   function Create (Node : Node_Type; MD : Node_Metadata) return Entity is
    begin
-      return Entity'
-        (El      => El,
-         Info    => (MD => MD, Rebindings => null));
+      return Entity'(Node => Node,
+                     Info => (MD => MD, Rebindings => null));
    end Create;
 
    ----------------
@@ -319,12 +318,12 @@ package body Langkit_Support.Lexical_Env is
 
    function Equivalent (L, R : Entity) return Boolean is
    begin
-      if L.El /= R.El then
+      if L.Node /= R.Node then
          return False;
       end if;
 
-      --  All null element are equals, regardless of their entity info
-      if L.El = No_Element then
+      --  All null nodes are equals, regardless of their entity info
+      if L.Node = No_Node then
          return True;
       end if;
 
@@ -338,7 +337,7 @@ package body Langkit_Support.Lexical_Env is
 
    function Create
      (Parent            : Env_Getter;
-      Node              : Element_T;
+      Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env is
    begin
@@ -366,16 +365,16 @@ package body Langkit_Support.Lexical_Env is
    procedure Add
      (Self     : Lexical_Env;
       Key      : Symbol_Type;
-      Value    : Element_T;
-      MD       : Element_Metadata := Empty_Metadata;
+      Value    : Node_Type;
+      MD       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
    is
       use Internal_Envs;
 
-      Element : constant Internal_Map_Element := (Value, MD, Resolver);
-      C       : Cursor;
-      Dummy   : Boolean;
-      Map     : Internal_Envs.Map renames Self.Env.Map.all;
+      Node  : constant Internal_Map_Node := (Value, MD, Resolver);
+      C     : Cursor;
+      Dummy : Boolean;
+      Map   : Internal_Envs.Map renames Self.Env.Map.all;
    begin
       --  See Empty_Env's documentation
 
@@ -384,18 +383,15 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Self.Env.Lookup_Cache_Valid := False;
-      Map.Insert (Key, Internal_Map_Element_Vectors.Empty_Vector, C, Dummy);
-      Reference (Map, C).Element.Append (Element);
+      Map.Insert (Key, Internal_Map_Node_Vectors.Empty_Vector, C, Dummy);
+      Reference (Map, C).Element.Append (Node);
    end Add;
 
    ------------
    -- Remove --
    ------------
 
-   procedure Remove
-     (Self  : Lexical_Env;
-      Key   : Symbol_Type;
-      Value : Element_T)
+   procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
    is
       V : constant Internal_Envs.Reference_Type :=
          Self.Env.Map.Reference (Key);
@@ -409,7 +405,7 @@ package body Langkit_Support.Lexical_Env is
       --  this in place (using V.Pop) as we need to preserve the order of
       --  elements.
       for I in reverse 1 .. V.Length loop
-         if V.Get (I).Element = Value then
+         if V.Get (I).Node = Value then
             V.Remove_At (I);
             exit;
          end if;
@@ -424,7 +420,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Reference
      (Self            : Lexical_Env;
-      Referenced_From : Element_T;
+      Referenced_From : Node_Type;
       Resolver        : Lexical_Env_Resolver;
       Kind            : Ref_Kind := Normal)
    is
@@ -470,97 +466,95 @@ package body Langkit_Support.Lexical_Env is
       Key           : Symbol_Type;
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
-      Metadata      : Element_Metadata := Empty_Metadata)
+      Metadata      : Node_Metadata := Empty_Metadata)
       return Lookup_Result_Array
    is
 
       Local_Results      : Lookup_Result_Vector;
       Current_Rebindings : Env_Rebindings;
 
-      procedure Get_Refd_Elements (Self : in out Referenced_Env);
+      procedure Get_Refd_Nodes (Self : in out Referenced_Env);
 
       procedure Append_Result
-        (El         : Internal_Map_Element;
-         MD         : Element_Metadata;
+        (Node       : Internal_Map_Node;
+         MD         : Node_Metadata;
          Rebindings : Env_Rebindings);
       --  Add E to results, if it passes the Can_Reach filter. Return whether
       --  result was appended or not.
 
       use Internal_Envs;
 
-      function Get_Elements (Env : Lexical_Env) return Boolean;
-      --  Lookup for matching elements in Env's internal map and append them to
+      function Get_Nodes (Env : Lexical_Env) return Boolean;
+      --  Lookup for matching nodes in Env's internal map and append them to
       --  Local_Results. Return whether we found some.
 
-      ------------------
-      -- Get_Elements --
-      ------------------
+      ---------------
+      -- Get_Nodes --
+      ---------------
 
-      function Get_Elements (Env : Lexical_Env) return Boolean is
-         C        : Cursor := Internal_Envs.No_Element;
-         Elements : Internal_Map_Element_Vectors.Vector;
+      function Get_Nodes (Env : Lexical_Env) return Boolean is
+         C     : Cursor := Internal_Envs.No_Element;
+         Nodes : Internal_Map_Node_Vectors.Vector;
       begin
          if Env.Env.Map /= null then
             C := Env.Env.Map.Find (Key);
          end if;
 
          if Has_Element (C) then
-            Elements := Element (C);
+            Nodes := Element (C);
 
             --  We iterate in reverse, so that last inserted results are
             --  returned first.
 
             --  TODO??? Use "for ... of reverse" next GPL release
-            for I in reverse Elements.First_Index .. Elements.Last_Index loop
-               Append_Result
-                 (Elements.Get (I),
-                  Metadata,
-                  Current_Rebindings);
+            for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
+               Append_Result (Nodes.Get (I), Metadata, Current_Rebindings);
             end loop;
             return True;
          end if;
 
          return False;
-      end Get_Elements;
+      end Get_Nodes;
 
       -------------------
       -- Append_Result --
       -------------------
 
       procedure Append_Result
-        (El         : Internal_Map_Element;
-         MD         : Element_Metadata;
+        (Node       : Internal_Map_Node;
+         MD         : Node_Metadata;
          Rebindings : Env_Rebindings)
       is
          E : constant Entity :=
-           (El   => El.Element,
-            Info => (MD         => Combine (El.MD, MD),
+           (Node => Node.Node,
+            Info => (MD         => Combine (Node.MD, MD),
                      Rebindings => Rebindings));
       begin
 
          if Has_Trace then
             Traces.Trace
-              (Me, "Found " & Image (Element_Image (E.El, False)));
+              (Me, "Found " & Image (Node_Image (E.Node, False)));
          end if;
 
          declare
             Resolved_Entity : constant Entity :=
-              (if El.Resolver = null
+              (if Node.Resolver = null
                then E
-               else El.Resolver.all (E));
+               else Node.Resolver.all (E));
          begin
             Local_Results.Append
-              (Lookup_Result_Item'(E                    => Resolved_Entity,
-                                   Filter_From          => El.Resolver = null,
-                                   Override_Filter_Node => No_Element));
+              (Lookup_Result_Item'
+                 (E                    => Resolved_Entity,
+                  Filter_From          => Node.Resolver = null,
+                  Override_Filter_Node => No_Node));
          end;
       end Append_Result;
 
-      -----------------------
-      -- Get_Refd_Elements --
-      -----------------------
+      --------------------
+      -- Get_Refd_Nodes --
+      --------------------
 
-      procedure Get_Refd_Elements (Self : in out Referenced_Env) is
+      procedure Get_Refd_Nodes (Self : in out Referenced_Env) is
          Env : Lexical_Env := Empty_Env;
          --  Make sure this holds a valid environment at all times so that the
          --  exception handler below can always call Dec_Ref on it.
@@ -616,7 +610,7 @@ package body Langkit_Support.Lexical_Env is
             Dec_Ref (Env);
             Self.Being_Visited := False;
             raise;
-      end Get_Refd_Elements;
+      end Get_Refd_Nodes;
 
       Env : Lexical_Env;
 
@@ -649,7 +643,7 @@ package body Langkit_Support.Lexical_Env is
             --  Just concatenate lookups for all grouped environments
             Traces.Increase_Indent (Me);
             declare
-               MD : constant Element_Metadata :=
+               MD : constant Node_Metadata :=
                   Combine (Self.Env.Default_MD, Metadata);
             begin
                for E of Self.Env.Grouped_Envs.all loop
@@ -714,25 +708,25 @@ package body Langkit_Support.Lexical_Env is
 
       Current_Rebindings := Rebindings;
 
-      --  Phase 1: Get elements in own env if there are any
+      --  Phase 1: Get nodes in own env if there are any
       Env := Extract_Rebinding (Current_Rebindings, Self);
-      if not Get_Elements (Env) and then Env /= Self then
-         --  Getting the elements in Self (env before extract rebinding) should
-         --  still have the proper env rebindings, so we do Get_Elements in the
+      if not Get_Nodes (Env) and then Env /= Self then
+         --  Getting the nodes in Self (env before extract rebinding) should
+         --  still have the proper env rebindings, so we do Get_Nodes in the
          --  context of Old rebindings. TODO??? This code is kludgy ugly. There
          --  might be a better way, for example, passing rebindings to
-         --  Get_Elements explicitly.
+         --  Get_Nodes explicitly.
          declare
             Tmp : Env_Rebindings;
          begin
             Tmp := Current_Rebindings;
             Current_Rebindings := Rebindings;
-            Dummy := Get_Elements (Self);
+            Dummy := Get_Nodes (Self);
             Current_Rebindings := Tmp;
          end;
       end if;
 
-      --  Phase 2: Get elements in transitive and prioritary referenced envs
+      --  Phase 2: Get nodes in transitive and prioritary referenced envs
 
       for I in Self.Env.Referenced_Envs.First_Index
             .. Self.Env.Referenced_Envs.Last_Index
@@ -740,11 +734,11 @@ package body Langkit_Support.Lexical_Env is
          if Self.Env.Referenced_Envs.Get_Access (I).Kind
            in Transitive | Prioritary
          then
-            Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+            Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
          end if;
       end loop;
 
-      --  Phase 3: Get elements in parent envs
+      --  Phase 3: Get nodes in parent envs
 
       if Recursive or Self.Env.Transitive_Parent then
          declare
@@ -772,7 +766,7 @@ package body Langkit_Support.Lexical_Env is
          end;
       end if;
 
-      --  Phase 4: Get elements in normal referenced envs
+      --  Phase 4: Get nodes in normal referenced envs
 
       if Recursive then
          if Has_Trace then
@@ -787,7 +781,7 @@ package body Langkit_Support.Lexical_Env is
             if Self.Env.Referenced_Envs.Get_Access (I).Kind
               not in Transitive | Prioritary
             then
-               Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+               Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
             end if;
          end loop;
 
@@ -822,7 +816,7 @@ package body Langkit_Support.Lexical_Env is
    function Get
      (Self      : Lexical_Env;
       Key       : Symbol_Type;
-      From      : Element_T := No_Element;
+      From      : Node_Type := No_Node;
       Recursive : Boolean := True)
       return Entity_Array
    is
@@ -840,10 +834,10 @@ package body Langkit_Support.Lexical_Env is
             Get_Internal (Self, Key, Recursive, null, Empty_Metadata);
       begin
          for El of Results loop
-            if From = No_Element
-              or else (if El.Override_Filter_Node /= No_Element
+            if From = No_Node
+              or else (if El.Override_Filter_Node /= No_Node
                        then Can_Reach (El.Override_Filter_Node, From)
-                       else Can_Reach (El.E.El, From))
+                       else Can_Reach (El.E.Node, From))
               or else not El.Filter_From
             then
                FV.Append (El.E);
@@ -872,7 +866,7 @@ package body Langkit_Support.Lexical_Env is
    function Get_First
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
-      From       : Element_T := No_Element;
+      From       : Node_Type := No_Node;
       Recursive  : Boolean := True) return Entity
    is
       FV : Entity_Vectors.Vector;
@@ -890,10 +884,10 @@ package body Langkit_Support.Lexical_Env is
       begin
 
          for El of V loop
-            if From = No_Element
-              or else (if El.Override_Filter_Node /= No_Element
+            if From = No_Node
+              or else (if El.Override_Filter_Node /= No_Node
                        then Can_Reach (El.Override_Filter_Node, From)
-                       else Can_Reach (El.E.El, From))
+                       else Can_Reach (El.E.Node, From))
               or else not El.Filter_From
             then
                FV.Append (El.E);
@@ -907,7 +901,7 @@ package body Langkit_Support.Lexical_Env is
 
          return Ret : constant Entity :=
            (if FV.Length > 0 then FV.First_Element
-            else (No_Element, No_Entity_Info))
+            else (No_Node, No_Entity_Info))
          do
             FV.Destroy;
             if Has_Trace then
@@ -974,7 +968,7 @@ package body Langkit_Support.Lexical_Env is
 
    function Group
      (Envs    : Lexical_Env_Array;
-      With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env
+      With_Md : Node_Metadata := Empty_Metadata) return Lexical_Env
    is
       V : Lexical_Env_Vectors.Vector;
 
@@ -1102,7 +1096,7 @@ package body Langkit_Support.Lexical_Env is
             --  it's convenient for testing not to allocate it.
             if Self.Env.Map /= null then
                for Elts of Self.Env.Map.all loop
-                  Internal_Map_Element_Vectors.Destroy (Elts);
+                  Internal_Map_Node_Vectors.Destroy (Elts);
                end loop;
                Destroy (Self.Env.Map);
             end if;
@@ -1238,7 +1232,7 @@ package body Langkit_Support.Lexical_Env is
       while
          First_Rebindable_Parent /= Empty_Env
          and then
-           (Env_Node (First_Rebindable_Parent) = No_Element
+           (Env_Node (First_Rebindable_Parent) = No_Node
             or else not Is_Rebindable (Env_Node (First_Rebindable_Parent)))
       loop
          declare
@@ -1306,7 +1300,7 @@ package body Langkit_Support.Lexical_Env is
    function Image (Self : Env_Rebindings) return Text_Type is
 
       function Image (Self : Lexical_Env) return Text_Type is
-        (Element_Image (Env_Node (Self)));
+        (Node_Image (Env_Node (Self)));
 
       function Rebinding_Image (Self : Env_Rebindings) return Text_Type is
         (Image (Self.New_Env));
@@ -1402,7 +1396,7 @@ package body Langkit_Support.Lexical_Env is
             when True =>
                return Combine
                  ((1,
-                   Element_Hash (Getter.Node),
+                   Node_Hash (Getter.Node),
                    Hash (Convert (Getter.Resolver))));
             when False =>
                return Combine (0, Hash (Getter.Env));
@@ -1446,7 +1440,7 @@ package body Langkit_Support.Lexical_Env is
               ((Base_Hash,
                 Hash (Env.Parent),
                 (if Env.Transitive_Parent then 1 else 0),
-                Element_Hash (Env.Node),
+                Node_Hash (Env.Node),
                 Hash (Env.Referenced_Envs),
                 Hash (Env.Map)));
 
@@ -1481,10 +1475,10 @@ package body Langkit_Support.Lexical_Env is
      (L.all < R.all);
 
    package Sorted_Envs is new Ada.Containers.Ordered_Maps
-     (Symbol_Type,
-      Element_Type    => Internal_Map_Element_Vectors.Vector,
-      "<"             => "<",
-      "="             => Internal_Map_Element_Vectors."=");
+     (Key_Type     => Symbol_Type,
+      Element_Type => Internal_Map_Node_Vectors.Vector,
+      "<"          => "<",
+      "="          => Internal_Map_Node_Vectors."=");
 
    function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map;
 
@@ -1521,21 +1515,21 @@ package body Langkit_Support.Lexical_Env is
       Sub_Prefix : constant String := Prefix & "  ";
 
       function Short_Image
-        (N : Element_T) return String
-      is (if N = No_Element then "<null>"
-          else Image (Element_Image (N, False)));
-      --  Wrapper around Element_Image to handle null elements.
+        (N : Node_Type) return String
+      is (if N = No_Node then "<null>"
+          else Image (Node_Image (N, False)));
+      --  Wrapper around Node_Image to handle null nodes.
       --
       --  TODO??? This is slightly hackish, because we're converting a wide
       --  string back to string. But since we're using this solely for
       --  test/debug purposes, it should not matter. Still, would be good to
       --  have Text_Type everywhere at some point.
 
-      function Image (El : Internal_Map_Element) return String is
-        (Short_Image (El.Element));
-      --  Wrapper around Element_Image to format a lexical env map element
+      function Image (Node : Internal_Map_Node) return String is
+        (Short_Image (Node.Node));
+      --  Wrapper around Node_Image to format a lexical env map node
 
-      function Image is new Internal_Map_Element_Vectors.Image (Image);
+      function Image is new Internal_Map_Node_Vectors.Image (Image);
 
       procedure New_Arg;
       --  Helper to be called before emitting a new lexical env. "argument".
@@ -1581,10 +1575,10 @@ package body Langkit_Support.Lexical_Env is
                        then Parent_Env_Id else "null"));
          end if;
 
-         if Env_Node (Self) /= No_Element then
+         if Env_Node (Self) /= No_Node then
             New_Arg;
             Append (Result, "Node="
-                    & Image (Element_Image (Env_Node (Self), False)));
+                    & Image (Node_Image (Env_Node (Self), False)));
          end if;
       end if;
 
@@ -1763,12 +1757,12 @@ package body Langkit_Support.Lexical_Env is
    -- Env_Node --
    --------------
 
-   function Env_Node (Self : Lexical_Env) return Element_T is
+   function Env_Node (Self : Lexical_Env) return Node_Type is
    begin
       return (case Self.Kind is
               when Primary  => Self.Env.Node,
               when Orphaned => Env_Node (Self.Env.Orphaned_Env),
-              when Grouped  => No_Element,
+              when Grouped  => No_Node,
               when Rebound  => Env_Node (Self.Env.Rebound_Env));
    end Env_Node;
 

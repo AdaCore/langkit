@@ -49,7 +49,7 @@ class Block(DefNode):
                          md=Entity.info.md,
                          rebindings=rbdng))
 
-        return New(Block.entity, el=Self, info=e_info)
+        return New(Block.entity, node=Self, info=e_info)
 
     env_spec = EnvSpec(
         add_to_env(mappings=New(T.env_assoc, key=Self.name, val=Self)),

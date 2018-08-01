@@ -21,10 +21,10 @@ with Langkit_Support.Vectors;
 --  - You can reference other envs, which are virtually treated like parent
 --    envs too.
 --
---  - You can annotate both whole environments and env elements with metadata,
---    giving more information about the elements. The consequence is that
---    metadata needs to be combinable, eg. you need to be able to create a
---    single metadata record from two metadata records.
+--  - You can annotate both whole environments and nodes with metadata, giving
+--    more information about the fnodes. The consequence is that metadata needs
+--    to be combinable, eg. you need to be able to create a single metadata
+--    record from two metadata records.
 --
 --  TODO??? For the moment, everything is public, because it is not yet clear
 --  what the interaction interface will be with the generated library. We might
@@ -37,34 +37,32 @@ generic
    --  Unit is passed solely for the Get_Version function, that is used in
    --  cache invalidation.
 
-   type Element_T is private;
-   type Element_Metadata is private;
-   No_Element     : Element_T;
-   Empty_Metadata : Element_Metadata;
+   type Node_Type is private;
+   type Node_Metadata is private;
+   No_Node        : Node_Type;
+   Empty_Metadata : Node_Metadata;
 
-   with function Element_Hash (Element : Element_T) return Hash_Type;
-   with function Metadata_Hash (Metadata : Element_Metadata) return Hash_Type;
+   with function Node_Hash (Node : Node_Type) return Hash_Type;
+   with function Metadata_Hash (Metadata : Node_Metadata) return Hash_Type;
 
    with procedure Raise_Property_Error (Message : String := "");
 
-   with function Combine (L, R : Element_Metadata) return Element_Metadata;
+   with function Combine (L, R : Node_Metadata) return Node_Metadata;
 
-   with function Can_Reach (El, From : Element_T) return Boolean is <>;
+   with function Can_Reach (Node, From : Node_Type) return Boolean is <>;
    --  Function that will allow filtering nodes depending on the origin node of
    --  the request. In practice, this is used to implement sequential semantics
-   --  for lexical envs, as-in, an element declared after another is not yet
-   --  visible.
+   --  for lexical envs, as-in, node declared after another is not yet visible.
 
-   with function Is_Rebindable (Element : Element_T) return Boolean is <>;
-   --  Return whether a lexical environment whose node is Element can be
-   --  rebound.
+   with function Is_Rebindable (Node : Node_Type) return Boolean is <>;
+   --  Return whether a lexical environment whose node is Node can be rebound
 
-   with function Element_Image (El    : Element_T;
-                                Short : Boolean := True) return Text_Type;
+   with function Node_Image
+     (Node  : Node_Type; Short : Boolean := True) return Text_Type;
 
    with procedure Register_Rebinding
-     (Element : Element_T; Rebinding : System.Address);
-   --  Register a rebinding to be destroyed when Element is destroyed
+     (Node : Node_Type; Rebinding : System.Address);
+   --  Register a rebinding to be destroyed when Node is destroyed
 
 package Langkit_Support.Lexical_Env is
 
@@ -96,7 +94,7 @@ package Langkit_Support.Lexical_Env is
    --------------
 
    type Entity_Info is record
-      MD         : Element_Metadata;
+      MD         : Node_Metadata;
       Rebindings : Env_Rebindings := null;
    end record
       with Convention => C;
@@ -104,15 +102,15 @@ package Langkit_Support.Lexical_Env is
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
 
    type Entity is record
-      El   : Element_T;
+      Node : Node_Type;
       Info : Entity_Info;
    end record;
-   --  Wrapper structure to contain both the 'real' env element that the user
-   --  wanted to store, and its associated metadata.
+   --  Wrapper structure to contain both the 'real' node that the user wanted
+   --  to store, and its associated metadata.
 
-   function Create (El : Element_T; MD : Element_Metadata) return Entity;
-   --  Constructor that returns an Entity from an Element_T and an
-   --  Element_Metadata instances.
+   function Create (Node : Node_Type; MD : Node_Metadata) return Entity;
+   --  Constructor that returns an Entity from an Node_Type and an
+   --  Node_Metadata instances.
 
    function Equivalent (L, R : Entity) return Boolean;
    --  Return whether we can consider that L and R are equivalent entities
@@ -184,7 +182,7 @@ package Langkit_Support.Lexical_Env is
 
       case Dynamic is
          when True =>
-            Node     : Element_T;
+            Node     : Node_Type;
             Resolver : Lexical_Env_Resolver;
             --  Data and callable to resolve this getter
 
@@ -205,7 +203,7 @@ package Langkit_Support.Lexical_Env is
    --  Create a static Env_Getter (i.e. pointer to environment)
 
    function Dyn_Env_Getter
-     (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter;
+     (Resolver : Lexical_Env_Resolver; Node : Node_Type) return Env_Getter;
    --  Create a dynamic Env_Getter (i.e. function and closure to compute an
    --  environment).
 
@@ -268,19 +266,19 @@ package Langkit_Support.Lexical_Env is
 
    function Image (Self : Env_Rebindings) return Text_Type;
 
-   -------------------------------------
-   -- Arrays of elements and entities --
-   -------------------------------------
+   ----------------------------------
+   -- Arrays of nodes and entities --
+   ----------------------------------
 
    package Entity_Vectors is new Langkit_Support.Vectors
      (Entity, Small_Vector_Capacity => 2);
-   --  Vectors used to store collections of environment elements, as values of
-   --  a lexical environment map. We want to use vectors internally.
+   --  Vectors used to store collections of nodes, as values of a lexical
+   --  environment map. We want to use vectors internally.
 
-   type Element_Array is array (Positive range <>) of Element_T;
+   type Node_Array is array (Positive range <>) of Node_Type;
 
    subtype Entity_Array is Entity_Vectors.Elements_Array;
-   --  Arrays of wrapped elements stored in the environment maps
+   --  Arrays of wrapped nodes stored in the environment maps
 
    -----------------------------
    -- Referenced environments --
@@ -340,7 +338,7 @@ package Langkit_Support.Lexical_Env is
 
    function Create
      (Parent            : Env_Getter;
-      Node              : Element_T;
+      Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env
       with Post => Create'Result.Kind = Primary;
@@ -349,22 +347,19 @@ package Langkit_Support.Lexical_Env is
    procedure Add
      (Self     : Lexical_Env;
       Key      : Symbol_Type;
-      Value    : Element_T;
-      MD       : Element_Metadata := Empty_Metadata;
+      Value    : Node_Type;
+      MD       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
       with Pre => Self.Kind = Primary;
    --  Add Value to the list of values for the key Key, with the metadata MD
 
-   procedure Remove
-     (Self  : Lexical_Env;
-      Key   : Symbol_Type;
-      Value : Element_T)
+   procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
       with Pre => Self.Kind = Primary;
    --  Remove Value from the list of values for the key Key
 
    procedure Reference
      (Self            : Lexical_Env;
-      Referenced_From : Element_T;
+      Referenced_From : Node_Type;
       Resolver        : Lexical_Env_Resolver;
       Kind            : Ref_Kind := Normal)
       with Pre => Self.Kind = Primary;
@@ -410,11 +405,11 @@ package Langkit_Support.Lexical_Env is
    function Get
      (Self      : Lexical_Env;
       Key       : Symbol_Type;
-      From      : Element_T := No_Element;
+      From      : Node_Type := No_Node;
       Recursive : Boolean := True) return Entity_Array;
-   --  Get the array of entities for this Key. If From is given, then
-   --  elements will be filtered according to the Can_Reach primitive given
-   --  as parameter for the generic package.
+   --  Get the array of entities for this Key. If From is given, then nodes
+   --  will be filtered according to the Can_Reach primitive given as parameter
+   --  for the generic package.
    --
    --  If Recursive, look for Key in all Self's parents as well, and in
    --  referenced envs. Otherwise, limit the search to Self.
@@ -425,7 +420,7 @@ package Langkit_Support.Lexical_Env is
    function Get_First
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
-      From       : Element_T := No_Element;
+      From       : Node_Type := No_Node;
       Recursive  : Boolean := True)
       return Entity;
    --  Like Get, but return only the first matching entity. Return a null
@@ -440,12 +435,12 @@ package Langkit_Support.Lexical_Env is
    --  Return the parent lexical env for env Self or Empty_Env if Self has no
    --  parent.
 
-   function Env_Node (Self : Lexical_Env) return Element_T;
-   --  Return the element node associated to Self, if any
+   function Env_Node (Self : Lexical_Env) return Node_Type;
+   --  Return the node associated to Self, if any
 
    function Group
      (Envs    : Lexical_Env_Array;
-      With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env;
+      With_Md : Node_Metadata := Empty_Metadata) return Lexical_Env;
    --  Return a lexical environment that logically groups together multiple
    --  lexical environments. Note that this does not modify the input
    --  environments, however it returns a new owning reference.
@@ -454,8 +449,8 @@ package Langkit_Support.Lexical_Env is
    --  is greater than 1, the result is dynamically allocated.
    --
    --  If With_Md is passed, the resulting env will have the passed metadata
-   --  instance as default metadata. As a result, any env element returned will
-   --  have its metadata combined with the default metadata.
+   --  instance as default metadata. As a result, any node returned will have
+   --  its metadata combined with the default metadata.
 
    function Rebind_Env
       (Base_Env : Lexical_Env;
@@ -496,7 +491,7 @@ package Langkit_Support.Lexical_Env is
       Filter_From : Boolean;
       --  Wether to filter with Can_Reach
 
-      Override_Filter_Node : Element_T := No_Element;
+      Override_Filter_Node : Node_Type := No_Node;
       --  Node to use when filtering with Can_Reach, if different from the
       --  Entity.
    end record;
@@ -521,7 +516,7 @@ package Langkit_Support.Lexical_Env is
       Rebindings : Env_Rebindings;
       --  Rebindings used for this lookup
 
-      Metadata : Element_Metadata;
+      Metadata : Node_Metadata;
       --  Metadata used for this lookup
    end record;
    --  Key in environment lookup caches. Basically the parameters for the Get
@@ -571,33 +566,33 @@ package Langkit_Support.Lexical_Env is
 
    package Lexical_Env_Vectors is new Langkit_Support.Vectors (Lexical_Env);
 
-   type Internal_Map_Element is record
-      Element : Element_T;
-      --  If Resolver is null, this is the element that lexical env lookup must
+   type Internal_Map_Node is record
+      Node : Node_Type;
+      --  If Resolver is null, this is the node that lexical env lookup must
       --  return. Otherwise, it is the argument to pass to Resolver in order to
       --  get the result.
 
-      MD : Element_Metadata;
-      --  Metadata associated to Element
+      MD : Node_Metadata;
+      --  Metadata associated to Node
 
       Resolver : Entity_Resolver;
    end record;
 
-   package Internal_Map_Element_Vectors is new Langkit_Support.Vectors
-     (Internal_Map_Element);
+   package Internal_Map_Node_Vectors is new Langkit_Support.Vectors
+     (Internal_Map_Node);
 
-   subtype Internal_Map_Element_Array is
-      Internal_Map_Element_Vectors.Elements_Array;
+   subtype Internal_Map_Node_Array is
+      Internal_Map_Node_Vectors.Elements_Array;
 
    package Internal_Envs is new Ada.Containers.Hashed_Maps
      (Key_Type        => Symbol_Type,
-      Element_Type    => Internal_Map_Element_Vectors.Vector,
+      Element_Type    => Internal_Map_Node_Vectors.Vector,
       Hash            => Hash,
       Equivalent_Keys => "=",
-      "="             => Internal_Map_Element_Vectors."=");
+      "="             => Internal_Map_Node_Vectors."=");
 
    type Internal_Map is access all Internal_Envs.Map;
-   --  Internal maps of Symbols to vectors of elements
+   --  Internal maps of Symbols to vectors of nodes
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
@@ -628,17 +623,16 @@ package Langkit_Support.Lexical_Env is
             Transitive_Parent : Boolean := False;
             --  Whether the parent link is transitive or not
 
-            Node : Element_T := No_Element;
+            Node : Node_Type := No_Node;
             --  Node for which this environment was created
 
             Referenced_Envs : Referenced_Envs_Vectors.Vector;
             --  A list of environments referenced by this environment
 
             Map : Internal_Map := null;
-            --  Map containing mappings from symbols to elements for this env
-            --  instance. In the generated library, Elements will be AST nodes.
-            --  If the lexical env is refcounted, then it does not own this
-            --  env.
+            --  Map containing mappings from symbols to nodes for this env
+            --  instance. If the lexical env is refcounted, then it does not
+            --  own this env.
 
             Rebindings_Pool : Env_Rebindings_Pool := null;
             --  Cache for all parent-less env rebindings whose Old_Env is the
@@ -670,7 +664,7 @@ package Langkit_Support.Lexical_Env is
                   Grouped_Envs : Lexical_Env_Array_Access;
                   --  Array of lexical environment that are grouped together
 
-                  Default_MD : Element_Metadata := Empty_Metadata;
+                  Default_MD : Node_Metadata := Empty_Metadata;
                   --  Default metadata to use for lookups
 
                when Rebound =>
@@ -741,7 +735,7 @@ private
      (Kind               => Primary,
       Parent             => No_Env_Getter,
       Transitive_Parent  => False,
-      Node               => No_Element,
+      Node               => No_Node,
       Referenced_Envs    => <>,
       Map                => Empty_Env_Map'Access,
       Rebindings_Pool    => null,

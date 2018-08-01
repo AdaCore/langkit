@@ -45,8 +45,7 @@
 
    % if cls.is_entity_type:
       function Create
-         (El : ${cls.el_type.name}; Info : Entity_Info)
-          return ${cls.name};
+        (Node : ${cls.el_type.name}; Info : Entity_Info) return ${cls.name};
    % endif
 
    % if cls.has_equivalent_function:
@@ -103,14 +102,13 @@
       ------------
 
       function Create
-         (El : ${cls.el_type.name}; Info : Entity_Info)
-          return ${cls.name} is
-       begin
-         if El = null then
+        (Node : ${cls.el_type.name}; Info : Entity_Info) return ${cls.name} is
+      begin
+         if Node = null then
             return ${cls.nullexpr};
          end if;
-         return (El => El, Info => Info);
-       end Create;
+         return (Node => Node, Info => Info);
+      end Create;
 
    % endif
 
@@ -142,8 +140,9 @@
       function Trace_Image (R : ${cls.name}) return String is
       begin
          % if cls.is_entity_type:
-            return Trace_Image (Entity'(El   => ${root_node_type_name} (R.El),
-                                        Info => R.Info));
+            return Trace_Image
+              (Entity'(Node => ${root_node_type_name} (R.Node),
+                       Info => R.Info));
          % else:
             return
               ("("

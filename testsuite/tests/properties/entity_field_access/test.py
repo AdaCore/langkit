@@ -58,7 +58,7 @@ class Couple(FooNode):
     @langkit_property()
     def get_entity(md=Metadata):
         return New(Couple.entity,
-                   el=Self,
+                   node=Self,
                    info=New(T.entity_info,
                             md=md,
                             rebindings=No(EnvRebindingsType)))

@@ -24,7 +24,7 @@ package body Support is
             declare
                Img : constant Text_Type := Envs.Image (E.Info.Rebindings);
             begin
-               Put_Line ("  * '" & E.El & "' " & Image (Img));
+               Put_Line ("  * '" & E.Node & "' " & Image (Img));
             end;
          end loop;
       end if;

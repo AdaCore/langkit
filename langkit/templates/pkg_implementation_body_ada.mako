@@ -2847,9 +2847,9 @@ package body ${ada_lib_name}.Implementation is
 
    function Image (Ent : ${T.entity.name}) return Text_Type is
    begin
-      if Ent.El /= null then
+      if Ent.Node /= null then
          declare
-            Node_Image : constant Text_Type := Ent.El.Short_Image;
+            Node_Image : constant Text_Type := Ent.Node.Short_Image;
          begin
             return
             (if Ent.Info.Rebindings /= null
@@ -2897,11 +2897,10 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Create
-      (El : ${root_node_type_name}; Info : Entity_Info)
-       return Entity is
-    begin
-      return (El => El, Info => Info);
-    end Create;
+     (Node : ${root_node_type_name}; Info : Entity_Info) return Entity is
+   begin
+      return (Node => Node, Info => Info);
+   end Create;
 
    -----------------
    -- Hash_Entity --
@@ -2909,7 +2908,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type is
    begin
-      return Combine (Hash (Self.El), Hash (Self.Info.Rebindings));
+      return Combine (Hash (Self.Node), Hash (Self.Info.Rebindings));
    end Hash_Entity;
 
    --------------------
@@ -2919,7 +2918,7 @@ package body ${ada_lib_name}.Implementation is
    function Compare_Entity (Left, Right : ${root_entity.name}) return Boolean
    is
    begin
-      return (Left.El = Right.El
+      return (Left.Node = Right.Node
               and then Left.Info.Rebindings = Right.Info.Rebindings);
    end Compare_Entity;
 
@@ -2984,10 +2983,10 @@ package body ${ada_lib_name}.Implementation is
 
       function Trace_Image (E : Entity) return String is
       begin
-         if E.El = null then
+         if E.Node = null then
             return "None";
          else
-            return ("<|" & Trace_Image (E.El, Decoration => False)
+            return ("<|" & Trace_Image (E.Node, Decoration => False)
                     & " " & Trace_Image (E.Info) & "|>");
          end if;
       end Trace_Image;

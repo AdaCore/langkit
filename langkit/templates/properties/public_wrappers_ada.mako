@@ -33,7 +33,7 @@
          local_vars = []
          unwrap_code = []
          wrap_code = []
-         actuals = ['{} ({}.Internal.El)'
+         actuals = ['{} ({}.Internal.Node)'
                     .format(property.struct.name, self_arg)]
 
          # Build the list of arguments to pass to the property. Unwrap
@@ -42,12 +42,12 @@
          for arg in property.arguments:
             if arg.type.is_entity_type:
                actual = (
-                  '({type} ({name}.Internal.El), {name}.Internal.Info)'
+                  '({type} ({name}.Internal.Node), {name}.Internal.Info)'
                   .format(type=arg.type.el_type.name, name=arg.name)
                )
 
             elif arg.type.is_ast_node:
-               actual = '{type} ({name}.Internal.El)'.format(
+               actual = '{type} ({name}.Internal.Node)'.format(
                   type=arg.type.name,
                   name=arg.name
                )
@@ -66,7 +66,7 @@
                     unwrap_code.extend([
                         "for I in {arg}'Range loop"
                         "   {actual}.Items (I) :="
-                        "      ({typ} ({arg} (I).Internal.El),"
+                        "      ({typ} ({arg} (I).Internal.Node),"
                         "       {arg} (I).Internal.Info);".format(
                             actual=actual,
                             arg=arg.name,
@@ -101,7 +101,7 @@
              return result
 
          if property.type.is_entity_type:
-             wrapped_result = wrap_node('Property_Result.El',
+             wrapped_result = wrap_node('Property_Result.Node',
                                         'Property_Result.Info',
                                         property.type.astnode)
 
@@ -121,7 +121,7 @@
                      "         Property_Result.Items (I);",
                      "   begin",
                      "      Result (I) := {};".format(wrap_node(
-                         'Item.El', 'Item.Info',
+                         'Item.Node', 'Item.Info',
                          property.type.element_type.astnode
                      )),
                      "   end;",

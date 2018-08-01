@@ -510,7 +510,7 @@ package body ${ada_lib_name}.Analysis is
    -------------
 
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
-     (Node.Internal.El = null);
+     (Node.Internal.Node = null);
 
    -------------------
    -- Is_Token_Node --
@@ -520,7 +520,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Is_Token_Node;
+      return Node.Internal.Node.Is_Token_Node;
    end Is_Token_Node;
 
    ---------
@@ -542,7 +542,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return (if Node.Is_Null then "None" else Node.Internal.El.Short_Image);
+      return (if Node.Is_Null then "None" else Node.Internal.Node.Short_Image);
    end Short_Image;
 
    function Short_Image (Node : ${root_entity.api_name}'Class) return String is
@@ -573,7 +573,7 @@ package body ${ada_lib_name}.Analysis is
       function As_${e.el_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name}
       is
-         N : constant ${root_node_type_name} := Node.Internal.El;
+         N : constant ${root_node_type_name} := Node.Internal.Node;
       begin
          if N = null then
             return No_${e.api_name};
@@ -581,7 +581,7 @@ package body ${ada_lib_name}.Analysis is
 
          Check_Safety_Net (Node.Safety_Net);
          if N.all in ${e.el_type.value_type_name()}'Class then
-            return (Internal   => (El => N, Info => Node.Internal.Info),
+            return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          else
             raise Constraint_Error with "Invalid type conversion";
@@ -612,7 +612,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name} is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Kind;
+      return Node.Internal.Node.Kind;
    end Kind;
 
    ---------------
@@ -622,7 +622,7 @@ package body ${ada_lib_name}.Analysis is
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Kind_Name;
+      return Node.Internal.Node.Kind_Name;
    end Kind_Name;
 
    % for e in ctx.entity_types:
@@ -651,7 +651,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Abstract_Children_Count;
+      return Node.Internal.Node.Abstract_Children_Count;
    end Children_Count;
 
    -----------------------
@@ -662,7 +662,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.First_Child_Index;
+      return Node.Internal.Node.First_Child_Index;
    end First_Child_Index;
 
    ----------------------
@@ -673,7 +673,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Last_Child_Index;
+      return Node.Internal.Node.Last_Child_Index;
    end Last_Child_Index;
 
    ---------------
@@ -689,7 +689,7 @@ package body ${ada_lib_name}.Analysis is
       N : ${root_node_type_name};
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Node.Internal.El.Get_Child (Index, Index_In_Bounds, N);
+      Node.Internal.Node.Get_Child (Index, Index_In_Bounds, N);
       Result := Wrap_Node (N, Node.Internal.Info);
    end Get_Child;
 
@@ -703,7 +703,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Wrap_Node (Node.Internal.El.Child (Index), Node.Internal.Info);
+      return Wrap_Node (Node.Internal.Node.Child (Index), Node.Internal.Info);
    end Child;
 
    ----------------
@@ -714,7 +714,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Source_Location_Range is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Sloc_Range;
+      return Node.Internal.Node.Sloc_Range;
    end Sloc_Range;
 
    -------------
@@ -726,7 +726,7 @@ package body ${ada_lib_name}.Analysis is
       Sloc : Source_Location) return Relative_Position is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Compare (Sloc);
+      return Node.Internal.Node.Compare (Sloc);
    end Compare;
 
    ------------
@@ -738,7 +738,7 @@ package body ${ada_lib_name}.Analysis is
       Sloc : Source_Location) return ${root_entity.api_name} is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Wrap_Node (Node.Internal.El.Lookup (Sloc));
+      return Wrap_Node (Node.Internal.Node.Lookup (Sloc));
    end Lookup;
 
    ----------
@@ -769,7 +769,7 @@ package body ${ada_lib_name}.Analysis is
    begin
       Check_Safety_Net (Node.Safety_Net);
       return Token_Iterator'(Node.As_${T.root_node.kwless_raw_name},
-                             Node.Internal.El.Token_End_Index);
+                             Node.Internal.Node.Token_End_Index);
    end Token_Range;
 
    -----------
@@ -782,7 +782,7 @@ package body ${ada_lib_name}.Analysis is
       Line_Prefix : String := "") is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Node.Internal.El.Print (Show_Slocs, Line_Prefix);
+      Node.Internal.Node.Print (Show_Slocs, Line_Prefix);
    end Print;
 
    ---------------
@@ -793,7 +793,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class; Line_Prefix : String := "") is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Node.Internal.El.PP_Trivia (Line_Prefix);
+      Node.Internal.Node.PP_Trivia (Line_Prefix);
    end PP_Trivia;
 
    --------------
@@ -823,7 +823,7 @@ package body ${ada_lib_name}.Analysis is
 
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Traverse (Wrapper'Access);
+      return Node.Internal.Node.Traverse (Wrapper'Access);
    end Traverse;
 
    --------------
@@ -849,7 +849,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.El.Child_Index;
+      return Node.Internal.Node.Child_Index;
    end Child_Index;
 
    --------------------------------
@@ -860,7 +860,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Assign_Names_To_Logic_Vars (Node.Internal.El);
+      Assign_Names_To_Logic_Vars (Node.Internal.Node);
    end Assign_Names_To_Logic_Vars;
 
    --------------------------
@@ -1048,7 +1048,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Unwrap_Node
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name}
-   is (Node.Internal.El);
+   is (Node.Internal.Node);
 
 begin
    Converters.Wrap_Context := Wrap_Context'Access;

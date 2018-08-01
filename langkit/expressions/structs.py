@@ -149,7 +149,7 @@ class IsNull(AbstractExpression):
     def construct_node(cexpr):
         return BasicExpr(
             'Is_Null',
-            '{} = null'.format('{}.El'
+            '{} = null'.format('{}.Node'
                                if cexpr.type.is_entity_type else '{}'),
             T.BoolType, [cexpr]
         )
@@ -592,7 +592,7 @@ class FieldAccess(AbstractExpression):
             prefix = self.prefix
 
             if self.implicit_deref:
-                prefix = '{}.El'.format(prefix)
+                prefix = '{}.Node'.format(prefix)
 
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
@@ -644,7 +644,7 @@ class FieldAccess(AbstractExpression):
                 )
 
             if self.wrap_result_in_entity:
-                ret = 'Create (El => {}, Info => {})'.format(
+                ret = 'Create (Node => {}, Info => {})'.format(
                     ret, self.entity_info_expr
                 )
 
@@ -847,7 +847,7 @@ class IsA(AbstractExpression):
             super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            target = ('{}.El' if self.expr.type.is_entity_type
+            target = ('{}.Node' if self.expr.type.is_entity_type
                       else '{}').format(self.expr.render_expr())
             result_expr = (
                 '{target} /= null \nand then {target}.all in {nodes}'.format(

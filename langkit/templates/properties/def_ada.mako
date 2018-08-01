@@ -30,7 +30,7 @@ is
 
    % if property._has_self_entity:
    Ent : ${Self.type.entity.name} :=
-     ${Self.type.entity.name}'(Info => E_Info, El => Self);
+     ${Self.type.entity.name}'(Node => Self, Info => E_Info);
    % endif
 
    % for arg in property.arguments:

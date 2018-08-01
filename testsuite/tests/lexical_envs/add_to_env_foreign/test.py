@@ -54,7 +54,7 @@ class SimpleId(Id):
 
     @langkit_property()
     def resolve(base_env=T.LexicalEnvType):
-        return base_env.get_first(Self.symbol).el.cast(T.Scope)
+        return base_env.get_first(Self.symbol).node.cast(T.Scope)
 
 
 class ScopedId(Id):
@@ -68,7 +68,7 @@ class ScopedId(Id):
     @langkit_property()
     def resolve(base_env=T.LexicalEnvType):
         return (Self.scope.resolve(base_env)
-                .children_env.get_first(Self.name.symbol).el
+                .children_env.get_first(Self.name.symbol).node
                 .cast(T.Scope))
 
 

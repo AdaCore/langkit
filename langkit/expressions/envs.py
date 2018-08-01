@@ -402,7 +402,7 @@ def make_as_entity(node_expr, entity_info=None, null_check=True,
                 if null_check else node_expr)
 
     entity_expr = New.StructExpr(
-        entity_type, {names.Name('El'): node_ref,
+        entity_type, {names.Name('Node'): node_ref,
                       names.Name('Info'): entity_info},
         result_var_name=names.Name.from_lower('as_entity'),
     )
