@@ -233,7 +233,6 @@ package body ${ada_lib_name}.Implementation is
       Context := new Analysis_Context_Type'
         (Ref_Count     => 1,
          Units         => <>,
-         Removed_Units => <>,
          Filenames     => <>,
          Symbols       => Symbols,
          Charset       => To_Unbounded_String (Actual_Charset),
@@ -328,17 +327,10 @@ package body ${ada_lib_name}.Implementation is
    is
       use Units_Maps;
 
-      Cur  : Cursor := Context.Removed_Units.Find
-        (Normalized_Filename);
       Unit : Internal_Unit;
    begin
-      if Cur = No_Element then
-         Unit := Create_Special_Unit
-           (Context, Normalized_Filename, Charset, Rule);
-      else
-         Unit := Element (Cur);
-         Context.Removed_Units.Delete (Cur);
-      end if;
+      Unit := Create_Special_Unit
+        (Context, Normalized_Filename, Charset, Rule);
       Context.Units.Insert (Normalized_Filename, Unit);
       return Unit;
    end Create_Unit;
@@ -535,36 +527,6 @@ package body ${ada_lib_name}.Implementation is
       end if;
    end Get_With_Error;
 
-   ------------
-   -- Remove --
-   ------------
-
-   procedure Remove (Context : Internal_Context; Filename : String) is
-      use Units_Maps;
-
-      Cur      : Cursor := Context.Units.Find
-        (Normalized_Unit_Filename (Context, Filename));
-      Unit     : Internal_Unit;
-      Reparsed : Reparsed_Unit;
-   begin
-      if Cur = No_Element then
-         raise Constraint_Error with "No such analysis unit";
-      end if;
-
-      Unit := Element (Cur);
-      GNATCOLL.Traces.Trace (Main_Trace, "Removing unit: " & Basename (Unit));
-
-      --  Do as if we just reparsed Unit with minimal data, to get rid of all
-      --  its parsing data. This will schedule a lexical enviroment cleanup.
-      Initialize (Reparsed.TDH, Context.Symbols);
-      Update_After_Reparse (Unit, Reparsed);
-
-      --  Move the unit to the set of removed units so the unit handle still
-      --  points to valid memory. We will re-use it if we reparse this unit.
-      Context.Units.Delete (Cur);
-      Context.Removed_Units.Insert (Unit.Filename, Unit);
-   end Remove;
-
    -------------
    -- Inc_Ref --
    -------------
@@ -597,10 +559,6 @@ package body ${ada_lib_name}.Implementation is
    procedure Destroy (Context : in out Internal_Context) is
    begin
       for Unit of Context.Units loop
-         Unit.Context := null;
-         Dec_Ref (Unit);
-      end loop;
-      for Unit of Context.Removed_Units loop
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;

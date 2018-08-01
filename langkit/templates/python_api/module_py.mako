@@ -320,11 +320,6 @@ class AnalysisContext(object):
             ))
 % endif
 
-    def remove(self, filename):
-        ${py_doc('langkit.remove_unit', 8)}
-        if not _remove_analysis_unit(self._c_value, filename):
-            raise KeyError('No such unit: {}'.format(filename))
-
     def discard_errors_in_populate_lexical_env(self, discard):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
         _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
@@ -1405,10 +1400,6 @@ _get_analysis_unit_from_provider = _import_func(
     AnalysisUnit._c_type
 )
 % endif
-_remove_analysis_unit = _import_func(
-    '${capi.get_name("remove_analysis_unit")}',
-    [AnalysisContext._c_type, ctypes.c_char_p], ctypes.c_int
-)
 _unit_root = _import_func(
     '${capi.get_name("unit_root")}',
     [AnalysisUnit._c_type, ctypes.POINTER(${c_entity})], None

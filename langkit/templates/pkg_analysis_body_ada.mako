@@ -287,15 +287,6 @@ package body ${ada_lib_name}.Analysis is
 
    % endif
 
-   ------------
-   -- Remove --
-   ------------
-
-   procedure Remove (Context : Analysis_Context'Class; Filename : String) is
-   begin
-      Remove (Unwrap_Context (Context), Filename);
-   end Remove;
-
    -------------
    -- Context --
    -------------

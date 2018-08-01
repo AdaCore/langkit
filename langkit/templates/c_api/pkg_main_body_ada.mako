@@ -244,29 +244,6 @@ package body ${ada_lib_name}.Implementation.C is
       end;
    % endif
 
-   function ${capi.get_name("remove_analysis_unit")}
-     (Context  : ${analysis_context_type};
-      Filename : chars_ptr) return int is
-   begin
-      Clear_Last_Exception;
-
-      declare
-         Ctx : constant Internal_Context := Unwrap (Context);
-      begin
-         begin
-            Remove (Ctx, Value (Filename));
-         exception
-            when Constraint_Error =>
-               return 0;
-         end;
-         return 1;
-      end;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end;
-
    procedure ${capi.get_name('unit_root')}
      (Unit     : ${analysis_unit_type};
       Result_P : ${entity_type}_Ptr) is

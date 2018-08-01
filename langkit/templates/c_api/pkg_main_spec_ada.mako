@@ -231,14 +231,6 @@ private package ${ada_lib_name}.Implementation.C is
       ${ada_c_doc('langkit.get_unit_from_provider', 6)}
    % endif
 
-   function ${capi.get_name('remove_analysis_unit')}
-     (Context  : ${analysis_context_type};
-      Filename : chars_ptr) return int
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('remove_analysis_unit')}";
-   ${ada_c_doc('langkit.remove_unit', 3)}
-
    procedure ${capi.get_name('unit_root')}
      (Unit     : ${analysis_unit_type};
       Result_P : ${entity_type}_Ptr)

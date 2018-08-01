@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function
 print('main.py: Running...')
 
 
-import gc
 import sys
 
 import libfoolang
@@ -29,17 +28,13 @@ print('unit_a references: {}'.format(
     [n.p_referenced for n in unit_a.root.f_content]
 ))
 
-print('Deallocate unit_b')
-ctx.remove('b.txt')
-del unit_b
-gc.collect()
+print('Reparse unit_b')
+unit_b.reparse('b.txt', '')
 
 # And then unit_a: we expect the destroy mechanism not to try to dec-ref the
 # memoization slot, which point to a lexical environment that has been
 # deallocated.
-print('Deallocate unit_a')
-ctx.remove('a.txt')
-del unit_a
-gc.collect()
+print('Reparse unit_a')
+unit_a.reparse('a.txt', '')
 
 print('main.py: Done.')

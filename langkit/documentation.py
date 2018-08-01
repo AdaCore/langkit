@@ -271,21 +271,6 @@ base_langkit_docs = {
         parsing failure, return an analysis unit anyway: errors are described
         as diagnostics of the returned analysis unit.
     """,
-    'langkit.remove_unit': """
-        Remove the corresponding analysis unit from this context. If someone
-        still owns a reference to it, it remains available but becomes
-        context-less.
-
-        % if lang == 'ada':
-            If there is no such analysis unit, raise a Constraint_Error
-            exception.
-        % elif lang == 'c':
-            Return whether the removal was successful (i.e. whether the
-            analysis unit existed).
-        % elif lang == 'python':
-            If there is no such analysis unit, raise a KeyError exception.
-        % endif
-    """,
 
     'langkit.unit_context': """
         Return the context that owns this unit.
