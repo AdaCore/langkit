@@ -453,6 +453,7 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.node_extension', 3)}
 
 % if ctx.default_unit_provider:
+
    --------------------
    -- Unit providers --
    --------------------
