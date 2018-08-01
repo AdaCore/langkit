@@ -119,9 +119,11 @@
           )
       )};
    begin
+      Check_Safety_Net (Node.Safety_Net);
       % if field.type.is_ast_node:
-         return (Internal => (${root_node_type_name} (Result),
-                              Node.Internal.Info));
+         return (Internal   => (${root_node_type_name} (Result),
+                                Node.Internal.Info),
+                 Safety_Net => Node.Safety_Net);
       % else:
          return Result;
       % endif

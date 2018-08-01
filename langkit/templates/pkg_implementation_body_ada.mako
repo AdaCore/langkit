@@ -3699,6 +3699,10 @@ package body ${ada_lib_name}.Implementation is
       Unit.AST_Mem_Pool := Reparsed.AST_Mem_Pool;
       Reparsed.AST_Mem_Pool := No_Pool;
 
+      --  Increment unit version number to invalidate caches and stale node
+      --  reference.
+      Unit.Unit_Version := Unit.Unit_Version + 1;
+
       --  If Unit had its lexical environments populated, re-populate them
       if not Unit.Is_Env_Populated then
          return;
@@ -3729,9 +3733,8 @@ package body ${ada_lib_name}.Implementation is
          Extract_Foreign_Nodes (Unit, Foreign_Nodes);
 
          --  Reset the flag so that the call to Populate_Lexical_Env below does
-         --  its work, and increment unit version number to invalidate caches.
+         --  its work.
          Unit.Is_Env_Populated := False;
-         Unit.Unit_Version := Unit.Unit_Version + 1;
 
          --  Now that Unit has been reparsed, we can destroy all its
          --  destroyables, which refer to the old tree (i.e. dangling
@@ -3969,6 +3972,24 @@ package body ${ada_lib_name}.Implementation is
    begin
       Context.Rewriting_Handle := Handle;
    end Set_Rewriting_Handle;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Self : Node_Safety_Net) is
+   begin
+      --  TODO??? Check that the context is still alive using
+      --  Self.Context_Serial.
+
+      --  Now that we can assume that Self's context is alive, we know that all
+      --  its units are alive, so we just have to check the version number.
+      if Self.Unit /= null
+         and then Self.Unit.Unit_Version /= Self.Unit_Version
+      then
+         raise Stale_Reference_Error;
+      end if;
+   end Check_Safety_Net;
 
 begin
    No_Big_Integer.Value.Set (0);
