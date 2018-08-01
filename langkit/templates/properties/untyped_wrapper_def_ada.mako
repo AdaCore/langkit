@@ -13,12 +13,12 @@ is
    %>
 
    % if uses_einfo:
-      E_Info : Entity_Info := Shed_Rebindings (E.Info, E.El.Node_Env);
+      E_Info : Entity_Info := Shed_Rebindings (E.Info, E.Node.Node_Env);
       <% args.append('E_Info') %>
    % endif
 
    Result : constant ${property.untyped_wrapper_rtype.name} :=
-      ${Self.type.name} (E.El).${property.name}
+      ${Self.type.name} (E.Node).${property.name}
          ${'({})'.format(', '.join(args)) if args else ''};
 begin
    return Result;

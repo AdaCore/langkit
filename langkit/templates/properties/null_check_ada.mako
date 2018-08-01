@@ -11,7 +11,7 @@ ${operand.render_pre()}
       if operand.type.is_ptr and operand.type.null_allowed:
          operand_expr = operand.render_expr()
       elif expr.implicit_deref:
-         operand_expr = '{}.El'.format(operand.render_expr())
+         operand_expr = '{}.Node'.format(operand.render_expr())
       else:
          operand_expr = None
    %>

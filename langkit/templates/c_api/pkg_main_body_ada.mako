@@ -537,7 +537,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         K : ${root_node_kind_name} := Node.El.Kind;
+         K : ${root_node_kind_name} := Node.Node.Kind;
       begin
          return ${node_kind_type} (K'Enum_Rep);
       end;
@@ -570,7 +570,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Node : ${entity_type}_Ptr) return int is
    begin
       Clear_Last_Exception;
-      return Boolean'Pos (Node.El.Is_Token_Node);
+      return Boolean'Pos (Node.Node.Is_Token_Node);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -582,7 +582,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         Img : constant Text_Type := Node.El.Short_Image;
+         Img : constant Text_Type := Node.Node.Short_Image;
       begin
          return Wrap_Alloc (Img);
       end;
@@ -598,7 +598,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      Sloc_Range_P.all := Wrap (Sloc_Range (Node.El));
+      Sloc_Range_P.all := Wrap (Sloc_Range (Node.Node));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -614,7 +614,7 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          S : constant Source_Location := Unwrap (Sloc);
       begin
-         Result.all := (Lookup (Node.El, S), Node.Info);
+         Result.all := (Lookup (Node.Node, S), Node.Info);
       end;
    exception
       when Exc : others =>
@@ -625,7 +625,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Node : ${entity_type}_Ptr) return unsigned is
    begin
       Clear_Last_Exception;
-      return unsigned (Node.El.Abstract_Children_Count);
+      return unsigned (Node.Node.Abstract_Children_Count);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -646,7 +646,7 @@ package body ${ada_lib_name}.Implementation.C is
          if N > unsigned (Natural'Last) then
             return 0;
          end if;
-         Get_Child (Node.El, Natural (N) + 1, Exists, Result);
+         Get_Child (Node.Node, Natural (N) + 1, Exists, Result);
          if Exists then
             Child_P.all := (Result, Node.Info);
             return 1;

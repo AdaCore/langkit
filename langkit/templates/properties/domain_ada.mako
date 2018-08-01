@@ -14,9 +14,9 @@ begin
       begin
          A (J + 1) := (
             % if expr.domain.static_type.element_type.is_entity_type:
-               (El => ${root_node_type_name} (Item.El), Info => Item.Info)
+               (Node => ${root_node_type_name} (Item.Node), Info => Item.Info)
             % else:
-               (El => Item, others => <>)
+               (Node => Item, others => <>)
             % endif
          );
       end;

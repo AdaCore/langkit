@@ -69,12 +69,12 @@
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
       Ret := ${conv_prop.name}
-        (${conv_prop.self_arg_name}    => ${conv_prop.struct.name} (From.El),
+        (${conv_prop.self_arg_name}    => ${conv_prop.struct.name} (From.Node),
          % for dynvar in conv_prop.dynamic_vars:
             ${dynvar.argument_name}    => Self.${dynvar.argument_name},
          % endfor
          ${conv_prop.entity_info_name} => From.Info);
-      return (El => ${root_class} (Ret.El), Info => Ret.Info);
+      return (Node => ${root_class} (Ret.Node), Info => Ret.Info);
    end Convert;
 </%def>
 
@@ -94,20 +94,21 @@
      % endif
    begin
       --  If any node pointer is null, then use that for equality
-      if L.El = null or else R.El = null then
-         return L.El = R.El;
+      if L.Node = null or else R.Node = null then
+         return L.Node = R.Node;
       end if;
 
       --  If both args are of the proper AST node type
-      if L.El.all in ${struct}_Type'Class
-         and then R.El.all in ${struct}_Type'Class
+      if L.Node.all in ${struct}_Type'Class
+         and then R.Node.all in ${struct}_Type'Class
       then
          --  Then call the equality property on it
          declare
-            R_Entity : constant ${struct_entity} := (${struct} (R.El), R.Info);
+            R_Entity : constant ${struct_entity} :=
+              (${struct} (R.Node), R.Info);
          begin
             return ${eq_prop.name}
-             (${eq_prop.self_arg_name}             => ${struct} (L.El),
+             (${eq_prop.self_arg_name}             => ${struct} (L.Node),
               ${eq_prop.natural_arguments[0].name} => R_Entity,
               % for dynvar in eq_prop.dynamic_vars:
                  ${dynvar.argument_name} => Data.${dynvar.argument_name},
@@ -207,7 +208,7 @@
      ) return Boolean
    is
       Node : constant ${formal_node_types[0].name} :=
-         ${formal_node_types[0].name} (Node_0.El);
+         ${formal_node_types[0].name} (Node_0.Node);
    begin
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user to
@@ -221,7 +222,7 @@
 
       <%
          args = ['Node'] + [
-            '(El => {} (Node_{}.El), Info => Node_{}.Info)'.format(
+            '(Node => {} (Node_{}.Node), Info => Node_{}.Info)'.format(
                 formal_type.el_type.name, i, i
             ) for i, formal_type in enumerate(formal_node_types[1:], 1)
          ] + [

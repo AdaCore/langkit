@@ -44,7 +44,7 @@
 
    ${accessor_profile(field)}
    is
-      Unwrapped_Node : constant ${root_node_type_name} := Node.El;
+      Unwrapped_Node : constant ${root_node_type_name} := Node.Node;
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
       % for arg in field.arguments:
@@ -66,11 +66,11 @@
             % elif arg.type.is_analysis_unit_kind:
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
-               ${arg.type.name} (${arg_ref}.El)
+               ${arg.type.name} (${arg_ref}.Node)
             % elif arg.type.is_entity_type:
-               (if ${arg_ref}.El = null
+               (if ${arg_ref}.Node = null
                 then ${arg.type.nullexpr}
-                else (${arg.type.el_type.name} (${arg_ref}.El),
+                else (${arg.type.el_type.name} (${arg_ref}.Node),
                       ${arg_ref}.Info))
             % elif arg.type.is_array and not arg.type.emit_c_type:
                Convert (${arg_ref})
@@ -150,7 +150,7 @@
                % elif field.type.is_ast_node:
                    (${root_node_type_name} (Result), Node.Info)
                % elif field.type.is_entity_type:
-                  (${root_node_type_name} (Result.El), Result.Info)
+                  (${root_node_type_name} (Result.Node), Result.Info)
                % elif field.type.is_array and not field.type.emit_c_type:
                   Convert (Result)
                % elif field.type.is_token_type:

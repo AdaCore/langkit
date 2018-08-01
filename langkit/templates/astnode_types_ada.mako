@@ -111,7 +111,7 @@
    function ${field.name}
      (Node : ${type_name}'Class) return ${ret_type.api_name}
    is
-      Self   : constant ${bare_type} := ${bare_type} (Node.Internal.El);
+      Self   : constant ${bare_type} := ${bare_type} (Node.Internal.Node);
       Result : constant ${field.type.name} := ${(
           field.type.extract_from_storage_expr(
               node_expr='Self',
@@ -130,7 +130,7 @@
    end ${field.name};
 
    % if field.type.is_ast_node:
-      <% field_expr = ('{} (Node.Internal.El).{}'
+      <% field_expr = ('{} (Node.Internal.Node).{}'
                        .format(bare_type, field.name)) %>
 
       % if field.type.is_bool_node:
@@ -380,7 +380,7 @@
    ---------------------------
 
    function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
-      Self : constant ${cls.name} := ${cls.name} (E.El);
+      Self : constant ${cls.name} := ${cls.name} (E.Node);
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
@@ -419,7 +419,7 @@
    begin
       % if has_dyn_env:
          Initial_Env := ${env_getter}
-           ((El => ${root_node_type_name} (Self), Info => No_Entity_Info));
+           ((Node => ${root_node_type_name} (Self), Info => No_Entity_Info));
       % endif
 
       % for action in cls.env_spec.pre_actions:

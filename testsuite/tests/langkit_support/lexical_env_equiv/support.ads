@@ -15,7 +15,7 @@ package Support is
 
    Default_MD : constant Metadata := (I => 0);
 
-   function Element_Hash (C : Character) return Hash_Type is (0);
+   function Node_Hash (C : Character) return Hash_Type is (0);
    function Metadata_Hash (MD : Metadata) return Hash_Type is (0);
    procedure Raise_Property_Error (Message : String := "");
    function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
@@ -23,7 +23,7 @@ package Support is
    function Can_Reach (Node, From : Character) return Boolean is (True);
    function Is_Rebindable (Node : Character) return Boolean is (True);
 
-   function Element_Image
+   function Node_Image
      (Node : Character; Short : Boolean := True) return Text_Type
    is (To_Text ("'" & Node & "'"));
 
@@ -36,17 +36,17 @@ package Support is
      (Unit_T               => Boolean,
       Get_Version          => Get_Version,
       No_Unit              => False,
-      Element_T            => Character,
-      Element_Metadata     => Metadata,
-      No_Element           => ' ',
+      Node_Type            => Character,
+      Node_Metadata        => Metadata,
+      No_Node              => ' ',
       Empty_Metadata       => Default_MD,
-      Element_Hash         => Element_Hash,
+      Node_Hash            => Node_Hash,
       Metadata_Hash        => Metadata_Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
       Can_Reach            => Can_Reach,
       Is_Rebindable        => Is_Rebindable,
-      Element_Image        => Element_Image,
+      Node_Image           => Node_Image,
       Register_Rebinding   => Register_Rebinding);
 
    procedure Destroy is new Ada.Unchecked_Deallocation

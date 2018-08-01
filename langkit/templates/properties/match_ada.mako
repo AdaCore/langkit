@@ -11,7 +11,7 @@
     kind_expr = '{} ({}{}.Kind)'.format(
         prefix_node_type.ada_kind_range_name,
         expr.prefix_var.name,
-        '.El' if expr.prefix_var.type.is_entity_type else ''
+        '.Node' if expr.prefix_var.type.is_entity_type else ''
     )
 %>
 

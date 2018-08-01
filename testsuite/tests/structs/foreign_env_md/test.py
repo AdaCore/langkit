@@ -38,7 +38,7 @@ class Def(FooNode):
         add_to_env(
             mappings=New(T.env_assoc, key=Self.name.sym, val=Self),
             metadata=New(Metadata, node=Self.ref.then(
-                lambda r: r.resolve.el,
+                lambda r: r.resolve.node,
                 default_val=No(T.FooNode)
             ))
         )

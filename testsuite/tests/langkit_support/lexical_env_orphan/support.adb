@@ -21,7 +21,7 @@ package body Support is
          Put_Line ("  <none>");
       else
          for E of Elements loop
-            Put_Line ("  * '" & E.El & "'");
+            Put_Line ("  * '" & E.Node & "'");
          end loop;
       end if;
    end Put_Line;

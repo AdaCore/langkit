@@ -722,7 +722,7 @@ def length(self, collection):
     orig_type = coll_expr.type
 
     if coll_expr.type.is_entity_type:
-        coll_expr = FieldAccessExpr(coll_expr, 'El', coll_expr.type.astnode,
+        coll_expr = FieldAccessExpr(coll_expr, 'Node', coll_expr.type.astnode,
                                     do_explicit_incref=False)
     check_source_language(
         coll_expr.type.is_collection,

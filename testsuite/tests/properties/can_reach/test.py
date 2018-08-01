@@ -15,7 +15,7 @@ class FooNode(ASTNode):
 
     @langkit_property(public=True)
     def can_reach(n=T.FooNode.entity, from_node=T.FooNode.entity):
-        return n.el.can_reach(from_node.el)
+        return n.node.can_reach(from_node.node)
 
 
 class Example(FooNode):
