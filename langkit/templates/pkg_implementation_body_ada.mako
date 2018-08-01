@@ -253,7 +253,6 @@ package body ${ada_lib_name}.Implementation is
          Discard_Errors_In_Populate_Lexical_Env => <>,
          Logic_Resolution_Timeout => <>,
          In_Populate_Lexical_Env => False,
-         Populate_Lexical_Env_Queue => <>,
          Cache_Version => <>,
 
          Rewriting_Handle => <>,
@@ -653,15 +652,6 @@ package body ${ada_lib_name}.Implementation is
       Saved_In_Populate_Lexical_Env : constant Boolean :=
          Unit.Context.In_Populate_Lexical_Env;
    begin
-      --  If there are several analysis units for which lexical envs must be
-      --  re-created, go through them now. Check the In_Populate_Lexical_Env
-      --  flag to avoid infinite recursion.
-      if not Context.Populate_Lexical_Env_Queue.Is_Empty
-         and then not Context.In_Populate_Lexical_Env
-      then
-         Flush_Populate_Lexical_Env_Queue (Context);
-      end if;
-
       --  TODO??? Handle env invalidation when reparsing a unit and when a
       --  previous call raised a Property_Error.
       if Unit.Is_Env_Populated then
@@ -3709,11 +3699,62 @@ package body ${ada_lib_name}.Implementation is
       Unit.AST_Mem_Pool := Reparsed.AST_Mem_Pool;
       Reparsed.AST_Mem_Pool := No_Pool;
 
-      --  If Unit had its lexical environments populated, schedule a lexical
-      --  environment update for Unit.
-      if Unit.Is_Env_Populated then
-         Unit.Context.Populate_Lexical_Env_Queue.Include (Unit);
+      --  If Unit had its lexical environments populated, re-populate them
+      if not Unit.Is_Env_Populated then
+         return;
       end if;
+
+      declare
+         Unit_Name     : constant String := +Unit.Filename.Base_Name;
+         Context       : constant Internal_Context := Unit.Context;
+         Foreign_Nodes : ${root_node_type_name}_Vectors.Vector :=
+            ${root_node_type_name}_Vectors.Empty_Vector;
+
+         Saved_In_Populate_Lexical_Env : constant Boolean :=
+            Context.In_Populate_Lexical_Env;
+      begin
+         GNATCOLL.Traces.Trace
+           (Main_Trace, "Updating lexical envs for " & Unit_Name
+                        & " after reparse");
+         GNATCOLL.Traces.Increase_Indent (Main_Trace);
+
+         Context.In_Populate_Lexical_Env := True;
+
+         --  Remove the `symbol -> AST node` associations in foreign lexical
+         --  environments.
+         Remove_Exiled_Entries (Unit);
+
+         --  Collect all nodes that are foreign in this Unit's lexical envs.
+         --  Exclude them from the corresponding lists of exiled entries.
+         Extract_Foreign_Nodes (Unit, Foreign_Nodes);
+
+         --  Reset the flag so that the call to Populate_Lexical_Env below does
+         --  its work, and increment unit version number to invalidate caches.
+         Unit.Is_Env_Populated := False;
+         Unit.Unit_Version := Unit.Unit_Version + 1;
+
+         --  Now that Unit has been reparsed, we can destroy all its
+         --  destroyables, which refer to the old tree (i.e. dangling
+         --  pointers).
+         Destroy_Unit_Destroyables (Unit);
+
+         for FN of Foreign_Nodes loop
+            declare
+               Node_Image : constant String := Image (FN.Short_Image);
+               Unit_Name  : constant String := +FN.Unit.Filename.Base_Name;
+            begin
+               GNATCOLL.Traces.Trace
+                 (Main_Trace, "Rerooting: " & Node_Image
+                              & " (from " & Unit_Name & ")");
+            end;
+            Reroot_Foreign_Node (FN);
+         end loop;
+         Foreign_Nodes.Destroy;
+
+         Populate_Lexical_Env (Unit);
+         Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
+         GNATCOLL.Traces.Decrease_Indent (Main_Trace);
+      end;
    end Update_After_Reparse;
 
    -------------------------------
@@ -3728,77 +3769,6 @@ package body ${ada_lib_name}.Implementation is
       Destroyable_Vectors.Clear (Unit.Destroyables);
    end Destroy_Unit_Destroyables;
 
-   --------------------------------------
-   -- Flush_Populate_Lexical_Env_Queue --
-   --------------------------------------
-
-   procedure Flush_Populate_Lexical_Env_Queue (Context : Internal_Context) is
-      Foreign_Nodes : ${root_node_type_name}_Vectors.Vector :=
-         ${root_node_type_name}_Vectors.Empty_Vector;
-   begin
-      GNATCOLL.Traces.Trace
-        (Main_Trace, "Flushing the populate lexical env queue");
-      GNATCOLL.Traces.Increase_Indent (Main_Trace);
-      Context.In_Populate_Lexical_Env := True;
-
-      --  Remove traces of queued units in other units' lexical environments
-      --  and collect information about other units' nodes in queued units'
-      --  lexical environments.
-      for Unit of Context.Populate_Lexical_Env_Queue loop
-         GNATCOLL.Traces.Trace
-           (Main_Trace, "Remove exiled entries and extract foreign nodes for: "
-                        & Basename (Unit));
-
-         --  Remove the `symbol -> AST node` association affecting environments
-         --  that don't belong to the set of units to re-populate.
-         Remove_Exiled_Entries (Unit);
-
-         --  Collect all nodes that are foreign to the units to re-populate.
-         --  Exclude them from the corresponding lists of exiled entries.
-         Extract_Foreign_Nodes (Unit, Foreign_Nodes);
-
-         --  Reset the flag so that the call to Populate_Lexical_Env below does
-         --  its work, and increment unit version number to invalidate caches.
-         Unit.Is_Env_Populated := False;
-         Unit.Unit_Version := Unit.Unit_Version + 1;
-
-         --  Now that Unit has been reparsed, we can destroy all its
-         --  destroyables, which refer to the old tree (i.e. dangling
-         --  pointers).
-         Destroy_Unit_Destroyables (Unit);
-      end loop;
-
-      --  Reroot all foreign nodes. Do this before we re-run PLE on queued
-      --  units so that we get a chance to run PLE in dependency order.
-      GNATCOLL.Traces.Trace
-        (Main_Trace, "Reroot foreign nodes (PLE queue flush)");
-      GNATCOLL.Traces.Increase_Indent (Main_Trace);
-      for FN of Foreign_Nodes loop
-         declare
-            Node_Image : constant String := Image (FN.Short_Image);
-            Unit_Name  : constant String := +FN.Unit.Filename.Base_Name;
-         begin
-            GNATCOLL.Traces.Trace (Main_Trace, "Rerooting: " & Node_Image
-                                               & " (from " & Unit_Name & ")");
-         end;
-         Reroot_Foreign_Node (FN);
-      end loop;
-      GNATCOLL.Traces.Decrease_Indent (Main_Trace);
-
-      --  Recreate the lexical env structure for queued units, unless they were
-      --- removed.
-      for Unit of Context.Populate_Lexical_Env_Queue loop
-         if Context.Units.Contains (Unit.Filename) then
-            Populate_Lexical_Env (Unit);
-         end if;
-      end loop;
-
-      Foreign_Nodes.Destroy;
-      Context.Populate_Lexical_Env_Queue.Clear;
-      Context.In_Populate_Lexical_Env := False;
-      GNATCOLL.Traces.Decrease_Indent (Main_Trace);
-   end Flush_Populate_Lexical_Env_Queue;
-
    ---------------------------
    -- Remove_Exiled_Entries --
    ---------------------------
@@ -3806,30 +3776,25 @@ package body ${ada_lib_name}.Implementation is
    procedure Remove_Exiled_Entries (Unit : Internal_Unit) is
    begin
       for EE of Unit.Exiled_Entries loop
-         if EE.Env.Owner = No_Analysis_Unit
-              or else
-            not Unit.Context.Populate_Lexical_Env_Queue.Contains (EE.Env.Owner)
-         then
-            AST_Envs.Remove (EE.Env, EE.Key, EE.Node);
+         AST_Envs.Remove (EE.Env, EE.Key, EE.Node);
 
-            --  Also strip foreign nodes information from "outer" units so that
-            --  it does not contain stale information (i.e. dangling pointers
-            --  to nodes that belong to the units in the queue).
-            if EE.Env.Owner /= No_Analysis_Unit then
-               declare
-                  Foreign_Nodes : Foreign_Node_Entry_Vectors.Vector renames
-                     EE.Env.Env.Node.Unit.Foreign_Nodes;
-                  Current       : Positive := Foreign_Nodes.First_Index;
-               begin
-                  while Current <= Foreign_Nodes.Last_Index loop
-                     if Foreign_Nodes.Get (Current).Node = EE.Node then
-                        Foreign_Nodes.Pop (Current);
-                     else
-                        Current := Current + 1;
-                     end if;
-                  end loop;
-               end;
-            end if;
+         --  Also strip foreign nodes information from "outer" units so that it
+         --  does not contain stale information (i.e. dangling pointers to
+         --  nodes that belong to the units in the queue).
+         if EE.Env.Owner /= No_Analysis_Unit then
+            declare
+               Foreign_Nodes : Foreign_Node_Entry_Vectors.Vector renames
+                  EE.Env.Env.Node.Unit.Foreign_Nodes;
+               Current       : Positive := Foreign_Nodes.First_Index;
+            begin
+               while Current <= Foreign_Nodes.Last_Index loop
+                  if Foreign_Nodes.Get (Current).Node = EE.Node then
+                     Foreign_Nodes.Pop (Current);
+                  else
+                     Current := Current + 1;
+                  end if;
+               end loop;
+            end;
          end if;
       end loop;
 
@@ -3845,23 +3810,21 @@ package body ${ada_lib_name}.Implementation is
       Foreign_Nodes : in out ${root_node_type_name}_Vectors.Vector) is
    begin
       for FN of Unit.Foreign_Nodes loop
-         if not Unit.Context.Populate_Lexical_Env_Queue.Contains (FN.Unit) then
-            Foreign_Nodes.Append (FN.Node);
+         Foreign_Nodes.Append (FN.Node);
 
-            declare
-               Exiled_Entries : Exiled_Entry_Vectors.Vector renames
-                  FN.Unit.Exiled_Entries;
-               Current        : Positive := Exiled_Entries.First_Index;
-            begin
-               while Current <= Exiled_Entries.Last_Index loop
-                  if Exiled_Entries.Get (Current).Node = FN.Node then
-                     Exiled_Entries.Pop (Current);
-                  else
-                     Current := Current + 1;
-                  end if;
-               end loop;
-            end;
-         end if;
+         declare
+            Exiled_Entries : Exiled_Entry_Vectors.Vector renames
+               FN.Unit.Exiled_Entries;
+            Current        : Positive := Exiled_Entries.First_Index;
+         begin
+            while Current <= Exiled_Entries.Last_Index loop
+               if Exiled_Entries.Get (Current).Node = FN.Node then
+                  Exiled_Entries.Pop (Current);
+               else
+                  Current := Current + 1;
+               end if;
+            end loop;
+         end;
       end loop;
       Unit.Foreign_Nodes.Clear;
    end Extract_Foreign_Nodes;
