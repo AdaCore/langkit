@@ -128,31 +128,6 @@ package ${ada_lib_name}.Analysis is
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
-   function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
-   ${ada_doc('langkit.context_hash', 3)}
-
-   function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean;
-   --  Return whether Context keeps trivia when parsing units
-
-   procedure Discard_Errors_In_Populate_Lexical_Env
-     (Context : Analysis_Context'Class; Discard : Boolean);
-   ${ada_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
-
-   procedure Set_Logic_Resolution_Timeout
-     (Context : Analysis_Context'Class; Timeout : Natural);
-   ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
-
-   procedure Disable_Lookup_Cache (Disable : Boolean := True);
-   --  Debug helper: if Disable is true, disable the use of caches in lexical
-   --  environment lookups. Otherwise, activate it.
-
-   function Has_Rewriting_Handle
-     (Context : Analysis_Context'Class) return Boolean;
-   --  Return whether Context has a rewriting handler (see
-   --  ${ada_lib_name}.Rewriting), i.e. whether it is in the process of
-   --  rewriting. If true, this means that the set of currently loaded analysis
-   --  units is frozen until the rewriting process is done.
-
    function Has_Unit
      (Context       : Analysis_Context'Class;
       Unit_Filename : String) return Boolean;
@@ -201,6 +176,31 @@ package ${ada_lib_name}.Analysis is
      (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst;
    --  Object to translate unit names to file names
    % endif
+
+   function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
+   ${ada_doc('langkit.context_hash', 3)}
+
+   function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean;
+   --  Return whether Context keeps trivia when parsing units
+
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Analysis_Context'Class; Discard : Boolean);
+   ${ada_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
+
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Analysis_Context'Class; Timeout : Natural);
+   ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
+
+   procedure Disable_Lookup_Cache (Disable : Boolean := True);
+   --  Debug helper: if Disable is true, disable the use of caches in lexical
+   --  environment lookups. Otherwise, activate it.
+
+   function Has_Rewriting_Handle
+     (Context : Analysis_Context'Class) return Boolean;
+   --  Return whether Context has a rewriting handler (see
+   --  ${ada_lib_name}.Rewriting), i.e. whether it is in the process of
+   --  rewriting. If true, this means that the set of currently loaded analysis
+   --  units is frozen until the rewriting process is done.
 
    ------------------------------
    -- Analysis unit primitives --
