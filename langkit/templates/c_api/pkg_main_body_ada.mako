@@ -157,22 +157,6 @@ package body ${ada_lib_name}.Implementation.C is
       Discard_Errors_In_Populate_Lexical_Env (C, Discard /= 0);
    end;
 
-   procedure ${capi.get_name("destroy_analysis_context")}
-     (Context : ${analysis_context_type})
-   is
-   begin
-      Clear_Last_Exception;
-
-      declare
-         C : Internal_Context := Unwrap (Context);
-      begin
-         Destroy (C);
-      end;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-   end;
-
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
