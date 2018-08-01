@@ -956,11 +956,6 @@ private package ${ada_lib_name}.Implementation is
       Units : Units_Maps.Map;
       --  Collection of analysis units loaded in this context
 
-      Removed_Units : Units_Maps.Map;
-      --  Collection of analysis unit that were loaded and then removed in this
-      --  context. We need to keep allocated Analysis_Unit_Type records around
-      --  to keep the PLE updating mechanism memory-safe.
-
       Filenames : Virtual_File_Maps.Map;
       --  Cache for GNATCOLL.VFS.Virtual_File we create for String filenames.
       --  Re-using older Virtual_File values is useful as this reduces the need
@@ -1216,10 +1211,6 @@ private package ${ada_lib_name}.Implementation is
      (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst;
    --  Implementation for Analysis.Unit_Provider
    % endif
-
-   procedure Remove (Context : Internal_Context; Filename : String)
-      with Pre => not Has_Rewriting_Handle (Context);
-   --  Implementation for Analysis.Remove
 
    procedure Inc_Ref (Context : Internal_Context);
    --  Increment the ref-count of Context. This does nothing if Context is

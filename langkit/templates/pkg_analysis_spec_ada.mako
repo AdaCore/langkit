@@ -202,10 +202,6 @@ package ${ada_lib_name}.Analysis is
    --  Object to translate unit names to file names
    % endif
 
-   procedure Remove (Context : Analysis_Context'Class; Filename : String)
-      with Pre => not Has_Rewriting_Handle (Context);
-   ${ada_doc('langkit.remove_unit', 3)}
-
    ------------------------------
    -- Analysis unit primitives --
    ------------------------------

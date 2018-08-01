@@ -235,11 +235,6 @@ ${capi.get_name("get_analysis_unit_from_provider")}(
         int reparse);
 % endif
 
-${c_doc('langkit.remove_unit')}
-extern int
-${capi.get_name("remove_analysis_unit")}(${analysis_context_type} context,
-                                         const char *filename);
-
 ${c_doc('langkit.unit_root')}
 extern void
 ${capi.get_name("unit_root")}(${analysis_unit_type} unit,

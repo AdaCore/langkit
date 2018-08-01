@@ -302,7 +302,6 @@ begin
                Filename : constant String := Get_Line (F);
             begin
                Process_File (Filename, Ctx);
-               Remove (Ctx, Filename);
             end;
          end loop;
          Close (F);
