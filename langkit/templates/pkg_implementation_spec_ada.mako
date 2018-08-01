@@ -14,7 +14,6 @@
 
 with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Containers.Ordered_Sets;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Deallocation;
@@ -805,9 +804,6 @@ private package ${ada_lib_name}.Implementation is
 
    function "<" (Left, Right : Internal_Unit) return Boolean;
 
-   package Analysis_Unit_Ordered_Sets is new Ada.Containers.Ordered_Sets
-     (Element_Type => Internal_Unit);
-
    type Exiled_Entry is record
       Env  : Lexical_Env;
       Key  : Symbol_Type;
@@ -993,10 +989,6 @@ private package ${ada_lib_name}.Implementation is
       --  Flag to tell whether we are running the Populate_Lexical_Env pass.
       --  When it's on, we must not use the memoization map as the hash of
       --  lexical environment changes when their content changes.
-
-      Populate_Lexical_Env_Queue : Analysis_Unit_Ordered_Sets.Set;
-      --  Queue of analysis units for which we must run Populate_Lexical_Env
-      --  before starting executing any property that uses environments.
 
       Logic_Resolution_Timeout : Natural := 100_000;
       --  If zero, inefficient. Otherwise, designates the maximal number of
@@ -1332,10 +1324,6 @@ private package ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit);
    --  Parse text for Unit using Input and store the result in Result. This
    --  leaves Unit unchanged.
-
-   procedure Flush_Populate_Lexical_Env_Queue (Context : Internal_Context);
-   --  Update lexical environment data related to all units in the populate
-   --  lexical env queue, then clear this queue.
 
    procedure Update_After_Reparse
      (Unit : Internal_Unit; Reparsed : in out Reparsed_Unit);
