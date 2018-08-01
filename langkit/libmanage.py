@@ -591,10 +591,10 @@ class ManageScript(object):
                                 ['gnatpp', '--version'],
                                 abort_on_error=False)
 
-            argv = [
-                'gnatpp', '-P{}'.format(project_file), '-rnb',
-                '--insert-blank-lines', '--syntax-only', '--eol=lf'
-            ]
+            argv = ['gnatpp', '-P{}'.format(project_file),
+                    '--syntax-only',
+                    '--eol=lf']
+
             if self.verbosity.debug:
                 argv.append('-v')
 
