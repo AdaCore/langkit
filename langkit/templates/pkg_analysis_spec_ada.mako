@@ -547,13 +547,15 @@ private
    % for e in ctx.entity_types:
       % if e.is_root_type:
          type ${e.api_name} is tagged record
-            Internal : Implementation.AST_Envs.${root_entity.name};
+            Internal   : Implementation.AST_Envs.${root_entity.name};
+            Safety_Net : Implementation.Node_Safety_Net;
          end record;
       % else:
          type ${e.api_name} is new ${e.base.api_name} with null record;
       % endif
       No_${e.api_name} : constant ${e.api_name} :=
-        (Internal => Implementation.${root_entity.nullexpr});
+        (Internal   => Implementation.${root_entity.nullexpr},
+         Safety_Net => Implementation.No_Node_Safety_Net);
    % endfor
 
    --------------------------------

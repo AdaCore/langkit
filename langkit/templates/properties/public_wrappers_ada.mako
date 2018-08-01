@@ -152,6 +152,8 @@
       % endfor
       Property_Result : ${property.type.name};
    begin
+     Check_Safety_Net (${self_arg}.Safety_Net);
+
       % for chunk in unwrap_code:
          ${chunk}
       % endfor
