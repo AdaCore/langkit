@@ -132,8 +132,8 @@
                ${struct.name} (Unwrapped_Node);
             Result     : ${field.type.name};
          begin
-            --  Keep this assignment after the BEGIN keyword above so that the
-            --  exception handler covers it.
+            ##  Keep this assignment after the BEGIN keyword above so that the
+            ##  exception handler covers it.
             Result := ${field_access};
 
             Value_P.all :=
