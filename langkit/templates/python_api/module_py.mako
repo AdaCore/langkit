@@ -1377,10 +1377,6 @@ _discard_errors_in_populate_lexical_env = _import_func(
    '${capi.get_name("context_discard_errors_in_populate_lexical_env")}',
    [AnalysisContext._c_type, ctypes.c_int], None
 )
-_destroy_analysis_context = _import_func(
-    '${capi.get_name("destroy_analysis_context")}',
-    [AnalysisContext._c_type, ], None
-)
 _get_analysis_unit_from_file = _import_func(
     '${capi.get_name("get_analysis_unit_from_file")}',
     [AnalysisContext._c_type,  # context

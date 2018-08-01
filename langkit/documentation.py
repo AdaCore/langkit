@@ -195,11 +195,6 @@ base_langkit_docs = {
         If Timeout is zero, disable the timeout. By default, the timeout is
         100,000 steps.
     """,
-    'langkit.destroy_context': """
-        Invoke Remove on all the units Context contains and free Context. Thus,
-        any analysis unit it contains may survive if there are still references
-        to it elsewhere.
-    """,
 
     'langkit.get_unit_from_file': """
         Create a new analysis unit for Filename or return the existing one if

@@ -193,13 +193,6 @@ private package ${ada_lib_name}.Implementation.C is
               'context_discard_errors_in_populate_lexical_env')}";
    ${ada_c_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
 
-   procedure ${capi.get_name('destroy_analysis_context')}
-     (Context : ${analysis_context_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('destroy_analysis_context')}";
-   ${ada_c_doc('langkit.destroy_context', 3)}
-
    function ${capi.get_name('get_analysis_unit_from_file')}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;

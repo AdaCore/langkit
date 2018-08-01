@@ -207,11 +207,6 @@ ${capi.get_name("context_discard_errors_in_populate_lexical_env")}(
         ${analysis_context_type} context,
         int discard);
 
-${c_doc('langkit.destroy_context')}
-extern void
-${capi.get_name("destroy_analysis_context")}(
-        ${analysis_context_type} context);
-
 ${c_doc('langkit.get_unit_from_file')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_file")}(

@@ -1231,7 +1231,7 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Destroy (Context : in out Internal_Context)
       with Pre => not Has_Rewriting_Handle (Context);
-   --  Implementation for Analysis.Destroy
+   --  Free all resources allocated for Context
 
    -------------------------------------------------
    -- Implementation for analysis unit primitives --
