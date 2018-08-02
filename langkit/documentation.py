@@ -209,7 +209,7 @@ base_langkit_docs = {
         If Timeout is greater than zero, set a timeout for the resolution of
         logic equations. The unit is the number of steps in ANY/ALL relations.
         If Timeout is zero, disable the timeout. By default, the timeout is
-        100,000 steps.
+        ``100 000`` steps.
     """,
 
     'langkit.get_unit_from_file': """
