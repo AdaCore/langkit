@@ -45,7 +45,8 @@
 
    % if cls.is_entity_type:
       function Create
-        (Node : ${cls.el_type.name}; Info : Entity_Info) return ${cls.name};
+        (Node : ${cls.element_type.name}; Info : Entity_Info)
+         return ${cls.name};
    % endif
 
    % if cls.has_equivalent_function:
@@ -102,7 +103,8 @@
       ------------
 
       function Create
-        (Node : ${cls.el_type.name}; Info : Entity_Info) return ${cls.name} is
+        (Node : ${cls.element_type.name}; Info : Entity_Info)
+         return ${cls.name} is
       begin
          if Node = null then
             return ${cls.nullexpr};

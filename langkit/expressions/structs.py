@@ -740,7 +740,7 @@ class FieldAccess(AbstractExpression):
         # If still not found, maybe the receiver is an entity, in which case we
         # want to do implicit dereference.
         if not self.to_get and pfx_type.is_entity_type:
-            self.to_get = pfx_type.el_type.get_abstract_fields_dict().get(
+            self.to_get = pfx_type.element_type.get_abstract_fields_dict().get(
                 self.field, None
             )
             self.is_deref = bool(self.to_get)
@@ -841,7 +841,7 @@ class IsA(AbstractExpression):
                 ResolvedExpression's constructor.
             """
             self.expr = expr
-            self.astnodes = [a.el_type if a.is_entity_type else a
+            self.astnodes = [a.element_type if a.is_entity_type else a
                              for a in astnodes]
 
             super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
@@ -1011,7 +1011,7 @@ class Match(AbstractExpression):
 
             :rtype: ASTNodeType
             """
-            return (self.match_type.el_type
+            return (self.match_type.element_type
                     if self.match_type.is_entity_type else
                     self.match_type)
 
@@ -1076,9 +1076,9 @@ class Match(AbstractExpression):
             # actually match.
             prefix_type = self.prefix_expr.type
             if prefix_type.is_entity_type:
-                prefix_type = prefix_type.el_type
+                prefix_type = prefix_type.element_type
             matched_types, remainder = collapse_concrete_nodes(
-                (prefix_type.el_type
+                (prefix_type.element_type
                  if prefix_type.is_entity_type else prefix_type),
                 [m.match_astnode_type for m in self.matchers]
             )
@@ -1166,13 +1166,13 @@ class Match(AbstractExpression):
         is_entity = input_type.is_entity_type
 
         if is_entity:
-            input_type = input_type.el_type
+            input_type = input_type.element_type
 
         for i, (typ, _, _) in enumerate(self.matchers, 1):
             t_name = 'default one' if typ is None else typ.dsl_name
 
             if typ and typ.is_entity_type:
-                typ = typ.el_type
+                typ = typ.element_type
 
             check_source_language(not type_set.include(typ or input_type),
                                   'The #{} matcher ({}) is unreachable'

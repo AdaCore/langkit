@@ -223,7 +223,7 @@ class Bind(AbstractExpression):
                 "First arg of equality property should be an entity type"
             )
             check_source_language(
-                other_type.el_type == self.eq_prop.struct,
+                other_type.element_type == self.eq_prop.struct,
                 "Self and first argument should be of the same type"
             )
 

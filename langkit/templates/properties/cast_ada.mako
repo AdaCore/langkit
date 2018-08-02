@@ -2,7 +2,7 @@
 
 <%
 is_entity = expr.static_type.is_entity_type
-ast_node = expr.static_type.el_type if is_entity else expr.static_type
+ast_node = expr.static_type.element_type if is_entity else expr.static_type
 %>
 
 <%def name="generate_cast(operand_expr)">

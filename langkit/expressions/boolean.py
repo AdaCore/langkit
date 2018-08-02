@@ -199,8 +199,8 @@ class Eq(AbstractExpression):
         elif lhs.type.is_entity_type:
             check_type_compatibility(rhs.type.is_entity_type)
             check_never_equal(
-                lhs.type.el_type.matches(rhs.type.el_type)
-                or rhs.type.el_type.matches(lhs.type.el_type)
+                lhs.type.element_type.matches(rhs.type.element_type)
+                or rhs.type.element_type.matches(lhs.type.element_type)
             )
             return self.make_expr_for_entities(lhs, rhs, self)
 

@@ -223,7 +223,7 @@
       <%
          args = ['Node'] + [
             '(Node => {} (Node_{}.Node), Info => Node_{}.Info)'.format(
-                formal_type.el_type.name, i, i
+                formal_type.element_type.name, i, i
             ) for i, formal_type in enumerate(formal_node_types[1:], 1)
          ] + [
             'Self.Field_{}'.format(i)

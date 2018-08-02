@@ -207,7 +207,7 @@ class CollectionExpression(AbstractExpression):
             entity_var = elt_vars[-1]
             node_var = AbstractVariable(
                 names.Name('Bare') + self.element_var._name,
-                type=elt_type.el_type
+                type=elt_type.element_type
             )
             elt_var_inits.append(make_as_entity(construct(node_var),
                                                 entity_info=entity_info))
