@@ -51,3 +51,6 @@ testsuite/tmp
 tmp
 
 contrib/python/build
+
+# Custom grab bag dir
+/misc
