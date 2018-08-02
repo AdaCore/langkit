@@ -351,54 +351,6 @@ package body ${ada_lib_name}.Implementation is
       return Context;
    end Create;
 
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash (Context : Internal_Context) return Hash_Type is
-      function H is new Hash_Access (Analysis_Context_Type, Internal_Context);
-   begin
-      return H (Context);
-   end Hash;
-
-   ---------------------
-   -- Has_With_Trivia --
-   ---------------------
-
-   function Has_With_Trivia (Context : Internal_Context) return Boolean is
-   begin
-      return Context.With_Trivia;
-   end Has_With_Trivia;
-
-   --------------------------------------------
-   -- Discard_Errors_In_Populate_Lexical_Env --
-   --------------------------------------------
-
-   procedure Discard_Errors_In_Populate_Lexical_Env
-     (Context : Internal_Context; Discard : Boolean) is
-   begin
-      Context.Discard_Errors_In_Populate_Lexical_Env := Discard;
-   end Discard_Errors_In_Populate_Lexical_Env;
-
-   ----------------------------------
-   -- Set_Logic_Resolution_Timeout --
-   ----------------------------------
-
-   procedure Set_Logic_Resolution_Timeout
-     (Context : Internal_Context; Timeout : Natural) is
-   begin
-      Context.Logic_Resolution_Timeout := Timeout;
-   end Set_Logic_Resolution_Timeout;
-
-   --------------------------
-   -- Has_Rewriting_Handle --
-   --------------------------
-
-   function Has_Rewriting_Handle (Context : Internal_Context) return Boolean is
-   begin
-      return Context.Rewriting_Handle /= No_Rewriting_Handle_Pointer;
-   end Has_Rewriting_Handle;
-
    -----------------
    -- Create_Unit --
    -----------------
@@ -546,6 +498,38 @@ package body ${ada_lib_name}.Implementation is
       return Get_Unit (Context, Filename, Charset, True, Input, Rule);
    end Get_From_Buffer;
 
+   --------------------
+   -- Get_With_Error --
+   --------------------
+
+   function Get_With_Error
+     (Context  : Internal_Context;
+      Filename : String;
+      Error    : String;
+      Charset  : String;
+      Rule     : Grammar_Rule) return Internal_Unit
+   is
+      use Units_Maps;
+
+      Normalized_Filename : constant Virtual_File :=
+         Normalized_Unit_Filename (Context, Filename);
+      Cur                 : constant Cursor :=
+         Context.Units.Find (Normalized_Filename);
+   begin
+      if Cur = No_Element then
+         declare
+            Unit : constant Internal_Unit := Create_Unit
+              (Context, Normalized_Filename, Charset, Rule);
+            Msg  : constant Text_Type := To_Text (Error);
+         begin
+            Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
+            return Unit;
+         end;
+      else
+         return Element (Cur);
+      end if;
+   end Get_With_Error;
+
    % if ctx.default_unit_provider:
 
    -----------------------
@@ -579,37 +563,53 @@ package body ${ada_lib_name}.Implementation is
 
    % endif
 
-   --------------------
-   -- Get_With_Error --
-   --------------------
+   ----------
+   -- Hash --
+   ----------
 
-   function Get_With_Error
-     (Context  : Internal_Context;
-      Filename : String;
-      Error    : String;
-      Charset  : String;
-      Rule     : Grammar_Rule) return Internal_Unit
-   is
-      use Units_Maps;
-
-      Normalized_Filename : constant Virtual_File :=
-         Normalized_Unit_Filename (Context, Filename);
-      Cur                 : constant Cursor :=
-         Context.Units.Find (Normalized_Filename);
+   function Hash (Context : Internal_Context) return Hash_Type is
+      function H is new Hash_Access (Analysis_Context_Type, Internal_Context);
    begin
-      if Cur = No_Element then
-         declare
-            Unit : constant Internal_Unit := Create_Unit
-              (Context, Normalized_Filename, Charset, Rule);
-            Msg  : constant Text_Type := To_Text (Error);
-         begin
-            Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
-            return Unit;
-         end;
-      else
-         return Element (Cur);
-      end if;
-   end Get_With_Error;
+      return H (Context);
+   end Hash;
+
+   ---------------------
+   -- Has_With_Trivia --
+   ---------------------
+
+   function Has_With_Trivia (Context : Internal_Context) return Boolean is
+   begin
+      return Context.With_Trivia;
+   end Has_With_Trivia;
+
+   --------------------------------------------
+   -- Discard_Errors_In_Populate_Lexical_Env --
+   --------------------------------------------
+
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Internal_Context; Discard : Boolean) is
+   begin
+      Context.Discard_Errors_In_Populate_Lexical_Env := Discard;
+   end Discard_Errors_In_Populate_Lexical_Env;
+
+   ----------------------------------
+   -- Set_Logic_Resolution_Timeout --
+   ----------------------------------
+
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Internal_Context; Timeout : Natural) is
+   begin
+      Context.Logic_Resolution_Timeout := Timeout;
+   end Set_Logic_Resolution_Timeout;
+
+   --------------------------
+   -- Has_Rewriting_Handle --
+   --------------------------
+
+   function Has_Rewriting_Handle (Context : Internal_Context) return Boolean is
+   begin
+      return Context.Rewriting_Handle /= No_Rewriting_Handle_Pointer;
+   end Has_Rewriting_Handle;
 
    -------------
    -- Inc_Ref --
