@@ -1127,23 +1127,6 @@ private package ${ada_lib_name}.Implementation is
      ) return Internal_Context;
    --  Implementation for Analysis.Create
 
-   function Hash (Context : Internal_Context) return Hash_Type;
-   --  Implementation for Analysis.Hash
-
-   function Has_With_Trivia (Context : Internal_Context) return Boolean;
-   --  Implementation for Analysis.Has_With_Trivia
-
-   procedure Discard_Errors_In_Populate_Lexical_Env
-     (Context : Internal_Context; Discard : Boolean);
-   --  Implementation for Analysis.Discard_Errors_In_Populate_Lexical_Env
-
-   procedure Set_Logic_Resolution_Timeout
-     (Context : Internal_Context; Timeout : Natural);
-   --  Implementation for Analysis.Set_Logic_Resolution_Timeout
-
-   function Has_Rewriting_Handle (Context : Internal_Context) return Boolean;
-   --  Implementation for Analysis.Has_Rewriting_Handle
-
    function Create_Unit
      (Context             : Internal_Context;
       Normalized_Filename : GNATCOLL.VFS.Virtual_File;
@@ -1160,6 +1143,11 @@ private package ${ada_lib_name}.Implementation is
       Rule              : Grammar_Rule) return Internal_Unit;
    --  Helper for Get_From_File and Get_From_Buffer. Return the resulting
    --  analysis unit.
+
+   function Has_Unit
+     (Context       : Internal_Context;
+      Unit_Filename : String) return Boolean;
+   --  Implementation for Analysis.Has_Unit
 
    function Get_From_File
      (Context  : Internal_Context;
@@ -1187,11 +1175,6 @@ private package ${ada_lib_name}.Implementation is
       Rule     : Grammar_Rule) return Internal_Unit;
    --  Implementation for Analysis.Get_With_Error
 
-   function Has_Unit
-     (Context       : Internal_Context;
-      Unit_Filename : String) return Boolean;
-   --  Implementation for Analysis.Has_Unit
-
    % if ctx.default_unit_provider:
 
    function Get_From_Provider
@@ -1207,6 +1190,23 @@ private package ${ada_lib_name}.Implementation is
      (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst;
    --  Implementation for Analysis.Unit_Provider
    % endif
+
+   function Hash (Context : Internal_Context) return Hash_Type;
+   --  Implementation for Analysis.Hash
+
+   function Has_With_Trivia (Context : Internal_Context) return Boolean;
+   --  Implementation for Analysis.Has_With_Trivia
+
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Internal_Context; Discard : Boolean);
+   --  Implementation for Analysis.Discard_Errors_In_Populate_Lexical_Env
+
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Internal_Context; Timeout : Natural);
+   --  Implementation for Analysis.Set_Logic_Resolution_Timeout
+
+   function Has_Rewriting_Handle (Context : Internal_Context) return Boolean;
+   --  Implementation for Analysis.Has_Rewriting_Handle
 
    procedure Inc_Ref (Context : Internal_Context);
    --  Increment the ref-count of Context. This does nothing if Context is

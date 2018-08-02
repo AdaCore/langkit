@@ -127,66 +127,6 @@ package body ${ada_lib_name}.Analysis is
       end return;
    end Create;
 
-   ----------
-   -- Hash --
-   ----------
-
-   function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type
-   is
-   begin
-      return Hash (Unwrap_Context (Context));
-   end Hash;
-
-   ---------------------
-   -- Has_With_Trivia --
-   ---------------------
-
-   function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean
-   is
-   begin
-      return Has_With_Trivia (Unwrap_Context (Context));
-   end Has_With_Trivia;
-
-   --------------------------------------------
-   -- Discard_Errors_In_Populate_Lexical_Env --
-   --------------------------------------------
-
-   procedure Discard_Errors_In_Populate_Lexical_Env
-     (Context : Analysis_Context'Class; Discard : Boolean) is
-   begin
-      Discard_Errors_In_Populate_Lexical_Env
-        (Unwrap_Context (Context), Discard);
-   end Discard_Errors_In_Populate_Lexical_Env;
-
-   ----------------------------------
-   -- Set_Logic_Resolution_Timeout --
-   ----------------------------------
-
-   procedure Set_Logic_Resolution_Timeout
-     (Context : Analysis_Context'Class; Timeout : Natural) is
-   begin
-      Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
-   end Set_Logic_Resolution_Timeout;
-
-   --------------------------
-   -- Disable_Lookup_Cache --
-   --------------------------
-
-   procedure Disable_Lookup_Cache (Disable : Boolean := True) is
-   begin
-      Implementation.AST_Envs.Activate_Lookup_Cache := not Disable;
-   end Disable_Lookup_Cache;
-
-   --------------------------
-   -- Has_Rewriting_Handle --
-   --------------------------
-
-   function Has_Rewriting_Handle
-     (Context : Analysis_Context'Class) return Boolean is
-   begin
-      return Has_Rewriting_Handle (Unwrap_Context (Context));
-   end Has_Rewriting_Handle;
-
    --------------
    -- Has_Unit --
    --------------
@@ -286,6 +226,66 @@ package body ${ada_lib_name}.Analysis is
    end Unit_Provider;
 
    % endif
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type
+   is
+   begin
+      return Hash (Unwrap_Context (Context));
+   end Hash;
+
+   ---------------------
+   -- Has_With_Trivia --
+   ---------------------
+
+   function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean
+   is
+   begin
+      return Has_With_Trivia (Unwrap_Context (Context));
+   end Has_With_Trivia;
+
+   --------------------------------------------
+   -- Discard_Errors_In_Populate_Lexical_Env --
+   --------------------------------------------
+
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Analysis_Context'Class; Discard : Boolean) is
+   begin
+      Discard_Errors_In_Populate_Lexical_Env
+        (Unwrap_Context (Context), Discard);
+   end Discard_Errors_In_Populate_Lexical_Env;
+
+   ----------------------------------
+   -- Set_Logic_Resolution_Timeout --
+   ----------------------------------
+
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Analysis_Context'Class; Timeout : Natural) is
+   begin
+      Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
+   end Set_Logic_Resolution_Timeout;
+
+   --------------------------
+   -- Disable_Lookup_Cache --
+   --------------------------
+
+   procedure Disable_Lookup_Cache (Disable : Boolean := True) is
+   begin
+      Implementation.AST_Envs.Activate_Lookup_Cache := not Disable;
+   end Disable_Lookup_Cache;
+
+   --------------------------
+   -- Has_Rewriting_Handle --
+   --------------------------
+
+   function Has_Rewriting_Handle
+     (Context : Analysis_Context'Class) return Boolean is
+   begin
+      return Has_Rewriting_Handle (Unwrap_Context (Context));
+   end Has_Rewriting_Handle;
 
    -------------
    -- Context --
