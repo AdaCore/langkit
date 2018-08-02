@@ -167,25 +167,27 @@ base_langkit_docs = {
             ref-count will be ignored.
         % endif
 
-        Charset will be used as a default charset to decode input sources in
-        analysis units. Please see GNATCOLL.Iconv for a couple of supported
-        charsets. Be careful: passing an unsupported charset here is not
-        guaranteed to raise an error here.  If no charset is provided, take
-        ${ctx.default_charset} as the default.
+        ``Charset`` will be used as a default charset to decode input sources
+        in analysis units. Please see ``GNATCOLL.Iconv`` for a couple of
+        supported charsets. Be careful: passing an unsupported charset is
+        not guaranteed to raise an error here. If no charset is provided,
+        ``"${ctx.default_charset}"`` is the default.
 
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
 
-        When With_Trivia is true, the parsed analysis units will contain
+        When ``With_Trivia`` is true, the parsed analysis units will contain
         trivias.
 
         % if ctx.default_unit_provider:
-            If provided, Unit_Provider will be used to query the file name that
-            corresponds to a unit reference during semantic analysis. If it is
-            ${null}, the default one is used instead. It is up to the caller to
-            free resources allocated to it when done with the analysis context.
+            If provided, ``Unit_Provider`` will be used to query the file name
+            that corresponds to a unit reference during semantic analysis. If
+            it is ``${null}``, the default one is used instead. It is up to the
+            caller to free resources allocated to it when done with the
+            analysis context.
         % endif
     """,
+
     'langkit.context_incref': """
         Increase the reference count to an analysis context.
         % if lang == 'c':
