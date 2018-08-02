@@ -1033,10 +1033,12 @@ package body ${ada_lib_name}.Analysis is
       end if;
 
       declare
-         Unit : constant Internal_Unit := Node.Unit;
+         Unit    : constant Internal_Unit := Node.Unit;
+         Context : constant Internal_Context := Unit.Context;
       begin
          return ((Internal   => (Node, Info),
-                  Safety_Net => (Context_Serial => Unit.Context.Serial_Number,
+                  Safety_Net => (Context        => Context,
+                                 Context_Serial => Context.Serial_Number,
                                  Unit           => Unit,
                                  Unit_Version   => Unit.Unit_Version)));
       end;

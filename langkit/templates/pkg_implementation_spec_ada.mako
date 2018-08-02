@@ -1372,8 +1372,10 @@ private package ${ada_lib_name}.Implementation is
    --  Set the Rewriting_Handle component of Context
 
    type Node_Safety_Net is record
+      Context        : Internal_Context;
       Context_Serial : Version_Number;
-      --  Serial number for the analysis context this is associated to
+      --  Analysis context and serial number at the time this safety net was
+      --  produced.
 
       Unit         : Internal_Unit;
       Unit_Version : Version_Number;
@@ -1383,7 +1385,7 @@ private package ${ada_lib_name}.Implementation is
    --  Information to embed in public APIs, used to check before accessing data
    --  that the said-data is still valid.
 
-   No_Node_Safety_Net : constant Node_Safety_Net := (0, null, 0);
+   No_Node_Safety_Net : constant Node_Safety_Net := (null, 0, null, 0);
 
    procedure Check_Safety_Net (Self : Node_Safety_Net);
    --  Check that Self's node is still valid, raising a Stale_Reference_Error
