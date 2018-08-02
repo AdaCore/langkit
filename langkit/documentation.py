@@ -51,7 +51,19 @@ base_langkit_docs = {
     #
 
     'langkit.analysis_context_type': """
-        Context for all source analysis.
+        This type represents a context for all source analysis. This is the
+        first type you need to create to use ${ctx.lib_name}. It will contain
+        the results of all analysis, and is the main holder for all the data.
+
+        You can create several analysis contexts if you need to, which enables
+        you, for example to:
+
+        - Analyze several different projects at the same time
+        - Analyze different parts of the same projects in parallel
+
+        In its current design, ${ctx.lib_name} will keep all the data it
+        analyzes for-ever, so if you need to get memory back, the only option
+        at your disposal is to destroy your ``AnalysisContext`` instance.
     """,
     'langkit.analysis_unit_type': """
         Context for the analysis of a single compilation unit.
