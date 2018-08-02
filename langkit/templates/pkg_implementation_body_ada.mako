@@ -12,6 +12,7 @@
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Vectors;
 with Ada.Exceptions;
+with Ada.Finalization;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
@@ -75,8 +76,42 @@ ${(exts.with_clauses(with_clauses + [
 
 package body ${ada_lib_name}.Implementation is
 
-   Next_Context_Serial_Number : Version_Number := 0;
-   --  Serial number to use for the next analysis context to create
+   package Context_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Positive,
+      Element_Type => Internal_Context);
+
+   type Contexts_Destructor is limited
+      new Ada.Finalization.Limited_Controlled with null record;
+   overriding procedure Finalize (CD : in out Contexts_Destructor);
+   --  Helper to destroy all contexts when terminating the process
+
+   protected Context_Pool is
+
+      procedure Acquire (Context : out Internal_Context)
+         with Post => Context /= null;
+      --  If a context is free for reuse, increment its serial number and
+      --  return it. Otherwise, allocate a new one. In any case, this does not
+      --  initialize it, except for the Serial_Number and Released fields.
+
+      procedure Release (Context : in out Internal_Context)
+         with Pre  => Context /= null,
+              Post => Context = null;
+      --  Tag Context as free for reuse and set it to null
+
+      procedure Free;
+      --  Free all contexts in this pool. Intended to be called only when the
+      --  process is terminating, to avoid reported memory leaks.
+
+   private
+
+      Available : Context_Vectors.Vector;
+      --  List of allocated contexts that can be re-used right now
+
+      CD : Contexts_Destructor with Unreferenced;
+      --  Singleton whose only purpose is to free all contexts in Available
+      --  when finalized.
+
+   end Context_Pool;
 
    generic
       type T (<>) is limited private;
@@ -135,6 +170,63 @@ package body ${ada_lib_name}.Implementation is
    function Create_Symbol_Literals
      (Symbols : Symbol_Table) return Symbol_Literal_Array;
    --  Create pre-computed symbol literals in Symbols and return them
+
+   ------------------
+   -- Context_Pool --
+   ------------------
+
+   protected body Context_Pool is
+
+      -------------
+      -- Acquire --
+      -------------
+
+      procedure Acquire (Context : out Internal_Context) is
+      begin
+         if Available.Is_Empty then
+            Context := new Analysis_Context_Type;
+            Context.Serial_Number := 1;
+         else
+            Context := Available.Last_Element;
+            Context.Serial_Number := Context.Serial_Number + 1;
+            Available.Delete_Last;
+         end if;
+         Context.Released := False;
+      end Acquire;
+
+      -------------
+      -- Release --
+      -------------
+
+      procedure Release (Context : in out Internal_Context) is
+      begin
+         Available.Append (Context);
+         Context.Released := True;
+         Context := null;
+      end Release;
+
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free is
+      begin
+         for C of Available loop
+            Free (C);
+         end loop;
+      end Free;
+
+   end Context_Pool;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (CD : in out Contexts_Destructor) is
+      pragma Unreferenced (CD);
+   begin
+      Context_Pool.Free;
+   end Finalize;
 
    ----------------
    -- Get_Env_Id --
@@ -230,39 +322,32 @@ package body ${ada_lib_name}.Implementation is
       Symbols        : constant Symbol_Table := Create;
       Context        : Internal_Context;
    begin
-      Context := new Analysis_Context_Type'
-        (Ref_Count     => 1,
-         Units         => <>,
-         Filenames     => <>,
-         Symbols       => Symbols,
-         Charset       => To_Unbounded_String (Actual_Charset),
-         With_Trivia   => With_Trivia,
-         Root_Scope    => AST_Envs.Create
-                            (Parent => AST_Envs.No_Env_Getter,
-                             Node   => null,
-                             Owner  => No_Analysis_Unit),
+      Context_Pool.Acquire (Context);
+      Context.Ref_Count := 1;
+      Context.Symbols := Symbols;
+      Context.Charset := To_Unbounded_String (Actual_Charset);
+      Context.With_Trivia := With_Trivia;
+      Context.Root_Scope := AST_Envs.Create (Parent => AST_Envs.No_Env_Getter,
+                                             Node   => null,
+                                             Owner  => No_Analysis_Unit);
 
-         % if ctx.default_unit_provider:
-         Unit_Provider => Unit_Provider,
-         % endif
+      % if ctx.default_unit_provider:
+      Context.Unit_Provider := Unit_Provider;
+      % endif
 
-         Symbol_Literals => Create_Symbol_Literals (Symbols),
-
-         Parser => <>,
-
-         Discard_Errors_In_Populate_Lexical_Env => <>,
-         Logic_Resolution_Timeout => <>,
-         In_Populate_Lexical_Env => False,
-         Cache_Version => <>,
-
-         Rewriting_Handle => <>,
-         Templates_Unit => <>,
-
-         Serial_Number => Next_Context_Serial_Number);
-
-      Next_Context_Serial_Number := Next_Context_Serial_Number + 1;
+      Context.Symbol_Literals := Create_Symbol_Literals (Symbols);
       Initialize (Context.Parser);
+
+      Context.Discard_Errors_In_Populate_Lexical_Env := True;
+      Context.Logic_Resolution_Timeout := 100_000;
+      Context.In_Populate_Lexical_Env := False;
+      Context.Cache_Version := 0;
+
+      Context.Rewriting_Handle := No_Rewriting_Handle_Pointer;
+      Context.Templates_Unit := No_Analysis_Unit;
+
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
+
       return Context;
    end Create;
 
@@ -561,6 +646,9 @@ package body ${ada_lib_name}.Implementation is
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
+      Context.Units := Units_Maps.Empty_Map;
+      Context.Filenames := Virtual_File_Maps.Empty_Map;
+
       Dec_Ref (Context.Templates_Unit);
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
@@ -568,7 +656,7 @@ package body ${ada_lib_name}.Implementation is
       % if ctx.default_unit_provider:
          Destroy (Context.Unit_Provider);
       % endif
-      Free (Context);
+      Context_Pool.Release (Context);
    end Destroy;
 
    -------------
