@@ -4066,13 +4066,15 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Check_Safety_Net (Self : Node_Safety_Net) is
    begin
-      --  TODO??? Check that the context is still alive using
-      --  Self.Context_Serial.
+      if Self.Context = null then
+         return;
+      end if;
 
-      --  Now that we can assume that Self's context is alive, we know that all
-      --  its units are alive, so we just have to check the version number.
-      if Self.Unit /= null
-         and then Self.Unit.Unit_Version /= Self.Unit_Version
+      --  Check that Self's context has not been release (see the
+      --  Context_Pool). Then check that the unit version is the same.
+      if Self.Context.Released
+         or else Self.Context.Serial_Number /= Self.Context_Serial
+         or else Self.Unit.Unit_Version /= Self.Unit_Version
       then
          raise Stale_Reference_Error;
       end if;
