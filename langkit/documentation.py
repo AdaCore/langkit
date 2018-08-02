@@ -65,10 +65,12 @@ base_langkit_docs = {
         analyzes for-ever, so if you need to get memory back, the only option
         at your disposal is to destroy your ``AnalysisContext`` instance.
     """,
+
     'langkit.analysis_unit_type': """
-        Context for the analysis of a single compilation unit.
+        This type represents the analysis of a single file.
+
         % if lang != 'python':
-            References are ref-counted.
+        References are ref-counted.
         % endif
     """,
     'langkit.grammar_rule_type': """
