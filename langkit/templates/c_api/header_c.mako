@@ -123,7 +123,6 @@ typedef struct {
     % endif
 % endfor
 
-% if ctx.default_unit_provider:
 /*
  * Types for unit providers
  */
@@ -156,7 +155,6 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    const char *charset,
    int reparse
 );
-% endif
 
 /* All the functions below can potentially raise an exception, so
    ${capi.get_name("get_last_exception")} must be checked after them even
@@ -187,10 +185,8 @@ ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(
    const char *charset,
-   int with_trivia
-   % if ctx.default_unit_provider:
-   , ${unit_provider_type} unit_provider
-   % endif
+   int with_trivia,
+   ${unit_provider_type} unit_provider
 );
 
 ${c_doc('langkit.context_incref')}
@@ -397,7 +393,6 @@ ${capi.get_name("node_extension")}(
     ${capi.get_name("node_extension_destructor")} dtor
 );
 
-% if ctx.default_unit_provider:
 /*
  * Unit providers
  */
@@ -416,7 +411,6 @@ ${capi.get_name('destroy_unit_provider')}(void *data);
 ${exts.include_extension(
    ctx.ext('analysis', 'c_api', 'unit_providers', 'header')
 )}
-% endif
 
 /*
  * Misc

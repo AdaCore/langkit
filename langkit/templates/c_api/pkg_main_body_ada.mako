@@ -34,7 +34,6 @@ package body ${ada_lib_name}.Implementation.C is
    --  Avoid hiding from $.Lexer
    subtype Token_Data_Type is Common.Token_Data_Type;
 
-% if ctx.default_unit_provider:
    type C_Unit_Provider_Type is
       new Ada.Finalization.Controlled
       and Unit_Provider_Interface
@@ -59,7 +58,6 @@ package body ${ada_lib_name}.Implementation.C is
       Kind     : Unit_Kind;
       Charset  : String := "";
       Reparse  : Boolean := False) return Analysis_Unit'Class;
-% endif
 
    function Value_Or_Empty (S : chars_ptr) return String
    --  If S is null, return an empty string. Return Value (S) otherwise.
@@ -87,14 +85,9 @@ package body ${ada_lib_name}.Implementation.C is
    -------------------------
 
    function ${capi.get_name("create_analysis_context")}
-     (Charset            : chars_ptr;
-      With_Trivia        : int
-      % if ctx.default_unit_provider:
-      ; Unit_Provider : ${unit_provider_type}
-      % endif
-     )
-      return ${analysis_context_type}
-   is
+     (Charset       : chars_ptr;
+      With_Trivia   : int;
+      Unit_Provider : ${unit_provider_type}) return ${analysis_context_type} is
    begin
       Clear_Last_Exception;
 
@@ -104,18 +97,13 @@ package body ${ada_lib_name}.Implementation.C is
             then ${string_repr(ctx.default_charset)}
             else Value (Charset));
 
-         % if ctx.default_unit_provider:
-         Provider          : constant Unit_Provider_Access_Cst :=
+         Provider : constant Unit_Provider_Access_Cst :=
             Unit_Provider_Access_Cst (Unwrap (Unit_Provider));
-         % endif
 
          Context      : constant Analysis_Context := Create
-           (Charset     => C,
-            With_Trivia => With_Trivia /= 0
-            % if ctx.default_unit_provider:
-            , Unit_Provider => Provider
-            % endif
-            );
+           (Charset       => C,
+            With_Trivia   => With_Trivia /= 0,
+            Unit_Provider => Provider);
          Internal_Ctx : constant Internal_Context := Unwrap_Context (Context);
 
       begin
@@ -217,37 +205,37 @@ package body ${ada_lib_name}.Implementation.C is
    end;
 
    % if ctx.default_unit_provider:
-      function ${capi.get_name("get_analysis_unit_from_provider")}
-        (Context     : ${analysis_context_type};
-         Name        : ${text_type};
-         Kind        : ${unit_kind_type};
-         Charset     : chars_ptr;
-         Reparse     : int) return ${analysis_unit_type} is
+   function ${capi.get_name("get_analysis_unit_from_provider")}
+     (Context     : ${analysis_context_type};
+      Name        : ${text_type};
+      Kind        : ${unit_kind_type};
+      Charset     : chars_ptr;
+      Reparse     : int) return ${analysis_unit_type} is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         Text_Name : Text_Type (1 .. Integer (Name.Length))
+            with Import  => True,
+                 Address => Name.Chars;
+
+         Ctx  : constant Internal_Context := Unwrap (Context);
+         Unit : constant Internal_Unit := Get_From_Provider
+           (Ctx,
+            Text_Name,
+            Unwrap (Kind),
+            Value_Or_Empty (Charset),
+            Reparse /= 0);
       begin
-         Clear_Last_Exception;
-
-         declare
-            Text_Name : Text_Type (1 .. Integer (Name.Length))
-               with Import  => True,
-                    Address => Name.Chars;
-
-            Ctx  : constant Internal_Context := Unwrap (Context);
-            Unit : constant Internal_Unit := Get_From_Provider
-              (Ctx,
-               Text_Name,
-               Unwrap (Kind),
-               Value_Or_Empty (Charset),
-               Reparse /= 0);
-         begin
-            return Wrap (Unit);
-         end;
-      exception
-         when Invalid_Unit_Name_Error =>
-            return ${analysis_unit_type} (System.Null_Address);
-         when Exc : others =>
-            Set_Last_Exception (Exc);
-            return ${analysis_unit_type} (System.Null_Address);
+         return Wrap (Unit);
       end;
+   exception
+      when Invalid_Unit_Name_Error =>
+         return ${analysis_unit_type} (System.Null_Address);
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_unit_type} (System.Null_Address);
+   end;
    % endif
 
    procedure ${capi.get_name('unit_root')}
@@ -1023,7 +1011,6 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
-% if ctx.default_unit_provider:
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
@@ -1134,7 +1121,6 @@ package body ${ada_lib_name}.Implementation.C is
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'body')
    )}
-% endif
 
    ----------
    -- Wrap --

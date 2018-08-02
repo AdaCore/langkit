@@ -180,12 +180,12 @@ base_langkit_docs = {
         When ``With_Trivia`` is true, the parsed analysis units will contain
         trivias.
 
-        % if ctx.default_unit_provider:
-            If provided, ``Unit_Provider`` will be used to query the file name
-            that corresponds to a unit reference during semantic analysis. If
-            it is ``${null}``, the default one is used instead. It is up to the
-            caller to free resources allocated to it when done with the
-            analysis context.
+        If provided, ``Unit_Provider`` will be used to query the file name
+        that corresponds to a unit reference during semantic analysis. If
+        it is ``${null}``, the default one is used instead.
+        % if lang != 'python':
+            It is up to the caller to free resources allocated to it when done
+            with the analysis context.
         % endif
     """,
 
