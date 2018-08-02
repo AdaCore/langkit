@@ -70,7 +70,7 @@
             % elif arg.type.is_entity_type:
                (if ${arg_ref}.Node = null
                 then ${arg.type.nullexpr}
-                else (${arg.type.el_type.name} (${arg_ref}.Node),
+                else (${arg.type.element_type.name} (${arg_ref}.Node),
                       ${arg_ref}.Info))
             % elif arg.type.is_array and not arg.type.emit_c_type:
                Convert (${arg_ref})

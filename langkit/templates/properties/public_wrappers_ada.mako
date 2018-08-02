@@ -43,7 +43,7 @@
             if arg.type.is_entity_type:
                actual = (
                   '({type} ({name}.Internal.Node), {name}.Internal.Info)'
-                  .format(type=arg.type.el_type.name, name=arg.name)
+                  .format(type=arg.type.element_type.name, name=arg.name)
                )
 
             elif arg.type.is_ast_node:
@@ -70,7 +70,7 @@
                         "       {arg} (I).Internal.Info);".format(
                             actual=actual,
                             arg=arg.name,
-                            typ=arg.type.element_type.el_type.name,
+                            typ=arg.type.element_type.element_type.name,
                         ),
                         "end loop;",
                     ])

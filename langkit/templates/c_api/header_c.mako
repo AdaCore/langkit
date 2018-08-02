@@ -307,7 +307,7 @@ ${capi.get_name("unit_populate_lexical_env")}(${analysis_unit_type} unit);
 ${c_doc('langkit.node_is_null')}
 static inline int
 ${capi.get_name("node_is_null")}(${entity_type} *node) {
-    return node->el == NULL;
+    return node->node == NULL;
 }
 
 ${c_doc('langkit.node_kind')}

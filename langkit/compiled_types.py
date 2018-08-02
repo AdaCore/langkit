@@ -544,8 +544,8 @@ class CompiledType(object):
     @property
     def element_type(self):
         """
-        Assuming this is a collection type (array or list), return the
-        corresponding element type.
+        Assuming this is a collection type (array or list) or an entity, return
+        the corresponding element type.
 
         :rtype: CompiledType
         """
@@ -670,8 +670,8 @@ class CompiledType(object):
         # ASTNodeType instances (and thus entities) always can be unified:
         # just take the most recent common ancestor.
         if self.is_entity_type and other.is_entity_type:
-            return ASTNodeType.common_ancestor(self.el_type,
-                                               other.el_type).entity
+            return ASTNodeType.common_ancestor(self.element_type,
+                                               other.element_type).entity
         elif self.is_ast_node and other.is_ast_node:
             return ASTNodeType.common_ancestor(self, other)
 
@@ -697,7 +697,7 @@ class CompiledType(object):
         """
 
         if self.is_entity_type and formal.is_entity_type:
-            return self.el_type.matches(formal.el_type)
+            return self.element_type.matches(formal.element_type)
 
         if formal.is_ast_node and self.is_ast_node:
             return formal in self.get_inheritance_chain()
@@ -1665,7 +1665,7 @@ class EntityType(StructType):
                                    doc='Entity info for this node'))],
         )
         self.is_entity_type = True
-        self.el_type = astnode
+        self._element_type = astnode
         self._exposed = True
 
         if self.astnode.is_root_node:
@@ -1676,7 +1676,7 @@ class EntityType(StructType):
 
     @property
     def dsl_name(self):
-        return '{}.entity'.format(self.el_type.dsl_name)
+        return '{}.entity'.format(self.element_type.dsl_name)
 
     def c_type(self, capi):
         # Emit only one C binding type for entities. They are all ABI

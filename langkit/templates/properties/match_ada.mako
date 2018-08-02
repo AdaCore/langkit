@@ -3,7 +3,7 @@
 <%
     prefix_node_type = expr.prefix_var.type
     if prefix_node_type.is_entity_type:
-        prefix_node_type = prefix_node_type.el_type
+        prefix_node_type = prefix_node_type.element_type
 
     # Expression to compute the kind of the prefix, on which we dispatch. Take
     # care of converting it to the actual kind subrange so that we get full

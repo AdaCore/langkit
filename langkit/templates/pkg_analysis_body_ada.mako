@@ -570,7 +570,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------------
 
    % for e in ctx.entity_types:
-      function As_${e.el_type.kwless_raw_name}
+      function As_${e.element_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name}
       is
          N : constant ${root_node_type_name} := Node.Internal.Node;
@@ -580,7 +580,7 @@ package body ${ada_lib_name}.Analysis is
          end if;
 
          Check_Safety_Net (Node.Safety_Net);
-         if N.all in ${e.el_type.value_type_name()}'Class then
+         if N.all in ${e.element_type.value_type_name()}'Class then
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          else
@@ -627,14 +627,14 @@ package body ${ada_lib_name}.Analysis is
 
    % for e in ctx.entity_types:
 
-      % for f in e.el_type.get_parse_fields( \
+      % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
          predicate=lambda f: f.is_public \
       ):
          ${astnode_types.field_body(f)}
       % endfor
 
-      % for p in e.el_type.get_properties( \
+      % for p in e.element_type.get_properties( \
          include_inherited=False, \
          predicate=lambda p: p.is_public and not p.overriding \
       ):

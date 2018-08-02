@@ -367,14 +367,14 @@ package ${ada_lib_name}.Analysis is
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
 
-      % for f in e.el_type.get_parse_fields( \
+      % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
          predicate=lambda f: f.is_public, \
       ):
          ${astnode_types.field_decl(f)}
       % endfor
 
-      % for p in e.el_type.get_properties( \
+      % for p in e.element_type.get_properties( \
          include_inherited=False, \
          predicate=lambda p: p.is_public and not p.overriding \
       ):
@@ -514,7 +514,7 @@ package ${ada_lib_name}.Analysis is
 
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
-      function As_${e.el_type.kwless_raw_name}
+      function As_${e.element_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
       --% no-document: True
    % endfor
