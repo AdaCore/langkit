@@ -4,6 +4,23 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
+
+   procedure Try_Node (N : Foo_Node; Label : String);
+
+   --------------
+   -- Try_Node --
+   --------------
+
+   procedure Try_Node (N : Foo_Node; Label : String) is
+   begin
+      Put_Line (Label);
+      Put_Line (N.Short_Image);
+      Put_Line ("   ... did not get the expected stale reference error");
+   exception
+      when Stale_Reference_Error =>
+         Put_Line ("   ... got the expected stale reference error");
+   end Try_Node;
+
 begin
 
    declare
@@ -37,12 +54,26 @@ begin
       R : constant Foo_Node := U.Root;
    begin
       U.Reparse ("example");
+      Try_Node (R, "Using node after unit reparse");
+   end;
+
+   declare
+      N : Foo_Node;
+   begin
+      declare
+         U : constant Analysis_Unit := Create.Get_From_Buffer
+           (Filename => "main.txt", Buffer   => "example");
       begin
-         Put_Line (R.Short_Image);
-         Put_Line ("Did not get the expected stale reference error");
-      exception
-         when Stale_Reference_Error =>
-            Put_Line ("Got the expected stale reference error");
+         N := U.Root;
+      end;
+
+      Try_Node (N, "Using node after context destruction");
+
+      declare
+         Dummy_Unit : constant Analysis_Unit := Create.Get_From_Buffer
+           (Filename => "main.txt", Buffer   => "example");
+      begin
+         Try_Node (N, "Using node after context re-use");
       end;
    end;
 

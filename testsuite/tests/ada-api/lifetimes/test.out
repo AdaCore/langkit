@@ -1,3 +1,8 @@
-Got the expected stale reference error
+Using node after unit reparse
+   ... got the expected stale reference error
+Using node after context destruction
+   ... got the expected stale reference error
+Using node after context re-use
+   ... got the expected stale reference error
 Done.
 Done
