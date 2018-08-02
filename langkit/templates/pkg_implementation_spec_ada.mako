@@ -981,21 +981,21 @@ private package ${ada_lib_name}.Implementation is
       --  Main parser type. TODO: If we want to parse in several tasks, we'll
       --  replace that by an array of parsers.
 
-      Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
+      Discard_Errors_In_Populate_Lexical_Env : Boolean;
       --  See the eponym procedure
 
-      In_Populate_Lexical_Env : Boolean := False;
+      In_Populate_Lexical_Env : Boolean;
       --  Flag to tell whether we are running the Populate_Lexical_Env pass.
       --  When it's on, we must not use the memoization map as the hash of
       --  lexical environment changes when their content changes.
 
-      Logic_Resolution_Timeout : Natural := 100_000;
+      Logic_Resolution_Timeout : Natural;
       --  If zero, inefficient. Otherwise, designates the maximal number of
       --  steps allowed in the resolution of logic equations before
       --  interrupting the resolution because of timeout. See the
       --  Set_Logic_Resolution_Timeout procedure.
 
-      Cache_Version : Natural := 0;
+      Cache_Version : Natural;
       --  Version number used to invalidate memoization caches in a lazy
       --  fashion. If an analysis unit's version number is strictly inferior to
       --  this, its memoization map should be cleared.
@@ -1010,7 +1010,12 @@ private package ${ada_lib_name}.Implementation is
       --  templates in the context of tree rewriting.
 
       Serial_Number : Version_Number;
-      --  Serial number that is unique to this analysis context instance
+      --  Serial number that is incremented each time this context allocation
+      --  is re-used.
+
+      Released : Boolean;
+      --  Whether this context has been released and thus is available in
+      --  Context_Pool.
    end record;
 
    type Analysis_Unit_Type is limited record
