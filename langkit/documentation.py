@@ -63,7 +63,7 @@ base_langkit_docs = {
 
         In its current design, ${ctx.lib_name} will keep all the data it
         analyzes for-ever, so if you need to get memory back, the only option
-        at your disposal is to destroy your ``AnalysisContext`` instance.
+        at your disposal is to destroy your ``Analysis_Context`` instance.
     """,
 
     'langkit.analysis_unit_type': """
@@ -173,7 +173,7 @@ base_langkit_docs = {
         not guaranteed to raise an error here. If no charset is provided,
         ``"${ctx.default_charset}"`` is the default.
 
-        .. todo:: 
+        .. todo::
 
             Passing an unsupported charset here is not guaranteed to raise
             an error right here, but this would be really helpful for users.
