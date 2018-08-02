@@ -120,7 +120,6 @@ private package ${ada_lib_name}.Implementation.C is
           External_Name => "${capi.get_name('destroy_text')}";
    ${ada_c_doc('langkit.destroy_text', 3)}
 
-% if ctx.default_unit_provider:
    --  Types for unit providers
 
    type ${unit_kind_type} is new int;
@@ -150,20 +149,15 @@ private package ${ada_lib_name}.Implementation.C is
       Reparse     : int) return ${analysis_unit_type}
       with Convention => C;
    ${ada_c_doc('langkit.unit_provider_get_unit_from_name_type', 3)}
-% endif
 
    -------------------------
    -- Analysis primitives --
    -------------------------
 
    function ${capi.get_name('create_analysis_context')}
-     (Charset            : chars_ptr;
-      With_Trivia        : int
-      % if ctx.default_unit_provider:
-      ; Unit_Provider : ${unit_provider_type}
-      % endif
-     )
-      return ${analysis_context_type}
+     (Charset       : chars_ptr;
+      With_Trivia   : int;
+      Unit_Provider : ${unit_provider_type}) return ${analysis_context_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('create_analysis_context')}";
@@ -217,18 +211,17 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
    % if ctx.default_unit_provider:
-      function ${capi.get_name('get_analysis_unit_from_provider')}
-        (Context     : ${analysis_context_type};
-         Name        : ${text_type};
-         Kind        : ${unit_kind_type};
-         Charset     : chars_ptr;
-         Reparse     : int)
-         return ${analysis_unit_type}
-         with Export        => True,
-              Convention    => C,
-              External_name =>
-                 "${capi.get_name('get_analysis_unit_from_provider')}";
-      ${ada_c_doc('langkit.get_unit_from_provider', 6)}
+   function ${capi.get_name('get_analysis_unit_from_provider')}
+     (Context : ${analysis_context_type};
+      Name    : ${text_type};
+      Kind    : ${unit_kind_type};
+      Charset : chars_ptr;
+      Reparse : int) return ${analysis_unit_type}
+      with Export        => True,
+           Convention    => C,
+           External_name =>
+              "${capi.get_name('get_analysis_unit_from_provider')}";
+   ${ada_c_doc('langkit.get_unit_from_provider', 6)}
    % endif
 
    procedure ${capi.get_name('unit_root')}
@@ -452,8 +445,6 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('node_extension')}";
    ${ada_c_doc('langkit.node_extension', 3)}
 
-% if ctx.default_unit_provider:
-
    --------------------
    -- Unit providers --
    --------------------
@@ -480,7 +471,6 @@ private package ${ada_lib_name}.Implementation.C is
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'spec')
    )}
-% endif
 
    ------------------
    -- Struct types --
@@ -657,7 +647,6 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (Token : Token_Reference) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Reference;
 
-% if ctx.default_unit_provider:
    function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is
      (Unit_Kind'Pos (Kind));
    function Unwrap (Kind : ${unit_kind_type}) return Unit_Kind is
@@ -666,7 +655,6 @@ private package ${ada_lib_name}.Implementation.C is
      (Unit_Provider_Access, ${unit_provider_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${unit_provider_type}, Unit_Provider_Access);
-% endif
 
    function Convert is new Ada.Unchecked_Conversion
      (${capi.get_name('node_extension_destructor')},

@@ -128,11 +128,9 @@ package ${ada_lib_name}.Analysis is
 
    function Create
      (Charset     : String := Default_Charset;
-      With_Trivia : Boolean := True
-      % if ctx.default_unit_provider:
-         ; Unit_Provider : Unit_Provider_Access_Cst := null
-      % endif
-     ) return Analysis_Context;
+      With_Trivia : Boolean := True;
+      Unit_Provider : Unit_Provider_Access_Cst := null)
+      return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
    --% belongs-to: Analysis_Context
 
@@ -180,12 +178,12 @@ package ${ada_lib_name}.Analysis is
       with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
+   % endif
+
    function Unit_Provider
      (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst;
    --% belongs-to: Analysis_Context
    --  Return the unit provider for ``Context``.
-
-   % endif
 
    function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
    ${ada_doc('langkit.context_hash', 3)}

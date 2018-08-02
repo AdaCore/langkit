@@ -97,27 +97,21 @@ package body ${ada_lib_name}.Analysis is
    ------------
 
    function Create
-     (Charset     : String := Default_Charset;
-      With_Trivia : Boolean := True
-      % if ctx.default_unit_provider:
-         ; Unit_Provider : Unit_Provider_Access_Cst := null
-      % endif
-     ) return Analysis_Context
+     (Charset       : String := Default_Charset;
+      With_Trivia   : Boolean := True;
+      Unit_Provider : Unit_Provider_Access_Cst := null) return Analysis_Context
    is
-      % if ctx.default_unit_provider:
-         P : constant Internal_Unit_Provider_Access :=
+      P : constant Internal_Unit_Provider_Access :=
+         % if ctx.default_unit_provider:
            new Unit_Provider_Wrapper'
              (Internal => (if Unit_Provider = null
                            then ${ctx.default_unit_provider.fqn}
                            else Unit_Provider));
-      % endif
-      Result : Internal_Context := Create
-        (Charset,
-         With_Trivia
-         % if ctx.default_unit_provider:
-            , P
+         % else:
+            null;
          % endif
-         );
+
+      Result : Internal_Context := Create (Charset, With_Trivia, P);
    begin
       return Context : constant Analysis_Context := Wrap_Context (Result)
       do
@@ -206,6 +200,8 @@ package body ${ada_lib_name}.Analysis is
                             Charset, Reparse));
    end Get_From_Provider;
 
+   % endif
+
    -------------------
    -- Unit_Provider --
    -------------------
@@ -224,8 +220,6 @@ package body ${ada_lib_name}.Analysis is
 
       return Unit_Provider_Wrapper (Provider.all).Internal;
    end Unit_Provider;
-
-   % endif
 
    ----------
    -- Hash --

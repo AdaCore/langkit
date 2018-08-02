@@ -969,10 +969,8 @@ private package ${ada_lib_name}.Implementation is
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
 
-      % if ctx.default_unit_provider:
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
-      % endif
 
       Symbol_Literals : aliased Symbol_Literal_Array;
       --  List of pre-computed symbols in the Symbols table
@@ -1119,12 +1117,9 @@ private package ${ada_lib_name}.Implementation is
    ----------------------------------------------------
 
    function Create
-     (Charset     : String;
-      With_Trivia : Boolean
-      % if ctx.default_unit_provider:
-         ; Unit_Provider : Internal_Unit_Provider_Access
-      % endif
-     ) return Internal_Context;
+     (Charset       : String;
+      With_Trivia   : Boolean;
+      Unit_Provider : Internal_Unit_Provider_Access) return Internal_Context;
    --  Implementation for Analysis.Create
 
    function Create_Unit
@@ -1186,10 +1181,11 @@ private package ${ada_lib_name}.Implementation is
       with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
    --  Implementation for Analysis.Get_From_Provider
 
+   % endif
+
    function Unit_Provider
      (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst;
    --  Implementation for Analysis.Unit_Provider
-   % endif
 
    function Hash (Context : Internal_Context) return Hash_Type;
    --  Implementation for Analysis.Hash

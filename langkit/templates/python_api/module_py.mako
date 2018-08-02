@@ -194,7 +194,6 @@ class _big_integer(_text):
         return int(super(_big_integer, self)._wrap())
 
 
-% if ctx.default_unit_provider:
 ${py_doc('langkit.unit_kind_type')}
 _str_to_unit_kind = {
     'specification': 0,
@@ -214,7 +213,6 @@ def _unwrap_unit_kind(kind):
 
 class _unit_provider(_hashable_void_p):
     pass
-% endif
 
 
 #
@@ -257,30 +255,19 @@ class AnalysisContext(object):
     def __init__(self,
                  charset=None,
                  with_trivia=True,
-% if ctx.default_unit_provider:
                  unit_provider=None,
-% endif
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
-% if ctx.default_unit_provider:
         c_unit_provider = unit_provider._c_value if unit_provider else None
-% endif
         self._c_value = (
-            _create_analysis_context(
-                charset, with_trivia,
-% if ctx.default_unit_provider:
-                c_unit_provider,
-% endif
-            )
+            _create_analysis_context(charset, with_trivia, c_unit_provider)
             if _c_value is None else
             _context_incref(_c_value)
         )
 
-% if ctx.default_unit_provider:
         # Keep a reference to the unit provider so that it is live at least as
         # long as the analysis context is live.
         self._unit_provider = unit_provider
-% endif
 
     def __del__(self):
         _context_decref(self._c_value)
@@ -304,7 +291,6 @@ class AnalysisContext(object):
                                                  buffer, len(buffer))
         return AnalysisUnit(c_value)
 
-% if ctx.default_unit_provider:
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
         _name = _text._unwrap(name)
@@ -318,7 +304,6 @@ class AnalysisContext(object):
             raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
                 repr(name), kind
             ))
-% endif
 
     def discard_errors_in_populate_lexical_env(self, discard):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
@@ -744,8 +729,6 @@ class Token(ctypes.Structure):
         return (self._token_data, self._token_index, self._trivia_index)
 
 
-% if ctx.default_unit_provider:
-
 ## TODO: if this is needed some day, also bind create_unit_provider to allow
 ## Python users to create their own unit providers.
 class UnitProvider(object):
@@ -764,8 +747,6 @@ class UnitProvider(object):
 ${exts.include_extension(
    ctx.ext('python_api', 'unit_providers', 'methods')
 )}
-
-% endif
 
 
 class ${root_astnode_name}(object):
@@ -1364,12 +1345,7 @@ _destroy_text = _import_func(
 # Analysis primitives
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
-    [
-        ctypes.c_char_p,
-% if ctx.default_unit_provider:
-        _unit_provider,
-% endif
-    ], AnalysisContext._c_type
+    [ctypes.c_char_p, _unit_provider], AnalysisContext._c_type
 )
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',
@@ -1545,7 +1521,6 @@ _register_extension = _import_func(
     [ctypes.c_char_p], ctypes.c_uint
 )
 
-% if ctx.default_unit_provider:
 # Unit providers
 _destroy_unit_provider = _import_func(
     '${capi.get_name("destroy_unit_provider")}',
@@ -1554,7 +1529,6 @@ _destroy_unit_provider = _import_func(
 ${exts.include_extension(
    ctx.ext('python_api', 'unit_providers', 'low_level_bindings')
 )}
-% endif
 
 # Misc
 _token_kind_name = _import_func(
