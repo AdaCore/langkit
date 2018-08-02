@@ -173,8 +173,10 @@ base_langkit_docs = {
         not guaranteed to raise an error here. If no charset is provided,
         ``"${ctx.default_charset}"`` is the default.
 
-        ${TODO} Passing an unsupported charset here is not guaranteed to raise
-        an error right here, but this would be really helpful for users.
+        .. todo:: 
+
+            Passing an unsupported charset here is not guaranteed to raise
+            an error right here, but this would be really helpful for users.
 
         When ``With_Trivia`` is true, the parsed analysis units will contain
         trivias.
