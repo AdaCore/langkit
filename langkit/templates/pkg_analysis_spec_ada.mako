@@ -208,7 +208,7 @@ package ${ada_lib_name}.Analysis is
    function Has_Rewriting_Handle
      (Context : Analysis_Context'Class) return Boolean;
    --  Return whether ``Context`` has a rewriting handler (see
-   --  ``${ada_lib_name}.Rewriting)``, i.e. whether it is in the process of
+   --  ``${ada_lib_name}.Rewriting``), i.e. whether it is in the process of
    --  rewriting. If true, this means that the set of currently loaded analysis
    --  units is frozen until the rewriting process is done.
 
