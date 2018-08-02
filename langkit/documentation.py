@@ -705,12 +705,13 @@ def split_paragraphs(text):
             current_paragraph[:] = []
 
     for line in text.split('\n'):
-        is_bullet = line.strip().startswith("- ")
-        if line.strip() and not is_bullet:
-            current_paragraph.append(line.strip())
+        line = line.strip()
+        is_bullet = line.startswith('- ') or line.startswith('* ')
+        if line and not is_bullet:
+            current_paragraph.append(line)
         elif is_bullet:
             end_paragraph()
-            current_paragraph.append(line.strip())
+            current_paragraph.append(line)
         else:
             end_paragraph()
     end_paragraph()
