@@ -64,6 +64,13 @@ package ${ada_lib_name}.Analysis is
 
    % for e in ctx.entity_types:
       No_${e.api_name} : constant ${e.api_name};
+      % if e == root_entity:
+      --  Special value to represent the absence of a node. Note that every
+      --  node type derived from the root type has a similar ``No_Node``
+      --  constant.
+      % else:
+      --% no-document: True
+      % endif
    % endfor
 
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
@@ -127,6 +134,7 @@ package ${ada_lib_name}.Analysis is
       % endif
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
+   --% belongs-to: Analysis_Context
 
    function Has_Unit
      (Context       : Analysis_Context'Class;
@@ -157,9 +165,9 @@ package ${ada_lib_name}.Analysis is
       Error    : String;
       Charset  : String := "";
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit;
-   --  If a Unit for Filename already exists, return it unchanged. Otherwise,
-   --  create an empty analysis unit for Filename with a diagnostic that
-   --  contains the Error message.
+   --  If a Unit for ``Filename`` already exists, return it unchanged.
+   --  Otherwise, create an empty analysis unit for ``Filename`` with a
+   --  diagnostic that contains the Error message.
 
    % if ctx.default_unit_provider:
 
@@ -174,14 +182,16 @@ package ${ada_lib_name}.Analysis is
 
    function Unit_Provider
      (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst;
-   --  Object to translate unit names to file names
+   --% belongs-to: Analysis_Context
+   --  Return the unit provider for ``Context``.
+
    % endif
 
    function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
    ${ada_doc('langkit.context_hash', 3)}
 
    function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean;
-   --  Return whether Context keeps trivia when parsing units
+   --  Return whether ``Context`` keeps trivia when parsing units
 
    procedure Discard_Errors_In_Populate_Lexical_Env
      (Context : Analysis_Context'Class; Discard : Boolean);
@@ -192,13 +202,13 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
    procedure Disable_Lookup_Cache (Disable : Boolean := True);
-   --  Debug helper: if Disable is true, disable the use of caches in lexical
-   --  environment lookups. Otherwise, activate it.
+   --  Debug helper: if ``Disable`` is true, disable the use of caches in
+   --  lexical environment lookups. Otherwise, activate it.
 
    function Has_Rewriting_Handle
      (Context : Analysis_Context'Class) return Boolean;
-   --  Return whether Context has a rewriting handler (see
-   --  ${ada_lib_name}.Rewriting), i.e. whether it is in the process of
+   --  Return whether ``Context`` has a rewriting handler (see
+   --  ``${ada_lib_name}.Rewriting)``, i.e. whether it is in the process of
    --  rewriting. If true, this means that the set of currently loaded analysis
    --  units is frozen until the rewriting process is done.
 
@@ -303,8 +313,10 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Children_Array;
    --  Return the children of this node interleaved with Trivia token nodes, so
    --  that:
-   --  - Every trivia contained between Node.Start_Token and Node.End_Token - 1
-   --    will be part of the returned array;
+   --
+   --  - Every trivia contained between ``Node.Start_Token`` and
+   --    ``Node.End_Token - 1`` will be part of the returned array.
+   --
    --  - Nodes and trivias will be lexically ordered.
 
    -----------------
@@ -504,6 +516,7 @@ package ${ada_lib_name}.Analysis is
    % for e in ctx.entity_types:
       function As_${e.el_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
+      --% no-document: True
    % endfor
 
    function Hash
