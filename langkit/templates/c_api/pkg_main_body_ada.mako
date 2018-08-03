@@ -443,6 +443,21 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
+   function ${capi.get_name('unit_version_number')}
+     (Unit : ${analysis_unit_type}) return Version_Number is
+   begin
+      Clear_Last_Exception;
+      declare
+         U : Internal_Unit := Unwrap (Unit);
+      begin
+         return U.Unit_Version;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
    function ${capi.get_name('unit_context')}
      (Unit : ${analysis_unit_type}) return ${analysis_context_type} is
    begin

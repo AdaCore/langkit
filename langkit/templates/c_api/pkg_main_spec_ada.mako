@@ -323,6 +323,13 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('unit_decref')}";
    ${ada_c_doc('langkit.unit_decref', 3)}
 
+   function ${capi.get_name('unit_version_number')}
+     (Unit : ${analysis_unit_type}) return Version_Number
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('unit_version_number')}";
+   ${ada_c_doc('langkit.unit_version_number', 3)}
+
    function ${capi.get_name('unit_context')}
      (Unit : ${analysis_unit_type})
       return ${analysis_context_type}
