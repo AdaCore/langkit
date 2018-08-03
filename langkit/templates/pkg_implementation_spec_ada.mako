@@ -923,9 +923,7 @@ private package ${ada_lib_name}.Implementation is
 
    type Internal_Unit_Provider is limited interface;
    type Internal_Unit_Provider_Access is
-      access Internal_Unit_Provider'Class;
-   type Internal_Unit_Provider_Access_Cst is
-      access constant Internal_Unit_Provider'Class;
+      access all Internal_Unit_Provider'Class;
 
    function Get_Unit_Filename
      (Provider : Internal_Unit_Provider;
@@ -1184,7 +1182,7 @@ private package ${ada_lib_name}.Implementation is
    % endif
 
    function Unit_Provider
-     (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst;
+     (Context : Internal_Context) return Internal_Unit_Provider_Access;
    --  Implementation for Analysis.Unit_Provider
 
    function Hash (Context : Internal_Context) return Hash_Type;

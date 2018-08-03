@@ -128,6 +128,13 @@ private package ${ada_lib_name}.Implementation.C is
    type ${unit_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_provider_type', 3)}
 
+   type Unit_Provider_Access is access all Unit_Provider_Reference;
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Unit_Provider_Reference, Unit_Provider_Access);
+
+   function Create_Unit_Provider_C_Reference
+     (Provider : Unit_Provider_Interface'Class) return ${unit_provider_type};
+
    type ${unit_provider_destroy_type} is access procedure
      (Data : System.Address)
       with Convention => C;

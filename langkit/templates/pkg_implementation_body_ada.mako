@@ -555,8 +555,8 @@ package body ${ada_lib_name}.Implementation is
    -------------------
 
    function Unit_Provider
-     (Context : Internal_Context) return Internal_Unit_Provider_Access_Cst
-   is (Internal_Unit_Provider_Access_Cst (Context.Unit_Provider));
+     (Context : Internal_Context) return Internal_Unit_Provider_Access
+   is (Context.Unit_Provider);
 
    ----------
    -- Hash --
