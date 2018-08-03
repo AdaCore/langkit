@@ -250,7 +250,7 @@ ${exts.include_extension(
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    __slots__ = ('_c_value', '_unit_provider')
+    __slots__ = ('_c_value', '_unit_provider', '_unit_cache')
 
     _context_cache = {}
     """
@@ -280,6 +280,14 @@ class AnalysisContext(object):
         # long as the analysis context is live.
         self._unit_provider = unit_provider
 
+        self._unit_cache = {}
+        """
+        Cache for AnalysisUnit wrappers, indexed by analysis unit addresses,
+        which are known to stay valid as long as the context is alive.
+
+        :type: dict[str, AnalysisUnit]
+        """
+
     def __del__(self):
         _context_decref(self._c_value)
 
@@ -293,14 +301,14 @@ class AnalysisContext(object):
         ${py_doc('langkit.get_unit_from_file', 8)}
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
                                                charset or '', reparse)
-        return AnalysisUnit(c_value)
+        return AnalysisUnit._wrap(c_value)
 
     def get_from_buffer(self, filename, buffer, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset or '',
                                                  buffer, len(buffer))
-        return AnalysisUnit(c_value)
+        return AnalysisUnit._wrap(c_value)
 
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
@@ -310,7 +318,7 @@ class AnalysisContext(object):
             self._c_value, ctypes.byref(_name), _kind, charset or '', reparse
         )
         if c_value:
-            return AnalysisUnit(c_value)
+            return AnalysisUnit._wrap(c_value)
         else:
             raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
                 repr(name), kind
@@ -334,7 +342,7 @@ class AnalysisContext(object):
 class AnalysisUnit(object):
     ${py_doc('langkit.analysis_unit_type', 4)}
 
-    __slots__ = ('_c_value', )
+    __slots__ = ('_c_value', '_context_link')
 
     class DiagnosticsList(object):
         """List of analysis unit diagnostics."""
@@ -377,7 +385,7 @@ class AnalysisUnit(object):
             self.first = self.first.next
             return result
 
-    def __init__(self, c_value):
+    def __init__(self, context, c_value):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. Please use AnalysisContext.get_from_* methods to create
@@ -385,6 +393,14 @@ class AnalysisUnit(object):
         """
         self._c_value = c_value
         _unit_incref(self._c_value)
+
+        # Keep a reference on the owning context so that we keep it alive at
+        # least as long as this unit is alive.
+        self._context_link = context
+
+        # Store this wrapper in caches for later re-use
+        assert c_value not in context._unit_cache
+        context._unit_cache[c_value] = self
 
     def __del__(self):
         _unit_decref(self._c_value)
@@ -399,8 +415,7 @@ class AnalysisUnit(object):
     @property
     def context(self):
         ${py_doc('langkit.unit_context', 8)}
-        ctx = _unit_context(self._c_value)
-        return AnalysisContext._wrap(ctx)
+        return self._context_link
 
     def reparse(self, buffer=None, charset=None):
         ${py_doc('langkit.unit_reparse_generic', 8)}
@@ -485,7 +500,13 @@ class AnalysisUnit(object):
 
     @classmethod
     def _wrap(cls, c_value):
-        return cls(c_value) if c_value else None
+        if not c_value:
+            return None
+        context = cls._context(c_value)
+        try:
+            return context._unit_cache[c_value]
+        except KeyError:
+            return cls(context, c_value)
 
     @classmethod
     def _unwrap(cls, value):
@@ -495,6 +516,11 @@ class AnalysisUnit(object):
             _raise_type_error(cls.__name__, value)
         else:
             return value._c_value
+
+    @classmethod
+    def _context(cls, c_value):
+        ctx = _unit_context(c_value)
+        return AnalysisContext._wrap(ctx)
 
 
 class Sloc(object):
