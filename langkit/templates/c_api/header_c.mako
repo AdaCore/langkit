@@ -314,6 +314,11 @@ ${c_doc('langkit.kind_name')}
 extern ${text_type}
 ${capi.get_name("kind_name")}(${node_kind_type} kind);
 
+${c_doc('langkit.node_unit')}
+extern int
+${capi.get_name("node_unit")}(${entity_type} *node,
+                              ${analysis_unit_type} *unit_p);
+
 ${c_doc('langkit.node_is_token_node')}
 extern int
 ${capi.get_name("node_is_token_node")}(${entity_type} *node);

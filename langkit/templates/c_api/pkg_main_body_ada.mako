@@ -550,6 +550,21 @@ package body ${ada_lib_name}.Implementation.C is
          return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
+   function ${capi.get_name('node_unit')}
+     (Node : ${entity_type}_Ptr) return ${analysis_unit_type} is
+   begin
+      Clear_Last_Exception;
+      declare
+         Unit : constant Internal_Unit := Node.Node.Unit;
+      begin
+         return Wrap (Unit);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_unit_type} (System.Null_Address);
+   end;
+
    function ${capi.get_name('is_token_node')}
      (Node : ${entity_type}_Ptr) return int is
    begin

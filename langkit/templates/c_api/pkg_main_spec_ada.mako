@@ -366,6 +366,13 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('kind_name')}";
    ${ada_c_doc('langkit.kind_name', 3)}
 
+   function ${capi.get_name('node_unit')}
+     (Node : ${entity_type}_Ptr) return ${analysis_unit_type}
+      with Export => True,
+           Convention => C,
+           External_Name => "${capi.get_name('node_unit')}";
+   ${ada_c_doc('langkit.node_unit', 3)}
+
    function ${capi.get_name('is_token_node')}
      (Node : ${entity_type}_Ptr) return int
       with Export        => True,

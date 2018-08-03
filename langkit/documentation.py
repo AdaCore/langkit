@@ -405,6 +405,9 @@ base_langkit_docs = {
         Helper for textual dump: return the name of a node kind. The returned
         string is a copy and thus must be free'd by the caller.
     """,
+    'langkit.node_unit': """
+        Return the analysis unit that owns this node.
+    """,
     'langkit.node_sloc_range': """
         Get the spanning source location range for an AST node.
     """,
