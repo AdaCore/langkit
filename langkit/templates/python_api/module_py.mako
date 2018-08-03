@@ -783,7 +783,7 @@ class ${root_astnode_name}(object):
         """
         Cache for fields and argument-less properties.
 
-        :type: dict[int, T]
+        :type: dict[str, T]
         """
 
     @property
