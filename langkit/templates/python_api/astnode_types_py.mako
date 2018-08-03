@@ -59,23 +59,7 @@
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8, rtype=field.type)}
-
-        ## If this field/property takes no argument, use the cache
-        <% field_name = repr(field.name.lower) %>
-        % if not field.arguments:
-        try:
-            return self._field_cache[${field_name}]
-        except KeyError:
-            pass
-        % endif
-
         ${accessor_body(field)}
-
-        ## Corresponding cache store
-        % if not field.arguments:
-        self._field_cache[${field_name}] = result
-        % endif
-
         return result
     % endfor
 
