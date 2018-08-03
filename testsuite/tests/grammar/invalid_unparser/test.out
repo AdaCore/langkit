@@ -17,4 +17,8 @@ File "test.py", line 74, In definition of grammar rule main_rule
   line 73, In definition of grammar rule main_rule
     Error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
 
+== Pick in List ==
+File "test.py", line 85, In definition of grammar rule main_rule
+    Error: Unparsers generation require list parsers to directly build nodes for each list item
+
 Done

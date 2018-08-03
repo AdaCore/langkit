@@ -316,6 +316,12 @@ class NodeUnparser(Unparser):
                 return NodeUnparser._from_transform_parser(node, parser)
 
             if isinstance(parser, List):
+                check_source_language(
+                    isinstance(parser.parser, (Defer, List, Null, Or,
+                                               _Transform)),
+                    'Unparsers generation require list parsers to directly'
+                    ' build nodes for each list item'
+                )
                 return ListNodeUnparser(
                     node,
                     TokenUnparser.from_parser(parser.sep)
