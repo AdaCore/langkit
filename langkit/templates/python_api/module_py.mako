@@ -250,7 +250,7 @@ ${exts.include_extension(
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    __slots__ = ('_c_value', '_unit_provider', '_unit_cache')
+    __slots__ = ('_c_value', '_unit_provider', '_serial_number', '_unit_cache')
 
     _context_cache = {}
     """
@@ -280,6 +280,7 @@ class AnalysisContext(object):
         # long as the analysis context is live.
         self._unit_provider = unit_provider
 
+        self._serial_number = None
         self._unit_cache = {}
         """
         Cache for AnalysisUnit wrappers, indexed by analysis unit addresses,
@@ -287,6 +288,8 @@ class AnalysisContext(object):
 
         :type: dict[str, AnalysisUnit]
         """
+
+        self._check_unit_cache()
 
     def __del__(self):
         _context_decref(self._c_value)
@@ -337,6 +340,15 @@ class AnalysisContext(object):
             return cls._context_cache[c_value]
         except KeyError:
             return cls(_c_value=c_value)
+
+    def _check_unit_cache(self):
+        """
+        If this context has been re-used, invalidate its unit cache.
+        """
+        serial_number = _context_serial_number(self._c_value)
+        if self._serial_number != serial_number:
+            self._unit_cache = {}
+            self._serial_number = serial_number
 
 
 class AnalysisUnit(object):
@@ -510,7 +522,12 @@ class AnalysisUnit(object):
     def _wrap(cls, c_value):
         if not c_value:
             return None
+
+        # Invalidate the unit cache if needed, then look for an existing
+        # wrapper for this unit.
         context = cls._context(c_value)
+        context._check_unit_cache()
+
         try:
             return context._unit_cache[c_value]
         except KeyError:
@@ -1421,6 +1438,10 @@ _context_incref = _import_func(
 _context_decref = _import_func(
     '${capi.get_name("context_decref")}',
     [AnalysisContext._c_type], None
+)
+_context_serial_number = _import_func(
+    '${capi.get_name("context_serial_number")}',
+    [AnalysisContext._c_type], ctypes.c_uint64
 )
 _discard_errors_in_populate_lexical_env = _import_func(
    '${capi.get_name("context_discard_errors_in_populate_lexical_env")}',

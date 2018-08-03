@@ -19,6 +19,7 @@ with Interfaces.C.Strings; use Interfaces.C.Strings;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Types; use Langkit_Support.Types;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
@@ -184,6 +185,13 @@ private package ${ada_lib_name}.Implementation.C is
            Convention    => C,
            External_name => "${capi.get_name('context_decref')}";
    ${ada_c_doc('langkit.context_decref', 3)}
+
+   function ${capi.get_name('context_serial_number')}
+     (Context : ${analysis_context_type}) return Version_Number
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('context_serial_number')}";
+   ${ada_c_doc('langkit.context_serial_number', 3)}
 
    procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
      (Context : ${analysis_context_type};

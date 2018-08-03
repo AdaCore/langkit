@@ -132,6 +132,21 @@ package body ${ada_lib_name}.Implementation.C is
       Dec_Ref (C);
    end;
 
+   function ${capi.get_name('context_serial_number')}
+     (Context : ${analysis_context_type}) return Version_Number is
+   begin
+      Clear_Last_Exception;
+      declare
+         C : Internal_Context := Unwrap (Context);
+      begin
+         return C.Serial_Number;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
    procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
      (Context : ${analysis_context_type};
       Discard : int) is

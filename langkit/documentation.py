@@ -199,6 +199,10 @@ base_langkit_docs = {
         Decrease the reference count to an analysis context. Destruction
         happens when the ref-count reaches 0.
     """,
+    'langkit.context_serial_number': """
+        Return the serial number currently associated to this allocated
+        context. Used to invalidate caches in language bindings.
+    """,
     'langkit.context_hash': """
         Return a hash for this context, to be used in hash tables.
     """,
