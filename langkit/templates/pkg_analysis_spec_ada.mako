@@ -10,7 +10,8 @@
 
 with Ada.Containers;
 private with Ada.Finalization;
-with Ada.Unchecked_Deallocation;
+
+with GNATCOLL.Refcount;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -97,11 +98,7 @@ package ${ada_lib_name}.Analysis is
    -- Unit providers --
    --------------------
 
-   type Unit_Provider_Interface is limited interface;
-   type Unit_Provider_Access is
-      access all Unit_Provider_Interface'Class;
-   type Unit_Provider_Access_Cst is
-      access constant Unit_Provider_Interface'Class;
+   type Unit_Provider_Interface is interface;
    ${ada_doc('langkit.unit_provider_type', 3)}
 
    function Get_Unit_Filename
@@ -119,17 +116,32 @@ package ${ada_lib_name}.Analysis is
       Reparse     : Boolean := False) return Analysis_Unit'Class is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
 
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Unit_Provider_Interface'Class, Unit_Provider_Access);
+   procedure Release (Provider : in out Unit_Provider_Interface) is abstract;
+   --  Actions to perform when releasing resources associated to Provider
+
+   procedure Do_Release (Provider : in out Unit_Provider_Interface'Class);
+   --  Helper for the instantiation below
+
+   package Unit_Provider_References is new GNATCOLL.Refcount.Shared_Pointers
+     (Unit_Provider_Interface'Class, Do_Release);
+
+   subtype Unit_Provider_Reference is Unit_Provider_References.Ref;
+   No_Unit_Provider_Reference : Unit_Provider_Reference renames
+      Unit_Provider_References.Null_Ref;
+
+   function Create_Unit_Provider_Reference
+     (Provider : Unit_Provider_Interface'Class) return Unit_Provider_Reference;
+   --  Simple wrapper around the GNATCOLL.Refcount API to create unit provider
+   --  references.
 
    ---------------------------------
    -- Analysis context primitives --
    ---------------------------------
 
    function Create
-     (Charset     : String := Default_Charset;
-      With_Trivia : Boolean := True;
-      Unit_Provider : Unit_Provider_Access_Cst := null)
+     (Charset       : String := Default_Charset;
+      With_Trivia   : Boolean := True;
+      Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference)
       return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
    --% belongs-to: Analysis_Context
@@ -181,7 +193,7 @@ package ${ada_lib_name}.Analysis is
    % endif
 
    function Unit_Provider
-     (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst;
+     (Context : Analysis_Context'Class) return Unit_Provider_Reference;
    --% belongs-to: Analysis_Context
    --  Return the unit provider for ``Context``.
 

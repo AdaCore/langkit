@@ -10,7 +10,6 @@
 
 with Ada.Containers; use Ada.Containers;
 with Ada.Unchecked_Conversion;
-with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Traces;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
@@ -49,8 +48,10 @@ package body ${ada_lib_name}.Analysis is
    ---------------------------
 
    type Unit_Provider_Wrapper is new Internal_Unit_Provider with record
-      Internal : Unit_Provider_Access_Cst;
+      Internal : Unit_Provider_Reference;
    end record;
+
+   type Unit_Provider_Wrapper_Access is access all Unit_Provider_Wrapper;
 
    overriding function Get_Unit_Filename
      (Provider : Unit_Provider_Wrapper;
@@ -72,7 +73,7 @@ package body ${ada_lib_name}.Analysis is
      (Provider : Unit_Provider_Wrapper;
       Name     : Text_Type;
       Kind     : Unit_Kind) return String
-   is (Provider.Internal.Get_Unit_Filename (Name, Kind));
+   is (Provider.Internal.Get.Get_Unit_Filename (Name, Kind));
 
    --------------
    -- Get_Unit --
@@ -88,9 +89,31 @@ package body ${ada_lib_name}.Analysis is
    is
       Ctx : constant Analysis_Context := Wrap_Context (Context);
    begin
-      return Unwrap_Unit (Provider.Internal.Get_Unit
+      return Unwrap_Unit (Provider.Internal.Get.Get_Unit
         (Ctx, Name, Kind, Charset, Reparse));
    end Get_Unit;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Provider : in out Unit_Provider_Interface'Class) is
+   begin
+      Provider.Release;
+   end Do_Release;
+
+   ------------------------------------
+   -- Create_Unit_Provider_Reference --
+   ------------------------------------
+
+   function Create_Unit_Provider_Reference
+     (Provider : Unit_Provider_Interface'Class) return Unit_Provider_Reference
+   is
+   begin
+      return Result : Unit_Provider_Reference do
+         Result.Set (Provider);
+      end return;
+   end Create_Unit_Provider_Reference;
 
    ------------
    -- Create --
@@ -99,20 +122,28 @@ package body ${ada_lib_name}.Analysis is
    function Create
      (Charset       : String := Default_Charset;
       With_Trivia   : Boolean := True;
-      Unit_Provider : Unit_Provider_Access_Cst := null) return Analysis_Context
+      Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference)
+      return Analysis_Context
    is
-      P : constant Internal_Unit_Provider_Access :=
-         % if ctx.default_unit_provider:
-           new Unit_Provider_Wrapper'
-             (Internal => (if Unit_Provider = null
-                           then ${ctx.default_unit_provider.fqn}
-                           else Unit_Provider));
-         % else:
-            null;
-         % endif
+      use Unit_Provider_References;
 
-      Result : Internal_Context := Create (Charset, With_Trivia, P);
+      Provider : Unit_Provider_Reference := Unit_Provider;
+      Result   : Internal_Context;
    begin
+      % if ctx.default_unit_provider:
+         if Provider = No_Unit_Provider_Reference then
+            Provider.Set (${ctx.default_unit_provider.fqn});
+         end if;
+      % endif
+
+      declare
+         Provider_Wrapper : constant Unit_Provider_Wrapper_Access :=
+            new Unit_Provider_Wrapper'(Internal => Provider);
+      begin
+         Result := Create (Charset, With_Trivia,
+                           Internal_Unit_Provider_Access (Provider_Wrapper));
+      end;
+
       return Context : constant Analysis_Context := Wrap_Context (Result)
       do
          --  Result has one ownership share and the call to Wrap_Context
@@ -207,9 +238,9 @@ package body ${ada_lib_name}.Analysis is
    -------------------
 
    function Unit_Provider
-     (Context : Analysis_Context'Class) return Unit_Provider_Access_Cst
+     (Context : Analysis_Context'Class) return Unit_Provider_Reference
    is
-      Provider : constant Internal_Unit_Provider_Access_Cst :=
+      Provider : constant Internal_Unit_Provider_Access :=
          Unit_Provider (Unwrap_Context (Context));
    begin
       --  By design, Unit_Provider_Wrapper is supposed to be the only
