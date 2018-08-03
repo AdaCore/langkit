@@ -6,7 +6,7 @@ properly detected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
-from langkit.parsers import Grammar, Or, Pick
+from langkit.parsers import Grammar, List, Or, Pick
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -72,6 +72,18 @@ run(
             T.Identifier(Token.Identifier),
             T.Identifier(Token.Example),
             T.Number(Token.Number)
+        )
+    )
+)
+run(
+    'Pick in List',
+    main_rule=lambda T, g: List(
+        'example',
+        T.Root(
+            Or(
+                Pick('example', T.Identifier(Token.Identifier)),
+                T.Number(Token.Number)
+            )
         )
     )
 )
