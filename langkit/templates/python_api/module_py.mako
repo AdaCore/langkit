@@ -252,18 +252,29 @@ class AnalysisContext(object):
 
     __slots__ = ('_c_value', '_unit_provider')
 
+    _context_cache = {}
+    """
+    Cache for analysis context wrappers. Indexed by anlysis context addresses,
+    which are known to stay valid forever (and re-used).
+
+    :type: dict[AnalysisContext._c_type, AnalysisContext]
+    """
+
     def __init__(self,
                  charset=None,
                  with_trivia=True,
                  unit_provider=None,
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
-        c_unit_provider = unit_provider._c_value if unit_provider else None
-        self._c_value = (
-            _create_analysis_context(charset, with_trivia, c_unit_provider)
-            if _c_value is None else
-            _context_incref(_c_value)
-        )
+
+        if _c_value is None:
+            c_unit_provider = unit_provider._c_value if unit_provider else None
+            self._c_value = _create_analysis_context(charset, with_trivia,
+                                                     c_unit_provider)
+        else:
+            self._c_value = _context_incref(_c_value)
+        assert self._c_value not in self._context_cache
+        self._context_cache[self._c_value] = self
 
         # Keep a reference to the unit provider so that it is live at least as
         # long as the analysis context is live.
@@ -311,6 +322,13 @@ class AnalysisContext(object):
 
     class _c_type(_hashable_void_p):
         pass
+
+    @classmethod
+    def _wrap(cls, c_value):
+        try:
+            return cls._context_cache[c_value]
+        except KeyError:
+            return cls(_c_value=c_value)
 
 
 class AnalysisUnit(object):
@@ -382,7 +400,7 @@ class AnalysisUnit(object):
     def context(self):
         ${py_doc('langkit.unit_context', 8)}
         ctx = _unit_context(self._c_value)
-        return AnalysisContext(_c_value=ctx)
+        return AnalysisContext._wrap(ctx)
 
     def reparse(self, buffer=None, charset=None):
         ${py_doc('langkit.unit_reparse_generic', 8)}
