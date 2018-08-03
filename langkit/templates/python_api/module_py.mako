@@ -342,7 +342,7 @@ class AnalysisContext(object):
 class AnalysisUnit(object):
     ${py_doc('langkit.analysis_unit_type', 4)}
 
-    __slots__ = ('_c_value', '_context_link')
+    __slots__ = ('_c_value', '_context_link', '_node_cache')
 
     class DiagnosticsList(object):
         """List of analysis unit diagnostics."""
@@ -401,6 +401,14 @@ class AnalysisUnit(object):
         # Store this wrapper in caches for later re-use
         assert c_value not in context._unit_cache
         context._unit_cache[c_value] = self
+
+        self._node_cache = {}
+        """
+        Cache for all node wrappers in this unit. Indexed by couples:
+        (c_value, metadata, rebindings).
+
+        :type: dict[T, ${root_astnode_name}]
+        """
 
     def __del__(self):
         _unit_decref(self._c_value)
@@ -801,7 +809,7 @@ class ${root_astnode_name}(object):
 
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self, c_value, node_c_value, rebindings):
+    def __init__(self, c_value, node_c_value, metadata, rebindings):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
@@ -809,11 +817,7 @@ class ${root_astnode_name}(object):
         """
         self._c_value = c_value
         self._node_c_value = node_c_value
-
-        # For performance, don't unwrap metadata until it's necessary: see the
-        # "metadata" property.
-        self._metadata = None
-
+        self._metadata = metadata
         self._rebindings = rebindings
 
         self._getitem_cache = {}
@@ -832,9 +836,6 @@ class ${root_astnode_name}(object):
 
     @property
     def metadata(self):
-        if self._metadata is None:
-            self._metadata = ${pyapi.wrap_value('self._c_value.info.md',
-                                                T.env_md)}
         return self._metadata
 
     def __del__(self):
@@ -1163,12 +1164,24 @@ class ${root_astnode_name}(object):
         if not node_c_value:
             return None
 
-        rebindings = ${(pyapi.wrap_value('c_value.info.rebindings',
-                                         T.EnvRebindingsType))}
+        rebindings = ${pyapi.wrap_value('c_value.info.rebindings',
+                                        T.EnvRebindingsType)}
+        metadata = ${pyapi.wrap_value('c_value.info.md', T.env_md)}
+
+        # Look for an already existing wrapper for this node
+        cache_key = (node_c_value, metadata, rebindings)
+        unit = cls._unit(c_value)
+        try:
+            return unit._node_cache[cache_key]
+        except KeyError:
+            pass
 
         # Pick the right subclass to materialize this node in Python
         kind = _node_kind(ctypes.byref(c_value))
-        return _kind_to_astnode_cls[kind](c_value, node_c_value, rebindings)
+        result = _kind_to_astnode_cls[kind](c_value, node_c_value, metadata,
+                                            rebindings)
+        unit._node_cache[cache_key] = result
+        return result
 
     @classmethod
     def _unwrap(cls, py_value):
