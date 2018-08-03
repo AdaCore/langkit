@@ -308,6 +308,10 @@ base_langkit_docs = {
     'langkit.unit_decref': """
         Decrease the reference count to an analysis unit.
     """,
+    'langkit.unit_version_number': """
+        Return the version number currently associated to this allocated unit.
+        Used to invalidate caches in language bindings.
+    """,
     'langkit.unit_reparse_file': """
         Reparse an analysis unit from the associated file. If Charset is empty
         or ${null}, use the last charset successfuly used for this unit,

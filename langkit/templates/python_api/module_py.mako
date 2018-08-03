@@ -354,7 +354,7 @@ class AnalysisContext(object):
 class AnalysisUnit(object):
     ${py_doc('langkit.analysis_unit_type', 4)}
 
-    __slots__ = ('_c_value', '_context_link', '_node_cache')
+    __slots__ = ('_c_value', '_context_link', '_version_number', '_node_cache')
 
     class DiagnosticsList(object):
         """List of analysis unit diagnostics."""
@@ -414,6 +414,7 @@ class AnalysisUnit(object):
         assert c_value not in context._unit_cache
         context._unit_cache[c_value] = self
 
+        self._version_number = None
         self._node_cache = {}
         """
         Cache for all node wrappers in this unit. Indexed by couples:
@@ -421,6 +422,8 @@ class AnalysisUnit(object):
 
         :type: dict[T, ${root_astnode_name}]
         """
+
+        self._check_node_cache()
 
     def __del__(self):
         _unit_decref(self._c_value)
@@ -546,6 +549,15 @@ class AnalysisUnit(object):
     def _context(cls, c_value):
         ctx = _unit_context(c_value)
         return AnalysisContext._wrap(ctx)
+
+    def _check_node_cache(self):
+        """
+        If this unit has been reparsed, invalidate its node cache.
+        """
+        version_number = _unit_version_number(self._c_value)
+        if self._version_number != version_number:
+            self._node_cache = {}
+            self._version_number = version_number
 
 
 class Sloc(object):
@@ -1188,6 +1200,7 @@ class ${root_astnode_name}(object):
         # Look for an already existing wrapper for this node
         cache_key = (node_c_value, metadata, rebindings)
         unit = cls._unit(c_value)
+        unit._check_node_cache()
         try:
             return unit._node_cache[cache_key]
         except KeyError:
@@ -1522,6 +1535,10 @@ _unit_incref = _import_func(
 _unit_decref = _import_func(
     '${capi.get_name("unit_decref")}',
     [AnalysisUnit._c_type], None
+)
+_unit_version_number = _import_func(
+    '${capi.get_name("unit_version_number")}',
+    [AnalysisUnit._c_type], ctypes.c_uint64
 )
 _unit_context = _import_func(
     '${capi.get_name("unit_context")}',

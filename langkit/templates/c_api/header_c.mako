@@ -280,6 +280,10 @@ ${c_doc('langkit.unit_decref')}
 extern void
 ${capi.get_name("unit_decref")}(${analysis_unit_type} unit);
 
+${c_doc('langkit.unit_version_number')}
+extern uint64_t
+${capi.get_name("unit_version_number")}(${analysis_unit_type} context);
+
 ${c_doc('langkit.unit_context')}
 extern ${analysis_context_type}
 ${capi.get_name("unit_context")}(${analysis_unit_type} context);
