@@ -854,12 +854,12 @@ class ListNodeUnparser(NodeUnparser):
     def _combine(self, other):
         assert self.node == other.node
         check_source_language(
+            TokenUnparser.equivalent(self.separator, other.separator),
             'Inconsistent separation token for {}: {} and {}'.format(
                 self.node.dsl_name,
                 TokenUnparser.dump_or_none(self.separator),
                 TokenUnparser.dump_or_none(other.separator)
-            ),
-            TokenUnparser.equivalent(self.separator, other.separator)
+            )
         )
         return self
 

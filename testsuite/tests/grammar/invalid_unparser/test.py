@@ -87,4 +87,15 @@ run(
         )
     )
 )
+run(
+    'Ambiguous lists',
+    main_rule=lambda T, g: T.Root(
+        Or(
+            T.Root('example', List(g.leaf, sep=',')),
+            List(g.leaf),
+        )
+    ),
+    leaf=lambda T, g: Or(T.Identifier(Token.Identifier),
+                         T.Number(Token.Number))
+)
 print('Done')

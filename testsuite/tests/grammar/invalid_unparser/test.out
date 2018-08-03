@@ -21,4 +21,7 @@ File "test.py", line 74, In definition of grammar rule main_rule
 File "test.py", line 85, In definition of grammar rule main_rule
     Error: Unparsers generation require list parsers to directly build nodes for each list item
 
+== Ambiguous lists ==
+Error: Inconsistent separation token for FooNode.list: , and <none>
+
 Done
