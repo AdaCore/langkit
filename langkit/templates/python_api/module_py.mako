@@ -816,6 +816,11 @@ class ${root_astnode_name}(object):
         return self._kind_name
 
     @property
+    def unit(self):
+        ${py_doc('langkit.node_unit', 8)}
+        return self._unit(self._c_value)
+
+    @property
     def is_token_node(self):
         ${py_doc('langkit.node_is_token_node', 8)}
         node = self._unwrap(self)
@@ -1138,6 +1143,11 @@ class ${root_astnode_name}(object):
     @property
     def _unwrap_einfo(self):
         return self._c_value.info
+
+    @classmethod
+    def _unit(cls, c_value):
+        return ${pyapi.wrap_value('_node_unit(ctypes.byref(c_value))',
+                                  T.AnalysisUnitType)}
 
     def _eval_field(self, c_result, c_accessor, *c_args):
         """
@@ -1466,6 +1476,10 @@ _node_kind = _import_func(
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
     [ctypes.c_int], _text
+)
+_node_unit = _import_func(
+    '${capi.get_name("node_unit")}',
+    [ctypes.POINTER(${c_entity})], AnalysisUnit._c_type
 )
 _node_is_token_node = _import_func(
     '${capi.get_name("node_is_token_node")}',
