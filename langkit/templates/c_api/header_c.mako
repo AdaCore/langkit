@@ -197,6 +197,10 @@ ${c_doc('langkit.context_decref')}
 extern void
 ${capi.get_name("context_decref")}(${analysis_context_type} context);
 
+${c_doc('langkit.context_serial_number')}
+extern uint64_t
+${capi.get_name("context_serial_number")}(${analysis_context_type} context);
+
 ${c_doc('langkit.context_discard_errors_in_populate_lexical_env')}
 extern void
 ${capi.get_name("context_discard_errors_in_populate_lexical_env")}(
