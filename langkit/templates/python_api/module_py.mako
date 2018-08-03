@@ -856,13 +856,6 @@ class ${root_astnode_name}(object):
         :type: dict[int, ${root_astnode_name}]
         """
 
-        self._field_cache = {}
-        """
-        Cache for fields and argument-less properties.
-
-        :type: dict[str, T]
-        """
-
     @property
     def metadata(self):
         return self._metadata
