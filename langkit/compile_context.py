@@ -1897,35 +1897,26 @@ class CompileCtx(object):
         symbols = self._symbol_literals
         self._symbol_literals = None
 
-        i = 1
-        for name in sorted(symbols):
-            # Create a candidate name for this symbol: replace all
-            # non-alphabetic characters with underscores and remove
-            # leading/trailing/consecutive underscores.
-            candidate_lower_name = ''
-            last_is_alpha = False
-            for c in name.lower():
-                if 'a' <= c <= 'z':
-                    candidate_lower_name += c
-                    last_is_alpha = True
-                else:
-                    if last_is_alpha:
-                        candidate_lower_name += '_'
-                    last_is_alpha = False
+        for i, name in enumerate(sorted(symbols)):
+            # Replace all non-alphabetic characters with underscores
+            tmp_1 = (c if c.isalpha() else '_' for c in name.lower())
 
-            candidate_name = names.Name.from_lower(
-                candidate_lower_name.strip('_')
+            # Remove consecutive underscores
+            tmp_2 = reduce(
+                lambda s, c: s if s.endswith('_') and c == '_' else s + c,
+                tmp_1
             )
 
-            # If we have no candidate or if the candidate is already used, fall
-            # back to an unique number.
-            if not candidate_name or candidate_name in self.symbol_literals:
-                enum_name = names.Name(str(i))
-                i += 1
-            else:
-                enum_name = candidate_name
+            # Remove leading/trailing underscores, and add 'Symbol' prefix
+            candidate_name = names.Name('Symbol') + names.Name.from_lower(
+                tmp_2.strip('_')
+            )
 
-            self.symbol_literals[name] = names.Name('Symbol') + enum_name
+            # If the candidate is already used, add an unique number
+            if candidate_name in self.symbol_literals.values():
+                candidate_name = candidate_name + names.Name(str(i))
+
+            self.symbol_literals[name] = candidate_name
 
     def annotate_fields_types(self):
         """
