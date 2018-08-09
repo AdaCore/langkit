@@ -1052,6 +1052,8 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name}
    is (Node.Internal.Node);
 
+   ${exts.include_extension(ctx.ext('analysis', 'bodies'))}
+
 begin
    Converters.Wrap_Context := Wrap_Context'Access;
    Converters.Unwrap_Context := Unwrap_Context'Access;
