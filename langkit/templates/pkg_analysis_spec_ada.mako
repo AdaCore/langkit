@@ -487,6 +487,8 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Token_Iterator;
    --  Return an iterator on the range of tokens encompassed by Node
 
+   ${exts.include_extension(ctx.ext('analysis', 'public_decls'))}
+
    -------------------
    -- Debug helpers --
    -------------------
