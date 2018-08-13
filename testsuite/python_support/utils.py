@@ -42,7 +42,8 @@ end Gen;
 """
 
 
-def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
+def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
+                    symbol_canonicalizer=None):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -54,6 +55,9 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
         context.
 
     :param WarningSet warning_set: Set of warnings to emit.
+
+    :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
+        Symbol canoncalizes to use for this context, if any.
     """
 
     if lexer is None:
@@ -66,7 +70,8 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
     os.mkdir('build')
 
     # Try to emit code
-    ctx = CompileCtx(lang_name='Foo', lexer=lexer, grammar=grammar)
+    ctx = CompileCtx(lang_name='Foo', lexer=lexer, grammar=grammar,
+                     symbol_canonicalizer=symbol_canonicalizer)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -75,7 +80,7 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
 
 def emit_and_print_errors(grammar, lexer=None,
                           warning_set=default_warning_set,
-                          generate_unparser=False):
+                          generate_unparser=False, symbol_canonicalizer=None):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
@@ -88,6 +93,9 @@ def emit_and_print_errors(grammar, lexer=None,
 
     :param bool generate_unparser: Whether to generate unparser.
 
+    :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
+        Symbol canoncalizes to use for this context, if any.
+
     :rtype: bool
     """
 
@@ -96,7 +104,8 @@ def emit_and_print_errors(grammar, lexer=None,
         lexer = foo_lexer
 
     try:
-        ctx = prepare_context(grammar, lexer, warning_set)
+        ctx = prepare_context(grammar, lexer, warning_set,
+                              symbol_canonicalizer=symbol_canonicalizer)
         ctx.emit('build', generate_lexer=False,
                  generate_unparser=generate_unparser)
         # ... and tell about how it went
@@ -120,7 +129,7 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
 
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
                   warning_set=default_warning_set, properties_logging=False,
-                  generate_unparser=False):
+                  generate_unparser=False, symbol_canonicalizer=None):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -139,13 +148,16 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     :param bool properties_logging: Whether to enable properties logging in
         code generation.
     :param bool generate_unparser: Whether to generate unparser.
+    :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
+        Symbol canoncalizes to use for this context, if any.
     """
 
     if lexer is None:
         from lexer_example import foo_lexer
         lexer = foo_lexer
 
-    ctx = prepare_context(grammar, lexer, warning_set)
+    ctx = prepare_context(grammar, lexer, warning_set,
+                          symbol_canonicalizer=symbol_canonicalizer)
 
     class Manage(ManageScript):
         def create_context(self, args):
