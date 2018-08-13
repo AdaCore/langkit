@@ -1114,11 +1114,11 @@ private package ${ada_lib_name}.Implementation is
    -- Implementation for analysis context primitives --
    ----------------------------------------------------
 
-   function Create
+   function Create_Context
      (Charset       : String;
       With_Trivia   : Boolean;
       Unit_Provider : Internal_Unit_Provider_Access) return Internal_Context;
-   --  Implementation for Analysis.Create
+   --  Implementation for Analysis.Create_Context
 
    function Create_Unit
      (Context             : Internal_Context;

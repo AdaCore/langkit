@@ -115,11 +115,11 @@ package body ${ada_lib_name}.Analysis is
       end return;
    end Create_Unit_Provider_Reference;
 
-   ------------
-   -- Create --
-   ------------
+   --------------------
+   -- Create_Context --
+   --------------------
 
-   function Create
+   function Create_Context
      (Charset       : String := Default_Charset;
       With_Trivia   : Boolean := True;
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference)
@@ -140,8 +140,9 @@ package body ${ada_lib_name}.Analysis is
          Provider_Wrapper : constant Unit_Provider_Wrapper_Access :=
             new Unit_Provider_Wrapper'(Internal => Provider);
       begin
-         Result := Create (Charset, With_Trivia,
-                           Internal_Unit_Provider_Access (Provider_Wrapper));
+         Result := Create_Context
+           (Charset, With_Trivia,
+            Internal_Unit_Provider_Access (Provider_Wrapper));
       end;
 
       return Context : constant Analysis_Context := Wrap_Context (Result)
@@ -150,7 +151,7 @@ package body ${ada_lib_name}.Analysis is
          --  creates a new one, so don't forget to dec-ref before returning.
          Dec_Ref (Result);
       end return;
-   end Create;
+   end Create_Context;
 
    --------------
    -- Has_Unit --

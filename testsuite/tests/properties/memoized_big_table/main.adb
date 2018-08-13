@@ -5,7 +5,7 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 
 procedure Main is
-   Ctx  : constant Analysis_Context := Create;
+   Ctx  : constant Analysis_Context := Create_Context;
    Unit : constant Analysis_Unit :=
       Get_From_Buffer (Ctx, "foo.txt", Buffer => "example");
    Node : constant Example := Root (Unit).As_Example;

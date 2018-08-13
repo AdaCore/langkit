@@ -140,7 +140,7 @@ procedure Parse is
       Input_Str_Length : Natural;
 
       Ctx  : constant Analysis_Context :=
-         Create (With_Trivia => Do_Print_Trivia);
+         Create_Context (With_Trivia => Do_Print_Trivia);
       Unit : Analysis_Unit;
    begin
       Get_String (Input_Str, Input_Str_Ptr, Input_Str_Length);
@@ -294,7 +294,7 @@ begin
       declare
          F   : File_Type;
          Ctx : constant Analysis_Context :=
-           Create (Charset.all, With_Trivia => Do_Print_Trivia);
+           Create_Context (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Open (F, In_File, File_List.all);
          while not End_Of_File (F) loop
@@ -310,7 +310,7 @@ begin
    elsif Filename.all'Length /= 0 then
       declare
          Ctx : constant Analysis_Context :=
-           Create (Charset.all, With_Trivia => Do_Print_Trivia);
+           Create_Context (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Register_Lookups;
          Process_File (Filename.all, Ctx);

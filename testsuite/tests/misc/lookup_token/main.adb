@@ -6,7 +6,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create_Context;
 
    procedure Test (Filename : String);
 

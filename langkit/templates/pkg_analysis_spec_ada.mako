@@ -138,7 +138,7 @@ package ${ada_lib_name}.Analysis is
    -- Analysis context primitives --
    ---------------------------------
 
-   function Create
+   function Create_Context
      (Charset       : String := Default_Charset;
       With_Trivia   : Boolean := True;
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference)

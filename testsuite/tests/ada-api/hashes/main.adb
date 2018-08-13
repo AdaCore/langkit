@@ -26,13 +26,13 @@ procedure Main is
    US : Unit_Sets.Set;
    NS : Node_Sets.Set;
 
-   C : constant Analysis_Context := Create;
+   C : constant Analysis_Context := Create_Context;
    U1 : constant Analysis_Unit := C.Get_From_Buffer (Filename => "main1.txt",
                                                      Buffer   => "example");
    U2 : constant Analysis_Unit := C.Get_From_Buffer (Filename => "main2.txt",
                                                      Buffer   => "example");
 begin
-   CS.Insert (Create);
+   CS.Insert (Create_Context);
    CS.Insert (C);
 
    US.Insert (U1);

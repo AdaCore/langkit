@@ -8,7 +8,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx  : constant Analysis_Context := Create;
+   Ctx  : constant Analysis_Context := Create_Context;
    Unit : constant Analysis_Unit := Get_From_File (Ctx, "main.txt");
 
    function Visit (Node : Foo_Node'Class) return Visit_Status;

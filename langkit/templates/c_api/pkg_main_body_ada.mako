@@ -99,7 +99,7 @@ package body ${ada_lib_name}.Implementation.C is
             (if Unit_Provider = ${unit_provider_type} (System.Null_Address)
              then No_Unit_Provider_Reference
              else Unwrap (Unit_Provider).all);
-         Context      : constant Analysis_Context := Create
+         Context      : constant Analysis_Context := Create_Context
            (Charset       => C,
             With_Trivia   => With_Trivia /= 0,
             Unit_Provider => Provider);
