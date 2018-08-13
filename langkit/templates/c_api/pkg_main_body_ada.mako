@@ -1043,7 +1043,7 @@ package body ${ada_lib_name}.Implementation.C is
               Address => Big_Int.Chars;
       As_String : constant String := Image (As_Text);
    begin
-      return Create (As_String);
+      return Create_Big_Integer (As_String);
    end Unwrap;
 
    procedure ${capi.get_name('destroy_text')} (T : access ${text_type}) is
