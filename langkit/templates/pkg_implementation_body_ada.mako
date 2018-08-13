@@ -1742,8 +1742,7 @@ package body ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.array_type_name}
    is
-      First : constant Integer
-        := ${root_node_array.index_type()}'First;
+      First : constant Integer := ${root_node_array.index_type()}'First;
       Last  : constant Integer := First + Node.Abstract_Children_Count - 1;
    begin
       return A : ${root_node_array.array_type_name} (First .. Last)
@@ -1760,7 +1759,9 @@ package body ${ada_lib_name}.Implementation is
    is
       C : ${root_node_array.array_type_name} := Children (Node);
    begin
-      return Ret : ${root_node_array.name} := Create (C'Length) do
+      return Ret : ${root_node_array.name} :=
+         ${root_node_array.constructor_name} (C'Length)
+      do
          Ret.Items := C;
       end return;
    end Children;
@@ -2214,7 +2215,8 @@ package body ${ada_lib_name}.Implementation is
       end loop;
 
       declare
-         Result : constant ${root_node_array.name} := Create (Count);
+         Result : constant ${root_node_array.name} :=
+            ${root_node_array.constructor_name} (Count);
       begin
          Cur := Start;
          for I in Result.Items'Range loop
@@ -2826,7 +2828,8 @@ package body ${ada_lib_name}.Implementation is
       E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
    is
       Bare_Parents : ${root_node_array.name} := Node.Parents;
-      Result       : Entity_Array_Access := Create (Bare_Parents.N);
+      Result       : Entity_Array_Access :=
+         ${root_entity.array.constructor_name} (Bare_Parents.N);
    begin
       --  TODO: shed entity information as appropriate
       for I in Bare_Parents.Items'Range loop
@@ -2845,7 +2848,8 @@ package body ${ada_lib_name}.Implementation is
       E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
    is
       Bare_Children : ${root_node_array.name} := Node.Children;
-      Result        : Entity_Array_Access := Create (Bare_Children.N);
+      Result        : Entity_Array_Access :=
+         ${root_entity.array.constructor_name} (Bare_Children.N);
    begin
       --  TODO: shed entity information as appropriate
       for I in Bare_Children.Items'Range loop

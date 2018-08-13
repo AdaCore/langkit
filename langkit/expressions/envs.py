@@ -82,7 +82,8 @@ class EnvGet(AbstractExpression):
                     ', '.join('{} => {}'.format(n, v) for n, v in args)
                 )
             else:
-                result_expr = 'Create (AST_Envs.Get ({}))'.format(
+                result_expr = '{} (AST_Envs.Get ({}))'.format(
+                    self.type.constructor_name,
                     ', '.join('{} => {}'.format(n, v) for n, v in args)
                 )
 

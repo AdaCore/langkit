@@ -102,7 +102,7 @@ begin
       end loop;
 
       ## Then convert the vector into the final array type
-      ${array_var} := Create
+      ${array_var} := ${map.type.constructor_name}
         (Items_Count => Natural (${vec_pkg}.Length (${vec_var})));
       for I in ${array_var}.Items'Range loop
          ${array_var}.Items (I) := ${vec_pkg}.Get
@@ -117,7 +117,7 @@ begin
       ## for property writers.
 
       if ${map.collection.render_expr()} = null then
-         ${array_var} := Create (0);
+         ${array_var} := ${map.type.constructor_name} (0);
       else
          ${build_loop()}
       end if;

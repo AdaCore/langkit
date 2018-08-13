@@ -33,10 +33,11 @@
    ## arrays starting from 1. We need it to convert from entity arrays,
    ## to our array record type.
    % if cls.element_type == T.root_node.entity:
-   function Create (Items : AST_Envs.Entity_Array) return ${cls.name};
+   function ${cls.constructor_name}
+     (Items : AST_Envs.Entity_Array) return ${cls.name};
    % endif
 
-   function Create (Items_Count : Natural) return ${cls.name};
+   function ${cls.constructor_name} (Items_Count : Natural) return ${cls.name};
    --  Create a new array for N uninitialized elements and give its only
    --  ownership share to the caller.
 
@@ -116,9 +117,9 @@
    ------------
 
    function Concat (L, R : ${cls.name}) return ${cls.name} is
-      Ret : ${cls.name} := Create (Length (L) + Length (R));
+      Ret : ${cls.name} := ${cls.constructor_name} (Length (L) + Length (R));
    begin
-      Ret.Items := (L.Items & R.Items);
+      Ret.Items := L.Items & R.Items;
       % if cls.element_type.is_refcounted:
          for Item of Ret.Items loop
             Inc_Ref (Item);
@@ -167,31 +168,29 @@
       end if;
    end Dec_Ref;
 
-   ------------
-   -- Create --
-   ------------
-
-   function Create (Items_Count : Natural) return ${cls.name} is
-     (new ${cls.pointed}'(N => Items_Count, Ref_Count => 1, Items => <>));
+   function ${cls.constructor_name} (Items_Count : Natural) return ${cls.name}
+   is (new ${cls.pointed}'(N => Items_Count, Ref_Count => 1, Items => <>));
 
    % if cls.element_type == T.root_node.entity:
-   function Create (Items : AST_Envs.Entity_Array) return ${cls.name}
+   function ${cls.constructor_name}
+     (Items : AST_Envs.Entity_Array) return ${cls.name}
    is (new ${cls.pointed}'
          (N         => Items'Length,
           Items     => Implementation.${cls.array_type_name} (Items),
           Ref_Count => 1));
    % else:
    pragma Warnings (Off, "referenced");
-   function Create (Items : ${cls.array_type_name}) return ${cls.name} is
+   function ${cls.constructor_name}
+     (Items : ${cls.array_type_name}) return ${cls.name} is
    begin
       % if cls.element_type.is_refcounted:
          for El of Items loop
             Inc_Ref (El);
          end loop;
       % endif
-      return
-        new ${cls.pointed}'(N => Items'Length, Ref_Count => 1, Items => Items);
-   end Create;
+      return new ${cls.pointed}'
+        (N => Items'Length, Ref_Count => 1, Items => Items);
+   end;
    pragma Warnings (On, "referenced");
    % endif
 
