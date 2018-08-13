@@ -11,18 +11,43 @@ class TDH(object):
     def __init__(self, value):
         self.value = value
 
+    def _vector_item(self, vector, index):
+        last = int(vector['size'])
+        if index < 1 or last < index:
+            raise gdb.error('Out of bounds index')
+
+        array = vector['e'].dereference()
+        return array[index]
+
+    def get(self, token_no, trivia_no):
+        """
+        Retreive the token or trivia in this TDH corresponding to the given
+        indices.
+
+        :rtype: Token
+        """
+        return (self.trivia(token_no, trivia_no)
+                if trivia_no else
+                self.token(token_no))
+
     def token(self, token_no):
         """
         Retreive the token number "token_no" in this TDH.
 
         :rtype: Token
         """
-        last_token = int(self.value['tokens']['size'])
-        if token_no < 1 or last_token < token_no:
-            raise gdb.error('Out of bounds token number')
+        return Token(self, self._vector_item(self.value['tokens'], token_no),
+                     token_no, 0)
 
-        tokens_array = self.value['tokens']['e'].dereference()
-        return Token(self, tokens_array[token_no])
+    def trivia(self, token_no, trivia_no):
+        """
+        Retreive the trivia number "trivia" in this TDH.
+
+        :rtype: Token
+        """
+        return Token(self,
+                     self._vector_item(self.value['trivias'], trivia_no)['t'],
+                     token_no, trivia_no)
 
 
 class Token(object):
@@ -30,9 +55,11 @@ class Token(object):
     Helper to deal with tokens.
     """
 
-    def __init__(self, tdh, value):
+    def __init__(self, tdh, value, token_no, trivia_no):
         self.tdh = tdh
         self.value = value
+        self.token_no = token_no
+        self.trivia_no = trivia_no
 
     @property
     def kind(self):
@@ -41,6 +68,11 @@ class Token(object):
     @property
     def sloc_range(self):
         return SlocRange(self.value['sloc_range'])
+
+    def __repr__(self):
+        return '<Token {} {}/{} at {}>'.format(
+            self.kind, self.token_no, self.trivia_no, self.sloc_range
+        )
 
 
 class Sloc(object):
