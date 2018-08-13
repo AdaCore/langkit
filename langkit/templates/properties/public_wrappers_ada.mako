@@ -79,7 +79,7 @@
                                                                 arg.name))
 
             elif arg.type.is_big_integer_type:
-                actual = 'Create ({})'.format(arg.name)
+                actual = 'Create_Big_Integer ({})'.format(arg.name)
 
             elif arg.type.is_analysis_unit_type:
                 actual = 'Unwrap_Unit ({})'.format(arg.name)

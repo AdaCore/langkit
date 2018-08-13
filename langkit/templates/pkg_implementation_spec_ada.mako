@@ -284,11 +284,11 @@ private package ${ada_lib_name}.Implementation is
 
    type Big_Integer_Type is access all Big_Integer_Record;
 
-   function Create
+   function Create_Big_Integer
      (Image : String; Base : Integer := 10) return Big_Integer_Type;
-   function Create
+   function Create_Big_Integer
      (Big_Int : GNATCOLL.GMP.Integers.Big_Integer) return Big_Integer_Type;
-   function Create (Int : Integer) return Big_Integer_Type;
+   function Create_Big_Integer (Int : Integer) return Big_Integer_Type;
 
    No_Big_Integer_Record : aliased Big_Integer_Record :=
      (Value => <>, Ref_Count => -1);

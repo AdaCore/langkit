@@ -4580,7 +4580,7 @@ class BigInteger(AbstractExpression):
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
             super(BigInteger.Expr, self).__init__(
-                'Big_Int', 'Create', T.BigIntegerType,
+                'Big_Int', 'Create_Big_Integer', T.BigIntegerType,
                 [expr], abstract_expr=abstract_expr
             )
 

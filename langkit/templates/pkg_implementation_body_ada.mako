@@ -1979,11 +1979,11 @@ package body ${ada_lib_name}.Implementation is
    -- Big integers wrapper --
    --------------------------
 
-   ------------
-   -- Create --
-   ------------
+   ------------------------
+   -- Create_Big_Integer --
+   ------------------------
 
-   function Create
+   function Create_Big_Integer
      (Image : String; Base : Integer := 10) return Big_Integer_Type
    is
       use GNATCOLL.GMP;
@@ -1991,13 +1991,13 @@ package body ${ada_lib_name}.Implementation is
    begin
       return new Big_Integer_Record'(Value     => Make (Image, Int (Base)),
                                      Ref_Count => 1);
-   end Create;
+   end Create_Big_Integer;
 
-   ------------
-   -- Create --
-   ------------
+   ------------------------
+   -- Create_Big_Integer --
+   ------------------------
 
-   function Create
+   function Create_Big_Integer
      (Big_Int : GNATCOLL.GMP.Integers.Big_Integer) return Big_Integer_Type
    is
       Result : constant Big_Integer_Type :=
@@ -2006,20 +2006,20 @@ package body ${ada_lib_name}.Implementation is
    begin
       Result.Value.Set (Big_Int);
       return Result;
-   end Create;
+   end Create_Big_Integer;
 
-   ------------
-   -- Create --
-   ------------
+   ------------------------
+   -- Create_Big_Integer --
+   ------------------------
 
-   function Create (Int : Integer) return Big_Integer_Type is
+   function Create_Big_Integer (Int : Integer) return Big_Integer_Type is
       Result : constant Big_Integer_Type :=
          new Big_Integer_Record'(Value     => <>,
                                  Ref_Count => 1);
    begin
       Result.Value.Set (GNATCOLL.GMP.Long (Int));
       return Result;
-   end Create;
+   end Create_Big_Integer;
 
    ----------------
    -- To_Integer --
@@ -2120,7 +2120,7 @@ package body ${ada_lib_name}.Implementation is
    function "+" (Left, Right : Big_Integer_Type) return Big_Integer_Type is
       use type GNATCOLL.GMP.Integers.Big_Integer;
    begin
-      return Create (Left.Value + Right.Value);
+      return Create_Big_Integer (Left.Value + Right.Value);
    end "+";
 
    ---------
@@ -2130,7 +2130,7 @@ package body ${ada_lib_name}.Implementation is
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type is
       use type GNATCOLL.GMP.Integers.Big_Integer;
    begin
-      return Create (Left.Value - Right.Value);
+      return Create_Big_Integer (Left.Value - Right.Value);
    end "-";
 
    -------------
