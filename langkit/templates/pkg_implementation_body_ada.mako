@@ -326,9 +326,10 @@ package body ${ada_lib_name}.Implementation is
       Context.Symbols := Symbols;
       Context.Charset := To_Unbounded_String (Actual_Charset);
       Context.With_Trivia := With_Trivia;
-      Context.Root_Scope := AST_Envs.Create (Parent => AST_Envs.No_Env_Getter,
-                                             Node   => null,
-                                             Owner  => No_Analysis_Unit);
+      Context.Root_Scope := AST_Envs.Create_Lexical_Env
+        (Parent => AST_Envs.No_Env_Getter,
+         Node   => null,
+         Owner  => No_Analysis_Unit);
 
       Context.Unit_Provider := Unit_Provider;
 
