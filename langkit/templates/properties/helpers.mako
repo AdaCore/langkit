@@ -172,11 +172,7 @@
       Dbg_Img : String_Access := null;
    end record;
 
-   ------------
-   -- Create --
-   ------------
-
-   function Create (
+   function Create_${pred_id}_Predicate (
       % for i, arg_type in enumerate(args_types):
          Field_${i} : ${arg_type.name};
       % endfor
@@ -194,7 +190,7 @@
          % endfor
          Dbg_Img => Dbg_Img
       );
-   end Create;
+   end;
 
    ----------
    -- Call --
