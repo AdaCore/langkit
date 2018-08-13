@@ -10,13 +10,15 @@ with Support; use Support;
 use Support.Envs;
 
 procedure Main is
-   Symbols : Symbol_Table := Create;
+   Symbols : Symbol_Table := Create_Symbol_Table;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
-   A_Parent : Lexical_Env := Create (No_Env_Getter, 'P', Owner => True);
-   A        : Lexical_Env := Create (Simple_Env_Getter (A_Parent), 'A',
-                                     Owner => True);
-   B        : Lexical_Env := Create (No_Env_Getter, 'B', Owner => True);
+   A_Parent : Lexical_Env := Create_Lexical_Env
+     (No_Env_Getter, 'P', Owner => True);
+   A        : Lexical_Env := Create_Lexical_Env
+     (Simple_Env_Getter (A_Parent), 'A', Owner => True);
+   B        : Lexical_Env := Create_Lexical_Env
+     (No_Env_Getter, 'B', Owner => True);
 
    Grouped : Lexical_Env := Group ((A, B));
 begin

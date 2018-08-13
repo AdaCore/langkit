@@ -24,25 +24,26 @@ procedure Main is
    Name_Item_Y1   : String_Access := +"Item(Y1)";
    Name_Item_Y2   : String_Access := +"Item(Y2)";
 
-   Symbols : Symbol_Table := Create;
+   Symbols : Symbol_Table := Create_Symbol_Table;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
    Key_Y   : constant Symbol_Type := Find (Symbols, "Y");
 
-   Old_Env_1 : Lexical_Env := Create
+   Old_Env_1 : Lexical_Env := Create_Lexical_Env
      (No_Env_Getter, Name_Old_Env_1, Owner => True);
-   New_Env_1 : Lexical_Env := Create
+   New_Env_1 : Lexical_Env := Create_Lexical_Env
      (No_Env_Getter, Name_New_Env_1, Owner => True);
-   Old_Env_2 : Lexical_Env := Create
+   Old_Env_2 : Lexical_Env := Create_Lexical_Env
      (No_Env_Getter, Name_Old_Env_2, Owner => True);
-   New_Env_2 : Lexical_Env := Create
+   New_Env_2 : Lexical_Env := Create_Lexical_Env
      (No_Env_Getter, Name_New_Env_2, Owner => True);
 
    R1 : Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
    R2 : Env_Rebindings := Append (R1, Old_Env_2, New_Env_2);
 
-   Prim_A : Lexical_Env := Create (No_Env_Getter, Name_Prim_A, Owner => True);
-   Prim_B : Lexical_Env := Create (Simple_Env_Getter (Prim_A), Name_Prim_B,
-                                   Owner => True);
+   Prim_A : Lexical_Env := Create_Lexical_Env
+     (No_Env_Getter, Name_Prim_A, Owner => True);
+   Prim_B : Lexical_Env := Create_Lexical_Env
+     (Simple_Env_Getter (Prim_A), Name_Prim_B, Owner => True);
 
    Orphaned_1 : Lexical_Env := Orphan (Prim_B);
    Orphaned_2 : Lexical_Env := Orphan (Orphaned_1);

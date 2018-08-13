@@ -336,12 +336,12 @@ package Langkit_Support.Lexical_Env is
    --  no-op. This makes sense as Empty_Env's purpose is to be used to
    --  represent missing scopes from erroneous trees.
 
-   function Create
+   function Create_Lexical_Env
      (Parent            : Env_Getter;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env
-      with Post => Create'Result.Kind = Primary;
+      with Post => Create_Lexical_Env'Result.Kind = Primary;
    --  Create a new primary lexical env
 
    procedure Add

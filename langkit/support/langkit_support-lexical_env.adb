@@ -332,11 +332,11 @@ package body Langkit_Support.Lexical_Env is
       return L.Info = R.Info;
    end Equivalent;
 
-   ------------
-   -- Create --
-   ------------
+   ------------------------
+   -- Create_Lexical_Env --
+   ------------------------
 
-   function Create
+   function Create_Lexical_Env
      (Parent            : Env_Getter;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
@@ -357,7 +357,7 @@ package body Langkit_Support.Lexical_Env is
             Lookup_Cache_Valid => True,
             Lookup_Cache       => Lookup_Cache_Maps.Empty_Map),
          Owner => Owner);
-   end Create;
+   end Create_Lexical_Env;
 
    ---------
    -- Add --

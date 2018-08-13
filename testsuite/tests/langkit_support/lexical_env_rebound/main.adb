@@ -11,14 +11,18 @@ with Support; use Support;
 use Support.Envs;
 
 procedure Main is
-   Symbols : Symbol_Table := Create;
+   Symbols : Symbol_Table := Create_Symbol_Table;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
-   Old_Env : Lexical_Env := Create (No_Env_Getter, 'O', Owner => True);
-   New_Env : Lexical_Env := Create (No_Env_Getter, 'N', Owner => True);
+   Old_Env : Lexical_Env := Create_Lexical_Env
+     (No_Env_Getter, 'O', Owner => True);
+   New_Env : Lexical_Env := Create_Lexical_Env
+     (No_Env_Getter, 'N', Owner => True);
 
-   Root  : Lexical_Env := Create (No_Env_Getter, 'R', Owner => True);
-   Child : Lexical_Env := Create (Simple_Env_Getter (Root), 'R', Owner => True);
+   Root  : Lexical_Env := Create_Lexical_Env
+     (No_Env_Getter, 'R', Owner => True);
+   Child : Lexical_Env := Create_Lexical_Env
+     (Simple_Env_Getter (Root), 'R', Owner => True);
 
    Rebindings : Env_Rebindings := Append (null, Old_Env, New_Env);
    Rebound    : Lexical_Env := Rebind_Env (Child, Rebindings);
