@@ -48,6 +48,7 @@ def setup(lib_name, astnode_names, prefix):
         printers.ArrayPrettyPrinter,
         printers.LangkitVectorPrinter,
         printers.RebindingsPrinter,
+        printers.TokenReferencePrinter,
     ]:
         gdb_printers.append(printer)
 

@@ -94,3 +94,13 @@ class Context(object):
         :rtype: str
         """
         return '{}__implementation__{}'.format(self.lib_name, suffix)
+
+    def comname(self, suffix):
+        """
+        Return the C-style symbol name to use for an Ada entity in the
+        $.Common package.
+
+        :param str suffix: Name suffix. For instance: "my_type_name".
+        :rtype: str
+        """
+        return '{}__common__{}'.format(self.lib_name, suffix)
