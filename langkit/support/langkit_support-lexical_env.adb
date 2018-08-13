@@ -302,15 +302,16 @@ package body Langkit_Support.Lexical_Env is
       return Append (Self, Old_Env, New_Env);
    end Append_Rebinding;
 
-   ------------
-   -- Create --
-   ------------
+   -------------------
+   -- Create_Entity --
+   -------------------
 
-   function Create (Node : Node_Type; MD : Node_Metadata) return Entity is
+   function Create_Entity (Node : Node_Type; MD : Node_Metadata) return Entity
+   is
    begin
       return Entity'(Node => Node,
                      Info => (MD => MD, Rebindings => null));
-   end Create;
+   end Create_Entity;
 
    ----------------
    -- Equivalent --

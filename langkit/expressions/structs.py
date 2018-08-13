@@ -644,8 +644,8 @@ class FieldAccess(AbstractExpression):
                 )
 
             if self.wrap_result_in_entity:
-                ret = 'Create (Node => {}, Info => {})'.format(
-                    ret, self.entity_info_expr
+                ret = '{} (Node => {}, Info => {})'.format(
+                    self.type.constructor_name, ret, self.entity_info_expr
                 )
 
             return ret

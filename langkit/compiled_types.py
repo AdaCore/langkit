@@ -1710,6 +1710,15 @@ class EntityType(StructType):
         """
         return self.astnode.kwless_raw_name
 
+    @property
+    def constructor_name(self):
+        """
+        Name of the internal Ada functions to instantiate this array.
+
+        :rtype: names.Name
+        """
+        return names.Name('Create') + self.name
+
 
 class ASTNodeType(BaseStructType):
     """

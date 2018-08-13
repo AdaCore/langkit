@@ -44,7 +44,7 @@
    % endif
 
    % if cls.is_entity_type:
-      function Create
+      function ${cls.constructor_name}
         (Node : ${cls.element_type.name}; Info : Entity_Info)
          return ${cls.name};
    % endif
@@ -98,11 +98,7 @@
 
    % if cls.is_entity_type:
 
-      ------------
-      -- Create --
-      ------------
-
-      function Create
+      function ${cls.constructor_name}
         (Node : ${cls.element_type.name}; Info : Entity_Info)
          return ${cls.name} is
       begin
@@ -110,7 +106,7 @@
             return ${cls.nullexpr};
          end if;
          return (Node => Node, Info => Info);
-      end Create;
+      end;
 
    % endif
 
