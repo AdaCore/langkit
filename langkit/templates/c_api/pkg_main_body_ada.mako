@@ -25,7 +25,10 @@ with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
-${(exts.with_clauses(with_clauses))}
+${(exts.with_clauses(with_clauses + [
+   ((ctx.symbol_canonicalizer.unit_fqn, False)
+    if ctx.symbol_canonicalizer else None)
+]))}
 
 package body ${ada_lib_name}.Implementation.C is
 
@@ -971,10 +974,23 @@ package body ${ada_lib_name}.Implementation.C is
    function Unwrap
      (Unit : Internal_Unit; Text : ${text_type}) return Symbol_Type
    is
-      T : Text_Type (1 .. Natural (Text.Length));
-      for T'Address use Text.Chars;
+      Raw_Text : Text_Type (1 .. Natural (Text.Length))
+         with Import  => True,
+              Address => Text.Chars;
+
+      Symbol : constant Symbolization_Result :=
+         % if ctx.symbol_canonicalizer:
+            ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
+         % else:
+            Create_Symbol (Raw_Text)
+         % endif
+      ;
    begin
-     return Find (Unit.TDH.Symbols, T, False);
+      if Symbol.Success then
+         return Find (Unit.TDH.Symbols, Symbol.Symbol, False);
+      else
+         return null;
+      end if;
    end Unwrap;
 
    ----------------
