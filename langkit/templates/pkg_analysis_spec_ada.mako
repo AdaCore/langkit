@@ -19,10 +19,10 @@ with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
+with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 private with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Common;     use ${ada_lib_name}.Common;
-
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+private with ${ada_lib_name}.Debug;
+with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 ${exts.with_clauses(with_clauses)}
@@ -591,5 +591,11 @@ private
       Node : ${root_entity.api_name};
       Last : Token_Index;
    end record;
+
+   --  Dummy references to package to force them to be included in static
+   --  links (thanks to the binder). This benefits the GDB helpers at no cost.
+
+   Version : String renames ${ada_lib_name}.Version;
+   package DBG renames ${ada_lib_name}.Debug;
 
 end ${ada_lib_name}.Analysis;
