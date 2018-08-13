@@ -46,7 +46,9 @@ with ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False)
-    if ctx.env_hook_subprogram else None)
+    if ctx.env_hook_subprogram else None),
+   ((ctx.symbol_canonicalizer.unit_fqn, False)
+    if ctx.symbol_canonicalizer else None)
 ]))}
 
 ## Generate a dispatching case statement for the root node class. It will keep
