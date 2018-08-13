@@ -27,14 +27,14 @@ package body Langkit_Support.Symbols is
       return Image (S.all, With_Quotes);
    end Image;
 
-   ------------
-   -- Create --
-   ------------
+   -------------------------
+   -- Create_Symbol_Table --
+   -------------------------
 
-   function Create return Symbol_Table is
+   function Create_Symbol_Table return Symbol_Table is
    begin
       return new Sets.Set;
-   end Create;
+   end Create_Symbol_Table;
 
    ----------
    -- Find --
