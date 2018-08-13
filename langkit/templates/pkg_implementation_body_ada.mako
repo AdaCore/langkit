@@ -2979,15 +2979,15 @@ package body ${ada_lib_name}.Implementation is
           Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
 
-   ------------
-   -- Create --
-   ------------
+   -------------------
+   -- Create_Entity --
+   -------------------
 
-   function Create
+   function Create_Entity
      (Node : ${root_node_type_name}; Info : Entity_Info) return Entity is
    begin
       return (Node => Node, Info => Info);
-   end Create;
+   end Create_Entity;
 
    -----------------
    -- Hash_Entity --

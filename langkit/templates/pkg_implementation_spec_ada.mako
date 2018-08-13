@@ -231,7 +231,7 @@ private package ${ada_lib_name}.Implementation is
 
    use AST_Envs;
 
-   function Create
+   function Create_Entity
      (Node : ${root_node_type_name}; Info : Entity_Info) return Entity;
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;

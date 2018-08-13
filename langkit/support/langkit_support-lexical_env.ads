@@ -108,7 +108,7 @@ package Langkit_Support.Lexical_Env is
    --  Wrapper structure to contain both the 'real' node that the user wanted
    --  to store, and its associated metadata.
 
-   function Create (Node : Node_Type; MD : Node_Metadata) return Entity;
+   function Create_Entity (Node : Node_Type; MD : Node_Metadata) return Entity;
    --  Constructor that returns an Entity from an Node_Type and an
    --  Node_Metadata instances.
 
