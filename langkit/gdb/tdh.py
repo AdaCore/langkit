@@ -69,9 +69,31 @@ class Token(object):
     def sloc_range(self):
         return SlocRange(self.value['sloc_range'])
 
+    @property
+    def text(self):
+        # Fetch the fat pointer, the bounds and then go subscript the
+        # underlying array ourselves.
+        src_buffer = self.tdh.value['source_buffer']
+        first = self.value['source_first']
+        last = self.value['source_last']
+
+        length = last - first + 1
+        if length <= 0:
+            return u''
+
+        uint32_t = gdb.lookup_type('uint32_t').pointer()
+        text_addr = (src_buffer['P_ARRAY'].cast(uint32_t) +
+                     (first - src_buffer['P_BOUNDS']['LB0']))
+
+        char = gdb.lookup_type('char').pointer()
+        return (text_addr.cast(char)
+                .string('latin-1', length=4 * length)
+                .decode('utf32'))
+
     def __repr__(self):
-        return '<Token {} {}/{} at {}>'.format(
-            self.kind, self.token_no, self.trivia_no, self.sloc_range
+        return '<Token {} {}/{} at {} {}>'.format(
+            self.kind, self.token_no, self.trivia_no, self.sloc_range,
+            repr(self.text)
         )
 
 
