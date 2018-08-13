@@ -318,7 +318,7 @@ package body ${ada_lib_name}.Implementation is
    is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
-      Symbols        : constant Symbol_Table := Create;
+      Symbols        : constant Symbol_Table := Create_Symbol_Table;
       Context        : Internal_Context;
    begin
       Context_Pool.Acquire (Context);

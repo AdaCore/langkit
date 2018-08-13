@@ -21,7 +21,7 @@ package Langkit_Support.Symbols is
    No_Symbol_Table : constant Symbol_Table;
    --  Value to use as a default for unallocated symbol tables
 
-   function Create return Symbol_Table;
+   function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
 
    function Find
