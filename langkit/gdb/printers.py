@@ -706,3 +706,23 @@ class LangkitVectorPrinter(BasePrinter):
 
         for i in range(1, self.length + 1):
             yield ('[{}]'.format(i), items[i])
+
+
+class TokenReferencePrinter(BasePrinter):
+    """
+    Pretty-printer for token references.
+    """
+
+    name = 'TokenReference'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (value.type.code == gdb.TYPE_CODE_STRUCT
+                and value.type.name == context.comname('token_reference'))
+
+    def to_string(self):
+        if not self.value['tdh']:
+            return 'No_Token'
+
+        index = self.value['index']
+        return '<Token {}/{}>'.format(index['token'], index['trivia'])
