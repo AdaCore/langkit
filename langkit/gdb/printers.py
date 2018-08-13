@@ -486,7 +486,7 @@ class EntityPrinter(BasePrinter):
 
     @property
     def node(self):
-        return self.value['el']
+        return self.value['node']
 
     def to_string(self):
         if not self.node:
