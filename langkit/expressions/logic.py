@@ -522,11 +522,12 @@ class Predicate(AbstractExpression):
         )))
 
         logic_var_exprs.append(
-            untyped_literal_expr("Create ({})".format(", ".join(
-                ["{}" for _ in range(len(closure_exprs) - 1)]
-                + ["Dbg_Img => (if Debug then new String'({})"
-                   "            else null)"]
-            )), operands=closure_exprs)
+            untyped_literal_expr('Create_{}_Predicate ({})'.format(
+                pred_id,
+                ', '.join(['{}' for _ in range(len(closure_exprs) - 1)]
+                          + ["Dbg_Img => (if Debug then new String'({})"
+                             "            else null)"])
+            ), operands=closure_exprs)
         )
 
         return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs,
