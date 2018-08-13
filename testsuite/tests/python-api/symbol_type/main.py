@@ -15,22 +15,12 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-try:
-    res_none = u.root.p_sym(None)
-except TypeError as exc:
-    res_none = '<TypeError: {}>'.format(exc)
-print('u.root.p_sym(None) = {}'.format(res_none))
-
-try:
-    res_error = u.root.p_sym(42)
-except TypeError as exc:
-    res_error = '<TypeError: {}>'.format(exc)
-print('u.root.p_sym(42) = {}'.format(res_error))
-
-res_field = u.root.p_sym(u.root.token_start.text)
-print('u.root.p_sym(u.root.token_start.text) = {}'.format(res_field))
-
-res_no_such_symbol = u.root.p_sym('no_such_symbol')
-print('u.root.p_sym("no_such_symbol") = {}'.format(res_no_such_symbol))
+for s in (None, 42, 'my_ident', 'MY_IDENT', 'no_such_symbol',
+          'invalid_symbol0'):
+    try:
+        result = '= {}'.format(repr(u.root.p_sym(s)))
+    except TypeError as exc:
+        result = 'raised <TypeError: {}>'.format(exc)
+    print('u.root.p_sym({}) {}'.format(repr(s), result))
 
 print('main.py: Done.')

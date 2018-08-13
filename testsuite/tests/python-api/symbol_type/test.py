@@ -4,6 +4,7 @@ Test that Symbol bindings in the Python API are properly working.
 
 from __future__ import absolute_import, division, print_function
 
+from langkit.compile_context import LibraryEntity
 from langkit.dsl import ASTNode, SymbolType
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar
@@ -29,5 +30,6 @@ foo_grammar.add_rules(
     main_rule=Example(Token.Identifier),
 )
 
-build_and_run(foo_grammar, 'main.py')
+build_and_run(foo_grammar, 'main.py',
+              symbol_canonicalizer=LibraryEntity('Aux', 'Canonicalize'))
 print('Done')
