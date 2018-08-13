@@ -4,8 +4,9 @@ package body Langkit_Support.Tree_Traversal_Iterator is
    -- Next --
    ----------
 
-   function Next (It      : in out Traverse_Iterator;
-                  Element : out Node_Type) return Boolean
+   function Next
+     (It      : in out Traverse_Iterator;
+      Element : out Node_Type) return Boolean
    is
       use Natural_Vectors;
 
@@ -72,14 +73,14 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       Natural_Vectors.Destroy (It.Stack);
    end Finalize;
 
-   ------------
-   -- Create --
-   ------------
+   --------------------------
+   -- Create_Tree_Iterator --
+   --------------------------
 
-   function Create (Root : Node_Type) return Traverse_Iterator is
+   function Create_Tree_Iterator (Root : Node_Type) return Traverse_Iterator is
    begin
       return Traverse_Iterator'
         (Ada.Finalization.Limited_Controlled with Root, others => <>);
-   end Create;
+   end Create_Tree_Iterator;
 
 end Langkit_Support.Tree_Traversal_Iterator;

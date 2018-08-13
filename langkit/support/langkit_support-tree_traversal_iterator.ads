@@ -46,7 +46,7 @@ package Langkit_Support.Tree_Traversal_Iterator is
 
    overriding procedure Finalize (It : in out Traverse_Iterator);
 
-   function Create (Root : Node_Type) return Traverse_Iterator;
+   function Create_Tree_Iterator (Root : Node_Type) return Traverse_Iterator;
    --  Create an iterator that will yield all nodes in Root in prefix depth
    --  first order (DFS).
 
