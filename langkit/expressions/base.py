@@ -2596,12 +2596,12 @@ class ArrayLiteral(AbstractExpression):
     @staticmethod
     def construct_static(elements, array_type, abstract_expr=None):
         if len(elements) == 0:
-            return CallExpr('Array_Lit', 'Create', array_type,
-                            ['Items_Count => 0'],
+            return CallExpr('Array_Lit', array_type.constructor_name,
+                            array_type, ['Items_Count => 0'],
                             abstract_expr=abstract_expr)
         else:
             return CallExpr(
-                'Array_Lit', 'Create', array_type,
+                'Array_Lit', array_type.constructor_name, array_type,
                 [aggregate_expr(str(array_type.array_type_name), [
                     (i, el) for i, el in enumerate(elements, 1)
                 ])],

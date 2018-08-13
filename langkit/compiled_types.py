@@ -2494,6 +2494,17 @@ class ArrayType(CompiledType):
                 self.element_type.api_name + names.Name('Array'))
 
     @property
+    def constructor_name(self):
+        """
+        Name of the internal Ada functions to instantiate this array.
+
+        :rtype: names.Name
+        """
+        return (names.Name('Create') +
+                self.element_type.name +
+                names.Name('Array'))
+
+    @property
     def dsl_name(self):
         return '{}.array'.format(self.element_type.dsl_name)
 

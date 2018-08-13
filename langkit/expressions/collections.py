@@ -759,10 +759,11 @@ class CollectionSingleton(AbstractExpression):
         def _render_pre(self):
             result_var = self.result_var.name
             return self.expr.render_pre() + """
-                {result_var} := Create (Items_Count => 1);
+                {result_var} := {constructor} (Items_Count => 1);
                 {result_var}.Items (1) := {item};
                 {inc_ref}
             """.format(
+                constructor=self.type.constructor_name,
                 result_var=result_var,
                 item=self.expr.render_expr(),
                 inc_ref=('Inc_Ref ({}.Items (1));'.format(result_var)
