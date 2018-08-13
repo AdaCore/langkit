@@ -724,5 +724,6 @@ class TokenReferencePrinter(BasePrinter):
         if not self.value['tdh']:
             return 'No_Token'
 
+        tdh = TDH(self.value['tdh'])
         index = self.value['index']
-        return '<Token {}/{}>'.format(index['token'], index['trivia'])
+        return str(tdh.get(index['token'], index['trivia']))
