@@ -56,7 +56,7 @@ procedure Rewrite is
       end if;
    end Check_Diagnostics;
 
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create_Context;
    U1  : constant Analysis_Unit := Get_From_Buffer
      (Ctx, "u1.txt", Buffer => Buffer);
    U2  : constant Analysis_Unit := Get_From_Buffer

@@ -14,7 +14,7 @@ procedure Iter_Units is
    Buffer_B : constant String := "def b = 2" & ASCII.LF;
    Buffer_C : constant String := "def c = 3" & ASCII.LF;
 
-   Ctx    : constant Analysis_Context := Create;
+   Ctx    : constant Analysis_Context := Create_Context;
    Unit_A : constant Analysis_Unit :=
       Get_From_Buffer (Ctx, "a.txt", Buffer => Buffer_A);
    Unit_B : constant Analysis_Unit :=

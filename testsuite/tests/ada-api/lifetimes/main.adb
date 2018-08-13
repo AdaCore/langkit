@@ -24,7 +24,7 @@ procedure Main is
 begin
 
    declare
-      Dummy : constant Analysis_Context := Create;
+      Dummy : constant Analysis_Context := Create_Context;
    begin
       null; --  Ctx is supposed to be destroyed when leaving the scope
    end;
@@ -33,7 +33,7 @@ begin
       U : Analysis_Unit;
    begin
       declare
-         C : constant Analysis_Context := Create;
+         C : constant Analysis_Context := Create_Context;
       begin
          U := C.Get_From_Buffer ("main.txt", "ASCII", "example");
       end;
@@ -48,7 +48,7 @@ begin
    end;
 
    declare
-      U : constant Analysis_Unit := Create.Get_From_Buffer
+      U : constant Analysis_Unit := Create_Context.Get_From_Buffer
         (Filename => "main.txt",
          Buffer   => "example");
       R : constant Foo_Node := U.Root;
@@ -61,7 +61,7 @@ begin
       N : Foo_Node;
    begin
       declare
-         U : constant Analysis_Unit := Create.Get_From_Buffer
+         U : constant Analysis_Unit := Create_Context.Get_From_Buffer
            (Filename => "main.txt", Buffer   => "example");
       begin
          N := U.Root;
@@ -70,7 +70,7 @@ begin
       Try_Node (N, "Using node after context destruction");
 
       declare
-         Dummy_Unit : constant Analysis_Unit := Create.Get_From_Buffer
+         Dummy_Unit : constant Analysis_Unit := Create_Context.Get_From_Buffer
            (Filename => "main.txt", Buffer   => "example");
       begin
          Try_Node (N, "Using node after context re-use");

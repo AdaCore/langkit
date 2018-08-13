@@ -8,7 +8,7 @@ with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 with Process_Apply;
 
 procedure Rewrite_Lists is
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create_Context;
    U   : constant Analysis_Unit :=
       Get_From_Buffer (Ctx, "main.txt", Buffer => "");
    RH  : Rewriting_Handle := Start_Rewriting (Ctx);

@@ -6,7 +6,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create_Context;
    U   : constant Analysis_Unit := Get_From_Buffer
      (Ctx, "foo.txt",
       Buffer =>

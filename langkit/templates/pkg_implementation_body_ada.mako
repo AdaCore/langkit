@@ -307,11 +307,11 @@ package body ${ada_lib_name}.Implementation is
       % endif
    end Create_Symbol_Literals;
 
-   ------------
-   -- Create --
-   ------------
+   --------------------
+   -- Create_Context --
+   --------------------
 
-   function Create
+   function Create_Context
      (Charset       : String;
       With_Trivia   : Boolean;
       Unit_Provider : Internal_Unit_Provider_Access) return Internal_Context
@@ -346,7 +346,7 @@ package body ${ada_lib_name}.Implementation is
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
 
       return Context;
-   end Create;
+   end Create_Context;
 
    -----------------
    -- Create_Unit --

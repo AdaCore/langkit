@@ -44,7 +44,7 @@ procedure Preserve_Formatting is
       end if;
    end Double_Text;
 
-   Ctx : constant Analysis_Context := Create;
+   Ctx : constant Analysis_Context := Create_Context;
    U   : constant Analysis_Unit :=
       Get_From_File (Ctx, "preserve_formatting.txt");
    RH  : Rewriting_Handle;

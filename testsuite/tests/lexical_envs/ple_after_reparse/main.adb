@@ -9,7 +9,7 @@ with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
 procedure Main is
-   Ctx    : constant Analysis_Context := Create;
+   Ctx    : constant Analysis_Context := Create_Context;
    Unit_A : constant Analysis_Unit := Get_From_File (Ctx, "a.txt");
    Unit_B : constant Analysis_Unit := Get_From_File (Ctx, "b.txt");
    Unit_C : constant Analysis_Unit := Get_From_File (Ctx, "b-c.txt");
