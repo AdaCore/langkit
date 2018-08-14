@@ -62,7 +62,7 @@
             % elif arg.type.is_character_type:
                Character_Type'Val (${arg_ref})
             % elif arg.type.is_analysis_unit_type:
-               Unwrap (${arg_ref})
+               ${arg_ref}
             % elif arg.type.is_analysis_unit_kind:
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
@@ -144,7 +144,7 @@
                % elif field.type.is_character_type:
                    Character_Type'Pos (Result)
                % elif field.type.is_analysis_unit_type:
-                   Wrap (Result)
+                   Result
                % elif field.type.is_analysis_unit_kind:
                    Unit_Kind'Pos (Result)
                % elif field.type.is_ast_node:

@@ -32,10 +32,10 @@ ${exts.with_clauses(with_clauses)}
 
 private package ${ada_lib_name}.Implementation.C is
 
-   type ${analysis_context_type} is new System.Address;
+   subtype ${analysis_context_type} is Internal_Context;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
 
-   type ${analysis_unit_type} is new System.Address;
+   subtype ${analysis_unit_type} is Internal_Unit;
    ${ada_c_doc('langkit.analysis_unit_type', 3)}
 
    type ${node_type} is new System.Address;
@@ -657,16 +657,6 @@ private package ${ada_lib_name}.Implementation.C is
    --       Optimization-and-Strict-Aliasing.html>.
 
    pragma Warnings (Off, "possible aliasing problem for type");
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Internal_Context, ${analysis_context_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_context_type}, Internal_Context);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Internal_Unit, ${analysis_unit_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_unit_type}, Internal_Unit);
 
    function Wrap is new Ada.Unchecked_Conversion
      (${root_node_type_name}, ${node_type});
