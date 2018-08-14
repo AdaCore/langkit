@@ -12,7 +12,7 @@ import sys
 from langkit.common import string_repr
 from langkit.compiled_types import get_context
 from langkit.diagnostics import WarningSet, check_source_language
-from langkit.lexer import LexerToken
+from langkit.lexer import Ignore, LexerToken
 import langkit.names as names
 from langkit.parsers import (
     Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Skip, _Extract, _Row,
@@ -1082,6 +1082,16 @@ class Unparsers(object):
         """
         Pass to finalize the preparation of unparsers code generation.
         """
+        if self.context.generate_unparser:
+            ignore_tokens = []
+            for rule_assoc in self.context.lexer.rules:
+                if isinstance(rule_assoc.action, Ignore):
+                    ignore_tokens.append(rule_assoc.action)
+            check_source_language(
+                not ignore_tokens,
+                'Ignore() tokens are incompatible with unparsers.'
+                ' Consider using WithTrivia() instead.'
+            )
 
         # Combine all unparsers for each node, checking that they are
         # consistent. Iterate on all nodes first to get deterministic
