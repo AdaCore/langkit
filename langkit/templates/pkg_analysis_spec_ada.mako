@@ -592,10 +592,12 @@ private
       Last : Token_Index;
    end record;
 
-   --  Dummy references to package to force them to be included in static
-   --  links (thanks to the binder). This benefits the GDB helpers at no cost.
+   --  The dummy references to these packages forces them to be included in
+   --  statically linked builds (thanks to the binder). This benefits the GDB
+   --  helpers at no cost.
 
    Version : String renames ${ada_lib_name}.Version;
-   package DBG renames ${ada_lib_name}.Debug;
+   procedure RN (Node : ${ada_lib_name}.Implementation.${root_node_type_name})
+      renames ${ada_lib_name}.Debug.PN;
 
 end ${ada_lib_name}.Analysis;
