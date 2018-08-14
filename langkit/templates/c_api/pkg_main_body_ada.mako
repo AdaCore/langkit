@@ -109,41 +109,34 @@ package body ${ada_lib_name}.Implementation.C is
          --  Create a new ownership share for the result since the one Context
          --  owns will disappear once we return.
          Inc_Ref (Internal_Ctx);
-         return Wrap (Internal_Ctx);
+         return Internal_Ctx;
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_context_type} (System.Null_Address);
+         return null;
    end;
 
    function ${capi.get_name('context_incref')}
-     (Context : ${analysis_context_type})
-      return ${analysis_context_type}
-   is
-      C : constant Internal_Context := Unwrap (Context);
+     (Context : ${analysis_context_type}) return ${analysis_context_type} is
    begin
-      Inc_Ref (C);
+      Inc_Ref (Context);
       return Context;
    end;
 
    procedure ${capi.get_name('context_decref')}
      (Context : ${analysis_context_type})
    is
-      C : Internal_Context := Unwrap (Context);
+      Context_Var : Internal_Context := Context;
    begin
-      Dec_Ref (C);
+      Dec_Ref (Context_Var);
    end;
 
    function ${capi.get_name('context_serial_number')}
      (Context : ${analysis_context_type}) return Version_Number is
    begin
       Clear_Last_Exception;
-      declare
-         C : Internal_Context := Unwrap (Context);
-      begin
-         return C.Serial_Number;
-      end;
+      return Context.Serial_Number;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -155,11 +148,7 @@ package body ${ada_lib_name}.Implementation.C is
       Discard : int) is
    begin
       Clear_Last_Exception;
-      declare
-         C : Internal_Context := Unwrap (Context);
-      begin
-         Discard_Errors_In_Populate_Lexical_Env (C, Discard /= 0);
-      end;
+      Discard_Errors_In_Populate_Lexical_Env (Context, Discard /= 0);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -172,21 +161,16 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         Ctx  : constant Internal_Context := Unwrap (Context);
-         Unit : constant Internal_Unit := Get_From_File
-           (Ctx,
-            Value (Filename),
-            Value_Or_Empty (Charset),
-            Reparse /= 0,
-            ${Name.from_lower(ctx.main_rule_name)}_Rule);
-      begin
-         return Wrap (Unit);
-      end;
+      return Get_From_File
+        (Context,
+         Value (Filename),
+         Value_Or_Empty (Charset),
+         Reparse /= 0,
+         ${Name.from_lower(ctx.main_rule_name)}_Rule);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_unit_type} (System.Null_Address);
+         return null;
    end;
 
    function ${capi.get_name("get_analysis_unit_from_buffer")}
@@ -198,24 +182,20 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Ctx : constant Internal_Context := Unwrap (Context);
-         Unit : Internal_Unit;
-
-         Buffer_Str : String (1 .. Positive (Buffer_Size));
-         for Buffer_Str'Address use Convert (Buffer);
+         Buffer_Str : String (1 .. Positive (Buffer_Size))
+            with Import, Address => Convert (Buffer);
       begin
-         Unit := Get_From_Buffer
-           (Ctx,
+         return Get_From_Buffer
+           (Context,
             Value (Filename),
             Value_Or_Empty (Charset),
             Buffer_Str,
             ${Name.from_lower(ctx.main_rule_name)}_Rule);
-         return Wrap (Unit);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_unit_type} (System.Null_Address);
+         return null;
    end;
 
    % if ctx.default_unit_provider:
@@ -230,25 +210,21 @@ package body ${ada_lib_name}.Implementation.C is
 
       declare
          Text_Name : Text_Type (1 .. Integer (Name.Length))
-            with Import  => True,
-                 Address => Name.Chars;
-
-         Ctx  : constant Internal_Context := Unwrap (Context);
-         Unit : constant Internal_Unit := Get_From_Provider
-           (Ctx,
+            with Import, Address => Name.Chars;
+      begin
+         return Get_From_Provider
+           (Context,
             Text_Name,
             Unwrap (Kind),
             Value_Or_Empty (Charset),
             Reparse /= 0);
-      begin
-         return Wrap (Unit);
       end;
    exception
       when Invalid_Unit_Name_Error =>
-         return ${analysis_unit_type} (System.Null_Address);
+         return null;
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_unit_type} (System.Null_Address);
+         return null;
    end;
    % endif
 
@@ -258,11 +234,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         Result_P.all := (U.AST_Root, No_Entity_Info);
-      end;
+      Result_P.all := (Unit.AST_Root, No_Entity_Info);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -275,8 +247,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Internal_Unit := Unwrap (Unit);
-         T : constant Token_Reference := First_Token (U);
+         T : constant Token_Reference := First_Token (Unit);
       begin
          Token.all := Wrap (T);
       end;
@@ -292,8 +263,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Internal_Unit := Unwrap (Unit);
-         T : constant Token_Reference := Last_Token (U);
+         T : constant Token_Reference := Last_Token (Unit);
       begin
          Token.all := Wrap (T);
       end;
@@ -307,11 +277,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         return int (Token_Count (U));
-      end;
+      return int (Token_Count (Unit));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -323,11 +289,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         return int (Trivia_Count (U));
-      end;
+      return int (Trivia_Count (Unit));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -342,9 +304,8 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U   : constant Internal_Unit := Unwrap (Unit);
          S   : constant Source_Location := Unwrap (Sloc.all);
-         Tok : constant Token_Reference := Lookup_Token (U, S);
+         Tok : constant Token_Reference := Lookup_Token (Unit, S);
       begin
          Result.all := Wrap (Tok);
       end;
@@ -358,11 +319,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         return New_String (Get_Filename (U));
-      end;
+      return New_String (Get_Filename (Unit));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -374,11 +331,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         return unsigned (U.Diagnostics.Length);
-      end;
+      return unsigned (Unit.Diagnostics.Length);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -393,22 +346,18 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         if N < unsigned (U.Diagnostics.Length) then
-            declare
-               D_In  : Diagnostic renames U.Diagnostics (Natural (N) + 1);
-               D_Out : ${diagnostic_type} renames Diagnostic_P.all;
-            begin
-               D_Out.Sloc_Range := Wrap (D_In.Sloc_Range);
-               D_Out.Message := Wrap (D_In.Message);
-               return 1;
-            end;
-         else
-            return 0;
-         end if;
-      end;
+      if N < unsigned (Unit.Diagnostics.Length) then
+         declare
+            D_In  : Diagnostic renames Unit.Diagnostics (Natural (N) + 1);
+            D_Out : ${diagnostic_type} renames Diagnostic_P.all;
+         begin
+            D_Out.Sloc_Range := Wrap (D_In.Sloc_Range);
+            D_Out.Message := Wrap (D_In.Message);
+            return 1;
+         end;
+      else
+         return 0;
+      end if;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -420,27 +369,20 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         Inc_Ref (U);
-         return Unit;
-      end;
+      Inc_Ref (Unit);
+      return Unit;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_unit_type} (System.Null_Address);
+         return null;
    end;
 
    procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type}) is
+      Unit_Var : Internal_Unit := Unit;
    begin
       Clear_Last_Exception;
 
-      declare
-         U : Internal_Unit := Unwrap (Unit);
-      begin
-         Dec_Ref (U);
-      end;
+      Dec_Ref (Unit_Var);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -450,11 +392,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Unit : ${analysis_unit_type}) return Version_Number is
    begin
       Clear_Last_Exception;
-      declare
-         U : Internal_Unit := Unwrap (Unit);
-      begin
-         return U.Unit_Version;
-      end;
+      return Unit.Unit_Version;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -465,16 +403,11 @@ package body ${ada_lib_name}.Implementation.C is
      (Unit : ${analysis_unit_type}) return ${analysis_context_type} is
    begin
       Clear_Last_Exception;
-
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         return Wrap (U.Context);
-      end;
+      return Unit.Context;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_context_type} (System.Null_Address);
+         return null;
    end;
 
    procedure ${capi.get_name("unit_reparse_from_file")}
@@ -482,11 +415,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         Reparse (U, Value_Or_Empty (Charset));
-      end;
+      Reparse (Unit, Value_Or_Empty (Charset));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -501,11 +430,10 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         U : constant Internal_Unit := Unwrap (Unit);
-         Buffer_Str : String (1 .. Positive (Buffer_Size));
-         for Buffer_Str'Address use Convert (Buffer);
+         Buffer_Str : String (1 .. Positive (Buffer_Size))
+            with Import, Address => Convert (Buffer);
       begin
-         Reparse (U, Value_Or_Empty (Charset), Buffer_Str);
+         Reparse (Unit, Value_Or_Empty (Charset), Buffer_Str);
       end;
    exception
       when Exc : others =>
@@ -516,21 +444,15 @@ package body ${ada_lib_name}.Implementation.C is
      (Unit : ${analysis_unit_type}) return int is
    begin
       Clear_Last_Exception;
-
-      declare
-         U : constant Internal_Unit := Unwrap (Unit);
-      begin
-         Populate_Lexical_Env (U);
-      exception
-         when Exc : Property_Error =>
-            ## If we reach this handler, it means the expression failed at
-            ## some point because of a safety check. Tell the user about
-            ## it.
-            Set_Last_Exception (Exc, Is_Fatal => False);
-            return 0;
-      end;
+      Populate_Lexical_Env (Unit);
       return 1;
    exception
+      when Exc : Property_Error =>
+         ## If we reach this handler, it means the expression failed at some
+         ## point because of a safety check. Tell the user about it.
+         Set_Last_Exception (Exc, Is_Fatal => False);
+         return 0;
+
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
@@ -587,15 +509,11 @@ package body ${ada_lib_name}.Implementation.C is
      (Node : ${entity_type}_Ptr) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
-      declare
-         Unit : constant Internal_Unit := Node.Node.Unit;
-      begin
-         return Wrap (Unit);
-      end;
+      return Node.Node.Unit;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${analysis_unit_type} (System.Null_Address);
+         return null;
    end;
 
    function ${capi.get_name('is_token_node')}
@@ -1155,7 +1073,7 @@ package body ${ada_lib_name}.Implementation.C is
       Reparse  : Boolean := False) return Analysis_Unit'Class
    is
       Ctx         : constant ${analysis_context_type} :=
-         Wrap (Unwrap_Context (Context));
+         Unwrap_Context (Context);
       Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
       C_Charset   : chars_ptr := (if Charset'Length = 0
                                   then Null_Ptr
@@ -1166,10 +1084,10 @@ package body ${ada_lib_name}.Implementation.C is
          C_Charset, Boolean'Pos (Reparse));
    begin
       Free (C_Charset);
-      if C_Result = ${analysis_unit_type} (System.Null_Address) then
+      if C_Result = null then
          raise Property_Error with "invalid AST node for unit name";
       end if;
-      return Wrap_Unit (Unwrap (C_Result));
+      return Wrap_Unit (C_Result);
    end Get_Unit;
 
    -------------
