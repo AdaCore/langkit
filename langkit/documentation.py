@@ -64,6 +64,11 @@ base_langkit_docs = {
         In its current design, ${ctx.lib_name} will keep all the data it
         analyzes for-ever, so if you need to get memory back, the only option
         at your disposal is to destroy your ``Analysis_Context`` instance.
+
+        % if lang == 'c':
+        This structure is partially opaque: some fields are exposed to allow
+        direct access, for performance concerns.
+        % endif
     """,
 
     'langkit.analysis_unit_type': """
@@ -71,6 +76,11 @@ base_langkit_docs = {
 
         % if lang != 'python':
         References are ref-counted.
+        % endif
+
+        % if lang == 'c':
+        This structure is partially opaque: some fields are exposed to allow
+        direct access, for performance concerns.
         % endif
     """,
     'langkit.grammar_rule_type': """
