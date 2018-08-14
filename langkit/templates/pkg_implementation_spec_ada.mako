@@ -944,6 +944,17 @@ private package ${ada_lib_name}.Implementation is
      (Internal_Unit_Provider'Class, Internal_Unit_Provider_Access);
 
    type Analysis_Context_Type is limited record
+      --  Start of ABI area. In order to perform fast checks from foreign
+      --  languages, we maintain minimal ABI for analysis context: this allows
+      --  us in language bindings to directly peek in this record rather than
+      --  rely on (slow) calls to getters.
+
+      Serial_Number : Version_Number;
+      --  Serial number that is incremented each time this context allocation
+      --  is re-used.
+
+      --  End of ABI area
+
       Ref_Count : Natural;
 
       Units : Units_Maps.Map;
@@ -1005,16 +1016,23 @@ private package ${ada_lib_name}.Implementation is
       --  Special analysis unit used only as a containing unit to parse
       --  templates in the context of tree rewriting.
 
-      Serial_Number : Version_Number;
-      --  Serial number that is incremented each time this context allocation
-      --  is re-used.
-
       Released : Boolean;
       --  Whether this context has been released and thus is available in
       --  Context_Pool.
    end record;
 
    type Analysis_Unit_Type is limited record
+      --  Start of ABI area. In order to perform fast checks from foreign
+      --  languages, we maintain minimal ABI for analysis context: this allows
+      --  us in language bindings to directly peek in this record rather than
+      --  rely on (slow) calls to getters.
+
+      Unit_Version : Version_Number := 0;
+      --  Version for this particular unit. This will be incremented every time
+      --  a reparse occurs.
+
+      --  End of ABI area
+
       Context : Internal_Context;
       --  The owning context for this analysis unit
 
@@ -1083,10 +1101,6 @@ private package ${ada_lib_name}.Implementation is
 
       Cache_Version : Natural := 0;
       --  See the eponym field in Analysis_Context_Type
-
-      Unit_Version : Version_Number := 0;
-      --  Version for this particular unit. This will be incremented every time
-      --  a reparse occurs.
    end record;
 
    procedure Free is new Ada.Unchecked_Deallocation
