@@ -120,19 +120,41 @@ _get_last_exception = _import_func(
 )
 
 
-class _hashable_c_pointer(object):
+def _hashable_c_pointer(pointed_type=None):
     """
-    Mixin for ctypes pointers, so these can be used in hashed maps.
+    Create a "pointer to `pointed_type` type and make it hashable.
+
+    :param pointed_type: ctypes type class. If left to `None`, we return a
+        subclass of `ctypes.c_void_p`.
+    :rtype: ctypes.POINTER
     """
+
+    if pointed_type is None:
+        class _c_type(ctypes.c_void_p):
+            @property
+            def _pointer_value(self):
+                return self.value or 0
+    else:
+        @property
+        def _pointer_value(self):
+            return ctypes.addressof(self.contents)
+
+        _c_type = ctypes.POINTER(pointed_type)
+        _c_type._pointer_value = _pointer_value
 
     def __hash__(self):
-        return self.value or 0
+        return self._pointer_value
 
     def __eq__(self, other):
-        return self.value == other.value
+        return self._pointer_value == other._pointer_value
 
     def __ne__(self, other):
         return not (self == other)
+
+    _c_type.__hash__ = __hash__
+    _c_type.__eq__ = __eq__
+    _c_type.__ne__ = __ne__
+    return _c_type
 
 
 class _text(ctypes.Structure):
@@ -211,8 +233,7 @@ def _unwrap_unit_kind(kind):
     return _unwrap_enum(kind, 'analysis unit kind', _str_to_unit_kind)
 
 
-class _unit_provider(_hashable_c_pointer, ctypes.c_void_p):
-    pass
+_unit_provider = _hashable_c_pointer()
 
 
 #
@@ -331,8 +352,7 @@ class AnalysisContext(object):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
         _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
 
-    class _c_type(_hashable_c_pointer, ctypes.c_void_p):
-        pass
+    _c_type = _hashable_c_pointer()
 
     @classmethod
     def _wrap(cls, c_value):
@@ -518,8 +538,7 @@ class AnalysisUnit(object):
             os.path.basename(self.filename)
         ))
 
-    class _c_type(_hashable_c_pointer, ctypes.c_void_p):
-        pass
+    _c_type = _hashable_c_pointer()
 
     @classmethod
     def _wrap(cls, c_value):
@@ -671,8 +690,7 @@ class Diagnostic(object):
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_reference_type', 4)}
 
-    class _tdh_c_type(_hashable_c_pointer, ctypes.c_void_p):
-        pass
+    _tdh_c_type = _hashable_c_pointer()
 
     _fields_ = [('_token_data',   _tdh_c_type),
                 ('_token_index',  ctypes.c_int),
@@ -1176,8 +1194,7 @@ class ${root_astnode_name}(object):
         assert isinstance(self, typ)
         return self
 
-    class _node_c_type(_hashable_c_pointer, ctypes.c_void_p):
-        pass
+    _node_c_type = _hashable_c_pointer()
 
     @classmethod
     def _wrap(cls, c_value):
@@ -1347,8 +1364,7 @@ class EnvRebindings(object):
     def __hash__(self):
         return hash(self._address)
 
-    class _c_type(_hashable_c_pointer, ctypes.c_void_p):
-        pass
+    _c_type = _hashable_c_pointer()
 
     @classmethod
     def _unwrap(cls, value):
