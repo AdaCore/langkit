@@ -120,9 +120,9 @@ _get_last_exception = _import_func(
 )
 
 
-class _hashable_void_p(ctypes.c_void_p):
+class _hashable_c_pointer(object):
     """
-    Base class for pointers, can be used in hashed maps.
+    Mixin for ctypes pointers, so these can be used in hashed maps.
     """
 
     def __hash__(self):
@@ -211,7 +211,7 @@ def _unwrap_unit_kind(kind):
     return _unwrap_enum(kind, 'analysis unit kind', _str_to_unit_kind)
 
 
-class _unit_provider(_hashable_void_p):
+class _unit_provider(_hashable_c_pointer, ctypes.c_void_p):
     pass
 
 
@@ -331,7 +331,7 @@ class AnalysisContext(object):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
         _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
 
-    class _c_type(_hashable_void_p):
+    class _c_type(_hashable_c_pointer, ctypes.c_void_p):
         pass
 
     @classmethod
@@ -518,7 +518,7 @@ class AnalysisUnit(object):
             os.path.basename(self.filename)
         ))
 
-    class _c_type(_hashable_void_p):
+    class _c_type(_hashable_c_pointer, ctypes.c_void_p):
         pass
 
     @classmethod
@@ -671,7 +671,10 @@ class Diagnostic(object):
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_reference_type', 4)}
 
-    _fields_ = [('_token_data',   _hashable_void_p),
+    class _tdh_c_type(_hashable_c_pointer, ctypes.c_void_p):
+        pass
+
+    _fields_ = [('_token_data',   _tdh_c_type),
                 ('_token_index',  ctypes.c_int),
                 ('_trivia_index', ctypes.c_int),
                 ('_kind',         ctypes.c_int),
@@ -1173,7 +1176,7 @@ class ${root_astnode_name}(object):
         assert isinstance(self, typ)
         return self
 
-    class _node_c_type(_hashable_void_p):
+    class _node_c_type(_hashable_c_pointer, ctypes.c_void_p):
         pass
 
     @classmethod
@@ -1344,7 +1347,7 @@ class EnvRebindings(object):
     def __hash__(self):
         return hash(self._address)
 
-    class _c_type(_hashable_void_p):
+    class _c_type(_hashable_c_pointer, ctypes.c_void_p):
         pass
 
     @classmethod
