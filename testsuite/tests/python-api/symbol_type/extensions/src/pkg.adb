@@ -1,4 +1,4 @@
-package body Aux is
+package body Pkg is
 
    ------------------
    -- Canonicalize --
@@ -26,4 +26,4 @@ package body Aux is
       return Create_Symbol (Result (Result'First .. Next - 1));
    end Canonicalize;
 
-end Aux;
+end Pkg;

@@ -31,5 +31,5 @@ foo_grammar.add_rules(
 )
 
 build_and_run(foo_grammar, 'main.py',
-              symbol_canonicalizer=LibraryEntity('Aux', 'Canonicalize'))
+              symbol_canonicalizer=LibraryEntity('Pkg', 'Canonicalize'))
 print('Done')
