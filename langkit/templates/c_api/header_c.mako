@@ -20,10 +20,16 @@ ${c_doc('langkit.initialize')}
 void ${capi.lib_name}_initialize(void);
 
 ${c_doc('langkit.analysis_context_type')}
-typedef void* ${analysis_context_type};
+typedef struct
+{
+   uint64_t serial_number;
+} *${analysis_context_type};
 
 ${c_doc('langkit.analysis_unit_type')}
-typedef void* ${analysis_unit_type};
+typedef struct
+{
+   uint64_t version_number;
+} *${analysis_unit_type};
 
 ${c_doc('langkit.node_type')}
 typedef void* ${node_type};
