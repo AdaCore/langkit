@@ -132,17 +132,6 @@ package body ${ada_lib_name}.Implementation.C is
       Dec_Ref (Context_Var);
    end;
 
-   function ${capi.get_name('context_serial_number')}
-     (Context : ${analysis_context_type}) return Version_Number is
-   begin
-      Clear_Last_Exception;
-      return Context.Serial_Number;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end;
-
    procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
      (Context : ${analysis_context_type};
       Discard : int) is
@@ -386,17 +375,6 @@ package body ${ada_lib_name}.Implementation.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end;
-
-   function ${capi.get_name('unit_version_number')}
-     (Unit : ${analysis_unit_type}) return Version_Number is
-   begin
-      Clear_Last_Exception;
-      return Unit.Unit_Version;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
    end;
 
    function ${capi.get_name('unit_context')}

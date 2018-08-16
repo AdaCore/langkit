@@ -203,10 +203,6 @@ ${c_doc('langkit.context_decref')}
 extern void
 ${capi.get_name("context_decref")}(${analysis_context_type} context);
 
-${c_doc('langkit.context_serial_number')}
-extern uint64_t
-${capi.get_name("context_serial_number")}(${analysis_context_type} context);
-
 ${c_doc('langkit.context_discard_errors_in_populate_lexical_env')}
 extern void
 ${capi.get_name("context_discard_errors_in_populate_lexical_env")}(
@@ -285,10 +281,6 @@ ${capi.get_name("unit_incref")}(${analysis_unit_type} unit);
 ${c_doc('langkit.unit_decref')}
 extern void
 ${capi.get_name("unit_decref")}(${analysis_unit_type} unit);
-
-${c_doc('langkit.unit_version_number')}
-extern uint64_t
-${capi.get_name("unit_version_number")}(${analysis_unit_type} context);
 
 ${c_doc('langkit.unit_context')}
 extern ${analysis_context_type}

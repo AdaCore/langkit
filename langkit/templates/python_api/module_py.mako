@@ -1468,10 +1468,6 @@ _context_decref = _import_func(
     '${capi.get_name("context_decref")}',
     [AnalysisContext._c_type], None
 )
-_context_serial_number = _import_func(
-    '${capi.get_name("context_serial_number")}',
-    [AnalysisContext._c_type], ctypes.c_uint64
-)
 _discard_errors_in_populate_lexical_env = _import_func(
    '${capi.get_name("context_discard_errors_in_populate_lexical_env")}',
    [AnalysisContext._c_type, ctypes.c_int], None
@@ -1551,10 +1547,6 @@ _unit_incref = _import_func(
 _unit_decref = _import_func(
     '${capi.get_name("unit_decref")}',
     [AnalysisUnit._c_type], None
-)
-_unit_version_number = _import_func(
-    '${capi.get_name("unit_version_number")}',
-    [AnalysisUnit._c_type], ctypes.c_uint64
 )
 _unit_context = _import_func(
     '${capi.get_name("unit_context")}',
