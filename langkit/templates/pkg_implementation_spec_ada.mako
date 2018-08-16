@@ -409,6 +409,13 @@ private package ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class)
       return ${root_node_type_name};
 
+   function Fetch_Sibling
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info;
+      Offset : Integer) return Entity;
+   --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
+   --  child of the same parent, or No_Entity if there is no such sibling.
+
    function Traverse
      (Node  : access ${root_node_value_type}'Class;
       Visit : access function (Node : access ${root_node_value_type}'Class)

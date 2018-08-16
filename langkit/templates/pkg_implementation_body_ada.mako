@@ -2614,19 +2614,40 @@ package body ${ada_lib_name}.Implementation is
       raise Program_Error;
    end Child_Index;
 
+   -------------------
+   -- Fetch_Sibling --
+   -------------------
+
+   function Fetch_Sibling
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info;
+      Offset : Integer) return Entity
+   is
+      Node_Index : constant Positive := Node.Child_Index + 1;
+      --  Child_Index is 0-based, but the Child primitive expects a 1-based
+      --  index.
+
+      Sibling_Index : constant Integer := Node_Index + Offset;
+
+      Sibling : constant ${root_node_type_name} :=
+        (if Sibling_Index >= 1
+         then Node.Parent.Child (Sibling_Index)
+         else null);
+      --  Child returns null for out-of-bound indexes
+   begin
+      --  Don't forget to clear entity info if the result is null
+      return (if Sibling = null then No_Entity else (Sibling, E_Info));
+   end Fetch_Sibling;
+
    ----------------------
    -- Previous_Sibling --
    ----------------------
 
    function Previous_Sibling
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity
-   is
-      N : constant Positive := Child_Index (Node) + 1;
+      E_Info : Entity_Info := No_Entity_Info) return Entity is
    begin
-      return (if N = 1
-              then No_Entity
-              else (Node.Parent.Child (N - 1), E_Info));
+      return Node.Fetch_Sibling (E_Info, -1);
    end Previous_Sibling;
 
    ------------------
@@ -2637,11 +2658,8 @@ package body ${ada_lib_name}.Implementation is
      (Node   : access ${root_node_value_type}'Class;
       E_Info : Entity_Info := No_Entity_Info) return Entity
    is
-      Ret : constant ${root_node_type_name} :=
-        Node.Parent.Child (Child_Index (Node) + 1);
    begin
-      --  If Node is the last sibling, then Child will return null
-      return (if Ret /= null then (Ret, E_Info) else No_Entity);
+      return Node.Fetch_Sibling (E_Info, 1);
    end Next_Sibling;
 
    ## Env metadata's body
