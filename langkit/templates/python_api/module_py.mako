@@ -859,7 +859,8 @@ class ${root_astnode_name}(object):
     ${py_doc(T.root_node, 4)}
 
     is_list_type = False
-    __slots__ = ('_node_ext', '_metadata', '_rebindings')
+    __slots__ = ('_c_value', '_node_c_value', '_metadata', '_rebindings',
+                 '_getitem_cache')
 
     ${astnode_types.subclass_decls(T.root_node)}
 

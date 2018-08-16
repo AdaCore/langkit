@@ -82,6 +82,7 @@
 
 class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):
     ${py_doc(cls, 4)}
+    __slots__ = ${pyapi.type_public_name(T.root_node)}.__slots__
 ${subclass_decls(cls)}
 
 </%def>
