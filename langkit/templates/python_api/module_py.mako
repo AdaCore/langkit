@@ -263,6 +263,10 @@ class PropertyError(Exception):
     ${py_doc('langkit.property_error', 4)}
     pass
 
+class StaleReferenceError(Exception):
+    ${py_doc('langkit.stale_reference_error', 4)}
+    pass
+
 ${exts.include_extension(
    ctx.ext('python_api', 'exceptions')
 )}
@@ -872,8 +876,9 @@ class ${root_astnode_name}(object):
     ${py_doc(T.root_node, 4)}
 
     is_list_type = False
-    __slots__ = ('_c_value', '_node_c_value', '_metadata', '_rebindings',
-                 '_getitem_cache')
+    __slots__ = ('_unprotected_c_value', '_node_c_value', '_metadata',
+                 '_rebindings', '_unprotected_getitem_cache', '_unit',
+                 '_unit_version')
 
     ${astnode_types.subclass_decls(T.root_node)}
 
@@ -883,20 +888,51 @@ class ${root_astnode_name}(object):
         used directly. For now, the creation of AST nodes can happen only as
         part of the parsing of an analysis unit.
         """
-        self._c_value = c_value
+
+        self._unprotected_c_value = c_value
+
+        # Access to these fields is unprotected from stale references, but it
+        # is supposed to be used only in _id_tuple, which itself should not be
+        # used outside of hashing/equality use cases.
         self._node_c_value = node_c_value
-        self._metadata = metadata
         self._rebindings = rebindings
 
-        self._getitem_cache = {}
+        # The "metadata" property is the only legitimate reader for this field,
+        # and thus the only place that contains the stale reference check.
+        self._metadata = metadata
+
+        self._unprotected_getitem_cache = {}
         """
         Cache for the __getitem__ override.
 
         :type: dict[int, ${root_astnode_name}]
         """
 
+        # Information to check before accessing node data that it is still
+        # valid.
+        self._unit = self._fetch_unit(c_value)
+        self._unit_version = self._unit._unit_version
+
+    def _check_stale_reference(self):
+        # We have a reference to the owning unit, so there is no need to
+        # check that the unit and the context are still valid. Just check that
+        # the unit has not been reparsed.
+        if self._unit._unit_version != self._unit_version:
+            raise StaleReferenceError()
+
+    @property
+    def _c_value(self):
+        self._check_stale_reference()
+        return self._unprotected_c_value
+
+    @property
+    def _getitem_cache(self):
+        self._check_stale_reference()
+        return self._unprotected_getitem_cache
+
     @property
     def metadata(self):
+        self._check_stale_reference()
         return self._metadata
 
     def __del__(self):
@@ -924,7 +960,7 @@ class ${root_astnode_name}(object):
     @property
     def unit(self):
         ${py_doc('langkit.node_unit', 8)}
-        return self._unit(self._c_value)
+        return self._unit
 
     @property
     def is_token_node(self):
@@ -1230,7 +1266,7 @@ class ${root_astnode_name}(object):
 
         # Look for an already existing wrapper for this node
         cache_key = (node_c_value, metadata, rebindings)
-        unit = cls._unit(c_value)
+        unit = cls._fetch_unit(c_value)
         unit._check_node_cache()
         try:
             return unit._node_cache[cache_key]
@@ -1263,7 +1299,7 @@ class ${root_astnode_name}(object):
         return self._c_value.info
 
     @classmethod
-    def _unit(cls, c_value):
+    def _fetch_unit(cls, c_value):
         return ${pyapi.wrap_value('_node_unit(ctypes.byref(c_value))',
                                   T.AnalysisUnitType)}
 
