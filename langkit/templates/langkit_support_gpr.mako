@@ -9,8 +9,8 @@ library project Langkit_Support is
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
-   Library_Kind_Param : Library_Kind_Type :=
-     external ("LIBRARY_TYPE", "static");
+   Library_Kind_Param : Library_Kind_Type := external
+     ("LIBRARY_TYPE", external ("LANGKIT_SUPPORT_LIBRARY_TYPE", "static"));
 
    for Languages use ("Ada");
    for Library_Name use "langkit_support";
