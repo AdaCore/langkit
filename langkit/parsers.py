@@ -1191,10 +1191,14 @@ class List(Parser):
             # If several, then wrap them in a Pick parser
             self.parser = Pick(*parsers)
 
-        sep = opts.get('sep')
+        sep = opts.pop('sep', None)
         self.sep = resolve(sep) if sep else None
-        self.empty_valid = opts.get('empty_valid', False)
-        self.list_cls = opts.get('list_cls', None)
+        self.empty_valid = opts.pop('empty_valid', False)
+        self.list_cls = opts.pop('list_cls', None)
+
+        if opts:
+            raise TypeError('unexpected keyword arguments: {}'.format(
+                ', '.join(opts)))
 
     @property
     def children(self):
