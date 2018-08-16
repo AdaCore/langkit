@@ -167,9 +167,7 @@ package ${ada_lib_name}.Common is
    --  Raise a Property_Error with the given Message
 
    Stale_Reference_Error : exception;
-   --  Exception raised while trying to access data that was deallocated. This
-   --  happens when one tries to use a node whose unit has been reparsed, for
-   --  instance.
+   ${ada_doc('langkit.stale_reference_error', 3)}
 
 private
 
