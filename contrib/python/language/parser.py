@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, EnumNode, T, abstract
+from langkit.dsl import ASTNode, Field, EnumNode, T, abstract, synthetic
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Self, Property, No
 from langkit.parsers import Grammar, List, Opt, Or, Pick, _
@@ -285,6 +285,7 @@ class Op(PythonNode):
     token_node = True
 
 
+@synthetic
 class BinOp(Expr):
     left = Field(type=T.Expr)
     op = Field(type=T.Op)
