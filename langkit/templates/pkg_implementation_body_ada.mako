@@ -1130,9 +1130,7 @@ package body ${ada_lib_name}.Implementation is
      (R            : Relation;
       Context_Node : ${root_node_type_name}) return Boolean is
    begin
-      if Context_Node /= null 
-         and then Langkit_Support.Adalog.Debug.Debug
-      then
+      if Context_Node /= null and then Langkit_Support.Adalog.Debug.Debug then
          Context_Node.Assign_Names_To_Logic_Vars;
       end if;
 
@@ -2621,7 +2619,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    function Previous_Sibling
-     (Node : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type}'Class;
       E_Info : Entity_Info := No_Entity_Info) return Entity
    is
       N : constant Positive := Child_Index (Node) + 1;
@@ -2636,10 +2634,10 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Next_Sibling
-     (Node : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type}'Class;
       E_Info : Entity_Info := No_Entity_Info) return Entity
    is
-      Ret : constant ${root_node_type_name} := 
+      Ret : constant ${root_node_type_name} :=
         Node.Parent.Child (Child_Index (Node) + 1);
    begin
       --  If Node is the last sibling, then Child will return null
@@ -2716,7 +2714,7 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    function Group
-     (Envs : ${T.LexicalEnvType.array.name}; 
+     (Envs   : ${T.LexicalEnvType.array.name};
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name}
    is (Group (AST_Envs.Lexical_Env_Array (Envs.Items), Env_Md));
 
