@@ -795,11 +795,13 @@ class ManageScript(object):
             argv.extend(self.gpr_scenario_vars(args, 'prod', library_type))
             self.check_call(args, 'Install', argv)
 
+        # Install the static libraries first, so that in the resulting project
+        # files, "static" is the default library type.
         build_shared, build_static = self.what_to_build(args, is_library)
-        if build_shared:
-            run('relocatable')
         if build_static:
             run('static')
+        if build_shared:
+            run('relocatable')
 
     def do_build(self, args):
         """
