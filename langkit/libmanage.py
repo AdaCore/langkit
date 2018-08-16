@@ -765,10 +765,14 @@ class ManageScript(object):
 
         :type args: argparse.Namespace
         """
+        assert project_file.endswith('.gpr')
+        project_name = os.path.basename(project_file)[:-4].upper()
+
         base_argv = ['gprinstall', '-p',
                      '-P{}'.format(project_file),
                      '--prefix={}'.format(self.dirs.install_dir()),
-                     '--build-var=LIBRARY_TYPE']
+                     '--build-var=LIBRARY_TYPE',
+                     '--build-var={}_LIBRARY_TYPE'.format(project_name)]
 
         # If this is a library, install sources in an unique location: there is
         # no need to have one location per build mode as sources are going to
