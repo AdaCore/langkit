@@ -163,6 +163,11 @@ base_langkit_docs = {
         ``${'P_' if lang == 'ada' else 'p_'}``. This is the only exceptions
         that such functions can raise.
     """,
+    'langkit.stale_reference_error': """
+        Exception raised while trying to access data that was deallocated. This
+        happens when one tries to use a node whose unit has been reparsed, for
+        instance.
+    """,
 
     #
     # Analysis primitives
