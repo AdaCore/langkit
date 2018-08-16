@@ -376,7 +376,8 @@ class AnalysisContext(object):
 class AnalysisUnit(object):
     ${py_doc('langkit.analysis_unit_type', 4)}
 
-    __slots__ = ('_c_value', '_context_link', '_version_number', '_node_cache')
+    __slots__ = ('_c_value', '_context_link', '_cache_version_number',
+                 '_node_cache')
 
     class DiagnosticsList(object):
         """List of analysis unit diagnostics."""
@@ -436,7 +437,16 @@ class AnalysisUnit(object):
         assert c_value not in context._unit_cache
         context._unit_cache[c_value] = self
 
-        self._version_number = None
+        self._cache_version_number = None
+        """
+        Last version number we saw for this analysis unit wrapper. If it's
+        different from `self._unit_version`, it means that the unit was
+        reparsed: in this case we need to clear the node cache below (see the
+        `_check_node_cache` method).
+
+        :type: int
+        """
+
         self._node_cache = {}
         """
         Cache for all node wrappers in this unit. Indexed by couples:
@@ -573,14 +583,17 @@ class AnalysisUnit(object):
         ctx = _unit_context(c_value)
         return AnalysisContext._wrap(ctx)
 
+    @property
+    def _unit_version(self):
+        return self._c_value.contents.unit_version
+
     def _check_node_cache(self):
         """
         If this unit has been reparsed, invalidate its node cache.
         """
-        version_number = self._c_value.contents.unit_version
-        if self._version_number != version_number:
+        if self._cache_version_number != self._unit_version:
             self._node_cache = {}
-            self._version_number = version_number
+            self._cache_version_number = self._unit_version
 
 
 class Sloc(object):
