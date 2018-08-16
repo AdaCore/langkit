@@ -352,7 +352,9 @@ class AnalysisContext(object):
         ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
         _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
 
-    _c_type = _hashable_c_pointer()
+    class _c_struct(ctypes.Structure):
+        _fields_ = [('serial_number', ctypes.c_uint64)]
+    _c_type = _hashable_c_pointer(_c_struct)
 
     @classmethod
     def _wrap(cls, c_value):
@@ -365,7 +367,7 @@ class AnalysisContext(object):
         """
         If this context has been re-used, invalidate its unit cache.
         """
-        serial_number = _context_serial_number(self._c_value)
+        serial_number = self._c_value.contents.serial_number
         if self._serial_number != serial_number:
             self._unit_cache = {}
             self._serial_number = serial_number
@@ -538,7 +540,9 @@ class AnalysisUnit(object):
             os.path.basename(self.filename)
         ))
 
-    _c_type = _hashable_c_pointer()
+    class _c_struct(ctypes.Structure):
+        _fields_ = [('unit_version', ctypes.c_uint64)]
+    _c_type = _hashable_c_pointer(_c_struct)
 
     @classmethod
     def _wrap(cls, c_value):
@@ -558,7 +562,7 @@ class AnalysisUnit(object):
     @classmethod
     def _unwrap(cls, value):
         if value is None:
-            return 0
+            return value
         elif not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
         else:
@@ -573,7 +577,7 @@ class AnalysisUnit(object):
         """
         If this unit has been reparsed, invalidate its node cache.
         """
-        version_number = _unit_version_number(self._c_value)
+        version_number = self._c_value.contents.unit_version
         if self._version_number != version_number:
             self._node_cache = {}
             self._version_number = version_number
