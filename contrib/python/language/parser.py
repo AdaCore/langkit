@@ -8,7 +8,7 @@ from language.lexer import python_lexer as L
 
 
 def newlines():
-    return _(List(P.nl, empty_valid=True, discard=False))
+    return _(List(P.nl, empty_valid=True))
 
 
 class VarArgsFlag(EnumNode):
