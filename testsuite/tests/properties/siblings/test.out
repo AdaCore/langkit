@@ -1,0 +1,15 @@
+main.py: Running...
+== A ==
+  None <= a => None
+
+== B ==
+  None <= a => b
+  a <= b => None
+
+== C ==
+  None <= a => b
+  a <= b => c
+  b <= c => None
+
+main.py: Done.
+Done
