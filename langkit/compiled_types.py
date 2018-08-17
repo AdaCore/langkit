@@ -1655,7 +1655,7 @@ class EntityType(StructType):
 
         name = names.Name('Entity')
         if not self.astnode.is_root_node:
-            name += self.astnode.raw_name
+            name += self.astnode.kwless_raw_name
 
         super(EntityType, self).__init__(
             name, None, None,
@@ -1786,7 +1786,7 @@ class ASTNodeType(BaseStructType):
                                 if is_keyword(self.raw_name) else
                                 self.raw_name)
 
-        name = names.Name('Bare') + name
+        name = names.Name('Bare') + self.kwless_raw_name
 
         is_root = base is None
         is_root_list = base is not None and base.is_generic_list_type
