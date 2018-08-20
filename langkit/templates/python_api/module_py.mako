@@ -1669,13 +1669,13 @@ _${field.accessor_basename.lower} = _import_func(
     [ctypes.POINTER(${c_entity}),
      % for arg in field.arguments:
         <%
-            type_expr = pyapi.type_internal_name(arg.public_type)
+            type_expr = pyapi.c_type(arg.public_type)
             if arg.public_type.is_ada_record:
                 type_expr = 'ctypes.POINTER({})'.format(type_expr)
         %>
         ${type_expr},
      % endfor
-     ctypes.POINTER(${pyapi.type_internal_name(field.public_type)})],
+     ctypes.POINTER(${pyapi.c_type(field.public_type)})],
     ctypes.c_int
 )
     % endfor

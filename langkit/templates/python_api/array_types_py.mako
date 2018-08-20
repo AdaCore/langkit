@@ -70,7 +70,7 @@ class _BaseArray(object):
 
 <%
    element_type = cls.element_type
-   c_element_type = pyapi.type_internal_name(element_type)
+   c_element_type = pyapi.c_type(element_type)
 %>
 
 class ${pyapi.type_public_name(cls)}(_BaseArray):
