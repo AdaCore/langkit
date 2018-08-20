@@ -60,9 +60,8 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (T.CharacterType, lambda _: 'unichr({{}}{})'.format(value_suffix)),
-            (ct.ArrayType, lambda cls: '{}._wrap({{}}, inc_ref={})'.format(
-                self.array_wrapper(type),
-                inc_ref
+            (ct.ArrayType, lambda _: '{}._wrap({{}})'.format(
+                self.array_wrapper(type)
             )),
             (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
                 type.name.camel,
@@ -148,7 +147,7 @@ class PythonAPISettings(AbstractAPISettings):
     def array_wrapper(self, array_type):
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
-                array_type).api_name.camel
+                array_type).py_converter
 
     def type_public_name(self, type):
         """
@@ -167,8 +166,10 @@ class PythonAPISettings(AbstractAPISettings):
             (T.SymbolType, lambda _: 'unicode'),
             (ct.ASTNodeType, lambda t: t.kwless_raw_name.camel),
             (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
-            (ct.ArrayType, lambda t: t.api_name),
             (T.AnalysisUnitType, lambda t: t.api_name),
+            (ct.ArrayType, lambda _: 'list[{}]'.format(
+                type.element_type.name.camel
+            )),
             (ct.StructType, lambda _: type.name.camel),
             (T.AnalysisUnitKind, lambda _: 'str'),
             (T.BigIntegerType, lambda _: 'int'),

@@ -8,6 +8,13 @@
         result = self._eval_astnode_field(${c_accessor})
 
         % else:
+        ## Create C values for arguments
+        % for arg in field.arguments:
+        unwrapped_${arg.name.lower} = ${pyapi.unwrap_value(arg.name.lower,
+                                                           arg.public_type)}
+        % endfor
+
+        ## Evaluate the property
         <%
             # Expression to create a holder for the C result
             c_result_constructor = '{}()'.format(
@@ -15,17 +22,17 @@
             )
 
             # Expression for the C value for field evaluation
-            explicit_args = [
-                pyapi.unwrap_value(arg.name.lower, arg.public_type)
-                for arg in field.arguments
+            eval_args = [c_result_constructor, c_accessor] + [
+                'unwrapped_{}{}'.format(
+                    arg.name.lower,
+                    '.c_value' if arg.type.is_refcounted else ''
+                ) for arg in field.arguments
             ]
-            eval_args = [c_result_constructor, c_accessor] + explicit_args
-            c_result = 'self._eval_field({})'.format(', '.join(eval_args))
-
-            # What comes next is the unwrapping of this C result for the
-            # caller.
         %>
-        result = ${pyapi.wrap_value(c_result, field.public_type)}
+        ## Evaluate the C value for field evaluation, and then the Python
+        ## wrapper.
+        c_result = self._eval_field(${', '.join(eval_args)})
+        result = ${pyapi.wrap_value('c_result', field.public_type)}
         % endif
 
 </%def>
