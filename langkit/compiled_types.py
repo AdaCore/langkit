@@ -2601,6 +2601,17 @@ class ArrayType(CompiledType):
         return capi.get_name(self.api_name + names.Name('Dec_Ref'))
 
     @property
+    def py_converter(self):
+        """
+        Name of the Python class used to convert back and forth between
+        user-facing values (lists) and C API values (pointers to array
+        records).
+
+        :rtype: str
+        """
+        return '_{}Converter'.format(self.api_name.camel)
+
+    @property
     def emit_c_type(self):
         """
         Return whether to emit a C type for this type.
