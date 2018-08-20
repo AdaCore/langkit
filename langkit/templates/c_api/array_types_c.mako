@@ -11,6 +11,10 @@ typedef struct {
    ${cls.element_type.c_type(capi).name} items[1];
 } *${type_name};
 
+/* Create a length-sized array.  */
+extern ${type_name}
+${cls.c_create(capi)}(int length);
+
 /* Increment the ref-count for "a".  */
 extern void
 ${cls.c_inc_ref(capi)}(${type_name} a);

@@ -2573,6 +2573,15 @@ class ArrayType(CompiledType):
         """
         return names.Name(self.pkg_vector.camel_with_underscores + '.Vector')
 
+    def c_create(self, capi):
+        """
+        Name of the C API function to create an array value.
+
+        :param langkit.c_api.CAPISettings capi: Settings for the C API.
+        :rtype: str
+        """
+        return capi.get_name(self.api_name + names.Name('Create'))
+
     def c_inc_ref(self, capi):
         """
         Name of the C API function to inc-ref an array value.
