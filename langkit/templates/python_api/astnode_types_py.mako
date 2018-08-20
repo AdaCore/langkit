@@ -11,7 +11,7 @@
         <%
             # Expression to create a holder for the C result
             c_result_constructor = '{}()'.format(
-                pyapi.type_internal_name(field.public_type),
+                pyapi.c_type(field.public_type),
             )
 
             # Expression for the C value for field evaluation

@@ -136,7 +136,7 @@ class ${type_name}(${base_cls}):
              % if field.type.is_array_type:
                  ctypes.c_void_p
              % else:
-                ${pyapi.type_internal_name(field.type)}
+                ${pyapi.c_type(field.type)}
              % endif
              ),
         % endfor
@@ -151,7 +151,7 @@ class ${type_name}(${base_cls}):
                 if field.type.is_array_type:
                     fld = 'ctypes.cast({}, {})'.format(
                         fld,
-                        pyapi.type_internal_name(field.type)
+                        pyapi.c_type(field.type)
                     )
                 copy = pyapi.wrap_value(fld, field.type,
                                         from_field_access=True)

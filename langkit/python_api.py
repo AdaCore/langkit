@@ -110,13 +110,12 @@ class PythonAPISettings(AbstractAPISettings):
             ' (unwrapping): {}'.format(type)
         )).format(value)
 
-    def type_internal_name(self, type):
+    def c_type(self, type):
         """
-        Python specific helper, to get the internal name of a type that is
-        wrapped.
+        Return the name of the type to use in the C API for ``type``.
 
-        :param CompiledType type: The type for which we want to get the
-            internal name.
+        :param CompiledType type: The type for which we want to get the C type
+            name.
         :rtype: str
         """
         def ctype_type(name):
