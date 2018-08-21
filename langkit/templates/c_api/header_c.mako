@@ -274,14 +274,6 @@ ${capi.get_name("unit_diagnostic")}(${analysis_unit_type} unit,
                                     unsigned n,
                                     ${diagnostic_type} *diagnostic_p);
 
-${c_doc('langkit.unit_incref')}
-extern ${analysis_unit_type}
-${capi.get_name("unit_incref")}(${analysis_unit_type} unit);
-
-${c_doc('langkit.unit_decref')}
-extern void
-${capi.get_name("unit_decref")}(${analysis_unit_type} unit);
-
 ${c_doc('langkit.unit_context')}
 extern ${analysis_context_type}
 ${capi.get_name("unit_context")}(${analysis_unit_type} context);

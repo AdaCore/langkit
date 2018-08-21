@@ -232,12 +232,6 @@ package ${ada_lib_name}.Analysis is
    function Hash (Unit : Analysis_Unit) return Ada.Containers.Hash_Type;
    ${ada_doc('langkit.unit_hash', 3)}
 
-   procedure Inc_Ref (Unit : Analysis_Unit'Class);
-   ${ada_doc('langkit.unit_incref', 3)}
-
-   procedure Dec_Ref (Unit : in out Analysis_Unit'Class);
-   ${ada_doc('langkit.unit_decref', 3)}
-
    procedure Reparse (Unit : Analysis_Unit'Class; Charset : String := "");
    ${ada_doc('langkit.unit_reparse_file', 3)}
 

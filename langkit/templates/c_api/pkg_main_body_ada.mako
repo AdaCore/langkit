@@ -353,30 +353,6 @@ package body ${ada_lib_name}.Implementation.C is
          return 0;
    end;
 
-   function ${capi.get_name("unit_incref")}
-     (Unit : ${analysis_unit_type}) return ${analysis_unit_type} is
-   begin
-      Clear_Last_Exception;
-
-      Inc_Ref (Unit);
-      return Unit;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return null;
-   end;
-
-   procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type}) is
-      Unit_Var : Internal_Unit := Unit;
-   begin
-      Clear_Last_Exception;
-
-      Dec_Ref (Unit_Var);
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-   end;
-
    function ${capi.get_name('unit_context')}
      (Unit : ${analysis_unit_type}) return ${analysis_context_type} is
    begin

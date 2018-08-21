@@ -333,28 +333,6 @@ package body ${ada_lib_name}.Analysis is
    end Hash;
 
    -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Unit : Analysis_Unit'Class) is
-   begin
-      Inc_Ref (Unwrap_Unit (Unit));
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Unit : in out Analysis_Unit'Class) is
-      U : Internal_Unit := Unwrap_Unit (Unit);
-   begin
-      Dec_Ref (U);
-      if U = null then
-         Unit.Internal := null;
-      end if;
-   end Dec_Ref;
-
-   -------------
    -- Reparse --
    -------------
 

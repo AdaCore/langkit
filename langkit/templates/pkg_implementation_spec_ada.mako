@@ -1043,10 +1043,6 @@ private package ${ada_lib_name}.Implementation is
       Context : Internal_Context;
       --  The owning context for this analysis unit
 
-      Ref_Count : Natural;
-      --  Ref count for the analysis unit. Note that in the Ada API you'll
-      --  still have to call Inc_Ref/Dec_Ref manually.
-
       AST_Root : ${root_node_type_name};
 
       Filename : GNATCOLL.VFS.Virtual_File;
@@ -1244,12 +1240,6 @@ private package ${ada_lib_name}.Implementation is
 
    function Hash (Unit : Internal_Unit) return Hash_Type;
    --  Implementation for Analysis.Hash
-
-   procedure Inc_Ref (Unit : Internal_Unit);
-   --  Implementation for Analysis.Inc_Ref
-
-   procedure Dec_Ref (Unit : in out Internal_Unit);
-   --  Implementation for Analysis.Dec_Ref
 
    procedure Reparse (Unit : Internal_Unit; Charset : String);
    --  Implementation for Analysis.Reparse
