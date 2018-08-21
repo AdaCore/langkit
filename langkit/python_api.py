@@ -134,7 +134,7 @@ class PythonAPISettings(AbstractAPISettings):
                 self.type_public_name(ct.T.root_node))),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(self.array_wrapper(cls))),
-            (ct.EntityType, lambda _: 'Entity._c_type'),
+            (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:
                 '{}._c_type'.format(type.name.camel)),
             (T.BigIntegerType, lambda _: '_big_integer'),

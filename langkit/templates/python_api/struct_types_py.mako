@@ -60,8 +60,7 @@ class _BaseStruct(object):
 <%def name="decl(cls)">
 
 
-class ${('Entity' if cls.is_entity_type else
-         pyapi.type_public_name(cls))}(_BaseStruct):
+class ${pyapi.type_public_name(cls)}(_BaseStruct):
     ${py_doc(cls, 4)}
 
     <% field_names = [f.name.lower for f in cls.get_fields()] %>
@@ -116,10 +115,6 @@ class ${('Entity' if cls.is_entity_type else
             %>${copy},
             % endfor
         )
-        % if cls.is_entity_type:
-        if result.el is None:
-            return None
-        % endif
         if cls._inc_ref and inc_ref:
             cls._inc_ref(ctypes.byref(c_value))
         return result

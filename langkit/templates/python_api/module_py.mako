@@ -20,7 +20,7 @@ from __future__ import (absolute_import, division, print_function,
 <%
     root_astnode_name = pyapi.type_public_name(T.root_node)
     c_node = '{}._node_c_type'.format(root_astnode_name)
-    c_entity = '{}._c_type'.format(root_entity.name.camel)
+    c_entity = pyapi.c_type(root_entity)
 %>
 
 
@@ -1466,7 +1466,17 @@ def _unwrap_enum(py_value, type_name, translator):
 ${struct_types.base_decls()}
 
 % for struct_type in ctx.struct_types:
-    % if struct_type._exposed and struct_type.emit_c_type:
+    ## Emit a single C type for all entities, as they are all ABI compatible.
+    ## We emit them as a special case as we just need the C structure layout:
+    ## the node/entity wrapper will take care of the rest.
+    % if struct_type.is_entity_type:
+        % if struct_type is root_entity:
+class ${c_entity}(ctypes.Structure):
+    _fields_ = [('node', ${root_astnode_name}._node_c_type),
+                ('info', ${pyapi.c_type(T.entity_info)})]
+        % endif
+    ## Emit other (and regular) structures
+    % elif struct_type._exposed:
 ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -1722,7 +1732,7 @@ _token_range_text = _import_func(
 % if T.entity._exposed:
 _entity_image = _import_func(
     "${capi.get_name('entity_image')}",
-    [ctypes.POINTER(Entity._c_type)], _text
+    [ctypes.POINTER(${c_entity})], _text
 )
 % endif
 
