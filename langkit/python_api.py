@@ -61,7 +61,7 @@ class PythonAPISettings(AbstractAPISettings):
             ' (wrapping): {}'.format(type)
         )).format(value)
 
-    def unwrap_value(self, value, type):
+    def unwrap_value(self, value, type, context):
         """
         Given an expression for a high-level value and the associated type,
         return an other expression that yields the corresponding low-level
@@ -70,8 +70,12 @@ class PythonAPISettings(AbstractAPISettings):
         :param str value: Expression yielding a high-level value.
         :param ct.CompiledType type: Type corresponding to the "value"
             expression.
+        :param str context: Expression to return a C value for the context.
+            This is required to unwrap some types of value.
         :rtype: str
         """
+        context_arg = (', {}'.format(context)
+                       if self.unwrap_requires_context(type) else '')
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
             (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({value})'),
@@ -83,17 +87,17 @@ class PythonAPISettings(AbstractAPISettings):
             (T.LongType, lambda _: 'int({value})'),
             (T.CharacterType, lambda _: 'ord({value})'),
             (ct.ArrayType, lambda cls:
-                '{}._unwrap({{value}})'
+                '{}._unwrap({{value}}{{context}})'
                 .format(self.array_wrapper(cls))),
             (ct.StructType, lambda _:
-                '{}._unwrap({{value}})'.format(type.name.camel)),
-            (T.SymbolType, lambda _: '_text._unwrap({value})'),
+                '{}._unwrap({{value}}{{context}})'.format(type.name.camel)),
+            (T.SymbolType, lambda _: '_symbol_type.unwrap({value}{context})'),
             (T.EnvRebindingsType, lambda _: '{value}'),
             (T.BigIntegerType, lambda _: '_big_integer._unwrap({value})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
-        )).format(value=value)
+        )).format(value=value, context=context_arg)
 
     def c_type(self, type):
         """
@@ -157,4 +161,26 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _: type.name.camel),
             (T.AnalysisUnitKind, lambda _: 'str'),
             (T.BigIntegerType, lambda _: 'int'),
+        ])
+
+    def unwrap_requires_context(self, type):
+        """
+        Return whether unwrapping values for the given ``type`` requires having
+        an analysis context. For types that do, the ``.(_)unwrap`` method
+        should take the context as a C value in addition to the Python value to
+        unwrap.
+
+        :param CompiledType type: Type to analyze.
+        :rtype: bool
+        """
+        return dispatch_on_type(type, [
+            (T.ArrayType, lambda _:
+                self.unwrap_requires_context(type.element_type)),
+            (T.EntityType, lambda _: False),
+            (T.StructType, lambda _: any(
+                self.unwrap_requires_context(f.type)
+                for f in type.get_fields())),
+
+            # By default, assume the context is not required
+            (ct.CompiledType, lambda _: False),
         ])
