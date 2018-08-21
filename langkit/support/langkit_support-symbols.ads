@@ -27,9 +27,7 @@ package Langkit_Support.Symbols is
    function Find
      (ST     : Symbol_Table;
       T      : Text_Type;
-      Create : Boolean := True)
-      return Symbol_Type
-      with Inline;
+      Create : Boolean := True) return Symbol_Type with Inline;
    --  Look for an entry for the T text in the ST symbol table. If there is
    --  such an entry, return it. Otherwise, create it and return it if Create
    --  is true. Elsewise, return null.
