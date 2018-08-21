@@ -160,6 +160,13 @@ def _hashable_c_pointer(pointed_type=None):
 
 
 class _text(ctypes.Structure):
+    """
+    C value for unicode strings. This object is the owner of the underlying
+    buffer, so the string will be deallocated when ``self`` is destroyed.
+
+    ``_unwrap`` takes a string/unicode object and returns a ``_text`` instance,
+    while ``_wrap`` retuns an unicode instance.
+    """
     # The chars field really is a uint32_t* but considering it as a char* here
     # is more convenient for conversion in this binding layer. On the other
     # side, we have to be careful about converting the length when retrieving
