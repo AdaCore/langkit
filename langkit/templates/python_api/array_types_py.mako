@@ -56,13 +56,13 @@ class _BaseArray(object):
         return result
 
     @classmethod
-    def _unwrap(cls, value):
+    def _unwrap(cls, value, context=None):
         if not isinstance(value, list):
             _raise_type_error('list', value)
 
         result = cls(cls._create(len(value)))
         for i, item in enumerate(value):
-            result.items[i] = result._unwrap_item(item)
+            result.items[i] = result._unwrap_item(item, context)
         return result
 
 </%def>
@@ -90,8 +90,8 @@ class ${cls.py_converter}(_BaseArray):
                                   from_field_access=True)}
 
     @staticmethod
-    def _unwrap_item(item):
-        return ${pyapi.unwrap_value('item', element_type)}
+    def _unwrap_item(item, context=None):
+        return ${pyapi.unwrap_value('item', element_type, 'context')}
 
     ## If this is a string type, override wrapping to return native unicode
     ## instances.

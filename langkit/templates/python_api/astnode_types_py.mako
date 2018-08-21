@@ -9,9 +9,14 @@
 
         % else:
         ## Create C values for arguments
+        % if any(pyapi.unwrap_requires_context(arg.type) \
+                 for arg in field.arguments):
+        _context = self.unit.context._c_value
+        % endif
         % for arg in field.arguments:
         unwrapped_${arg.name.lower} = ${pyapi.unwrap_value(arg.name.lower,
-                                                           arg.public_type)}
+                                                           arg.public_type,
+                                                           '_context')}
         % endfor
 
         ## Evaluate the property

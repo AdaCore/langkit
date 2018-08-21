@@ -117,7 +117,7 @@ class ${pyapi.type_public_name(cls)}(_BaseStruct):
         )
 
     @classmethod
-    def _unwrap(cls, value):
+    def _unwrap(cls, value, context=None):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
@@ -125,7 +125,7 @@ class ${pyapi.type_public_name(cls)}(_BaseStruct):
             % for f in cls.get_fields():
             <%
                 f_access = 'value.{}'.format(f.name.lower)
-                unwrapped = pyapi.unwrap_value(f_access, f.type)
+                unwrapped = pyapi.unwrap_value(f_access, f.type, 'context')
             %>
             ${f.name.lower}=${(
                 'ctypes.cast({}, ctypes.c_void_p)'.format(unwrapped)
