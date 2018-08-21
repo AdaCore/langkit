@@ -22,7 +22,7 @@ class PythonAPISettings(AbstractAPISettings):
     def get_enum_alternative(self, type_name, alt_name, suffix):
         return alt_name.upper
 
-    def wrap_value(self, value, type, from_field_access=False, inc_ref=False):
+    def wrap_value(self, value, type, from_field_access=False):
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -34,19 +34,8 @@ class PythonAPISettings(AbstractAPISettings):
         :param bool from_field_access: True if "value" is a record field or
             array item access (False by default). This is a special case
             because of the way ctypes works.
-        :param bool inc_ref: If True, this conversion also creates a new
-            ownership share for "value".
         :rtype: str
         """
-
-        # TODO: handle all types
-        assert (not inc_ref
-                or not type.is_refcounted
-                or isinstance(type, (ct.ArrayType, ct.StructType))), (
-            'Incrementing ref-count of {} in the Python API is not handled'
-            ' yet'.format(type.name)
-        )
-
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
@@ -63,10 +52,8 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda _: '{}._wrap({{}})'.format(
                 self.array_wrapper(type)
             )),
-            (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
-                type.name.camel,
-                inc_ref
-            )),
+            (ct.StructType, lambda _: '{}._wrap({{}})'.format(
+                type.name.camel)),
             (T.EnvRebindingsType, lambda _: '{}'),
             (T.BigIntegerType, lambda _: '_big_integer._wrap({})'),
         ], exception=TypeError(

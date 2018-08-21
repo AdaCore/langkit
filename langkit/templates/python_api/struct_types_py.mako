@@ -100,8 +100,8 @@ class ${pyapi.type_public_name(cls)}(_BaseStruct):
         ]
 
     @classmethod
-    def _wrap(cls, c_value, inc_ref=False):
-        result = cls(
+    def _wrap(cls, c_value):
+        return cls(
             % for field in cls.get_fields():
             <%
                 fld = 'c_value.{}'.format(field.name.lower)
@@ -115,9 +115,6 @@ class ${pyapi.type_public_name(cls)}(_BaseStruct):
             %>${copy},
             % endfor
         )
-        if cls._inc_ref and inc_ref:
-            cls._inc_ref(ctypes.byref(c_value))
-        return result
 
     @classmethod
     def _unwrap(cls, value):
