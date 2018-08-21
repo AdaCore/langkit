@@ -1376,6 +1376,11 @@ class ${c_entity}(ctypes.Structure):
     _fields_ = [('node', ${root_astnode_name}._node_c_type),
                 ('info', ${pyapi.c_type(T.entity_info)})]
         % endif
+    ## Likewise for entity info structures: they will never be wrapped
+    % elif struct_type is T.entity_info:
+class ${c_entity_info}(ctypes.Structure):
+    _fields_ = [('md', ${pyapi.c_type(T.env_md)}),
+                ('rebindings', ${pyapi.c_type(T.EnvRebindingsType)})]
     ## Emit other (and regular) structures
     % elif struct_type._exposed:
 ${struct_types.decl(struct_type)}
