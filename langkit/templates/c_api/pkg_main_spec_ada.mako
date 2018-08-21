@@ -45,6 +45,12 @@ private package ${ada_lib_name}.Implementation.C is
 
    ${struct_types.decl(root_entity)}
 
+   type ${symbol_type} is record
+      Data, Bounds : System.Address;
+   end record
+      with Convention => C;
+   ${ada_c_doc('langkit.symbol_type', 3)}
+
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -120,6 +126,12 @@ private package ${ada_lib_name}.Implementation.C is
           External_Name => "${capi.get_name('destroy_text')}";
    ${ada_c_doc('langkit.destroy_text', 3)}
 
+   procedure ${capi.get_name('symbol_text')}
+     (Symbol : access ${symbol_type}; Text : access ${text_type})
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('symbol_text')}";
+   ${ada_c_doc('langkit.symbol_text', 3)}
+
    --  Types for unit providers
 
    type ${unit_kind_type} is new int;
@@ -184,6 +196,14 @@ private package ${ada_lib_name}.Implementation.C is
            Convention    => C,
            External_name => "${capi.get_name('context_decref')}";
    ${ada_c_doc('langkit.context_decref', 3)}
+
+   procedure ${capi.get_name('context_symbol')}
+     (Context : ${analysis_context_type};
+      Text    : access ${text_type};
+      Symbol  : access ${symbol_type})
+      with Export, Convention => C,
+           External_name => "${capi.get_name('context_symbol')}";
+   ${ada_c_doc('langkit.context_symbol', 3)}
 
    procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
      (Context : ${analysis_context_type};
@@ -614,10 +634,10 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (Big_Int : Big_Integer_Type) return ${big_integer_type};
    function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type;
 
-   function Wrap_Symbol (T : Symbol_Type) return ${text_type} is
-     (Wrap (Text_Cst_Access (T)));
-   function Unwrap_Symbol
-     (Context : Internal_Context; Text : ${text_type}) return Symbol_Type;
+   function Wrap_Symbol is new Ada.Unchecked_Conversion
+     (Symbol_Type, ${symbol_type});
+   function Unwrap_Symbol is new Ada.Unchecked_Conversion
+     (${symbol_type}, Symbol_Type);
 
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access

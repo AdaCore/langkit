@@ -212,6 +212,30 @@ class _text(ctypes.Structure):
         _destroy_text(ctypes.byref(self))
 
 
+class _symbol_type(ctypes.Structure):
+    _fields_ = [('data', ctypes.c_void_p),
+                ('bounds', ctypes.c_void_p)]
+
+    @classmethod
+    def wrap(cls, c_value):
+        # First extract the text associated to this symbol in "text"
+        text = _text()
+        _symbol_text(ctypes.byref(c_value), ctypes.byref(text))
+
+        # Then wrap this text
+        return text._wrap()
+
+    @classmethod
+    def unwrap(cls, py_value, context):
+        # First turn the given symbol into a low-level text object
+        text = _text._unwrap(py_value)
+
+        # Then convert it to a symbol
+        result = cls()
+        _context_symbol(context, ctypes.byref(text), ctypes.byref(result))
+        return result
+
+
 class _big_integer(_text):
 
     @classmethod
@@ -1439,6 +1463,11 @@ _destroy_text = _import_func(
     '${capi.get_name("destroy_text")}', [ctypes.POINTER(_text)], None
 )
 
+_symbol_text = _import_func(
+    '${capi.get_name("symbol_text")}',
+    [ctypes.POINTER(_symbol_type), ctypes.POINTER(_text)], None
+)
+
 # Analysis primitives
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
@@ -1451,6 +1480,12 @@ _context_incref = _import_func(
 _context_decref = _import_func(
     '${capi.get_name("context_decref")}',
     [AnalysisContext._c_type], None
+)
+_context_symbol = _import_func(
+    '${capi.get_name("context_symbol")}',
+    [AnalysisContext._c_type,
+     ctypes.POINTER(_text),
+     ctypes.POINTER(_symbol_type)], None
 )
 _discard_errors_in_populate_lexical_env = _import_func(
    '${capi.get_name("context_discard_errors_in_populate_lexical_env")}',

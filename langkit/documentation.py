@@ -96,6 +96,11 @@ base_langkit_docs = {
     'langkit.node_kind_type': """
         Kind of AST nodes in parse trees.
     """,
+    'langkit.symbol_type': """
+        Reference to a symbol. Symbols are owned by analysis contexts, so they
+        must not outlive them. This type exists only in the C API, and roughly
+        wraps the corresponding Ada type (an array fat pointer).
+    """,
     'langkit.lexical_env_type': """
         Data type for lexical environments. For internal use only.
     """,
@@ -216,6 +221,10 @@ base_langkit_docs = {
     """,
     'langkit.context_hash': """
         Return a hash for this context, to be used in hash tables.
+    """,
+    'langkit.context_symbol': """
+        Get the symbol corresponding to the given string, or null if there is
+        no such symbol in this context.
     """,
     'langkit.context_discard_errors_in_populate_lexical_env': """
         Debug helper. Set whether Property_Error exceptions raised in
@@ -467,6 +476,9 @@ base_langkit_docs = {
         Note that even though this accepts a pointer to a text object, it does
         not deallocates the text object itself but rather the buffer it
         references.
+    """,
+    'langkit.symbol_text': """
+        Get the text associated to this symbol.
     """,
 
     #

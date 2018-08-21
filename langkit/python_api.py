@@ -45,7 +45,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (T.TokenType, lambda _: '{}'),
-            (T.SymbolType, lambda _: '{}._wrap()'),
+            (T.SymbolType, lambda _: '_symbol_type.wrap({})'),
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (T.CharacterType, lambda _: 'unichr({{}}{})'.format(value_suffix)),
@@ -108,10 +108,7 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         def ctype_type(name):
-            return "ctypes.{}".format(name)
-
-        def wrapped_type(name):
-            return "_{}".format(name)
+            return 'ctypes.{}'.format(name)
 
         return dispatch_on_type(type, [
             (T.BoolType, lambda _: ctype_type('c_uint8')),
@@ -119,7 +116,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.CharacterType, lambda _: ctype_type('c_uint32')),
             (T.EnvRebindingsType, lambda _: '_EnvRebindings_c_type'),
             (T.TokenType, lambda _: 'Token'),
-            (T.SymbolType, lambda _: wrapped_type('text')),
+            (T.SymbolType, lambda _: '_symbol_type'),
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (T.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
             (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
@@ -174,6 +171,7 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: bool
         """
         return dispatch_on_type(type, [
+            (T.SymbolType, lambda _: True),
             (T.ArrayType, lambda _:
                 self.unwrap_requires_context(type.element_type)),
             (T.EntityType, lambda _: False),

@@ -132,6 +132,30 @@ package body ${ada_lib_name}.Implementation.C is
       Dec_Ref (Context_Var);
    end;
 
+   procedure ${capi.get_name('context_symbol')}
+     (Context : ${analysis_context_type};
+      Text    : access ${text_type};
+      Symbol  : access ${symbol_type})
+   is
+      Raw_Text : Text_Type (1 .. Natural (Text.Length))
+         with Import, Address => Text.Chars;
+
+      Canon_Symbol : constant Symbolization_Result :=
+         % if ctx.symbol_canonicalizer:
+            ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
+         % else:
+            Create_Symbol (Raw_Text)
+         % endif
+      ;
+
+      Sym : constant Symbol_Type :=
+        (if Canon_Symbol.Success
+         then Find (Context.Symbols, Canon_Symbol.Symbol, False)
+         else null);
+   begin
+      Symbol.all := Wrap_Symbol (Sym);
+   end;
+
    procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
      (Context : ${analysis_context_type};
       Discard : int) is
@@ -839,31 +863,6 @@ package body ${ada_lib_name}.Implementation.C is
          return (System.Null_Address, 0, 0);
    end;
 
-   -------------------
-   -- Unwrap_Symbol --
-   -------------------
-
-   function Unwrap_Symbol
-     (Context : Internal_Context; Text : ${text_type}) return Symbol_Type
-   is
-      Raw_Text : Text_Type (1 .. Natural (Text.Length))
-         with Import, Address => Text.Chars;
-
-      Symbol : constant Symbolization_Result :=
-         % if ctx.symbol_canonicalizer:
-            ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
-         % else:
-            Create_Symbol (Raw_Text)
-         % endif
-      ;
-   begin
-      if Symbol.Success then
-         return Find (Context.Symbols, Symbol.Symbol, False);
-      else
-         return null;
-      end if;
-   end Unwrap_Symbol;
-
    ----------------
    -- Wrap_Alloc --
    ----------------
@@ -933,6 +932,22 @@ package body ${ada_lib_name}.Implementation.C is
             end;
             T.Chars := System.Null_Address;
          end if;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('symbol_text')}
+     (Symbol : access ${symbol_type}; Text : access ${text_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         Sym    : constant Symbol_Type := Unwrap_Symbol (Symbol.all);
+         Result : constant Text_Type :=
+           (if Sym = null then "" else Image (Sym));
+      begin
+         Text.all := Wrap_Alloc (Result);
       end;
    exception
       when Exc : others =>

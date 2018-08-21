@@ -50,6 +50,12 @@ typedef enum {
 % endfor
 } ${node_kind_type};
 
+${c_doc('langkit.symbol_type')}
+typedef struct {
+   void *data;
+   void *bounds;
+} ${symbol_type};
+
 ${c_doc('langkit.env_rebindings_type')}
 typedef void *${env_rebindings_type};
 
@@ -202,6 +208,12 @@ ${capi.get_name("context_incref")}(${analysis_context_type} context);
 ${c_doc('langkit.context_decref')}
 extern void
 ${capi.get_name("context_decref")}(${analysis_context_type} context);
+
+${c_doc('langkit.context_symbol')}
+extern void
+${capi.get_name("context_symbol")}(${analysis_context_type} context,
+                                   ${text_type} *text,
+                                   ${symbol_type} *symbol);
 
 ${c_doc('langkit.context_discard_errors_in_populate_lexical_env')}
 extern void
@@ -357,6 +369,11 @@ ${capi.get_name("free")}(void *address);
 ${c_doc('langkit.destroy_text')}
 extern void
 ${capi.get_name("destroy_text")}(${text_type} *text);
+
+${c_doc('langkit.symbol_text')}
+extern void
+${capi.get_name("symbol_text")}(${symbol_type} *symbol,
+                                    ${text_type} *text);
 
 /*
  * Kind-specific AST node primitives
