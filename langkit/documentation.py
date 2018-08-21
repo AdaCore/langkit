@@ -310,15 +310,6 @@ base_langkit_docs = {
     'langkit.unit_hash': """
         Return a hash for this unit, to be used in hash tables.
     """,
-    'langkit.unit_incref': """
-        Increase the reference count to an analysis unit.
-        % if lang == 'c':
-            Return the reference for convenience.
-        % endif
-    """,
-    'langkit.unit_decref': """
-        Decrease the reference count to an analysis unit.
-    """,
     'langkit.unit_reparse_file': """
         Reparse an analysis unit from the associated file. If Charset is empty
         or ${null}, use the last charset successfuly used for this unit,

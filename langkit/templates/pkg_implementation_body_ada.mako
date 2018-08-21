@@ -640,14 +640,15 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Destroy (Context : in out Internal_Context) is
    begin
+      --  If we are asked to free this context, it means that no one else have
+      --  references to its analysis units, so it's safe to destroy these.
       for Unit of Context.Units loop
-         Unit.Context := null;
-         Dec_Ref (Unit);
+         Destroy (Unit);
       end loop;
       Context.Units := Units_Maps.Empty_Map;
       Context.Filenames := Virtual_File_Maps.Empty_Map;
 
-      Dec_Ref (Context.Templates_Unit);
+      Destroy (Context.Templates_Unit);
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
       Destroy (Context.Parser);
@@ -673,30 +674,6 @@ package body ${ada_lib_name}.Implementation is
    begin
       return H (Unit);
    end Hash;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Unit : Internal_Unit) is
-   begin
-      Unit.Ref_Count := Unit.Ref_Count + 1;
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Unit : in out Internal_Unit) is
-   begin
-      if Unit = No_Analysis_Unit then
-         return;
-      end if;
-      Unit.Ref_Count := Unit.Ref_Count - 1;
-      if Unit.Ref_Count = 0 then
-         Destroy (Unit);
-      end if;
-   end Dec_Ref;
 
    -------------
    -- Reparse --
@@ -3365,7 +3342,6 @@ package body ${ada_lib_name}.Implementation is
    is
       Unit : Internal_Unit := new Analysis_Unit_Type'
         (Context           => Context,
-         Ref_Count         => 1,
          AST_Root          => null,
          Filename          => Normalized_Filename,
          Charset           => To_Unbounded_String (Charset),

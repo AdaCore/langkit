@@ -302,19 +302,6 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('unit_diagnostic')}";
    ${ada_c_doc('langkit.unit_diagnostic', 3)}
 
-   function ${capi.get_name('unit_incref')}
-     (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('unit_incref')}";
-   ${ada_c_doc('langkit.unit_incref', 3)}
-
-   procedure ${capi.get_name('unit_decref')} (Unit : ${analysis_unit_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('unit_decref')}";
-   ${ada_c_doc('langkit.unit_decref', 3)}
-
    function ${capi.get_name('unit_context')}
      (Unit : ${analysis_unit_type})
       return ${analysis_context_type}

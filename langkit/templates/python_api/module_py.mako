@@ -433,7 +433,6 @@ class AnalysisUnit(object):
         analysis unit instances instead.
         """
         self._c_value = c_value
-        _unit_incref(self._c_value)
 
         # Keep a reference on the owning context so that we keep it alive at
         # least as long as this unit is alive.
@@ -462,10 +461,6 @@ class AnalysisUnit(object):
         """
 
         self._check_node_cache()
-
-    def __del__(self):
-        _unit_decref(self._c_value)
-        super(AnalysisUnit, self).__init__()
 
     def __eq__(self, other):
         return self._c_value == other._c_value
@@ -1524,14 +1519,6 @@ _unit_diagnostic = _import_func(
     '${capi.get_name("unit_diagnostic")}',
     [AnalysisUnit._c_type, ctypes.c_uint, ctypes.POINTER(Diagnostic._c_type)],
     ctypes.c_int
-)
-_unit_incref = _import_func(
-    '${capi.get_name("unit_incref")}',
-    [AnalysisUnit._c_type], AnalysisUnit._c_type
-)
-_unit_decref = _import_func(
-    '${capi.get_name("unit_decref")}',
-    [AnalysisUnit._c_type], None
 )
 _unit_context = _import_func(
     '${capi.get_name("unit_context")}',
