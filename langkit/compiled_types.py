@@ -93,6 +93,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             ctx.root_grammar_class.c_type(capi).name,
             'entity_type':           T.entity.c_type(capi).name,
+            'symbol_type':           T.SymbolType.c_type(capi).name,
             'env_rebindings_type':   T.EnvRebindingsType.c_type(capi).name,
             'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
             'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
@@ -2773,7 +2774,7 @@ def create_builtin_types():
 
         # See below: symbols are represented in the C API as text records
         is_ada_record=True,
-        c_type_name='text',
+        c_type_name='symbol_type',
         hashable=True,
     )
 

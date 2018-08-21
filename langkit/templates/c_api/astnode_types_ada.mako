@@ -77,7 +77,7 @@
             % elif arg.type.is_token_type:
                Token (Node, Token_Index ({arg_ref}.Index))
             % elif arg.type.is_symbol_type:
-               Unwrap_Symbol (Unwrapped_Node.Unit.Context, ${arg_ref})
+               Unwrap_Symbol (${arg_ref})
             % elif arg.type.is_big_integer_type:
                Unwrap (${arg_ref})
             % elif simple_wrapping(arg.type):
