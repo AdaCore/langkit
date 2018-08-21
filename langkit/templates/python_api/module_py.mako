@@ -21,6 +21,8 @@ from __future__ import (absolute_import, division, print_function,
     root_astnode_name = pyapi.type_public_name(T.root_node)
     c_node = '{}._node_c_type'.format(root_astnode_name)
     c_entity = pyapi.c_type(root_entity)
+    metadata = pyapi.type_public_name(T.env_md)
+    c_entity_info = pyapi.c_type(T.entity_info)
 %>
 
 
@@ -899,7 +901,7 @@ class ${root_astnode_name}(object):
 
         # The "metadata" property is the only legitimate reader for this field,
         # and thus the only place that contains the stale reference check.
-        self._metadata = metadata
+        self._metadata = metadata or ${metadata}._null_value
 
         self._unprotected_getitem_cache = {}
         """
@@ -1375,6 +1377,10 @@ ${struct_types.base_decls()}
 class ${c_entity}(ctypes.Structure):
     _fields_ = [('node', ${root_astnode_name}._node_c_type),
                 ('info', ${pyapi.c_type(T.entity_info)})]
+
+    @classmethod
+    def from_bare_node(cls, node_c_value):
+        return cls(node_c_value, ${c_entity_info}._null_value)
         % endif
     ## Likewise for entity info structures: they will never be wrapped
     % elif struct_type is T.entity_info:
@@ -1386,6 +1392,15 @@ class ${c_entity_info}(ctypes.Structure):
 ${struct_types.decl(struct_type)}
     % endif
 % endfor
+
+
+${metadata}._null_c_value = ${pyapi.c_type(T.env_md)}(${', '.join(
+    'None' if f.type.is_entity_type else 'False'
+    for f in T.env_md.get_fields()
+)})
+${c_entity_info}._null_value = ${c_entity_info}(${metadata}._null_c_value,
+                                                None)
+
 
 #
 # Low-level binding - Second part
