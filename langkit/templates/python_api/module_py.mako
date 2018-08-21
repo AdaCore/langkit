@@ -1332,58 +1332,6 @@ class ${root_astnode_name}(object):
         )
 
 
-class _Extension(object):
-    """
-    Internal holder for a handle to a C API resource.
-
-    We use the extension mechanism to keep a single _Extension instance per
-    underlying C API resource.
-    """
-
-    __slots__ = ('_c_handle', )
-
-    @classmethod
-    def lookup(cls, c_handle):
-        raise NotImplementedError()
-
-    @classmethod
-    def get_or_create(cls, c_handle):
-        if not c_handle:
-            return None
-
-        # If there is already an _Extension instance for the `c_handle`
-        # resource, return it.
-        c_pyobj_p = ctypes.cast(cls.lookup(c_handle),
-                                ctypes.POINTER(ctypes.py_object))
-        if c_pyobj_p.contents:
-            return c_pyobj_p.contents.value
-
-        # Otherwise, create a dedicated one...
-        ext = cls(c_handle)
-
-        # .. and store it in our extension.
-        c_pyobj_p[0] = ctypes.py_object(ext)
-
-        # We want to increment its ref count so that the wrapper will be
-        # alive as long as the extension references it.
-        ctypes.pythonapi.Py_IncRef(ctypes.py_object(ext))
-        return ext
-
-    def __init__(self, c_handle):
-        self._c_handle = c_handle
-
-    @property
-    def c_handle(self):
-        return self._c_handle
-
-    @classmethod
-    def unwrap(cls, value):
-        if value is None:
-            return None
-        assert isinstance(value, cls)
-        return value.c_handle
-
-
 % for astnode in ctx.astnode_types:
     % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
