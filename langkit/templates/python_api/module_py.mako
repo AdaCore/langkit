@@ -1283,6 +1283,10 @@ class ${root_astnode_name}(object):
         return result
 
     @classmethod
+    def _wrap_bare_node(cls, c_value):
+        return cls._wrap(${c_entity}.from_bare_node(c_value))
+
+    @classmethod
     def _unwrap(cls, py_value):
         """
         Internal helper to unwrap a high-level ASTNode instance into a
