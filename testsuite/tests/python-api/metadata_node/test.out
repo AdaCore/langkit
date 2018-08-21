@@ -1,0 +1,10 @@
+main.py: Running...
+>> <Example 1:1-1:8>
+   <Metadata f_node=None>
+   None
+>> <Example 1:1-1:8>
+   <Metadata f_node=<Example 1:1-1:8>>
+   <Example 1:1-1:8>
+main.py: Done.
+
+Done
