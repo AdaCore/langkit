@@ -839,16 +839,15 @@ package body ${ada_lib_name}.Implementation.C is
          return (System.Null_Address, 0, 0);
    end;
 
-   ------------
-   -- Unwrap --
-   ------------
+   -------------------
+   -- Unwrap_Symbol --
+   -------------------
 
-   function Unwrap
-     (Unit : Internal_Unit; Text : ${text_type}) return Symbol_Type
+   function Unwrap_Symbol
+     (Context : Internal_Context; Text : ${text_type}) return Symbol_Type
    is
       Raw_Text : Text_Type (1 .. Natural (Text.Length))
-         with Import  => True,
-              Address => Text.Chars;
+         with Import, Address => Text.Chars;
 
       Symbol : constant Symbolization_Result :=
          % if ctx.symbol_canonicalizer:
@@ -859,11 +858,11 @@ package body ${ada_lib_name}.Implementation.C is
       ;
    begin
       if Symbol.Success then
-         return Find (Unit.TDH.Symbols, Symbol.Symbol, False);
+         return Find (Context.Symbols, Symbol.Symbol, False);
       else
          return null;
       end if;
-   end Unwrap;
+   end Unwrap_Symbol;
 
    ----------------
    -- Wrap_Alloc --

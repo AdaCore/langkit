@@ -610,14 +610,14 @@ private package ${ada_lib_name}.Implementation.C is
       else (Chars => T.all'Address, Length => T.all'Length, Is_Allocated => 0));
    function Wrap (T : Text_Access) return ${text_type} is
      (Wrap (Text_Cst_Access (T)));
-   function Wrap (T : Symbol_Type) return ${text_type} is
-     (Wrap (Text_Cst_Access (T)));
 
    function Wrap (Big_Int : Big_Integer_Type) return ${big_integer_type};
    function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type;
 
-   function Unwrap
-     (Unit : Internal_Unit; Text : ${text_type}) return Symbol_Type;
+   function Wrap_Symbol (T : Symbol_Type) return ${text_type} is
+     (Wrap (Text_Cst_Access (T)));
+   function Unwrap_Symbol
+     (Context : Internal_Context; Text : ${text_type}) return Symbol_Type;
 
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access
