@@ -66,7 +66,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name.camel,
                 inc_ref
             )),
-            (T.EnvRebindingsType, lambda _: 'EnvRebindings._wrap({})'),
+            (T.EnvRebindingsType, lambda _: '{}'),
             (T.BigIntegerType, lambda _: '_big_integer._wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
@@ -100,7 +100,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name.camel
             )),
             (T.SymbolType, lambda _: '_text._unwrap({})'),
-            (T.EnvRebindingsType, lambda _: 'EnvRebindings._unwrap({})'),
+            (T.EnvRebindingsType, lambda _: '{}'),
             (T.BigIntegerType, lambda _: '_big_integer._unwrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
@@ -125,7 +125,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: ctype_type('c_uint8')),
             (T.LongType, lambda _: ctype_type('c_int')),
             (T.CharacterType, lambda _: ctype_type('c_uint32')),
-            (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
+            (T.EnvRebindingsType, lambda _: '_EnvRebindings_c_type'),
             (T.TokenType, lambda _: 'Token'),
             (T.SymbolType, lambda _: wrapped_type('text')),
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
@@ -157,7 +157,6 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: 'bool'),
             (T.LongType, lambda _: 'int'),
             (T.CharacterType, lambda _: 'unicode'),
-            (T.EnvRebindingsType, lambda _: 'EnvRebindings'),
             (T.TokenType, lambda _: 'Token'),
             (T.SymbolType, lambda _: 'unicode'),
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),

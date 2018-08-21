@@ -1384,56 +1384,6 @@ class _Extension(object):
         return value.c_handle
 
 
-## TODO: use the _Extension mechanism for env rebindings
-
-class EnvRebindings(object):
-    ${py_doc('langkit.env_rebindings_type', 4)}
-
-    def __init__(self, c_value):
-        """
-        This constructor is an implementation detail, and is not meant to be
-        used directly.
-        """
-        self._c_value = c_value
-
-    @property
-    def _address(self):
-        if self._c_value:
-            # Create a dummy int* value so that we can get the pointed address
-            ptr = ctypes.cast(self._c_value, ctypes.POINTER(ctypes.c_int))
-            return ctypes.addressof(ptr.contents)
-        else:
-            return 0
-
-    def __repr__(self):
-        return '<EnvRebindings at {}>'.format(hex(self._address))
-
-    def __eq__(self, other):
-        return (isinstance(other, EnvRebindings) and
-                self._address == other._address)
-
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __hash__(self):
-        return hash(self._address)
-
-    _c_type = _hashable_c_pointer()
-
-    @classmethod
-    def _unwrap(cls, value):
-        if value is None:
-            return None
-        elif not isinstance(value, cls):
-            _raise_type_error(cls.__name__, value)
-        else:
-            return value._c_value
-
-    @classmethod
-    def _wrap(cls, c_value):
-        return cls(c_value) if c_value else None
-
-
 % for astnode in ctx.astnode_types:
     % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
@@ -1461,6 +1411,9 @@ def _unwrap_enum(py_value, type_name, translator):
         return translator[py_value]
     except KeyError:
         raise ValueError('Invalid {}: {}'.format(type_name, py_value))
+
+
+_EnvRebindings_c_type = _hashable_c_pointer()
 
 
 ${struct_types.base_decls()}
