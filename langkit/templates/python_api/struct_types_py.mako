@@ -55,55 +55,13 @@ class _BaseStruct(object):
     _inc_ref = None
     _dec_ref = None
 
-
-class _BaseEntity(_BaseStruct):
-    """
-    Specialized mixin for env elements.
-    """
-
-    def __getattr__(self, name):
-        """
-        Evaluate the "name" attribute on the wrapped AST node. This
-        automatically passes parents environment rebindings.
-        """
-        # Assuming "name" designates a property or a field accessor, try to get
-        # its private implementation method. If there is none, it means we have
-        # a regular attribute access for the AST node.
-        try:
-            unbound_method = getattr(type(self.el), '_ENT_' + name)
-        except AttributeError:
-            return getattr(self.el, name)
-
-        bound_method = getattr(type(self.el), name)
-
-        def wrapper(*args, **kwargs):
-            args = [self.el] + list(args) + [self.info]
-            return unbound_method(*args, **kwargs)
-
-        # If the target method is a property, we must evaluate it right away.
-        # Otherwise, return a callable.
-        return wrapper() if isinstance(bound_method, property) else wrapper
-
-    def __repr__(self):
-        c_value = Entity._unwrap(self)
-        return _entity_image(ctypes.byref(c_value))._wrap()
-
 </%def>
 
 <%def name="decl(cls)">
 
-<%
-    type_name = cls.name.camel
 
-    if cls == T.entity:
-        base_cls = '_BaseEntity'
-    elif cls.is_entity_type:
-        base_cls = cls.element_type.base.entity.name.camel
-    else:
-        base_cls = '_BaseStruct'
-%>
-
-class ${type_name}(${base_cls}):
+class ${('Entity' if cls.is_entity_type else
+         pyapi.type_public_name(cls))}(_BaseStruct):
     ${py_doc(cls, 4)}
 
     <% field_names = [f.name.lower for f in cls.get_fields()] %>
