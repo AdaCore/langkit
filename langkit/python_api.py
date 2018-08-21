@@ -73,28 +73,27 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         return dispatch_on_type(type, [
-            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({})'),
-            (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
-            (ct.ASTNodeType, lambda _: '{}'),
-            (ct.ASTNodeType, lambda _: '{}._node_c_value'),
-            (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
+            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
+            (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({value})'),
+            (ct.ASTNodeType, lambda _: '{value}'),
+            (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
+            (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),
-            (T.BoolType, lambda _: 'bool({})'),
-            (T.LongType, lambda _: 'int({})'),
-            (T.CharacterType, lambda _: 'ord({})'),
-            (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
-                self.array_wrapper(cls)
-            )),
-            (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
-                type.name.camel
-            )),
-            (T.SymbolType, lambda _: '_text._unwrap({})'),
-            (T.EnvRebindingsType, lambda _: '{}'),
-            (T.BigIntegerType, lambda _: '_big_integer._unwrap({})'),
+            (T.BoolType, lambda _: 'bool({value})'),
+            (T.LongType, lambda _: 'int({value})'),
+            (T.CharacterType, lambda _: 'ord({value})'),
+            (ct.ArrayType, lambda cls:
+                '{}._unwrap({{value}})'
+                .format(self.array_wrapper(cls))),
+            (ct.StructType, lambda _:
+                '{}._unwrap({{value}})'.format(type.name.camel)),
+            (T.SymbolType, lambda _: '_text._unwrap({value})'),
+            (T.EnvRebindingsType, lambda _: '{value}'),
+            (T.BigIntegerType, lambda _: '_big_integer._unwrap({value})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
-        )).format(value)
+        )).format(value=value)
 
     def c_type(self, type):
         """
