@@ -86,8 +86,8 @@ class ${cls.py_converter}(_BaseArray):
 
     @staticmethod
     def _wrap_item(item):
-        return ${pyapi.wrap_value('item', element_type, from_field_access=True,
-                                  inc_ref=True)}
+        return ${pyapi.wrap_value('item', element_type,
+                                  from_field_access=True)}
 
     @staticmethod
     def _unwrap_item(item):
