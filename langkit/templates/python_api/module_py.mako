@@ -932,9 +932,6 @@ class ${root_astnode_name}(object):
         self._check_stale_reference()
         return self._metadata
 
-    def __del__(self):
-        super(${root_astnode_name}, self).__init__()
-
     @property
     def _id_tuple(self):
         return (self._node_c_value, self._rebindings)
