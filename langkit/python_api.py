@@ -53,8 +53,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitKind, lambda _: '_unit_kind_to_str[{}]'),
             (ct.ASTNodeType, lambda _: '{}'),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
-                ct.T.root_node.kwless_raw_name.camel
-            )),
+                self.type_public_name(ct.T.root_node))),
             (T.TokenType, lambda _: '{}'),
             (T.SymbolType, lambda _: '{}._wrap()'),
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
@@ -90,8 +89,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNodeType, lambda _: '{}'),
             (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
-                ct.T.root_node.kwless_raw_name.camel
-            )),
+                self.type_public_name(ct.T.root_node))),
             (T.BoolType, lambda _: 'bool({})'),
             (T.LongType, lambda _: 'int({})'),
             (T.CharacterType, lambda _: 'ord({})'),
@@ -133,12 +131,11 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (T.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
             (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
-                ct.T.root_node.kwless_raw_name.camel)),
+                self.type_public_name(ct.T.root_node))),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(self.array_wrapper(cls))),
             (ct.EntityType, lambda _: '{}._c_type'.format(
-                ct.T.entity.name.camel
-            )),
+                self.type_public_name(ct.T.root_node))),
             (ct.StructType, lambda _:
                 '{}._c_type'.format(type.name.camel)),
             (T.BigIntegerType, lambda _: '_big_integer'),
@@ -164,7 +161,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.EnvRebindingsType, lambda _: 'EnvRebindings'),
             (T.TokenType, lambda _: 'Token'),
             (T.SymbolType, lambda _: 'unicode'),
-            (ct.ASTNodeType, lambda t: t.kwless_raw_name.camel),
+            (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
             (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
             (T.AnalysisUnitType, lambda t: t.api_name),
             (ct.ArrayType, lambda _: 'list[{}]'.format(
