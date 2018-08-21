@@ -51,7 +51,8 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
             (T.AnalysisUnitKind, lambda _: '_unit_kind_to_str[{}]'),
-            (ct.ASTNodeType, lambda _: '{}'),
+            (ct.ASTNodeType, lambda _: '{}._wrap_bare_node({{}})'.format(
+                self.type_public_name(ct.T.root_node))),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (T.TokenType, lambda _: '{}'),
@@ -88,6 +89,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({})'),
             (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNodeType, lambda _: '{}'),
+            (ct.ASTNodeType, lambda _: '{}._node_c_value'),
             (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (T.BoolType, lambda _: 'bool({})'),
