@@ -79,7 +79,7 @@
             % elif arg.type.is_symbol_type:
                Unwrap_Symbol (${arg_ref})
             % elif arg.type.is_big_integer_type:
-               Unwrap (${arg_ref})
+               Unwrap_Big_Integer (${arg_ref})
             % elif simple_wrapping(arg.type):
                Unwrap (${arg_ref})
             % else:
@@ -158,17 +158,13 @@
                % elif field.type.is_symbol_type:
                    Wrap_Symbol (Result)
                % elif field.type.is_big_integer_type:
-                   Wrap (Result)
+                   Wrap_Big_Integer (Result)
                % elif simple_wrapping(field.type):
                    Wrap (Result)
                % else:
                    Result
                % endif
             ;
-
-            % if field.type.is_big_integer_type:
-               Dec_Ref (Result);
-            % endif
 
             return 1;
          exception

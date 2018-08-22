@@ -236,17 +236,45 @@ class _symbol_type(ctypes.Structure):
         return result
 
 
-class _big_integer(_text):
+class _big_integer(object):
+
+    class c_type(ctypes.c_void_p):
+        pass
+
+    def __init__(self, c_value):
+        self.c_value = c_value
 
     @classmethod
-    def _unwrap(cls, value):
+    def unwrap(cls, value):
         if not isinstance(value, (int, long)):
             _raise_type_error('int or long', value)
 
-        return super(_big_integer, cls)._unwrap(str(value))
+        text = _text._unwrap(str(value))
+        c_value = cls.create(ctypes.byref(text))
+        return cls(c_value)
 
-    def _wrap(self):
-        return int(super(_big_integer, self)._wrap())
+    @classmethod
+    def wrap(cls, c_value):
+        helper = cls(c_value)
+        text = _text()
+        cls.text(helper.c_value, ctypes.byref(text))
+        return int(text._wrap())
+
+    def __del__(self):
+        self.decref(self.c_value)
+
+    create = staticmethod(_import_func(
+        '${capi.get_name("create_big_integer")}',
+        [ctypes.POINTER(_text)], c_type
+    ))
+    text = staticmethod(_import_func(
+        '${capi.get_name("big_integer_text")}',
+        [c_type, ctypes.POINTER(_text)], None
+    ))
+    decref = staticmethod(_import_func(
+        '${capi.get_name("big_integer_decref")}',
+        [c_type], None
+    ))
 
 
 ${py_doc('langkit.unit_kind_type')}

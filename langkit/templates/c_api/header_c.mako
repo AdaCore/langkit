@@ -87,7 +87,7 @@ typedef struct {
 } ${text_type};
 
 ${c_doc('langkit.big_integer_type')}
-typedef ${text_type} ${big_integer_type};
+typedef void *${big_integer_type};
 
 ${c_doc('langkit.token_kind')}
 typedef enum {
@@ -374,6 +374,19 @@ ${c_doc('langkit.symbol_text')}
 extern void
 ${capi.get_name("symbol_text")}(${symbol_type} *symbol,
                                     ${text_type} *text);
+
+${c_doc('langkit.create_big_integer')}
+extern ${big_integer_type}
+${capi.get_name("create_big_integer")}(${text_type} *text);
+
+${c_doc('langkit.big_integer_text')}
+extern void
+${capi.get_name("big_integer_text")}(${big_integer_type} bigint,
+                                     ${text_type} *text);
+
+${c_doc('langkit.big_integer_decref')}
+extern void
+${capi.get_name("big_integer_decref")}(${big_integer_type} bigint);
 
 /*
  * Kind-specific AST node primitives
