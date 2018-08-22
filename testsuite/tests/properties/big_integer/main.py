@@ -35,4 +35,7 @@ for decl in u.root:
     print('{} evaluates to {} ({})'.format(decl.f_name.text, big_int,
                                            small_int))
 
+
+print('.p_identity(1234) = {}'.format(u.root.p_identity(1234)))
+
 print('main.py: Done.')
