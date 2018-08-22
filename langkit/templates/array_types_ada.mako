@@ -22,7 +22,11 @@
 
    % if cls.to_internal_converter_required:
       function ${cls.to_internal_converter}
-         (Value : ${cls.api_name}) return ${cls.name};
+         (Value : ${cls.api_name}
+          % if cls.conversion_requires_context:
+            Context : Internal_Context
+          % endif
+          ) return ${cls.name};
    % endif
 </%def>
 
@@ -42,13 +46,18 @@
 
    % if cls.to_internal_converter_required:
       function ${cls.to_internal_converter}
-         (Value : ${cls.api_name}) return ${cls.name} is
+         (Value : ${cls.api_name}
+          % if cls.conversion_requires_context:
+            Context : Internal_Context
+          % endif
+          ) return ${cls.name}
+      is
          Result : constant ${cls.name} :=
             ${cls.constructor_name} (Value'Length);
       begin
          for I in Value'Range loop
             Result.Items (I - Value'First + Result.Items'First) :=
-               ${cls.element_type.to_internal_expr('Value (I)')};
+               ${cls.element_type.to_internal_expr('Value (I)', 'Context')};
          end loop;
          return Result;
       end;
