@@ -3,7 +3,7 @@ u.root.p_sym(None) raised <TypeError: string or unicode instance expected, got <
 u.root.p_sym(42) raised <TypeError: string or unicode instance expected, got <type 'int'> instead>
 u.root.p_sym('my_ident') = u'my_ident'
 u.root.p_sym('MY_IDENT') = u'my_ident'
-u.root.p_sym('no_such_symbol') = None
-u.root.p_sym('invalid_symbol0') = None
+u.root.p_sym('no_such_symbol') = u'no_such_symbol'
+u.root.p_sym('invalid_symbol0') raised <InvalidSymbolError: invalid_symbol0>
 main.py: Done.
 Done

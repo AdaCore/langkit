@@ -160,6 +160,9 @@ package ${ada_lib_name}.Common is
    Invalid_Unit_Name_Error : exception;
    ${ada_doc('langkit.invalid_unit_name_error', 3)}
 
+   Invalid_Symbol_Error : exception;
+   ${ada_doc('langkit.invalid_symbol_error', 3)}
+
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for T
 

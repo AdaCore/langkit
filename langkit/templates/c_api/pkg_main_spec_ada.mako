@@ -215,10 +215,10 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('context_decref')}";
    ${ada_c_doc('langkit.context_decref', 3)}
 
-   procedure ${capi.get_name('context_symbol')}
+   function ${capi.get_name('context_symbol')}
      (Context : ${analysis_context_type};
       Text    : access ${text_type};
-      Symbol  : access ${symbol_type})
+      Symbol  : access ${symbol_type}) return int
       with Export, Convention => C,
            External_name => "${capi.get_name('context_symbol')}";
    ${ada_c_doc('langkit.context_symbol', 3)}
