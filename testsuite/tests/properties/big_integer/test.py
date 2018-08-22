@@ -17,7 +17,10 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    pass
+
+    @langkit_property(public=True)
+    def identity(value=T.BigIntegerType):
+        return value
 
 
 class Decl(FooNode):

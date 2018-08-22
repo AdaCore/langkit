@@ -7,5 +7,6 @@ d evaluates to 0 (0)
 e evaluates to 1 (1)
 f evaluates to 1 (1)
 g evaluates to 0 (0)
+.p_identity(1234) = 1234
 main.py: Done.
 Done
