@@ -289,6 +289,8 @@ private package ${ada_lib_name}.Implementation is
    function Create_Big_Integer
      (Big_Int : GNATCOLL.GMP.Integers.Big_Integer) return Big_Integer_Type;
    function Create_Big_Integer (Int : Integer) return Big_Integer_Type;
+   function Create_Public_Big_Integer
+     (Big_Int : Big_Integer_Type) return GNATCOLL.GMP.Integers.Big_Integer;
 
    No_Big_Integer_Record : aliased Big_Integer_Record :=
      (Value => <>, Ref_Count => -1);
