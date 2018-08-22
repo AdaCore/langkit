@@ -1997,6 +1997,18 @@ package body ${ada_lib_name}.Implementation is
       return Result;
    end Create_Big_Integer;
 
+   -------------------------------
+   -- Create_Public_Big_Integer --
+   -------------------------------
+
+   function Create_Public_Big_Integer
+     (Big_Int : Big_Integer_Type) return GNATCOLL.GMP.Integers.Big_Integer is
+   begin
+      return Result : GNATCOLL.GMP.Integers.Big_Integer do
+         Result.Set (Big_Int.Value);
+      end return;
+   end Create_Public_Big_Integer;
+
    ----------------
    -- To_Integer --
    ----------------
