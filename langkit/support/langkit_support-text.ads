@@ -1,9 +1,12 @@
+with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Deallocation;
 
 package Langkit_Support.Text is
 
    subtype Character_Type is Wide_Wide_Character;
    subtype Text_Type is Wide_Wide_String;
+   subtype Unbounded_Text_Type is
+      Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
    --  All our strings are encoded in UTF-32 (native endinannness). This type,
    --  which is not a subtype of String, makes it obvious when conversions are
    --  needed.
@@ -14,6 +17,12 @@ package Langkit_Support.Text is
    function To_Text (S : String) return Text_Type;
    --  Convenience converter for pure ASCII strings. Raise a Constraint_Error
    --  if a non-ASCII character is met.
+
+   function To_Text (UT : Unbounded_Text_Type) return Text_Type
+      renames Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String;
+
+   function To_Unbounded_Text (T : Text_Type) return Unbounded_Text_Type
+      renames Ada.Strings.Wide_Wide_Unbounded.To_Unbounded_Wide_Wide_String;
 
    function Image
      (T : Text_Type; With_Quotes : Boolean := False)
