@@ -320,6 +320,11 @@ class CompiledType(object):
         type_repo_name = type_repo_name or name.camel
         CompiledTypeRepo.type_dict[type_repo_name] = self
 
+        # If this type does not have public/internal converters, these are not
+        # used. Otherwise, they indicate whether these should be generated.
+        self.to_public_converter_required = False
+        self.to_internal_converter_required = False
+
     @property
     def has_equivalent_function(self):
         return self._has_equivalent_function
@@ -394,6 +399,62 @@ class CompiledType(object):
         :rtype: str
         """
         return self._dsl_name or self.name.camel
+
+    @property
+    def to_public_converter(self):
+        """
+        If this type requires a conversion in public properties, return the
+        name of the function that takes an internal value and returns a public
+        one. Return None otherwise.
+
+        :rtype: names.Name|None
+        """
+        return None
+
+    @property
+    def to_internal_converter(self):
+        """
+        If this type requires a conversion in public properties, return the
+        name of the function that takes a public value and returns an internal
+        one. Return None otherwise.
+
+        :rtype: names.Name|None
+        """
+        return None
+
+    def to_public_expr(self, internal_expr):
+        """
+        Given ``internal_expr``, an expression that computes an internal value,
+        for this type return another expression that converts it to a public
+        value.
+
+        :type internal_expr: str
+        :rtype: str
+        """
+        if self.to_public_converter:
+            return '{} ({})'.format(self.to_public_converter, internal_expr)
+        else:
+            # By default, assume public and internal types are identical, i.e.
+            # that we can return the internal value as-is.
+            assert self.name == self.api_name
+            return internal_expr
+
+    def to_internal_expr(self, public_expr):
+        """
+        Given ``public_expr``, an expression that computes a public value, for
+        this type return another expression that converts it to an internal
+        value.
+
+        :type public_expr: str
+        :rtype: str
+        """
+        if self.to_internal_converter:
+            return '{} ({})'.format(self.to_internal_converter, public_expr)
+        else:
+            # By default, assume public and internal types are identical, i.e.
+            # that we can return the internal value as-is.
+            assert self.name == self.api_name
+            return public_expr
 
     def __repr__(self):
         return '<CompiledType {}>'.format(self.name.camel)
@@ -1667,9 +1728,14 @@ class EntityType(StructType):
         )
         self.is_entity_type = True
         self._element_type = astnode
-        self._exposed = True
 
         if self.astnode.is_root_node:
+            # The root entity is always exposed in public APIs. Some things are
+            # automatically emitted for all derived types (without checking
+            # _exposed), but we also rely on this flag to be set only for
+            # entity types that are used in public properties.
+            self._exposed = True
+
             # LexicalEnv.get, which is bound in the AST.C generate package,
             # returns arrays of root node entities, so the corresponding
             # array type must be declared manually there.
@@ -1719,6 +1785,17 @@ class EntityType(StructType):
         :rtype: names.Name
         """
         return names.Name('Create') + self.name
+
+    def to_public_expr(self, internal_expr):
+        result = ('Wrap_Node ({expr}.Node, {expr}.Info)'
+                  .format(expr=internal_expr))
+        if not self.element_type.is_root_node:
+            result += '.As_{}'.format(self.api_name)
+        return result
+
+    def to_internal_expr(self, public_expr):
+        return ('({type} ({name}.Internal.Node), {name}.Internal.Info)'
+                .format(type=self.element_type.name, name=public_expr))
 
 
 class ASTNodeType(BaseStructType):
@@ -2453,6 +2530,16 @@ class ASTNodeType(BaseStructType):
     def snaps_at_end(self):
         return self.snaps(True)
 
+    def to_public_expr(self, internal_expr):
+        result = 'Wrap_Node ({}, No_Entity_Info)'.format(internal_expr)
+        if not self.is_root_node:
+            result += '.As_{}'.format(self.entity.api_name)
+        return result
+
+    def to_internal_expr(self, public_expr):
+        return ('{type} ({name}.Internal.Node)'
+                .format(type=self.name, name=public_expr))
+
 
 # We tag the ASTNodeType class as abstract here, because of the circular
 # dependency between the @abstract decorator and the ASTNodeType class, which
@@ -2613,6 +2700,14 @@ class ArrayType(CompiledType):
         return '_{}Converter'.format(self.api_name.camel)
 
     @property
+    def to_public_converter(self):
+        return names.Name('To_Public') + self.api_name
+
+    @property
+    def to_internal_converter(self):
+        return names.Name('To_Internal') + self.api_name
+
+    @property
     def emit_c_type(self):
         """
         Return whether to emit a C type for this type.
@@ -2681,23 +2776,57 @@ def create_enum_node_types(cls):
         base_enum_node._alternatives.append(alt_type)
 
 
+class BigIntegerType(CompiledType):
+    def __init__(self):
+        super(BigIntegerType, self).__init__(
+            'BigIntegerType',
+            type_repo_name='BigIntegerType',
+            exposed=True,
+            nullexpr='No_Big_Integer',
+            is_refcounted=True,
+            has_equivalent_function=True,
+            is_ada_record=True,
+            c_type_name='big_integer',
+            api_name='BigInteger')
+
+    @property
+    def to_public_converter(self):
+        return 'Create_Public_Big_Integer'
+
+    @property
+    def to_internal_converter(self):
+        return 'Create_Big_Integer'
+
+
+class AnalysisUnitType(CompiledType):
+    def __init__(self):
+        super(AnalysisUnitType, self).__init__(
+            'InternalUnit',
+            type_repo_name='AnalysisUnitType',
+            exposed=True,
+            nullexpr='null',
+            should_emit_array_type=True,
+            null_allowed=True,
+            hashable=True,
+            c_type_name='analysis_unit',
+            api_name='AnalysisUnit',
+            dsl_name='AnalysisUnitType')
+
+    @property
+    def to_public_converter(self):
+        return 'Wrap_Unit'
+
+    @property
+    def to_internal_converter(self):
+        return 'Unwrap_Unit'
+
+
 def create_builtin_types():
     """
     Create CompiledType instances for all built-in types. This will
     automatically register them in the current CompiledTypeRepo.
     """
-    CompiledType(
-        'InternalUnit',
-        type_repo_name='AnalysisUnitType',
-        exposed=True,
-        nullexpr='null',
-        should_emit_array_type=True,
-        null_allowed=True,
-        hashable=True,
-        c_type_name='analysis_unit',
-        api_name='AnalysisUnit',
-        dsl_name='AnalysisUnitType',
-    )
+    AnalysisUnitType()
 
     CompiledType(
         'UnitKind',
@@ -2778,18 +2907,7 @@ def create_builtin_types():
         hashable=True,
     )
 
-    # It may not be the most efficient way to pass arbitrarily large integers
-    # between Ada, C and Python, but for simplicity (and code reuse), we
-    # currently hold them as their UTF-32 (text) representation.
-    CompiledType('BigIntegerType',
-                 type_repo_name='BigIntegerType',
-                 exposed=True,
-                 nullexpr='No_Big_Integer',
-                 is_refcounted=True,
-                 has_equivalent_function=True,
-                 is_ada_record=True,
-                 c_type_name='big_integer',
-                 api_name='BigInteger')
+    BigIntegerType()
 
     CompiledType('CharacterType',
                  type_repo_name='CharacterType',

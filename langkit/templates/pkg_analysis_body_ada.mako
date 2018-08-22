@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
 <%namespace name="list_types"    file="list_types_ada.mako" />
 <%namespace name="public_properties"
@@ -64,6 +65,10 @@ package body ${ada_lib_name}.Analysis is
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit;
+
+   % for cls in ctx.array_types:
+      ${array_types.ada_api_converters_decl(cls)}
+   % endfor
 
    -----------------------
    -- Get_Unit_Filename --
@@ -628,6 +633,10 @@ package body ${ada_lib_name}.Analysis is
       Check_Safety_Net (Node.Safety_Net);
       return Node.Internal.Node.Kind_Name;
    end Kind_Name;
+
+   % for cls in ctx.array_types:
+      ${array_types.ada_api_converters_body(cls)}
+   % endfor
 
    % for e in ctx.entity_types:
 
