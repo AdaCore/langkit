@@ -232,7 +232,9 @@ class _symbol_type(ctypes.Structure):
 
         # Then convert it to a symbol
         result = cls()
-        _context_symbol(context, ctypes.byref(text), ctypes.byref(result))
+        if not _context_symbol(context, ctypes.byref(text),
+                               ctypes.byref(result)):
+            raise InvalidSymbolError(py_value)
         return result
 
 
@@ -322,6 +324,10 @@ class InvalidUnitNameError(Exception):
 
 class PropertyError(Exception):
     ${py_doc('langkit.property_error', 4)}
+    pass
+
+class InvalidSymbolError(Exception):
+    ${py_doc('langkit.invalid_symbol_error', 4)}
     pass
 
 class StaleReferenceError(Exception):
@@ -1513,7 +1519,7 @@ _context_symbol = _import_func(
     '${capi.get_name("context_symbol")}',
     [AnalysisContext._c_type,
      ctypes.POINTER(_text),
-     ctypes.POINTER(_symbol_type)], None
+     ctypes.POINTER(_symbol_type)], ctypes.c_int
 )
 _discard_errors_in_populate_lexical_env = _import_func(
    '${capi.get_name("context_discard_errors_in_populate_lexical_env")}',

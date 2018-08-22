@@ -25,10 +25,7 @@ with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
-${(exts.with_clauses(with_clauses + [
-   ((ctx.symbol_canonicalizer.unit_fqn, False)
-    if ctx.symbol_canonicalizer else None)
-]))}
+${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Implementation.C is
 
@@ -132,28 +129,23 @@ package body ${ada_lib_name}.Implementation.C is
       Dec_Ref (Context_Var);
    end;
 
-   procedure ${capi.get_name('context_symbol')}
+   function ${capi.get_name('context_symbol')}
      (Context : ${analysis_context_type};
       Text    : access ${text_type};
-      Symbol  : access ${symbol_type})
+      Symbol  : access ${symbol_type}) return int
    is
       Raw_Text : Text_Type (1 .. Natural (Text.Length))
          with Import, Address => Text.Chars;
-
-      Canon_Symbol : constant Symbolization_Result :=
-         % if ctx.symbol_canonicalizer:
-            ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
-         % else:
-            Create_Symbol (Raw_Text)
-         % endif
-      ;
-
-      Sym : constant Symbol_Type :=
-        (if Canon_Symbol.Success
-         then Find (Context.Symbols, Canon_Symbol.Symbol, False)
-         else null);
    begin
-      Symbol.all := Wrap_Symbol (Sym);
+      Clear_Last_Exception;
+      Symbol.all := Wrap_Symbol (Lookup_Symbol (Context, Raw_Text));
+      return 1;
+   exception
+      when Invalid_Symbol_Error =>
+         return 0;
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end;
 
    procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}

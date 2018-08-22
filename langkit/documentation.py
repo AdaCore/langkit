@@ -167,6 +167,9 @@ base_langkit_docs = {
         ``${'P_' if lang == 'ada' else 'p_'}``. This is the only exceptions
         that such functions can raise.
     """,
+    'langkit.invalid_symbol_error': """
+        Exception raise when an invalid symbol is passed to a subprogram.
+    """,
     'langkit.stale_reference_error': """
         Exception raised while trying to access data that was deallocated. This
         happens when one tries to use a node whose unit has been reparsed, for
@@ -222,8 +225,8 @@ base_langkit_docs = {
         Return a hash for this context, to be used in hash tables.
     """,
     'langkit.context_symbol': """
-        Get the symbol corresponding to the given string, or null if there is
-        no such symbol in this context.
+        If the given string is a valid symbol, yield it as a symbol and return
+        true. Otherwise, return false.
     """,
     'langkit.context_discard_errors_in_populate_lexical_env': """
         Debug helper. Set whether Property_Error exceptions raised in

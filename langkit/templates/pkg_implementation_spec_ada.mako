@@ -900,6 +900,8 @@ private package ${ada_lib_name}.Implementation is
 
    function Lookup_Symbol
      (Context : Internal_Context; Symbol : Text_Type) return Symbol_Type;
+   --  Return the given symbol text as a symbol for this context. Raise an
+   --  Invalid_Symbol_Error if it is invalid.
 
    function Create_Special_Unit
      (Context             : Internal_Context;

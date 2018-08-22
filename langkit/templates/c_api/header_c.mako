@@ -210,7 +210,7 @@ extern void
 ${capi.get_name("context_decref")}(${analysis_context_type} context);
 
 ${c_doc('langkit.context_symbol')}
-extern void
+extern int
 ${capi.get_name("context_symbol")}(${analysis_context_type} context,
                                    ${text_type} *text,
                                    ${symbol_type} *symbol);

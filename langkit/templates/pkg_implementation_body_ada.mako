@@ -3325,9 +3325,21 @@ package body ${ada_lib_name}.Implementation is
    -------------------
 
    function Lookup_Symbol
-     (Context : Internal_Context; Symbol : Text_Type) return Symbol_Type is
+     (Context : Internal_Context; Symbol : Text_Type) return Symbol_Type
+   is
+      Canon_Symbol : constant Symbolization_Result :=
+         % if ctx.symbol_canonicalizer:
+            ${ctx.symbol_canonicalizer.fqn} (Symbol)
+         % else:
+            Create_Symbol (Symbol)
+         % endif
+      ;
    begin
-      return Find (Context.Symbols, Symbol);
+      if Canon_Symbol.Success then
+         return Find (Context.Symbols, Canon_Symbol.Symbol);
+      else
+         raise Invalid_Symbol_Error with Image (Symbol, With_Quotes => True);
+      end if;
    end Lookup_Symbol;
 
    -------------------------
