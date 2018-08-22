@@ -449,17 +449,26 @@ class CompiledType(object):
             assert self.name == self.api_name
             return internal_expr
 
-    def to_internal_expr(self, public_expr):
+    def to_internal_expr(self, public_expr, context=None):
         """
         Given ``public_expr``, an expression that computes a public value, for
         this type return another expression that converts it to an internal
         value.
 
         :type public_expr: str
+        :param str|None context: If this type requires the context for this
+            conversion, this must be an expression that yields the context.
         :rtype: str
         """
+        requires_context = self.conversion_requires_context
+        assert not (requires_context and context is None)
+
         if self.to_internal_converter:
-            return '{} ({})'.format(self.to_internal_converter, public_expr)
+            return '{} ({}{})'.format(
+                self.to_internal_converter,
+                public_expr,
+                (', ' + context) if requires_context else ''
+            )
         else:
             # By default, assume public and internal types are identical, i.e.
             # that we can return the internal value as-is.
@@ -1808,7 +1817,7 @@ class EntityType(StructType):
             result += '.As_{}'.format(self.api_name)
         return result
 
-    def to_internal_expr(self, public_expr):
+    def to_internal_expr(self, public_expr, context=None):
         return ('({type} ({name}.Internal.Node), {name}.Internal.Info)'
                 .format(type=self.element_type.name, name=public_expr))
 
@@ -2551,7 +2560,7 @@ class ASTNodeType(BaseStructType):
             result += '.As_{}'.format(self.entity.api_name)
         return result
 
-    def to_internal_expr(self, public_expr):
+    def to_internal_expr(self, public_expr, context=None):
         return ('{type} ({name}.Internal.Node)'
                 .format(type=self.name, name=public_expr))
 

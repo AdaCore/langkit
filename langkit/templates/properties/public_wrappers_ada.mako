@@ -27,7 +27,10 @@
 
 <%def name="body(property)">
    function ${property.name} ${public_prototype(property)} is
-      <% self_arg = property.self_arg_name %>
+      <%
+         self_arg = property.self_arg_name
+         context_expr = '{}.Internal.Node.Unit.Context'.format(self_arg)
+      %>
    begin
       Check_Safety_Net (${self_arg}.Safety_Net);
 
@@ -36,7 +39,7 @@
          % for arg in property.arguments:
             Internal_Arg_${arg.name} :
                ${'' if arg.type.is_refcounted else 'constant'} ${arg.type.name}
-               := ${arg.type.to_internal_expr(str(arg.name))};
+               := ${arg.type.to_internal_expr(str(arg.name), context_expr)};
          % endfor
 
          ## Call the property
