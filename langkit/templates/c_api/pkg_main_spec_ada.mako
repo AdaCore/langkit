@@ -76,7 +76,7 @@ private package ${ada_lib_name}.Implementation.C is
      with Convention => C;
    ${ada_c_doc('langkit.text_type', 3)}
 
-   type ${big_integer_type} is new ${text_type};
+   type ${big_integer_type} is new System.Address;
    ${ada_c_doc('langkit.big_integer_type', 3)}
 
    type ${token_type} is record
@@ -131,6 +131,24 @@ private package ${ada_lib_name}.Implementation.C is
       with Export, Convention => C,
            External_Name => "${capi.get_name('symbol_text')}";
    ${ada_c_doc('langkit.symbol_text', 3)}
+
+   function ${capi.get_name("create_big_integer")}
+     (Text : access ${text_type}) return ${big_integer_type}
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('create_big_integer')}";
+   ${ada_c_doc('langkit.create_big_integer', 3)}
+
+   procedure ${capi.get_name("big_integer_text")}
+     (Bigint : ${big_integer_type}; Text : access ${text_type})
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('big_integer_text')}";
+   ${ada_c_doc('langkit.big_integer_text', 3)}
+
+   procedure ${capi.get_name("big_integer_decref")}
+     (Bigint : ${big_integer_type})
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('big_integer_decref')}";
+   ${ada_c_doc('langkit.big_integer_decref', 3)}
 
    --  Types for unit providers
 
@@ -631,8 +649,10 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (T : Text_Access) return ${text_type} is
      (Wrap (Text_Cst_Access (T)));
 
-   function Wrap (Big_Int : Big_Integer_Type) return ${big_integer_type};
-   function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type;
+   function Wrap_Big_Integer is new Ada.Unchecked_Conversion
+     (Big_Integer_Type, ${big_integer_type});
+   function Unwrap_Big_Integer is new Ada.Unchecked_Conversion
+     (${big_integer_type}, Big_Integer_Type);
 
    function Wrap_Symbol is new Ada.Unchecked_Conversion
      (Symbol_Type, ${symbol_type});

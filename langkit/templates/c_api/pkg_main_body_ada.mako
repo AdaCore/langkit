@@ -893,29 +893,6 @@ package body ${ada_lib_name}.Implementation.C is
                     Is_Allocated => 0));
    end Wrap;
 
-   ----------
-   -- Wrap --
-   ----------
-
-   function Wrap (Big_Int : Big_Integer_Type) return ${big_integer_type} is
-      Img : constant String := Big_Int.Value.Image;
-   begin
-      return ${big_integer_type} (Wrap_Alloc (To_Text (Img)));
-   end Wrap;
-
-   ------------
-   -- Unwrap --
-   ------------
-
-   function Unwrap (Big_Int : ${big_integer_type}) return Big_Integer_Type is
-      As_Text   : Text_Type (1 .. Integer (Big_Int.Length))
-         with Import  => True,
-              Address => Big_Int.Chars;
-      As_String : constant String := Image (As_Text);
-   begin
-      return Create_Big_Integer (As_String);
-   end Unwrap;
-
    procedure ${capi.get_name('destroy_text')} (T : access ${text_type}) is
    begin
       Clear_Last_Exception;
@@ -948,6 +925,53 @@ package body ${ada_lib_name}.Implementation.C is
            (if Sym = null then "" else Image (Sym));
       begin
          Text.all := Wrap_Alloc (Result);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   function ${capi.get_name("create_big_integer")}
+     (Text : access ${text_type}) return ${big_integer_type} is
+   begin
+      Clear_Last_Exception;
+      declare
+         T      : Text_Type (1 .. Natural (Text.Length))
+            with Import, Address => Text.Chars;
+         Image  : constant String := Langkit_Support.Text.Image (T);
+         Result : constant Big_Integer_Type := Create_Big_Integer (Image);
+      begin
+         return Wrap_Big_Integer (Result);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${big_integer_type} (System.Null_Address);
+   end ${capi.get_name("create_big_integer")};
+
+   procedure ${capi.get_name("big_integer_text")}
+     (Bigint : ${big_integer_type}; Text : access ${text_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         BI    : constant Big_Integer_Type := Unwrap_Big_Integer (Bigint);
+         Image : constant String := BI.Value.Image;
+      begin
+         Text.all := Wrap_Alloc (To_Text (Image));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name("big_integer_decref")}
+     (Bigint : ${big_integer_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         BI : Big_Integer_Type := Unwrap_Big_Integer (Bigint);
+      begin
+         Dec_Ref (BI);
       end;
    exception
       when Exc : others =>

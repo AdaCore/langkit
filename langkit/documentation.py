@@ -135,8 +135,7 @@ base_langkit_docs = {
         Size of the string (in characters).
     """,
     'langkit.big_integer_type': """
-        Arbitrary large integer represented in base 10 a a UTF-32 string
-        (native endianness).
+        Arbitrary large integer.
     """,
     'langkit.diagnostic_type': """
         Analysis unit diagnostics.
@@ -479,6 +478,15 @@ base_langkit_docs = {
     """,
     'langkit.symbol_text': """
         Get the text associated to this symbol.
+    """,
+    'langkit.create_big_integer': """
+        Create a big integer from its string representation (in base 10).
+    """,
+    'langkit.big_integer_text': """
+        Return the string representation (in base 10) of this big integer.
+    """,
+    'langkit.big_integer_decref': """
+        Decrease the reference count for this big integer.
     """,
 
     #
