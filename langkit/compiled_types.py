@@ -2850,6 +2850,29 @@ class AnalysisUnitType(CompiledType):
         return 'Unwrap_Unit'
 
 
+class SymbolType(CompiledType):
+    def __init__(self):
+        super(SymbolType, self).__init__(
+            'SymbolType',
+            type_repo_name='SymbolType',
+            exposed=True,
+            nullexpr='null',
+            null_allowed=True,
+
+            # See below: symbols are represented in the C API as text records
+            is_ada_record=True,
+            c_type_name='symbol_type',
+            api_name='UnboundedTextType',
+            hashable=True,
+            conversion_requires_context=True)
+
+    def to_public_expr(self, internal_expr):
+        return 'To_Unbounded_Text (Image ({}))'.format(internal_expr)
+
+    def to_internal_expr(self, public_expr, context):
+        return 'Lookup_Symbol ({}, To_Text ({}))'.format(context, public_expr)
+
+
 def create_builtin_types():
     """
     Create CompiledType instances for all built-in types. This will
@@ -2922,20 +2945,7 @@ def create_builtin_types():
     )
 
     TokenType()
-
-    CompiledType(
-        'SymbolType',
-        type_repo_name='SymbolType',
-        exposed=True,
-        nullexpr='null',
-        null_allowed=True,
-
-        # See below: symbols are represented in the C API as text records
-        is_ada_record=True,
-        c_type_name='symbol_type',
-        hashable=True,
-        conversion_requires_context=True)
-
+    SymbolType()
     BigIntegerType()
 
     CompiledType('CharacterType',
