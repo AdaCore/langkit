@@ -7,6 +7,9 @@ class _BaseStruct(object):
     Mixin for Ada struct wrappers.
     """
 
+    # Subclasses will override this to a subclass of ctypes.Structure
+    _c_type = None
+
     def __getitem__(self, key):
       if not isinstance(key, int):
          raise TypeError('Tuples items are indexed by integers, not {}'.format(
@@ -42,25 +45,14 @@ class _BaseStruct(object):
     def __hash__(self):
         return hash(self.as_tuple)
 
-    # There is no need here to override __del__ as all structure fields already
-    # override their own __del__ operators, so structure fields will
-    # automatically deallocate themselves when their own Python ref-count will
-    # reach 0.
-
-    # Subclasses will override this to a subclass of ctypes.Structure
-    _c_type = None
-
-    # If subclasses implement a ref-counted struct, they will override these
-    # two to the inc_ref/dec_ref functions.
-    _inc_ref = None
-    _dec_ref = None
 
 </%def>
 
 <%def name="decl(cls)">
 
+<% public_name = pyapi.type_public_name(cls) %>
 
-class ${pyapi.type_public_name(cls)}(_BaseStruct):
+class ${public_name}(_BaseStruct):
     ${py_doc(cls, 4)}
 
     <% field_names = [f.name.lower for f in cls.get_fields()] %>
