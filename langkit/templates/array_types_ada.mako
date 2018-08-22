@@ -14,6 +14,47 @@
    type ${cls.name} is access all ${cls.pointed};
 </%def>
 
+<%def name="ada_api_converters_decl(cls)">
+   % if cls.to_public_converter_required:
+      function ${cls.to_public_converter}
+         (Value : ${cls.name}) return ${cls.api_name};
+   % endif
+
+   % if cls.to_internal_converter_required:
+      function ${cls.to_internal_converter}
+         (Value : ${cls.api_name}) return ${cls.name};
+   % endif
+</%def>
+
+<%def name="ada_api_converters_body(cls)">
+   % if cls.to_public_converter_required:
+      function ${cls.to_public_converter}
+         (Value : ${cls.name}) return ${cls.api_name} is
+         Result : ${cls.api_name} (1 .. Value.N);
+      begin
+         for I in Result'Range loop
+            Result (I - Value.Items'First + Result'First) :=
+               ${cls.element_type.to_public_expr('Value.Items (I)')};
+         end loop;
+         return Result;
+      end;
+   % endif
+
+   % if cls.to_internal_converter_required:
+      function ${cls.to_internal_converter}
+         (Value : ${cls.api_name}) return ${cls.name} is
+         Result : constant ${cls.name} :=
+            ${cls.constructor_name} (Value'Length);
+      begin
+         for I in Value'Range loop
+            Result.Items (I - Value'First + Result.Items'First) :=
+               ${cls.element_type.to_internal_expr('Value (I)')};
+         end loop;
+         return Result;
+      end;
+   % endif
+</%def>
+
 <%def name="decl(cls)">
 
    <% elt_type = cls.element_type.name %>

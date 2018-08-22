@@ -1987,7 +1987,7 @@ class CompileCtx(object):
                     severity=Severity.non_blocking_error
                 )
 
-        def expose(t, for_field, type_use, traceback):
+        def expose(t, to_internal, for_field, type_use, traceback):
             """
             Recursively tag "t" and all the types it references as exposed.
             """
@@ -2007,9 +2007,11 @@ class CompileCtx(object):
                     )
 
             if t._exposed:
-                return
+                # If the type is already exposed, there is nothing to *check*,
+                # but we still need to set the converter flags below.
+                pass
 
-            if isinstance(t, ArrayType):
+            elif isinstance(t, ArrayType):
                 # Don't allow public arrays of arrays
                 check(
                     not isinstance(t.element_type, ArrayType),
@@ -2022,8 +2024,12 @@ class CompileCtx(object):
                     '{}, an array of bare AST nodes'.format(t.dsl_name)
                 )
 
-                expose(t.element_type, for_field, 'element type',
+                expose(t.element_type, to_internal, for_field, 'element type',
                        traceback + ['array of {}'.format(t.dsl_name)])
+
+            elif t.is_entity_type:
+                # Allow all entity types to be exposed
+                pass
 
             else:
                 # Only array types have their "_exposed" attribute inferred. We
@@ -2032,6 +2038,10 @@ class CompileCtx(object):
                 check(t._exposed, t.dsl_name)
                 return
 
+            if to_internal:
+                t.to_internal_converter_required = True
+            else:
+                t.to_public_converter_required = True
             t._exposed = True
 
         # As struct exceptions, manually expose structs required to expose
@@ -2052,17 +2062,17 @@ class CompileCtx(object):
             if isinstance(f, Field) and f.type.is_ast_node:
                 continue
 
-            expose(f.type, f,
+            expose(f.type, False, f,
                    'return type' if f.is_property else 'type',
                    [f.qualname])
             for arg in f.natural_arguments:
                 reject_string_arg(f, arg)
-                expose(arg.type, f, '"{}" argument'.format(arg.dsl_name),
+                expose(arg.type, True, f, '"{}" argument'.format(arg.dsl_name),
                        [f.qualname])
             if f.is_property:
                 for dv in f.dynamic_vars:
                     reject_string_arg(f, dv)
-                    expose(dv.type, f,
+                    expose(dv.type, True, f,
                            '"{}" dynamic variable'.format(dv.dsl_name),
                            [f.qualname])
 
