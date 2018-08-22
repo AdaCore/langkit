@@ -9,7 +9,7 @@
 
         % else:
         ## Create C values for arguments
-        % if any(pyapi.unwrap_requires_context(arg.type) \
+        % if any(arg.type.conversion_requires_context \
                  for arg in field.arguments):
         _context = self.unit.context._c_value
         % endif
