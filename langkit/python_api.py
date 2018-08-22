@@ -49,7 +49,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (T.CharacterType, lambda _: 'unichr({{}}{})'.format(value_suffix)),
-            (ct.ArrayType, lambda _: '{}._wrap({{}})'.format(
+            (ct.ArrayType, lambda _: '{}.wrap({{}})'.format(
                 self.array_wrapper(type)
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
@@ -87,7 +87,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.LongType, lambda _: 'int({value})'),
             (T.CharacterType, lambda _: 'ord({value})'),
             (ct.ArrayType, lambda cls:
-                '{}._unwrap({{value}}{{context}})'
+                '{}.unwrap({{value}}{{context}})'
                 .format(self.array_wrapper(cls))),
             (ct.StructType, lambda _:
                 '{}._unwrap({{value}}{{context}})'.format(type.name.camel)),
@@ -122,7 +122,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
                 self.type_public_name(ct.T.root_node))),
             (ct.ArrayType, lambda cls:
-                '{}._c_type'.format(self.array_wrapper(cls))),
+                '{}.c_type'.format(self.array_wrapper(cls))),
             (T.entity_info, lambda _: '_EntityInfo_c_type'),
             (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:
