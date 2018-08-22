@@ -204,7 +204,8 @@ class CompiledType(object):
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
                  nullexpr=None, py_nullexpr=None, element_type=None,
                  hashable=False, has_equivalent_function=False,
-                 type_repo_name=None, api_name=None, dsl_name=None):
+                 type_repo_name=None, api_name=None, dsl_name=None,
+                 conversion_requires_context=False):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -288,6 +289,9 @@ class CompiledType(object):
 
         :param str|None dsl_name: If provided, name used to represent this type
             at the DSL level. Useful to format diagnostics.
+
+        :param bool conversion_requires_context: Whether converting this type
+            from public to internal values requires an analysis context.
     """
         if isinstance(name, str):
             name = names.Name.from_camel(name)
@@ -320,10 +324,16 @@ class CompiledType(object):
         type_repo_name = type_repo_name or name.camel
         CompiledTypeRepo.type_dict[type_repo_name] = self
 
+        self._conversion_requires_context = conversion_requires_context
+
         # If this type does not have public/internal converters, these are not
         # used. Otherwise, they indicate whether these should be generated.
         self.to_public_converter_required = False
         self.to_internal_converter_required = False
+
+    @property
+    def conversion_requires_context(self):
+        return self._conversion_requires_context
 
     @property
     def has_equivalent_function(self):
@@ -1638,6 +1648,11 @@ class StructType(BaseStructType):
         self._init_fields(fields)
         CompiledTypeRepo.struct_types.append(self)
 
+    @property
+    def conversion_requires_context(self):
+        return any(f.type.conversion_requires_context
+                   for f in self.get_fields())
+
     def add_as_memoization_key(self, context):
         super(StructType, self).add_as_memoization_key(context)
         for f in self.get_fields():
@@ -2555,12 +2570,13 @@ class ArrayType(CompiledType):
     def __init__(self, name, element_type):
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
-        super(ArrayType, self).__init__(name=name, is_ptr=True,
-                                        is_refcounted=True,
-                                        nullexpr=null_constant(),
-                                        element_type=element_type,
-                                        null_allowed=True,
-                                        has_equivalent_function=True)
+        super(ArrayType, self).__init__(
+            name=name, is_ptr=True,
+            is_refcounted=True,
+            nullexpr=null_constant(),
+            element_type=element_type,
+            null_allowed=True,
+            has_equivalent_function=True)
 
         # Register this type where it needs to be registered
         ctx = get_context(True)
@@ -2698,6 +2714,10 @@ class ArrayType(CompiledType):
         :rtype: str
         """
         return '_{}Converter'.format(self.api_name.camel)
+
+    @property
+    def conversion_requires_context(self):
+        return self.element_type.conversion_requires_context
 
     @property
     def to_public_converter(self):
@@ -2905,7 +2925,7 @@ def create_builtin_types():
         is_ada_record=True,
         c_type_name='symbol_type',
         hashable=True,
-    )
+        conversion_requires_context=True)
 
     BigIntegerType()
 

@@ -75,7 +75,7 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         context_arg = (', {}'.format(context)
-                       if self.unwrap_requires_context(type) else '')
+                       if type.conversion_requires_context else '')
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
             (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({value})'),
@@ -157,27 +157,4 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _: type.name.camel),
             (T.AnalysisUnitKind, lambda _: 'str'),
             (T.BigIntegerType, lambda _: 'int'),
-        ])
-
-    def unwrap_requires_context(self, type):
-        """
-        Return whether unwrapping values for the given ``type`` requires having
-        an analysis context. For types that do, the ``.(_)unwrap`` method
-        should take the context as a C value in addition to the Python value to
-        unwrap.
-
-        :param CompiledType type: Type to analyze.
-        :rtype: bool
-        """
-        return dispatch_on_type(type, [
-            (T.SymbolType, lambda _: True),
-            (T.ArrayType, lambda _:
-                self.unwrap_requires_context(type.element_type)),
-            (T.EntityType, lambda _: False),
-            (T.StructType, lambda _: any(
-                self.unwrap_requires_context(f.type)
-                for f in type.get_fields())),
-
-            # By default, assume the context is not required
-            (ct.CompiledType, lambda _: False),
         ])
