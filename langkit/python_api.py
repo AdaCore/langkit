@@ -79,7 +79,6 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
             (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({value})'),
-            (ct.ASTNodeType, lambda _: '{value}'),
             (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
             (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),
