@@ -29,6 +29,7 @@ with Langkit_Support.Adalog.Predicates;
 use Langkit_Support.Adalog.Predicates;
 with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;

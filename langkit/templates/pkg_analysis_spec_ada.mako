@@ -16,7 +16,6 @@ with GNATCOLL.Refcount;
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
-with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
