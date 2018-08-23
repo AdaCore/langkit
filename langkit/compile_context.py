@@ -1225,7 +1225,7 @@ class CompileCtx(object):
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
              warnings=None, generate_unparser=False, properties_logging=False,
-             generate_astdoc=True):
+             generate_astdoc=True, generate_gdb_hook=True):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1267,6 +1267,10 @@ class CompileCtx(object):
 
         :param bool generate_astdoc: Whether to generate the HTML documentation
             for AST nodes, their fields and their properties.
+
+        :param bool generate_gdb_hook: Whether to generate the
+            ".debug_gdb_scripts" section. Good for debugging, but better to
+            disable for releases.
         """
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
@@ -1277,6 +1281,7 @@ class CompileCtx(object):
         self.generate_unparser = generate_unparser
         self.properties_logging = properties_logging
         self.generate_astdoc = generate_astdoc
+        self.generate_gdb_hook = generate_gdb_hook
         if warnings:
             self.warnings = warnings
 
@@ -1672,11 +1677,14 @@ class CompileCtx(object):
                         if self.short_name else lib_name),
             )
         )
-        write_source_file(
-            os.path.join(src_path, 'gdb.c'),
-            self.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                 os_name=os.name)
-        )
+
+        # Emit the ".debug_gdb_scripts" section if asked to
+        if self.generate_gdb_hook:
+            write_source_file(
+                os.path.join(src_path, 'gdb.c'),
+                self.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                     os_name=os.name)
+            )
 
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):

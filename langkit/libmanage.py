@@ -354,6 +354,14 @@ class ManageScript(object):
                  ' can be abitrary inserted between two tokens without'
                  ' affecting lexing.'
         )
+        subparser.add_argument(
+            '--no-gdb-hook', action='store_true',
+            help='Do not generate the ".debug_gdb_script" section. This'
+                 ' section is used to automatically run Langkit GDB helpers'
+                 ' when loading the generated library in a debugger.'
+                 ' Conventient for debugging, but bad for releases as this'
+                 ' hardcodes source paths in the sources.'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -630,7 +638,8 @@ class ManageScript(object):
                           no_property_checks=args.no_property_checks,
                           generate_unparser=args.generate_unparser,
                           properties_logging=args.enabled_properties_logging,
-                          generate_astdoc=not args.no_astdoc)
+                          generate_astdoc=not args.no_astdoc,
+                          generate_gdb_hook=not args.no_gdb_hook)
 
         if args.check_only:
             return

@@ -57,7 +57,9 @@ library project ${lib_name} is
                            for p in ctx.additional_source_files):
       "${path}",
       % endfor
+      % if ctx.generate_gdb_hook:
       "gdb.c",
+      % endif
       "quex_interface.c",
       "quex_interface.h",
       "quex_lexer.c",
