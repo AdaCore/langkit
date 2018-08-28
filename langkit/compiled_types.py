@@ -1622,7 +1622,7 @@ class BaseStructType(CompiledType):
         else:
             all_fields = self.get_abstract_fields_dict(include_inherited)
             result = OrderedDict(
-                filter(lambda (k, v): isinstance(v, field_class),
+                filter(lambda kv: isinstance(kv[1], field_class),
                        all_fields.items())
             )
 
