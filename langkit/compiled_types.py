@@ -2927,7 +2927,7 @@ def create_builtin_types():
     )
 
     CompiledType(
-        name=get_type(long),
+        name=get_type(int),
         type_repo_name='LongType',
         exposed=True,
         is_ptr=False,

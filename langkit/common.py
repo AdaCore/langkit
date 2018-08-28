@@ -121,11 +121,11 @@ def gen_name(var_name):
 
 basic_types = {
     "ada": {
-        long: "Integer",
+        int: "Integer",
         bool: "Boolean"
     },
     "cpp": {
-        long: "long",
+        int: "long",
         bool: "bool"
     }
 }
