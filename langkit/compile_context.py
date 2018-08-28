@@ -23,6 +23,7 @@ from os import path
 import subprocess
 import sys
 
+from functools import reduce
 from funcy import keep
 
 from langkit import caching, names
