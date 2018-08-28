@@ -271,12 +271,19 @@ class OrderingTest(AbstractExpression):
 
         :rtype: OrderingTest.Expr
         """
-        return OrderingTest.Expr(self.operator, *[
-            construct(e, lambda t: t in (T.LongType, T.BigIntegerType),
-                      'Comparisons only work on {} and {}, not {{expr_type}}'
-                      .format(T.LongType.dsl_name, T.BigIntegerType.dsl_name))
-            for e in (self.lhs, self.rhs)
-        ])
+        lhs, rhs = construct(self.lhs), construct(self.rhs)
+        check_source_language(
+            lhs.type.is_long_type or lhs.type.is_big_integer_type,
+            'Comparisons only work on {} and {}, not {}'
+            .format(T.LongType.dsl_name, T.BigIntegerType.dsl_name,
+                    lhs.type.dsl_name)
+        )
+        check_source_language(
+            lhs.type == rhs.type,
+            'Comparisons require the same type for both operands'
+            ' (got {} and {})'.format(lhs.type.dsl_name, rhs.type.dsl_name)
+        )
+        return OrderingTest.Expr(self.operator, lhs, rhs)
 
 
 @dsl_document
