@@ -76,31 +76,31 @@ def print_struct(context, file, struct):
     else:
         kind = 'struct'
     print(
-        '<dt id="{name}">'
-        '<span class="kw">{kind}</span>'
-        ' <span class="def">{name}</span>'
-        '{descr}</dt>'.format(
+        u'<dt id="{name}">'
+        u'<span class="kw">{kind}</span>'
+        u' <span class="def">{name}</span>'
+        u'{descr}</dt>'.format(
             name=struct.dsl_name,
             kind=kind,
             descr=' : {}'.format(' '.join(descr)) if descr else ''
         ),
         file=file
     )
-    print('<dd>{}'.format(format_doc(struct)), file=file)
+    print(u'<dd>{}'.format(format_doc(struct)), file=file)
 
-    print('<dl>', file=file)
+    print(u'<dl>', file=file)
     for f in fields:
         print_field(context, file, struct, f)
 
-    print('</dl>', file=file)
-    print('</dd>', file=file)
+    print(u'</dl>', file=file)
+    print(u'</dd>', file=file)
 
 
 def print_field(context, file, struct, field):
     prefixes = []
     if field.is_private:
-        prefixes.append('<span class="private">private</span>')
-    prefixes.append('<span class="kw">{}</span>'.format(
+        prefixes.append(u'<span class="private">private</span>')
+    prefixes.append(u'<span class="kw">{}</span>'.format(
         dispatch_on_type(type(field), (
             (compiled_types.AbstractField, lambda _: 'field'),
             (expressions.PropertyDef, lambda _: 'property')
@@ -120,11 +120,11 @@ def print_field(context, file, struct, field):
     if field.is_private:
         div_classes.append('field_private')
 
-    print('<div class="{}">'.format(' '.join(div_classes)), file=file)
+    print(u'<div class="{}">'.format(' '.join(div_classes)), file=file)
     print(
-        '<dt>{prefixes}'
-        ' <span class="def" id="{node}-{field}">{field}</span>'
-        ' : {type}{inherit_note}</dt>'.format(
+        u'<dt>{prefixes}'
+        u' <span class="def" id="{node}-{field}">{field}</span>'
+        u' : {type}{inherit_note}</dt>'.format(
             prefixes=' '.join(prefixes),
             node=struct.dsl_name,
             field=field.name.lower,
@@ -139,39 +139,39 @@ def print_field(context, file, struct, field):
     )
     # Don't repeat the documentation for inheritted fields
     if field.struct == struct:
-        print('<dd>{}</dd>'.format(format_doc(field)), file=file)
+        print(u'<dd>{}</dd>'.format(format_doc(field)), file=file)
 
-    print('</div>', file=file)
+    print(u'</duiv>', file=file)
 
 
 def print_enum(context, file, enum_type):
     print(
-        '<dt id="{name}">'
-        '<span class="kw">enum</span>'
-        ' <span class="def">{name}</span>'
-        '</dt>'.format(name=enum_type.dsl_name),
+        u'<dt id="{name}">'
+        u'<span class="kw">enum</span>'
+        u' <span class="def">{name}</span>'
+        u'</dt>'.format(name=enum_type.dsl_name),
         file=file
     )
-    print('<dd>{}<dl>'.format(format_doc(enum_type)), file=file)
+    print(u'<dd>{}<dl>'.format(format_doc(enum_type)), file=file)
     for alt in enum_type.alternatives:
-        print('<dt class="def">{}</dt>'.format(alt), file=file)
-    print('</dl></dd>', file=file)
+        print(u'<dt class="def">{}</dt>'.format(alt), file=file)
+    print(u'</dl></dd>', file=file)
 
 
 def astnode_ref(node):
-    return '<a href="#{name}" class="ref-link">{name}</a>'.format(
+    return u'<a href="#{name}" class="ref-link">{name}</a>'.format(
         name=node.dsl_name
     )
 
 
 def field_ref(field):
-    return '<a href="#{node}-{field}" class="ref-link">{node}</a>'.format(
+    return u'<a href="#{node}-{field}" class="ref-link">{node}</a>'.format(
         node=field.struct.dsl_name,
         field=field.name.lower
     )
 
 
-ASTDOC_CSS = """
+ASTDOC_CSS = u"""
 html {
     background-color: rgb(8, 8, 8);
     color: rgb(248, 248, 242);
@@ -219,7 +219,7 @@ dt { font-family: monospace; }
 }
 """.strip()
 
-ASTDOC_JS = """
+ASTDOC_JS = u"""
 <script>
 function trigger_elements(cat) {
     var btn = document.getElementById('btn_show_' + cat);
@@ -236,7 +236,7 @@ function trigger_elements(cat) {
 """
 
 
-ASTDOC_HTML = """<html>
+ASTDOC_HTML = u"""<html>
 <head>
     <title>{lang_name} - AST documentation</title>
     <style type="text/css">{css}</style>
@@ -269,17 +269,17 @@ def write_astdoc(context, file):
         js=ASTDOC_JS
     ), file=file)
 
-    print('<h2>Structure types</h2>', file=file)
+    print(u'<h2>Structure types</h2>', file=file)
 
-    print('<dl>', file=file)
+    print(u'<dl>', file=file)
     for struct_type in context.struct_types:
         print_struct(context, file, struct_type)
-    print('</dl>', file=file)
+    print(u'</dl>', file=file)
 
-    print('<h2>AST node types</h2>', file=file)
+    print(u'<h2>AST node types</h2>', file=file)
 
-    print('<dl>', file=file)
+    print(u'<dl>', file=file)
     for typ in context.astnode_types:
         print_struct(context, file, typ)
-    print('</dl>', file=file)
-    print('</div></body></html>', file=file)
+    print(u'</dl>', file=file)
+    print(u'</div></body></html>', file=file)

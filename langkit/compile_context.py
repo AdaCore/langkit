@@ -17,9 +17,9 @@ from collections import defaultdict
 from contextlib import contextmanager
 from distutils.spawn import find_executable
 from glob import glob
+from io import StringIO
 import os
 from os import path
-from StringIO import StringIO
 import subprocess
 import sys
 
