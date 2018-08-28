@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import argparse
+from functools import reduce
 from funcy import keep
 import glob
 import inspect
