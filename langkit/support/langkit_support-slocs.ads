@@ -47,6 +47,12 @@ package Langkit_Support.Slocs is
 
    function "<" (L, R : Source_Location) return Boolean is
      (Compare (L, R) = After);
+   function "<=" (L, R : Source_Location) return Boolean is
+     (Compare (L, R) in After | Inside);
+   function ">" (L, R : Source_Location) return Boolean is
+     (Compare (L, R) = Before);
+   function ">=" (L, R : Source_Location) return Boolean is
+     (Compare (L, R) in Before | Inside);
 
    function Compare
      (Sloc_Range : Source_Location_Range;
