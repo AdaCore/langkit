@@ -919,7 +919,7 @@ def create_doc_printer(lang, formatter):
 
         return formatter(doc, column, **kwargs)
 
-    func.__name__ = b'{}_doc'.format(lang)
+    func.__name__ = '{}_doc'.format(lang)
     return func
 
 # The following are functions which return formatted source code documentation
