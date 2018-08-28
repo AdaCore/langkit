@@ -14,7 +14,7 @@ from __future__ import absolute_import, division, print_function
 
 import ast
 from collections import defaultdict
-from contextlib import contextmanager, nested
+from contextlib import contextmanager
 from distutils.spawn import find_executable
 from glob import glob
 import os
@@ -1032,11 +1032,13 @@ class CompileCtx(object):
 
         def process_expr(expr):
             if isinstance(expr, FieldAccess.Expr):
-                context_mgrs = []
-                if expr.abstract_expr:
-                    context_mgrs.append(expr.abstract_expr.diagnostic_context)
+                context_mgr = (
+                    expr.abstract_expr.diagnostic_context
+                    if expr.abstract_expr
+                    else Context('', None, '')
+                )
 
-                with nested(*context_mgrs):
+                with context_mgr:
                     check_source_language(
                         not expr.node_data.uses_entity_info
                         or expr.node_data.optional_entity_info
