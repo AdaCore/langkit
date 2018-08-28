@@ -488,6 +488,13 @@ private package ${ada_lib_name}.Implementation is
    --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
    --  it, or null if no such node was found.
 
+   function Compare
+     (Left, Right : access ${root_node_value_type}'Class;
+      Relation    : Comparison_Relation) return Boolean;
+   --  If Left and Right don't belong to the same analysis units or if one of
+   --  them is null, raise a Property_Error. Otherwise, return the comparison
+   --  of their starting source location according to Relation.
+
    -------------------
    -- Debug helpers --
    -------------------

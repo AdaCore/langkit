@@ -1662,6 +1662,29 @@ package body ${ada_lib_name}.Implementation is
                      else null);
    end Lookup_Relative;
 
+   -------------
+   -- Compare --
+   -------------
+
+   function Compare
+     (Left, Right : access ${root_node_value_type}'Class;
+      Relation    : Comparison_Relation) return Boolean
+   is
+      LS, RS : Source_Location;
+   begin
+      if Left = null or else Right = null or else Left.Unit /= Right.Unit then
+         raise Property_Error with "invalid node comparison";
+      end if;
+
+      LS := Start_Sloc (Left.Sloc_Range);
+      RS := Start_Sloc (Right.Sloc_Range);
+      return (case Relation is
+              when Langkit_Support.Types.Less_Than        => LS < RS,
+              when Langkit_Support.Types.Less_Or_Equal    => LS <= RS,
+              when Langkit_Support.Types.Greater_Than     => LS > RS,
+              when Langkit_Support.Types.Greater_Or_Equal => LS >= RS);
+   end Compare;
+
    -------------------
    -- Get_Extension --
    -------------------

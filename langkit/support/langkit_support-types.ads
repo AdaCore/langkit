@@ -9,4 +9,7 @@ package Langkit_Support.Types is
    --  for some class of resource. For instance unique in all analysis contexts
    --  a process creates.
 
+   type Comparison_Relation is
+     (Less_Than, Less_Or_Equal, Greater_Than, Greater_Or_Equal);
+
 end Langkit_Support.Types;
