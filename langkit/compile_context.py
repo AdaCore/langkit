@@ -1896,7 +1896,7 @@ class CompileCtx(object):
         :rtype: list[(str, str)]
         """
         return sorted(self.symbol_literals.items(),
-                      key=lambda (s, n): n)
+                      key=lambda kv: kv[1])
 
     def finalize_symbol_literals(self):
         """
@@ -2591,7 +2591,7 @@ class CompileCtx(object):
                     queue.add(caller)
 
         for prop, annot in sorted(annotations.items(),
-                                  key=lambda (p, _): p.qualname):
+                                  key=lambda p: p[0].qualname):
             if not prop.memoized or annot.memoizable:
                 continue
 
