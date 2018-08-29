@@ -109,6 +109,21 @@ def inherited_property(parent_getter, default_val=False):
     return impl
 
 
+try:
+    from contextlib import nested  # Python 2
+except ImportError:
+    from contextlib import ExitStack, contextmanager
+
+    @contextmanager
+    def nested(*contexts):
+        """
+        Reimplementation of nested in python 3.
+        """
+        with ExitStack() as stack:
+            for ctx in contexts:
+                stack.enter_context(ctx)
+            yield contexts
+
 # pyflakes off
 from langkit.utils.colors import *
 from langkit.utils.logging import *
