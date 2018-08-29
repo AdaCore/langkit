@@ -22,8 +22,6 @@ class Name(object):
         :param str mixed_with_underscores: Name in the mixed case and
             underscore format.
         """
-        if isinstance(mixed_with_underscores, unicode):
-            mixed_with_underscores = mixed_with_underscores.encode('ascii')
         self.base_name = mixed_with_underscores
 
     def __len__(self):
