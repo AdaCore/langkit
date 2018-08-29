@@ -1,6 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-from itertools import izip_longest
+# Python 2/3 compatibility
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 
 import funcy
 
@@ -465,7 +469,7 @@ class Predicate(AbstractExpression):
         # arguments expect and that 2) arguments left without an actual have a
         # default value.
         default_passed_args = 0
-        for i, (expr, arg) in enumerate(izip_longest(exprs, args)):
+        for i, (expr, arg) in enumerate(zip_longest(exprs, args)):
 
             if expr is None:
                 check_source_language(
