@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from contextlib import contextmanager, nested
+from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
@@ -22,7 +22,7 @@ from langkit.diagnostics import (
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
     TypeSet, assert_type, dispatch_on_type, inherited_property,
-    not_implemented_error, memoized, self_memoized
+    not_implemented_error, memoized, self_memoized, nested
 )
 
 
