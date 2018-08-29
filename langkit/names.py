@@ -57,7 +57,7 @@ class Name(object):
 
         :rtype: str
         """
-        return self.base_name.replace(b'_', b'')
+        return self.base_name.replace('_', '')
 
     @property
     def lower(self):
