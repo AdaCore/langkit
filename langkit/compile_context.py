@@ -177,7 +177,7 @@ class Verbosity(object):
             this level or the corresponding integer constant.
         :type level: str|int
         """
-        if isinstance(level, basestring):
+        if isinstance(level, str):
             if level not in self.NAMES:
                 raise ValueError('Invalid verbosity level: {}'.format(level))
             self.level = self._get(level)
