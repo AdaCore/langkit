@@ -1968,7 +1968,7 @@ package body ${ada_lib_name}.Implementation is
    % endif
 
    % if T.entity_info.requires_hash_function:
-      function Hash (Info : Entity_Info) return Hash_Type is
+      function Hash (Info : ${T.entity_info.name}) return Hash_Type is
         (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
    % endif
 
@@ -2632,8 +2632,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Fetch_Sibling
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info;
-      Offset : Integer) return Entity
+      E_Info : ${T.entity_info.name};
+      Offset : Integer) return ${root_entity.name}
    is
       Node_Index : constant Positive := Node.Child_Index + 1;
       --  Child_Index is 0-based, but the Child primitive expects a 1-based
@@ -2657,7 +2657,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Previous_Sibling
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return ${root_entity.name} is
    begin
       return Node.Fetch_Sibling (E_Info, -1);
    end Previous_Sibling;
@@ -2668,8 +2669,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Next_Sibling
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity
-   is
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return ${root_entity.name} is
    begin
       return Node.Fetch_Sibling (E_Info, 1);
    end Next_Sibling;
@@ -2713,16 +2714,14 @@ package body ${ada_lib_name}.Implementation is
 
    function Get
      (A     : AST_Envs.Entity_Array;
-      Index : Integer)
-      return Entity
+      Index : Integer) return ${root_entity.name}
    is
       function Length (A : AST_Envs.Entity_Array) return Natural
       is (A'Length);
 
       function Get
         (A     : AST_Envs.Entity_Array;
-         Index : Integer)
-         return Entity
+         Index : Integer) return ${root_entity.name}
       is (A (Index + 1)); --  A is 1-based but Index is 0-based
 
       function Relative_Get is new Langkit_Support.Relative_Get
@@ -2730,7 +2729,7 @@ package body ${ada_lib_name}.Implementation is
          Sequence_Type => AST_Envs.Entity_Array,
          Length        => Length,
          Get           => Get);
-      Result : Entity;
+      Result : ${root_entity.name};
    begin
       if Relative_Get (A, Index, Result) then
          return Result;
@@ -2758,7 +2757,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Children_Env
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return Lexical_Env
    is (Rebind_Env (Node.Self_Env, E_Info));
 
    --------------
@@ -2767,7 +2767,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Node_Env
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return Lexical_Env
    is
       <%
          ## Env specs might be overriden, so node kind that don't add envs
@@ -2842,7 +2843,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Parent
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return ${root_entity.name} is
    begin
       --  TODO: shed entity information as appropriate
       return (Node.Parent, E_Info);
@@ -2854,10 +2856,11 @@ package body ${ada_lib_name}.Implementation is
 
    function Parents
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return ${root_entity.array.name}
    is
       Bare_Parents : ${root_node_array.name} := Node.Parents;
-      Result       : Entity_Array_Access :=
+      Result       : ${root_entity.array.name} :=
          ${root_entity.array.constructor_name} (Bare_Parents.N);
    begin
       --  TODO: shed entity information as appropriate
@@ -2874,10 +2877,11 @@ package body ${ada_lib_name}.Implementation is
 
    function Children
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
+      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+      return ${root_entity.array.name}
    is
       Bare_Children : ${root_node_array.name} := Node.Children;
-      Result        : Entity_Array_Access :=
+      Result        : ${root_entity.array.name} :=
          ${root_entity.array.constructor_name} (Bare_Children.N);
    begin
       --  TODO: shed entity information as appropriate
@@ -3008,15 +3012,12 @@ package body ${ada_lib_name}.Implementation is
           Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
 
-   -------------------
-   -- Create_Entity --
-   -------------------
-
-   function Create_Entity
-     (Node : ${root_node_type_name}; Info : Entity_Info) return Entity is
+   function ${root_entity.constructor_name}
+     (Node : ${root_node_type_name};
+      Info : ${T.entity_info.name}) return ${root_entity.name} is
    begin
       return (Node => Node, Info => Info);
-   end Create_Entity;
+   end;
 
    -----------------
    -- Hash_Entity --
@@ -3097,7 +3098,7 @@ package body ${ada_lib_name}.Implementation is
       -- Trace_Image --
       -----------------
 
-      function Trace_Image (E : Entity) return String is
+      function Trace_Image (E : ${root_entity.name}) return String is
       begin
          if E.Node = null then
             return "None";
@@ -3111,7 +3112,7 @@ package body ${ada_lib_name}.Implementation is
       -- Trace_Image --
       -----------------
 
-      function Trace_Image (Info : Entity_Info) return String is
+      function Trace_Image (Info : ${T.entity_info.name}) return String is
       begin
          return ("(MD => " & Trace_Image (Info.MD)
                  & ", Rebindings => " & Trace_Image (Info.Rebindings));

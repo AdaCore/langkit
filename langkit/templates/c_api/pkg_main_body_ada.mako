@@ -239,7 +239,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
 
-      Result_P.all := (Unit.AST_Root, No_Entity_Info);
+      Result_P.all := (Unit.AST_Root, ${T.entity_info.nullexpr});
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);

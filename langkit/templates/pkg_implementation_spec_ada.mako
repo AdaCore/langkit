@@ -236,8 +236,9 @@ private package ${ada_lib_name}.Implementation is
    ${root_entity.nullexpr} : constant ${root_entity.name} :=
      (null, ${T.entity_info.nullexpr});
 
-   function Create_Entity
-     (Node : ${root_node_type_name}; Info : Entity_Info) return Entity;
+   function ${root_entity.constructor_name}
+     (Node : ${root_node_type_name};
+      Info : ${T.entity_info.name}) return ${root_entity.name};
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
    --  Hash function to use in the public API. It's like the regular one, but
@@ -271,7 +272,7 @@ private package ${ada_lib_name}.Implementation is
    % endif
 
    % if T.entity_info.requires_hash_function:
-      function Hash (Info : Entity_Info) return Hash_Type;
+      function Hash (Info : ${T.entity_info.name}) return Hash_Type;
    % endif
 
    ${struct_types.decl_hash(T.entity)}
@@ -418,8 +419,8 @@ private package ${ada_lib_name}.Implementation is
 
    function Fetch_Sibling
      (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info;
-      Offset : Integer) return Entity;
+      E_Info : ${T.entity_info.name};
+      Offset : Integer) return ${root_entity.name};
    --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
    --  child of the same parent, or No_Entity if there is no such sibling.
 
@@ -548,8 +549,8 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (I : Integer) return String;
       function Trace_Image (S : Symbol_Type) return String;
       function Trace_Image (Env : Lexical_Env) return String;
-      function Trace_Image (E : Entity) return String;
-      function Trace_Image (Info : Entity_Info) return String;
+      function Trace_Image (E : ${root_entity.name}) return String;
+      function Trace_Image (Info : ${T.entity_info.name}) return String;
       function Trace_Image (R : Env_Rebindings) return String;
       function Trace_Image (Unit : Internal_Unit) return String;
       function Trace_Image (Eq : Logic_Equation) return String;

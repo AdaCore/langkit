@@ -419,7 +419,8 @@
    begin
       % if has_dyn_env:
          Initial_Env := ${env_getter}
-           ((Node => ${root_node_type_name} (Self), Info => No_Entity_Info));
+           ((Node => ${root_node_type_name} (Self),
+             Info => ${T.entity_info.nullexpr}));
       % endif
 
       % for action in cls.env_spec.pre_actions:
