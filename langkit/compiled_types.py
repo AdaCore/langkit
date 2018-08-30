@@ -1643,14 +1643,18 @@ class StructType(BaseStructType):
             field) for this struct's fields. Inheritted fields must not appear
             in this list.
         """
+        internal_name = names.Name('Internal') + name
         super(StructType, self).__init__(
-            name, location, doc,
+            internal_name, location, doc,
             is_ptr=False,
             null_allowed=True,
             nullexpr=(names.Name('No') + name).camel_with_underscores,
             is_ada_record=True,
             exposed=False,
             hashable=True,
+            api_name=name,
+            type_repo_name=name.camel,
+            dsl_name=name.camel,
 
             **kwargs
         )

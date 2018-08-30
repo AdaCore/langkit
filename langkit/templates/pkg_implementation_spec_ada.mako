@@ -230,6 +230,8 @@ private package ${ada_lib_name}.Implementation is
       Register_Rebinding   => Register_Rebinding);
 
    use AST_Envs;
+   subtype Internal_Entity is AST_Envs.Entity;
+   subtype Internal_Entity_Info is AST_Envs.Entity_Info;
 
    ${T.entity_info.nullexpr} : constant ${T.entity_info.name} :=
      (No_Metadata, null);

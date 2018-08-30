@@ -53,7 +53,7 @@ class PythonAPISettings(AbstractAPISettings):
                 self.array_wrapper(type)
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
-                type.name.camel)),
+                self.type_public_name(type))),
             (T.EnvRebindingsType, lambda _: '{}'),
             (T.BigIntegerType, lambda _: '_big_integer.wrap({})'),
         ], exception=TypeError(
@@ -89,7 +89,8 @@ class PythonAPISettings(AbstractAPISettings):
                 '{}.unwrap({{value}}{{context}})'
                 .format(self.array_wrapper(cls))),
             (ct.StructType, lambda _:
-                '{}._unwrap({{value}}{{context}})'.format(type.name.camel)),
+                '{}._unwrap({{value}}{{context}})'
+                .format(self.type_public_name(type))),
             (T.SymbolType, lambda _: '_symbol_type.unwrap({value}{context})'),
             (T.EnvRebindingsType, lambda _: '{value}'),
             (T.BigIntegerType, lambda _: '_big_integer.unwrap({value})'),
@@ -125,7 +126,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.entity_info, lambda _: '_EntityInfo_c_type'),
             (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:
-                '{}._c_type'.format(type.name.camel)),
+                '{}._c_type'.format(self.type_public_name(type))),
             (T.BigIntegerType, lambda _: '_big_integer.c_type'),
         ])
 
@@ -154,7 +155,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda _: 'list[{}]'.format(
                 type.element_type.name.camel
             )),
-            (ct.StructType, lambda _: type.name.camel),
+            (ct.StructType, lambda _: type.api_name.camel),
             (T.AnalysisUnitKind, lambda _: 'str'),
             (T.BigIntegerType, lambda _: 'int'),
         ])
