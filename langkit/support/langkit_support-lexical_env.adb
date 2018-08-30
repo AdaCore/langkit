@@ -10,6 +10,8 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Env is
 
+   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
+
    function Has_Lookup_Cache (Dummy : Lexical_Env) return Boolean
    is
      (Activate_Lookup_Cache);

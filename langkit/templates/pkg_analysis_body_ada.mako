@@ -993,7 +993,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Wrap_Node
      (Node : access ${root_node_value_type}'Class;
-      Info : AST_Envs.Entity_Info := AST_Envs.No_Entity_Info)
+      Info : AST_Envs.Entity_Info := No_Entity_Info)
       return ${root_entity.api_name};
    function Unwrap_Node
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
@@ -1039,7 +1039,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Wrap_Node
      (Node : access ${root_node_value_type}'Class;
-      Info : AST_Envs.Entity_Info := AST_Envs.No_Entity_Info)
+      Info : AST_Envs.Entity_Info := No_Entity_Info)
       return ${root_entity.api_name} is
    begin
       if Node = null then

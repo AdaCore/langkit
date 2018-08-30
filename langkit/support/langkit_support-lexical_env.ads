@@ -99,8 +99,6 @@ package Langkit_Support.Lexical_Env is
    end record
       with Convention => C;
 
-   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
-
    type Entity is record
       Node : Node_Type;
       Info : Entity_Info;

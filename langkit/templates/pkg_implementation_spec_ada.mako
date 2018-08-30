@@ -231,6 +231,11 @@ private package ${ada_lib_name}.Implementation is
 
    use AST_Envs;
 
+   ${T.entity_info.nullexpr} : constant ${T.entity_info.name} :=
+     (No_Metadata, null);
+   ${root_entity.nullexpr} : constant ${root_entity.name} :=
+     (null, ${T.entity_info.nullexpr});
+
    function Create_Entity
      (Node : ${root_node_type_name}; Info : Entity_Info) return Entity;
 
@@ -740,8 +745,6 @@ private package ${ada_lib_name}.Implementation is
    --------------------------------------
    -- Environments handling (internal) --
    --------------------------------------
-
-   No_Entity : constant Entity := (null, No_Entity_Info);
 
    function Get (A : AST_Envs.Entity_Array; Index : Integer) return Entity;
    --  Simple getter that raises Property_Error on out-of-bound accesses.
