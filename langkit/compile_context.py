@@ -1985,19 +1985,6 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import ArrayType, Field, T
 
-        # TODO: enhance Python bindings to support these. For now, as strings
-        # are arrays of characters, users would be required pass an instance of
-        # the corresponding _BaseArray subclass, whereas we would like them to
-        # be able to pass simple strings instead.
-        def reject_string_arg(for_field, arg):
-            with for_field.diagnostic_context:
-                check_source_language(
-                    not arg.type.is_string_type,
-                    'String arguments in public properties are not supported'
-                    ' at the moment',
-                    severity=Severity.non_blocking_error
-                )
-
         def expose(t, to_internal, for_field, type_use, traceback):
             """
             Recursively tag "t" and all the types it references as exposed.
@@ -2077,12 +2064,10 @@ class CompileCtx(object):
                    'return type' if f.is_property else 'type',
                    [f.qualname])
             for arg in f.natural_arguments:
-                reject_string_arg(f, arg)
                 expose(arg.type, True, f, '"{}" argument'.format(arg.dsl_name),
                        [f.qualname])
             if f.is_property:
                 for dv in f.dynamic_vars:
-                    reject_string_arg(f, dv)
                     expose(dv.type, True, f,
                            '"{}" dynamic variable'.format(dv.dsl_name),
                            [f.qualname])
