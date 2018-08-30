@@ -184,10 +184,7 @@ class _text(ctypes.Structure):
 
     @classmethod
     def _unwrap(cls, value):
-        if isinstance(value, str):
-            value = value.decode('ascii')
-        elif not isinstance(value, unicode):
-            _raise_type_error('string or unicode', value)
+        value = cls.cast(value)
 
         text = value.encode(cls.encoding)
         text_buffer = ctypes.create_string_buffer(text)
@@ -207,6 +204,19 @@ class _text(ctypes.Structure):
             return self.chars[:4 * self.length].decode(self.encoding)
         else:
             return None
+
+    @classmethod
+    def cast(cls, value):
+        """
+        Try to cast ``value`` into an unicode object. Raise a TypeError, or
+        raise a string decoding error when this is not possible.
+        """
+        if isinstance(value, str):
+            return value.decode('ascii')
+        elif not isinstance(value, unicode):
+            _raise_type_error('string or unicode', value)
+        else:
+            return value
 
     def __del__(self):
         _destroy_text(ctypes.byref(self))
