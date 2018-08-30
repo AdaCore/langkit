@@ -565,7 +565,7 @@ private
    % for e in ctx.entity_types:
       % if e.is_root_type:
          type ${e.api_name} is tagged record
-            Internal   : Implementation.AST_Envs.${root_entity.name};
+            Internal   : Implementation.AST_Envs.Entity;
             Safety_Net : Implementation.Node_Safety_Net;
          end record;
       % else:
