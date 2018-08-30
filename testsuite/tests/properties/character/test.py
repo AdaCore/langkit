@@ -34,6 +34,10 @@ class Example(FooNode):
     def double(c=T.CharacterType):
         return ArrayLiteral([c, c], T.CharacterType)
 
+    @langkit_property(public=True)
+    def text_identity(s=T.StringType):
+        return s
+
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(main_rule=Example('example'))
