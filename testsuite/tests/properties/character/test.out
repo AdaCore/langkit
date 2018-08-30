@@ -11,5 +11,11 @@ Trying to evaluate .identity(u'aa')
    ... got a TypeError: ord() expected a character, but string of length 2 found
 .double(u'a') = u'aa'
 .double(u'\u03c0') = u'\u03c0\u03c0'
+.text_identity(1) = <TypeError: string or unicode instance expected, got <type 'int'> instead>
+.text_identity('foo') = u'foo'
+.text_identity(['a', 'b']) = u'ab'
+.text_identity(u'h\xe9llo') = u'h\xe9llo'
+.text_identity('h\xe9llo') = <UnicodeDecodeError: 'ascii' codec can't decode byte 0xe9 in position 1: ordinal not in range(128)>
+.text_identity(['a', 1]) = <TypeError: ord() expected string of length 1, but int found>
 main.py: Done.
 Done

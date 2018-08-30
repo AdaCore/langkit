@@ -34,4 +34,13 @@ for obj in (1, 'aa', u'aa'):
 print(".double(u'a') = {}".format(repr(n.p_double('a'))))
 print(".double(u'\\u03c0') = {}".format(repr(n.p_double(u'\u03c0'))))
 
+for obj in (1, 'foo', ['a', 'b'], u'h\xe9llo', 'h\xe9llo', ['a', 1]):
+    try:
+        value = n.p_text_identity(obj)
+    except Exception as exc:
+        value = '<{}: {}>'.format(type(exc).__name__, exc)
+    else:
+        value = repr(value)
+    print('.text_identity({}) = {}'.format(repr(obj), value))
+
 print('main.py: Done.')
