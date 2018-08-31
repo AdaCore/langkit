@@ -331,6 +331,12 @@ class CompiledType(object):
         self.to_public_converter_required = False
         self.to_internal_converter_required = False
 
+        self.used_in_public_struct = False
+        """
+        Whether this type is used as a field in a struct that belongs to the
+        public API.
+        """
+
     @property
     def conversion_requires_context(self):
         return self._conversion_requires_context

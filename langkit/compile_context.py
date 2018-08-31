@@ -1388,6 +1388,9 @@ class CompileCtx(object):
                 (t, dependencies(t))
                 for t in sorted(struct_types, key=lambda t: t.name)
             ))
+            for s in self._struct_types:
+                for f in s.get_fields():
+                    f.type.used_in_public_struct = True
 
         return self._struct_types
 
