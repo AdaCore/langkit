@@ -1,10 +1,3 @@
-*********
-Internals
-*********
-
-This section describes various Langkit implementation details. It is intended
-for Langkit developpers.
-
 Memory management in properties
 ===============================
 

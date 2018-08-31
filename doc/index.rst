@@ -16,7 +16,7 @@ Contents:
    extension_points
    api_documentation
    properties_dsl
-   internals
+   internals/index
 
 
 Indices and tables
