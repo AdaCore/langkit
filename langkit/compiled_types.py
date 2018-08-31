@@ -452,7 +452,10 @@ class CompiledType(object):
         else:
             # By default, assume public and internal types are identical, i.e.
             # that we can return the internal value as-is.
-            assert self.name == self.api_name
+            assert self.name == self.api_name, (
+                'Trying to avoid conversion while internal type is {} and'
+                ' public type is {}'.format(self.name, self.api_name)
+            )
             return internal_expr
 
     def to_internal_expr(self, public_expr, context=None):
