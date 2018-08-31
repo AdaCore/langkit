@@ -308,7 +308,7 @@ class CompiledType(object):
         self.should_emit_array_type = should_emit_array_type
         self.c_type_name = c_type_name
         self.external = external
-        self._exposed = exposed
+        self.exposed = exposed
         self.null_allowed = null_allowed
         self.is_ada_record = is_ada_record
         self._is_refcounted = is_refcounted
@@ -1788,7 +1788,7 @@ class EntityType(StructType):
             # automatically emitted for all derived types (without checking
             # _exposed), but we also rely on this flag to be set only for
             # entity types that are used in public properties.
-            self._exposed = True
+            self.exposed = True
 
             # LexicalEnv.get, which is bound in the AST.C generate package,
             # returns arrays of root node entities, so the corresponding
@@ -2629,7 +2629,7 @@ class ArrayType(CompiledType):
         # Langkit_Support.Text. To avoid discrepancies in code generation,
         # consider it is always exposed.
         if element_type.is_character_type:
-            self._exposed = True
+            self.exposed = True
 
     @property
     def name(self):

@@ -327,7 +327,7 @@ package ${ada_lib_name}.Analysis is
    -----------------
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-      % if array_type._exposed:
+      % if array_type.exposed:
          ${array_types.public_api_decl(array_type)}
       % endif
    % endfor

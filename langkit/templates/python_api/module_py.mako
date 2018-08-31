@@ -1459,7 +1459,7 @@ class ${c_entity_info}(ctypes.Structure):
     _fields_ = [('md', ${pyapi.c_type(T.env_md)}),
                 ('rebindings', ${pyapi.c_type(T.EnvRebindingsType)})]
     ## Emit other (and regular) structures
-    % elif struct_type._exposed:
+    % elif struct_type.exposed:
 ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -1486,7 +1486,7 @@ ${array_types.base_decl()}
 ${array_types.decl(T.root_node.array)}
 ${array_types.decl(T.entity.array)}
 % for array_type in ctx.sorted_types(ctx.array_types):
-    % if array_type._exposed and array_type.emit_c_type:
+    % if array_type.exposed and array_type.emit_c_type:
 ${array_types.decl(array_type)}
     % endif
 % endfor
@@ -1724,7 +1724,7 @@ _token_range_text = _import_func(
     [ctypes.POINTER(Token), ctypes.POINTER(Token), ctypes.POINTER(_text)],
     ctypes.c_int
 )
-% if T.entity._exposed:
+% if T.entity.exposed:
 _entity_image = _import_func(
     "${capi.get_name('entity_image')}",
     [ctypes.POINTER(${c_entity})], _text

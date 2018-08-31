@@ -516,7 +516,7 @@ private package ${ada_lib_name}.Implementation.C is
    ------------------
 
    % for struct_type in ctx.sorted_types(ctx.struct_types):
-      % if struct_type._exposed and \
+      % if struct_type.exposed and \
             struct_type.emit_c_type and \
             struct_type != root_entity:
          ${struct_types.decl(struct_type)}
@@ -529,7 +529,7 @@ private package ${ada_lib_name}.Implementation.C is
 
    % for array_type in ctx.sorted_types(ctx.array_types):
       % if array_type.element_type.should_emit_array_type and \
-            array_type._exposed and \
+            array_type.exposed and \
             array_type.emit_c_type:
          ${array_types.decl(array_type)}
       % endif
