@@ -2007,7 +2007,7 @@ class CompileCtx(object):
                         severity=Severity.non_blocking_error
                     )
 
-            if t._exposed:
+            if t.exposed:
                 # If the type is already exposed, there is nothing to *check*,
                 # but we still need to set the converter flags below.
                 pass
@@ -2036,22 +2036,22 @@ class CompileCtx(object):
                 # Only array types have their "_exposed" attribute inferred. We
                 # consider all other ones to have a static value, so complain
                 # if we reach a type that must not be exposed.
-                check(t._exposed, t.dsl_name)
+                check(t.exposed, t.dsl_name)
                 return
 
             if to_internal:
                 t.to_internal_converter_required = True
             else:
                 t.to_public_converter_required = True
-            t._exposed = True
+            t.exposed = True
 
         # As struct exceptions, manually expose structs required to expose
         # entities.
         #
         # TODO: this must go away once we manage to make entity types opaque in
         # the public API.
-        T.env_md._exposed = True
-        T.entity_info._exposed = True
+        T.env_md.exposed = True
+        T.entity_info.exposed = True
 
         for f in astnode.get_abstract_fields(
             predicate=lambda f: f.is_public,

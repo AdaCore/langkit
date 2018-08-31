@@ -130,7 +130,7 @@ typedef struct {
 } ${exception_type};
 
 % for struct_type in ctx.struct_types:
-    % if struct_type._exposed and struct_type.emit_c_type:
+    % if struct_type.exposed and struct_type.emit_c_type:
         ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -182,7 +182,7 @@ ${array_types.decl(T.entity.array)}
 
 % for array_type in ctx.sorted_types(ctx.array_types):
     % if array_type.element_type.should_emit_array_type and \
-            array_type._exposed and \
+            array_type.exposed and \
             array_type.emit_c_type:
         ${array_types.decl(array_type)}
     % endif
