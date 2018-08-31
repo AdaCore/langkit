@@ -67,8 +67,8 @@ package body ${ada_lib_name}.Analysis is
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit;
 
-   % for cls in ctx.array_types:
-      ${array_types.ada_api_converters_decl(cls)}
+   % for array_type in ctx.sorted_types(ctx.array_types):
+      ${array_types.ada_api_converters_decl(array_type)}
    % endfor
 
    -----------------------
@@ -635,8 +635,8 @@ package body ${ada_lib_name}.Analysis is
       return Node.Internal.Node.Kind_Name;
    end Kind_Name;
 
-   % for cls in ctx.array_types:
-      ${array_types.ada_api_converters_body(cls)}
+   % for array_type in ctx.sorted_types(ctx.array_types):
+      ${array_types.ada_api_converters_body(array_type)}
    % endfor
 
    % for e in ctx.entity_types:
