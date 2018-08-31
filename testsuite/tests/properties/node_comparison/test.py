@@ -18,7 +18,7 @@ class FooNode(ASTNode):
         return Self < n
 
     @langkit_property(public=True)
-    def before_or_equal(n=T.FooNode):
+    def before_or_equal(n=T.Example):
         return Self <= n
 
 
