@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import (ASTNode, BoolType, EnvRebindingsType, Field, Struct,
                          T, UserField, env_metadata)
-from langkit.expressions import New, No, Self, langkit_property
+from langkit.expressions import Entity, New, No, Self, langkit_property
 from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
@@ -20,6 +20,14 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
+
+    @langkit_property(public=True)
+    def first_set():
+        return Entity.info.md.is_first
+
+    @langkit_property(public=True)
+    def second_set():
+        return Entity.info.md.is_second
 
     @langkit_property(public=True)
     def test_main():

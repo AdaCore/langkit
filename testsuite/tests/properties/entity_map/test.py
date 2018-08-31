@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import (ASTNode, BoolType, EnumNode, Field, Struct, UserField,
                          T, env_metadata)
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import New, Self, langkit_property
+from langkit.expressions import Entity, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt
 
 from lexer_example import Token
@@ -20,7 +20,10 @@ class Metadata(Struct):
 
 
 class FooNode(ASTNode):
-    pass
+
+    @langkit_property(public=True)
+    def b_set():
+        return Entity.info.md.b
 
 
 class Name(FooNode):

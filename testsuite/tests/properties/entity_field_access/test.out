@@ -1,5 +1,5 @@
 main.py: Running...
-.test_main: <Couple 1:2-1:8> (metadata=<Metadata f_is_first=True f_is_second=False>)
-.property_on_entity: <Couple 1:1-1:12> (metadata=<Metadata f_is_first=False f_is_second=False>)
+.test_main: <Couple 1:2-1:8> (is_first=True, is_second=False)
+.property_on_entity: <Couple 1:1-1:12> (is_first=False, is_second=False)
 main.py: Done.
 Done
