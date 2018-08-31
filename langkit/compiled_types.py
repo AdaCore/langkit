@@ -813,6 +813,17 @@ class CompiledType(object):
     def is_array(self):
         return isinstance(self, ArrayType)
 
+    @property
+    def public_requires_boxing(self):
+        """
+        Whether the public type in the Ada API for this requires some boxing to
+        be embedded in a record. This is true for all unbounded types (i.e.
+        arrays).
+
+        :rtype: bool
+        """
+        return False
+
     def new(self, *args, **kwargs):
         """
         Shortcut to the New expression, allowing type.new(..) syntax.
@@ -1733,6 +1744,15 @@ class StructType(BaseStructType):
         :rtype: bool
         """
         return not self.is_entity_type or self == T.entity
+
+    @property
+    def contains_boxed_field(self):
+        """
+        Return if at least one field requires boxing in the public API.
+
+        :rtype: bool
+        """
+        return any(f.type.public_requires_boxing for f in self.get_fields())
 
 
 class EntityType(StructType):
@@ -2752,6 +2772,10 @@ class ArrayType(CompiledType):
         """
         return (not self.element_type.is_struct_type or
                 self.element_type.emit_c_type)
+
+    @property
+    def public_requires_boxing(self):
+        return True
 
 
 def create_enum_node_types(cls):
