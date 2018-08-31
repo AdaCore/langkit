@@ -1986,7 +1986,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, Field, T
+        from langkit.compiled_types import ArrayType, Field
 
         def expose(t, to_internal, for_field, type_use, traceback):
             """
@@ -2044,14 +2044,6 @@ class CompileCtx(object):
             else:
                 t.to_public_converter_required = True
             t.exposed = True
-
-        # As struct exceptions, manually expose structs required to expose
-        # entities.
-        #
-        # TODO: this must go away once we manage to make entity types opaque in
-        # the public API.
-        T.env_md.exposed = True
-        T.entity_info.exposed = True
 
         for f in astnode.get_abstract_fields(
             predicate=lambda f: f.is_public,

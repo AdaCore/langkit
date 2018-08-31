@@ -54,7 +54,6 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
-            (T.EnvRebindingsType, lambda _: '{}'),
             (T.BigIntegerType, lambda _: '_big_integer.wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
@@ -92,7 +91,6 @@ class PythonAPISettings(AbstractAPISettings):
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
             (T.SymbolType, lambda _: '_symbol_type.unwrap({value}{context})'),
-            (T.EnvRebindingsType, lambda _: '{value}'),
             (T.BigIntegerType, lambda _: '_big_integer.unwrap({value})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
@@ -124,6 +122,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda cls:
                 '{}.c_type'.format(self.array_wrapper(cls))),
             (T.entity_info, lambda _: '_EntityInfo_c_type'),
+            (T.env_md, lambda _: '_Metadata_c_type'),
             (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:
                 '{}._c_type'.format(self.type_public_name(type))),

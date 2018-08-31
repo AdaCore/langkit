@@ -21,8 +21,8 @@ from __future__ import (absolute_import, division, print_function,
     root_astnode_name = pyapi.type_public_name(T.root_node)
     c_node = '{}._node_c_type'.format(root_astnode_name)
     c_entity = pyapi.c_type(root_entity)
-    metadata = pyapi.type_public_name(T.env_md)
     c_entity_info = pyapi.c_type(T.entity_info)
+    c_metadata = pyapi.c_type(T.env_md)
 %>
 
 
@@ -968,10 +968,7 @@ class ${root_astnode_name}(object):
         # used outside of hashing/equality use cases.
         self._node_c_value = node_c_value
         self._rebindings = rebindings
-
-        # The "metadata" property is the only legitimate reader for this field,
-        # and thus the only place that contains the stale reference check.
-        self._metadata = metadata or ${metadata}._null_value
+        self._metadata = metadata
 
         self._unprotected_getitem_cache = {}
         """
@@ -1001,11 +998,6 @@ class ${root_astnode_name}(object):
     def _getitem_cache(self):
         self._check_stale_reference()
         return self._unprotected_getitem_cache
-
-    @property
-    def metadata(self):
-        self._check_stale_reference()
-        return self._metadata
 
     @property
     def _id_tuple(self):
@@ -1329,9 +1321,8 @@ class ${root_astnode_name}(object):
         if not node_c_value:
             return None
 
-        rebindings = ${pyapi.wrap_value('c_value.info.rebindings',
-                                        T.EnvRebindingsType)}
-        metadata = ${pyapi.wrap_value('c_value.info.md', T.env_md)}
+        rebindings = c_value.info.rebindings
+        metadata = c_value.info.md
 
         # Look for an already existing wrapper for this node
         cache_key = (node_c_value, metadata, rebindings)
@@ -1458,6 +1449,28 @@ class ${c_entity}(ctypes.Structure):
 class ${c_entity_info}(ctypes.Structure):
     _fields_ = [('md', ${pyapi.c_type(T.env_md)}),
                 ('rebindings', ${pyapi.c_type(T.EnvRebindingsType)})]
+    ## Likewise for metadata structures
+    % elif struct_type is T.env_md:
+class ${c_metadata}(ctypes.Structure):
+    _fields_ = [
+        % for field in struct_type.get_fields():
+            ('${field.name.lower}', ${pyapi.c_type(field.type)}),
+        % endfor
+    ]
+
+    @property
+    def as_tuple(self):
+        return tuple(getattr(self, f) for f, _ in self._fields_)
+
+    def __eq__(self, other):
+        return (isinstance(other, type(self)) and
+                self.as_tuple == other.as_tuple)
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __hash__(self):
+        return hash(self.as_tuple)
     ## Emit other (and regular) structures
     % elif struct_type.exposed:
 ${struct_types.decl(struct_type)}
@@ -1465,11 +1478,11 @@ ${struct_types.decl(struct_type)}
 % endfor
 
 
-${metadata}._null_c_value = ${pyapi.c_type(T.env_md)}(${', '.join(
+${c_metadata}._null_value = ${pyapi.c_type(T.env_md)}(${', '.join(
     'None' if f.type.is_entity_type else 'False'
     for f in T.env_md.get_fields()
 )})
-${c_entity_info}._null_value = ${c_entity_info}(${metadata}._null_c_value,
+${c_entity_info}._null_value = ${c_entity_info}(${c_metadata}._null_value,
                                                 None)
 
 
