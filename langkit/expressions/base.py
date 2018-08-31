@@ -45,6 +45,8 @@ def unsugar(expr, ignore_errors=False):
     # WARNING: Since bools are ints in python, bool needs to be before int
     if isinstance(expr, (bool, int)):
         expr = Literal(expr)
+    if isinstance(expr, long):
+        expr = BigInteger(expr)
     elif isinstance(expr, basestring):
         expr = SymbolLiteral(expr)
     elif isinstance(expr, TypeRepo.Defer):
@@ -4592,7 +4594,12 @@ class BigInteger(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        expr = construct(self.expr, T.LongType)
+        # If we got a mere integer, assume it's too big to fit in an Ada
+        # Integer and use the overload of Create_Big_Integer to create a big
+        # int from its base-10 string representation.
+        expr = ('"{}"'.format(self.expr)
+                if isinstance(self.expr, (int, long)) else
+                construct(self.expr, T.LongType))
         return BigInteger.Expr(expr, abstract_expr=self)
 
     def __repr__(self):
