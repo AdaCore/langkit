@@ -280,14 +280,14 @@ class OrderingTest(AbstractExpression):
             .format(T.LongType.dsl_name, T.BigIntegerType.dsl_name,
                     lhs.type.dsl_name)
         )
-        check_source_language(
-            lhs.type == rhs.type,
-            'Comparisons require the same type for both operands'
-            ' (got {} and {})'.format(lhs.type.dsl_name, rhs.type.dsl_name)
-        )
 
         # If we are comparing two nodes, just use the dedicated helper
         if lhs.type.is_ast_node:
+            check_source_language(
+                rhs.type.is_ast_node,
+                'A node can only be compared to another node (got {} and {})'
+                .format(lhs.type.dsl_name, rhs.type.dsl_name)
+            )
             relation = {self.LT: 'Less_Than',
                         self.LE: 'Less_Or_Equal',
                         self.GT: 'Greater_Than',
@@ -295,6 +295,13 @@ class OrderingTest(AbstractExpression):
             return CallExpr('Node_Comp', 'Compare', T.BoolType,
                             [lhs, rhs, relation], abstract_expr=self)
 
+        # Otherwise, expect strict equality for both operands and use the
+        # native comparison operator for code generation.
+        check_source_language(
+            lhs.type == rhs.type,
+            'Comparisons require the same type for both operands'
+            ' (got {} and {})'.format(lhs.type.dsl_name, rhs.type.dsl_name)
+        )
         return OrderingTest.Expr(self.operator, lhs, rhs)
 
 
