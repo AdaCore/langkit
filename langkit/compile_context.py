@@ -16,6 +16,7 @@ import ast
 from collections import defaultdict
 from contextlib import contextmanager
 from distutils.spawn import find_executable
+from functools import reduce
 from glob import glob
 from io import StringIO
 import os
@@ -23,7 +24,6 @@ from os import path
 import subprocess
 import sys
 
-from functools import reduce
 from funcy import keep
 
 from langkit import caching, names
@@ -1035,8 +1035,8 @@ class CompileCtx(object):
             if isinstance(expr, FieldAccess.Expr):
                 context_mgr = (
                     expr.abstract_expr.diagnostic_context
-                    if expr.abstract_expr
-                    else Context('', None, '')
+                    if expr.abstract_expr else
+                    Context('', None, '')
                 )
 
                 with context_mgr:
