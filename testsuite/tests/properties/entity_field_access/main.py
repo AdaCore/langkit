@@ -17,7 +17,8 @@ if u.diagnostics:
 
 
 def entity_repr(e):
-    return '{} (metadata={})'.format(e, e.metadata)
+    return '{} (is_first={}, is_second={})'.format(e, e.p_first_set,
+                                                   e.p_second_set)
 
 
 print('.test_main:', entity_repr(u.root.p_test_main))
