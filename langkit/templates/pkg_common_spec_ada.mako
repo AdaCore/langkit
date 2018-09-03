@@ -6,8 +6,6 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
-
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
 
@@ -15,6 +13,11 @@ with GNATCOLL.Traces;
 --  package tree.
 
 package ${ada_lib_name}.Common is
+
+   <%
+      lexer = ctx.lexer
+      tokens = lexer.sorted_tokens
+   %>
 
    Main_Trace : constant GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
@@ -67,6 +70,34 @@ package ${ada_lib_name}.Common is
                .. ${subclasses[-1].ada_kind_name};
       % endif
    % endfor
+
+   type Lexer_Input_Kind is (File, Bytes_Buffer, Text_Buffer);
+
+   type Token_Kind is (
+      ${',\n'.join(t.ada_name for t in tokens)}
+   );
+
+   type Token_Family is
+     (${', '.join(tf.ada_name for tf in lexer.tokens.token_families)});
+
+   % if lexer.track_indent:
+   type Indent_Kind is (Indent, Dedent, Nodent, None);
+   % endif
+
+   Token_Kind_To_Family : array (Token_Kind) of Token_Family :=
+     (${', '.join('{} => {}'.format(t.ada_name,
+                                     lexer.tokens.token_to_family[t].ada_name)
+                   for t in tokens)});
+
+   function Token_Kind_Name (Token_Id : Token_Kind) return String;
+   ${ada_doc('langkit.token_kind_name', 3)}
+
+   function Token_Kind_Literal (Token_Id : Token_Kind) return Text_Type;
+   --  Return the canonical literal corresponding to this token kind, or an
+   --  empty string if this token has no literal.
+
+   function Token_Error_Image (Token_Id : Token_Kind) return String;
+   --  Return a string repr of token kind suitable in error messages
 
    function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean;
    --  Return whether Kind corresponds to a token node
@@ -155,6 +186,18 @@ package ${ada_lib_name}.Common is
    type Child_Or_Trivia is (Child, Trivia);
    --  Discriminator for the Child_Record type
 
+   type Symbolization_Result (Success : Boolean; Size : Natural) is record
+      case Success is
+         when True  => Symbol : Text_Type (1 .. Size);
+         when False => Error_Message : Text_Type (1 .. Size);
+      end case;
+   end record;
+
+   function Create_Symbol (Name : Text_Type) return Symbolization_Result is
+     ((Success => True, Size => Name'Length, Symbol => Name));
+   function Create_Error (Message : Text_Type) return Symbolization_Result is
+     ((Success => False, Size => Message'Length, Error_Message => Message));
+
    Property_Error : exception;
    ${ada_doc('langkit.property_error', 3)}
 
@@ -172,6 +215,14 @@ package ${ada_lib_name}.Common is
 
    Stale_Reference_Error : exception;
    ${ada_doc('langkit.stale_reference_error', 3)}
+
+   Unknown_Charset : exception;
+   --  Raised by lexing functions (${ada_lib_name}.Lexer) when the input
+   --  charset is not supported.
+
+   Invalid_Input : exception;
+   --  Raised by lexing functions (${ada_lib_name}.Lexer) when the input
+   --  contains an invalid byte sequence.
 
 private
 

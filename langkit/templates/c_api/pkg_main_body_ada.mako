@@ -23,7 +23,6 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
 ${exts.with_clauses(with_clauses)}
 

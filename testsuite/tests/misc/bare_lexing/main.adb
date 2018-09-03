@@ -6,7 +6,8 @@ with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
-with Libfoolang.Lexer; use Libfoolang.Lexer;
+with Libfoolang.Common; use Libfoolang.Common;
+with Libfoolang.Lexer;  use Libfoolang.Lexer;
 
 procedure Main is
 

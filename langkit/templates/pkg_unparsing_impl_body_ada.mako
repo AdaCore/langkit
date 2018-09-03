@@ -18,7 +18,6 @@ with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 
 package body ${ada_lib_name}.Unparsing_Implementation is
 
@@ -162,7 +161,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  Emit to Result the sequence of tokens in Template, or do nothing if the
    --  template is absent.
 
-   ## Emit the table to indicate spacing rules between tokens. Use "Lexer."
+   ## Emit the table to indicate spacing rules between tokens. Use "Common."
    ## qualified names for token kinds and token families to avoid conflicts
    ## with node names from "Analysis.".
 
@@ -172,8 +171,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          spacing_table = ctx.lexer.spacing_table
       %>
       (${', '.join(
-         'Lexer.{} => ({})'.format(tf1.ada_name, ', '.join(
-            'Lexer.{} => {}'.format(tf2.ada_name, spacing_table[tf1][tf2])
+         'Common.{} => ({})'.format(tf1.ada_name, ', '.join(
+            'Common.{} => {}'.format(tf2.ada_name, spacing_table[tf1][tf2])
             for tf2 in token_families
          ))
          for tf1 in token_families)});
@@ -182,7 +181,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  Token_Spacing_Table (TF1, TF2).
 
    Token_Newline_Table : array (Token_Kind) of Boolean :=
-     (${', '.join('Lexer.{} => {}'.format(t.ada_name,
+     (${', '.join('Common.{} => {}'.format(t.ada_name,
                                           t in ctx.lexer.newline_after)
                   for t in ctx.lexer.sorted_tokens)});
    --  A line break must be append during unparsing after a token T iff
