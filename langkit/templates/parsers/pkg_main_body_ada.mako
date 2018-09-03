@@ -10,6 +10,7 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
@@ -101,7 +102,7 @@ package body ${ada_lib_name}.Parsers is
    -----------------
 
    procedure Init_Parser
-     (Input           : Lexer_Input;
+     (Input           : Internal_Lexer_Input;
       With_Trivia     : Boolean;
       Unit            : access Implementation.Analysis_Unit_Type;
       TDH             : Token_Data_Handler_Access;

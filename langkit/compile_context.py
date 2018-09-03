@@ -1627,8 +1627,9 @@ class CompileCtx(object):
             ('pkg_unparsing_impl', 'Unparsing_Implementation', True),
             # Unit for all parsers
             ('parsers/pkg_main', 'Parsers', True),
-            # Unit for the lexer
-            ('lexer/pkg_main', 'Lexer', True),
+            # Units for the lexer
+            ('pkg_lexer', 'Lexer', True),
+            ('pkg_lexer_impl', 'Lexer_Implementation', True),
             # Unit for debug helpers
             ('pkg_debug', 'Debug', True),
         ]

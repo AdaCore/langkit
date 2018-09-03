@@ -21,10 +21,10 @@ procedure Main is
 
 begin
    Extract_Tokens
-     (Input => (Kind     => Bytes_Buffer,
-                Charset  => To_Unbounded_String ("ascii"),
-                Read_BOM => True,
-                Bytes    => Buffer'Unrestricted_Access),
+     (Input => (Kind        => Bytes_Buffer,
+                Charset     => To_Unbounded_String ("ascii"),
+                Read_BOM    => True,
+                Bytes       => To_Unbounded_String (Buffer)),
       With_Trivia => True,
       TDH         => TDH,
       Diagnostics => Diagnostics);

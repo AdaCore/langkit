@@ -7,7 +7,8 @@ use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 limited with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer_Implementation;
+use ${ada_lib_name}.Lexer_Implementation;
 
 --  Internal package to provide types and primitives to parse buffers and files
 --  and get AST out of them. Plesae don't use this package directly.
@@ -57,7 +58,7 @@ private package ${ada_lib_name}.Parsers is
    end record;
 
    procedure Init_Parser
-     (Input           : Lexer_Input;
+     (Input           : Internal_Lexer_Input;
       With_Trivia     : Boolean;
       Unit            : access Implementation.Analysis_Unit_Type;
       TDH             : Token_Data_Handler_Access;
