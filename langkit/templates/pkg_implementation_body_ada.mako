@@ -17,6 +17,7 @@ with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
+with System;
 
 with GNATCOLL.Traces;
 
@@ -42,7 +43,7 @@ pragma Warnings (On, "referenced");
 with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False)
@@ -377,7 +378,7 @@ package body ${ada_lib_name}.Implementation is
      (Context           : Internal_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Input             : Lexer_Input;
+      Input             : Internal_Lexer_Input;
       Rule              : Grammar_Rule) return Internal_Unit
    is
       use Units_Maps;
@@ -391,7 +392,7 @@ package body ${ada_lib_name}.Implementation is
       Unit    : Internal_Unit;
 
       Actual_Charset : Unbounded_String;
-      Refined_Input  : Lexer_Input := Input;
+      Refined_Input  : Internal_Lexer_Input := Input;
 
    begin
       --  Determine which encoding to use. The parameter comes first, then the
@@ -467,7 +468,7 @@ package body ${ada_lib_name}.Implementation is
       Reparse  : Boolean;
       Rule     : Grammar_Rule) return Internal_Unit
    is
-      Input : constant Lexer_Input :=
+      Input : constant Internal_Lexer_Input :=
         (Kind     => File,
          Charset  => <>,
          Read_BOM => False,
@@ -487,11 +488,12 @@ package body ${ada_lib_name}.Implementation is
       Buffer   : String;
       Rule     : Grammar_Rule) return Internal_Unit
    is
-      Input : constant Lexer_Input :=
-        (Kind     => Bytes_Buffer,
-         Charset  => <>,
-         Read_BOM => False,
-         Bytes    => Buffer'Unrestricted_Access);
+      Input : constant Internal_Lexer_Input :=
+        (Kind        => Bytes_Buffer,
+         Charset     => <>,
+         Read_BOM    => False,
+         Bytes       => Buffer'Address,
+         Bytes_Count => Buffer'Length);
    begin
       return Get_Unit (Context, Filename, Charset, True, Input, Rule);
    end Get_From_Buffer;
@@ -3668,7 +3670,9 @@ package body ${ada_lib_name}.Implementation is
    ----------------
 
    procedure Do_Parsing
-     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit)
+     (Unit   : Internal_Unit;
+      Input  : Internal_Lexer_Input;
+      Result : out Reparsed_Unit)
    is
       Context  : constant Internal_Context := Unit.Context;
       Unit_TDH : constant Token_Data_Handler_Access := Token_Data (Unit);

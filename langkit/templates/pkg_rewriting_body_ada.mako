@@ -2,6 +2,7 @@
 
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
+with System;
 
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
@@ -9,12 +10,12 @@ use Langkit_Support.Token_Data_Handlers;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer_Implementation;
+use ${ada_lib_name}.Lexer_Implementation;
 
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Unparsing_Implementation;
 use ${ada_lib_name}.Unparsing_Implementation;
-
 
 package body ${ada_lib_name}.Rewriting is
 
@@ -149,20 +150,24 @@ package body ${ada_lib_name}.Rewriting is
             PU    : constant Processed_Unit := new Processed_Unit_Record'
               (Unit     => Unwrap_Unit (Unit_Handle.Unit),
                New_Data => <>);
-            Input : Lexer_Input :=
-              (Kind     => Bytes_Buffer,
-               Charset  => <>,
-               Read_BOM => False,
-               Bytes    => null);
+            Input : Internal_Lexer_Input :=
+              (Kind        => Bytes_Buffer,
+               Charset     => <>,
+               Read_BOM    => False,
+               Bytes       => System.Null_Address,
+               Bytes_Count => 0);
+            Bytes : String_Access;
          begin
             Units.Append (PU);
 
             --  Reparse (i.e. unparse and then parse) this rewritten unit
-            Input.Bytes := Unparse (Unit_Handle.Root, PU.Unit,
-                                    Preserve_Formatting => True,
-                                    As_Unit             => True);
+            Bytes := Unparse (Unit_Handle.Root, PU.Unit,
+                              Preserve_Formatting => True,
+                              As_Unit             => True);
+            Input.Bytes := Bytes.all'Address;
+            Input.Bytes_Count := Bytes.all'Length;
             Do_Parsing (PU.Unit, Input, PU.New_Data);
-            Free (Input.Bytes);
+            Free (Bytes);
 
             --  If there is a parsing error, abort the rewriting process
             if not PU.New_Data.Diagnostics.Is_Empty then
@@ -979,9 +984,10 @@ package body ${ada_lib_name}.Rewriting is
          Unit     : constant Internal_Unit := Templates_Unit (Context);
          Reparsed : Reparsed_Unit;
          Text     : constant Text_Type := To_Wide_Wide_String (Buffer);
-         Input    : constant Lexer_Input :=
-           (Kind => Text_Buffer,
-            Text => Text'Unrestricted_Access);
+         Input    : constant Internal_Lexer_Input :=
+           (Kind       => Text_Buffer,
+            Text       => Text'Address,
+            Text_Count => Text'Length);
 
          function Transform
            (Node   : ${root_node_type_name};

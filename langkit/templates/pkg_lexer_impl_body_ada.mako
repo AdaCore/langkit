@@ -27,11 +27,13 @@ with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
+with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+
 % if ctx.symbol_canonicalizer:
 with ${ctx.symbol_canonicalizer.unit_fqn};
 % endif
 
-package body ${ada_lib_name}.Lexer is
+package body ${ada_lib_name}.Lexer_Implementation is
 
    Quex_Leading_Characters  : constant := 2;
    Quex_Trailing_Characters : constant := 1;
@@ -40,11 +42,6 @@ package body ${ada_lib_name}.Lexer is
    --  Quex requires its input buffer to have two leading reserved bytes and
    --  one trailing. These are not part of the true payload, but must be
    --  available anyway.
-
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind is
-     (Token_Kind'Val (Raw));
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind is
-     (Token_Kind'Pos (Kind));
 
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
@@ -475,7 +472,7 @@ package body ${ada_lib_name}.Lexer is
    --------------------
 
    procedure Extract_Tokens
-     (Input       : Lexer_Input;
+     (Input       : Internal_Lexer_Input;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector) is
@@ -512,21 +509,28 @@ package body ${ada_lib_name}.Lexer is
             end;
 
          when Bytes_Buffer =>
-            Extract_Tokens_From_Bytes_Buffer
-              (Input.Bytes.all, To_String (Input.Charset), Input.Read_BOM,
-               With_Trivia, TDH, Diagnostics);
+            declare
+               Bytes : String (1 .. Input.Bytes_Count)
+                  with Import, Address => Input.Bytes;
+            begin
+               Extract_Tokens_From_Bytes_Buffer
+                 (Bytes, To_String (Input.Charset), Input.Read_BOM,
+                  With_Trivia, TDH, Diagnostics);
+            end;
 
          when Text_Buffer =>
             declare
                Decoded_Buffer : Text_Access := new Text_Type
-                 (1 .. Input.Text.all'Length + Quex_Extra_Characters);
+                 (1 .. Input.Text_Count + Quex_Extra_Characters);
                Source_First  : constant Positive :=
                   1 + Quex_Leading_Characters;
                Source_Last   : constant Positive :=
-                  Source_First + Input.Text.all'Length - 1;
+                  Source_First + Input.Text_Count - 1;
+
+               Text_View : Text_Type (1 .. Input.Text_Count)
+                  with Import, Address => Input.Text;
             begin
-               Decoded_Buffer.all (Source_First .. Source_Last) :=
-                  Input.Text.all;
+               Decoded_Buffer.all (Source_First .. Source_Last) := Text_View;
                Extract_Tokens_From_Text_Buffer
                  (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
                   Diagnostics);
@@ -659,4 +663,4 @@ package body ${ada_lib_name}.Lexer is
       Iconv_Close (State);
    end Decode_Buffer;
 
-end ${ada_lib_name}.Lexer;
+end ${ada_lib_name}.Lexer_Implementation;

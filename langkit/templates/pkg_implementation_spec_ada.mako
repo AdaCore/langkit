@@ -44,8 +44,9 @@ with Langkit_Support.Types;       use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
-with ${ada_lib_name}.Lexer;   use ${ada_lib_name}.Lexer;
 with ${ada_lib_name}.Common;  use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Lexer_Implementation;
+use ${ada_lib_name}.Lexer_Implementation;
 
 ${exts.with_clauses(with_clauses)}
 
@@ -1167,7 +1168,7 @@ private package ${ada_lib_name}.Implementation is
      (Context           : Internal_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Input             : Lexer_Input;
+      Input             : Internal_Lexer_Input;
       Rule              : Grammar_Rule) return Internal_Unit;
    --  Helper for Get_From_File and Get_From_Buffer. Return the resulting
    --  analysis unit.
@@ -1348,7 +1349,9 @@ private package ${ada_lib_name}.Implementation is
      (Referenced, Unit : Internal_Unit) return Boolean;
 
    procedure Do_Parsing
-     (Unit : Internal_Unit; Input : Lexer_Input; Result : out Reparsed_Unit);
+     (Unit   : Internal_Unit;
+      Input  : Internal_Lexer_Input;
+      Result : out Reparsed_Unit);
    --  Parse text for Unit using Input and store the result in Result. This
    --  leaves Unit unchanged.
 
