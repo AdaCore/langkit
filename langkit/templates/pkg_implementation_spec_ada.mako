@@ -38,13 +38,14 @@ with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;       use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
-with ${ada_lib_name}.Parsers;     use ${ada_lib_name}.Parsers;
-with ${ada_lib_name}.Lexer;       use ${ada_lib_name}.Lexer;
-use ${ada_lib_name}.Lexer.Token_Data_Handlers;
-with ${ada_lib_name}.Common;     use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
+with ${ada_lib_name}.Lexer;   use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Common;  use ${ada_lib_name}.Common;
 
 ${exts.with_clauses(with_clauses)}
 

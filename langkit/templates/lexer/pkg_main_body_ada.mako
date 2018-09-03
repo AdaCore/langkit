@@ -24,6 +24,7 @@ with GNAT.Byte_Order_Mark;
 with GNATCOLL.Iconv;
 with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
 
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
@@ -40,6 +41,11 @@ package body ${ada_lib_name}.Lexer is
    --  Quex requires its input buffer to have two leading reserved bytes and
    --  one trailing. These are not part of the true payload, but must be
    --  available anyway.
+
+   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind is
+     (Token_Kind'Val (Raw));
+   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind is
+     (Token_Kind'Pos (Kind));
 
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
@@ -119,16 +125,6 @@ package body ${ada_lib_name}.Lexer is
      (Lexer       : Lexer_Type;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
-
-   ----------------
-   -- Sloc_Range --
-   ----------------
-
-   function Sloc_Range (Token : Stored_Token_Data) return Source_Location_Range
-   is
-   begin
-      return Token.Sloc_Range;
-   end Sloc_Range;
 
    ------------------------
    -- Process_All_Tokens --
@@ -268,7 +264,7 @@ package body ${ada_lib_name}.Lexer is
                   Append
                     (TDH.Trivias,
                      (Has_Next => False,
-                      T        => (Kind         => Token_Id,
+                      T        => (Kind         => From_Token_Kind (Token_Id),
                                    Source_First => Source_First,
                                    Source_Last  => Source_Last,
                                    Symbol       => null,
@@ -301,7 +297,7 @@ package body ${ada_lib_name}.Lexer is
          --  with it.
 
          TDH.Tokens.Append
-           ((Kind         => Token_Id,
+           ((Kind         => From_Token_Kind (Token_Id),
              Source_First => (if Token_Id = ${termination}
                               then TDH.Source_Last + 1
                               else Source_First),
@@ -321,7 +317,7 @@ package body ${ada_lib_name}.Lexer is
          if Token_Id = ${termination} then
             while Get_Col > 1 loop
                TDH.Tokens.Append
-                 ((Kind         => ${lexer.Dedent.ada_name},
+                 ((Kind         => From_Token_Kind (${lexer.Dedent.ada_name}),
                    Source_First => TDH.Source_Last + 1,
                    Source_Last  => TDH.Source_Last,
                    Symbol       => null,
@@ -369,14 +365,14 @@ package body ${ada_lib_name}.Lexer is
                   --  Emit every necessary dedent token if the line is
                   -- dedented, and pop values from the stack.
                   while Sloc_Range.Start_Column < Get_Col loop
-                     T.Kind := ${lexer.Dedent.ada_name};
+                     T.Kind := From_Token_Kind (${lexer.Dedent.ada_name});
                      TDH.Tokens.Append (T);
                      Columns_Stack_Len := Columns_Stack_Len - 1;
                   end loop;
                elsif Sloc_Range.Start_Column > Get_Col then
                   --  Emit a single indent token, and put the new value on the
                   --  indent stack.
-                  T.Kind := ${lexer.Indent.ada_name};
+                  T.Kind := From_Token_Kind (${lexer.Indent.ada_name});
                   TDH.Tokens.Append (T);
                   Columns_Stack_Len := Columns_Stack_Len + 1;
                   Columns_Stack (Columns_Stack_Len) := Sloc_Range.Start_Column;
@@ -399,7 +395,7 @@ package body ${ada_lib_name}.Lexer is
             or else Ign_Layout_Level <= 0
          then
             TDH.Tokens.Append
-              ((Kind         => Token_Id,
+              ((Kind         => From_Token_Kind (Token_Id),
                 Source_First => (if Token_Id = ${termination}
                                  then TDH.Source_Last + 1
                                  else Source_First),

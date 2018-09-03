@@ -3,9 +3,10 @@ with Ada.Text_IO;           use Ada.Text_IO;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 with Libfoolang.Lexer; use Libfoolang.Lexer;
-use Libfoolang.Lexer.Token_Data_Handlers;
 
 procedure Main is
 
@@ -19,10 +20,10 @@ procedure Main is
 
 begin
    Extract_Tokens
-     (Input => (Kind => Bytes_Buffer,
-                Charset => To_Unbounded_String ("ascii"),
+     (Input => (Kind     => Bytes_Buffer,
+                Charset  => To_Unbounded_String ("ascii"),
                 Read_BOM => True,
-                Bytes => Buffer'Unrestricted_Access),
+                Bytes    => Buffer'Unrestricted_Access),
       With_Trivia => True,
       TDH         => TDH,
       Diagnostics => Diagnostics);
@@ -33,7 +34,7 @@ begin
          Token_Data : constant Stored_Token_Data := Data (Tok, TDH);
       begin
          Put_Line (Image (Token_Data.Sloc_Range)
-                   & " " & Token_Kind'Image (Token_Data.Kind)
+                   & " " & Token_Kind'Image (To_Token_Kind (Token_Data.Kind))
                    & ": " & Image (TDH, Token_Data));
       end;
       Tok := Next (Tok, TDH);

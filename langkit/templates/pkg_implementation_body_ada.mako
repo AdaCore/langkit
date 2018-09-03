@@ -871,7 +871,6 @@ package body ${ada_lib_name}.Implementation is
    function Lookup_Token
      (Unit : Internal_Unit; Sloc : Source_Location) return Token_Reference
    is
-      use Token_Data_Handlers;
       Result : constant Token_Or_Trivia_Index := Lookup_Token (Unit.TDH, Sloc);
    begin
       return Wrap_Token_Reference (Unit.TDH'Access, Result);

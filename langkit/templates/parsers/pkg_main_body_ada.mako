@@ -159,10 +159,14 @@ package body ${ada_lib_name}.Parsers is
                First_Garbage_Token : Stored_Token_Data renames
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
             begin
-               Append (Parser.Diagnostics, First_Garbage_Token.Sloc_Range,
-                       To_Text ("End of input expected, got """
-                                & Token_Kind_Name (First_Garbage_Token.Kind)
-                                & """"));
+               Append
+                 (Parser.Diagnostics,
+                  First_Garbage_Token.Sloc_Range,
+                  To_Text
+                    ("End of input expected, got """
+                     & Token_Kind_Name
+                         (To_Token_Kind (First_Garbage_Token.Kind))
+                     & """"));
             end;
 
          --  Else, the last fail pos is further down the line, and we want to

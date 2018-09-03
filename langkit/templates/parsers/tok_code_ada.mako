@@ -10,7 +10,7 @@ declare
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (${parser.res_var}));
 begin
    if
-      T.Kind /= ${token_kind}
+      T.Kind /= From_Token_Kind (${token_kind})
       % if parser.matches_symbol:
       or else T.Symbol /= Parser.Symbol_Literals
         (${ctx.symbol_literals[parser.match_text]})
@@ -26,7 +26,7 @@ begin
             (Kind              => Token_Fail,
              Pos               => ${parser.start_pos},
              Expected_Token_Id => ${token_kind},
-             Found_Token_Id    => T.Kind);
+             Found_Token_Id    => To_Token_Kind (T.Kind));
        end if;
    else
       ## We don't want to increment the position if we are matching the

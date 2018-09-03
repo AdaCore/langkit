@@ -2,11 +2,12 @@
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
-with ${ada_lib_name}.Common;    use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 limited with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
-use ${ada_lib_name}.Lexer.Token_Data_Handlers;
+with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 
 --  Internal package to provide types and primitives to parse buffers and files
 --  and get AST out of them. Plesae don't use this package directly.

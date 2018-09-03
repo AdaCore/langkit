@@ -3,9 +3,10 @@
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
-use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;

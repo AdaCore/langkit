@@ -2,11 +2,12 @@
 
 with Langkit_Support.Text; use Langkit_Support.Text;
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 with ${ada_lib_name}.Analysis;       use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer;
-use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 --  Internal package: provide implementation helpers to switch between public
 --  types and implementation ones.

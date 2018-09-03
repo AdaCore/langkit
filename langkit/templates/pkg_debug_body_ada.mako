@@ -49,7 +49,7 @@ package body ${ada_lib_name}.Debug is
          declare
             D : constant Stored_Token_Data := TDH.Tokens.Get (Index);
          begin
-            Put (Token_Kind_Name (D.Kind));
+            Put (Token_Kind_Name (To_Token_Kind (D.Kind)));
             Put (" " & Image (Text (TDH.all, D), With_Quotes => True));
             Put_Line (" [" & Image (D.Sloc_Range) & "]");
          end;

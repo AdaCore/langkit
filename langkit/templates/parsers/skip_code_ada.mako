@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 if Get_Token (Parser.TDH.all, ${parser.start_pos}).Kind 
-   = ${ctx.lexer.Termination.ada_name} 
+   = From_Token_Kind (${ctx.lexer.Termination.ada_name})
 then
    ${parser.pos_var} := No_Token_Index;
    goto ${exit_label};

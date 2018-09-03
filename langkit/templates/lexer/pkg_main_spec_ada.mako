@@ -5,10 +5,10 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with GNATCOLL.VFS;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 --  This package provides types and primitives to split text streams into lists
 --  of tokens.
@@ -24,40 +24,17 @@ package ${ada_lib_name}.Lexer is
       ${',\n'.join(t.ada_name for t in tokens)}
    );
 
+   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
+      with Inline;
+   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
+      with Inline;
+
    type Token_Family is
      (${', '.join(tf.ada_name for tf in lexer.tokens.token_families)});
 
    % if lexer.track_indent:
    type Indent_Kind is (Indent, Dedent, Nodent, None);
    % endif
-
-   type Stored_Token_Data is record
-      Kind : Token_Kind;
-      --  Kind for this token
-
-      Source_First : Positive;
-      Source_Last  : Natural;
-      --  Bounds in the source buffer corresponding to this token
-
-      Symbol : Symbol_Type;
-      --  Depending on the token kind (according to the lexer specification),
-      --  this is either null or the symbolization of the token text.
-      --
-      --  For instance: null for keywords but actual text for identifiers.
-
-      Sloc_Range : Source_Location_Range;
-      --  Source location range for this token. Note that the end bound is
-      --  exclusive.
-   end record;
-   --  Holder for per-token data to be stored in the token data handler
-
-   function Sloc_Range
-     (Token : Stored_Token_Data) return Source_Location_Range;
-   --  Helper for the generic package instantiation below
-
-   package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
-     (Stored_Token_Data, Sloc_Range);
-   use Token_Data_Handlers;
 
    Unknown_Charset : exception;
    --  Raised by Lex_From_* functions when the input charset is not supported
