@@ -304,6 +304,9 @@ class OrderingTest(AbstractExpression):
         )
         return OrderingTest.Expr(self.operator, lhs, rhs)
 
+    def __repr__(self):
+        return '<OrderingTest {}>'.format(repr(self.operator))
+
 
 @dsl_document
 class If(AbstractExpression):
