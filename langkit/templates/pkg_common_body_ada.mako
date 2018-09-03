@@ -98,8 +98,7 @@ package body ${ada_lib_name}.Common is
    ----------------
 
    function Get_Symbol (Token : Token_Reference) return Symbol_Type is
-      subtype Token_Data_Reference is
-         Token_Data_Handlers.Token_Vectors.Element_Access;
+      subtype Token_Data_Reference is Token_Vectors.Element_Access;
 
       Token_Data : constant Token_Data_Reference :=
         (if Token.Index.Trivia = No_Token_Index
@@ -252,7 +251,7 @@ package body ${ada_lib_name}.Common is
       Token    : Token_Reference;
       Raw_Data : Stored_Token_Data) return Token_Data_Type is
    begin
-      return (Kind          => Raw_Data.Kind,
+      return (Kind          => To_Token_Kind (Raw_Data.Kind),
               Is_Trivia     => Token.Index.Trivia /= No_Token_Index,
               Index         => (if Token.Index.Trivia = No_Token_Index
                                 then Token.Index.Token

@@ -3,11 +3,13 @@
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
-use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Unparsing_Implementation;

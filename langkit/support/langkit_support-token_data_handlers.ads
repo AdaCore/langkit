@@ -21,11 +21,29 @@ with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
-generic
-   type Token_Data_Type is private;
-   with function Sloc_Range
-     (Token : Token_Data_Type) return Source_Location_Range is <>;
 package Langkit_Support.Token_Data_Handlers is
+
+   type Raw_Token_Kind is new Natural;
+   --  Kind for a token, stored as a mere number
+
+   type Stored_Token_Data is record
+      Kind : Raw_Token_Kind;
+
+      Source_First : Positive;
+      Source_Last  : Natural;
+      --  Bounds in the source buffer corresponding to this token
+
+      Symbol : Symbol_Type;
+      --  Depending on the token kind (according to the lexer specification),
+      --  this is either null or the symbolization of the token text.
+      --
+      --  For instance: null for keywords but actual text for identifiers.
+
+      Sloc_Range : Source_Location_Range;
+      --  Source location range for this token. Note that the end bound is
+      --  exclusive.
+   end record;
+   --  Holder for per-token data to be stored in the token data handler
 
    --  Trivias are tokens that are not to be taken into account during parsing,
    --  and are marked as so in the lexer definition. Conceptually, we want
@@ -33,13 +51,13 @@ package Langkit_Support.Token_Data_Handlers is
    --  is every trivia that is between the current token and the next token.
 
    type Trivia_Node is record
-      T        : aliased Token_Data_Type;
+      T        : aliased Stored_Token_Data;
       Has_Next : Boolean;
    end record;
    --  This defines a node in a trivia linked list
 
    package Token_Vectors is new Langkit_Support.Vectors
-     (Element_Type => Token_Data_Type);
+     (Element_Type => Stored_Token_Data);
    package Text_Vectors is new Langkit_Support.Vectors
      (Element_Type => Text_Access);
    package Trivia_Vectors is new Langkit_Support.Vectors
@@ -154,7 +172,7 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Get_Token
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Data_Type;
+      Index : Token_Index) return Stored_Token_Data;
    --  Return data for the token at the given Index in TDH
 
    function Last_Token (TDH : Token_Data_Handler) return Token_Index;
@@ -208,7 +226,7 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Data
      (Token : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler) return Token_Data_Type;
+      TDH   : Token_Data_Handler) return Stored_Token_Data;
    --  Return the data associated to Token in TDH
 
    function Get_Trivias

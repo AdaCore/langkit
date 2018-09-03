@@ -193,7 +193,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
    function Get_Token
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Data_Type is
+      Index : Token_Index) return Stored_Token_Data is
    begin
       return Token_Vectors.Get (TDH.Tokens, Natural (Index));
    end Get_Token;
@@ -466,10 +466,10 @@ package body Langkit_Support.Token_Data_Handlers is
                Triv_Index     : constant Natural := Natural (Key_Trivia);
                Tok_Index      : constant Natural := Element_Index - 1;
                Key_Start_Sloc : constant Source_Location := Start_Sloc
-                 (Sloc_Range (TDH.Trivias.Get (Triv_Index).T));
+                 (TDH.Trivias.Get (Triv_Index).T.Sloc_Range);
             begin
                return Compare
-                 (Sloc_Range (TDH.Tokens.Get (Tok_Index)), Key_Start_Sloc);
+                 (TDH.Tokens.Get (Tok_Index).Sloc_Range, Key_Start_Sloc);
             end;
          end if;
 
@@ -510,18 +510,18 @@ package body Langkit_Support.Token_Data_Handlers is
       function Compare
         (Sloc        : Source_Location;
          Dummy_Index : Positive;
-         Token       : Token_Data_Type) return Relative_Position
-      is (Compare (Sloc_Range (Token), Sloc));
+         Token       : Stored_Token_Data) return Relative_Position
+      is (Compare (Token.Sloc_Range, Sloc));
 
       function Compare
         (Sloc        : Source_Location;
          Dummy_Index : Positive;
          Trivia      : Trivia_Node) return Relative_Position
-      is (Compare (Sloc_Range (Trivia.T), Sloc));
+      is (Compare (Trivia.T.Sloc_Range, Sloc));
 
       function Token_Floor is new Floor
         (Key_Type        => Source_Location,
-         Element_Type    => Token_Data_Type,
+         Element_Type    => Stored_Token_Data,
          Element_Vectors => Token_Vectors);
       function Trivia_Floor is new Floor
         (Key_Type        => Source_Location,
@@ -547,8 +547,8 @@ package body Langkit_Support.Token_Data_Handlers is
       end if;
 
       declare
-         function SS (Token : Token_Data_Type) return Source_Location is
-           (Start_Sloc (Sloc_Range (Token)));
+         function SS (Token : Stored_Token_Data) return Source_Location is
+           (Start_Sloc (Token.Sloc_Range));
 
          Tok_Sloc  : constant Source_Location := SS (TDH.Tokens.Get (Token));
          Triv_Sloc : constant Source_Location :=
@@ -572,7 +572,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
    function Data
      (Token : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler) return Token_Data_Type is
+      TDH   : Token_Data_Handler) return Stored_Token_Data is
    begin
       return (if Token.Trivia = No_Token_Index
               then TDH.Tokens.Get (Natural (Token.Token))

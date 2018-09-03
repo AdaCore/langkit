@@ -33,7 +33,7 @@ with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.default_unit_provider.unit_fqn, False)
