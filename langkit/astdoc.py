@@ -31,6 +31,9 @@ def trim_docstring_lines(docstring):
     # Remove leading newline if needed
     docstring = docstring.lstrip('\n')
 
+    if not docstring.strip():
+        return ""
+
     # Compute the offset
     offset = len(docstring) - len(docstring.lstrip(' '))
 

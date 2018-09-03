@@ -814,7 +814,7 @@ def format_c(text, column):
     :param int column: Indentation level for the result.
     :rtype str:
     """
-    if not text:
+    if not text.strip():
         return ''
 
     available_width = get_available_width(column)
@@ -848,7 +848,7 @@ def format_python(text, column, rtype=None):
     """
     from langkit.compile_context import get_context
 
-    if text == '' and rtype is None:
+    if text.strip() == '' and rtype is None:
         return ''
 
     available_width = get_available_width(column)
