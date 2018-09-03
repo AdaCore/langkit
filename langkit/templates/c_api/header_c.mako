@@ -129,8 +129,13 @@ typedef struct {
    const char *information;
 } ${exception_type};
 
+## Even when metadata and entity structures are not exposed, we need to
+## emit their type definition them for low-level interfacing.
 % for struct_type in ctx.struct_types:
-    % if struct_type.exposed and struct_type.emit_c_type:
+    % if struct_type in (T.env_md, T.entity_info) or ( \
+         struct_type.exposed and \
+         struct_type.emit_c_type \
+    ):
         ${struct_types.decl(struct_type)}
     % endif
 % endfor
