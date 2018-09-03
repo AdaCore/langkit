@@ -3760,13 +3760,13 @@ package body ${ada_lib_name}.Implementation is
             Rotate_TDH;
             return;
 
-         when Lexer.Unknown_Charset =>
+         when Unknown_Charset =>
             Add_Diagnostic
               ("Unknown charset """ & To_String (Unit.Charset) & """");
             Rotate_TDH;
             return;
 
-         when Lexer.Invalid_Input =>
+         when Invalid_Input =>
             --  TODO??? Tell where (as a source location) we failed to decode
             --  the input.
             Add_Diagnostic

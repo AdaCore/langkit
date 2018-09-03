@@ -1,7 +1,6 @@
 ## vim: filetype=makoada
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 
 package ${ada_lib_name}.Introspection is
 

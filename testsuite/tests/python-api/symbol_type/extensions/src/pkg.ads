@@ -1,5 +1,5 @@
 with Langkit_Support.Text; use Langkit_Support.Text;
-with Libfoolang.Lexer;     use Libfoolang.Lexer;
+with Libfoolang.Common;    use Libfoolang.Common;
 
 package Pkg is
 

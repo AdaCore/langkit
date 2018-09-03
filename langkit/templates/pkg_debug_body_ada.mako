@@ -8,7 +8,8 @@ with Ada.Unchecked_Conversion;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.symbol_canonicalizer.unit_fqn, False)

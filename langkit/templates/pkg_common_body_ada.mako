@@ -1,6 +1,13 @@
 ## vim: filetype=makoada
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+
+% if ctx.symbol_canonicalizer:
+with ${ctx.symbol_canonicalizer.unit_fqn};
+% endif
 
 package body ${ada_lib_name}.Common is
 
@@ -23,6 +30,62 @@ package body ${ada_lib_name}.Common is
       First         : out Positive;
       Last          : out Natural);
    --  Implementations for converters soft-links
+
+   function Force_Symbol
+     (TDH : Token_Data_Handler;
+      T   : in out Stored_Token_Data) return Symbol_Type;
+   --  If T has a symbol, return it. Otherwise, force its symbolization and
+   --  return the symbol.
+
+   Token_Kind_To_Literals : constant array (Token_Kind) of Text_Access := (
+   <% already_seen_set = set() %>
+
+   % for lit, tok in ctx.lexer.literals_map.items():
+      ## It's more user-friendly to represent the newline token by name rather
+      ## than by escape sequence in user messages.
+      % if tok.ada_name not in already_seen_set and lit != '\\n':
+         ${tok.ada_name} => new Text_Type'("${lit}"),
+         <% already_seen_set.add(tok.ada_name) %>
+      % endif
+   % endfor
+      others => new Text_Type'("")
+   );
+
+   Token_Kind_Names : constant array (Token_Kind) of String_Access := (
+      % for tok in ctx.lexer.tokens:
+          ${tok.ada_name} =>
+             new String'("${tok.name}")
+          % if (not loop.last):
+              ,
+          % endif
+      % endfor
+   );
+
+   ---------------------
+   -- Token_Kind_Name --
+   ---------------------
+
+   function Token_Kind_Name (Token_Id : Token_Kind) return String is
+     (Token_Kind_Names (Token_Id).all);
+
+   ------------------------
+   -- Token_Kind_Literal --
+   ------------------------
+
+   function Token_Kind_Literal (Token_Id : Token_Kind) return Text_Type is
+     (Token_Kind_To_Literals (Token_Id).all);
+
+   -----------------------
+   -- Token_Error_Image --
+   -----------------------
+
+   function Token_Error_Image (Token_Id : Token_Kind) return String is
+      Literal : constant Text_Type := Token_Kind_Literal (Token_Id);
+   begin
+      return (if Literal /= ""
+              then "'" & Image (Literal) & "'"
+              else Token_Kind_Name (Token_Id));
+   end Token_Error_Image;
 
    -------------------
    -- Is_Token_Node --
@@ -322,6 +385,37 @@ package body ${ada_lib_name}.Common is
       First := Token.Source_First;
       Last := Token.Source_Last;
    end Extract_Token_Text;
+
+   ------------------
+   -- Force_Symbol --
+   ------------------
+
+   function Force_Symbol
+     (TDH : Token_Data_Handler;
+      T   : in out Stored_Token_Data) return Symbol_Type is
+   begin
+      if T.Symbol = null then
+         declare
+            Text   : Text_Type renames
+               TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
+            Symbol : constant Symbolization_Result :=
+               % if ctx.symbol_canonicalizer:
+                  ${ctx.symbol_canonicalizer.fqn} (Text)
+               % else:
+                  Create_Symbol (Text)
+               % endif
+            ;
+         begin
+            --  This function is run as part of semantic analysis: there is
+            --  currently no way to report errors from here, so just discard
+            --  canonicalization issues here.
+            if Symbol.Success then
+               T.Symbol := Find (TDH.Symbols, Symbol.Symbol);
+            end if;
+         end;
+      end if;
+      return T.Symbol;
+   end Force_Symbol;
 
 begin
    Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
