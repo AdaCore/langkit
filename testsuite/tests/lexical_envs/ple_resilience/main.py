@@ -26,7 +26,7 @@ libfoolang.FooNode.__repr__ = node_repr
 def process(n, indent=''):
     print('{}processing {}'.format(indent, n))
     indent += '  '
-    if n.is_a(libfoolang.DefList):
+    if n.is_a(libfoolang.DefNodeList):
         for d in n:
             process(d, indent)
     if n.is_a(libfoolang.Scope):
