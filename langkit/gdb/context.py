@@ -48,12 +48,14 @@ class Context(object):
         corresponding entity records.
         """
         return {
-            '{}__implementation__entity_{}'.format(
+            '{}__implementation__internal_entity_{}'.format(
                 self.lib_name,
                 Name.from_camel_with_underscores(name).lower
             ) for name in self.astnode_names
-        } | {'{}__implementation__ast_envs__entity'
-             .format(self.lib_name)}
+        } | {
+            '{}__implementation__internal_entity'.format(self.lib_name),
+            '{}__implementation__ast_envs__entity'.format(self.lib_name),
+        }
 
     def decode_state(self, frame=None):
         """
