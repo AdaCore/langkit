@@ -41,11 +41,11 @@ class Prefix(Name):
 
 
 @abstract
-class Def(FooNode):
+class DefNode(FooNode):
     pass
 
 
-class Scope(Def):
+class Scope(DefNode):
     name = Field()
     defs = Field()
 
@@ -55,7 +55,7 @@ class Scope(Def):
     )
 
 
-class Var(Def):
+class Var(DefNode):
     name = Field()
     value = Field()
 
