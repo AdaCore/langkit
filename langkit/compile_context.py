@@ -91,7 +91,7 @@ def copy_file(from_path, to_path):
     write_source_file(to_path, content)
 
 
-def write_source_file(file_path, source):
+def write_source_file(file_path, source, post_process=None):
     """
     Helper to write a source file.
 
@@ -99,10 +99,15 @@ def write_source_file(file_path, source):
 
     :param str file_path: Path of the file to write.
     :param str source: Content of the file to write.
+    :param post_process: If provided, callable used to transform the source
+        file content just before writing it.
+    :type post_process: None | (str) -> str
 
     :rtype: bool
     """
     context = get_context()
+    if post_process:
+        source = post_process(source)
     if (not os.path.exists(file_path) or
             context.cache.is_stale(file_path, source)):
         if context.verbosity.debug:
@@ -114,14 +119,14 @@ def write_source_file(file_path, source):
     return False
 
 
-def write_cpp_file(file_path, source):
+def write_cpp_file(file_path, source, post_process=None):
     """
     Helper to write a C/C++ source file.
 
     :param str file_path: Path of the file to write.
     :param str source: Content of the file to write.
     """
-    if write_source_file(file_path, source):
+    if write_source_file(file_path, source, post_process):
         if find_executable('clang-format'):
             subprocess.check_call(['clang-format', '-i', file_path])
 
@@ -130,7 +135,8 @@ ADA_SPEC = "spec"
 ADA_BODY = "body"
 
 
-def write_ada_file(out_dir, source_kind, qual_name, content):
+def write_ada_file(out_dir, source_kind, qual_name, content,
+                   post_process=None):
     """
     Helper to write an Ada file.
 
@@ -154,7 +160,7 @@ def write_ada_file(out_dir, source_kind, qual_name, content):
         content = '\n'.join(l for l in lines if l.strip())
 
     # TODO: no tool is able to pretty-print a single Ada source file
-    write_source_file(file_path, content)
+    write_source_file(file_path, content, post_process)
 
 
 class Verbosity(object):
@@ -674,6 +680,11 @@ class CompileCtx(object):
 
         :type: ASTNodeType|None
         """
+
+        # Optional callbacks to post-process the content of source files
+        self.post_process_ada = None
+        self.post_process_cpp = None
+        self.post_process_python = None
 
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False):
         """
@@ -1228,7 +1239,9 @@ class CompileCtx(object):
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
              warnings=None, generate_unparser=False, properties_logging=False,
-             generate_astdoc=True, generate_gdb_hook=True):
+             generate_astdoc=True, generate_gdb_hook=True,
+             post_process_ada=None, post_process_cpp=None,
+             post_process_python=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1287,6 +1300,13 @@ class CompileCtx(object):
         self.generate_gdb_hook = generate_gdb_hook
         if warnings:
             self.warnings = warnings
+
+        if post_process_ada:
+            self.post_process_ada = post_process_ada
+        if post_process_cpp:
+            self.post_process_cpp = post_process_cpp
+        if post_process_python:
+            self.post_process_python = post_process_python
 
         from langkit.unparsers import Unparsers
         self.unparsers = Unparsers(self)
@@ -1355,7 +1375,8 @@ class CompileCtx(object):
                             kind
                         ),
                         with_clauses=with_clauses,
-                    )
+                    ),
+                    post_process=self.post_process_ada
                 )
 
     @property
@@ -1621,17 +1642,20 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             write_ada_file(
                 path.join(file_root, "src"), ADA_BODY, [names.Name('Parse')],
-                self.render_template("main_parse_ada")
+                self.render_template("main_parse_ada"),
+                self.post_process_ada
             )
 
         with names.lower:
             # ... and the Quex C interface
             write_cpp_file(path.join(src_path, "quex_interface.h"),
                            self.render_template(
-                               "lexer/quex_interface_header_c"))
+                               "lexer/quex_interface_header_c"),
+                           self.post_process_cpp)
             write_cpp_file(path.join(src_path, "quex_interface.c"),
                            self.render_template(
-                               "lexer/quex_interface_body_c"))
+                               "lexer/quex_interface_body_c"),
+                           self.post_process_cpp)
 
         imain_project_file = os.path.join(file_root, "src", "mains.gpr")
         write_source_file(
@@ -1660,14 +1684,16 @@ class CompileCtx(object):
                 self.render_template(
                     "python_api/playground_py",
                     module_name=self.python_api_settings.module_name
-                )
+                ),
+                self.post_process_python
             )
             os.chmod(playground_file, 0o775)
 
             setup_py_file = os.path.join(file_root, 'python', 'setup.py')
             write_source_file(
                 setup_py_file,
-                self.render_template('python_api/setup_py')
+                self.render_template('python_api/setup_py'),
+                self.post_process_python
             )
 
         # Emit GDB helpers initialization script
@@ -1681,7 +1707,8 @@ class CompileCtx(object):
                 lib_name=lib_name,
                 prefix=(self.short_name.lower
                         if self.short_name else lib_name),
-            )
+            ),
+            self.post_process_python
         )
 
         # Emit the ".debug_gdb_scripts" section if asked to
@@ -1689,7 +1716,8 @@ class CompileCtx(object):
             write_source_file(
                 os.path.join(src_path, 'gdb.c'),
                 self.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                     os_name=os.name)
+                                     os_name=os.name),
+                self.post_process_cpp
             )
 
         # Add any sources in $lang_path/extensions/support if it exists
@@ -1739,7 +1767,8 @@ class CompileCtx(object):
             write_cpp_file(
                 path.join(include_path,
                           "{}.h".format(self.c_api_settings.lib_name)),
-                render("c_api/header_c")
+                render("c_api/header_c"),
+                self.post_process_cpp
             )
 
         self.write_ada_module(
@@ -1821,7 +1850,8 @@ class CompileCtx(object):
                 pp_code = code
 
             write_source_file(os.path.join(package_dir, '__init__.py'),
-                              pp_code)
+                              pp_code,
+                              self.post_process_python)
             if exc:
                 raise exc
 
