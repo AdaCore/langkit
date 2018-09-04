@@ -1,0 +1,27 @@
+main.py: Running...
+First struct:
+s.entity_field = <Example 1:1-1:8>
+s.array_field = [<Example 1:1-1:8>, <ExampleList 1:1-1:8>]
+s.bigint_field = 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Second struct:
+s.entity_field = <Example 1:1-1:8>
+s.array_field = []
+s.bigint_field = 2
+
+main.py: Done.
+
+First struct:
+Entity_Field = <Example 1:1-1:8>
+Array_Field:
+  <Example 1:1-1:8>
+  <ExampleList 1:1-1:8>
+Bigint_Field = 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Second struct::
+Entity_Field = <ExampleList 1:1-1:8>
+Array_Field:
+Bigint_Field = 2
+
+
+Done
