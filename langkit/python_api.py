@@ -66,6 +66,16 @@ class PythonAPISettings(AbstractAPISettings):
         return an other expression that yields the corresponding low-level
         value.
 
+        Note that because of the way we handle resource (de)allocation, for
+        some types, this does *not* yield a value that can be passed to C
+        functions: for instance, arrays will yield an instance of a _BaseArray
+        subclass. In order to get the C value, use the ``extract_c_value``
+        method:
+
+        >>> py_value_expr = ...
+        >>> c_holder_expr = pyapi.unwrap_value(py_value_expr, my_type, context)
+        >>> c_value_expr = pyapi.extract_c_value(c_holder_expr, my_type)
+
         :param str value: Expression yielding a high-level value.
         :param ct.CompiledType type: Type corresponding to the "value"
             expression.
@@ -96,6 +106,12 @@ class PythonAPISettings(AbstractAPISettings):
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
         )).format(value=value, context=context_arg)
+
+    def extract_c_value(self, value, type):
+        """
+        See ``unwrap_value``.
+        """
+        return '{}.c_value'.format(value) if type.is_refcounted else value
 
     def c_type(self, type):
         """

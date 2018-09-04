@@ -12,6 +12,11 @@ class _BaseArray(object):
     Ctype class for array elements.
     """
 
+    items_refcounted = False
+    """
+    Whether items for this arrays are ref-counted.
+    """
+
     __slots__ = ('c_value', 'length', 'items')
 
     def __init__(self, c_value):
@@ -63,9 +68,24 @@ class _BaseArray(object):
         if not isinstance(value, list):
             _raise_type_error('list', value)
 
+        # Create a holder for the result
         result = cls(cls.create(len(value)))
-        for i, item in enumerate(value):
-            result.items[i] = result.unwrap_item(item, context)
+
+        # Unwrap all items at once, preserving their holder so that resources
+        # are deallocated if there is an error at some point.
+        items = [result.unwrap_item(item, context) for item in value]
+
+        # Initialize the resulting array
+        for i, (_, item) in enumerate(items):
+            result.items[i] = item
+
+        # At this point, we know that this is successful. We don't want
+        # holders to dec-ref the content so that the return array takes over
+        # the corresponding refcounting shares.
+        if cls.items_refcounted:
+            for holder, _ in items:
+                holder.clear()
+
         return result
 
 </%def>
@@ -86,6 +106,7 @@ class ${cls.py_converter}(_BaseArray):
     """
 
     __slots__ = _BaseArray.__slots__
+    items_refcounted = ${cls.element_type.is_refcounted}
 
     @staticmethod
     def wrap_item(item):
@@ -94,7 +115,9 @@ class ${cls.py_converter}(_BaseArray):
 
     @staticmethod
     def unwrap_item(item, context=None):
-        return ${pyapi.unwrap_value('item', element_type, 'context')}
+        c_holder = ${pyapi.unwrap_value('item', element_type, 'context')}
+        c_value = ${pyapi.extract_c_value('c_holder', element_type)}
+        return (c_holder, c_value)
 
     ## If this is a string type, override wrapping to return native unicode
     ## instances.
