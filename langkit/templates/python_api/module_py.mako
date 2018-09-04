@@ -272,8 +272,12 @@ class _big_integer(object):
         cls.text(helper.c_value, ctypes.byref(text))
         return int(text._wrap())
 
+    def clear(self):
+        self.c_value = None
+
     def __del__(self):
         self.decref(self.c_value)
+        self.clear()
 
     create = staticmethod(_import_func(
         '${capi.get_name("create_big_integer")}',
