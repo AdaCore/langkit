@@ -2,6 +2,14 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
+<%def name="create_prototype(cls)">
+   function Create_${cls.api_name} (${'; '.join('{} : {}{}'.format(
+      f.name,
+      f.type.api_name,
+      "'Class" if f.type.is_entity_type or f.type.is_ast_node else ''
+   ) for f in cls.get_fields())}) return ${cls.api_name}
+</%def>
+
 <%def name="public_api_decl(cls)">
    type ${cls.api_name} is private;
    ${ada_doc(cls, 3)}
@@ -14,6 +22,8 @@
                                         f.type.is_ast_node else '')};
       ${ada_doc(f, 6)}
    % endfor
+
+   ${create_prototype(cls)};
 </%def>
 
 <%def name="public_api_private_decl(cls)">
@@ -161,6 +171,27 @@
          return Result;
       end;
    % endif
+
+   ${create_prototype(cls)} is
+      Result     : constant ${cls.api_name} :=
+         ${cls.api_name} (Boxed_${cls.api_name}.Create_Element);
+      Record_Def : constant Boxed_${cls.api_name}.Element_Access :=
+         Internal_Access (Result);
+   begin
+      % for f in cls.get_fields():
+         <% field_expr = 'Record_Def.Internal_{}'.format(f.name) %>
+         % if f.type.is_big_integer_type:
+            ${field_expr}.Set (${f.name});
+         % elif f.type.is_array_type:
+            ${field_expr} := new ${f.type.api_name}'(${f.name});
+         % elif f.type.is_entity_type or f.type.is_ast_node:
+            ${field_expr} := ${f.name}.As_${f.type.api_name};
+         % else:
+            ${field_expr} := ${f.name};
+         % endif
+      % endfor
+      return Result;
+   end;
 </%def>
 
 <%def name="incomplete_decl(cls)">
