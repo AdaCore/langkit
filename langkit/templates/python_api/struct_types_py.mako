@@ -91,6 +91,19 @@ class ${public_name}(_BaseStruct):
         % endfor
         ]
 
+    class _Holder(object):
+        def __init__(self, c_value):
+            self.c_value = c_value
+
+        def clear(self):
+            self.c_value = None
+
+        def __del__(self):
+            % if cls.is_refcounted:
+            ${public_name}._dec_ref(self.c_value)
+            % endif
+            self.clear()
+
     @classmethod
     def _wrap(cls, c_value):
         return cls(
@@ -113,18 +126,35 @@ class ${public_name}(_BaseStruct):
         if not isinstance(value, cls):
             _raise_type_error(cls.__name__, value)
 
-        result = cls._c_type(
+        % for f in cls.get_fields():
+        <% field_name = f.name.lower %>
+        ${field_name} = ${pyapi.unwrap_value(
+            'value.{}'.format(field_name),
+            f.type,
+            'context'
+        )}
+        % endfor
+
+        result = cls._Holder(cls._c_type(
             % for f in cls.get_fields():
             <%
-                f_access = 'value.{}'.format(f.name.lower)
-                unwrapped = pyapi.unwrap_value(f_access, f.type, 'context')
+                field_name = f.name.lower
+                field_value = pyapi.extract_c_value(field_name, f.type)
+                if f.type.is_array_type:
+                    field_value = ('ctypes.cast({}, ctypes.c_void_p)'
+                                   .format(field_value))
             %>
-            ${f.name.lower}=${(
-                'ctypes.cast({}, ctypes.c_void_p)'.format(unwrapped)
-                if f.type.is_array_type else unwrapped
-            )},
+            ${field_name}=${field_value},
             % endfor
-        )
+        ))
+
+        ## Our Python holders for ref-counted C values own a refcounting share,
+        ## so we must inc-ref all fields so that the created structure owns a
+        ## share.
+        % if cls.is_refcounted:
+        cls._inc_ref(result.c_value)
+        % endif
+
         return result
 
     % if cls.is_refcounted:
