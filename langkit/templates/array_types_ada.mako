@@ -228,7 +228,8 @@
          (N         => Items'Length,
           Items     => Implementation.${cls.array_type_name} (Items),
           Ref_Count => 1));
-   % else:
+   % endif
+
    pragma Warnings (Off, "referenced");
    function ${cls.constructor_name}
      (Items : ${cls.array_type_name}) return ${cls.name} is
@@ -242,7 +243,6 @@
         (N => Items'Length, Ref_Count => 1, Items => Items);
    end;
    pragma Warnings (On, "referenced");
-   % endif
 
    ----------------
    -- Equivalent --
