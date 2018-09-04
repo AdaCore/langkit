@@ -27,7 +27,7 @@ generic
    type Element_Type is limited private;
    --  The type to be boxed
 
-   with function Refcount (Self : in out Element_Type) return Positive is <>;
+   with function Refcount (Self : Element_Type) return Positive is <>;
    --  Return Self's reference count
 
    with procedure Set_Refcount (Self : in out Element_Type; Count : Positive);
