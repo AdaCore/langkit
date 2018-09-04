@@ -1139,7 +1139,7 @@ package body ${ada_lib_name}.Implementation is
             return;
          end if;
 
-         if Mapping.F_Val.Unit /= Self.Unit then
+         if Mapping.Val.Unit /= Self.Unit then
             raise Property_Error with "Cannot add_to_env an AST node that"
                                       & " comes from another analysis unit";
          end if;
@@ -1163,8 +1163,8 @@ package body ${ada_lib_name}.Implementation is
 
          --  Add the element to the environment
          Add (Self  => Env,
-              Key   => Mapping.F_Key,
-              Value => Mapping.F_Val,
+              Key   => Mapping.Key,
+              Value => Mapping.Val,
               MD    => MD,
               Resolver => Resolver);
 
@@ -1177,15 +1177,15 @@ package body ${ada_lib_name}.Implementation is
             --  Add the environment, the key, and the value to the list of
             --  entries contained in other units, so we can remove them when
             --  reparsing Val's unit.
-            Mapping.F_Val.Unit.Exiled_Entries.Append
-              ((Env, Mapping.F_Key, Mapping.F_Val));
+            Mapping.Val.Unit.Exiled_Entries.Append
+              ((Env, Mapping.Key, Mapping.Val));
 
             if Env /= Root_Scope then
                --  Add Val to the list of foreign nodes that Env's unit
                --  contains, so that when that unit is reparsed, we can call
                --  Add_To_Env again on those nodes.
                Env.Env.Node.Unit.Foreign_Nodes.Append
-                 ((Mapping.F_Val, Self.Unit));
+                 ((Mapping.Val, Self.Unit));
             end if;
          end if;
       end Add_To_Env;
