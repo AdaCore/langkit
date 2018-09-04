@@ -26,11 +26,14 @@ class _BaseArray(object):
     def __repr__(self):
         return '<{} {}>'.format(type(self).__name__, list(self))
 
-    def __del__(self):
-        self.dec_ref(self.c_value)
+    def clear(self):
         self.c_value = None
         self.length = None
         self.items = None
+
+    def __del__(self):
+        self.dec_ref(self.c_value)
+        self.clear()
 
     @classmethod
     def wrap(cls, c_value):
