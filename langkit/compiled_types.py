@@ -1767,6 +1767,16 @@ class StructType(BaseStructType):
         return not self.is_entity_type or self == T.entity
 
     @property
+    def public_record_type(self):
+        """
+        Name of the Ada record type used to expose this struct in the public
+        API.
+
+        :rtype: names.Name
+        """
+        return self.name + names.Name('Record')
+
+    @property
     def contains_boxed_fields(self):
         """
         Return if at least one field requires boxing in the public API.
@@ -1774,6 +1784,14 @@ class StructType(BaseStructType):
         :rtype: bool
         """
         return any(f.type.public_requires_boxing for f in self.get_fields())
+
+    @property
+    def to_public_converter(self):
+        return names.Name('To_Public') + self.api_name
+
+    @property
+    def to_internal_converter(self):
+        return names.Name('To_Internal') + self.api_name
 
     @property
     def exposed_types(self):
@@ -2667,6 +2685,16 @@ class ArrayType(CompiledType):
         return (names.Name('Text_Type')
                 if self.is_string_type else
                 self.element_type.api_name + names.Name('Array'))
+
+    @property
+    def api_access_name(self):
+        """
+        Name of the access type for public arrays. Used as internals for
+        array struct fields.
+
+        :rtype: names.Name
+        """
+        return self.api_name + names.Name('Access')
 
     @property
     def constructor_name(self):

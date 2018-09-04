@@ -9,6 +9,14 @@
    % endif
 </%def>
 
+<%def name="public_api_private_decl(cls)">
+   % if cls.used_in_public_struct:
+      type ${cls.api_access_name} is access all ${cls.api_name};
+      procedure Free is new Ada.Unchecked_Deallocation
+        (${cls.api_name}, ${cls.api_access_name});
+   % endif
+</%def>
+
 <%def name="incomplete_decl(cls)">
    type ${cls.pointed};
    type ${cls.name} is access all ${cls.pointed};
