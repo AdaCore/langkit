@@ -236,4 +236,17 @@ package Langkit_Support.Token_Data_Handlers is
    function Get_Leading_Trivias
      (TDH : Token_Data_Handler) return Token_Index_Vectors.Elements_Array;
 
+   function Text
+     (TDH : Token_Data_Handler;
+      T   : Stored_Token_Data) return Text_Type
+   is (TDH.Source_Buffer.all (T.Source_First .. T.Source_Last));
+   --  Return the text associated to T, a token that belongs to TDH
+
+   function Image
+     (TDH : Token_Data_Handler;
+      T   : Stored_Token_Data) return String
+   is (Image (Text (TDH, T)));
+   --  Debug helper: return a human-readable representation of T, a token that
+   --  belongs to TDH.
+
 end Langkit_Support.Token_Data_Handlers;
