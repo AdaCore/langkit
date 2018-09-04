@@ -60,17 +60,4 @@ package ${ada_lib_name}.Lexer is
    --  charset is unknown. Raise an Invalid_Input exception if the source
    --  cannot be decoded using the given Charset.
 
-   function Text
-     (TDH : Token_Data_Handler;
-      T   : Stored_Token_Data) return Text_Type
-   is (TDH.Source_Buffer.all (T.Source_First .. T.Source_Last));
-   --  Return the text associated to T, a token that belongs to TDH
-
-   function Image
-     (TDH : Token_Data_Handler;
-      T   : Stored_Token_Data) return String
-   is (Image (Text (TDH, T)));
-   --  Debug helper: return a human-readable representation of T, a token that
-   --  belongs to TDH.
-
 end ${ada_lib_name}.Lexer;

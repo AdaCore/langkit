@@ -43,7 +43,6 @@ pragma Warnings (On, "referenced");
 with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer;      use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False)
