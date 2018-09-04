@@ -2064,16 +2064,28 @@ class CompileCtx(object):
                 pass
 
             else:
-                # Only array types have their "_exposed" attribute inferred. We
-                # consider all other ones to have a static value, so complain
-                # if we reach a type that must not be exposed.
+                # Only array and struct types have their "_exposed" attribute
+                # inferred. We consider all other ones to have a static value,
+                # so complain if we reach a type that must not be exposed.
                 check(t.exposed, t.dsl_name)
                 return
 
+            # Propagate the need of converters to exposed types. We can't rely
+            # on the above recursive calls to expose if ``t`` was already
+            # exposed.
             if to_internal:
-                t.to_internal_converter_required = True
+                if not t.to_internal_converter_required:
+                    for et in t.exposed_types:
+                        expose(et, to_internal, for_field, 'exposed type',
+                               traceback)
+                    t.to_internal_converter_required = True
             else:
-                t.to_public_converter_required = True
+                if not t.to_public_converter_required:
+                    for et in t.exposed_types:
+                        expose(et, to_internal, for_field, 'exposed type',
+                               traceback)
+                    t.to_public_converter_required = True
+
             t.exposed = True
 
         for f in astnode.get_abstract_fields(
