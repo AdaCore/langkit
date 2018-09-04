@@ -2017,7 +2017,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, Field
+        from langkit.compiled_types import ArrayType, Field, StructType
 
         def expose(t, to_internal, for_field, type_use, traceback):
             """
@@ -2043,6 +2043,11 @@ class CompileCtx(object):
                 # but we still need to set the converter flags below.
                 pass
 
+            elif t.is_entity_type:
+                # Allow all entity types to be exposed, and don't try to expose
+                # internals, unlike for regular structs.
+                pass
+
             elif isinstance(t, ArrayType):
                 # Don't allow public arrays of arrays
                 check(
@@ -2059,9 +2064,16 @@ class CompileCtx(object):
                 expose(t.element_type, to_internal, for_field, 'element type',
                        traceback + ['array of {}'.format(t.dsl_name)])
 
-            elif t.is_entity_type:
-                # Allow all entity types to be exposed
-                pass
+            elif isinstance(t, StructType):
+                # Expose all record fields
+                for f in t.get_fields():
+                    # Reject public arrays of bare AST nodes
+                    check(
+                        not f.type.is_ast_node,
+                        '{}, a bare AST node struct field'.format(f.qualname)
+                    )
+                    expose(f.type, to_internal, for_field, 'field type',
+                           traceback + ['{} structures'.format(t.dsl_name)])
 
             else:
                 # Only array and struct types have their "_exposed" attribute
