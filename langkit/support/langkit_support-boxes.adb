@@ -87,7 +87,7 @@ package body Langkit_Support.Boxes is
       end if;
 
       declare
-         Next_Count : constant Natural := Refcount (Self.Internal.all);
+         Next_Count : constant Natural := Refcount (Self.Internal.all) - 1;
       begin
          if Next_Count = 0 then
             Release (Self.Internal.all);
