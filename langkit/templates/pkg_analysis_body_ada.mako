@@ -4,6 +4,7 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
 <%namespace name="list_types"    file="list_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
 <%namespace name="public_properties"
             file="properties/public_wrappers_ada.mako" />
 
@@ -68,6 +69,12 @@ package body ${ada_lib_name}.Analysis is
 
    % for array_type in ctx.sorted_types(ctx.array_types):
       ${array_types.ada_api_converters_decl(array_type)}
+   % endfor
+
+   % for struct_type in ctx.sorted_types(ctx.struct_types):
+      % if struct_type.exposed and not struct_type.is_entity_type:
+         ${struct_types.ada_api_converters_decl(struct_type)}
+      % endif
    % endfor
 
    -----------------------
@@ -636,6 +643,12 @@ package body ${ada_lib_name}.Analysis is
 
    % for array_type in ctx.sorted_types(ctx.array_types):
       ${array_types.ada_api_converters_body(array_type)}
+   % endfor
+
+   % for struct_type in ctx.sorted_types(ctx.struct_types):
+      % if struct_type.exposed and not struct_type.is_entity_type:
+         ${struct_types.public_api_body(struct_type)}
+      % endif
    % endfor
 
    % for e in ctx.entity_types:

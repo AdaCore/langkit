@@ -5,14 +5,21 @@
 <%namespace name="exts"          file="extensions.mako" />
 <%namespace name="public_properties"
             file="properties/public_wrappers_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
 
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Containers;
 private with Ada.Finalization;
+% if any(a.used_in_public_struct for a in ctx.array_types):
+   private with Ada.Unchecked_Deallocation;
+% endif
 
 with GNATCOLL.Refcount;
 
+% if any(s.exposed and not s.is_entity_type for s in ctx.struct_types):
+   private with Langkit_Support.Boxes;
+% endif
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
@@ -332,6 +339,16 @@ package ${ada_lib_name}.Analysis is
       % endif
    % endfor
 
+   ---------------------
+   -- Structure types --
+   ---------------------
+
+   % for struct_type in ctx.sorted_types(ctx.struct_types):
+      % if struct_type.exposed and not struct_type.is_entity_type:
+         ${struct_types.public_api_decl(struct_type)}
+      % endif
+   % endfor
+
    --------------------
    -- Token Iterator --
    --------------------
@@ -584,6 +601,26 @@ private
       Node : ${root_entity.api_name};
       Last : Token_Index;
    end record;
+
+   -----------------------------
+   -- Array types (internals) --
+   -----------------------------
+
+   % for array_type in ctx.sorted_types(ctx.array_types):
+      % if array_type.exposed:
+         ${array_types.public_api_private_decl(array_type)}
+      % endif
+   % endfor
+
+   ---------------------------------
+   -- Structure types (internals) --
+   ---------------------------------
+
+   % for struct_type in ctx.sorted_types(ctx.struct_types):
+      % if struct_type.exposed and not struct_type.is_entity_type:
+         ${struct_types.public_api_private_decl(struct_type)}
+      % endif
+   % endfor
 
    --  The dummy references to these packages forces them to be included in
    --  statically linked builds (thanks to the binder). This benefits the GDB

@@ -32,6 +32,7 @@ library project Langkit_Support is
       "Langkit_Support.Adalog.Unify_Lr",
       "Langkit_Support.Adalog.Unify_One_Side",
       "Langkit_Support.Array_Utils",
+      "Langkit_Support.Boxes",
       "Langkit_Support.Bump_Ptr",
       "Langkit_Support.Bump_Ptr.Vectors",
       "Langkit_Support.Cheap_Sets",
