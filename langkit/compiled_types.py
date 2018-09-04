@@ -833,6 +833,16 @@ class CompiledType(object):
         """
         return False
 
+    @property
+    def exposed_types(self):
+        """
+        Return the list of types that ``self`` exposes when it is itself
+        exposed.
+
+        :rtype: list[CompiledType]
+        """
+        return []
+
     def new(self, *args, **kwargs):
         """
         Shortcut to the New expression, allowing type.new(..) syntax.
@@ -1764,6 +1774,13 @@ class StructType(BaseStructType):
         :rtype: bool
         """
         return any(f.type.public_requires_boxing for f in self.get_fields())
+
+    @property
+    def exposed_types(self):
+        # Entity types are exposed as opaque types, so don't expose their
+        # internals.
+        return ([] if self.is_entity_type else
+                [f.type for f in self.get_fields()])
 
 
 class EntityType(StructType):
@@ -2787,6 +2804,10 @@ class ArrayType(CompiledType):
     @property
     def public_requires_boxing(self):
         return True
+
+    @property
+    def exposed_types(self):
+        return [self.element_type]
 
 
 def create_enum_node_types(cls):
