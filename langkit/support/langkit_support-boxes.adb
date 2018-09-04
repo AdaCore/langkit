@@ -64,9 +64,16 @@ package body Langkit_Support.Boxes is
    ------------
 
    overriding procedure Adjust (Self : in out Reference) is
-      Element : Element_Type renames Self.Internal.all;
    begin
-      Set_Refcount (Element, Refcount (Element) + 1);
+      if Self.Internal = null then
+         return;
+      end if;
+
+      declare
+         Element : Element_Type renames Self.Internal.all;
+      begin
+         Set_Refcount (Element, Refcount (Element) + 1);
+      end;
    end Adjust;
 
    --------------
@@ -74,14 +81,21 @@ package body Langkit_Support.Boxes is
    --------------
 
    overriding procedure Finalize (Self : in out Reference) is
-      Next_Count : constant Natural := Refcount (Self.Internal.all);
    begin
-      if Next_Count = 0 then
-         Release (Self.Internal.all);
-         Free (Self.Internal);
-      else
-         Set_Refcount (Self.Internal.all, Next_Count);
+      if Self.Internal = null then
+         return;
       end if;
+
+      declare
+         Next_Count : constant Natural := Refcount (Self.Internal.all);
+      begin
+         if Next_Count = 0 then
+            Release (Self.Internal.all);
+            Free (Self.Internal);
+         else
+            Set_Refcount (Self.Internal.all, Next_Count);
+         end if;
+      end;
    end Finalize;
 
 end Langkit_Support.Boxes;
