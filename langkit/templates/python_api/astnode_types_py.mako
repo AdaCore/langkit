@@ -23,15 +23,13 @@
         <%
             # Expression to create a holder for the C result
             c_result_constructor = '{}()'.format(
-                pyapi.c_type(field.public_type),
-            )
+                pyapi.c_type(field.public_type))
 
             # Expression for the C value for field evaluation
             eval_args = [c_result_constructor, c_accessor] + [
-                'unwrapped_{}{}'.format(
-                    arg.name.lower,
-                    '.c_value' if arg.type.is_refcounted else ''
-                ) for arg in field.arguments
+                pyapi.extract_c_value('unwrapped_{}'.format(arg.name.lower),
+                                      arg.type)
+                for arg in field.arguments
             ]
         %>
         ## Evaluate the C value for field evaluation, and then the Python
