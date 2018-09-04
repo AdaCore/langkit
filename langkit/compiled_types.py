@@ -1767,7 +1767,7 @@ class StructType(BaseStructType):
         return not self.is_entity_type or self == T.entity
 
     @property
-    def contains_boxed_field(self):
+    def contains_boxed_fields(self):
         """
         Return if at least one field requires boxing in the public API.
 
