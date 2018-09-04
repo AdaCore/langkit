@@ -1452,6 +1452,8 @@ class UserField(AbstractField):
     Node type, will be ignored by the parsing code.
     """
 
+    prefix = None
+
     def __init__(self, type, repr=False, doc=None, public=True,
                  access_needs_incref=True):
         """
