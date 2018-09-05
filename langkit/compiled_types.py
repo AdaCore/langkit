@@ -2999,7 +2999,7 @@ def create_builtin_types():
         'LogicEquation',
         type_repo_name='EquationType',
         nullexpr='Null_Logic_Equation',
-        null_allowed=True,
+        null_allowed=False,
         c_type_name='equation_type',
         is_refcounted=True,
     )
