@@ -71,6 +71,8 @@ private package ${ada_lib_name}.Implementation is
    type ${root_node_type_name} is access all ${root_node_value_type}'Class;
    --  Most generic AST node type
 
+   ${T.root_node.null_constant} : constant ${root_node_type_name} := null;
+
    type Rewriting_Handle_Pointer is new System.Address;
    No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
       Rewriting_Handle_Pointer (System.Null_Address);
@@ -331,6 +333,9 @@ private package ${ada_lib_name}.Implementation is
 
    type ${generic_list_type_name} is
       access all ${generic_list_value_type}'Class;
+
+   ${ctx.generic_list_type.null_constant} :
+      constant ${generic_list_type_name} := null;
 
    % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
