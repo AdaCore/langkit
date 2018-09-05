@@ -4,10 +4,10 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AnalysisUnitType, ASTNode, Field, LongType, T, abstract
-from langkit.expressions import (
-    AbstractProperty, ExternalProperty, Property, Self, langkit_property
-)
+from langkit.dsl import (AnalysisUnitType, ASTNode, Field, IntegerType, T,
+                         abstract)
+from langkit.expressions import (AbstractProperty, ExternalProperty, Property,
+                                 Self, langkit_property)
 from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
@@ -22,7 +22,7 @@ class FooNode(ASTNode):
 
 @abstract
 class Expression(FooNode):
-    result = AbstractProperty(type=LongType, public=True)
+    result = AbstractProperty(type=IntegerType, public=True)
 
 
 class Literal(Expression):

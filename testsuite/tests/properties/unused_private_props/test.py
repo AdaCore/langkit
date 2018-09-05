@@ -4,11 +4,10 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AnalysisUnitType, ASTNode, Field, LongType, T, abstract
-from langkit.expressions import (
-    AbstractProperty, No, ExternalProperty, Property, Self,
-    langkit_property
-)
+from langkit.dsl import (AnalysisUnitType, ASTNode, Field, IntegerType, T,
+                         abstract)
+from langkit.expressions import (AbstractProperty, No, ExternalProperty,
+                                 Property, Self, langkit_property)
 from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
@@ -30,7 +29,7 @@ class FooNode(ASTNode):
 class Expression(FooNode):
     # This property and all its children are private. Only Literal.result is
     # called by a public property, so all others are unused.
-    result = AbstractProperty(type=LongType)
+    result = AbstractProperty(type=IntegerType)
 
     # This property is private, but is called from "referenced_units", so
     # "names" and all its overriding properties are used.

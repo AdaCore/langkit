@@ -21,13 +21,13 @@ class FooNode(ASTNode):
 @abstract
 class Expr(FooNode):
 
-    prop1 = AbstractProperty(T.LongType, public=True)
+    prop1 = AbstractProperty(T.IntegerType, public=True)
 
     # Warning: all concrete subclasses override this (concrete root property)
     prop2 = Property(0, public=True)
 
     # Warning: all concrete subclasses override this (runtime check)
-    prop3 = AbstractProperty(T.LongType, public=True, runtime_check=True)
+    prop3 = AbstractProperty(T.IntegerType, public=True, runtime_check=True)
 
 
 @abstract

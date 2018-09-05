@@ -157,7 +157,7 @@ class CollectionExpression(AbstractExpression):
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
-                names.Name('I'), type=T.LongType,
+                names.Name('I'), type=T.IntegerType,
                 source_name=names.Name.from_lower(argspec.args[index_var_pos])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
@@ -680,7 +680,7 @@ def collection_get(self, collection, index, or_null):
     """
     # index yields a 0-based index and all the Get primitives expect 0-based
     # indexes, so there is no need to fiddle indexes here.
-    index_expr = construct(index, T.LongType)
+    index_expr = construct(index, T.IntegerType)
 
     coll_expr = construct(collection)
     as_entity = coll_expr.type.is_entity_type
@@ -729,7 +729,7 @@ def length(self, collection):
         'Collection expected but got {} instead'.format(orig_type.dsl_name)
     )
 
-    return CallExpr('Len', 'Length', T.LongType, [coll_expr],
+    return CallExpr('Len', 'Length', T.IntegerType, [coll_expr],
                     abstract_expr=self)
 
 

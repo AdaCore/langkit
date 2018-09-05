@@ -5,7 +5,7 @@ stack overflow.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LongType
+from langkit.dsl import ASTNode, IntegerType
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar
 
@@ -18,8 +18,8 @@ class FooNode(ASTNode):
 
 class Example(FooNode):
 
-    @langkit_property(public=True, memoized=True, return_type=LongType)
-    def compute(i=LongType):
+    @langkit_property(public=True, memoized=True, return_type=IntegerType)
+    def compute(i=IntegerType):
         return i + 1
 
 

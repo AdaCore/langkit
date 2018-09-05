@@ -584,7 +584,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.LongType
+        return self == T.IntegerType
 
     @property
     def is_character_type(self):
@@ -2540,7 +2540,7 @@ class ASTNodeType(BaseStructType):
                 doc='Return the last token used to parse this node.'
             )),
             ('child_index', BuiltinField(
-                type=T.LongType,
+                type=T.IntegerType,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),
@@ -3017,7 +3017,7 @@ def create_builtin_types():
 
     CompiledType(
         name=get_type(int),
-        type_repo_name='LongType',
+        type_repo_name='IntegerType',
         exposed=True,
         is_ptr=False,
         nullexpr='0',

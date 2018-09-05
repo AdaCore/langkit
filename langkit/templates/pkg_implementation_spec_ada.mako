@@ -271,7 +271,7 @@ private package ${ada_lib_name}.Implementation is
       function Hash (B : Boolean) return Hash_Type;
    % endif
 
-   % if T.LongType.requires_hash_function:
+   % if T.IntegerType.requires_hash_function:
       function Hash (I : Integer) return Hash_Type;
    % endif
 

@@ -380,7 +380,7 @@ class Predicate(AbstractExpression):
             b = UserField(LogicVarType)
 
             @langkit_property(return_type=BoolType)
-            def test_property(other_node=BaseNode, int_arg=LongType):
+            def test_property(other_node=BaseNode, int_arg=IntegerType):
                 ...
 
             # This is a valid Predicate instantiation for the above property

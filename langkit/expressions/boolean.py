@@ -277,7 +277,7 @@ class OrderingTest(AbstractExpression):
             lhs.type.is_big_integer_type or
             lhs.type.is_ast_node,
             'Comparisons only work on {}, {} or nodes not {}'
-            .format(T.LongType.dsl_name, T.BigIntegerType.dsl_name,
+            .format(T.IntegerType.dsl_name, T.BigIntegerType.dsl_name,
                     lhs.type.dsl_name)
         )
 

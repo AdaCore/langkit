@@ -5,10 +5,10 @@ takes entities.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, LongType, LogicVarType, T, UserField
-from langkit.expressions import (
-    AbstractProperty, Let, Property, Self, Bind, langkit_property
-)
+from langkit.dsl import (ASTNode, BoolType, IntegerType, LogicVarType, T,
+                         UserField)
+from langkit.expressions import (AbstractProperty, Let, Property, Self, Bind,
+                                 langkit_property)
 from langkit.parsers import Grammar
 
 from lexer_example import Token
@@ -16,7 +16,7 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    prop = AbstractProperty(runtime_check=True, type=LongType, public=True)
+    prop = AbstractProperty(runtime_check=True, type=IntegerType, public=True)
 
 
 class Literal(FooNode):
