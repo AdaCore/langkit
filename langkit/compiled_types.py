@@ -3011,6 +3011,7 @@ def create_builtin_types():
         exposed=True,
         is_ptr=False,
         nullexpr='False',
+        null_allowed=True,
         py_nullexpr='False',
         hashable=True,
 
