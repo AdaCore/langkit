@@ -513,17 +513,10 @@ class Then(AbstractExpression):
         self.then_expr = unsugar(self.then_fn(self.var_expr))
 
     def construct(self):
-        # Accept as a prefix:
-        #
-        #   * any pointer, since it can be checked against "null";
-        #   * any StructType, since structs are nullable;
-        #   * any LexicalEnvType, which has EmptyEnv as a null value.
+        # Accept as a prefix all types that can have a null value
         expr = construct(
             self.expr,
-            lambda cls: (cls.is_ptr or
-                         cls.is_struct_type or
-                         cls.is_lexical_env_type,
-                         cls.is_bool_type),
+            lambda cls: cls.null_allowed,
             'Invalid prefix type for .then: {expr_type}'
         )
         self.var_expr.set_type(expr.type)
