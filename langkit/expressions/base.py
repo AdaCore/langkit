@@ -1591,25 +1591,27 @@ class NullExpr(BindableLiteralExpr):
     """
 
     def __init__(self, type, abstract_expr=None):
-        expr = type.nullexpr
-        if type.is_ptr:
-            expr = "{}'({})".format(type.name.camel_with_underscores,
-                                    expr)
-        super(NullExpr, self).__init__(expr, type, abstract_expr=abstract_expr)
+        super(NullExpr, self).__init__(type.nullexpr, type,
+                                       abstract_expr=abstract_expr)
 
     def render_private_ada_constant(self):
         return self._render_expr()
 
     def render_public_ada_constant(self):
+        # First, handle all types that 1) have different types in the public
+        # and internal Ada APIs and that 2) can have default values.
         if self.type.is_entity_type:
             return 'No_{}'.format(self.type.api_name.camel_with_underscores)
 
-        assert self.type.api_name == self.type.name, (
-            'Cannot generate a public Ada constant for type {}'.format(
-                self.type.dsl_name
+        # For all other cases, make sure that the internal type is the one
+        # exposed in the public Ada API.
+        else:
+            assert self.type.api_name == self.type.name, (
+                'Cannot generate a public Ada constant for type {}'.format(
+                    self.type.dsl_name
+                )
             )
-        )
-        return self._render_expr()
+            return self._render_expr()
 
     def render_python_constant(self):
         return 'None' if self.type.is_entity_type else self.type.py_nullexpr
@@ -4202,15 +4204,10 @@ class No(AbstractExpression):
 
         :rtype: LiteralExpr
         """
-        et = resolve_type(self.expr_type)
-        if et.is_array:
-            return ArrayLiteral.construct_static([], et, abstract_expr=self)
-        else:
-            return NullExpr(et, abstract_expr=self)
+        return NullExpr(resolve_type(self.expr_type), abstract_expr=self)
 
     def __repr__(self):
-        expr_type = resolve_type(self.expr_type)
-        return '<No {}>'.format(expr_type.name.camel)
+        return '<No {}>'.format(resolve_type(self.expr_type).name.camel)
 
 
 class FieldAccessExpr(BasicExpr):
