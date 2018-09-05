@@ -5,39 +5,7 @@ import itertools
 
 from langkit import names
 
-LANGUAGE = "ada"
-
-languages_extensions = {
-    "ada": "adb",
-    "cpp": "cpp",
-}
-
-keywords = {
-    "cpp": set("""
-        align as alignof and and_eq asm auto
-        bitand bitor bool break
-        case catch char char16_t char32_t class compl concept const constexpr
-        const_cast continue
-        decltype default delete do double dynamic_cast
-        else enum explicit export extern
-        false float for friend
-        goto
-        if inline int
-        long
-        mutable
-        namespace new noexcept not not_eq nullptr
-        operator or or_eq
-        private protected public
-        register reinterpret_cast requires return
-        short signed sizeof static static_assert static_cast struct switch
-        template this thread_local throw true try typedef typeid typename
-        union unsigned using
-        virtual void volatile
-        wchar_t while
-        xor xor_eq
-    """.split()),
-
-    "ada": set("""
+ada_keywords = set("""
     abort abs abstract accept access aliased all and array at
     begin body
     case constant
@@ -57,8 +25,7 @@ keywords = {
     tagged task terminate then type
     until use
     when while with xor
-    """.split()),
-}
+""".split())
 
 
 def string_repr(string):
@@ -73,7 +40,7 @@ def string_repr(string):
 
 def is_keyword(name):
     """
-    Returns wether `name` is a keyword given the chosen global language.
+    Returns wether `name` is an Ada keyword.
 
     :param str|names.Name name: The name we want to test.
     :rtype: bool
@@ -82,7 +49,7 @@ def is_keyword(name):
     str_name = name.lower if isinstance(name, names.Name) else name
     assert isinstance(str_name, basestring)
 
-    return str_name.lower() in keywords[LANGUAGE]
+    return str_name.lower() in ada_keywords
 
 
 __next_ids = defaultdict(lambda: itertools.count(0))
