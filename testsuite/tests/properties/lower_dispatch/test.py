@@ -33,15 +33,15 @@ class Name(FooNode):
 @abstract
 class Expr(FooNode):
 
-    evaluate_abstract = AbstractProperty(T.LongType, public=True)
-    evaluate_rtcheck = AbstractProperty(T.LongType, public=True,
+    evaluate_abstract = AbstractProperty(T.IntegerType, public=True)
+    evaluate_rtcheck = AbstractProperty(T.IntegerType, public=True,
                                         runtime_check=True)
 
     @langkit_property(public=True)
     def evaluate_concrete():
         return 1
 
-    evaluate_entity = AbstractProperty(T.LongType, public=True)
+    evaluate_entity = AbstractProperty(T.IntegerType, public=True)
 
 
 @abstract

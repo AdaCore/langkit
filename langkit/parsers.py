@@ -1135,7 +1135,7 @@ class _Row(Parser):
         # no_backtrack mode.
         if (self.containing_transform
                 and self.containing_transform.no_backtrack):
-            self.progress_var = VarDef('row_progress', T.LongType)
+            self.progress_var = VarDef('row_progress', T.IntegerType)
 
     def generate_code(self):
         return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))

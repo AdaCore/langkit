@@ -942,11 +942,11 @@ class LogicVarType(_BuiltinType):
     _name = names.Name('Logic_Var_Type')
 
 
-class LongType(_BuiltinType):
+class IntegerType(_BuiltinType):
     """
     Simple integer type.
     """
-    _name = names.Name('Long_Type')
+    _name = names.Name('Integer_Type')
 
 
 class SymbolType(_BuiltinType):

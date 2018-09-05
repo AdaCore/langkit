@@ -1550,7 +1550,7 @@ class IntegerLiteralExpr(BindableLiteralExpr):
     def __init__(self, value, abstract_expr=None):
         self.value = value
         super(IntegerLiteralExpr, self).__init__(
-            str(value), T.LongType, abstract_expr=abstract_expr
+            str(value), T.IntegerType, abstract_expr=abstract_expr
         )
 
     def render_private_ada_constant(self):
@@ -4432,7 +4432,7 @@ class LocalVars(object):
 
             from langkit.compiled_types import LocalVars, T
             vars = LocalVars()
-            var = vars.create('Index', T.LongType)
+            var = vars.create('Index', T.IntegerType)
 
         The names are *always* unique, so you can pass several time the same
         string as a name, and create will handle creating a name that is unique
@@ -4599,7 +4599,7 @@ class BigInteger(AbstractExpression):
         # int from its base-10 string representation.
         expr = ('"{}"'.format(self.expr)
                 if isinstance(self.expr, (int, long)) else
-                construct(self.expr, T.LongType))
+                construct(self.expr, T.IntegerType))
         return BigInteger.Expr(expr, abstract_expr=self)
 
     def __repr__(self):
@@ -4613,7 +4613,7 @@ def as_int(self, expr):
     if the big integer is out of range.
     """
     big_int_expr = construct(expr, T.BigIntegerType)
-    return CallExpr('Small_Int', 'To_Integer', T.LongType, [big_int_expr],
+    return CallExpr('Small_Int', 'To_Integer', T.IntegerType, [big_int_expr],
                     abstract_expr=self)
 
 
@@ -4651,7 +4651,7 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (T.LongType, T.BigIntegerType),
+            l.type in (T.IntegerType, T.BigIntegerType),
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 

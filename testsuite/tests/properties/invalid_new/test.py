@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LongType, Struct, UserField
+from langkit.dsl import ASTNode, IntegerType, Struct, UserField
 from langkit.expressions import (Literal, New, No, Property, Self, Var,
                                  langkit_property)
 from langkit.parsers import Grammar
@@ -19,8 +19,8 @@ def run(name, expr):
     print('== {} =='.format(name))
 
     class MyStruct(Struct):
-        a = UserField(type=LongType)
-        b = UserField(type=LongType)
+        a = UserField(type=IntegerType)
+        b = UserField(type=IntegerType)
 
     class FooNode(ASTNode):
         pass

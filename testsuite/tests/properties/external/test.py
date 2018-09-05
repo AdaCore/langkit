@@ -4,7 +4,7 @@ Test that external properties build and run properly.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, LongType, abstract
+from langkit.dsl import ASTNode, Field, IntegerType, abstract
 from langkit.expressions import (
     AbstractProperty, ExternalProperty, Property, Self
 )
@@ -20,7 +20,7 @@ class FooNode(ASTNode):
 
 @abstract
 class Expression(FooNode):
-    result = AbstractProperty(type=LongType, public=True)
+    result = AbstractProperty(type=IntegerType, public=True)
 
 
 class Literal(Expression):
