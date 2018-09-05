@@ -1959,6 +1959,7 @@ class ASTNodeType(BaseStructType):
                                 self.raw_name)
 
         name = names.Name('Bare') + self.kwless_raw_name
+        self.null_constant = names.Name('No') + name
 
         is_root = base is None
         is_root_list = base is not None and base.is_generic_list_type
@@ -1985,8 +1986,9 @@ class ASTNodeType(BaseStructType):
             # public APIs and will (un)wrap them as entities automatically.
             exposed=True,
 
-            is_refcounted=False, nullexpr='null', py_nullexpr='None',
-            element_type=element_type, hashable=True,
+            is_refcounted=False,
+            nullexpr=self.null_constant.camel_with_underscores,
+            py_nullexpr='None', element_type=element_type, hashable=True,
             type_repo_name=self.raw_name.camel,
 
             dsl_name=dsl_name or self.raw_name.camel

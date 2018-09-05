@@ -6,6 +6,8 @@
 <%def name="public_incomplete_decl(cls)">
    type ${cls.value_type_name()};
    type ${cls.name} is access all ${cls.value_type_name()}'Class;
+
+   ${cls.null_constant} : constant ${cls.name} := null;
 </%def>
 
 <%def name="logic_helpers()">

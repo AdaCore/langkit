@@ -6,15 +6,12 @@
 
 <%def name="public_incomplete_decl(element_type)">
 
-   <%
-      list_type = element_type.list
-      value_type = list_type.value_type_name()
-      type_name = list_type.name
-   %>
+   <% list_type = element_type.list %>
 
-   type ${value_type};
-   type ${type_name} is access all ${list_type.value_type_name()}'Class;
+   type ${list_type.value_type_name()};
+   type ${list_type.name} is access all ${list_type.value_type_name()}'Class;
 
+   ${list_type.null_constant} : constant ${list_type.name} := null;
 </%def>
 
 <%def name="private_decl(element_type)">
