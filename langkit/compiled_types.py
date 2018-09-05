@@ -7,7 +7,7 @@ import pipes
 
 from langkit import names
 from langkit.c_api import CAPIType
-from langkit.common import get_type, null_constant, is_keyword
+from langkit.common import null_constant, is_keyword
 from langkit.diagnostics import (
     Context, WarningSet, check_source_language, extract_library_location
 )
@@ -3002,7 +3002,7 @@ def create_builtin_types():
     EnvRebindingsType()
 
     CompiledType(
-        name=get_type(bool),
+        name='Boolean',
         type_repo_name='BoolType',
         exposed=True,
         is_ptr=False,
@@ -3016,7 +3016,7 @@ def create_builtin_types():
     )
 
     CompiledType(
-        name=get_type(int),
+        name='Integer',
         type_repo_name='IntegerType',
         exposed=True,
         is_ptr=False,

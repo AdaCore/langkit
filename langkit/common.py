@@ -117,27 +117,3 @@ def gen_name(var_name):
 
     var_id = next(__next_ids[var_name.lower])
     return var_name + names.Name(str(var_id))
-
-
-basic_types = {
-    "ada": {
-        int: "Integer",
-        bool: "Boolean"
-    },
-    "cpp": {
-        int: "long",
-        bool: "bool"
-    }
-}
-":type: dict[str, dict[type, str]]"
-
-
-def get_type(typ):
-    """
-    Given a base python type, long or bool, will return the representation
-    of that type in the target global language.
-
-    :param type typ: The type to be represented.
-    :rtype: str
-    """
-    return basic_types[LANGUAGE][typ]
