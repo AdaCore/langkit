@@ -82,9 +82,17 @@
    % endif
 
    type ${cls.pointed} (N : Natural) is record
-      Ref_Count : Positive;
+      Ref_Count : Integer;
+      --  Negative values are interpreted as "always living singleton".
+      --  Non-negative values have the usual ref-counting semantics.
+
       Items     : ${cls.array_type_name} (1 .. N);
    end record;
+
+   Empty_${cls.api_name}_Record : aliased ${cls.pointed} :=
+     (N => 0, Ref_Count => -1, Items => (1 .. 0 => <>));
+   ${cls.null_constant} : constant ${cls.name} :=
+      Empty_${cls.api_name}_Record'Access;
 
    ## If we are on the entity type, we need a conversion function
    ## to be able to get element arrays starting from 0 and convert them into
@@ -192,7 +200,9 @@
 
    procedure Inc_Ref (T : ${cls.name}) is
    begin
-      T.Ref_Count := T.Ref_Count + 1;
+      if T.Ref_Count >= 0 then
+         T.Ref_Count := T.Ref_Count + 1;
+      end if;
    end Inc_Ref;
 
    ------------
@@ -207,7 +217,7 @@
 
    procedure Dec_Ref (T : in out ${cls.name}) is
    begin
-      if T = null then
+      if T = null or else T.Ref_Count < 0 then
          return;
       end if;
 
@@ -227,12 +237,16 @@
    end Dec_Ref;
 
    function ${cls.constructor_name} (Items_Count : Natural) return ${cls.name}
-   is (new ${cls.pointed}'(N => Items_Count, Ref_Count => 1, Items => <>));
+   is (if Items_Count = 0
+       then ${cls.nullexpr}
+       else new ${cls.pointed}'(N => Items_Count, Ref_Count => 1, Items => <>));
 
    % if cls.element_type == T.root_node.entity:
    function ${cls.constructor_name}
      (Items : AST_Envs.Entity_Array) return ${cls.name}
-   is (new ${cls.pointed}'
+   is (if Items'Length = 0
+       then ${cls.nullexpr}
+       else new ${cls.pointed}'
          (N         => Items'Length,
           Items     => Implementation.${cls.array_type_name} (Items),
           Ref_Count => 1));
@@ -242,6 +256,10 @@
    function ${cls.constructor_name}
      (Items : ${cls.array_type_name}) return ${cls.name} is
    begin
+      if Items'Length = 0 then
+         return ${cls.nullexpr};
+      end if;
+
       % if cls.element_type.is_refcounted:
          for El of Items loop
             Inc_Ref (El);
