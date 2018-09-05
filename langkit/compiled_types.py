@@ -2648,12 +2648,14 @@ class ArrayType(CompiledType):
     """
 
     def __init__(self, name, element_type):
+        self.null_constant = names.Name('No') + name
+
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
         super(ArrayType, self).__init__(
             name=name, is_ptr=True,
             is_refcounted=True,
-            nullexpr='null',
+            nullexpr=self.null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True)
