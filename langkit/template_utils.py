@@ -7,7 +7,7 @@ import mako.exceptions
 from mako.lookup import TemplateLookup
 
 from langkit import documentation, names
-from langkit.common import string_repr, null_constant
+from langkit.common import string_repr
 from langkit.diagnostics import DiagnosticError
 
 
@@ -61,7 +61,6 @@ def mako_template(file_name):
 
 common_renderer = Renderer({
     'string_repr':      string_repr,
-    'null_constant':    null_constant,
     'Name':             names.Name,
 
     'ada_doc':          documentation.ada_doc,

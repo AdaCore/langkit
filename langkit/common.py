@@ -12,11 +12,6 @@ languages_extensions = {
     "cpp": "cpp",
 }
 
-null_constants = {
-    "ada": "null",
-    "cpp": "nullptr"
-}
-
 keywords = {
     "cpp": set("""
         align as alignof and and_eq asm auto
@@ -74,17 +69,6 @@ def string_repr(string):
     :return: A string literal representation of string.
     """
     return '"{0}"'.format(repr(string)[1:-1].replace('"', '""'))
-
-
-def null_constant():
-    """
-    Return the applicable representation of the null constant given the
-    chosen global language.
-
-    :return: The null constant.
-    :rtype: str
-    """
-    return null_constants[LANGUAGE]
 
 
 def is_keyword(name):

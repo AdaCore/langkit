@@ -7,7 +7,7 @@ import pipes
 
 from langkit import names
 from langkit.c_api import CAPIType
-from langkit.common import null_constant, is_keyword
+from langkit.common import is_keyword
 from langkit.diagnostics import (
     Context, WarningSet, check_source_language, extract_library_location
 )
@@ -1985,7 +1985,7 @@ class ASTNodeType(BaseStructType):
             # public APIs and will (un)wrap them as entities automatically.
             exposed=True,
 
-            is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
+            is_refcounted=False, nullexpr='null', py_nullexpr='None',
             element_type=element_type, hashable=True,
             type_repo_name=self.raw_name.camel,
 
@@ -2653,7 +2653,7 @@ class ArrayType(CompiledType):
         super(ArrayType, self).__init__(
             name=name, is_ptr=True,
             is_refcounted=True,
-            nullexpr=null_constant(),
+            nullexpr='null',
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True)
