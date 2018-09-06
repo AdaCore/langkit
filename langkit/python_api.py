@@ -39,7 +39,7 @@ class PythonAPISettings(AbstractAPISettings):
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
-            (T.AnalysisUnitKind, lambda _: '_unit_kind_to_str[{}]'),
+            (T.AnalysisUnitKind, lambda _: '_AnalysisUnitKind._wrap({})'),
             (ct.ASTNodeType, lambda _: '{}._wrap_bare_node({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
@@ -87,7 +87,8 @@ class PythonAPISettings(AbstractAPISettings):
                        if type.conversion_requires_context else '')
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
-            (T.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({value})'),
+            (T.AnalysisUnitKind, lambda _:
+                '_AnalysisUnitKind._unwrap({value})'),
             (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
             (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),

@@ -293,21 +293,50 @@ class _big_integer(object):
     ))
 
 
-${py_doc('langkit.unit_kind_type')}
-_str_to_unit_kind = {
-    'specification': 0,
-    'body': 1,
-}
-_unit_kind_to_str = {c_val: py_val
-                     for py_val, c_val in _str_to_unit_kind.items()}
+class _Enum(object):
+
+    name = None
+    """
+    Name for this enumeration type.
+    :type: str
+    """
+
+    c_to_py = None
+    """
+    Mapping from C values to user-level Python values.
+    :type: list[str]
+    """
+
+    py_to_c = None
+    """
+    Mapping from user-level Python values to C values.
+    :type: dict[str, int]
+    """
+
+    @classmethod
+    def _unwrap(cls, py_value):
+        if not isinstance(py_value, basestring):
+            raise TypeError('str expected but got {} instead'.format(
+                type(py_value)))
+        try:
+            return cls.py_to_c[py_value]
+        except KeyError:
+            raise ValueError('Invalid {}: {}'.format(cls.name, py_value))
+
+    @classmethod
+    def _wrap(cls, c_value):
+        if isinstance(c_value, ctypes.c_int):
+            c_value = c_value.value
+        return cls.c_to_py[c_value]
 
 
-def _unwrap_unit_kind(kind):
-    """
-    Given a string representing an analysis unit kind in the Python API, return
-    the corresponding C API value.
-    """
-    return _unwrap_enum(kind, 'analysis unit kind', _str_to_unit_kind)
+class _AnalysisUnitKind(_Enum):
+    ${py_doc('langkit.unit_kind_type', 4)}
+
+    name = 'AnalysisUnitKind'
+    c_to_py = ['specification', 'body']
+    py_to_c = {name: index for index, name in enumerate(c_to_py)}
+
 
 
 _unit_provider = _hashable_c_pointer()
@@ -1405,28 +1434,6 @@ class ${root_astnode_name}(object):
 ${astnode_types.decl(astnode)}
     % endif
 % endfor
-
-
-def _unwrap_enum(py_value, type_name, translator):
-    """
-    Internal helper to unwrap a high-level enumeration value (i.e. a string)
-    into a low-level value (i.e. an integer). Raise a TypeError if the input
-    value has an unexpected type and a ValueError if the string does not
-    represent a valid enumerator.
-
-    :param str py_value: The high-level enumeration value.
-    :param str type_name: Name for the enumeration type.
-    :param dict[str, int] translator: A mapping that provides the low-level
-        values for all high-level ones.
-    """
-    if not isinstance(py_value, basestring):
-        raise TypeError('str expected but got {} instead'.format(
-            type(py_value)
-        ))
-    try:
-        return translator[py_value]
-    except KeyError:
-        raise ValueError('Invalid {}: {}'.format(type_name, py_value))
 
 
 _EnvRebindings_c_type = _hashable_c_pointer()
