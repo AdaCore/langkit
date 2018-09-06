@@ -137,6 +137,14 @@ class CompiledTypeRepo(object):
     :rtype: dict[str, CompiledType]
     """
 
+    enum_types = []
+    """
+    List of EnumType instances. This list is updated every time a new instance
+    is created.
+
+    :type: list[EnumType]
+    """
+
     astnode_types = []
     """
     List of ASTNodeType instances. This list is updated every time a new
@@ -2896,6 +2904,63 @@ def create_enum_node_types(cls):
         # Make the alternative derived class accessible from the root node for
         # the enum.
         base_enum_node._alternatives.append(alt_type)
+
+
+class EnumType(CompiledType):
+    """
+    Ada-like enumeration type.
+    """
+
+    def __init__(self, name, location, doc, value_names):
+        """
+        :type value_names: list[name.Names]
+        """
+        super(EnumType, self).__init__(
+            name, location, doc, is_ptr=False, exposed=True,
+            null_allowed=False, hashable=True)
+
+        self.values = [EnumValue(self, vn, i)
+                       for i, vn in enumerate(value_names)]
+
+        CompiledTypeRepo.enum_types.append(self)
+
+
+class EnumValue(object):
+    """
+    Possible value for an enumeration type.
+    """
+
+    def __init__(self, enum_type, name, index):
+        self.type = enum_type
+        """
+        Enumeration type that owns this enumeration value.
+
+        :type: EnumType
+        """
+
+        self.name = name
+        """
+        Name for this enumeration value.
+
+        :type: names.Name
+        """
+
+        self.index = index
+        """
+        Index for this enumeration value. Each enumeration values in a given
+        enumeration type are assigned an index, incrementing from 0.
+
+        :type: int
+        """
+
+    @property
+    def dsl_name(self):
+        """
+        Return the DSL name for this enumeration value.
+
+        :rtype: str
+        """
+        return '{}.{}'.format(self.enum_type.dsl_name, self.name.camel)
 
 
 class BigIntegerType(CompiledType):

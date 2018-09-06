@@ -71,6 +71,13 @@ package ${ada_lib_name}.Common is
       % endif
    % endfor
 
+   % for enum_type in ctx.enum_types:
+      type ${enum_type.api_name} is
+        (${', '.join(str(v.name) for v in enum_type.values)})
+         with Convention => C;
+      ${ada_doc(enum_type, 6)}
+   % endfor
+
    type Lexer_Input_Kind is (File, Bytes_Buffer, Text_Buffer);
 
    type Token_Kind is (
