@@ -21,6 +21,3 @@ class AdaAPISettings(AbstractAPISettings):
     @classmethod
     def escape(cls, name, suffix):
         return (name + suffix if is_keyword(name.base_name) else name)
-
-    def get_enum_alternative(self, type_name, alt_name, suffix):
-        return self.escape(alt_name, suffix)
