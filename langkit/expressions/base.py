@@ -55,6 +55,8 @@ def unsugar(expr, ignore_errors=False):
         expr = expr.get()
     elif isinstance(expr, (list, tuple)):
         expr = ArrayLiteral(expr, None)
+    elif isinstance(expr, langkit.dsl._BuiltinValue):
+        expr = expr._resolve()
     elif isinstance(expr, EnumValue):
         expr = expr.to_abstract_expr
     elif isinstance(expr, langkit.dsl.EnumValue):
