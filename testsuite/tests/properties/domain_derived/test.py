@@ -29,7 +29,7 @@ class Definition(FooNode):
 class Name(FooNode):
     token_node = True
 
-    ref_var = UserField(type=T.LogicVarType, public=False)
+    ref_var = UserField(type=T.LogicVar, public=False)
 
     @langkit_property(public=True)
     def resolve():

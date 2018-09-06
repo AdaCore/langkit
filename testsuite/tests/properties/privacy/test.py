@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import itertools
 
-from langkit.dsl import ASTNode, BoolType, abstract
+from langkit.dsl import ASTNode, Bool, abstract
 from langkit.expressions import AbstractProperty, Literal, Property, Self
 from langkit.parsers import Grammar, Or
 
@@ -30,7 +30,7 @@ def run(abstract_public, concrete_public):
 
     @abstract
     class AbstractNode(RootNode):
-        prop = AbstractProperty(BoolType, public=abstract_public)
+        prop = AbstractProperty(Bool, public=abstract_public)
 
         public_prop = Property(Self.prop, public=True)
 

@@ -11,7 +11,7 @@ File "test.py", line 33, in Example.prop
 == Bad argument type ==
 File "test.py", line 33, in Example.prop
   line 35, in Predicate expression
-    Error: Argument #1 of predicate has type Boolean, should be FooNode.entity
+    Error: Argument #1 of predicate has type Bool, should be FooNode.entity
 
 == Too many arguments ==
 File "test.py", line 33, in Example.prop

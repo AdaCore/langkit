@@ -4,7 +4,7 @@ Test that invalid AST node parse fields are properly rejected.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, TokenType, synthetic
+from langkit.dsl import ASTNode, Field, Token, synthetic
 from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
@@ -20,7 +20,7 @@ class Example(FooNode):
 
 @synthetic
 class SynthExample(FooNode):
-    f = Field(type=TokenType)
+    f = Field(type=Token)
 
 
 foo_grammar = Grammar('main_rule')

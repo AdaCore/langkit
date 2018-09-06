@@ -15,11 +15,11 @@ from utils import build_and_run
 class FooNode(ASTNode):
 
     @langkit_property()
-    def at_bare(n=T.Example.list, i=T.IntegerType):
+    def at_bare(n=T.Example.list, i=T.Integer):
         return n.at(i)
 
     @langkit_property()
-    def at_entity(n=T.Example.list.entity, i=T.IntegerType):
+    def at_entity(n=T.Example.list.entity, i=T.Integer):
         return n.at(i)
 
     @langkit_property(public=True)

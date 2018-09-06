@@ -4,8 +4,7 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (AnalysisUnitType, ASTNode, Field, IntegerType, T,
-                         abstract)
+from langkit.dsl import AnalysisUnit, ASTNode, Field, Integer, T, abstract
 from langkit.expressions import (AbstractProperty, ExternalProperty, Property,
                                  Self, langkit_property)
 from langkit.parsers import Grammar, Or
@@ -16,13 +15,13 @@ from utils import build_and_run
 
 class FooNode(ASTNode):
     @langkit_property(public=True)
-    def eval_unit(u=AnalysisUnitType):
+    def eval_unit(u=AnalysisUnit):
         return u.root.cast(T.Expression).result
 
 
 @abstract
 class Expression(FooNode):
-    result = AbstractProperty(type=IntegerType, public=True)
+    result = AbstractProperty(type=Integer, public=True)
 
 
 class Literal(Expression):
@@ -35,7 +34,7 @@ class Name(Expression):
     token_node = True
 
     designated_unit = ExternalProperty(
-        type=AnalysisUnitType, uses_entity_info=False, uses_envs=True
+        type=AnalysisUnit, uses_entity_info=False, uses_envs=True
     )
     result = Property(Self.designated_unit.root.cast(Expression).result)
 

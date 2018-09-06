@@ -1,5 +1,5 @@
 File "test.py", line 26, In definition of grammar rule main_rule
-    Error: List parsers only accept subparsers that yield AST nodes (TokenReference provided here)
+    Error: List parsers only accept subparsers that yield AST nodes (Token provided here)
 File "test.py", line 35, In definition of grammar rule main_rule
     Error: Invalid list type for List parser: ListNode. Not a list type
 Done

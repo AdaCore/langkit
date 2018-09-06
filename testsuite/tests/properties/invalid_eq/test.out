@@ -16,12 +16,12 @@ Code generation was successful
 == Boolean <-> ASTNode ==
 File "test.py", line 28, in Example.prop
   line 28, in Eq expression
-    Error: Incompatible types for equality: Boolean and FooNode
+    Error: Incompatible types for equality: Bool and FooNode
 
 == ASTNode <-> Boolean ==
 File "test.py", line 28, in Example.prop
   line 28, in Eq expression
-    Error: Incompatible types for equality: FooNode and Boolean
+    Error: Incompatible types for equality: FooNode and Bool
 
 == ASTNode <-> Entity ==
 File "test.py", line 28, in Example.prop
@@ -31,17 +31,17 @@ File "test.py", line 28, in Example.prop
 == Boolean <-> Entity ==
 File "test.py", line 28, in Example.prop
   line 28, in Eq expression
-    Error: Incompatible types for equality: Boolean and FooNode.entity
+    Error: Incompatible types for equality: Bool and FooNode.entity
 
 == ASTNode <-> Boolean ==
 File "test.py", line 28, in Example.prop
   line 28, in Eq expression
-    Error: Incompatible types for equality: FooNode and Boolean
+    Error: Incompatible types for equality: FooNode and Bool
 
 == Long <-> Boolean ==
 File "test.py", line 28, in Example.prop
   line 28, in Eq expression
-    Error: Incompatible types for equality: Integer and Boolean
+    Error: Incompatible types for equality: Integer and Bool
 
 == ASTNode <-> ASTNode (never equal) ==
 File "test.py", line 28, in Example.prop

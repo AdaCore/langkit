@@ -11,11 +11,11 @@ File "test.py", line 23, in Example.p
 == Bad condition type ==
 File "test.py", line 23, in Example.p
   line 3, in SelfVariable expression
-    Error: Bad condition type in Cond expression: Boolean expected but got Example instead
+    Error: Bad condition type in Cond expression: Bool expected but got Example instead
 
 == Bad return type ==
 File "test.py", line 23, in Example.p
   line 36, in Cond expression
-    Error: Mismatching types in Cond expression: Boolean expected but got Example instead
+    Error: Mismatching types in Cond expression: Bool expected but got Example instead
 
 Done

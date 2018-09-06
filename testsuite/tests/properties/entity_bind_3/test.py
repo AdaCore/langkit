@@ -5,7 +5,7 @@ takes entities.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LogicVarType, IntegerType, UserField, T
+from langkit.dsl import ASTNode, LogicVar, Integer, UserField, T
 from langkit.expressions import (
     AbstractProperty, Let, Property, Self, Bind, langkit_property
 )
@@ -16,14 +16,14 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    prop = AbstractProperty(runtime_check=True, type=IntegerType, public=True)
+    prop = AbstractProperty(runtime_check=True, type=Integer, public=True)
 
 
 class Literal(FooNode):
     token_node = True
 
     a = AbstractProperty(runtime_check=True, type=FooNode.entity)
-    var = UserField(LogicVarType, public=False)
+    var = UserField(LogicVar, public=False)
 
     @langkit_property(return_type=T.Literal.entity)
     def node():

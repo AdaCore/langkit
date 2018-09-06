@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, IntegerType
+from langkit.dsl import ASTNode, Integer
 from langkit.expressions import Property, No, Self
 from langkit.parsers import Grammar
 
@@ -21,7 +21,7 @@ def run(name, expr):
         pass
 
     class BarNode(FooNode):
-        prop_2 = Property(lambda x=IntegerType: x, public=True)
+        prop_2 = Property(lambda x=Integer: x, public=True)
         prop = Property(expr, public=True)
 
     grammar = Grammar('main_rule')

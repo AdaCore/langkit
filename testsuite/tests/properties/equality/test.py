@@ -15,7 +15,7 @@ from utils import build_and_run
 
 
 class EnvStruct(Struct):
-    env = UserField(type=T.LexicalEnvType)
+    env = UserField(type=T.LexicalEnv)
 
 
 class FooNode(ASTNode):
@@ -47,15 +47,15 @@ class Decl(FooNode):
         add_env(),
     )
 
-    @langkit_property(public=True, return_type=T.BoolType)
+    @langkit_property(public=True, return_type=T.Bool)
     def test_env(other=T.FooNode.entity):
         return Self.children_env.env_orphan == other.children_env.env_orphan
 
-    @langkit_property(public=True, return_type=T.BoolType)
+    @langkit_property(public=True, return_type=T.Bool)
     def test_struct(other=T.FooNode.entity):
         return Self.env_struct == other.env_struct
 
-    @langkit_property(public=True, return_type=T.BoolType)
+    @langkit_property(public=True, return_type=T.Bool)
     def test_array(other=T.FooNode.entity):
         return Self.env_array == other.env_array
 

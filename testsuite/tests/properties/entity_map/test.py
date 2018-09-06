@@ -4,7 +4,7 @@ Check that map expressions on entity types work properly.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (ASTNode, BoolType, EnumNode, Field, Struct, UserField,
+from langkit.dsl import (ASTNode, Bool, EnumNode, Field, Struct, UserField,
                          T, env_metadata)
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import Entity, New, Self, langkit_property
@@ -16,7 +16,7 @@ from utils import build_and_run
 
 @env_metadata
 class Metadata(Struct):
-    b = UserField(type=BoolType)
+    b = UserField(type=Bool)
 
 
 class FooNode(ASTNode):

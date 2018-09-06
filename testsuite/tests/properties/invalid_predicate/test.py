@@ -4,7 +4,7 @@ Test that Prediate works well with default argument values.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, LogicVarType, T, UserField
+from langkit.dsl import ASTNode, Bool, LogicVar, T, UserField
 from langkit.expressions import Predicate, Self, Var, ignore, langkit_property
 from langkit.parsers import Grammar
 
@@ -19,15 +19,15 @@ def run(name, *pred_args):
 
     class Example(FooNode):
 
-        var1 = UserField(LogicVarType, public=False)
-        var2 = UserField(LogicVarType, public=False)
+        var1 = UserField(LogicVar, public=False)
+        var2 = UserField(LogicVar, public=False)
 
         @langkit_property(warn_on_unused=False)
         def pred1(n=T.FooNode.entity):
             return n.is_null
 
         @langkit_property(warn_on_unused=False)
-        def pred2(n=T.FooNode.entity, b=(BoolType, False)):
+        def pred2(n=T.FooNode.entity, b=(Bool, False)):
             return n.is_null & b
 
         @langkit_property(public=True)

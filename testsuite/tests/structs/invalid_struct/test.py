@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import DiagnosticError
-from langkit.dsl import ASTNode, IntegerType, Struct, UserField
+from langkit.dsl import ASTNode, Integer, Struct, UserField
 
 
 class FooNode(ASTNode):
@@ -9,11 +9,11 @@ class FooNode(ASTNode):
 
 
 class StructA(Struct):
-    a = UserField(type=IntegerType)
+    a = UserField(type=Integer)
 
 try:
     class StructB(StructA):
-        b = UserField(type=IntegerType)
+        b = UserField(type=Integer)
 except DiagnosticError:
     pass
 

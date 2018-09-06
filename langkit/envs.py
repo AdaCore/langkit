@@ -241,7 +241,7 @@ class EnvSpec(object):
         self.initial_env_prop = self.create_internal_property(
             'Initial_Env',
             self.initial_env and self.initial_env.env_expr,
-            T.LexicalEnvType
+            T.LexicalEnv
         )
 
         for action in self.actions:
@@ -421,7 +421,7 @@ class AddToEnv(EnvAction):
             'Env_Mappings', self.mappings, None
         )
         self.dest_env_prop = env_spec.create_internal_property(
-            'Env_Dest', self.dest_env, T.LexicalEnvType
+            'Env_Dest', self.dest_env, T.LexicalEnv
         )
         self.metadata_prop = env_spec.create_internal_property(
             'MD', self.metadata, T.defer_env_md
@@ -493,11 +493,11 @@ class RefEnvs(EnvAction):
         )
 
         self.dest_env_prop = env_spec.create_internal_property(
-            'Env_Dest', self.dest_env, T.LexicalEnvType
+            'Env_Dest', self.dest_env, T.LexicalEnv
         )
 
         self.cond_prop = env_spec.create_internal_property(
-            'Ref_Cond', self.cond, T.BoolType
+            'Ref_Cond', self.cond, T.Bool
         )
 
     def check(self):
@@ -510,7 +510,7 @@ class RefEnvs(EnvAction):
         self.resolver.require_untyped_wrapper()
 
         check_source_language(
-            self.resolver.type.matches(T.LexicalEnvType),
+            self.resolver.type.matches(T.LexicalEnv),
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
                 self.resolver.type.dsl_name

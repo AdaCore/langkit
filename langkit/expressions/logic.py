@@ -86,7 +86,7 @@ class Bind(AbstractExpression):
             super(Bind.Expr, self).__init__(
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
-                T.EquationType, constructor_args,
+                T.Equation, constructor_args,
                 abstract_expr=abstract_expr
             )
 
@@ -207,7 +207,7 @@ class Bind(AbstractExpression):
         if self.eq_prop:
             args = self.eq_prop.natural_arguments
             check_multiple([
-                (self.eq_prop.type == T.BoolType,
+                (self.eq_prop.type == T.Bool,
                  'Equality property must return boolean'),
 
                 (self.eq_prop.struct.matches(T.root_node),
@@ -247,13 +247,13 @@ class Bind(AbstractExpression):
 
         # Left operand must be a logic variable. Make sure the resulting
         # equation will work on a clean logic variable.
-        lhs = ResetLogicVar(construct(self.from_expr, T.LogicVarType))
+        lhs = ResetLogicVar(construct(self.from_expr, T.LogicVar))
 
         # Second one can be either a logic variable or an entity (or an AST
         # node that is promoted to an entity).
         rhs = construct(self.to_expr)
 
-        if rhs.type.matches(T.LogicVarType):
+        if rhs.type.matches(T.LogicVar):
             # For this operand too, make sure it will work on a clean logic
             # variable.
             rhs = ResetLogicVar(rhs)
@@ -284,7 +284,7 @@ class Bind(AbstractExpression):
 
 
 class DomainExpr(ComputingExpr):
-    static_type = T.EquationType
+    static_type = T.Equation
 
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
         from langkit.compile_context import get_context
@@ -359,7 +359,7 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection, "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        ResetLogicVar(construct(logic_var_expr, T.LogicVarType)),
+        ResetLogicVar(construct(logic_var_expr, T.LogicVar)),
         abstract_expr=self,
     )
 
@@ -399,7 +399,7 @@ class Predicate(AbstractExpression):
 
             super(Predicate.Expr, self).__init__(
                 'Pred', '{}_Pred.Create'.format(pred_id),
-                T.EquationType, logic_var_exprs,
+                T.Equation, logic_var_exprs,
                 abstract_expr=abstract_expr
             )
 
@@ -430,7 +430,7 @@ class Predicate(AbstractExpression):
 
     def construct(self):
         check_multiple([
-            (self.pred_property.type.matches(T.BoolType),
+            (self.pred_property.type.matches(T.Bool),
              'Predicate property must return a boolean, got {}'.format(
                  self.pred_property.type.dsl_name
             )),
@@ -444,14 +444,14 @@ class Predicate(AbstractExpression):
         # Separate logic variable expressions from extra argument expressions
         exprs = [construct(e) for e in self.exprs]
         logic_var_exprs, closure_exprs = funcy.split_by(
-            lambda e: e.type == T.LogicVarType, exprs
+            lambda e: e.type == T.LogicVar, exprs
         )
         check_source_language(
             len(logic_var_exprs) > 0, "Predicate instantiation should have at "
             "least one logic variable expression"
         )
         check_source_language(
-            all(e.type != T.LogicVarType for e in closure_exprs),
+            all(e.type != T.LogicVar for e in closure_exprs),
             'Logic variable expressions should be grouped at the beginning,'
             ' and should not appear after non logic variable expressions'
         )
@@ -488,7 +488,7 @@ class Predicate(AbstractExpression):
                 )
             )
 
-            if expr.type == T.LogicVarType:
+            if expr.type == T.LogicVar:
                 check_source_language(
                     arg.type.matches(T.root_node.entity),
                     "Argument #{} of predicate "
@@ -556,12 +556,12 @@ def get_value(self, logic_var):
 
     rtype = T.root_node.entity
 
-    logic_var_expr = construct(logic_var, T.LogicVarType)
+    logic_var_expr = construct(logic_var, T.LogicVar)
     logic_var_ref = logic_var_expr.create_result_var('Logic_Var_Value')
 
     return If.Expr(
         cond=CallExpr('Is_Logic_Var_Defined', 'Eq_Node.Refs.Is_Defined',
-                      T.BoolType, [logic_var_expr]),
+                      T.Bool, [logic_var_expr]),
         then=CallExpr('Eq_Solution', 'Eq_Node.Refs.Get_Value', rtype,
                       [logic_var_ref]),
         else_then=NullExpr(T.root_node.entity),
@@ -588,8 +588,8 @@ def solve(self, equation):
     :param AbstractExpression equation: The equation to solve.
     """
     PropertyDef.get()._solves_equation = True
-    return CallExpr('Solve_Success', 'Solve_Wrapper', T.BoolType,
-                    [construct(equation, T.EquationType),
+    return CallExpr('Solve_Success', 'Solve_Wrapper', T.Bool,
+                    [construct(equation, T.Equation),
                      construct(Self, T.root_node)],
                     abstract_expr=self)
 
@@ -621,11 +621,11 @@ class LogicBooleanOp(AbstractExpression):
         # access to record: unwrap it.
         relation_array = untyped_literal_expr(
             'Relation_Array ({}.Items)',
-            [construct(self.equation_array, T.EquationType.array)]
+            [construct(self.equation_array, T.Equation.array)]
         )
 
         return CallExpr('Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
-                        T.EquationType, [relation_array],
+                        T.Equation, [relation_array],
                         abstract_expr=self)
 
     def __repr__(self):
@@ -664,7 +664,7 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_True', 'True_Rel', T.EquationType, [])
+        return CallExpr('Logic_True', 'True_Rel', T.Equation, [])
 
     def __repr__(self):
         return '<LogicTrue>'
@@ -680,7 +680,7 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_False', 'False_Rel', T.EquationType, [])
+        return CallExpr('Logic_False', 'False_Rel', T.Equation, [])
 
     def __repr__(self):
         return '<LogicFalse>'
@@ -695,9 +695,9 @@ class ResetLogicVar(ResolvedExpression):
     """
 
     def __init__(self, logic_var_expr):
-        assert logic_var_expr.type == T.LogicVarType
+        assert logic_var_expr.type == T.LogicVar
         self.logic_var_expr = logic_var_expr
-        self.static_type = T.LogicVarType
+        self.static_type = T.LogicVar
         super(ResetLogicVar, self).__init__()
 
     def _render_pre(self):

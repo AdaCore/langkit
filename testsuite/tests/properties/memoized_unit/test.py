@@ -14,7 +14,7 @@ class FooNode(ASTNode):
 class Example(FooNode):
 
     @langkit_property(public=True, memoized=True)
-    def unit_root_node(unit=T.AnalysisUnitType):
+    def unit_root_node(unit=T.AnalysisUnit):
         return unit.root.as_bare_entity
 
 

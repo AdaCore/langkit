@@ -30,7 +30,7 @@ def run(name, expr):
 
 
 run('Empty: missing type', [])
-run('Empty: ok', ArrayLiteral([], T.BoolType))
+run('Empty: ok', ArrayLiteral([], T.Bool))
 run('Single: ok', [True])
 run('Multiple: heterogeneous types', [True, Self])
 print('Done')

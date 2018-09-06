@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LexicalEnvType, LogicVarType, T, UserField
+from langkit.dsl import ASTNode, LexicalEnv, LogicVar, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  langkit_property, ignore)
 from langkit.parsers import Grammar, Or
@@ -14,7 +14,7 @@ def run(name, eq_prop):
     a property in BarNode.
     """
 
-    env = DynamicVariable('env', LexicalEnvType)
+    env = DynamicVariable('env', LexicalEnv)
     dyn_node = DynamicVariable('dyn_node', T.BazNode)
 
     print('== {} =='.format(name))
@@ -22,8 +22,8 @@ def run(name, eq_prop):
     eq_prop = eval(eq_prop)
 
     class FooNode(ASTNode):
-        ref_var = UserField(LogicVarType, public=False)
-        type_var = UserField(LogicVarType, public=False)
+        ref_var = UserField(LogicVar, public=False)
+        type_var = UserField(LogicVar, public=False)
 
     class BarNode(FooNode):
         main_prop = Property(

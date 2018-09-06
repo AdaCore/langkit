@@ -19,23 +19,23 @@ class FooNode(ASTNode):
 class Example(FooNode):
 
     @langkit_property(public=True)
-    def get_a(c=(T.CharacterType, CharacterLiteral('a'))):
+    def get_a(c=(T.Character, CharacterLiteral('a'))):
         return c
 
     @langkit_property(public=True)
-    def get_eacute(c=(T.CharacterType, CharacterLiteral(u'\xe9'))):
+    def get_eacute(c=(T.Character, CharacterLiteral(u'\xe9'))):
         return c
 
     @langkit_property(public=True)
-    def identity(c=T.CharacterType):
+    def identity(c=T.Character):
         return c
 
     @langkit_property(public=True)
-    def double(c=T.CharacterType):
-        return ArrayLiteral([c, c], T.CharacterType)
+    def double(c=T.Character):
+        return ArrayLiteral([c, c], T.Character)
 
     @langkit_property(public=True)
-    def text_identity(s=T.StringType):
+    def text_identity(s=T.String):
         return s
 
 

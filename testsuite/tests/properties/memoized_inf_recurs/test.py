@@ -4,7 +4,7 @@ Check that infinite recursion in memoized properties behaves as expected.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType
+from langkit.dsl import ASTNode, Bool
 from langkit.expressions import Self, langkit_property
 from langkit.parsers import Grammar
 
@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 class Example(FooNode):
 
-    @langkit_property(public=True, memoized=True, return_type=BoolType)
+    @langkit_property(public=True, memoized=True, return_type=Bool)
     def recurse():
         return Self.recurse
 

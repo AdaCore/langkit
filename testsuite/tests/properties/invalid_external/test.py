@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, T, abstract
+from langkit.dsl import ASTNode, Bool, T, abstract
 from langkit.expressions import ExternalProperty, Property, Self
 from langkit.parsers import Grammar
 
@@ -45,13 +45,12 @@ run('Invalid abstract',
     lambda: Property(Self))
 
 run('Invalid memoized',
-    lambda: ExternalProperty(memoized=True, type=BoolType,
+    lambda: ExternalProperty(memoized=True, type=Bool,
                              uses_entity_info=False, uses_envs=False))
 
 run('Missing uses_entity_info=...',
-    lambda: ExternalProperty(memoized=True, type=BoolType, uses_envs=False))
+    lambda: ExternalProperty(memoized=True, type=Bool, uses_envs=False))
 run('Missing uses_envs=...',
-    lambda: ExternalProperty(memoized=True, type=BoolType,
-                             uses_entity_info=False))
+    lambda: ExternalProperty(memoized=True, type=Bool, uses_entity_info=False))
 
 print('Done')

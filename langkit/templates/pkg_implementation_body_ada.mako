@@ -1343,7 +1343,7 @@ package body ${ada_lib_name}.Implementation is
       return Node.Unit;
    end Unit;
 
-   ${array_types.body(T.LexicalEnvType.array)}
+   ${array_types.body(T.LexicalEnv.array)}
    ${array_types.body(T.root_node.entity.array)}
 
    function Lookup_Internal
@@ -1959,11 +1959,11 @@ package body ${ada_lib_name}.Implementation is
       return H (Node);
    end Hash;
 
-   % if T.BoolType.requires_hash_function:
+   % if T.Bool.requires_hash_function:
       function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
    % endif
 
-   % if T.IntegerType.requires_hash_function:
+   % if T.Integer.requires_hash_function:
       function Hash (I : Integer) return Hash_Type is (Hash_Type'Mod (I));
    % endif
 
@@ -2743,8 +2743,8 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    function Group
-     (Envs   : ${T.LexicalEnvType.array.name};
-      Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name}
+     (Envs   : ${T.LexicalEnv.array.name};
+      Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnv.name}
    is (Group (AST_Envs.Lexical_Env_Array (Envs.Items), Env_Md));
 
    % for astnode in ctx.astnode_types:

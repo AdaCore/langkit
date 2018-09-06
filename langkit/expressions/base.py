@@ -1539,9 +1539,8 @@ class BooleanLiteralExpr(BindableLiteralExpr):
 
     def __init__(self, value, abstract_expr=None):
         self.value = value
-        super(BooleanLiteralExpr, self).__init__(
-            str(value), T.BoolType, abstract_expr=abstract_expr
-        )
+        super(BooleanLiteralExpr, self).__init__(str(value), T.Bool,
+                                                 abstract_expr=abstract_expr)
 
     def render_private_ada_constant(self):
         return str(self.value)
@@ -1558,7 +1557,7 @@ class IntegerLiteralExpr(BindableLiteralExpr):
     def __init__(self, value, abstract_expr=None):
         self.value = value
         super(IntegerLiteralExpr, self).__init__(
-            str(value), T.IntegerType, abstract_expr=abstract_expr
+            str(value), T.Integer, abstract_expr=abstract_expr
         )
 
     def render_private_ada_constant(self):
@@ -1580,7 +1579,7 @@ class CharacterLiteralExpr(BindableLiteralExpr):
         self.ada_value = "Character_Type'Val ({})".format(ord(self.value))
 
         super(CharacterLiteralExpr, self).__init__(
-            self.ada_value, T.CharacterType, abstract_expr=abstract_expr
+            self.ada_value, T.Character, abstract_expr=abstract_expr
         )
 
     def render_private_ada_constant(self):
@@ -2160,7 +2159,7 @@ def can_reach(self, node, from_node):
     """
     node_expr = construct(node, T.root_node)
     from_node_expr = construct(from_node, T.root_node)
-    return CallExpr('Node_Can_Reach', 'Can_Reach', T.BoolType,
+    return CallExpr('Node_Can_Reach', 'Can_Reach', T.Bool,
                     [node_expr, from_node_expr], abstract_expr=self)
 
 
@@ -2245,7 +2244,7 @@ class GetSymbol(AbstractExpression):
 
     @staticmethod
     def construct_static(node_expr, abstract_expr=None):
-        return CallExpr('Sym', 'Get_Symbol', T.SymbolType, [node_expr],
+        return CallExpr('Sym', 'Get_Symbol', T.Symbol, [node_expr],
                         abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -2260,7 +2259,7 @@ class SymbolLiteral(AbstractExpression):
     class Expr(ComputingExpr):
 
         def __init__(self, name, abstract_expr=None):
-            self.static_type = T.SymbolType
+            self.static_type = T.Symbol
             self.name = name
             get_context().add_symbol_literal(self.name)
 
@@ -4455,7 +4454,7 @@ class LocalVars(object):
 
             from langkit.compiled_types import LocalVars, T
             vars = LocalVars()
-            var = vars.create('Index', T.IntegerType)
+            var = vars.create('Index', T.Integer)
 
         The names are *always* unique, so you can pass several time the same
         string as a name, and create will handle creating a name that is unique
@@ -4605,7 +4604,7 @@ class BigIntegerLiteral(AbstractExpression):
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
             super(BigIntegerLiteral.Expr, self).__init__(
-                'Big_Int', 'Create_Big_Integer', T.BigIntegerType,
+                'Big_Int', 'Create_Big_Integer', T.BigInteger,
                 [expr], abstract_expr=abstract_expr
             )
 
@@ -4622,7 +4621,7 @@ class BigIntegerLiteral(AbstractExpression):
         # int from its base-10 string representation.
         expr = ('"{}"'.format(self.expr)
                 if isinstance(self.expr, (int, long)) else
-                construct(self.expr, T.IntegerType))
+                construct(self.expr, T.Integer))
         return BigIntegerLiteral.Expr(expr, abstract_expr=self)
 
     def __repr__(self):
@@ -4635,8 +4634,8 @@ def as_int(self, expr):
     Convert a big integer into a regular integer. This raises a PropertyError
     if the big integer is out of range.
     """
-    big_int_expr = construct(expr, T.BigIntegerType)
-    return CallExpr('Small_Int', 'To_Integer', T.IntegerType, [big_int_expr],
+    big_int_expr = construct(expr, T.BigInteger)
+    return CallExpr('Small_Int', 'To_Integer', T.Integer, [big_int_expr],
                     abstract_expr=self)
 
 
@@ -4659,12 +4658,12 @@ class Arithmetic(AbstractExpression):
         l = construct(self.l)
         r = construct(self.r)
 
-        if l.type == T.SymbolType and r.type == T.SymbolType:
+        if l.type == T.Symbol and r.type == T.Symbol:
             assert self.op == '&'
             return BasicExpr(
                 'Sym_Concat',
                 'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))',
-                T.SymbolType, [l, r]
+                T.Symbol, [l, r]
             )
 
         check_source_language(
@@ -4674,7 +4673,7 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (T.IntegerType, T.BigIntegerType),
+            l.type in (T.Integer, T.BigInteger),
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 

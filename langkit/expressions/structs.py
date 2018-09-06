@@ -151,7 +151,7 @@ class IsNull(AbstractExpression):
             'Is_Null',
             '{} = null'.format('{}.Node'
                                if cexpr.type.is_entity_type else '{}'),
-            T.BoolType, [cexpr]
+            T.Bool, [cexpr]
         )
 
     def construct(self):
@@ -828,7 +828,7 @@ class IsA(AbstractExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = T.BoolType
+        static_type = T.Bool
         pretty_class_name = 'IsA'
 
         def __init__(self, expr, astnodes, abstract_expr=None):

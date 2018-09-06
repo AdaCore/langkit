@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType
+from langkit.dsl import ASTNode, Bool
 from langkit.expressions import AbstractKind, langkit_property
 from langkit.parsers import Grammar
 
@@ -17,7 +17,7 @@ def run(name, arg_parent, arg_overriding):
     print('== {} =='.format(name))
 
     class FooNode(ASTNode):
-        @langkit_property(public=True, return_type=BoolType,
+        @langkit_property(public=True, return_type=Bool,
                           kind=AbstractKind.abstract)
         def prop(a=arg_parent):
             pass
@@ -35,9 +35,9 @@ def run(name, arg_parent, arg_overriding):
     print('')
 
 
-run('Missing default value', (BoolType, True), BoolType)
-run('Extra default value',   BoolType,         (BoolType, True))
-run('Wrong value',           (BoolType, True), (BoolType, False))
-run('Correct',               (BoolType, True), (BoolType, True))
+run('Missing default value', (Bool, True), Bool)
+run('Extra default value',   Bool,         (Bool, True))
+run('Wrong value',           (Bool, True), (Bool, False))
+run('Correct',               (Bool, True), (Bool, True))
 
 print('Done')

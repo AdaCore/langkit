@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, IntegerType, SymbolType
+from langkit.dsl import ASTNode, Field, Integer, Symbol
 from langkit.expressions import Property, langkit_property, AbstractKind
 from langkit.parsers import Grammar
 
@@ -14,13 +14,13 @@ class FooNode(ASTNode):
 class BarCode(FooNode):
     a = Field()
 
-    @langkit_property(kind=AbstractKind.abstract, return_type=IntegerType)
-    def base_prop(x=IntegerType):
+    @langkit_property(kind=AbstractKind.abstract, return_type=Integer)
+    def base_prop(x=Integer):
         pass
 
 
 class BarNode(BarCode):
-    base_prop = Property(lambda x=SymbolType: 12)
+    base_prop = Property(lambda x=Symbol: 12)
 
 
 grammar = Grammar('main_rule')

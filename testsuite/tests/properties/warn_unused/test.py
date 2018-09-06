@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, Field, T
+from langkit.dsl import ASTNode, Bool, Field, T
 from langkit.expressions import (
     Let, Property, Self, Var, langkit_property, ignore
 )
@@ -58,7 +58,7 @@ class ExampleList(FooNode):
                 lambda _: False,
             )
         ),
-        type=BoolType.array,
+        type=Bool.array,
         public=True
     )
 

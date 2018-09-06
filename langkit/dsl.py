@@ -1049,24 +1049,24 @@ class AnalysisUnitKind(_BuiltinType):
         lambda: AnalysisUnitKind._resolve().resolve_value('unit_body'))
 
 
-class AnalysisUnitType(_BuiltinType):
+class AnalysisUnit(_BuiltinType):
     """
     Type for analysis unit values.
     """
-    _name = names.Name('Analysis_Unit_Type')
+    _name = names.Name('Analysis_Unit')
 
 
-class BoolType(_BuiltinType):
+class Bool(_BuiltinType):
     """
     Type for boolean values.
     """
-    _name = names.Name('Bool_Type')
+    _name = names.Name('Bool')
 
 
-class EquationType(_BuiltinType):
+class Equation(_BuiltinType):
     """
-    An EquationType instance is an equation where logic variables (of type
-    LogicVarType) are involved in logical expressions.
+    An Equation instance is an equation where logic variables (of type
+    LogicVar) are involved in logical expressions.
 
     An equation can be solved, and the variables instances will then be bound
     to specific values.
@@ -1074,53 +1074,53 @@ class EquationType(_BuiltinType):
     Equations instance will typically be produced by expressions involving
     logic variables.
     """
-    _name = names.Name('Equation_Type')
+    _name = names.Name('Equation')
 
 
-class EnvRebindingsType(_BuiltinType):
+class EnvRebindings(_BuiltinType):
     """
     Type for environment rebinding values.
     """
-    _name = names.Name('Env_Rebindings_Type')
+    _name = names.Name('Env_Rebindings')
 
 
-class LexicalEnvType(_BuiltinType):
+class LexicalEnv(_BuiltinType):
     """
     Type for lexical environments.
     """
-    _name = names.Name('Lexical_Env_Type')
+    _name = names.Name('Lexical_Env')
 
 
-class LogicVarType(_BuiltinType):
+class LogicVar(_BuiltinType):
     """
-    Type for logic variables, to be used in equations (see EquationType).
+    Type for logic variables, to be used in equations (see Equation).
     """
-    _name = names.Name('Logic_Var_Type')
+    _name = names.Name('Logic_Var')
 
 
-class IntegerType(_BuiltinType):
+class Integer(_BuiltinType):
     """
     Simple integer type.
     """
-    _name = names.Name('Integer_Type')
+    _name = names.Name('Integer')
 
 
-class SymbolType(_BuiltinType):
+class Symbol(_BuiltinType):
     """
     Type for symbol values (canonicalized names).
     """
-    _name = names.Name('Symbol_Type')
+    _name = names.Name('Symbol')
 
 
-class TokenType(_BuiltinType):
+class Token(_BuiltinType):
     """
     Type for token values, as found in an analysis unit's token data handler.
     """
-    _name = names.Name('Token_Type')
+    _name = names.Name('Token')
 
 
-class BigIntegerType(_BuiltinType):
+class BigInteger(_BuiltinType):
     """
     Type for integers of arbitrary precision.
     """
-    _name = names.Name('Big_Integer_Type')
+    _name = names.Name('Big_Integer')

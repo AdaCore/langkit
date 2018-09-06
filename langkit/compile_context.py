@@ -811,7 +811,7 @@ class CompileCtx(object):
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        self.array_types.add(T.LexicalEnvType.array)
+        self.array_types.add(T.LexicalEnv.array)
 
         # Likewise for the entity array type: LexicalEnv.get returns it.
         self.array_types.add(entity.array)

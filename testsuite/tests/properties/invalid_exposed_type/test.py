@@ -8,7 +8,7 @@ from langkit.parsers import Grammar
 from utils import emit_and_print_errors
 
 
-env = DynamicVariable('env', T.LexicalEnvType)
+env = DynamicVariable('env', T.LexicalEnv)
 
 
 class FooNode(ASTNode):
@@ -22,7 +22,7 @@ class Example(FooNode):
         return EmptyEnv
 
     @langkit_property(public=True)
-    def as_arg(env=T.LexicalEnvType):
+    def as_arg(env=T.LexicalEnv):
         ignore(env)
         return True
 

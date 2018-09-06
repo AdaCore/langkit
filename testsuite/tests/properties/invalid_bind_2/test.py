@@ -16,8 +16,8 @@ def run(name, equation_expr):
     print('== {} =='.format(name))
 
     class FooNode(ASTNode):
-        var1 = UserField(type=T.LogicVarType, public=False)
-        var2 = UserField(type=T.LogicVarType, public=False)
+        var1 = UserField(type=T.LogicVar, public=False)
+        var2 = UserField(type=T.LogicVar, public=False)
 
     class ExampleNode(FooNode):
         @langkit_property(public=True)

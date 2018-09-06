@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, Field, abstract
+from langkit.dsl import ASTNode, Bool, Field, abstract
 from langkit.expressions import Literal, Property, Self
 from langkit.parsers import Grammar, Or
 
@@ -82,7 +82,7 @@ run('Missing Compound', lambda: Self.body.match(
 run('Invalid type', lambda: Self.body.match(
     lambda e=NullNode:   e.prop,
     lambda e=Expression: e.prop,
-    lambda e=BoolType:   e.prop,
+    lambda e=Bool:       e.prop,
 ))
 run('Irrelevant AST node', lambda: Self.body.match(
     lambda e=NullNode:   e.prop,

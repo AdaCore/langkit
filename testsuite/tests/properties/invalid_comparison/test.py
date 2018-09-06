@@ -14,7 +14,7 @@ class FooNode(ASTNode):
 class Example(FooNode):
 
     @langkit_property(public=True)
-    def compare(lhs=T.IntegerType, rhs=T.BigIntegerType):
+    def compare(lhs=T.Integer, rhs=T.BigInteger):
         return lhs < rhs
 
 

@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, IntegerType
+from langkit.dsl import ASTNode, Field, Integer
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List
 
@@ -48,6 +48,6 @@ def run(name, expr):
 
 
 run("Correct code", lambda: Self.parent.cast(BarNode))
-run("Invalid cast 1", lambda: Self.parent.cast(IntegerType))
+run("Invalid cast 1", lambda: Self.parent.cast(Integer))
 run("Invalid cast 2", lambda: Self.bar_node_parent.cast(ListNode))
 print('Done')

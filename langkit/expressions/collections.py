@@ -157,7 +157,7 @@ class CollectionExpression(AbstractExpression):
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
-                names.Name('I'), type=T.IntegerType,
+                names.Name('I'), type=T.Integer,
                 source_name=names.Name.from_lower(argspec.args[index_var_pos])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
@@ -499,10 +499,10 @@ class Map(CollectionExpression):
         )
 
         with r.inner_scope.use():
-            filter_expr = (construct(self.filter_expr, T.BoolType)
+            filter_expr = (construct(self.filter_expr, T.Bool)
                            if self.filter_expr else None)
 
-            take_while_expr = (construct(self.take_while_expr, T.BoolType)
+            take_while_expr = (construct(self.take_while_expr, T.Bool)
                                if self.take_while_expr else None)
 
         return Map.Expr(r.element_vars, r.index_var, r.collection_expr,
@@ -556,7 +556,7 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = T.BoolType
+        static_type = T.Bool
         pretty_class_name = 'Quantifier'
 
         def __init__(self, kind, collection, expr, element_vars, index_var,
@@ -592,7 +592,7 @@ class Quantifier(CollectionExpression):
             self.element_vars = element_vars
             self.index_var = index_var
             self.iter_scope = iter_scope
-            self.static_type = T.BoolType
+            self.static_type = T.Bool
 
             with iter_scope.parent.use():
                 super(Quantifier.Expr, self).__init__(
@@ -650,7 +650,7 @@ class Quantifier(CollectionExpression):
         r = self.construct_common()
 
         check_source_language(
-            r.inner_expr.type.matches(T.BoolType),
+            r.inner_expr.type.matches(T.Bool),
             'Wrong type for expression in quantifier: expected bool,'
             ' got {}'.format(r.inner_expr.type.dsl_name)
         )
@@ -680,7 +680,7 @@ def collection_get(self, collection, index, or_null):
     """
     # index yields a 0-based index and all the Get primitives expect 0-based
     # indexes, so there is no need to fiddle indexes here.
-    index_expr = construct(index, T.IntegerType)
+    index_expr = construct(index, T.Integer)
 
     coll_expr = construct(collection)
     as_entity = coll_expr.type.is_entity_type
@@ -729,7 +729,7 @@ def length(self, collection):
         'Collection expected but got {} instead'.format(orig_type.dsl_name)
     )
 
-    return CallExpr('Len', 'Length', T.IntegerType, [coll_expr],
+    return CallExpr('Len', 'Length', T.Integer, [coll_expr],
                     abstract_expr=self)
 
 

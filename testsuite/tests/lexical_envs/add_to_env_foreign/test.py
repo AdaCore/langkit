@@ -41,7 +41,7 @@ class Id(FooNode):
         pass
 
     @langkit_property(return_type=T.Scope, kind=AbstractKind.abstract)
-    def resolve(base_env=T.LexicalEnvType):
+    def resolve(base_env=T.LexicalEnv):
         pass
 
 
@@ -53,7 +53,7 @@ class SimpleId(Id):
         return Self
 
     @langkit_property()
-    def resolve(base_env=T.LexicalEnvType):
+    def resolve(base_env=T.LexicalEnv):
         return base_env.get_first(Self.symbol).node.cast(T.Scope)
 
 
@@ -66,7 +66,7 @@ class ScopedId(Id):
         return Self.name
 
     @langkit_property()
-    def resolve(base_env=T.LexicalEnvType):
+    def resolve(base_env=T.LexicalEnv):
         return (Self.scope.resolve(base_env)
                 .children_env.get_first(Self.name.symbol).node
                 .cast(T.Scope))

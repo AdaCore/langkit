@@ -1404,7 +1404,7 @@ class ${root_astnode_name}(object):
     @classmethod
     def _fetch_unit(cls, c_value):
         return ${pyapi.wrap_value('_node_unit(ctypes.byref(c_value))',
-                                  T.AnalysisUnitType)}
+                                  T.AnalysisUnit)}
 
     def _eval_field(self, c_result, c_accessor, *c_args):
         """
@@ -1465,7 +1465,7 @@ class ${c_entity}(ctypes.Structure):
     % elif struct_type is T.entity_info:
 class ${c_entity_info}(ctypes.Structure):
     _fields_ = [('md', ${pyapi.c_type(T.env_md)}),
-                ('rebindings', ${pyapi.c_type(T.EnvRebindingsType)})]
+                ('rebindings', ${pyapi.c_type(T.EnvRebindings)})]
     ## Likewise for metadata structures
     % elif struct_type is T.env_md:
 class ${c_metadata}(ctypes.Structure):
