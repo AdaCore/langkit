@@ -329,7 +329,7 @@ class CompiledType(object):
         self._api_name = api_name
         self._dsl_name = dsl_name
 
-        type_repo_name = type_repo_name or name.camel
+        type_repo_name = type_repo_name or dsl_name or name.camel
         CompiledTypeRepo.type_dict[type_repo_name] = self
 
         self._conversion_requires_context = conversion_requires_context
