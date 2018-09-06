@@ -13,7 +13,7 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    get_num = AbstractProperty(T.Integer)
+    get_num = AbstractProperty(T.Int)
 
 
 class Example(FooNode):

@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Integer
+from langkit.dsl import ASTNode, Int
 from langkit.expressions import Property, No
 from langkit.parsers import Grammar
 
@@ -32,5 +32,5 @@ def run(name, expr):
 
 
 run("Correct code", lambda: No(FooNode.entity))
-run("Incorrect No usage", lambda: No(Integer))
+run("Incorrect No usage", lambda: No(Int))
 print('Done')

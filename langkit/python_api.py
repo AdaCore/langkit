@@ -44,14 +44,14 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Token, lambda _: '{}'),
             (T.Symbol, lambda _: '_symbol_type.wrap({})'),
             (T.Bool, lambda _: 'bool({{}}{})'.format(value_suffix)),
-            (T.Integer, lambda _: '{{}}{}'.format(value_suffix)),
+            (T.Int, lambda _: '{{}}{}'.format(value_suffix)),
             (T.Character, lambda _: 'unichr({{}}{})'.format(value_suffix)),
             (ct.ArrayType, lambda _: '{}.wrap({{}})'.format(
                 self.array_wrapper(type)
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
-            (T.BigInteger, lambda _: '_big_integer.wrap({})'),
+            (T.BigInt, lambda _: '_big_integer.wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (wrapping): {}'.format(type)
@@ -90,7 +90,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (T.Bool, lambda _: 'bool({value})'),
-            (T.Integer, lambda _: 'int({value})'),
+            (T.Int, lambda _: 'int({value})'),
             (T.Character, lambda _: 'ord({value})'),
             (ct.ArrayType, lambda cls:
                 '{}.unwrap({{value}}{{context}})'
@@ -99,7 +99,7 @@ class PythonAPISettings(AbstractAPISettings):
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
             (T.Symbol, lambda _: '_symbol_type.unwrap({value}{context})'),
-            (T.BigInteger, lambda _: '_big_integer.unwrap({value})'),
+            (T.BigInt, lambda _: '_big_integer.unwrap({value})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
@@ -124,7 +124,7 @@ class PythonAPISettings(AbstractAPISettings):
 
         return dispatch_on_type(type, [
             (T.Bool, lambda _: ctype_type('c_uint8')),
-            (T.Integer, lambda _: ctype_type('c_int')),
+            (T.Int, lambda _: ctype_type('c_int')),
             (T.Character, lambda _: ctype_type('c_uint32')),
             (T.EnvRebindings, lambda _: '_EnvRebindings_c_type'),
             (T.Token, lambda _: 'Token'),
@@ -140,7 +140,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:
                 '{}._c_type'.format(self.type_public_name(type))),
-            (T.BigInteger, lambda _: '_big_integer.c_type'),
+            (T.BigInt, lambda _: '_big_integer.c_type'),
         ])
 
     def array_wrapper(self, array_type):
@@ -158,7 +158,7 @@ class PythonAPISettings(AbstractAPISettings):
         """
         return dispatch_on_type(type, [
             (T.Bool, lambda _: 'bool'),
-            (T.Integer, lambda _: 'int'),
+            (T.Int, lambda _: 'int'),
             (T.Character, lambda _: 'unicode'),
             (T.Token, lambda _: 'Token'),
             (T.Symbol, lambda _: 'unicode'),
@@ -170,5 +170,5 @@ class PythonAPISettings(AbstractAPISettings):
                 type.element_type.name.camel
             )),
             (ct.StructType, lambda _: type.api_name.camel),
-            (T.BigInteger, lambda _: 'int'),
+            (T.BigInt, lambda _: 'int'),
         ])

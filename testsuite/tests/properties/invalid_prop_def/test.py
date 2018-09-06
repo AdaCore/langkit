@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Integer
+from langkit.dsl import ASTNode, Int
 from langkit.expressions import Property
 from langkit.parsers import Grammar
 
@@ -32,9 +32,9 @@ def run(name, prop_lambda):
 
 run("Correct code", lambda: True)
 run("Incorrect property definition 1", lambda x, *y, **z: "pouet")
-run("Incorrect property definition 2", lambda x, y=Integer: x)
+run("Incorrect property definition 2", lambda x, y=Int: x)
 run("Incorrect property definition 3",
-    lambda Node=Integer, Lex_Env=Integer: Node)
+    lambda Node=Int, Lex_Env=Int: Node)
 run("Incorrect property definition 4", lambda a=["Obviously wrong"]: a)
 run("Incorrect property definition 5", lambda a=Diagnostics: a)
 

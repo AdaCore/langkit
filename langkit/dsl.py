@@ -1098,11 +1098,11 @@ class LogicVar(_BuiltinType):
     _name = names.Name('Logic_Var')
 
 
-class Integer(_BuiltinType):
+class Int(_BuiltinType):
     """
     Simple integer type.
     """
-    _name = names.Name('Integer')
+    _name = names.Name('Int')
 
 
 class Symbol(_BuiltinType):
@@ -1119,8 +1119,8 @@ class Token(_BuiltinType):
     _name = names.Name('Token')
 
 
-class BigInteger(_BuiltinType):
+class BigInt(_BuiltinType):
     """
     Type for integers of arbitrary precision.
     """
-    _name = names.Name('Big_Integer')
+    _name = names.Name('Big_Int')

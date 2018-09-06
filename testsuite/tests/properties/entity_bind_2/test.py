@@ -5,7 +5,7 @@ takes entities.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Bool, Integer, LogicVar, T, UserField
+from langkit.dsl import ASTNode, Bool, Int, LogicVar, T, UserField
 from langkit.expressions import (AbstractProperty, Let, Property, Self, Bind,
                                  langkit_property)
 from langkit.parsers import Grammar
@@ -15,7 +15,7 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    prop = AbstractProperty(runtime_check=True, type=Integer, public=True)
+    prop = AbstractProperty(runtime_check=True, type=Int, public=True)
 
 
 class Literal(FooNode):

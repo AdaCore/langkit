@@ -4,10 +4,10 @@ Test that big integers work as expected in the DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BigInteger, Field, T, abstract
+from langkit.dsl import ASTNode, BigInt, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import (
-    AbstractProperty, BigIntegerLiteral, ExternalProperty, If, New, Self,
+    AbstractProperty, BigIntLiteral, ExternalProperty, If, New, Self,
     langkit_property
 )
 from langkit.parsers import Grammar, List, Or
@@ -19,7 +19,7 @@ from utils import build_and_run
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def identity(value=T.BigInteger):
+    def identity(value=T.BigInt):
         return value
 
 
@@ -37,7 +37,7 @@ class Identifier(FooNode):
 
 @abstract
 class Expr(FooNode):
-    evaluate = AbstractProperty(type=BigInteger, public=True)
+    evaluate = AbstractProperty(type=BigInt, public=True)
 
     @langkit_property(public=True)
     def evaluate_as_int():
@@ -83,8 +83,8 @@ class Equal(Expr):
 
     @langkit_property()
     def evaluate():
-        return BigIntegerLiteral(If(Self.left.evaluate == Self.right.evaluate,
-                                    1, 0))
+        return BigIntLiteral(If(Self.left.evaluate == Self.right.evaluate,
+                                1, 0))
 
 
 class LessThan(Expr):
@@ -93,8 +93,8 @@ class LessThan(Expr):
 
     @langkit_property()
     def evaluate():
-        return BigIntegerLiteral(If(Self.left.evaluate < Self.right.evaluate,
-                                    1, 0))
+        return BigIntLiteral(If(Self.left.evaluate < Self.right.evaluate,
+                                1, 0))
 
 
 g = Grammar('main_rule')
