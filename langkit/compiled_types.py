@@ -592,7 +592,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.Integer
+        return self == T.Int
 
     @property
     def is_character_type(self):
@@ -637,7 +637,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.BigInteger
+        return self == T.BigInt
 
     @property
     def element_type(self):
@@ -2548,7 +2548,7 @@ class ASTNodeType(BaseStructType):
                 doc='Return the last token used to parse this node.'
             )),
             ('child_index', BuiltinField(
-                type=T.Integer,
+                type=T.Int,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),
@@ -3021,7 +3021,7 @@ class BigIntegerType(CompiledType):
     def __init__(self):
         super(BigIntegerType, self).__init__(
             'BigIntegerType',
-            dsl_name='BigInteger',
+            dsl_name='BigInt',
             exposed=True,
             nullexpr='No_Big_Integer',
             is_refcounted=True,
@@ -3142,7 +3142,7 @@ def create_builtin_types():
 
     CompiledType(
         name='Integer',
-        dsl_name='Integer',
+        dsl_name='Int',
         exposed=True,
         is_ptr=False,
         nullexpr='0',

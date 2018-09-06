@@ -1963,7 +1963,7 @@ package body ${ada_lib_name}.Implementation is
       function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
    % endif
 
-   % if T.Integer.requires_hash_function:
+   % if T.Int.requires_hash_function:
       function Hash (I : Integer) return Hash_Type is (Hash_Type'Mod (I));
    % endif
 

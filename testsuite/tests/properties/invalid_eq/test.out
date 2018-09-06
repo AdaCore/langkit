@@ -41,7 +41,7 @@ File "test.py", line 28, in Example.prop
 == Long <-> Boolean ==
 File "test.py", line 28, in Example.prop
   line 28, in Eq expression
-    Error: Incompatible types for equality: Integer and Bool
+    Error: Incompatible types for equality: Int and Bool
 
 == ASTNode <-> ASTNode (never equal) ==
 File "test.py", line 28, in Example.prop

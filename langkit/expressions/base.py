@@ -48,7 +48,7 @@ def unsugar(expr, ignore_errors=False):
     if isinstance(expr, (bool, int)):
         expr = Literal(expr)
     if isinstance(expr, long):
-        expr = BigIntegerLiteral(expr)
+        expr = BigIntLiteral(expr)
     elif isinstance(expr, basestring):
         expr = SymbolLiteral(expr)
     elif isinstance(expr, TypeRepo.Defer):
@@ -1557,7 +1557,7 @@ class IntegerLiteralExpr(BindableLiteralExpr):
     def __init__(self, value, abstract_expr=None):
         self.value = value
         super(IntegerLiteralExpr, self).__init__(
-            str(value), T.Integer, abstract_expr=abstract_expr
+            str(value), T.Int, abstract_expr=abstract_expr
         )
 
     def render_private_ada_constant(self):
@@ -4454,7 +4454,7 @@ class LocalVars(object):
 
             from langkit.compiled_types import LocalVars, T
             vars = LocalVars()
-            var = vars.create('Index', T.Integer)
+            var = vars.create('Index', T.Int)
 
         The names are *always* unique, so you can pass several time the same
         string as a name, and create will handle creating a name that is unique
@@ -4596,15 +4596,15 @@ class NullCheckExpr(ResolvedExpression):
 
 
 @dsl_document
-class BigIntegerLiteral(AbstractExpression):
+class BigIntLiteral(AbstractExpression):
     """
     Turn an integer value into a big integer one.
     """
 
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
-            super(BigIntegerLiteral.Expr, self).__init__(
-                'Big_Int', 'Create_Big_Integer', T.BigInteger,
+            super(BigIntLiteral.Expr, self).__init__(
+                'Big_Int', 'Create_Big_Integer', T.BigInt,
                 [expr], abstract_expr=abstract_expr
             )
 
@@ -4612,7 +4612,7 @@ class BigIntegerLiteral(AbstractExpression):
             return '<BigInteger.Expr {}>'.format(self.expr)
 
     def __init__(self, expr):
-        super(BigIntegerLiteral, self).__init__()
+        super(BigIntLiteral, self).__init__()
         self.expr = expr
 
     def construct(self):
@@ -4621,8 +4621,8 @@ class BigIntegerLiteral(AbstractExpression):
         # int from its base-10 string representation.
         expr = ('"{}"'.format(self.expr)
                 if isinstance(self.expr, (int, long)) else
-                construct(self.expr, T.Integer))
-        return BigIntegerLiteral.Expr(expr, abstract_expr=self)
+                construct(self.expr, T.Int))
+        return BigIntLiteral.Expr(expr, abstract_expr=self)
 
     def __repr__(self):
         return '<BigInteger {}>'.format(self.expr)
@@ -4634,8 +4634,8 @@ def as_int(self, expr):
     Convert a big integer into a regular integer. This raises a PropertyError
     if the big integer is out of range.
     """
-    big_int_expr = construct(expr, T.BigInteger)
-    return CallExpr('Small_Int', 'To_Integer', T.Integer, [big_int_expr],
+    big_int_expr = construct(expr, T.BigInt)
+    return CallExpr('Small_Int', 'To_Integer', T.Int, [big_int_expr],
                     abstract_expr=self)
 
 
@@ -4673,7 +4673,7 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (T.Integer, T.BigInteger),
+            l.type in (T.Int, T.BigInt),
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 
