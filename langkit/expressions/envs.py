@@ -12,29 +12,44 @@ from langkit.expressions.utils import array_aggr, assign_var
 
 
 @attr_call('get')
-def get(env, symbol, recursive=True, from_node=None):
+def get(env, symbol, lookup=None, from_node=None):
     """
     Perform a lexical environment lookup. Look for nodes that are associated to
     the given `symbol` in the `env` lexical environment.
 
-    If `recursive` is true (the default), do a recursive lookup in parent
-    environments and referenced ones. Otherwise, only look into `env`.
+    If ``lookup`` is None (the default), it will take the default
+    value ``LookupKind.recursive`` which will do a recursive lookup in
+    parent environments and referenced ones.
+
+    If ``lookup`` evaluates to ``LookupKind.flat``, only lookup own
+    env and transitive referenced/parent envs.
+
+    If ``lookup`` evaluates to ``LookupKind.minimal``, only lookup
+    own env.
 
     If `from_node` is not None, do a sequential lookup: discard AST nodes that
     belong to the same unit as `from_node` node and that appear before it.
     """
-    return EnvGet(env, symbol, recursive=recursive,
+    from langkit.dsl import LookupKind
+    if not lookup:
+        lookup = LookupKind.recursive
+
+    return EnvGet(env, symbol, lookup=lookup,
                   sequential_from=from_node)
 
 
 @attr_call('get_first')
-def get_first(env, symbol, recursive=True, from_node=None):
+def get_first(env, symbol, lookup=None, from_node=None):
     """
     Like :dsl:`get`, but only return the first entity found, or a null entity
     if no entity is found.
     """
-    return EnvGet(env, symbol, recursive=recursive, only_first=True,
-                  sequential_from=from_node)
+    from langkit.dsl import LookupKind
+    if not lookup:
+        lookup = LookupKind.recursive
+
+    return EnvGet(env, symbol, lookup=lookup,
+                  only_first=True, sequential_from=from_node)
 
 
 class EnvGet(AbstractExpression):
@@ -43,12 +58,12 @@ class EnvGet(AbstractExpression):
     """
 
     class Expr(ComputingExpr):
-        def __init__(self, env_expr, key_expr, recursive_expr,
+        def __init__(self, env_expr, key_expr, lookup_kind_expr,
                      sequential_from=None,
                      only_first=False, abstract_expr=None):
             self.env_expr = env_expr
             self.key_expr = key_expr
-            self.recursive_expr = recursive_expr
+            self.lookup_kind_expr = lookup_kind_expr
             self.sequential_from = sequential_from
 
             self.static_type = (
@@ -66,11 +81,13 @@ class EnvGet(AbstractExpression):
             result = [
                 self.env_expr.render_pre(),
                 self.key_expr.render_pre(),
-                self.recursive_expr.render_pre(),
+                self.lookup_kind_expr.render_pre(),
             ]
             args = [('Self', self.env_expr.render_expr()),
                     ('Key', self.key_expr.render_expr()),
-                    ('Recursive', self.recursive_expr.render_expr())]
+                    ('Lookup_Kind', 'To_Lookup_Kind_Type ({})'.format(
+                        self.lookup_kind_expr.render_expr()
+                    ))]
 
             # Pass the From parameter if the user wants sequential semantics
             if self.sequential_from:
@@ -101,12 +118,12 @@ class EnvGet(AbstractExpression):
             return {
                 'env': self.env_expr,
                 'key': self.key_expr,
-                'recursive': self.recursive_expr,
+                'lookup_kind': self.lookup_kind_expr,
                 'sequential_from': self.sequential_from,
             }
 
-    def __init__(self, env, symbol, sequential_from=Self,
-                 recursive=True, only_first=False):
+    def __init__(self, env, symbol, lookup,
+                 sequential_from=Self, only_first=False):
         """
         :param AbstractExpression env: Expression that will yield the env to
             get the element from.
@@ -115,9 +132,9 @@ class EnvGet(AbstractExpression):
             symbol.
         :param AbstractExpression sequential_from: If resolution needs to be
             sequential, must be an expression to use as the reference node.
-        :param AbstractExpression recursive: Expression that must return a
-            boolean, which controls whether lookup must be performed
-            recursively on parent environments.
+        :param AbstractExpression lookup: Expression that must return an
+            LookupKind, which controls whether lookup must be performed
+            recursively on parent/referenced environments.
         """
         super(EnvGet, self).__init__()
 
@@ -129,7 +146,7 @@ class EnvGet(AbstractExpression):
         self.env = env
         self.symbol = symbol
         self.sequential_from = sequential_from
-        self.recursive = recursive
+        self.lookup_kind = lookup
         self.only_first = only_first
 
     def construct(self):
@@ -154,9 +171,9 @@ class EnvGet(AbstractExpression):
         from_expr = (construct(self.sequential_from, T.root_node)
                      if self.sequential_from is not None else None)
 
-        recursive_expr = construct(self.recursive, T.Bool)
+        lookup_kind_expr = construct(self.lookup_kind, T.LookupKind)
 
-        return EnvGet.Expr(env_expr, sym_expr, recursive_expr,
+        return EnvGet.Expr(env_expr, sym_expr, lookup_kind_expr,
                            from_expr, self.only_first,
                            abstract_expr=self)
 

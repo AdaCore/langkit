@@ -6,7 +6,7 @@ lexical environments created by list items that appear later.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import Annotations, ASTNode, Field, T, abstract
+from langkit.dsl import Annotations, ASTNode, Field, T, abstract, LookupKind
 from langkit.envs import EnvSpec, add_to_env, add_env, do, set_initial_env
 from langkit.expressions import AbstractProperty, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Or, Pick
@@ -59,7 +59,7 @@ class Prefix(Name):
     def resolve():
         return Self.prefix.resolve.children_env.get_first(
             Self.suffix.symbol,
-            recursive=False
+            lookup=LookupKind.flat,
         )
 
     @langkit_property()

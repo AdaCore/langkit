@@ -25,6 +25,7 @@ with Ada.Unchecked_Conversion;
 with System.Address_Image;
 
 with Langkit_Support.Images; use Langkit_Support.Images;
+with System.Assertions;
 
 package body Langkit_Support.Lexical_Env is
 
@@ -82,7 +83,7 @@ package body Langkit_Support.Lexical_Env is
    function Get_Internal
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
-      Recursive     : Boolean := True;
+      Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata)
       return Lookup_Result_Array;
@@ -485,7 +486,7 @@ package body Langkit_Support.Lexical_Env is
    function Get_Internal
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
-      Recursive     : Boolean := True;
+      Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata)
       return Lookup_Result_Array
@@ -585,7 +586,7 @@ package body Langkit_Support.Lexical_Env is
          --   * the node that created this environment reference is a parent of
          --     From.
 
-         if (not Recursive
+         if (Lookup_Kind /= Recursive
              and then Self.Kind /= Transitive)
            or else Self.Being_Visited
            or else Self.State = Inactive
@@ -600,7 +601,13 @@ package body Langkit_Support.Lexical_Env is
             Refd_Results : constant Lookup_Result_Array :=
               Get_Internal
                 (Env, Key,
-                 Recursive  => Recursive and Self.Kind = Transitive,
+                 Lookup_Kind =>
+                   (if Lookup_Kind = Recursive and then Self.Kind = Transitive
+                    then Recursive
+                    elsif Lookup_Kind = Minimal
+                    then raise System.Assertions.Assert_Failure
+                      with "Should not happen"
+                    else Flat),
                  Rebindings =>
                    (if Self.Kind = Transitive
                     then Current_Rebindings
@@ -652,13 +659,13 @@ package body Langkit_Support.Lexical_Env is
            (Me, "Get_Internal env="
             & Lexical_Env_Image (Self, Dump_Content => False)
             & " key = " & Image (Key.all)
-            & " recursive = " & Boolean'Image (Recursive));
+            & " lookup kind = " & Lookup_Kind_Type'Image (Lookup_Kind));
       end if;
 
       case Self.Kind is
          when Orphaned => null;
             return Get_Internal
-              (Self.Env.Orphaned_Env, Key, False, Rebindings, Metadata);
+              (Self.Env.Orphaned_Env, Key, Flat, Rebindings, Metadata);
 
          when Grouped =>
             --  Just concatenate lookups for all grouped environments
@@ -669,7 +676,7 @@ package body Langkit_Support.Lexical_Env is
             begin
                for E of Self.Env.Grouped_Envs.all loop
                   Local_Results.Concat
-                    (Get_Internal (E, Key, Recursive, Rebindings, MD));
+                    (Get_Internal (E, Key, Lookup_Kind, Rebindings, MD));
                end loop;
             end;
             Traces.Decrease_Indent (Me);
@@ -681,7 +688,7 @@ package body Langkit_Support.Lexical_Env is
 
          when Rebound =>
             return Get_Internal
-              (Self.Env.Rebound_Env, Key, Recursive,
+              (Self.Env.Rebound_Env, Key, Lookup_Kind,
                Combine (Self.Env.Rebindings, Rebindings),
                Metadata);
 
@@ -690,7 +697,7 @@ package body Langkit_Support.Lexical_Env is
 
       --  At this point, we know that Self is a primary lexical environment
 
-      if Has_Lookup_Cache (Self) and then Recursive then
+      if Has_Lookup_Cache (Self) and then Lookup_Kind = Recursive then
 
          if not Is_Lookup_Cache_Valid (Self) then
             Reset_Lookup_Cache (Self);
@@ -730,6 +737,7 @@ package body Langkit_Support.Lexical_Env is
       Current_Rebindings := Rebindings;
 
       --  Phase 1: Get nodes in own env if there are any
+
       Env := Extract_Rebinding (Current_Rebindings, Self);
       if not Get_Nodes (Env) and then Env /= Self then
          --  Getting the nodes in Self (env before extract rebinding) should
@@ -747,73 +755,77 @@ package body Langkit_Support.Lexical_Env is
          end;
       end if;
 
-      --  Phase 2: Get nodes in transitive and prioritary referenced envs
+      if Lookup_Kind /= Minimal then
 
-      for I in Self.Env.Referenced_Envs.First_Index
-            .. Self.Env.Referenced_Envs.Last_Index
-      loop
-         if Self.Env.Referenced_Envs.Get_Access (I).Kind
-           in Transitive | Prioritary
-         then
-            Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
-         end if;
-      end loop;
-
-      --  Phase 3: Get nodes in parent envs
-
-      if Recursive or Self.Env.Transitive_Parent then
-         declare
-            Parent_Env        : Lexical_Env := Parent (Self);
-            Parent_Rebindings : constant Env_Rebindings :=
-              (if Env /= Self
-               then Shed_Rebindings (Parent_Env, Current_Rebindings)
-               else Current_Rebindings);
-         begin
-            if Has_Trace then
-               Traces.Trace
-                 (Me, "Recursing on parent environments");
-               Traces.Increase_Indent (Me);
-            end if;
-            Local_Results.Concat
-              (Get_Internal
-                 (Parent_Env, Key, True,
-                  Parent_Rebindings,
-                  Metadata));
-            if Has_Trace then
-               Traces.Decrease_Indent (Me);
-            end if;
-
-            Dec_Ref (Parent_Env);
-         end;
-      end if;
-
-      --  Phase 4: Get nodes in normal referenced envs
-
-      if Recursive then
-         if Has_Trace then
-            Traces.Trace
-              (Me, "Recursing on non transitive referenced environments");
-            Traces.Increase_Indent (Me);
-         end if;
+         --  Phase 2: Get nodes in transitive and prioritary referenced envs
 
          for I in Self.Env.Referenced_Envs.First_Index
            .. Self.Env.Referenced_Envs.Last_Index
          loop
             if Self.Env.Referenced_Envs.Get_Access (I).Kind
-              not in Transitive | Prioritary
+            in Transitive | Prioritary
             then
                Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
             end if;
          end loop;
 
-         if Has_Trace then
-            Traces.Decrease_Indent (Me);
+         --  Phase 3: Get nodes in parent envs
+
+         if Lookup_Kind = Recursive or else Self.Env.Transitive_Parent
+         then
+            declare
+               Parent_Env        : Lexical_Env := Parent (Self);
+               Parent_Rebindings : constant Env_Rebindings :=
+                 (if Env /= Self
+                  then Shed_Rebindings (Parent_Env, Current_Rebindings)
+                  else Current_Rebindings);
+            begin
+               if Has_Trace then
+                  Traces.Trace
+                    (Me, "Recursing on parent environments");
+                  Traces.Increase_Indent (Me);
+               end if;
+               Local_Results.Concat
+                 (Get_Internal
+                    (Parent_Env, Key, Lookup_Kind,
+                     Parent_Rebindings,
+                     Metadata));
+               if Has_Trace then
+                  Traces.Decrease_Indent (Me);
+               end if;
+
+               Dec_Ref (Parent_Env);
+            end;
+         end if;
+
+         --  Phase 4: Get nodes in normal referenced envs
+
+         if Lookup_Kind = Recursive then
+            if Has_Trace then
+               Traces.Trace
+                 (Me, "Recursing on non transitive referenced environments");
+               Traces.Increase_Indent (Me);
+            end if;
+
+            for I in Self.Env.Referenced_Envs.First_Index
+              .. Self.Env.Referenced_Envs.Last_Index
+            loop
+               if Self.Env.Referenced_Envs.Get_Access (I).Kind
+               not in Transitive | Prioritary
+               then
+                  Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
+               end if;
+            end loop;
+
+            if Has_Trace then
+               Traces.Decrease_Indent (Me);
+            end if;
          end if;
       end if;
 
       Dec_Ref (Env);
 
-      if Has_Lookup_Cache (Self) and then Recursive then
+      if Has_Lookup_Cache (Self) and then Lookup_Kind = Recursive then
          declare
             Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
          begin
@@ -835,10 +847,10 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self      : Lexical_Env;
-      Key       : Symbol_Type;
-      From      : Node_Type := No_Node;
-      Recursive : Boolean := True)
+     (Self        : Lexical_Env;
+      Key         : Symbol_Type;
+      From        : Node_Type := No_Node;
+      Lookup_Kind : Lookup_Kind_Type := Recursive)
       return Entity_Array
    is
       FV : Entity_Vectors.Vector;
@@ -852,7 +864,7 @@ package body Langkit_Support.Lexical_Env is
 
       declare
          Results : constant Lookup_Result_Array :=
-            Get_Internal (Self, Key, Recursive, null, Empty_Metadata);
+            Get_Internal (Self, Key, Lookup_Kind, null, Empty_Metadata);
       begin
          for El of Results loop
             if From = No_Node
@@ -885,10 +897,10 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get_First
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Node_Type := No_Node;
-      Recursive  : Boolean := True) return Entity
+     (Self        : Lexical_Env;
+      Key         : Symbol_Type;
+      From        : Node_Type := No_Node;
+      Lookup_Kind : Lookup_Kind_Type := Recursive) return Entity
    is
       FV : Entity_Vectors.Vector;
    begin
@@ -901,7 +913,7 @@ package body Langkit_Support.Lexical_Env is
 
       declare
          V : constant Lookup_Result_Array :=
-           Get_Internal (Self, Key, Recursive, null, Empty_Metadata);
+           Get_Internal (Self, Key, Lookup_Kind, null, Empty_Metadata);
       begin
 
          for El of V loop

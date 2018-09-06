@@ -307,6 +307,10 @@ package body ${ada_lib_name}.Implementation is
       % endif
    end Create_Symbol_Literals;
 
+   function To_Lookup_Kind_Type (K : Lookup_Kind) return Lookup_Kind_Type
+   is
+     (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
+
    --------------------
    -- Create_Context --
    --------------------
