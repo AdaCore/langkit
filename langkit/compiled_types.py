@@ -2924,6 +2924,16 @@ class EnumType(CompiledType):
 
         CompiledTypeRepo.enum_types.append(self)
 
+    @property
+    def py_helper(self):
+        """
+        Name of the class helper in the Python binding layer to convert values
+        for this enumeration back and forth between C and Python-level values.
+
+        :rtype: str
+        """
+        return self.api_name.camel
+
 
 class EnumValue(object):
     """
@@ -2970,6 +2980,16 @@ class EnumValue(object):
         :rtype: str
         """
         return self.name.camel_with_underscores
+
+    def c_name(self, c_api_settings):
+        """
+        Return the identifier used in C to designate this value.
+
+        :param CAPISettings c_api_settings: The settings for the C API.
+        :rtype: str
+        """
+        return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
+                              (self.type.name + self.name).upper)
 
 
 class BigIntegerType(CompiledType):

@@ -338,6 +338,20 @@ class _AnalysisUnitKind(_Enum):
     py_to_c = {name: index for index, name in enumerate(c_to_py)}
 
 
+% for enum_type in ctx.enum_types:
+class ${enum_type.py_helper}(_Enum):
+    ${py_doc(enum_type, 4)}
+
+    % for v in enum_type.values:
+    ${v.name.lower} = ${repr(v.name.lower)}
+    % endfor
+
+    name = ${repr(enum_type.api_name.camel)}
+    c_to_py = [
+        ${', '.join(v.name.lower for v in enum_type.values)}]
+    py_to_c = {name: index for index, name in enumerate(c_to_py)}
+% endfor
+
 
 _unit_provider = _hashable_c_pointer()
 
