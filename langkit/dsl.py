@@ -1042,6 +1042,12 @@ class AnalysisUnitKind(_BuiltinType):
     """
     _name = names.Name('Analysis_Unit_Kind')
 
+    unit_specification = _BuiltinValue(
+        lambda:
+        AnalysisUnitKind._resolve().resolve_value('unit_specification'))
+    unit_body = _BuiltinValue(
+        lambda: AnalysisUnitKind._resolve().resolve_value('unit_body'))
+
 
 class AnalysisUnitType(_BuiltinType):
     """

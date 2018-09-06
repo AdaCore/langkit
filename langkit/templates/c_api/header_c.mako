@@ -151,12 +151,6 @@ typedef struct {
  * Types for unit providers
  */
 
-${c_doc('langkit.unit_kind_type')}
-typedef enum {
-   ${capi.get_name('unit_kind_specification')},
-   ${capi.get_name('unit_kind_body')}
-} ${unit_kind_type};
-
 ${c_doc('langkit.unit_provider_type')}
 typedef void *${unit_provider_type};
 

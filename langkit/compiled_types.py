@@ -3094,12 +3094,15 @@ def create_builtin_types():
     """
     AnalysisUnitType()
 
-    CompiledType(
-        'AnalysisUnitKind',
-        type_repo_name='AnalysisUnitKind',
-        exposed=True,
-        is_ptr=False,
-    )
+    EnumType(name='AnalysisUnitKind',
+             location=None,
+             doc="""
+             Specify a kind of analysis unit. Specification units provide an
+             interface to the outer world while body units provide an
+             implementation for the corresponding interface.
+             """,
+             value_names=[names.Name('Unit_Specification'),
+                          names.Name('Unit_Body')])
 
     CompiledType(
         'LexicalEnv',
