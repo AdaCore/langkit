@@ -110,14 +110,14 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit_Filename
      (Provider : Unit_Provider_Interface;
       Name     : Text_Type;
-      Kind     : Unit_Kind) return String is abstract;
+      Kind     : Analysis_Unit_Kind) return String is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
 
    function Get_Unit
      (Provider    : Unit_Provider_Interface;
       Context     : Analysis_Context'Class;
       Name        : Text_Type;
-      Kind        : Unit_Kind;
+      Kind        : Analysis_Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False) return Analysis_Unit'Class is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
@@ -190,7 +190,7 @@ package ${ada_lib_name}.Analysis is
    function Get_From_Provider
      (Context : Analysis_Context'Class;
       Name    : Text_Type;
-      Kind    : Unit_Kind;
+      Kind    : Analysis_Unit_Kind;
       Charset : String := "";
       Reparse : Boolean := False) return Analysis_Unit
       with Pre => not Reparse or else not Has_Rewriting_Handle (Context);

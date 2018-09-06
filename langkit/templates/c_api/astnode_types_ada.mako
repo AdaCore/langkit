@@ -64,7 +64,7 @@
             % elif arg.type.is_analysis_unit_type:
                ${arg_ref}
             % elif arg.type.is_analysis_unit_kind:
-               Unit_Kind'Val (${arg_ref})
+               Analysis_Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
                ${arg.type.name} (${arg_ref}.Node)
             % elif arg.type.is_entity_type:
@@ -146,7 +146,7 @@
                % elif field.type.is_analysis_unit_type:
                    Result
                % elif field.type.is_analysis_unit_kind:
-                   Unit_Kind'Pos (Result)
+                   Analysis_Unit_Kind'Pos (Result)
                % elif field.type.is_ast_node:
                    (${root_node_type_name} (Result), Node.Info)
                % elif field.type.is_entity_type:

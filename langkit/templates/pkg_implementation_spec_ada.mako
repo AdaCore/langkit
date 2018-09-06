@@ -553,7 +553,7 @@ private package ${ada_lib_name}.Implementation is
    Null_Logic_Equation : constant Logic_Equation := null;
 
    % if ctx.properties_logging:
-      function Trace_Image (K : Unit_Kind) return String;
+      function Trace_Image (K : Analysis_Unit_Kind) return String;
       function Trace_Image (B : Boolean) return String;
       function Trace_Image (I : Integer) return String;
       function Trace_Image (S : Symbol_Type) return String;
@@ -959,14 +959,14 @@ private package ${ada_lib_name}.Implementation is
    function Get_Unit_Filename
      (Provider : Internal_Unit_Provider;
       Name     : Text_Type;
-      Kind     : Unit_Kind) return String is abstract;
+      Kind     : Analysis_Unit_Kind) return String is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
 
    function Get_Unit
      (Provider    : Internal_Unit_Provider;
       Context     : Internal_Context;
       Name        : Text_Type;
-      Kind        : Unit_Kind;
+      Kind        : Analysis_Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
@@ -1214,7 +1214,7 @@ private package ${ada_lib_name}.Implementation is
    function Get_From_Provider
      (Context : Internal_Context;
       Name    : Text_Type;
-      Kind    : Unit_Kind;
+      Kind    : Analysis_Unit_Kind;
       Charset : String;
       Reparse : Boolean) return Internal_Unit
       with Pre => not Reparse or else not Has_Rewriting_Handle (Context);

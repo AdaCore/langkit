@@ -682,10 +682,10 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (Token : Token_Reference) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Reference;
 
-   function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is
-     (Unit_Kind'Pos (Kind));
-   function Unwrap (Kind : ${unit_kind_type}) return Unit_Kind is
-     (Unit_Kind'Val (Kind));
+   function Wrap (Kind : Analysis_Unit_Kind) return ${unit_kind_type} is
+     (Analysis_Unit_Kind'Pos (Kind));
+   function Unwrap (Kind : ${unit_kind_type}) return Analysis_Unit_Kind is
+     (Analysis_Unit_Kind'Val (Kind));
    function Wrap is new Ada.Unchecked_Conversion
      (Unit_Provider_Access, ${unit_provider_type});
    function Unwrap is new Ada.Unchecked_Conversion
