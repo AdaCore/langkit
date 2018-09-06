@@ -1,20 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit import names
 from langkit.compiled_types import T
 from langkit.expressions.base import (
-    AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, PropertyDef,
-    auto_attr, auto_attr_custom, construct
-)
-
-
-UnitSpecification = AbstractVariable(
-    names.Name('Unit_Specification'),
-    type=T.AnalysisUnitKind
-)
-UnitBody = AbstractVariable(
-    names.Name('Unit_Body'),
-    type=T.AnalysisUnitKind
+    CallExpr, FieldAccessExpr, NullCheckExpr, PropertyDef, auto_attr,
+    auto_attr_custom, construct
 )
 
 

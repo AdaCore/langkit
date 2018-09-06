@@ -63,8 +63,6 @@
                Character_Type'Val (${arg_ref})
             % elif arg.type.is_analysis_unit_type:
                ${arg_ref}
-            % elif arg.type.is_analysis_unit_kind:
-               Analysis_Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
                ${arg.type.name} (${arg_ref}.Node)
             % elif arg.type.is_entity_type:
@@ -145,8 +143,6 @@
                    Character_Type'Pos (Result)
                % elif field.type.is_analysis_unit_type:
                    Result
-               % elif field.type.is_analysis_unit_kind:
-                   Analysis_Unit_Kind'Pos (Result)
                % elif field.type.is_ast_node:
                    (${root_node_type_name} (Result), Node.Info)
                % elif field.type.is_entity_type:

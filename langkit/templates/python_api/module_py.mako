@@ -330,14 +330,6 @@ class _Enum(object):
         return cls.c_to_py[c_value]
 
 
-class _AnalysisUnitKind(_Enum):
-    ${py_doc('langkit.unit_kind_type', 4)}
-
-    name = 'AnalysisUnitKind'
-    c_to_py = ['specification', 'body']
-    py_to_c = {name: index for index, name in enumerate(c_to_py)}
-
-
 % for enum_type in ctx.enum_types:
 class ${enum_type.py_helper}(_Enum):
     ${py_doc(enum_type, 4)}
@@ -465,7 +457,7 @@ class AnalysisContext(object):
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
         _name = _text._unwrap(name)
-        _kind = _unwrap_unit_kind(kind)
+        _kind = ${pyapi.unwrap_value('kind', T.AnalysisUnitKind, None)}
         c_value = _get_analysis_unit_from_provider(
             self._c_value, ctypes.byref(_name), _kind, charset or '', reparse
         )

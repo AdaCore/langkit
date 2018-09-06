@@ -219,7 +219,7 @@ package body ${ada_lib_name}.Implementation.C is
          return Get_From_Provider
            (Context,
             Text_Name,
-            Unwrap (Kind),
+            Kind,
             Value_Or_Empty (Charset),
             Reparse /= 0);
       end;
@@ -1029,7 +1029,7 @@ package body ${ada_lib_name}.Implementation.C is
       Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
 
       C_Result : chars_ptr := Provider.Get_Unit_Filename_Func
-        (Provider.Data, Wrap (Name_Access), Wrap (Kind));
+        (Provider.Data, Wrap (Name_Access), Kind);
    begin
       if C_Result = Null_Ptr then
          raise Property_Error with "invalid AST node for unit name";
@@ -1063,7 +1063,7 @@ package body ${ada_lib_name}.Implementation.C is
                                   else New_String (Charset));
 
       C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
-        (Provider.Data, Ctx, Wrap (Name_Access), Wrap (Kind),
+        (Provider.Data, Ctx, Wrap (Name_Access), Kind,
          C_Charset, Boolean'Pos (Reparse));
    begin
       Free (C_Charset);

@@ -552,11 +552,6 @@ base_langkit_docs = {
     # Unit providers
     #
 
-    'langkit.unit_kind_type': """
-        Specify a kind of analysis unit. Specification units provide an
-        interface to the outer world while body units provide an implementation
-        for the corresponding interface.
-    """,
     'langkit.unit_provider_type': """
         Interface to fetch analysis units from a name and a unit kind.
 

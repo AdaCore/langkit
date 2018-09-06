@@ -156,9 +156,6 @@ private package ${ada_lib_name}.Implementation.C is
 
    --  Types for unit providers
 
-   type ${unit_kind_type} is new int;
-   ${ada_c_doc('langkit.unit_kind_type', 3)}
-
    type ${unit_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_provider_type', 3)}
 
@@ -682,10 +679,6 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (Token : Token_Reference) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Reference;
 
-   function Wrap (Kind : Analysis_Unit_Kind) return ${unit_kind_type} is
-     (Analysis_Unit_Kind'Pos (Kind));
-   function Unwrap (Kind : ${unit_kind_type}) return Analysis_Unit_Kind is
-     (Analysis_Unit_Kind'Val (Kind));
    function Wrap is new Ada.Unchecked_Conversion
      (Unit_Provider_Access, ${unit_provider_type});
    function Unwrap is new Ada.Unchecked_Conversion
