@@ -1,7 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
+import itertools
+
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, CompiledTypeRepo, Field as _Field,
+    ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
     StructType, UserField as _UserField, T
 )
 from langkit.diagnostics import (
@@ -874,6 +876,136 @@ def UserField(type, repr=False, doc=None, public=True):
     :param bool is_public: Whether this field is public in the generated APIs.
     """
     return _UserField(type, repr, doc, public)
+
+
+class _EnumMetaclass(type):
+
+    base_enum_type = None
+    """
+    This is set to Enum once this class it built.
+    """
+
+    enum_types = []
+    """
+    List of all Enum subclasses.
+
+    :type: list[Enum]
+    """
+
+    @classmethod
+    def reset(cls):
+        cls.enum_types = []
+
+    def __new__(mcs, name, bases, dct):
+        # Don't do anything special for Enum itself
+        if not mcs.base_enum_type:
+            result = type.__new__(mcs, name, bases, dct)
+            mcs.base_enum_type = result
+            return result
+
+        location = extract_library_location()
+        with Context('in {}'.format(name), location):
+            check_source_language(
+                bases == (Enum, ),
+                'Enumeration types must derive from and only from Enum'
+            )
+
+            # Get the list of values, initializing their name
+            values = []
+            for key, value in dct.items():
+                # Ignore __special__ fields
+                if key.startswith('__') and key.endswith('__'):
+                    continue
+
+                check_source_language(
+                    isinstance(value, EnumValue),
+                    'Enum subclass can only contain EnumValue instances'
+                    ' (here, {} is {})'.format(key, value)
+                )
+                check_source_language(
+                    value._type is None,
+                    'EnumValue instances cannot be used in multiple Enum'
+                    ' subclasses (here: {})'.format(key)
+                )
+                value._name = names.Name.from_lower(key)
+                values.append(value)
+            values.sort(key=lambda v: v._id)
+            dct['_values'] = values
+
+        DSLType._import_base_type_info(name, location, dct)
+
+        # Create the subclass and associate values to it
+        cls = type.__new__(mcs, name, bases, dct)
+        for value in cls._values:
+            value._type = cls
+
+        # Now create the CompiledType instance, register it where needed
+        enum_type = EnumType(cls._name, cls._location, cls._doc,
+                             [v._name for v in cls._values])
+        enum_type.dsl_decl = cls
+        cls._type = enum_type
+
+        # Associate the enumeration values in the DSL/Langkit internals
+        for dsl_val, internal_val in zip(cls._values, enum_type.values):
+            dsl_val._type = cls
+            dsl_val._value = internal_val
+            internal_val.dsl_decl = dsl_val
+
+        return cls
+
+
+class Enum(DSLType):
+    """
+    Subclass this in order to create enumeration types.
+
+    For instance::
+
+        class MyEnum(Enum):
+            a = EnumValue()
+            b = EnumValue()
+    """
+    __metaclass__ = _EnumMetaclass
+
+    _values = None
+    """
+    List of enumeration values associated to this type.
+
+    :type: list[EnumValue]
+    """
+
+
+class EnumValue(object):
+    """
+    Enumeration value, to be used when subclassing Enum.
+    """
+
+    _next_id = iter(itertools.count(0))
+
+    def __init__(self):
+        self._id = next(self._next_id)
+        """
+        Program-wide unique identifier used to sort enumeration values by
+        instantiation order.
+
+        :type: int
+        """
+
+        self._name = None
+        """
+        Name for this value.
+
+        :type: names.Name
+        """
+
+        self._value = None
+        """
+        :type: langkit.compiled_type.EnumValue
+        """
+
+        self._type = None
+        """
+        Enum subclass that owns this value.
+        """
 
 
 class _BuiltinType(DSLType):
