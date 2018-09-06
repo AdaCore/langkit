@@ -428,6 +428,13 @@ class CompileCtx(object):
         :type: set[parsers.Parser]
         """
 
+        self._enum_types = []
+        """
+        List of all enumeration types.
+
+        :type: list[langkit.compiled_types.EnumType]
+        """
+
         self.astnode_types = []
         """
         List for all ASTnodeType instances, sorted so that A is before B when A
@@ -1414,6 +1421,22 @@ class CompileCtx(object):
                     f.type.used_in_public_struct = True
 
         return self._struct_types
+
+    @property
+    def enum_types(self):
+        from langkit.compiled_types import CompiledTypeRepo
+
+        enum_types = CompiledTypeRepo.enum_types
+
+        if self._enum_types:
+            assert len(self._enum_types) == len(enum_types), (
+                'CompileCtx.enum_types called too early: more enum types were'
+                ' added')
+        else:
+            self._enum_types = list(enum_types)
+            enum_types.sort(key=lambda et: et.name)
+
+        return self._enum_types
 
     @property
     def entity_types(self):

@@ -240,6 +240,7 @@ def reset_langkit():
     CompiledTypeRepo.root_grammar_class = None
     CompiledTypeRepo.astnode_types = []
     CompiledTypeRepo.struct_types = []
+    CompiledTypeRepo.enum_types = []
     CompiledTypeRepo.env_metadata = None
     CompiledTypeRepo.entity_info = None
     Self.unfreeze()
