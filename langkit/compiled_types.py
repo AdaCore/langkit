@@ -87,14 +87,14 @@ def make_renderer(base_renderer=None):
             'T':                     T,
             'ada_api':               get_context().ada_api_settings,
             'capi':                  capi,
-            'bool_type':             T.BoolType.c_type(capi).name,
+            'bool_type':             T.Bool.c_type(capi).name,
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
-            'analysis_unit_type':    T.AnalysisUnitType.c_type(capi).name,
+            'analysis_unit_type':    T.AnalysisUnit.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             ctx.root_grammar_class.c_type(capi).name,
             'entity_type':           T.entity.c_type(capi).name,
-            'symbol_type':           T.SymbolType.c_type(capi).name,
-            'env_rebindings_type':   T.EnvRebindingsType.c_type(capi).name,
+            'symbol_type':           T.Symbol.c_type(capi).name,
+            'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,
             'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
             'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
             'unit_provider_destroy_type':
@@ -515,7 +515,7 @@ class CompiledType(object):
         """
         Return whether this is the analysis unit type.
         """
-        return self == T.AnalysisUnitType
+        return self == T.AnalysisUnit
 
     @property
     def is_analysis_unit_kind(self):
@@ -538,7 +538,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.BoolType
+        return self == T.Bool
 
     @property
     def is_collection(self):
@@ -556,7 +556,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.EnvRebindingsType
+        return self == T.EnvRebindings
 
     @property
     def is_equation_type(self):
@@ -565,7 +565,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.EquationType
+        return self == T.Equation
 
     @property
     def is_lexical_env_type(self):
@@ -574,7 +574,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.LexicalEnvType
+        return self == T.LexicalEnv
 
     @property
     def is_logic_var_type(self):
@@ -592,7 +592,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.IntegerType
+        return self == T.Integer
 
     @property
     def is_character_type(self):
@@ -601,7 +601,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.CharacterType
+        return self == T.Character
 
     @property
     def is_string_type(self):
@@ -610,7 +610,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.CharacterType.array
+        return self == T.Character.array
 
     @property
     def is_symbol_type(self):
@@ -619,7 +619,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.SymbolType
+        return self == T.Symbol
 
     @property
     def is_token_type(self):
@@ -628,7 +628,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.TokenType
+        return self == T.Token
 
     @property
     def is_big_integer_type(self):
@@ -637,7 +637,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.BigIntegerType
+        return self == T.BigInteger
 
     @property
     def element_type(self):
@@ -894,7 +894,6 @@ class LogicVarType(CompiledType):
     def __init__(self):
         super(LogicVarType, self).__init__(
             name='LogicVar',
-            type_repo_name='LogicVarType',
             nullexpr='null',
             is_ptr=False,
             has_special_storage=True,
@@ -925,7 +924,6 @@ class EnvRebindingsType(CompiledType):
     def __init__(self):
         super(EnvRebindingsType, self).__init__(
             name='EnvRebindings',
-            type_repo_name='EnvRebindingsType',
             exposed=True,
             null_allowed=True,
             nullexpr='null',
@@ -944,7 +942,7 @@ class TokenType(CompiledType):
     def __init__(self):
         super(TokenType, self).__init__(
             name='TokenReference',
-            type_repo_name='TokenType',
+            dsl_name='Token',
             exposed=True,
             is_ptr=False,
             nullexpr='No_Token',
@@ -2410,7 +2408,7 @@ class ASTNodeType(BaseStructType):
                         T.defer_env_md,
                         doc='The metadata associated to the AST node'
                     )),
-                    ('rebindings', BuiltinField(T.EnvRebindingsType,
+                    ('rebindings', BuiltinField(T.EnvRebindings,
                                                 access_needs_incref=True,
                                                 doc=""))
                 ],
@@ -2497,7 +2495,7 @@ class ASTNodeType(BaseStructType):
             # analysis unit, so they are not ref-counted.
 
             ('node_env', PropertyDef(
-                expr=None, prefix=None, type=T.LexicalEnvType, public=False,
+                expr=None, prefix=None, type=T.LexicalEnv, public=False,
                 external=True, uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return the'
@@ -2505,7 +2503,7 @@ class ASTNodeType(BaseStructType):
                     ' environment otherwise.'
             )),
             ('children_env', PropertyDef(
-                expr=None, prefix=None, type=T.LexicalEnvType, public=False,
+                expr=None, prefix=None, type=T.LexicalEnv, public=False,
                 external=True, uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return it.'
@@ -2538,19 +2536,19 @@ class ASTNodeType(BaseStructType):
                     ' children.'
             )),
             ('token_start', PropertyDef(
-                expr=None, prefix=None, type=T.TokenType,
+                expr=None, prefix=None, type=T.Token,
                 public=True, external=True, uses_entity_info=False,
                 uses_envs=False,
                 doc='Return the first token used to parse this node.'
             )),
             ('token_end', PropertyDef(
-                expr=None, prefix=None, type=T.TokenType,
+                expr=None, prefix=None, type=T.Token,
                 public=True, external=True, uses_entity_info=False,
                 uses_envs=False,
                 doc='Return the last token used to parse this node.'
             )),
             ('child_index', BuiltinField(
-                type=T.IntegerType,
+                type=T.Integer,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),
@@ -2567,13 +2565,13 @@ class ASTNodeType(BaseStructType):
                 doc="Return the node's next sibling, if there is one."
             )),
             ('unit', PropertyDef(
-                expr=None, prefix=None, type=T.AnalysisUnitType, public=True,
+                expr=None, prefix=None, type=T.AnalysisUnit, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,
                 warn_on_unused=False,
                 doc='Return the analysis unit owning this node.'
             )),
             ('is_ghost', PropertyDef(
-                expr=None, prefix=None, type=T.BoolType, public=True,
+                expr=None, prefix=None, type=T.Bool, public=True,
                 external=True, uses_entity_info=False, uses_envs=False,
                 warn_on_unused=False,
                 doc="""
@@ -2865,7 +2863,7 @@ def create_enum_node_types(cls):
     if is_bool_node:
         present_alt = cls._alternatives[0]
         prop = AbstractProperty(
-            type=T.BoolType, public=True,
+            type=T.Bool, public=True,
             doc='Return whether this is an instance of {}'.format(
                 (cls._name + present_alt.name).camel
             )
@@ -3023,7 +3021,7 @@ class BigIntegerType(CompiledType):
     def __init__(self):
         super(BigIntegerType, self).__init__(
             'BigIntegerType',
-            type_repo_name='BigIntegerType',
+            dsl_name='BigInteger',
             exposed=True,
             nullexpr='No_Big_Integer',
             is_refcounted=True,
@@ -3045,7 +3043,6 @@ class AnalysisUnitType(CompiledType):
     def __init__(self):
         super(AnalysisUnitType, self).__init__(
             'InternalUnit',
-            type_repo_name='AnalysisUnitType',
             exposed=True,
             nullexpr='null',
             should_emit_array_type=True,
@@ -3053,7 +3050,7 @@ class AnalysisUnitType(CompiledType):
             hashable=True,
             c_type_name='analysis_unit',
             api_name='AnalysisUnit',
-            dsl_name='AnalysisUnitType')
+            dsl_name='AnalysisUnit')
 
     @property
     def to_public_converter(self):
@@ -3068,7 +3065,7 @@ class SymbolType(CompiledType):
     def __init__(self):
         super(SymbolType, self).__init__(
             'SymbolType',
-            type_repo_name='SymbolType',
+            dsl_name='Symbol',
             exposed=True,
             nullexpr='null',
             null_allowed=True,
@@ -3106,7 +3103,6 @@ def create_builtin_types():
 
     CompiledType(
         'LexicalEnv',
-        type_repo_name='LexicalEnvType',
         nullexpr='Empty_Env',
         should_emit_array_type=False,
         null_allowed=True,
@@ -3121,7 +3117,7 @@ def create_builtin_types():
 
     CompiledType(
         'LogicEquation',
-        type_repo_name='EquationType',
+        dsl_name='Equation',
         nullexpr='Null_Logic_Equation',
         null_allowed=False,
         c_type_name='equation_type',
@@ -3131,7 +3127,7 @@ def create_builtin_types():
 
     CompiledType(
         name='Boolean',
-        type_repo_name='BoolType',
+        dsl_name='Bool',
         exposed=True,
         is_ptr=False,
         nullexpr='False',
@@ -3146,7 +3142,7 @@ def create_builtin_types():
 
     CompiledType(
         name='Integer',
-        type_repo_name='IntegerType',
+        dsl_name='Integer',
         exposed=True,
         is_ptr=False,
         nullexpr='0',
@@ -3167,7 +3163,7 @@ def create_builtin_types():
     BigIntegerType()
 
     CompiledType('CharacterType',
-                 type_repo_name='CharacterType',
+                 dsl_name='Character',
                  exposed=True,
                  nullexpr="Chars.NUL",
                  c_type_name='uint32_t',
@@ -3334,16 +3330,16 @@ class TypeRepo(object):
         """
         return StructType(
             names.Name('Env_Assoc'), None, None,
-            [('key', UserField(type=T.SymbolType)),
+            [('key', UserField(type=T.Symbol)),
              ('val', UserField(type=self.defer_root_node))]
         )
 
     @property
-    def StringType(self):
+    def String(self):
         """
-        Shortcut for CharacterType.array.
+        Shortcut for Character.array.
         """
-        return self.CharacterType.array
+        return self.Character.array
 
 
 def resolve_type(typeref):

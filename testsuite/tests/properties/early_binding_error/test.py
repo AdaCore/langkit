@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    a = UserField(T.LogicVarType, public=False)
+    a = UserField(T.LogicVar, public=False)
 
     @langkit_property()
     def pred():

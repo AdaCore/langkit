@@ -13,7 +13,7 @@ from utils import emit_and_print_errors
 
 
 class FooNode(ASTNode):
-    var = UserField(type=T.LogicVarType, public=False)
+    var = UserField(type=T.LogicVar, public=False)
 
 
 class Example(FooNode):

@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, LexicalEnvType, T
+from langkit.dsl import ASTNode, Field, LexicalEnv, T
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import DynamicVariable, New, Self, langkit_property
 from langkit.parsers import Grammar, List
@@ -9,7 +9,7 @@ from lexer_example import Token
 from utils import build_and_run
 
 
-Env = DynamicVariable('env', LexicalEnvType)
+Env = DynamicVariable('env', LexicalEnv)
 
 
 class FooNode(ASTNode):

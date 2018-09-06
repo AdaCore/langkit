@@ -10,8 +10,8 @@ Test that:
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (ASTNode, BoolType, EnvRebindingsType, Field, Struct,
-                         T, UserField, env_metadata)
+from langkit.dsl import (ASTNode, Bool, EnvRebindings, Field, Struct, T,
+                         UserField, env_metadata)
 from langkit.expressions import Entity, New, No, Self, langkit_property
 from langkit.parsers import Grammar, Or
 
@@ -45,8 +45,8 @@ class FooNode(ASTNode):
 
 @env_metadata
 class Metadata(Struct):
-    is_first = UserField(BoolType)
-    is_second = UserField(BoolType)
+    is_first = UserField(Bool)
+    is_second = UserField(Bool)
 
 
 class Literal(FooNode):
@@ -69,7 +69,7 @@ class Couple(FooNode):
                    node=Self,
                    info=New(T.entity_info,
                             md=md,
-                            rebindings=No(EnvRebindingsType)))
+                            rebindings=No(EnvRebindings)))
 
     @langkit_property(public=True)
     def property_on_entity():

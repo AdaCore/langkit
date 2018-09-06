@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, T
+from langkit.dsl import ASTNode, Bool, T
 from langkit.expressions import No, langkit_property
 from langkit.parsers import Grammar
 
@@ -15,7 +15,7 @@ class Example(FooNode):
 
     # Test default argument for a simple type: boolean
     @langkit_property(public=True)
-    def prop1(arg=(BoolType, True)):
+    def prop1(arg=(Bool, True)):
         return arg
 
     # Test default argument for public entities

@@ -133,7 +133,7 @@ class EnvGet(AbstractExpression):
         self.only_first = only_first
 
     def construct(self):
-        env_expr = construct(self.env, T.LexicalEnvType)
+        env_expr = construct(self.env, T.LexicalEnv)
 
         sym_expr = construct(self.symbol)
 
@@ -147,14 +147,14 @@ class EnvGet(AbstractExpression):
             sym_expr = GetSymbol.construct_static(sym_expr)
 
         check_source_language(
-            sym_expr.type == T.SymbolType,
+            sym_expr.type == T.Symbol,
             'Invalid key type: {}'.format(sym_expr.type.dsl_name)
         )
 
         from_expr = (construct(self.sequential_from, T.root_node)
                      if self.sequential_from is not None else None)
 
-        recursive_expr = construct(self.recursive, T.BoolType)
+        recursive_expr = construct(self.recursive, T.Bool)
 
         return EnvGet.Expr(env_expr, sym_expr, recursive_expr,
                            from_expr, self.only_first,
@@ -172,8 +172,8 @@ def env_orphan(self, env):
     :param AbstractExpression env: Expression that will return a
         lexical environment.
     """
-    return CallExpr('Orphan_Env', 'AST_Envs.Orphan', T.LexicalEnvType,
-                    [construct(env, T.LexicalEnvType)],
+    return CallExpr('Orphan_Env', 'AST_Envs.Orphan', T.LexicalEnv,
+                    [construct(env, T.LexicalEnv)],
                     abstract_expr=self)
 
 
@@ -188,10 +188,10 @@ class EnvGroup(AbstractExpression):
         self.env_exprs = list(env_exprs)
 
     def construct(self):
-        env_exprs = [construct(e, T.LexicalEnvType) for e in self.env_exprs]
+        env_exprs = [construct(e, T.LexicalEnv) for e in self.env_exprs]
         array_arg = LiteralExpr(array_aggr(['{}' for _ in env_exprs]),
                                 no_compiled_type, env_exprs)
-        return CallExpr('Group_Env', 'Group', T.LexicalEnvType,
+        return CallExpr('Group_Env', 'Group', T.LexicalEnv,
                         [array_arg],
                         abstract_expr=self)
 
@@ -217,8 +217,8 @@ def env_group(self, env_array, with_md=None):
     if not with_md:
         with_md = No(T.env_md)
 
-    return CallExpr('Group_Env', 'Group', T.LexicalEnvType,
-                    [construct(env_array, T.LexicalEnvType.array),
+    return CallExpr('Group_Env', 'Group', T.LexicalEnv,
+                    [construct(env_array, T.LexicalEnv.array),
                      construct(with_md, T.env_md)],
                     abstract_expr=self)
 
@@ -240,9 +240,9 @@ def is_visible_from(self, referenced_env, base_env):
 class IsVisibleFromExpr(CallExpr):
     def __init__(self, referenced_env, base_env, abstract_expr=None):
         super(IsVisibleFromExpr, self).__init__(
-            'Is_Visible', 'Is_Visible_From', T.BoolType,
-            [construct(referenced_env, T.LexicalEnvType),
-             construct(base_env, T.LexicalEnvType)],
+            'Is_Visible', 'Is_Visible_From', T.Bool,
+            [construct(referenced_env, T.LexicalEnv),
+             construct(base_env, T.LexicalEnv)],
             abstract_expr=abstract_expr
         )
 
@@ -257,7 +257,7 @@ def env_node(self, env):
     :param AbstractExpression env: The source environment.
     """
     return CallExpr('Env_Node', 'AST_Envs.Env_Node', T.root_node,
-                    [construct(env, T.LexicalEnvType)],
+                    [construct(env, T.LexicalEnv)],
                     abstract_expr=self)
 
 
@@ -269,15 +269,15 @@ def env_parent(self, env):
     :param AbstractExpression env: The source environment.
     """
     return CallExpr(
-        'Env_Parent', 'AST_Envs.Parent', T.LexicalEnvType,
-        [construct(env, T.LexicalEnvType)],
+        'Env_Parent', 'AST_Envs.Parent', T.LexicalEnv,
+        [construct(env, T.LexicalEnv)],
         abstract_expr=self,
     )
 
 
 def make_append_rebinding(self, rebindings, old_env, new_env):
     return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
-                    T.EnvRebindingsType,
+                    T.EnvRebindings,
                     [rebindings, old_env, new_env],
                     abstract_expr=self)
 
@@ -290,9 +290,9 @@ def append_rebinding(self, rebindings, old_env, new_env):
     """
     return make_append_rebinding(
         self,
-        construct(rebindings, T.EnvRebindingsType),
-        construct(old_env, T.LexicalEnvType),
-        construct(new_env, T.LexicalEnvType)
+        construct(rebindings, T.EnvRebindings),
+        construct(old_env, T.LexicalEnv),
+        construct(new_env, T.LexicalEnv)
     )
 
 
@@ -305,7 +305,7 @@ def construct_non_null_rebindings(rebindings):
         process.
     :rtype: ResolvedExpression
     """
-    return NullCheckExpr(construct(rebindings, T.EnvRebindingsType))
+    return NullCheckExpr(construct(rebindings, T.EnvRebindings))
 
 
 @auto_attr
@@ -318,7 +318,7 @@ def rebindings_old_env(self, rebindings):
     :rtype: ResolvedExpression
     """
     return FieldAccessExpr(construct_non_null_rebindings(rebindings),
-                           'Old_Env', T.LexicalEnvType,
+                           'Old_Env', T.LexicalEnv,
                            do_explicit_incref=True, abstract_expr=self)
 
 
@@ -332,7 +332,7 @@ def rebindings_new_env(self, rebindings):
     :rtype: ResolvedExpression
     """
     return FieldAccessExpr(construct_non_null_rebindings(rebindings),
-                           'New_Env', T.LexicalEnvType,
+                           'New_Env', T.LexicalEnv,
                            do_explicit_incref=True, abstract_expr=self)
 
 
@@ -346,7 +346,7 @@ def rebindings_parent(self, rebindings):
     :rtype: ResolvedExpression
     """
     return FieldAccessExpr(construct_non_null_rebindings(rebindings),
-                           'Parent', T.EnvRebindingsType,
+                           'Parent', T.EnvRebindings,
                            do_explicit_incref=False, abstract_expr=self)
 
 
@@ -356,9 +356,9 @@ def concat_rebindings(self, lhs, rhs):
     Combine rebindings from the `lhs` and `rhs` environment rebindings.
     """
     return CallExpr('Rebinding', 'AST_Envs.Combine',
-                    T.EnvRebindingsType,
-                    [construct(lhs, T.EnvRebindingsType),
-                     construct(rhs, T.EnvRebindingsType)],
+                    T.EnvRebindings,
+                    [construct(lhs, T.EnvRebindings),
+                     construct(rhs, T.EnvRebindings)],
                     abstract_expr=self)
 
 
@@ -367,9 +367,9 @@ def rebind_env(self, env, rebindings):
     """
     Return a new environment based on `env` to include the given `rebindings`.
     """
-    return CallExpr('Rebound_Env', 'Rebind_Env', T.LexicalEnvType,
-                    [construct(env, T.LexicalEnvType),
-                     construct(rebindings, T.EnvRebindingsType)],
+    return CallExpr('Rebound_Env', 'Rebind_Env', T.LexicalEnv,
+                    [construct(env, T.LexicalEnv),
+                     construct(rebindings, T.EnvRebindings)],
                     abstract_expr=self)
 
 
@@ -458,4 +458,4 @@ def as_bare_entity(self, node):
 
 
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
-                            type=T.LexicalEnvType)
+                            type=T.LexicalEnv)

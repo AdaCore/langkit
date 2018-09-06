@@ -20,10 +20,10 @@ def run(name, runtime_check):
 
     @abstract
     class BaseNode(FooNode):
-        prop = AbstractProperty(T.BoolType, public=True)
+        prop = AbstractProperty(T.Bool, public=True)
 
     class Example(BaseNode):
-        prop = AbstractProperty(T.BoolType, runtime_check=runtime_check)
+        prop = AbstractProperty(T.Bool, runtime_check=runtime_check)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(main_rule=Example('example'))

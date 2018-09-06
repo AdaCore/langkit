@@ -54,7 +54,7 @@ class BinaryBooleanOperator(AbstractExpression):
         :rtype: IfExpr
         """
         def construct_op(op):
-            return construct(op, lambda t: t in (T.BoolType, T.EquationType),
+            return construct(op, lambda t: t in (T.Bool, T.Equation),
                              "Operands of binary logic operator must be of "
                              "boolean or equation type, got {expr_type}")
 
@@ -65,22 +65,22 @@ class BinaryBooleanOperator(AbstractExpression):
             "operator should have the same type"
         )
 
-        if lhs.type is T.BoolType:
+        if lhs.type is T.Bool:
             # Boolean case
             if self.kind == self.AND:
                 then = rhs
-                else_then = LiteralExpr('False', T.BoolType)
+                else_then = LiteralExpr('False', T.Bool)
             else:
-                then = LiteralExpr('True', T.BoolType)
+                then = LiteralExpr('True', T.Bool)
                 else_then = rhs
-            return If.Expr(lhs, then, else_then, T.BoolType)
+            return If.Expr(lhs, then, else_then, T.Bool)
 
         else:
             # Equation case
             kind_name = self.kind.capitalize()
             return CallExpr(
                 '{}_Pred'.format(kind_name), 'Logic_{}'.format(kind_name),
-                T.EquationType, [lhs, rhs],
+                T.Equation, [lhs, rhs],
                 abstract_expr=self
             )
 
@@ -125,10 +125,10 @@ class Eq(AbstractExpression):
         if lhs.type.is_entity_type:
             return cls.make_expr_for_entities(lhs, rhs, abstract_expr)
         elif lhs.type.has_equivalent_function:
-            return CallExpr('Is_Equal', 'Equivalent', T.BoolType, [lhs, rhs],
+            return CallExpr('Is_Equal', 'Equivalent', T.Bool, [lhs, rhs],
                             abstract_expr=abstract_expr)
         else:
-            return BasicExpr('Is_Equal', '{} = {}', T.BoolType, [lhs, rhs],
+            return BasicExpr('Is_Equal', '{} = {}', T.Bool, [lhs, rhs],
                              abstract_expr=abstract_expr)
 
     @staticmethod
@@ -139,8 +139,7 @@ class Eq(AbstractExpression):
             lhs = Cast.Expr(lhs, T.entity)
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
-        return CallExpr('Is_Equiv', 'Equivalent', T.BoolType,
-                        [lhs, rhs],
+        return CallExpr('Is_Equiv', 'Equivalent', T.Bool, [lhs, rhs],
                         abstract_expr=abstract_expr)
 
     def __init__(self, lhs, rhs):
@@ -243,7 +242,7 @@ class OrderingTest(AbstractExpression):
             )
 
             super(OrderingTest.Expr, self).__init__(
-                'Comp_Result', template, T.BoolType, [lhs, rhs],
+                'Comp_Result', template, T.Bool, [lhs, rhs],
                 abstract_expr=abstract_expr
             )
 
@@ -277,7 +276,7 @@ class OrderingTest(AbstractExpression):
             lhs.type.is_big_integer_type or
             lhs.type.is_ast_node,
             'Comparisons only work on {}, {} or nodes not {}'
-            .format(T.IntegerType.dsl_name, T.BigIntegerType.dsl_name,
+            .format(T.Integer.dsl_name, T.BigInteger.dsl_name,
                     lhs.type.dsl_name)
         )
 
@@ -292,7 +291,7 @@ class OrderingTest(AbstractExpression):
                         self.LE: 'Less_Or_Equal',
                         self.GT: 'Greater_Than',
                         self.GE: 'Greater_Or_Equal'}[self.operator]
-            return CallExpr('Node_Comp', 'Compare', T.BoolType,
+            return CallExpr('Node_Comp', 'Compare', T.Bool,
                             [lhs, rhs, relation], abstract_expr=self)
 
         # Otherwise, expect strict equality for both operands and use the
@@ -388,7 +387,7 @@ class If(AbstractExpression):
         if else_then.type != rtype:
             else_then = Cast.Expr(else_then, rtype)
 
-        return If.Expr(construct(self.cond, T.BoolType), then, else_then,
+        return If.Expr(construct(self.cond, T.Bool), then, else_then,
                        rtype, abstract_expr=self)
 
     def __repr__(self):
@@ -409,12 +408,12 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        return Not.make_expr(construct(self.expr, T.BoolType),
+        return Not.make_expr(construct(self.expr, T.Bool),
                              abstract_expr=self)
 
     @staticmethod
     def make_expr(expr, abstract_expr=None):
-        return BasicExpr('Not_Val', 'not ({})', T.BoolType, [expr],
+        return BasicExpr('Not_Val', 'not ({})', T.Bool, [expr],
                          abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -532,7 +531,7 @@ class Then(AbstractExpression):
         # Affect default value to the fallback expression
         if self.default_val is None:
             check_source_language(
-                then_expr.type.null_allowed or then_expr.type is T.BoolType,
+                then_expr.type.null_allowed or then_expr.type is T.Bool,
                 "Then expression should have a default value provided,"
                 " in cases where the provided function's return type (here"
                 " {}) does not have a default null value".format(
@@ -608,7 +607,7 @@ class Cond(AbstractExpression):
         pairs = []
         for i in range(len(self.args) // 2):
             cond = construct(
-                self.args[2 * i], T.BoolType,
+                self.args[2 * i], T.Bool,
                 custom_msg='Bad condition type in Cond expression: {expected}'
                            ' expected but got {expr_type} instead'
             )

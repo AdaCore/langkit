@@ -12,6 +12,6 @@ File "test.py", line 23, in ExampleNode.resolve
 == Bind(logic_var, bool) ==
 File "test.py", line 23, in ExampleNode.resolve
   line 39, in Bind expression
-    Error: Right operand must be either a logic variable or an entity, got Boolean
+    Error: Right operand must be either a logic variable or an entity, got Bool
 
 Done

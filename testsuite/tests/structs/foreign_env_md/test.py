@@ -25,7 +25,7 @@ class Metadata(Struct):
 class Name(FooNode):
     token_node = True
 
-    sym = Property(Self.symbol, type=T.SymbolType)
+    sym = Property(Self.symbol, type=T.Symbol)
     resolve = Property(Self.parent.node_env.get(Self.sym).at(0),
                        type=T.FooNode.entity)
 

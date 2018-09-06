@@ -5,7 +5,7 @@ them.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AnalysisUnitType, ASTNode, Field, T, abstract
+from langkit.dsl import AnalysisUnit, ASTNode, Field, T, abstract
 from langkit.expressions import No, Property, Self
 from langkit.parsers import Grammar, Or, Pick
 
@@ -14,7 +14,7 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    null_unit = Property(No(AnalysisUnitType), public=True)
+    null_unit = Property(No(AnalysisUnit), public=True)
     null_node = Property(No(T.Expression.entity), public=True)
 
     deref_null_unit = Property(Self.null_unit.root.as_bare_entity, public=True)

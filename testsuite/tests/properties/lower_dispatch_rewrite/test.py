@@ -50,7 +50,7 @@ class Ref(Atom):
 
     @langkit_property()
     def referenced_env():
-        return No(T.LexicalEnvType)
+        return No(T.LexicalEnv)
 
 
 @synthetic
@@ -58,7 +58,7 @@ class MiddleRef(Ref):
 
     @langkit_property()
     def referenced_env():
-        return No(T.LexicalEnvType)
+        return No(T.LexicalEnv)
 
 
 class DerivedRef(MiddleRef):

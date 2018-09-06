@@ -450,7 +450,7 @@ class Parser(object):
         variable if necessary, indicating which parsers should not backtrack.
         """
         if isinstance(self, NoBacktrack):
-            self.no_backtrack = VarDef('nobt', T.BoolType, reinit=True)
+            self.no_backtrack = VarDef('nobt', T.Bool, reinit=True)
 
         for c in self.children:
             nobt = c.traverse_nobacktrack()
@@ -498,8 +498,7 @@ class Parser(object):
     def init_vars(self, pos_var=None, res_var=None):
         base_name = self.parser_cls_name().lower()
 
-        self.pos_var = pos_var or VarDef('{}_pos'.format(base_name),
-                                         T.TokenType)
+        self.pos_var = pos_var or VarDef('{}_pos'.format(base_name), T.Token)
         self.res_var = res_var or VarDef('{}_res'.format(base_name),
                                          self.get_type())
 
@@ -660,7 +659,7 @@ class Parser(object):
         context.fns.add(self)
 
         with add_var_context() as var_context:
-            pos_var = VarDef("pos", T.TokenType, create=False)
+            pos_var = VarDef("pos", T.Token, create=False)
 
             # Compute no_backtrack information for this parser
             self.traverse_nobacktrack()
@@ -798,7 +797,7 @@ class _Token(Parser):
         return True
 
     def get_type(self):
-        return T.TokenType
+        return T.Token
 
     def create_vars_after(self, start_pos):
         self.init_vars()
@@ -1135,7 +1134,7 @@ class _Row(Parser):
         # no_backtrack mode.
         if (self.containing_transform
                 and self.containing_transform.no_backtrack):
-            self.progress_var = VarDef('row_progress', T.IntegerType)
+            self.progress_var = VarDef('row_progress', T.Integer)
 
     def generate_code(self):
         return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))
@@ -1235,7 +1234,7 @@ class List(Parser):
             )
 
     def create_vars_before(self):
-        self.cpos = VarDef("lst_cpos", T.TokenType)
+        self.cpos = VarDef("lst_cpos", T.Token)
         self.tmplist = VarDef('tmp_list', 'Free_Parse_List')
         return self.cpos
 
@@ -1597,7 +1596,7 @@ class _Transform(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars(self.parser.pos_var)
         if self.no_backtrack:
-            self.has_failed_var = VarDef('transform_has_failed', T.BoolType)
+            self.has_failed_var = VarDef('transform_has_failed', T.Bool)
 
     def generate_code(self):
         return self.render(
@@ -1690,7 +1689,7 @@ class Predicate(Parser):
         self.property_ref = resolve_property(self.property_ref)
 
         check_source_language(
-            self.property_ref.type.matches(T.BoolType),
+            self.property_ref.type.matches(T.Bool),
             "Property passed as predicate to Predicate parser must return"
             " a boolean"
         )

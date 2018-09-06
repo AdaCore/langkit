@@ -4,7 +4,7 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, LexicalEnvType, T
+from langkit.dsl import ASTNode, Field, LexicalEnv, T
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import (DynamicVariable, New, Property, Self,
                                  langkit_property)
@@ -14,7 +14,7 @@ from lexer_example import Token
 from utils import emit_and_print_errors
 
 
-Env = DynamicVariable('env', LexicalEnvType)
+Env = DynamicVariable('env', LexicalEnv)
 
 
 def run(name, prop):
@@ -63,6 +63,6 @@ def run(name, prop):
 run('Bad return type', Property(Self.node_env.get('foo')))
 run('Has dynamic variable', Property(Self.node_env.get('foo').at(0),
                                      dynamic_vars=[Env]))
-run('Has arguments', Property(lambda i=T.IntegerType:
+run('Has arguments', Property(lambda i=T.Integer:
                               Self.node_env.get('foo').at(i)))
 print('Done')

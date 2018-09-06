@@ -5,14 +5,14 @@ expected public API.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType
+from langkit.dsl import ASTNode, Bool
 from langkit.expressions import DynamicVariable, langkit_property
 from langkit.parsers import Grammar
 
 from utils import build_and_run
 
 
-BoolVar = DynamicVariable('bool_var', BoolType)
+BoolVar = DynamicVariable('bool_var', Bool)
 
 
 class RootNode(ASTNode):

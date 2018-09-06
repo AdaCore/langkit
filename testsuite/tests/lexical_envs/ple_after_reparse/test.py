@@ -21,14 +21,14 @@ class FooNode(ASTNode):
 @abstract
 class Name(FooNode):
     resolve = AbstractProperty(T.FooNode.entity, public=True)
-    suffix_symbol = AbstractProperty(T.SymbolType, public=True)
+    suffix_symbol = AbstractProperty(T.Symbol, public=True)
 
-    @langkit_property(return_type=T.AnalysisUnitType, external=True,
+    @langkit_property(return_type=T.AnalysisUnit, external=True,
                       uses_entity_info=False, uses_envs=False)
-    def referenced_unit_or_error(or_error=T.BoolType):
+    def referenced_unit_or_error(or_error=T.Bool):
         pass
 
-    @langkit_property(public=True, return_type=T.AnalysisUnitType)
+    @langkit_property(public=True, return_type=T.AnalysisUnit)
     def referenced_unit():
         return Self.referenced_unit_or_error(False)
 

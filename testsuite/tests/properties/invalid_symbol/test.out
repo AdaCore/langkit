@@ -4,7 +4,7 @@ Code generation was successful
 == Invalid - Bad type ==
 File "test.py", line 28, in Example.p
   line 28, in GetSymbol expression
-    Error: Token node expected, but got instead Boolean
+    Error: Token node expected, but got instead Bool
 
 == Invalid - Non-token node ==
 File "test.py", line 28, in Example.p

@@ -4,7 +4,7 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType
+from langkit.dsl import ASTNode, Bool
 from langkit.expressions import Cond, No, Self, langkit_property
 from langkit.parsers import Grammar
 
@@ -18,7 +18,7 @@ class FooNode(ASTNode):
 class Example(FooNode):
 
     @langkit_property()
-    def identity(b=BoolType):
+    def identity(b=Bool):
         return b
 
     @langkit_property(public=True)
@@ -26,25 +26,25 @@ class Example(FooNode):
         return Cond(1)
 
     @langkit_property(public=True)
-    def cond1(b=BoolType):
+    def cond1(b=Bool):
         return Cond(Self.identity(b), 1,
                     2)
 
     @langkit_property(public=True)
-    def cond2(b1=BoolType, b2=BoolType):
+    def cond2(b1=Bool, b2=Bool):
         return Cond(Self.identity(b1), 1,
                     Self.identity(b2), 2,
                     3)
 
     @langkit_property(public=True)
-    def cond3(b1=BoolType, b2=BoolType, b3=BoolType):
+    def cond3(b1=Bool, b2=Bool, b3=Bool):
         return Cond(Self.identity(b1), 1,
                     Self.identity(b2), 2,
                     Self.identity(b3), 3,
                     3)
 
     @langkit_property(public=True)
-    def cond_node(b=BoolType):
+    def cond_node(b=Bool):
         return Cond(Self.identity(b), Self,
                     No(FooNode)).as_bare_entity
 

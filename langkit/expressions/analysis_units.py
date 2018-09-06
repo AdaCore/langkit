@@ -26,9 +26,9 @@ def is_referenced_from(self, referenced_unit, base_unit):
 class IsReferencedFrom(CallExpr):
     def __init__(self, referenced_unit, base_unit, abstract_expr=None):
         super(IsReferencedFrom, self).__init__(
-            'Is_Referenced', 'Is_Referenced_From', T.BoolType,
-            [construct(referenced_unit, T.AnalysisUnitType),
-             construct(base_unit, T.AnalysisUnitType)],
+            'Is_Referenced', 'Is_Referenced_From', T.Bool,
+            [construct(referenced_unit, T.AnalysisUnit),
+             construct(base_unit, T.AnalysisUnit)],
             abstract_expr=self
         )
 
@@ -43,6 +43,6 @@ def analysis_unit_root(self, unit):
     :param ResolvedExpression unit: Expression that yields the analysis
         unit for which we want to extract the root AST node.
     """
-    unit_expr = NullCheckExpr(construct(unit, T.AnalysisUnitType))
+    unit_expr = NullCheckExpr(construct(unit, T.AnalysisUnit))
     return FieldAccessExpr(unit_expr, 'AST_Root', T.root_node,
                            do_explicit_incref=False, abstract_expr=self)

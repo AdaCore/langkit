@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import itertools
 
-from langkit.dsl import ASTNode, LexicalEnvType, BoolType, abstract
+from langkit.dsl import ASTNode, LexicalEnv, Bool, abstract
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
 from langkit.parsers import Grammar
@@ -10,7 +10,7 @@ from langkit.parsers import Grammar
 from utils import emit_and_print_errors
 
 
-Env = DynamicVariable('env', LexicalEnvType)
+Env = DynamicVariable('env', LexicalEnv)
 
 
 def run(abstract_dyn_vars, concrete_dyn_vars):
@@ -37,7 +37,7 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
 
     @abstract
     class AbstractNode(RootNode):
-        prop = AbstractProperty(BoolType, dynamic_vars=abstract_dyn_vars)
+        prop = AbstractProperty(Bool, dynamic_vars=abstract_dyn_vars)
 
         use_prop = Property(Env.bind(Self.node_env, Self.prop), public=True)
 

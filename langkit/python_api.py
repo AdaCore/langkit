@@ -35,23 +35,23 @@ class PythonAPISettings(AbstractAPISettings):
         """
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
-            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
+            (T.AnalysisUnit, lambda _: 'AnalysisUnit._wrap({})'),
             (ct.EnumType, lambda _: '{}._wrap({{}})'.format(type.py_helper)),
             (ct.ASTNodeType, lambda _: '{}._wrap_bare_node({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
-            (T.TokenType, lambda _: '{}'),
-            (T.SymbolType, lambda _: '_symbol_type.wrap({})'),
-            (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
-            (T.IntegerType, lambda _: '{{}}{}'.format(value_suffix)),
-            (T.CharacterType, lambda _: 'unichr({{}}{})'.format(value_suffix)),
+            (T.Token, lambda _: '{}'),
+            (T.Symbol, lambda _: '_symbol_type.wrap({})'),
+            (T.Bool, lambda _: 'bool({{}}{})'.format(value_suffix)),
+            (T.Integer, lambda _: '{{}}{}'.format(value_suffix)),
+            (T.Character, lambda _: 'unichr({{}}{})'.format(value_suffix)),
             (ct.ArrayType, lambda _: '{}.wrap({{}})'.format(
                 self.array_wrapper(type)
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
-            (T.BigIntegerType, lambda _: '_big_integer.wrap({})'),
+            (T.BigInteger, lambda _: '_big_integer.wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (wrapping): {}'.format(type)
@@ -83,23 +83,23 @@ class PythonAPISettings(AbstractAPISettings):
         context_arg = (', {}'.format(context)
                        if type.conversion_requires_context else '')
         return dispatch_on_type(type, [
-            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
+            (T.AnalysisUnit, lambda _: 'AnalysisUnit._unwrap({value})'),
             (ct.EnumType, lambda _:
                 '{}._unwrap({{value}})'.format(type.py_helper)),
             (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
             (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),
-            (T.BoolType, lambda _: 'bool({value})'),
-            (T.IntegerType, lambda _: 'int({value})'),
-            (T.CharacterType, lambda _: 'ord({value})'),
+            (T.Bool, lambda _: 'bool({value})'),
+            (T.Integer, lambda _: 'int({value})'),
+            (T.Character, lambda _: 'ord({value})'),
             (ct.ArrayType, lambda cls:
                 '{}.unwrap({{value}}{{context}})'
                 .format(self.array_wrapper(cls))),
             (ct.StructType, lambda _:
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
-            (T.SymbolType, lambda _: '_symbol_type.unwrap({value}{context})'),
-            (T.BigIntegerType, lambda _: '_big_integer.unwrap({value})'),
+            (T.Symbol, lambda _: '_symbol_type.unwrap({value}{context})'),
+            (T.BigInteger, lambda _: '_big_integer.unwrap({value})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
@@ -123,13 +123,13 @@ class PythonAPISettings(AbstractAPISettings):
             return 'ctypes.{}'.format(name)
 
         return dispatch_on_type(type, [
-            (T.BoolType, lambda _: ctype_type('c_uint8')),
-            (T.IntegerType, lambda _: ctype_type('c_int')),
-            (T.CharacterType, lambda _: ctype_type('c_uint32')),
-            (T.EnvRebindingsType, lambda _: '_EnvRebindings_c_type'),
-            (T.TokenType, lambda _: 'Token'),
-            (T.SymbolType, lambda _: '_symbol_type'),
-            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
+            (T.Bool, lambda _: ctype_type('c_uint8')),
+            (T.Integer, lambda _: ctype_type('c_int')),
+            (T.Character, lambda _: ctype_type('c_uint32')),
+            (T.EnvRebindings, lambda _: '_EnvRebindings_c_type'),
+            (T.Token, lambda _: 'Token'),
+            (T.Symbol, lambda _: '_symbol_type'),
+            (T.AnalysisUnit, lambda _: 'AnalysisUnit._c_type'),
             (ct.EnumType, lambda _: ctype_type('c_int')),
             (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
                 self.type_public_name(ct.T.root_node))),
@@ -140,7 +140,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '_Entity_c_type'),
             (ct.StructType, lambda _:
                 '{}._c_type'.format(self.type_public_name(type))),
-            (T.BigIntegerType, lambda _: '_big_integer.c_type'),
+            (T.BigInteger, lambda _: '_big_integer.c_type'),
         ])
 
     def array_wrapper(self, array_type):
@@ -157,18 +157,18 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         return dispatch_on_type(type, [
-            (T.BoolType, lambda _: 'bool'),
-            (T.IntegerType, lambda _: 'int'),
-            (T.CharacterType, lambda _: 'unicode'),
-            (T.TokenType, lambda _: 'Token'),
-            (T.SymbolType, lambda _: 'unicode'),
+            (T.Bool, lambda _: 'bool'),
+            (T.Integer, lambda _: 'int'),
+            (T.Character, lambda _: 'unicode'),
+            (T.Token, lambda _: 'Token'),
+            (T.Symbol, lambda _: 'unicode'),
             (ct.EnumType, lambda _: 'str'),
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
             (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
-            (T.AnalysisUnitType, lambda t: t.api_name),
+            (T.AnalysisUnit, lambda t: t.api_name),
             (ct.ArrayType, lambda _: 'list[{}]'.format(
                 type.element_type.name.camel
             )),
             (ct.StructType, lambda _: type.api_name.camel),
-            (T.BigIntegerType, lambda _: 'int'),
+            (T.BigInteger, lambda _: 'int'),
         ])

@@ -256,8 +256,8 @@ private package ${ada_lib_name}.Implementation is
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
-   ${array_types.incomplete_decl(T.LexicalEnvType.array)}
-   ${array_types.decl(T.LexicalEnvType.array)}
+   ${array_types.incomplete_decl(T.LexicalEnv.array)}
+   ${array_types.decl(T.LexicalEnv.array)}
 
    ## See ASTNodeType.entity
    ${array_types.incomplete_decl(T.root_node.entity.array)}
@@ -269,11 +269,11 @@ private package ${ada_lib_name}.Implementation is
    ${array_types.decl(root_node_array)}
 
    ## Generate Hash functions for "built-in types" if need be
-   % if T.BoolType.requires_hash_function:
+   % if T.Bool.requires_hash_function:
       function Hash (B : Boolean) return Hash_Type;
    % endif
 
-   % if T.IntegerType.requires_hash_function:
+   % if T.Integer.requires_hash_function:
       function Hash (I : Integer) return Hash_Type;
    % endif
 
@@ -761,8 +761,8 @@ private package ${ada_lib_name}.Implementation is
    --  Useful for code generation.
 
    function Group
-     (Envs   : ${T.LexicalEnvType.array.name};
-      Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name};
+     (Envs   : ${T.LexicalEnv.array.name};
+      Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnv.name};
    --  Convenience wrapper for uniform types handling in code generation
 
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);

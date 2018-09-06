@@ -15,11 +15,11 @@ class Example(FooNode):
 
     @langkit_property(public=True)
     def raise_msg():
-        return PropertyError(T.BoolType, 'Custom error message!')
+        return PropertyError(T.Bool, 'Custom error message!')
 
     @langkit_property(public=True)
     def raise_no_msg():
-        return PropertyError(T.BoolType)
+        return PropertyError(T.Bool)
 
 
 foo_grammar = Grammar('main_rule')

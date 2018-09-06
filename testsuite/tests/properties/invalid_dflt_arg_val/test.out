@@ -1,15 +1,15 @@
 == Bad tuple ==
 File "test.py", line 25, in Example.p
-    Error: Invalid type reference: (<class 'langkit.dsl.BoolType'>,)
+    Error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
 
 == Bad expr ==
 File "test.py", line 25, in Example.p
-    Error: Invalid abstract expression: <class 'langkit.dsl.BoolType'>
+    Error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
 
 == Bad type ==
 File "test.py", line 25, in Example.p
   line 32, in Literal expression
-    Error: Expected type Boolean, got Integer
+    Error: Expected type Bool, got Integer
 
 == Bad Self use ==
 File "test.py", line 25, in Example.p
@@ -34,7 +34,7 @@ File "test.py", line 26, in Example.calling
 == Bad keyword argument ==
 File "test.py", line 26, in Example.calling
   line 32, in Literal expression
-    Error: Invalid "a" actual for Example.p_p: expected Boolean but got Integer
+    Error: Invalid "a" actual for Example.p_p: expected Bool but got Integer
 
 == Too many arguments (1) ==
 File "test.py", line 26, in Example.calling

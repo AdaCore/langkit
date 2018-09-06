@@ -5,7 +5,7 @@ invalid input.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BoolType, T, has_abstract_list
+from langkit.dsl import ASTNode, Bool, T, has_abstract_list
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import EmptyEnv, If, New, Self, Var, langkit_property
 from langkit.parsers import Grammar, List
@@ -17,7 +17,7 @@ from utils import build_and_run
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def prop(empty1=BoolType, empty2=BoolType):
+    def prop(empty1=Bool, empty2=Bool):
         arg1 = Var(If(empty1, EmptyEnv, Self.children_env))
         arg2 = Var(If(empty2, EmptyEnv, Self.children_env))
         return arg1.is_visible_from(arg2)

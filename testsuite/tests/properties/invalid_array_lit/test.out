@@ -16,6 +16,6 @@ Code generation was successful
 == Multiple: heterogeneous types ==
 File "test.py", line 22, in Example.p
   line 28, in ArrayLiteral expression
-    Error: In Array literal, expected element of type Boolean, got Example
+    Error: In Array literal, expected element of type Bool, got Example
 
 Done

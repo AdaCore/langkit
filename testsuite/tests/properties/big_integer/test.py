@@ -4,7 +4,7 @@ Test that big integers work as expected in the DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, BigIntegerType, Field, T, abstract
+from langkit.dsl import ASTNode, BigInteger, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import (
     AbstractProperty, BigIntegerLiteral, ExternalProperty, If, New, Self,
@@ -19,7 +19,7 @@ from utils import build_and_run
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def identity(value=T.BigIntegerType):
+    def identity(value=T.BigInteger):
         return value
 
 
@@ -37,7 +37,7 @@ class Identifier(FooNode):
 
 @abstract
 class Expr(FooNode):
-    evaluate = AbstractProperty(type=BigIntegerType, public=True)
+    evaluate = AbstractProperty(type=BigInteger, public=True)
 
     @langkit_property(public=True)
     def evaluate_as_int():
@@ -93,7 +93,8 @@ class LessThan(Expr):
 
     @langkit_property()
     def evaluate():
-        return BigInteger(If(Self.left.evaluate < Self.right.evaluate, 1, 0))
+        return BigIntegerLiteral(If(Self.left.evaluate < Self.right.evaluate,
+                                    1, 0))
 
 
 g = Grammar('main_rule')

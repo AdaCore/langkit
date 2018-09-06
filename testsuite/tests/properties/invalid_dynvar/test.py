@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LexicalEnvType
+from langkit.dsl import ASTNode, LexicalEnv
 from langkit.expressions import DynamicVariable, Property, Self
 from langkit.parsers import Grammar
 
@@ -8,7 +8,7 @@ from lexer_example import Token
 from utils import emit_and_print_errors
 
 
-Env = DynamicVariable('env', LexicalEnvType)
+Env = DynamicVariable('env', LexicalEnv)
 
 
 def run(expr):

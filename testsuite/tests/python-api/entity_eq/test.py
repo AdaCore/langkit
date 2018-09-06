@@ -25,7 +25,7 @@ class Name(FooNode):
 
 @abstract
 class DefNode(FooNode):
-    name = AbstractProperty(T.SymbolType, public=True)
+    name = AbstractProperty(T.Symbol, public=True)
     env_spec = EnvSpec(add_to_env(mappings=New(T.env_assoc,
                                                key=Self.name,
                                                val=Self)))
