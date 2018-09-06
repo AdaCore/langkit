@@ -2962,6 +2962,15 @@ class EnumValue(object):
         """
         return '{}.{}'.format(self.enum_type.dsl_name, self.name.camel)
 
+    @property
+    def ada_name(self):
+        """
+        Return the identifier used in Ada to designate this value.
+
+        :rtype: str
+        """
+        return self.name.camel_with_underscores
+
 
 class BigIntegerType(CompiledType):
     def __init__(self):

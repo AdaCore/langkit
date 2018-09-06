@@ -11,8 +11,8 @@ import funcy
 from langkit import names
 from langkit.common import string_repr
 from langkit.compiled_types import (
-    AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
-    gdb_helper, get_context, no_compiled_type, render as ct_render,
+    AbstractNodeData, Argument, ASTNodeType, CompiledType, EnumValue, T,
+    TypeRepo, gdb_helper, get_context, no_compiled_type, render as ct_render,
     resolve_type
 )
 from langkit.diagnostics import (
@@ -39,6 +39,8 @@ def unsugar(expr, ignore_errors=False):
 
     :rtype: AbstractExpression
     """
+    import langkit.dsl
+
     if expr is None:
         return None
 
@@ -53,6 +55,10 @@ def unsugar(expr, ignore_errors=False):
         expr = expr.get()
     elif isinstance(expr, (list, tuple)):
         expr = ArrayLiteral(expr, None)
+    elif isinstance(expr, EnumValue):
+        expr = EnumLiteral(expr)
+    elif isinstance(expr, langkit.dsl.EnumValue):
+        expr = EnumLiteral(expr._value)
 
     check_source_language(
         ignore_errors or isinstance(expr, AbstractExpression),
@@ -2640,6 +2646,24 @@ class ArrayLiteral(AbstractExpression):
 
     def __repr__(self):
         return '<ArrayLiteral>'
+
+
+class EnumLiteral(AbstractExpression):
+    """
+    Abstract expression to hold enumeration literals.
+
+    This is not meant to be used in the DSL directly, but we need
+    AbstractExpression subclasses in our internal tree.
+    """
+
+    def __init__(self, value):
+        super(EnumLiteral, self).__init__()
+        assert isinstance(value, EnumValue)
+        self.value = value
+
+    def construct(self):
+        return LiteralExpr(self.value.ada_name, self.value.type,
+                           abstract_expr=self)
 
 
 def gdb_property_start(prop):
