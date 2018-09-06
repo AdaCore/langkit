@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, BigIntegerType, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import (
-    AbstractProperty, BigInteger, ExternalProperty, If, New, Self,
+    AbstractProperty, BigIntegerLiteral, ExternalProperty, If, New, Self,
     langkit_property
 )
 from langkit.parsers import Grammar, List, Or
@@ -83,7 +83,8 @@ class Equal(Expr):
 
     @langkit_property()
     def evaluate():
-        return BigInteger(If(Self.left.evaluate == Self.right.evaluate, 1, 0))
+        return BigIntegerLiteral(If(Self.left.evaluate == Self.right.evaluate,
+                                    1, 0))
 
 
 class LessThan(Expr):
