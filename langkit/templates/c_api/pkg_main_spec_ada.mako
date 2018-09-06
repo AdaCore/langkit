@@ -113,6 +113,10 @@ private package ${ada_lib_name}.Implementation.C is
    type ${bool_type} is new Unsigned_8;
    subtype uint32_t is Unsigned_32;
 
+   % for enum_type in ctx.enum_types:
+      subtype ${enum_type.c_type(capi).name} is ${enum_type.name};
+   % endfor
+
    procedure Free (Address : System.Address)
      with Export        => True,
           Convention    => C,

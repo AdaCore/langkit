@@ -40,6 +40,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
             (T.AnalysisUnitKind, lambda _: '_AnalysisUnitKind._wrap({})'),
+            (ct.EnumType, lambda _: '{}._wrap({{}})'.format(type.py_helper)),
             (ct.ASTNodeType, lambda _: '{}._wrap_bare_node({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
@@ -89,6 +90,8 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({value})'),
             (T.AnalysisUnitKind, lambda _:
                 '_AnalysisUnitKind._unwrap({value})'),
+            (ct.EnumType, lambda _:
+                '{}._unwrap({{value}})'.format(type.py_helper)),
             (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
             (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),
@@ -134,6 +137,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.SymbolType, lambda _: '_symbol_type'),
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (T.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
+            (ct.EnumType, lambda _: ctype_type('c_int')),
             (ct.ASTNodeType, lambda _: '{}._node_c_type'.format(
                 self.type_public_name(ct.T.root_node))),
             (ct.ArrayType, lambda cls:
@@ -165,6 +169,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.CharacterType, lambda _: 'unicode'),
             (T.TokenType, lambda _: 'Token'),
             (T.SymbolType, lambda _: 'unicode'),
+            (ct.EnumType, lambda _: 'str'),
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
             (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
             (T.AnalysisUnitType, lambda t: t.api_name),

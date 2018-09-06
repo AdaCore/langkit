@@ -129,6 +129,13 @@ typedef struct {
    const char *information;
 } ${exception_type};
 
+% for enum_type in ctx.enum_types:
+   typedef enum {
+      ${', '.join(v.c_name(capi) for v in enum_type.values)}
+   } ${enum_type.c_type(capi).name};
+   ${c_doc(enum_type, 3)}
+% endfor
+
 ## Even when metadata and entity structures are not exposed, we need to
 ## emit their type definition them for low-level interfacing.
 % for struct_type in ctx.struct_types:
