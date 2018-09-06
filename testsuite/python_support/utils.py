@@ -9,7 +9,8 @@ import langkit.compile_context
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledTypeRepo, create_builtin_types
 from langkit.diagnostics import DiagnosticError, WarningSet
-from langkit.dsl import _StructMetaclass, _ASTNodeMetaclass, _EnumNodeMetaclass
+from langkit.dsl import (_StructMetaclass, _ASTNodeMetaclass,
+                         _EnumNodeMetaclass, _EnumMetaclass)
 from langkit.expressions import Entity, Self
 from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
@@ -252,6 +253,7 @@ def reset_langkit():
     _StructMetaclass.reset()
     _ASTNodeMetaclass.reset()
     _EnumNodeMetaclass.reset()
+    _EnumMetaclass.reset()
 
     reset_memoized()
     langkit.compile_context.compile_ctx = None
