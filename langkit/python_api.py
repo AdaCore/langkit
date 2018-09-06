@@ -19,9 +19,6 @@ class PythonAPISettings(AbstractAPISettings):
     def module_name(self):
         return self.context.lib_name.lower
 
-    def get_enum_alternative(self, type_name, alt_name, suffix):
-        return alt_name.upper
-
     def wrap_value(self, value, type, from_field_access=False):
         """
         Given an expression for a low-level value and the associated type,

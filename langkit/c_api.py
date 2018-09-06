@@ -113,8 +113,3 @@ class CAPISettings(AbstractAPISettings):
             name = names.Name(name)
         return names.Name('{}_{}'.format(self.symbol_prefix, name.base_name)
                           if self.symbol_prefix else name).lower
-
-    def get_enum_alternative(self, type_name, alt_name, suffix):
-        return self.get_name(
-            names.Name('{}_{}'.format(type_name.base_name,
-                                      alt_name.base_name)))
