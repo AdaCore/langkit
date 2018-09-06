@@ -1036,6 +1036,25 @@ class _BuiltinValue(object):
         return self._resolver()
 
 
+class LookupKind(_BuiltinType):
+    """
+    Type for the analysis unit kind enumeration.
+    """
+    _name = names.Name('Lookup_Kind')
+
+    recursive = _BuiltinValue(
+        lambda: LookupKind._resolve().resolve_value('recursive')
+    )
+
+    flat = _BuiltinValue(
+        lambda: LookupKind._resolve().resolve_value('flat')
+    )
+
+    minimal = _BuiltinValue(
+        lambda: LookupKind._resolve().resolve_value('minimal')
+    )
+
+
 class AnalysisUnitKind(_BuiltinType):
     """
     Type for the analysis unit kind enumeration.

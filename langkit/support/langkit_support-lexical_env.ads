@@ -418,11 +418,13 @@ package Langkit_Support.Lexical_Env is
    --  referenced environment reachable from Self: referenced environments in
    --  Self, but also referenced environments in Self's parents.
 
+   type Lookup_Kind_Type is (Recursive, Flat, Minimal);
+
    function Get
-     (Self      : Lexical_Env;
-      Key       : Symbol_Type;
-      From      : Node_Type := No_Node;
-      Recursive : Boolean := True) return Entity_Array;
+     (Self        : Lexical_Env;
+      Key         : Symbol_Type;
+      From        : Node_Type := No_Node;
+      Lookup_Kind : Lookup_Kind_Type := Recursive) return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then nodes
    --  will be filtered according to the Can_Reach primitive given as parameter
    --  for the generic package.
@@ -434,11 +436,10 @@ package Langkit_Support.Lexical_Env is
    --  which Filter.all (From, Env) returns False.
 
    function Get_First
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Node_Type := No_Node;
-      Recursive  : Boolean := True)
-      return Entity;
+     (Self        : Lexical_Env;
+      Key         : Symbol_Type;
+      From        : Node_Type := No_Node;
+      Lookup_Kind : Lookup_Kind_Type := Recursive) return Entity;
    --  Like Get, but return only the first matching entity. Return a null
    --  entity if no entity is found.
 

@@ -3115,6 +3115,13 @@ def create_builtin_types():
              value_names=[names.Name('Unit_Specification'),
                           names.Name('Unit_Body')])
 
+    EnumType(name='LookupKind',
+             location=None,
+             doc="""
+             """,
+             value_names=[names.Name('Recursive'),
+                          names.Name('Flat'),
+                          names.Name('Minimal')])
     CompiledType(
         'LexicalEnv',
         nullexpr='Empty_Env',

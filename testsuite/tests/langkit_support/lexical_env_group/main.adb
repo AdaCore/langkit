@@ -26,11 +26,11 @@ begin
    Add (A, Key_X, '2');
    Add (B, Key_X, '3');
 
-   Put_Line ("Looking in Grouped (Recursive => True):");
-   Put_Line (Get (Grouped, Key_X, Recursive => True));
+   Put_Line ("Looking in Grouped (Lookup_Kind => Recursive):");
+   Put_Line (Get (Grouped, Key_X, Lookup_Kind => Recursive));
 
-   Put_Line ("Looking in Grouped (Recursive => False):");
-   Put_Line (Get (Grouped, Key_X, Recursive => False));
+   Put_Line ("Looking in Grouped (Lookup_Kind => Flat):");
+   Put_Line (Get (Grouped, Key_X, Lookup_Kind => Flat));
 
    Dec_Ref (Grouped);
    Destroy (A_Parent);
