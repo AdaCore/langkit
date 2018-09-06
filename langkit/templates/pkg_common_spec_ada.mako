@@ -116,7 +116,7 @@ package ${ada_lib_name}.Common is
    --  Helper type to control the AST node traversal process. See the
    --  ${ada_lib_name}.Analysis.Traverse function.
 
-   type Unit_Kind is (Unit_Specification, Unit_Body);
+   type Analysis_Unit_Kind is (Unit_Specification, Unit_Body);
    ${ada_doc('langkit.unit_kind_type', 3)}
 
    -----------------------

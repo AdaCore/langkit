@@ -41,13 +41,13 @@ package body ${ada_lib_name}.Implementation.C is
    overriding function Get_Unit_Filename
      (Provider : C_Unit_Provider;
       Name     : Text_Type;
-      Kind     : Unit_Kind) return String;
+      Kind     : Analysis_Unit_Kind) return String;
 
    overriding function Get_Unit
      (Provider : C_Unit_Provider;
       Context  : Analysis_Context'Class;
       Name     : Text_Type;
-      Kind     : Unit_Kind;
+      Kind     : Analysis_Unit_Kind;
       Charset  : String := "";
       Reparse  : Boolean := False) return Analysis_Unit'Class;
 
@@ -1024,7 +1024,7 @@ package body ${ada_lib_name}.Implementation.C is
    overriding function Get_Unit_Filename
      (Provider : C_Unit_Provider;
       Name     : Text_Type;
-      Kind     : Unit_Kind) return String
+      Kind     : Analysis_Unit_Kind) return String
    is
       Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
 
@@ -1051,7 +1051,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Provider : C_Unit_Provider;
       Context  : Analysis_Context'Class;
       Name     : Text_Type;
-      Kind     : Unit_Kind;
+      Kind     : Analysis_Unit_Kind;
       Charset  : String := "";
       Reparse  : Boolean := False) return Analysis_Unit'Class
    is

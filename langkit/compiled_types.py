@@ -3095,7 +3095,7 @@ def create_builtin_types():
     AnalysisUnitType()
 
     CompiledType(
-        'UnitKind',
+        'AnalysisUnitKind',
         type_repo_name='AnalysisUnitKind',
         exposed=True,
         is_ptr=False,

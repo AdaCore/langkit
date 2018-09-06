@@ -538,7 +538,7 @@ package body ${ada_lib_name}.Implementation is
    function Get_From_Provider
      (Context : Internal_Context;
       Name    : Text_Type;
-      Kind    : Unit_Kind;
+      Kind    : Analysis_Unit_Kind;
       Charset : String;
       Reparse : Boolean) return Internal_Unit is
    begin
@@ -549,7 +549,7 @@ package body ${ada_lib_name}.Implementation is
       when Property_Error =>
          raise Invalid_Unit_Name_Error with
             "Invalid unit name: " & Image (Name, With_Quotes => True)
-            & " (" & Unit_Kind'Image (Kind) & ")";
+            & " (" & Analysis_Unit_Kind'Image (Kind) & ")";
    end Get_From_Provider;
 
    % endif
@@ -3158,9 +3158,9 @@ package body ${ada_lib_name}.Implementation is
       -- Trace_Image --
       -----------------
 
-      function Trace_Image (K : Unit_Kind) return String is
+      function Trace_Image (K : Analysis_Unit_Kind) return String is
       begin
-         return Unit_Kind'Image (K);
+         return Analysis_Unit_Kind'Image (K);
       end Trace_Image;
 
    % endif

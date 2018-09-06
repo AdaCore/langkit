@@ -58,12 +58,12 @@ package body ${ada_lib_name}.Analysis is
    overriding function Get_Unit_Filename
      (Provider : Unit_Provider_Wrapper;
       Name     : Text_Type;
-      Kind     : Unit_Kind) return String;
+      Kind     : Analysis_Unit_Kind) return String;
    overriding function Get_Unit
      (Provider    : Unit_Provider_Wrapper;
       Context     : Internal_Context;
       Name        : Text_Type;
-      Kind        : Unit_Kind;
+      Kind        : Analysis_Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit;
 
@@ -84,7 +84,7 @@ package body ${ada_lib_name}.Analysis is
    overriding function Get_Unit_Filename
      (Provider : Unit_Provider_Wrapper;
       Name     : Text_Type;
-      Kind     : Unit_Kind) return String
+      Kind     : Analysis_Unit_Kind) return String
    is (Provider.Internal.Get.Get_Unit_Filename (Name, Kind));
 
    --------------
@@ -95,7 +95,7 @@ package body ${ada_lib_name}.Analysis is
      (Provider    : Unit_Provider_Wrapper;
       Context     : Internal_Context;
       Name        : Text_Type;
-      Kind        : Unit_Kind;
+      Kind        : Analysis_Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit
    is
@@ -235,7 +235,7 @@ package body ${ada_lib_name}.Analysis is
    function Get_From_Provider
      (Context : Analysis_Context'Class;
       Name    : Text_Type;
-      Kind    : Unit_Kind;
+      Kind    : Analysis_Unit_Kind;
       Charset : String := "";
       Reparse : Boolean := False) return Analysis_Unit is
    begin
