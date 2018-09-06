@@ -1018,6 +1018,24 @@ class _BuiltinType(DSLType):
         return CompiledTypeRepo.type_dict[cls._name.camel]
 
 
+class _BuiltinValue(object):
+    """
+    Base class for all built-in values.
+    """
+
+    def __init__(self, resolver):
+        """
+        :param resolver: Callback that returns the
+            ``langkit.expressions.AbstractExpression`` instance corresponding
+            to this value.
+        :type resolver: () -> langkit.expressions.AbstractExpression
+        """
+        self._resolver = resolver
+
+    def _resolve(self):
+        return self._resolver()
+
+
 class AnalysisUnitKind(_BuiltinType):
     """
     Type for the analysis unit kind enumeration.
