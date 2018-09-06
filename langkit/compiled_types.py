@@ -2922,6 +2922,13 @@ class EnumType(CompiledType):
         self.values = [EnumValue(self, vn, i)
                        for i, vn in enumerate(value_names)]
 
+        self.values_dict = {v.name: v for v in self.values}
+        """
+        Lookup dictionnary for enumeration values, by name.
+
+        :type: dict[names.Name: EnumValue]
+        """
+
         CompiledTypeRepo.enum_types.append(self)
 
     @property
@@ -2933,6 +2940,16 @@ class EnumType(CompiledType):
         :rtype: str
         """
         return self.api_name.camel
+
+    def resolve_value(self, value_name):
+        """
+        Return an abstract expression corresponding to the given value name.
+
+        :param str value_name: Lower-case name of the value to process.
+        :rtype: langkit.expressions.AbstractExpression
+        """
+        return (self.values_dict[names.Name.from_lower(value_name)]
+                .to_abstract_expr)
 
 
 class EnumValue(object):
