@@ -2991,6 +2991,16 @@ class EnumValue(object):
         return '{}_{}'.format(c_api_settings.symbol_prefix.upper(),
                               (self.type.name + self.name).upper)
 
+    @property
+    def to_abstract_expr(self):
+        """
+        Create an abstract expression wrapping this enumeration value.
+
+        :rtype: langkit.expressions.AbstractExpression
+        """
+        from langkit.expressions import EnumLiteral
+        return EnumLiteral(self)
+
 
 class BigIntegerType(CompiledType):
     def __init__(self):
