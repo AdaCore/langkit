@@ -48,7 +48,7 @@ def unsugar(expr, ignore_errors=False):
     if isinstance(expr, (bool, int)):
         expr = Literal(expr)
     if isinstance(expr, long):
-        expr = BigInteger(expr)
+        expr = BigIntegerLiteral(expr)
     elif isinstance(expr, basestring):
         expr = SymbolLiteral(expr)
     elif isinstance(expr, TypeRepo.Defer):
@@ -4597,14 +4597,14 @@ class NullCheckExpr(ResolvedExpression):
 
 
 @dsl_document
-class BigInteger(AbstractExpression):
+class BigIntegerLiteral(AbstractExpression):
     """
     Turn an integer value into a big integer one.
     """
 
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
-            super(BigInteger.Expr, self).__init__(
+            super(BigIntegerLiteral.Expr, self).__init__(
                 'Big_Int', 'Create_Big_Integer', T.BigIntegerType,
                 [expr], abstract_expr=abstract_expr
             )
@@ -4613,7 +4613,7 @@ class BigInteger(AbstractExpression):
             return '<BigInteger.Expr {}>'.format(self.expr)
 
     def __init__(self, expr):
-        super(BigInteger, self).__init__()
+        super(BigIntegerLiteral, self).__init__()
         self.expr = expr
 
     def construct(self):
@@ -4623,7 +4623,7 @@ class BigInteger(AbstractExpression):
         expr = ('"{}"'.format(self.expr)
                 if isinstance(self.expr, (int, long)) else
                 construct(self.expr, T.IntegerType))
-        return BigInteger.Expr(expr, abstract_expr=self)
+        return BigIntegerLiteral.Expr(expr, abstract_expr=self)
 
     def __repr__(self):
         return '<BigInteger {}>'.format(self.expr)
