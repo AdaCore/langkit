@@ -1341,6 +1341,8 @@ class CompileCtx(object):
             self._emit(file_root, generate_lexer, main_source_dirs,
                        main_programs)
 
+        self.documentations.report_unused()
+
     def compile(self, check_only=False, annotate_fields_types=False):
         with global_context(self):
             self._compile(check_only, annotate_fields_types)

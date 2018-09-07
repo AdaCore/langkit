@@ -28,6 +28,43 @@ import textwrap
 from mako.template import Template
 
 
+class DocDatabase(object):
+    """
+    Database for documentation entries.
+    """
+
+    def __init__(self, dict):
+        self._dict = dict
+        """
+        Documentation database.
+
+        :type: dict[str, str]
+        """
+
+        self._used = set()
+        """
+        Set of names for documentation database that were actually used.
+
+        :type: set[str]
+        """
+
+    def __getitem__(self, key):
+        self._used.add(key)
+        return self._dict[key]
+
+    def report_unused(self):
+        """
+        Report all documentation entries that have not been used on the
+        standard output. Either they should be used, or they should be removed.
+        """
+        unused = set(self._dict) - self._used
+        if unused:
+            print('The following documentation entries were not used in code'
+                  'generation:')
+            for k in sorted(unused):
+                print('   ', k)
+
+
 def instantiate_templates(doc_dict):
     """
     Turn a pure text documentation database into a Mako template one.
@@ -37,7 +74,7 @@ def instantiate_templates(doc_dict):
 
     :rtype: dict[str, mako.template.Template]
     """
-    return {key: Template(val) for key, val in doc_dict.items()}
+    return DocDatabase({key: Template(val) for key, val in doc_dict.items()})
 
 
 base_langkit_docs = {
