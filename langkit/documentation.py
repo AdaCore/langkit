@@ -101,15 +101,6 @@ base_langkit_docs = {
         must not outlive them. This type exists only in the C API, and roughly
         wraps the corresponding Ada type (an array fat pointer).
     """,
-    'langkit.lexical_env_type': """
-        Data type for lexical environments. For internal use only.
-    """,
-    'langkit.logic_var_type': """
-        Data type for logic variables. For internal use only.
-    """,
-    'langkit.equation_type': """
-        Data type for equation types. For internal use only.
-    """,
     'langkit.env_rebindings_type': """
         Data type for env rebindings. For internal use only.
     """,
@@ -490,30 +481,6 @@ base_langkit_docs = {
     """,
     'langkit.big_integer_decref': """
         Decrease the reference count for this big integer.
-    """,
-
-    #
-    # Lexical environment primitives
-    #
-
-    'langkit.lexical_env_empty': """
-        Return the empty lexical environment constant.
-    """,
-    'langkit.lexical_env_parent': """
-        Get the ENV's parent lexical environment. This returns ${null} for the
-        root lexical environment.
-    """,
-    'langkit.lexical_env_node': """
-        Get the AST node for which this environment was created.
-    """,
-    'langkit.lexical_env_get': """
-        Look for elements in ENV corresponding to NAME.
-
-        % if lang != 'python':
-        The result is a dynamically allocated array. The caller is responsible
-        for deallocating it afterwards. The content of the array is owned by
-        the corresponding analysis unit, however.
-        % endif
     """,
 
     #
