@@ -436,6 +436,7 @@ ${capi.get_name("node_extension")}(
  * Unit providers
  */
 
+${c_doc('langkit.create_unit_provider')}
 extern ${unit_provider_type}
 ${capi.get_name('create_unit_provider')}(
    void *data,
@@ -444,6 +445,7 @@ ${capi.get_name('create_unit_provider')}(
    ${unit_provider_get_unit_from_name_type} get_unit_from_name_func
 );
 
+${c_doc('langkit.unit_provider_destroy')}
 extern void
 ${capi.get_name('destroy_unit_provider')}(void *data);
 
