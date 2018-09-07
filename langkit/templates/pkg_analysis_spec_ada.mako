@@ -37,8 +37,8 @@ ${exts.with_clauses(with_clauses)}
 --  analysis units.
 --
 --  This is the entry point to parse and process a unit: first create an
---  analysis context with Create, then get analysis units out of it using the
---  Get_From_* functions.
+--  analysis context with ``Create_Context``, then get analysis units out of it
+--  using the ``Get_From_*`` functions.
 
 package ${ada_lib_name}.Analysis is
 
@@ -48,11 +48,10 @@ package ${ada_lib_name}.Analysis is
    type Analysis_Unit is tagged private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
-   No_Analysis_Unit : constant Analysis_Unit;
-   --  Special value to mean the absence of analysis unit. No analysis units
-   --  can be passed this value.
-
    No_Analysis_Context : constant Analysis_Context;
+   --  Special value to mean the absence of analysis context
+
+   No_Analysis_Unit : constant Analysis_Unit;
    --  Special value to mean the absence of analysis unit. No analysis units
    --  can be passed this value.
 
@@ -155,7 +154,8 @@ package ${ada_lib_name}.Analysis is
    function Has_Unit
      (Context       : Analysis_Context'Class;
       Unit_Filename : String) return Boolean;
-   --  Return whether Context contains a unit correponding to Unit_Filename
+   --  Return whether ``Context`` contains a unit correponding to
+   --  ``Unit_Filename``.
 
    function Get_From_File
      (Context  : Analysis_Context'Class;
@@ -183,7 +183,7 @@ package ${ada_lib_name}.Analysis is
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit;
    --  If a Unit for ``Filename`` already exists, return it unchanged.
    --  Otherwise, create an empty analysis unit for ``Filename`` with a
-   --  diagnostic that contains the Error message.
+   --  diagnostic that contains the ``Error`` message.
 
    % if ctx.default_unit_provider:
 
