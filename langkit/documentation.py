@@ -124,11 +124,8 @@ base_langkit_docs = {
         Gramar rule to use for parsing.
     """,
     'langkit.node_type': """
-        Data type for all AST nodes. AST nodes are assembled to make up a tree.
-        See the AST node primitives below to inspect such trees.
-        % if lang != 'python':
-            References are ref-counted.
-        % endif
+        Data type for all nodes. Nodes are assembled to make up a tree.  See
+        the node primitives below to inspect such trees.
     """,
     'langkit.node_kind_type': """
         Kind of AST nodes in parse trees.
@@ -142,7 +139,7 @@ base_langkit_docs = {
         Data type for env rebindings. For internal use only.
     """,
     'langkit.sloc_type': """
-        Location in a source file. Line and column numbers are one based.
+        Location in a source file. Line and column numbers are one-based.
     """,
     'langkit.sloc_range_type': """
         Location of a span of text in a source file.
@@ -163,19 +160,20 @@ base_langkit_docs = {
         Size of the string (in characters).
     """,
     'langkit.big_integer_type': """
-        Arbitrary large integer.
+        Arbitrarily large integer.
     """,
     'langkit.diagnostic_type': """
-        Analysis unit diagnostics.
+        Diagnostic for an analysis unit: cannot open the source file, parsing
+        error, ...
     """,
     'langkit.exception_type': """
         Holder for native exceptions-related information.  Memory management
         for this and all the fields is handled by the library: one just has to
         make sure not to keep references to it.
 
-        TODO: For the moment, this structure contains already formatted
-        information, but depending on possible future Ada runtime improvements,
-        this might change.
+        .. todo:: For the moment, this structure contains already formatted
+           information, but depending on possible future Ada runtime
+           improvements, this might change.
     """,
     'langkit.exception_type.is_fatal': """
         Whether this exception is fatal for this process. If it is fatal, then
@@ -209,23 +207,17 @@ base_langkit_docs = {
     #
 
     'langkit.create_context': """
-        Create a new Analysis_Context.
-        % if lang != 'python':
-            The returned value has a ref-count set to 1. If you use shared
-            ownership, use ref-counting primitives (Inc_Ref and Dec_Ref).
-            Otherwise, just invoke Destroy when you are done with it: the
-            ref-count will be ignored.
-        % endif
+        Create a new analysis context.
 
         ``Charset`` will be used as a default charset to decode input sources
-        in analysis units. Please see ``GNATCOLL.Iconv`` for a couple of
-        supported charsets. Be careful: passing an unsupported charset is
-        not guaranteed to raise an error here. If no charset is provided,
+        in analysis units. Please see ``GNATCOLL.Iconv`` for several supported
+        charsets. Be careful: passing an unsupported charset is not guaranteed
+        to raise an error here. If no charset is provided,
         ``"${ctx.default_charset}"`` is the default.
 
-        ..
-            Passing an unsupported charset here is not guaranteed to raise
-            an error right here, but this would be really helpful for users.
+        .. todo:: Passing an unsupported charset here is not guaranteed to
+           raise an error right here, but this would be really helpful for
+           users.
 
         When ``With_Trivia`` is true, the parsed analysis units will contain
         trivias.
@@ -233,10 +225,6 @@ base_langkit_docs = {
         If provided, ``Unit_Provider`` will be used to query the file name
         that corresponds to a unit reference during semantic analysis. If
         it is ``${null}``, the default one is used instead.
-        % if lang != 'python':
-            It is up to the caller to free resources allocated to it when done
-            with the analysis context.
-        % endif
     """,
 
     'langkit.context_incref': """
@@ -257,86 +245,76 @@ base_langkit_docs = {
         true. Otherwise, return false.
     """,
     'langkit.context_discard_errors_in_populate_lexical_env': """
-        Debug helper. Set whether Property_Error exceptions raised in
-        Populate_Lexical_Env should be discarded. They are by default.
+        Debug helper. Set whether ``Property_Error`` exceptions raised in
+        ``Populate_Lexical_Env`` should be discarded. They are by default.
     """,
     'langkit.context_set_logic_resolution_timeout': """
-        If Timeout is greater than zero, set a timeout for the resolution of
-        logic equations. The unit is the number of steps in ANY/ALL relations.
-        If Timeout is zero, disable the timeout. By default, the timeout is
-        ``100 000`` steps.
+        If ``Timeout`` is greater than zero, set a timeout for the resolution
+        of logic equations. The unit is the number of steps in ANY/ALL
+        relations.  If ``Timeout`` is zero, disable the timeout. By default,
+        the timeout is ``100 000`` steps.
     """,
 
     'langkit.get_unit_from_file': """
-        Create a new analysis unit for Filename or return the existing one if
-        any. If Reparse is true and the analysis unit already exists, reparse
-        it from Filename.
-
-        % if lang != 'python':
-            The result is owned by the context: the caller must increase its
-            ref-count in order to keep a reference to it.
-        % endif
+        Create a new analysis unit for ``Filename`` or return the existing one
+        if any. If ``Reparse`` is true and the analysis unit already exists,
+        reparse it from ``Filename``.
 
         % if lang == 'ada':
-            Rule controls which grammar rule is used to parse the unit.
+        ``Rule`` controls which grammar rule is used to parse the unit.
 
-            ${TODO} export this feature to the C and Python APIs.
+        .. todo:: Export this feature to the C and Python APIs.
         % endif
 
-        Use Charset in order to decode the content of Filename. If Charset is
+        Use ``Charset`` in order to decode the source file. If ``Charset`` is
         empty then use the last charset used for this unit, or use the
         context's default if creating this unit.
 
         If any failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
-        as diagnostics.
+        as diagnostics of the returned analysis unit.
     """,
     'langkit.get_unit_from_buffer': """
-        Create a new analysis unit for Filename or return the existing one if
-        any. Whether the analysis unit already exists or not, (re)parse it from
-        the source code in Buffer.
+        Create a new analysis unit for ``Filename`` or return the existing one
+        if any. Whether the analysis unit already exists or not, (re)parse it
+        from the source code in ``Buffer``.
 
-        % if lang != 'python':
-            The result is owned by the context: the caller must increase its
-            ref-count in order to keep a reference to it.
+        % if lang == 'ada':
+        ``Rule`` controls which grammar rule is used to parse the unit.
+
+        .. todo:: Export this feature to the C and Python APIs.
         % endif
 
-        Use Charset in order to decode the content of Filename. If Charset is
-        empty then use the last charset used for this unit, or use the
-        context's default if creating this unit.
+        Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+        then use the last charset used for this unit, or use the context's
+        default if creating this unit.
 
         If any failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
-        as diagnostics of
-        the returned analysis unit.
+        as diagnostics of the returned analysis unit.
     """,
     'langkit.get_unit_from_provider': """
-        Create a new analysis unit for Name/Kind or return the existing one if
-        any. If Reparse is true and the analysis unit already exists, reparse
-        it from Filename.
-
-        % if lang != 'python':
-            The result is owned by the context: the caller must increase its
-            ref-count in order to keep a reference to it.
-        % endif
+        Create a new analysis unit for ``Name``/``Kind`` or return the existing
+        one if any. If ``Reparse`` is true and the analysis unit already
+        exists, reparse it from ``Filename``.
 
         % if lang == 'ada':
-            Rule controls which grammar rule is used to parse the unit.
+        ``Rule`` controls which grammar rule is used to parse the unit.
 
-            ${TODO} export this feature to the C and Python APIs.
+        .. todo:: Export this feature to the C and Python APIs.
         % endif
 
-        Use Charset in order to decode the content of Filename. If Charset is
-        empty then use the last charset used for this unit, or use the
-        context's default if creating this unit.
+        Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+        then use the last charset used for this unit, or use the context's
+        default if creating this unit.
 
         If the unit name cannot be tuned into a file name,
         % if lang == 'ada':
-            raise an Invalid_Unit_Name_Error exception.
+            raise an ``Invalid_Unit_Name_Error`` exception.
         % elif lang == 'python':
-            raise an InvalidUnitNameError exception.
+            raise an ``InvalidUnitNameError`` exception.
         % else:
-            return ${null}.
+            return ``${null}``.
         % endif
         If any other failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
@@ -350,32 +328,32 @@ base_langkit_docs = {
         Return a hash for this unit, to be used in hash tables.
     """,
     'langkit.unit_reparse_file': """
-        Reparse an analysis unit from the associated file. If Charset is empty
-        or ${null}, use the last charset successfuly used for this unit,
-        otherwise use it to decode the content of Filename.
+        Reparse an analysis unit from the associated file. If ``Charset`` is
+        empty or ``${null}``, use the last charset successfuly used for this
+        unit, otherwise use it to decode the source file.
 
-        If any failure occurs, such as decoding, lexing or parsing
-        failure, diagnostic are emitted to explain what happened.
+        If any failure occurs, such as decoding, lexing or parsing failure,
+        diagnostic are emitted to explain what happened.
     """,
     'langkit.unit_reparse_buffer': """
-        Reparse an analysis unit from a buffer. If Charset is empty or ${null},
-        use the last charset successfuly used for this unit, otherwise use it
-        to decode the content of Filename.
+        Reparse an analysis unit from a buffer. If ``Charset`` is empty or
+        ``${null}, use the last charset successfuly used for this unit,
+        otherwise use it to decode the source.
 
-        If any failure occurs, such as decoding, lexing or parsing
-        failure, diagnostic are emitted to explain what happened.
+        If any failure occurs, such as decoding, lexing or parsing failure,
+        diagnostic are emitted to explain what happened.
     """,
     'langkit.unit_reparse_generic': """
         Reparse an analysis unit from a buffer, if provided, or from the
-        original file otherwise. If Charset is empty or ${null}, use the last
-        charset successfuly used for this unit, otherwise use it to decode the
-        content of the source file.
+        original file otherwise. If ``Charset`` is empty or ``${null}``, use
+        the last charset successfuly used for this unit, otherwise use it to
+        decode the content of the source file.
 
-        If any failure occurs, such as decoding, lexing or parsing
-        failure, diagnostic are emitted to explain what happened.
+        If any failure occurs, such as decoding, lexing or parsing failure,
+        diagnostic are emitted to explain what happened.
     """,
     'langkit.unit_root': """
-        Return the root AST node for this unit, or ${null} if there is none.
+        Return the root node for this unit, or ``${null}`` if there is none.
     """,
     'langkit.unit_first_token': """
         Return a reference to the first token scanned in this unit.
@@ -401,7 +379,7 @@ base_langkit_docs = {
         in this unit, return no token.
     """,
     'langkit.unit_filename': """
-        Return the filename a unit is associated to.
+        Return the filename this unit is associated to.
 
         % if lang == 'c':
             The returned string is dynamically allocated and the caller must
@@ -431,11 +409,11 @@ base_langkit_docs = {
         occurs.
 
         Depending on whether errors are discarded (see
-        Discard_Errors_In_Populate_Lexical_Env),
+        ``Discard_Errors_In_Populate_Lexical_Env``),
         % if lang == 'c':
             return 0 on failure and 1 on success.
         % else:
-            raise a Property_Error on failure.
+            raise a ``Property_Error`` on failure.
         % endif
     """,
 
@@ -444,47 +422,49 @@ base_langkit_docs = {
     #
 
     'langkit.node_kind': """
-        Get the kind of an AST node.
+        Return the kind of this node.
     """,
     'langkit.kind_name': """
-        Helper for textual dump: return the name of a node kind. The returned
-        string is a copy and thus must be free'd by the caller.
+        Helper for textual dump: return the kind name for this node.
+        % if lang == 'c':
+        The returned string is a copy and thus must be free'd by the caller.
+        % endif
     """,
     'langkit.node_unit': """
         Return the analysis unit that owns this node.
     """,
     'langkit.node_sloc_range': """
-        Get the spanning source location range for an AST node.
+        Return the spanning source location range for this node.
     """,
     'langkit.lookup_in_node': """
-        Return the bottom-most AST node from NODE that contains SLOC, or
-        ${null} if there is none.
+        Return the bottom-most node from in ``Node`` and its children which
+        contains ``Sloc``, or ``${null}`` if there is none.
     """,
     'langkit.node_children_count': """
-        Return the number of AST node children in NODE.
+        Return the number of children in this node.
     """,
     'langkit.node_child': """
-        Get the Nth child AST node in NODE's fields and store it into *CHILD_P.
-        Return zero on failure (when N is too big).
+        Return the Nth child for in this node's fields and store it into
+        *CHILD_P.  Return zero on failure (when N is too big).
     """,
     'langkit.node_is_null': """
-        Return whether NODE is a null AST node reference.
+        Return whether this node is a null node reference.
     """,
     'langkit.node_is_token_node': """
-        Return whether NODE is a node that contains only a single token.
+        Return whether this node is a node that contains only a single token.
     """,
     'langkit.node_short_image': """
-        Return a representation of NODE as a string.
+        Return a representation of this node as a string.
     """,
     'langkit.entity_image': """
-        Return a representation of E as a string.
+        Return a representation of this entity as a string.
     """,
 
     'langkit.token_text': """
-        Get the text of the given token.
+        Return the text of the given token.
     """,
     'langkit.token_sloc_range': """
-        Get the source location range of the given token.
+        Return the source location range of the given token.
     """,
     'langkit.text_to_locale_string': """
         Encode some text using the current locale. The result is dynamically
@@ -508,7 +488,7 @@ base_langkit_docs = {
         references.
     """,
     'langkit.symbol_text': """
-        Get the text associated to this symbol.
+        Return the text associated to this symbol.
     """,
     'langkit.create_big_integer': """
         Create a big integer from its string representation (in base 10).
@@ -565,46 +545,46 @@ base_langkit_docs = {
     'langkit.unit_provider_get_unit_filename': """
         Return the filename corresponding to the given unit name/unit kind.
         % if lang == 'ada':
-            Raise a Property_Error
+            Raise a ``Property_Error``
         % else:
-            Return ${null}
+            Return ``${null}``
         % endif
-        if Name is not a valid unit name.
+        if the given unit name is not valid.
     """,
     'langkit.unit_provider_get_unit_from_name': """
         Fetch and return the analysis unit referenced by the given unit name.
         % if lang == 'ada':
-            Raise a Property_Error
+            Raise a ``Property_Error``
         % else:
-            Return ${null}
+            Return ``${null}``
         % endif
-        if Name is not a valid unit name.
+        if the given unit name is not valid.
     """,
     'langkit.unit_provider_destroy': """
-        Free any resources that needs to be free'd in "data".
+        Free any resources that needs to be free'd in ``data``.
     """,
 
     'langkit.create_unit_provider': """
         Create a unit provider. When done with it, the result must be passed to
-        ${capi.get_name('destroy_unit_provider')}.
+        ``${capi.get_name('destroy_unit_provider')}``.
 
-        Pass as "data" a pointer to hold your private data: it will be passed
+        Pass as ``data`` a pointer to hold your private data: it will be passed
         to all callbacks below.
 
-        "destroy" is a callback that is called by
-        ${capi.get_name('destroy_unit_provider')} to leave a chance to free
-        resources that "data" may hold.
+        ``destroy`` is a callback that is called by
+        ``${capi.get_name('destroy_unit_provider')}`` to leave a chance to free
+        resources that ``data`` may hold.
 
-        "get_unit_from_node" is a callback. It turns an analysis unit reference
-        represented as an AST node into an analysis unit. It should return
-        ${null} if Node is not a valid unit name representation.
+        ``get_unit_from_node`` is a callback. It turns an analysis unit
+        reference represented as a node into an analysis unit. It should return
+        ``${null}`` if the node is not a valid unit name representation.
 
-        "get_unit_from_name" is a callback similar to "get_unit_from_node",
+        ``get_unit_from_name`` is a callback similar to ``get_unit_from_node``
         except it takes an analysis unit reference represented as a string.
     """,
     'langkit.destroy_unit_provider': """
-        Destroy a unit provider. This calls the "destroy" callback: see
-        ${capi.get_name('create_unit_provider')} for more information.
+        Destroy a unit provider. This calls the ``destroy`` callback: see
+        ``${capi.get_name('create_unit_provider')}`` for more information.
     """,
 
     'langkit.unit_provider_destroy_type': """
@@ -633,11 +613,11 @@ base_langkit_docs = {
         Return a human-readable name for a token kind.
 
         % if lang == 'c':
-            The returned string is dynamically allocated and the caller must
-            free it when done with it.
+        The returned string is dynamically allocated and the caller must free
+        it when done with it.
 
-            If the given kind is invalid, return NULL and set the last
-            exception accordingly.
+        If the given kind is invalid, return ``NULL`` and set the last
+        exception accordingly.
         % endif
     """,
     'langkit.token_next': """
@@ -659,31 +639,31 @@ base_langkit_docs = {
         (included). This returns an empty list if the first token appears after
         the other one in the source code.
         % if lang == 'python':
-            Raise a ValueError if both tokens come from different analysis
+            Raise a ``ValueError`` if both tokens come from different analysis
             units.
         % endif
     """,
     'langkit.token_is_equivalent': """
-        Return whether L and R are structurally equivalent tokens. This means
-        that their position in the stream won't be taken into account, only the
-        kind and text of the token.
+        Return whether ``L`` and ``R`` are structurally equivalent tokens. This
+        means that their position in the stream won't be taken into account,
+        only the kind and text of the token.
     """,
     'langkit.token_range_text': """
         Compute the source buffer slice corresponding to the text that spans
-        between the First and Last tokens (both included). This yields an empty
-        slice if Last actually appears before First.
+        between the ``First`` and ``Last`` tokens (both included). This yields
+        an empty slice if ``Last`` actually appears before ``First``.
         % if lang == 'c':
-            Put the result in RESULT.
+        Put the result in ``RESULT``.
         % endif
 
         % if lang == 'ada':
-            This raises a Constraint_Error
+            This raises a ``Constraint_Error``
         % elif lang == 'c':
             This returns 0
         % elif lang == 'python':
-            This raises a ValueError
+            This raises a ``ValueError``
         % endif
-        if First and Last don't belong to the same analysis unit.
+        if ``First`` and ``Last`` don't belong to the same analysis unit.
         % if lang == 'c':
             Return 1 if successful.
         % endif
