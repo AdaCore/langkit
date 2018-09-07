@@ -892,6 +892,7 @@ class Token(ctypes.Structure):
 
     @property
     def text(self):
+        ${py_doc('langkit.token_text', 8)}
         return self._text._wrap()
 
     @classmethod
@@ -911,6 +912,7 @@ class Token(ctypes.Structure):
 
     @property
     def sloc_range(self):
+        ${py_doc('langkit.token_sloc_range', 8)}
         return self._sloc_range._wrap()
 
     def __eq__(self, other):
