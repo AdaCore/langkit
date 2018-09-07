@@ -761,6 +761,21 @@ def get_available_width(indent_level, width=None):
 text_wrapper = textwrap.TextWrapper(drop_whitespace=True)
 
 
+def wrap(paragraph, width):
+    result = textwrap.wrap(paragraph, width)
+
+    # If this is a Sphinx admonition, preserve its formatting so that it's
+    # still an admonition.
+    if result and result[0].startswith('.. '):
+        first_line, rest = result[0], result[1:]
+        result = [first_line] + [
+            '   ' + line
+            for line in textwrap.wrap('\n'.join(rest), width - 3)
+        ]
+
+    return result
+
+
 def format_text(text, column, width=None):
     """
     Format some text as mere indented text.
@@ -770,12 +785,11 @@ def format_text(text, column, width=None):
     :param int|None width: See get_available_width.
     :rtype: str
     """
-    text_wrapper.available_width = get_available_width(column, width)
     lines = []
     for i, paragraph in enumerate(split_paragraphs(text)):
         if i > 0:
             lines.append('')
-        for line in text_wrapper.wrap(paragraph):
+        for line in wrap(paragraph, get_available_width(column, width)):
             lines.append(' ' * column + line)
 
     return '\n'.join(lines)
@@ -794,8 +808,7 @@ def format_ada(text, column):
     for i, paragraph in enumerate(split_paragraphs(text)):
         if i > 0:
             lines.append('--')
-        for line in textwrap.wrap(paragraph, available_width - 4,
-                                  drop_whitespace=True):
+        for line in wrap(paragraph, available_width - 4):
             lines.append('--  {}'.format(line))
 
     return '\n{}'.format(' ' * column).join(lines)
@@ -817,8 +830,7 @@ def format_c(text, column):
     for i, paragraph in enumerate(split_paragraphs(text)):
         if i > 0:
             lines.append('')
-        for j, line in enumerate(textwrap.wrap(paragraph, available_width - 3,
-                                               drop_whitespace=True)):
+        for j, line in enumerate(wrap(paragraph, available_width - 3)):
             prefix = '/* ' if i == 0 and j == 0 else '   '
             lines.append('{}{}'.format(prefix, line))
 
