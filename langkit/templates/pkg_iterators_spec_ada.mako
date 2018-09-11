@@ -9,8 +9,7 @@ with Langkit_Support.Tree_Traversal_Iterator;
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
---  This package provides an interface to work with iterators on AST node
---  sequences.
+--  This package provides an interface to work with iterators on nodes
 
 package ${ada_lib_name}.Iterators is
 
@@ -24,13 +23,13 @@ package ${ada_lib_name}.Iterators is
 
    function Traverse
      (Root : ${root_entity.api_name}'Class) return Traverse_Iterator;
-   --  Return an iterator that yields all AST nodes under Root (included) in a
-   --  prefix DFS (depth first search) fasion.
+   --  Return an iterator that yields all nodes under ``Root`` (included) in a
+   --  prefix DFS (depth first search) fashion.
 
    type ${root_entity.api_name}_Predicate_Type is interface;
    type ${root_entity.api_name}_Predicate is
       access all ${root_entity.api_name}_Predicate_Type'Class;
-   --  Predicate on AST nodes.
+   --  Predicate on nodes.
    --
    --  Useful predicates often rely on values from some context, so predicates
    --  that are mere accesses to a function are not powerful enough. Having a
@@ -40,7 +39,7 @@ package ${ada_lib_name}.Iterators is
    function Evaluate
      (P : access ${root_entity.api_name}_Predicate_Type;
       N : ${root_entity.api_name}) return Boolean is abstract;
-   --  Return the value of the predicate for the N node
+   --  Return the value of the predicate for the ``N`` node
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (${root_entity.api_name}_Predicate_Type'Class,
@@ -49,7 +48,7 @@ package ${ada_lib_name}.Iterators is
    type Find_Iterator is
       limited new ${root_entity.api_name}_Iterators.Iterator
       with private;
-   --  Iterator type for Find (see below)
+   --  Iterator type for ``Find`` (see below)
 
    overriding function Next
      (It      : in out Find_Iterator;
@@ -58,10 +57,10 @@ package ${ada_lib_name}.Iterators is
    type Local_Find_Iterator is
       limited new ${root_entity.api_name}_Iterators.Iterator
       with private;
-   --  Iterator type for the Find function that takes an access to function. It
-   --  is called Local_Find_Iterator because if you use a locally declared
-   --  function, the iterator itself will only be valid in the scope of the
-   --  function.
+   --  Iterator type for the ``Find`` function that takes an access to
+   --  function. It is called ``Local_Find_Iterator`` because if you use a
+   --  locally declared function, the iterator itself will only be valid in the
+   --  scope of the function.
 
    overriding function Next
      (It      : in out Local_Find_Iterator;
@@ -72,39 +71,39 @@ package ${ada_lib_name}.Iterators is
       Predicate :
         access function (N : ${root_entity.api_name}) return Boolean := null)
       return Local_Find_Iterator;
-   --  Return an iterator that yields all AST nodes under Root (included) that
-   --  satisfy the Predicate predicate.
+   --  Return an iterator that yields all nodes under ``Root`` (included) that
+   --  satisfy the ``Predicate`` predicate.
 
    function Find_First
      (Root      : ${root_entity.api_name}'Class;
       Predicate :
         access function (N : ${root_entity.api_name}) return Boolean := null)
       return ${root_entity.api_name};
-   --  Return the first node found under Root (included) that satisfies the
-   --  given Predicate. Return a null node if there is no such node.
+   --  Return the first node found under ``Root`` (included) that satisfies the
+   --  given ``Predicate``. Return a null node if there is no such node.
 
    function Find
      (Root      : ${root_entity.api_name}'Class;
       Predicate : ${root_entity.api_name}_Predicate) return Find_Iterator;
-   --  Return an iterator that yields all AST nodes under Root (included) that
-   --  satisfy the Predicate predicate. Predicate will be destroyed when
-   --  Find_Iterator is exhausted.
+   --  Return an iterator that yields all nodes under ``Root`` (included) that
+   --  satisfy the ``Predicate`` predicate. ``Predicate`` will be destroyed
+   --  when ``Find_Iterator`` is exhausted.
 
    function Find_First
      (Root      : ${root_entity.api_name}'Class;
       Predicate : ${root_entity.api_name}_Predicate)
       return ${root_entity.api_name};
-   --  Return the first node found under Root (included) that satisfies the
-   --  given Predicate. Return a null node if there is no such node.
+   --  Return the first node found under ``Root`` (included) that satisfies the
+   --  given ``Predicate``. Return a null node if there is no such node.
 
    type ${root_entity.api_name}_Kind_Filter is
       new ${root_entity.api_name}_Predicate_Type with
    record
       Kind : ${root_node_kind_name};
    end record;
-   --  Predicate that returns true for all AST nodes of some kind
+   --  Predicate that returns true for all nodes of some kind
 
-   function Evaluate
+   overriding function Evaluate
      (P : access ${root_entity.api_name}_Kind_Filter;
       N : ${root_entity.api_name}) return Boolean;
 
