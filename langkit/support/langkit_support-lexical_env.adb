@@ -85,11 +85,26 @@ package body Langkit_Support.Lexical_Env is
       Key           : Symbol_Type;
       Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
-      Metadata      : Node_Metadata := Empty_Metadata)
+      Metadata      : Node_Metadata := Empty_Metadata;
+      Categories    : Ref_Categories)
       return Lookup_Result_Array;
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
+
+   function Image (Cats : Ref_Categories) return String;
+   pragma Unreferenced (Image);
+   function Image (Cats : Ref_Categories) return String is
+      Ret : Unbounded_String;
+   begin
+      Append (Ret, "(");
+
+      for Cat in Ref_Category'Range loop
+         Append (Ret, Cat'Image & " => " & Cats (Cat)'Image & ", ");
+      end loop;
+      Append (Ret, ")");
+      return To_String (Ret);
+   end Image;
 
    ---------------------------
    -- Is_Lookup_Cache_Valid --
@@ -444,12 +459,13 @@ package body Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Node_Type;
       Resolver        : Lexical_Env_Resolver;
-      Kind            : Ref_Kind := Normal)
+      Kind            : Ref_Kind := Normal;
+      Categories      : Ref_Categories := All_Cats)
    is
       Refd_Env : Referenced_Env :=
         (Kind,
          Dyn_Env_Getter (Resolver, Referenced_From),
-         False, Inactive);
+         False, Inactive, Categories);
    begin
       if Self = Empty_Env then
          return;
@@ -467,10 +483,11 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
-      Kind         : Ref_Kind := Normal)
+      Kind         : Ref_Kind := Normal;
+      Categories   : Ref_Categories := All_Cats)
    is
       Ref : constant Referenced_Env :=
-        (Kind, Simple_Env_Getter (To_Reference), False, Active);
+        (Kind, Simple_Env_Getter (To_Reference), False, Active, Categories);
    begin
       if Self = Empty_Env then
          return;
@@ -488,7 +505,8 @@ package body Langkit_Support.Lexical_Env is
       Key           : Symbol_Type;
       Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
-      Metadata      : Node_Metadata := Empty_Metadata)
+      Metadata      : Node_Metadata := Empty_Metadata;
+      Categories    : Ref_Categories)
       return Lookup_Result_Array
    is
 
@@ -586,12 +604,26 @@ package body Langkit_Support.Lexical_Env is
          --   * the node that created this environment reference is a parent of
          --     From.
 
-         if (Lookup_Kind /= Recursive
-             and then Self.Kind /= Transitive)
+         if (Lookup_Kind /= Recursive and then Self.Kind /= Transitive)
            or else Self.Being_Visited
            or else Self.State = Inactive
          then
             return;
+         end if;
+
+         if Self.Categories /= All_Cats
+           and then Categories /= All_Cats
+         then
+            declare
+               Cond : constant Boolean :=
+                 (for some C of
+                    Ref_Categories'(Categories and Self.Categories) => C);
+            begin
+               if not Cond
+               then
+                  return;
+               end if;
+            end;
          end if;
 
          Self.Being_Visited := True;
@@ -612,7 +644,8 @@ package body Langkit_Support.Lexical_Env is
                    (if Self.Kind = Transitive
                     then Current_Rebindings
                     else Shed_Rebindings (Env, Current_Rebindings)),
-                 Metadata   => Metadata);
+                 Metadata    => Metadata,
+                 Categories  => Categories);
          begin
             if Self.Getter.Dynamic then
                for Res of Refd_Results loop
@@ -643,7 +676,7 @@ package body Langkit_Support.Lexical_Env is
       Env : Lexical_Env;
 
       Res_Key           : constant Lookup_Cache_Key :=
-        (Key, Rebindings, Metadata);
+        (Key, Rebindings, Metadata, Categories);
       Cached_Res_Cursor : Lookup_Cache_Maps.Cursor;
       Res_Val           : Lookup_Cache_Entry;
       Inserted, Dummy   : Boolean;
@@ -665,7 +698,8 @@ package body Langkit_Support.Lexical_Env is
       case Self.Kind is
          when Orphaned => null;
             return Get_Internal
-              (Self.Env.Orphaned_Env, Key, Flat, Rebindings, Metadata);
+              (Self.Env.Orphaned_Env, Key, Flat, Rebindings, Metadata,
+               Categories);
 
          when Grouped =>
             --  Just concatenate lookups for all grouped environments
@@ -676,7 +710,8 @@ package body Langkit_Support.Lexical_Env is
             begin
                for E of Self.Env.Grouped_Envs.all loop
                   Local_Results.Concat
-                    (Get_Internal (E, Key, Lookup_Kind, Rebindings, MD));
+                    (Get_Internal (E, Key, Lookup_Kind, Rebindings, MD,
+                     Categories));
                end loop;
             end;
             Traces.Decrease_Indent (Me);
@@ -690,7 +725,7 @@ package body Langkit_Support.Lexical_Env is
             return Get_Internal
               (Self.Env.Rebound_Env, Key, Lookup_Kind,
                Combine (Self.Env.Rebindings, Rebindings),
-               Metadata);
+               Metadata, Categories);
 
          when Primary => null; --  Handled below to avoid extra nesting levels
       end case;
@@ -789,7 +824,7 @@ package body Langkit_Support.Lexical_Env is
                  (Get_Internal
                     (Parent_Env, Key, Lookup_Kind,
                      Parent_Rebindings,
-                     Metadata));
+                     Metadata, Categories));
                if Has_Trace then
                   Traces.Decrease_Indent (Me);
                end if;
@@ -850,7 +885,8 @@ package body Langkit_Support.Lexical_Env is
      (Self        : Lexical_Env;
       Key         : Symbol_Type;
       From        : Node_Type := No_Node;
-      Lookup_Kind : Lookup_Kind_Type := Recursive)
+      Lookup_Kind : Lookup_Kind_Type := Recursive;
+      Categories  : Ref_Categories := All_Cats)
       return Entity_Array
    is
       FV : Entity_Vectors.Vector;
@@ -864,7 +900,8 @@ package body Langkit_Support.Lexical_Env is
 
       declare
          Results : constant Lookup_Result_Array :=
-            Get_Internal (Self, Key, Lookup_Kind, null, Empty_Metadata);
+           Get_Internal
+             (Self, Key, Lookup_Kind, null, Empty_Metadata, Categories);
       begin
          for El of Results loop
             if From = No_Node
@@ -900,7 +937,8 @@ package body Langkit_Support.Lexical_Env is
      (Self        : Lexical_Env;
       Key         : Symbol_Type;
       From        : Node_Type := No_Node;
-      Lookup_Kind : Lookup_Kind_Type := Recursive) return Entity
+      Lookup_Kind : Lookup_Kind_Type := Recursive;
+      Categories  : Ref_Categories := All_Cats) return Entity
    is
       FV : Entity_Vectors.Vector;
    begin
@@ -913,7 +951,8 @@ package body Langkit_Support.Lexical_Env is
 
       declare
          V : constant Lookup_Result_Array :=
-           Get_Internal (Self, Key, Lookup_Kind, null, Empty_Metadata);
+           Get_Internal
+             (Self, Key, Lookup_Kind, null, Empty_Metadata, Categories);
       begin
 
          for El of V loop

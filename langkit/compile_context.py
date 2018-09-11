@@ -706,6 +706,12 @@ class CompileCtx(object):
         self.post_process_cpp = None
         self.post_process_python = None
 
+        self.ref_cats = set([names.Name.from_lower('nocat')])
+        """
+        Set of all env lookup categories, used to optionally discriminate
+        referenced envs during env lookup.
+        """
+
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False):
         """
         Add a WITH clause for `to_pkg` in the `source_kind` part of the

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import T, no_compiled_type
+from langkit.compiled_types import T, no_compiled_type, get_context
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
@@ -12,7 +12,7 @@ from langkit.expressions.utils import array_aggr, assign_var
 
 
 @attr_call('get')
-def get(env, symbol, lookup=None, from_node=None):
+def get(env, symbol, lookup=None, from_node=None, categories=None):
     """
     Perform a lexical environment lookup. Look for nodes that are associated to
     the given `symbol` in the `env` lexical environment.
@@ -35,11 +35,11 @@ def get(env, symbol, lookup=None, from_node=None):
         lookup = LookupKind.recursive
 
     return EnvGet(env, symbol, lookup=lookup,
-                  sequential_from=from_node)
+                  sequential_from=from_node, categories=categories)
 
 
 @attr_call('get_first')
-def get_first(env, symbol, lookup=None, from_node=None):
+def get_first(env, symbol, lookup=None, from_node=None, categories=None):
     """
     Like :dsl:`get`, but only return the first entity found, or a null entity
     if no entity is found.
@@ -48,8 +48,8 @@ def get_first(env, symbol, lookup=None, from_node=None):
     if not lookup:
         lookup = LookupKind.recursive
 
-    return EnvGet(env, symbol, lookup=lookup,
-                  only_first=True, sequential_from=from_node)
+    return EnvGet(env, symbol, lookup=lookup, only_first=True,
+                  sequential_from=from_node, categories=categories)
 
 
 class EnvGet(AbstractExpression):
@@ -60,11 +60,13 @@ class EnvGet(AbstractExpression):
     class Expr(ComputingExpr):
         def __init__(self, env_expr, key_expr, lookup_kind_expr,
                      sequential_from=None,
-                     only_first=False, abstract_expr=None):
+                     only_first=False, abstract_expr=None,
+                     categories=None):
             self.env_expr = env_expr
             self.key_expr = key_expr
             self.lookup_kind_expr = lookup_kind_expr
             self.sequential_from = sequential_from
+            self.categories = categories
 
             self.static_type = (
                 T.root_node.entity if only_first
@@ -78,6 +80,14 @@ class EnvGet(AbstractExpression):
             PropertyDef.get().set_uses_envs()
 
         def _render_pre(self):
+            if self.categories:
+                cat_arg = "({})".format(", ".join(
+                    "{} => {}".format(cat_name, cat_val)
+                    for cat_name, cat_val in self.categories.items()
+                ))
+            else:
+                cat_arg = "All_Cats"
+
             result = [
                 self.env_expr.render_pre(),
                 self.key_expr.render_pre(),
@@ -87,7 +97,8 @@ class EnvGet(AbstractExpression):
                     ('Key', self.key_expr.render_expr()),
                     ('Lookup_Kind', 'To_Lookup_Kind_Type ({})'.format(
                         self.lookup_kind_expr.render_expr()
-                    ))]
+                    )),
+                    ('Categories', cat_arg)]
 
             # Pass the From parameter if the user wants sequential semantics
             if self.sequential_from:
@@ -123,7 +134,9 @@ class EnvGet(AbstractExpression):
             }
 
     def __init__(self, env, symbol, lookup,
-                 sequential_from=Self, only_first=False):
+                 sequential_from=Self,
+                 only_first=False,
+                 categories=None):
         """
         :param AbstractExpression env: Expression that will yield the env to
             get the element from.
@@ -148,6 +161,7 @@ class EnvGet(AbstractExpression):
         self.sequential_from = sequential_from
         self.lookup_kind = lookup
         self.only_first = only_first
+        self.categories = categories
 
     def construct(self):
         env_expr = construct(self.env, T.LexicalEnv)
@@ -173,9 +187,38 @@ class EnvGet(AbstractExpression):
 
         lookup_kind_expr = construct(self.lookup_kind, T.LookupKind)
 
+        ctx = get_context()
+
+        if self.categories:
+            check_source_language(
+                isinstance(self.categories, dict),
+                "Categories should be a dict"
+            )
+
+            self.categories = {cat.lower(): val
+                               for cat, val in self.categories.items()}
+
+            check_source_language(
+                self.categories.get('others', None)
+                or all(self.categories.get(cat, None) for cat in ctx.ref_cats),
+                "Categories for env.get do not contain mappings for all "
+                "categories"
+            )
+
+            check_source_language(
+                all(isinstance(val, bool) for val in self.categories.values()),
+                "Categories values should be bool"
+            )
+
+            self.categories = {
+                names.Name.from_lower(cat).camel_with_underscores
+                if cat != 'others' else 'others': val
+                for cat, val in self.categories.items()
+            }
+
         return EnvGet.Expr(env_expr, sym_expr, lookup_kind_expr,
                            from_expr, self.only_first,
-                           abstract_expr=self)
+                           abstract_expr=self, categories=self.categories)
 
     def __repr__(self):
         return '<EnvGet({}, {})>'.format(self.env, self.symbol)
