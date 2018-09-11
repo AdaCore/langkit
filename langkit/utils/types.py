@@ -135,6 +135,29 @@ class TypeSet(object):
 
         return False
 
+    def exclude(self, t):
+        """
+        Exclude a class and all of its subclasses.
+
+        :param ASTNodeType t: Node to exclude.
+        """
+        if t not in self.matched_types:
+            return
+
+        def remove_children(t):
+            self.matched_types.discard(t)
+            for child in t.subclasses:
+                remove_children(child)
+
+        # Exclude "t" and all its subclasses
+        remove_children(t)
+
+        # Make sure abstract parents are excluded too
+        for parent in t.get_inheritance_chain():
+            if not parent.abstract:
+                break
+            self.matched_types.discard(parent)
+
     def unmatched_types(self, t):
         """
         Return the set of `t` subclasses that are not matched by any matcher.
