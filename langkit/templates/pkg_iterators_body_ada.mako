@@ -135,7 +135,7 @@ package body ${ada_lib_name}.Iterators is
    -- Evaluate --
    --------------
 
-   function Evaluate
+   overriding function Evaluate
      (P : access ${root_entity.api_name}_Kind_Filter;
       N : ${root_entity.api_name}) return Boolean is
    begin
