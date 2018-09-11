@@ -60,6 +60,9 @@ generic
    No_Node        : Node_Type;
    Empty_Metadata : Node_Metadata;
 
+   type Ref_Category is (<>);
+   type Ref_Categories is array (Ref_Category) of Boolean;
+
    with function Node_Hash (Node : Node_Type) return Hash_Type;
    with function Metadata_Hash (Metadata : Node_Metadata) return Hash_Type;
 
@@ -85,6 +88,12 @@ generic
 package Langkit_Support.Lexical_Env is
 
    Activate_Lookup_Cache : Boolean := True;
+
+   All_Cats : Ref_Categories := (others => True);
+
+   pragma Compile_Time_Error
+     (Ref_Categories'Length > 32,
+      "Categories has to fit in a 32 bits Integer");
 
    pragma Suppress (Container_Checks);
    --  Remove container checks for standard containers
@@ -330,6 +339,8 @@ package Langkit_Support.Lexical_Env is
 
       State : Refd_Env_State := Inactive;
       --  State of the referenced env, whether active or inactive
+
+      Categories : Ref_Categories := All_Cats;
    end record;
    --  Represents a referenced env
 
@@ -377,7 +388,8 @@ package Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Node_Type;
       Resolver        : Lexical_Env_Resolver;
-      Kind            : Ref_Kind := Normal)
+      Kind            : Ref_Kind := Normal;
+      Categories      : Ref_Categories := All_Cats)
       with Pre => Self.Kind = Primary;
    --  Add a dynamic reference from Self to the lexical environment computed
    --  calling Resolver on Referenced_From. This makes the content of this
@@ -394,7 +406,8 @@ package Langkit_Support.Lexical_Env is
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
-      Kind         : Ref_Kind := Normal)
+      Kind         : Ref_Kind := Normal;
+      Categories   : Ref_Categories := All_Cats)
       with Pre => Self.Kind = Primary;
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
@@ -424,7 +437,8 @@ package Langkit_Support.Lexical_Env is
      (Self        : Lexical_Env;
       Key         : Symbol_Type;
       From        : Node_Type := No_Node;
-      Lookup_Kind : Lookup_Kind_Type := Recursive) return Entity_Array;
+      Lookup_Kind : Lookup_Kind_Type := Recursive;
+      Categories  : Ref_Categories := All_Cats) return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then nodes
    --  will be filtered according to the Can_Reach primitive given as parameter
    --  for the generic package.
@@ -439,7 +453,8 @@ package Langkit_Support.Lexical_Env is
      (Self        : Lexical_Env;
       Key         : Symbol_Type;
       From        : Node_Type := No_Node;
-      Lookup_Kind : Lookup_Kind_Type := Recursive) return Entity;
+      Lookup_Kind : Lookup_Kind_Type := Recursive;
+      Categories  : Ref_Categories := All_Cats) return Entity;
    --  Like Get, but return only the first matching entity. Return a null
    --  entity if no entity is found.
 
@@ -535,6 +550,8 @@ package Langkit_Support.Lexical_Env is
 
       Metadata : Node_Metadata;
       --  Metadata used for this lookup
+
+      Categories : Ref_Categories := All_Cats;
    end record;
    --  Key in environment lookup caches. Basically the parameters for the Get
    --  functiont that are relevant for caching.

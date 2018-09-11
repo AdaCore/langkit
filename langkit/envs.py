@@ -70,7 +70,8 @@ class RefKind(Enum):
 
 
 def reference(nodes, through,
-              kind=RefKind.normal, dest_env=None, cond=None):
+              kind=RefKind.normal, dest_env=None, cond=None,
+              category=None):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
@@ -85,9 +86,16 @@ def reference(nodes, through,
         a boolean condition. If False, reference won't be made and the others
         expressions won't be evaluated.
 
+    :param str category: If passed, must be a string representing a category
+        name. String must represent a valid Ada name. A category in set of
+        possible referenced envs categories will be implicitly created for each
+        unique string passed to a call to reference, in a given compilation
+        context.
+
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes, kind, dest_env=dest_env, cond=cond)
+    return RefEnvs(through, nodes, kind, dest_env=dest_env, cond=cond,
+                   category=category and category.lower())
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -437,7 +445,7 @@ class RefEnvs(EnvAction):
     """
 
     def __init__(self, resolver, nodes_expr,
-                 kind=RefKind.normal, dest_env=None, cond=None):
+                 kind=RefKind.normal, dest_env=None, cond=None, category=None):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -478,10 +486,9 @@ class RefEnvs(EnvAction):
         """
 
         self.kind = kind
-
         self.dest_env = dest_env
-
         self.cond = cond
+        self.category = category
 
     def create_internal_properties(self, env_spec):
         """
@@ -504,7 +511,17 @@ class RefEnvs(EnvAction):
         """
         Check that the resolver property is conforming.
         """
-        get_context().has_ref_env = True
+        ctx = get_context()
+        ctx.has_ref_env = True
+
+        if self.category:
+            check_source_language(
+                self.category != 'nocat',
+                'Nocat is not a valid name for a referenced env category'
+            )
+
+            self.category = names.Name.from_lower(self.category)
+            ctx.ref_cats.add(self.category)
 
         self.resolver = resolve_property(self.resolver)
         self.resolver.require_untyped_wrapper()

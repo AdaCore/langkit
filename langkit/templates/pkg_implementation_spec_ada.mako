@@ -218,6 +218,10 @@ private package ${ada_lib_name}.Implementation is
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.
 
+   type Ref_Category is (${", ".join(str(cat) for cat in ctx.ref_cats)});
+   type Ref_Categories is array (Ref_Category) of Boolean;
+   pragma Pack (Ref_Categories);
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Unit_T               => Internal_Unit,
       No_Unit              => No_Analysis_Unit,
@@ -231,7 +235,9 @@ private package ${ada_lib_name}.Implementation is
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
       Node_Image           => AST_Envs_Element_Image,
-      Register_Rebinding   => Register_Rebinding);
+      Register_Rebinding   => Register_Rebinding,
+      Ref_Category         => Ref_Category,
+      Ref_Categories       => Ref_Categories);
 
    use AST_Envs;
    subtype Internal_Entity is AST_Envs.Entity;

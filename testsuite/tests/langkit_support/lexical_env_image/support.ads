@@ -36,6 +36,9 @@ package Support is
 
    function Get_Version (B : Boolean) return Version_Number is (0);
 
+   type Ref_Category is (No_Cat);
+   type Ref_Categories is array (Ref_Category) of Boolean;
+
    package Envs is new Langkit_Support.Lexical_Env
      (Unit_T               => Boolean,
       Get_Version          => Get_Version,
@@ -51,7 +54,9 @@ package Support is
       Can_Reach            => Can_Reach,
       Is_Rebindable        => Is_Rebindable,
       Node_Image           => Node_Image,
-      Register_Rebinding   => Register_Rebinding);
+      Register_Rebinding   => Register_Rebinding,
+      Ref_Category         => Ref_Category,
+      Ref_Categories       => Ref_Categories);
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Envs.Env_Rebindings_Type, Envs.Env_Rebindings);
