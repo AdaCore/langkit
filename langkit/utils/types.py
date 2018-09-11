@@ -181,6 +181,16 @@ class TypeSet(object):
             result = {t}
         return result
 
+    def minimal_matched_types(self, t):
+        """
+        Return the minimal set of ``t`` subclasses that are matched.
+
+        :type t: ASTNodeType
+        :rtype: set[ASTNodeType]
+        """
+        return {t for t in self.matched_types
+                if t.base is None or t.base not in self.matched_types}
+
 
 def issubtype(type, parent_type):
     """
