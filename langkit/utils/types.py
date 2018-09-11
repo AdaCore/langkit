@@ -96,8 +96,8 @@ class TypeSet(object):
     """
 
     def __init__(self):
-        # Working set of ASTNode subclasses for the types that are covered by
-        # matchers. Updated as we go through the list of matchers.
+        # Working set of ASTNodeType instances for the types that are covered
+        # by matchers. Updated as we go through the list of matchers.
         self.matched_types = set()
 
     def include(self, t):
@@ -110,7 +110,7 @@ class TypeSet(object):
 
         Return whether `t` was already present in `self`.
 
-        :param ASTNodeType|None t: AST node to include.
+        :param ASTNodeType t: AST node to include.
         :rtype: bool
         """
         if t in self.matched_types:
