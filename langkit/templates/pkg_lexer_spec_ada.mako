@@ -47,17 +47,18 @@ package ${ada_lib_name}.Lexer is
          --  Source buffer to read
       end case;
    end record;
+   --  Input from which the lexer will read tokens
 
    procedure Extract_Tokens
      (Input       : Lexer_Input;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
-   --  Extract tokens out of the given Input and store them into TDH.
+   --  Extract tokens out of the given ``Input`` and store them into ``TDH``.
    --
-   --  Raise a Name_Error exception if this involves reading a file that can
-   --  not be open. Raise an Unknown_Charset exception if the requested
-   --  charset is unknown. Raise an Invalid_Input exception if the source
-   --  cannot be decoded using the given Charset.
+   --  Raise a ``Name_Error`` exception if this involves reading a file that
+   --  can not be open. Raise an ``Unknown_Charset`` exception if the requested
+   --  charset is unknown. Raise an ``Invalid_Input`` exception if the source
+   --  cannot be decoded using the given ``Charset``.
 
 end ${ada_lib_name}.Lexer;
