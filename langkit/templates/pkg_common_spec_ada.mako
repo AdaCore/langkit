@@ -43,6 +43,7 @@ package ${ada_lib_name}.Common is
    --  Default grammar rule to use when parsing analysis units
 
    subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
+   --  Shortcut for ``GNATCOLL.GMP.Integers.Big_Integer``
 
    ## Output enumerators so that all concrete AST_Node subclasses get their own
    ## kind. Nothing can be an instance of an abstract subclass, so these do not
@@ -78,23 +79,38 @@ package ${ada_lib_name}.Common is
       ${ada_doc(enum_type, 6)}
    % endfor
 
-   type Lexer_Input_Kind is (File, Bytes_Buffer, Text_Buffer);
+   type Lexer_Input_Kind is
+     (File,
+      --  Readable source file
+
+      Bytes_Buffer,
+      --  Buffer of undecoded bytes
+
+      Text_Buffer
+      --  Buffer of decoded bytes
+   );
+   --  Kind of lexer input
 
    type Token_Kind is (
       ${',\n'.join(t.ada_name for t in tokens)}
    );
+   --  Kind of token: indentifier, string literal, ...
 
    type Token_Family is
      (${', '.join(tf.ada_name for tf in lexer.tokens.token_families)});
+   --  Groups of token kinds, to make the processing of some groups of token
+   --  uniform.
 
    % if lexer.track_indent:
    type Indent_Kind is (Indent, Dedent, Nodent, None);
+   --  Change of indentation
    % endif
 
    Token_Kind_To_Family : array (Token_Kind) of Token_Family :=
      (${', '.join('{} => {}'.format(t.ada_name,
                                      lexer.tokens.token_to_family[t].ada_name)
                    for t in tokens)});
+   --  Associate a token family to all token kinds
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}
@@ -104,7 +120,8 @@ package ${ada_lib_name}.Common is
    --  empty string if this token has no literal.
 
    function Token_Error_Image (Token_Id : Token_Kind) return String;
-   --  Return a string repr of token kind suitable in error messages
+   --  Return a string representation of ``Token_Id`` that is suitable in error
+   --  messages.
 
    function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean;
    --  Return whether Kind corresponds to a token node
@@ -113,8 +130,8 @@ package ${ada_lib_name}.Common is
    --  Return whether Kind corresponds to a list node
 
    type Visit_Status is (Into, Over, Stop);
-   --  Helper type to control the AST node traversal process. See the
-   --  ${ada_lib_name}.Analysis.Traverse function.
+   --  Helper type to control the node traversal process. See the
+   --  ``${ada_lib_name}.Analysis.Traverse`` function.
 
    -----------------------
    -- Lexical utilities --
@@ -128,8 +145,8 @@ package ${ada_lib_name}.Common is
    type Token_Data_Type is private;
 
    function "<" (Left, Right : Token_Reference) return Boolean;
-   --  Assuming Left and Right belong to the same analysis unit, return whether
-   --  Left came before Right in the source file.
+   --  Assuming ``Left`` and ``Right`` belong to the same analysis unit, return
+   --  whether ``Left`` came before ``Right`` in the source file.
 
    function Next
      (Token          : Token_Reference;
@@ -142,7 +159,7 @@ package ${ada_lib_name}.Common is
    ${ada_doc('langkit.token_previous', 3)}
 
    function Data (Token : Token_Reference) return Token_Data_Type;
-   --  Return the data associated to T
+   --  Return the data associated to ``Token``
 
    function Is_Equivalent (L, R : Token_Reference) return Boolean;
    ${ada_doc('langkit.token_is_equivalent', 3)}
@@ -151,17 +168,17 @@ package ${ada_lib_name}.Common is
    --  Debug helper: return a human-readable text to represent a token
 
    function Text (Token : Token_Reference) return Text_Type;
-   --  Return the text of the token as Text_Type
+   --  Return the text of the token as ``Text_Type``
 
    function Text (Token : Token_Reference) return String;
-   --  Return the text of the token as String
+   --  Return the text of the token as ``String``
 
    function Text (First, Last : Token_Reference) return Text_Type;
    ${ada_doc('langkit.token_range_text', 3)}
 
    function Get_Symbol (Token : Token_Reference) return Symbol_Type;
-   --  Assuming that Token refers to a token that contains a symbol, return the
-   --  corresponding symbol.
+   --  Assuming that ``Token`` refers to a token that contains a symbol, return
+   --  the corresponding symbol.
 
    function Kind (Token_Data : Token_Data_Type) return Token_Kind;
    ${ada_doc('langkit.token_kind', 3)}
@@ -173,6 +190,8 @@ package ${ada_lib_name}.Common is
    ${ada_doc('langkit.token_is_trivia', 3)}
 
    function Index (Token : Token_Reference) return Token_Index;
+   ${ada_doc('langkit.token_index', 3)}
+
    function Index (Token_Data : Token_Data_Type) return Token_Index;
    ${ada_doc('langkit.token_index', 3)}
 
@@ -185,22 +204,33 @@ package ${ada_lib_name}.Common is
      (TDH      : Token_Data_Handler;
       Token    : Token_Reference;
       Raw_Data : Stored_Token_Data) return Token_Data_Type;
-   --  Turn data from TDH and Raw_Data into a user-ready token data record
+   --  Turn data from ``TDH`` and ``Raw_Data`` into a user-ready token data
+   --  record.
 
    type Child_Or_Trivia is (Child, Trivia);
-   --  Discriminator for the Child_Record type
+   --  Discriminator for the ``Child_Record`` type
 
    type Symbolization_Result (Success : Boolean; Size : Natural) is record
       case Success is
-         when True  => Symbol : Text_Type (1 .. Size);
-         when False => Error_Message : Text_Type (1 .. Size);
+         when True  =>
+            Symbol : Text_Type (1 .. Size);
+            --  Text for successfully symbolized identifiers
+
+         when False =>
+            Error_Message : Text_Type (1 .. Size);
+            --  Message describing why symbolization failed
       end case;
    end record;
+   --  Holder for results of the symbolization process, conditionned by whether
+   --  this process was successful.
 
    function Create_Symbol (Name : Text_Type) return Symbolization_Result is
      ((Success => True, Size => Name'Length, Symbol => Name));
+   --  Shortcut to create successful symbolization results
+
    function Create_Error (Message : Text_Type) return Symbolization_Result is
      ((Success => False, Size => Message'Length, Error_Message => Message));
+   --  Shortcut to create failed symbolization results
 
    Property_Error : exception;
    ${ada_doc('langkit.property_error', 3)}
@@ -212,20 +242,20 @@ package ${ada_lib_name}.Common is
    ${ada_doc('langkit.invalid_symbol_error', 3)}
 
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
-   --  Return the raw token data for T
+   --  Return the raw token data for ``T``
 
    procedure Raise_Property_Error (Message : String := "");
-   --  Raise a Property_Error with the given Message
+   --  Raise a ``Property_Error`` with the given message
 
    Stale_Reference_Error : exception;
    ${ada_doc('langkit.stale_reference_error', 3)}
 
    Unknown_Charset : exception;
-   --  Raised by lexing functions (${ada_lib_name}.Lexer) when the input
+   --  Raised by lexing functions (``${ada_lib_name}.Lexer``) when the input
    --  charset is not supported.
 
    Invalid_Input : exception;
-   --  Raised by lexing functions (${ada_lib_name}.Lexer) when the input
+   --  Raised by lexing functions (``${ada_lib_name}.Lexer``) when the input
    --  contains an invalid byte sequence.
 
 private
