@@ -1002,6 +1002,10 @@ private package ${ada_lib_name}.Implementation is
       Charset : Unbounded_String;
       --  Default charset to use in analysis units
 
+      Tab_Stop : Positive;
+      --  Tab stop for the lexer to correctly interpret ASCII.HT input
+      --  characters.
+
       With_Trivia : Boolean;
       --  Whether Trivia nodes were parsed and included in analysis units
 
@@ -1157,8 +1161,9 @@ private package ${ada_lib_name}.Implementation is
 
    function Create_Context
      (Charset       : String;
+      Unit_Provider : Internal_Unit_Provider_Access;
       With_Trivia   : Boolean;
-      Unit_Provider : Internal_Unit_Provider_Access) return Internal_Context;
+      Tab_Stop      : Positive) return Internal_Context;
    --  Implementation for Analysis.Create_Context
 
    function Create_Unit

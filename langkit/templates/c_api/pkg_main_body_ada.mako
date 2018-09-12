@@ -80,8 +80,9 @@ package body ${ada_lib_name}.Implementation.C is
 
    function ${capi.get_name("create_analysis_context")}
      (Charset       : chars_ptr;
+      Unit_Provider : ${unit_provider_type};
       With_Trivia   : int;
-      Unit_Provider : ${unit_provider_type}) return ${analysis_context_type} is
+      Tab_Stop      : int) return ${analysis_context_type} is
    begin
       Clear_Last_Exception;
 
@@ -97,8 +98,9 @@ package body ${ada_lib_name}.Implementation.C is
              else Unwrap (Unit_Provider).all);
          Context      : constant Analysis_Context := Create_Context
            (Charset       => C,
+            Unit_Provider => Provider,
             With_Trivia   => With_Trivia /= 0,
-            Unit_Provider => Provider);
+            Tab_Stop      => Natural (Tab_Stop));
          Internal_Ctx : constant Internal_Context := Unwrap_Context (Context);
 
       begin

@@ -276,6 +276,7 @@ class CompileCtx(object):
                  c_symbol_prefix=None,
                  enable_python_api=True,
                  default_charset='utf-8',
+                 default_tab_stop=8,
                  verbosity=Verbosity('none'),
                  template_lookup_extra_dirs=None,
                  env_hook_subprogram=None,
@@ -315,6 +316,9 @@ class CompileCtx(object):
 
         :param str default_charset: In the generated library, this will be the
             default charset to use to scan input source files.
+
+        :param int default_tab_stop: Tabulation stop to use as a default value
+            in the analysis context constructor.
 
         :param Verbosity verbosity: Amount of messages to display on standard
             output. None by default.
@@ -395,6 +399,7 @@ class CompileCtx(object):
         )
 
         self.default_charset = default_charset
+        self.default_tab_stop = default_tab_stop
 
         self.verbosity = verbosity
 

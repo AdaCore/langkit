@@ -225,6 +225,9 @@ base_langkit_docs = {
         If provided, ``Unit_Provider`` will be used to query the file name
         that corresponds to a unit reference during semantic analysis. If
         it is ``${null}``, the default one is used instead.
+
+        ``Tab_Stop`` is a positive number to describe the effect of tabulation
+        characters on the column number in source files.
     """,
 
     'langkit.context_incref': """

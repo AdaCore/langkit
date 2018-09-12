@@ -313,8 +313,9 @@ package body ${ada_lib_name}.Implementation is
 
    function Create_Context
      (Charset       : String;
+      Unit_Provider : Internal_Unit_Provider_Access;
       With_Trivia   : Boolean;
-      Unit_Provider : Internal_Unit_Provider_Access) return Internal_Context
+      Tab_Stop      : Positive) return Internal_Context
    is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
@@ -325,6 +326,7 @@ package body ${ada_lib_name}.Implementation is
       Context.Ref_Count := 1;
       Context.Symbols := Symbols;
       Context.Charset := To_Unbounded_String (Actual_Charset);
+      Context.Tab_Stop := Tab_Stop;
       Context.With_Trivia := With_Trivia;
       Context.Root_Scope := AST_Envs.Create_Lexical_Env
         (Parent => AST_Envs.No_Env_Getter,
@@ -3752,7 +3754,7 @@ package body ${ada_lib_name}.Implementation is
          use Ada.Exceptions;
       begin
          Init_Parser
-           (Input, Context.With_Trivia, Unit, Unit_TDH,
+           (Input, Context.Tab_Stop, Context.With_Trivia, Unit, Unit_TDH,
             Context.Symbol_Literals'Access,
             Unit.Context.Parser);
       exception

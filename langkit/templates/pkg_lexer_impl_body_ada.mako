@@ -80,6 +80,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
+      Tab_Stop       : Positive;
       With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
       Diagnostics    : in out Diagnostics_Vectors.Vector);
@@ -90,6 +91,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
    procedure Extract_Tokens_From_Bytes_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
+      Tab_Stop        : Positive;
       With_Trivia     : Boolean;
       TDH             : in out Token_Data_Handler;
       Diagnostics     : in out Diagnostics_Vectors.Vector);
@@ -117,6 +119,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       With_Trivia : Boolean;
    procedure Process_All_Tokens
      (Lexer       : Lexer_Type;
+      Tab_Stop    : Positive;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
@@ -126,6 +129,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
    procedure Process_All_Tokens
      (Lexer       : Lexer_Type;
+      Tab_Stop    : Positive;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
@@ -144,6 +148,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       Next_Sloc : Source_Location;
       --  Source location after scanning the current token
+
+      Last_Token_Last : Natural;
+      --  Index in TDH.Source_Buffer for the last character of the previous
+      --  token. Used to process chunks of ignored text.
 
       ## Variables specific to indentation tracking
       % if lexer.track_indent:
@@ -219,6 +227,19 @@ package body ${ada_lib_name}.Lexer_Implementation is
                case T is
                   when Chars.LF =>
                      Result := (Result.Line + 1, 1);
+
+                  when Chars.HT =>
+                     --  Make horizontal tabulations move by stride of 8
+                     --  columns, as usually implemented in code editors.
+                     declare
+                        Zero_Based : constant Natural :=
+                           Natural (Result.Column - 1);
+                        Aligned    : constant Natural :=
+                           (Zero_Based + Tab_Stop) / Tab_Stop * Tab_Stop;
+                     begin
+                        Result.Column := Column_Number (Aligned + 1);
+                     end;
+
                   when others =>
                      Result.Column := Result.Column + 1;
                end case;
@@ -229,6 +250,9 @@ package body ${ada_lib_name}.Lexer_Implementation is
    begin
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
       Prepare_For_Trivia;
+
+      Token.Offset := 0;
+      Last_Token_Last := Source_First;
 
       while Continue loop
 
@@ -245,7 +269,17 @@ package body ${ada_lib_name}.Lexer_Implementation is
          Token_Id := Token_Kind'Enum_Val (Token.Id);
          Symbol := null;
 
-         --  Update Next_Sloc according to Token's text
+         --  Initialize the first sloc for the token to come. For this, process
+         --  the text that was ignored since the last token.
+         declare
+            Ignored_Text : Text_Type renames
+               TDH.Source_Buffer (Last_Token_Last + 1 .. Source_First - 1);
+         begin
+            Current_Sloc := Sloc_After (Current_Sloc, Ignored_Text);
+            Last_Token_Last := Source_Last;
+         end;
+
+         --  Then update Next_Sloc according to Token's text
          if Token_Id /= ${termination} then
             declare
                Text : Text_Type (1 .. Natural (Token.Text_Length))
@@ -461,6 +495,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
+      Tab_Stop       : Positive;
       With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
       Diagnostics    : in out Diagnostics_Vectors.Vector)
@@ -476,9 +511,9 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
 
       if With_Trivia then
-         Process_All_Tokens_With_Trivia (Lexer, TDH, Diagnostics);
+         Process_All_Tokens_With_Trivia (Lexer, Tab_Stop, TDH, Diagnostics);
       else
-         Process_All_Tokens_No_Trivia (Lexer, TDH, Diagnostics);
+         Process_All_Tokens_No_Trivia (Lexer, Tab_Stop, TDH, Diagnostics);
       end if;
       Free_Lexer (Lexer);
    end Extract_Tokens_From_Text_Buffer;
@@ -490,6 +525,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
    procedure Extract_Tokens_From_Bytes_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
+      Tab_Stop        : Positive;
       With_Trivia     : Boolean;
       TDH             : in out Token_Data_Handler;
       Diagnostics     : in out Diagnostics_Vectors.Vector)
@@ -501,7 +537,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First,
                      Source_Last);
       Extract_Tokens_From_Text_Buffer
-        (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
+        (Decoded_Buffer, Source_First, Source_Last, Tab_Stop, With_Trivia, TDH,
          Diagnostics);
    end Extract_Tokens_From_Bytes_Buffer;
 
@@ -511,6 +547,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
    procedure Extract_Tokens
      (Input       : Internal_Lexer_Input;
+      Tab_Stop    : Positive;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector) is
@@ -535,7 +572,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                        Address => Buffer_Addr;
             begin
                Extract_Tokens_From_Bytes_Buffer
-                 (Buffer, To_String (Input.Charset), Input.Read_BOM,
+                 (Buffer, To_String (Input.Charset), Input.Read_BOM, Tab_Stop,
                   With_Trivia, TDH, Diagnostics);
                Free (Region);
                Close (File);
@@ -552,7 +589,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                   with Import, Address => Input.Bytes;
             begin
                Extract_Tokens_From_Bytes_Buffer
-                 (Bytes, To_String (Input.Charset), Input.Read_BOM,
+                 (Bytes, To_String (Input.Charset), Input.Read_BOM, Tab_Stop,
                   With_Trivia, TDH, Diagnostics);
             end;
 
@@ -570,8 +607,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
             begin
                Decoded_Buffer.all (Source_First .. Source_Last) := Text_View;
                Extract_Tokens_From_Text_Buffer
-                 (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
-                  Diagnostics);
+                 (Decoded_Buffer, Source_First, Source_Last, Tab_Stop,
+                  With_Trivia, TDH, Diagnostics);
             end;
       end case;
    end Extract_Tokens;
