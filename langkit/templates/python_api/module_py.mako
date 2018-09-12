@@ -408,6 +408,10 @@ class AnalysisContext(object):
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
 
+        # Initialize this field in case we raise an exception during
+        # construction, so that the destructor can run later on.
+        self._c_value = None
+
         if _c_value is None:
             c_unit_provider = unit_provider._c_value if unit_provider else None
             self._c_value = _create_analysis_context(charset, with_trivia,
@@ -433,7 +437,8 @@ class AnalysisContext(object):
         self._check_unit_cache()
 
     def __del__(self):
-        _context_decref(self._c_value)
+        if self._c_value:
+            _context_decref(self._c_value)
 
     def __eq__(self, other):
         return self._c_value == other._c_value
