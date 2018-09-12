@@ -100,7 +100,7 @@ procedure Parse is
                Lookup (Node, (Line, Column));
          begin
             Put_Line ("Lookup " & Image (Sloc) & ":");
-            Print (Lookup_Node);
+            Print (Lookup_Node, not Hide_Slocs);
          end;
       end loop;
    end Process_Lookups;
