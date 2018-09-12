@@ -192,10 +192,11 @@ private package ${ada_lib_name}.Implementation.C is
    -- Analysis primitives --
    -------------------------
 
-   function ${capi.get_name('create_analysis_context')}
+   function ${capi.get_name("create_analysis_context")}
      (Charset       : chars_ptr;
+      Unit_Provider : ${unit_provider_type};
       With_Trivia   : int;
-      Unit_Provider : ${unit_provider_type}) return ${analysis_context_type}
+      Tab_Stop      : int) return ${analysis_context_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('create_analysis_context')}";

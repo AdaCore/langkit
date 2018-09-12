@@ -403,8 +403,9 @@ class AnalysisContext(object):
 
     def __init__(self,
                  charset=None,
-                 with_trivia=True,
                  unit_provider=None,
+                 with_trivia=True,
+                 tab_stop=${ctx.default_tab_stop},
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
 
@@ -413,9 +414,12 @@ class AnalysisContext(object):
         self._c_value = None
 
         if _c_value is None:
+            if not isinstance(tab_stop, int) or tab_stop < 1:
+                raise ValueError(
+                    'Invalid tab_stop (positive integer expected)')
             c_unit_provider = unit_provider._c_value if unit_provider else None
-            self._c_value = _create_analysis_context(charset, with_trivia,
-                                                     c_unit_provider)
+            self._c_value = _create_analysis_context(charset, c_unit_provider,
+                                                     with_trivia, tab_stop)
         else:
             self._c_value = _context_incref(_c_value)
         assert self._c_value not in self._context_cache
@@ -1552,7 +1556,7 @@ _symbol_text = _import_func(
 # Analysis primitives
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
-    [ctypes.c_char_p, _unit_provider], AnalysisContext._c_type
+    [ctypes.c_char_p, _unit_provider, ctypes.c_int], AnalysisContext._c_type
 )
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',

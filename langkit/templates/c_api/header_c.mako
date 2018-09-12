@@ -203,8 +203,9 @@ ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(
    const char *charset,
+   ${unit_provider_type} unit_provider,
    int with_trivia,
-   ${unit_provider_type} unit_provider
+   int tab_stop
 );
 
 ${c_doc('langkit.context_incref')}

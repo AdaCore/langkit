@@ -145,8 +145,9 @@ package ${ada_lib_name}.Analysis is
 
    function Create_Context
      (Charset       : String := Default_Charset;
+      Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
       With_Trivia   : Boolean := True;
-      Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference)
+      Tab_Stop      : Positive := ${ctx.default_tab_stop})
       return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
    --% belongs-to: Analysis_Context

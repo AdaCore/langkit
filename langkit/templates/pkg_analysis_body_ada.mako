@@ -133,8 +133,9 @@ package body ${ada_lib_name}.Analysis is
 
    function Create_Context
      (Charset       : String := Default_Charset;
+      Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
       With_Trivia   : Boolean := True;
-      Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference)
+      Tab_Stop      : Positive := ${ctx.default_tab_stop})
       return Analysis_Context
    is
       use Unit_Provider_References;
@@ -153,8 +154,8 @@ package body ${ada_lib_name}.Analysis is
             new Unit_Provider_Wrapper'(Internal => Provider);
       begin
          Result := Create_Context
-           (Charset, With_Trivia,
-            Internal_Unit_Provider_Access (Provider_Wrapper));
+           (Charset, Internal_Unit_Provider_Access (Provider_Wrapper),
+            With_Trivia, Tab_Stop);
       end;
 
       return Context : constant Analysis_Context := Wrap_Context (Result)
