@@ -651,16 +651,6 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (T : Text_Access) return ${text_type} is
      (Wrap (Text_Cst_Access (T)));
 
-   function Wrap_Big_Integer is new Ada.Unchecked_Conversion
-     (Big_Integer_Type, ${big_integer_type});
-   function Unwrap_Big_Integer is new Ada.Unchecked_Conversion
-     (${big_integer_type}, Big_Integer_Type);
-
-   function Wrap_Symbol is new Ada.Unchecked_Conversion
-     (Symbol_Type, ${symbol_type});
-   function Unwrap_Symbol is new Ada.Unchecked_Conversion
-     (${symbol_type}, Symbol_Type);
-
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access
    --  types.  All read/writes for the pointed values are made through the
@@ -671,6 +661,16 @@ private package ${ada_lib_name}.Implementation.C is
    --       Optimization-and-Strict-Aliasing.html>.
 
    pragma Warnings (Off, "possible aliasing problem for type");
+
+   function Wrap_Big_Integer is new Ada.Unchecked_Conversion
+     (Big_Integer_Type, ${big_integer_type});
+   function Unwrap_Big_Integer is new Ada.Unchecked_Conversion
+     (${big_integer_type}, Big_Integer_Type);
+
+   function Wrap_Symbol is new Ada.Unchecked_Conversion
+     (Symbol_Type, ${symbol_type});
+   function Unwrap_Symbol is new Ada.Unchecked_Conversion
+     (${symbol_type}, Symbol_Type);
 
    function Wrap is new Ada.Unchecked_Conversion
      (${root_node_type_name}, ${node_type});
