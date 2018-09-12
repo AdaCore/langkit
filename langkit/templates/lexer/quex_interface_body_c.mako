@@ -65,10 +65,6 @@ ${capi.get_name("next_token")}(Lexer* lexer, struct token* tok) {
     tok->id = lexer->buffer_tk._id;
     tok->text = lexer->buffer_tk.text;
     tok->text_length = lexer->buffer_tk.len;
-    tok->start_line = lexer->buffer_tk._line_n;
-    tok->end_line = lexer->buffer_tk.end_line;
-    tok->start_column = lexer->buffer_tk._column_n;
-    tok->end_column = lexer->buffer_tk.end_column;
     tok->offset = lexer->buffer_tk.offset;
 
     /* Update the prev_id field, but only if we just got a token (not a

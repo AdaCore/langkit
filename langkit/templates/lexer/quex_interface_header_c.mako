@@ -19,10 +19,6 @@ struct token {
     /* Size (in 32-bit words) for text. */
     size_t text_length;
 
-    /* Source location for this token.  */
-    uint32_t start_line, end_line;
-    uint16_t start_column, end_column;
-
     /* Code point offset from the beginning of the source buffer for this
        token.  */
     uint32_t offset;

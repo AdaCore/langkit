@@ -46,12 +46,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
    type Quex_Token_Type is record
-      Id                       : Unsigned_16;
-      Text                     : System.Address;
-      Text_Length              : size_t;
-      Start_Line, End_Line     : Unsigned_32;
-      Start_Column, End_Column : Unsigned_16;
-      Offset                   : Unsigned_32;
+      Id          : Unsigned_16;
+      Text        : System.Address;
+      Text_Length : size_t;
+      Offset      : Unsigned_32;
    end record
       with Convention => C;
    type Interface_Token_Access is access all Quex_Token_Type;
@@ -141,6 +139,12 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
+      Current_Sloc : Source_Location := (1, 1);
+      --  Source location before scanning the current token
+
+      Next_Sloc : Source_Location;
+      --  Source location after scanning the current token
+
       ## Variables specific to indentation tracking
       % if lexer.track_indent:
 
@@ -172,16 +176,17 @@ package body ${ada_lib_name}.Lexer_Implementation is
       --  Likewise, for the last character
 
       function Sloc_Range return Source_Location_Range is
-        ((Line_Number (Token.Start_Line),
-          Line_Number (Token.End_Line),
-          Column_Number (Token.Start_Column),
-          Column_Number (Token.End_Column)));
+        (Make_Range (Current_Sloc, Next_Sloc));
       --  Create a sloc range value corresponding to Token
 
       procedure Prepare_For_Trivia
         with Inline;
       --  Append an entry for the current token in the Tokens_To_Trivias
       --  correspondence vector.
+
+      function Sloc_After
+        (Base_Sloc : Source_Location; Text : Text_Type) return Source_Location;
+      --  Return Base_Sloc updated as if Text was appended
 
       ------------------------
       -- Prepare_For_Trivia --
@@ -198,6 +203,28 @@ package body ${ada_lib_name}.Lexer_Implementation is
             Last_Token_Was_Trivia := False;
          end if;
       end Prepare_For_Trivia;
+
+      ----------------
+      -- Sloc_After --
+      ----------------
+
+      function Sloc_After
+        (Base_Sloc : Source_Location; Text : Text_Type) return Source_Location
+      is
+      begin
+         return Result : Source_Location := Base_Sloc do
+            --  TODO: use the Unicode algorithm to account for grapheme
+            --  clusters.
+            for T of Text loop
+               case T is
+                  when Chars.LF =>
+                     Result := (Result.Line + 1, 1);
+                  when others =>
+                     Result.Column := Result.Column + 1;
+               end case;
+            end loop;
+         end return;
+      end Sloc_After;
 
    begin
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
@@ -217,6 +244,16 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
          Token_Id := Token_Kind'Enum_Val (Token.Id);
          Symbol := null;
+
+         --  Update Next_Sloc according to Token's text
+         if Token_Id /= ${termination} then
+            declare
+               Text : Text_Type (1 .. Natural (Token.Text_Length))
+                  with Import, Address => Token.Text;
+            begin
+               Next_Sloc := Sloc_After (Current_Sloc, Text);
+            end;
+         end if;
 
          case Token_Id is
 
@@ -408,6 +445,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       % if lexer.token_actions['WithTrivia']:
          <<Dont_Append>>
       % endif
+         Current_Sloc := Next_Sloc;
       end loop;
 
    end Process_All_Tokens;
