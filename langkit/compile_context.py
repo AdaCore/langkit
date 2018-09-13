@@ -467,14 +467,14 @@ class CompileCtx(object):
         :type: dict[int, langkit.compiled_types.ASTNodeType]
         """
 
-        self._struct_types = []
+        self._struct_types = None
         """
         List of all plain struct types.
 
         :type: list[langkit.compiled_types.StructType]
         """
 
-        self._entity_types = []
+        self._entity_types = None
         """
         List of all entity types.
 
@@ -523,6 +523,13 @@ class CompileCtx(object):
         generation.
 
         :type: list[langkit.compiled_types.ArrayType]
+        """
+
+        self._composite_types = None
+        """
+        Dependency-sorted list of array and struct types.
+
+        :type: list[langkit.compiled_types.CompiledType]
         """
 
         self.memoized_properties = set()
@@ -1396,51 +1403,24 @@ class CompileCtx(object):
                 )
 
     @property
+    def composite_types(self):
+        assert self._composite_types is not None
+        return self._composite_types
+
+    @property
     def array_types(self):
-        from langkit.compiled_types import CompiledTypeRepo
-
-        # If the sorted set of array types is not computed yet, do it now
-        if CompiledTypeRepo.array_types is not None:
-            # Make sure we don't create other array types later by accident
-            array_types = CompiledTypeRepo.array_types
-            CompiledTypeRepo.array_types = None
-
-            self._array_types = sorted(array_types)
-
+        assert self._array_types is not None
         return self._array_types
 
     @property
     def struct_types(self):
-        from langkit.compiled_types import CompiledTypeRepo
-
-        def dependencies(struct_type):
-            """
-            Compute the set of dependencies for struct_type, namely the set of
-            struct types that are used by its fields. For entities, this also
-            includes the entity type of the parent node.
-            """
-            result = set(f.type for f in struct_type._fields.values()
-                         if f.type.is_struct_type)
-            if (struct_type.is_entity_type and not
-                    struct_type.element_type.is_root_node):
-                result.add(struct_type.element_type.base.entity)
-            return result
-
-        # If the sorted set of struct types is not computed yet, do it now
-        if CompiledTypeRepo.struct_types is not None:
-            # Make sure we don't create other struct types later by accident
-            struct_types = CompiledTypeRepo.struct_types
-            CompiledTypeRepo.struct_types = None
-
-            self._struct_types = list(topological_sort(
-                (t, dependencies(t))
-                for t in sorted(struct_types, key=lambda t: t.name)
-            ))
-            for s in self._struct_types:
-                for f in s.get_fields():
-                    f.type.used_in_public_struct = True
-
+        assert self._struct_types is not None
         return self._struct_types
+
+    @property
+    def entity_types(self):
+        assert self._entity_types is not None
+        return self._entity_types
 
     @property
     def enum_types(self):
@@ -1457,16 +1437,6 @@ class CompileCtx(object):
             enum_types.sort(key=lambda et: et.name)
 
         return self._enum_types
-
-    @property
-    def entity_types(self):
-        if not self._entity_types:
-            from langkit.compiled_types import EntityType
-
-            self._entity_types = [s for s in self.struct_types
-                                  if isinstance(s, EntityType)]
-
-        return self._entity_types
 
     def _compile(self, check_only=False, annotate_fields_types=False):
         """
@@ -1542,6 +1512,8 @@ class CompileCtx(object):
                        CompileCtx.warn_unreachable_base_properties),
             PropertyPass('warn on undocumented public properties',
                          PropertyDef.warn_on_undocumented_public_property),
+            GlobalPass('compute composite types',
+                       CompileCtx.compute_composite_types),
             ASTNodePass('expose public structs and arrays types in APIs',
                         CompileCtx.expose_public_api_types,
                         auto_context=False),
@@ -2054,6 +2026,60 @@ class CompileCtx(object):
                 if f.struct is n:
                     self.sorted_parse_fields.append(f)
 
+    def compute_composite_types(self):
+        """
+        Check that struct and array types are valid and compute related lists.
+
+        Today this only checks that there is no inclusing loop between these
+        types. For instance: (1) is an array of (2) and (2) is a struct that
+        contains (1).
+        """
+        from langkit.compiled_types import CompiledTypeRepo
+
+        def dependencies(typ):
+            """
+            Return dependencies for the given compiled type that are relevant
+            to the topological sort of composite types.
+            """
+            if typ.is_struct_type:
+                # A struct type depends on the type of its fields
+                result = [f.type for f in typ.get_fields()]
+
+                # For non-root entity types, also add a dependency on the
+                # parent entity type so that parents are declared before their
+                # children.
+                if typ.is_entity_type and not typ.element_type.is_root_node:
+                    result.append(typ.element_type.base.entity)
+
+            elif typ.is_array_type:
+                result = [typ.element_type]
+
+            else:
+                assert False, 'Invalid composite type: {}'.format(typ.dsl_name)
+
+            # Filter types that are relevant for dependency analysis
+            return [t for t in result if t.is_struct_type or t.is_array_type]
+
+        # Collect existing types and make sure we don't create other ones later
+        # by accident.
+        struct_types = CompiledTypeRepo.struct_types
+        array_types = CompiledTypeRepo.array_types
+        CompiledTypeRepo.struct_types = None
+        CompiledTypeRepo.array_types = None
+
+        # Sort the struct and array types by dependency order
+        types_and_deps = (
+            [(st, dependencies(st)) for st in struct_types]
+            + [(at, dependencies(at)) for at in array_types])
+        self._composite_types = topological_sort(types_and_deps)
+
+        self._array_types = [t for t in self._composite_types
+                             if t.is_array_type]
+        self._struct_types = [t for t in self._composite_types
+                              if t.is_struct_type]
+        self._entity_types = [t for t in self._composite_types
+                              if t.is_entity_type]
+
     def expose_public_api_types(self, astnode):
         """
         Tag all struct and array types referenced by the public API as exposed.
@@ -2117,6 +2143,7 @@ class CompileCtx(object):
                     )
                     expose(f.type, to_internal, for_field, 'field type',
                            traceback + ['{} structures'.format(t.dsl_name)])
+                    f.type.used_in_public_struct = True
 
             else:
                 # Only array and struct types have their "_exposed" attribute
