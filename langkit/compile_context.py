@@ -1399,11 +1399,14 @@ class CompileCtx(object):
     def array_types(self):
         from langkit.compiled_types import CompiledTypeRepo
 
-        array_types = CompiledTypeRepo.array_types
-        if self._array_types is None:
+        # If the sorted set of array types is not computed yet, do it now
+        if CompiledTypeRepo.array_types is not None:
+            # Make sure we don't create other array types later by accident
+            array_types = CompiledTypeRepo.array_types
+            CompiledTypeRepo.array_types = None
+
             self._array_types = sorted(array_types)
-        else:
-            assert len(self._array_types) == len(array_types)
+
         return self._array_types
 
     @property
@@ -1423,15 +1426,12 @@ class CompileCtx(object):
                 result.add(struct_type.element_type.base.entity)
             return result
 
-        struct_types = CompiledTypeRepo.struct_types
+        # If the sorted set of struct types is not computed yet, do it now
+        if CompiledTypeRepo.struct_types is not None:
+            # Make sure we don't create other struct types later by accident
+            struct_types = CompiledTypeRepo.struct_types
+            CompiledTypeRepo.struct_types = None
 
-        if self._struct_types:
-            assert (
-                len(self._struct_types) == len(struct_types)
-            ), ('CompileCtx.struct_types called too early: more struct types'
-                ' were added')
-
-        else:
             self._struct_types = list(topological_sort(
                 (t, dependencies(t))
                 for t in sorted(struct_types, key=lambda t: t.name)
