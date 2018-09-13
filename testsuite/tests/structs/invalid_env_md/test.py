@@ -4,11 +4,12 @@ Test that invalid environment metadata structs are properly rejected.
 
 from __future__ import absolute_import, division, print_function
 
+import langkit
 from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
 from langkit.parsers import Grammar
 
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def run(md_constructor):
@@ -31,7 +32,7 @@ def run(md_constructor):
     try:
         md_constructor()
     except DiagnosticError:
-        reset_langkit()
+        langkit.reset()
     else:
         emit_and_print_errors(grammar)
     print('')

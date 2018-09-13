@@ -199,6 +199,22 @@ class CompiledTypeRepo(object):
     :type: StructType
     """
 
+    @classmethod
+    def reset(cls):
+        """
+        Make this holder empty again. Useful to use Langkit multiple times in a
+        process.
+        """
+        cls.type_dict = {}
+        cls.enum_types = []
+        cls.astnode_types = []
+        cls.struct_types = []
+        cls.pending_list_types = []
+        cls.array_types = set()
+        cls.root_grammar_class = None
+        cls.env_metadata = None
+        cls.entity_info = None
+
 
 class CompiledType(object):
     """
