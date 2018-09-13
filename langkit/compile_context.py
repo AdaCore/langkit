@@ -39,7 +39,8 @@ from langkit.passes import (
     PassManager, PropertyPass, StopPipeline, errors_checkpoint_pass
 )
 from langkit.template_utils import add_template_dir
-from langkit.utils import Colors, printcol, topological_sort
+from langkit.utils import (Colors, TopologicalSortError, printcol,
+                           topological_sort)
 
 
 compile_ctx = None
@@ -2071,7 +2072,17 @@ class CompileCtx(object):
         types_and_deps = (
             [(st, dependencies(st)) for st in struct_types]
             + [(at, dependencies(at)) for at in array_types])
-        self._composite_types = topological_sort(types_and_deps)
+        try:
+            self._composite_types = topological_sort(types_and_deps)
+        except TopologicalSortError as exc:
+            message = ['Invalid composition of types:']
+            for i, item in enumerate(exc.loop):
+                next_item = (exc.loop[i + 1]
+                             if i + 1 < len(exc.loop) else
+                             exc.loop[0])
+                message.append('  * {} contains a {}'
+                               .format(item.dsl_name, next_item.dsl_name))
+            check_source_language(False, '\n'.join(message))
 
         self._array_types = [t for t in self._composite_types
                              if t.is_array_type]
