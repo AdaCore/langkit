@@ -345,6 +345,10 @@ class CompiledType(object):
         public API.
         """
 
+    def __lt__(self, other):
+        assert isinstance(other, CompiledType)
+        return self.name < other.name
+
     @property
     def conversion_requires_context(self):
         return self._conversion_requires_context
