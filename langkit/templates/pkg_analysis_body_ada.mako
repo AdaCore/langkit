@@ -65,11 +65,11 @@ package body ${ada_lib_name}.Analysis is
       Charset     : String := "";
       Reparse     : Boolean := False) return Internal_Unit;
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
       ${array_types.ada_api_converters_decl(array_type)}
    % endfor
 
-   % for struct_type in ctx.sorted_types(ctx.struct_types):
+   % for struct_type in ctx.struct_types:
       % if struct_type.exposed and not struct_type.is_entity_type:
          ${struct_types.ada_api_converters_decl(struct_type)}
       % endif
@@ -640,11 +640,11 @@ package body ${ada_lib_name}.Analysis is
       return Node.Internal.Node.Kind_Name;
    end Kind_Name;
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
       ${array_types.ada_api_converters_body(array_type)}
    % endfor
 
-   % for struct_type in ctx.sorted_types(ctx.struct_types):
+   % for struct_type in ctx.struct_types:
       % if struct_type.exposed and not struct_type.is_entity_type:
          ${struct_types.public_api_body(struct_type)}
       % endif

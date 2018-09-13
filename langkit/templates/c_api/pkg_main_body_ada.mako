@@ -1167,13 +1167,13 @@ package body ${ada_lib_name}.Implementation.C is
        % endfor
    % endfor
 
-   % for struct_type in ctx.sorted_types(ctx.struct_types):
+   % for struct_type in ctx.struct_types:
       % if struct_type.exposed and struct_type.emit_c_type:
          ${struct_types.body(struct_type)}
       % endif
    % endfor
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
       % if array_type.element_type.should_emit_array_type and \
             array_type.exposed and \
             array_type.emit_c_type:

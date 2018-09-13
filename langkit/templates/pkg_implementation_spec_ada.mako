@@ -578,7 +578,7 @@ private package ${ada_lib_name}.Implementation is
    -- Array types (incomplete declarations) --
    -------------------------------------------
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
    % if array_type.element_type.should_emit_array_type:
    ${array_types.incomplete_decl(array_type)}
    % endif
@@ -607,7 +607,7 @@ private package ${ada_lib_name}.Implementation is
    --  We implement array types as discriminated records so that binding to C
    --  can be done without copy.
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
    % if array_type.element_type.should_emit_array_type:
    ${array_types.decl(array_type)}
    % endif

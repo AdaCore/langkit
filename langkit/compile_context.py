@@ -513,16 +513,16 @@ class CompileCtx(object):
         :type: set[langkit.compiled_types.ASTNodeType]
         """
 
-        self.array_types = set()
+        self._array_types = None
         """
-        Set of all ArrayType instances.
+        Sorted list of all ArrayType instances.
 
         For each ArrayType instance T, code emission for type definition will
-        automatically happen in the AST.Types packages unless
-        T.element_type.should_emit_array_type is False. In this case, type
-        definition should be hard-wired in the AST package.
+        automatically happen unless T.element_type.should_emit_array_type is
+        False. In this case, type definition should be hard-wired in code
+        generation.
 
-        :type: set[langkit.compiled_types.ArrayType]
+        :type: list[langkit.compiled_types.ArrayType]
         """
 
         self.memoized_properties = set()
@@ -809,19 +809,19 @@ class CompileCtx(object):
         self.list_types.update(
             t.element_type for t in CompiledTypeRepo.pending_list_types
         )
-        self.array_types.update(CompiledTypeRepo.pending_array_types)
 
         self.generic_list_type = self.root_grammar_class.generic_list_type
         self.env_metadata = CompiledTypeRepo.env_metadata
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        self.array_types.add(T.LexicalEnv.array)
+        CompiledTypeRepo.array_types.add(T.LexicalEnv.array)
 
         # Likewise for the entity array type (LexicalEnv.get returns it) and
         # for the root node array type (some primitives need that).
-        self.array_types.add(entity.array)
-        self.array_types.add(CompiledTypeRepo.root_grammar_class.array)
+        CompiledTypeRepo.array_types.add(entity.array)
+        CompiledTypeRepo.array_types.add(
+            CompiledTypeRepo.root_grammar_class.array)
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -1394,6 +1394,17 @@ class CompileCtx(object):
                     ),
                     post_process=self.post_process_ada
                 )
+
+    @property
+    def array_types(self):
+        from langkit.compiled_types import CompiledTypeRepo
+
+        array_types = CompiledTypeRepo.array_types
+        if self._array_types is None:
+            self._array_types = sorted(array_types)
+        else:
+            assert len(self._array_types) == len(array_types)
+        return self._array_types
 
     @property
     def struct_types(self):
