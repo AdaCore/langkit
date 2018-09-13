@@ -2687,12 +2687,6 @@ class ArrayType(CompiledType):
             element_type=element_type,
             null_allowed=True,
             has_equivalent_function=True)
-
-        # Make sure it's not too late to create an array type and then register
-        # it.
-        ctx = get_context(True)
-        if ctx:
-            assert ctx._array_types is None
         CompiledTypeRepo.array_types.add(self)
 
         # Text_Type is always defined, since it comes from
