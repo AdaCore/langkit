@@ -330,23 +330,19 @@ package ${ada_lib_name}.Analysis is
    --
    --  - Nodes and trivias will be lexically ordered.
 
-   -----------------
-   -- Array types --
-   -----------------
-
-   % for array_type in ctx.array_types:
-      % if array_type.exposed:
-         ${array_types.public_api_decl(array_type)}
-      % endif
-   % endfor
-
    ---------------------
-   -- Structure types --
+   -- Composite types --
    ---------------------
 
-   % for struct_type in ctx.struct_types:
-      % if struct_type.exposed and not struct_type.is_entity_type:
-         ${struct_types.public_api_decl(struct_type)}
+   % for t in ctx.composite_types:
+      % if t.is_array_type:
+         % if t.exposed:
+            ${array_types.public_api_decl(t)}
+         % endif
+      % elif t.is_struct_type:
+         % if t.exposed and not t.is_entity_type:
+            ${struct_types.public_api_decl(t)}
+         % endif
       % endif
    % endfor
 
@@ -603,23 +599,19 @@ private
       Last : Token_Index;
    end record;
 
-   -----------------------------
-   -- Array types (internals) --
-   -----------------------------
-
-   % for array_type in ctx.array_types:
-      % if array_type.exposed:
-         ${array_types.public_api_private_decl(array_type)}
-      % endif
-   % endfor
-
    ---------------------------------
-   -- Structure types (internals) --
+   -- Composite types (internals) --
    ---------------------------------
 
-   % for struct_type in ctx.struct_types:
-      % if struct_type.exposed and not struct_type.is_entity_type:
-         ${struct_types.public_api_private_decl(struct_type)}
+   % for t in ctx.composite_types:
+      % if t.is_array_type:
+         % if t.exposed:
+            ${array_types.public_api_private_decl(t)}
+         % endif
+      % elif t.is_struct_type:
+         % if t.exposed and not t.is_entity_type:
+            ${struct_types.public_api_private_decl(t)}
+         % endif
       % endif
    % endfor
 
