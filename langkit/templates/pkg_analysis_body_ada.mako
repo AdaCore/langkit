@@ -8,8 +8,6 @@
 <%namespace name="public_properties"
             file="properties/public_wrappers_ada.mako" />
 
-<% root_node_array = T.root_node.array %>
-
 with Ada.Containers; use Ada.Containers;
 with Ada.Unchecked_Conversion;
 
