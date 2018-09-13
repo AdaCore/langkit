@@ -630,7 +630,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == T.Character.array
+        return self.is_array_type and self.element_type.is_character_type
 
     @property
     def is_symbol_type(self):
