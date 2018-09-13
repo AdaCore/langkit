@@ -1049,7 +1049,7 @@ package body ${ada_lib_name}.Implementation is
 
    ${array_types.body(root_node_array)}
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
    % if array_type.element_type.should_emit_array_type:
    ${array_types.body(array_type)}
    % endif

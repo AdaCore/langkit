@@ -168,11 +168,11 @@ class CompiledTypeRepo(object):
     :type: list[ASTNodeType]
     """
 
-    pending_array_types = []
+    array_types = set()
     """
-    Set of ArrayType instances that are created while there is no context.
+    Set of all created ArrayType instances.
 
-    :type: list[langkit.compiled_types.ArrayType]
+    :type: set[langkit.compiled_types.ArrayType]
     """
 
     root_grammar_class = None
@@ -2672,12 +2672,12 @@ class ArrayType(CompiledType):
             null_allowed=True,
             has_equivalent_function=True)
 
-        # Register this type where it needs to be registered
+        # Make sure it's not too late to create an array type and then register
+        # it.
         ctx = get_context(True)
         if ctx:
-            ctx.array_types.add(self)
-        else:
-            CompiledTypeRepo.pending_array_types.append(self)
+            assert ctx._array_types is None
+        CompiledTypeRepo.array_types.add(self)
 
         # Text_Type is always defined, since it comes from
         # Langkit_Support.Text. To avoid discrepancies in code generation,

@@ -334,7 +334,7 @@ package ${ada_lib_name}.Analysis is
    -- Array types --
    -----------------
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
       % if array_type.exposed:
          ${array_types.public_api_decl(array_type)}
       % endif
@@ -344,7 +344,7 @@ package ${ada_lib_name}.Analysis is
    -- Structure types --
    ---------------------
 
-   % for struct_type in ctx.sorted_types(ctx.struct_types):
+   % for struct_type in ctx.struct_types:
       % if struct_type.exposed and not struct_type.is_entity_type:
          ${struct_types.public_api_decl(struct_type)}
       % endif
@@ -607,7 +607,7 @@ private
    -- Array types (internals) --
    -----------------------------
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
+   % for array_type in ctx.array_types:
       % if array_type.exposed:
          ${array_types.public_api_private_decl(array_type)}
       % endif
@@ -617,7 +617,7 @@ private
    -- Structure types (internals) --
    ---------------------------------
 
-   % for struct_type in ctx.sorted_types(ctx.struct_types):
+   % for struct_type in ctx.struct_types:
       % if struct_type.exposed and not struct_type.is_entity_type:
          ${struct_types.public_api_private_decl(struct_type)}
       % endif
