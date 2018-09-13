@@ -1,0 +1,4 @@
+Error: Invalid composition of types:
+      * MyStruct contains a MyStruct.array
+      * MyStruct.array contains a MyStruct
+Done
