@@ -48,32 +48,73 @@ def is_same(coll):
     return len(set(coll)) == 1
 
 
+class TopologicalSortError(Exception):
+    """
+    Exception to be raised when a topological sort fails due to a dependency
+    loop. This exception stores the chain of items that form the loop as a
+    list.
+    """
+
+    def __init__(self, loop):
+        super(TopologicalSortError, self).__init__(
+            'Dependency loop detected: {}'
+            .format(', '.join(str(item) for item in loop)))
+        self.loop = loop
+
+
 def topological_sort(items):
     """
-    'items' is an iterable of (item, dependencies) pairs, where 'dependencies'
-    is an iterable of the same type as 'items'.
+    Yield elements from the ``items`` collection in topological order.
 
-    If 'items' is a generator rather than a data structure, it should not be
-    empty. Passing an empty generator for 'items' (zero yields before return)
-    will cause topological_sort() to raise TopologicalSortFailure.
+    ``items`` must be an iterable of ``(item, dependencies)`` pairs, where
+    ``dependencies`` is an iterable of the same type as ``items``. The result
+    is deterministic.
 
-    An empty iterable (e.g. list, tuple, set, ...) produces no items but
-    raises no exception.
+    This raises a ``TopologicalSortError`` if ``items`` contains a dependency
+    loop.
+
+    :type items: list[(T, list[T])]
+    :rtype: generator[T]
     """
-    provided = set()
-    while items:
-        remaining_items = []
-        emitted = False
-        for item, dependencies in items:
-            dependencies = set(dependencies)
-            if provided.issuperset(dependencies):
-                yield item
-                provided.add(item)
-                emitted = True
-            else:
-                remaining_items.append((item, dependencies))
-        assert emitted
-        items = remaining_items
+    # Result is the sequence we return (its order matters) whereas satisfied is
+    # here only to check for membership to the result.
+    result = []
+    satisfied = set()
+
+    deps_map = {item: sorted(dependencies) for item, dependencies in items}
+
+    def process(item, current_chain):
+        """
+        Add ``item`` to the result, processing its dependencies first if
+        needed. Raise a TopologicalSortError if we detect a loop.
+        ``current_chain`` contains the sequence of items we're recursively
+        trying to add to the result.
+        """
+        # Check for dependency loops
+        for i, it in enumerate(current_chain):
+            if item == it:
+                raise TopologicalSortError(current_chain[i:])
+        current_chain = current_chain + [item]
+
+        # If this item is already satisfied, there is nothing to do here
+        if item in satisfied:
+            return
+
+        # Make sure we satisfy dependencies before sending this item
+        for dep in deps_map[item]:
+            process(dep, current_chain)
+
+        result.append(item)
+        satisfied.add(item)
+
+    # Process the queue until all items are consumed. Reverse-sort the input
+    # queue so that 1) the output is deterministic and 2) independent types are
+    # sorted by name.
+    queue = list(reversed(sorted(deps_map)))
+    while queue:
+        process(queue.pop(), [])
+
+    return result
 
 
 class classproperty(property):
