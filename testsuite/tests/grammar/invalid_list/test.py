@@ -1,10 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
+import langkit
 from langkit.dsl import ASTNode, Field, Annotations
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def create_nodes():
@@ -27,7 +28,7 @@ grammar.add_rules(
 )
 emit_and_print_errors(grammar)
 
-reset_langkit()
+langkit.reset()
 create_nodes()
 grammar = Grammar('main_rule')
 grammar.add_rules(

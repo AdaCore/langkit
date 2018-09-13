@@ -5,15 +5,11 @@ import shutil
 import subprocess
 import sys
 
+import langkit
 import langkit.compile_context
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import CompiledTypeRepo, create_builtin_types
 from langkit.diagnostics import DiagnosticError, WarningSet
-from langkit.dsl import (_StructMetaclass, _ASTNodeMetaclass,
-                         _EnumNodeMetaclass, _EnumMetaclass)
-from langkit.expressions import Entity, Self
 from langkit.libmanage import ManageScript
-from langkit.utils import reset_memoized
 
 from testsuite_support.valgrind import valgrind_cmd
 
@@ -118,7 +114,7 @@ def emit_and_print_errors(grammar, lexer=None,
         print('Code generation was successful')
         return True
     finally:
-        reset_langkit()
+        langkit.reset()
 
 
 def build(grammar, lexer=None, warning_set=default_warning_set):
@@ -229,32 +225,3 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             if os.environ.get('VALGRIND_ENABLED'):
                 argv = valgrind_cmd(argv)
             run(*argv)
-
-
-def reset_langkit():
-    """
-    Reset global state in Langkit.
-
-    TODO: this is a hack to workaround another hack. At some point in the
-    future, we should get rid of this global state in Langkit.
-    """
-    CompiledTypeRepo.root_grammar_class = None
-    CompiledTypeRepo.astnode_types = []
-    CompiledTypeRepo.struct_types = []
-    CompiledTypeRepo.array_types = set()
-    CompiledTypeRepo.enum_types = []
-    CompiledTypeRepo.env_metadata = None
-    CompiledTypeRepo.entity_info = None
-    Self.unfreeze()
-    Entity.unfreeze()
-
-    CompiledTypeRepo.type_dict.clear()
-    create_builtin_types()
-
-    _StructMetaclass.reset()
-    _ASTNodeMetaclass.reset()
-    _EnumNodeMetaclass.reset()
-    _EnumMetaclass.reset()
-
-    reset_memoized()
-    langkit.compile_context.compile_ctx = None
