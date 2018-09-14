@@ -1043,10 +1043,12 @@ private package ${ada_lib_name}.Implementation is
       --  interrupting the resolution because of timeout. See the
       --  Set_Logic_Resolution_Timeout procedure.
 
-      Cache_Version : Natural;
+      Cache_Version, Reparse_Cache_Version : Natural;
       --  Version number used to invalidate memoization caches in a lazy
       --  fashion. If an analysis unit's version number is strictly inferior to
       --  this, its memoization map should be cleared.
+      --  Reparse_Cache_Version is used to invalidate referenced envs caches,
+      --  and only incremented when an unit is reparsed in the context.
 
       Rewriting_Handle : Rewriting_Handle_Pointer :=
          No_Rewriting_Handle_Pointer;
@@ -1339,8 +1341,10 @@ private package ${ada_lib_name}.Implementation is
    function Basename (Unit : Internal_Unit) return String;
    --  Return the base filename for Unit
 
-   procedure Invalidate_Caches (Context : Internal_Context);
-   --  Invalidate all caches (memoization and envs)
+   procedure Invalidate_Caches
+     (Context : Internal_Context; Invalidate_Envs : Boolean);
+   --  Invalidate caches. If Invalidate_Envs is true, will invalidate
+   --  referenced envs caches as well as memoization caches.
 
    procedure Reset_Caches (Unit : Internal_Unit);
    --  Destroy Unit's memoization cache. This resets Unit's version number to
