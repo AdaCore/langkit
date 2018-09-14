@@ -346,6 +346,7 @@ package body ${ada_lib_name}.Implementation is
       Context.Logic_Resolution_Timeout := 100_000;
       Context.In_Populate_Lexical_Env := False;
       Context.Cache_Version := 0;
+      Context.Reparse_Cache_Version := 0;
 
       Context.Rewriting_Handle := No_Rewriting_Handle_Pointer;
       Context.Templates_Unit := No_Analysis_Unit;
@@ -3511,7 +3512,9 @@ package body ${ada_lib_name}.Implementation is
    -- Invalidate_Caches --
    -----------------------
 
-   procedure Invalidate_Caches (Context : Internal_Context) is
+   procedure Invalidate_Caches
+     (Context : Internal_Context; Invalidate_Envs : Boolean)
+   is
    begin
       --  Increase Context's version number. If we are about to overflow, reset
       --  all version numbers from analysis units.
@@ -3522,6 +3525,10 @@ package body ${ada_lib_name}.Implementation is
          end loop;
       else
          Context.Cache_Version := Context.Cache_Version + 1;
+      end if;
+
+      if Invalidate_Envs then
+         Context.Reparse_Cache_Version := Context.Cache_Version;
       end if;
    end Invalidate_Caches;
 
@@ -3611,12 +3618,17 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    procedure Reset_Caches (Unit : Internal_Unit) is
+      Cache_Version : Natural := Unit.Cache_Version;
    begin
-      if Unit.Cache_Version < Unit.Context.Cache_Version then
+      if Cache_Version < Unit.Context.Reparse_Cache_Version then
+         Unit.Cache_Version := Unit.Context.Reparse_Cache_Version;
+         Reset_Envs (Unit);
+      end if;
+
+      if Cache_Version < Unit.Context.Cache_Version then
          GNATCOLL.Traces.Trace
            (Main_Trace, "In reset caches for unit " & Basename (Unit));
          Unit.Cache_Version := Unit.Context.Cache_Version;
-         Reset_Envs (Unit);
          % if ctx.has_memoization:
             Destroy (Unit.Memoization_Map);
          % endif
@@ -3815,14 +3827,15 @@ package body ${ada_lib_name}.Implementation is
       Unit.Diagnostics := Reparsed.Diagnostics;
       Reparsed.Diagnostics.Clear;
 
+      --  As (re-)loading a unit can change how any AST node property in the
+      --  whole analysis context behaves, we have to invalidate caches. This
+      --  is likely overkill, but kill all caches here as it's easy to do.
+      Invalidate_Caches
+        (Unit.Context, Invalidate_Envs => Unit.AST_Root /= null);
+
       --  Likewise for token data
       Free (Unit.TDH);
       Move (Unit.TDH, Reparsed.TDH);
-
-      --  As (re-)loading a unit can change how any AST node property in the
-      --  whole analysis context behaves, we have to invalidate caches. This is
-      --  likely overkill, but kill all caches here as it's easy to do.
-      Invalidate_Caches (Unit.Context);
 
       --  Reparsing will invalidate all lexical environments related to this
       --  unit, so destroy all related rebindings as well. This browses AST
