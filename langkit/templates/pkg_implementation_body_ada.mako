@@ -1288,11 +1288,14 @@ package body ${ada_lib_name}.Implementation is
      (Self                : access ${root_node_value_type}'Class;
       Bound_Env, Root_Env : AST_Envs.Lexical_Env) is
    begin
-      <%self:case_dispatch pred="${lambda n: n.env_spec \
-                                   and not n.is_env_spec_inherited \
-                                   and n.env_spec.post_actions}">
+      <%self:case_dispatch
+        pred="${(lambda n: n.env_spec and not n.is_env_spec_inherited)}">
       <%def name="action(n)">
+         % if n.env_spec.post_actions:
          ${n.name}_Post_Env_Actions (${n.name} (Self), Bound_Env, Root_Env);
+         % else:
+         null;
+         % endif
       </%def>
       <%def name="default()"> null; </%def>
       </%self:case_dispatch>
