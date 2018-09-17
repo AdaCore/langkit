@@ -1,6 +1,6 @@
 ## vim: filetype=makoada
 
-package ${ada_lib_name} is
+package ${ada_lib_name} with Pure is
 
    ## It is up to each Langkit user to update these constants to whatever
    ## appropriate.
