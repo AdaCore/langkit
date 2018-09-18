@@ -1465,8 +1465,11 @@ ${struct_types.base_decls()}
     % if struct_type.is_entity_type:
         % if struct_type is root_entity:
 class ${c_entity}(ctypes.Structure):
-    _fields_ = [('node', ${root_astnode_name}._node_c_type),
-                ('info', ${pyapi.c_type(T.entity_info)})]
+    _fields_ = [
+        % for field in struct_type.get_fields():
+            ('${field.name.lower}', ${pyapi.c_type(field.type)}),
+        % endfor
+    ]
 
     @classmethod
     def from_bare_node(cls, node_c_value):
@@ -1475,8 +1478,11 @@ class ${c_entity}(ctypes.Structure):
     ## Likewise for entity info structures: they will never be wrapped
     % elif struct_type is T.entity_info:
 class ${c_entity_info}(ctypes.Structure):
-    _fields_ = [('md', ${pyapi.c_type(T.env_md)}),
-                ('rebindings', ${pyapi.c_type(T.EnvRebindings)})]
+    _fields_ = [
+        % for field in struct_type.get_fields():
+            ('${field.name.lower}', ${pyapi.c_type(field.type)}),
+        % endfor
+    ]
     ## Likewise for metadata structures
     % elif struct_type is T.env_md:
 class ${c_metadata}(ctypes.Structure):
