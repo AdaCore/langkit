@@ -244,7 +244,7 @@ private package ${ada_lib_name}.Implementation is
    subtype Internal_Entity_Info is AST_Envs.Entity_Info;
 
    ${T.entity_info.nullexpr} : constant ${T.entity_info.name} :=
-     (No_Metadata, null);
+     (No_Metadata, null, False);
    ${root_entity.nullexpr} : constant ${root_entity.name} :=
      (null, ${T.entity_info.nullexpr});
 

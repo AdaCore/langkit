@@ -2430,7 +2430,8 @@ class ASTNodeType(BaseStructType):
                     )),
                     ('rebindings', BuiltinField(T.EnvRebindings,
                                                 access_needs_incref=True,
-                                                doc=""))
+                                                doc="")),
+                    ('from_rebound', BuiltinField(T.Bool, doc=""))
                 ],
             )
         return CompiledTypeRepo.entity_info

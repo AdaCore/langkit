@@ -47,7 +47,8 @@ class Block(DefNode):
 
         e_info = Var(New(T.entity_info,
                          md=Entity.info.md,
-                         rebindings=rbdng))
+                         rebindings=rbdng,
+                         from_rebound=False))
 
         return New(Block.entity, node=Self, info=e_info)
 

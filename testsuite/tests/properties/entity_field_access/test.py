@@ -69,7 +69,8 @@ class Couple(FooNode):
                    node=Self,
                    info=New(T.entity_info,
                             md=md,
-                            rebindings=No(EnvRebindings)))
+                            rebindings=No(EnvRebindings),
+                            from_rebound=False))
 
     @langkit_property(public=True)
     def property_on_entity():

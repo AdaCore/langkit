@@ -128,8 +128,12 @@ package Langkit_Support.Lexical_Env is
    --------------
 
    type Entity_Info is record
-      MD         : Node_Metadata;
-      Rebindings : Env_Rebindings := null;
+      MD              : Node_Metadata;
+      --  External metadata for the node
+      Rebindings      : Env_Rebindings := null;
+      --  Rebindings applying to this entity
+      From_Rebound    : Boolean := False;
+      --  Whether this entity has been obtained out of a rebound environment
    end record
       with Convention => C;
 
@@ -146,6 +150,9 @@ package Langkit_Support.Lexical_Env is
 
    function Equivalent (L, R : Entity) return Boolean;
    --  Return whether we can consider that L and R are equivalent entities
+
+   function Equivalent (L, R : Entity_Info) return Boolean;
+   --  Return whether we can consider that L and R are equivalent entity info
 
    ----------------------
    -- Lexical_Env Type --

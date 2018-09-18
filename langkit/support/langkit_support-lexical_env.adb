@@ -34,7 +34,7 @@ with System.Assertions;
 
 package body Langkit_Support.Lexical_Env is
 
-   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
+   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, False);
 
    function Has_Lookup_Cache (Dummy : Lexical_Env) return Boolean
    is
@@ -63,7 +63,8 @@ package body Langkit_Support.Lexical_Env is
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
-      Rebound_Env : Lexical_Env) return Lexical_Env;
+      Rebound_Env : Lexical_Env;
+      Found       : out Boolean) return Lexical_Env;
    --  Look for a pair in Rebindings whose Old_Env field is "Rebound_Env".
    --
    --  If there is one, return the env it is associated to, and put the
@@ -352,9 +353,19 @@ package body Langkit_Support.Lexical_Env is
    function Create_Entity (Node : Node_Type; MD : Node_Metadata) return Entity
    is
    begin
-      return Entity'(Node => Node,
-                     Info => (MD => MD, Rebindings => null));
+      return Entity'
+        (Node => Node,
+         Info => (MD => MD, Rebindings => null, From_Rebound => False));
    end Create_Entity;
+
+   ----------------
+   -- Equivalent --
+   ----------------
+
+   function Equivalent (L, R : Entity_Info) return Boolean is
+   begin
+      return L.MD = R.MD and then L.Rebindings = R.Rebindings;
+   end Equivalent;
 
    ----------------
    -- Equivalent --
@@ -372,7 +383,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       --  For all other cases, make sure the entity info is equivalent
-      return L.Info = R.Info;
+      return Equivalent (L.Info, R.Info);
    end Equivalent;
 
    ------------------------
@@ -523,15 +534,17 @@ package body Langkit_Support.Lexical_Env is
       procedure Get_Refd_Nodes (Self : in out Referenced_Env);
 
       procedure Append_Result
-        (Node       : Internal_Map_Node;
-         MD         : Node_Metadata;
-         Rebindings : Env_Rebindings);
+        (Node         : Internal_Map_Node;
+         MD           : Node_Metadata;
+         Rebindings   : Env_Rebindings;
+         From_Rebound : Boolean := False);
       --  Add E to results, if it passes the Can_Reach filter. Return whether
       --  result was appended or not.
 
       use Internal_Envs;
 
-      function Get_Nodes (Env : Lexical_Env) return Boolean;
+      function Get_Nodes
+        (Env : Lexical_Env; From_Rebound : Boolean := False) return Boolean;
       --  Lookup for matching nodes in Env's internal map and append them to
       --  Local_Results. Return whether we found some.
 
@@ -539,7 +552,9 @@ package body Langkit_Support.Lexical_Env is
       -- Get_Nodes --
       ---------------
 
-      function Get_Nodes (Env : Lexical_Env) return Boolean is
+      function Get_Nodes
+        (Env : Lexical_Env; From_Rebound : Boolean := False) return Boolean
+      is
          C     : Cursor := Internal_Envs.No_Element;
          Nodes : Internal_Map_Node_Vectors.Vector;
       begin
@@ -555,7 +570,8 @@ package body Langkit_Support.Lexical_Env is
 
             --  TODO??? Use "for ... of reverse" next GPL release
             for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
-               Append_Result (Nodes.Get (I), Metadata, Current_Rebindings);
+               Append_Result
+                 (Nodes.Get (I), Metadata, Current_Rebindings, From_Rebound);
             end loop;
             return True;
          end if;
@@ -568,27 +584,31 @@ package body Langkit_Support.Lexical_Env is
       -------------------
 
       procedure Append_Result
-        (Node       : Internal_Map_Node;
-         MD         : Node_Metadata;
-         Rebindings : Env_Rebindings)
+        (Node         : Internal_Map_Node;
+         MD           : Node_Metadata;
+         Rebindings   : Env_Rebindings;
+         From_Rebound : Boolean := False)
       is
          E : constant Entity :=
            (Node => Node.Node,
             Info => (MD         => Combine (Node.MD, MD),
-                     Rebindings => Rebindings));
+                     Rebindings => Rebindings,
+                     From_Rebound => From_Rebound));
       begin
 
          if Has_Trace then
             Traces.Trace
-              (Me, "Found " & Image (Node_Image (E.Node, False)));
+              (Me, "Found " & Image (Node_Image (E.Node, False))
+               & " from_rebound => " & From_Rebound'Img);
          end if;
 
          declare
-            Resolved_Entity : constant Entity :=
+            Resolved_Entity : Entity :=
               (if Node.Resolver = null
                then E
                else Node.Resolver.all (E));
          begin
+            Resolved_Entity.Info.From_Rebound := From_Rebound;
             Local_Results.Append
               (Lookup_Result_Item'
                  (E                    => Resolved_Entity,
@@ -683,6 +703,8 @@ package body Langkit_Support.Lexical_Env is
       Inserted, Dummy   : Boolean;
       use Lookup_Cache_Maps;
 
+      Found_Rebinding   : Boolean := False;
+
    begin
       if Self in Empty_Env then
          return Empty_Lookup_Result_Array;
@@ -774,8 +796,8 @@ package body Langkit_Support.Lexical_Env is
 
       --  Phase 1: Get nodes in own env if there are any
 
-      Env := Extract_Rebinding (Current_Rebindings, Self);
-      if not Get_Nodes (Env) and then Env /= Self then
+      Env := Extract_Rebinding (Current_Rebindings, Self, Found_Rebinding);
+      if not Get_Nodes (Env, Found_Rebinding) and then Env /= Self then
          --  Getting the nodes in Self (env before extract rebinding) should
          --  still have the proper env rebindings, so we do Get_Nodes in the
          --  context of Old rebindings. TODO??? This code is kludgy ugly. There
@@ -1234,10 +1256,13 @@ package body Langkit_Support.Lexical_Env is
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
-      Rebound_Env : Lexical_Env) return Lexical_Env
+      Rebound_Env : Lexical_Env;
+      Found       : out Boolean) return Lexical_Env
    is
       Return_Env : Lexical_Env := Rebound_Env;
    begin
+      Found := False;
+
       if Rebindings /= null then
          --  Look for a rebinding in the chain whose Old_Env is Rebound_Env.
          --  The correct behavior is to extract the *last* rebinding, because
@@ -1259,6 +1284,7 @@ package body Langkit_Support.Lexical_Env is
                begin
                   if Rebound_Env = R_Old_Env then
                      Return_Env := R.New_Env;
+                     Found := True;
 
                      --  Extracted rebinding *must* be the last one
                      if R /= Rebindings then
@@ -1341,8 +1367,9 @@ package body Langkit_Support.Lexical_Env is
    function Shed_Rebindings
      (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info is
    begin
-      return (MD         => E_Info.MD,
-              Rebindings => Shed_Rebindings (Env, E_Info.Rebindings));
+      return (MD              => E_Info.MD,
+              Rebindings      => Shed_Rebindings (Env, E_Info.Rebindings),
+              From_Rebound => False);
    end Shed_Rebindings;
 
    ------------------------------

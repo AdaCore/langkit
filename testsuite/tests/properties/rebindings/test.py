@@ -46,7 +46,8 @@ class Block(DefNode):
 
         e_info = Var(New(T.entity_info,
                          md=Entity.info.md,
-                         rebindings=rbdng))
+                         rebindings=rbdng,
+                         from_rebound=False))
 
         return New(Block.entity, node=Self, info=e_info)
 
@@ -54,7 +55,8 @@ class Block(DefNode):
     def parent_rebindings():
         e_info = Var(New(T.entity_info,
                          md=Entity.info.md,
-                         rebindings=Entity.info.rebindings.rebindings_parent))
+                         rebindings=Entity.info.rebindings.rebindings_parent,
+                         from_rebound=False))
         return New(Block.entity, node=Self, info=e_info)
 
     @langkit_property(public=True)
