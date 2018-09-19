@@ -16,10 +16,10 @@ package ${ada_lib_name}.Introspection is
          new Integer range 1 .. 0
       % endif
    ;
-   --  Enumeration of all node fields
+   --  Enumeration of all fields for regular nodes
 
    function Field_Name (Field : Field_Reference) return String;
-   --  Return a lower-case name for Field
+   --  Return a lower-case name for ``Field``
 
    function Index (Field : Field_Reference) return Positive;
    --  Return the index in nodes to access the given ``Field``
