@@ -201,8 +201,9 @@ package ${ada_lib_name}.Analysis is
 
    function Unit_Provider
      (Context : Analysis_Context'Class) return Unit_Provider_Reference;
+   --  Return the unit provider for ``Context``
+   --
    --% belongs-to: Analysis_Context
-   --  Return the unit provider for ``Context``.
 
    function Hash (Context : Analysis_Context) return Ada.Containers.Hash_Type;
    ${ada_doc('langkit.context_hash', 3)}

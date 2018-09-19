@@ -310,7 +310,11 @@ def check_generic(report, filename, content, lang):
         """
         check_text(report, filename, lang,
                    comment_first_line,
-                   b'\n'.join(comment_block),
+
+                   # Ignored lines starting with '%': they are directives for
+                   # documentation generators.
+                   b'\n'.join(l for l in comment_block
+                              if not l.startswith('%')),
                    True)
         comment_block[:] = []
 
