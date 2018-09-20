@@ -3516,8 +3516,7 @@ package body ${ada_lib_name}.Implementation is
    -----------------------
 
    procedure Invalidate_Caches
-     (Context : Internal_Context; Invalidate_Envs : Boolean)
-   is
+     (Context : Internal_Context; Invalidate_Envs : Boolean) is
    begin
       --  Increase Context's version number. If we are about to overflow, reset
       --  all version numbers from analysis units.
@@ -3621,7 +3620,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    procedure Reset_Caches (Unit : Internal_Unit) is
-      Cache_Version : Natural := Unit.Cache_Version;
+      Cache_Version : constant Natural := Unit.Cache_Version;
    begin
       if Cache_Version < Unit.Context.Reparse_Cache_Version then
          Unit.Cache_Version := Unit.Context.Reparse_Cache_Version;
@@ -3833,6 +3832,9 @@ package body ${ada_lib_name}.Implementation is
       --  As (re-)loading a unit can change how any AST node property in the
       --  whole analysis context behaves, we have to invalidate caches. This
       --  is likely overkill, but kill all caches here as it's easy to do.
+      --
+      --  As an optimization, invalidate referenced envs cache only if this is
+      --  not the first time we parse Unit.
       Invalidate_Caches
         (Unit.Context, Invalidate_Envs => Unit.AST_Root /= null);
 

@@ -712,7 +712,7 @@ package body Langkit_Support.Lexical_Env is
                for E of Self.Env.Grouped_Envs.all loop
                   Local_Results.Concat
                     (Get_Internal (E, Key, Lookup_Kind, Rebindings, MD,
-                     Categories));
+                                   Categories));
                end loop;
             end;
             Traces.Decrease_Indent (Me);
