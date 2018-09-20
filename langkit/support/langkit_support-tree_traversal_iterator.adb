@@ -28,11 +28,12 @@ package body Langkit_Support.Tree_Traversal_Iterator is
    ----------
 
    function Next
-     (It      : in out Traverse_Iterator;
-      Element : out Node_Type) return Boolean
+     (Iterator : in out Traverse_Iterator;
+      Element  : out Node_Type) return Boolean
    is
       use Natural_Vectors;
 
+      It    : Traverse_Iterator_Record renames Iterator.Unchecked_Get.all;
       Child : Node_Type;
    begin
 
@@ -87,23 +88,24 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       return True;
    end Next;
 
-   --------------
-   -- Finalize --
-   --------------
+   -------------
+   -- Release --
+   -------------
 
-   overriding procedure Finalize (It : in out Traverse_Iterator) is
+   procedure Release (It : in out Traverse_Iterator_Record) is
    begin
       Natural_Vectors.Destroy (It.Stack);
-   end Finalize;
+   end Release;
 
    --------------------------
    -- Create_Tree_Iterator --
    --------------------------
 
-   function Create_Tree_Iterator (Root : Node_Type) return Traverse_Iterator is
+   procedure Create_Tree_Iterator
+     (Root     : Node_Type;
+      Iterator : in out Traverse_Iterator'Class) is
    begin
-      return Traverse_Iterator'
-        (Ada.Finalization.Limited_Controlled with Root, others => <>);
+      Iterator.Set (Traverse_Iterator_Record'(Node => Root, others => <>));
    end Create_Tree_Iterator;
 
 end Langkit_Support.Tree_Traversal_Iterator;

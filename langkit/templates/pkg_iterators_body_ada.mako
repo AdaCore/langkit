@@ -1,5 +1,10 @@
 ## vim: filetype=makoada
 
+<%
+   pred_type = '{}_Predicate_Type'.format(root_entity.api_name)
+   pred_ref = '{}_Predicate'.format(root_entity.api_name)
+%>
+
 package body ${ada_lib_name}.Iterators is
 
    --------------
@@ -7,11 +12,24 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    function Traverse
-     (Root : ${root_entity.api_name}'Class) return Traverse_Iterator is
+     (Root : ${root_entity.api_name}'Class) return Traverse_Iterator'Class is
    begin
-      return Create_Tree_Iterator
-        (As_${root_entity.element_type.kwless_raw_name} (Root));
+      return Result : Traverse_Iterator do
+         Traversal_Iterators.Create_Tree_Iterator
+           (Root.As_${root_entity.api_name}, Result);
+      end return;
    end Traverse;
+
+   -------------
+   -- Kind_Is --
+   -------------
+
+   function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref} is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set (Kind_Predicate'(${pred_type} with Kind => Kind));
+      end return;
+   end Kind_Is;
 
    ----------
    -- Next --
@@ -19,10 +37,12 @@ package body ${ada_lib_name}.Iterators is
 
    function Next
      (It      : in out Find_Iterator;
-      Element : out ${root_entity.api_name}) return Boolean is
+      Element : out ${root_entity.api_name}) return Boolean
+   is
+      Parent : Traverse_Iterator := Traverse_Iterator (It);
    begin
-      while Next (It.Traverse_It, Element) loop
-         if It.Predicate.Evaluate (Element) then
+      while Next (Parent, Element) loop
+         if It.Predicate.Unchecked_Get.Evaluate (Element) then
             return True;
          end if;
       end loop;
@@ -37,8 +57,9 @@ package body ${ada_lib_name}.Iterators is
      (It      : in out Local_Find_Iterator;
       Element : out ${root_entity.api_name}) return Boolean
    is
+      Parent : Traverse_Iterator := Traverse_Iterator (It);
    begin
-      while Next (It.Traverse_It, Element) loop
+      while Next (Parent, Element) loop
          if It.Predicate = null or else It.Predicate (Element) then
             return True;
          end if;
@@ -54,21 +75,16 @@ package body ${ada_lib_name}.Iterators is
      (Root      : ${root_entity.api_name}'Class;
       Predicate :
         access function (N : ${root_entity.api_name}) return Boolean := null)
-     return Local_Find_Iterator
-   is
-      Dummy  : ${root_entity.api_name};
-      Ignore : Boolean;
+     return Traverse_Iterator'Class is
    begin
-      return Ret : Local_Find_Iterator := Local_Find_Iterator'
-        (Ada.Finalization.Limited_Controlled with
-         Traverse_It => Traverse (Root),
+      return Ret : Local_Find_Iterator do
+         Traversal_Iterators.Create_Tree_Iterator
+           (Root.As_${root_entity.api_name}, Ret);
 
          --  We still want to provide this functionality, even though it is
          --  unsafe. TODO: We might be able to make a safe version of this
          --  using generics. Still would be more verbose though.
-         Predicate   => Predicate'Unrestricted_Access.all)
-      do
-         Ignore := Next (Ret.Traverse_It, Dummy);
+         Ret.Predicate := Predicate'Unrestricted_Access.all;
       end return;
    end Find;
 
@@ -82,7 +98,7 @@ package body ${ada_lib_name}.Iterators is
         access function (N : ${root_entity.api_name}) return Boolean := null)
       return ${root_entity.api_name}
    is
-      I      : Local_Find_Iterator := Find (Root, Predicate);
+      I      : Traverse_Iterator'Class := Find (Root, Predicate);
       Result : ${root_entity.api_name};
       Ignore : Boolean;
    begin
@@ -97,18 +113,17 @@ package body ${ada_lib_name}.Iterators is
    ----------
 
    function Find
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate : ${root_entity.api_name}_Predicate) return Find_Iterator
-   is
-      Dummy  : ${root_entity.api_name};
-      Ignore : Boolean;
+     (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
+      return Traverse_Iterator'Class is
    begin
-      return Ret : Find_Iterator :=
-        (Ada.Finalization.Limited_Controlled with
-         Traverse_It => Traverse (Root),
-         Predicate   => Predicate)
-      do
-         Ignore := Next (Ret.Traverse_It, Dummy);
+      return Ret : Find_Iterator do
+         Traversal_Iterators.Create_Tree_Iterator
+           (Root.As_${root_entity.api_name}, Ret);
+
+         --  We still want to provide this functionality, even though it is
+         --  unsafe. TODO: We might be able to make a safe version of this
+         --  using generics. Still would be more verbose though.
+         Ret.Predicate := ${pred_ref} (Predicate);
       end return;
    end Find;
 
@@ -117,11 +132,10 @@ package body ${ada_lib_name}.Iterators is
    ----------------
 
    function Find_First
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate : ${root_entity.api_name}_Predicate)
+     (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
       return ${root_entity.api_name}
    is
-      I      : Find_Iterator := Find (Root, Predicate);
+      I      : Traverse_Iterator'Class := Find (Root, Predicate);
       Result : ${root_entity.api_name};
       Ignore : Boolean;
    begin
@@ -130,17 +144,6 @@ package body ${ada_lib_name}.Iterators is
       end if;
       return Result;
    end Find_First;
-
-   --------------
-   -- Evaluate --
-   --------------
-
-   overriding function Evaluate
-     (P : access ${root_entity.api_name}_Kind_Filter;
-      N : ${root_entity.api_name}) return Boolean is
-   begin
-      return Kind (N) = P.Kind;
-   end Evaluate;
 
    ----------------
    -- Get_Parent --
@@ -175,12 +178,13 @@ package body ${ada_lib_name}.Iterators is
    is (Child (N, I));
 
    --------------
-   -- Finalize --
+   -- Evaluate --
    --------------
 
-   overriding procedure Finalize (It : in out Find_Iterator) is
+   overriding function Evaluate
+     (P : in out Kind_Predicate; N : ${root_entity.api_name}) return Boolean is
    begin
-      Destroy (It.Predicate);
-   end Finalize;
+      return Kind (N) = P.Kind;
+   end Evaluate;
 
 end ${ada_lib_name}.Iterators;
