@@ -21,7 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Finalization;
+with GNATCOLL.Refcount;
 
 with Langkit_Support.Iterators;
 with Langkit_Support.Vectors;
@@ -59,17 +59,16 @@ generic
 
 package Langkit_Support.Tree_Traversal_Iterator is
 
-   type Traverse_Iterator is limited new Ada.Finalization.Limited_Controlled
-     and Iterators.Iterator with private;
+   type Traverse_Iterator is new Iterators.Iterator with private;
    --  Iterator type for Traverse (see below)
 
    overriding function Next
-     (It      : in out Traverse_Iterator;
-      Element : out Node_Type) return Boolean;
+     (Iterator : in out Traverse_Iterator;
+      Element  : out Node_Type) return Boolean;
 
-   overriding procedure Finalize (It : in out Traverse_Iterator);
-
-   function Create_Tree_Iterator (Root : Node_Type) return Traverse_Iterator;
+   procedure Create_Tree_Iterator
+     (Root     : Node_Type;
+      Iterator : in out Traverse_Iterator'Class);
    --  Create an iterator that will yield all nodes in Root in prefix depth
    --  first order (DFS).
 
@@ -77,12 +76,18 @@ private
 
    package Natural_Vectors is new Langkit_Support.Vectors (Natural);
 
-   type Traverse_Iterator is limited new Ada.Finalization.Limited_Controlled
-     and Iterators.Iterator with
-      record
-         Node, Parent : Node_Type := No_Node;
-         Stack        : Natural_Vectors.Vector;
-         Continue     : Boolean := True;
-      end record;
+   type Traverse_Iterator_Record is record
+      Node, Parent : Node_Type := No_Node;
+      Stack        : Natural_Vectors.Vector;
+      Continue     : Boolean := True;
+   end record;
+
+   procedure Release (It : in out Traverse_Iterator_Record);
+
+   package References is new GNATCOLL.Refcount.Shared_Pointers
+     (Traverse_Iterator_Record, Release);
+
+   type Traverse_Iterator is
+      new References.Ref and Iterators.Iterator with null record;
 
 end Langkit_Support.Tree_Traversal_Iterator;
