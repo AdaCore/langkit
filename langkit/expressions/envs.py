@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import T, no_compiled_type, get_context
+from langkit.compiled_types import T, get_context, no_compiled_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
@@ -201,8 +201,8 @@ class EnvGet(AbstractExpression):
             check_source_language(
                 self.categories.get('others', None)
                 or all(self.categories.get(cat, None) for cat in ctx.ref_cats),
-                "Categories for env.get do not contain mappings for all "
-                "categories"
+                'Categories for env.get do not contain mappings for all'
+                ' categories'
             )
 
             check_source_language(
