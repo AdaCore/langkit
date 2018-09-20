@@ -4,7 +4,7 @@ import itertools
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
-    StructType, UserField as _UserField, T
+    StructType, UserField as _UserField, T, resolve_type
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
@@ -1035,6 +1035,12 @@ class _BuiltinValue(object):
     def _resolve(self):
         return self._resolver()
 
+    @classmethod
+    def _enum_value_resolver(cls, enum_type_name, value_name):
+        return cls(
+            lambda:
+            resolve_type(getattr(T, enum_type_name)).resolve_value(value_name))
+
 
 class LookupKind(_BuiltinType):
     """
@@ -1042,17 +1048,9 @@ class LookupKind(_BuiltinType):
     """
     _name = names.Name('Lookup_Kind')
 
-    recursive = _BuiltinValue(
-        lambda: LookupKind._resolve().resolve_value('recursive')
-    )
-
-    flat = _BuiltinValue(
-        lambda: LookupKind._resolve().resolve_value('flat')
-    )
-
-    minimal = _BuiltinValue(
-        lambda: LookupKind._resolve().resolve_value('minimal')
-    )
+    recursive = _BuiltinValue._enum_value_resolver('LookupKind', 'recursive')
+    flat = _BuiltinValue._enum_value_resolver('LookupKind', 'flat')
+    minimal = _BuiltinValue._enum_value_resolver('LookupKind', 'minimal')
 
 
 class AnalysisUnitKind(_BuiltinType):
@@ -1061,11 +1059,10 @@ class AnalysisUnitKind(_BuiltinType):
     """
     _name = names.Name('Analysis_Unit_Kind')
 
-    unit_specification = _BuiltinValue(
-        lambda:
-        AnalysisUnitKind._resolve().resolve_value('unit_specification'))
-    unit_body = _BuiltinValue(
-        lambda: AnalysisUnitKind._resolve().resolve_value('unit_body'))
+    unit_specification = _BuiltinValue._enum_value_resolver(
+        'AnalysisUnitKind', 'unit_specification')
+    unit_body = _BuiltinValue._enum_value_resolver(
+        'AnalysisUnitKind', 'unit_body')
 
 
 class AnalysisUnit(_BuiltinType):
