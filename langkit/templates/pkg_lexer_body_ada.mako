@@ -22,7 +22,7 @@ package body ${ada_lib_name}.Lexer is
 
    procedure Extract_Tokens
      (Input       : Lexer_Input;
-      Tab_Stop    : Positive;
+      Tab_Stop    : Positive := ${ctx.default_tab_stop};
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
