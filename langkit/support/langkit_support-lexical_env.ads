@@ -100,6 +100,8 @@ package Langkit_Support.Lexical_Env is
      (Ref_Categories'Length > 32,
       "Categories has to fit in a 32 bits Integer");
 
+   function Image (Cats : Ref_Categories) return Text_Type;
+
    pragma Suppress (Container_Checks);
    --  Remove container checks for standard containers
 

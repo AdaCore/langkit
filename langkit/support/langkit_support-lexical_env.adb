@@ -97,18 +97,20 @@ package body Langkit_Support.Lexical_Env is
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
 
-   function Image (Cats : Ref_Categories) return String;
-   pragma Unreferenced (Image);
-   function Image (Cats : Ref_Categories) return String is
-      Ret : Unbounded_String;
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Cats : Ref_Categories) return Text_Type is
+      Ret : Unbounded_Text_Type;
    begin
       Append (Ret, "(");
 
       for Cat in Ref_Category'Range loop
-         Append (Ret, Cat'Image & " => " & Cats (Cat)'Image & ", ");
+         Append (Ret, To_Text (Cat'Image & " => " & Cats (Cat)'Image & ", "));
       end loop;
       Append (Ret, ")");
-      return To_String (Ret);
+      return To_Text (Ret);
    end Image;
 
    ---------------------------
