@@ -619,18 +619,12 @@ package body Langkit_Support.Lexical_Env is
          end if;
 
          if Self.Categories /= All_Cats
-           and then Categories /= All_Cats
+            and then Categories /= All_Cats
+            and then not (for some C
+                          of Ref_Categories'(Categories and Self.Categories)
+                          => C)
          then
-            declare
-               Cond : constant Boolean :=
-                 (for some C of
-                    Ref_Categories'(Categories and Self.Categories) => C);
-            begin
-               if not Cond
-               then
-                  return;
-               end if;
-            end;
+            return;
          end if;
 
          Self.Being_Visited := True;
