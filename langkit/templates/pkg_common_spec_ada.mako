@@ -52,7 +52,7 @@ package ${ada_lib_name}.Common is
      (${', '.join(cls.ada_kind_name
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
-   --  AST node concrete types
+   --  Type for concrete nodes
 
    for ${root_node_kind_name} use
      (${', '.join('{} => {}'.format(cls.ada_kind_name,
@@ -69,6 +69,7 @@ package ${ada_lib_name}.Common is
             ${root_node_kind_name} range
                ${subclasses[0].ada_kind_name}
                .. ${subclasses[-1].ada_kind_name};
+         --% no-document: True
       % endif
    % endfor
 
@@ -111,6 +112,8 @@ package ${ada_lib_name}.Common is
                                      lexer.tokens.token_to_family[t].ada_name)
                    for t in tokens)});
    --  Associate a token family to all token kinds
+   --
+   --% document-value: False
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}
