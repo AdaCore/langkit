@@ -62,6 +62,32 @@ package ${ada_lib_name}.Iterators is
    subtype ${pred_ref} is ${root_entity.api_name}_Predicate_References.Ref;
    --  Ref-counted reference to a predicate
 
+   type ${pred_ref}_Array is array (Positive range <>) of ${pred_ref};
+
+   function "and" (Left, Right : ${pred_ref}) return ${pred_ref};
+   --  Return a predicate that accepts only nodes that are accepted by both
+   --  Left and Right.
+   --
+   --% belongs-to: ${pred_ref}
+
+   function "or" (Left, Right : ${pred_ref}) return ${pred_ref};
+   --  Return a predicate that accepts only nodes that are accepted by Left
+   --  or Right.
+   --
+   --% belongs-to: ${pred_ref}
+
+   function For_All (Predicates : ${pred_ref}_Array) return ${pred_ref};
+   --  Return a predicate that accepts only nodes that are accepted by all
+   --  given ``Predicates``.
+   --
+   --% belongs-to: ${pred_ref}
+
+   function For_Some (Predicates : ${pred_ref}_Array) return ${pred_ref};
+   --  Return a predicate that accepts only nodes that are accepted by at least
+   --  one of the given ``Predicates``.
+   --
+   --% belongs-to: ${pred_ref}
+
    ---------------------------
    -- Node search functions --
    ---------------------------
@@ -161,6 +187,22 @@ private
    --------------------------
    -- Predicates internals --
    --------------------------
+
+   type For_All_Predicate (N : Natural) is new ${pred_iface} with record
+      Predicates : ${pred_ref}_Array (1 .. N);
+   end record;
+
+   overriding function Evaluate
+     (P : in out For_All_Predicate;
+      N : ${root_entity.api_name}) return Boolean;
+
+   type For_Some_Predicate (N : Natural) is new ${pred_iface} with record
+      Predicates : ${pred_ref}_Array (1 .. N);
+   end record;
+
+   overriding function Evaluate
+     (P : in out For_Some_Predicate;
+      N : ${root_entity.api_name}) return Boolean;
 
    type Kind_Predicate is new ${pred_iface} with record
       Kind : ${root_node_kind_name};

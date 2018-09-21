@@ -2,16 +2,40 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
+with Ada.Containers.Vectors;
+with Ada.Strings.Wide_Wide_Unbounded;
+
 <%
    pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
    pred_ref = '{}_Predicate'.format(root_entity.api_name)
 %>
 
-with Ada.Strings.Wide_Wide_Unbounded;
-
 ${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Iterators is
+
+   package Predicate_Vectors is new Ada.Containers.Vectors
+     (Index_Type   => Positive,
+      Element_Type => ${pred_ref},
+      "="          => ${root_entity.api_name}_Predicate_References."=");
+
+   function To_Array
+     (Predicates : Predicate_Vectors.Vector) return ${pred_ref}_Array;
+
+   --------------
+   -- To_Array --
+   --------------
+
+   function To_Array
+     (Predicates : Predicate_Vectors.Vector) return ${pred_ref}_Array
+   is
+   begin
+      return Result : ${pred_ref}_Array (1 .. Natural (Predicates.Length)) do
+         for I in Result'Range loop
+            Result (I) := Predicates.Element (I);
+         end loop;
+      end return;
+   end To_Array;
 
    --------------
    -- Traverse --
@@ -25,6 +49,80 @@ package body ${ada_lib_name}.Iterators is
            (Root.As_${root_entity.api_name}, Result);
       end return;
    end Traverse;
+
+   -----------
+   -- "and" --
+   -----------
+
+   function "and" (Left, Right : ${pred_ref}) return ${pred_ref} is
+   begin
+      return For_All ((Left, Right));
+   end "and";
+
+   ----------
+   -- "or" --
+   ----------
+
+   function "or" (Left, Right : ${pred_ref}) return ${pred_ref} is
+   begin
+      return For_Some ((Left, Right));
+   end "or";
+
+   -------------
+   -- For_All --
+   -------------
+
+   function For_All (Predicates : ${pred_ref}_Array) return ${pred_ref} is
+      Preds : Predicate_Vectors.Vector;
+   begin
+      --  Flatten sub-predicates that are themselves For_All predicates in
+      --  Predicates.
+      for P of Predicates loop
+         if P.Unchecked_Get.all in For_All_Predicate'Class then
+            for Sub_P of For_All_Predicate (P.Unchecked_Get.all).Predicates
+            loop
+               Preds.Append (Sub_P);
+            end loop;
+         else
+            Preds.Append (P);
+         end if;
+      end loop;
+
+      return Result : ${pred_ref} do
+         Result.Set (For_All_Predicate'
+           (${pred_iface} with
+            N          => Natural (Preds.Length),
+            Predicates => To_Array (Preds)));
+      end return;
+   end For_All;
+
+   --------------
+   -- For_Some --
+   --------------
+
+   function For_Some (Predicates : ${pred_ref}_Array) return ${pred_ref} is
+      Preds : Predicate_Vectors.Vector;
+   begin
+      --  Flatten sub-predicates that are themselves For_Some predicates in
+      --  Predicates.
+      for P of Predicates loop
+         if P.Unchecked_Get.all in For_Some_Predicate'Class then
+            for Sub_P of For_Some_Predicate (P.Unchecked_Get.all).Predicates
+            loop
+               Preds.Append (Sub_P);
+            end loop;
+         else
+            Preds.Append (P);
+         end if;
+      end loop;
+
+      return Result : ${pred_ref} do
+         Result.Set (For_Some_Predicate'
+           (${pred_iface} with
+            N          => Natural (Preds.Length),
+            Predicates => To_Array (Preds)));
+      end return;
+   end For_Some;
 
    -------------
    -- Kind_Is --
@@ -194,6 +292,38 @@ package body ${ada_lib_name}.Iterators is
    function Get_Child
      (N : ${root_entity.api_name}; I : Natural) return ${root_entity.api_name}
    is (Child (N, I));
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out For_All_Predicate;
+      N : ${root_entity.api_name}) return Boolean is
+   begin
+      for Predicate of P.Predicates loop
+         if not Predicate.Unchecked_Get.Evaluate (N) then
+            return False;
+         end if;
+      end loop;
+      return True;
+   end Evaluate;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out For_Some_Predicate;
+      N : ${root_entity.api_name}) return Boolean is
+   begin
+      for Predicate of P.Predicates loop
+         if Predicate.Unchecked_Get.Evaluate (N) then
+            return True;
+         end if;
+      end loop;
+      return False;
+   end Evaluate;
 
    --------------
    -- Evaluate --
