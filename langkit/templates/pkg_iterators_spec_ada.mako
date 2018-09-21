@@ -3,6 +3,7 @@
 with GNATCOLL.Refcount;
 
 with Langkit_Support.Iterators;
+with Langkit_Support.Text; use Langkit_Support.Text;
 private with Langkit_Support.Tree_Traversal_Iterator;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
@@ -17,6 +18,10 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 package ${ada_lib_name}.Iterators is
 
+   --------------------
+   -- Iterators core --
+   --------------------
+
    package ${root_entity.api_name}_Iterators is new Langkit_Support.Iterators
      (Element_Type  => ${root_entity.api_name},
       Element_Array => ${root_entity.array.api_name});
@@ -30,29 +35,9 @@ package ${ada_lib_name}.Iterators is
    --  Return an iterator that yields all nodes under ``Root`` (included) in a
    --  prefix DFS (depth first search) fashion.
 
-   ------------------------------------
-   -- Local function-based iterators --
-   ------------------------------------
-
-   function Find
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate :
-        access function (N : ${root_entity.api_name}) return Boolean := null)
-      return Traverse_Iterator'Class;
-   --  Return an iterator that yields all nodes under ``Root`` (included) that
-   --  satisfy the ``Predicate`` predicate.
-
-   function Find_First
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate :
-        access function (N : ${root_entity.api_name}) return Boolean := null)
-      return ${root_entity.api_name};
-   --  Return the first node found under ``Root`` (included) that satisfies the
-   --  given ``Predicate``. Return a null node if there is no such node.
-
-   -------------------------------
-   -- Predicate-based iterators --
-   -------------------------------
+   ---------------------
+   -- Predicates core --
+   ---------------------
 
    type ${pred_type} is interface;
    --  Predicate on nodes.
@@ -73,8 +58,17 @@ package ${ada_lib_name}.Iterators is
    subtype ${pred_ref} is ${root_entity.api_name}_Predicate_References.Ref;
    --  Ref-counted reference to a predicate
 
-   function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref};
-   --  Return a predicate that accepts only nodes of the given ``Kind``
+   ---------------------------
+   -- Node search functions --
+   ---------------------------
+
+   function Find
+     (Root      : ${root_entity.api_name}'Class;
+      Predicate :
+        access function (N : ${root_entity.api_name}) return Boolean := null)
+      return Traverse_Iterator'Class;
+   --  Return an iterator that yields all nodes under ``Root`` (included) that
+   --  satisfy the ``Predicate`` predicate.
 
    function Find
      (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
@@ -83,12 +77,34 @@ package ${ada_lib_name}.Iterators is
    --  satisfy the ``Predicate`` predicate.
 
    function Find_First
+     (Root      : ${root_entity.api_name}'Class;
+      Predicate :
+        access function (N : ${root_entity.api_name}) return Boolean := null)
+      return ${root_entity.api_name};
+   --  Return the first node found under ``Root`` (included) that satisfies the
+   --  given ``Predicate``. Return a null node if there is no such node.
+
+   function Find_First
      (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
       return ${root_entity.api_name};
    --  Return the first node found under ``Root`` (included) that satisfies the
    --  given ``Predicate``. Return a null node if there is no such node.
 
+   ----------------
+   -- Predicates --
+   ----------------
+
+   function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref};
+   --  Return a predicate that accepts only nodes of the given ``Kind``
+
+   function Text_Is (Text : Text_Type) return ${pred_ref};
+   --  Return a predicate that accepts only nodes that match the given ``Text``
+
 private
+
+   ------------------------
+   -- Iterator internals --
+   ------------------------
 
    function Get_Parent
      (N : ${root_entity.api_name}) return ${root_entity.api_name};
@@ -136,6 +152,10 @@ private
      (It      : in out Local_Find_Iterator;
       Element : out ${root_entity.api_name}) return Boolean;
 
+   --------------------------
+   -- Predicates internals --
+   --------------------------
+
    type Kind_Predicate is new ${pred_type} with
    record
       Kind : ${root_node_kind_name};
@@ -144,5 +164,14 @@ private
 
    overriding function Evaluate
      (P : in out Kind_Predicate; N : ${root_entity.api_name}) return Boolean;
+
+   type Text_Predicate is new ${pred_type} with
+   record
+      Text : Unbounded_Text_Type;
+   end record;
+   --  Predicate that returns true for all nodes that match some text
+
+   overriding function Evaluate
+     (P : in out Text_Predicate; N : ${root_entity.api_name}) return Boolean;
 
 end ${ada_lib_name}.Iterators;

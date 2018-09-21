@@ -5,6 +5,8 @@
    pred_ref = '{}_Predicate'.format(root_entity.api_name)
 %>
 
+with Ada.Strings.Wide_Wide_Unbounded;
+
 package body ${ada_lib_name}.Iterators is
 
    --------------
@@ -30,6 +32,18 @@ package body ${ada_lib_name}.Iterators is
          Result.Set (Kind_Predicate'(${pred_type} with Kind => Kind));
       end return;
    end Kind_Is;
+
+   -------------
+   -- Text_Is --
+   -------------
+
+   function Text_Is (Text : Text_Type) return ${pred_ref} is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set (Text_Predicate'(${pred_type}
+                     with Text => To_Unbounded_Text (Text)));
+      end return;
+   end Text_Is;
 
    ----------
    -- Next --
@@ -185,6 +199,20 @@ package body ${ada_lib_name}.Iterators is
      (P : in out Kind_Predicate; N : ${root_entity.api_name}) return Boolean is
    begin
       return Kind (N) = P.Kind;
+   end Evaluate;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out Text_Predicate; N : ${root_entity.api_name}) return Boolean
+   is
+      use Ada.Strings.Wide_Wide_Unbounded;
+   begin
+      return (if N.Is_Null
+              then P.Text = ""
+              else N.Text = P.Text);
    end Evaluate;
 
 end ${ada_lib_name}.Iterators;
