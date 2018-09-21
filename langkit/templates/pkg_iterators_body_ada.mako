@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%
-   pred_type = '{}_Predicate_Type'.format(root_entity.api_name)
+   pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
    pred_ref = '{}_Predicate'.format(root_entity.api_name)
 %>
 
@@ -29,7 +29,7 @@ package body ${ada_lib_name}.Iterators is
    function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref} is
    begin
       return Result : ${pred_ref} do
-         Result.Set (Kind_Predicate'(${pred_type} with Kind => Kind));
+         Result.Set (Kind_Predicate'(${pred_iface} with Kind => Kind));
       end return;
    end Kind_Is;
 
@@ -40,7 +40,7 @@ package body ${ada_lib_name}.Iterators is
    function Text_Is (Text : Text_Type) return ${pred_ref} is
    begin
       return Result : ${pred_ref} do
-         Result.Set (Text_Predicate'(${pred_type}
+         Result.Set (Text_Predicate'(${pred_iface}
                      with Text => To_Unbounded_Text (Text)));
       end return;
    end Text_Is;

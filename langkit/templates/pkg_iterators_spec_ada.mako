@@ -12,7 +12,7 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 --  This package provides an interface to work with iterators on nodes
 
 <%
-   pred_type = '{}_Predicate_Type'.format(root_entity.api_name)
+   pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
    pred_ref = '{}_Predicate'.format(root_entity.api_name)
 %>
 
@@ -39,7 +39,7 @@ package ${ada_lib_name}.Iterators is
    -- Predicates core --
    ---------------------
 
-   type ${pred_type} is interface;
+   type ${pred_iface} is interface;
    --  Predicate on nodes.
    --
    --  Useful predicates often rely on values from some context, so predicates
@@ -48,12 +48,12 @@ package ${ada_lib_name}.Iterators is
    --  code and some data it needs.
 
    function Evaluate
-     (P : in out ${pred_type};
+     (P : in out ${pred_iface};
       N : ${root_entity.api_name}) return Boolean is abstract;
    --  Return the value of the predicate for the ``N`` node
 
    package ${root_entity.api_name}_Predicate_References is new
-      GNATCOLL.Refcount.Shared_Pointers (${pred_type}'Class);
+      GNATCOLL.Refcount.Shared_Pointers (${pred_iface}'Class);
 
    subtype ${pred_ref} is ${root_entity.api_name}_Predicate_References.Ref;
    --  Ref-counted reference to a predicate
@@ -156,8 +156,7 @@ private
    -- Predicates internals --
    --------------------------
 
-   type Kind_Predicate is new ${pred_type} with
-   record
+   type Kind_Predicate is new ${pred_iface} with record
       Kind : ${root_node_kind_name};
    end record;
    --  Predicate that returns true for all nodes of some kind
@@ -165,8 +164,7 @@ private
    overriding function Evaluate
      (P : in out Kind_Predicate; N : ${root_entity.api_name}) return Boolean;
 
-   type Text_Predicate is new ${pred_type} with
-   record
+   type Text_Predicate is new ${pred_iface} with record
       Text : Unbounded_Text_Type;
    end record;
    --  Predicate that returns true for all nodes that match some text
