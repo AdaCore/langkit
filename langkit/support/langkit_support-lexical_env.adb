@@ -1348,7 +1348,7 @@ package body Langkit_Support.Lexical_Env is
          return null;
       end if;
 
-      --  If we fond a rebindable parent, then we will shed all rebindings
+      --  If we found a rebindable parent, then we will shed all rebindings
       --  between the top of the rebinding stack and the corresponding
       --  rebinding.
       while Result /= null and then Result.Old_Env /= First_Rebindable_Parent
