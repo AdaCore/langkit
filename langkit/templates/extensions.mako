@@ -17,9 +17,9 @@
 ## second tuple member is true. For convenience, None items and duplicate
 ## packages are allowed (and filtered out) in the top-level list.
 <%def name="with_clauses(packages)">
-   % for pkg, use_clause in sorted(set(packages) - {None}):
+   % for pkg, use_clause, is_private in sorted(set(packages) - {None}):
       % if pkg:
-         with ${pkg};
+         ${'private' if is_private else ''} with ${pkg};
          % if use_clause:
             use ${pkg};
          % endif
