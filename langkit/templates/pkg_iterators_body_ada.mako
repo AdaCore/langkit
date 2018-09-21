@@ -1,11 +1,15 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 <%
    pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
    pred_ref = '{}_Predicate'.format(root_entity.api_name)
 %>
 
 with Ada.Strings.Wide_Wide_Unbounded;
+
+${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Iterators is
 
@@ -214,5 +218,7 @@ package body ${ada_lib_name}.Iterators is
               then P.Text = ""
               else N.Text = P.Text);
    end Evaluate;
+
+   ${exts.include_extension(ctx.ext('iterators', 'pred_bodies'))}
 
 end ${ada_lib_name}.Iterators;

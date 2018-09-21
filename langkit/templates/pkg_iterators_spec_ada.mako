@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 with GNATCOLL.Refcount;
 
 with Langkit_Support.Iterators;
@@ -8,6 +10,8 @@ private with Langkit_Support.Tree_Traversal_Iterator;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
+
+${exts.with_clauses(with_clauses)}
 
 --  This package provides an interface to work with iterators on nodes
 
@@ -100,6 +104,8 @@ package ${ada_lib_name}.Iterators is
    function Text_Is (Text : Text_Type) return ${pred_ref};
    --  Return a predicate that accepts only nodes that match the given ``Text``
 
+   ${exts.include_extension(ctx.ext('iterators', 'pred_public_decls'))}
+
 private
 
    ------------------------
@@ -171,5 +177,7 @@ private
 
    overriding function Evaluate
      (P : in out Text_Predicate; N : ${root_entity.api_name}) return Boolean;
+
+   ${exts.include_extension(ctx.ext('iterators', 'pred_private_decls'))}
 
 end ${ada_lib_name}.Iterators;
