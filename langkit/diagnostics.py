@@ -28,8 +28,10 @@ class Diagnostics(object):
     be called by manage before functions depending on knowing the language
     source dir can be called.
     """
-    lang_source_dir = os.environ.get('LANGKIT_LANG_SOURCE_DIR',
-                                     '<invalid dir>')
+    lang_source_dir = (
+        os.path.abspath(os.environ['LANGKIT_LANG_SOURCE_DIR'])
+        if 'LANGKIT_LANG_SOURCE_DIR' in os.environ else
+        '<invalid dir>')
     has_pending_error = False
     _is_under_langkit_cache = {}
 
