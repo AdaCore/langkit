@@ -34,7 +34,7 @@ pragma Warnings (On, "referenced");
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 
 ${(exts.with_clauses(with_clauses + [
-   ((ctx.default_unit_provider.unit_fqn, False)
+   ((ctx.default_unit_provider.unit_fqn, False, False)
     if ctx.default_unit_provider else None),
 ]))}
 

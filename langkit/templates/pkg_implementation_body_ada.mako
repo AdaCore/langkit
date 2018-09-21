@@ -45,9 +45,9 @@ with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Introspection;
 
 ${(exts.with_clauses(with_clauses + [
-   ((ctx.env_hook_subprogram.unit_fqn, False)
+   ((ctx.env_hook_subprogram.unit_fqn, False, False)
     if ctx.env_hook_subprogram else None),
-   ((ctx.symbol_canonicalizer.unit_fqn, False)
+   ((ctx.symbol_canonicalizer.unit_fqn, False, False)
     if ctx.symbol_canonicalizer else None)
 ]))}
 

@@ -12,7 +12,7 @@ with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
-   ((ctx.symbol_canonicalizer.unit_fqn, False)
+   ((ctx.symbol_canonicalizer.unit_fqn, False, False)
     if ctx.symbol_canonicalizer else None),
 ]))}
 

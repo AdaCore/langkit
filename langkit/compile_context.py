@@ -683,7 +683,7 @@ class CompileCtx(object):
         for each source file in the generated library. Used to add WITH/USE
         clauses required by extensions. See the `add_with_clause` method.
 
-        :type: dict[(str, str), list[(str, bool)]
+        :type: dict[(str, str), list[(str, bool, bool)]
         """
 
         self.sorted_parse_fields = None
@@ -714,7 +714,8 @@ class CompileCtx(object):
         :type: set[names.Name]
         """
 
-    def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False):
+    def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
+                        is_private=False):
         """
         Add a WITH clause for `to_pkg` in the `source_kind` part of the
         `from_pkg` generated package.
@@ -723,10 +724,16 @@ class CompileCtx(object):
         :param str source_kind: Kind of source file in which the WITH clause
             must be added. Must be eiher ADA_SPEC or ADA_BODY.
         :param str to_pkg: Name of the Ada package to WITH.
-        :param bool use_clause: Whethet to generate the corresponding USE
+        :param bool use_clause: Whether to generate the corresponding USE
             clause.
+        :param bool is_private: Whether to generate a "private with" clause.
         """
-        self.with_clauses[(from_pkg, source_kind)].append((to_pkg, use_clause))
+        assert not use_clause or not is_private, (
+            'Cannot generate a private with clause and a use clause for {}'
+            ' (from {}:{})'
+            .format(to_pkg, source_kind, from_pkg))
+        self.with_clauses[(from_pkg, source_kind)].append(
+            (to_pkg, use_clause, is_private))
 
     @property
     def sorted_logic_binders(self):
