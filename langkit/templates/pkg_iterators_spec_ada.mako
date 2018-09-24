@@ -66,13 +66,13 @@ package ${ada_lib_name}.Iterators is
 
    function "and" (Left, Right : ${pred_ref}) return ${pred_ref};
    --  Return a predicate that accepts only nodes that are accepted by both
-   --  Left and Right.
+   --  ``Left`` and ``Right``.
    --
    --% belongs-to: ${pred_ref}
 
    function "or" (Left, Right : ${pred_ref}) return ${pred_ref};
-   --  Return a predicate that accepts only nodes that are accepted by Left
-   --  or Right.
+   --  Return a predicate that accepts only nodes that are accepted by ``Left``
+   --  or ``Right``.
    --
    --% belongs-to: ${pred_ref}
 
@@ -126,9 +126,13 @@ package ${ada_lib_name}.Iterators is
 
    function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref};
    --  Return a predicate that accepts only nodes of the given ``Kind``
+   --
+   --% belongs-to: ${pred_ref}
 
    function Text_Is (Text : Text_Type) return ${pred_ref};
    --  Return a predicate that accepts only nodes that match the given ``Text``
+   --
+   --% belongs-to: ${pred_ref}
 
    ${exts.include_extension(ctx.ext('iterators', 'pred_public_decls'))}
 
