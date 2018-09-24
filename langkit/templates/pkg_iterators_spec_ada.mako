@@ -64,6 +64,12 @@ package ${ada_lib_name}.Iterators is
 
    type ${pred_ref}_Array is array (Positive range <>) of ${pred_ref};
 
+   function "not" (Predicate : ${pred_ref}) return ${pred_ref};
+   --  Return a predicate that accepts only nodes that are *not* accepted by
+   --  ``Predicate``.
+   --
+   --% belongs-to: ${pred_ref}
+
    function "and" (Left, Right : ${pred_ref}) return ${pred_ref};
    --  Return a predicate that accepts only nodes that are accepted by both
    --  ``Left`` and ``Right``.
@@ -191,6 +197,14 @@ private
    --------------------------
    -- Predicates internals --
    --------------------------
+
+   type Not_Predicate is new ${pred_iface} with record
+      Predicate : ${pred_ref};
+   end record;
+
+   overriding function Evaluate
+     (P : in out Not_Predicate;
+      N : ${root_entity.api_name}) return Boolean;
 
    type For_All_Predicate (N : Natural) is new ${pred_iface} with record
       Predicates : ${pred_ref}_Array (1 .. N);
