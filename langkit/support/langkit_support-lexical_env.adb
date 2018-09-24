@@ -401,15 +401,16 @@ package body Langkit_Support.Lexical_Env is
       end if;
       return Wrap
         (new Lexical_Env_Type'
-           (Kind               => Primary,
-            Parent             => Parent,
-            Transitive_Parent  => Transitive_Parent,
-            Node               => Node,
-            Referenced_Envs    => <>,
-            Map                => new Internal_Envs.Map,
-            Rebindings_Pool    => null,
-            Lookup_Cache_Valid => True,
-            Lookup_Cache       => Lookup_Cache_Maps.Empty_Map),
+           (Kind                     => Primary,
+            Parent                   => Parent,
+            Transitive_Parent        => Transitive_Parent,
+            Node                     => Node,
+            Referenced_Envs          => <>,
+            Map                      => new Internal_Envs.Map,
+            Rebindings_Pool          => null,
+            Lookup_Cache_Valid       => True,
+            Lookup_Cache             => Lookup_Cache_Maps.Empty_Map,
+            Rebindings_Assoc_Ref_Env => -1),
          Owner => Owner);
    end Create_Lexical_Env;
 
@@ -474,11 +475,12 @@ package body Langkit_Support.Lexical_Env is
    ---------------
 
    procedure Reference
-     (Self            : Lexical_Env;
-      Referenced_From : Node_Type;
-      Resolver        : Lexical_Env_Resolver;
-      Kind            : Ref_Kind := Normal;
-      Categories      : Ref_Categories := All_Cats)
+     (Self             : Lexical_Env;
+      Referenced_From  : Node_Type;
+      Resolver         : Lexical_Env_Resolver;
+      Kind             : Ref_Kind := Normal;
+      Categories       : Ref_Categories := All_Cats;
+      Rebindings_Assoc : Boolean := False)
    is
       Refd_Env : Referenced_Env :=
         (Kind,
@@ -490,7 +492,20 @@ package body Langkit_Support.Lexical_Env is
       end if;
       Resolve (Refd_Env.Getter);
       Refd_Env.State := Active;
-      Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Refd_Env);
+
+      Referenced_Envs_Vectors.Append
+        (Self.Env.Referenced_Envs, Refd_Env);
+
+      if Rebindings_Assoc then
+         if Self.Env.Rebindings_Assoc_Ref_Env /= -1 then
+            Raise_Property_Error
+              ("Env already has a rebindings associated reference env");
+         end if;
+
+         Self.Env.Rebindings_Assoc_Ref_Env :=
+           Self.Env.Referenced_Envs.Last_Index;
+      end if;
+
       Self.Env.Lookup_Cache_Valid := False;
    end Reference;
 
@@ -499,10 +514,11 @@ package body Langkit_Support.Lexical_Env is
    ---------------
 
    procedure Reference
-     (Self         : Lexical_Env;
-      To_Reference : Lexical_Env;
-      Kind         : Ref_Kind := Normal;
-      Categories   : Ref_Categories := All_Cats)
+     (Self             : Lexical_Env;
+      To_Reference     : Lexical_Env;
+      Kind             : Ref_Kind := Normal;
+      Categories       : Ref_Categories := All_Cats;
+      Rebindings_Assoc : Boolean := False)
    is
       Ref : constant Referenced_Env :=
         (Kind, Simple_Env_Getter (To_Reference), False, Active, Categories);
@@ -511,6 +527,10 @@ package body Langkit_Support.Lexical_Env is
          return;
       end if;
       Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Ref);
+      if Rebindings_Assoc then
+         Self.Env.Rebindings_Assoc_Ref_Env :=
+           Self.Env.Referenced_Envs.Last_Index;
+      end if;
       Self.Env.Lookup_Cache_Valid := False;
    end Reference;
 
@@ -834,9 +854,7 @@ package body Langkit_Support.Lexical_Env is
             declare
                Parent_Env        : Lexical_Env := Parent (Self);
                Parent_Rebindings : constant Env_Rebindings :=
-                 (if Env /= Self
-                  then Shed_Rebindings (Parent_Env, Current_Rebindings)
-                  else Current_Rebindings);
+                 Shed_Rebindings (Parent_Env, Current_Rebindings);
             begin
                if Has_Trace then
                   Traces.Trace
@@ -1317,6 +1335,7 @@ package body Langkit_Support.Lexical_Env is
       Rebindings : Env_Rebindings) return Env_Rebindings
    is
       First_Rebindable_Parent : Lexical_Env;
+      Assoc_Ref_Env           : Lexical_Env;
       Result                  : Env_Rebindings := Rebindings;
    begin
       --  If there is no bindings, nothing to do here
@@ -1334,6 +1353,28 @@ package body Langkit_Support.Lexical_Env is
            (Env_Node (First_Rebindable_Parent) = No_Node
             or else not Is_Rebindable (Env_Node (First_Rebindable_Parent)))
       loop
+
+         --  Search for an environment that would be associated to this one and
+         --  that is rebindable.
+         if First_Rebindable_Parent.Kind = Primary and then
+           First_Rebindable_Parent.Env.Rebindings_Assoc_Ref_Env /= -1
+         then
+            Assoc_Ref_Env := Get_Env
+              (First_Rebindable_Parent.Env.Referenced_Envs.Get_Access
+                 (First_Rebindable_Parent.Env.Rebindings_Assoc_Ref_Env)
+               .Getter);
+
+            declare
+               N : Node_Type renames Env_Node (Assoc_Ref_Env);
+            begin
+               if N /= No_Node and then Is_Rebindable (N) then
+                  Dec_Ref (First_Rebindable_Parent);
+                  First_Rebindable_Parent := Assoc_Ref_Env;
+                  exit;
+               end if;
+            end;
+         end if;
+
          declare
             Next : constant Lexical_Env := Parent (First_Rebindable_Parent);
          begin

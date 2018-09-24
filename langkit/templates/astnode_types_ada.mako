@@ -314,7 +314,8 @@
                ${ref_env.kind.value},
                ${("({} => True, others => False)"
                   .format(ref_env.category.camel_with_underscores)
-                  if ref_env.category else "All_Cats")});
+                  if ref_env.category else "All_Cats")},
+               ${ref_env.shed_rebindings});
             Dec_Ref (Ref_Env_Nodes);
          end;
 

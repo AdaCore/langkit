@@ -399,11 +399,12 @@ package Langkit_Support.Lexical_Env is
    --  Remove Value from the list of values for the key Key
 
    procedure Reference
-     (Self            : Lexical_Env;
-      Referenced_From : Node_Type;
-      Resolver        : Lexical_Env_Resolver;
-      Kind            : Ref_Kind := Normal;
-      Categories      : Ref_Categories := All_Cats)
+     (Self             : Lexical_Env;
+      Referenced_From  : Node_Type;
+      Resolver         : Lexical_Env_Resolver;
+      Kind             : Ref_Kind := Normal;
+      Categories       : Ref_Categories := All_Cats;
+      Rebindings_Assoc : Boolean := False)
       with Pre => Self.Kind = Primary;
    --  Add a dynamic reference from Self to the lexical environment computed
    --  calling Resolver on Referenced_From. This makes the content of this
@@ -418,10 +419,11 @@ package Langkit_Support.Lexical_Env is
    --      Referenced_From in the file.
 
    procedure Reference
-     (Self         : Lexical_Env;
-      To_Reference : Lexical_Env;
-      Kind         : Ref_Kind := Normal;
-      Categories   : Ref_Categories := All_Cats)
+     (Self             : Lexical_Env;
+      To_Reference     : Lexical_Env;
+      Kind             : Ref_Kind := Normal;
+      Categories       : Ref_Categories := All_Cats;
+      Rebindings_Assoc : Boolean := False)
       with Pre => Self.Kind = Primary;
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
@@ -695,6 +697,8 @@ package Langkit_Support.Lexical_Env is
             --  Whether Cached_Results contains lookup results that can be
             --  currently reused (i.e. whether they are not stale).
 
+            Rebindings_Assoc_Ref_Env : Integer := -1;
+
          when others =>
             Ref_Count : Integer := 1;
             --  Number of owners. It is initially set to 1. When it drops to 0,
@@ -780,15 +784,16 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Kind               => Primary,
-      Parent             => No_Env_Getter,
-      Transitive_Parent  => False,
-      Node               => No_Node,
-      Referenced_Envs    => <>,
-      Map                => Empty_Env_Map'Access,
-      Rebindings_Pool    => null,
-      Lookup_Cache_Valid => False,
-      Lookup_Cache       => Lookup_Cache_Maps.Empty_Map);
+     (Kind                     => Primary,
+      Parent                   => No_Env_Getter,
+      Transitive_Parent        => False,
+      Node                     => No_Node,
+      Referenced_Envs          => <>,
+      Map                      => Empty_Env_Map'Access,
+      Rebindings_Pool          => null,
+      Lookup_Cache_Valid       => False,
+      Lookup_Cache             => Lookup_Cache_Maps.Empty_Map,
+      Rebindings_Assoc_Ref_Env => -1);
 
    --  Because of circular elaboration issues, we cannot call Hash here to
    --  compute the real hash. Using a dummy precomputed one is probably enough.
