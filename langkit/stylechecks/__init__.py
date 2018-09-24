@@ -204,7 +204,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
             if is_comment:
                 if ((self.lines_count > 1 or not is_last) and
                         self.last_end not in ends):
-                    if is_comment and self.lines_count == 1 and not is_last:
+                    if self.lines_count == 1 and not is_last:
                         self.may_be_header = True
                         self.header_context = report.context
                     else:
