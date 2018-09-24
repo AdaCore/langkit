@@ -1102,7 +1102,8 @@ package body ${ada_lib_name}.Implementation is
          Ref_Env_Nodes       : in out ${T.root_node.array.name};
          Resolver            : Lexical_Env_Resolver;
          Kind                : Ref_Kind;
-         Cats                : Ref_Categories);
+         Cats                : Ref_Categories;
+         Shed_Rebindings     : Boolean);
       --  Add referenced environments to Self.Self_Env. Calling this takes an
       --  ownership share for Ref_Env_Nodes.
    % endif
@@ -1230,7 +1231,8 @@ package body ${ada_lib_name}.Implementation is
          Ref_Env_Nodes       : in out ${T.root_node.array.name};
          Resolver            : Lexical_Env_Resolver;
          Kind                : Ref_Kind;
-         Cats                : Ref_Categories)
+         Cats                : Ref_Categories;
+         Shed_Rebindings     : Boolean)
       is
       begin
          for N of Ref_Env_Nodes.Items loop
@@ -1240,7 +1242,7 @@ package body ${ada_lib_name}.Implementation is
                      "attempt to add a referenced environment to a foreign"
                      & " unit";
                end if;
-               Reference (Dest_Env, N, Resolver, Kind, Cats);
+               Reference (Dest_Env, N, Resolver, Kind, Cats, Shed_Rebindings);
             end if;
          end loop;
          Dec_Ref (Ref_Env_Nodes);
