@@ -171,6 +171,11 @@ package ${ada_lib_name}.Iterators is
    --
    --% belongs-to: ${pred_ref}
 
+   function Node_Is_Null return ${pred_ref};
+   --  Return a predicate that accepts only null nodes
+   --
+   --% belongs-to: ${pred_ref}
+
    ${exts.include_extension(ctx.ext('iterators', 'pred_public_decls'))}
 
 private
@@ -268,6 +273,12 @@ private
 
    overriding function Evaluate
      (P : in out Text_Predicate; N : ${root_entity.api_name}) return Boolean;
+
+   type Node_Is_Null_Predicate is new ${pred_iface} with null record;
+
+   overriding function Evaluate
+     (P : in out Node_Is_Null_Predicate;
+      N : ${root_entity.api_name}) return Boolean;
 
    ${exts.include_extension(ctx.ext('iterators', 'pred_private_decls'))}
 
