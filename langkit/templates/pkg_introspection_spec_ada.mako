@@ -2,12 +2,29 @@
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 
+--  This package provides primitives to inspect the structure of parse trees.
+--  It answers questions such as: what is the index of a syntax field in a
+--  node? or conversely, to what syntax field does a couple (index, node kind)
+--  correspond?
+--
+--  For instance, the following code snippet prints the name of the first
+--  syntax field in ``Node``:
+--
+--  .. code-block:: ada
+--
+--     declare
+--        Field_Ref : constant Field_Reference :=
+--           Field_Reference_From_Index (Node.Kind, 1);
+--     begin
+--        Ada.Text_IO.Put_Line (Field_Name (Field_Ref));
+--     end;
+
 package ${ada_lib_name}.Introspection is
 
    Invalid_Field : exception;
 
    ## In a lot of testcases, there is a single concrete node that has no
-   ## field. For these, generates a type that has no valid value.
+   ## field. For these, generate a type that has no valid value.
    type Field_Reference is
       % if ctx.sorted_parse_fields:
          (${', '.join(f.introspection_enum_literal
