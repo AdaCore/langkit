@@ -13,12 +13,40 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 ${exts.with_clauses(with_clauses)}
 
---  This package provides an interface to work with iterators on nodes
-
 <%
    pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
    pred_ref = '{}_Predicate'.format(root_entity.api_name)
 %>
+
+--  This package provides an interface to iterate on nodes in parse trees and
+--  to look for node patterns.
+--
+--  First, as an alternative to ``${ada_lib_name}.Analysis.Traverse``, you can
+--  do:
+--
+--  .. code-block:: ada
+--
+--     declare
+--        It   : Traverse_Iterator := Traverse (My_Unit.Root);
+--        Node : ${root_entity.api_name};
+--     begin
+--        while It.Next (Node) loop
+--           --  Process Node
+--        end loop;
+--     end;
+--
+--  Now, if you are exclusively looking for nodes whose text is either ``foo``
+--  or ``bar``, you can replace the call to ``Traverse`` with the following:
+--
+--  .. code-block:: ada
+--
+--        Find (My_Unit.Root, Text_Is ("foo") or Text_Is ("bar"));
+--
+--  The ``Find``-like functions below take as a second argument a *predicate*,
+--  which is an object that can decide if a node should be processed or not.
+--  This package provides several built-in predicates (``Kind_Is``,
+--  ``Text_Is``, etc.), then you can either define your own, derivating the
+--  ``${pred_iface}`` type, or compose them using Ada's boolean operators.
 
 package ${ada_lib_name}.Iterators is
 
