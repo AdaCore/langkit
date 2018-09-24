@@ -78,6 +78,9 @@ package ${ada_lib_name}.Iterators is
    --  that are mere accesses to a function are not powerful enough. Having a
    --  full interface for this makes it possible to package both the predicate
    --  code and some data it needs.
+   --
+   --  Note that predicates are not thread-safe: make sure you don't use a
+   --  predicate from multiple threads, as they can contain caches.
 
    function Evaluate
      (P : in out ${pred_iface};
