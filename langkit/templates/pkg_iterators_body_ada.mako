@@ -159,6 +159,17 @@ package body ${ada_lib_name}.Iterators is
       end return;
    end Text_Is;
 
+   ------------------
+   -- Node_Is_Null --
+   ------------------
+
+   function Node_Is_Null return ${pred_ref} is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set (Node_Is_Null_Predicate'(${pred_iface} with null record));
+      end return;
+   end Node_Is_Null;
+
    ----------
    -- Next --
    ----------
@@ -370,6 +381,19 @@ package body ${ada_lib_name}.Iterators is
       return (if N.Is_Null
               then P.Text = ""
               else N.Text = P.Text);
+   end Evaluate;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out Node_Is_Null_Predicate;
+      N : ${root_entity.api_name}) return Boolean
+   is
+      pragma Unreferenced (P);
+   begin
+      return N.Is_Null;
    end Evaluate;
 
    ${exts.include_extension(ctx.ext('iterators', 'pred_bodies'))}
