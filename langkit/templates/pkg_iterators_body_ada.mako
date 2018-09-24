@@ -51,6 +51,18 @@ package body ${ada_lib_name}.Iterators is
    end Traverse;
 
    -----------
+   -- "not" --
+   -----------
+
+   function "not" (Predicate : ${pred_ref}) return ${pred_ref} is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set
+           (Not_Predicate'(${pred_iface} with Predicate => Predicate));
+      end return;
+   end "not";
+
+   -----------
    -- "and" --
    -----------
 
@@ -292,6 +304,17 @@ package body ${ada_lib_name}.Iterators is
    function Get_Child
      (N : ${root_entity.api_name}; I : Natural) return ${root_entity.api_name}
    is (Child (N, I));
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out Not_Predicate;
+      N : ${root_entity.api_name}) return Boolean is
+   begin
+      return not P.Predicate.Unchecked_Get.Evaluate (N);
+   end Evaluate;
 
    --------------
    -- Evaluate --
