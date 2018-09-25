@@ -23,7 +23,7 @@ procedure Main is
          begin
             Put_Line ("  " & Image (Sloc)
                       & " -> [" & Image (Sloc_Range (Data (Token))) & "] "
-                      & Text (Token));
+                      & String_Text (Token));
             if Line > 1 then
                if Previous_Tok = Token then
                   Put_Line ("    Same as previous token");
