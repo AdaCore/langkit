@@ -14,8 +14,9 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 ${exts.with_clauses(with_clauses)}
 
 <%
-   pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
-   pred_ref = '{}_Predicate'.format(root_entity.api_name)
+   node = root_entity.api_name
+   pred_iface = '{}_Predicate_Interface'.format(node)
+   pred_ref = '{}_Predicate'.format(node)
 %>
 
 --  This package provides an interface to iterate on nodes in parse trees and
@@ -28,7 +29,7 @@ ${exts.with_clauses(with_clauses)}
 --
 --     declare
 --        It   : Traverse_Iterator := Traverse (My_Unit.Root);
---        Node : ${root_entity.api_name};
+--        Node : ${node};
 --     begin
 --        while It.Next (Node) loop
 --           --  Process Node
@@ -54,16 +55,14 @@ package ${ada_lib_name}.Iterators is
    -- Iterators core --
    --------------------
 
-   package ${root_entity.api_name}_Iterators is new Langkit_Support.Iterators
-     (Element_Type  => ${root_entity.api_name},
+   package ${node}_Iterators is new Langkit_Support.Iterators
+     (Element_Type  => ${node},
       Element_Array => ${root_entity.array.api_name});
 
-   type Traverse_Iterator is new ${root_entity.api_name}_Iterators.Iterator
-      with private;
+   type Traverse_Iterator is new ${node}_Iterators.Iterator with private;
    --  Iterator that yields nodes from a tree
 
-   function Traverse
-     (Root : ${root_entity.api_name}'Class) return Traverse_Iterator'Class;
+   function Traverse (Root : ${node}'Class) return Traverse_Iterator'Class;
    --  Return an iterator that yields all nodes under ``Root`` (included) in a
    --  prefix DFS (depth first search) fashion.
 
@@ -83,14 +82,13 @@ package ${ada_lib_name}.Iterators is
    --  predicate from multiple threads, as they can contain caches.
 
    function Evaluate
-     (P : in out ${pred_iface};
-      N : ${root_entity.api_name}) return Boolean is abstract;
+     (P : in out ${pred_iface}; N : ${node}) return Boolean is abstract;
    --  Return the value of the predicate for the ``N`` node
 
-   package ${root_entity.api_name}_Predicate_References is new
+   package ${node}_Predicate_References is new
       GNATCOLL.Refcount.Shared_Pointers (${pred_iface}'Class);
 
-   subtype ${pred_ref} is ${root_entity.api_name}_Predicate_References.Ref;
+   subtype ${pred_ref} is ${node}_Predicate_References.Ref;
    --  Ref-counted reference to a predicate
 
    type ${pred_ref}_Array is array (Positive range <>) of ${pred_ref};
@@ -130,30 +128,27 @@ package ${ada_lib_name}.Iterators is
    ---------------------------
 
    function Find
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate :
-        access function (N : ${root_entity.api_name}) return Boolean := null)
+     (Root      : ${node}'Class;
+      Predicate : access function (N : ${node}) return Boolean := null)
       return Traverse_Iterator'Class;
    --  Return an iterator that yields all nodes under ``Root`` (included) that
    --  satisfy the ``Predicate`` predicate.
 
    function Find
-     (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
+     (Root : ${node}'Class; Predicate : ${pred_ref}'Class)
       return Traverse_Iterator'Class;
    --  Return an iterator that yields all nodes under ``Root`` (included) that
    --  satisfy the ``Predicate`` predicate.
 
    function Find_First
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate :
-        access function (N : ${root_entity.api_name}) return Boolean := null)
-      return ${root_entity.api_name};
+     (Root      : ${node}'Class;
+      Predicate : access function (N : ${node}) return Boolean := null)
+      return ${node};
    --  Return the first node found under ``Root`` (included) that satisfies the
    --  given ``Predicate``. Return a null node if there is no such node.
 
    function Find_First
-     (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
-      return ${root_entity.api_name};
+     (Root : ${node}'Class; Predicate : ${pred_ref}'Class) return ${node};
    --  Return the first node found under ``Root`` (included) that satisfies the
    --  given ``Predicate``. Return a null node if there is no such node.
 
@@ -184,25 +179,18 @@ private
    -- Iterator internals --
    ------------------------
 
-   function Get_Parent
-     (N : ${root_entity.api_name}) return ${root_entity.api_name};
-
-   function First_Child_Index_For_Traverse
-     (N : ${root_entity.api_name}) return Natural;
-
-   function Last_Child_Index_For_Traverse
-     (N : ${root_entity.api_name}) return Natural;
-
-   function Get_Child
-     (N : ${root_entity.api_name}; I : Natural) return ${root_entity.api_name};
+   function Get_Parent (N : ${node}) return ${node};
+   function First_Child_Index_For_Traverse (N : ${node}) return Natural;
+   function Last_Child_Index_For_Traverse (N : ${node}) return Natural;
+   function Get_Child (N : ${node}; I : Natural) return ${node};
 
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
-     (Node_Type         => ${root_entity.api_name},
-      No_Node           => No_${root_entity.api_name},
+     (Node_Type         => ${node},
+      No_Node           => No_${node},
       Node_Array        => ${root_entity.array.api_name},
       First_Child_Index => First_Child_Index_For_Traverse,
       Last_Child_Index  => Last_Child_Index_For_Traverse,
-      Iterators         => ${root_entity.api_name}_Iterators);
+      Iterators         => ${node}_Iterators);
 
    type Traverse_Iterator is
       new Traversal_Iterators.Traverse_Iterator with null record;
@@ -214,11 +202,10 @@ private
    --  Iterator type for the ``Find`` function
 
    overriding function Next
-     (It      : in out Find_Iterator;
-      Element : out ${root_entity.api_name}) return Boolean;
+     (It : in out Find_Iterator; Element : out ${node}) return Boolean;
 
    type Local_Find_Iterator is new Traverse_Iterator with record
-      Predicate : access function (N : ${root_entity.api_name}) return Boolean;
+      Predicate : access function (N : ${node}) return Boolean;
       --  Predicate used to filter the nodes Traverse_It yields
    end record;
    --  Iterator type for the ``Find`` function that takes an access to
@@ -227,8 +214,7 @@ private
    --  scope of the function.
 
    overriding function Next
-     (It      : in out Local_Find_Iterator;
-      Element : out ${root_entity.api_name}) return Boolean;
+     (It : in out Local_Find_Iterator; Element : out ${node}) return Boolean;
 
    --------------------------
    -- Predicates internals --
@@ -239,24 +225,21 @@ private
    end record;
 
    overriding function Evaluate
-     (P : in out Not_Predicate;
-      N : ${root_entity.api_name}) return Boolean;
+     (P : in out Not_Predicate; N : ${node}) return Boolean;
 
    type For_All_Predicate (N : Natural) is new ${pred_iface} with record
       Predicates : ${pred_ref}_Array (1 .. N);
    end record;
 
    overriding function Evaluate
-     (P : in out For_All_Predicate;
-      N : ${root_entity.api_name}) return Boolean;
+     (P : in out For_All_Predicate; N : ${node}) return Boolean;
 
    type For_Some_Predicate (N : Natural) is new ${pred_iface} with record
       Predicates : ${pred_ref}_Array (1 .. N);
    end record;
 
    overriding function Evaluate
-     (P : in out For_Some_Predicate;
-      N : ${root_entity.api_name}) return Boolean;
+     (P : in out For_Some_Predicate; N : ${node}) return Boolean;
 
    type Kind_Predicate is new ${pred_iface} with record
       Kind : ${root_node_kind_name};
@@ -264,7 +247,7 @@ private
    --  Predicate that returns true for all nodes of some kind
 
    overriding function Evaluate
-     (P : in out Kind_Predicate; N : ${root_entity.api_name}) return Boolean;
+     (P : in out Kind_Predicate; N : ${node}) return Boolean;
 
    type Text_Predicate is new ${pred_iface} with record
       Text : Unbounded_Text_Type;
@@ -272,13 +255,12 @@ private
    --  Predicate that returns true for all nodes that match some text
 
    overriding function Evaluate
-     (P : in out Text_Predicate; N : ${root_entity.api_name}) return Boolean;
+     (P : in out Text_Predicate; N : ${node}) return Boolean;
 
    type Node_Is_Null_Predicate is new ${pred_iface} with null record;
 
    overriding function Evaluate
-     (P : in out Node_Is_Null_Predicate;
-      N : ${root_entity.api_name}) return Boolean;
+     (P : in out Node_Is_Null_Predicate; N : ${node}) return Boolean;
 
    ${exts.include_extension(ctx.ext('iterators', 'pred_private_decls'))}
 
