@@ -289,6 +289,9 @@ package ${ada_lib_name}.Analysis is
    function Text (Unit : Analysis_Unit'Class) return Text_Type;
    ${ada_doc('langkit.unit_text', 3)}
 
+   function String_Text (Unit : Analysis_Unit'Class) return String;
+   --  Like ``Text``, to get the source buffer slice as a string
+
    function Lookup_Token
      (Unit : Analysis_Unit'Class; Sloc : Source_Location)
       return Token_Reference;
