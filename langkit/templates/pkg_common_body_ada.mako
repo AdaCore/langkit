@@ -193,6 +193,13 @@ package body ${ada_lib_name}.Common is
       return Token.TDH.Source_Buffer (RD.Source_First .. RD.Source_Last);
    end Text;
 
+   -----------------
+   -- String_Text --
+   -----------------
+
+   function String_Text (Token : Token_Reference) return String
+   is (Image (Text (Token)));
+
    ----------
    -- Text --
    ----------
@@ -207,12 +214,14 @@ package body ${ada_lib_name}.Common is
       return FD.Source_Buffer.all (FD.Source_First .. LD.Source_Last);
    end Text;
 
-   ----------
-   -- Text --
-   ----------
+   -----------------
+   -- String_Text --
+   -----------------
 
-   function Text (Token : Token_Reference) return String
-   is (Image (Text (Token)));
+   function String_Text (First, Last : Token_Reference) return String is
+   begin
+      return Image (Text (First, Last));
+   end String_Text;
 
    ----------
    -- Kind --
