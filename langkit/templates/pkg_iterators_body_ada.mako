@@ -135,6 +135,38 @@ package body ${ada_lib_name}.Iterators is
       end return;
    end For_Some;
 
+   ----------------------
+   -- For_All_Children --
+   ----------------------
+
+   function For_All_Children
+     (Predicate : ${pred_ref}; Skip_Null : Boolean := True) return ${pred_ref}
+   is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set (For_All_Children_Predicate'
+           (${pred_iface} with
+            Predicate => Predicate,
+            Skip_Null => Skip_Null));
+      end return;
+   end For_All_Children;
+
+   -----------------------
+   -- For_Some_Children --
+   -----------------------
+
+   function For_Some_Children
+     (Predicate : ${pred_ref}; Skip_Null : Boolean := True) return ${pred_ref}
+   is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set (For_Some_Children_Predicate'
+           (${pred_iface} with
+            Predicate => Predicate,
+            Skip_Null => Skip_Null));
+      end return;
+   end For_Some_Children;
+
    -------------
    -- Kind_Is --
    -------------
@@ -342,6 +374,52 @@ package body ${ada_lib_name}.Iterators is
          if Predicate.Unchecked_Get.Evaluate (N) then
             return True;
          end if;
+      end loop;
+      return False;
+   end Evaluate;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out For_All_Children_Predicate; N : ${node}) return Boolean
+   is
+      Child_Pred : ${pred_iface}'Class renames P.Predicate.Unchecked_Get.all;
+   begin
+      for I in 1 .. N.Children_Count loop
+         declare
+            Child : constant ${node} := N.Child (I);
+         begin
+            if (not P.Skip_Null or else not Child.Is_Null)
+               and then not Child_Pred.Evaluate (Child)
+            then
+               return False;
+            end if;
+         end;
+      end loop;
+      return True;
+   end Evaluate;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out For_Some_Children_Predicate; N : ${node}) return Boolean
+   is
+      Child_Pred : ${pred_iface}'Class renames P.Predicate.Unchecked_Get.all;
+   begin
+      for I in 1 .. N.Children_Count loop
+         declare
+            Child : constant ${node} := N.Child (I);
+         begin
+            if (not P.Skip_Null or else not Child.Is_Null)
+               and then Child_Pred.Evaluate (Child)
+            then
+               return True;
+            end if;
+         end;
       end loop;
       return False;
    end Evaluate;

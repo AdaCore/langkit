@@ -123,6 +123,22 @@ package ${ada_lib_name}.Iterators is
    --
    --% belongs-to: ${pred_ref}
 
+   function For_All_Children
+     (Predicate : ${pred_ref}; Skip_Null : Boolean := True) return ${pred_ref};
+   --  Return a predicate that accepts only nodes for which ``Predicate``
+   --  accepts all children. Unless ``Skip_Null`` is false, this does not
+   --  evaluate the predicate on null children.
+   --
+   --% belongs-to: ${pred_ref}
+
+   function For_Some_Children
+     (Predicate : ${pred_ref}; Skip_Null : Boolean := True) return ${pred_ref};
+   --  Return a predicate that accepts only nodes for which ``Predicate``
+   --  accepts at least one child. Unless ``Skip_Null`` is false, this does not
+   --  evaluate the predicate on null children.
+   --
+   --% belongs-to: ${pred_ref}
+
    ---------------------------
    -- Node search functions --
    ---------------------------
@@ -240,6 +256,22 @@ private
 
    overriding function Evaluate
      (P : in out For_Some_Predicate; N : ${node}) return Boolean;
+
+   type For_All_Children_Predicate is new ${pred_iface} with record
+      Predicate : ${pred_ref};
+      Skip_Null : Boolean;
+   end record;
+
+   overriding function Evaluate
+     (P : in out For_All_Children_Predicate; N : ${node}) return Boolean;
+
+   type For_Some_Children_Predicate is new ${pred_iface} with record
+      Predicate : ${pred_ref};
+      Skip_Null : Boolean;
+   end record;
+
+   overriding function Evaluate
+     (P : in out For_Some_Children_Predicate; N : ${node}) return Boolean;
 
    type Kind_Predicate is new ${pred_iface} with record
       Kind : ${root_node_kind_name};
