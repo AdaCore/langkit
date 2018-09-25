@@ -1905,11 +1905,11 @@ package body ${ada_lib_name}.Implementation is
       return Populate_Internal (Node, Root_Env);
    end Populate_Lexical_Env;
 
-   ----------------------------
-   -- AST_Envs_Element_Image --
-   ----------------------------
+   ------------------------------
+   -- AST_Envs_Node_Text_Image --
+   ------------------------------
 
-   function AST_Envs_Element_Image
+   function AST_Envs_Node_Text_Image
      (Node  : ${root_node_type_name};
       Short : Boolean := True) return Text_Type is
    begin
@@ -1917,9 +1917,9 @@ package body ${ada_lib_name}.Implementation is
          return To_Text (Basename (Node.Unit))
            & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))));
       else
-         return Node.Short_Image;
+         return Node.Short_Text_Image;
       end if;
-   end AST_Envs_Element_Image;
+   end AST_Envs_Node_Text_Image;
 
    -------------------
    -- Is_Rebindable --
@@ -2167,11 +2167,11 @@ package body ${ada_lib_name}.Implementation is
       return Unit.Unit_Version;
    end Version;
 
-   -----------------
-   -- Short_Image --
-   -----------------
+   ----------------------
+   -- Short_Text_Image --
+   ----------------------
 
-   function Short_Image
+   function Short_Text_Image
      (Self : access ${root_node_value_type}'Class) return Text_Type is
    begin
       <%self:case_dispatch
@@ -2184,7 +2184,7 @@ package body ${ada_lib_name}.Implementation is
                 & " " & To_Text (Image (Self.Sloc_Range)) & ">";
       </%def>
       </%self:case_dispatch>
-   end Short_Image;
+   end Short_Text_Image;
 
    --------------------
    -- Snaps_At_Start --
@@ -2954,7 +2954,8 @@ package body ${ada_lib_name}.Implementation is
          LV    : in out Logic_Var_Record;
          Field : String) is
       begin
-         LV.Dbg_Name := new String'(Image (Node.Short_Image) & "." & Field);
+         LV.Dbg_Name := new String'
+           (Image (Node.Short_Text_Image) & "." & Field);
       end Assign;
 
       K : constant ${root_node_kind_name} := Node.Kind;
@@ -2980,15 +2981,15 @@ package body ${ada_lib_name}.Implementation is
       end loop;
    end Assign_Names_To_Logic_Vars;
 
-   -----------
-   -- Image --
-   -----------
+   ----------------
+   -- Text_Image --
+   ----------------
 
-   function Image (Ent : ${T.entity.name}) return Text_Type is
+   function Text_Image (Ent : ${T.entity.name}) return Text_Type is
    begin
       if Ent.Node /= null then
          declare
-            Node_Image : constant Text_Type := Ent.Node.Short_Image;
+            Node_Image : constant Text_Type := Ent.Node.Short_Text_Image;
          begin
             return
             (if Ent.Info.Rebindings /= null
@@ -3000,14 +3001,14 @@ package body ${ada_lib_name}.Implementation is
       else
          return "None";
       end if;
-   end Image;
+   end Text_Image;
 
    -----------
    -- Image --
    -----------
 
    function Image (Ent : ${T.entity.name}) return String is
-      Result : constant Text_Type := Image (Ent);
+      Result : constant Text_Type := Text_Image (Ent);
    begin
       return Image (Result);
    end Image;
@@ -3905,7 +3906,7 @@ package body ${ada_lib_name}.Implementation is
 
          for FN of Foreign_Nodes loop
             declare
-               Node_Image : constant String := Image (FN.Short_Image);
+               Node_Image : constant String := Image (FN.Short_Text_Image);
                Unit_Name  : constant String := +FN.Unit.Filename.Base_Name;
             begin
                GNATCOLL.Traces.Trace

@@ -557,7 +557,9 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return (if Node.Is_Null then "None" else Node.Internal.Node.Short_Image);
+      return (if Node.Is_Null
+              then "None"
+              else Node.Internal.Node.Short_Text_Image);
    end Short_Image;
 
    function Short_Image (Node : ${root_entity.api_name}'Class) return String is
@@ -570,7 +572,7 @@ package body ${ada_lib_name}.Analysis is
    function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Image (Node.Internal);
+      return Text_Image (Node.Internal);
    end Image;
 
    -----------

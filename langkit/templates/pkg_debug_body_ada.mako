@@ -24,7 +24,7 @@ package body ${ada_lib_name}.Debug is
 
    procedure PN (Node : ${root_node_type_name}) is
    begin
-      Put_Line (Image (Node.Short_Image));
+      Put_Line (Image (Node.Short_Text_Image));
    end PN;
 
    --------

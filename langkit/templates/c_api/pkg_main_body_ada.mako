@@ -503,7 +503,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         Img : constant Text_Type := Node.Node.Short_Image;
+         Img : constant Text_Type := Node.Node.Short_Text_Image;
       begin
          return Wrap_Alloc (Img);
       end;
@@ -846,7 +846,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         Img : constant Text_Type := Image (Ent.all);
+         Img : constant Text_Type := Text_Image (Ent.all);
       begin
          return Wrap_Alloc (Img);
       end;
