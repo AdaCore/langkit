@@ -234,7 +234,7 @@ private package ${ada_lib_name}.Implementation is
       Metadata_Hash        => Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
-      Node_Image           => AST_Envs_Element_Image,
+      Node_Text_Image      => AST_Envs_Element_Image,
       Register_Rebinding   => Register_Rebinding,
       Ref_Category         => Ref_Category,
       Ref_Categories       => Ref_Categories);

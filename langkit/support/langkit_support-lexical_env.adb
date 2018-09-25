@@ -98,11 +98,11 @@ package body Langkit_Support.Lexical_Env is
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
 
-   -----------
-   -- Image --
-   -----------
+   ----------------
+   -- Text_Image --
+   ----------------
 
-   function Image (Cats : Ref_Categories) return Text_Type is
+   function Text_Image (Cats : Ref_Categories) return Text_Type is
       Ret : Unbounded_Text_Type;
    begin
       Append (Ret, "(");
@@ -112,7 +112,7 @@ package body Langkit_Support.Lexical_Env is
       end loop;
       Append (Ret, ")");
       return To_Text (Ret);
-   end Image;
+   end Text_Image;
 
    ---------------------------
    -- Is_Lookup_Cache_Valid --
@@ -618,7 +618,7 @@ package body Langkit_Support.Lexical_Env is
 
          if Has_Trace then
             Traces.Trace
-              (Me, "Found " & Image (Node_Image (E.Node, False))
+              (Me, "Found " & Image (Node_Text_Image (E.Node, False))
                & " from_rebound => " & From_Rebound'Img);
          end if;
 
@@ -1434,17 +1434,17 @@ package body Langkit_Support.Lexical_Env is
       end loop;
    end Check_Rebindings_Unicity;
 
-   -----------
-   -- Image --
-   -----------
+   ----------------
+   -- Text_Image --
+   ----------------
 
-   function Image (Self : Env_Rebindings) return Text_Type is
+   function Text_Image (Self : Env_Rebindings) return Text_Type is
 
-      function Image (Self : Lexical_Env) return Text_Type is
-        (Node_Image (Env_Node (Self)));
+      function Text_Image (Self : Lexical_Env) return Text_Type is
+        (Node_Text_Image (Env_Node (Self)));
 
-      function Rebinding_Image (Self : Env_Rebindings) return Text_Type is
-        (Image (Self.New_Env));
+      function Text_Image (Self : Env_Rebindings) return Text_Type is
+        (Text_Image (Self.New_Env));
 
    begin
       if Self = null then
@@ -1467,14 +1467,14 @@ package body Langkit_Support.Lexical_Env is
             if I < Rebindings_Vector.Last_Index then
                Append (Buffer, ", ");
             end if;
-            Append (Buffer, Rebinding_Image (Rebindings_Vector.Get (I)));
+            Append (Buffer, Text_Image (Rebindings_Vector.Get (I)));
          end loop;
          Append (Buffer, "]");
 
          Rebindings_Vector.Destroy;
          return To_Wide_Wide_String (Buffer);
       end;
-   end Image;
+   end Text_Image;
 
    ----------------
    -- Equivalent --
@@ -1658,8 +1658,8 @@ package body Langkit_Support.Lexical_Env is
       function Short_Image
         (N : Node_Type) return String
       is (if N = No_Node then "<null>"
-          else Image (Node_Image (N, False)));
-      --  Wrapper around Node_Image to handle null nodes.
+          else Image (Node_Text_Image (N, False)));
+      --  Wrapper around Node_Text_Image to handle null nodes.
       --
       --  TODO??? This is slightly hackish, because we're converting a wide
       --  string back to string. But since we're using this solely for
@@ -1668,7 +1668,7 @@ package body Langkit_Support.Lexical_Env is
 
       function Image (Node : Internal_Map_Node) return String is
         (Short_Image (Node.Node));
-      --  Wrapper around Node_Image to format a lexical env map node
+      --  Wrapper around Node_Text_Image to format a lexical env map node
 
       function Image is new Internal_Map_Node_Vectors.Image (Image);
 
@@ -1719,7 +1719,7 @@ package body Langkit_Support.Lexical_Env is
          if Env_Node (Self) /= No_Node then
             New_Arg;
             Append (Result, "Node="
-                    & Image (Node_Image (Env_Node (Self), False)));
+                    & Image (Node_Text_Image (Env_Node (Self), False)));
          end if;
       end if;
 
@@ -1801,7 +1801,7 @@ package body Langkit_Support.Lexical_Env is
          when Rebound =>
             Append
               (Result, Sub_Prefix & "Rebindings: "
-                       & Image (Image (Self.Env.Rebindings))
+                       & Image (Text_Image (Self.Env.Rebindings))
                        & ASCII.LF);
             Append
               (Result, Sub_Prefix & "Rebound: " & Lexical_Env_Image
