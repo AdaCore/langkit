@@ -472,6 +472,15 @@ package body ${ada_lib_name}.Analysis is
       return Text (Unwrap_Unit (Unit));
    end Text;
 
+   -----------------
+   -- String_Text --
+   -----------------
+
+   function String_Text (Unit : Analysis_Unit'Class) return String is
+   begin
+      return Image (Unit.Text);
+   end String_Text;
+
    ------------------
    -- Lookup_Token --
    ------------------
