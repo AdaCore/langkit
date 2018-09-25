@@ -682,6 +682,40 @@ package body ${ada_lib_name}.Analysis is
          end List_Child;
       % endif
 
+      % if e.element_type.is_root_list_type:
+         <% rtype = e.element_type.element_type.entity.api_name %>
+
+         function ${e.api_name}_First (Node : ${e.api_name}) return Positive
+         is
+           pragma Unreferenced (Node);
+         begin
+            return 1;
+         end;
+
+         function ${e.api_name}_Next
+           (Node : ${e.api_name}; Cursor : Positive) return Positive
+         is
+           pragma Unreferenced (Node);
+         begin
+            return Cursor + 1;
+         end;
+
+         function ${e.api_name}_Has_Element
+           (Node : ${e.api_name}; Cursor : Positive) return Boolean
+         is
+         begin
+            return Cursor in 1 .. Node.Children_Count;
+         end;
+
+         function ${e.api_name}_Element
+           (Node : ${e.api_name}; Cursor : Positive) return ${rtype}'Class
+         is
+            Child : constant ${root_entity.api_name} := Node.Child (Cursor);
+         begin
+            return ${rtype}'(Child.As_${rtype});
+         end;
+      % endif
+
       % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
          predicate=lambda f: f.is_public \
