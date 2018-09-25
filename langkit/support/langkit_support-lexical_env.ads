@@ -417,6 +417,9 @@ package Langkit_Support.Lexical_Env is
    --    * Can_Reach (Referenced_From, From) is True. Practically this means
    --      that the origin point of the request needs to be *after*
    --      Referenced_From in the file.
+   --
+   --  If ``Rebindings_Assoc`` is True, then the referenced env will be
+   --  considered just as Self when shedding rebindings.
 
    procedure Reference
      (Self             : Lexical_Env;
@@ -698,6 +701,10 @@ package Langkit_Support.Lexical_Env is
             --  currently reused (i.e. whether they are not stale).
 
             Rebindings_Assoc_Ref_Env : Integer := -1;
+            --  If present, index to the Referenced_Envs vector that points to
+            --  an environment we want to look at when shedding rebindings. If
+            --  the referenced env is not none, it will be considered in place
+            --  of Self when shedding rebindings.
 
          when others =>
             Ref_Count : Integer := 1;
