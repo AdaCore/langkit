@@ -63,7 +63,14 @@ package ${ada_lib_name}.Analysis is
       % if e.is_root_type:
       type ${e.api_name} is tagged private;
       % else:
-      type ${e.api_name} is new ${e.base.api_name} with private;
+      type ${e.api_name} is new ${e.base.api_name} with private
+      % if e.element_type.is_root_list_type:
+         with Iterable => (First       => ${e.api_name}_First,
+                           Next        => ${e.api_name}_Next,
+                           Has_Element => ${e.api_name}_Has_Element,
+                           Element     => ${e.api_name}_Element)
+      % endif
+      ;
       % endif
       ${ada_doc(e.astnode, 6)}
    % endfor
@@ -397,6 +404,24 @@ package ${ada_lib_name}.Analysis is
             return ${e.element_type.element_type.entity.api_name};
          --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
          --  no such child.
+      % endif
+
+      % if e.element_type.is_root_list_type:
+         function ${e.api_name}_First (Node : ${e.api_name}) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function ${e.api_name}_Next
+           (Node : ${e.api_name}; Cursor : Positive) return Positive;
+         --  Implementation detail for the Iterable aspect
+
+         function ${e.api_name}_Has_Element
+           (Node : ${e.api_name}; Cursor : Positive) return Boolean;
+         --  Implementation detail for the Iterable aspect
+
+         function ${e.api_name}_Element
+           (Node : ${e.api_name}; Cursor : Positive)
+            return ${e.element_type.element_type.entity.api_name}'Class;
+         --  Implementation detail for the Iterable aspect
       % endif
 
       % for f in e.element_type.get_parse_fields( \
