@@ -723,7 +723,7 @@ package body Langkit_Support.Lexical_Env is
       Inserted, Dummy   : Boolean;
       use Lookup_Cache_Maps;
 
-      Found_Rebinding   : Boolean := False;
+      Found_Rebinding : Boolean := False;
 
    begin
       if Self in Empty_Env then

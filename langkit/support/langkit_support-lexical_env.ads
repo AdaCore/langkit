@@ -128,11 +128,13 @@ package Langkit_Support.Lexical_Env is
    --------------
 
    type Entity_Info is record
-      MD              : Node_Metadata;
+      MD : Node_Metadata;
       --  External metadata for the node
-      Rebindings      : Env_Rebindings := null;
+
+      Rebindings : Env_Rebindings := null;
       --  Rebindings applying to this entity
-      From_Rebound    : Boolean := False;
+
+      From_Rebound : Boolean := False;
       --  Whether this entity has been obtained out of a rebound environment
    end record
       with Convention => C;
