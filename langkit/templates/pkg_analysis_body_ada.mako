@@ -666,6 +666,22 @@ package body ${ada_lib_name}.Analysis is
 
    % for e in ctx.entity_types:
 
+      % if (e.element_type.is_root_list_type and \
+            not e.element_type.element_type.is_root_node):
+         <% rtype = e.element_type.element_type.entity.api_name %>
+         ----------------
+         -- List_Child --
+         ----------------
+
+         function List_Child
+           (Node : ${e.api_name}'Class; Index : Positive) return ${rtype}
+         is
+            Result : constant ${root_entity.api_name} := Node.Child (Index);
+         begin
+            return Result.As_${rtype};
+         end List_Child;
+      % endif
+
       % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
          predicate=lambda f: f.is_public \

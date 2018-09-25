@@ -388,6 +388,17 @@ package ${ada_lib_name}.Analysis is
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
 
+      ## Generate specific children accessors for root lists so that users can
+      ## get list children with their specific type.
+      % if (e.element_type.is_root_list_type and \
+            not e.element_type.element_type.is_root_node):
+         function List_Child
+           (Node : ${e.api_name}'Class; Index : Positive)
+            return ${e.element_type.element_type.entity.api_name};
+         --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has
+         --  no such child.
+      % endif
+
       % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
          predicate=lambda f: f.is_public, \
