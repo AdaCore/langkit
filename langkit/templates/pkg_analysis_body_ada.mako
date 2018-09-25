@@ -549,38 +549,43 @@ package body ${ada_lib_name}.Analysis is
       return Compare_Entity (L.Internal, R.Internal);
    end "=";
 
-   -----------------
-   -- Short_Image --
-   -----------------
+   ----------------------
+   -- Short_Text_Image --
+   ----------------------
 
-   function Short_Image
+   function Short_Text_Image
      (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
       return (if Node.Is_Null
               then "None"
               else Node.Internal.Node.Short_Text_Image);
-   end Short_Image;
+   end Short_Text_Image;
+
+   -----------------
+   -- Short_Image --
+   -----------------
 
    function Short_Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Node.Short_Image));
+     (Image (Node.Short_Text_Image));
 
-   -----------
-   -- Image --
-   -----------
+   ----------------
+   -- Text_Image --
+   ----------------
 
-   function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
+   function Text_Image (Node : ${root_entity.api_name}'Class) return Text_Type
+   is
    begin
       Check_Safety_Net (Node.Safety_Net);
       return Text_Image (Node.Internal);
-   end Image;
+   end Text_Image;
 
    -----------
    -- Image --
    -----------
 
    function Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Node.Image));
+     (Image (Node.Text_Image));
 
    -----------------------
    -- Entity converters --
@@ -778,14 +783,14 @@ package body ${ada_lib_name}.Analysis is
       return Text (Node.Token_Start, Node.Token_End);
    end Text;
 
-   ----------
-   -- Text --
-   ----------
+   -----------------
+   -- String_Text --
+   -----------------
 
-   function Text (Node : ${root_entity.api_name}'Class) return String is
+   function String_Text (Node : ${root_entity.api_name}'Class) return String is
    begin
       return Image (Node.Text);
-   end Text;
+   end String_Text;
 
    -----------------
    -- Token_Range --

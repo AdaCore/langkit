@@ -89,13 +89,13 @@ package ${ada_lib_name}.Analysis is
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
    --  Return whether L and R designate the same entity
 
-   function Short_Image
+   function Short_Text_Image
      (Node : ${root_entity.api_name}'Class) return Text_Type;
    function Short_Image (Node : ${root_entity.api_name}'Class) return String;
    --  Return a short string describing Node, or "None" if Node.Is_Null is
    --  true.
 
-   function Image (Node : ${root_entity.api_name}'Class) return Text_Type;
+   function Text_Image (Node : ${root_entity.api_name}'Class) return Text_Type;
    function Image (Node : ${root_entity.api_name}'Class) return String;
    --  Like Short_Image, also including its rebinding metadata
 
@@ -498,8 +498,8 @@ package ${ada_lib_name}.Analysis is
    --  Shortcut to get the source buffer slice corresponding to the text that
    --  spans between the first and last tokens of an AST node.
 
-   function Text (Node : ${root_entity.api_name}'Class) return String;
-   --  Overload to get the source buffer slice as a string
+   function String_Text (Node : ${root_entity.api_name}'Class) return String;
+   --  Like ``Text``, to get the source buffer slice as a string
 
    function Token_Range
      (Node : ${root_entity.api_name}'Class) return Token_Iterator;
