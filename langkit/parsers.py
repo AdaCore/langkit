@@ -444,24 +444,22 @@ class Parser(object):
         for c in self.children:
             c.traverse_dontskip(grammar)
 
-    def traverse_nobacktrack(self):
+    def traverse_nobacktrack(self, nobt=None):
         """
         This method will traverse the parser hierarchy and set the no_backtrack
         variable if necessary, indicating which parsers should not backtrack.
         """
         if isinstance(self, NoBacktrack):
-            self.no_backtrack = VarDef('nobt', T.Bool, reinit=True)
+            if nobt:
+                self.no_backtrack = nobt
+            else:
+                self.no_backtrack = VarDef('nobt', T.Bool, reinit=True)
 
         for c in self.children:
-            nobt = c.traverse_nobacktrack()
+            nobt = c.traverse_nobacktrack(self.no_backtrack)
             # Or parsers are a stop point for nobacktrack
 
             if nobt and not isinstance(self, Or):
-                check_source_language(
-                    self.no_backtrack is None,
-                    "Extraneous no backtrack annotation. Only one per parser "
-                    "hierarchy allowed"
-                )
                 self.no_backtrack = nobt
 
         return self.no_backtrack
