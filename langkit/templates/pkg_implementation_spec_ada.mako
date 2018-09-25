@@ -114,7 +114,7 @@ private package ${ada_lib_name}.Implementation is
    function Is_Null
      (Node : access ${root_node_value_type}'Class) return Boolean;
 
-   function Short_Image
+   function Short_Text_Image
      (Self : access ${root_node_value_type}'Class) return Text_Type;
    --  Return a short representation of the node, containing just the kind
    --  name and the sloc.
@@ -185,7 +185,7 @@ private package ${ada_lib_name}.Implementation is
    --  eg this does not handle general visibility issues, just sequentiality of
    --  declarations.
 
-   function AST_Envs_Element_Image
+   function AST_Envs_Node_Text_Image
      (Node  : ${root_node_type_name};
       Short : Boolean := True) return Text_Type;
    --  Return a "sourcefile:lineno:columnno" corresponding to the starting sloc
@@ -234,7 +234,7 @@ private package ${ada_lib_name}.Implementation is
       Metadata_Hash        => Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
-      Node_Text_Image      => AST_Envs_Element_Image,
+      Node_Text_Image      => AST_Envs_Node_Text_Image,
       Register_Rebinding   => Register_Rebinding,
       Ref_Category         => Ref_Category,
       Ref_Categories       => Ref_Categories);
@@ -543,7 +543,7 @@ private package ${ada_lib_name}.Implementation is
    -- Adalog instantiations --
    ---------------------------
 
-   function Image (Ent : ${T.entity.name}) return Text_Type;
+   function Text_Image (Ent : ${T.entity.name}) return Text_Type;
    function Image (Ent : ${T.entity.name}) return String;
    ${ada_doc('langkit.entity_image', 3)}
 
