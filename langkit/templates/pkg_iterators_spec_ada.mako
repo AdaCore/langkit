@@ -8,8 +8,9 @@ with Langkit_Support.Iterators;
 with Langkit_Support.Text; use Langkit_Support.Text;
 private with Langkit_Support.Tree_Traversal_Iterator;
 
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
-with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Analysis;      use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;        use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
 
 ${exts.with_clauses(with_clauses)}
 
@@ -136,6 +137,14 @@ package ${ada_lib_name}.Iterators is
    --  Return a predicate that accepts only nodes for which ``Predicate``
    --  accepts at least one child. Unless ``Skip_Null`` is false, this does not
    --  evaluate the predicate on null children.
+   --
+   --% belongs-to: ${pred_ref}
+
+   function Child_With
+     (Field : Field_Reference; Predicate : ${pred_ref}) return ${pred_ref};
+   --  Return a predicate that accepts only nodes which have a child
+   --  corresponding to the given field reference and for which this child is
+   --  accepted by the given predicate.
    --
    --% belongs-to: ${pred_ref}
 
@@ -272,6 +281,15 @@ private
 
    overriding function Evaluate
      (P : in out For_Some_Children_Predicate; N : ${node}) return Boolean;
+
+   type Child_With_Predicate is new ${pred_iface} with record
+      Field       : Field_Reference;
+      Field_Index : Positive;
+      Predicate   : ${pred_ref};
+   end record;
+
+   overriding function Evaluate
+     (P : in out Child_With_Predicate; N : ${node}) return Boolean;
 
    type Kind_Predicate is new ${pred_iface} with record
       Kind : ${root_node_kind_name};

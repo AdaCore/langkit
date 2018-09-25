@@ -167,6 +167,27 @@ package body ${ada_lib_name}.Iterators is
       end return;
    end For_Some_Children;
 
+   ----------------
+   -- Child_With --
+   ----------------
+
+   function Child_With
+     (Field : Field_Reference; Predicate : ${pred_ref}) return ${pred_ref} is
+   begin
+      % if ctx.sorted_parse_fields:
+         return Result : ${pred_ref} do
+            Result.Set (Child_With_Predicate'
+              (${pred_iface} with
+               Field       => Field,
+               Field_Index => Index (Field),
+               Predicate => Predicate));
+         end return;
+      % else:
+         pragma Unreferenced (Field, Predicate);
+         return (raise Program_Error);
+      % endif
+   end Child_With;
+
    -------------
    -- Kind_Is --
    -------------
@@ -422,6 +443,30 @@ package body ${ada_lib_name}.Iterators is
          end;
       end loop;
       return False;
+   end Evaluate;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   overriding function Evaluate
+     (P : in out Child_With_Predicate; N : ${node}) return Boolean is
+   begin
+      if N.Is_Null then
+         return False;
+      end if;
+
+      --  First check that N has the requested field
+      begin
+         if Field_Reference_From_Index (N.Kind, P.Field_Index) /= P.Field then
+            return False;
+         end if;
+      exception
+         when Invalid_Field =>
+            return False;
+      end;
+
+      return P.Predicate.Unchecked_Get.Evaluate (N.Child (P.Field_Index));
    end Evaluate;
 
    --------------
