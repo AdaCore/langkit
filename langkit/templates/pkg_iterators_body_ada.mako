@@ -6,8 +6,9 @@ with Ada.Containers.Vectors;
 with Ada.Strings.Wide_Wide_Unbounded;
 
 <%
-   pred_iface = '{}_Predicate_Interface'.format(root_entity.api_name)
-   pred_ref = '{}_Predicate'.format(root_entity.api_name)
+   node = root_entity.api_name
+   pred_iface = '{}_Predicate_Interface'.format(node)
+   pred_ref = '{}_Predicate'.format(node)
 %>
 
 ${exts.with_clauses(with_clauses)}
@@ -17,7 +18,7 @@ package body ${ada_lib_name}.Iterators is
    package Predicate_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
       Element_Type => ${pred_ref},
-      "="          => ${root_entity.api_name}_Predicate_References."=");
+      "="          => ${node}_Predicate_References."=");
 
    function To_Array
      (Predicates : Predicate_Vectors.Vector) return ${pred_ref}_Array;
@@ -41,12 +42,10 @@ package body ${ada_lib_name}.Iterators is
    -- Traverse --
    --------------
 
-   function Traverse
-     (Root : ${root_entity.api_name}'Class) return Traverse_Iterator'Class is
+   function Traverse (Root : ${node}'Class) return Traverse_Iterator'Class is
    begin
       return Result : Traverse_Iterator do
-         Traversal_Iterators.Create_Tree_Iterator
-           (Root.As_${root_entity.api_name}, Result);
+         Traversal_Iterators.Create_Tree_Iterator (Root.As_${node}, Result);
       end return;
    end Traverse;
 
@@ -175,8 +174,7 @@ package body ${ada_lib_name}.Iterators is
    ----------
 
    function Next
-     (It      : in out Find_Iterator;
-      Element : out ${root_entity.api_name}) return Boolean
+     (It : in out Find_Iterator; Element : out ${node}) return Boolean
    is
       Parent : Traverse_Iterator := Traverse_Iterator (It);
    begin
@@ -193,8 +191,7 @@ package body ${ada_lib_name}.Iterators is
    ----------
 
    overriding function Next
-     (It      : in out Local_Find_Iterator;
-      Element : out ${root_entity.api_name}) return Boolean
+     (It : in out Local_Find_Iterator; Element : out ${node}) return Boolean
    is
       Parent : Traverse_Iterator := Traverse_Iterator (It);
    begin
@@ -211,14 +208,12 @@ package body ${ada_lib_name}.Iterators is
    ----------
 
    function Find
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate :
-        access function (N : ${root_entity.api_name}) return Boolean := null)
+     (Root      : ${node}'Class;
+      Predicate : access function (N : ${node}) return Boolean := null)
      return Traverse_Iterator'Class is
    begin
       return Ret : Local_Find_Iterator do
-         Traversal_Iterators.Create_Tree_Iterator
-           (Root.As_${root_entity.api_name}, Ret);
+         Traversal_Iterators.Create_Tree_Iterator (Root.As_${node}, Ret);
 
          --  We still want to provide this functionality, even though it is
          --  unsafe. TODO: We might be able to make a safe version of this
@@ -232,17 +227,16 @@ package body ${ada_lib_name}.Iterators is
    ----------------
 
    function Find_First
-     (Root      : ${root_entity.api_name}'Class;
-      Predicate :
-        access function (N : ${root_entity.api_name}) return Boolean := null)
-      return ${root_entity.api_name}
+     (Root      : ${node}'Class;
+      Predicate : access function (N : ${node}) return Boolean := null)
+      return ${node}
    is
       I      : Traverse_Iterator'Class := Find (Root, Predicate);
-      Result : ${root_entity.api_name};
+      Result : ${node};
       Ignore : Boolean;
    begin
       if not I.Next (Result) then
-         Result := No_${root_entity.api_name};
+         Result := No_${node};
       end if;
       return Result;
    end Find_First;
@@ -252,12 +246,12 @@ package body ${ada_lib_name}.Iterators is
    ----------
 
    function Find
-     (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
+     (Root : ${node}'Class; Predicate : ${pred_ref}'Class)
       return Traverse_Iterator'Class is
    begin
       return Ret : Find_Iterator do
          Traversal_Iterators.Create_Tree_Iterator
-           (Root.As_${root_entity.api_name}, Ret);
+           (Root.As_${node}, Ret);
 
          --  We still want to provide this functionality, even though it is
          --  unsafe. TODO: We might be able to make a safe version of this
@@ -271,15 +265,15 @@ package body ${ada_lib_name}.Iterators is
    ----------------
 
    function Find_First
-     (Root : ${root_entity.api_name}'Class; Predicate : ${pred_ref}'Class)
+     (Root : ${node}'Class; Predicate : ${pred_ref}'Class)
       return ${root_entity.api_name}
    is
       I      : Traverse_Iterator'Class := Find (Root, Predicate);
-      Result : ${root_entity.api_name};
+      Result : ${node};
       Ignore : Boolean;
    begin
       if not I.Next (Result) then
-         Result := No_${root_entity.api_name};
+         Result := No_${node};
       end if;
       return Result;
    end Find_First;
@@ -288,32 +282,28 @@ package body ${ada_lib_name}.Iterators is
    -- Get_Parent --
    ----------------
 
-   function Get_Parent
-     (N : ${root_entity.api_name}) return ${root_entity.api_name}
+   function Get_Parent (N : ${node}) return ${root_entity.api_name}
    is (Parent (N));
 
    ------------------------------------
    -- First_Child_Index_For_Traverse --
    ------------------------------------
 
-   function First_Child_Index_For_Traverse
-     (N : ${root_entity.api_name}) return Natural
+   function First_Child_Index_For_Traverse (N : ${node}) return Natural
    is (First_Child_Index (N));
 
    -----------------------------------
    -- Last_Child_Index_For_Traverse --
    -----------------------------------
 
-   function Last_Child_Index_For_Traverse
-     (N : ${root_entity.api_name}) return Natural
+   function Last_Child_Index_For_Traverse (N : ${node}) return Natural
    is (Last_Child_Index (N));
 
    ---------------
    -- Get_Child --
    ---------------
 
-   function Get_Child
-     (N : ${root_entity.api_name}; I : Natural) return ${root_entity.api_name}
+   function Get_Child (N : ${node}; I : Natural) return ${node}
    is (Child (N, I));
 
    --------------
@@ -321,8 +311,7 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Not_Predicate;
-      N : ${root_entity.api_name}) return Boolean is
+     (P : in out Not_Predicate; N : ${node}) return Boolean is
    begin
       return not P.Predicate.Unchecked_Get.Evaluate (N);
    end Evaluate;
@@ -332,8 +321,7 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out For_All_Predicate;
-      N : ${root_entity.api_name}) return Boolean is
+     (P : in out For_All_Predicate; N : ${node}) return Boolean is
    begin
       for Predicate of P.Predicates loop
          if not Predicate.Unchecked_Get.Evaluate (N) then
@@ -348,8 +336,7 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out For_Some_Predicate;
-      N : ${root_entity.api_name}) return Boolean is
+     (P : in out For_Some_Predicate; N : ${node}) return Boolean is
    begin
       for Predicate of P.Predicates loop
          if Predicate.Unchecked_Get.Evaluate (N) then
@@ -364,7 +351,7 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Kind_Predicate; N : ${root_entity.api_name}) return Boolean is
+     (P : in out Kind_Predicate; N : ${node}) return Boolean is
    begin
       return Kind (N) = P.Kind;
    end Evaluate;
@@ -374,7 +361,7 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Text_Predicate; N : ${root_entity.api_name}) return Boolean
+     (P : in out Text_Predicate; N : ${node}) return Boolean
    is
       use Ada.Strings.Wide_Wide_Unbounded;
    begin
@@ -388,8 +375,7 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Node_Is_Null_Predicate;
-      N : ${root_entity.api_name}) return Boolean
+     (P : in out Node_Is_Null_Predicate; N : ${node}) return Boolean
    is
       pragma Unreferenced (P);
    begin
