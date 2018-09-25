@@ -48,7 +48,7 @@ package Support is
       Combine              => Combine,
       Can_Reach            => Can_Reach,
       Is_Rebindable        => Is_Rebindable,
-      Node_Image           => Node_Image,
+      Node_Text_Image      => Node_Image,
       Register_Rebinding   => Register_Rebinding,
       Ref_Category         => Ref_Category,
       Ref_Categories       => Ref_Categories);

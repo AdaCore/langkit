@@ -22,7 +22,7 @@ package body Support is
       else
          for E of Elements loop
             declare
-               Img : constant Text_Type := Envs.Image (E.Info.Rebindings);
+               Img : constant Text_Type := Envs.Text_Image (E.Info.Rebindings);
             begin
                Put_Line ("  * '" & E.Node & "' " & Image (Img));
             end;

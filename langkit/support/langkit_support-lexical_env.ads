@@ -83,7 +83,7 @@ generic
    with function Is_Rebindable (Node : Node_Type) return Boolean is <>;
    --  Return whether a lexical environment whose node is Node can be rebound
 
-   with function Node_Image
+   with function Node_Text_Image
      (Node  : Node_Type; Short : Boolean := True) return Text_Type;
 
    with procedure Register_Rebinding
@@ -100,7 +100,7 @@ package Langkit_Support.Lexical_Env is
      (Ref_Categories'Length > 32,
       "Categories has to fit in a 32 bits Integer");
 
-   function Image (Cats : Ref_Categories) return Text_Type;
+   function Text_Image (Cats : Ref_Categories) return Text_Type;
 
    pragma Suppress (Container_Checks);
    --  Remove container checks for standard containers
@@ -305,7 +305,7 @@ package Langkit_Support.Lexical_Env is
    function Hash is new Hashes.Hash_Access
      (Env_Rebindings_Type, Env_Rebindings);
 
-   function Image (Self : Env_Rebindings) return Text_Type;
+   function Text_Image (Self : Env_Rebindings) return Text_Type;
 
    ----------------------------------
    -- Arrays of nodes and entities --

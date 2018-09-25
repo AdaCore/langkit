@@ -2994,7 +2994,7 @@ package body ${ada_lib_name}.Implementation is
             (if Ent.Info.Rebindings /= null
              then "<| "
              & Node_Image (Node_Image'First + 1 .. Node_Image'Last - 1) & " "
-             & AST_Envs.Image (Ent.Info.Rebindings) & " |>"
+             & AST_Envs.Text_Image (Ent.Info.Rebindings) & " |>"
              else Node_Image);
          end;
       else
@@ -3143,7 +3143,7 @@ package body ${ada_lib_name}.Implementation is
 
       function Trace_Image (R : Env_Rebindings) return String is
       begin
-         return Image (Image (R));
+         return Image (Text_Image (R));
       end Trace_Image;
 
       -----------------
