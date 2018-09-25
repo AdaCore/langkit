@@ -1465,11 +1465,7 @@ ${struct_types.base_decls()}
     % if struct_type.is_entity_type:
         % if struct_type is root_entity:
 class ${c_entity}(ctypes.Structure):
-    _fields_ = [
-        % for field in struct_type.get_fields():
-            ('${field.name.lower}', ${pyapi.c_type(field.type)}),
-        % endfor
-    ]
+    _fields_ = ${struct_types.ctype_fields(struct_type)}
 
     @classmethod
     def from_bare_node(cls, node_c_value):
@@ -1478,19 +1474,11 @@ class ${c_entity}(ctypes.Structure):
     ## Likewise for entity info structures: they will never be wrapped
     % elif struct_type is T.entity_info:
 class ${c_entity_info}(ctypes.Structure):
-    _fields_ = [
-        % for field in struct_type.get_fields():
-            ('${field.name.lower}', ${pyapi.c_type(field.type)}),
-        % endfor
-    ]
+    _fields_ = ${struct_types.ctype_fields(struct_type)}
     ## Likewise for metadata structures
     % elif struct_type is T.env_md:
 class ${c_metadata}(ctypes.Structure):
-    _fields_ = [
-        % for field in struct_type.get_fields():
-            ('${field.name.lower}', ${pyapi.c_type(field.type)}),
-        % endfor
-    ]
+    _fields_ = ${struct_types.ctype_fields(struct_type)}
 
     @property
     def as_tuple(self):

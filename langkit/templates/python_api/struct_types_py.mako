@@ -1,5 +1,20 @@
 ## vim: filetype=makopython
 
+<%def name="ctype_fields(cls)"> [
+    % for field in cls.get_fields():
+        ('${field.name.lower}',
+         ## At this point in the binding, no array type has been emitted
+         ## yet, so use a generic pointer: we will do the conversion later
+         ## for users.
+         % if field.type.is_array_type:
+             ctypes.c_void_p
+         % else:
+            ${pyapi.c_type(field.type)}
+         % endif
+         ),
+    % endfor
+] </%def>
+
 <%def name="base_decls()">
 
 class _BaseStruct(object):
@@ -76,20 +91,7 @@ class ${public_name}(_BaseStruct):
     % endfor
 
     class _c_type(ctypes.Structure):
-        _fields_ = [
-        % for field in cls.get_fields():
-            ('${field.name.lower}',
-             ## At this point in the binding, no array type has been emitted
-             ## yet, so use a generic pointer: we will do the conversion later
-             ## for users.
-             % if field.type.is_array_type:
-                 ctypes.c_void_p
-             % else:
-                ${pyapi.c_type(field.type)}
-             % endif
-             ),
-        % endfor
-        ]
+        _fields_ = ${ctype_fields(cls)}
 
     class _Holder(object):
         def __init__(self, c_value):
