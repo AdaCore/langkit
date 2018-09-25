@@ -14,8 +14,6 @@ procedure Main is
    Symbols : Symbol_Table := Create_Symbol_Table;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
-   Old_Env : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'O', Owner => True);
    New_Env : Lexical_Env := Create_Lexical_Env
      (No_Env_Getter, 'N', Owner => True);
 
@@ -23,12 +21,15 @@ procedure Main is
      (No_Env_Getter, 'R', Owner => True);
    Child : Lexical_Env := Create_Lexical_Env
      (Simple_Env_Getter (Root), 'R', Owner => True);
+   Grandchild : Lexical_Env := Create_Lexical_Env
+     (Simple_Env_Getter (Child), 'O', Owner => True);
 
-   Rebindings : Env_Rebindings := Append (null, Old_Env, New_Env);
-   Rebound    : Lexical_Env := Rebind_Env (Child, Rebindings);
+   Rebindings : Env_Rebindings := Append (null, Child, New_Env);
+   Rebound    : Lexical_Env := Rebind_Env (Grandchild, Rebindings);
 begin
    Add (Root, Key_X, '1');
-   Add (Child, Key_X, '2');
+   Add (New_Env, Key_X, '2');
+   Add (Grandchild, Key_X, '3');
 
    Put_Line ("Looking in Rebound:");
    Put_Line (Get (Rebound, Key_X));
@@ -36,7 +37,7 @@ begin
    declare
       R : Env_Rebindings;
    begin
-      R := Append (Rebindings, Old_Env, New_Env);
+      R := Append (Rebindings, Child, New_Env);
       Put_Line ("Double rebinding: no error raised...");
    exception
       when Exc : Property_Error =>
@@ -46,7 +47,7 @@ begin
 
    Dec_Ref (Rebound);
 
-   Destroy (Old_Env);
+   Destroy (Grandchild);
    Destroy (New_Env);
 
    Destroy (Root);

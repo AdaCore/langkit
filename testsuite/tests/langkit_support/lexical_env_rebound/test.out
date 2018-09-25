@@ -1,5 +1,6 @@
 Looking in Rebound:
-  * '2' ['N']
-  * '1' ['N']
+  * '3' ['N']
+  * '2' <null>
+  * '1' <null>
 Got a Property_Error:
 Old_Env present twice in rebindings
