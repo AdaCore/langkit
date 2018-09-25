@@ -557,9 +557,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return (if Node.Is_Null
-              then "None"
-              else Node.Internal.Node.Short_Text_Image);
+      return Node.Internal.Node.Short_Text_Image;
    end Short_Text_Image;
 
    -----------------

@@ -117,7 +117,7 @@ private package ${ada_lib_name}.Implementation is
    function Short_Text_Image
      (Self : access ${root_node_value_type}'Class) return Text_Type;
    --  Return a short representation of the node, containing just the kind
-   --  name and the sloc.
+   --  name and the sloc, or "None" if Self is null.
 
    function Is_Token_Node
      (Node : access ${root_node_value_type}'Class) return Boolean;

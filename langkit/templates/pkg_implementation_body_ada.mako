@@ -2174,6 +2174,10 @@ package body ${ada_lib_name}.Implementation is
    function Short_Text_Image
      (Self : access ${root_node_value_type}'Class) return Text_Type is
    begin
+      if Self = null then
+         return "None";
+      end if;
+
       <%self:case_dispatch
          pred="${lambda n: n.annotations.custom_short_image}">
       <%def name="action(node)">
