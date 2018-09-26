@@ -66,7 +66,7 @@ def print_struct(context, file, struct):
     base = struct.base if is_astnode else None
 
     # Do not document internal fields
-    fields = [f for f in struct.get_abstract_fields() if not f.is_internal]
+    fields = [f for f in struct.get_abstract_node_data() if not f.is_internal]
 
     descr = []
     if is_astnode:
@@ -105,7 +105,7 @@ def print_field(context, file, struct, field):
         prefixes.append(u'<span class="private">private</span>')
     prefixes.append(u'<span class="kw">{}</span>'.format(
         dispatch_on_type(type(field), (
-            (compiled_types.AbstractField, lambda _: 'field'),
+            (compiled_types.BaseField, lambda _: 'field'),
             (expressions.PropertyDef, lambda _: 'property')
         )),
     ))

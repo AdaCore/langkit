@@ -2196,7 +2196,7 @@ class CompileCtx(object):
 
             t.exposed = True
 
-        for f in astnode.get_abstract_fields(
+        for f in astnode.get_abstract_node_data(
             predicate=lambda f: f.is_public,
             include_inherited=False
         ):
