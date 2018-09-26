@@ -327,7 +327,7 @@ class New(AbstractExpression):
 
         required_fields = {
             f._name.lower: f
-            for f in self.struct_type.get_abstract_fields()
+            for f in self.struct_type.get_abstract_node_data()
             if is_required(f)
         }
 
@@ -734,15 +734,15 @@ class FieldAccess(AbstractExpression):
             )
         )
 
-        self.to_get = pfx_type.get_abstract_fields_dict().get(self.field, None)
+        self.to_get = pfx_type.get_abstract_node_data_dict().get(self.field,
+                                                                 None)
         ":type: AbstractNodeField"
 
         # If still not found, maybe the receiver is an entity, in which case we
         # want to do implicit dereference.
         if not self.to_get and pfx_type.is_entity_type:
-            self.to_get = pfx_type.element_type.get_abstract_fields_dict().get(
-                self.field, None
-            )
+            self.to_get = (pfx_type.element_type.get_abstract_node_data_dict()
+                           .get(self.field, None))
             self.is_deref = bool(self.to_get)
 
         return self.to_get

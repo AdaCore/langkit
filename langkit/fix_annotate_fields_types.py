@@ -51,7 +51,7 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
         ":type: langkit.compiled_types.ASTNodeType"
 
         field_name = node.parent.children[0].value
-        field = ast_node.get_abstract_fields_dict()[field_name]
+        field = ast_node.get_abstract_node_data_dict()[field_name]
         field_type_name = field.type.dsl_name
 
         # This assumes that a typerepo instance of name T is available in

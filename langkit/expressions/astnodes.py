@@ -14,7 +14,7 @@ def get_builtin_field(name):
     :param str name: Name of the builtin to fetch.
     :rtype: langkit.compiled_types.AbstractNodeData
     """
-    return T.root_node.get_abstract_fields_dict()[name]
+    return T.root_node.get_abstract_node_data_dict()[name]
 
 
 @auto_attr

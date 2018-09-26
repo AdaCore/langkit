@@ -1352,15 +1352,15 @@ class AbstractNodeData(object):
         return self.type.is_refcounted and self._access_needs_incref
 
 
-class AbstractField(AbstractNodeData):
+class BaseField(AbstractNodeData):
     """
-    Placeholder descriptors used to associate data to AST nodes (see below).
+    Base class for node fields and structure fields.
     """
 
     concrete = False
     """
     Field used to prevent instantiation of the class. Concrete descendants
-    of AbstractField must put that field to True in their definition.
+    of BaseField must put that field to True in their definition.
     """
 
     prefix = AbstractNodeData.PREFIX_FIELD
@@ -1376,9 +1376,9 @@ class AbstractField(AbstractNodeData):
         :param bool access_needs_incref: See AbstractNodeData's constructor.
         """
 
-        assert self.concrete, 'AbstractField itself cannot be instantiated'
+        assert self.concrete, 'BaseField itself cannot be instantiated'
 
-        super(AbstractField, self).__init__(
+        super(BaseField, self).__init__(
             public=True, access_needs_incref=access_needs_incref
         )
 
@@ -1421,7 +1421,7 @@ class AbstractField(AbstractNodeData):
         return self._doc
 
 
-class Field(AbstractField):
+class Field(BaseField):
     """
     Fields that are meant to store parsing results. Can be used only on
     subclasses of ASTNodeType.
@@ -1482,7 +1482,7 @@ class Field(AbstractField):
         return (self.struct.entity.api_name + self.name).camel_with_underscores
 
 
-class UserField(AbstractField):
+class UserField(BaseField):
     """
     Fields that are not meant to store parsing results. Can be used on any
     Node type, will be ignored by the parsing code.
@@ -1544,11 +1544,11 @@ class BaseStructType(CompiledType):
 
         super(BaseStructType, self).__init__(name, location, doc, **kwargs)
 
-        self._abstract_fields_dict_cache = {}
+        self._abstract_node_data_dict_cache = {}
         """
-        Cache for the get_abstract_fields_dict class method.
+        Cache for the get_abstract_node_data_dict class method.
 
-        :type: dict[(bool, AbstractNodeData), dict[str, AbstractField]]
+        :type: dict[(bool, AbstractNodeData), dict[str, BaseField]]
         """
 
     def _init_fields(self, fields):
@@ -1585,7 +1585,7 @@ class BaseStructType(CompiledType):
         field.struct = self
 
         # Invalidate the field lookup cache
-        self._abstract_fields_dict_cache = {}
+        self._abstract_node_data_dict_cache = {}
 
     def get_user_fields(self, predicate=None, include_inherited=True):
         """
@@ -1601,8 +1601,8 @@ class BaseStructType(CompiledType):
 
         :rtype: list[UserField]
         """
-        return self.get_abstract_fields(predicate, include_inherited,
-                                        field_class=UserField)
+        return self.get_abstract_node_data(predicate, include_inherited,
+                                           field_class=UserField)
 
     def get_fields(self, predicate=None, include_inherited=True):
         """
@@ -1615,15 +1615,15 @@ class BaseStructType(CompiledType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :rtype: list[AbstractField]
+        :rtype: list[BaseField]
         """
-        return self.get_abstract_fields(predicate, include_inherited,
-                                        field_class=AbstractField)
+        return self.get_abstract_node_data(predicate, include_inherited,
+                                           field_class=BaseField)
 
-    def get_abstract_fields(self, predicate=None, include_inherited=True,
-                            field_class=AbstractNodeData):
+    def get_abstract_node_data(self, predicate=None, include_inherited=True,
+                               field_class=AbstractNodeData):
         """
-        Get all AbstractField instances for the class.
+        Get all BaseField instances for the class.
 
         :param predicate: Predicate to filter fields if needed.
         :type predicate: None|(AbstractNodeData) -> bool
@@ -1638,14 +1638,14 @@ class BaseStructType(CompiledType):
         """
         return filter(
             predicate or (lambda f: True),
-            self.get_abstract_fields_dict(include_inherited,
-                                          field_class).values()
+            self.get_abstract_node_data_dict(include_inherited,
+                                             field_class).values()
         )
 
-    def get_abstract_fields_dict(self, include_inherited=True,
-                                 field_class=AbstractNodeData):
+    def get_abstract_node_data_dict(self, include_inherited=True,
+                                    field_class=AbstractNodeData):
         """
-        Get all AbstractField instances for the class.
+        Get all BaseField instances for the class.
 
         :param bool include_inherited: If true, include inheritted fields in
             the returned list. Return only fields that were part of the
@@ -1660,7 +1660,7 @@ class BaseStructType(CompiledType):
         # First, see if we have a cached result for this
         key = (include_inherited, field_class)
         try:
-            return self._abstract_fields_dict_cache[key]
+            return self._abstract_node_data_dict_cache[key]
         except KeyError:
             pass
 
@@ -1678,13 +1678,13 @@ class BaseStructType(CompiledType):
         # Otherwise, just rely on the potentially already cached whole list of
         # fields and do filtering.
         else:
-            all_fields = self.get_abstract_fields_dict(include_inherited)
+            all_fields = self.get_abstract_node_data_dict(include_inherited)
             result = OrderedDict(
                 filter(lambda kv: isinstance(kv[1], field_class),
                        all_fields.items())
             )
 
-        self._abstract_fields_dict_cache[key] = result
+        self._abstract_node_data_dict_cache[key] = result
         return result
 
 
@@ -2297,8 +2297,8 @@ class ASTNodeType(BaseStructType):
 
         :rtype: list[Field]
         """
-        return self.get_abstract_fields(predicate, include_inherited,
-                                        field_class=Field)
+        return self.get_abstract_node_data(predicate, include_inherited,
+                                           field_class=Field)
 
     def get_properties(self, predicate=None, include_inherited=True):
         """
@@ -2313,7 +2313,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: list[langkit.expressions.base.PropertyDef]
         """
-        return self.get_abstract_fields(
+        return self.get_abstract_node_data(
             lambda f: f.is_property and (predicate is None or predicate(f)),
             include_inherited
         )
@@ -2327,7 +2327,7 @@ class ASTNodeType(BaseStructType):
         the context requires them to be public in the generated library.
         """
         return [f
-                for f in self.get_abstract_fields(
+                for f in self.get_abstract_node_data(
                     include_inherited=False,
                     predicate=lambda f: f.is_public
                 )
@@ -2482,7 +2482,7 @@ class ASTNodeType(BaseStructType):
 
         # Unless the special case of inheritted properties, reject fields which
         # are homonym with inherited fields.
-        inherited_fields = (self.base.get_abstract_fields_dict()
+        inherited_fields = (self.base.get_abstract_node_data_dict()
                             if self.base else {})
         for f_n, f_v in self._fields.items():
             with f_v.diagnostic_context:

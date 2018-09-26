@@ -1293,7 +1293,7 @@ class ResolvedExpression(object):
         """
         from langkit.expressions.structs import FieldAccess
         assert self.type.is_entity_type
-        fields = self.type.get_abstract_fields_dict()
+        fields = self.type.get_abstract_node_data_dict()
         saved = SavedExpr('Saved', self)
         return (
             saved,
@@ -3228,7 +3228,7 @@ class PropertyDef(AbstractNodeData):
         :rtype: PropertyDef|None
         """
         if self.struct.is_ast_node and self.struct.base:
-            result = self.struct.base.get_abstract_fields_dict(
+            result = self.struct.base.get_abstract_node_data_dict(
                 field_class=PropertyDef
             ).get(self._name.lower, None)
 
