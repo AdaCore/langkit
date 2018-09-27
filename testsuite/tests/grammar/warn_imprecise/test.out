@@ -1,0 +1,8 @@
+File "test.py", line 19, in Decl
+  line 20, in Decl.name
+    Warning: Specified type is FooNode, but it could be more specific: Name
+File "test.py", line 23, in VarDecl
+  line 24, in VarDecl.var_kw
+    Warning: Specified type is FooNode, but it could be more specific: VarKeyword
+Code generation was successful
+Done
