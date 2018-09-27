@@ -36,7 +36,11 @@ if ${parser.pos_var} /= No_Token_Index then
      (if ${parser.pos_var} = ${parser.start_pos}
       then No_Token_Index
       else ${parser.pos_var} - 1);
-   <% fields_n_args = zip(parser.get_type().get_parse_fields(), args) %>
+   <% fields_n_args = zip(
+         parser.get_type().get_parse_fields(
+            predicate=lambda f: not f.abstract,
+            concrete_order=True),
+         args) %>
 
    % for i, (field, arg) in enumerate(fields_n_args):
       ## Set children fields into the created node
