@@ -1459,6 +1459,12 @@ class Field(BaseField):
         """
 
         self._index = None
+        """
+        0-based index for this parsing field in the owning AST node's children
+        list. This is -1 for abstract fields.
+
+        :type: int
+        """
 
     @property
     def overriding(self):
@@ -1531,11 +1537,14 @@ class Field(BaseField):
     def index(self):
         """
         Return the 0-based index of this parsing field in the owning AST node's
-        children list.
+        children list. Only concrete fields have an index.
 
         :rtype: int
         """
-        assert self._index is not None
+        assert self._index is not None, (
+            'Index for {} is not computed'.format(self.qualname))
+        assert self._index != -1, (
+            'Trying to get index of abstract field {}'.format(self.qualname))
         return self._index
 
     @property

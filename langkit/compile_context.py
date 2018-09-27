@@ -688,8 +688,8 @@ class CompileCtx(object):
 
         self.sorted_parse_fields = None
         """
-        Sorted list of all parsing fields. Used to generate the AST node
-        introspection API.
+        Sorted list of all parsing fields, minus fields that override abstract
+        ones. Used to generate the AST node introspection API.
 
         :type: list[langkit.compiled_types.Field]
         """
@@ -2034,12 +2034,22 @@ class CompileCtx(object):
         # their indexes.
         self.sorted_parse_fields = []
         for n in self.astnode_types:
-            for i, f in enumerate(n.get_parse_fields()):
-                if f._index is None:
-                    f._index = i
+            i = 0
+            for f in n.get_parse_fields():
+
+                # Compute the index
+                if f.abstract:
+                    assert f._index in (None, -1)
+                    f._index = -1
                 else:
-                    assert f._index == i
-                if f.struct is n:
+                    if f._index is None:
+                        f._index = i
+                    else:
+                        assert f._index == i
+                    i += 1
+
+                # Register the field
+                if (f.abstract or not f.overriding) and f.struct is n:
                     self.sorted_parse_fields.append(f)
 
     def compute_composite_types(self):
