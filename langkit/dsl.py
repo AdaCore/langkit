@@ -877,6 +877,17 @@ def AbstractField(type, doc=None):
     return _Field(type=type, doc=doc, abstract=True)
 
 
+def NullField():
+    """
+    Create a null field.
+
+    Null fields are valid only when they override an abstract field. They are a
+    way to say that this field is absent on all concrete nodes that inherit
+    this null field.
+    """
+    return _Field(null=True)
+
+
 def UserField(type, repr=False, doc=None, public=True):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
