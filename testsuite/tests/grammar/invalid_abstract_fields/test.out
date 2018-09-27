@@ -1,0 +1,21 @@
+== Not overriden ==
+File "test.py", line 28, in ExampleHolder
+    Error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f_f
+
+== Partly overriden ==
+File "test.py", line 50, in OtherExampleHolder
+    Error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f_f
+
+== Abstract overriding abstract ==
+File "test.py", line 70, in ExampleHolder.f
+    Error: ExampleHolder.f_f cannot override BaseExampleHolder.f_f unless the former is a concrete field and the latter is an abstract one
+
+== Abstract overriding concrete ==
+File "test.py", line 89, in ExampleHolder.f
+    Error: ExampleHolder.f_f cannot override BaseExampleHolder.f_f unless the former is a concrete field and the latter is an abstract one
+
+== Inconsistent overriding type ==
+File "test.py", line 108, in ExampleHolder.f
+    Error: Type of overriding field (FooNode) does not match type of abstract field (Example)
+
+Done
