@@ -8,6 +8,7 @@ from langkit.lexer import (
 
 class Token(LexerToken):
     Def = WithText()
+    Var = WithText()
     Error = WithText()
     Example = WithText()
     Null = WithText()
@@ -43,6 +44,7 @@ foo_lexer.add_rules(
     (Eof(),                  Token.Termination),
 
     (Literal('def'),         Token.Def),
+    (Literal('var'),         Token.Var),
     (Literal('error'),       Token.Error),
     (Literal('example'),     Token.Example),
     (Literal('null'),        Token.Null),
