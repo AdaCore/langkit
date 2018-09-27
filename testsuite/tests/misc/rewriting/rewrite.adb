@@ -155,10 +155,12 @@ begin
                (RH,
                 Create_Ref (RH, Create_Token_Node (RH, Foo_Name, "d")),
                 Nested_Expr));
+
+      Fifth_Child : constant Node_Rewriting_Handle := Child (N, 5);
    begin
       Set_Child
-        (Child (N, 5),
-         Index (Def_F_Expr),
+        (Fifth_Child,
+         Index (Kind (Fifth_Child), Def_F_Expr),
          Top_Expr);
    end;
 

@@ -27,9 +27,9 @@ procedure Iter_Units is
    DA : constant Node_Rewriting_Handle := Handle (Root (Unit_A).Child (1));
    DB : constant Node_Rewriting_Handle := Handle (Root (Unit_B).Child (1));
 begin
-   Set_Child (DA, Index (Def_F_Expr),
+   Set_Child (DA, Index (Kind (DA), Def_F_Expr),
               Create_Token_Node (RH, Foo_Literal, "11"));
-   Set_Child (DB, Index (Def_F_Expr),
+   Set_Child (DB, Index (Kind (DB), Def_F_Expr),
               Create_Token_Node (RH, Foo_Literal, "22"));
 
    declare

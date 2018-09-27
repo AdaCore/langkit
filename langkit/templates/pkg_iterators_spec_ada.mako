@@ -283,9 +283,8 @@ private
      (P : in out For_Some_Children_Predicate; N : ${node}) return Boolean;
 
    type Child_With_Predicate is new ${pred_iface} with record
-      Field       : Field_Reference;
-      Field_Index : Positive;
-      Predicate   : ${pred_ref};
+      Field     : Field_Reference;
+      Predicate : ${pred_ref};
    end record;
 
    overriding function Evaluate

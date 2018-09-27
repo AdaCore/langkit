@@ -7,15 +7,6 @@ use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
-   Field_Indexes : constant array (Field_Reference) of Natural := (
-      ${(', '.join('{} => {}'.format(f.introspection_enum_literal,
-                                     f.index + 1)
-                   for f in ctx.sorted_parse_fields)
-         if ctx.sorted_parse_fields else '1 .. 0 => 0')}
-   );
-   --  For each field reference, provide the corresponding 1-based field index
-   --  in AST nodes.
-
    ----------------
    -- Field_Name --
    ----------------
@@ -39,15 +30,27 @@ package body ${ada_lib_name}.Introspection is
    -- Index --
    -----------
 
-   function Index (Field : Field_Reference) return Positive is
+   function Index
+     (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive
+   is
    begin
-      return
-         % if ctx.sorted_parse_fields:
-            Field_Indexes (Field)
-         % else:
-            (raise Program_Error)
-         % endif
-      ;
+      % if ctx.sorted_parse_fields:
+         <% concrete_astnodes = [n for n in ctx.astnode_types
+                                 if not n.abstract] %>
+         case Kind is
+            % for n in concrete_astnodes:
+               when ${n.ada_kind_name} =>
+               return (case Field is
+                       % for f in n.get_parse_fields():
+                       when ${f.introspection_enum_literal} => ${f.index + 1},
+                       % endfor
+                       when others => raise Constraint_Error);
+            % endfor
+         end case;
+
+      % else:
+         return (raise Program_Error);
+      % endif
    end Index;
 
    --------------------------------
