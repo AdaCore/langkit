@@ -155,18 +155,18 @@
       ext = ctx.ext('nodes', cls.raw_name, 'components')
    %>
    % if fields:
-       % for f in fields:
-            ${f.name} : aliased ${f.type.storage_type_name}
-               := ${f.type.storage_nullexpr};
-            ${ada_doc(f, 12)}
-       % endfor
+      % for f in fields:
+         ${f.name} : aliased ${f.type.storage_type_name}
+            := ${f.type.storage_nullexpr};
+         ${ada_doc(f, 8)}
+      % endfor
 
-       % if cls == ctx.ple_unit_root:
+      % if cls == ctx.ple_unit_root:
          Is_Env_Populated : Boolean := False;
          --  Whether this PLE unit root was processed by Populate_Lexical_Env
-       % endif
+      % endif
 
-       ${exts.include_extension(ext)}
+      ${exts.include_extension(ext)}
    % elif emit_null:
       null;
    % endif
