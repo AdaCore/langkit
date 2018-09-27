@@ -2594,13 +2594,19 @@ class ASTNodeType(BaseStructType):
                 ' a type annotation for all its fields'
             )
 
-        # All fields must be AST nodes
         for f in parse_fields:
             with f.diagnostic_context:
+                # All syntax fields must be nodes
                 check_source_language(
                     f.type.is_ast_node,
                     'AST node parse fields must all be AST node themselves.'
                     ' Here, field type is {}'.format(f.type.dsl_name)
+                )
+
+                # Null fields must override an abstract one
+                check_source_language(
+                    not f.null or f.overriding,
+                    'Null fields can only be used to override abstract fields'
                 )
 
         # Unless the special case of inheritted abstract fields/properties,
