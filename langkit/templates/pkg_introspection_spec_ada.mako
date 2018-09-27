@@ -38,8 +38,10 @@ package ${ada_lib_name}.Introspection is
    function Field_Name (Field : Field_Reference) return String;
    --  Return a lower-case name for ``Field``
 
-   function Index (Field : Field_Reference) return Positive;
-   --  Return the index in nodes to access the given ``Field``
+   function Index
+     (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive;
+   --  Return the index in nodes to access the given ``Field`` considering the
+   --  given ``Kind`` of node.
 
    function Field_Reference_From_Index
      (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference;

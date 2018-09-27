@@ -178,8 +178,7 @@ package body ${ada_lib_name}.Iterators is
          return Result : ${pred_ref} do
             Result.Set (Child_With_Predicate'
               (${pred_iface} with
-               Field       => Field,
-               Field_Index => Index (Field),
+               Field     => Field,
                Predicate => Predicate));
          end return;
       % else:
@@ -450,7 +449,9 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Child_With_Predicate; N : ${node}) return Boolean is
+     (P : in out Child_With_Predicate; N : ${node}) return Boolean
+   is
+      Field_Index : Positive;
    begin
       if N.Is_Null then
          return False;
@@ -458,15 +459,13 @@ package body ${ada_lib_name}.Iterators is
 
       --  First check that N has the requested field
       begin
-         if Field_Reference_From_Index (N.Kind, P.Field_Index) /= P.Field then
-            return False;
-         end if;
+         Field_Index := Index (N.Kind, P.Field);
       exception
          when Invalid_Field =>
             return False;
       end;
 
-      return P.Predicate.Unchecked_Get.Evaluate (N.Child (P.Field_Index));
+      return P.Predicate.Unchecked_Get.Evaluate (N.Child (Field_Index));
    end Evaluate;
 
    --------------

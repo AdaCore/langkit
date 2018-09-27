@@ -22,7 +22,8 @@ procedure Revert is
 begin
    --  Alter the tree so that rewriting will fail and so that the resulting
    --  list of tokens it much smaller.
-   Set_Child (Def_A, Index (Def_F_Name), No_Node_Rewriting_Handle);
+   Set_Child
+     (Def_A, Index (Kind (Def_A), Def_F_Name), No_Node_Rewriting_Handle);
    Remove_Child (Def_List, 5);
    Remove_Child (Def_List, 4);
 

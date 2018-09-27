@@ -85,12 +85,14 @@ begin
    New_Line;
    Put_Line ("Use templates to create trees of node rewriting handles...");
    declare
-      Nested_Expr : constant Node_Rewriting_Handle :=
+      Nested_Expr  : constant Node_Rewriting_Handle :=
          Create_From_Template (RH, "(a + 3)", (1 .. 0 => <>), Expr_Rule);
-      Full_Expr   : constant Node_Rewriting_Handle :=
+      Full_Expr    : constant Node_Rewriting_Handle :=
          Create_From_Template (RH, "(b + {})", (1 => Nested_Expr), Expr_Rule);
+      Second_Child : constant Node_Rewriting_Handle := Child (N, 2);
    begin
-      Set_Child (Child (N, 2), Index (Def_F_Expr), Full_Expr);
+      Set_Child
+        (Second_Child, Index (Kind (Second_Child), Def_F_Expr), Full_Expr);
    end;
 
    New_Line;
