@@ -1377,6 +1377,8 @@ class BaseField(AbstractNodeData):
 
     prefix = AbstractNodeData.PREFIX_FIELD
 
+    _null = False
+
     def __init__(self, repr=True, doc=None, type=None,
                  access_needs_incref=False):
         """
@@ -1432,6 +1434,15 @@ class BaseField(AbstractNodeData):
     def doc(self):
         return self._doc
 
+    @property
+    def null(self):
+        """
+        Return whether this field is always supposed to be null.
+
+        :rtype: bool
+        """
+        return self._null
+
 
 class Field(BaseField):
     """
@@ -1440,10 +1451,13 @@ class Field(BaseField):
     """
     concrete = True
 
-    def __init__(self, repr=True, doc=None, type=None, abstract=False):
+    def __init__(self, repr=True, doc=None, type=None, abstract=False,
+                 null=False):
         super(Field, self).__init__(repr, doc, type)
 
+        assert not abstract or not null
         self._abstract = abstract
+        self._null = null
 
         self._overriding_computed = False
         self._overriding = None
@@ -1461,7 +1475,7 @@ class Field(BaseField):
         self._index = None
         """
         0-based index for this parsing field in the owning AST node's children
-        list. This is -1 for abstract fields.
+        list. This is -1 for abstract or null fields.
 
         :type: int
         """
@@ -1537,14 +1551,15 @@ class Field(BaseField):
     def index(self):
         """
         Return the 0-based index of this parsing field in the owning AST node's
-        children list. Only concrete fields have an index.
+        children list. Only non-null concrete fields have an index.
 
         :rtype: int
         """
         assert self._index is not None, (
             'Index for {} is not computed'.format(self.qualname))
         assert self._index != -1, (
-            'Trying to get index of abstract field {}'.format(self.qualname))
+            'Trying to get index of abstract/null field {}'
+            .format(self.qualname))
         return self._index
 
     @property
@@ -2123,11 +2138,18 @@ class ASTNodeType(BaseStructType):
         for f_n, f_v in self._fields.items():
             base_field = inherited_fields.get(f_n)
             if isinstance(f_v, Field):
-                f_v.overriding = (base_field
-                                  if (base_field and
-                                      isinstance(base_field, Field) and
-                                      base_field.abstract)
-                                  else None)
+                if (
+                    base_field and
+                    isinstance(base_field, Field) and
+                    base_field.abstract
+                ):
+                    f_v.overriding = base_field
+                    # Null fields are not initialized with a type, so they must
+                    # inherit their type from the abstract field they override.
+                    if f_v.null:
+                        f_v._type = base_field._type
+                else:
+                    f_v.overriding = None
 
         from langkit.dsl import Annotations
         annotations = annotations or Annotations()
