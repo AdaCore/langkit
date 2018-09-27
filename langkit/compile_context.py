@@ -2038,7 +2038,7 @@ class CompileCtx(object):
             for f in n.get_parse_fields():
 
                 # Compute the index
-                if f.abstract:
+                if f.abstract or f.null:
                     assert f._index in (None, -1)
                     f._index = -1
                 else:
