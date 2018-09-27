@@ -2229,7 +2229,7 @@ class ASTNodeType(BaseStructType):
 
         :type types: list[CompiledType]
         """
-        fields = self.get_parse_fields()
+        fields = self.get_parse_fields(concrete_order=True)
 
         check_source_language(
             len(fields) == len(types), '{} has {} fields ({} types given). You'
@@ -2556,21 +2556,62 @@ class ASTNodeType(BaseStructType):
                     ' Here, field type is {}'.format(f.type.dsl_name)
                 )
 
-        # Unless the special case of inheritted properties, reject fields which
-        # are homonym with inherited fields.
+        # Unless the special case of inheritted abstract fields/properties,
+        # reject fields which are homonym with inherited fields.
         inherited_fields = (self.base.get_abstract_node_data_dict()
                             if self.base else {})
+
+        # Also check that concrete nodes with not-overriden abstract fields
+        abstract_fields = {f_n: f_v for f_n, f_v in inherited_fields.items()
+                           if isinstance(f_v, Field) and f_v.abstract}
+
         for f_n, f_v in self._fields.items():
             with f_v.diagnostic_context:
+                f_v_abstract_field = isinstance(f_v, Field) and f_v.abstract
+                if f_v_abstract_field:
+                    abstract_fields[f_v.name.lower] = f_v
+
                 homonym_fld = inherited_fields.get(f_n)
-                if homonym_fld:
+                if not homonym_fld:
+                    continue
+
+                if f_v.is_property:
                     check_source_language(
-                        f_v.is_property and homonym_fld.is_property,
-                        '"{}" must be renamed as it conflicts with'
-                        ' {}'.format(
-                            f_n, homonym_fld.qualname
-                        )
+                        homonym_fld.is_property,
+                        'The {} property cannot override {} as the latter is'
+                        ' not a property'.format(f_v.qualname,
+                                                 homonym_fld.qualname)
                     )
+                elif (
+                    isinstance(f_v, Field) and
+                    not f_v.abstract and
+                    isinstance(homonym_fld, Field) and
+                    homonym_fld.abstract
+                ):
+                    check_source_language(
+                        f_v.type.matches(homonym_fld.type),
+                        'Type of overriding field ({}) does not match type of'
+                        ' abstract field ({})'
+                        .format(f_v.type.dsl_name, homonym_fld.type.dsl_name))
+                else:
+                    check_source_language(
+                        False,
+                        '{} cannot override {} unless the former is a concrete'
+                        ' field and the latter is an abstract one'
+                        .format(f_v.qualname, homonym_fld.qualname)
+                    )
+
+                if f_n in abstract_fields:
+                    abstract_fields.pop(f_n)
+
+        with self.diagnostic_context:
+            check_source_language(
+                self.abstract or not abstract_fields,
+                'This node is concrete, yet it has abstract fields that are'
+                ' not overriden: {}'.format(', '.join(sorted(
+                    f.qualname for f in abstract_fields.values()
+                )))
+            )
 
     def builtin_properties(self):
         """
