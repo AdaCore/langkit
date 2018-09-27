@@ -9,7 +9,8 @@ from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import is_keyword
 from langkit.diagnostics import (
-    Context, WarningSet, check_source_language, extract_library_location
+    Context, Severity, WarningSet, check_source_language,
+    extract_library_location
 )
 from langkit.template_utils import common_renderer
 from langkit.utils import (issubtype, memoized, not_implemented_error,
@@ -2601,13 +2602,15 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f.type.is_ast_node,
                     'AST node parse fields must all be AST node themselves.'
-                    ' Here, field type is {}'.format(f.type.dsl_name)
+                    ' Here, field type is {}'.format(f.type.dsl_name),
+                    severity=Severity.non_blocking_error
                 )
 
                 # Null fields must override an abstract one
                 check_source_language(
                     not f.null or f.overriding,
-                    'Null fields can only be used to override abstract fields'
+                    'Null fields can only be used to override abstract fields',
+                    severity=Severity.non_blocking_error
                 )
 
         # Unless the special case of inheritted abstract fields/properties,
@@ -2634,7 +2637,8 @@ class ASTNodeType(BaseStructType):
                         homonym_fld.is_property,
                         'The {} property cannot override {} as the latter is'
                         ' not a property'.format(f_v.qualname,
-                                                 homonym_fld.qualname)
+                                                 homonym_fld.qualname),
+                        severity=Severity.non_blocking_error
                     )
                 elif (
                     isinstance(f_v, Field) and
@@ -2646,13 +2650,16 @@ class ASTNodeType(BaseStructType):
                         f_v.type.matches(homonym_fld.type),
                         'Type of overriding field ({}) does not match type of'
                         ' abstract field ({})'
-                        .format(f_v.type.dsl_name, homonym_fld.type.dsl_name))
+                        .format(f_v.type.dsl_name, homonym_fld.type.dsl_name),
+                        severity=Severity.non_blocking_error
+                    )
                 else:
                     check_source_language(
                         False,
                         '{} cannot override {} unless the former is a concrete'
                         ' field and the latter is an abstract one'
-                        .format(f_v.qualname, homonym_fld.qualname)
+                        .format(f_v.qualname, homonym_fld.qualname),
+                        severity=Severity.non_blocking_error
                     )
 
                 if f_n in abstract_fields:
@@ -2664,7 +2671,8 @@ class ASTNodeType(BaseStructType):
                 'This node is concrete, yet it has abstract fields that are'
                 ' not overriden: {}'.format(', '.join(sorted(
                     f.qualname for f in abstract_fields.values()
-                )))
+                ))),
+                severity=Severity.non_blocking_error
             )
 
     def builtin_properties(self):
