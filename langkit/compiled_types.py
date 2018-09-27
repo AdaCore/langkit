@@ -2349,7 +2349,8 @@ class ASTNodeType(BaseStructType):
 
         return result
 
-    def get_parse_fields(self, predicate=None, include_inherited=True):
+    def get_parse_fields(self, predicate=None, include_inherited=True,
+                         concrete_order=False):
         """
         Return the list of all the parse fields `self` has, including its
         parents'.
@@ -2361,10 +2362,16 @@ class ASTNodeType(BaseStructType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
+        :param bool concrete_order: Sort the returned parse fields by serial,
+            so that we get concrete order: concrete fields that override
+            abstract ones don't go before other fields.
+
         :rtype: list[Field]
         """
-        return self.get_abstract_node_data(predicate, include_inherited,
-                                           field_class=Field)
+        result = self.get_abstract_node_data(predicate, include_inherited,
+                                             field_class=Field)
+        result.sort(key=lambda f: f._serial)
+        return result
 
     def get_properties(self, predicate=None, include_inherited=True):
         """
