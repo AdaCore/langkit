@@ -1,4 +1,4 @@
-<VarDecl 1:1-1:11>.F_Name =
+<VarDecl 1:1-1:15>.F_Name =
   (direct accessor) <Name 1:5-1:10>
   (introspection) <Name 1:5-1:10> [index= 2]
 <FunDecl 2:1-2:13>.F_Name =

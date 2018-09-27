@@ -18,4 +18,8 @@ File "test.py", line 97, In definition of grammar rule main_rule
 File "test.py", line 110, in ExampleHolder.f
     Error: Type of overriding field (FooNode) does not match type of abstract field (Example)
 
+== Free-standing null field ==
+File "test.py", line 131, In definition of grammar rule main_rule
+    Error: Transform parser generates 1 values, but ExampleHolder has 0 fields
+
 Done
