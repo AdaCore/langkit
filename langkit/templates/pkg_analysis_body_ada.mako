@@ -718,7 +718,7 @@ package body ${ada_lib_name}.Analysis is
 
       % for f in e.element_type.get_parse_fields( \
          include_inherited=False, \
-         predicate=lambda f: f.is_public \
+         predicate=lambda f: f.is_public and not f.overriding \
       ):
          ${astnode_types.field_body(f)}
       % endfor

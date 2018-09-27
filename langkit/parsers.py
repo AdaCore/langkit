@@ -1579,7 +1579,7 @@ class _Transform(Parser):
         # fields in the destination node are the same.
         nb_transform_values = len(fields_types)
         nb_fields = len(typ.get_parse_fields(
-            predicate=lambda f: not f.abstract))
+            predicate=lambda f: not f.abstract and not f.null))
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
