@@ -26,7 +26,8 @@ with test('Not overriden'):
         pass
 
     class ExampleHolder(FooNode):
-        f = AbstractField(T.FooNode)
+        f1 = AbstractField(T.FooNode)
+        f2 = Field(type=T.FooNode)
 
     class Example(FooNode):
         token_node = True
@@ -64,10 +65,11 @@ with test('Abstract overriding abstract'):
 
     @abstract
     class BaseExampleHolder(FooNode):
-        f = AbstractField(T.FooNode)
+        f1 = AbstractField(T.FooNode)
 
     class ExampleHolder(BaseExampleHolder):
-        f = AbstractField(T.FooNode)
+        f1 = AbstractField(T.FooNode)
+        f2 = Field(type=T.FooNode)
 
     class Example(FooNode):
         token_node = True

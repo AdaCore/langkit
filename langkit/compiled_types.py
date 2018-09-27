@@ -2253,7 +2253,8 @@ class ASTNodeType(BaseStructType):
 
         :type types: list[CompiledType]
         """
-        fields = self.get_parse_fields(concrete_order=True)
+        fields = self.get_parse_fields(predicate=lambda f: not f.abstract,
+                                       concrete_order=True)
 
         check_source_language(
             len(fields) == len(types), '{} has {} fields ({} types given). You'

@@ -1578,7 +1578,8 @@ class _Transform(Parser):
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
         nb_transform_values = len(fields_types)
-        nb_fields = len(typ.get_parse_fields())
+        nb_fields = len(typ.get_parse_fields(
+            predicate=lambda f: not f.abstract))
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
