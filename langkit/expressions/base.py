@@ -2930,7 +2930,7 @@ class PropertyDef(AbstractNodeData):
 
         self.expected_type = type
 
-        self.abstract = abstract
+        self._abstract = abstract
         """
         Whether this property is declared as abstract in the DSL.
 

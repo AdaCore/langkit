@@ -2346,14 +2346,14 @@ class CompileCtx(object):
                     if p == root_static:
                         prop.struct.add_field(p)
 
-                    p.abstract = False
+                    p._abstract = False
                     p.reset_inheritance_info()
 
                     redirected_props[p] = prop
 
                 # Now turn the root property into a dispatcher
                 wrapper_props.add(prop)
-                prop.abstract = False
+                prop._abstract = False
 
                 # If at least one property this dispatcher calls uses entity
                 # info, then we must consider that the dispatcher itself uses

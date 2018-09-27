@@ -1094,6 +1094,8 @@ class AbstractNodeData(object):
     :type: names.Name|None
     """
 
+    _abstract = False
+
     def __init__(self, name=None, public=True, access_needs_incref=False):
         """
         :param names.Name|None name: Name for this field. Most of the time,
@@ -1152,6 +1154,16 @@ class AbstractNodeData(object):
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
+
+    @property
+    def abstract(self):
+        """
+        Return whether this field is abstract. This can be true only for
+        properties and syntax fields.
+
+        :rtype: bool
+        """
+        return self._abstract
 
     @property
     def is_overriding(self):
@@ -1428,8 +1440,14 @@ class Field(BaseField):
     """
     concrete = True
 
-    def __init__(self, repr=True, doc=None, type=None):
+    def __init__(self, repr=True, doc=None, type=None, abstract=False):
         super(Field, self).__init__(repr, doc, type)
+
+        self._abstract = abstract
+
+        self._overriding_computed = False
+        self._overriding = None
+        self._concrete_fields = []
 
         self._types_from_parser = set()
         """
@@ -1441,6 +1459,37 @@ class Field(BaseField):
         """
 
         self._index = None
+
+    @property
+    def overriding(self):
+        """
+        If this field overrides an abstract field, return the abstract field.
+        return None otherwise.
+
+        :rtype: None|Field
+        """
+        assert self._overriding_computed, (
+            '"overriding" not computed for {}'.format(self.qualname))
+        return self._overriding
+
+    @overriding.setter
+    def overriding(self, overriding):
+        assert not self._overriding_computed
+        self._overriding_computed = True
+        self._overriding = overriding
+        if overriding:
+            overriding._concrete_fields.append(self)
+
+    @property
+    def concrete_fields(self):
+        """
+        Assuming this field is abstract, return the list of concrete fields
+        that override it.
+
+        :rtype: list[Field]
+        """
+        assert self.abstract and self._overriding_computed
+        return self._concrete_fields
 
     @property
     def inferred_type(self):
@@ -1475,10 +1524,13 @@ class Field(BaseField):
     def introspection_enum_literal(self):
         """
         Return the name of the enumeration literal to use to represent this
-        field.
+        field. Note that this is not valid on abstract fields.
 
         :rtype: str
         """
+        assert self.abstract or not self.overriding, (
+            'Trying to get introspection enumeration literal for overriding'
+            ' field {}'.format(self.qualname))
         return (self.struct.entity.api_name + self.name).camel_with_underscores
 
 
@@ -2035,6 +2087,20 @@ class ASTNodeType(BaseStructType):
         if is_root:
             fields = self.builtin_properties() + fields
         self._init_fields(fields)
+
+        # Associate concrete syntax fields to the corresponding abstract ones,
+        # if any. Don't bother doing validity checking here: the valide_field
+        # pass will take care of it.
+        inherited_fields = (self.base.get_abstract_node_data_dict()
+                            if self.base else {})
+        for f_n, f_v in self._fields.items():
+            base_field = inherited_fields.get(f_n)
+            if isinstance(f_v, Field):
+                f_v.overriding = (base_field
+                                  if (base_field and
+                                      isinstance(base_field, Field) and
+                                      base_field.abstract)
+                                  else None)
 
         from langkit.dsl import Annotations
         annotations = annotations or Annotations()
