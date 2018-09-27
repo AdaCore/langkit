@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 from contextlib import contextmanager
 
 import langkit
-from langkit.dsl import ASTNode, AbstractField, Field, T, abstract
+from langkit.dsl import ASTNode, AbstractField, Field, NullField, T, abstract
 from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
@@ -108,6 +108,21 @@ with test('Inconsistent overriding type'):
 
     class ExampleHolder(BaseExampleHolder):
         f = Field(type=T.FooNode)
+
+    class Example(FooNode):
+        token_node = True
+
+    foo_grammar = Grammar('main_rule')
+    foo_grammar.add_rules(main_rule=ExampleHolder(Example('example')))
+    emit_and_print_errors(foo_grammar)
+
+
+with test('Free-standing null field'):
+    class FooNode(ASTNode):
+        pass
+
+    class ExampleHolder(FooNode):
+        f = NullField()
 
     class Example(FooNode):
         token_node = True
