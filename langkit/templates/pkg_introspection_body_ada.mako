@@ -35,14 +35,18 @@ package body ${ada_lib_name}.Introspection is
    is
    begin
       % if ctx.sorted_parse_fields:
-         <% concrete_astnodes = [n for n in ctx.astnode_types
-                                 if not n.abstract] %>
+         <%
+            concrete_astnodes = [n for n in ctx.astnode_types
+                                 if not n.abstract]
+            def enum_literal(f):
+               return (f.overriding or f).introspection_enum_literal
+         %>
          case Kind is
             % for n in concrete_astnodes:
                when ${n.ada_kind_name} =>
                return (case Field is
-                       % for f in n.get_parse_fields():
-                       when ${f.introspection_enum_literal} => ${f.index + 1},
+                       % for f in n.get_parse_fields(concrete_order=True):
+                       when ${enum_literal(f)} => ${f.index + 1},
                        % endfor
                        when others => raise Constraint_Error);
             % endfor
@@ -63,7 +67,10 @@ package body ${ada_lib_name}.Introspection is
    begin
       <%
          def get_actions(astnode, node_expr):
-            fields = astnode.get_parse_fields(include_inherited=False)
+            fields = astnode.get_parse_fields(
+               predicate=lambda f: not f.abstract,
+               include_inherited=False
+            )
             result = []
 
             # List types have no field, so just raise an error if a list kind
@@ -81,7 +88,8 @@ package body ${ada_lib_name}.Introspection is
                result.append('case Index is')
                for f in fields:
                   result.append('when {} => return {};'.format(
-                     f.index + 1, f.introspection_enum_literal
+                     f.index + 1,
+                     (f.overriding or f).introspection_enum_literal
                   ))
                result.append('when others => null;')
                result.append('end case;')

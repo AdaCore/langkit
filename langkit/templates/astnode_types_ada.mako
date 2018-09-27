@@ -75,9 +75,30 @@
 
    function ${field.name}
      (Node : access ${type_name}'Class) return ${field.type.name}
-   is (${field.type.extract_from_storage_expr(
-             node_expr='Node',
-             base_expr='Node.{}'.format(field.name))});
+   is
+      <%def name="return_value(node_expr)">
+         return ${field.type.extract_from_storage_expr(
+                     node_expr=node_expr,
+                     base_expr='{}.{}'.format(node_expr, field.name)
+         )};
+      </%def>
+   begin
+      % if field.abstract:
+         case ${field.struct.ada_kind_name} (Node.Kind) is
+            % for cf in field.concrete_fields:
+               when ${cf.struct.ada_kind_name} =>
+                  declare
+                     N : constant ${cf.struct.name} :=
+                        ${cf.struct.name} (Node);
+                  begin
+                     ${return_value('N')}
+                  end;
+            % endfor
+         end case;
+      % else:
+         ${return_value('Node')}
+      % endif
+   end;
 </%def>
 
 
@@ -150,8 +171,9 @@
 
 <%def name="node_fields(cls, emit_null=True)">
    <%
-      fields = cls.get_fields(include_inherited=False,
-                              predicate=lambda f: f.should_emit)
+      fields = cls.get_fields(
+         include_inherited=False,
+         predicate=lambda f: f.should_emit and not f.abstract)
       ext = ctx.ext('nodes', cls.raw_name, 'components')
    %>
    % if fields:
@@ -186,7 +208,10 @@
    end record;
 
    ## Field getters
-   % for field in cls.get_parse_fields(include_inherited=False):
+   % for field in cls.get_parse_fields( \
+      include_inherited=False, \
+      predicate=lambda f: f.abstract or not f.overriding, \
+   ):
       ${bare_field_decl(field)}
    % endfor
 
@@ -458,7 +483,10 @@
    % endif
 
    ## Field getters
-   % for field in cls.get_parse_fields(include_inherited=False):
+   % for field in cls.get_parse_fields( \
+      include_inherited=False, \
+      predicate=lambda f: f.abstract or not f.overriding, \
+   ):
       ${bare_field_body(field)}
    % endfor
 

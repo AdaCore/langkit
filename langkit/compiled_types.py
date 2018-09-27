@@ -1502,11 +1502,26 @@ class Field(BaseField):
 
         :rtype: CompiledType
         """
-        types = ([f.type for f in self.concrete_fields]
-                 if self.abstract else
-                 list(self._types_from_parser))
+
+        if self.null:
+            # Null fields have their type automatically computed from the
+            # abstract field they override.
+            types = [self.type]
+
+        elif self.abstract:
+            # For abstract fields, we want to make sure the declared type
+            # matches all types for concrete fields.
+            types = [f.type for f in self.concrete_fields]
+
+        else:
+            # For regular fields, this just the unification of all types that
+            # parsers have computed.
+            types = list(self._types_from_parser)
+
         if not types:
             return None
+
+        # Unify all given types
         result = types.pop()
         while types:
             result = result.unify(types.pop())

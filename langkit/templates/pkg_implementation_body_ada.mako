@@ -2290,7 +2290,7 @@ package body ${ada_lib_name}.Implementation is
 
         def get_actions(astnode, node_expr):
             specific_fields = astnode.get_parse_fields(
-                lambda f: f.type.is_ast_node,
+                lambda f: not f.abstract,
                 include_inherited=False
             )
 
@@ -2315,7 +2315,7 @@ package body ${ada_lib_name}.Implementation is
             elif specific_fields:
                 # Compute the index of the first AST node field we handle here
                 all_fields = astnode.get_parse_fields(
-                    lambda f: f.type.is_ast_node,
+                    lambda f: not f.abstract,
                     include_inherited=True
                 )
                 first_field_index = len(all_fields) - len(specific_fields) + 1
