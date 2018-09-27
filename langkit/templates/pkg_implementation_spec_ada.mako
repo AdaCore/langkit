@@ -381,7 +381,7 @@ private package ${ada_lib_name}.Implementation is
      (${', \n'.join(
            '{} => {}'.format(
               cls.ada_kind_name,
-              (len(cls.get_parse_fields(lambda f: f.type.is_ast_node))
+              (len(cls.get_parse_fields(lambda f: not f.null))
                if not cls.is_list_type else -1)
            )
            for cls in ctx.astnode_types if not cls.abstract)});

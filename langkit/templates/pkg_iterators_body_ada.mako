@@ -449,23 +449,29 @@ package body ${ada_lib_name}.Iterators is
    --------------
 
    overriding function Evaluate
-     (P : in out Child_With_Predicate; N : ${node}) return Boolean
-   is
-      Field_Index : Positive;
+     (P : in out Child_With_Predicate; N : ${node}) return Boolean is
    begin
       if N.Is_Null then
          return False;
       end if;
 
-      --  First check that N has the requested field
-      begin
-         Field_Index := Index (N.Kind, P.Field);
-      exception
-         when Invalid_Field =>
-            return False;
-      end;
+      % if ctx.sorted_parse_fields:
+         declare
+            Field_Index : Positive;
+         begin
+            --  First check that N has the requested field
+            begin
+               Field_Index := Index (N.Kind, P.Field);
+            exception
+               when Invalid_Field =>
+                  return False;
+            end;
 
-      return P.Predicate.Unchecked_Get.Evaluate (N.Child (Field_Index));
+            return P.Predicate.Unchecked_Get.Evaluate (N.Child (Field_Index));
+         end;
+      % else:
+         return False;
+      % endif
    end Evaluate;
 
    --------------

@@ -45,7 +45,10 @@ package body ${ada_lib_name}.Introspection is
             % for n in concrete_astnodes:
                when ${n.ada_kind_name} =>
                return (case Field is
-                       % for f in n.get_parse_fields(concrete_order=True):
+                       % for f in n.get_parse_fields( \
+                          predicate=lambda f: not f.null, \
+                          concrete_order=True \
+                       ):
                        when ${enum_literal(f)} => ${f.index + 1},
                        % endfor
                        when others => raise Constraint_Error);
@@ -68,7 +71,7 @@ package body ${ada_lib_name}.Introspection is
       <%
          def get_actions(astnode, node_expr):
             fields = astnode.get_parse_fields(
-               predicate=lambda f: not f.abstract,
+               predicate=lambda f: not f.abstract and not f.null,
                include_inherited=False
             )
             result = []

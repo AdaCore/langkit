@@ -720,7 +720,8 @@ class RegularNodeUnparser(NodeUnparser):
         """
         self.node = node
 
-        parse_fields = self.node.get_parse_fields()
+        parse_fields = self.node.get_parse_fields(
+            predicate=lambda f: not f.null)
 
         self.pre_tokens = TokenSequenceUnparser()
         """

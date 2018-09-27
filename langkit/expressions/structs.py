@@ -321,9 +321,16 @@ class New(AbstractExpression):
         # Create a dict of field names to fields in the struct type
 
         def is_required(f):
-            return (self.struct_type.is_struct_type
-                    if isinstance(f, BuiltinField) else
-                    isinstance(f, (Field, UserField)))
+            if isinstance(f, BuiltinField):
+                # BuiltinFields are actually stored fields only for structure
+                # types (not for nodes).
+                return self.struct_type.is_struct_type
+
+            elif isinstance(f, Field):
+                return not f.null
+
+            else:
+                return isinstance(f, UserField)
 
         required_fields = {
             f._name.lower: f

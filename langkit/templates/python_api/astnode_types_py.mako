@@ -74,7 +74,10 @@
     % endfor
 
     _field_names = ${parent_fields} + (
-        % for field in cls.fields_with_accessors():
+        % for field in cls.get_parse_fields( \
+            predicate=lambda f: not f.abstract and not f.null, \
+            include_inherited=False \
+        ):
         "${field.name.lower}",
         % endfor
     )
