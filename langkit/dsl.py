@@ -860,6 +860,23 @@ def Field(repr=True, doc=None, type=None):
     return _Field(repr, doc, type)
 
 
+def AbstractField(type, doc=None):
+    """
+    Create an abstract field.
+
+    Concrete node subclasses must override all inherited abstract fields, and
+    only concrete fields can override abstract fields. Abstract fields are
+    useful to make syntax fields available in abstract nodes when these don't
+    have the same field index in derived nodes.
+
+    :param DSLType|CompiledType type: DSLType or CompiledType subclass for
+        values this field holds.
+
+    :param str|None doc: User documentation for this field.
+    """
+    return _Field(type=type, doc=doc, abstract=True)
+
+
 def UserField(type, repr=False, doc=None, public=True):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
