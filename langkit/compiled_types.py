@@ -1497,11 +1497,14 @@ class Field(BaseField):
         Return the type for this field that parsers inferred.
 
         Note that this is None for synthetic nodes, as parsers don't create
-        them.
+        them. For abstract fields, this is the unification of the type of all
+        overriding fields.
 
         :rtype: CompiledType
         """
-        types = list(self._types_from_parser)
+        types = ([f.type for f in self.concrete_fields]
+                 if self.abstract else
+                 list(self._types_from_parser))
         if not types:
             return None
         result = types.pop()
