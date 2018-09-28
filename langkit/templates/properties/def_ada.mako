@@ -26,11 +26,13 @@ is
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name} := ${Self.type.name}
      (${property.self_arg_name});
-   ${gdb_bind('self', 'Self')}
 
    % if property._has_self_entity:
    Ent : ${Self.type.entity.name} :=
      ${Self.type.entity.name}'(Node => Self, Info => E_Info);
+   ${gdb_bind('entity', 'Ent')}
+   % else:
+   ${gdb_bind('self', 'Self')}
    % endif
 
    % for arg in property.arguments:
