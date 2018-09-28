@@ -1168,8 +1168,7 @@ class ${root_astnode_name}(object):
                 yield ('item_{}'.format(i), value)
         else:
             for field_name in self._field_names:
-                if field_name.startswith('f_'):
-                    yield (field_name, getattr(self, '{}'.format(field_name)))
+                yield (field_name, getattr(self, '{}'.format(field_name)))
 
     def dump_str(self):
         """
@@ -1209,10 +1208,8 @@ class ${root_astnode_name}(object):
         else:
             for name, value in self.iter_fields():
                 # Remove the f_ prefix to have the same behavior as the Ada
-                # dumper. Also filter out non-exposed types to keep the same
-                # output with debug builds.
-                if getattr(value, '_exposed', True):
-                    print_node(name[2:], value)
+                # dumper.
+                print_node(name[2:], value)
 
     def findall(self, ast_type_or_pred, **kwargs):
         """
