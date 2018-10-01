@@ -1399,7 +1399,6 @@ package body ${ada_lib_name}.Implementation is
          return;
       end if;
 
-      Node.Free_Extensions;
       Node.Reset_Logic_Vars;
       for I in 1 .. Node.Abstract_Children_Count loop
          Destroy (Node.Child (I));
@@ -1698,54 +1697,6 @@ package body ${ada_lib_name}.Implementation is
               when Langkit_Support.Types.Greater_Than     => LS > RS,
               when Langkit_Support.Types.Greater_Or_Equal => LS >= RS);
    end Compare;
-
-   -------------------
-   -- Get_Extension --
-   -------------------
-
-   function Get_Extension
-     (Node : access ${root_node_value_type}'Class;
-      ID   : Extension_ID;
-      Dtor : Extension_Destructor) return Extension_Access
-   is
-      use Extension_Vectors;
-   begin
-      for Slot of Node.Extensions loop
-         if Slot.ID = ID then
-            return Slot.Extension;
-         end if;
-      end loop;
-
-      declare
-         New_Ext : constant Extension_Access :=
-           new Extension_Type'(Extension_Type (System.Null_Address));
-      begin
-         Append (Node.Extensions,
-                 Extension_Slot'(ID        => ID,
-                                 Extension => New_Ext,
-                                 Dtor      => Dtor));
-         return New_Ext;
-      end;
-   end Get_Extension;
-
-   ---------------------
-   -- Free_Extensions --
-   ---------------------
-
-   procedure Free_Extensions (Node : access ${root_node_value_type}'Class) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Extension_Type, Extension_Access);
-      use Extension_Vectors;
-      Slot : Extension_Slot;
-   begin
-      --  Explicit iteration for perf
-      for J in First_Index (Node.Extensions) .. Last_Index (Node.Extensions)
-      loop
-         Slot := Get (Node.Extensions, J);
-         Slot.Dtor (Node, Slot.Extension.all);
-         Free (Slot.Extension);
-      end loop;
-   end Free_Extensions;
 
    --------------
    -- Children --
@@ -3220,7 +3171,6 @@ package body ${ada_lib_name}.Implementation is
       --  Don't call Node.Destroy, as Node's children may be gone already: they
       --  have their own destructor and there is no specified order for the
       --  call of these destructors.
-      Node.Free_Extensions;
       Node.Reset_Logic_Vars;
 
       Free (Node);

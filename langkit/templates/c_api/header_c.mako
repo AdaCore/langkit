@@ -3,7 +3,7 @@
 <%namespace name="array_types"   file="array_types_c.mako" />
 <%namespace name="struct_types"  file="struct_types_c.mako" />
 <%namespace name="astnode_types" file="astnode_types_c.mako" />
-<%namespace name="exts" file="../extensions.mako" />
+<%namespace name="exts"          file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>
 
@@ -409,29 +409,6 @@ ${capi.get_name("big_integer_decref")}(${big_integer_type} bigint);
         ${astnode_types.accessor_decl(field)}
     % endfor
 % endfor
-
-
-/*
- * Extensions handling
- */
-
-${c_doc('langkit.extensions_handling')}
-
-${c_doc('langkit.node_extension_destructor')}
-typedef void (*${capi.get_name("node_extension_destructor")})(${node_type} node,
-                                                              void *extension);
-
-${c_doc('langkit.register_extension')}
-extern unsigned
-${capi.get_name("register_extension")}(const char *name);
-
-${c_doc('langkit.node_extension')}
-extern void **
-${capi.get_name("node_extension")}(
-    ${node_type} node,
-    unsigned ext_id,
-    ${capi.get_name("node_extension_destructor")} dtor
-);
 
 /*
  * Unit providers

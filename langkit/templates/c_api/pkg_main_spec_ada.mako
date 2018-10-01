@@ -457,35 +457,6 @@ private package ${ada_lib_name}.Implementation.C is
    ${array_types.decl(T.root_node.array)}
    ${array_types.decl(T.root_node.entity.array)}
 
-   -------------------------
-   -- Extensions handling --
-   -------------------------
-
-   ${ada_c_doc('langkit.extensions_handling', 3)}
-
-   type ${capi.get_name('node_extension_destructor')} is
-      access procedure (Node      : ${node_type};
-                        Extension : System.Address)
-      with Convention => C;
-   ${ada_c_doc('langkit.node_extension_destructor', 3)}
-
-   function ${capi.get_name('register_extension')} (Name : chars_ptr)
-      return unsigned
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('register_extension')}";
-   ${ada_c_doc('langkit.register_extension', 3)}
-
-   function ${capi.get_name('node_extension')}
-     (Node   : ${node_type};
-      Ext_Id : unsigned;
-      Dtor   : ${capi.get_name('node_extension_destructor')})
-      return System.Address
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('node_extension')}";
-   ${ada_c_doc('langkit.node_extension', 3)}
-
    --------------------
    -- Unit providers --
    --------------------
@@ -685,9 +656,6 @@ private package ${ada_lib_name}.Implementation.C is
    function Unwrap is new Ada.Unchecked_Conversion
      (${unit_provider_type}, Unit_Provider_Access);
 
-   function Convert is new Ada.Unchecked_Conversion
-     (${capi.get_name('node_extension_destructor')},
-      Extension_Destructor);
    function Convert is new Ada.Unchecked_Conversion
      (chars_ptr, System.Address);
 

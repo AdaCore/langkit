@@ -504,38 +504,6 @@ base_langkit_docs = {
     """,
 
     #
-    # Extensions handling
-    #
-
-    'langkit.extensions_handling': """
-        The following functions makes it possible to attach arbitrary data to
-        AST nodes: these are extensions.  Each data is associated with both an
-        extension ID and a destructor.  AST nodes can have either none or only
-        one extension for a given ID.  The destructor is called when the AST
-        node is about to be destroyed itself.
-
-        This mechanism is inteded to ease annotating trees with analysis data
-        but also to host node wrappers for language bindings.
-    """,
-    'langkit.node_extension_destructor': """
-        Type for extension destructors.  The parameter are the "node" the
-        extension was attached to and the "extension" itself.
-    """,
-    'langkit.register_extension': """
-        Register an extension and return its identifier.  Multiple calls with
-        the same name will return the same identifier.
-    """,
-    'langkit.node_extension': """
-        Create an extension slot in "node".  If this node already contains an
-        extension for "ext_id", return the existing slot.  If not, create such
-        a slot, associate the "dtor" destructor to it and initialize the slot
-        to ${null}.  Return a pointer to the slot.
-
-        Note that the pointer is not guaranteed to stay valid after further
-        calls to this function.
-    """,
-
-    #
     # Unit providers
     #
 

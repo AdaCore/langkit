@@ -1718,13 +1718,6 @@ _${field.accessor_basename.lower} = _import_func(
     % endfor
 % endfor
 
-
-# Extensions handling
-_register_extension = _import_func(
-    '${capi.get_name("register_extension")}',
-    [ctypes.c_char_p], ctypes.c_uint
-)
-
 # Unit providers
 _destroy_unit_provider = _import_func(
     '${capi.get_name("destroy_unit_provider")}',

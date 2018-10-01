@@ -18,7 +18,6 @@ use type System.Address;
 with GNATCOLL.Iconv;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
@@ -641,43 +640,6 @@ package body ${ada_lib_name}.Implementation.C is
          Output (Output_Index) := ASCII.NUL;
 
          return Result;
-      end;
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return System.Null_Address;
-   end;
-
-   -------------------------
-   -- Extensions handling --
-   -------------------------
-
-   function ${capi.get_name("register_extension")}
-     (Name : chars_ptr) return unsigned is
-   begin
-      Clear_Last_Exception;
-
-      return unsigned (Register_Extension (Value (Name)));
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return 0;
-   end;
-
-   function ${capi.get_name("node_extension")}
-     (Node   : ${node_type};
-      Ext_Id : unsigned;
-      Dtor   : ${capi.get_name("node_extension_destructor")})
-      return System.Address is
-   begin
-      Clear_Last_Exception;
-
-      declare
-         N  : constant ${root_node_type_name} := Unwrap (Node);
-         ID : constant Extension_ID := Extension_ID (Ext_Id);
-         D  : constant Extension_Destructor := Convert (Dtor);
-      begin
-         return Get_Extension (N, ID, D).all'Address;
       end;
    exception
       when Exc : others =>
