@@ -1,11 +1,11 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"       file="array_types_ada.mako" />
-<%namespace name="astnode_types"     file="astnode_types_ada.mako" />
-<%namespace name="exts"              file="extensions.mako" />
-<%namespace name="list_types"        file="list_types_ada.mako" />
-<%namespace name="struct_types"      file="struct_types_ada.mako" />
-<%namespace name="memoization"       file="memoization_ada.mako" />
+<%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="exts"          file="extensions.mako" />
+<%namespace name="list_types"    file="list_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
+<%namespace name="memoization"   file="memoization_ada.mako" />
 
 <%
    root_node_array = T.root_node.array
@@ -33,7 +33,6 @@ with Langkit_Support.Adalog.Eq_Same;
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
@@ -122,47 +121,6 @@ private package ${ada_lib_name}.Implementation is
    function Is_Token_Node
      (Node : access ${root_node_value_type}'Class) return Boolean;
    ${ada_doc('langkit.node_is_token_node', 3)}
-
-   ----------------
-   -- Extensions --
-   ----------------
-
-   --  Extensions are a way to associate arbitrary data (Extension_Type, i.e.
-   --  pointers) to AST nodes.
-   --
-   --  In order to associate an extension to an AST node, one has first to
-   --  register itself in Langkit_Support.Extensions to get an Extension_ID.
-   --  Then, this ID must be passed to Get_Extension, which will create a slot
-   --  to store this extension (or return an already existing one for the same
-   --  ID). It is this slot that can be used to store arbitrary data.
-   --
-   --  As AST nodes can be deallocated later on, this abritrary data sometimes
-   --  needs to be deallocated as well. The destructor mechanism was designed
-   --  for this: when the AST node is about to be deallocated, the destructor
-   --  callback is invoked so that one has a chance to release allocated
-   --  resources.
-
-   type Extension_Type is new System.Address;
-   --  Data type storing arbitrary values in AST nodes
-
-   type Extension_Access is access all Extension_Type;
-   --  Access to the arbitrary values stored in AST nodes
-
-   type Extension_Destructor is
-     access procedure (Node      : access ${root_node_value_type}'Class;
-                       Extension : Extension_Type)
-     with Convention => C;
-   --  Type for extension destructors. The parameter are the "Node" the
-   --  extension was attached to and the "Extension" itself.
-
-   function Get_Extension
-     (Node : access ${root_node_value_type}'Class;
-      ID   : Extension_ID;
-      Dtor : Extension_Destructor) return Extension_Access;
-   --  Get (and create if needed) the extension corresponding to ID for Node.
-   --  If the extension is created, the Dtor destructor is associated to it.
-   --  Note that the returned access is not guaranteed to stay valid after
-   --  subsequent calls to Get_Extension.
 
    ---------------------------
    -- Environments handling --
@@ -619,19 +577,6 @@ private package ${ada_lib_name}.Implementation is
    % endif
    % endfor
 
-   --------------------------
-   -- Extensions internals --
-   --------------------------
-
-   type Extension_Slot is record
-      ID        : Extension_ID;
-      Extension : Extension_Access;
-      Dtor      : Extension_Destructor;
-   end record;
-
-   package Extension_Vectors is new Langkit_Support.Vectors
-     (Element_Type => Extension_Slot);
-
    -------------------------------
    -- Root AST node (internals) --
    -------------------------------
@@ -649,9 +594,6 @@ private package ${ada_lib_name}.Implementation is
       --  this node is a ghost, Token_Start_Index is the token that this AST
       --  node relates to and Token_End_Index is No_Token_Index. Otherwise,
       --  both tokens are inclusive, i.e. they both belong to this node.
-
-      Extensions : Extension_Vectors.Vector;
-      --  See documentation for the "Extensions" section above
 
       Self_Env : Lexical_Env;
       --  Hold the environment this node defines, or the parent environment
@@ -770,9 +712,6 @@ private package ${ada_lib_name}.Implementation is
      (Envs   : ${T.LexicalEnv.array.name};
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnv.name};
    --  Convenience wrapper for uniform types handling in code generation
-
-   procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
-   --  Implementation helper to free the extensions associatde to Node
 
    package ${T.root_node.array.pkg_vector} is
       new Langkit_Support.Vectors (${T.root_node.name});
