@@ -68,7 +68,7 @@ begin
 
    New_Line;
    Put_Line ("Quoting source buffer for rewritten unit...");
-   Put_Line (Transcode (Text (U), "ASCII"));
+   Put_Line (Encode (Text (U), "ASCII"));
 
    Put_Line ("preserve_formatting.adb: Done.");
 end Preserve_Formatting;
