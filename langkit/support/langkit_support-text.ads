@@ -62,8 +62,11 @@ package Langkit_Support.Text is
    function Encode (Text : Text_Type; Charset : String) return String;
    --  Use GNATCOLL.Iconv to convert Text into a String encoded using the given
    --  Charset. Note that this is only a convenience wrapper around
-   --  GNATCOLL.Iconv: for instance, if performance needs dictatet to avoid
+   --  GNATCOLL.Iconv: for instance, if performance needs dictate to avoid
    --  secondary stack usage, please use directly GNATCOLL.Iconv.
+
+   function Decode (S : String; Charset : String) return Text_Type;
+   --  Likewise, but convert a string to text
 
    type Text_Access is access all Text_Type;
    type Text_Cst_Access is access constant Text_Type;

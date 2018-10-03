@@ -164,4 +164,21 @@ package body Langkit_Support.Text is
          From_Code => Text_Charset);
    end Encode;
 
+   ------------
+   -- Decode --
+   ------------
+
+   function Decode (S : String; Charset : String) return Text_Type is
+      Result : constant String := GNATCOLL.Iconv.Iconv
+        (Input     => S,
+         To_Code   => Text_Charset,
+         From_Code => Charset);
+      pragma Assert (S'Length mod 4 = 0);
+
+      Text_Result : constant Text_Type (1 .. Result'Length / 4)
+         with Import, Address => Result'Address;
+   begin
+      return Text_Result;
+   end Decode;
+
 end Langkit_Support.Text;
