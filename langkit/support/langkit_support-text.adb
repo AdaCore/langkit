@@ -151,30 +151,17 @@ package body Langkit_Support.Text is
       Proc.all (S);
    end Process_As_String;
 
-   ---------------
-   -- Transcode --
-   ---------------
+   ------------
+   -- Encode --
+   ------------
 
-   function Transcode (Text : Text_Type; Charset : String) return String is
-
-      Result : Unbounded_String;
-      procedure Process (S : String);
-
-      -------------
-      -- Process --
-      -------------
-
-      procedure Process (S : String) is
-      begin
-         Result := To_Unbounded_String (GNATCOLL.Iconv.Iconv
-            (Input     => S,
-             To_Code   => Charset,
-             From_Code => Text_Charset));
-      end Process;
-
+   function Encode (Text : Text_Type; Charset : String) return String is
+      S : String (1 .. 4 * Text'Length) with Import, Address => Text'Address;
    begin
-      Process_As_String (Text, Process'Access);
-      return To_String (Result);
-   end Transcode;
+      return GNATCOLL.Iconv.Iconv
+        (Input     => S,
+         To_Code   => Charset,
+         From_Code => Text_Charset);
+   end Encode;
 
 end Langkit_Support.Text;

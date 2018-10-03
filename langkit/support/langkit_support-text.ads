@@ -59,7 +59,7 @@ package Langkit_Support.Text is
    --  Call Proc, passing to it Text as a String. This is useful to call APIs
    --  that work on mere strings to do conversions, such as GNATCOLL.Iconv.
 
-   function Transcode (Text : Text_Type; Charset : String) return String;
+   function Encode (Text : Text_Type; Charset : String) return String;
    --  Use GNATCOLL.Iconv to convert Text into a String encoded using the given
    --  Charset. Note that this is only a convenience wrapper around
    --  GNATCOLL.Iconv: for instance, if performance needs dictatet to avoid
