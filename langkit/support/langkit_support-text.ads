@@ -21,6 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.UTF_Encoding;
 with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Deallocation;
 
@@ -67,6 +68,14 @@ package Langkit_Support.Text is
 
    function Decode (S : String; Charset : String) return Text_Type;
    --  Likewise, but convert a string to text
+
+   function To_UTF8
+     (Text : Text_Type) return Ada.Strings.UTF_Encoding.UTF_8_String;
+   --  Encode the given text into an UTF-8 string
+
+   function From_UTF8
+     (S : Ada.Strings.UTF_Encoding.UTF_8_String) return Text_Type;
+   --  Decode the given UTF-8 string into text
 
    type Text_Access is access all Text_Type;
    type Text_Cst_Access is access constant Text_Type;

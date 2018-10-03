@@ -181,4 +181,24 @@ package body Langkit_Support.Text is
       return Text_Result;
    end Decode;
 
+   -------------
+   -- To_UTF8 --
+   -------------
+
+   function To_UTF8
+     (Text : Text_Type) return Ada.Strings.UTF_Encoding.UTF_8_String is
+   begin
+      return Encode (Text, "UTF-8");
+   end To_UTF8;
+
+   ---------------
+   -- From_UTF8 --
+   ---------------
+
+   function From_UTF8
+     (S : Ada.Strings.UTF_Encoding.UTF_8_String) return Text_Type is
+   begin
+      return Decode (S, "UTF-8");
+   end From_UTF8;
+
 end Langkit_Support.Text;
