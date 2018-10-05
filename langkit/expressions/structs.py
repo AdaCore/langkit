@@ -419,7 +419,7 @@ class FieldAccess(AbstractExpression):
                             arg_spec.default_value is not None,
                             'Missing actual for argument {}'.format(arg_name)
                         )
-                        # Don't pass the argument explicitely: let Ada pass the
+                        # Don't pass the argument explicitly: let Ada pass the
                         # default one instead.
                         actual = None
 
