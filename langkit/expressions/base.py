@@ -1882,7 +1882,7 @@ class AbstractVariable(AbstractExpression):
 
         self._ignored = False
         """
-        Whether this variable was explicitely ignored
+        Whether this variable was explicitly ignored
         """
 
     def create_local_variable(self, scope=None):
@@ -3562,8 +3562,7 @@ class PropertyDef(AbstractNodeData):
             )
             check_source_language(
                 self._uses_envs is None,
-                'Cannot explicitely pass uses_envs for internal'
-                ' properties'
+                'Cannot explicitly pass uses_envs for internal properties'
             )
 
         # Add dynamically bound variables as arguments
@@ -3616,7 +3615,7 @@ class PropertyDef(AbstractNodeData):
         """
         check_source_language(
             self._uses_entity_info is not False,
-            'Cannot use entity info, as explicitely forbidden'
+            'Cannot use entity info, as explicitly forbidden'
         )
         self._uses_entity_info = True
 
@@ -3640,7 +3639,7 @@ class PropertyDef(AbstractNodeData):
         """
         check_source_language(
             self._uses_envs is not False,
-            'Cannot use lexical environments, as explicitely forbidden'
+            'Cannot use lexical environments, as explicitly forbidden'
         )
         self._uses_envs = True
 

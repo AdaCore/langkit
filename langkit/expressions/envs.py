@@ -492,8 +492,8 @@ def as_entity(self, node):
 
     check_source_language(
         p._uses_entity_info is not False,
-        'This property has been explicitely tagged as not using entity info,'
-        ' so .as_entity is invalid here'
+        'This property has been explicitly tagged as not using entity info, so'
+        ' .as_entity is invalid here'
     )
 
     # We want to keep original type of node, so no downcast
