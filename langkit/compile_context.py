@@ -18,6 +18,7 @@ from contextlib import contextmanager
 from distutils.spawn import find_executable
 from functools import reduce
 from glob import glob
+import importlib
 from io import StringIO
 import json
 import os
@@ -1360,7 +1361,7 @@ class CompileCtx(object):
              no_property_checks=False, warnings=None, generate_unparser=False,
              generate_astdoc=True, generate_gdb_hook=True,
              post_process_ada=None, post_process_cpp=None,
-             post_process_python=None):
+             post_process_python=None, plugin_passes=[]):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1408,6 +1409,7 @@ class CompileCtx(object):
         for dirpath in keep(self.template_lookup_extra_dirs):
             add_template_dir(dirpath)
 
+        self.plugin_passes = list(plugin_passes)
         self.no_property_checks = no_property_checks
         self.generate_unparser = generate_unparser
         self.generate_astdoc = generate_astdoc
@@ -1655,6 +1657,11 @@ class CompileCtx(object):
                        disabled=not annotate_fields_types),
             errors_checkpoint_pass,
         )
+        for pass_fqn in self.plugin_passes:
+            mod_name, klass_name = pass_fqn.rsplit(".", 1)
+            mod = importlib.import_module(mod_name)
+            pass_fn = getattr(mod, klass_name)
+            pass_manager.add(pass_fn())
 
         with names.camel_with_underscores:
             pass_manager.run(self)

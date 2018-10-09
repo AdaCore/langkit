@@ -180,6 +180,13 @@ class ManageScript(object):
             default=DiagnosticStyle.default,
             help='Style for error messages.'
         )
+        args_parser.add_argument(
+            '--plugin-pass', action='append', default=[],
+            help='Fully qualified name to a langkit plug-in pass function. '
+            'The function must return a langkit pass, whose type derives from '
+            'langkit.passes.AbstractPass. It will be ran at the end of the '
+            'pass preexisting order'
+        )
 
         def create_parser(fn, needs_context=False):
             """
@@ -629,7 +636,8 @@ class ManageScript(object):
                           no_property_checks=args.no_property_checks,
                           generate_unparser=args.generate_unparser,
                           generate_astdoc=not args.no_astdoc,
-                          generate_gdb_hook=not args.no_gdb_hook)
+                          generate_gdb_hook=not args.no_gdb_hook,
+                          plugin_passes=args.plugin_pass)
 
         if args.check_only:
             return
