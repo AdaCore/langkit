@@ -26,19 +26,11 @@ import subprocess
 
 from funcy import keep
 
-from langkit import caching, names
+from langkit import caching, documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.compiled_types import EnumType
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
-import langkit.documentation
-from langkit.envs import EnvSpec
-from langkit.expressions import PropertyDef
-from langkit.passes import (
-    ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass, MajorStepPass,
-    PassManager, PropertyPass, StopPipeline, errors_checkpoint_pass
-)
 from langkit.template_utils import add_template_dir
 from langkit.utils import (Colors, TopologicalSortError, printcol,
                            topological_sort, memoized)
@@ -661,10 +653,10 @@ class CompileCtx(object):
         self.default_unit_provider = default_unit_provider
         self.symbol_canonicalizer = symbol_canonicalizer
 
-        docs = dict(langkit.documentation.base_langkit_docs)
+        docs = dict(documentation.base_langkit_docs)
         if documentations:
             docs.update(documentations)
-        self.documentations = langkit.documentation.instantiate_templates(docs)
+        self.documentations = documentation.instantiate_templates(docs)
         """
         Documentation database. Associate a Mako template for each entity to
         document in the generated library.
@@ -818,7 +810,9 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import CompiledTypeRepo, StructType, T
+        from langkit.compiled_types import (
+            CompiledTypeRepo, StructType, T, EnumType
+        )
         from langkit.dsl import _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -1047,6 +1041,8 @@ class CompileCtx(object):
         :return: A tuple for 1) the forwards callgraph 2) the backwards one.
         :rtype: (dict[PropertyDef, set[T]], dict[PropertyDef, set[T]])
         """
+        from langkit.expressions import PropertyDef
+
         def add_forward(from_prop, to_prop, expr):
             backwards.setdefault(to_prop, set())
             forwards[from_prop].add(forwards_converter(expr, to_prop))
@@ -1308,14 +1304,53 @@ class CompileCtx(object):
                     severity=Severity.warning
                 )
 
+    _template_extensions_fns = []
+
+    @property
+    @memoized
+    def template_extensions(self):
+        """
+        Return the set of template extensions evaluated for this context.
+        """
+        from langkit.common import string_repr
+        base_env = {
+            'string_repr':      string_repr,
+            'Name':             names.Name,
+            'ada_doc':          documentation.ada_doc,
+            'c_doc':            documentation.c_doc,
+            'py_doc':           documentation.py_doc,
+            'ada_c_doc':        documentation.ada_c_doc,
+        }
+        for el in CompileCtx._template_extensions_fns:
+            ext_env = el()
+            for k, v in ext_env.items():
+                assert k not in base_env, (
+                    "Duplicate key in renderer env: {}".format(k)
+                )
+                base_env[k] = v
+        return base_env
+
+    @property
+    @memoized
+    def renderer(self):
+        """
+        Return the default renderer for this context.
+        """
+        from langkit import template_utils
+        return template_utils.Renderer(self.template_extensions)
+
     def render_template(self, *args, **kwargs):
-        # Kludge: to avoid circular dependency issues, do not import parsers
-        # until needed.
-        # TODO: If the render method was dynamically bound, like the compile
-        # context, rather than being explicitly redefined in every module, we
-        # could avoid this, maybe.
-        from langkit.parsers import render
-        return render(*args, **kwargs)
+        """
+        Shortcut for ``self.renderer.render(*args, **kwargs)``.
+        """
+        return self.renderer.render(*args, **kwargs)
+
+    @staticmethod
+    def register_template_extensions(exts_fn):
+        """
+        Register a set of mako template env extensions.
+        """
+        CompileCtx._template_extensions_fns.append(exts_fn)
 
     def emit(self, file_root='.', main_source_dirs=set(), main_programs=set(),
              annotate_fields_types=False, check_only=False,
@@ -1505,7 +1540,14 @@ class CompileCtx(object):
         assert self.grammar, "Set grammar before compiling"
 
         from langkit.compiled_types import CompiledTypeRepo
+        from langkit.envs import EnvSpec
         from langkit.parsers import Parser
+        from langkit.expressions import PropertyDef
+        from langkit.passes import (
+            ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
+            MajorStepPass, PassManager, PropertyPass, StopPipeline,
+            errors_checkpoint_pass
+        )
 
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
 
@@ -2244,7 +2286,7 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import Argument
         from langkit.expressions import (Entity, FieldAccess, LocalVars, Match,
-                                         Self, construct)
+                                         Self, construct, PropertyDef)
 
         ignored_props = set()
         redirected_props = {}
@@ -2757,8 +2799,8 @@ class CompileCtx(object):
                 check_source_language(False, message,
                                       severity=Severity.non_blocking_error)
 
-    astnode_kind_set = langkit.utils.astnode_kind_set
+    astnode_kind_set = utils.astnode_kind_set
 
     collapse_concrete_nodes = staticmethod(
-        langkit.utils.collapse_concrete_nodes
+        utils.collapse_concrete_nodes
     )

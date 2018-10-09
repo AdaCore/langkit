@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.template_utils import common_renderer
+from langkit.template_utils import Renderer
 
 
 class LangkitSupport(object):
@@ -43,5 +43,5 @@ class LangkitSupport(object):
                 os.mkdir(d)
 
         with open(self.lksp_project_file, 'w') as f:
-            f.write(common_renderer.render('langkit_support_gpr',
-                                           source_dir=self.lksp_source_dir))
+            f.write(Renderer().render('langkit_support_gpr',
+                                      source_dir=self.lksp_source_dir))

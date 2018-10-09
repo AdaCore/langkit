@@ -6,9 +6,9 @@ import sys
 import mako.exceptions
 from mako.lookup import TemplateLookup
 
-from langkit import documentation, names
 from langkit.common import string_repr
 from langkit.diagnostics import DiagnosticError
+from langkit.names import Name
 
 
 class Renderer(object):
@@ -16,6 +16,10 @@ class Renderer(object):
     def __init__(self, template_env=None, **kwargs):
         self.env = dict(template_env or {})
         self.env.update(kwargs)
+        self.env.update({
+            'string_repr': string_repr,
+            'Name': Name,
+        })
 
     def update(self, env):
         return Renderer(self.env, **env)
@@ -57,14 +61,3 @@ add_template_dir(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 def mako_template(file_name):
     return _template_lookup.get_template("{}.mako".format(file_name))
-
-
-common_renderer = Renderer({
-    'string_repr':      string_repr,
-    'Name':             names.Name,
-
-    'ada_doc':          documentation.ada_doc,
-    'c_doc':            documentation.c_doc,
-    'py_doc':           documentation.py_doc,
-    'ada_c_doc':        documentation.ada_c_doc,
-})
