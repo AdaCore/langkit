@@ -12,8 +12,7 @@ from langkit import names
 from langkit.common import string_repr
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, EnumValue, T,
-    TypeRepo, gdb_helper, get_context, no_compiled_type, render as ct_render,
-    resolve_type
+    TypeRepo, gdb_helper, get_context, no_compiled_type, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, WarningSet, check_multiple,
@@ -2841,7 +2840,7 @@ def gdb_bind_var(var):
 
 
 def render(*args, **kwargs):
-    return ct_render(
+    return get_context().render_template(
         *args,
         property=PropertyDef.get(),
         Self=Self,

@@ -8,28 +8,14 @@ import pipes
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import is_keyword
+from langkit.compile_context import get_context, CompileCtx
 from langkit.diagnostics import (
     Context, Severity, WarningSet, check_source_language,
     extract_library_location
 )
-from langkit.template_utils import common_renderer
 from langkit.utils import (issubtype, memoized, not_implemented_error,
                            self_memoized)
 from langkit.utils.types import TypeSet
-
-
-def get_context(*args, **kwargs):
-    """
-    Return the current compilation context, see
-    langkit.compile_context.get_context.
-
-    TODO: this function exists only to workaround circular dependency issues.
-    We should get rid of them.
-
-    :rtype: CompileCtx
-    """
-    from langkit.compile_context import get_context
-    return get_context(*args, **kwargs)
 
 
 def gdb_helper(*args):
@@ -42,88 +28,71 @@ def gdb_helper(*args):
     return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
 
 
-@memoized
-def make_renderer(base_renderer=None):
-    """
-    Create a template renderer with common helpers.
+def template_extensions():
+    ctx = get_context()
+    capi = ctx.c_api_settings
+    root_entity = ctx.root_grammar_class.entity
 
-    :param Renderer base_renderer: The renderer to base the resulting
-        renderer on.
-    """
-    if base_renderer is None:
-        base_renderer = common_renderer
+    # Name of the root AST node access type
+    type_name = ctx.root_grammar_class.name
 
-    def type_is(compiled_type):
-        return lambda t: t is compiled_type
+    # Name of the root AST node record type
+    value_type = type_name + names.Name('Type')
 
-    template_args = {}
-    if get_context():
-        ctx = get_context()
-        capi = ctx.c_api_settings
-        root_entity = ctx.root_grammar_class.entity
+    # Name of the root AST node kind type
+    kind_name = root_entity.api_name + names.Name('Kind_Type')
 
-        # Name of the root AST node access type
-        type_name = ctx.root_grammar_class.name
+    # Likewise, for the generic list type
+    glist_type_name = ctx.generic_list_type.name
+    glist_value_type = ctx.generic_list_type.name + names.Name('Type')
 
-        # Name of the root AST node record type
-        value_type = type_name + names.Name('Type')
-
-        # Name of the root AST node kind type
-        kind_name = root_entity.api_name + names.Name('Kind_Type')
-
-        # Likewise, for the generic list type
-        glist_type_name = ctx.generic_list_type.name
-        glist_value_type = ctx.generic_list_type.name + names.Name('Type')
-
-        template_args.update({
-            'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
-            'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
-            'default_grammar_rule':  capi.get_name('default_grammar_rule'),
-            'root_node_type_name':   type_name,
-            'root_node_value_type':  value_type,
-            'root_node_kind_name':   kind_name,
-            'generic_list_type_name': glist_type_name,
-            'generic_list_value_type': glist_value_type,
-            'root_entity':           root_entity,
-            'entity_array':          root_entity.array.api_name,
-            'ctx':                   get_context(),
-            'ada_lib_name':          get_context().ada_api_settings.lib_name,
-            'T':                     T,
-            'ada_api':               get_context().ada_api_settings,
-            'capi':                  capi,
-            'bool_type':             T.Bool.c_type(capi).name,
-            'analysis_context_type': CAPIType(capi, 'analysis_context').name,
-            'analysis_unit_type':    T.AnalysisUnit.c_type(capi).name,
-            'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
-            'node_type':             ctx.root_grammar_class.c_type(capi).name,
-            'entity_type':           T.entity.c_type(capi).name,
-            'symbol_type':           T.Symbol.c_type(capi).name,
-            'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,
-            'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
-            'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
-            'unit_provider_destroy_type':
-                CAPIType(capi, 'unit_provider_destroy_callback').name,
-            'unit_provider_get_unit_filename_type':
-                CAPIType(capi,
-                         'unit_provider_get_unit_filename_callback').name,
-            'unit_provider_get_unit_from_name_type':
-                CAPIType(capi,
-                         'unit_provider_get_unit_from_name_callback').name,
-            'token_kind':            CAPIType(capi, 'token_kind').name,
-            'token_type':            CAPIType(capi, 'token').name,
-            'sloc_type':             CAPIType(capi, 'source_location').name,
-            'sloc_range_type':
-                T.SourceLocationRange.c_type(capi).name,
-            'text_type':             CAPIType(capi, 'text').name,
-            'big_integer_type':      CAPIType(capi, 'big_integer').name,
-            'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
-            'exception_type':        CAPIType(capi, 'exception').name,
-        })
-    return base_renderer.update(template_args)
+    return {
+        'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
+        'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
+        'default_grammar_rule':  capi.get_name('default_grammar_rule'),
+        'root_node_type_name':   type_name,
+        'root_node_value_type':  value_type,
+        'root_node_kind_name':   kind_name,
+        'generic_list_type_name': glist_type_name,
+        'generic_list_value_type': glist_value_type,
+        'root_entity':           root_entity,
+        'entity_array':          root_entity.array.api_name,
+        'ctx':                   get_context(),
+        'ada_lib_name':          get_context().ada_api_settings.lib_name,
+        'T':                     T,
+        'ada_api':               get_context().ada_api_settings,
+        'capi':                  capi,
+        'bool_type':             T.Bool.c_type(capi).name,
+        'analysis_context_type': CAPIType(capi, 'analysis_context').name,
+        'analysis_unit_type':    T.AnalysisUnit.c_type(capi).name,
+        'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
+        'node_type':             ctx.root_grammar_class.c_type(capi).name,
+        'entity_type':           T.entity.c_type(capi).name,
+        'symbol_type':           T.Symbol.c_type(capi).name,
+        'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,
+        'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
+        'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
+        'unit_provider_destroy_type':
+            CAPIType(capi, 'unit_provider_destroy_callback').name,
+        'unit_provider_get_unit_filename_type':
+            CAPIType(capi,
+                     'unit_provider_get_unit_filename_callback').name,
+        'unit_provider_get_unit_from_name_type':
+            CAPIType(capi,
+                     'unit_provider_get_unit_from_name_callback').name,
+        'token_kind':            CAPIType(capi, 'token_kind').name,
+        'token_type':            CAPIType(capi, 'token').name,
+        'sloc_type':             CAPIType(capi, 'source_location').name,
+        'sloc_range_type':
+            T.SourceLocationRange.c_type(capi).name,
+        'text_type':             CAPIType(capi, 'text').name,
+        'big_integer_type':      CAPIType(capi, 'big_integer').name,
+        'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
+        'exception_type':        CAPIType(capi, 'exception').name,
+    }
 
 
-def render(*args, **kwargs):
-    return make_renderer().render(*args, **kwargs)
+CompileCtx.register_template_extensions(template_extensions)
 
 
 class CompiledTypeRepo(object):

@@ -27,9 +27,9 @@ import difflib
 from funcy import keep
 import inspect
 
-from langkit import compiled_types, names
+from langkit import names
 from langkit.common import gen_name
-from langkit.compile_context import get_context
+from langkit.compile_context import get_context, CompileCtx
 from langkit.compiled_types import ASTNodeType, T, resolve_type
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
@@ -139,12 +139,11 @@ class GeneratedParser(object):
         self.body = body
 
 
-def render(*args, **kwargs):
+def template_extensions():
     from langkit.unparsers import (
         ListNodeUnparser, RegularNodeUnparser, TokenNodeUnparser
     )
-
-    return compiled_types.make_renderer().update({
+    return {
         'is_tok':       type_check_instance(_Token),
         'is_row':       type_check_instance(_Row),
         'is_dontskip':  type_check_instance(DontSkip),
@@ -156,12 +155,13 @@ def render(*args, **kwargs):
         'is_nobt':      type_check_instance(NoBacktrack),
         'is_extract':   type_check_instance(_Extract),
         'is_class':     inspect.isclass,
-        'ctx':          get_context(),
-
         'is_regular_node_unparser': type_check_instance(RegularNodeUnparser),
         'is_list_node_unparser': type_check_instance(ListNodeUnparser),
         'is_token_node_unparser': type_check_instance(TokenNodeUnparser),
-    }).render(*args, **kwargs)
+    }
+
+
+CompileCtx.register_template_extensions(template_extensions)
 
 
 def resolve(parser):
@@ -681,8 +681,8 @@ class Parser(object):
 
             context.generated_parsers.append(GeneratedParser(
                 self.gen_fn_name,
-                render('parsers/fn_profile_ada', t_env),
-                render('parsers/fn_code_ada', t_env)
+                context.render_template('parsers/fn_profile_ada', t_env),
+                context.render_template('parsers/fn_code_ada', t_env)
             ))
 
     def get_type(self):
@@ -731,7 +731,7 @@ class Parser(object):
         Shortcut for render for parsers, passing the parsers sub-path for
         templates, and self as "parser" in the template context.
         """
-        return render(
+        return get_context().render_template(
             "parsers/{}".format(template_name), parser=self, **kwargs
         )
 

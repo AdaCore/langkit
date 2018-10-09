@@ -5,7 +5,8 @@ from funcy import split_by
 from itertools import count
 
 from langkit import names
-from langkit.compiled_types import AbstractNodeData, T, get_context
+from langkit.compile_context import get_context
+from langkit.compiled_types import AbstractNodeData, T
 from langkit.diagnostics import (
     check_source_language, extract_library_location, Context
 )
