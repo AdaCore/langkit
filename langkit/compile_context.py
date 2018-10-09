@@ -1321,8 +1321,8 @@ class CompileCtx(object):
             'py_doc':           documentation.py_doc,
             'ada_c_doc':        documentation.ada_c_doc,
         }
-        for el in CompileCtx._template_extensions_fns:
-            ext_env = el()
+        for fn in CompileCtx._template_extensions_fns:
+            ext_env = fn(self)
             for k, v in ext_env.items():
                 assert k not in base_env, (
                     "Duplicate key in renderer env: {}".format(k)
@@ -1349,6 +1349,9 @@ class CompileCtx(object):
     def register_template_extensions(exts_fn):
         """
         Register a set of mako template env extensions.
+
+        ``exts_fn`` is a function with signature ``(ctx) -> dict[str, Any]``
+        that will be evaluated the first time the renderer is created.
         """
         CompileCtx._template_extensions_fns.append(exts_fn)
 
