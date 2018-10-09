@@ -28,6 +28,7 @@ def gdb_helper(*args):
     return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
 
 
+@CompileCtx.register_template_extensions
 def template_extensions(ctx):
     capi = ctx.c_api_settings
     root_entity = ctx.root_grammar_class.entity
@@ -89,9 +90,6 @@ def template_extensions(ctx):
         'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
         'exception_type':        CAPIType(capi, 'exception').name,
     }
-
-
-CompileCtx.register_template_extensions(template_extensions)
 
 
 class CompiledTypeRepo(object):

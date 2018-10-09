@@ -139,6 +139,7 @@ class GeneratedParser(object):
         self.body = body
 
 
+@CompileCtx.register_template_extensions
 def template_extensions(ctx):
     from langkit.unparsers import (
         ListNodeUnparser, RegularNodeUnparser, TokenNodeUnparser
@@ -159,9 +160,6 @@ def template_extensions(ctx):
         'is_list_node_unparser': type_check_instance(ListNodeUnparser),
         'is_token_node_unparser': type_check_instance(TokenNodeUnparser),
     }
-
-
-CompileCtx.register_template_extensions(template_extensions)
 
 
 def resolve(parser):
