@@ -28,8 +28,7 @@ def gdb_helper(*args):
     return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
 
 
-def template_extensions():
-    ctx = get_context()
+def template_extensions(ctx):
     capi = ctx.c_api_settings
     root_entity = ctx.root_grammar_class.entity
 
@@ -57,10 +56,10 @@ def template_extensions():
         'generic_list_value_type': glist_value_type,
         'root_entity':           root_entity,
         'entity_array':          root_entity.array.api_name,
-        'ctx':                   get_context(),
-        'ada_lib_name':          get_context().ada_api_settings.lib_name,
+        'ctx':                   ctx,
+        'ada_lib_name':          ctx.ada_api_settings.lib_name,
         'T':                     T,
-        'ada_api':               get_context().ada_api_settings,
+        'ada_api':               ctx.ada_api_settings,
         'capi':                  capi,
         'bool_type':             T.Bool.c_type(capi).name,
         'analysis_context_type': CAPIType(capi, 'analysis_context').name,

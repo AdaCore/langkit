@@ -139,7 +139,7 @@ class GeneratedParser(object):
         self.body = body
 
 
-def template_extensions():
+def template_extensions(ctx):
     from langkit.unparsers import (
         ListNodeUnparser, RegularNodeUnparser, TokenNodeUnparser
     )
