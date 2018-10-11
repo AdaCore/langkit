@@ -54,3 +54,6 @@ contrib/python/build
 
 # Custom grab bag dir
 /misc
+
+.gdb_history
+.vscode
