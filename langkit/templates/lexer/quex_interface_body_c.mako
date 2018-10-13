@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 
-#include "quex_interface.h"
-#include "quex_lexer.h"
+#include "${ada_lib_name.lower()}_quex_interface.h"
+#include "${ada_lib_name.lower()}_lexer.h"
 
 
 struct Lexer {

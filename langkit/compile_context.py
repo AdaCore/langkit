@@ -1680,11 +1680,15 @@ class CompileCtx(object):
 
         with names.lower:
             # ... and the Quex C interface
-            write_cpp_file(path.join(src_path, "quex_interface.h"),
+            write_cpp_file(path.join(src_path,
+                                     "{}_quex_interface.h".format(
+                                         self.ada_api_settings.lib_name.lower())),
                            self.render_template(
                                "lexer/quex_interface_header_c"),
                            self.post_process_cpp)
-            write_cpp_file(path.join(src_path, "quex_interface.c"),
+            write_cpp_file(path.join(src_path,
+                                     "{}_quex_interface.c".format(
+                                         self.ada_api_settings.lib_name.lower())),
                            self.render_template(
                                "lexer/quex_interface_body_c"),
                            self.post_process_cpp)
@@ -1772,7 +1776,9 @@ class CompileCtx(object):
             quex_py_file = path.join(os.environ["QUEX_PATH"], "quex-exe.py")
             subprocess.check_call([sys.executable, quex_py_file, "-i",
                                    quex_file,
-                                   "-o", "quex_lexer",
+                                   "-o",
+                                   "{}_lexer".format(
+                                       self.lib_name.base_name.lower()),
                                    "--buffer-element-size", "4",
                                    "--token-id-offset",  "0x1000",
                                    "--language", "C",

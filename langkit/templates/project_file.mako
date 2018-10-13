@@ -62,13 +62,13 @@ library project ${lib_name} is
       % if ctx.generate_gdb_hook:
       "gdb.c",
       % endif
-      "quex_interface.c",
-      "quex_interface.h",
-      "quex_lexer.c",
-      "quex_lexer-configuration.h",
-      "quex_lexer.h",
-      "quex_lexer-token.h",
-      "quex_lexer-token_ids.h");
+      "${lib_name.lower()}_quex_interface.c",
+      "${lib_name.lower()}_quex_interface.h",
+      "${lib_name.lower()}_lexer.c",
+      "${lib_name.lower()}_lexer-configuration.h",
+      "${lib_name.lower()}_lexer.h",
+      "${lib_name.lower()}_lexer-token.h",
+      "${lib_name.lower()}_lexer-token_ids.h");
 
    <% source_dirs = ['../../include/{}'.format(lib_name.lower()),
                      ctx.extensions_src_dir] %>

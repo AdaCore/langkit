@@ -1,7 +1,7 @@
 token_type {
     header {
 
-    #include "quex_interface.h"
+    #include "${ada_lib_name.lower()}_quex_interface.h"
 
     /* Redefine the stamp action to add the end line and end column to tokens */
     #undef QUEX_ACTION_TOKEN_STAMP
