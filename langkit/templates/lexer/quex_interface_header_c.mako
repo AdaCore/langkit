@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#include "quex_lexer.h"
+#include "${ada_lib_name.lower()}_lexer.h"
 
 
 struct token {
