@@ -2593,6 +2593,14 @@ class Try(AbstractExpression):
         try_expr = construct(self.try_expr)
 
         if self.else_expr is None:
+            check_source_language(
+                try_expr.type.null_allowed,
+                "Try expression should have a default value provided,"
+                " in cases where the provided fallback expression's type (here"
+                " {}) does not have a default null value".format(
+                    try_expr.type.dsl_name
+                )
+            )
             else_expr = NullExpr(try_expr.type)
         else:
             else_expr = construct(self.else_expr)
