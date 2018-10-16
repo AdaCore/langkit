@@ -18,5 +18,6 @@ if u.diagnostics:
 n = u.root
 
 print(n.p_failsafe_property)
+print(n.p_failsafe_property_2)
 
 print('main.py: Done.')
