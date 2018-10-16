@@ -369,7 +369,7 @@ class If(AbstractExpression):
         """
         Construct a resolved expression for this.
 
-        :rtype: IfExpr
+        :rtype: If.Expr
         """
         from langkit.expressions import Cast
 
