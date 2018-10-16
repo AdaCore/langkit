@@ -531,7 +531,7 @@ class Then(AbstractExpression):
         # Affect default value to the fallback expression
         if self.default_val is None:
             check_source_language(
-                then_expr.type.null_allowed or then_expr.type is T.Bool,
+                then_expr.type.null_allowed,
                 "Then expression should have a default value provided,"
                 " in cases where the provided function's return type (here"
                 " {}) does not have a default null value".format(
