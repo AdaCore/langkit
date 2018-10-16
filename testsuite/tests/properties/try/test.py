@@ -21,6 +21,10 @@ class Example(FooNode):
     def failsafe_property():
         return Try(Self.failing_property, False)
 
+    @langkit_property(public=True, return_type=T.Bool)
+    def failsafe_property_2():
+        return Try(Self.failing_property)
+
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(

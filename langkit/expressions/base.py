@@ -2571,11 +2571,12 @@ class Try(AbstractExpression):
         def __repr__(self):
             return '<Try.Expr>'
 
-    def __init__(self, try_expr, else_expr):
+    def __init__(self, try_expr, else_expr=None):
         """
         :param try_expr: The expression that may raise.
         :param else_expr: If "try_expr" raises a property, this fallback
-            expression is evaluated.
+            expression is evaluated. If "else_expr" is None, the fallback
+            expression is the null expression of the expected type.
         """
         super(Try, self).__init__()
         self.try_expr = try_expr
@@ -2590,7 +2591,12 @@ class Try(AbstractExpression):
         from langkit.expressions import Cast
 
         try_expr = construct(self.try_expr)
-        else_expr = construct(self.else_expr)
+
+        if self.else_expr is None:
+            else_expr = NullExpr(try_expr.type)
+        else:
+            else_expr = construct(self.else_expr)
+
         rtype = else_expr.type.unify(
             try_expr.type,
             'Mismatching types in Try expression: {self} and {other}'
