@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
-from langkit.expressions import PropertyError, langkit_property, Self
+from langkit.expressions import PropertyError, langkit_property, Self, Try
 from langkit.parsers import Grammar
 
 from utils import build_and_run
@@ -19,7 +19,7 @@ class Example(FooNode):
 
     @langkit_property(public=True, return_type=T.Bool)
     def failsafe_property():
-        return Self.failing_property.try_or_else(False)
+        return Try(Self.failing_property, False)
 
 
 foo_grammar = Grammar('main_rule')
