@@ -2533,6 +2533,80 @@ class Block(Let):
         return '<Block>'
 
 
+@attr_call("try_or_else")
+class TryOrElse(AbstractExpression):
+    """
+    TryOrElse is used to provide a fallback expression to compute in case the
+    original expression to evaluate raises a PropertyError.
+    """
+    class Expr(ComputingExpr):
+        """
+        Resolved expression for a TryOrElse expression.
+        """
+        def __init__(self, try_expr, else_expr, rtype, abstract_expr):
+            """
+            :param ResolvedExpression try_expr: The expression that may raise.
+            :param ResolvedExpression else_expr: If "try_expr" raises a
+                property, this fallback expression is evaluated.
+            :param langkit.compiled_types.CompiledType rtype: The type that is
+                returned by try_expr and else_expr.
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
+            """
+            self.try_expr = try_expr
+            self.else_expr = else_expr
+            self.static_type = rtype
+
+            super(TryOrElse.Expr, self).__init__(
+                'TryOrElse_Result', abstract_expr=abstract_expr
+            )
+
+        def _render_pre(self):
+            return render('properties/try_or_else_ada', expr=self)
+
+        @property
+        def subexprs(self):
+            return {'0-try': self.try_expr,
+                    '1-else': self.else_expr}
+
+        def __repr__(self):
+            return '<TryOrElse.Expr>'
+
+    def __init__(self, try_expr, else_expr):
+        """
+        :param try_expr: The expression that may raise.
+        :param else_expr: If "try_expr" raises a property, this fallback
+            expression is evaluated.
+        """
+        super(TryOrElse, self).__init__()
+        self.try_expr = try_expr
+        self.else_expr = else_expr
+
+    def construct(self):
+        """
+        Constructs a resolved expression for this.
+
+        :rtype: TryOrElse.Expr
+        """
+        from langkit.expressions import Cast
+
+        try_expr = construct(self.try_expr)
+        else_expr = construct(self.else_expr)
+        rtype = else_expr.type.unify(
+            try_expr.type,
+            'Mismatching types in TryOrElse expression: {self} and {other}'
+        )
+
+        # If try_expr/else_expr are subtypes of the unified result type,
+        # we need to perform a conversion for the Ada code generation.
+        if try_expr.type != rtype:
+            try_expr = Cast.Expr(try_expr, rtype)
+        if else_expr.type != rtype:
+            else_expr = Cast.Expr(else_expr, rtype)
+
+        return TryOrElse.Expr(try_expr, else_expr, rtype, abstract_expr=self)
+
+
 class Var(AbstractVariable):
     """
     Var allows you to declare local variable bound to expressions in the body
