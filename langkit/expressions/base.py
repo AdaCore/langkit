@@ -2533,15 +2533,14 @@ class Block(Let):
         return '<Block>'
 
 
-@attr_call("try_or_else")
-class TryOrElse(AbstractExpression):
+class Try(AbstractExpression):
     """
-    TryOrElse is used to provide a fallback expression to compute in case the
+    Try is used to provide a fallback expression to compute in case the
     original expression to evaluate raises a PropertyError.
     """
     class Expr(ComputingExpr):
         """
-        Resolved expression for a TryOrElse expression.
+        Resolved expression for a Try expression.
         """
         def __init__(self, try_expr, else_expr, rtype, abstract_expr):
             """
@@ -2557,12 +2556,12 @@ class TryOrElse(AbstractExpression):
             self.else_expr = else_expr
             self.static_type = rtype
 
-            super(TryOrElse.Expr, self).__init__(
-                'TryOrElse_Result', abstract_expr=abstract_expr
+            super(Try.Expr, self).__init__(
+                'Try_Result', abstract_expr=abstract_expr
             )
 
         def _render_pre(self):
-            return render('properties/try_or_else_ada', expr=self)
+            return render('properties/try_ada', expr=self)
 
         @property
         def subexprs(self):
@@ -2570,7 +2569,7 @@ class TryOrElse(AbstractExpression):
                     '1-else': self.else_expr}
 
         def __repr__(self):
-            return '<TryOrElse.Expr>'
+            return '<Try.Expr>'
 
     def __init__(self, try_expr, else_expr):
         """
@@ -2578,7 +2577,7 @@ class TryOrElse(AbstractExpression):
         :param else_expr: If "try_expr" raises a property, this fallback
             expression is evaluated.
         """
-        super(TryOrElse, self).__init__()
+        super(Try, self).__init__()
         self.try_expr = try_expr
         self.else_expr = else_expr
 
@@ -2586,7 +2585,7 @@ class TryOrElse(AbstractExpression):
         """
         Constructs a resolved expression for this.
 
-        :rtype: TryOrElse.Expr
+        :rtype: Try.Expr
         """
         from langkit.expressions import Cast
 
@@ -2594,7 +2593,7 @@ class TryOrElse(AbstractExpression):
         else_expr = construct(self.else_expr)
         rtype = else_expr.type.unify(
             try_expr.type,
-            'Mismatching types in TryOrElse expression: {self} and {other}'
+            'Mismatching types in Try expression: {self} and {other}'
         )
 
         # If try_expr/else_expr are subtypes of the unified result type,
@@ -2604,7 +2603,7 @@ class TryOrElse(AbstractExpression):
         if else_expr.type != rtype:
             else_expr = Cast.Expr(else_expr, rtype)
 
-        return TryOrElse.Expr(try_expr, else_expr, rtype, abstract_expr=self)
+        return Try.Expr(try_expr, else_expr, rtype, abstract_expr=self)
 
 
 class Var(AbstractVariable):
