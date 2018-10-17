@@ -6,8 +6,8 @@ from langkit.compiled_types import T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, No, PropertyDef, attr_call, construct,
-    dsl_document, render, unsugar
+    ComputingExpr, LiteralExpr, PropertyDef, attr_call, construct,
+    dsl_document, expr_or_null, render, unsugar
 )
 
 
@@ -529,18 +529,10 @@ class Then(AbstractExpression):
         then_expr = BindingScope(then_expr, [var_expr], scope=then_scope)
 
         # Affect default value to the fallback expression
-        if self.default_val is None:
-            check_source_language(
-                then_expr.type.null_allowed,
-                "Then expression should have a default value provided,"
-                " in cases where the provided function's return type (here"
-                " {}) does not have a default null value".format(
-                    then_expr.type.dsl_name
-                )
-            )
-            default_expr = construct(No(then_expr.type))
-        else:
-            default_expr = construct(self.default_val, then_expr.type)
+        default_expr = expr_or_null(
+            then_expr.type, self.default_val,
+            'Then expression', "function's return type"
+        )
 
         return Then.Expr(expr, construct(self.var_expr), then_expr,
                          default_expr, then_scope)

@@ -70,6 +70,31 @@ def unsugar(expr, ignore_errors=False):
     return expr
 
 
+def expr_or_null(rtype, expr, context_name, use_case_name):
+    """
+    If `expr` is not None, construct it and check that it returns `rtype`
+    values. Otherwise, check that `rtype` is nullable and return a null
+    expression for it.
+
+    :param CompiledType rtype: Expected type for `expr`.
+    :param AbstractExpression|None expr: Expression to construct.
+    :param str context_name: Used for error message. Name of the expression
+        that uses `expr`.
+    :param str use_case_name: User for error message. Name for what `expr` is
+        used.
+    :rtype: ResolvedExpression
+    """
+    if expr is None:
+        check_source_language(
+            rtype.null_allowed,
+            '{} should have a default value provided, in cases where the type'
+            ' of the provided {} (here {}) does not have a default null value.'
+            .format(context_name.capitalize(), use_case_name, rtype.dsl_name))
+        return NullExpr(rtype)
+    else:
+        return construct(expr, rtype)
+
+
 def construct_compile_time_known(expr, *args, **kwargs):
     """
     Construct a expression and check that it is a compile-time known constant.
@@ -2592,18 +2617,8 @@ class Try(AbstractExpression):
 
         try_expr = construct(self.try_expr)
 
-        if self.else_expr is None:
-            check_source_language(
-                try_expr.type.null_allowed,
-                "Try expression should have a default value provided,"
-                " in cases where the provided fallback expression's type (here"
-                " {}) does not have a default null value".format(
-                    try_expr.type.dsl_name
-                )
-            )
-            else_expr = NullExpr(try_expr.type)
-        else:
-            else_expr = construct(self.else_expr)
+        else_expr = expr_or_null(try_expr.type, self.else_expr,
+                                 'try expression', 'fallback expression')
 
         rtype = else_expr.type.unify(
             try_expr.type,
