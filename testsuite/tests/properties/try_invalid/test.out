@@ -1,0 +1,11 @@
+== Heterogeneous types ==
+File "test.py", line 18, in Example.p
+  line 26, in Literal expression
+    Error: Expected type Int, got Bool
+
+== Not nullable type ==
+File "test.py", line 18, in Example.p
+  line 30, in Try expression
+    Error: Try expression should have a default value provided, in cases where the type of the provided fallback expression (here AnalysisUnitKind) does not have a default null value.
+
+Done
