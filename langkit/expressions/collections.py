@@ -799,9 +799,7 @@ class CollectionSingleton(AbstractExpression):
             return If.Expr(
                 IsNull.construct_static(expr),
                 ArrayLiteral.construct_static([], expr.type.array),
-                ret,
-                ret.type
-            )
+                ret)
         else:
             return ret
 

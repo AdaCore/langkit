@@ -565,8 +565,6 @@ def get_value(self, logic_var):
         then=CallExpr('Eq_Solution', 'Eq_Node.Refs.Get_Value', rtype,
                       [logic_var_ref]),
         else_then=NullExpr(T.root_node.entity),
-
-        rtype=rtype,
         abstract_expr=self
     )
 
