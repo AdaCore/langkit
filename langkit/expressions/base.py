@@ -2567,23 +2567,20 @@ class Try(AbstractExpression):
         """
         Resolved expression for a Try expression.
         """
-        def __init__(self, try_expr, else_expr, rtype, abstract_expr):
+        def __init__(self, try_expr, else_expr, abstract_expr):
             """
             :param ResolvedExpression try_expr: The expression that may raise.
             :param ResolvedExpression else_expr: If "try_expr" raises a
                 property, this fallback expression is evaluated.
-            :param langkit.compiled_types.CompiledType rtype: The type that is
-                returned by try_expr and else_expr.
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
             self.try_expr = try_expr
             self.else_expr = else_expr
-            self.static_type = rtype
+            self.static_type = try_expr.type
 
-            super(Try.Expr, self).__init__(
-                'Try_Result', abstract_expr=abstract_expr
-            )
+            super(Try.Expr, self).__init__('Try_Result',
+                                           abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/try_ada', expr=self)
@@ -2632,7 +2629,7 @@ class Try(AbstractExpression):
         if else_expr.type != rtype:
             else_expr = Cast.Expr(else_expr, rtype)
 
-        return Try.Expr(try_expr, else_expr, rtype, abstract_expr=self)
+        return Try.Expr(try_expr, else_expr, abstract_expr=self)
 
 
 class Var(AbstractVariable):
