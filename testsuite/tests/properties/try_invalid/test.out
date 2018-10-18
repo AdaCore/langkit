@@ -1,7 +1,7 @@
 == Heterogeneous types ==
 File "test.py", line 18, in Example.p
-  line 26, in Literal expression
-    Error: Expected type Int, got Bool
+  line 29, in Try expression
+    Error: Mismatching types in Try expression: Int and Bool
 
 == Not nullable type ==
 File "test.py", line 18, in Example.p
