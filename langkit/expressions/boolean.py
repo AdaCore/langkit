@@ -369,22 +369,8 @@ class If(AbstractExpression):
 
         :rtype: If.Expr
         """
-        from langkit.expressions import Cast
-
-        then = construct(self._then)
-        else_then = construct(self.else_then)
-        rtype = then.type.unify(
-            else_then.type,
-            'Mismatching types in If expression: {self} and {other}'
-        )
-
-        # If then/else_then have actually subtypes of the unified result type,
-        # we need to perform a conversion for the Ada code generation.
-        if then.type != rtype:
-            then = Cast.Expr(then, rtype)
-        if else_then.type != rtype:
-            else_then = Cast.Expr(else_then, rtype)
-
+        then, else_then = expr_or_null(self._then, self.else_then,
+                                       'If expression', None)
         return If.Expr(construct(self.cond, T.Bool), then, else_then,
                        abstract_expr=self)
 
