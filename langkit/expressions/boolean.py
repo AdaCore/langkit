@@ -529,8 +529,8 @@ class Then(AbstractExpression):
         then_expr = BindingScope(then_expr, [var_expr], scope=then_scope)
 
         # Affect default value to the fallback expression
-        default_expr = expr_or_null(
-            then_expr.type, self.default_val,
+        then_expr, default_expr = expr_or_null(
+            then_expr, self.default_val,
             'Then expression', "function's return type"
         )
 

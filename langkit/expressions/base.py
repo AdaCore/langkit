@@ -70,29 +70,36 @@ def unsugar(expr, ignore_errors=False):
     return expr
 
 
-def expr_or_null(rtype, expr, context_name, use_case_name):
+def expr_or_null(expr, default_expr, context_name, use_case_name):
     """
-    If `expr` is not None, construct it and check that it returns `rtype`
-    values. Otherwise, check that `rtype` is nullable and return a null
-    expression for it.
+    If `default_expr` is not None, construct it and unify its type with the
+    type of `expr`. Otherwise, check that `expr` has a nullable type and build
+    a null expression for it. Return the conversion of `expr` and
+    `default_expr` to the unified type.
 
-    :param CompiledType rtype: Expected type for `expr`.
-    :param AbstractExpression|None expr: Expression to construct.
+    :param AbstractExpression|ResolvedExpression expr: Initial expression.
+    :param AbstractExpression|None expr: Default expression.
     :param str context_name: Used for error message. Name of the expression
         that uses `expr`.
-    :param str use_case_name: User for error message. Name for what `expr` is
-        used.
-    :rtype: ResolvedExpression
+    :param str use_case_name: User for error message. Name for what
+        `default_expr` is used.
+    :rtype: (ResolvedExpression, ResolvedExpression)
     """
-    if expr is None:
+    if not isinstance(expr, ResolvedExpression):
+        expr = construct(expr)
+
+    if default_expr is None:
         check_source_language(
-            rtype.null_allowed,
+            expr.type.null_allowed,
             '{} should have a default value provided, in cases where the type'
             ' of the provided {} (here {}) does not have a default null value.'
-            .format(context_name.capitalize(), use_case_name, rtype.dsl_name))
-        return NullExpr(rtype)
+            .format(context_name.capitalize(), use_case_name,
+                    expr.type.dsl_name))
+        default_expr = NullExpr(expr.type)
     else:
-        return construct(expr, rtype)
+        default_expr = construct(default_expr)
+
+    return expr.unify(default_expr, context_name)
 
 
 def construct_compile_time_known(expr, *args, **kwargs):
@@ -1325,6 +1332,26 @@ class ResolvedExpression(object):
             FieldAccess.Expr(saved.result_var_expr, fields['node'], []),
             FieldAccess.Expr(saved.result_var_expr, fields['info'], []),
         )
+
+    def unify(self, expr, context_name):
+        """
+        Try to unify the type of `self` and of `expr`, and return a couple of
+        expressions for both that convert their results to this type. Emit a
+        user diagnostic using `context_name` if both have mismatching types.
+
+        :param ResolvedExpression expr: Expression to convert with `self`.
+        :param str context_name: User for error message. Name of the expression
+            that uses `self` and `expr`.
+        :rtype: (ResolvedExpression, ResolvedExpression)
+        """
+        from langkit.expressions import Cast
+
+        rtype = self.type.unify(
+            expr.type,
+            'Mismatching types in {}: {} and {}'.format(
+                context_name, self.type.dsl_name, expr.type.dsl_name))
+        return (self if self.type == rtype else Cast.Expr(self, rtype),
+                expr if expr.type == rtype else Cast.Expr(expr, rtype))
 
 
 class VariableExpr(ResolvedExpression):
@@ -2610,25 +2637,9 @@ class Try(AbstractExpression):
 
         :rtype: Try.Expr
         """
-        from langkit.expressions import Cast
-
-        try_expr = construct(self.try_expr)
-
-        else_expr = expr_or_null(try_expr.type, self.else_expr,
-                                 'try expression', 'fallback expression')
-
-        rtype = else_expr.type.unify(
-            try_expr.type,
-            'Mismatching types in Try expression: {self} and {other}'
-        )
-
-        # If try_expr/else_expr are subtypes of the unified result type,
-        # we need to perform a conversion for the Ada code generation.
-        if try_expr.type != rtype:
-            try_expr = Cast.Expr(try_expr, rtype)
-        if else_expr.type != rtype:
-            else_expr = Cast.Expr(else_expr, rtype)
-
+        try_expr, else_expr = expr_or_null(
+            self.try_expr, self.else_expr,
+            'Try expression', 'fallback expression')
         return Try.Expr(try_expr, else_expr, abstract_expr=self)
 
 
