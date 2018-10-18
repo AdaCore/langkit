@@ -472,7 +472,6 @@ def make_as_entity(node_expr, entity_info=None, null_check=True,
         IsNull.construct_static(node_expr),
         NullExpr(entity_type),
         entity_expr,
-        entity_type,
         abstract_expr=abstract_expr
     ) if null_check else entity_expr
 

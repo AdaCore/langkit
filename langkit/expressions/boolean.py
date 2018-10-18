@@ -73,7 +73,7 @@ class BinaryBooleanOperator(AbstractExpression):
             else:
                 then = LiteralExpr('True', T.Bool)
                 else_then = rhs
-            return If.Expr(lhs, then, else_then, T.Bool)
+            return If.Expr(lhs, then, else_then)
 
         else:
             # Equation case
@@ -320,22 +320,20 @@ class If(AbstractExpression):
 
         pretty_class_name = 'If'
 
-        def __init__(self, cond, then, else_then, rtype, abstract_expr=None):
+        def __init__(self, cond, then, else_then, abstract_expr=None):
             """
             :param ResolvedExpression cond: A boolean expression.
             :param ResolvedExpression then: If "cond" is evaluated to true,
                 this part is returned.
             :param ResolvedExpression else_then: If "cond" is evaluated to
                 false, this part is returned.
-            :param langkit.compiled_types.CompiledType rtype: The type that is
-                returned by then and else_then.
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
             self.cond = cond
             self.then = then
             self.else_then = else_then
-            self.static_type = rtype
+            self.static_type = then.type
 
             super(If.Expr, self).__init__('If_Result',
                                           abstract_expr=abstract_expr)
@@ -388,7 +386,7 @@ class If(AbstractExpression):
             else_then = Cast.Expr(else_then, rtype)
 
         return If.Expr(construct(self.cond, T.Bool), then, else_then,
-                       rtype, abstract_expr=self)
+                       abstract_expr=self)
 
     def __repr__(self):
         return '<If>'
@@ -625,7 +623,7 @@ class Cond(AbstractExpression):
         # Build this Cond as a big resolved expression
         result = cast_if_needed(else_expr)
         for cond, expr in reversed(pairs):
-            result = If.Expr(cond, cast_if_needed(expr), result, rtype)
+            result = If.Expr(cond, cast_if_needed(expr), result)
         result.abstract_expr = self
 
         return result
