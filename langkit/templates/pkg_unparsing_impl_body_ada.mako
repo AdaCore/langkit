@@ -41,6 +41,9 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    subtype Present_Token_Sequence_Template is Token_Sequence_Template (True);
 
+   Empty_Token_Sequence_Template : constant Present_Token_Sequence_Template :=
+     (Present => True, First => No_Token, Last => No_Token);
+
    function Create_Token_Sequence
      (Unparser    : Token_Sequence_Access;
       First_Token : in out Token_Reference)
@@ -246,7 +249,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          begin
             Result.Inter_Tokens (I) :=
               (if I = 1
-               then (Present => False)
+               then Empty_Token_Sequence_Template
                else Create_Token_Sequence (T, Next_Token));
 
             if Field_Present (R_Child, F) then
