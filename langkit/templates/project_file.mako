@@ -124,7 +124,8 @@ library project ${lib_name} is
             for Default_Switches ("C") use
                Common_C_Cargs & ("-g3", "-O0", "-DDEBUG=1");
 
-            for Switches ("quex_lexer.c") use Common_C_Cargs & ("-g0", "-O0");
+            for Switches ("${lib_name.lower()}_quex_lexer.c") use
+               Common_C_Cargs & ("-g0", "-O0");
             --  This file is *huge* and the debugging information for it harms
             --  Valgrind runs. We almost never have to debug this file so
             --  this is acceptable.
@@ -137,7 +138,7 @@ library project ${lib_name} is
 
             for Default_Switches ("C") use Common_C_Cargs & ("-Ofast");
 
-            for Switches ("quex_lexer.c") use Common_C_Cargs
+            for Switches ("${lib_name.lower()}_quex_lexer.c") use Common_C_Cargs
               & ("-O1", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
                  "-fdisable-rtl-sched2", "-mno-stv");
             --  Deactivate because of memory usage, see P726-024. This
