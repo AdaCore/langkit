@@ -1680,18 +1680,16 @@ class CompileCtx(object):
 
         with names.lower:
             # ... and the Quex C interface
-            write_cpp_file(path.join(src_path,
-                                     "{}_quex_interface.h".format(
-                                         self.ada_api_settings.lib_name.lower())),
-                           self.render_template(
-                               "lexer/quex_interface_header_c"),
-                           self.post_process_cpp)
-            write_cpp_file(path.join(src_path,
-                                     "{}_quex_interface.c".format(
-                                         self.ada_api_settings.lib_name.lower())),
-                           self.render_template(
-                               "lexer/quex_interface_body_c"),
-                           self.post_process_cpp)
+            write_cpp_file(
+                path.join(src_path,
+                          "{}_quex_interface.h".format(lib_name_low)),
+                self.render_template("lexer/quex_interface_header_c"),
+                self.post_process_cpp)
+            write_cpp_file(
+                path.join(src_path,
+                          "{}_quex_interface.c".format(lib_name_low)),
+                self.render_template("lexer/quex_interface_body_c"),
+                self.post_process_cpp)
 
         imain_project_file = os.path.join(file_root, "src", "mains.gpr")
         write_source_file(
