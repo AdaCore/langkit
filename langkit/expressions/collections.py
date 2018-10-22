@@ -509,15 +509,20 @@ class Map(CollectionExpression):
                         r.inner_expr, r.inner_scope, filter_expr,
                         self.do_concat, take_while_expr, abstract_expr=self)
 
-    def __repr__(self):
-        name = None
+
+    @property
+    def kind(self):
         if self.expr_fn == collection_expr_identity:
-            name = ('TakeWhile'
-                    if self.filter_fn == collection_expr_none else
-                    'Filter')
-        if not name:
-            name = 'MapCat' if self.do_concat else 'Map'
-        return '<{}>'.format(name)
+            return (
+                'take_while'
+                if self.filter_fn == collection_expr_none else 'filter'
+            )
+        if self.filter_fn != collection_expr_none:
+            return "filter_map"
+        return 'mapcat' if self.do_concat else 'map'
+
+    def __repr__(self):
+        return '<{}>'.format(self.kind)
 
 
 @auto_attr
