@@ -712,6 +712,7 @@ def langkit_main(langkit_root, files=[]):
             os.path.join('utils')]
     excludes = ['__pycache__',
                 os.path.join('contrib', 'python', 'build'),
+                os.path.join(b'contrib', b'lkt', b'build'),
                 os.path.join('langkit', 'support', 'obj'),
                 'out',
                 os.path.join('stylechecks', 'tests.py'),
