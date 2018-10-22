@@ -1730,11 +1730,13 @@ class BaseStructType(CompiledType):
 
         :rtype: list[AbstractNodeData]
         """
-        return filter(
+        result = filter(
             predicate or (lambda f: True),
             self.get_abstract_node_data_dict(include_inherited,
                                              field_class).values()
         )
+        result.sort(key=lambda f: f._serial)
+        return result
 
     def get_abstract_node_data_dict(self, include_inherited=True,
                                     field_class=AbstractNodeData):
@@ -2295,8 +2297,8 @@ class ASTNodeType(BaseStructType):
         # abstract nodes, so in theory we should not have abstract nodes here.
         # But at this point this DSL check has not happened yet...
         fields = self.get_parse_fields(
-            predicate=lambda f: not f.abstract and not f.null,
-            concrete_order=True)
+            predicate=lambda f: not f.abstract and not f.null
+        )
 
         parsers = parser.fields_parsers
         types = [p.get_type() for p in parsers]
@@ -2438,8 +2440,7 @@ class ASTNodeType(BaseStructType):
 
         return result
 
-    def get_parse_fields(self, predicate=None, include_inherited=True,
-                         concrete_order=False):
+    def get_parse_fields(self, predicate=None, include_inherited=True):
         """
         Return the list of all the parse fields `self` has, including its
         parents'.
@@ -2451,15 +2452,10 @@ class ASTNodeType(BaseStructType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :param bool concrete_order: Sort the returned parse fields by serial,
-            so that we get concrete order: concrete fields that override
-            abstract ones don't go before other fields.
-
         :rtype: list[Field]
         """
         result = self.get_abstract_node_data(predicate, include_inherited,
                                              field_class=Field)
-        result.sort(key=lambda f: f._serial)
         return result
 
     def get_properties(self, predicate=None, include_inherited=True):

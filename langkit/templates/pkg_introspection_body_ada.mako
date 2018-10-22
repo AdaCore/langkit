@@ -46,8 +46,7 @@ package body ${ada_lib_name}.Introspection is
                when ${n.ada_kind_name} =>
                return (case Field is
                        % for f in n.get_parse_fields( \
-                          predicate=lambda f: not f.null, \
-                          concrete_order=True \
+                          predicate=lambda f: not f.null \
                        ):
                        when ${enum_literal(f)} => ${f.index + 1},
                        % endfor
