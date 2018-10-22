@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+import funcy
 import inspect
 
 from langkit import names
@@ -572,6 +573,20 @@ class Cond(AbstractExpression):
         super(Cond, self).__init__()
         self.args = args
 
+    @property
+    def branches(self):
+        """
+        Return the branches for this cond expression.
+        """
+        return funcy.partition(2, self.args)
+
+    @property
+    def else_expr(self):
+        """
+        Return the else expr for this expression.
+        """
+        return self.args[-1]
+
     def construct(self):
         from langkit.expressions import Cast
 
@@ -580,16 +595,14 @@ class Cond(AbstractExpression):
                               'Missing last Cond argument')
 
         # Lower each pair of condition/expression in resolved expression
-        pairs = []
-        for i in range(len(self.args) // 2):
-            cond = construct(
-                self.args[2 * i], T.Bool,
-                custom_msg='Bad condition type in Cond expression: {expected}'
-                           ' expected but got {expr_type} instead'
-            )
-            expr = construct(self.args[2 * i + 1])
-            pairs.append((cond, expr))
-        else_expr = construct(self.args[-1])
+        pairs = [(
+            construct(a_cond, T.Bool,
+                      custom_msg='Condition in Cond expression should '
+                                 'be {expected}, got {expr_type}'),
+            construct(a_expr)
+        ) for a_cond, a_expr in self.branches]
+
+        else_expr = construct(self.else_expr)
 
         # Unify types for all return expression
         rtype = else_expr.type
