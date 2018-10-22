@@ -38,8 +38,7 @@ if ${parser.pos_var} /= No_Token_Index then
       else ${parser.pos_var} - 1);
    <% fields_n_args = zip(
          parser.get_type().get_parse_fields(
-            predicate=lambda f: not f.abstract and not f.null,
-            concrete_order=True),
+            predicate=lambda f: not f.abstract and not f.null),
          args) %>
 
    % for i, (field, arg) in enumerate(fields_n_args):
