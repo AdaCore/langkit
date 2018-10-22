@@ -509,7 +509,6 @@ class Map(CollectionExpression):
                         r.inner_expr, r.inner_scope, filter_expr,
                         self.do_concat, take_while_expr, abstract_expr=self)
 
-
     @property
     def kind(self):
         if self.expr_fn == collection_expr_identity:
@@ -739,9 +738,6 @@ def length(self, collection):
 
 
 @attr_expr('singleton')
-@attr_expr('to_array', coerce_null=True,
-           doc='Like :dsl:`singleton`, but return an empty array if `expr` is'
-               ' null.')
 class CollectionSingleton(AbstractExpression):
     """
     Return a 1-sized array whose only item is `expr`.
@@ -779,7 +775,7 @@ class CollectionSingleton(AbstractExpression):
         def subexprs(self):
             return [self.expr]
 
-    def __init__(self, expr, coerce_null=False):
+    def __init__(self, expr):
         """
         :param AbstractExpression expr: The expression representing the
             single element to create the collection from.
@@ -788,25 +784,9 @@ class CollectionSingleton(AbstractExpression):
         """
         super(CollectionSingleton, self).__init__()
         self.expr = expr
-        self.coerce_null = coerce_null
 
     def construct(self):
-        from langkit.expressions import If, IsNull, ArrayLiteral
-
-        expr = construct(self.expr)
-        expr_var = expr.create_result_var('To_Array_Prefix')
-
-        # Use "expr" only for first evaluation, and then use expr_var to refer
-        # to the result. We do this to avoid resolved expression sharing in the
-        # expression tree.
-        ret = CollectionSingleton.Expr(expr_var if self.coerce_null else expr)
-        if self.coerce_null:
-            return If.Expr(
-                IsNull.construct_static(expr),
-                ArrayLiteral.construct_static([], expr.type.array),
-                ret)
-        else:
-            return ret
+        return CollectionSingleton.Expr(construct(self.expr))
 
     def __repr__(self):
         return '<CollectionSingleton>'

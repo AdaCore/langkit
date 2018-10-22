@@ -60,7 +60,7 @@ class Decl(FooNode):
 class Using(FooNode):
     name = Field()
     env_spec = EnvSpec(
-        reference(Self.name.cast(FooNode).to_array,
+        reference(Self.name.cast(FooNode)._.singleton,
                   through=Name.designated_env)
     )
 
