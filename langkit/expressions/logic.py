@@ -615,7 +615,7 @@ class LogicBooleanOp(AbstractExpression):
         return 'Any' if self.kind == self.KIND_OR else 'All'
 
     def construct(self):
-        # The equation constructor takes an Ada array as a paramater, not our
+        # The equation constructor takes an Ada array as a parameter, not our
         # access to record: unwrap it.
         relation_array = untyped_literal_expr(
             'Relation_Array ({}.Items)',
