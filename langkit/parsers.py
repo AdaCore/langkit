@@ -1743,12 +1743,17 @@ class Predicate(Parser):
     def _is_left_recursive(self, rule_name):
         return self.parser._is_left_recursive(rule_name)
 
+    @property
+    def property_name(self):
+        return (
+            self.property_ref.label
+            if isinstance(self.property_ref, T.Defer) else
+            self.property_ref.qualname
+        )
+
     def __repr__(self):
         return 'Predicate({}, {})'.format(
-            self.parser,
-            (self.property_ref.label
-             if isinstance(self.property_ref, T.Defer) else
-             self.property_ref.qualname)
+            self.parser, self.property_name
         )
 
     def create_vars_after(self, start_pos):
