@@ -1794,7 +1794,7 @@ class StructType(BaseStructType):
         :param name: See CompiledType.__init__.
 
         :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
-            field) for this struct's fields. Inheritted fields must not appear
+            field) for this struct's fields. Inherited fields must not appear
             in this list.
         """
         internal_name = names.Name('Internal') + name
