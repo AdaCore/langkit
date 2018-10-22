@@ -1130,7 +1130,7 @@ class AbstractNodeData(object):
         :type: names.Name
         """
         if name:
-            self._original_name = self.name
+            self._original_name = name
 
         self.struct = None
         """
@@ -1286,7 +1286,7 @@ class AbstractNodeData(object):
         assert isinstance(name, names.Name)
         self._name = name
         if self._original_name is None:
-            self._original_name = self.name
+            self._original_name = name
 
     @property
     def original_name(self):

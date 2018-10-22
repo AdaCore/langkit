@@ -16,7 +16,7 @@ File "test.py", line 31, in BarNode.main_prop
 == Incorrect bind eq_prop 4 ==
 File "test.py", line 31, in BarNode.main_prop
   line 31, in Bind expression
-    Error: In Bind's eq_prop BazNode.p_prop4, some dynamic variables need to be bound: dyn_node
+    Error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
 
 == Correct bind eq_prop A ==
 Code generation was successful

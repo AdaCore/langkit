@@ -1,10 +1,10 @@
 == Missing default value ==
 File "test.py", line 27, in Example.prop
-    Error: Argument "A" must have the same default value as in base property (FooNode.p_prop)
+    Error: Argument "A" must have the same default value as in base property (FooNode.prop)
 
 == Extra default value ==
 File "test.py", line 27, in Example.prop
-    Error: Argument "A" cannot have a default value, to be consistent with its base property (FooNode.p_prop)
+    Error: Argument "A" cannot have a default value, to be consistent with its base property (FooNode.prop)
 
 == Wrong value ==
 File "test.py", line 27, in Example.prop
