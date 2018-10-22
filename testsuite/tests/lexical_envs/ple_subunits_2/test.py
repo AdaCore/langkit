@@ -48,7 +48,7 @@ class Id(Name):
 
     @langkit_property()
     def symbols():
-        return Self.symbol.to_array
+        return Self.symbol._.singleton
 
 
 class Prefix(Name):
