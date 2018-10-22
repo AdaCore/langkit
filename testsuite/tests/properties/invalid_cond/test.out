@@ -11,7 +11,7 @@ File "test.py", line 23, in Example.p
 == Bad condition type ==
 File "test.py", line 23, in Example.p
   line 3, in SelfVariable expression
-    Error: Bad condition type in Cond expression: Bool expected but got Example instead
+    Error: Condition in Cond expression should be Bool, got Example
 
 == Bad return type ==
 File "test.py", line 23, in Example.p
