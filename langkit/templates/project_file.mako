@@ -138,7 +138,7 @@ library project ${lib_name} is
 
             for Default_Switches ("C") use Common_C_Cargs & ("-Ofast");
 
-            for Switches ("${lib_name.lower()}_quex_lexer.c") use Common_C_Cargs
+            for Switches ("${lib_name.lower()}_lexer.c") use Common_C_Cargs
               & ("-O1", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
                  "-fdisable-rtl-sched2", "-mno-stv");
             --  Deactivate because of memory usage, see P726-024. This
