@@ -1997,6 +1997,17 @@ package body ${ada_lib_name}.Implementation is
       end return;
    end Create_Public_Big_Integer;
 
+   % if ctx.properties_logging:
+   -----------------
+   -- Trace_Image --
+   -----------------
+
+   function Trace_Image (I : Big_Integer_Type) return String is
+   begin
+      return GNATCOLL.GMP.Integers.Image (I.Value);
+   end Trace_Image;
+   % endif
+
    ----------------
    -- To_Integer --
    ----------------

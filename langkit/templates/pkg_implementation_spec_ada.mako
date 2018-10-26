@@ -288,6 +288,7 @@ private package ${ada_lib_name}.Implementation is
    function "+" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
    function "-" (Left, Right : Big_Integer_Type) return Big_Integer_Type;
 
+   function Trace_Image (I : Big_Integer_Type) return String;
    ------------------------------------------------------
    -- AST node derived types (incomplete declarations) --
    ------------------------------------------------------
