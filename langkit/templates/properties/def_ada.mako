@@ -5,6 +5,8 @@
 
 ## Regular property function
 
+<% has_logging = ctx.properties_logging and property.activate_tracing %>
+
 
 % if property.abstract_runtime_check:
 
