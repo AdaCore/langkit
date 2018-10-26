@@ -337,11 +337,6 @@ class ManageScript(object):
             help='Disable a warning.'
         )
         subparser.add_argument(
-            '--enable-properties-logging', dest='enabled_properties_logging',
-            action='store_true',
-            help='Instrument properties code to do logging.'
-        )
-        subparser.add_argument(
             '--no-astdoc', '-D', dest='no_astdoc',
             action='store_true',
             help='Do not generate the HTML documentation for AST nodes, their'
@@ -638,7 +633,6 @@ class ManageScript(object):
                           warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks,
                           generate_unparser=args.generate_unparser,
-                          properties_logging=args.enabled_properties_logging,
                           generate_astdoc=not args.no_astdoc,
                           generate_gdb_hook=not args.no_gdb_hook)
 
