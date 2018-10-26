@@ -85,7 +85,7 @@ is
 begin
    ${gdb_property_body_start()}
 
-   % if ctx.properties_logging:
+   % if has_logging:
       Properties_Traces.Trace
         ("${property.qualname} ("
         % if property._has_self_entity:
@@ -147,7 +147,7 @@ begin
             Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
             if Mmz_Val.Kind = Mmz_Evaluating then
-               % if ctx.properties_logging:
+               % if has_logging:
                   Properties_Traces.Trace
                     ("Result: infinite recursion");
                % endif
@@ -155,7 +155,7 @@ begin
                raise Property_Error with "Infinite recursion detected";
 
             elsif Mmz_Val.Kind = Mmz_Property_Error then
-               % if ctx.properties_logging:
+               % if has_logging:
                   Properties_Traces.Trace
                     ("Result: Property_Error");
                   Properties_Traces.Decrease_Indent;
@@ -169,7 +169,7 @@ begin
                   Inc_Ref (Property_Result);
                % endif
 
-               % if ctx.properties_logging:
+               % if has_logging:
                   Properties_Traces.Trace
                     ("Result: " & Trace_Image (Property_Result));
                   Properties_Traces.Decrease_Indent;
@@ -212,7 +212,7 @@ begin
       % endif
    % endif
 
-   % if ctx.properties_logging:
+   % if has_logging:
       Properties_Traces.Trace ("Result: " & Trace_Image (Property_Result));
       Properties_Traces.Decrease_Indent;
    % endif
@@ -221,7 +221,7 @@ begin
 
 % if property.vars.root_scope.has_refcounted_vars(True) or \
      property.memoized or \
-     ctx.properties_logging:
+     has_logging:
    exception
       when Property_Error =>
          % for scope in all_scopes:
@@ -242,7 +242,7 @@ begin
             % endif
          % endif
 
-         % if ctx.properties_logging:
+         % if has_logging:
             Properties_Traces.Trace ("Result: Properties_Error");
             Properties_Traces.Decrease_Indent;
          % endif

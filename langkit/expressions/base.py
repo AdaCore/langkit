@@ -2892,7 +2892,8 @@ class PropertyDef(AbstractNodeData):
                  uses_entity_info=None, uses_envs=None,
                  optional_entity_info=False, warn_on_unused=True,
                  ignore_warn_on_node=None,
-                 call_non_memoizable_because=None):
+                 call_non_memoizable_because=None,
+                 activate_tracing=False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2995,6 +2996,9 @@ class PropertyDef(AbstractNodeData):
             of this property in a memoized context impossible. Must be used for
             external properties that do side effects (such as loading an
             analysis unit), as this conflicts with the memoization machinery.
+
+        :param bool activate_tracing: Whether we want to activate tracing for
+            this property's execution.
         """
 
         self.prefix = prefix
@@ -3152,6 +3156,8 @@ class PropertyDef(AbstractNodeData):
         Whether this property uses the ".get_value" operation on a logic
         variable.
         """
+
+        self.activate_tracing = activate_tracing
 
     @property
     def has_debug_info(self):
@@ -4134,7 +4140,8 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      call_memoizable=False, memoize_in_populate=False,
                      external=False, uses_entity_info=None, uses_envs=None,
                      warn_on_unused=True, ignore_warn_on_node=None,
-                     call_non_memoizable_because=None):
+                     call_non_memoizable_because=None,
+                     activate_tracing=False):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -4162,6 +4169,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             warn_on_unused=warn_on_unused,
             ignore_warn_on_node=ignore_warn_on_node,
             call_non_memoizable_because=call_non_memoizable_because,
+            activate_tracing=activate_tracing,
         )
     return decorator
 
