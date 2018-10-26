@@ -88,7 +88,11 @@ begin
    % if ctx.properties_logging:
       Properties_Traces.Trace
         ("${property.qualname} ("
+        % if property._has_self_entity:
+         & Trace_Image (Ent)
+         % else:
          & Trace_Image (Self)
+         % endif
          % for arg in property.arguments:
             & ", " & Trace_Image (${arg.name})
          % endfor

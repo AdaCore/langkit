@@ -330,7 +330,7 @@
       function Trace_Image (R : ${cls.name}) return String is
       begin
          % if cls.is_entity_type:
-            return Trace_Image
+            return Image
               (Entity'(Node => ${root_node_type_name} (R.Node),
                        Info => R.Info));
          % else:
