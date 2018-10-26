@@ -40,7 +40,7 @@ from langkit.passes import (
 )
 from langkit.template_utils import add_template_dir
 from langkit.utils import (Colors, TopologicalSortError, printcol,
-                           topological_sort)
+                           topological_sort, memoized)
 
 
 compile_ctx = None
@@ -985,6 +985,15 @@ class CompileCtx(object):
             for prop in astnode.get_properties(*args, **kwargs):
                 yield prop
 
+
+    @memoized
+    def properties_logging(self):
+        """
+        Returns whether logging is activated for any properties in the compile
+        context.
+        """
+        return any(prop.activate_tracing for prop in self.all_properties)
+
     def properties_callgraphs(
         self, forwards_converter=lambda expr, to_prop: to_prop,
         backwards_converter=lambda expr, from_prop: from_prop,
@@ -1275,7 +1284,7 @@ class CompileCtx(object):
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
-             warnings=None, generate_unparser=False, properties_logging=False,
+             warnings=None, generate_unparser=False,
              generate_astdoc=True, generate_gdb_hook=True,
              post_process_ada=None, post_process_cpp=None,
              post_process_python=None):
@@ -1332,7 +1341,6 @@ class CompileCtx(object):
 
         self.no_property_checks = no_property_checks
         self.generate_unparser = generate_unparser
-        self.properties_logging = properties_logging
         self.generate_astdoc = generate_astdoc
         self.generate_gdb_hook = generate_gdb_hook
         if warnings:
