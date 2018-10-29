@@ -632,7 +632,7 @@ class FieldAccess(AbstractExpression):
                 # clash with local variables.
                 call_name = "{}.Implementation.{}".format(
                     get_context().ada_api_settings.lib_name,
-                    str(self.node_data.name)
+                    str(self.node_data.internal_name)
                 )
 
                 # Build the call
@@ -647,7 +647,8 @@ class FieldAccess(AbstractExpression):
                 # which may be different from the type thas is stored in the
                 # struct.
                 ret = self.node_data.type.extract_from_storage_expr(
-                    prefix, '{}.{}'.format(prefix, self.node_data.name)
+                    prefix,
+                    '{}.{}'.format(prefix, self.node_data.internal_name)
                 )
 
             if self.wrap_result_in_entity:

@@ -250,6 +250,7 @@ class AbstractNodeData(object):
         self.location = extract_library_location()
 
         self._name = name
+        self._internal_name = None
 
         self._original_name = None
         """
@@ -416,6 +417,24 @@ class AbstractNodeData(object):
         self._name = name
         if self._original_name is None:
             self._original_name = name
+
+    @property
+    def internal_name(self):
+        """
+        Internal name is the name of the field as far as generated code is
+        concerned.
+
+        :rtype: names.Name
+        """
+        if self._internal_name:
+            return self._internal_name
+        else:
+            return self.name
+
+    @internal_name.setter
+    def internal_name(self, name):
+        assert isinstance(name, names.Name)
+        self._internal_name = name
 
     @property
     def original_name(self):
