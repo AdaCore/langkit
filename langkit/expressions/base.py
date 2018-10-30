@@ -3869,9 +3869,11 @@ class PropertyDef(AbstractNodeData):
 
     def check_returned_nodes(self, context):
         """
-        Emit a warning if this property returns a bare node.
+        Check if a property returns a node type and hasn't been properly
+        annotated.
         """
-        if (self.struct.annotations.warn_on_node
+        if (self.struct.is_ast_node
+                and self.struct.annotations.warn_on_node
                 and not self.ignore_warn_on_node):
             WarningSet.prop_only_entities.warn_if(
                 self.type.matches(T.root_node),
