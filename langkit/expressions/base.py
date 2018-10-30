@@ -3887,10 +3887,14 @@ class PropertyDef(AbstractNodeData):
         :type context: langkit.compile_context.CompileCtx
         :rtype: basestring
         """
+
         with self.bind(), Self.bind_type(self.struct):
             with names.camel_with_underscores:
+                if not self.external:
+                    self.prop_def = render('properties/def_ada')
+                else:
+                    self.prop_def = ""
                 self.prop_decl = render('properties/decl_ada')
-                self.prop_def = render('properties/def_ada')
 
                 if self.requires_untyped_wrapper:
                     self.untyped_wrapper_decl = render(
