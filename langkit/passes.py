@@ -243,10 +243,9 @@ class PropertyPass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context):
-        for astnode in context.astnode_types:
-            for prop in astnode.get_properties(include_inherited=False):
-                with prop.diagnostic_context:
-                    self.pass_fn(prop, context)
+        for prop in context.all_properties(include_inherited=False):
+            with prop.diagnostic_context:
+                self.pass_fn(prop, context)
 
 
 class StopPipeline(AbstractPass):
