@@ -1275,6 +1275,24 @@ class CompiledType(object):
         result.sort(key=lambda f: f._serial)
         return result
 
+    def get_properties(self, predicate=None, include_inherited=True):
+        """
+        Return the list of all the fields `self` has.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[langkit.expressions.base.PropertyDef]
+        """
+        return self.get_abstract_node_data(
+            lambda f: f.is_property and (predicate is None or predicate(f)),
+            include_inherited
+        )
+
     def get_abstract_node_data_dict(self, include_inherited=True,
                                     field_class=AbstractNodeData):
         """
@@ -2487,24 +2505,6 @@ class ASTNodeType(BaseStructType):
         result = self.get_abstract_node_data(predicate, include_inherited,
                                              field_class=Field)
         return result
-
-    def get_properties(self, predicate=None, include_inherited=True):
-        """
-        Return the list of all the fields `self` has.
-
-        :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[langkit.expressions.base.PropertyDef]
-        """
-        return self.get_abstract_node_data(
-            lambda f: f.is_property and (predicate is None or predicate(f)),
-            include_inherited
-        )
 
     def fields_with_accessors(self):
         """
