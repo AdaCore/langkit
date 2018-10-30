@@ -3251,6 +3251,11 @@ class AnalysisUnitType(CompiledType):
             c_type_name='analysis_unit',
             api_name='AnalysisUnit',
             dsl_name='AnalysisUnit')
+        root_field = BuiltinField(T.defer_root_node, doc="")
+        root_field.internal_name = names.Name.from_camel_with_underscores(
+            "AST_Root"
+        )
+        self._init_fields([('root', root_field)])
 
     @property
     def to_public_converter(self):
