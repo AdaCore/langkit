@@ -2235,10 +2235,15 @@ class SelfVariable(AbstractVariable):
         _old_type = self._type
         _old_entity_type = Entity._type
         self._type = type
-        Entity._type = self._type.entity
+
+        if type.is_ast_node:
+            Entity._type = self._type.entity
+
         yield
         self._type = _old_type
-        Entity._type = _old_entity_type
+
+        if type.is_ast_node:
+            Entity._type = _old_entity_type
 
     def construct(self):
         check_source_language(self._type is not None,
