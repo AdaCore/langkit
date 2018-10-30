@@ -1,6 +1,6 @@
 == Invalid field ==
 File "test.py", line 22, in Example.result
   line 30, in access to .foobar
-    Error: AnalysisUnit values have no field (accessed field was foobar)
+    Error: Type AnalysisUnit has no 'foobar' field or property
 
 Done
