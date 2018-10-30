@@ -2,7 +2,11 @@
 
 <%def name="argument_list(property, dispatching)">
   (${property.self_arg_name} :
+   % if Self.type.is_ast_node:
       access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
+   % else:
+      ${Self.type.name}
+   % endif
 
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
