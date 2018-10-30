@@ -3611,14 +3611,14 @@ package body ${ada_lib_name}.Implementation is
    ------------------------
 
    function Is_Referenced_From
-     (Referenced, Unit : Internal_Unit) return Boolean is
+     (Self, Unit : Internal_Unit) return Boolean is
    begin
-      if Unit = null or else Referenced = null then
+      if Unit = null or else Self = null then
          return False;
-      elsif Unit = Referenced then
+      elsif Unit = Self then
          return True;
       else
-         return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
+         return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Self);
       end if;
    end Is_Referenced_From;
 

@@ -1292,7 +1292,7 @@ private package ${ada_lib_name}.Implementation is
    --  env hooks.
 
    function Is_Referenced_From
-     (Referenced, Unit : Internal_Unit) return Boolean;
+     (Self, Unit : Internal_Unit) return Boolean;
 
    procedure Do_Parsing
      (Unit   : Internal_Unit;
