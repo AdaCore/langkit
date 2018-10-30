@@ -1129,7 +1129,7 @@ class ResolvedExpression(object):
                 '{} must redefine the type property, or to fill the'
                 ' static_type class field'.format(self)
             )
-        return self.static_type
+        return resolve_type(self.static_type)
 
     @property
     def ir_dump(self):
