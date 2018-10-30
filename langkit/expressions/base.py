@@ -4575,7 +4575,7 @@ class LocalVars(object):
 
     def create(self, name, type):
         """
-        Create a local variables in templates::
+        Create a local variable in templates::
 
             from langkit.compiled_types import LocalVars, T
             vars = LocalVars()
