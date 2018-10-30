@@ -658,6 +658,18 @@ class CompiledType(object):
         public API.
         """
 
+        self._abstract_node_data_dict_cache = {}
+        """
+        Cache for the get_abstract_node_data_dict class method.
+
+        :type: dict[(bool, AbstractNodeData), dict[str, BaseField]]
+        """
+
+        self._fields = OrderedDict()
+        """
+        List of AbstractNodeData fields for this type.
+        """
+
     def __lt__(self, other):
         assert isinstance(other, CompiledType)
         return self.name < other.name
@@ -1185,7 +1197,6 @@ class CompiledType(object):
             field) for this struct's fields. Inheritted fields must not appear
             in this list.
         """
-        self._fields = OrderedDict()
         for f_n, f_v in fields:
             f_v.name = (f_n if isinstance(f_n, names.Name) else
                         names.Name.from_lower(f_n))
