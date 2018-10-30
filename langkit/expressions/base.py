@@ -953,7 +953,7 @@ class ResolvedExpression(object):
     def __init__(self, result_var_name=None, skippable_refcount=False,
                  abstract_expr=None):
         """
-        Create a resolve expression.
+        Create a resolved expression.
 
         :param None|str result_var_name: If provided, create a local variable
             using this as a base name to hold the result of this expression.
