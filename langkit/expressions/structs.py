@@ -734,14 +734,6 @@ class FieldAccess(AbstractExpression):
         self.receiver_expr = construct(self.receiver)
         pfx_type = self.receiver_expr.type
 
-        check_source_language(
-            pfx_type.is_base_struct_type,
-            '{} values have no field (accessed field was {})'.format(
-                pfx_type.dsl_name,
-                self.field
-            )
-        )
-
         self.to_get = pfx_type.get_abstract_node_data_dict().get(self.field,
                                                                  None)
         ":type: AbstractNodeField"
