@@ -2,8 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import T
 from langkit.expressions.base import (
-    CallExpr, FieldAccessExpr, NullCheckExpr, PropertyDef, auto_attr,
-    auto_attr_custom, construct
+    CallExpr, PropertyDef, auto_attr, construct
 )
 
 
@@ -33,16 +32,3 @@ class IsReferencedFrom(CallExpr):
         )
 
         PropertyDef.get().set_uses_envs()
-
-
-@auto_attr_custom("root")
-def analysis_unit_root(self, unit):
-    """
-    Return `unit`'s root AST node.
-
-    :param ResolvedExpression unit: Expression that yields the analysis
-        unit for which we want to extract the root AST node.
-    """
-    unit_expr = NullCheckExpr(construct(unit, T.AnalysisUnit))
-    return FieldAccessExpr(unit_expr, 'AST_Root', T.root_node,
-                           do_explicit_incref=False, abstract_expr=self)
