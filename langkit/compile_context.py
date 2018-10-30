@@ -985,7 +985,6 @@ class CompileCtx(object):
             for prop in astnode.get_properties(*args, **kwargs):
                 yield prop
 
-
     @memoized
     def properties_logging(self):
         """
