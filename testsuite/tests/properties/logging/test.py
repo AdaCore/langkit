@@ -41,7 +41,8 @@ class Decl(FooNode):
                    metadata=New(Metadata, b=Self.has_plus.as_bool))
     )
 
-    @langkit_property(public=True, return_type=T.Ref.entity.array)
+    @langkit_property(public=True, return_type=T.Ref.entity.array,
+                      activate_tracing=True)
     def entity_items():
         return Self.as_entity.items.map(lambda i: i)
 
@@ -60,5 +61,5 @@ fg.add_rules(
     ref=Ref(fg.name),
     name=Name(Token.Identifier),
 )
-build_and_run(fg, 'main.py', properties_logging=True)
+build_and_run(fg, 'main.py')
 print('Done')

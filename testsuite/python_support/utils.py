@@ -125,7 +125,7 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
 
 
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
-                  warning_set=default_warning_set, properties_logging=False,
+                  warning_set=default_warning_set,
                   generate_unparser=False, symbol_canonicalizer=None):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
@@ -142,8 +142,6 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         library. If the input is a single string, consider it's a single mail
         source file.
     :param WarningSet warning_set: Set of warnings to emit.
-    :param bool properties_logging: Whether to enable properties logging in
-        code generation.
     :param bool generate_unparser: Whether to generate unparser.
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canoncalizes to use for this context, if any.
@@ -171,8 +169,6 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     argv = sys.argv[1:] + ['--full-error-traces', '-vnone', 'make']
     for w in WarningSet.available_warnings:
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
-    if properties_logging:
-        argv.append('--enable-properties-logging')
     if not pretty_print:
         argv.append('--no-pretty-print')
     if generate_unparser:
