@@ -3241,6 +3241,8 @@ class BigIntegerType(CompiledType):
 
 class AnalysisUnitType(CompiledType):
     def __init__(self):
+        from langkit.expressions import PropertyDef
+
         super(AnalysisUnitType, self).__init__(
             'InternalUnit',
             exposed=True,
@@ -3251,11 +3253,20 @@ class AnalysisUnitType(CompiledType):
             c_type_name='analysis_unit',
             api_name='AnalysisUnit',
             dsl_name='AnalysisUnit')
+
         root_field = BuiltinField(T.defer_root_node, doc="")
         root_field.internal_name = names.Name.from_camel_with_underscores(
             "AST_Root"
         )
-        self._init_fields([('root', root_field)])
+        self._init_fields([
+            ('root', root_field),
+            ('is_referenced_from', PropertyDef(
+                lambda unit=T.AnalysisUnit: None,
+                prefix=None, type=T.Bool, public=False,
+                external=True, uses_entity_info=False,
+                uses_envs=True, warn_on_unused=False, doc=''
+            )),
+        ])
 
     @property
     def to_public_converter(self):
