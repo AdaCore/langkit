@@ -997,9 +997,16 @@ class CompileCtx(object):
 
         :rtype: seq[PropertyDef]
         """
+        from langkit.compiled_types import CompiledTypeRepo
         for astnode in self.astnode_types:
             for prop in astnode.get_properties(*args, **kwargs):
                 yield prop
+
+        # Compute properties for non-astnode types
+        for _, typ in CompiledTypeRepo.type_dict.items():
+            if not typ.is_ast_node:
+                for prop in typ.get_properties(*args, **kwargs):
+                    yield prop
 
     @memoized
     def properties_logging(self):
