@@ -186,6 +186,314 @@ class CompiledTypeRepo(object):
         cls.entity_info = None
 
 
+class AbstractNodeData(object):
+    """
+    This class defines an abstract base class for fields and properties on
+    AST nodes.
+
+    It defines the basis of what is needed to bind them in other languages
+    bindings: a type and a name.
+    """
+
+    # Hack: the field declarations order in AST nodes matters.  The simple and
+    # very handy syntax we use here for such declarations doesn't preserve this
+    # order in Python2, however.  Waiting for the move to Python3, we use a
+    # hack here: the following counter will help us to recover the declaration
+    # order (assuming it is the same as the Field instantiation order).
+    _counter = iter(count(0))
+
+    is_property = False
+    """
+    Whether this class is Property (to be overriden in the Property subclass).
+    :type: bool
+    """
+
+    PREFIX_FIELD = names.Name('F')
+    PREFIX_PROPERTY = names.Name('P')
+    PREFIX_INTERNAL = names.Name('Internal')
+
+    # Name to use for the implicit entity information argument in field
+    # accessors.
+    entity_info_name = names.Name('E_Info')
+
+    prefix = None
+    """
+    This can be overriden in subclasses of AbstractNodeData to add a prefix to
+    the name of AbstractNodeData instances.
+
+    :type: names.Name|None
+    """
+
+    _abstract = False
+
+    def __init__(self, name=None, public=True, access_needs_incref=False):
+        """
+        :param names.Name|None name: Name for this field. Most of the time,
+            this is initially unknown at field creation, so it is filled only
+            at struct creation time.
+
+        :param bool|None public: Whether this AbstractNodeData instance is
+            supposed to be public or not.
+
+            In the context of properties only, None is also allowed: in this
+            case, inherit vibility from parents. If there is no property to
+            override and None is passed, make the property private. This is
+            computed in the "compute" pass.
+
+        :param bool access_needs_incref: If True, field access evaluation does
+            not create an ownership share: callers must call Inc_Ref
+            themselves. See the eponym property.
+        """
+        self._serial = next(self._counter)
+        self._is_public = public
+
+        self.location = extract_library_location()
+
+        self._name = name
+
+        self._original_name = None
+        """
+        Name for this property as specified in the DSL, if different from the
+        current name.
+
+        :type: names.Name
+        """
+        if name:
+            self._original_name = name
+
+        self.struct = None
+        """
+        StructType subclass that declared this field. Initialized when creating
+        StructType subclasses.
+        :type: StructType
+        """
+
+        self.arguments = []
+        """
+        Code generation-wise, all node data can be considered as functions
+        which take at least a mandatory Self argument and return the
+        corresponding data.
+
+        This is a list that describes all other arguments. Note that only
+        Property instances accept other arguments.
+
+        :type: list[Argument]
+        """
+
+        self._uses_entity_info = False
+        self._has_self_entity = False
+        self.optional_entity_info = False
+        self._access_needs_incref = access_needs_incref
+
+    @property
+    def abstract(self):
+        """
+        Return whether this field is abstract. This can be true only for
+        properties and syntax fields.
+
+        :rtype: bool
+        """
+        return self._abstract
+
+    @property
+    def is_overriding(self):
+        """
+        Return whether this field overrides an inheritted one in a base class.
+
+        :rtype: bool
+        """
+        from langkit.expressions import PropertyDef
+
+        assert self._name and self.struct and self.struct.is_ast_node
+        parent_cls = self.struct.base
+        properties_to_override = ([p._name
+                                   for p in parent_cls.get_properties()]
+                                  if parent_cls else [])
+        return (isinstance(self, PropertyDef) and
+                self._name in properties_to_override)
+
+    @property
+    def uses_entity_info(self):
+        """
+        Return whether evaluating this field requires entity info.
+
+        :rtype: bool
+        """
+        assert self._uses_entity_info is not None
+        return self._uses_entity_info
+
+    @property
+    def diagnostic_context(self):
+        ctx_message = 'in {}.{}'.format(self.struct.dsl_name, self._name.lower)
+        return Context(ctx_message, self.location)
+
+    @property
+    def is_public(self):
+        """
+        Whether this field is private.
+        :rtype: bool
+        """
+        assert self._is_public is not None
+        return self._is_public
+
+    @property
+    def is_private(self):
+        """
+        Whether this field is public.
+
+        This is a shortcut for::
+            not self.is_public
+
+        :rtype: bool
+        """
+        return not self.is_public
+
+    @property
+    def is_internal(self):
+        """
+        Whether this property is internal.
+        :rtype: bool
+        """
+        return self.prefix == AbstractNodeData.PREFIX_INTERNAL
+
+    @property
+    def type(self):
+        """
+        Type of the abstract node field.
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        raise not_implemented_error(self, type(self).type)
+
+    @property
+    def public_type(self):
+        """
+        Return the type to use when exposing this field in public APIs.
+
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        return self.type.entity if self.type.is_ast_node else self.type
+
+    @type.setter
+    def type(self, type):
+        raise not_implemented_error(self, type(self).type)
+
+    def c_type_or_error(self, capi):
+        """
+        Within a diagnostic context for this field, return its C API type.
+
+        :rtype: CAPIType
+        """
+        with self.diagnostic_context:
+            return self.public_type.c_type(capi)
+
+    def _prefixed_name(self, name):
+        """
+        Decorate `name` with this AbstractNodeData's prefix.
+
+        :rtype: names.Name
+        """
+        assert name
+
+        # If this is an internal property, the name has an underscore
+        # prefix that we want to get rid of for code generation.
+        radix = (names.Name(name.base_name[1:])
+                 if self.is_internal else
+                 name)
+
+        return self.prefix + radix if self.prefix else radix
+
+    @property
+    @self_memoized
+    def name(self):
+        """
+        :rtype: names.Name
+        """
+        return self._prefixed_name(self._name)
+
+    @name.setter
+    def name(self, name):
+        assert isinstance(name, names.Name)
+        self._name = name
+        if self._original_name is None:
+            self._original_name = name
+
+    @property
+    def original_name(self):
+        """
+        :rtype: names.Name
+        """
+        assert self._original_name
+        return self._original_name
+
+    @property
+    def qualname(self):
+        """
+        Return the qualified name for this field, i.e. the name of the owning
+        type plus the name of the field itself. This is useful for diagnostic
+        messages.
+
+        Note that if expansion renamed this property, this will return the
+        original (DSL-level) name.
+
+        :rtype: str
+        """
+        return '{}.{}'.format(
+            self.struct.dsl_name if self.struct else '<unresolved>',
+            (self.original_name.lower
+             if self._original_name else '<unresolved>')
+        )
+
+    def __repr__(self):
+        return '<{} {}>'.format(
+            type(self).__name__,
+            self.qualname
+        )
+
+    @property
+    def doc(self):
+        """
+        Documentation for the abstract node field.
+        :rtype: str
+        """
+        raise not_implemented_error(self, type(self).doc)
+
+    @property
+    def accessor_basename(self):
+        """
+        Return the base name for the accessor we generate for this field.
+
+        Note that this is available only for fields attached to AST nodes.
+
+        :rtype: names.Name
+        """
+        assert self.struct
+        return self.struct.kwless_raw_name + self.name
+
+    @property
+    def natural_arguments(self):
+        """
+        Return the subset of "self.arguments" that are non-artificial
+        arguments, that is to say the subset that users actually handle in
+        expressions.
+
+        This property makes sense in user-facing layers.
+
+        :rtype: list[Argument]
+        """
+        return self.arguments
+
+    @property
+    def access_needs_incref(self):
+        """
+        Return whether field access evaluation does not create an ownership
+        share. In this case, users must call Inc_Ref themselves. This returns
+        always False for node data whose type is not ref-counted.
+
+        :rtype: bool
+        """
+        return self.type.is_refcounted and self._access_needs_incref
+
+
 class CompiledType(object):
     """
     Descriptor for a type in the generated code.
@@ -850,6 +1158,138 @@ class CompiledType(object):
         from langkit.expressions.structs import New
         return New(self, *args, **kwargs)
 
+    def _init_fields(self, fields):
+        """
+        Bind input fields to `self` and initialize their name.
+
+        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
+            field) for this struct's fields. Inheritted fields must not appear
+            in this list.
+        """
+        self._fields = OrderedDict()
+        for f_n, f_v in fields:
+            f_v.name = (f_n if isinstance(f_n, names.Name) else
+                        names.Name.from_lower(f_n))
+            f_v.struct = self
+
+            # Use the "hidden" name so that lookups work on undecorated field
+            # names.
+            self._fields[f_v._name.lower] = f_v
+
+    def add_field(self, field):
+        """
+        Append a field to this Struct/AST node.
+
+        :param AbstractNodeData field: Field to append.
+        """
+        self._fields[field._name.lower] = field
+        field.struct = self
+
+        # Invalidate the field lookup cache
+        self._abstract_node_data_dict_cache = {}
+
+    def get_user_fields(self, predicate=None, include_inherited=True):
+        """
+        Return the list of all the user fields `self` has, including its
+        parents'.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[UserField]
+        """
+        return self.get_abstract_node_data(predicate, include_inherited,
+                                           field_class=UserField)
+
+    def get_fields(self, predicate=None, include_inherited=True):
+        """
+        Return the list of all the fields `self` has, including its parents'.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[BaseField]
+        """
+        return self.get_abstract_node_data(predicate, include_inherited,
+                                           field_class=BaseField)
+
+    def get_abstract_node_data(self, predicate=None, include_inherited=True,
+                               field_class=AbstractNodeData):
+        """
+        Get all BaseField instances for the class.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(AbstractNodeData) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :param type field_class: The field class to use to filter fields.
+
+        :rtype: list[AbstractNodeData]
+        """
+        result = filter(
+            predicate or (lambda f: True),
+            self.get_abstract_node_data_dict(include_inherited,
+                                             field_class).values()
+        )
+        result.sort(key=lambda f: f._serial)
+        return result
+
+    def get_abstract_node_data_dict(self, include_inherited=True,
+                                    field_class=AbstractNodeData):
+        """
+        Get all BaseField instances for the class.
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :param type field_class: The field class to use to filter fields.
+
+        :rtype: dict[str, AbstractNodeData]
+        """
+        assert issubclass(field_class, AbstractNodeData)
+
+        # First, see if we have a cached result for this
+        key = (include_inherited, field_class)
+        try:
+            return self._abstract_node_data_dict_cache[key]
+        except KeyError:
+            pass
+
+        # No cached result, we have to compute it
+        if field_class == AbstractNodeData:
+            # If we don't filter by class (i.e. if we want the most general
+            # class field: AbstractNodeData), do the base class recursion.
+            if include_inherited and self.is_ast_node:
+                result = OrderedDict()
+                for base_class in self.get_inheritance_chain():
+                    result.update(base_class._fields)
+            else:
+                result = OrderedDict(self._fields)
+
+        # Otherwise, just rely on the potentially already cached whole list of
+        # fields and do filtering.
+        else:
+            all_fields = self.get_abstract_node_data_dict(include_inherited)
+            result = OrderedDict(
+                filter(lambda kv: isinstance(kv[1], field_class),
+                       all_fields.items())
+            )
+
+        self._abstract_node_data_dict_cache[key] = result
+        return result
+
 
 class NoCompiledType(CompiledType):
     """
@@ -1024,314 +1464,6 @@ class Argument(object):
 
     def __repr__(self):
         return '<Argument {} : {}>'.format(self.dsl_name, self.type.dsl_name)
-
-
-class AbstractNodeData(object):
-    """
-    This class defines an abstract base class for fields and properties on
-    AST nodes.
-
-    It defines the basis of what is needed to bind them in other languages
-    bindings: a type and a name.
-    """
-
-    # Hack: the field declarations order in AST nodes matters.  The simple and
-    # very handy syntax we use here for such declarations doesn't preserve this
-    # order in Python2, however.  Waiting for the move to Python3, we use a
-    # hack here: the following counter will help us to recover the declaration
-    # order (assuming it is the same as the Field instantiation order).
-    _counter = iter(count(0))
-
-    is_property = False
-    """
-    Whether this class is Property (to be overriden in the Property subclass).
-    :type: bool
-    """
-
-    PREFIX_FIELD = names.Name('F')
-    PREFIX_PROPERTY = names.Name('P')
-    PREFIX_INTERNAL = names.Name('Internal')
-
-    # Name to use for the implicit entity information argument in field
-    # accessors.
-    entity_info_name = names.Name('E_Info')
-
-    prefix = None
-    """
-    This can be overriden in subclasses of AbstractNodeData to add a prefix to
-    the name of AbstractNodeData instances.
-
-    :type: names.Name|None
-    """
-
-    _abstract = False
-
-    def __init__(self, name=None, public=True, access_needs_incref=False):
-        """
-        :param names.Name|None name: Name for this field. Most of the time,
-            this is initially unknown at field creation, so it is filled only
-            at struct creation time.
-
-        :param bool|None public: Whether this AbstractNodeData instance is
-            supposed to be public or not.
-
-            In the context of properties only, None is also allowed: in this
-            case, inherit vibility from parents. If there is no property to
-            override and None is passed, make the property private. This is
-            computed in the "compute" pass.
-
-        :param bool access_needs_incref: If True, field access evaluation does
-            not create an ownership share: callers must call Inc_Ref
-            themselves. See the eponym property.
-        """
-        self._serial = next(self._counter)
-        self._is_public = public
-
-        self.location = extract_library_location()
-
-        self._name = name
-
-        self._original_name = None
-        """
-        Name for this property as specified in the DSL, if different from the
-        current name.
-
-        :type: names.Name
-        """
-        if name:
-            self._original_name = name
-
-        self.struct = None
-        """
-        StructType subclass that declared this field. Initialized when creating
-        StructType subclasses.
-        :type: StructType
-        """
-
-        self.arguments = []
-        """
-        Code generation-wise, all node data can be considered as functions
-        which take at least a mandatory Self argument and return the
-        corresponding data.
-
-        This is a list that describes all other arguments. Note that only
-        Property instances accept other arguments.
-
-        :type: list[Argument]
-        """
-
-        self._uses_entity_info = False
-        self._has_self_entity = False
-        self.optional_entity_info = False
-        self._access_needs_incref = access_needs_incref
-
-    @property
-    def abstract(self):
-        """
-        Return whether this field is abstract. This can be true only for
-        properties and syntax fields.
-
-        :rtype: bool
-        """
-        return self._abstract
-
-    @property
-    def is_overriding(self):
-        """
-        Return whether this field overrides an inheritted one in a base class.
-
-        :rtype: bool
-        """
-        from langkit.expressions import PropertyDef
-
-        assert self._name and self.struct and self.struct.is_ast_node
-        parent_cls = self.struct.base
-        properties_to_override = ([p._name
-                                   for p in parent_cls.get_properties()]
-                                  if parent_cls else [])
-        return (isinstance(self, PropertyDef) and
-                self._name in properties_to_override)
-
-    @property
-    def uses_entity_info(self):
-        """
-        Return whether evaluating this field requires entity info.
-
-        :rtype: bool
-        """
-        assert self._uses_entity_info is not None
-        return self._uses_entity_info
-
-    @property
-    def diagnostic_context(self):
-        ctx_message = 'in {}.{}'.format(self.struct.dsl_name, self._name.lower)
-        return Context(ctx_message, self.location)
-
-    @property
-    def is_public(self):
-        """
-        Whether this field is private.
-        :rtype: bool
-        """
-        assert self._is_public is not None
-        return self._is_public
-
-    @property
-    def is_private(self):
-        """
-        Whether this field is public.
-
-        This is a shortcut for::
-            not self.is_public
-
-        :rtype: bool
-        """
-        return not self.is_public
-
-    @property
-    def is_internal(self):
-        """
-        Whether this property is internal.
-        :rtype: bool
-        """
-        return self.prefix == AbstractNodeData.PREFIX_INTERNAL
-
-    @property
-    def type(self):
-        """
-        Type of the abstract node field.
-        :rtype: langkit.compiled_types.CompiledType
-        """
-        raise not_implemented_error(self, type(self).type)
-
-    @property
-    def public_type(self):
-        """
-        Return the type to use when exposing this field in public APIs.
-
-        :rtype: langkit.compiled_types.CompiledType
-        """
-        return self.type.entity if self.type.is_ast_node else self.type
-
-    @type.setter
-    def type(self, type):
-        raise not_implemented_error(self, type(self).type)
-
-    def c_type_or_error(self, capi):
-        """
-        Within a diagnostic context for this field, return its C API type.
-
-        :rtype: CAPIType
-        """
-        with self.diagnostic_context:
-            return self.public_type.c_type(capi)
-
-    def _prefixed_name(self, name):
-        """
-        Decorate `name` with this AbstractNodeData's prefix.
-
-        :rtype: names.Name
-        """
-        assert name
-
-        # If this is an internal property, the name has an underscore
-        # prefix that we want to get rid of for code generation.
-        radix = (names.Name(name.base_name[1:])
-                 if self.is_internal else
-                 name)
-
-        return self.prefix + radix if self.prefix else radix
-
-    @property
-    @self_memoized
-    def name(self):
-        """
-        :rtype: names.Name
-        """
-        return self._prefixed_name(self._name)
-
-    @name.setter
-    def name(self, name):
-        assert isinstance(name, names.Name)
-        self._name = name
-        if self._original_name is None:
-            self._original_name = name
-
-    @property
-    def original_name(self):
-        """
-        :rtype: names.Name
-        """
-        assert self._original_name
-        return self._original_name
-
-    @property
-    def qualname(self):
-        """
-        Return the qualified name for this field, i.e. the name of the owning
-        type plus the name of the field itself. This is useful for diagnostic
-        messages.
-
-        Note that if expansion renamed this property, this will return the
-        original (DSL-level) name.
-
-        :rtype: str
-        """
-        return '{}.{}'.format(
-            self.struct.dsl_name if self.struct else '<unresolved>',
-            (self.original_name.lower
-             if self._original_name else '<unresolved>')
-        )
-
-    def __repr__(self):
-        return '<{} {}>'.format(
-            type(self).__name__,
-            self.qualname
-        )
-
-    @property
-    def doc(self):
-        """
-        Documentation for the abstract node field.
-        :rtype: str
-        """
-        raise not_implemented_error(self, type(self).doc)
-
-    @property
-    def accessor_basename(self):
-        """
-        Return the base name for the accessor we generate for this field.
-
-        Note that this is available only for fields attached to AST nodes.
-
-        :rtype: names.Name
-        """
-        assert self.struct
-        return self.struct.kwless_raw_name + self.name
-
-    @property
-    def natural_arguments(self):
-        """
-        Return the subset of "self.arguments" that are non-artificial
-        arguments, that is to say the subset that users actually handle in
-        expressions.
-
-        This property makes sense in user-facing layers.
-
-        :rtype: list[Argument]
-        """
-        return self.arguments
-
-    @property
-    def access_needs_incref(self):
-        """
-        Return whether field access evaluation does not create an ownership
-        share. In this case, users must call Inc_Ref themselves. This returns
-        always False for node data whose type is not ref-counted.
-
-        :rtype: bool
-        """
-        return self.type.is_refcounted and self._access_needs_incref
 
 
 class BaseField(AbstractNodeData):
@@ -1645,143 +1777,11 @@ class BaseStructType(CompiledType):
         :type: dict[(bool, AbstractNodeData), dict[str, BaseField]]
         """
 
-    def _init_fields(self, fields):
-        """
-        Bind input fields to `self` and initialize their name.
-
-        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
-            field) for this struct's fields. Inheritted fields must not appear
-            in this list.
-        """
-        self._fields = OrderedDict()
-        for f_n, f_v in fields:
-            f_v.name = (f_n if isinstance(f_n, names.Name) else
-                        names.Name.from_lower(f_n))
-            f_v.struct = self
-
-            # Use the "hidden" name so that lookups work on undecorated field
-            # names.
-            self._fields[f_v._name.lower] = f_v
-
     @property
     def py_nullexpr(self):
         return self._py_nullexpr or '{}({})'.format(self.name.camel, ', '.join(
             f.type.py_nullexpr for f in self.get_fields()
         ))
-
-    def add_field(self, field):
-        """
-        Append a field to this Struct/AST node.
-
-        :param AbstractNodeData field: Field to append.
-        """
-        self._fields[field._name.lower] = field
-        field.struct = self
-
-        # Invalidate the field lookup cache
-        self._abstract_node_data_dict_cache = {}
-
-    def get_user_fields(self, predicate=None, include_inherited=True):
-        """
-        Return the list of all the user fields `self` has, including its
-        parents'.
-
-        :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[UserField]
-        """
-        return self.get_abstract_node_data(predicate, include_inherited,
-                                           field_class=UserField)
-
-    def get_fields(self, predicate=None, include_inherited=True):
-        """
-        Return the list of all the fields `self` has, including its parents'.
-
-        :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[BaseField]
-        """
-        return self.get_abstract_node_data(predicate, include_inherited,
-                                           field_class=BaseField)
-
-    def get_abstract_node_data(self, predicate=None, include_inherited=True,
-                               field_class=AbstractNodeData):
-        """
-        Get all BaseField instances for the class.
-
-        :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(AbstractNodeData) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :param type field_class: The field class to use to filter fields.
-
-        :rtype: list[AbstractNodeData]
-        """
-        result = filter(
-            predicate or (lambda f: True),
-            self.get_abstract_node_data_dict(include_inherited,
-                                             field_class).values()
-        )
-        result.sort(key=lambda f: f._serial)
-        return result
-
-    def get_abstract_node_data_dict(self, include_inherited=True,
-                                    field_class=AbstractNodeData):
-        """
-        Get all BaseField instances for the class.
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :param type field_class: The field class to use to filter fields.
-
-        :rtype: dict[str, AbstractNodeData]
-        """
-        assert issubclass(field_class, AbstractNodeData)
-
-        # First, see if we have a cached result for this
-        key = (include_inherited, field_class)
-        try:
-            return self._abstract_node_data_dict_cache[key]
-        except KeyError:
-            pass
-
-        # No cached result, we have to compute it
-        if field_class == AbstractNodeData:
-            # If we don't filter by class (i.e. if we want the most general
-            # class field: AbstractNodeData), do the base class recursion.
-            if include_inherited and self.is_ast_node:
-                result = OrderedDict()
-                for base_class in self.get_inheritance_chain():
-                    result.update(base_class._fields)
-            else:
-                result = OrderedDict(self._fields)
-
-        # Otherwise, just rely on the potentially already cached whole list of
-        # fields and do filtering.
-        else:
-            all_fields = self.get_abstract_node_data_dict(include_inherited)
-            result = OrderedDict(
-                filter(lambda kv: isinstance(kv[1], field_class),
-                       all_fields.items())
-            )
-
-        self._abstract_node_data_dict_cache[key] = result
-        return result
 
 
 class StructType(BaseStructType):
