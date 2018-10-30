@@ -1,30 +1,6 @@
 main.py: Running...
-[PROPERTIES] Decl.internal_md_1 (<Decl main.txt:1:1-1:5>):
-   [PROPERTIES] HasPlus.p_as_bool (<HasPlusAbsent main.txt:1:1-1:1>):
-      [PROPERTIES] HasPlusAbsent.p_as_bool (<HasPlusAbsent main.txt:1:1-1:1>):
-         [PROPERTIES] Result: False
-      [PROPERTIES] Result: False
-   [PROPERTIES] Result: (B => False)
-[PROPERTIES] Decl.internal_env_mappings_0 (<Decl main.txt:1:1-1:5>):
-   [PROPERTIES] Result: (Key => "a", Val => <Decl main.txt:1:1-1:5>)
-[PROPERTIES] Decl.internal_md_1 (<Decl main.txt:1:6-1:12>):
-   [PROPERTIES] HasPlus.p_as_bool (<HasPlusAbsent main.txt:1:5-1:5>):
-      [PROPERTIES] HasPlusAbsent.p_as_bool (<HasPlusAbsent main.txt:1:5-1:5>):
-         [PROPERTIES] Result: False
-      [PROPERTIES] Result: False
-   [PROPERTIES] Result: (B => False)
-[PROPERTIES] Decl.internal_env_mappings_0 (<Decl main.txt:1:6-1:12>):
-   [PROPERTIES] Result: (Key => "b", Val => <Decl main.txt:1:6-1:12>)
-[PROPERTIES] Decl.internal_md_1 (<Decl main.txt:1:13-1:18>):
-   [PROPERTIES] HasPlus.p_as_bool (<HasPlusPresent main.txt:1:12-1:12>):
-      [PROPERTIES] HasPlusPresent.p_as_bool (<HasPlusPresent main.txt:1:12-1:12>):
-         [PROPERTIES] Result: True
-      [PROPERTIES] Result: True
-   [PROPERTIES] Result: (B => True)
-[PROPERTIES] Decl.internal_env_mappings_0 (<Decl main.txt:1:13-1:18>):
-   [PROPERTIES] Result: (Key => "c", Val => <Decl main.txt:1:13-1:18>)
 Calling p_entity_items...
-[PROPERTIES] Decl.p_entity_items (<Decl main.txt:1:1-1:5>):
-   [PROPERTIES] Result: [<|Ref main.txt:1:3-1:4 (MD => (B => False), Rebindings => <null>|>]
+[PROPERTIES] Decl.entity_items (<Decl main.txt:1:1-1:5>):
+   [PROPERTIES] Result: [<Ref 1:3-1:4>]
 main.py: Done.
 Done
