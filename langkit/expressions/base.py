@@ -2587,8 +2587,10 @@ class Block(Let):
 
 class Try(AbstractExpression):
     """
-    Try is used to provide a fallback expression to compute in case the
-    original expression to evaluate raises a PropertyError.
+    ``Try`` tries to evaluate the given primary expression. If it raises a
+    PropertyError, then either the fallback expression will be evaluated,
+    either the Try expression will return the null value for the type of the
+    primary expression.
     """
     class Expr(ComputingExpr):
         """
@@ -2623,7 +2625,7 @@ class Try(AbstractExpression):
     def __init__(self, try_expr, else_expr=None):
         """
         :param try_expr: The expression that may raise.
-        :param else_expr: If "try_expr" raises a property, this fallback
+        :param else_expr: If "try_expr" raises a property error, this fallback
             expression is evaluated. If "else_expr" is None, the fallback
             expression is the null expression of the expected type.
         """
