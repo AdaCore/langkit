@@ -604,9 +604,21 @@ class FieldAccess(AbstractExpression):
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
 
+                # TODO: For the moment, the first argument is named Node for
+                # properties on node & entity types, and Self for other
+                # properties. For the moment, properties that are not on nodes
+                # are necessarily built-in properties, so the inconsistency is
+                # not too bothering, but long-term we want to rename *every*
+                # self argument to Self.
+                rec_type = self.receiver_expr.type
+                first_arg_name = (
+                    'Node' if rec_type.is_ast_node or rec_type.is_entity_type
+                    else 'Self'
+                )
+
                 # Create a collection of name => expression for parameters.
                 # First argument is the node itself.
-                args = [('Node', prefix)] + [
+                args = [(first_arg_name, prefix)] + [
                     (formal.name, actual.render_expr())
                     for actual, formal in zip(
                         self.arguments, self.node_data.natural_arguments
