@@ -3324,7 +3324,7 @@ def create_builtin_types():
              value_names=[names.Name('Recursive'),
                           names.Name('Flat'),
                           names.Name('Minimal')])
-    CompiledType(
+    lex_env_type = CompiledType(
         'LexicalEnv',
         nullexpr='Empty_Env',
         should_emit_array_type=False,
@@ -3346,7 +3346,25 @@ def create_builtin_types():
         c_type_name='equation_type',
         is_refcounted=True,
     )
-    EnvRebindingsType()
+
+    rebindings = EnvRebindingsType()
+    rebindings_parent_field = BuiltinField(
+        rebindings, doc="Return the parent rebindings for `rebindings`."
+    )
+    rebindings_parent_field.internal_name = names.Name.from_lower("parent")
+
+    rebindings._init_fields([
+        ('old_env', BuiltinField(
+            lex_env_type,
+            doc="Return the lexical environment that is remapped by "
+            "`rebindings`."
+        )),
+        ('new_env', BuiltinField(
+            lex_env_type, doc="Return the lexical environment that "
+            "`rebindings` remaps to."
+        )),
+        ('get_parent', rebindings_parent_field),
+    ])
 
     CompiledType(
         name='Boolean',

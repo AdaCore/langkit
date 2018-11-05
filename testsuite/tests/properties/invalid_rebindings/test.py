@@ -27,10 +27,10 @@ def run(name, expr):
     print('')
 
 
-run('.rebindings_old_env: invalid input type',
-    No(T.FooNode).rebindings_old_env)
-run('.rebindings_new_env: invalid input type',
-    No(T.FooNode).rebindings_new_env)
-run('.rebindings_parent: invalid input type',
-    No(T.FooNode).rebindings_parent)
+run('.old_env: invalid input type',
+    No(T.FooNode).old_env)
+run('.new_env: invalid input type',
+    No(T.FooNode).new_env)
+run('.get_parent: invalid input type',
+    No(T.FooNode).get_parent)
 print('Done')

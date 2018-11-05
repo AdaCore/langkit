@@ -1,5 +1,5 @@
 """
-Check that .rebindings_* DSL operations behave as expected.
+Check that .rebindings related built-in properties behave as expected.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -55,18 +55,18 @@ class Block(DefNode):
     def parent_rebindings():
         e_info = Var(New(T.entity_info,
                          md=Entity.info.md,
-                         rebindings=Entity.info.rebindings.rebindings_parent,
+                         rebindings=Entity.info.rebindings.get_parent,
                          from_rebound=False))
         return New(Block.entity, node=Self, info=e_info)
 
     @langkit_property(public=True)
     def new():
-        return (Entity.info.rebindings.rebindings_new_env.env_node
+        return (Entity.info.rebindings.new_env.env_node
                 .as_bare_entity)
 
     @langkit_property(public=True)
     def old():
-        return (Entity.info.rebindings.rebindings_new_env.env_node
+        return (Entity.info.rebindings.new_env.env_node
                 .as_bare_entity)
 
     env_spec = EnvSpec(

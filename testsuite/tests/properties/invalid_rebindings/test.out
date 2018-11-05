@@ -1,16 +1,16 @@
-== .rebindings_old_env: invalid input type ==
+== .old_env: invalid input type ==
 File "test.py", line 22, in Example.p
-  line 31, in No expression
-    Error: Expected type EnvRebindings, got FooNode
+  line 31, in access to .old_env
+    Error: Type FooNode has no 'old_env' field or property
 
-== .rebindings_new_env: invalid input type ==
+== .new_env: invalid input type ==
 File "test.py", line 22, in Example.p
-  line 33, in No expression
-    Error: Expected type EnvRebindings, got FooNode
+  line 33, in access to .new_env
+    Error: Type FooNode has no 'new_env' field or property
 
-== .rebindings_parent: invalid input type ==
+== .get_parent: invalid input type ==
 File "test.py", line 22, in Example.p
-  line 35, in No expression
-    Error: Expected type EnvRebindings, got FooNode
+  line 35, in access to .get_parent
+    Error: Type FooNode has no 'get_parent' field or property
 
 Done
