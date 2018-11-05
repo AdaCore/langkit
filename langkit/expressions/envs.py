@@ -237,28 +237,6 @@ def env_orphan(self, env):
                     abstract_expr=self)
 
 
-@dsl_document
-class EnvGroup(AbstractExpression):
-    """
-    Like :dsl:`env_group`, but take a fixed list of input lexical environments.
-    """
-
-    def __init__(self, *env_exprs):
-        super(EnvGroup, self).__init__()
-        self.env_exprs = list(env_exprs)
-
-    def construct(self):
-        env_exprs = [construct(e, T.LexicalEnv) for e in self.env_exprs]
-        array_arg = LiteralExpr(array_aggr(['{}' for _ in env_exprs]),
-                                no_compiled_type, env_exprs)
-        return CallExpr('Group_Env', 'Group', T.LexicalEnv,
-                        [array_arg],
-                        abstract_expr=self)
-
-    def __repr__(self):
-        return '<EnvGroup>'
-
-
 @auto_attr
 def env_group(self, env_array, with_md=None):
     """
