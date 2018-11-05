@@ -1,14 +1,14 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import T, get_context, no_compiled_type
+from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
-    FieldAccessExpr, GetSymbol, LiteralExpr, NullCheckExpr, NullExpr,
-    PropertyDef, Self, attr_call, auto_attr, construct, dsl_document
+    GetSymbol, NullCheckExpr, NullExpr,
+    PropertyDef, Self, attr_call, auto_attr, construct
 )
-from langkit.expressions.utils import array_aggr, assign_var
+from langkit.expressions.utils import assign_var
 
 
 @attr_call('get')
@@ -366,48 +366,6 @@ def construct_non_null_rebindings(rebindings):
     :rtype: ResolvedExpression
     """
     return NullCheckExpr(construct(rebindings, T.EnvRebindings))
-
-
-@auto_attr
-def rebindings_old_env(self, rebindings):
-    """
-    Return the lexical environment that is remapped by `rebindings`.
-
-    :param AbstractExpression rebindings: Input expression, must evaluate to a
-        rebindings.
-    :rtype: ResolvedExpression
-    """
-    return FieldAccessExpr(construct_non_null_rebindings(rebindings),
-                           'Old_Env', T.LexicalEnv,
-                           do_explicit_incref=True, abstract_expr=self)
-
-
-@auto_attr
-def rebindings_new_env(self, rebindings):
-    """
-    Return the lexical environment that `rebindings` remaps to.
-
-    :param AbstractExpression rebindings: Input expression, must evaluate to a
-        rebindings.
-    :rtype: ResolvedExpression
-    """
-    return FieldAccessExpr(construct_non_null_rebindings(rebindings),
-                           'New_Env', T.LexicalEnv,
-                           do_explicit_incref=True, abstract_expr=self)
-
-
-@auto_attr
-def rebindings_parent(self, rebindings):
-    """
-    Return the parent rebindings for `rebindings`.
-
-    :param AbstractExpression rebindings: Input expression, must evaluate to a
-        rebindings.
-    :rtype: ResolvedExpression
-    """
-    return FieldAccessExpr(construct_non_null_rebindings(rebindings),
-                           'Parent', T.EnvRebindings,
-                           do_explicit_incref=False, abstract_expr=self)
 
 
 @auto_attr
