@@ -469,6 +469,8 @@ package Langkit_Support.Lexical_Env is
    --
    --  If Filter is not null, use it as a filter to disable lookup on envs for
    --  which Filter.all (From, Env) returns False.
+   --
+   --  If ``Key`` is null, return every entity in the scope regardless of name.
 
    function Get_First
      (Self        : Lexical_Env;

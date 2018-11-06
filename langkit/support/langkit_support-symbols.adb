@@ -47,7 +47,11 @@ package body Langkit_Support.Symbols is
    function Image
      (S : Symbol_Type; With_Quotes : Boolean := False) return String is
    begin
-      return Image (S.all, With_Quotes);
+      if S = null then
+         return "<no symbol>";
+      else
+         return Image (S.all, With_Quotes);
+      end if;
    end Image;
 
    -------------------------
@@ -121,10 +125,13 @@ package body Langkit_Support.Symbols is
    ----------
 
    function Hash (ST : Symbol_Type) return Hash_Type is
-      S : constant Storage_Elements.Integer_Address :=
-        To_Integer (ST.all'Address);
+
    begin
-      return Hash_Type'Mod (S);
+      if ST = null then
+         return Hash_Type (0);
+      else
+         return Hash_Type'Mod (To_Integer (ST.all'Address));
+      end if;
    end Hash;
 
 end Langkit_Support.Symbols;
