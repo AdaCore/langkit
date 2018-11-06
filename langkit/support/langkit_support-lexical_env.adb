@@ -578,7 +578,23 @@ package body Langkit_Support.Lexical_Env is
          C     : Cursor := Internal_Envs.No_Element;
          Nodes : Internal_Map_Node_Vectors.Vector;
       begin
+
          if Env.Env.Map /= null then
+
+            --  If Key is null, we want to get every entity stored in the map
+            --  regardless of the symbol.
+            if Key = null then
+               for Nodes of Env.Env.Map.all loop
+                  for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
+                     Append_Result
+                       (Nodes.Get (I), Metadata, Current_Rebindings,
+                        From_Rebound);
+                  end loop;
+               end loop;
+               return True;
+            end if;
+
+            --  Else, find the elements in the map corresponding to Key.
             C := Env.Env.Map.Find (Key);
          end if;
 
@@ -734,7 +750,7 @@ package body Langkit_Support.Lexical_Env is
          Traces.Trace
            (Me, "Get_Internal env="
             & Lexical_Env_Image (Self, Dump_Content => False)
-            & " key = " & Image (Key.all)
+            & " key = " & Image (Key)
             & " lookup kind = " & Lookup_Kind_Type'Image (Lookup_Kind));
       end if;
 
