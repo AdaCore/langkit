@@ -3596,8 +3596,6 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       if Cache_Version < Unit.Context.Cache_Version then
-         GNATCOLL.Traces.Trace
-           (Main_Trace, "In reset caches for unit " & Basename (Unit));
          Unit.Cache_Version := Unit.Context.Cache_Version;
          % if ctx.has_memoization:
             Destroy (Unit.Memoization_Map);
