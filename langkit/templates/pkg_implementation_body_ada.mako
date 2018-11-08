@@ -3724,7 +3724,10 @@ package body ${ada_lib_name}.Implementation is
       --  don't bother opening it and directly emit a diagnostic. This avoid
       --  pointless exceptions which harm debugging.
 
-      if Input.Kind = File and then not Input.Filename.Is_Readable then
+      if Input.Kind = File 
+         and then 
+         (Input.Filename.Is_Directory or else (not Input.Filename.Is_Readable))
+      then
          declare
             Name : constant String := Basename (Unit);
          begin
