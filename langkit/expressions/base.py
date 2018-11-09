@@ -2642,6 +2642,9 @@ class Try(AbstractExpression):
             'Try expression', 'fallback expression')
         return Try.Expr(try_expr, else_expr, abstract_expr=self)
 
+    def __repr__(self):
+        return '<Try>'
+
 
 class Var(AbstractVariable):
     """
