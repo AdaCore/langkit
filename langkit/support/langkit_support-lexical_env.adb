@@ -951,7 +951,7 @@ package body Langkit_Support.Lexical_Env is
 
       if Has_Trace then
          Traces.Trace
-           (Me, "===== In Env get, key=" & Image (Key.all) & " =====");
+           (Me, "===== In Env get, key=" & Image (Key) & " =====");
          Traces.Increase_Indent (Me);
       end if;
 
@@ -1002,7 +1002,7 @@ package body Langkit_Support.Lexical_Env is
 
       if Has_Trace then
          Traces.Trace
-           (Me, "==== In Env Get_First, key=" & Image (Key.all) & " ====");
+           (Me, "==== In Env Get_First, key=" & Image (Key) & " ====");
          Traces.Increase_Indent (Me);
       end if;
 
