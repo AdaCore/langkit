@@ -594,7 +594,7 @@ package body Langkit_Support.Lexical_Env is
                return True;
             end if;
 
-            --  Else, find the elements in the map corresponding to Key.
+            --  Else, find the elements in the map corresponding to Key
             C := Env.Env.Map.Find (Key);
          end if;
 
