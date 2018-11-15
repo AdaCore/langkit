@@ -167,7 +167,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
             (T.AnalysisUnit, lambda t: t.api_name),
             (ct.ArrayType, lambda _: 'list[{}]'.format(
-                type.element_type.name.camel
+                self.type_public_name(type.element_type)
             )),
             (ct.StructType, lambda _: type.api_name.camel),
             (T.BigInt, lambda _: 'int'),
