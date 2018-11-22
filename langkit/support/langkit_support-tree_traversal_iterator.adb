@@ -44,17 +44,16 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       end if;
 
       --  We have a next element to yield: put it aside and then look for
-      --  the element we'll yield at the next iteration: first non-null
-      --  children first, then siblings.
+      --  the element we'll yield at the next iteration: non-null children
+      --  first, then siblings.
 
       Element := It.Node;
 
-      for I in First_Child_Index (It.Node) .. Last_Child_Index (It.Node)
-      loop
+      for I in First_Child_Index (It.Node) .. Last_Child_Index (It.Node) loop
          Child := Get_Child (It.Node, I);
 
          if Child /= No_Node then
-            Append (It.Stack, I + 1);
+            It.Stack.Append (I + 1);
             It.Node := Child;
             return True;
          end if;
@@ -63,17 +62,17 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       --  We could not find non-null children: look for the next non-null
       --  sibling. If there's none, look for the parent's sibling and so on.
 
-      while Length (It.Stack) > 0 loop
+      while not It.Stack.Is_Empty loop
          It.Node := Get_Parent (It.Node);
 
-         for J in Pop (It.Stack) .. Last_Child_Index (It.Node) loop
+         for J in It.Stack.Pop .. Last_Child_Index (It.Node) loop
             Child := Get_Child (It.Node, J);
 
             if Child /= No_Node then
                --  We found a sibling! Remember to look for the next one
                --  when we get back to the parent and proceed.
 
-               Append (It.Stack, J + 1);
+               It.Stack.Append (J + 1);
                It.Node := Child;
                return True;
             end if;
