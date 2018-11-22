@@ -77,9 +77,19 @@ private
    package Natural_Vectors is new Langkit_Support.Vectors (Natural);
 
    type Traverse_Iterator_Record is record
-      Node, Parent : Node_Type := No_Node;
-      Stack        : Natural_Vectors.Vector;
-      Continue     : Boolean := True;
+      Node : Node_Type := No_Node;
+      --  Node is the AST node that is currently being visited, i.e. the node
+      --  to return at the next call to Next.
+
+      Stack : Natural_Vectors.Vector;
+      --  Stack used to remember where to resume traversal when returning from
+      --  a node to its parent.
+      --
+      --  When Node is any node but the root, the top of the stack is the index
+      --  of Node in its parent's list of children, plus 1. In other words, it
+      --  is the index of Node's sibling from which to resume traversal.
+      --
+      --  When Node is the root, then the stack is empty.
    end record;
 
    procedure Release (It : in out Traverse_Iterator_Record);
