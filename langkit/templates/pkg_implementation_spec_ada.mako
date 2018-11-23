@@ -609,6 +609,8 @@ private package ${ada_lib_name}.Implementation is
       ${astnode_types.node_fields(T.root_node, emit_null=False)}
 
       Last_Attempted_Child : Integer := -1;
+      --  0-based index for the last child we tried to parse for this node. -1
+      --  if parsing for all children was successful.
    end record;
 
    overriding function Abstract_Kind
