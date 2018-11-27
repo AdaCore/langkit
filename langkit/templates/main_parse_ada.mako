@@ -36,7 +36,6 @@ procedure Parse is
    Filename    : aliased GNAT.Strings.String_Access;
    File_List   : aliased GNAT.Strings.String_Access;
    Print_Envs  : aliased Boolean;
-   Count_Nodes : aliased Boolean;
    Do_Unparse  : aliased Boolean;
    Hide_Slocs  : aliased Boolean;
 
@@ -200,33 +199,13 @@ procedure Parse is
          Dump_Lexical_Env (Unit);
       end if;
 
-      if Count_Nodes then
          declare
-            Count : Natural := 0;
 
-            function Visit
-              (Node : ${root_entity.api_name}'Class) return Visit_Status;
 
-            -----------
-            -- Visit --
-            -----------
-
-            function Visit
-              (Node : ${root_entity.api_name}'Class) return Visit_Status is
             begin
-               if Is_Null (Node) then
-                  Count := Count + 1;
                end if;
-               return Into;
-            end Visit;
 
          begin
-            if Is_Null (AST) then
-               Traverse (AST, Visit'Access);
-            end if;
-            if not Silent then
-               Put_Line
-                 ("The tree contains" & Natural'Image (Count) & " nodes.");
             end if;
          end;
       end if;
@@ -251,10 +230,6 @@ begin
    Define_Switch
      (Config, Silent'Access, "-s", "--silent",
       Help   => "Do not print the representation of the resulting tree");
-   Define_Switch
-     (Config, Count_Nodes'Access, "-C", "--count",
-      Help   => "Count the number of nodes in the resulting tree. This is"
-                & " handy to measure the performance of tree traversal.");
    Define_Switch
      (Config, Print_Envs'Access, "-E", "--print-envs",
       Help   => "Print lexical environments computed");
