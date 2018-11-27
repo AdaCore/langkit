@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 with Ada.Calendar;              use Ada.Calendar;
+with Ada.Containers.Hashed_Sets;
 with Ada.Containers.Vectors;
 with Ada.Strings;               use Ada.Strings;
 with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
@@ -38,6 +39,7 @@ procedure Parse is
    Print_Envs  : aliased Boolean;
    Do_Unparse  : aliased Boolean;
    Hide_Slocs  : aliased Boolean;
+   Check       : aliased Boolean;
 
    Input_Str : Unbounded_String;
    Lookups   : String_Vectors.Vector;
@@ -167,6 +169,32 @@ procedure Parse is
 
    procedure Process_File (Filename : String; Ctx : Analysis_Context)
    is
+      package Node_Sets is 
+      new Ada.Containers.Hashed_Sets (${root_entity.api_name}, Hash, "=", "=");
+
+      Set : Node_Sets.Set;
+
+      procedure Check_Consistency (Node, Parent : ${root_entity.api_name});
+
+      procedure Check_Consistency (Node, Parent : ${root_entity.api_name}) is
+      begin
+         if Node.Parent /= Parent then
+            Put_Line ("Invalid parent for node " & Node.Short_Image);
+         end if;
+
+         if Set.Contains (Node) then
+            Put_Line ("Duplicate node" & Node.Short_Image);
+         end if;
+
+         Set.Insert (Node);
+
+         for C of Node.Children loop
+            if not C.Is_Null then
+               Check_Consistency (C, Node);
+            end if;
+         end loop;
+      end Check_Consistency;
+
       Unit         : Analysis_Unit;
       Time_Before  : constant Time := Clock;
       Time_After   : Time;
@@ -199,15 +227,12 @@ procedure Parse is
          Dump_Lexical_Env (Unit);
       end if;
 
-         declare
-
-
-            begin
-               end if;
-
-         begin
-            end if;
-         end;
+      if Check then
+         Put_Line ("");
+         Put_Line ("==== Checking tree consistency ====");
+         if not AST.Is_Null then
+            Check_Consistency (AST, No_${root_entity.api_name});
+         end if;
       end if;
 
       if Do_Unparse then
@@ -236,6 +261,9 @@ begin
    Define_Switch
      (Config, Measure_Time'Access, "-t", "--time",
       Help   => "Time the execution of parsing");
+   Define_Switch
+     (Config, Check'Access, "-C", "--check",
+      Help   => "Perform consistency checks on the tree");
    Define_Switch
      (Config, Rule_Name'Access, "-r:", "--rule-name:",
       Help   => "Rule name to parse");
