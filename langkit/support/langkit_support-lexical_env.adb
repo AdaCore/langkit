@@ -748,7 +748,7 @@ package body Langkit_Support.Lexical_Env is
 
       if Has_Trace then
          Traces.Trace
-           (Me, "Get_Internal env="
+           (Rec, "Get_Internal env="
             & Lexical_Env_Image (Self, Dump_Content => False)
             & " key = " & Image (Key)
             & " lookup kind = " & Lookup_Kind_Type'Image (Lookup_Kind));
@@ -762,7 +762,7 @@ package body Langkit_Support.Lexical_Env is
 
          when Grouped =>
             --  Just concatenate lookups for all grouped environments
-            Traces.Increase_Indent (Me);
+            Traces.Increase_Indent (Rec);
             declare
                MD : constant Node_Metadata :=
                   Combine (Self.Env.Default_MD, Metadata);
@@ -773,7 +773,7 @@ package body Langkit_Support.Lexical_Env is
                                    Categories));
                end loop;
             end;
-            Traces.Decrease_Indent (Me);
+            Traces.Decrease_Indent (Rec);
 
             return R : constant Lookup_Result_Array := Local_Results.To_Array
             do
@@ -810,7 +810,7 @@ package body Langkit_Support.Lexical_Env is
 
             if Has_Trace then
                Traces.Trace
-                 (Me, "Found a cache entry: "
+                 (Rec, "Found a cache entry: "
                        & Lookup_Cache_Entry_State'Image (Res_Val.State));
             end if;
 
@@ -874,8 +874,8 @@ package body Langkit_Support.Lexical_Env is
             begin
                if Has_Trace then
                   Traces.Trace
-                    (Me, "Recursing on parent environments");
-                  Traces.Increase_Indent (Me);
+                    (Rec, "Recursing on parent environments");
+                  Traces.Increase_Indent (Rec);
                end if;
                Local_Results.Concat
                  (Get_Internal
@@ -883,7 +883,7 @@ package body Langkit_Support.Lexical_Env is
                      Parent_Rebindings,
                      Metadata, Categories));
                if Has_Trace then
-                  Traces.Decrease_Indent (Me);
+                  Traces.Decrease_Indent (Rec);
                end if;
 
                Dec_Ref (Parent_Env);
@@ -895,8 +895,8 @@ package body Langkit_Support.Lexical_Env is
          if Lookup_Kind = Recursive then
             if Has_Trace then
                Traces.Trace
-                 (Me, "Recursing on non transitive referenced environments");
-               Traces.Increase_Indent (Me);
+                 (Rec, "Recursing on non transitive referenced environments");
+               Traces.Increase_Indent (Rec);
             end if;
 
             for I in Self.Env.Referenced_Envs.First_Index
@@ -910,7 +910,7 @@ package body Langkit_Support.Lexical_Env is
             end loop;
 
             if Has_Trace then
-               Traces.Decrease_Indent (Me);
+               Traces.Decrease_Indent (Rec);
             end if;
          end if;
       end if;
@@ -951,7 +951,10 @@ package body Langkit_Support.Lexical_Env is
 
       if Has_Trace then
          Traces.Trace
-           (Me, "===== In Env get, key=" & Image (Key) & " =====");
+           (Me,
+           "===== In Env get, key=" & Image (Key)
+            & ", env=" & Lexical_Env_Image (Self, Dump_Content => False)
+           & " =====");
          Traces.Increase_Indent (Me);
       end if;
 
