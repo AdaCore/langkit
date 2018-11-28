@@ -169,7 +169,7 @@ procedure Parse is
 
    procedure Process_File (Filename : String; Ctx : Analysis_Context)
    is
-      package Node_Sets is 
+      package Node_Sets is
       new Ada.Containers.Hashed_Sets (${root_entity.api_name}, Hash, "=", "=");
 
       Set : Node_Sets.Set;
