@@ -472,14 +472,14 @@ package body ${ada_lib_name}.Analysis is
       return Text (Unwrap_Unit (Unit));
    end Text;
 
-   -----------------
-   -- String_Text --
-   -----------------
+   ----------------
+   -- Debug_Text --
+   ----------------
 
-   function String_Text (Unit : Analysis_Unit'Class) return String is
+   function Debug_Text (Unit : Analysis_Unit'Class) return String is
    begin
       return Image (Unit.Text);
-   end String_Text;
+   end Debug_Text;
 
    ------------------
    -- Lookup_Token --
@@ -840,14 +840,14 @@ package body ${ada_lib_name}.Analysis is
       return Text (Node.Token_Start, Node.Token_End);
    end Text;
 
-   -----------------
-   -- String_Text --
-   -----------------
+   ----------------
+   -- Debug_Text --
+   ----------------
 
-   function String_Text (Node : ${root_entity.api_name}'Class) return String is
+   function Debug_Text (Node : ${root_entity.api_name}'Class) return String is
    begin
       return Image (Node.Text);
-   end String_Text;
+   end Debug_Text;
 
    -----------------
    -- Token_Range --

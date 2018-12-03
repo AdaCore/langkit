@@ -296,7 +296,7 @@ package ${ada_lib_name}.Analysis is
    function Text (Unit : Analysis_Unit'Class) return Text_Type;
    ${ada_doc('langkit.unit_text', 3)}
 
-   function String_Text (Unit : Analysis_Unit'Class) return String;
+   function Debug_Text (Unit : Analysis_Unit'Class) return String;
    --  Like ``Text``, to get the source buffer slice as a string
 
    function Lookup_Token
@@ -537,7 +537,7 @@ package ${ada_lib_name}.Analysis is
    --  Shortcut to get the source buffer slice corresponding to the text that
    --  spans between the first and last tokens of an AST node.
 
-   function String_Text (Node : ${root_entity.api_name}'Class) return String;
+   function Debug_Text (Node : ${root_entity.api_name}'Class) return String;
    --  Like ``Text``, to get the source buffer slice as a string
 
    function Token_Range
