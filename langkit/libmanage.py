@@ -727,7 +727,7 @@ class ManageScript(object):
             '-P{}'.format(project_file),
         ]
 
-        if is_library and not args.with_rpath:
+        if not args.with_rpath:
             # Prevent GPRbuild from adding RPATH to links, as paths will not be
             # valid once generated libraries are installed.
             base_argv.append('-R')
