@@ -1967,6 +1967,15 @@ package body Langkit_Support.Lexical_Env is
       end loop;
    end Recompute_Referenced_Envs;
 
+   ------------------
+   -- Reset_Caches --
+   ------------------
+
+   procedure Reset_Caches (Self : Lexical_Env) is
+   begin
+      Self.Env.Lookup_Cache_Valid := False;
+   end Reset_Caches;
+
    --------------
    -- Is_Stale --
    --------------

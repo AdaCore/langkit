@@ -459,6 +459,10 @@ package Langkit_Support.Lexical_Env is
    --  referenced environment reachable from Self: referenced environments in
    --  Self, but also referenced environments in Self's parents.
 
+   procedure Reset_Caches (Self : Lexical_Env)
+     with Pre => Self.Kind = Primary;
+   --- Reset the caches for this env
+
    type Lookup_Kind_Type is (Recursive, Flat, Minimal);
 
    function Get
