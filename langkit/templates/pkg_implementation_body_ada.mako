@@ -720,6 +720,23 @@ package body ${ada_lib_name}.Implementation is
 
       Saved_In_Populate_Lexical_Env : constant Boolean :=
          Unit.Context.In_Populate_Lexical_Env;
+
+      procedure Reset_Envs_Caches (Unit : Internal_Unit) is
+         procedure Internal
+           (Node : access ${root_node_value_type}'Class) is
+         begin
+            if Node = null then
+               return;
+            end if;
+            Reset_Caches (Node.Self_Env);
+            for I in 1 .. Node.Abstract_Children_Count loop
+               Internal (Node.Child (I));
+            end loop;
+         end Internal;
+      begin
+         Internal (Unit.AST_Root);
+      end Reset_Envs_Caches;
+
    begin
       --  TODO??? Handle env invalidation when reparsing a unit and when a
       --  previous call raised a Property_Error.
@@ -762,6 +779,9 @@ package body ${ada_lib_name}.Implementation is
          Saved_In_Populate_Lexical_Env;
 
       GNATCOLL.Traces.Decrease_Indent (Main_Trace);
+
+      Reset_Envs_Caches (Unit);
+
       if Has_Errors and then not Context.Discard_Errors_In_Populate_Lexical_Env
       then
          raise Property_Error with
@@ -3523,6 +3543,7 @@ package body ${ada_lib_name}.Implementation is
          if Node = null then
             return;
          end if;
+
          Deactivate_Referenced_Envs (Node.Self_Env);
          for I in 1 .. Node.Abstract_Children_Count loop
             Deactivate_Refd_Envs (Node.Child (I));
@@ -3546,6 +3567,8 @@ package body ${ada_lib_name}.Implementation is
       end Recompute_Refd_Envs;
 
    begin
+      GNATCOLL.Traces.Trace
+        (Main_Trace, "Resetting envs for unit " & Basename (Unit));
       --  First pass will deactivate every referenced envs that Unit possesses
       Deactivate_Refd_Envs (Unit.AST_Root);
 
