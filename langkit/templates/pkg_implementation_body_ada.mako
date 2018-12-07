@@ -3567,8 +3567,6 @@ package body ${ada_lib_name}.Implementation is
       end Recompute_Refd_Envs;
 
    begin
-      GNATCOLL.Traces.Trace
-        (Main_Trace, "Resetting envs for unit " & Basename (Unit));
       --  First pass will deactivate every referenced envs that Unit possesses
       Deactivate_Refd_Envs (Unit.AST_Root);
 
