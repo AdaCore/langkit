@@ -388,8 +388,8 @@ class ManageScript(object):
             help='Disable warnings to build the generated library.'
         )
         subparser.add_argument(
-            '--gargs',
-            help='Options appened to GPRbuild invocations.'
+            '--gargs', action='append',
+            help='Options appended to GPRbuild invocations.'
         )
         subparser.add_argument(
             '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
@@ -740,8 +740,8 @@ class ManageScript(object):
         # Depending on where this is invoked, the "--gargs" option may not be
         # set. Don't call shlex.split with an empty input, otherwise it will
         # try to read something from stdin...
-        gargs = getattr(args, 'gargs', '')
-        gargs = shlex.split(gargs) if gargs else []
+        gargs = getattr(args, 'gargs') or []
+        gargs = sum((shlex.split(args) for args in gargs), [])
 
         def run(library_type):
             argv = list(base_argv)
