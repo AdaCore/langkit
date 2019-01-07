@@ -31,6 +31,7 @@ import ctypes
 import json
 import os
 import sys
+import weakref
 
 
 #
@@ -391,12 +392,17 @@ ${exts.include_extension(
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    __slots__ = ('_c_value', '_unit_provider', '_serial_number', '_unit_cache')
+    __slots__ = ('_c_value', '_unit_provider', '_serial_number', '_unit_cache',
+                 '__weakref__')
 
-    _context_cache = {}
+    _context_cache = weakref.WeakValueDictionary()
     """
-    Cache for analysis context wrappers. Indexed by anlysis context addresses,
+    Cache for analysis context wrappers. Indexed by analysis context addresses,
     which are known to stay valid forever (and re-used).
+
+    Unlike unit and node caches, this one should contain weak references so
+    that analysis contexts (and their units/nodes) can be free'd when user code
+    does not reference them anymore.
 
     :type: dict[AnalysisContext._c_type, AnalysisContext]
     """
