@@ -697,6 +697,7 @@ class ManageScript(object):
 
         result = ['-XBUILD_MODE={}'.format(build_mode),
                   '-XLIBRARY_TYPE={}'.format(library_type),
+                  '-XGPR_BUILD={}'.format(library_type),
                   '-XXMLADA_BUILD={}'.format(library_type)]
 
         enable_build_warnings = getattr(args, 'enable_build_warnings', False)
