@@ -1,126 +1,116 @@
 ## vim: filetype=makoada
 
 with Ada.Unchecked_Conversion;
-with Ada.Unchecked_Deallocation;
-with System;
 
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
-with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
-with ${ada_lib_name}.Lexer_Implementation;
-use ${ada_lib_name}.Lexer_Implementation;
-
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Unparsing_Implementation;
-use ${ada_lib_name}.Unparsing_Implementation;
 
 package body ${ada_lib_name}.Rewriting is
 
-   --  Access to rewriting handle data is always done through Rewriting_Handle,
-   --  values (never through Rewriting_Handle_Pointer, except after calling
-   --  Convert), so there is no aliasing problem possible.
+   function Unwrap_RH is new Ada.Unchecked_Conversion
+     (Rewriting_Handle, Impl.Rewriting_Handle);
+   function Wrap_RH is new Ada.Unchecked_Conversion
+     (Impl.Rewriting_Handle, Rewriting_Handle);
 
-   pragma Warnings (Off, "possible aliasing problem for type");
-   function Convert is new Ada.Unchecked_Conversion
-     (Rewriting_Handle, Rewriting_Handle_Pointer);
-   function Convert is new Ada.Unchecked_Conversion
-     (Rewriting_Handle_Pointer, Rewriting_Handle);
-   pragma Warnings (On, "possible aliasing problem for type");
+   function Unwrap_Node_RH is new Ada.Unchecked_Conversion
+     (Node_Rewriting_Handle, Impl.Node_Rewriting_Handle);
+   function Wrap_Node_RH is new Ada.Unchecked_Conversion
+     (Impl.Node_Rewriting_Handle, Node_Rewriting_Handle);
+
+   function Unwrap_Unit_RH is new Ada.Unchecked_Conversion
+     (Unit_Rewriting_Handle, Impl.Unit_Rewriting_Handle);
+   function Wrap_Unit_RH is new Ada.Unchecked_Conversion
+     (Impl.Unit_Rewriting_Handle, Unit_Rewriting_Handle);
+
+   function Wrap_Apply_Result
+     (Res : Impl.Apply_Result) return Apply_Result;
+
+   function Wrap_Unit_RH_Array
+     (Arr : Impl.Unit_Rewriting_Handle_Array)
+      return Unit_Rewriting_Handle_Array;
+
+   function Unwrap_Node_RH_Array
+     (Arr : Node_Rewriting_Handle_Array)
+      return Impl.Node_Rewriting_Handle_Array;
+
+   function Wrap_Apply_Result
+     (Res : Impl.Apply_Result) return Apply_Result is
+   begin
+      if Res.Success then
+         return (Success => True);
+      else
+         return
+           (Success     => False,
+            Unit        => Wrap_Unit (Res.Unit),
+            Diagnostics => Res.Diagnostics);
+      end if;
+   end Wrap_Apply_Result;
+
+   function Wrap_Unit_RH_Array
+     (Arr : Impl.Unit_Rewriting_Handle_Array)
+      return Unit_Rewriting_Handle_Array
+   is
+      Res : Unit_Rewriting_Handle_Array (Arr'Range);
+   begin
+      for I in Arr'Range loop
+         Res (I) := Wrap_Unit_RH (Arr (I));
+      end loop;
+      return Res;
+   end Wrap_Unit_RH_Array;
+
+   function Unwrap_Node_RH_Array
+     (Arr : Node_Rewriting_Handle_Array)
+      return Impl.Node_Rewriting_Handle_Array
+   is
+      Res : Impl.Node_Rewriting_Handle_Array (Arr'Range);
+   begin
+      for I in Arr'Range loop
+         Res (I) := Unwrap_Node_RH (Arr (I));
+      end loop;
+      return Res;
+   end Unwrap_Node_RH_Array;
+
+   ------------
+   -- Handle --
+   ------------
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle is
-     (Convert (Get_Rewriting_Handle (Unwrap_Context (Context))));
+   begin
+      return Wrap_RH (Impl.Handle (Unwrap_Context (Context)));
+   end Handle;
+
+   -------------
+   -- Context --
+   -------------
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
-     (Handle.Context);
-
-   function Handle
-     (Node : ${root_node_type_name}) return Node_Rewriting_Handle;
-   --  Helper to implement the public "Handle" function, which works on public
-   --  entities type.
-
-   function Allocate
-     (Kind          : ${root_node_kind_name};
-      Context       : Rewriting_Handle;
-      Unit_Handle   : Unit_Rewriting_Handle;
-      Parent_Handle : Node_Rewriting_Handle)
-      return Node_Rewriting_Handle
-      with Pre =>
-         Context /= No_Rewriting_Handle
-         and then (Unit_Handle = No_Unit_Rewriting_Handle
-                   or else Unit_Handle.Context_Handle = Context)
-         and then (Parent_Handle = No_Node_Rewriting_Handle
-                   or else Parent_Handle.Context_Handle = Context);
-
-   function Allocate
-     (Node          : ${root_node_type_name};
-      Context       : Rewriting_Handle;
-      Unit_Handle   : Unit_Rewriting_Handle;
-      Parent_Handle : Node_Rewriting_Handle)
-      return Node_Rewriting_Handle
-      with Pre =>
-         Context /= No_Rewriting_Handle
-         and then (Unit_Handle = No_Unit_Rewriting_Handle
-                   or else Unit_Handle.Context_Handle = Context)
-         and then (Parent_Handle = No_Node_Rewriting_Handle
-                   or else Parent_Handle.Context_Handle = Context);
-   --  Allocate a handle for Node and register it in Unit_Handle's map
-
-   procedure Expand_Children (Node : Node_Rewriting_Handle)
-      with Pre => Node /= No_Node_Rewriting_Handle;
-   --  If Node.Children.Kind is Unexpanded, populate Node's list of Children to
-   --  mimic the related bare AST node. Otherwise, do nothing.
-
-   procedure Free_Handles (Handle : in out Rewriting_Handle);
-   --  Free all resources tied to Handle. This also releases the rewriting
-   --  handle singleton in Handle's Context.
-
-   procedure Tie
-     (Handle, Parent : Node_Rewriting_Handle;
-      Unit           : Unit_Rewriting_Handle)
-      with Pre =>
-        (Handle = No_Node_Rewriting_Handle or else not Tied (Handle))
-         and then (if Parent = No_Node_Rewriting_Handle
-                   then Unit /= No_Unit_Rewriting_Handle
-                   else Unit = No_Unit_Rewriting_Handle);
-   --  Tie the node represented by handle so that either:
-   --
-   --    * it is the root of Unit (Parent is null);
-   --    * it is a child of Parent (Unit is null).
-   --
-   --  Do nothing if Handle is null.
-
-   procedure Untie (Handle : Node_Rewriting_Handle)
-      with Pre => Handle = No_Node_Rewriting_Handle or else Tied (Handle);
-   --  Untie the node represented by Handle. Do nothing if Handle is null.
+   begin
+      return Wrap_Context (Impl.Context (Unwrap_RH (Handle)));
+   end Context;
 
    ---------------------
    -- Start_Rewriting --
    ---------------------
 
    function Start_Rewriting
-     (Context : Analysis_Context) return Rewriting_Handle
-   is
-      Result : constant Rewriting_Handle := new Rewriting_Handle_Type'
-        (Context   => Context,
-         Units     => <>,
-         Pool      => Create,
-         New_Nodes => <>);
+     (Context : Analysis_Context) return Rewriting_Handle is
    begin
-      Result.New_Nodes := Nodes_Pools.Create (Result.Pool);
-      Set_Rewriting_Handle (Unwrap_Context (Context), Convert (Result));
-      return Result;
+      return Wrap_RH (Impl.Start_Rewriting (Unwrap_Context (Context)));
    end Start_Rewriting;
 
    ---------------------
    -- Abort_Rewriting --
    ---------------------
 
-   procedure Abort_Rewriting (Handle : in out Rewriting_Handle) is
+   procedure Abort_Rewriting
+     (Handle          : in out Rewriting_Handle)
+   is
+      Internal_Handle : Impl.Rewriting_Handle := Unwrap_RH (Handle);
    begin
-      Free_Handles (Handle);
+      Impl.Abort_Rewriting (Internal_Handle);
+      Handle := Wrap_RH (Internal_Handle);
    end Abort_Rewriting;
 
    -----------
@@ -128,73 +118,11 @@ package body ${ada_lib_name}.Rewriting is
    -----------
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result is
-
-      type Processed_Unit_Record is record
-         Unit     : Internal_Unit;
-         New_Data : Reparsed_Unit;
-      end record;
-      type Processed_Unit is access Processed_Unit_Record;
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Processed_Unit_Record, Processed_Unit);
-
-      package Processed_Unit_Vectors is new Ada.Containers.Vectors
-        (Positive, Processed_Unit);
-
-      Units  : Processed_Unit_Vectors.Vector;
-      Result : Apply_Result := (Success => True);
-
+      Internal_Handle : Impl.Rewriting_Handle := Unwrap_RH (Handle);
+      Res             : Impl.Apply_Result := Impl.Apply (Internal_Handle);
    begin
-      --  Try to reparse all units that were potentially modified
-      for Unit_Handle of Handle.Units loop
-         declare
-            PU    : constant Processed_Unit := new Processed_Unit_Record'
-              (Unit     => Unwrap_Unit (Unit_Handle.Unit),
-               New_Data => <>);
-            Input : Internal_Lexer_Input :=
-              (Kind        => Bytes_Buffer,
-               Charset     => <>,
-               Read_BOM    => False,
-               Bytes       => System.Null_Address,
-               Bytes_Count => 0);
-            Bytes : String_Access;
-         begin
-            Units.Append (PU);
-
-            --  Reparse (i.e. unparse and then parse) this rewritten unit
-            Bytes := Unparse (Unit_Handle.Root, PU.Unit,
-                              Preserve_Formatting => True,
-                              As_Unit             => True);
-            Input.Bytes := Bytes.all'Address;
-            Input.Bytes_Count := Bytes.all'Length;
-            Do_Parsing (PU.Unit, Input, PU.New_Data);
-            Free (Bytes);
-
-            --  If there is a parsing error, abort the rewriting process
-            if not PU.New_Data.Diagnostics.Is_Empty then
-               Result := (Success     => False,
-                          Unit        => Wrap_Unit (PU.Unit),
-                          Diagnostics => <>);
-               Result.Diagnostics.Move (PU.New_Data.Diagnostics);
-               Destroy (PU.New_Data);
-               exit;
-            end if;
-         end;
-      end loop;
-
-      --  If all reparsing went fine, actually replace the AST nodes all over
-      --  the context and free all resources associated to Handle.
-      if Result.Success then
-         for PU of Units loop
-            Update_After_Reparse (PU.Unit, PU.New_Data);
-         end loop;
-         Free_Handles (Handle);
-      end if;
-
-      --  Clean-up our local resources and return
-      for PU of Units loop
-         Free (PU);
-      end loop;
-      return Result;
+      Handle := Wrap_RH (Internal_Handle);
+      return Wrap_Apply_Result (Res);
    end Apply;
 
    ------------------
@@ -202,17 +130,9 @@ package body ${ada_lib_name}.Rewriting is
    ------------------
 
    function Unit_Handles
-     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
-   is
-      Count  : constant Natural := Natural (Handle.Units.Length);
-      Result : Unit_Rewriting_Handle_Array (1 .. Count);
-      I      : Positive := 1;
+     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array is
    begin
-      for Unit of Handle.Units loop
-         Result (I) := Unit;
-         I := I + 1;
-      end loop;
-      return Result;
+      return Wrap_Unit_RH_Array (Impl.Unit_Handles (Unwrap_RH (Handle)));
    end Unit_Handles;
 
    ------------
@@ -220,39 +140,17 @@ package body ${ada_lib_name}.Rewriting is
    ------------
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle is
-      use Unit_Maps;
-
-      Context        : constant Analysis_Context := Analysis.Context (Unit);
-      Context_Handle : constant Rewriting_Handle := Handle (Context);
-      Filename       : constant Unbounded_String :=
-         To_Unbounded_String (Get_Filename (Unit));
-      Cur            : constant Cursor := Context_Handle.Units.Find (Filename);
    begin
-      if Cur /= No_Element then
-         return Element (Cur);
-      end if;
-
-      declare
-         Result : constant Unit_Rewriting_Handle :=
-            new Unit_Rewriting_Handle_Type'(Context_Handle => Context_Handle,
-                                            Unit           => Unit,
-                                            Root           => <>,
-                                            Nodes          => <>);
-      begin
-         Context_Handle.Units.Insert (Filename, Result);
-         Result.Root := Handle (Root (Unit));
-         return Result;
-      end;
+      return Wrap_Unit_RH (Impl.Handle (Unwrap_Unit (Unit)));
    end Handle;
 
    ----------
    -- Unit --
    ----------
 
-   function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
-   is
+   function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit is
    begin
-      return Handle.Unit;
+      return Wrap_Unit (Impl.Unit (Unwrap_Unit_RH (Handle)));
    end Unit;
 
    ------------
@@ -262,7 +160,7 @@ package body ${ada_lib_name}.Rewriting is
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle is
    begin
-      return Handle (Unwrap_Node (Node));
+      return Wrap_Node_RH (Impl.Handle (Unwrap_Node (Node)));
    end Handle;
 
    ----------
@@ -272,7 +170,7 @@ package body ${ada_lib_name}.Rewriting is
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_entity.api_name} is
    begin
-      return Wrap_Node (Handle.Node);
+      return Wrap_Node (Impl.Node (Unwrap_Node_RH (Handle)));
    end Node;
 
    -------------
@@ -281,7 +179,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle is
    begin
-      return Handle.Context_Handle;
+      return Wrap_RH (Impl.Context (Unwrap_Node_RH (Handle)));
    end Context;
 
    -------------
@@ -290,281 +188,8 @@ package body ${ada_lib_name}.Rewriting is
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      return Unparsing_Implementation.Unparse
-        (Handle, Preserve_Formatting => True);
+      return Impl.Unparse (Unwrap_Node_RH (Handle));
    end Unparse;
-
-   ------------
-   -- Handle --
-   ------------
-
-   function Handle
-     (Node : ${root_node_type_name}) return Node_Rewriting_Handle is
-   begin
-      if Node = null then
-         return No_Node_Rewriting_Handle;
-      end if;
-
-      declare
-         use Node_Maps;
-
-         Unit_Handle : constant Unit_Rewriting_Handle :=
-            Handle (Wrap_Unit (Node.Unit));
-         Cur         : constant Cursor := Unit_Handle.Nodes.Find (Node);
-      begin
-         --  If we have already built a handle for this node, just return it
-         if Cur /= No_Element then
-            return Element (Cur);
-
-         --  Otherwise, if this node has a parent, make sure this parent has
-         --  its own handle, then expand its children. This last must create
-         --  the handle we are supposed to return.
-         elsif Node.Parent /= null then
-            Expand_Children (Handle (Node.Parent));
-            return Element (Unit_Handle.Nodes.Find (Node));
-         end if;
-
-         --  Otherwise, we are dealing with the root node: just create its
-         --  rewriting handle.
-         return Allocate (Node, Unit_Handle.Context_Handle, Unit_Handle,
-                          No_Node_Rewriting_Handle);
-      end;
-   end Handle;
-
-   --------------
-   -- Allocate --
-   --------------
-
-   function Allocate
-     (Kind          : ${root_node_kind_name};
-      Context       : Rewriting_Handle;
-      Unit_Handle   : Unit_Rewriting_Handle;
-      Parent_Handle : Node_Rewriting_Handle)
-      return Node_Rewriting_Handle
-   is
-      Tied : constant Boolean := Unit_Handle /= No_Unit_Rewriting_Handle;
-   begin
-      return new Node_Rewriting_Handle_Type'
-        (Context_Handle => Context,
-         Node           => null,
-         Parent         => Parent_Handle,
-         Kind           => Kind,
-         Tied           => Tied,
-         Root_Of        =>
-           (if Tied and then Parent_Handle = No_Node_Rewriting_Handle
-            then Unit_Handle
-            else No_Unit_Rewriting_Handle),
-         Children       => Unexpanded_Children);
-   end Allocate;
-
-   --------------
-   -- Allocate --
-   --------------
-
-   function Allocate
-     (Node          : ${root_node_type_name};
-      Context       : Rewriting_Handle;
-      Unit_Handle   : Unit_Rewriting_Handle;
-      Parent_Handle : Node_Rewriting_Handle)
-      return Node_Rewriting_Handle
-   is
-      Result : constant Node_Rewriting_Handle := Allocate
-        (Node.Kind, Context, Unit_Handle, Parent_Handle);
-   begin
-      Result.Node := Node;
-      if Result.Tied then
-         Unit_Handle.Nodes.Insert (Node, Result);
-      end if;
-      return Result;
-   end Allocate;
-
-   ---------------------
-   -- Expand_Children --
-   ---------------------
-
-   procedure Expand_Children (Node : Node_Rewriting_Handle) is
-      Children : Node_Children renames Node.Children;
-   begin
-      --  If this handle has already be expanded, there is nothing to do
-      if Children.Kind /= Unexpanded then
-         return;
-      end if;
-
-      --  Otherwise, expand to the appropriate children form: token node or
-      --  regular one.
-      declare
-         N           : constant ${root_node_type_name} := Node.Node;
-         Unit_Handle : constant Unit_Rewriting_Handle :=
-            Handle (Wrap_Unit (N.Unit));
-      begin
-         if N.Is_Token_Node then
-            Children := (Kind => Expanded_Token_Node,
-                         Text => To_Unbounded_Wide_Wide_String (N.Text));
-
-         else
-            Children := (Kind => Expanded_Regular, Vector => <>);
-            declare
-               Count : constant Natural := N.Abstract_Children_Count;
-            begin
-               Children.Vector.Reserve_Capacity
-                 (Ada.Containers.Count_Type (Count));
-               for I in 1 .. Count loop
-                  declare
-                     Child : constant ${root_node_type_name} := N.Child (I);
-                  begin
-                     Children.Vector.Append
-                       ((if Child = null
-                         then null
-                         else Allocate (Child, Unit_Handle.Context_Handle,
-                                        Unit_Handle, Node)));
-                  end;
-               end loop;
-            end;
-         end if;
-      end;
-   end Expand_Children;
-
-   ------------------
-   -- Free_Handles --
-   ------------------
-
-   procedure Free_Handles (Handle : in out Rewriting_Handle) is
-
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Rewriting_Handle_Type, Rewriting_Handle);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Unit_Rewriting_Handle_Type, Unit_Rewriting_Handle);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Node_Rewriting_Handle_Type, Node_Rewriting_Handle);
-
-      Ctx : constant Analysis_Context := Context (Handle);
-   begin
-      --  Free all resources tied to Handle
-      for Unit of Handle.Units loop
-         for Node of Unit.Nodes loop
-            Free (Node);
-         end loop;
-         Free (Unit);
-      end loop;
-      for Node of Handle.New_Nodes loop
-         declare
-            N : Node_Rewriting_Handle := Node;
-         begin
-            Free (N);
-         end;
-      end loop;
-      Free (Handle.Pool);
-      Free (Handle);
-
-      --  Release the rewriting handle singleton for its context
-      Set_Rewriting_Handle (Unwrap_Context (Ctx), Convert (Handle));
-   end Free_Handles;
-
-   ---------
-   -- Tie --
-   ---------
-
-   procedure Tie
-     (Handle, Parent : Node_Rewriting_Handle;
-      Unit           : Unit_Rewriting_Handle) is
-   begin
-      if Handle /= No_Node_Rewriting_Handle then
-         Handle.Parent := Parent;
-         Handle.Tied := True;
-         if Parent = No_Node_Rewriting_Handle then
-            Handle.Root_Of := Unit;
-         end if;
-      end if;
-   end Tie;
-
-   -----------
-   -- Untie --
-   -----------
-
-   procedure Untie (Handle : Node_Rewriting_Handle) is
-   begin
-      if Handle /= No_Node_Rewriting_Handle then
-         Handle.Parent := No_Node_Rewriting_Handle;
-         Handle.Tied := False;
-         Handle.Root_Of := No_Unit_Rewriting_Handle;
-      end if;
-   end Untie;
-
-   -------------------
-   -- Abstract_Kind --
-   -------------------
-
-   overriding function Abstract_Kind
-     (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name}
-   is
-   begin
-      return Node.Kind;
-   end Abstract_Kind;
-
-   -----------------------------
-   -- Abstract_Children_Count --
-   -----------------------------
-
-   overriding function Abstract_Children_Count
-     (Node : access Node_Rewriting_Handle_Type) return Natural is
-   begin
-      return
-        (case Node.Children.Kind is
-         when Unexpanded          => Node.Node.Abstract_Children_Count,
-         when Expanded_Regular    => Natural (Node.Children.Vector.Length),
-         when Expanded_Token_Node => 0);
-   end Abstract_Children_Count;
-
-   --------------------
-   -- Abstract_Child --
-   --------------------
-
-   overriding function Abstract_Child
-     (Node  : access Node_Rewriting_Handle_Type;
-      Index : Positive) return Implementation.Abstract_Node is
-   begin
-      return
-        (case Node.Children.Kind is
-         when Unexpanded          => Node.Node.Abstract_Child (Index),
-         when Expanded_Regular    =>
-            Implementation.Abstract_Node
-              (Node.Children.Vector.Element (Index)),
-         when Expanded_Token_Node => null);
-   end Abstract_Child;
-
-   -------------------
-   -- Abstract_Text --
-   -------------------
-
-   overriding function Abstract_Text
-     (Node : access Node_Rewriting_Handle_Type) return Text_Type is
-   begin
-      case Node.Children.Kind is
-         when Unexpanded =>
-            if Is_Token_Node (Node.Kind) then
-               return Node.Node.Text;
-            else
-               raise Program_Error;
-            end if;
-
-         when Expanded_Regular =>
-            raise Program_Error;
-
-         when Expanded_Token_Node =>
-            return To_Wide_Wide_String (Node.Children.Text);
-      end case;
-   end Abstract_Text;
-
-   -----------------------------
-   -- Abstract_Rewritten_Node --
-   -----------------------------
-
-   overriding function Abstract_Rewritten_Node
-     (Node : access Node_Rewriting_Handle_Type) return ${root_node_type_name}
-  is
-   begin
-      return Node.Node;
-   end Abstract_Rewritten_Node;
 
    ----------
    -- Kind --
@@ -573,7 +198,7 @@ package body ${ada_lib_name}.Rewriting is
    function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
    is
    begin
-      return Handle.Kind;
+      return Impl.Kind (Unwrap_Node_RH (Handle));
    end Kind;
 
    ----------
@@ -582,7 +207,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean is
    begin
-      return Handle.Tied;
+      return Impl.Tied (Unwrap_Node_RH (Handle));
    end Tied;
 
    ------------
@@ -592,7 +217,7 @@ package body ${ada_lib_name}.Rewriting is
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      return Handle.Parent;
+      return Wrap_Node_RH (Impl.Parent (Unwrap_Node_RH (Handle)));
    end Parent;
 
    --------------------
@@ -601,7 +226,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
    begin
-      return Handle.Abstract_Children_Count;
+      return Impl.Children_Count (Unwrap_Node_RH (Handle));
    end Children_Count;
 
    -----------
@@ -612,14 +237,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) return Node_Rewriting_Handle is
    begin
-      --  If this handle represents an already existing node, make sure it is
-      --  expanded so we have a handle to return.
-      Expand_Children (Handle);
-
-      --  Only regular nodes can have fields. As Index is checked to be
-      --  in-bounds in the pre-condition, we can assume here that the result
-      --  exists.
-      return Handle.Children.Vector.Element (Index);
+      return Wrap_Node_RH (Impl.Child (Unwrap_Node_RH (Handle), Index));
    end Child;
 
    ----------
@@ -629,7 +247,7 @@ package body ${ada_lib_name}.Rewriting is
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
    is
    begin
-      return Handle.Root;
+      return Wrap_Node_RH (Impl.Root (Unwrap_Unit_RH (Handle)));
    end Root;
 
    ---------------
@@ -642,25 +260,7 @@ package body ${ada_lib_name}.Rewriting is
       Child  : Node_Rewriting_Handle)
    is
    begin
-      --  If this handle represents an already existing node, make sure it is
-      --  expanded so that its children vector can be modified.
-      Expand_Children (Handle);
-
-      --  Only regular nodes can have fields. As Index is checked to be
-      --  in-bounds in the pre-condition, we can assume here that we have an
-      --  Expanded_Regular children record.
-      declare
-         Child_Slot : Node_Rewriting_Handle renames
-            Handle.Children.Vector.Reference (Index);
-      begin
-         --  Untie the child to be replaced if it exists
-         Untie (Child_Slot);
-
-         --  Tie the new child if it exists
-         Tie (Child, Handle, No_Unit_Rewriting_Handle);
-
-         Child_Slot := Child;
-      end;
+      Impl.Set_Child (Unwrap_Node_RH (Handle), Index, Unwrap_Node_RH (Child));
    end Set_Child;
 
    ----------
@@ -669,14 +269,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      case Handle.Children.Kind is
-         when Unexpanded =>
-            return Text (Handle.Node);
-         when Expanded_Regular =>
-            return (raise Program_Error);
-         when Expanded_Token_Node =>
-            return To_Wide_Wide_String (Handle.Children.Text);
-      end case;
+      return Impl.Text (Unwrap_Node_RH (Handle));
    end Text;
 
    --------------
@@ -685,10 +278,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type) is
    begin
-      --  Make sure Handle is expanded so we have a Text field to override
-      Expand_Children (Handle);
-
-      Handle.Children.Text := To_Unbounded_Wide_Wide_String (Text);
+      Impl.Set_Text (Unwrap_Node_RH (Handle), Text);
    end Set_Text;
 
    --------------
@@ -699,9 +289,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Unit_Rewriting_Handle;
       Root   : Node_Rewriting_Handle) is
    begin
-      Untie (Handle.Root);
-      Handle.Root := Root;
-      Tie (Root, No_Node_Rewriting_Handle, Handle);
+      Impl.Set_Root (Unwrap_Unit_RH (Handle), Unwrap_Node_RH (Root));
    end Set_Root;
 
    -------------
@@ -710,31 +298,7 @@ package body ${ada_lib_name}.Rewriting is
 
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle) is
    begin
-      if Handle = New_Node then
-         return;
-      end if;
-
-      if Handle.Root_Of = No_Unit_Rewriting_Handle then
-         --  If Handle is not the root node of its owning unit, go replace it
-         --  in its parent's children list.
-         declare
-            Parent : Node_Rewriting_Handle renames Handle.Parent;
-            Index  : Natural := 0;
-         begin
-            for I in 1 .. Children_Count (Parent) loop
-               if Child (Parent, I) = Handle then
-                  Index := I;
-                  exit;
-               end if;
-            end loop;
-            pragma Assert (Index > 0);
-            Set_Child (Parent, Index, New_Node);
-         end;
-
-      else
-         --  Otherwise, replace it as a root node
-         Set_Root (Handle.Root_Of, New_Node);
-      end if;
+      Impl.Replace (Unwrap_Node_RH (Handle), Unwrap_Node_RH (New_Node));
    end Replace;
 
    ------------------
@@ -746,11 +310,8 @@ package body ${ada_lib_name}.Rewriting is
       Index  : Positive;
       Child  : Node_Rewriting_Handle) is
    begin
-      --  First, just create room for the new node and let Set_Child take care
-      --  of tiding Child to Handle's tree.
-      Expand_Children (Handle);
-      Handle.Children.Vector.Insert (Index, No_Node_Rewriting_Handle);
-      Set_Child (Handle, Index, Child);
+      Impl.Insert_Child
+        (Unwrap_Node_RH (Handle), Index, Unwrap_Node_RH (Child));
    end Insert_Child;
 
    ------------------
@@ -761,7 +322,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Child  : Node_Rewriting_Handle) is
    begin
-      Insert_Child (Handle, Children_Count (Handle) + 1, Child);
+      Impl.Append_Child (Unwrap_Node_RH (Handle), Unwrap_Node_RH (Child));
    end Append_Child;
 
    ------------------
@@ -772,10 +333,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) is
    begin
-      --  First, let Set_Child take care of untiding the child to remove, and
-      --  then actually remove the corresponding children list slot.
-      Set_Child (Handle, Index, No_Node_Rewriting_Handle);
-      Handle.Children.Vector.Delete (Index);
+      Impl.Remove_Child (Unwrap_Node_RH (Handle), Index);
    end Remove_Child;
 
    -----------
@@ -785,39 +343,8 @@ package body ${ada_lib_name}.Rewriting is
    function Clone
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
    is
-      Result : Node_Rewriting_Handle;
    begin
-      if Handle = No_Node_Rewriting_Handle then
-         return Handle;
-      end if;
-
-      --  Make sure the original handle is expanded so we can iterate on it
-      Expand_Children (Handle);
-
-      Result := Allocate (Handle.Node, Handle.Context_Handle,
-                          No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
-      Nodes_Pools.Append (Handle.Context_Handle.New_Nodes, Result);
-
-      --  Recursively clone children
-      case Handle.Children.Kind is
-         when Unexpanded =>
-            raise Program_Error;
-
-         when Expanded_Token_Node =>
-            Result.Children := (Kind => Expanded_Token_Node,
-                                Text => Handle.Children.Text);
-
-         when Expanded_Regular =>
-            Result.Children := (Kind => Expanded_Regular, Vector => <>);
-            Result.Children.Vector.Reserve_Capacity
-              (Handle.Children.Vector.Length);
-            for I in 1 .. Handle.Children.Vector.Last_Index loop
-               Result.Children.Vector.Append
-                 (Clone (Handle.Children.Vector.Element (I)));
-            end loop;
-      end case;
-
-      return Result;
+      return Wrap_Node_RH (Impl.Clone (Unwrap_Node_RH (Handle)));
    end Clone;
 
    -----------------
@@ -828,17 +355,7 @@ package body ${ada_lib_name}.Rewriting is
      (Handle : Rewriting_Handle;
       Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle is
    begin
-      if Is_Token_Node (Kind) then
-         return Create_Token_Node (Handle, Kind, "");
-      else
-         declare
-            Refs     : constant Field_Reference_Array := Fields (Kind);
-            Children : constant Node_Rewriting_Handle_Array (Refs'Range) :=
-               (others => No_Node_Rewriting_Handle);
-         begin
-            return Create_Regular_Node (Handle, Kind, Children);
-         end;
-      end if;
+      return Wrap_Node_RH (Impl.Create_Node (Unwrap_RH (Handle), Kind));
    end Create_Node;
 
    -----------------------
@@ -850,13 +367,9 @@ package body ${ada_lib_name}.Rewriting is
       Kind   : ${root_node_kind_name};
       Text   : Text_Type) return Node_Rewriting_Handle
    is
-      Result : constant Node_Rewriting_Handle := Allocate
-        (Kind, Handle, No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
    begin
-      Result.Children := (Kind => Expanded_Token_Node,
-                          Text => To_Unbounded_Wide_Wide_String (Text));
-      Nodes_Pools.Append (Handle.New_Nodes, Result);
-      return Result;
+      return Wrap_Node_RH
+        (Impl.Create_Token_Node (Unwrap_RH (Handle), Kind, Text));
    end Create_Token_Node;
 
    -------------------------
@@ -868,20 +381,9 @@ package body ${ada_lib_name}.Rewriting is
       Kind     : ${root_node_kind_name};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
    is
-      Result : Node_Rewriting_Handle := Allocate
-        (Kind, Handle, No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
    begin
-      Result.Children := (Kind   => Expanded_Regular,
-                          Vector => <>);
-      Result.Children.Vector.Reserve_Capacity (Children'Length);
-      for C of Children loop
-         Result.Children.Vector.Append (C);
-         if C /= No_Node_Rewriting_Handle then
-            Tie (C, Result, No_Unit_Rewriting_Handle);
-         end if;
-      end loop;
-      Nodes_Pools.Append (Handle.New_Nodes, Result);
-      return Result;
+      return Wrap_Node_RH (Impl.Create_Regular_Node
+        (Unwrap_RH (Handle), Kind, Unwrap_Node_RH_Array (Children)));
    end Create_Regular_Node;
 
    --------------------------
@@ -892,175 +394,13 @@ package body ${ada_lib_name}.Rewriting is
      (Handle    : Rewriting_Handle;
       Template  : Text_Type;
       Arguments : Node_Rewriting_Handle_Array;
-      Rule      : Grammar_Rule) return Node_Rewriting_Handle
-   is
-      type State_Type is (
-         Default,
-         --  Default state: no meta character being processed
-
-         Open_Brace,
-         --  The previous character is a open brace: the current one
-         --  determines what it means.
-
-         Close_Brace
-         --  The previous character is a closing brace: the current one must be
-         --  another closing brace.
-      );
-
-      Buffer   : Unbounded_Wide_Wide_String;
-      State    : State_Type := Default;
-      Next_Arg : Positive := Arguments'First;
+      Rule      : Grammar_Rule) return Node_Rewriting_Handle is
    begin
-      --  Interpret the template looping over its characters with a state
-      --  machine.
-      for C of Template loop
-         case State is
-         when Default =>
-            case C is
-            when '{' =>
-               State := Open_Brace;
-            when '}' =>
-               State := Close_Brace;
-            when others =>
-               Append (Buffer, C);
-            end case;
-
-         when Open_Brace =>
-            case C is
-            when '{' =>
-               State := Default;
-               Append (Buffer, C);
-            when '}' =>
-               State := Default;
-               if Next_Arg in Arguments'Range then
-                  declare
-                     Unparsed_Arg : constant Wide_Wide_String :=
-                        Rewriting.Unparse (Arguments (Next_Arg));
-                  begin
-                     Next_Arg := Next_Arg + 1;
-                     Append (Buffer, Unparsed_Arg);
-                  end;
-               else
-                  raise Template_Args_Error with
-                     "not enough arguments provided";
-               end if;
-            when others =>
-               raise Template_Format_Error with
-                  "standalone ""{"" character";
-            end case;
-
-         when Close_Brace =>
-            case C is
-            when '}' =>
-               State := Default;
-               Append (Buffer, C);
-            when others =>
-               raise Template_Format_Error with
-                  "standalone ""}"" character";
-            end case;
-         end case;
-      end loop;
-
-      --  Make sure that there is no standalone metacharacter at the end of the
-      --  template.
-      case State is
-         when Default => null;
-         when Open_Brace =>
-            raise Template_Format_Error with "standalone ""{"" character";
-         when Close_Brace =>
-            raise Template_Format_Error with "standalone ""}"" character";
-      end case;
-
-      --  Make sure all given arguments were consumed
-      if Next_Arg in Arguments'Range then
-         raise Template_Args_Error with "too many arguments provided";
-      end if;
-
-      --  Now parse the resulting buffer and create the corresponding tree of
-      --  nodes.
-      declare
-         Context  : constant Internal_Context := Unwrap_Context
-           (Rewriting.Context (Handle));
-         Unit     : constant Internal_Unit := Templates_Unit (Context);
-         Reparsed : Reparsed_Unit;
-         Text     : constant Text_Type := To_Wide_Wide_String (Buffer);
-         Input    : constant Internal_Lexer_Input :=
-           (Kind       => Text_Buffer,
-            Text       => Text'Address,
-            Text_Count => Text'Length);
-
-         function Transform
-           (Node   : ${root_node_type_name};
-            Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle;
-         --  Turn a node from the Reparsed unit into a recursively expanded
-         --  node rewriting handle.
-
-         ---------------
-         -- Transform --
-         ---------------
-
-         function Transform
-           (Node   : ${root_node_type_name};
-            Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle
-         is
-            Result : Node_Rewriting_Handle;
-         begin
-            if Node = null then
-               return No_Node_Rewriting_Handle;
-            end if;
-
-            --  Allocate the handle for Node, and don't forget to remove the
-            --  backlink to Node itself as it exists only temporarily for
-            --  template instantiation.
-            Result := Allocate (Node, Handle, No_Unit_Rewriting_Handle,
-                                Parent);
-            Result.Node := null;
-
-            if Node.Is_Token_Node then
-               declare
-                  Index : constant Natural := Natural (Node.Token_Start_Index);
-                  Data  : constant Stored_Token_Data :=
-                     Reparsed.TDH.Tokens.Get (Index);
-                  Text      : constant Text_Type := Reparsed.TDH.Source_Buffer
-                    (Data.Source_First .. Data.Source_Last);
-               begin
-                  Result.Children :=
-                    (Kind => Expanded_Token_Node,
-                     Text => To_Unbounded_Wide_Wide_String (Text));
-               end;
-
-            else
-               declare
-                  Count : constant Natural := Node.Abstract_Children_Count;
-               begin
-                  Result.Children := (Kind => Expanded_Regular, Vector => <>);
-                  Result.Children.Vector.Reserve_Capacity
-                    (Ada.Containers.Count_Type (Count));
-                  for I in 1 .. Count loop
-                     Result.Children.Vector.Append
-                       (Transform (Node.Child (I), Result));
-                  end loop;
-               end;
-            end if;
-            return Result;
-         end Transform;
-
-      begin
-         Set_Rule (Unit, Rule);
-         Do_Parsing (Unit, Input, Reparsed);
-         if not Reparsed.Diagnostics.Is_Empty then
-            Destroy (Reparsed);
-            raise Template_Instantiation_Error;
-         end if;
-
-         declare
-            Result : constant Node_Rewriting_Handle :=
-               Transform (Reparsed.AST_Root, No_Node_Rewriting_Handle);
-         begin
-            Destroy (Reparsed);
-            return Result;
-         end;
-      end;
+      return Wrap_Node_RH (Impl.Create_From_Template
+        (Unwrap_RH (Handle),
+         Template,
+         Unwrap_Node_RH_Array (Arguments),
+         Rule));
    end Create_From_Template;
 
    % for n in ctx.astnode_types:
@@ -1076,9 +416,9 @@ package body ${ada_lib_name}.Rewriting is
             % endfor
             ) return Node_Rewriting_Handle is
          begin
-            return Create_Regular_Node
-              (Handle, ${n.ada_kind_name},
-               (${', '.join('{} => {}'.format(i, f.name)
+            return Wrap_Node_RH (Impl.Create_${n.entity.api_name}
+               (Unwrap_RH (Handle),
+                ${', '.join('{} => Unwrap_Node_RH ({})'.format(f.name, f.name)
                             for i, f in enumerate(n.get_parse_fields(), 1))}));
          end;
 
