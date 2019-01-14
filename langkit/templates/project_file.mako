@@ -49,6 +49,8 @@ library project ${lib_name} is
       "${lib_name.lower()}-lexer_implementation.ads",
       "${lib_name.lower()}-parsers.adb",
       "${lib_name.lower()}-parsers.ads",
+      "${lib_name.lower()}-rewriting_implementation.adb",
+      "${lib_name.lower()}-rewriting_implementation.ads",
       "${lib_name.lower()}-rewriting.adb",
       "${lib_name.lower()}-rewriting.ads",
       "${lib_name.lower()}-unparsing.adb",

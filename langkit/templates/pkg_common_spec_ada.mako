@@ -264,6 +264,21 @@ package ${ada_lib_name}.Common is
    --  Raised by lexing functions (``${ada_lib_name}.Lexer``) when the input
    --  contains an invalid byte sequence.
 
+   ---------------
+   -- Rewriting --
+   ---------------
+
+   Template_Format_Error : exception;
+   --  Exception raised when a template has an invalid syntax, such as badly
+   --  formatted holes.
+
+   Template_Args_Error : exception;
+   --  Exception raised when the provided arguments for a template don't match
+   --  what the template expects.
+
+   Template_Instantiation_Error : exception;
+   --  Exception raised when the instantiation of a template cannot be parsed
+
 private
 
    type Token_Reference is record

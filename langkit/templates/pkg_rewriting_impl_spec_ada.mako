@@ -6,31 +6,140 @@
 --  allow experiments, it is totally unsupported and the API is very likely to
 --  change in the future.
 
+with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Vectors;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded.Hash;
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Text;        use Langkit_Support.Text;
+with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Bump_Ptr.Vectors;
 
-with System;
-
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
-private with ${ada_lib_name}.Rewriting_Implementation;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 
-package ${ada_lib_name}.Rewriting is
+private package ${ada_lib_name}.Rewriting_Implementation is
 
-   type Rewriting_Handle is private;
+   type Rewriting_Handle_Type;
+   type Unit_Rewriting_Handle_Type;
+   type Node_Rewriting_Handle_Type;
+
+   type Rewriting_Handle is access Rewriting_Handle_Type;
    --  Handle for an analysis context rewriting session
 
-   type Unit_Rewriting_Handle is private;
+   type Unit_Rewriting_Handle is access Unit_Rewriting_Handle_Type;
    --  Handle for the process of rewriting an analysis unit. Such handles are
    --  owned by a Rewriting_Handle instance.
 
-   type Node_Rewriting_Handle is private;
-   --  Handle for the process of rewriting an AST node. Such handles are owned
-   --  by a Rewriting_Handle instance.
+   type Node_Rewriting_Handle is access Node_Rewriting_Handle_Type;
+   --  Handle for the process of rewriting an analysis unit. Such handles are
+   --  owned by a Rewriting_Handle instance.
 
-   No_Rewriting_Handle      : constant Rewriting_Handle;
-   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle;
-   No_Node_Rewriting_Handle : constant Node_Rewriting_Handle;
+   package Unit_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => Unit_Rewriting_Handle,
+      Hash            => Ada.Strings.Unbounded.Hash,
+      Equivalent_Keys => "=");
+
+   package Node_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => ${root_node_type_name},
+      Element_Type    => Node_Rewriting_Handle,
+      Hash            => Named_Hash,
+      Equivalent_Keys => "=");
+
+   package Nodes_Pools is new Langkit_Support.Bump_Ptr.Vectors
+     (Node_Rewriting_Handle);
+
+   type Rewriting_Handle_Type is record
+      Context : Internal_Context;
+      --  Analysis context this rewriting handle relates to
+
+      Units : Unit_Maps.Map;
+      --  Keep track of rewriting handles we create all units that Context owns
+
+      Pool      : Bump_Ptr_Pool;
+      New_Nodes : Nodes_Pools.Vector;
+      --  Keep track of all node rewriting handles that don't map to original
+      --  nodes, i.e. all nodes that were created during this rewriting
+      --  session.
+   end record;
+
+   type Unit_Rewriting_Handle_Type is record
+      Context_Handle : Rewriting_Handle;
+      --  Rewriting handle for the analysis context this relates to
+
+      Unit : Internal_Unit;
+      --  Analysis unit this relates to
+
+      Root : Node_Rewriting_Handle;
+      --  Handle for the node that will become the root node of this analysis
+      --  unit.
+
+      Nodes : Node_Maps.Map;
+      --  Keep track of rewriting handles we create for base AST nodes that
+      --  Unit owns.
+   end record;
+
+   package Node_Vectors is new Ada.Containers.Vectors
+     (Positive, Node_Rewriting_Handle);
+
+   type Node_Children_Kind is (
+      Unexpanded,
+      --  Dummy node rewriting handle: children don't have their own handle yet
+
+      Expanded_Regular,
+      --  Expanded node rewriting handle: children have their own handle. Note
+      --  that this is for all but token nodes.
+
+      Expanded_Token_Node
+      --  Expanded node rewriting handle, specific for token nodes: there is no
+      --  children, only some associated text.
+   );
+
+   type Node_Children (Kind : Node_Children_Kind := Unexpanded) is record
+      case Kind is
+         when Unexpanded          => null;
+         when Expanded_Regular    => Vector : Node_Vectors.Vector;
+         when Expanded_Token_Node => Text   : Unbounded_Wide_Wide_String;
+      end case;
+   end record;
+   --  Lazily evaluated vector of children for a Node_Rewriting_Handle.
+   --
+   --  In order to avoid constructing the whole tree of Node_Rewriting_Handle
+   --  for some analysis unit at once, we build them in a lazy fashion.
+
+   Unexpanded_Children : constant Node_Children := (Kind => Unexpanded);
+
+   type Node_Rewriting_Handle_Type is new Abstract_Node_Type with record
+      Context_Handle : Rewriting_Handle;
+      --  Rewriting handle for the analysis context that owns Node
+
+      Node : ${root_node_type_name};
+      --  Bare AST node which this rewriting handle relates to
+
+      Parent : Node_Rewriting_Handle;
+      --  Rewriting handle for Node's parent, or No_Node_Rewriting_Handle if
+      --  Node is a root node.
+
+      Kind : ${root_node_kind_name};
+      --  Kind for the node this handle represents. When Node is not null (i.e.
+      --  when this represents an already existing node, rather than a new
+      --  one), this must be equal to Node.Kind.
+
+      Tied : Boolean;
+      --  Whether this node is tied to an analysis unit tree. It can be
+      --  assigned as a child to another node iff it is not tied.
+
+      Root_Of : Unit_Rewriting_Handle;
+      --  If the node this handle represents is the root of a rewritten unit,
+      --  this references this unit. No_Unit_Rewriting_Handle in all other
+      --  cases.
+
+      Children : Node_Children;
+      --  Lazily evaluated vector of children for the rewritten node
+   end record;
 
    type Unit_Rewriting_Handle_Array is
       array (Positive range <>) of Unit_Rewriting_Handle;
@@ -38,26 +147,23 @@ package ${ada_lib_name}.Rewriting is
    type Node_Rewriting_Handle_Array is
       array (Positive range <>) of Node_Rewriting_Handle;
 
+   No_Rewriting_Handle      : constant Rewriting_Handle      := null;
+   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle := null;
+   No_Node_Rewriting_Handle : constant Node_Rewriting_Handle := null;
+
    -----------------------
    -- Context rewriting --
    -----------------------
 
-   function Handle (Context : Analysis_Context) return Rewriting_Handle;
+   function Handle (Context : Internal_Context) return Rewriting_Handle;
    --  Return the rewriting handle associated to Context, or
    --  No_Rewriting_Handle if Context is not being rewritten.
 
-   function Context (Handle : Rewriting_Handle) return Analysis_Context
-      with Pre => Handle /= No_Rewriting_Handle;
+   function Context (Handle : Rewriting_Handle) return Internal_Context;
    --  Return the analysis context associated to Handle
 
    function Start_Rewriting
-     (Context : Analysis_Context) return Rewriting_Handle
-     with Pre  => Handle (Context) = No_Rewriting_Handle,
-          Post => Handle (Context) /= No_Rewriting_Handle
-                  and then Has_With_Trivia (Context)
-                  and then Start_Rewriting'Result = Handle (Context)
-                  and then ${ada_lib_name}.Rewriting.Context
-                             (Start_Rewriting'Result) = Context;
+     (Context : Internal_Context) return Rewriting_Handle;
    --  Start a rewriting session for Context.
    --
    --  This handle will keep track of all changes to do on Context's analysis
@@ -69,15 +175,13 @@ package ${ada_lib_name}.Rewriting is
    --  will raise an Existing_Rewriting_Handle_Error exception if Context
    --  already has a living rewriting session.
 
-   procedure Abort_Rewriting (Handle : in out Rewriting_Handle)
-      with Pre  => Handle /= No_Rewriting_Handle,
-           Post => Handle = No_Rewriting_Handle;
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle);
    --  Discard all modifications registered in Handle and close Handle
 
    type Apply_Result (Success : Boolean := True) is record
       case Success is
          when False =>
-            Unit : Analysis_Unit;
+            Unit : Internal_Unit;
             --  Reference to the analysis unit that was being processed when
             --  the error occurred.
 
@@ -87,11 +191,7 @@ package ${ada_lib_name}.Rewriting is
       end case;
    end record;
 
-   function Apply (Handle : in out Rewriting_Handle) return Apply_Result
-      with Pre  => Handle /= No_Rewriting_Handle,
-           Post => (if Apply'Result.Success
-                    then Handle = No_Rewriting_Handle
-                    else Handle = Handle'Old);
+   function Apply (Handle : in out Rewriting_Handle) return Apply_Result;
    --  Apply all modifications to Handle's analysis context. If that worked,
    --  close Handle and return (Success => True). Otherwise, reparsing did not
    --  work, so keep Handle and its Context unchanged and return details about
@@ -107,25 +207,19 @@ package ${ada_lib_name}.Rewriting is
    -- Unit rewriting --
    --------------------
 
-   function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
-      with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;
+   function Handle (Unit : Internal_Unit) return Unit_Rewriting_Handle;
    --  Return the rewriting handle corresponding to Unit
 
-   function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
-      with Pre => Handle /= No_Unit_Rewriting_Handle;
+   function Unit (Handle : Unit_Rewriting_Handle) return Internal_Unit;
    --  Return the unit corresponding to Handle
 
-   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Unit_Rewriting_Handle;
+   function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle;
    --  Return the node handle corresponding to the root of the unit which
    --  Handle designates.
 
    procedure Set_Root
      (Handle : Unit_Rewriting_Handle;
-      Root   : Node_Rewriting_Handle)
-      with Pre => Handle /= No_Unit_Rewriting_Handle
-                  and then (Root = No_Node_Rewriting_Handle
-                            or else not Tied (Root));
+      Root   : Node_Rewriting_Handle);
    --  Set the root node for the unit Handle to Root. This unties the previous
    --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
    --  Root to Handle.
@@ -135,42 +229,34 @@ package ${ada_lib_name}.Rewriting is
    --------------------
 
    function Handle
-     (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle
-      with Pre => Handle (Context (Unit (Node))) /= No_Rewriting_Handle;
+     (Node : ${root_node_type_name}) return Node_Rewriting_Handle;
    --  Return the rewriting handle corresponding to Node
 
    function Node
-     (Handle : Node_Rewriting_Handle) return ${root_entity.api_name}
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+     (Handle : Node_Rewriting_Handle) return ${root_node_type_name};
    --  Return the node which the given rewriting Handle relates to. This can
    --  be the null entity if this handle designates a new node.
 
-   function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+   function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle;
    --  Return a handle for the rewriting context to which Handle belongs
 
-   function Unparse (Handle : Node_Rewriting_Handle) return Text_Type
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+   function Unparse (Handle : Node_Rewriting_Handle) return Text_Type;
    --  Turn the given rewritten node Handles designates into text. This is the
    --  text that is used in Apply in order to re-create an analysis unit.
 
-   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name};
    --  Return the kind corresponding to Handle's node
 
-   function Tied (Handle : Node_Rewriting_Handle) return Boolean
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+   function Tied (Handle : Node_Rewriting_Handle) return Boolean;
    --  Return whether this node handle is tied to an analysis unit. If it is
    --  not, it can be passed as the Child parameter to Set_Child.
 
    function Parent
-     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+     (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
    --  Return a handle for the node that is the parent of Handle's node. This
    --  is No_Rewriting_Handle for a node that is not tied to any tree yet.
 
-   function Children_Count (Handle : Node_Rewriting_Handle) return Natural
-      with Pre => Handle /= No_Node_Rewriting_Handle;
+   function Children_Count (Handle : Node_Rewriting_Handle) return Natural;
    --  Return the number of children the node represented by Handle has
 
    function Child
@@ -220,33 +306,19 @@ package ${ada_lib_name}.Rewriting is
    procedure Insert_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
-      Child  : Node_Rewriting_Handle)
-      with Pre  => Handle /= No_Node_Rewriting_Handle
-                   and then Is_List_Node (Kind (Handle))
-                   and then Index <= Children_Count (Handle) + 1
-                   and then (Child = No_Node_Rewriting_Handle
-                             or else not Tied (Child)),
-           Post => Rewriting.Child (Handle, Index) = Child;
+      Child  : Node_Rewriting_Handle);
    --  Assuming Handle refers to a list node, insert the given Child node to be
    --  in the children list at the given index.
 
    procedure Append_Child
      (Handle : Node_Rewriting_Handle;
-      Child  : Node_Rewriting_Handle)
-      with Pre  => Handle /= No_Node_Rewriting_Handle
-                   and then Is_List_Node (Kind (Handle))
-                   and then (Child = No_Node_Rewriting_Handle
-                             or else not Tied (Child)),
-           Post => Rewriting.Child (Handle, Children_Count (Handle)) = Child;
+      Child  : Node_Rewriting_Handle);
    --  Assuming Handle refers to a list node, append the given Child node to
    --  the children list.
 
    procedure Remove_Child
      (Handle : Node_Rewriting_Handle;
-      Index  : Positive)
-      with Pre  => Handle /= No_Node_Rewriting_Handle
-                   and then Is_List_Node (Kind (Handle))
-                   and then Index in 1 .. Children_Count (Handle);
+      Index  : Positive);
    --  Assuming Handle refers to a list node, remove the child at the given
    --  Index from the children list.
 
@@ -261,27 +333,20 @@ package ${ada_lib_name}.Rewriting is
 
    function Create_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Rewriting_Handle;
+      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle;
    --  Create a new node of the given Kind, with empty text (for token nodes)
    --  or children (for regular nodes).
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
       Kind   : ${root_node_kind_name};
-      Text   : Text_Type) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Rewriting_Handle
-                  and then Is_Token_Node (Kind);
+      Text   : Text_Type) return Node_Rewriting_Handle;
    --  Create a new token node with the given Kind and Text
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
       Kind     : ${root_node_kind_name};
-      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Rewriting_Handle
-                  and then not Is_Token_Node (Kind)
-                  and then (for all C of Children =>
-                            C = No_Node_Rewriting_Handle or else not Tied (C));
+      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle;
    --  Create a new regular node of the given Kind and assign it the given
    --  Children.
    --
@@ -316,10 +381,7 @@ package ${ada_lib_name}.Rewriting is
      (Handle    : Rewriting_Handle;
       Template  : Text_Type;
       Arguments : Node_Rewriting_Handle_Array;
-      Rule      : Grammar_Rule) return Node_Rewriting_Handle
-      with Pre => (for all A of Arguments =>
-                   A = No_Node_Rewriting_Handle
-                   or else Rewriting.Context (A) = Handle);
+      Rule      : Grammar_Rule) return Node_Rewriting_Handle;
    --  Create a tree of new nodes from the given Template string, filling holes
    --  in it with nodes in Arguments and parsed according to the given grammar
    --  Rule.
@@ -341,26 +403,25 @@ package ${ada_lib_name}.Rewriting is
             % for f in n.get_parse_fields():
                ; ${f.name} : Node_Rewriting_Handle
             % endfor
-            ) return Node_Rewriting_Handle
-            with Pre => Handle /= No_Rewriting_Handle;
+            ) return Node_Rewriting_Handle;
 
       % endif
    % endfor
 
-private
-   package Impl renames ${ada_lib_name}.Rewriting_Implementation;
+   overriding function Abstract_Kind
+     (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name};
 
-   --  Workaround S114-026 by not deriving from Impl.Rewriting_Handle directly.
-   --  TODO: Cleanup once S114-026 is fixed.
-   type Rewriting_Handle is new System.Address;
-   type Unit_Rewriting_Handle is new System.Address;
-   type Node_Rewriting_Handle is new System.Address;
+   overriding function Abstract_Children_Count
+     (Node : access Node_Rewriting_Handle_Type) return Natural;
 
-   No_Rewriting_Handle : constant Rewriting_Handle :=
-      Rewriting_Handle (System.Null_Address);
-   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle :=
-      Unit_Rewriting_Handle (System.Null_Address);
-   No_Node_Rewriting_Handle : constant Node_Rewriting_Handle :=
-      Node_Rewriting_Handle (System.Null_Address);
+   overriding function Abstract_Child
+     (Node  : access Node_Rewriting_Handle_Type;
+      Index : Positive) return Implementation.Abstract_Node;
 
-end ${ada_lib_name}.Rewriting;
+   overriding function Abstract_Text
+     (Node : access Node_Rewriting_Handle_Type) return Text_Type;
+
+   overriding function Abstract_Rewritten_Node
+     (Node : access Node_Rewriting_Handle_Type) return ${root_node_type_name};
+
+end ${ada_lib_name}.Rewriting_Implementation;

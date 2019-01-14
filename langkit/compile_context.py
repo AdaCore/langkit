@@ -1659,6 +1659,8 @@ class CompileCtx(object):
             ('pkg_iterators', 'Iterators', True),
             # Unit for AST rewriting primitives
             ('pkg_rewriting', 'Rewriting', True),
+            # Unit for AST rewriting implementation
+            ('pkg_rewriting_impl', 'Rewriting_Implementation', True),
             # Unit for AST unparsing primitives
             ('pkg_unparsing', 'Unparsing', True),
             # Unit for AST implementation of unparsing primitives
