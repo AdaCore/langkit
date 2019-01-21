@@ -27,15 +27,13 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    type Node_Rewriting_Handle_Type;
 
    type Rewriting_Handle is access Rewriting_Handle_Type;
-   --  Handle for an analysis context rewriting session
+   --  Internal handle for an analysis context rewriting session
 
    type Unit_Rewriting_Handle is access Unit_Rewriting_Handle_Type;
-   --  Handle for the process of rewriting an analysis unit. Such handles are
-   --  owned by a Rewriting_Handle instance.
+   --  Internal handle for the process of rewriting an analysis unit
 
    type Node_Rewriting_Handle is access Node_Rewriting_Handle_Type;
-   --  Handle for the process of rewriting an analysis unit. Such handles are
-   --  owned by a Rewriting_Handle instance.
+   --  Internal handle for the process of rewriting an analysis unit
 
    package Unit_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
@@ -151,32 +149,22 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle := null;
    No_Node_Rewriting_Handle : constant Node_Rewriting_Handle := null;
 
-   -----------------------
-   -- Context rewriting --
-   -----------------------
+   --------------------------------------------------
+   -- Implementation of context rewriting routines --
+   --------------------------------------------------
 
    function Handle (Context : Internal_Context) return Rewriting_Handle;
-   --  Return the rewriting handle associated to Context, or
-   --  No_Rewriting_Handle if Context is not being rewritten.
+   --  Implementation for Rewriting.Handle
 
    function Context (Handle : Rewriting_Handle) return Internal_Context;
-   --  Return the analysis context associated to Handle
+   --  Implementation for Rewriting.Context
 
    function Start_Rewriting
      (Context : Internal_Context) return Rewriting_Handle;
-   --  Start a rewriting session for Context.
-   --
-   --  This handle will keep track of all changes to do on Context's analysis
-   --  units. Once the set of changes is complete, call the Apply procedure to
-   --  actually update Context. This makes it possible to inspect the "old"
-   --  Context state while creating the list of changes.
-   --
-   --  There can be only one rewriting session per analysis context, so this
-   --  will raise an Existing_Rewriting_Handle_Error exception if Context
-   --  already has a living rewriting session.
+   --  Implementation for Rewriting.Start_Rewriting
 
    procedure Abort_Rewriting (Handle : in out Rewriting_Handle);
-   --  Discard all modifications registered in Handle and close Handle
+   --  Implementation for Rewriting.Abort_Rewriting
 
    type Apply_Result (Success : Boolean := True) is record
       case Success is
@@ -192,80 +180,68 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    end record;
 
    function Apply (Handle : in out Rewriting_Handle) return Apply_Result;
-   --  Apply all modifications to Handle's analysis context. If that worked,
-   --  close Handle and return (Success => True). Otherwise, reparsing did not
-   --  work, so keep Handle and its Context unchanged and return details about
-   --  the error that happened.
+   --  Implementation for Rewriting.Apply
 
    function Unit_Handles
      (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
       with Pre => Handle /= No_Rewriting_Handle;
-   --  Return the list of unit rewriting handles in the given context handle
-   --  for units that the Apply primitive will modify.
+   --  Implementation for Rewriting.Unit_Handles
 
-   --------------------
-   -- Unit rewriting --
-   --------------------
+   ---------------------------------------
+   -- Implementation for unit rewriting --
+   ---------------------------------------
 
    function Handle (Unit : Internal_Unit) return Unit_Rewriting_Handle;
-   --  Return the rewriting handle corresponding to Unit
+   --  Implementation for Rewriting.Handle
 
    function Unit (Handle : Unit_Rewriting_Handle) return Internal_Unit;
-   --  Return the unit corresponding to Handle
+   --  Implementation for Rewriting.Unit
 
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle;
-   --  Return the node handle corresponding to the root of the unit which
-   --  Handle designates.
+   --  Implementation for Rewriting.Root
 
    procedure Set_Root
      (Handle : Unit_Rewriting_Handle;
       Root   : Node_Rewriting_Handle);
-   --  Set the root node for the unit Handle to Root. This unties the previous
-   --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
-   --  Root to Handle.
+   --  Implementation for Rewriting.Set_Root
 
-   --------------------
-   -- Node rewriting --
-   --------------------
+   ---------------------------------------
+   -- Implementation for node rewriting --
+   ---------------------------------------
 
    function Handle
      (Node : ${root_node_type_name}) return Node_Rewriting_Handle;
-   --  Return the rewriting handle corresponding to Node
+   --  Implementation for Rewriting.Handle
 
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_node_type_name};
-   --  Return the node which the given rewriting Handle relates to. This can
-   --  be the null entity if this handle designates a new node.
+   --  Implementation for Rewriting.Node
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle;
-   --  Return a handle for the rewriting context to which Handle belongs
+   --  Implementation for Rewriting.Context
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type;
-   --  Turn the given rewritten node Handles designates into text. This is the
-   --  text that is used in Apply in order to re-create an analysis unit.
+   --  Implementation for Rewriting.Unparse
 
    function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name};
-   --  Return the kind corresponding to Handle's node
+   --  Implementation for Rewriting.Kind
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
-   --  Return whether this node handle is tied to an analysis unit. If it is
-   --  not, it can be passed as the Child parameter to Set_Child.
+   --  Implementation for Rewriting.Tied
 
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
-   --  Return a handle for the node that is the parent of Handle's node. This
-   --  is No_Rewriting_Handle for a node that is not tied to any tree yet.
+   --  Implementation for Rewriting.Parent
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural;
-   --  Return the number of children the node represented by Handle has
+   --  Implementation for Rewriting.Children_Count
 
    function Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) return Node_Rewriting_Handle
       with Pre => Handle /= No_Node_Rewriting_Handle
                   and then Index in 1 .. Children_Count (Handle);
-   --  Return a handle corresponding to the Index'th child of the node that
-   --  Handle represents. Index is 1-based.
+   --  Implementation for Rewriting.Child
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
@@ -275,19 +251,17 @@ private package ${ada_lib_name}.Rewriting_Implementation is
          Handle /= No_Node_Rewriting_Handle
          and then Index in 1 .. Children_Count (Handle)
          and then (Child = No_Node_Rewriting_Handle or else not Tied (Child));
-   --  If Child is No_Rewriting_Node, untie the Handle's Index'th child to this
-   --  tree, so it can be attached to another one. Otherwise, Child must have
-   --  no parent as it will be tied to Handle's tree.
+   --  Implementation for Rewriting.Set_Child
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type
       with Pre => Handle /= No_Node_Rewriting_Handle
                   and then Is_Token_Node (Kind (Handle));
-   --  Return the text associated to the given token node
+   --  Implementation for Rewriting.Text
 
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type)
       with Pre => Handle /= No_Node_Rewriting_Handle
                   and then Is_Token_Node (Kind (Handle));
-   --  Override text associated to the given token node
+   --  Implementation for Rewriting.Set_Text
 
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle)
       with Pre =>
@@ -295,96 +269,63 @@ private package ${ada_lib_name}.Rewriting_Implementation is
          and then Tied (Handle)
          and then (New_Node = No_Node_Rewriting_Handle
                    or else not Tied (New_Node));
-   --  If Handle is the root of an analysis unit, untie it and set New_Node as
-   --  its new root. Otherwise, replace Handle with New_Node in Handle's parent
-   --  node.
+   --  Implementation for Rewriting.Replace
 
-   -------------------------
-   -- List node rewriting --
-   -------------------------
+   --------------------------------------------
+   -- Implementation for list node rewriting --
+   --------------------------------------------
 
    procedure Insert_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
       Child  : Node_Rewriting_Handle);
-   --  Assuming Handle refers to a list node, insert the given Child node to be
-   --  in the children list at the given index.
+   --  Implementation for Rewriting.Insert_Child
 
    procedure Append_Child
      (Handle : Node_Rewriting_Handle;
       Child  : Node_Rewriting_Handle);
-   --  Assuming Handle refers to a list node, append the given Child node to
-   --  the children list.
+   --  Implementation for Rewriting.Append_Child
 
    procedure Remove_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive);
-   --  Assuming Handle refers to a list node, remove the child at the given
-   --  Index from the children list.
+   --  Implementation for Rewriting.Remove_Child
 
-   -------------------
-   -- Node creation --
-   -------------------
+   --------------------------------------
+   -- Implementation for node creation --
+   --------------------------------------
 
    function Clone
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
-   --  Create a clone of the Handle node tree. The result is not tied to any
-   --  analysis unit tree.
+   --  Implementation for Rewriting.Clone
 
    function Create_Node
      (Handle : Rewriting_Handle;
       Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle;
-   --  Create a new node of the given Kind, with empty text (for token nodes)
-   --  or children (for regular nodes).
+   --  Implementation for Rewriting.Create_Node
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
       Kind   : ${root_node_kind_name};
       Text   : Text_Type) return Node_Rewriting_Handle;
-   --  Create a new token node with the given Kind and Text
+   --  Implementation for Rewriting.Create_Token_Node
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
       Kind     : ${root_node_kind_name};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle;
-   --  Create a new regular node of the given Kind and assign it the given
-   --  Children.
-   --
-   --  Except for lists, which can have any number of children, the
-   --  size of Children must match the number of children associated to the
-   --  given Kind. Besides, all given children must not be tied.
+   --  Implementation for Rewriting.Create_Regular_Node
 
-   ---------------
-   -- Templates --
-   ---------------
-
-   --  Templating is a way to create trees of node rewriting handles. It is
-   --  intended to be more convenient than calling node constructors for each
-   --  individual node in a tree.
-   --
-   --  A template is text that represents source code, including zero or
-   --  multiple holes (stray "{}").
-   --
-   --  Create a tree of new nodes from a template is called instantiating a
-   --  template: just call Create_From_Template, passing to it the template
-   --  itself, a sequence of nodes (the template arguments) to fill the
-   --  template holes and a grammar rule to parse the resulting source code.
-   --  This will unparse given nodes to replace holes in the template text, and
-   --  then parse the resulting source code in order to create a tree of node
-   --  rewriting handles.
-   --
-   --  In order not to interfer with the template DSL, stray "{" and "}"
-   --  characters in the source code must be doubled: for instance "{{"
-   --  represent "{" in the source code to be parsed.
+   ----------------------------------
+   -- Implementation for templates --
+   ----------------------------------
 
    function Create_From_Template
      (Handle    : Rewriting_Handle;
       Template  : Text_Type;
       Arguments : Node_Rewriting_Handle_Array;
       Rule      : Grammar_Rule) return Node_Rewriting_Handle;
-   --  Create a tree of new nodes from the given Template string, filling holes
-   --  in it with nodes in Arguments and parsed according to the given grammar
-   --  Rule.
+   --  Implementation for Rewriting.Create_From_Template
 
    -----------------------------
    -- Node creation shortcuts --

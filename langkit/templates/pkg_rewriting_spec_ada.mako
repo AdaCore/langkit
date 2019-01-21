@@ -18,15 +18,13 @@ private with ${ada_lib_name}.Rewriting_Implementation;
 package ${ada_lib_name}.Rewriting is
 
    type Rewriting_Handle is private;
-   --  Handle for an analysis context rewriting session
+   ${ada_doc('langkit.rewriting.rewriting_handle_type', 3)}
 
    type Unit_Rewriting_Handle is private;
-   --  Handle for the process of rewriting an analysis unit. Such handles are
-   --  owned by a Rewriting_Handle instance.
+   ${ada_doc('langkit.rewriting.unit_rewriting_handle_type', 3)}
 
    type Node_Rewriting_Handle is private;
-   --  Handle for the process of rewriting an AST node. Such handles are owned
-   --  by a Rewriting_Handle instance.
+   ${ada_doc('langkit.rewriting.node_rewriting_handle_type', 3)}
 
    No_Rewriting_Handle      : constant Rewriting_Handle;
    No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle;
@@ -43,12 +41,11 @@ package ${ada_lib_name}.Rewriting is
    -----------------------
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle;
-   --  Return the rewriting handle associated to Context, or
-   --  No_Rewriting_Handle if Context is not being rewritten.
+   ${ada_doc('langkit.rewriting.context_handle', 3)}
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context
       with Pre => Handle /= No_Rewriting_Handle;
-   --  Return the analysis context associated to Handle
+   ${ada_doc('langkit.rewriting.handle_context', 3)}
 
    function Start_Rewriting
      (Context : Analysis_Context) return Rewriting_Handle
@@ -58,21 +55,12 @@ package ${ada_lib_name}.Rewriting is
                   and then Start_Rewriting'Result = Handle (Context)
                   and then ${ada_lib_name}.Rewriting.Context
                              (Start_Rewriting'Result) = Context;
-   --  Start a rewriting session for Context.
-   --
-   --  This handle will keep track of all changes to do on Context's analysis
-   --  units. Once the set of changes is complete, call the Apply procedure to
-   --  actually update Context. This makes it possible to inspect the "old"
-   --  Context state while creating the list of changes.
-   --
-   --  There can be only one rewriting session per analysis context, so this
-   --  will raise an Existing_Rewriting_Handle_Error exception if Context
-   --  already has a living rewriting session.
+   ${ada_doc('langkit.rewriting.start_rewriting', 3)}
 
    procedure Abort_Rewriting (Handle : in out Rewriting_Handle)
       with Pre  => Handle /= No_Rewriting_Handle,
            Post => Handle = No_Rewriting_Handle;
-   --  Discard all modifications registered in Handle and close Handle
+   ${ada_doc('langkit.rewriting.abort_rewriting', 3)}
 
    type Apply_Result (Success : Boolean := True) is record
       case Success is
@@ -92,16 +80,12 @@ package ${ada_lib_name}.Rewriting is
            Post => (if Apply'Result.Success
                     then Handle = No_Rewriting_Handle
                     else Handle = Handle'Old);
-   --  Apply all modifications to Handle's analysis context. If that worked,
-   --  close Handle and return (Success => True). Otherwise, reparsing did not
-   --  work, so keep Handle and its Context unchanged and return details about
-   --  the error that happened.
+   ${ada_doc('langkit.rewriting.apply', 3)}
 
    function Unit_Handles
      (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
       with Pre => Handle /= No_Rewriting_Handle;
-   --  Return the list of unit rewriting handles in the given context handle
-   --  for units that the Apply primitive will modify.
+   ${ada_doc('langkit.rewriting.unit_handles', 3)}
 
    --------------------
    -- Unit rewriting --
@@ -109,16 +93,15 @@ package ${ada_lib_name}.Rewriting is
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
       with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;
-   --  Return the rewriting handle corresponding to Unit
+   ${ada_doc('langkit.rewriting.unit_handle', 3)}
 
    function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
       with Pre => Handle /= No_Unit_Rewriting_Handle;
-   --  Return the unit corresponding to Handle
+   ${ada_doc('langkit.rewriting.handle_unit', 3)}
 
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
       with Pre => Handle /= No_Unit_Rewriting_Handle;
-   --  Return the node handle corresponding to the root of the unit which
-   --  Handle designates.
+   ${ada_doc('langkit.rewriting.root', 3)}
 
    procedure Set_Root
      (Handle : Unit_Rewriting_Handle;
@@ -126,9 +109,7 @@ package ${ada_lib_name}.Rewriting is
       with Pre => Handle /= No_Unit_Rewriting_Handle
                   and then (Root = No_Node_Rewriting_Handle
                             or else not Tied (Root));
-   --  Set the root node for the unit Handle to Root. This unties the previous
-   --  root handle. If Root is not No_Node_Rewriting_Handle, this also ties
-   --  Root to Handle.
+   ${ada_doc('langkit.rewriting.set_root', 3)}
 
    --------------------
    -- Node rewriting --
@@ -137,49 +118,44 @@ package ${ada_lib_name}.Rewriting is
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle
       with Pre => Handle (Context (Unit (Node))) /= No_Rewriting_Handle;
-   --  Return the rewriting handle corresponding to Node
+   ${ada_doc('langkit.rewriting.node_handle', 3)}
 
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_entity.api_name}
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Return the node which the given rewriting Handle relates to. This can
-   --  be the null entity if this handle designates a new node.
+   ${ada_doc('langkit.rewriting.handle_node', 3)}
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Return a handle for the rewriting context to which Handle belongs
+   ${ada_doc('langkit.rewriting.node_context', 3)}
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Turn the given rewritten node Handles designates into text. This is the
-   --  text that is used in Apply in order to re-create an analysis unit.
+   ${ada_doc('langkit.rewriting.unparse', 3)}
 
    function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Return the kind corresponding to Handle's node
+   ${ada_doc('langkit.rewriting.kind', 3)}
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Return whether this node handle is tied to an analysis unit. If it is
-   --  not, it can be passed as the Child parameter to Set_Child.
+   ${ada_doc('langkit.rewriting.tied', 3)}
 
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Return a handle for the node that is the parent of Handle's node. This
-   --  is No_Rewriting_Handle for a node that is not tied to any tree yet.
+   ${ada_doc('langkit.rewriting.parent', 3)}
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural
       with Pre => Handle /= No_Node_Rewriting_Handle;
-   --  Return the number of children the node represented by Handle has
+   ${ada_doc('langkit.rewriting.children_count', 3)}
 
    function Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) return Node_Rewriting_Handle
       with Pre => Handle /= No_Node_Rewriting_Handle
                   and then Index in 1 .. Children_Count (Handle);
-   --  Return a handle corresponding to the Index'th child of the node that
-   --  Handle represents. Index is 1-based.
+   ${ada_doc('langkit.rewriting.child', 3)}
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
@@ -189,19 +165,17 @@ package ${ada_lib_name}.Rewriting is
          Handle /= No_Node_Rewriting_Handle
          and then Index in 1 .. Children_Count (Handle)
          and then (Child = No_Node_Rewriting_Handle or else not Tied (Child));
-   --  If Child is No_Rewriting_Node, untie the Handle's Index'th child to this
-   --  tree, so it can be attached to another one. Otherwise, Child must have
-   --  no parent as it will be tied to Handle's tree.
+   ${ada_doc('langkit.rewriting.set_child', 3)}
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type
       with Pre => Handle /= No_Node_Rewriting_Handle
                   and then Is_Token_Node (Kind (Handle));
-   --  Return the text associated to the given token node
+   ${ada_doc('langkit.rewriting.text', 3)}
 
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type)
       with Pre => Handle /= No_Node_Rewriting_Handle
                   and then Is_Token_Node (Kind (Handle));
-   --  Override text associated to the given token node
+   ${ada_doc('langkit.rewriting.set_text', 3)}
 
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle)
       with Pre =>
@@ -209,9 +183,7 @@ package ${ada_lib_name}.Rewriting is
          and then Tied (Handle)
          and then (New_Node = No_Node_Rewriting_Handle
                    or else not Tied (New_Node));
-   --  If Handle is the root of an analysis unit, untie it and set New_Node as
-   --  its new root. Otherwise, replace Handle with New_Node in Handle's parent
-   --  node.
+   ${ada_doc('langkit.rewriting.replace', 3)}
 
    -------------------------
    -- List node rewriting --
@@ -227,8 +199,7 @@ package ${ada_lib_name}.Rewriting is
                    and then (Child = No_Node_Rewriting_Handle
                              or else not Tied (Child)),
            Post => Rewriting.Child (Handle, Index) = Child;
-   --  Assuming Handle refers to a list node, insert the given Child node to be
-   --  in the children list at the given index.
+   ${ada_doc('langkit.rewriting.insert_child', 3)}
 
    procedure Append_Child
      (Handle : Node_Rewriting_Handle;
@@ -238,8 +209,7 @@ package ${ada_lib_name}.Rewriting is
                    and then (Child = No_Node_Rewriting_Handle
                              or else not Tied (Child)),
            Post => Rewriting.Child (Handle, Children_Count (Handle)) = Child;
-   --  Assuming Handle refers to a list node, append the given Child node to
-   --  the children list.
+   ${ada_doc('langkit.rewriting.append_child', 3)}
 
    procedure Remove_Child
      (Handle : Node_Rewriting_Handle;
@@ -247,8 +217,7 @@ package ${ada_lib_name}.Rewriting is
       with Pre  => Handle /= No_Node_Rewriting_Handle
                    and then Is_List_Node (Kind (Handle))
                    and then Index in 1 .. Children_Count (Handle);
-   --  Assuming Handle refers to a list node, remove the child at the given
-   --  Index from the children list.
+   ${ada_doc('langkit.rewriting.remove_child', 3)}
 
    -------------------
    -- Node creation --
@@ -256,15 +225,13 @@ package ${ada_lib_name}.Rewriting is
 
    function Clone
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle;
-   --  Create a clone of the Handle node tree. The result is not tied to any
-   --  analysis unit tree.
+   ${ada_doc('langkit.rewriting.clone', 3)}
 
    function Create_Node
      (Handle : Rewriting_Handle;
       Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle
       with Pre => Handle /= No_Rewriting_Handle;
-   --  Create a new node of the given Kind, with empty text (for token nodes)
-   --  or children (for regular nodes).
+   ${ada_doc('langkit.rewriting.create_node', 3)}
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
@@ -272,7 +239,7 @@ package ${ada_lib_name}.Rewriting is
       Text   : Text_Type) return Node_Rewriting_Handle
       with Pre => Handle /= No_Rewriting_Handle
                   and then Is_Token_Node (Kind);
-   --  Create a new token node with the given Kind and Text
+   ${ada_doc('langkit.rewriting.create_token_node', 3)}
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
@@ -282,12 +249,7 @@ package ${ada_lib_name}.Rewriting is
                   and then not Is_Token_Node (Kind)
                   and then (for all C of Children =>
                             C = No_Node_Rewriting_Handle or else not Tied (C));
-   --  Create a new regular node of the given Kind and assign it the given
-   --  Children.
-   --
-   --  Except for lists, which can have any number of children, the
-   --  size of Children must match the number of children associated to the
-   --  given Kind. Besides, all given children must not be tied.
+   ${ada_doc('langkit.rewriting.create_regular_node', 3)}
 
    ---------------
    -- Templates --
@@ -320,9 +282,7 @@ package ${ada_lib_name}.Rewriting is
       with Pre => (for all A of Arguments =>
                    A = No_Node_Rewriting_Handle
                    or else Rewriting.Context (A) = Handle);
-   --  Create a tree of new nodes from the given Template string, filling holes
-   --  in it with nodes in Arguments and parsed according to the given grammar
-   --  Rule.
+   ${ada_doc('langkit.rewriting.create_from_template', 3)}
 
    -----------------------------
    -- Node creation shortcuts --

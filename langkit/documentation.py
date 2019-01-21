@@ -652,6 +652,150 @@ base_langkit_docs = {
         index for this token/trivia. Tokens and trivias get their own index
         space.
     """,
+
+    #
+    # Misc
+    #
+
+    'langkit.rewriting.rewriting_handle_type': """
+        Handle for an analysis context rewriting session
+    """,
+    'langkit.rewriting.unit_rewriting_handle_type': """
+        Handle for the process of rewriting an analysis unit. Such handles are
+        owned by a Rewriting_Handle instance.
+    """,
+    'langkit.rewriting.node_rewriting_handle_type': """
+        Handle for the process of rewriting an AST node. Such handles are owned
+        by a Rewriting_Handle instance.
+    """,
+    'langkit.rewriting.context_handle': """
+        Return the rewriting handle associated to Context, or
+        No_Rewriting_Handle if Context is not being rewritten.
+    """,
+    'langkit.rewriting.handle_context': """
+        Return the analysis context associated to Handle
+    """,
+    'langkit.rewriting.start_rewriting': """
+        Start a rewriting session for Context.
+        This handle will keep track of all changes to do on Context's analysis
+        units. Once the set of changes is complete, call the Apply procedure to
+        actually update Context. This makes it possible to inspect the "old"
+        Context state while creating the list of changes.
+        There can be only one rewriting session per analysis context, so this
+        will raise an Existing_Rewriting_Handle_Error exception if Context
+        already has a living rewriting session.
+    """,
+    'langkit.rewriting.abort_rewriting': """
+        Discard all modifications registered in Handle and close Handle
+    """,
+    'langkit.rewriting.apply': """
+        Apply all modifications to Handle's analysis context. If that worked,
+        close Handle and return (Success => True). Otherwise, reparsing did not
+        work, so keep Handle and its Context unchanged and return details about
+        the error that happened.
+    """,
+    'langkit.rewriting.unit_handles': """
+        Return the list of unit rewriting handles in the given context handle
+        for units that the Apply primitive will modify.
+    """,
+    'langkit.rewriting.unit_handle': """
+        Return the rewriting handle corresponding to Unit
+    """,
+    'langkit.rewriting.handle_unit': """
+        Return the unit corresponding to Handle
+    """,
+    'langkit.rewriting.root': """
+        Return the node handle corresponding to the root of the unit which
+        Handle designates.
+    """,
+    'langkit.rewriting.set_root': """
+        Set the root node for the unit Handle to Root. This unties the previous
+        root handle. If Root is not No_Node_Rewriting_Handle, this also ties
+        Root to Handle.
+    """,
+    'langkit.rewriting.node_handle': """
+        Return the rewriting handle corresponding to Node
+    """,
+    'langkit.rewriting.handle_node': """
+        Return the node which the given rewriting Handle relates to. This can
+        be the null entity if this handle designates a new node.
+    """,
+    'langkit.rewriting.node_context': """
+        Return a handle for the rewriting context to which Handle belongs
+    """,
+    'langkit.rewriting.unparse': """
+        Turn the given rewritten node Handles designates into text. This is the
+        text that is used in Apply in order to re-create an analysis unit.
+    """,
+    'langkit.rewriting.kind': """
+        Return the kind corresponding to Handle's node
+    """,
+    'langkit.rewriting.tied': """
+        Return whether this node handle is tied to an analysis unit. If it is
+        not, it can be passed as the Child parameter to Set_Child.
+    """,
+    'langkit.rewriting.parent': """
+        Return a handle for the node that is the parent of Handle's node. This
+        is No_Rewriting_Handle for a node that is not tied to any tree yet.
+    """,
+    'langkit.rewriting.children_count': """
+        Return the number of children the node represented by Handle has
+    """,
+    'langkit.rewriting.child': """
+        Return a handle corresponding to the Index'th child of the node that
+        Handle represents. Index is 1-based.
+    """,
+    'langkit.rewriting.set_child': """
+        If Child is No_Rewriting_Node, untie the Handle's Index'th child to this
+        tree, so it can be attached to another one. Otherwise, Child must have
+        no parent as it will be tied to Handle's tree.
+    """,
+    'langkit.rewriting.text': """
+        Return the text associated to the given token node
+    """,
+    'langkit.rewriting.set_text': """
+        Override text associated to the given token node
+    """,
+    'langkit.rewriting.replace': """
+        If Handle is the root of an analysis unit, untie it and set New_Node as
+        its new root. Otherwise, replace Handle with New_Node in Handle's parent
+        node.
+    """,
+    'langkit.rewriting.insert_child': """
+        Assuming Handle refers to a list node, insert the given Child node to be
+        in the children list at the given index.
+    """,
+    'langkit.rewriting.append_child': """
+        Assuming Handle refers to a list node, append the given Child node to
+        the children list.
+    """,
+    'langkit.rewriting.remove_child': """
+        Assuming Handle refers to a list node, remove the child at the given
+        Index from the children list.
+    """,
+    'langkit.rewriting.clone': """
+        Create a clone of the Handle node tree. The result is not tied to any
+        analysis unit tree.
+    """,
+    'langkit.rewriting.create_node': """
+        Create a new node of the given Kind, with empty text (for token nodes)
+        or children (for regular nodes).
+    """,
+    'langkit.rewriting.create_token_node': """
+        Create a new token node with the given Kind and Text
+    """,
+    'langkit.rewriting.create_regular_node': """
+        Create a new regular node of the given Kind and assign it the given
+        Children.
+        Except for lists, which can have any number of children, the
+        size of Children must match the number of children associated to the
+        given Kind. Besides, all given children must not be tied.
+    """,
+    'langkit.rewriting.create_from_template': """
+        Create a tree of new nodes from the given Template string, filling holes
+        in it with nodes in Arguments and parsed according to the given grammar
+        Rule.
+    """,
 }
 
 
