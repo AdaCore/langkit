@@ -746,9 +746,9 @@ base_langkit_docs = {
         Handle represents. Index is 1-based.
     """,
     'langkit.rewriting.set_child': """
-        If Child is No_Rewriting_Node, untie the Handle's Index'th child to this
-        tree, so it can be attached to another one. Otherwise, Child must have
-        no parent as it will be tied to Handle's tree.
+        If Child is No_Rewriting_Node, untie the Handle's Index'th child to
+        this tree, so it can be attached to another one. Otherwise, Child must
+        have no parent as it will be tied to Handle's tree.
     """,
     'langkit.rewriting.text': """
         Return the text associated to the given token node
@@ -758,12 +758,12 @@ base_langkit_docs = {
     """,
     'langkit.rewriting.replace': """
         If Handle is the root of an analysis unit, untie it and set New_Node as
-        its new root. Otherwise, replace Handle with New_Node in Handle's parent
-        node.
+        its new root. Otherwise, replace Handle with New_Node in Handle's
+        parent node.
     """,
     'langkit.rewriting.insert_child': """
-        Assuming Handle refers to a list node, insert the given Child node to be
-        in the children list at the given index.
+        Assuming Handle refers to a list node, insert the given Child node to
+        be in the children list at the given index.
     """,
     'langkit.rewriting.append_child': """
         Assuming Handle refers to a list node, append the given Child node to
@@ -792,9 +792,9 @@ base_langkit_docs = {
         given Kind. Besides, all given children must not be tied.
     """,
     'langkit.rewriting.create_from_template': """
-        Create a tree of new nodes from the given Template string, filling holes
-        in it with nodes in Arguments and parsed according to the given grammar
-        Rule.
+        Create a tree of new nodes from the given Template string, filling
+        holes in it with nodes in Arguments and parsed according to the given
+        grammar Rule.
     """,
 }
 
