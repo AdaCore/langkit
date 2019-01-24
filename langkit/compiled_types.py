@@ -15,6 +15,7 @@ from langkit.diagnostics import (
 from langkit.template_utils import common_renderer
 from langkit.utils import (issubtype, memoized, not_implemented_error,
                            self_memoized)
+from langkit.utils.types import TypeSet
 
 
 def get_context(*args, **kwargs):
@@ -2334,12 +2335,24 @@ class ASTNodeType(BaseStructType):
             return
 
         for field in self.get_parse_fields():
-            inferred_type = field.inferred_type
+
+            # We want to compare the type annotation to the type that was
+            # inferred from the grammar. There is more to do than just
+            # comparing the two types since there can be several types that
+            # specify the same number of concrete types: think of an abstract
+            # type that is subclassed only once. So use type sets to do the
+            # comparison, instead.
+            inferred_types = TypeSet()
+            inferred_types.include(field.inferred_type)
+            field_types = TypeSet()
+            field_types.include(field.type)
+
             with field.diagnostic_context:
                 WarningSet.imprecise_field_type_annotations.warn_if(
-                    field.type != inferred_type,
+                    inferred_types != field_types,
                     'Specified type is {}, but it could be more specific:'
-                    ' {}'.format(field.type.dsl_name, inferred_type.dsl_name)
+                    ' {}'.format(field.type.dsl_name,
+                                 field.inferred_type.dsl_name)
                 )
 
     def get_inheritance_chain(self):
