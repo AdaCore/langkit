@@ -999,8 +999,8 @@ class Unparsers(object):
         If unparsers are requested, compute unparsers for all node-constructing
         sub-parsers in ``parser``.
 
-        Also abort the generation of unparsers if the grammar contain
-        parsing constructs we don't support with unparsers.
+        Also abort the generation of unparsers if the grammar contains parsing
+        constructs we don't support with unparsers.
 
         :param Parser parser: Parser combinator to analyze.
         """
