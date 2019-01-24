@@ -100,6 +100,21 @@ class TypeSet(object):
         # by matchers. Updated as we go through the list of matchers.
         self.matched_types = set()
 
+    def __eq__(self, type_set):
+        return (isinstance(type_set, TypeSet) and
+                self.matched_types == type_set.matched_types)
+
+    def __ne__(self, type_set):
+        return not (self == type_set)
+
+    def __contains__(self, t):
+        """
+        Check whether ``t`` is included in this type set.
+
+        :rtype: bool
+        """
+        return t in self.matched_types
+
     def include(self, t):
         """
         Include a class and all of its subclasses.
