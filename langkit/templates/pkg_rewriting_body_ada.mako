@@ -48,6 +48,10 @@ package body ${ada_lib_name}.Rewriting is
       end if;
    end Wrap_Apply_Result;
 
+   ------------------------
+   -- Wrap_Unit_RH_Array --
+   ------------------------
+
    function Wrap_Unit_RH_Array
      (Arr : Impl.Unit_Rewriting_Handle_Array)
       return Unit_Rewriting_Handle_Array
@@ -59,6 +63,10 @@ package body ${ada_lib_name}.Rewriting is
       end loop;
       return Res;
    end Wrap_Unit_RH_Array;
+
+   --------------------------
+   -- Unwrap_Node_RH_Array --
+   --------------------------
 
    function Unwrap_Node_RH_Array
      (Arr : Node_Rewriting_Handle_Array)
