@@ -49,7 +49,7 @@ class Plus(Expr):
 
 g = Grammar('main_rule')
 g.add_rules(
-    main_rule=List(g.def_rule),
+    main_rule=List(g.def_rule, empty_valid=True),
 
     name=Name(Token.Identifier),
 
