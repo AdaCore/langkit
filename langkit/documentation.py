@@ -677,10 +677,12 @@ base_langkit_docs = {
     """,
     'langkit.rewriting.start_rewriting': """
         Start a rewriting session for Context.
+
         This handle will keep track of all changes to do on Context's analysis
         units. Once the set of changes is complete, call the Apply procedure to
         actually update Context. This makes it possible to inspect the "old"
         Context state while creating the list of changes.
+
         There can be only one rewriting session per analysis context, so this
         will raise an Existing_Rewriting_Handle_Error exception if Context
         already has a living rewriting session.
@@ -787,6 +789,7 @@ base_langkit_docs = {
     'langkit.rewriting.create_regular_node': """
         Create a new regular node of the given Kind and assign it the given
         Children.
+
         Except for lists, which can have any number of children, the
         size of Children must match the number of children associated to the
         given Kind. Besides, all given children must not be tied.
