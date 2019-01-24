@@ -590,7 +590,11 @@ class NodeUnparser(Unparser):
             # this field.
             field_unparser.always_absent = False
             for subparser in parser.parsers:
-                if not isinstance(subparser, Defer):
+                # Named parsing rules always create nodes, so we don't need to
+                # check Defer parsers. Skip parsers also create nodes, but most
+                # importantly they trigger a parsing error, so unparsers can
+                # ignore them.
+                if not isinstance(subparser, (Defer, Skip)):
                     NodeUnparser.from_parser(subparser.get_type(), subparser)
 
         elif isinstance(parser, _Extract):
