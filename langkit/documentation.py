@@ -510,6 +510,12 @@ base_langkit_docs = {
     'langkit.unit_provider_type': """
         Interface to fetch analysis units from a name and a unit kind.
 
+        The unit provider mechanism provides an abstraction which assumes that
+        to any couple (unit name, unit kind) we can associate at most one
+        source file. This means that several couples can be associated to the
+        same source file, but on the other hand, only one one source file can
+        be associated to a couple.
+
         This is used to make the semantic analysis able to switch from one
         analysis units to another.
     """,
