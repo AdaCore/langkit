@@ -1474,6 +1474,13 @@ class Field(BaseField):
         :type: set[CompiledType]
         """
 
+        self._frozen_types_from_parser = None
+        """
+        Cache for the types_from_parser property.
+
+        :type: TypeSet
+        """
+
         self._index = None
         """
         0-based index for this parsing field in the owning AST node's children
@@ -1514,6 +1521,56 @@ class Field(BaseField):
         return self._concrete_fields
 
     @property
+    def types_from_parser(self):
+        """
+        Return the set of types inferred from parsers for this field.
+
+        This is None for fields from synthetic nodes.
+
+        :rtype: None|TypeSet
+        """
+        # Make sure that all node types are computed, and thus that we had a
+        # chance to collect all field types from parsers.
+        assert get_context().astnode_types
+
+        # If the result was not already computed, do it and cache it
+        if self._frozen_types_from_parser is None:
+            if self.null:
+                # Null fields have their type automatically computed from the
+                # abstract field they override.
+                types = [self.type]
+
+            elif self.abstract:
+                # For abstract fields, we want to make sure the declared type
+                # matches all types for concrete fields.
+                types = [f.inferred_type for f in self.concrete_fields]
+
+            elif self.struct.synthetic:
+                types = []
+
+            else:
+                # For regular fields, this is just the unification of all types
+                # that parsers have computed.
+                types = list(self._types_from_parser)
+
+            self._frozen_types_from_parser = TypeSet()
+            for t in types:
+                self._frozen_types_from_parser.include(t)
+
+        return self._frozen_types_from_parser
+
+    def add_type_from_parser(self, t):
+        """
+        Add ``t`` as a possible type for this field, as inferred by parsers.
+
+        :type t: ASTNodeType
+        """
+        # Make sure that we don't add types from parser after freezing type
+        # inference.
+        assert not get_context().astnode_types
+        self._types_from_parser.add(t)
+
+    @property
     def inferred_type(self):
         """
         Return the type for this field that parsers inferred.
@@ -1524,22 +1581,7 @@ class Field(BaseField):
 
         :rtype: CompiledType
         """
-
-        if self.null:
-            # Null fields have their type automatically computed from the
-            # abstract field they override.
-            types = [self.type]
-
-        elif self.abstract:
-            # For abstract fields, we want to make sure the declared type
-            # matches all types for concrete fields.
-            types = [f.type for f in self.concrete_fields]
-
-        else:
-            # For regular fields, this just the unification of all types that
-            # parsers have computed.
-            types = list(self._types_from_parser)
-
+        types = list(self.types_from_parser.matched_types)
         if not types:
             return None
 
@@ -2298,7 +2340,7 @@ class ASTNodeType(BaseStructType):
                         field.qualname, field.type.dsl_name, f_type.dsl_name
                     )
                 )
-            field._types_from_parser.add(f_type)
+            field.add_type_from_parser(f_type)
 
         # Only assign types if self was not yet typed. In the case where it
         # was already typed, we checked above that the new types were
