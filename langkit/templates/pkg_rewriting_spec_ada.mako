@@ -92,7 +92,8 @@ package ${ada_lib_name}.Rewriting is
    --------------------
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
-      with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;
+      with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle
+                  and then not Unit.Has_Diagnostics;
    ${ada_doc('langkit.rewriting.unit_handle', 3)}
 
    function Unit (Handle : Unit_Rewriting_Handle) return Analysis_Unit
@@ -117,7 +118,8 @@ package ${ada_lib_name}.Rewriting is
 
    function Handle
      (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle
-      with Pre => Handle (Context (Unit (Node))) /= No_Rewriting_Handle;
+      with Pre => Handle (Context (Unit (Node))) /= No_Rewriting_Handle
+                  and then not Node.Unit.Has_Diagnostics;
    ${ada_doc('langkit.rewriting.node_handle', 3)}
 
    function Node
