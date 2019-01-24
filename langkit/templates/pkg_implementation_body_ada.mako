@@ -2785,7 +2785,7 @@ package body ${ada_lib_name}.Implementation is
                   nodes_adding_env.exclude(n)
          sorted_nodes_adding_env = sorted(
             n.ada_kind_name
-            for n in nodes_adding_env.minimal_matched_types(T.root_node)
+            for n in nodes_adding_env.minimal_matched_types
          )
          all_nodes_add_env = (
             sorted_nodes_adding_env == [T.root_node.ada_kind_name]

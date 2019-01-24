@@ -181,9 +181,13 @@ class TypeSet(object):
             result = {t}
         return result
 
-    def minimal_matched_types(self, t):
+    @property
+    def minimal_matched_types(self):
         """
-        Return the minimal set of ``t`` subclasses that are matched.
+        Return the minimal set of subclasses that are matched.
+
+        The result is "minimal" in the sense that if B derives from A and both
+        are matched, the result includes only A.
 
         :type t: ASTNodeType
         :rtype: set[ASTNodeType]
