@@ -1,0 +1,12 @@
+main.adb: starting...
+Errors:
+main.txt:2:1: Skipped token b
+main.txt:2:2: Skipped token ;
+
+Assertion failure on unparsing badly parsed unit
+
+Assertion failure on getting badly parsed unit rewriting handle
+Assertion failure on getting rewriting handle for root of badly parsed unit
+
+main.adb: done.
+Done
