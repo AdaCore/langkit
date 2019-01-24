@@ -136,10 +136,11 @@ class TypeSet(object):
         for child in t.subclasses:
             self.include(child)
 
-        # Include its parents if all their children are matched
+        # Include its parents if all their children are matched. Stop right
+        # before the first parent that is concrete.
         parents = list(t.get_inheritance_chain())[:-1]
         for parent in reversed(parents):
-            if parent in self.matched_types:
+            if not parent.abstract or parent in self.matched_types:
                 break
             subclasses = set(parent.subclasses)
             if not subclasses.issubset(self.matched_types):
