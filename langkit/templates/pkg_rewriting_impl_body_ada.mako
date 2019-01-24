@@ -989,10 +989,13 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
             --  Allocate the handle for Node, and don't forget to remove the
             --  backlink to Node itself as it exists only temporarily for
-            --  template instantiation.
+            --  template instantiation. Also, track the newly allocated node
+            --  so that it is freed correctly upon destruction of the
+            --  rewriting context.
             Result := Allocate (Node, Handle, No_Unit_Rewriting_Handle,
                                 Parent);
             Result.Node := null;
+            Nodes_Pools.Append (Handle.New_Nodes, Result);
 
             if Node.Is_Token_Node then
                declare
