@@ -136,6 +136,10 @@ typedef struct {
    ${c_doc(enum_type, 3)}
 % endfor
 
+${grammar_rule_type} ${default_grammar_rule} = ${
+    T.GrammarRule.values_dict[ctx.main_rule_api_name].c_name(capi)
+};
+
 ## Even when metadata and entity structures are not exposed, we need to
 ## emit their type definition them for low-level interfacing.
 % for struct_type in ctx.struct_types:
@@ -193,7 +197,6 @@ ${array_types.decl(T.entity.array)}
         ${array_types.decl(array_type)}
     % endif
 % endfor
-
 
 /*
  * Analysis primitives

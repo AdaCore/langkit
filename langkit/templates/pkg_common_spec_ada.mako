@@ -32,24 +32,6 @@ package ${ada_lib_name}.Common is
    subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
    --  Shortcut for ``GNATCOLL.GMP.Integers.Big_Integer``
 
-   -------------------
-   -- Grammar rules --
-   -------------------
-
-   type Grammar_Rule is (
-      % for i, name in enumerate(ctx.user_rule_names):
-         % if i > 0:
-            ,
-         % endif
-         ${Name.from_lower(name)}_Rule
-      % endfor
-   );
-   ${ada_doc('langkit.grammar_rule_type', 3)}
-
-   Default_Grammar_Rule : constant Grammar_Rule :=
-      ${ctx.main_rule_api_name.camel_with_underscores};
-   --  Default grammar rule to use when parsing analysis units
-
    -------------------------------------
    -- Symbols and token data handlers --
    -------------------------------------
@@ -119,6 +101,10 @@ package ${ada_lib_name}.Common is
          with Convention => C;
       ${ada_doc(enum_type, 6)}
    % endfor
+
+   Default_Grammar_Rule : constant Grammar_Rule :=
+      ${ctx.main_rule_api_name.camel_with_underscores};
+   --  Default grammar rule to use when parsing analysis units
 
    type Lexer_Input_Kind is
      (File,
