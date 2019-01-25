@@ -2,8 +2,8 @@
 
 with Ada.Unchecked_Conversion;
 
-with Langkit_Support.Token_Data_Handlers;
-use Langkit_Support.Token_Data_Handlers;
+with ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Token_Data_Handlers;
 
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 

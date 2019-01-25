@@ -6,10 +6,9 @@ with System;
 with GNATCOLL.VFS;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Token_Data_Handlers;
-use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Token_Data_Handlers;
 
 private package ${ada_lib_name}.Lexer_Implementation is
 

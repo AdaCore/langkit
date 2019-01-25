@@ -3,10 +3,9 @@
 <%namespace name="exts" file="extensions.mako" />
 
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
-use Langkit_Support.Token_Data_Handlers;
 
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
@@ -30,6 +29,13 @@ package ${ada_lib_name}.Common is
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
    --  Default charset to use when creating analysis contexts
 
+   subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
+   --  Shortcut for ``GNATCOLL.GMP.Integers.Big_Integer``
+
+   -------------------
+   -- Grammar rules --
+   -------------------
+
    type Grammar_Rule is (
       % for i, name in enumerate(ctx.user_rule_names):
          % if i > 0:
@@ -44,8 +50,40 @@ package ${ada_lib_name}.Common is
       ${Name.from_lower(ctx.main_rule_name)}_Rule;
    --  Default grammar rule to use when parsing analysis units
 
-   subtype Big_Integer is GNATCOLL.GMP.Integers.Big_Integer;
-   --  Shortcut for ``GNATCOLL.GMP.Integers.Big_Integer``
+   -------------------------------------
+   -- Symbols and token data handlers --
+   -------------------------------------
+
+   type Precomputed_Symbol_Index is
+      % if ctx.symbol_literals:
+         (
+            <%
+               sym_items = ctx.sorted_symbol_literals
+               last_i = len(sym_items) - 1
+            %>
+            % for i, (sym, name) in enumerate(sym_items):
+               ${name}${',' if i < last_i else ''} --  ${sym}
+            % endfor
+         )
+      % else:
+         new Integer range 1 .. 0
+      % endif
+   ;
+
+   function Precomputed_Symbol
+     (Index : Precomputed_Symbol_Index) return Text_Type;
+
+   package Symbols is new Langkit_Support.Symbols
+     (Precomputed_Symbol_Index, Precomputed_Symbol);
+
+   package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
+     (Precomputed_Symbol_Index, Precomputed_Symbol, Symbols);
+
+   use Symbols, Token_Data_Handlers;
+
+   -----------
+   -- Nodes --
+   -----------
 
    ## Output enumerators so that all concrete AST_Node subclasses get their own
    ## kind. Nothing can be an instance of an abstract subclass, so these do not

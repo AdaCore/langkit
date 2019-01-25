@@ -61,6 +61,45 @@ package body ${ada_lib_name}.Common is
       % endfor
    );
 
+   ------------------------
+   -- Precomputed_Symbol --
+   ------------------------
+
+   function Precomputed_Symbol
+     (Index : Precomputed_Symbol_Index) return Text_Type is
+   begin
+      % if ctx.symbol_literals:
+         declare
+            Raw_Text : constant Text_Type := (case Index is
+            <%
+               sym_items = ctx.sorted_symbol_literals
+               last_i = len(sym_items) - 1
+            %>
+            % for i, (sym, name) in enumerate(sym_items):
+               when ${name} => ${string_repr(sym)}${',' if i < last_i else ''}
+            % endfor
+            );
+
+            Symbol : constant Symbolization_Result :=
+               % if ctx.symbol_canonicalizer:
+                  ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
+               % else:
+                  Create_Symbol (Raw_Text)
+               % endif
+            ;
+         begin
+            if Symbol.Success then
+               return Symbol.Symbol;
+            else
+               raise Program_Error with
+                 "Cannot canonicalize symbol literal: " & Image (Raw_Text);
+            end if;
+         end;
+      % else:
+         return (raise Program_Error);
+      % endif
+   end Precomputed_Symbol;
+
    ---------------------
    -- Token_Kind_Name --
    ---------------------

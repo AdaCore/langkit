@@ -23,10 +23,11 @@ with GNAT.Byte_Order_Mark;
 with GNATCOLL.Iconv;
 with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
 
-with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
+with ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Symbols;
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
 % if ctx.symbol_canonicalizer:

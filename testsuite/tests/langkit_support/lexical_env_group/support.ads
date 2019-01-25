@@ -3,6 +3,7 @@ with Ada.Containers; use Ada.Containers;
 with System;
 
 with Langkit_Support.Lexical_Env;
+with Langkit_Support.Symbols;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 with Langkit_Support.Types; use Langkit_Support.Types;
 
@@ -31,24 +32,35 @@ package Support is
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
 
+   type Precomputed_Symbol_Index is new Integer range 1 .. 0;
+   function Precomputed_Symbol
+     (Index : Precomputed_Symbol_Index) return Text_Type
+   is (raise Program_Error);
+
+   package Symbols is new Langkit_Support.Symbols
+     (Precomputed_Symbol_Index, Precomputed_Symbol);
+
    package Envs is new Langkit_Support.Lexical_Env
-     (Unit_T               => Boolean,
-      Get_Version          => Get_Version,
-      No_Unit              => False,
-      Node_Type            => Character,
-      Node_Metadata        => Metadata,
-      No_Node              => ' ',
-      Empty_Metadata       => Default_MD,
-      Node_Hash            => Node_Hash,
-      Metadata_Hash        => Metadata_Hash,
-      Raise_Property_Error => Raise_Property_Error,
-      Combine              => Combine,
-      Can_Reach            => Can_Reach,
-      Is_Rebindable        => Is_Rebindable,
-      Node_Text_Image      => Node_Image,
-      Register_Rebinding   => Register_Rebinding,
-      Ref_Category         => Ref_Category,
-      Ref_Categories       => Ref_Categories);
+     (Precomputed_Symbol_Index => Precomputed_Symbol_Index,
+      Precomputed_Symbol       => Precomputed_Symbol,
+      Symbols                  => Symbols,
+      Unit_T                   => Boolean,
+      Get_Version              => Get_Version,
+      No_Unit                  => False,
+      Node_Type                => Character,
+      Node_Metadata            => Metadata,
+      No_Node                  => ' ',
+      Empty_Metadata           => Default_MD,
+      Node_Hash                => Node_Hash,
+      Metadata_Hash            => Metadata_Hash,
+      Raise_Property_Error     => Raise_Property_Error,
+      Combine                  => Combine,
+      Can_Reach                => Can_Reach,
+      Is_Rebindable            => Is_Rebindable,
+      Node_Text_Image          => Node_Image,
+      Register_Rebinding       => Register_Rebinding,
+      Ref_Category             => Ref_Category,
+      Ref_Categories           => Ref_Categories);
 
 
    procedure Put_Line (Elements : Envs.Entity_Array);

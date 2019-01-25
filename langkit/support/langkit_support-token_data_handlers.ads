@@ -22,11 +22,21 @@
 ------------------------------------------------------------------------------
 
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
+generic
+
+   type Precomputed_Symbol_Index is (<>);
+   with function Precomputed_Symbol
+     (Index : Precomputed_Symbol_Index) return Text_Type is <>;
+   with package Symbols is new Langkit_Support.Symbols
+      (Precomputed_Symbol_Index, Precomputed_Symbol);
+
 package Langkit_Support.Token_Data_Handlers is
+
+   use Symbols;
 
    type Raw_Token_Kind is new Natural;
    --  Kind for a token, stored as a mere number

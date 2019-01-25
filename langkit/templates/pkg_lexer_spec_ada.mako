@@ -8,10 +8,9 @@ with GNATCOLL.VFS;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Text;        use Langkit_Support.Text;
-with Langkit_Support.Token_Data_Handlers;
-use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Token_Data_Handlers;
 
 --  This package provides types and primitives to split text streams into lists
 --  of tokens.

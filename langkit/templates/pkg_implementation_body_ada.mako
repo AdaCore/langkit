@@ -169,10 +169,6 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
-   function Create_Symbol_Literals
-     (Symbols : Symbol_Table) return Symbol_Literal_Array;
-   --  Create pre-computed symbol literals in Symbols and return them
-
    ------------------
    -- Context_Pool --
    ------------------
@@ -257,56 +253,6 @@ package body ${ada_lib_name}.Implementation is
       return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
    end Get_Env_Id;
 
-   % for sym, name in ctx.sorted_symbol_literals:
-      Text_${name} : aliased constant Text_Type := ${string_repr(sym)};
-   % endfor
-
-   Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
-   (
-      % if ctx.symbol_literals:
-         ${(', '.join("{name} => Text_{name}'Access".format(name=name)
-                      for sym, name in ctx.sorted_symbol_literals))}
-      % else:
-         1 .. 0 => <>
-      % endif
-   );
-
-   ----------------------------
-   -- Create_Symbol_Literals --
-   ----------------------------
-
-   function Create_Symbol_Literals
-     (Symbols : Symbol_Table) return Symbol_Literal_Array
-   is
-      Result : Symbol_Literal_Array;
-   begin
-      % if ctx.symbol_literals:
-         for Literal in Symbol_Literal_Type'Range loop
-            declare
-               Raw_Text : Text_Type renames
-                  Symbol_Literals_Text (Literal).all;
-               Symbol   : constant Symbolization_Result :=
-                  % if ctx.symbol_canonicalizer:
-                     ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
-                  % else:
-                     Create_Symbol (Raw_Text)
-                  % endif
-               ;
-            begin
-               if Symbol.Success then
-                  Result (Literal) := Find (Symbols, Symbol.Symbol);
-               else
-                  raise Program_Error with
-                    "Cannot canonicalize symbol literal: " & Image (Raw_Text);
-               end if;
-            end;
-         end loop;
-         return Result;
-      % else:
-         return (1 .. 0 => <>);
-      % endif
-   end Create_Symbol_Literals;
-
    function To_Lookup_Kind_Type (K : Lookup_Kind) return Lookup_Kind_Type
    is
      (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
@@ -339,7 +285,6 @@ package body ${ada_lib_name}.Implementation is
 
       Context.Unit_Provider := Unit_Provider;
 
-      Context.Symbol_Literals := Create_Symbol_Literals (Symbols);
       Initialize (Context.Parser);
 
       Context.Discard_Errors_In_Populate_Lexical_Env := True;
@@ -3765,7 +3710,6 @@ package body ${ada_lib_name}.Implementation is
       begin
          Init_Parser
            (Input, Context.Tab_Stop, Context.With_Trivia, Unit, Unit_TDH,
-            Context.Symbol_Literals'Access,
             Unit.Context.Parser);
       exception
          when Exc : Name_Error =>
