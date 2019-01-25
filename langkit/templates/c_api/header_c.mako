@@ -237,7 +237,8 @@ ${capi.get_name("get_analysis_unit_from_file")}(
         ${analysis_context_type} context,
         const char *filename,
         const char *charset,
-        int reparse);
+        int reparse,
+        ${grammar_rule_type} rule);
 
 ${c_doc('langkit.get_unit_from_buffer')}
 extern ${analysis_unit_type}
@@ -246,7 +247,8 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         const char *filename,
         const char *charset,
         const char *buffer,
-        size_t buffer_size);
+        size_t buffer_size,
+        ${grammar_rule_type} rule);
 
 % if ctx.default_unit_provider:
 ${c_doc('langkit.get_unit_from_provider')}

@@ -162,7 +162,8 @@ package body ${ada_lib_name}.Implementation.C is
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
-      Reparse           : int) return ${analysis_unit_type} is
+      Reparse           : int;
+      Rule              : ${grammar_rule_type}) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -171,7 +172,7 @@ package body ${ada_lib_name}.Implementation.C is
          Value (Filename),
          Value_Or_Empty (Charset),
          Reparse /= 0,
-         ${Name.from_lower(ctx.main_rule_name)}_Rule);
+         Rule);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -182,7 +183,8 @@ package body ${ada_lib_name}.Implementation.C is
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
-      Buffer_Size       : size_t) return ${analysis_unit_type} is
+      Buffer_Size       : size_t;
+      Rule              : ${grammar_rule_type}) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -195,7 +197,7 @@ package body ${ada_lib_name}.Implementation.C is
             Value (Filename),
             Value_Or_Empty (Charset),
             Buffer_Str,
-            ${Name.from_lower(ctx.main_rule_name)}_Rule);
+            Rule);
       end;
    exception
       when Exc : others =>

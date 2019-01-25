@@ -1,0 +1,5 @@
+main.py: Running...
+def f(x) = x + 2 (<class 'libfoolang.DefList'>)
+3 (<class 'libfoolang.Literal'>)
+main.py: Done.
+Done
