@@ -225,6 +225,21 @@ class TypeSet(object):
         return {t for t in self.matched_types
                 if t.base is None or t.base not in self.matched_types}
 
+    @property
+    def minimal_common_type(self):
+        """
+        Return the most specific common ancestor type for matched types.
+
+        :rtype: ASTNodeType
+        """
+        types = list(self.matched_types)
+        assert types
+
+        result = types.pop()
+        while types:
+            result = result.unify(types.pop())
+        return result
+
 
 def issubtype(type, parent_type):
     """
