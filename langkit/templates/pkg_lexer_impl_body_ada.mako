@@ -124,6 +124,12 @@ package body ${ada_lib_name}.Lexer_Implementation is
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
+   function Force_Symbol
+     (TDH : Token_Data_Handler;
+      T   : in out Stored_Token_Data) return Symbol_Type;
+   --  If T has a symbol, return it. Otherwise, force its symbolization and
+   --  return the symbol.
+
    ------------------------
    -- Process_All_Tokens --
    ------------------------
@@ -738,5 +744,56 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       Iconv_Close (State);
    end Decode_Buffer;
+
+   ----------------
+   -- Get_Symbol --
+   ----------------
+
+   function Get_Symbol
+     (Token : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler) return Symbol_Type
+   is
+      subtype Token_Data_Reference is Token_Vectors.Element_Access;
+
+      Token_Data : constant Token_Data_Reference :=
+        (if Token.Trivia = No_Token_Index
+         then Token_Data_Reference
+           (TDH.Tokens.Get_Access (Natural (Token.Token)))
+         else Token_Data_Reference'
+           (TDH.Trivias.Get_Access (Natural (Token.Trivia) - 1).T'Access));
+   begin
+      return Force_Symbol (TDH, Token_Data.all);
+   end Get_Symbol;
+
+   ------------------
+   -- Force_Symbol --
+   ------------------
+
+   function Force_Symbol
+     (TDH : Token_Data_Handler;
+      T   : in out Stored_Token_Data) return Symbols.Symbol_Type is
+   begin
+      if T.Symbol = null then
+         declare
+            Text   : Text_Type renames
+               TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
+            Symbol : constant Symbolization_Result :=
+               % if ctx.symbol_canonicalizer:
+                  ${ctx.symbol_canonicalizer.fqn} (Text)
+               % else:
+                  Create_Symbol (Text)
+               % endif
+            ;
+         begin
+            --  This function is run as part of semantic analysis: there is
+            --  currently no way to report errors from here, so just discard
+            --  canonicalization issues here.
+            if Symbol.Success then
+               T.Symbol := Find (TDH.Symbols, Symbol.Symbol);
+            end if;
+         end;
+      end if;
+      return T.Symbol;
+   end Force_Symbol;
 
 end ${ada_lib_name}.Lexer_Implementation;

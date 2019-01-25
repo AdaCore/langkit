@@ -4,6 +4,8 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer_Implementation;
+use ${ada_lib_name}.Lexer_Implementation;
 
 % if ctx.symbol_canonicalizer:
 with ${ctx.symbol_canonicalizer.unit_fqn};
@@ -30,12 +32,6 @@ package body ${ada_lib_name}.Common is
       First         : out Positive;
       Last          : out Natural);
    --  Implementations for converters soft-links
-
-   function Force_Symbol
-     (TDH : Token_Data_Handler;
-      T   : in out Stored_Token_Data) return Symbol_Type;
-   --  If T has a symbol, return it. Otherwise, force its symbolization and
-   --  return the symbol.
 
    Token_Kind_To_Literals : constant array (Token_Kind) of Text_Access := (
    <% already_seen_set = set() %>
@@ -200,17 +196,8 @@ package body ${ada_lib_name}.Common is
    ----------------
 
    function Get_Symbol (Token : Token_Reference) return Symbol_Type is
-      subtype Token_Data_Reference is Token_Vectors.Element_Access;
-
-      Token_Data : constant Token_Data_Reference :=
-        (if Token.Index.Trivia = No_Token_Index
-         then Token_Data_Reference
-           (Token.TDH.Tokens.Get_Access (Natural (Token.Index.Token)))
-         else Token_Data_Reference'
-           (Token.TDH.Trivias.Get_Access
-              (Natural (Token.Index.Trivia) - 1).T'Access));
    begin
-      return Force_Symbol (Token.TDH.all, Token_Data.all);
+      return Get_Symbol (Token.Index, Token.TDH.all);
    end Get_Symbol;
 
    ----------
@@ -433,37 +420,6 @@ package body ${ada_lib_name}.Common is
       First := Token.Source_First;
       Last := Token.Source_Last;
    end Extract_Token_Text;
-
-   ------------------
-   -- Force_Symbol --
-   ------------------
-
-   function Force_Symbol
-     (TDH : Token_Data_Handler;
-      T   : in out Stored_Token_Data) return Symbol_Type is
-   begin
-      if T.Symbol = null then
-         declare
-            Text   : Text_Type renames
-               TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
-            Symbol : constant Symbolization_Result :=
-               % if ctx.symbol_canonicalizer:
-                  ${ctx.symbol_canonicalizer.fqn} (Text)
-               % else:
-                  Create_Symbol (Text)
-               % endif
-            ;
-         begin
-            --  This function is run as part of semantic analysis: there is
-            --  currently no way to report errors from here, so just discard
-            --  canonicalization issues here.
-            if Symbol.Success then
-               T.Symbol := Find (TDH.Symbols, Symbol.Symbol);
-            end if;
-         end;
-      end if;
-      return T.Symbol;
-   end Force_Symbol;
 
 begin
    Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
