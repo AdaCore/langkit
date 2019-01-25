@@ -1541,7 +1541,14 @@ class _Transform(Parser):
     def get_type(self):
         return resolve_type(self.typ)
 
-    def compute_fields_types(self):
+    @property
+    def fields_parsers(self):
+        """
+        Return the list of parsers that return values for the fields in the
+        node this parser creates.
+
+        :rtype: list[Parser]
+        """
         typ = self.get_type()
 
         # Sub-parsers for Token nodes must parse exactly one token
@@ -1557,26 +1564,23 @@ class _Transform(Parser):
                     typ.dsl_name, self.parser
                 )
             )
-            fields_types = []
+            return []
 
         # Gather field types that come from all child parsers
         elif isinstance(self.parser, _Row):
             # There are multiple fields for _Row parsers
-            fields_types = [parser.get_type()
-                            for parser in self.parser.parsers
-                            if not parser.discard()]
+            return [p for p in self.parser.parsers if not p.discard()]
         elif isinstance(self.parser, _Token):
-            fields_types = []
+            return []
         else:
-            fields_types = [self.parser.get_type()]
+            return [self.parser]
 
-        assert all(t for t in fields_types), (
-            "Internal error when computing field types for {}:"
-            " some are None: {}".format(self.typ, fields_types)
-        )
+    def compute_fields_types(self):
+        fields_types = [p.get_type() for p in self.fields_parsers]
 
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
+        typ = self.get_type()
         nb_transform_values = len(fields_types)
         nb_fields = len(typ.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null))
