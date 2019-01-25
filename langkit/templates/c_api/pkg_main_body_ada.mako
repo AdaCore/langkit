@@ -205,11 +205,11 @@ package body ${ada_lib_name}.Implementation.C is
 
    % if ctx.default_unit_provider:
    function ${capi.get_name("get_analysis_unit_from_provider")}
-     (Context     : ${analysis_context_type};
-      Name        : ${text_type};
-      Kind        : ${unit_kind_type};
-      Charset     : chars_ptr;
-      Reparse     : int) return ${analysis_unit_type} is
+     (Context : ${analysis_context_type};
+      Name    : ${text_type};
+      Kind    : ${unit_kind_type};
+      Charset : chars_ptr;
+      Reparse : int) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
