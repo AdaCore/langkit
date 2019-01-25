@@ -183,8 +183,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    --  Implementation for Rewriting.Apply
 
    function Unit_Handles
-     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array
-      with Pre => Handle /= No_Rewriting_Handle;
+     (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array;
    --  Implementation for Rewriting.Unit_Handles
 
    ---------------------------------------
@@ -238,37 +237,22 @@ private package ${ada_lib_name}.Rewriting_Implementation is
 
    function Child
      (Handle : Node_Rewriting_Handle;
-      Index  : Positive) return Node_Rewriting_Handle
-      with Pre => Handle /= No_Node_Rewriting_Handle
-                  and then Index in 1 .. Children_Count (Handle);
+      Index  : Positive) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Child
 
    procedure Set_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
-      Child  : Node_Rewriting_Handle)
-      with Pre =>
-         Handle /= No_Node_Rewriting_Handle
-         and then Index in 1 .. Children_Count (Handle)
-         and then (Child = No_Node_Rewriting_Handle or else not Tied (Child));
+      Child  : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Set_Child
 
-   function Text (Handle : Node_Rewriting_Handle) return Text_Type
-      with Pre => Handle /= No_Node_Rewriting_Handle
-                  and then Is_Token_Node (Kind (Handle));
+   function Text (Handle : Node_Rewriting_Handle) return Text_Type;
    --  Implementation for Rewriting.Text
 
-   procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type)
-      with Pre => Handle /= No_Node_Rewriting_Handle
-                  and then Is_Token_Node (Kind (Handle));
+   procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type);
    --  Implementation for Rewriting.Set_Text
 
-   procedure Replace (Handle, New_Node : Node_Rewriting_Handle)
-      with Pre =>
-         Handle /= No_Node_Rewriting_Handle
-         and then Tied (Handle)
-         and then (New_Node = No_Node_Rewriting_Handle
-                   or else not Tied (New_Node));
+   procedure Replace (Handle, New_Node : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Replace
 
    --------------------------------------------
