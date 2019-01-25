@@ -45,4 +45,10 @@ private package ${ada_lib_name}.Lexer_Implementation is
       Diagnostics : in out Diagnostics_Vectors.Vector);
    --  Implementation for ${ada_lib_name}.Lexer.Extract_Tokens
 
+   function Get_Symbol
+     (Token : Token_Or_Trivia_Index;
+      TDH   : Token_Data_Handler) return Symbols.Symbol_Type;
+   --  Assuming that ``Token`` refers to a token that contains a symbol, return
+   --  the corresponding symbol.
+
 end ${ada_lib_name}.Lexer_Implementation;
