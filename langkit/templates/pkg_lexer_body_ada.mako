@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
@@ -61,5 +63,7 @@ package body ${ada_lib_name}.Lexer is
 
       Extract_Tokens (Internal_Input, Tab_Stop, With_Trivia, TDH, Diagnostics);
    end Extract_Tokens;
+
+   ${exts.include_extension(ctx.ext('lexer', 'bodies'))}
 
 end ${ada_lib_name}.Lexer;

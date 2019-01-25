@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNATCOLL.VFS;
@@ -64,5 +66,7 @@ package ${ada_lib_name}.Lexer is
    --  can not be open. Raise an ``Unknown_Charset`` exception if the requested
    --  charset is unknown. Raise an ``Invalid_Input`` exception if the source
    --  cannot be decoded using the given ``Charset``.
+
+   ${exts.include_extension(ctx.ext('lexer', 'public_decls'))}
 
 end ${ada_lib_name}.Lexer;
