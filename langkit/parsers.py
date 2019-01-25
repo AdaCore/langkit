@@ -39,6 +39,7 @@ from langkit.expressions import resolve_property
 from langkit.lexer import TokenAction, WithSymbol
 from langkit.utils import (assert_type, copy_with, issubtype,
                            type_check_instance)
+from langkit.utils.types import TypeSet
 
 
 def var_context():
@@ -683,6 +684,26 @@ class Parser(object):
         """
         raise NotImplementedError()
 
+    @property
+    def precise_types(self):
+        """
+        Return the precise set of nodes that this parser can return.
+
+        This is valid only for parsers that return nodes.
+
+        :rtype: TypeSet
+        """
+        assert self.get_type().is_ast_node, (
+            'Node expected, {} found'.format(self.get_type().dsl_name))
+        return self._precise_types()
+
+    def _precise_types(self):
+        """
+        Implementation for precise_types. Relevant subclasses must override
+        this.
+        """
+        raise NotImplementedError()
+
     def generate_code(self):
         """
         Return generated code for this parser into the global context.
@@ -858,6 +879,9 @@ class Skip(Parser):
     def get_type(self):
         return resolve_type(self.dest_node)
 
+    def _precise_types(self):
+        return TypeSet([self.get_type()])
+
     def create_vars_after(self, start_pos):
         self.init_vars(res_var=self.dest_node_parser.res_var)
         self.dummy_node = VarDef('skip_dummy', T.root_node)
@@ -902,6 +926,9 @@ class DontSkip(Parser):
 
     def get_type(self):
         return self.subparser.get_type()
+
+    def _precise_types(self):
+        return self.subparser.precise_types
 
     def create_vars_after(self, start_pos):
         self.init_vars(self.subparser.pos_var, self.subparser.res_var)
@@ -984,6 +1011,21 @@ class Or(Parser):
 
             self.cached_type = res
             return res
+        finally:
+            self.is_processing_type = False
+
+    def _precise_types(self):
+        # We need protection from infinite recursion the same way get_type
+        # does.
+        if self.is_processing_type:
+            return TypeSet()
+
+        try:
+            self.is_processing_type = True
+            result = TypeSet()
+            for p in self.parsers:
+                result.update(p.precise_types)
+            return result
         finally:
             self.is_processing_type = False
 
@@ -1220,6 +1262,9 @@ class List(Parser):
                 )
                 return item_type.list
 
+    def _precise_types(self):
+        return TypeSet([self.get_type()])
+
     def compute_fields_types(self):
         Parser.compute_fields_types(self)
 
@@ -1346,6 +1391,11 @@ class Opt(Parser):
             assert self._booleanize._type
             return resolve_type(self._booleanize._type)
 
+    def _precise_types(self):
+        return (self.parser.precise_types
+                if self._booleanize is None else
+                TypeSet([self.get_type()]))
+
     def create_vars_after(self, start_pos):
         self.init_vars(
             self.parser.pos_var,
@@ -1389,6 +1439,9 @@ class _Extract(Parser):
 
     def get_type(self):
         return self.parser.parsers[self.index].get_type()
+
+    def _precise_types(self):
+        return self.parser.parsers[self.index].precise_types
 
     def create_vars_after(self, start_pos):
         self.init_vars(
@@ -1485,6 +1538,9 @@ class Defer(Parser):
     def get_type(self):
         return self.parser.get_type()
 
+    def _precise_types(self):
+        return self.parser.precise_types
+
     def create_vars_after(self, start_pos):
         self.init_vars()
 
@@ -1541,6 +1597,9 @@ class _Transform(Parser):
     def get_type(self):
         return resolve_type(self.typ)
 
+    def _precise_types(self):
+        return TypeSet([self.get_type()])
+
     @property
     def fields_parsers(self):
         """
@@ -1576,12 +1635,10 @@ class _Transform(Parser):
             return [self.parser]
 
     def compute_fields_types(self):
-        fields_types = [p.get_type() for p in self.fields_parsers]
-
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
         typ = self.get_type()
-        nb_transform_values = len(fields_types)
+        nb_transform_values = len(self.fields_parsers)
         nb_fields = len(typ.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null))
         check_source_language(
@@ -1590,8 +1647,9 @@ class _Transform(Parser):
             .format(nb_transform_values, typ.dsl_name, nb_fields)
         )
 
-        # Propagate types from self to destination node's fields
-        typ.set_types(fields_types)
+        # Register this parser to the constructed type, which will propagate
+        # field types.
+        typ.add_transform(self)
 
         # Handle sub-parsers
         Parser.compute_fields_types(self)
@@ -1645,6 +1703,9 @@ class Null(Parser):
                 if isinstance(self.typ, Parser) else
                 resolve_type(self.typ))
 
+    def _precise_types(self):
+        return TypeSet([self.get_type()])
+
 
 _ = Discard
 
@@ -1687,6 +1748,9 @@ class Predicate(Parser):
 
     def get_type(self):
         return self.parser.get_type()
+
+    def _precise_types(self):
+        return self.parser.precise_types
 
     def generate_code(self):
         self.property_ref = resolve_property(self.property_ref)
