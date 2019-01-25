@@ -95,10 +95,15 @@ class TypeSet(object):
     cases.
     """
 
-    def __init__(self):
+    def __init__(self, types=set()):
+        """
+        :param sequence[T] types: Initial set of matched types.
+        """
         # Working set of ASTNodeType instances for the types that are covered
         # by matchers. Updated as we go through the list of matchers.
         self.matched_types = set()
+        for t in types:
+            self.include(t)
 
     def __eq__(self, type_set):
         return (isinstance(type_set, TypeSet) and
