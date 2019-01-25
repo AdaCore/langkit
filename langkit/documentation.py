@@ -120,9 +120,6 @@ base_langkit_docs = {
         direct access, for performance concerns.
         % endif
     """,
-    'langkit.grammar_rule_type': """
-        Gramar rule to use for parsing.
-    """,
     'langkit.node_type': """
         Data type for all nodes. Nodes are assembled to make up a tree.  See
         the node primitives below to inspect such trees.

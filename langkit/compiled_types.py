@@ -77,6 +77,8 @@ def make_renderer(base_renderer=None):
 
         template_args.update({
             'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
+            'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
+            'default_grammar_rule':  capi.get_name('default_grammar_rule'),
             'root_node_type_name':   type_name,
             'root_node_value_type':  value_type,
             'root_node_kind_name':   kind_name,

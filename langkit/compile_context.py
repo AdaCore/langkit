@@ -29,6 +29,7 @@ from funcy import keep
 from langkit import caching, names
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
+from langkit.compiled_types import EnumType
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
 import langkit.documentation
@@ -867,6 +868,13 @@ class CompileCtx(object):
         # We expose a hash function for public entities, so we must generate
         # the underlying required helpers.
         T.entity.require_hash_function()
+
+        # Create the type for grammar rules
+        EnumType(name='GrammarRule',
+                 location=None,
+                 doc="Gramar rule to use for parsing.",
+                 value_names=[self.grammar_rule_api_name(n)
+                              for n in self.grammar.get_user_defined_rules()])
 
     def check_ple_unit_root(self):
         """

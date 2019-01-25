@@ -346,6 +346,9 @@ class ${enum_type.py_helper}(_Enum):
 % endfor
 
 
+default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.lower}
+
+
 _unit_provider = _hashable_c_pointer()
 
 
