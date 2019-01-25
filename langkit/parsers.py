@@ -1302,7 +1302,10 @@ class Opt(Parser):
         return self.parser._is_left_recursive(rule_name)
 
     def __repr__(self):
-        return "Opt({0})".format(self.parser)
+        args = [str(self.parser)]
+        if self._booleanize:
+            args.append('to_bool={}'.format(self._booleanize))
+        return "Opt({0})".format(', '.join(args))
 
     def __init__(self, *parsers):
         """
