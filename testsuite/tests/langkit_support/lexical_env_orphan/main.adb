@@ -4,11 +4,10 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
 with Langkit_Support.Lexical_Env;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Support; use Support;
-use Support.Envs;
+use Support.Envs, Support.Symbols;
 
 procedure Main is
    Symbols : Symbol_Table := Create_Symbol_Table;

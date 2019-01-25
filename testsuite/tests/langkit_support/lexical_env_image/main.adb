@@ -3,13 +3,12 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Langkit_Support.Lexical_Env;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Text; use Langkit_Support.Text;
 
 with Support; use Support;
 
 procedure Main is
-   use Envs;
+   use Envs, Symbols;
 
    function "+" (S : String) return String_Access is (new String'(S));
 

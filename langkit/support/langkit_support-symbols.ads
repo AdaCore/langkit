@@ -30,6 +30,15 @@ with Langkit_Support.Text; use Langkit_Support.Text;
 
 --  Provide a symbol table for text (Text_Type) identifiers
 
+generic
+
+   type Precomputed_Symbol_Index is (<>);
+   --  Indexes for symbols to pre-compute in each symbol table
+
+   with function Precomputed_Symbol
+     (Index : Precomputed_Symbol_Index) return Text_Type is <>;
+   --  Return the symbol corresponding to the precomputed symbol Index
+
 package Langkit_Support.Symbols is
 
    type Symbol_Type is new Text_Cst_Access;
@@ -46,6 +55,11 @@ package Langkit_Support.Symbols is
 
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
+
+   function Precomputed_Symbol
+     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Symbol_Type
+      with Inline;
+   --  Return the precomputed symbol corresponding to Index
 
    function Find
      (ST     : Symbol_Table;
@@ -85,7 +99,15 @@ private
       Equivalent_Elements => Key_Equal,
       "="                 => "=");
 
-   type Symbol_Table is access Sets.Set;
+   type Precomputed_Symbol_Array is
+      array (Precomputed_Symbol_Index) of Symbol_Type;
+
+   type Symbol_Table_Record is record
+      Symbols     : Sets.Set;
+      Precomputed : Precomputed_Symbol_Array;
+   end record;
+
+   type Symbol_Table is access Symbol_Table_Record;
 
    No_Symbol_Table : constant Symbol_Table := null;
 

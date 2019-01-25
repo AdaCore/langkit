@@ -29,7 +29,7 @@ with System.Storage_Elements; use System.Storage_Elements;
 package body Langkit_Support.Symbols is
 
    procedure Deallocate is new Ada.Unchecked_Deallocation
-     (Sets.Set, Symbol_Table);
+     (Symbol_Table_Record, Symbol_Table);
 
    -----------
    -- Image --
@@ -60,8 +60,27 @@ package body Langkit_Support.Symbols is
 
    function Create_Symbol_Table return Symbol_Table is
    begin
-      return new Sets.Set;
+      return Result : constant Symbol_Table := new Symbol_Table_Record do
+         for I in Precomputed_Symbol_Index'Range loop
+            Result.Precomputed (I) := Find (Result, Precomputed_Symbol (I));
+         end loop;
+      end return;
    end Create_Symbol_Table;
+
+   ------------------------
+   -- Precomputed_Symbol --
+   ------------------------
+
+   function Precomputed_Symbol
+     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Symbol_Type
+   is
+   begin
+      --  For languages that carry no precomputed symbols, Index can have no
+      --  value, so we have noisy but useless warning.
+      pragma Warnings (Off, "value not in range");
+      return ST.Precomputed (Index);
+      pragma Warnings (On, "value not in range");
+   end Precomputed_Symbol;
 
    ----------
    -- Find --
@@ -76,7 +95,7 @@ package body Langkit_Support.Symbols is
       use Sets;
 
       T_Acc  : Symbol_Type := T'Unrestricted_Access;
-      Result : constant Cursor := ST.Find (T_Acc);
+      Result : constant Cursor := ST.Symbols.Find (T_Acc);
    begin
       --  If we already have such a symbol, return the access we already
       --  internalized. Otherwise, give up if asked to.
@@ -90,7 +109,7 @@ package body Langkit_Support.Symbols is
       --  At this point, we know we have to internalize a new symbol
 
       T_Acc := new Text_Type'(T);
-      ST.Insert (T_Acc);
+      ST.Symbols.Insert (T_Acc);
       return T_Acc;
    end Find;
 
@@ -100,7 +119,7 @@ package body Langkit_Support.Symbols is
 
    procedure Destroy (ST : in out Symbol_Table) is
       use Sets;
-      C : Cursor := ST.First;
+      C : Cursor := ST.Symbols.First;
    begin
       while Has_Element (C) loop
          declare

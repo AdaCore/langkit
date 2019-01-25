@@ -5,9 +5,10 @@ with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
-with Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
+with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Symbols;
 with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
@@ -15,7 +16,7 @@ with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
 package body ${ada_lib_name}.Parsers is
-   use all type Langkit_Support.Symbols.Symbol_Type;
+   use all type Symbols.Symbol_Type;
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
@@ -102,20 +103,18 @@ package body ${ada_lib_name}.Parsers is
    -----------------
 
    procedure Init_Parser
-     (Input           : Internal_Lexer_Input;
-      Tab_Stop        : Positive;
-      With_Trivia     : Boolean;
-      Unit            : access Implementation.Analysis_Unit_Type;
-      TDH             : Token_Data_Handler_Access;
-      Symbol_Literals : Symbol_Literal_Array_Access;
-      Parser          : in out Parser_Type) is
+     (Input       : Internal_Lexer_Input;
+      Tab_Stop    : Positive;
+      With_Trivia : Boolean;
+      Unit        : access Implementation.Analysis_Unit_Type;
+      TDH         : Token_Data_Handler_Access;
+      Parser      : in out Parser_Type) is
    begin
       Reset (Parser);
       Extract_Tokens
         (Input, Tab_Stop, With_Trivia, TDH.all, Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
-      Parser.Symbol_Literals := Symbol_Literals;
    end Init_Parser;
 
    ------------------------------

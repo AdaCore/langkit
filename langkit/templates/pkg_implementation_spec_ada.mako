@@ -35,15 +35,14 @@ with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
-with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
-with Langkit_Support.Token_Data_Handlers;
-use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;       use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
 with ${ada_lib_name}.Common;  use ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Symbols;
+use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 
@@ -181,21 +180,24 @@ private package ${ada_lib_name}.Implementation is
    pragma Pack (Ref_Categories);
 
    package AST_Envs is new Langkit_Support.Lexical_Env
-     (Unit_T               => Internal_Unit,
-      No_Unit              => No_Analysis_Unit,
-      Get_Version          => Version,
-      Node_Type            => ${root_node_type_name},
-      Node_Metadata        => ${T.env_md.name},
-      No_Node              => null,
-      Empty_Metadata       => No_Metadata,
-      Node_Hash            => Named_Hash,
-      Metadata_Hash        => Hash,
-      Raise_Property_Error => Raise_Property_Error,
-      Combine              => Combine,
-      Node_Text_Image      => AST_Envs_Node_Text_Image,
-      Register_Rebinding   => Register_Rebinding,
-      Ref_Category         => Ref_Category,
-      Ref_Categories       => Ref_Categories);
+     (Precomputed_Symbol_Index => Precomputed_Symbol_Index,
+      Precomputed_Symbol       => Precomputed_Symbol,
+      Symbols                  => Symbols,
+      Unit_T                   => Internal_Unit,
+      No_Unit                  => No_Analysis_Unit,
+      Get_Version              => Version,
+      Node_Type                => ${root_node_type_name},
+      Node_Metadata            => ${T.env_md.name},
+      No_Node                  => null,
+      Empty_Metadata           => No_Metadata,
+      Node_Hash                => Named_Hash,
+      Metadata_Hash            => Hash,
+      Raise_Property_Error     => Raise_Property_Error,
+      Combine                  => Combine,
+      Node_Text_Image          => AST_Envs_Node_Text_Image,
+      Register_Rebinding       => Register_Rebinding,
+      Ref_Category             => Ref_Category,
+      Ref_Categories           => Ref_Categories);
 
    use AST_Envs;
    subtype Internal_Entity is AST_Envs.Entity;
@@ -849,26 +851,6 @@ private package ${ada_lib_name}.Implementation is
       Hash            => GNATCOLL.VFS.Full_Name_Hash,
       Equivalent_Keys => GNATCOLL.VFS."=");
 
-   type Symbol_Literal_Type is
-      % if ctx.symbol_literals:
-         (
-            <%
-               sym_items = ctx.sorted_symbol_literals
-               last_i = len(sym_items) - 1
-            %>
-            % for i, (sym, name) in enumerate(sym_items):
-               ${name}${',' if i < last_i else ''}
-               --  ${sym}
-            % endfor
-         )
-      % else:
-         new Integer range 1 .. 0
-      % endif
-   ;
-
-   type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
-   type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
-
    function Token_Data (Unit : Internal_Unit) return Token_Data_Handler_Access;
 
    function Lookup_Symbol
@@ -966,9 +948,6 @@ private package ${ada_lib_name}.Implementation is
 
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
-
-      Symbol_Literals : aliased Symbol_Literal_Array;
-      --  List of pre-computed symbols in the Symbols table
 
       Parser : Parser_Type;
       --  Main parser type. TODO: If we want to parse in several tasks, we'll

@@ -2,10 +2,9 @@
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Token_Data_Handlers;
-use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+use ${ada_lib_name}.Common.Token_Data_Handlers;
 limited with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
@@ -41,31 +40,27 @@ private package ${ada_lib_name}.Parsers is
    end record;
 
    type Parsed_Node is access all Implementation.${root_node_value_type}'Class;
-   type Symbol_Literal_Array_Access is
-      access all Implementation.Symbol_Literal_Array;
 
    type Parser_Private_Part is private;
 
    type Parser_Type is record
-      Current_Pos     : Token_Index := First_Token_Index;
-      Last_Fail       : Fail_Info;
-      Diagnostics     : Diagnostics_Vectors.Vector;
-      Unit            : access Implementation.Analysis_Unit_Type;
-      TDH             : Token_Data_Handler_Access;
-      Mem_Pool        : Bump_Ptr_Pool;
-      Symbol_Literals : Symbol_Literal_Array_Access;
-      Private_Part    : Parser_Private_Part;
+      Current_Pos  : Token_Index := First_Token_Index;
+      Last_Fail    : Fail_Info;
+      Diagnostics  : Diagnostics_Vectors.Vector;
+      Unit         : access Implementation.Analysis_Unit_Type;
+      TDH          : Token_Data_Handler_Access;
+      Mem_Pool     : Bump_Ptr_Pool;
+      Private_Part : Parser_Private_Part;
    end record;
 
    procedure Init_Parser
-     (Input           : Internal_Lexer_Input;
-      Tab_Stop        : Positive;
-      With_Trivia     : Boolean;
-      Unit            : access Implementation.Analysis_Unit_Type;
-      TDH             : Token_Data_Handler_Access;
-      Symbol_Literals : Symbol_Literal_Array_Access;
-      Parser          : in out Parser_Type);
-   --  Init a parser to parse the given source. The resulting tokens (and
+     (Input        : Internal_Lexer_Input;
+      Tab_Stop     : Positive;
+      With_Trivia  : Boolean;
+      Unit         : access Implementation.Analysis_Unit_Type;
+      TDH          : Token_Data_Handler_Access;
+      Parser       : in out Parser_Type);
+   --  Init a parsto parse the given source. The resulting tokens (and
    --  trivia if With_Trivia) are stored into TDH.
    --
    --  This can raise:
