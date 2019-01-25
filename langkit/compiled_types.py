@@ -1572,9 +1572,7 @@ class Field(BaseField):
                 # that parsers have computed.
                 types = list(self._types_from_parser)
 
-            self._frozen_types_from_parser = TypeSet()
-            for t in types:
-                self._frozen_types_from_parser.include(t)
+            self._frozen_types_from_parser = TypeSet(types)
 
         return self._frozen_types_from_parser
 
@@ -2403,10 +2401,8 @@ class ASTNodeType(BaseStructType):
             # specify the same number of concrete types: think of an abstract
             # type that is subclassed only once. So use type sets to do the
             # comparison, instead.
-            inferred_types = TypeSet()
-            inferred_types.include(field.inferred_type)
-            field_types = TypeSet()
-            field_types.include(field.type)
+            inferred_types = TypeSet([field.inferred_type])
+            field_types = TypeSet([field.type])
 
             with field.diagnostic_context:
                 WarningSet.imprecise_field_type_annotations.warn_if(
