@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -278,6 +280,8 @@ package ${ada_lib_name}.Common is
 
    Template_Instantiation_Error : exception;
    --  Exception raised when the instantiation of a template cannot be parsed
+
+   ${exts.include_extension(ctx.ext('common', 'public_decls'))}
 
 private
 
