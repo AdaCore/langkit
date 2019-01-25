@@ -1465,18 +1465,17 @@ class Field(BaseField):
         self._overriding = None
         self._concrete_fields = []
 
-        self._types_from_parser = set()
+        self.parsers_from_transform = []
         """
-        Set of types for values that parsers assign to this field. `self.type`
-        must be a supertype of each of them. Note that this can be an empty
-        set, for synthetic nodes.
+        List of parsers that provide a value for this field. Such parsers are
+        children of Transform parsers.
 
-        :type: set[CompiledType]
+        :type: list[langkit.parsers.Parser]
         """
 
-        self._frozen_types_from_parser = None
+        self._precise_types = None
         """
-        Cache for the types_from_parser property.
+        Cache for the precise_types property.
 
         :type: TypeSet
         """
@@ -1490,13 +1489,54 @@ class Field(BaseField):
         """
 
     @property
+    def precise_types(self):
+        """
+        Return the precise set of types that this field can contain.
+
+        This is the same as ``TypeSet([self.type])`` except for nodes created
+        during parsing: for these, ``self.type`` might be too general.
+
+        :rtype: TypeSet
+        """
+        assert self._precise_types is not None
+        return self._precise_types
+
+    def _compute_precise_types(self):
+        if self.struct.is_ast_node and self.struct.synthetic:
+            types = TypeSet([self.type])
+
+        if self.null:
+            # Null fields have their type automatically computed from the
+            # abstract field they override.
+            types = TypeSet([self.type])
+
+        elif self.abstract:
+            # Abstract fields can contain anything the corresponding concrete
+            # one accept, thanks to the laws of inherittance.
+            types = TypeSet()
+            for f in self.concrete_fields:
+                f._compute_precise_types()
+                types.update(f.precise_types)
+
+        elif self.struct.synthetic:
+            types = TypeSet([self.type])
+
+        else:
+            # For regular
+            types = TypeSet()
+            for p in self.parsers_from_transform:
+                types.update(p.precise_types)
+
+        self._precise_types = types
+
+    @property
     def doc(self):
         result = super(Field, self).doc
 
         # If parsers build this field, add a precise list of types it can
         # contain: the field type might be too generic.
         if not self.struct.synthetic:
-            precise_types = self.types_from_parser.minimal_matched_types
+            precise_types = self.precise_types.minimal_matched_types
             if len(precise_types) > 1:
                 type_descr = '\n'.join([
                     'This field can contain one of the following nodes:'
@@ -1538,75 +1578,6 @@ class Field(BaseField):
         """
         assert self.abstract and self._overriding_computed
         return self._concrete_fields
-
-    @property
-    def types_from_parser(self):
-        """
-        Return the set of types inferred from parsers for this field.
-
-        This is None for fields from synthetic nodes.
-
-        :rtype: None|TypeSet
-        """
-        # Make sure that all node types are computed, and thus that we had a
-        # chance to collect all field types from parsers.
-        assert get_context().astnode_types
-
-        # If the result was not already computed, do it and cache it
-        if self._frozen_types_from_parser is None:
-            if self.null:
-                # Null fields have their type automatically computed from the
-                # abstract field they override.
-                types = [self.type]
-
-            elif self.abstract:
-                # For abstract fields, we want to make sure the declared type
-                # matches all types for concrete fields.
-                types = [f.inferred_type for f in self.concrete_fields]
-
-            elif self.struct.synthetic:
-                types = []
-
-            else:
-                # For regular fields, this is just the unification of all types
-                # that parsers have computed.
-                types = list(self._types_from_parser)
-
-            self._frozen_types_from_parser = TypeSet(types)
-
-        return self._frozen_types_from_parser
-
-    def add_type_from_parser(self, t):
-        """
-        Add ``t`` as a possible type for this field, as inferred by parsers.
-
-        :type t: ASTNodeType
-        """
-        # Make sure that we don't add types from parser after freezing type
-        # inference.
-        assert not get_context().astnode_types
-        self._types_from_parser.add(t)
-
-    @property
-    def inferred_type(self):
-        """
-        Return the type for this field that parsers inferred.
-
-        Note that this is None for synthetic nodes, as parsers don't create
-        them. For abstract fields, this is the unification of the type of all
-        overriding fields.
-
-        :rtype: CompiledType
-        """
-        types = list(self.types_from_parser.matched_types)
-        if not types:
-            return None
-
-        # Unify all given types
-        result = types.pop()
-        while types:
-            result = result.unify(types.pop())
-        return result
 
     @property
     def index(self):
@@ -2279,6 +2250,13 @@ class ASTNodeType(BaseStructType):
                 is_abstract=True
             )
 
+        self.transform_parsers = []
+        """
+        List of Transform parsers that produce this node.
+
+        :type: list[langkit.parsers._Transform]
+        """
+
         self.unparser = None
         """
         Unparser for this node. Computed during the NodesToParsers pass.
@@ -2328,23 +2306,37 @@ class ASTNodeType(BaseStructType):
             CompiledTypeRepo.root_grammar_class.generic_list_type,
         )
 
-    def set_types(self, types):
+    def add_transform(self, parser):
         """
-        Associate `types` (a list of CompiledType) to fields in `self` . It is
-        valid to perform this association multiple times as long as types are
-        consistent.
+        Register ``parser`` as a Transform parser that creates this node.
 
-        :type types: list[CompiledType]
+        This also registers sub-parsers in node fields and keep track of field
+        types, checking for consistencies.
+
+        :param langkit.parsers._Transform parser: Transform parser to register.
         """
+        self.transform_parsers.append(parser)
+
+        # Get parse fields except null ones, as parsers don't contribute to
+        # typing these.
+        #
+        # Parsers cannot build abstract types, and only abstract types can have
+        # abstract nodes, so in theory we should not have abstract nodes here.
+        # But at this point this DSL check has not happened yet...
         fields = self.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null,
             concrete_order=True)
 
-        check_source_language(
-            len(fields) == len(types), '{} has {} fields ({} types given). You'
-            ' probably have inconsistent grammar rules and type'
-            ' declarations'.format(self.dsl_name, len(fields), len(types))
-        )
+        parsers = parser.fields_parsers
+        types = [p.get_type() for p in parsers]
+
+        # Propagate sub-parsers to fields to let them compute precise types
+        for f, p in zip(fields, parsers):
+            f.parsers_from_transform.append(p)
+
+        # Typing in the Transform parser is already supposed to check
+        # consistency in the DSL.
+        assert len(fields) == len(types)
 
         # TODO: instead of expecting types to be subtypes, we might want to
         # perform type unification (take the nearest common ancestor for all
@@ -2357,7 +2349,6 @@ class ASTNodeType(BaseStructType):
                         field.qualname, field.type.dsl_name, f_type.dsl_name
                     )
                 )
-            field.add_type_from_parser(f_type)
 
         # Only assign types if self was not yet typed. In the case where it
         # was already typed, we checked above that the new types were
@@ -2387,6 +2378,10 @@ class ASTNodeType(BaseStructType):
                 else:
                     field.type = inferred_type
 
+    def compute_precise_fields_types(self):
+        for f in self.get_parse_fields(include_inherited=False):
+            f._compute_precise_types()
+
     def warn_imprecise_field_type_annotations(self):
         # The type of synthetic node fields are not inferred, so there is
         # nothing to do for them.
@@ -2401,7 +2396,8 @@ class ASTNodeType(BaseStructType):
             # specify the same number of concrete types: think of an abstract
             # type that is subclassed only once. So use type sets to do the
             # comparison, instead.
-            inferred_types = TypeSet([field.inferred_type])
+            common_inferred = field.precise_types.minimal_common_type
+            inferred_types = TypeSet([common_inferred])
             field_types = TypeSet([field.type])
 
             with field.diagnostic_context:
@@ -2409,7 +2405,7 @@ class ASTNodeType(BaseStructType):
                     inferred_types != field_types,
                     'Specified type is {}, but it could be more specific:'
                     ' {}'.format(field.type.dsl_name,
-                                 field.inferred_type.dsl_name)
+                                 common_inferred.dsl_name)
                 )
 
     def get_inheritance_chain(self):
@@ -2672,8 +2668,7 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f.type.is_ast_node,
                     'AST node parse fields must all be AST node themselves.'
-                    ' Here, field type is {}'.format(f.type.dsl_name),
-                    severity=Severity.non_blocking_error
+                    ' Here, field type is {}'.format(f.type.dsl_name)
                 )
 
                 # Null fields must override an abstract one

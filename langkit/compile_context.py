@@ -919,12 +919,12 @@ class CompileCtx(object):
             for f in n.get_parse_fields():
                 with f.diagnostic_context:
                     check_source_language(
-                        ple_unit_root_list not in f._types_from_parser,
+                        ple_unit_root_list not in f.precise_types,
                         '{} cannot appear anywhere in trees except as a root'
                         ' node'.format(ple_unit_root_list.dsl_name)
                     )
                     check_source_language(
-                        self.ple_unit_root not in f._types_from_parser,
+                        self.ple_unit_root not in f.precise_types,
                         '{} cannot appear anywhere in trees except as a child'
                         ' of {} nodes'.format(self.ple_unit_root.dsl_name,
                                               ple_unit_root_list.dsl_name)
@@ -1501,10 +1501,12 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
-            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
             ASTNodePass('validate AST node fields',
                         lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),
+            ASTNodePass('compute precise fields types',
+                        lambda _, n: n.compute_precise_fields_types()),
+            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),
             GlobalPass('compute AST node constants',
