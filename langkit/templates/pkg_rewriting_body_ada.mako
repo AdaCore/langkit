@@ -9,6 +9,7 @@ with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
 
 package body ${ada_lib_name}.Rewriting is
 
+   pragma Warnings (Off, "possible aliasing problem for type");
    function Unwrap_RH is new Ada.Unchecked_Conversion
      (Rewriting_Handle, Impl.Rewriting_Handle);
    function Wrap_RH is new Ada.Unchecked_Conversion
@@ -23,6 +24,7 @@ package body ${ada_lib_name}.Rewriting is
      (Unit_Rewriting_Handle, Impl.Unit_Rewriting_Handle);
    function Wrap_Unit_RH is new Ada.Unchecked_Conversion
      (Impl.Unit_Rewriting_Handle, Unit_Rewriting_Handle);
+   pragma Warnings (On, "possible aliasing problem for type");
 
    function Wrap_Apply_Result
      (Res : Impl.Apply_Result) return Apply_Result;

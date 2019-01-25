@@ -616,10 +616,6 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       --  If this handle represents an already existing node, make sure it is
       --  expanded so we have a handle to return.
       Expand_Children (Handle);
-
-      --  Only regular nodes can have fields. As Index is checked to be
-      --  in-bounds in the pre-condition, we can assume here that the result
-      --  exists.
       return Handle.Children.Vector.Element (Index);
    end Child;
 
@@ -637,9 +633,6 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       --  expanded so that its children vector can be modified.
       Expand_Children (Handle);
 
-      --  Only regular nodes can have fields. As Index is checked to be
-      --  in-bounds in the pre-condition, we can assume here that we have an
-      --  Expanded_Regular children record.
       declare
          Child_Slot : Node_Rewriting_Handle renames
             Handle.Children.Vector.Reference (Index);
