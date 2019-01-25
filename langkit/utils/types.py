@@ -120,6 +120,15 @@ class TypeSet(object):
         """
         return t in self.matched_types
 
+    def update(self, type_set):
+        """
+        Extend self to contain all types in ``type_set``.
+
+        :param TypeSet type_set: Types to include.
+        """
+        assert isinstance(type_set, TypeSet)
+        self.matched_types.update(type_set.matched_types)
+
     def include(self, t):
         """
         Include a class and all of its subclasses.
