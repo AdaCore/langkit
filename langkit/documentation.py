@@ -260,11 +260,7 @@ base_langkit_docs = {
         if any. If ``Reparse`` is true and the analysis unit already exists,
         reparse it from ``Filename``.
 
-        % if lang == 'ada':
         ``Rule`` controls which grammar rule is used to parse the unit.
-
-        .. todo:: Export this feature to the C and Python APIs.
-        % endif
 
         Use ``Charset`` in order to decode the source file. If ``Charset`` is
         empty then use the last charset used for this unit, or use the
@@ -279,11 +275,7 @@ base_langkit_docs = {
         if any. Whether the analysis unit already exists or not, (re)parse it
         from the source code in ``Buffer``.
 
-        % if lang == 'ada':
         ``Rule`` controls which grammar rule is used to parse the unit.
-
-        .. todo:: Export this feature to the C and Python APIs.
-        % endif
 
         Use ``Charset`` in order to decode the source. If ``Charset`` is empty
         then use the last charset used for this unit, or use the context's

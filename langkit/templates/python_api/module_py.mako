@@ -459,17 +459,21 @@ class AnalysisContext(object):
     def __hash__(self):
         return hash(self._c_value)
 
-    def get_from_file(self, filename, charset=None, reparse=False):
+    def get_from_file(self, filename, charset=None, reparse=False,
+                      rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_file', 8)}
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
-                                               charset or '', reparse)
+                                               charset or '', reparse,
+                                               GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
-    def get_from_buffer(self, filename, buffer, charset=None, reparse=False):
+    def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
+                        rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset or '',
-                                                 buffer, len(buffer))
+                                                 buffer, len(buffer),
+                                                 GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
     def get_from_provider(self, name, kind, charset=None, reparse=False):
@@ -1590,7 +1594,8 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_char_p,          # filename
      ctypes.c_char_p,          # charset
      ctypes.c_char_p,          # buffer
-     ctypes.c_size_t],         # buffer_size
+     ctypes.c_size_t,          # buffer_size
+     ctypes.c_int],            # grammar rule
     AnalysisUnit._c_type
 )
 % if ctx.default_unit_provider:
