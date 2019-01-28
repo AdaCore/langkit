@@ -317,10 +317,10 @@ class Annotations(object):
         :param bool rebindable: Whether lexical environments that belong to
             this kind of node can be rebound.
         :param bool custom_short_image: Whether this AST node must use a
-            custom Short_Image implementation. If true, extensions must add the
-            declaration and the definition of a function called
-            `[NODE_NAME]_Short_Image` that takes the node in argument and that
-            returns a `Text_Type` value.
+            custom Short_Text_Image implementation. If true, extensions must
+            add the declaration and the definition of a function called
+            `[NODE_NAME]_Short_Text_Image` that takes the node in argument and
+            that returns a `Text_Type` value.
         :param bool snaps: Whether this node's SLOCs are supposed to snap or
             not. Snapping designates the behavior where the start SLOC will be
             anchored to the previous token's end SLOC rather than the node's
