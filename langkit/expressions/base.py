@@ -16,13 +16,13 @@ from langkit.compiled_types import (
     resolve_type
 )
 from langkit.diagnostics import (
-    Context, DiagnosticError, Severity, WarningSet, check_multiple,
+    Context, DiagnosticError, WarningSet, check_multiple,
     check_source_language, check_type, extract_library_location
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    TypeSet, assert_type, dispatch_on_type, inherited_property,
-    not_implemented_error, memoized, self_memoized, nested
+    assert_type, dispatch_on_type, inherited_property, not_implemented_error,
+    memoized, self_memoized, nested
 )
 
 
@@ -3482,41 +3482,45 @@ class PropertyDef(AbstractNodeData):
 
         :type context: langkit.compile_context.CompileCtx
         """
-        type_set = TypeSet()
-
-        def check_overriding_props(node):
-            """
-            Recursive helper. Checks wether klass and its subclasses override
-            self.
-
-            :param langkit.compiled_types.ASTNodeType node: The AST node to
-                check.
-            """
-            for subclass in node.subclasses:
-                for prop in subclass.get_properties(include_inherited=False):
-                    if prop._name == self._name:
-                        type_set.include(subclass)
-                check_overriding_props(subclass)
 
         if self.abstract and not self.abstract_runtime_check:
-            check_overriding_props(assert_type(self.struct, ASTNodeType))
+            # Look for concrete subclasses in self.struct which do not override
+            # this property. Abstract nodes can keep inherited properties
+            # abstract.
+            concrete_types_not_overriding = []
 
-            # Don't consider abstract types for unmatched types as it's safe to
-            # have a propert that is left abstract on an abstract AST node.
-            unmatched_types = sorted(
-                [t for t in type_set.unmatched_types(self.struct)
-                 if not t.abstract],
-                key=lambda cls: cls.hierarchical_name
-            )
+            def find(node):
+                # If node overrides this property, all is fine. Obviously, do
+                # not check on the very node that defines the abstract
+                # property.
+                if node != self.struct:
+                    for prop in node.get_properties(
+                        include_inherited=False
+                    ):
+                        if (
+                            prop._name == self._name and
+                            (not prop.abstract or prop.abstract_runtime_check)
+                        ):
+                            return
 
+                # Otherwise, if it is an abstract node, all is still find, but
+                # we need to check its own subclasses...
+                if node.abstract:
+                    for subcls in node.subclasses:
+                        find(subcls)
+
+                # Otherwise, we have identified an illegal concrete subclass
+                else:
+                    concrete_types_not_overriding.append(node)
+
+            find(assert_type(self.struct, ASTNodeType))
             check_source_language(
-                not unmatched_types,
+                not concrete_types_not_overriding,
                 'Abstract property {} is not overriden in all subclasses.'
                 ' Missing overriding properties on classes: {}'.format(
-                    self.name.lower, ", ".join([t.dsl_name for t in
-                                                unmatched_types])
-                ),
-                severity=Severity.non_blocking_error
+                    self.name.lower, ", ".join([
+                        t.dsl_name for t in concrete_types_not_overriding])
+                )
             )
 
         if self.base_property:
