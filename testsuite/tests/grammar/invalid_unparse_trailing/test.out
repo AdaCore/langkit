@@ -1,0 +1,5 @@
+Error: Inconsistent postfix tokens for Assignment:
+      <no token>
+    and:
+      ;
+Done
