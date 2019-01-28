@@ -98,27 +98,30 @@
          return L.Node = R.Node;
       end if;
 
-      --  If both args are of the proper AST node type
-      if L.Node.all in ${struct}_Type'Class
-         and then R.Node.all in ${struct}_Type'Class
-      then
-         --  Then call the equality property on it
-         declare
-            R_Entity : constant ${struct_entity} :=
-              (${struct} (R.Node), R.Info);
-         begin
-            return ${eq_prop.name}
-             (${eq_prop.self_arg_name}             => ${struct} (L.Node),
-              ${eq_prop.natural_arguments[0].name} => R_Entity,
-              % for dynvar in eq_prop.dynamic_vars:
-                 ${dynvar.argument_name} => Data.${dynvar.argument_name},
-              % endfor
-              ${eq_prop.entity_info_name}          => L.Info);
-          end;
+      --  Check that both arguments have appropriate types for the property
+      --  call.
+      if L.Node.all not in ${struct}_Type'Class then
+         raise Property_Error with
+            "Wrong type for ${eq_prop.qualname}'s ""self"" argument";
+      elsif R.Node.all not in ${struct}_Type'Class then
+         raise Property_Error with
+            "Wrong type for ${eq_prop.qualname}'s"
+            & " ""${eq_prop.natural_arguments[0].dsl_name}"" argument";
       end if;
 
-      --  Else raise an error
-      raise Constraint_Error with "Wrong type for Eq_${eq_prop.uid} arguments";
+      --  All is good: do the call
+      declare
+         R_Entity : constant ${struct_entity} :=
+           (${struct} (R.Node), R.Info);
+      begin
+         return ${eq_prop.name}
+          (${eq_prop.self_arg_name}             => ${struct} (L.Node),
+           ${eq_prop.natural_arguments[0].name} => R_Entity,
+           % for dynvar in eq_prop.dynamic_vars:
+              ${dynvar.argument_name} => Data.${dynvar.argument_name},
+           % endfor
+           ${eq_prop.entity_info_name}          => L.Info);
+       end;
    end Eq_${eq_prop.uid};
 
 </%def>
