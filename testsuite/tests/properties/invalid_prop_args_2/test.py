@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, Int, Symbol
-from langkit.expressions import Property, langkit_property, AbstractKind
+from langkit.expressions import Property, langkit_property
 from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
@@ -14,9 +14,9 @@ class FooNode(ASTNode):
 class BarCode(FooNode):
     a = Field()
 
-    @langkit_property(kind=AbstractKind.abstract, return_type=Int)
+    @langkit_property(return_type=Int)
     def base_prop(x=Int):
-        pass
+        return x
 
 
 class BarNode(BarCode):
