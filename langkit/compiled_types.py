@@ -2114,8 +2114,8 @@ class ASTNodeType(BaseStructType):
         self.null_constant = names.Name('No') + name
 
         is_root = base is None
-        is_root_list = base is not None and base.is_generic_list_type
-        is_list = base is not None and (is_root_list or base.is_list_type)
+        is_root_list = not is_root and base.is_generic_list_type
+        is_list = not is_root and (is_root_list or base.is_list_type)
 
         if is_root_list:
             assert element_type.is_ast_node
