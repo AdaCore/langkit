@@ -812,6 +812,11 @@ class RegularNodeUnparser(NodeUnparser):
                 other_inter
             )
 
+        self.post_tokens.check_equivalence(
+            'postfix tokens for {}'.format(self.node.dsl_name),
+            other.post_tokens
+        )
+
         result = RegularNodeUnparser(self.node)
         result.pre_tokens = self.pre_tokens
         result.post_tokens = self.post_tokens
