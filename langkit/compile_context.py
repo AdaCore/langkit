@@ -1998,10 +1998,10 @@ class CompileCtx(object):
                 tmp_1
             )
 
-            # Remove leading/trailing underscores, and add 'Symbol' prefix
-            candidate_name = names.Name('Symbol') + names.Name.from_lower(
-                tmp_2.strip('_')
-            )
+            # Remove leading/trailing underscores, and add 'Precomputed_Symbol'
+            # prefix.
+            candidate_name = (names.Name('Precomputed_Symbol') +
+                              names.Name.from_lower(tmp_2.strip('_')))
 
             # If the candidate is already used, add an unique number
             if candidate_name in self.symbol_literals.values():
