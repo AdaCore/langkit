@@ -136,7 +136,7 @@ typedef struct {
    ${c_doc(enum_type, 3)}
 % endfor
 
-${grammar_rule_type} ${default_grammar_rule} = ${
+const ${grammar_rule_type} ${default_grammar_rule} = ${
     T.GrammarRule.values_dict[ctx.main_rule_api_name].c_name(capi)
 };
 
