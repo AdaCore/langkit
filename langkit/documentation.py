@@ -934,14 +934,17 @@ def format_c(text, column):
     return '\n{}'.format(' ' * column).join(lines)
 
 
-def format_python(text, column, rtype=None):
+def format_python(text, column, argtypes=[], rtype=None):
     """
     Format some text as Python docstring.
 
     :param str text: Text to format.
     :param int column: Indentation level for the result.
+    :param list[(str, langkit.compiled_types.CompiledType)]: List of argument
+        names and argument types, to be appended as ``:type:`` Sphinx
+        annotations.
     :param None|langkit.compiled_types.CompiledType rtype: If non-None, append
-        to the formatted docstring a Sphinx-style ``rtype`` annotation, whose
+        to the formatted docstring a Sphinx-style ``:rtype:`` annotation, whose
         type is the given ``rtype``.
     :rtype: str
     """
@@ -967,6 +970,12 @@ def format_python(text, column, rtype=None):
                                       drop_whitespace=True):
                 lines.append(line)
         lines.append('')
+
+    # Add types for arguments, if provided. Note that the ":param:" directive
+    # is required in order for the type to appear in the Sphinx autodoc.
+    for argname, argtype in argtypes:
+        lines.append(':param {}:'.format(argname))
+        lines.append(':type {}: {}'.format(argname, fmt_type(argtype)))
 
     # Add the return type, if provided
     if rtype:

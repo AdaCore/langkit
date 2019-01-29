@@ -68,7 +68,9 @@
     @property
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
-        ${py_doc(field, 8, rtype=field.type)}
+        ${py_doc(field, 8,
+                 argtypes=[(a.name.lower, a.type) for a in field.arguments],
+                 rtype=field.type)}
         ${accessor_body(field)}
         return result
     % endfor
