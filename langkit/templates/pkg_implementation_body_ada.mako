@@ -3377,7 +3377,7 @@ package body ${ada_lib_name}.Implementation is
             Normalized_Filename => No_File,
             Charset             => Default_Charset,
             Rule                =>
-               ${Name.from_lower(ctx.main_rule_name)}_Rule);
+               ${ctx.main_rule_api_name.camel_with_underscores});
       end if;
       return Context.Templates_Unit;
    end Templates_Unit;

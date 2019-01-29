@@ -742,15 +742,6 @@ class CompileCtx(object):
             + x[1].name.camel if x[1] else ""
         ))
 
-    @property
-    def main_rule_name(self):
-        """
-        Shortcut for "self.grammar.main_rule_name".
-
-        :rtype: str
-        """
-        return self.grammar.main_rule_name
-
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -777,18 +768,24 @@ class CompileCtx(object):
         """
         self.logic_binders.add((convert_property, eq_property))
 
-    @property
-    def user_rule_names(self):
+    @staticmethod
+    def grammar_rule_api_name(rule):
         """
-        Return a sorted list of names for user-available grammar rules.
+        Returns the API Name of the given grammar rule name.
 
-        :rtype: list[str]
+        :type rule: basestring
+        :rtype: names.Name
         """
-        return sorted(
-            name
-            for name, parser in self.grammar.rules.items()
-            if not parser.is_dont_skip_parser
-        )
+        return names.Name.from_lower(rule + '_rule')
+
+    @property
+    def main_rule_api_name(self):
+        """
+        Returns the API Name of the grammar's main rule.
+
+        :rtype: names.Name
+        """
+        return self.grammar_rule_api_name(self.grammar.main_rule_name)
 
     def create_enum_node_classes(self):
         """

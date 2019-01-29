@@ -47,7 +47,7 @@ package ${ada_lib_name}.Common is
    ${ada_doc('langkit.grammar_rule_type', 3)}
 
    Default_Grammar_Rule : constant Grammar_Rule :=
-      ${Name.from_lower(ctx.main_rule_name)}_Rule;
+      ${ctx.main_rule_api_name.camel_with_underscores};
    --  Default grammar rule to use when parsing analysis units
 
    -------------------------------------
