@@ -940,8 +940,9 @@ def format_python(text, column, rtype=None):
 
     :param str text: Text to format.
     :param int column: Indentation level for the result.
-    :param str|None rtype: If non-None, append to the formatted docstring a
-        Sphinx-style ``rtype`` annotation, whose type is the given ``rtype``.
+    :param None|langkit.compiled_types.CompiledType rtype: If non-None, append
+        to the formatted docstring a Sphinx-style ``rtype`` annotation, whose
+        type is the given ``rtype``.
     :rtype: str
     """
     from langkit.compile_context import get_context
