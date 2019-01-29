@@ -874,7 +874,7 @@ class CompileCtx(object):
                  location=None,
                  doc="Gramar rule to use for parsing.",
                  value_names=[self.grammar_rule_api_name(n)
-                              for n in self.grammar.get_user_defined_rules()])
+                              for n in self.grammar.user_defined_rules])
 
     def check_ple_unit_root(self):
         """
