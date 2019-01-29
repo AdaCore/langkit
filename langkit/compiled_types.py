@@ -2131,6 +2131,9 @@ class ASTNodeType(BaseStructType):
             if is_list:
                 element_type = base._element_type
 
+        if is_root_list:
+            doc = doc or 'List of {}.'.format(element_type.dsl_name)
+
         super(ASTNodeType, self).__init__(
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
