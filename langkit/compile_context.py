@@ -1144,6 +1144,22 @@ class CompileCtx(object):
         for prop in self.all_properties(include_inherited=False):
             prop._uses_envs = bool(prop._uses_envs)
 
+    def warn_on_undocumented(self, node):
+        """
+        Emit a warning if ``node`` is not documented.
+        """
+        # Ignore nodes that are created during the expansion of EnumNode: users
+        # cannot add documentation for these.
+        if node.base and node.base.is_enum_node:
+            return
+
+        # Likewise for the very abstract generic list type
+        elif node.is_generic_list_type:
+            return
+
+        WarningSet.undocumented_nodes.warn_if(
+            not node._doc, 'This node lacks documentation')
+
     def warn_unused_private_properties(self):
         """
         Check that all private properties are actually used: if one is not,
@@ -1542,6 +1558,8 @@ class CompileCtx(object):
                        CompileCtx.warn_unreachable_base_properties),
             PropertyPass('warn on undocumented public properties',
                          PropertyDef.warn_on_undocumented_public_property),
+            ASTNodePass('warn on undocumented nodes',
+                        CompileCtx.warn_on_undocumented),
             GlobalPass('compute composite types',
                        CompileCtx.compute_composite_types),
             ASTNodePass('expose public structs and arrays types in APIs',

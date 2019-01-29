@@ -16,8 +16,9 @@ from testsuite_support.valgrind import valgrind_cmd
 
 default_warning_set = WarningSet()
 
-# We don't want to be forced to provide dummy docs for public properties in
-# testcases.
+# We don't want to be forced to provide dummy docs for nodes and public
+# properties in testcases.
+default_warning_set.disable(WarningSet.undocumented_nodes)
 default_warning_set.disable(WarningSet.undocumented_public_properties)
 
 pretty_print = bool(int(os.environ.get('LANGKIT_PRETTY_PRINT', '0')))

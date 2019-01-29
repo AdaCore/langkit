@@ -9,6 +9,9 @@ from utils import emit_and_print_errors
 
 
 class FooNode(ASTNode):
+    """
+    Root node.
+    """
 
     # This property is documented, so it should not have a warning
     @langkit_property(public=True, return_type=T.Bool,
@@ -33,6 +36,9 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
+    """
+    Example node.
+    """
 
     # This property is undocumented but it inherits a documented one, so it
     # should not have a warning.

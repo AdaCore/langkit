@@ -90,6 +90,9 @@ class {lang_name}Node(ASTNode):
     pass
 
 class ExampleNode({lang_name}Node):
+    """
+    Example node.
+    """
     pass
 
 {lang_name_slug}_grammar = Grammar('main_rule')

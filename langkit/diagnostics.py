@@ -380,6 +380,10 @@ class WarningSet(object):
         'undocumented-public-properties', True,
         'Warn if a public property is left undocumented.'
     )
+    undocumented_nodes = WarningDescriptor(
+        'undocumented-nodes', True,
+        'Warn if a node is left undocumented.'
+    )
     imprecise_field_type_annotations = WarningDescriptor(
         'imprecise-field-type-annotations', True,
         'Warn about parsing field type annotations that are not as precise as'
@@ -387,7 +391,7 @@ class WarningSet(object):
     )
     available_warnings = [
         prop_only_entities, unused_bindings, unparser_bad_grammar,
-        unused_node_type, undocumented_public_properties,
+        unused_node_type, undocumented_public_properties, undocumented_nodes,
         imprecise_field_type_annotations,
     ]
 
