@@ -102,8 +102,7 @@ package ${ada_lib_name}.Common is
       ${ada_doc(enum_type, 6)}
    % endfor
 
-   Default_Grammar_Rule : constant Grammar_Rule :=
-      ${ctx.main_rule_api_name.camel_with_underscores};
+   Default_Grammar_Rule : constant Grammar_Rule := ${ctx.main_rule_api_name};
    --  Default grammar rule to use when parsing analysis units
 
    type Lexer_Input_Kind is
