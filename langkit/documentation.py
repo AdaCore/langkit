@@ -947,28 +947,40 @@ def format_python(text, column, rtype=None):
     """
     from langkit.compile_context import get_context
 
-    if text.strip() == '' and rtype is None:
-        return ''
+    def fmt_type(t):
+        return get_context().python_api_settings.type_public_name(t)
 
+    # Number of columns for the documentation text itself, per line
     available_width = get_available_width(column)
+
+    # Identation to prepend to every line, except the first
     indent = ' ' * column
-    lines = ['"""']
-    for i, paragraph in enumerate(split_paragraphs(text)):
-        if i > 0:
-            lines.append('')
-        for line in textwrap.wrap(paragraph, available_width,
-                                  drop_whitespace=True):
-            lines.append(indent + line)
 
+    lines = []
+
+    # Add the given documentation text
+    if text.strip():
+        for i, paragraph in enumerate(split_paragraphs(text)):
+            if i > 0:
+                lines.append('')
+            for line in textwrap.wrap(paragraph, available_width,
+                                      drop_whitespace=True):
+                lines.append(line)
+        lines.append('')
+
+    # Add the return type, if provided
     if rtype:
-        if len(lines) > 1:
-            lines.append("")
-        lines.append("{}:rtype: {}".format(
-            indent,
-            get_context().python_api_settings.type_public_name(rtype)
-        ))
+        lines.append(':rtype: {}'.format(fmt_type(rtype)))
 
-    lines.append(indent + '"""')
+    # Remove any trailing empty line
+    if lines and not lines[-1]:
+        lines.pop()
+
+    # Append indentation and multi-line string delimiters
+    lines = ['"""'] + [
+        '{}{}'.format(indent, line) if line else ''
+        for line in lines
+    ] + [indent + '"""']
     return '\n'.join(lines)
 
 
