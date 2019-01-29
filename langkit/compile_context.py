@@ -49,8 +49,8 @@ compile_ctx = None
 
 def get_context(or_none=False):
     """
-    Returns the current compilation context. Meant to be used by the rest of
-    LangKit, in any code that has been called as part of the CompileCtx.emit
+    Return the current compilation context. Meant to be used by the rest of
+    Langkit, in any code that has been called as part of the CompileCtx.emit
     primitive.
 
     :param bool or_none: If True, return None when there is no context.
@@ -772,7 +772,7 @@ class CompileCtx(object):
     @staticmethod
     def grammar_rule_api_name(rule):
         """
-        Returns the API Name of the given grammar rule name.
+        Return the API name of the given grammar rule name.
 
         :type rule: basestring
         :rtype: names.Name
@@ -782,7 +782,7 @@ class CompileCtx(object):
     @property
     def main_rule_api_name(self):
         """
-        Returns the API Name of the grammar's main rule.
+        Return the API name of the grammar's main rule.
 
         :rtype: names.Name
         """
@@ -980,7 +980,7 @@ class CompileCtx(object):
 
     def all_properties(self, *args, **kwargs):
         """
-        Returns an iterator on all the properties. *args and **kwargs are
+        Return an iterator on all the properties. *args and **kwargs are
         forwarded to the call to get_properties that is done on every astnode
         type.
 
@@ -993,7 +993,7 @@ class CompileCtx(object):
     @memoized
     def properties_logging(self):
         """
-        Returns whether logging is activated for any properties in the compile
+        Return whether logging is activated for any properties in the compile
         context.
         """
         return any(prop.activate_tracing for prop in self.all_properties)
@@ -1928,7 +1928,7 @@ class CompileCtx(object):
     @property
     def extensions_dir(self):
         """
-        Returns the absolute path to the extension dir, if it exists on the
+        Return the absolute path to the extension dir, if it exists on the
         disk, or None.
         """
         return self._extensions_dir
