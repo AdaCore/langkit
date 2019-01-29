@@ -331,6 +331,18 @@ class Grammar(object):
 
         return set(self.rules) - referenced_rules
 
+    def get_user_defined_rules(self):
+        """
+        Return the list of rule names defined by the user.
+
+        :rtype: list[str]
+        """
+        return [
+            rule
+            for rule, parser in self.rules.items()
+            if not parser.is_dont_skip_parser
+        ]
+
     def warn_unreferenced_parsing_rules(self, context):
         """
         Emit a warning for unreferenced parsing rules.
