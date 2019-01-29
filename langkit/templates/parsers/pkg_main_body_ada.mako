@@ -192,7 +192,7 @@ package body ${ada_lib_name}.Parsers is
       Result : ${root_node_type_name};
    begin
       case Rule is
-      % for name in ctx.grammar.get_user_defined_rules():
+      % for name in ctx.grammar.user_defined_rules:
          when ${ctx.grammar_rule_api_name(name)} =>
             Result := ${root_node_type_name}
               (${ctx.grammar.rules[name].gen_fn_name}
