@@ -17,6 +17,7 @@ class Matcher(object):
     input will trigger a match.
     """
 
+    @property
     def max_match_length(self):
         """
         Return the maximum number of characters this pattern will accept, or
@@ -44,6 +45,7 @@ class Pattern(Matcher):
     def __init__(self, pattern):
         self.pattern = pattern
 
+    @property
     def max_match_length(self):
         for c in self.pattern:
             check_source_language(
@@ -677,6 +679,7 @@ class Literal(Matcher):
     def __init__(self, to_match):
         self.to_match = to_match
 
+    @property
     def max_match_length(self):
         return len(self.to_match)
 
@@ -699,6 +702,7 @@ class Eof(Matcher):
     def __init__(self):
         pass
 
+    @property
     def max_match_length(self):
         return 0
 
@@ -820,5 +824,5 @@ class Case(RuleAssoc):
 
     def __init__(self, matcher, *alts):
         super(Case, self).__init__(
-            matcher, Case.CaseAction(matcher.max_match_length(), *alts)
+            matcher, Case.CaseAction(matcher.max_match_length, *alts)
         )
