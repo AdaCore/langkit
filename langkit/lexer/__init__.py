@@ -684,30 +684,9 @@ class Literal(Matcher):
         return '"{}"'.format(self.to_match)
 
 
-class NoCase(Matcher):
+class NoCaseLit(Literal):
     """
-    Matcher. This is a shortcut for a case insensitive pattern, so that::
-
-        Pattern(r"\C{abcd}")
-
-    is equivalent to::
-
-        NoCase("abcd")
-    """
-
-    def __init__(self, to_match):
-        self.to_match = to_match
-
-    def max_match_length(self):
-        return Pattern(self.to_match).max_match_length()
-
-    def render(self):
-        return '\C{%s}' % self.to_match
-
-
-class NoCaseLit(NoCase):
-    """
-    Same as NoCase, but for literal patterns.
+    Same as Literal, but with case insensitivity.
     """
     def render(self):
         return '\C{"%s"}' % self.to_match
