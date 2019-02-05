@@ -415,7 +415,9 @@ class _ASTNodeMetaclass(type):
         is_base = ((len(bases) == 1 and bases[0] in (object, BaseStruct))
                    or dct.pop('_ASTNodeList__is_astnode_list_cls', False))
 
-        # Is this the root AST node type?
+        # To determine if this class is the root node type, we use the fact
+        # that we know ASTNode will be the first class after BaseStruct to be
+        # created by this metaclass.
         is_root = not is_base and mcs.root_type is None
 
         if not is_base:
