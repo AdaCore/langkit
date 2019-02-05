@@ -18,10 +18,10 @@ class Matcher(object):
     """
 
     @property
-    def max_match_length(self):
+    def match_length(self):
         """
-        Return the maximum number of characters this pattern will accept, or
-        raise ValueError if it is unknown.
+        Return the number of characters this pattern will accept, or raise
+        ValueError if it is variable.
         :rtype: int
         """
         raise NotImplementedError()
@@ -46,7 +46,7 @@ class Pattern(Matcher):
         self.pattern = pattern
 
     @property
-    def max_match_length(self):
+    def match_length(self):
         for c in self.pattern:
             check_source_language(
                 re.escape(c) == c or c in ('.', '\''),
@@ -680,7 +680,7 @@ class Literal(Matcher):
         self.to_match = to_match
 
     @property
-    def max_match_length(self):
+    def match_length(self):
         return len(self.to_match)
 
     def render(self):
@@ -703,7 +703,7 @@ class Eof(Matcher):
         pass
 
     @property
-    def max_match_length(self):
+    def match_length(self):
         return 0
 
     def render(self):
@@ -787,9 +787,9 @@ class Case(RuleAssoc):
     """
 
     class CaseAction(Action):
-        def __init__(self, max_match_len, *alts):
+        def __init__(self, match_length, *alts):
             super(Case.CaseAction, self).__init__()
-            self.max_match_len = max_match_len
+            self.match_length = match_length
 
             for i, alt in enumerate(alts):
                 check_source_language(
@@ -797,10 +797,10 @@ class Case(RuleAssoc):
                     'Invalid alternative to Case matcher: {}'.format(alt)
                 )
                 check_source_language(
-                    alt.match_size <= max_match_len,
+                    alt.match_size <= match_length,
                     'Match size for this Case alternative ({}) cannot be'
                     ' longer than the Case matcher ({} chars)'.format(
-                        alt.match_size, max_match_len
+                        alt.match_size, match_length
                     )
                 )
 
@@ -818,11 +818,11 @@ class Case(RuleAssoc):
                 "lexer/case_action",
                 alts=self.alts,
                 default_alt=self.default_alt,
-                max_match_len=self.max_match_len,
+                max_match_len=self.match_length,
                 lexer=lexer
             )
 
     def __init__(self, matcher, *alts):
         super(Case, self).__init__(
-            matcher, Case.CaseAction(matcher.max_match_length, *alts)
+            matcher, Case.CaseAction(matcher.match_length, *alts)
         )
