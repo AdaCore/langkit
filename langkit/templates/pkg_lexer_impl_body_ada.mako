@@ -437,7 +437,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
             begin
                if Sloc_Range.Start_Column < Get_Col then
                   --  Emit every necessary dedent token if the line is
-                  -- dedented, and pop values from the stack.
+                  --  dedented, and pop values from the stack.
                   while Sloc_Range.Start_Column < Get_Col loop
                      T.Kind := From_Token_Kind (${lexer.Dedent.ada_name});
                      TDH.Tokens.Append (T);
