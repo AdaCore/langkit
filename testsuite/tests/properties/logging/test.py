@@ -4,7 +4,7 @@ Check that instrumentation properties logging is working property.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (ASTNode, Bool, EnumNode, Field, Struct, UserField,
+from langkit.dsl import (ASTNode, Bool, Field, Struct, UserField,
                          T, env_metadata)
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import New, Self, langkit_property
@@ -23,7 +23,8 @@ class FooNode(ASTNode):
     pass
 
 
-class HasPlus(EnumNode):
+class HasPlus(FooNode):
+    enum_node = True
     qualifier = True
 
 

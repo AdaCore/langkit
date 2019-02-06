@@ -421,36 +421,12 @@ class _ASTNodeMetaclass(type):
         is_root = not is_base and mcs.root_type is None
 
         if not is_base:
-            mcs.process_subclass(name, bases, dct, is_root)
-
-        cls = type.__new__(mcs, name, bases, dct)
+            cls = mcs.process_subclass(name, bases, dct, is_root)
+        else:
+            cls = type.__new__(mcs, name, bases, dct)
 
         if is_root:
             mcs.root_type = cls
-
-        if not is_base:
-            mcs.astnode_types.append(cls)
-
-            # Create the corresponding ASTNodeType subclass
-            if cls._base is _ASTNodeList:
-                # Only root list types are supposed to directly subclass
-                # _ASTNodeList.
-                element_type = cls._element_type._resolve()
-                assert element_type
-                astnode_type = element_type.list
-
-            else:
-                astnode_type = ASTNodeType(
-                    cls._name, cls._location, cls._doc,
-                    base=None if is_root else cls._base._resolve(),
-                    fields=cls._fields,
-                    env_spec=cls._env_spec,
-                    annotations=cls._annotations,
-                    is_token_node=cls._is_token_node,
-                )
-
-            astnode_type.dsl_decl = cls
-            cls._type = astnode_type
 
         return cls
 
@@ -517,20 +493,177 @@ class _ASTNodeMetaclass(type):
                     ' node'
                 )
 
+        # Handle enum nodes
+        with node_ctx:
+            # Forbid inheriting from an enum node
+            check_source_language(
+                not base._is_enum_node,
+                'Inheriting from an enum node is forbidden.'
+            )
+
+            # Determine if this is an enum node
+            is_enum_node = dct.pop('enum_node', False)
+            check_source_language(
+                isinstance(is_enum_node, bool),
+                'The "enum_node" field, when present, must contain a boolean'
+            )
+
+            if is_enum_node:
+                qualifier = dct.pop('qualifier', False)
+                if qualifier:
+                    alternatives = ['present', 'absent']
+                else:
+                    alternatives = dct.pop('alternatives', None)
+                    check_source_language(
+                        alternatives is not None,
+                        'Missing "alternatives" field'
+                    )
+                    check_source_language(
+                        isinstance(alternatives, list) and all(
+                            isinstance(alt, str) for alt in alternatives
+                        ),
+                        'The "alternatives" field must contain a list of '
+                        'strings'
+                    )
+
+                alts = [_EnumNodeAlternative(names.Name.from_lower(alt))
+                        for alt in alternatives]
+
+                allowed_field_types = (_UserField, PropertyDef)
+
         fields = ASTNode.collect_fields(name, location, dct,
                                         allowed_field_types)
 
         DSLType._import_base_type_info(name, location, dct)
+
+        if is_enum_node:
+            mcs.import_enum_node_attributes(dct, qualifier, alts, fields)
+
         dct['_fields'] = fields
         dct['_base'] = base
         dct['_env_spec'] = env_spec
         dct['_is_token_node'] = is_token_node
+        dct['_is_enum_node'] = is_enum_node
 
         # Make sure subclasses don't inherit the "list_type" cache from their
         # base classes.
         dct['_list_type'] = None
         dct['_element_type'] = element_type
         dct['_annotations'] = annotations
+
+        cls = type.__new__(mcs, name, bases, dct)
+
+        mcs.astnode_types.append(cls)
+
+        # Create the corresponding ASTNodeType subclass
+        if cls._base is _ASTNodeList:
+            # Only root list types are supposed to directly subclass
+            # _ASTNodeList.
+            element_type = cls._element_type._resolve()
+            assert element_type
+            astnode_type = element_type.list
+        else:
+            astnode_type = ASTNodeType(
+                cls._name, cls._location, cls._doc,
+                base=None if is_root else cls._base._resolve(),
+                fields=cls._fields,
+                env_spec=cls._env_spec,
+                annotations=cls._annotations,
+
+                # Only enum nodes are abstract at this point
+                is_abstract=cls._is_enum_node,
+
+                is_enum_node=cls._is_enum_node,
+                is_bool_node=cls._is_enum_node and cls._qualifier,
+                is_token_node=cls._is_token_node
+            )
+
+        astnode_type.dsl_decl = cls
+        cls._type = astnode_type
+
+        if is_enum_node:
+            mcs.create_enum_node_alternatives(cls, astnode_type)
+
+        return cls
+
+    @classmethod
+    def import_enum_node_attributes(mcs, dct, qualifier, alts, fields):
+        from langkit.expressions import AbstractProperty
+        from langkit.parsers import _Row, _Transform, Opt
+
+        def create_parser_bool_node(cls, *args):
+            # If the node is a boolean node, then we want to parse the
+            # sub-parsers as an optional parser that will be booleanized.
+            return Opt(*args).as_bool(cls)
+
+        def create_parser_enum_node(cls, alt_typeref, *args):
+            # Otherwise, we want to parse the sub-parsers as a row + transform
+            return _Transform(_Row(*args), alt_typeref)
+
+        def constructor(cls, *args):
+            """
+            This constructor can be used in the grammar to create a parser for
+            this enum node. This is valid only when qualifier is set to True.
+            """
+            assert qualifier
+            return create_parser_bool_node(cls, *args)
+
+        dct['__new__'] = constructor
+        dct['_create_parser'] = classmethod(
+            create_parser_bool_node if qualifier
+            else create_parser_enum_node
+        )
+
+        dct['_alternatives'] = alts
+        dct['_qualifier'] = qualifier
+
+        # Make _EnumNodeAlternative instances available as attributes of the
+        # enum node class for a convenient way to create parsers for them.
+        for alt in alts:
+            attr_name = (names.Name('alt') + alt.name).lower
+            dct[attr_name] = alt
+
+        if qualifier:
+            # Add the synthetic "as_bool" abstract property
+            present_alt = alts[0]
+            prop = AbstractProperty(
+                type=T.Bool, public=True,
+                doc='Return whether this is an instance of {}'.format(
+                    (dct['_name'] + present_alt.name).camel
+                )
+            )
+            prop.location = dct['_location']
+            fields.append(('as_bool', prop))
+
+    @classmethod
+    def create_enum_node_alternatives(mcs, enum_cls, enum_type):
+        from langkit.expressions import Property
+
+        enum_type.alternatives = enum_cls._alternatives
+        enum_type.is_type_resolved = True
+        enum_type._alternatives = []
+
+        for alt in enum_cls._alternatives:
+            alt_name = enum_cls._name + alt.name
+
+            # Generate the derived class corresponding to this alternative
+            fields = []
+            if enum_cls._qualifier:
+                prop = Property(alt.name.lower == 'present')
+                prop.location = enum_cls._location
+                fields.append(('as_bool', prop))
+
+            alt_type = ASTNodeType(
+                name=alt_name, location=None, doc=None,
+                base=enum_type,
+                fields=fields
+            )
+            alt._type = alt_type
+            alt._enum_node_cls = enum_cls
+
+            # Make the alternative derived class accessible from the root
+            # node for the enum.
+            enum_type._alternatives.append(alt_type)
 
 
 class ASTNode(BaseStruct):
@@ -572,6 +705,12 @@ class ASTNode(BaseStruct):
     _is_token_node = None
     """
     Whether this node only materializes a token.
+    :type: bool
+    """
+
+    _is_enum_node = None
+    """
+    Whether this node defines an enum node.
     :type: bool
     """
 
@@ -656,186 +795,49 @@ def has_abstract_list(cls):
     return cls
 
 
-class _EnumNodeMetaclass(type):
+class _EnumNodeAlternative(object):
+    def __init__(self, name):
+        """
+        :param names.Name name: Alternative name.
+        """
+        self.name = name
 
-    enum_types = []
-    """
-    List of all EnumNode subclasses, excluding EnumNode itself.
+        self._enum_node_cls = None
+        self._type = None
 
-    :type: list[EnumNode]
-    """
+    @property
+    def enum_node_cls(self):
+        """
+        The enum node class that this alternative belongs to.
+        """
+        assert self._enum_node_cls
+        return self._enum_node_cls
 
-    @classmethod
-    def reset(cls):
-        cls.enum_types = []
+    @property
+    def type(self):
+        """
+        ASTNodeType subclass corresponding to this alternative.
+        """
+        assert self._type
+        return self._type
 
-    def __new__(mcs, name, bases, dct):
-        # Don't do anything for EnumNode itself: it's just a placeholder
-        if bases == (BaseStruct, ):
-            return type.__new__(mcs, name, bases, dct)
-
-        location = extract_library_location()
-        with Context('in {}'.format(name), location):
-
-            qualifier = dct.pop('qualifier', False)
-            if qualifier:
-                alternatives = ['present', 'absent']
-            else:
-                alternatives = dct.pop('alternatives', None)
-                check_source_language(
-                    alternatives is not None,
-                    'Missing "alternatives" field'
-                )
-                check_source_language(
-                    isinstance(alternatives, list)
-                    and all(isinstance(alt, str) for alt in alternatives),
-                    'The "alternatives" field must contain a list of strings'
-                )
-
-        alts = [EnumNode.Alternative(names.Name.from_lower(alt))
-                for alt in alternatives]
-        fields = EnumNode.collect_fields(name, location, dct,
-                                         (_UserField, PropertyDef))
-
-        DSLType._import_base_type_info(name, location, dct)
-        dct['_fields'] = fields
-        dct['_alternatives'] = alts
-        dct['_qualifier'] = qualifier
-        if qualifier:
-            dct['_alt_present'], dct['_alt_absent'] = alts
-
-        # Make Alternative instances available as EnumNode class attributes for
-        # a convenient way to create parsers for them.
-        for alt in alts:
-            attr_name = (names.Name('alt') + alt.name).lower
-            dct[attr_name] = alt
-
-        cls = type.__new__(mcs, name, bases, dct)
-
-        mcs.enum_types.append(cls)
-        for alt in alts:
-            alt._enum_node_cls = cls
-
-        return cls
-
-
-class EnumNode(BaseStruct):
-    """
-    Using this base class, users can create a hierarchy of nodes deriving from
-    the root node that are similar to an enum type. By declaring an EnumNode
-    derived type in the following way::
-
-        class Foo(T.EnumNode):
-            alternatives = ['bar', 'baz']
-
-    The user will get:
-
-    * An abstract node type the base type, deriving from T.root_node, denoted
-      by Foo.
-    * A concrete but empty node type for every alternative of the enum type,
-      that can be denoted by Foo.alt_{alt_name}.
-
-    Instead of providing explicit alternatives, the user can just define the
-    EnumNode as a qualifier node::
-
-        class Foo(T.EnumNode):
-            qualifier = True
-
-    In which case, alternatives will automatically be "present" and "absent",
-    and an as_bool method will be automatically generated.
-    """
-
-    __metaclass__ = _EnumNodeMetaclass
-
-    _alternatives = None
-    """
-    List of alternatives: one for each enum value.
-    :type: list[EnumNode.Alternative]
-    """
-
-    _qualifier = None
-    """
-    If provided and set to True, the alternatives used are "present" and
-    "absent".
-
-    :type: bool
-    """
-
-    _alt_present = None
-    _alt_absent = None
-    """
-    If ``_qualifier`` is true, direct references to both alternatives.
-
-    :type: EnumNode.Alternative
-    """
-
-    class Alternative(object):
-        def __init__(self, name):
-            """
-            :param names.Name name: Alternative name.
-            """
-            self.name = name
-
-            self._enum_node_cls = None
-            self._type = None
-
-        @property
-        def enum_node_cls(self):
-            """
-            EnumNode subclass that this alternative belongs to.
-            """
-            assert self._enum_node_cls
-            return self._enum_node_cls
-
-        @property
-        def type(self):
-            """
-            ASTNodeType subclass corresponding to this alternative.
-            """
+    @property
+    def type_ref(self):
+        """
+        TypeRepo.Defer instance for the ASTNodeType subclass corresponding
+        to this alternative.
+        """
+        def get():
             assert self._type
             return self._type
+        return T.Defer(get, 'Alternative({})'.format(self.name.camel))
 
-        @property
-        def type_ref(self):
-            """
-            TypeRepo.Defer instance for the ASTNodeType subclass corresponding
-            to this alternative.
-            """
-            def get():
-                assert self._type
-                return self._type
-            return T.Defer(get, 'Alternative({})'.format(self.name.camel))
-
-        def __call__(self, *args):
-            """
-            Parser constructor for this alternative.
-            :rtype: langkit.parsers.Parser
-            """
-            return self.enum_node_cls._create_parser(self.type_ref, *args)
-
-    def __new__(cls, *args):
+    def __call__(self, *args):
         """
-        This constructor can be used in the grammar to create a parser for this
-        EnumNode. This is valid only when qualifier is set to True.
+        Parser constructor for this alternative.
+        :rtype: langkit.parsers.Parser
         """
-        assert cls._qualifier
-        return cls._create_parser(None, *args)
-
-    @classmethod
-    def _create_parser(cls, typeref, *args):
-        """
-        Construct a parser for this EnumNode subclass.
-        """
-        from langkit.parsers import _Row, _Transform, Opt
-
-        if cls._qualifier:
-            # If the node is a boolean node, then we want to parse the
-            # sub-parsers as an optional parser that will be booleanized.
-            return Opt(*args).as_bool(cls)
-
-        else:
-            # Otherwise, we want to parse the sub-parsers as a row + transform
-            return _Transform(_Row(*args), typeref)
+        return self.enum_node_cls._create_parser(self.type_ref, *args)
 
 
 def Field(repr=True, doc=None, type=None):

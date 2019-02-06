@@ -4,7 +4,7 @@ Test that the "is_ghost" AST node predicate works in the Python API.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, EnumNode, Field, T
+from langkit.dsl import ASTNode, Field, T
 from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
@@ -15,11 +15,13 @@ class FooNode(ASTNode):
     pass
 
 
-class Enum(EnumNode):
+class Enum(FooNode):
+    enum_node = True
     alternatives = ['null', 'example', 'default']
 
 
-class PlusQualifier(EnumNode):
+class PlusQualifier(FooNode):
+    enum_node = True
     qualifier = True
 
 

@@ -10,7 +10,7 @@ Test that the populate lexical env pass is resilent to errors:
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, EnumNode, Field, T, abstract
+from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env, add_env, do
 from langkit.expressions import (AbstractProperty, If, New, No, PropertyError,
                                  Self, langkit_property)
@@ -24,7 +24,8 @@ class FooNode(ASTNode):
     pass
 
 
-class HasError(EnumNode):
+class HasError(FooNode):
+    enum_node = True
     qualifier = True
 
 
