@@ -20,7 +20,6 @@ def reset():
 
     langkit.dsl._StructMetaclass.reset()
     langkit.dsl._ASTNodeMetaclass.reset()
-    langkit.dsl._EnumNodeMetaclass.reset()
     langkit.dsl._EnumMetaclass.reset()
 
     langkit.expressions.base.Entity.unfreeze()

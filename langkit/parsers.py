@@ -1329,9 +1329,9 @@ class Opt(Parser):
 
         self._booleanize = None
         """
-        If it is an EnumNode subclass with qualifier set to True, then the
-        result is booleanized into the corresponding two alternatives.
-        Otherwise, must be None.
+        If it is an enum node with qualifier set to True, then the result is
+        booleanized into the corresponding two alternatives. Otherwise, must be
+        None.
 
         :type: DSLType|CompiledType|None
         """
@@ -1365,7 +1365,7 @@ class Opt(Parser):
     def as_bool(self, dest):
         """
         Return the self parser, modified to return `dest` nodes rather than the
-        sub-parser result. `dest` must be a qualifier EnumNode: the parser
+        sub-parser result. `dest` must be a bool enum node: the parser
         result will be the "true" qualifier if the parse was successful, and
         the "false" qualifier otherwise.
 
@@ -1376,14 +1376,13 @@ class Opt(Parser):
 
             Opt("overriding").as_bool(OverridingQualifier)
 
-        :param langkit.dsl.EnumNode dest: EnumNode subclass with qualifier set
-            to True. The result will be booleanized using this enum type.
+        :param langkit.dsl.ASTNode dest: An enum node with qualifier set to
+            True. The result will be booleanized using this enum node type.
 
         :rtype: Opt
         """
-        from langkit.dsl import EnumNode
-
-        return copy_with(self, _booleanize=assert_type(dest, EnumNode))
+        assert dest._is_enum_node
+        return copy_with(self, _booleanize=dest)
 
     @property
     def booleanized_type(self):

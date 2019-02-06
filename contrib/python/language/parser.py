@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, EnumNode, T, abstract
+from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Self, Property, No
 from langkit.parsers import Grammar, List, Opt, Or, Pick, _
@@ -11,16 +11,18 @@ def newlines():
     return _(List(P.nl, empty_valid=True))
 
 
-class VarArgsFlag(EnumNode):
-    qualifier = True
-
-
-class KwArgsFlag(EnumNode):
-    qualifier = True
-
-
 class PythonNode(ASTNode):
     pass
+
+
+class VarArgsFlag(PythonNode):
+    enum_node = True
+    qualifier = True
+
+
+class KwArgsFlag(PythonNode):
+    enum_node = True
+    qualifier = True
 
 
 @abstract
@@ -253,7 +255,8 @@ class NotOp(Expr):
     expr = Field(type=T.Expr)
 
 
-class CompOpKind(EnumNode):
+class CompOpKind(PythonNode):
+    enum_node = True
     alternatives = [
         'lt', 'gt', 'eq', 'gte', 'lte', 'diamond', 'noteq',
         'in', 'notin', 'is', 'isnot'

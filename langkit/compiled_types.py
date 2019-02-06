@@ -2095,10 +2095,10 @@ class ASTNodeType(BaseStructType):
             list type is actually created.
 
         :param bool is_enum_node: Whether this node comes from the expansion of
-            langkit.dsl.EnumNode.
+            an enum node.
 
         :param bool is_bool_node: Whether this node is a qualifier coming from
-            the expansion of langkit.dsl.EnumNode.
+            the expansion of an enum node.
 
         :param bool is_token_node: Whether this node only materializes a parsed
             token. If so, grammars that produce such nodes must parse only one
@@ -3112,62 +3112,6 @@ class ArrayType(CompiledType):
         return [self.element_type]
 
 
-def create_enum_node_types(cls):
-    """
-    Create the ASTNodeType instances to implement a EnumNode.
-
-    :param langkit.dsl.EnumNode cls: EnumNode subclass that describes this
-        type.
-    """
-    from langkit.expressions import Property, AbstractProperty
-
-    is_bool_node = bool(cls._qualifier)
-
-    fields = list(cls._fields)
-    if is_bool_node:
-        present_alt = cls._alternatives[0]
-        prop = AbstractProperty(
-            type=T.Bool, public=True,
-            doc='Return whether this is an instance of {}'.format(
-                (cls._name + present_alt.name).camel
-            )
-        )
-        prop.location = cls._location
-        fields.append(('as_bool', prop))
-
-    # Generate the abstract base node type
-    base_enum_node = ASTNodeType(
-        name=cls._name, location=cls._location, doc=cls._doc, base=T.root_node,
-        fields=fields, is_abstract=True, is_enum_node=True,
-        is_bool_node=is_bool_node,
-    )
-    base_enum_node.alternatives = cls._alternatives
-    base_enum_node.is_type_resolved = True
-    base_enum_node._alternatives = []
-    cls._type = base_enum_node
-
-    for alt in cls._alternatives:
-        alt_name = cls._name + alt.name
-
-        # Generate the derived class corresponding to this alternative
-        fields = []
-        if is_bool_node:
-            prop = Property(alt.name.lower == 'present')
-            prop.location = cls._location
-            fields.append(('as_bool', prop))
-
-        alt_type = ASTNodeType(
-            name=alt_name, location=None, doc=None,
-            base=base_enum_node,
-            fields=fields
-        )
-        alt._type = alt_type
-
-        # Make the alternative derived class accessible from the root node for
-        # the enum.
-        base_enum_node._alternatives.append(alt_type)
-
-
 class EnumType(CompiledType):
     """
     Ada-like enumeration type.
@@ -3624,12 +3568,12 @@ def resolve_type(typeref):
         * a TypeRepo.Defer instance: it is deferred;
         * a DSLType subclass: the corresponding CompiledType instance is
           retrieved;
-        * an EnumNode.Alternative instance: the type corresponding to this
+        * an _EnumNodeAlternative instance: the type corresponding to this
           alternative is retrieved.
 
     :rtype: CompiledType
     """
-    from langkit.dsl import DSLType, EnumNode
+    from langkit.dsl import DSLType, _EnumNodeAlternative
 
     if typeref is None or isinstance(typeref, CompiledType):
         result = typeref
@@ -3640,7 +3584,7 @@ def resolve_type(typeref):
     elif issubtype(typeref, DSLType):
         result = typeref._resolve()
 
-    elif isinstance(typeref, EnumNode.Alternative):
+    elif isinstance(typeref, _EnumNodeAlternative):
         result = typeref.type
 
     else:

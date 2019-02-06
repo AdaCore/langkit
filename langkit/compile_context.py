@@ -788,15 +788,6 @@ class CompileCtx(object):
         """
         return self.grammar_rule_api_name(self.grammar.main_rule_name)
 
-    def create_enum_node_classes(self):
-        """
-        Expand all EnumNode subclasses into ASTNodeType instances.
-        """
-        from langkit.dsl import _EnumNodeMetaclass
-        from langkit.compiled_types import create_enum_node_types
-        for enum_type in _EnumNodeMetaclass.enum_types:
-            create_enum_node_types(enum_type)
-
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
@@ -1148,8 +1139,8 @@ class CompileCtx(object):
         """
         Emit a warning if ``node`` is not documented.
         """
-        # Ignore nodes that are created during the expansion of EnumNode: users
-        # cannot add documentation for these.
+        # Ignore nodes that are created during the expansion of enum nodes:
+        # users cannot add documentation for these.
         if node.base and node.base.is_enum_node:
             return
 
@@ -1511,8 +1502,6 @@ class CompileCtx(object):
             EnvSpecPass('create internal properties for env specs',
                         EnvSpec.create_properties,
                         iter_metaclass=True),
-            GlobalPass('create enum node classes',
-                       CompileCtx.create_enum_node_classes),
             GrammarRulePass('compute fields types',
                             lambda p: p.compute_fields_types()),
 
