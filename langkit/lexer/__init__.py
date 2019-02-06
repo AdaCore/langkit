@@ -8,7 +8,18 @@ from langkit.compile_context import get_context
 from langkit.compiled_types import render
 from langkit.diagnostics import (Context, check_source_language,
                                  extract_library_location)
+from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
 from langkit.names import Name
+
+
+# TODO: create a compilation pass to lower the lexer specification to a DFA.
+# This will let us report errors and do the real work before generating
+# sources.
+
+# All "signature" properties in classes below are used to identify the whole
+# lexer specification, and thus implement a cache. If the signature does not
+# change from one run to another, we can avoid computing the DFA and generating
+# the state machine sources, which can be costly.
 
 
 class Matcher(object):
@@ -26,11 +37,18 @@ class Matcher(object):
         """
         raise NotImplementedError()
 
-    def render(self):
+    @property
+    def regexp(self):
         """
-        Render method to be overloaded in subclasses.
+        Return a regular expression (syntax for langkit.lexer.regexp) to
+        implement this matcher.
+
         :rtype: str
         """
+        raise NotImplementedError()
+
+    @property
+    def signature(self):
         raise NotImplementedError()
 
 
@@ -55,8 +73,13 @@ class Pattern(Matcher):
             )
         return len(self.pattern)
 
-    def render(self):
+    @property
+    def regexp(self):
         return self.pattern
+
+    @property
+    def signature(self):
+        return ('Pattern', self.pattern)
 
 
 class Action(object):
@@ -65,15 +88,13 @@ class Action(object):
     match.
     """
 
-    def render(self, lexer):
-        """
-        Render method to be overloaded in subclasses.
+    @property
+    def is_case_action(self):
+        return isinstance(self, Case.CaseAction)
 
-        :param Lexer lexer: The instance of the lexer from which this render
-          function has been called.
-        :rtype: str
-        """
-        raise NotImplementedError()
+    @property
+    def is_ignore(self):
+        return isinstance(self, Ignore)
 
 
 class TokenAction(Action):
@@ -131,17 +152,15 @@ class TokenAction(Action):
         """
 
     @property
+    def signature(self):
+        return (type(self).__name__,
+                self.name.camel,
+                self.start_ignore_layout,
+                self.end_ignore_layout)
+
+    @property
     def value(self):
         return self._index
-
-    def render(self, lexer):
-        """
-        Return Quex code to implement this token action.
-
-        :param Lexer lexer: Corresponding lexer.
-        :rtype: str
-        """
-        raise NotImplementedError()
 
     def __call__(self, *args, **kwargs):
         """
@@ -197,9 +216,7 @@ class WithText(TokenAction):
             # String tokens will keep the associated text when lexed
             StringLiteral = WithText()
     """
-
-    def render(self, lexer):
-        return "=> {}(Lexeme);".format(self.quex_name)
+    pass
 
 
 class WithTrivia(WithText):
@@ -226,9 +243,7 @@ class WithSymbol(TokenAction):
             # Identifiers will keep an internalized version of the text
             Identifier = WithSymbol()
     """
-
-    def render(self, lexer):
-        return "=> {}(Lexeme);".format(self.quex_name)
+    pass
 
 
 class TokenFamily(object):
@@ -260,6 +275,11 @@ class TokenFamily(object):
     @property
     def ada_name(self):
         return self.name.camel_with_underscores
+
+    @property
+    def signature(self):
+        return ('TokenFamily', self.name.camel,
+                sorted(t.signature for t in self.tokens))
 
     @property
     def diagnostic_context(self):
@@ -334,6 +354,14 @@ class LexerToken(object):
     def __len__(self):
         return len(self.tokens)
 
+    @property
+    def signature(self):
+        return ('LexerToken',
+                sorted(t.signature for t in self.tokens),
+                sorted(tf.signature for tf in self.token_families),
+                sorted((t.name.camel, tf.name.camel)
+                       for t, tf in self.token_to_family.iteritems()))
+
 
 class Patterns(object):
     """
@@ -398,9 +426,6 @@ class Lexer(object):
             super(Lexer.PredefPattern, self).__init__(pattern)
             self.name = name
 
-        def render(self):
-            return "{{{}}}".format(self.name)
-
     def __init__(self, tokens_class, track_indent=False, pre_rules=[]):
         """
         :param type tokens_class: The class for the lexer's tokens.
@@ -413,6 +438,8 @@ class Lexer(object):
             rules this way is the same as calling add_rules.
         :type pre_rules: list[(Matcher, Action)|RuleAssoc]
         """
+        self.regexps = RegexpCollection()
+
         self.tokens = tokens_class(track_indent)
         assert isinstance(self.tokens, LexerToken)
 
@@ -453,7 +480,7 @@ class Lexer(object):
 
         if self.track_indent:
             self.add_rules(
-                (Literal(r'\n'), self.tokens.Newline),
+                (Literal('\n'), self.tokens.Newline),
             )
 
         self.spacing_table = defaultdict(lambda: defaultdict(lambda: False))
@@ -464,7 +491,7 @@ class Lexer(object):
         A space must be inserted between two token T1 and T2 iff
         ``spacing_rules[T1.family][T2.family]`` is true.
 
-        :type: set[(TokenFamily, TokenFamily)]
+        :type: dict[TokenFamily, dict[TokenFamily, bool]]
         """
 
         self.newline_after = set()
@@ -473,6 +500,26 @@ class Lexer(object):
 
         :type: set[TokenAction]
         """
+
+    @property
+    def signature(self):
+        return ('Lexer',
+                self.track_indent,
+                self.prefix,
+                self.tokens.signature,
+
+                sorted(p.signature for p in self.__patterns),
+
+                # Do not sort signatures for rules as their order matters
+                [r.signature for r in self.rules],
+
+                sorted((t1.name.camel,
+                        sorted(t2.name.camel
+                               for t2, present in mapping.iteritems()
+                               if present))
+                       for t1, mapping in self.spacing_table.iteritems()),
+
+                sorted(tf.name.camel for tf in self.newline_after))
 
     def add_patterns(self, *patterns):
         """
@@ -500,6 +547,8 @@ class Lexer(object):
             predef_pattern = Lexer.PredefPattern(k, v)
             setattr(self.patterns, k.lower(), predef_pattern)
             self.__patterns.append(predef_pattern)
+
+        self.regexps.add_patterns(**dict(patterns))
 
     def add_rules(self, *rules):
         """
@@ -566,6 +615,45 @@ class Lexer(object):
         :type tokens: list[TokenAction]
         """
         self.newline_after.update(tokens)
+
+    def build_dfa_code(self):
+        """
+        Build the DFA that implements this lexer (self.dfa_code).
+        """
+        # The first rule that was added must have precedence when multiple
+        # rules compete for the longest match. To implement this behavior, we
+        # associate increasing ids to each token action.
+        id_generator = count(0)
+
+        nfas = []
+        for i, a in enumerate(self.rules):
+            # TODO: handle all assocs
+            assert isinstance(a, RuleAssoc)
+
+            if isinstance(a.matcher, Eof):
+                assert a.action == self.tokens.Termination
+                continue
+            elif isinstance(a.matcher, Failure):
+                assert a.action == self.tokens.LexingFailure
+                continue
+
+            nfa_start, nfa_end = self.regexps.nfa_for(a.matcher.regexp)
+            nfa_end.label = (next(id_generator), a.action)
+            nfas.append(nfa_start)
+
+        # Create a big OR for all possible accepted patterns
+        nfa_start = NFAState()
+        for nfa in nfas:
+            nfa_start.add_transition(None, nfa)
+
+        def get_action(labels):
+            # If this labels contains one or several actions, get the most
+            # prioritary one (and leave out the index from id_generator above).
+            sorted_actions = sorted(labels)
+            return sorted_actions[0][1] if sorted_actions else None
+
+        # Compute the corresponding DFA
+        return DFACodeGenHolder(nfa_start.to_dfa(), get_action)
 
     def emit(self):
         """
@@ -683,50 +771,66 @@ class Literal(Matcher):
     def match_length(self):
         return len(self.to_match)
 
-    def render(self):
-        return '"{}"'.format(self.to_match)
+    @property
+    def regexp(self):
+        return re.escape(self.to_match)
+
+    @property
+    def signature(self):
+        return ('Literal', self.to_match)
 
 
 class NoCaseLit(Literal):
     """
     Same as Literal, but with case insensitivity.
     """
-    def render(self):
-        return '\C{"%s"}' % self.to_match
+
+    @property
+    def regexp(self):
+        return ''.join(
+            ('[{}{}]'.format(c.lower(), c.upper())
+             if c.lower() != c.upper() else
+             re.escape(c))
+            for c in self.to_match
+        )
+
+    @property
+    def signature(self):
+        return ('NoCaseLiteral', self.to_match)
 
 
 class Eof(Matcher):
     """
     Matcher. Matches the end of the file/input stream.
     """
-    def __init__(self):
-        pass
 
     @property
     def match_length(self):
         return 0
 
-    def render(self):
-        return "<<EOF>>"
+    @property
+    def signature(self):
+        return 'Eof'
 
 
 class Failure(Matcher):
     """
     Matcher. Matches a case of failure in the lexer.
     """
-    def __init__(self):
-        pass
 
-    def render(self):
-        return "on_failure"
+    @property
+    def signature(self):
+        return 'Failure'
 
 
 class Ignore(Action):
     """
     Action. Basically ignore the matched text.
     """
-    def render(self, lexer):
-        return "{ }"
+
+    @property
+    def signature(self):
+        return 'Ignore'
 
 
 class RuleAssoc(object):
@@ -739,11 +843,9 @@ class RuleAssoc(object):
         self.matcher = matcher
         self.action = action
 
-    def render(self, lexer):
-        return "{} {}".format(
-            self.matcher.render(),
-            self.action.render(lexer)
-        )
+    @property
+    def signature(self):
+        return ('RuleAssoc', self.matcher.signature, self.action.signature)
 
 
 class Alt(object):
@@ -755,6 +857,16 @@ class Alt(object):
         self.prev_token_cond = prev_token_cond
         self.send = send
         self.match_size = match_size
+
+    @property
+    def signature(self):
+        return (
+            'Alt',
+            [t.signature for t in self.prev_token_cond]
+            if self.prev_token_cond else [],
+            self.send.signature,
+            self.match_size
+        )
 
 
 class Case(RuleAssoc):
@@ -813,14 +925,14 @@ class Case(RuleAssoc):
             self.alts = alts[:-1]
             self.default_alt = alts[-1]
 
-        def render(self, lexer):
-            return render(
-                "lexer/case_action",
-                alts=self.alts,
-                default_alt=self.default_alt,
-                max_match_len=self.match_length,
-                lexer=lexer
-            )
+        @property
+        def all_alts(self):
+            return list(self.alts) + [self.default_alt]
+
+        @property
+        def signature(self):
+            return ('CaseAction', self.match_length,
+                    sorted(alt.signature for alt in self.all_alts))
 
     def __init__(self, matcher, *alts):
         super(Case, self).__init__(

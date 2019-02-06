@@ -47,6 +47,8 @@ library project ${lib_name} is
       "${lib_name.lower()}-lexer.ads",
       "${lib_name.lower()}-lexer_implementation.adb",
       "${lib_name.lower()}-lexer_implementation.ads",
+      "${lib_name.lower()}-lexer_state_machine.adb",
+      "${lib_name.lower()}-lexer_state_machine.ads",
       "${lib_name.lower()}-parsers.adb",
       "${lib_name.lower()}-parsers.ads",
       "${lib_name.lower()}-rewriting_implementation.adb",
@@ -62,15 +64,9 @@ library project ${lib_name} is
       "${path}",
       % endfor
       % if ctx.generate_gdb_hook:
-      "gdb.c",
+      "gdb.c"
       % endif
-      "${lib_name.lower()}_quex_interface.c",
-      "${lib_name.lower()}_quex_interface.h",
-      "${lib_name.lower()}_lexer.c",
-      "${lib_name.lower()}_lexer-configuration.h",
-      "${lib_name.lower()}_lexer.h",
-      "${lib_name.lower()}_lexer-token.h",
-      "${lib_name.lower()}_lexer-token_ids.h");
+      );
 
    <% source_dirs = ['../../include/{}'.format(lib_name.lower()),
                      ctx.extensions_src_dir] %>
@@ -112,25 +108,11 @@ library project ${lib_name} is
          when others => null;
       end case;
 
-      Common_C_Cargs :=
-        ("-I${quex_path}",
-         "-DQUEX_OPTION_ASSERTS_DISABLED",
-         "-DQUEX_OPTION_ASSERTS_WARNING_MESSAGE_DISABLED");
-
       case Build_Mode is
          when "dev" =>
 
             for Default_Switches ("Ada") use
                Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
-
-            for Default_Switches ("C") use
-               Common_C_Cargs & ("-g3", "-O0", "-DDEBUG=1");
-
-            for Switches ("${lib_name.lower()}_lexer.c") use
-               Common_C_Cargs & ("-g0", "-O0");
-            --  This file is *huge* and the debugging information for it harms
-            --  Valgrind runs. We almost never have to debug this file so
-            --  this is acceptable.
 
          when "prod" =>
             --  Debug information is useful even with optimization for
@@ -141,15 +123,6 @@ library project ${lib_name} is
             for Default_Switches ("Ada") use
                Common_Ada_Cargs & ("-g", "-Ofast", "-gnatp", "-gnatn2",
                                    "-fnon-call-exceptions");
-
-            for Default_Switches ("C") use Common_C_Cargs & ("-Ofast");
-
-            for Switches ("${lib_name.lower()}_lexer.c") use Common_C_Cargs
-              & ("-O1", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
-                 "-fdisable-rtl-sched2", "-mno-stv");
-            --  Deactivate because of memory usage, see P726-024. This
-            --  limits the memory usage peaks of GCC 6 based compilers
-            --  and should prevent OOM on 32-bit platforms.
 
             ## TODO: This extension point is added to change the flags of
             ## Libadalang specific extension files. It is a temporary

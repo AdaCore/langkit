@@ -13,9 +13,6 @@
 
 with Ada.Unchecked_Conversion;
 
-with Interfaces;   use Interfaces;
-with Interfaces.C; use Interfaces.C;
-
 with System;
 
 with GNAT.Byte_Order_Mark;
@@ -29,6 +26,8 @@ with Langkit_Support.Text;  use Langkit_Support.Text;
 with ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Symbols;
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer_State_Machine;
+use ${ada_lib_name}.Lexer_State_Machine;
 
 % if ctx.symbol_canonicalizer:
 with ${ctx.symbol_canonicalizer.unit_fqn};
@@ -36,26 +35,7 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 
 package body ${ada_lib_name}.Lexer_Implementation is
 
-   Quex_Leading_Characters  : constant := 2;
-   Quex_Trailing_Characters : constant := 1;
-   Quex_Extra_Characters    : constant :=
-      Quex_Leading_Characters + Quex_Trailing_Characters;
-   --  Quex requires its input buffer to have two leading reserved bytes and
-   --  one trailing. These are not part of the true payload, but must be
-   --  available anyway.
-
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
-
-   type Quex_Token_Type is record
-      Id          : Unsigned_16;
-      Text        : System.Address;
-      Text_Length : size_t;
-      Offset      : Unsigned_32;
-   end record
-      with Convention => C;
-   type Interface_Token_Access is access all Quex_Token_Type;
-
-   type Lexer_Type is new System.Address;
 
    procedure Decode_Buffer
      (Buffer, Charset : String;
@@ -71,11 +51,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
    --  Raise an Unknown_Charset exception if Charset is... unknown. Raise
    --  Invalid_Input if Buffer contains invalid byte sequences according to
    --  Charset.
-   --
-   --  Quex quirk: this actually allocates more than the actual buffer to keep
-   --  Quex happy. The two first characters are set to null and there is an
-   --  extra null character at the end of the buffer. See the Quex_*_Characters
-   --  constants above.
 
    procedure Extract_Tokens_From_Text_Buffer
      (Decoded_Buffer : Text_Access;
@@ -85,9 +60,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
       Diagnostics    : in out Diagnostics_Vectors.Vector);
-   --  Helper for the Extract_Tokens* procedures. Buffer must be a buffer
-   --  allocated to fullfil Quex's needs: see the Quex_*_Characters constants
-   --  above.
+   --  Helper for the Extract_Tokens procedure
 
    procedure Extract_Tokens_From_Bytes_Buffer
      (Buffer, Charset : String;
@@ -98,28 +71,12 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Diagnostics     : in out Diagnostics_Vectors.Vector);
    --  Helper for the Extract_Token procedure
 
-   function Lexer_From_Buffer (Buffer  : System.Address;
-                               Length  : size_t)
-                               return Lexer_Type
-      with Import        => True,
-           Convention    => C,
-           External_Name => "${capi.get_name("lexer_from_buffer")}";
-
-   procedure Free_Lexer (Lexer : Lexer_Type)
-      with Import        => True,
-           Convention    => C,
-           External_Name => "${capi.get_name("free_lexer")}";
-
-   function Next_Token (Lexer : Lexer_Type;
-                        Token : Interface_Token_Access) return int
-      with Import        => True,
-           Convention    => C,
-           External_Name => "${capi.get_name("next_token")}";
-
    generic
       With_Trivia : Boolean;
    procedure Process_All_Tokens
-     (Lexer       : Lexer_Type;
+     (Input       : Text_Access;
+      Input_First : Positive;
+      Input_Last  : Natural;
       Tab_Stop    : Positive;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
@@ -135,19 +92,20 @@ package body ${ada_lib_name}.Lexer_Implementation is
    ------------------------
 
    procedure Process_All_Tokens
-     (Lexer       : Lexer_Type;
+     (Input       : Text_Access;
+      Input_First : Positive;
+      Input_Last  : Natural;
       Tab_Stop    : Positive;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
 
-      Token                 : aliased Quex_Token_Type;
+      Token                 : Lexed_Token;
       Token_Id              : Token_Kind := ${termination};
       % if lexer.track_indent:
       Prev_Id               : Token_Kind := ${termination};
       % endif
       Symbol                : Symbol_Type;
-      Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
       Current_Sloc : Source_Location := (1, 1);
@@ -156,7 +114,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Next_Sloc : Source_Location;
       --  Source location after scanning the current token
 
-      Last_Token_Last : Natural;
+      Last_Token_Last : Natural := Input'First - 1;
       --  Index in TDH.Source_Buffer for the last character of the previous
       --  token. Used to process chunks of ignored text.
 
@@ -181,13 +139,11 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       % endif
 
-      function Source_First return Positive is
-        (Natural (Token.Offset) + TDH.Source_First - 1);
+      function Source_First return Positive is (Token.Text_First);
       --  Index in TDH.Source_Buffer for the first character corresponding to
       --  the current token.
 
-      function Source_Last return Natural is
-        (Source_First + Natural (Token.Text_Length) - 1);
+      function Source_Last return Natural is (Token.Text_Last);
       --  Likewise, for the last character
 
       function Sloc_Range return Source_Location_Range is
@@ -254,26 +210,24 @@ package body ${ada_lib_name}.Lexer_Implementation is
          end return;
       end Sloc_After;
 
+      State : Lexer_State;
+
    begin
+      Initialize (State, Input, Input_First, Input_Last);
+      Token := Last_Token (State);
+
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
       Prepare_For_Trivia;
 
-      Token.Offset := 0;
-      Last_Token_Last := Source_First;
-
-      while Continue loop
-
-         --  Next_Token returns 0 for the last token, which will be our "null"
-         --  token.
-
-         Continue := Next_Token (Lexer, Token'Unrestricted_Access) /= 0;
+      while Has_Next (State) loop
+         Next_Token (State, Token);
 
          % if lexer.track_indent:
          --  Update the previous token id variable
          Prev_Id := Token_Id;
          % endif
 
-         Token_Id := Token_Kind'Enum_Val (Token.Id);
+         Token_Id := Token.Kind;
          Symbol := null;
 
          --  Initialize the first sloc for the token to come. For this, process
@@ -289,8 +243,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
          --  Then update Next_Sloc according to Token's text
          if Token_Id /= ${termination} then
             declare
-               Text : Text_Type (1 .. Natural (Token.Text_Length))
-                  with Import, Address => Token.Text;
+               Text : Text_Type renames Input (Source_First .. Source_Last);
             begin
                Next_Sloc := Sloc_After (Current_Sloc, Text);
             end;
@@ -304,9 +257,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
             when ${' | '.join(with_symbol_actions)} =>
                if TDH.Symbols /= No_Symbol_Table then
                   declare
-                     Bounded_Text : Text_Type
-                       (1 .. Natural (Token.Text_Length))
-                        with Address => Token.Text;
+                     Bounded_Text : Text_Type renames
+                        Input (Token.Text_First .. Token.Text_Last);
 
                      Symbol_Res : constant Symbolization_Result :=
                         % if ctx.symbol_canonicalizer:
@@ -347,7 +299,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                   Last_Token_Was_Trivia := True;
                end if;
 
-               --  Whether or nottrivia is disabled, emit a diagnostic for
+               --  Whether or not trivia is disabled, emit a diagnostic for
                --  lexing failures.
 
                if Token_Id = ${lexer.LexingFailure.ada_name} then
@@ -505,11 +457,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Tab_Stop       : Positive;
       With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
-      Diagnostics    : in out Diagnostics_Vectors.Vector)
-   is
-      Lexer : Lexer_Type := Lexer_From_Buffer
-        (Decoded_Buffer.all'Address,
-         size_t (Source_Last - Source_First + 1));
+      Diagnostics    : in out Diagnostics_Vectors.Vector) is
    begin
 
       --  In the case we are reparsing an analysis unit, we want to get rid of
@@ -518,11 +466,14 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
 
       if With_Trivia then
-         Process_All_Tokens_With_Trivia (Lexer, Tab_Stop, TDH, Diagnostics);
+         Process_All_Tokens_With_Trivia
+           (Decoded_Buffer, Source_First, Source_Last, Tab_Stop, TDH,
+            Diagnostics);
       else
-         Process_All_Tokens_No_Trivia (Lexer, Tab_Stop, TDH, Diagnostics);
+         Process_All_Tokens_No_Trivia
+           (Decoded_Buffer, Source_First, Source_Last, Tab_Stop, TDH,
+            Diagnostics);
       end if;
-      Free_Lexer (Lexer);
    end Extract_Tokens_From_Text_Buffer;
 
    --------------------------------------
@@ -603,11 +554,9 @@ package body ${ada_lib_name}.Lexer_Implementation is
          when Text_Buffer =>
             declare
                Decoded_Buffer : Text_Access := new Text_Type
-                 (1 .. Input.Text_Count + Quex_Extra_Characters);
-               Source_First  : constant Positive :=
-                  1 + Quex_Leading_Characters;
-               Source_Last   : constant Positive :=
-                  Source_First + Input.Text_Count - 1;
+                 (1 .. Input.Text_Count);
+               Source_First  : constant Positive := Decoded_Buffer'First;
+               Source_Last   : constant Positive := Decoded_Buffer'Last;
 
                Text_View : Text_Type (1 .. Input.Text_Count)
                   with Import, Address => Input.Text;
@@ -638,15 +587,14 @@ package body ${ada_lib_name}.Lexer_Implementation is
       --  following is supposed to be big enough.
 
       Result : Text_Access :=
-         new Text_Type (1 .. Buffer'Length + Quex_Extra_Characters);
+         new Text_Type (1 .. Buffer'Length);
       State  : Iconv_T;
       Status : Iconv_Result;
       BOM    : BOM_Kind := Unknown;
 
       Input_Index, Output_Index : Positive;
 
-      First_Output_Index : constant Positive :=
-         1 + Quex_Leading_Characters * 4;
+      First_Output_Index : constant Positive := Result'First;
       --  Index of the first byte in Result at which Iconv must decode Buffer
 
       Output : Byte_Sequence (1 .. 4 * Buffer'Size);
@@ -655,7 +603,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
    begin
       Decoded_Buffer := Result;
-      Source_First := Result'First + Quex_Leading_Characters;
+      Source_First := Result'First;
 
       --  If we have a byte order mark, it overrides the requested Charset
 
@@ -731,16 +679,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
          when Success =>
             null;
       end case;
-
-      --  Clear the bytes we left for Quex
-
-      declare
-         Nul : constant Wide_Wide_Character := Wide_Wide_Character'Val (0);
-      begin
-         Result (1) := Nul;
-         Result (2) := Nul;
-         Result (Buffer'Length + 3) := Nul;
-      end;
 
       Iconv_Close (State);
    end Decode_Buffer;

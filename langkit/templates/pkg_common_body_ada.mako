@@ -39,7 +39,7 @@ package body ${ada_lib_name}.Common is
    % for lit, tok in ctx.lexer.literals_map.items():
       ## It's more user-friendly to represent the newline token by name rather
       ## than by escape sequence in user messages.
-      % if tok.ada_name not in already_seen_set and lit != '\\n':
+      % if tok.ada_name not in already_seen_set and '\n' not in lit:
          ${tok.ada_name} => new Text_Type'("${lit}"),
          <% already_seen_set.add(tok.ada_name) %>
       % endif
