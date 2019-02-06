@@ -403,6 +403,7 @@ class CompileCtx(object):
             names.Name(lib_name)
         )
         self.short_name = names.Name(short_name) if short_name else None
+        self.short_name_or_long = self.short_name or self.lib_name
 
         self.ada_api_settings = AdaAPISettings(self)
         self.c_api_settings = CAPISettings(
@@ -1773,8 +1774,7 @@ class CompileCtx(object):
                 'gdb_py',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
-                prefix=(self.short_name.lower
-                        if self.short_name else lib_name),
+                prefix=self.short_name_or_long.lower,
             ),
             self.post_process_python
         )
