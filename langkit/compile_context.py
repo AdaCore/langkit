@@ -137,10 +137,9 @@ ADA_SPEC = "spec"
 ADA_BODY = "body"
 
 
-def write_ada_file(out_dir, source_kind, qual_name, content,
-                   post_process=None):
+def ada_file_path(out_dir, source_kind, qual_name):
     """
-    Helper to write an Ada file.
+    Return the name of the Ada file for the given unit name/kind.
 
     :param str out_dir: The complete path to the directory in which we want to
         write the file.
@@ -148,12 +147,24 @@ def write_ada_file(out_dir, source_kind, qual_name, content,
         determining whether the source is a spec or a body.
     :param list[names.Name] qual_name: The qualified name of the Ada spec/body,
         as a list of Name components.
-    :param str content: The source content to write to the file.
     """
     assert source_kind in (ADA_SPEC, ADA_BODY)
     file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
                                'ads' if source_kind == ADA_SPEC else 'adb')
-    file_path = os.path.join(out_dir, file_name)
+    return os.path.join(out_dir, file_name)
+
+
+def write_ada_file(out_dir, source_kind, qual_name, content,
+                   post_process=None):
+    """
+    Helper to write an Ada file.
+
+    :param out_dir: See ada_file_path.
+    :param source_kind: See ada_file_path.
+    :param qual_name: See ada_file_path.
+    :param str content: The source content to write to the file.
+    """
+    file_path = ada_file_path(out_dir, source_kind, qual_name)
 
     # If there are too many lines, which triggers obscure debug info bugs,
     # strip empty lines.
