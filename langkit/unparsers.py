@@ -337,7 +337,7 @@ class NodeUnparser(Unparser):
                     # So in both cases, we create an unparser, but we emit
                     # tokens only for the "present" alternative.
                     result = RegularNodeUnparser(node)
-                    if node is parser._booleanize._alt_present.type:
+                    if node is parser._booleanize.alt_present.type:
                         NodeUnparser._emit_to_token_sequence(parser.parser,
                                                              result.pre_tokens)
                     return result
