@@ -115,6 +115,7 @@ def emit_and_print_errors(grammar, lexer=None,
         print('Code generation was successful')
         return True
     finally:
+        lexer._dfa_code = None
         langkit.reset()
 
 

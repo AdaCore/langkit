@@ -97,8 +97,8 @@ python_lexer = Lexer(Token, track_indent=True, pre_rules=[
 python_lexer.add_patterns(
     ("STRING_DBQ", r'\"(\\\"|[^\n\"])*\"'),
     ("STRING_SQ",  r"'(\\'|[^\n'])*'"),
-    ("MLSTRING_DBQ", r'\"\"\"(\A{\"\"\"}|\n)*\"\"\"'),
-    ("MLSTRING_SQ", r"'''(\A{'''}|\n)*'''"),
+    ("MLSTRING_DBQ", r'\"\"\"([^"]|("[^"])|(""[^"])|\n)*\"\"\"'),
+    ("MLSTRING_SQ", r"'''([^']|('[^'])|(''[^'])|\n)*'''"),
 )
 
 python_lexer.add_rules(

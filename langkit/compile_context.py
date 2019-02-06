@@ -19,10 +19,10 @@ from distutils.spawn import find_executable
 from functools import reduce
 from glob import glob
 from io import StringIO
+import json
 import os
 from os import path
 import subprocess
-import sys
 
 from funcy import keep
 
@@ -417,8 +417,6 @@ class CompileCtx(object):
 
         self.verbosity = verbosity
 
-        self.set_quex_path()
-
         self.compiled = False
         """
         Whether the language specification was compiled. This is used to avoid
@@ -725,6 +723,14 @@ class CompileCtx(object):
         referenced envs during env lookup.
 
         :type: set[names.Name]
+        """
+
+        self.dfa_code = None
+        """
+        Holder for the data structures used to generate code for the lexer
+        state machine (DFA).
+
+        :type: langkit.lexer.regexp.DFACodeGenHolder
         """
 
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
@@ -1649,7 +1655,6 @@ class CompileCtx(object):
                 "project_file",
                 lib_name=self.ada_api_settings.lib_name,
                 os_path=os.path,
-                quex_path=os.environ['QUEX_PATH'],
             )
         )
 
@@ -1663,6 +1668,26 @@ class CompileCtx(object):
 
         if self.verbosity.info:
             printcol("Generating sources... ", Colors.OKBLUE)
+
+        if self.verbosity.debug:
+            printcol("Compiling the lexer specification", Colors.OKBLUE)
+
+        # Generate the lexer state machine iff the file is missing or its
+        # signature has changed since last time.
+        lexer_sm_body = ada_file_path(
+            src_path, ADA_BODY,
+            [self.lib_name, names.Name('Lexer_State_Machine')])
+        generate_lexer_sm_body = False
+        stale_lexer_spec = write_source_file(
+            os.path.join(
+                file_root, 'obj',
+                '{}_lexer_signature.txt'
+                .format(self.short_name_or_long.lower)),
+            json.dumps(self.lexer.signature, indent=2)
+        )
+        if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
+            generate_lexer_sm_body = True
+            self.dfa_code = self.lexer.build_dfa_code()
 
         ada_modules = [
             # Top (pure) package
@@ -1696,6 +1721,8 @@ class CompileCtx(object):
             # Units for the lexer
             ('pkg_lexer', 'Lexer', True),
             ('pkg_lexer_impl', 'Lexer_Implementation', True),
+            ('pkg_lexer_state_machine', 'Lexer_State_Machine',
+             generate_lexer_sm_body),
             # Unit for debug helpers
             ('pkg_debug', 'Debug', True),
         ]
@@ -1712,19 +1739,6 @@ class CompileCtx(object):
                 self.render_template("main_parse_ada"),
                 self.post_process_ada
             )
-
-        with names.lower:
-            # ... and the Quex C interface
-            write_cpp_file(
-                path.join(src_path,
-                          "{}_quex_interface.h".format(lib_name_low)),
-                self.render_template("lexer/quex_interface_header_c"),
-                self.post_process_cpp)
-            write_cpp_file(
-                path.join(src_path,
-                          "{}_quex_interface.c".format(lib_name_low)),
-                self.render_template("lexer/quex_interface_body_c"),
-                self.post_process_cpp)
 
         imain_project_file = os.path.join(file_root, "src", "mains.gpr")
         write_source_file(
@@ -1792,34 +1806,6 @@ class CompileCtx(object):
         if self.ext('support'):
             for f in glob(path.join(self.ext('support'), "*.ad*")):
                 copy_file(f, src_path)
-
-        if self.verbosity.info:
-            printcol("Compiling the quex lexer specification", Colors.OKBLUE)
-
-        # Generating the lexer C code with Quex is quite long: do it only when
-        # the Quex specification changed from last build.
-        quex_file = os.path.join(src_path,
-                                 "{}.qx".format(self.lang_name.lower))
-        quex_spec = self.lexer.emit()
-        if (
-            write_source_file(quex_file, quex_spec) and
-            generate_lexer
-        ):
-            quex_py_file = path.join(os.environ["QUEX_PATH"], "quex-exe.py")
-            subprocess.check_call([sys.executable, quex_py_file, "-i",
-                                   quex_file,
-                                   "-o",
-                                   "{}_lexer".format(
-                                       self.lib_name.base_name.lower()),
-                                   "--buffer-element-size", "4",
-                                   "--token-id-offset",  "0x1000",
-                                   "--language", "C",
-                                   "--no-mode-transition-check",
-                                   "--single-mode-analyzer",
-                                   "--token-memory-management-by-user",
-                                   "--token-policy", "single",
-                                   "--token-id-prefix", self.lexer.prefix],
-                                  cwd=src_path)
 
         self.cache.save()
 
