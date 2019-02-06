@@ -485,12 +485,13 @@ class _ASTNodeMetaclass(type):
             annotations = dct.pop('annotations', None)
 
         # If this is a list type, determine the corresponding element type
-        if is_root_list_type:
-            element_type = dct.pop('_element_type')
-        elif is_list_type:
-            element_type = base._element_type
+        if is_list_type:
+            element_type = (dct.pop('_element_type')
+                            if is_root_list_type else base._element_type)
+            allowed_field_types = PropertyDef
         else:
             element_type = None
+            allowed_field_types = AbstractNodeData
 
         # Determine if this is a token node
         with node_ctx:
@@ -505,27 +506,19 @@ class _ASTNodeMetaclass(type):
             if is_token_node is None:
                 is_token_node = bool(base._is_token_node)
 
-            # Otherwise, make sure that all derivations of a token node are
-            # token nodes themselves.
-            elif not is_token_node:
+            if is_token_node:
+                allowed_field_types = (_UserField, PropertyDef)
+            else:
+                # Make sure that all derivations of a token node are token
+                # nodes themselves.
                 check_source_language(
-                    is_token_node == base._is_token_node,
+                    not base._is_token_node,
                     '"token_node" annotation inconsistent with inherited AST'
                     ' node'
                 )
 
-        fields = ASTNode.collect_fields(name, location, dct, AbstractNodeData)
-
-        # AST list types are not allowed to have syntax fields
-        if is_list_type:
-            syntax_fields = [f_n for f_n, f_v in fields
-                             if not f_v.is_property]
-            with node_ctx:
-                check_source_language(
-                    not syntax_fields,
-                    'ASTNode list types are not allowed to have fields'
-                    ' (here: {})'.format(', '.join(sorted(syntax_fields)))
-                )
+        fields = ASTNode.collect_fields(name, location, dct,
+                                        allowed_field_types)
 
         DSLType._import_base_type_info(name, location, dct)
         dct['_fields'] = fields
