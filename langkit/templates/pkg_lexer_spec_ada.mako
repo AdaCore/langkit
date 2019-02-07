@@ -55,7 +55,9 @@ package ${ada_lib_name}.Lexer is
       Tab_Stop    : Positive := ${ctx.default_tab_stop};
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
-      Diagnostics : in out Diagnostics_Vectors.Vector);
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+      with Pre  => Initialized (TDH) and then not Has_Source_Buffer (TDH),
+           Post => Has_Source_Buffer (TDH);
    --  Extract tokens out of the given ``Input`` and store them into ``TDH``.
    --
    --  ``Tab_Stop`` is a positive number to describe the effect of tabulation
