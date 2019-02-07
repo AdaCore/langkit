@@ -213,7 +213,7 @@ ${ctx.dfa_code.ada_table_decls('   ')}
          --  We haven't found a match. Just create an error token and plan to
          --  start a new token at the next character.
          if Index > Self.Input_Last then
-            Token := (${termination}, Index, Index);
+            Token := (${termination}, Index, Index - 1);
             Self.Has_Next := False;
          else
             Token := (${lexing_failure}, First_Index, First_Index);
