@@ -112,7 +112,7 @@ class ManageScript(object):
 
         self.args_parser = args_parser = argparse.ArgumentParser(
             description='General manager to handle actions relative to'
-                        ' building/testing libadalang.'
+                        ' building/testing your language.'
         )
         self.subparsers = subparsers = args_parser.add_subparsers()
 
@@ -573,7 +573,7 @@ class ManageScript(object):
 
     def do_generate(self, args):
         """
-        Generate source code for libadalang.
+        Generate source code for the user language.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
@@ -643,8 +643,12 @@ class ManageScript(object):
             self.do_generate_langkit_support(args)
 
         if not getattr(args, 'no_pretty_print', False):
-            self.log_info("Pretty-printing sources for Libadalang...",
-                          Colors.HEADER)
+            self.log_info(
+                "Pretty-printing sources for {}...".format(
+                    self.lib_name.lower()
+                ),
+                Colors.HEADER
+            )
             gnatpp(
                 self.dirs.build_dir('lib', 'gnat',
                                     '{}.gpr'.format(self.lib_name.lower())),
