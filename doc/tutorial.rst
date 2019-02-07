@@ -314,7 +314,8 @@ Take your code editor, open ``language/parser.py`` and replace the
     class Identifier(Expr):
         token_node = True
 
-    class Operator(EnumNode):
+    class Operator(KaleidoscopeNode):
+        enum_node = True
         alternatives = ['plus', 'minus', 'mult', 'div']
 
     class BinaryExpr(Expr):
@@ -327,7 +328,7 @@ Take your code editor, open ``language/parser.py`` and replace the
         args = Field()
 
 As usual, new code comes with its new dependencies: also complete the
-``langkit.dsl`` import statement with ``abstract``, ``EnumNode`` and ``Field``.
+``langkit.dsl`` import statement with ``abstract`` and ``Field``.
 
 Each class definition is a way to declare how a particular AST node will look.
 Think of it as a kind of structure: here the ``Function`` AST node has two
@@ -353,9 +354,10 @@ the ``abstract`` class decorator) to create a hierarchy of node types.
 Careful readers may also have spotted something else: the ``Operator``
 enumeration node type. We use an enumeration node type in order to store in the
 most simple way what kind of operation a ``BinaryExpr`` represents. As you can
-see, creating an enumeration node type is very easy: just subclass ``EnumNode``
-and set the ``alternatives`` field to a sequence of strings that will serve as
-names for the enumeration node values (also called *enumerators*).
+see, creating an enumeration node type is very easy: simply set the special
+``enum_node`` annotation to ``True`` in the node class body and set the
+``alternatives`` field to a sequence of strings that will serve as names
+for the enumeration node values (also called *enumerators*).
 
 There is also the special ``token_node = True`` annotation, which both the
 ``Number`` and ``Identifier`` classes have. This annotation specifies that
