@@ -317,19 +317,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
          end case;
 
          % if not lexer.track_indent:
-         --  Special case for the termination token: Quex yields inconsistent
-         --  offsets/sizes. Make sure we get the end of the buffer so that the
-         --  rest of our machinery (in particular source slices) works well
-         --  with it.
-
          TDH.Tokens.Append
            ((Kind         => From_Token_Kind (Token_Id),
-             Source_First => (if Token_Id = ${termination}
-                              then TDH.Source_Last + 1
-                              else Source_First),
-             Source_Last  => (if Token_Id = ${termination}
-                              then TDH.Source_Last
-                              else Source_Last),
+             Source_First => Source_First,
+             Source_Last  => Source_Last,
              Symbol       => Symbol,
              Sloc_Range   => Sloc_Range));
 
@@ -422,12 +413,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
          then
             TDH.Tokens.Append
               ((Kind         => From_Token_Kind (Token_Id),
-                Source_First => (if Token_Id = ${termination}
-                                 then TDH.Source_Last + 1
-                                 else Source_First),
-                Source_Last  => (if Token_Id = ${termination}
-                                 then TDH.Source_Last
-                                 else Source_Last),
+                Source_First => Source_First,
+                Source_Last  => Source_Last,
                 Symbol       => Symbol,
                 Sloc_Range   => Sloc_Range));
          end if;

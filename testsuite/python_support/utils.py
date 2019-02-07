@@ -104,8 +104,7 @@ def emit_and_print_errors(grammar, lexer=None,
     try:
         ctx = prepare_context(grammar, lexer, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer)
-        ctx.emit('build', generate_lexer=False,
-                 generate_unparser=generate_unparser)
+        ctx.emit('build', generate_unparser=generate_unparser)
         # ... and tell about how it went
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics

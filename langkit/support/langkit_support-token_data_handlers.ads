@@ -124,12 +124,7 @@ package Langkit_Support.Token_Data_Handlers is
 
       Source_First : Positive;
       Source_Last  : Natural;
-      --  Actual bounds in Source_Buffer for the source text.
-      --
-      --  Because of Quex's hackish way of working, Source_Buffer actually has
-      --  extra elements allocated for the lexer to work properly. These
-      --  elements, at the beginning and at the end of Source_Buffer don't
-      --  actually belong to the sources.
+      --  Actual bounds in Source_Buffer for the source text
 
       Tokens : Token_Vectors.Vector;
       --  Sequence of tokens in the same order as found in the source file

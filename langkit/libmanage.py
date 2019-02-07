@@ -308,10 +308,6 @@ class ManageScript(object):
                  ' definitions.'
         )
         subparser.add_argument(
-            '--no-compile-quex', action='store_true',
-            help="Don't compile the Quex lexer."
-        )
-        subparser.add_argument(
             '--check-only', action='store_true',
             help="Only check the input for errors, don't generate the code."
         )
@@ -628,7 +624,6 @@ class ManageScript(object):
                           main_source_dirs=main_source_dirs,
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
-                          generate_lexer=not args.no_compile_quex,
                           check_only=args.check_only,
                           warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks,
