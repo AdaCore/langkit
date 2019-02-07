@@ -5,6 +5,12 @@ import sys
 import unicodedata
 
 
+# We don't want to restrict the range of Unicode characters depending on
+# whether the Python interpreter was built to use UCS-2 or UCS-4, so roll our
+# own constant, to simulate the effect of PEP 393.
+MAXUNICODE = 0x10FFFF
+
+
 def format_char(char):
     ochar = ord(char)
     return ('\\U{:x}'.format(ochar)
@@ -55,6 +61,13 @@ class CharSet(object):
             else:
                 raise TypeError('Invalid CharSet item: {}'.format(repr(item)))
 
+    @classmethod
+    def from_int_ranges(cls, *items):
+        result = cls()
+        for l, h in items:
+            result.add_int_range(l, h)
+        return result
+
     def __repr__(self):
         ranges = []
         for l, h in self.ranges:
@@ -100,7 +113,7 @@ class CharSet(object):
         result = CharSet()
         for cs in (self, other):
             for l, h in cs.ranges:
-                result.add_range(unichr(l), unichr(h))
+                result.add_int_range(l, h)
         return result
 
     @property
@@ -132,7 +145,9 @@ class CharSet(object):
 
     @classmethod
     def any_char(cls):
-        return cls((unichr(0), unichr(sys.maxunicode)))
+        result = cls()
+        result.add_int_range(0, MAXUNICODE)
+        return result
 
     @property
     def negation(self):
@@ -144,18 +159,15 @@ class CharSet(object):
         """
         result = CharSet()
 
-        def add_range(low, high):
-            result.add_range(unichr(low), unichr(high))
-
         last = None
         for l, h in self.ranges:
             if last is None:
                 if l > 0:
-                    add_range(0, l - 1)
+                    result.add_int_range(0, l - 1)
             else:
-                add_range(last + 1, l - 1)
+                result.add_int_range(last + 1, l - 1)
             last = h
-        add_range(last + 1, sys.maxunicode)
+        result.add_int_range(last + 1, sys.maxunicode)
         return result
 
     @property
@@ -174,12 +186,12 @@ class CharSet(object):
 
         for l, h in self.ranges:
             if h < 128:
-                add_range(ascii, l, h)
+                ascii.add_int_range(l, h)
             elif l < 128:
-                add_range(ascii, l, 127)
-                add_range(non_ascii, 128, h)
+                ascii.add_int_range(l, 127)
+                non_ascii.add_int_range(128, h)
             else:
-                add_range(non_ascii, l, h)
+                non_ascii.add_int_range(l, h)
 
         return (ascii, non_ascii)
 
@@ -249,15 +261,14 @@ class CharSet(object):
         """
         self.add_range(char, char)
 
-    def add_range(self, low, high):
+    def add_int_range(self, low, high):
         """
         Add a range of characters to this set.
 
-        :type low: unicode
-        :type righ: unicode
+        :type low: int
+        :type righ: int
         """
-        low = ord(low)
-        high = ord(high)
+        assert low <= MAXUNICODE and high <= MAXUNICODE
 
         # Look for a range that contains the low bound
         found, index = self._lookup(low)
@@ -305,6 +316,15 @@ class CharSet(object):
                 # we added, so there is nothing else to do.
                 break
 
+    def add_range(self, low, high):
+        """
+        Add a range of characters to this set.
+
+        :type low: unicode
+        :type righ: unicode
+        """
+        self.add_int_range(ord(low), ord(high))
+
     @staticmethod
     def for_category(category):
         """
@@ -322,8 +342,10 @@ class CharSet(object):
 
 
 def compute_unicode_categories_char_sets():
+    # We assume here that the Python interpreter is built to use UCS-4 to
+    # represent strings.
     sets = {}
-    for i in range(sys.maxunicode + 1):
+    for i in range(MAXUNICODE + 1):
         char = unichr(i)
         cat = unicodedata.category(unichr(i))
         for subcat in (cat, cat[0]):
@@ -343,11 +365,9 @@ def compute_unicode_categories_char_sets():
         'unicode_categories_char_sets = {',
     ]
     for cat, char_set in sorted(sets.iteritems()):
-        lines.append('    {}: CharSet(*['.format(repr(cat)))
+        lines.append('    {}: CharSet.from_int_ranges(*['.format(repr(cat)))
         for low, high in char_set.ranges:
-            lines.append('        ({}, {}),'.format(
-                repr(unichr(low)), repr(unichr(high))
-            ))
+            lines.append('        ({}, {}),'.format(low, high))
         lines.append('    ]),')
     lines.append('}')
 
