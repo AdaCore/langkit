@@ -54,10 +54,45 @@ class Matcher(object):
 
 class Pattern(Matcher):
     """
-    Matcher. This will match a regular expression like pattern. Since the
-    lexer DSL uses Quex underneath, you can find more documentation about
-    the recognized regular expression language here: `Quex pattern language
-    <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
+    Regular-expression based matcher.
+
+    The following subset of regular expressions is supported:
+
+    * ``A|B``: match either the ``A`` pattern or the ``B`` one.
+
+    * ``(A)``: match the ``A`` pattern. Useful to group patterns and change
+      associativity.
+
+    * ``[XYZ]``: match either the ``X`` character, the ``Y`` one or the ``Z``
+      one.
+
+    * ``[^XYZ]``: match any character but the ``X`` character, the ``Y`` one or
+      the ``Z`` one.
+
+    * ``[A-Z]``: match any character between ``A`` and ``Z``.
+
+    * ``{NAME}``: reference to the pattern called ``NAME``. See
+      ``Lexer.add_patterns`` for how to add named patterns.
+
+    * ``A*``: match the ``A`` pattern zero, one or multiple times.
+
+    * ``A+``: match the ``A`` pattern one or multiple times.
+
+    * ``A?``: match the ``A`` pattern zero or one time.
+
+    * ``.``: match any character except the newline one. Equivalent to
+      ``[^\n]``.
+
+    * ``\p{CATEGORY}``: match any character in the given Unicode general
+      category.
+
+    * ``\P{CATEGORY}``: match any character *not* in the given Unicode general
+      category.
+
+    Note that due to the intended use of these regular expressions, several
+    traditional constructs are not supported:
+
+    * ``^`` and ``$``, to match the very beginning of the input and its end.
     """
 
     def __init__(self, pattern):
