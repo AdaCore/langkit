@@ -37,8 +37,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import resolve_property
 from langkit.lexer import TokenAction, WithSymbol
-from langkit.utils import (assert_type, copy_with, issubtype,
-                           type_check_instance)
+from langkit.utils import copy_with, issubtype, type_check_instance
 from langkit.utils.types import TypeSet
 
 
