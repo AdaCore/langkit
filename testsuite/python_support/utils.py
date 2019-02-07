@@ -223,3 +223,14 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             if os.environ.get('VALGRIND_ENABLED'):
                 argv = valgrind_cmd(argv)
             run(*argv)
+
+
+def add_gpr_path(dirname):
+    """
+    Prepend the given directory name to the ``GPR_PROJECT_PATH`` environment
+    variable.
+    """
+    old_path = os.environ.get('GPR_PROJECT_PATH')
+    os.environ['GPR_PROJECT_PATH'] = (
+        '{}{}{}'.format(dirname, os.path.pathsep, old_path)
+        if old_path else dirname)
