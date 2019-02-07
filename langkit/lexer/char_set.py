@@ -380,57 +380,5 @@ def compute_unicode_categories_char_sets():
 
 
 if __name__ == '__main__':
+    # When executed as the main script, regenerate the unicode_data.py file
     compute_unicode_categories_char_sets()
-
-    def check_ranges(cs, ranges):
-        cs_ranges = [(unichr(l), unichr(h))
-                     for l, h in cs.ranges]
-        assert cs_ranges == ranges, (
-            'Expected: {}\n'
-            'but got:  {}\n'.format(format_char_ranges(ranges),
-                                    format_char_ranges(cs_ranges))
-        )
-
-    check_ranges(
-        CharSet('a'),
-        [('a', 'a')])
-    check_ranges(
-        CharSet('a', 'b'),
-        [('a', 'b')])
-    check_ranges(
-        CharSet('a', 'c'),
-        [('a', 'a'), ('c', 'c')])
-    check_ranges(
-        CharSet('c', 'a'),
-        [('a', 'a'), ('c', 'c')])
-    check_ranges(
-        CharSet('a', 'c', 'b'),
-        [('a', 'c')])
-
-    check_ranges(
-        CharSet(('a', 'c'), ('d', 'c')),
-        [('a', 'c')])
-    check_ranges(
-        CharSet(('a', 'c'), 'b'),
-        [('a', 'c')])
-    check_ranges(
-        CharSet(('i', 'o'), ('a', 'c')),
-        [('a', 'c'), ('i', 'o')])
-    for c in ('h', 'i', 'j', 'k'):
-        check_ranges(
-            CharSet(('i', 'o'), ('a', c)),
-            [('a', 'o')])
-    check_ranges(
-        CharSet(('i', 'o'), ('a', 'o')),
-        [('a', 'o')])
-    check_ranges(
-        CharSet(('i', 'o'), ('a', 'p')),
-        [('a', 'p')])
-    for c in ('i', 'j', 'k'):
-        check_ranges(
-            CharSet(('i', 'o'), (c, 'p')),
-            [('i', 'p')])
-
-    check_ranges(
-        CharSet(('\x00', '\x10'), ('b', 'y')).negation,
-        [('\x11', 'a'), ('z', unichr(sys.maxunicode))])
