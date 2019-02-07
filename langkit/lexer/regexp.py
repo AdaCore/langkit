@@ -4,7 +4,6 @@ from collections import defaultdict
 from contextlib import contextmanager
 import itertools
 import re
-import sys
 
 
 from langkit.lexer.char_set import CharSet
@@ -858,19 +857,3 @@ class DFACodeGenHolder(object):
             lines.extend(ranges)
             lines.append(');')
         return '\n'.join(prefix + line for line in lines)
-
-
-if __name__ == '__main__':
-    regexps = RegexpCollection()
-    regexps.add_patterns(
-        digit='[0-9]',
-        extended_digit='[0-9a-zA-Z]',
-        integer='({digit}(_?{digit})*)',
-        exponent='([eE](\\+?|-){integer})',
-        integer_literal='{integer}{exponent}',
-    )
-    print(regexps.patterns['integer_literal'], file=sys.stderr)
-    nfa, _ = regexps.nfa_for('\p{L}{integer_literal}')
-    dfa = nfa.to_dfa()
-
-    print(dfa.to_dot())

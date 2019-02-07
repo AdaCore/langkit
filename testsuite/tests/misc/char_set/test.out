@@ -1,0 +1,55 @@
+== Single ==
+a-a
+
+== Adjacent 2 singles ==
+a-b
+
+== Non-adjacent 2 singles ==
+a-a c-c
+
+== Reverted non-adjacent 2 singles ==
+a-a c-c
+
+== Adjacent 3 singles ==
+a-c
+
+== Empty range ==
+a-c
+
+== Redundant single ==
+a-c
+
+== Non-adjacent ranges ==
+a-c i-o
+
+== Adjacent ranges - h ==
+a-o
+
+== Adjacent ranges - i ==
+a-o
+
+== Adjacent ranges - j ==
+a-o
+
+== Adjacent ranges - k ==
+a-o
+
+== Overlapping ranges (1) ==
+a-o
+
+== Nested range ==
+a-p
+
+== Overlappingranges (2) ==
+i-p
+
+== Overlappingranges (2) ==
+i-p
+
+== Overlappingranges (2) ==
+i-p
+
+== Negation ==
+\U+0011-a z-\U+10FFFF
+
+Done
