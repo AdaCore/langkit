@@ -1310,10 +1310,9 @@ class CompileCtx(object):
         from langkit.parsers import render
         return render(*args, **kwargs)
 
-    def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
-             main_programs=set(), annotate_fields_types=False,
-             check_only=False, no_property_checks=False,
-             warnings=None, generate_unparser=False,
+    def emit(self, file_root='.', main_source_dirs=set(), main_programs=set(),
+             annotate_fields_types=False, check_only=False,
+             no_property_checks=False, warnings=None, generate_unparser=False,
              generate_astdoc=True, generate_gdb_hook=True,
              post_process_ada=None, post_process_cpp=None,
              post_process_python=None):
@@ -1323,10 +1322,6 @@ class CompileCtx(object):
 
         :param str file_root: (optional) Path of the directory in which the
             library should be generated. The default is the current directory.
-
-        :param bool generate_lexer: (optional) Whether to invoke Quex to
-            generate the lexer source code. Will do by default. As this can
-            take time, it is useful to disable it during testing.
 
         :param set[str] main_source_dirs: List of source directories to use in
             the project file for mains. Source directories must be relative to
@@ -1405,8 +1400,7 @@ class CompileCtx(object):
         if check_only:
             return
         with global_context(self):
-            self._emit(file_root, generate_lexer, main_source_dirs,
-                       main_programs)
+            self._emit(file_root, main_source_dirs, main_programs)
 
         self.documentations.report_unused()
 
@@ -1609,8 +1603,7 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             pass_manager.run(self)
 
-    def _emit(self, file_root, generate_lexer, main_source_dirs,
-              main_programs):
+    def _emit(self, file_root, main_source_dirs, main_programs):
         """
         Emit native code for all the rules in this grammar as a library:
         a library specification and the corresponding implementation.  Also
@@ -1944,28 +1937,6 @@ class CompileCtx(object):
             ret = path.join(*args)
             if path.isfile(path.join(self.extensions_dir, ret)):
                 return ret
-
-    def set_quex_path(self):
-        """
-        If the QUEX_PATH environment variable is defined, do nothing.
-        Otherwise, look for the "quex" program and determine Quex's "share"
-        install directory: define the QUEX_PATH environment variable with it.
-        """
-        if 'QUEX_PATH' in os.environ:
-            return
-
-        try:
-            quex_bin = subprocess.check_output(['which', 'quex']).strip()
-        except subprocess.CalledProcessError:
-            printcol('Cannot find the "quex" program. Please define the'
-                     ' QUEX_PATH environment variable to Quex\'s "share"'
-                     ' install directory', Colors.FAIL)
-            raise
-
-        os.environ['QUEX_PATH'] = os.path.join(
-            os.path.dirname(os.path.dirname(quex_bin)),
-            'share', 'quex'
-        )
 
     def add_symbol_literal(self, name):
         """

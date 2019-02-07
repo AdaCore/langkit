@@ -5,7 +5,6 @@ from itertools import count
 import re
 
 from langkit.compile_context import get_context
-from langkit.compiled_types import render
 from langkit.diagnostics import (Context, check_source_language,
                                  extract_library_location)
 from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
@@ -227,14 +226,6 @@ class TokenAction(Action):
     def c_name(self):
         prefixed_name = get_context().lang_name + self.base_name
         return prefixed_name.upper
-
-    @property
-    def quex_name(self):
-        pfx = get_context().lexer.prefix
-        assert pfx is not None, (
-            "Lexer's prefix needs to be set before emission"
-        )
-        return "{}{}".format(pfx, self.base_name.upper)
 
     def __repr__(self):
         return '<{} {}>'.format(type(self).__name__,
@@ -689,22 +680,6 @@ class Lexer(object):
 
         # Compute the corresponding DFA
         return DFACodeGenHolder(nfa_start.to_dfa(), get_action)
-
-    def emit(self):
-        """
-        Return the content of the .qx file corresponding to this lexer
-        specification. This function is not to be called by the client, and
-        will be called by langkit when needed.
-
-        :rtype: str
-        """
-        return render(
-            "lexer/quex_lexer_spec",
-            tokens=self.tokens,
-            patterns=self.__patterns,
-            rules=self.rules,
-            lexer=self
-        )
 
     def get_token(self, literal):
         """
