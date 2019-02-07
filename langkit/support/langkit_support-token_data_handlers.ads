@@ -157,25 +157,38 @@ package Langkit_Support.Token_Data_Handlers is
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
 
-   procedure Initialize (TDH : out Token_Data_Handler; Symbols : Symbol_Table);
+   function Initialized (TDH : Token_Data_Handler) return Boolean;
+   --  Return whether TDH has been initialized (see the Initialize procedure)
+
+   function Has_Source_Buffer (TDH : Token_Data_Handler) return Boolean
+      with Pre => Initialized (TDH);
+   --  Return whether TDH was used to lex some input source
+
+   procedure Initialize (TDH : out Token_Data_Handler; Symbols : Symbol_Table)
+      with Pre  => Symbols /= No_Symbol_Table,
+           Post => Initialized (TDH) and then not Has_Source_Buffer (TDH);
    --  Create a token data handler that is associated with Symbols
 
    procedure Reset
-     (TDH           : out Token_Data_Handler;
+     (TDH           : in out Token_Data_Handler;
       Source_Buffer : Text_Access;
       Source_First  : Positive;
-      Source_Last   : Natural);
+      Source_Last   : Natural)
+      with Pre => Initialized (TDH);
    --  Free TDH's source buffer, remove all its tokens and associate another
    --  source buffer to it. Unlike Free, this does not deallocate the vectors.
    --
    --  This is equivalent to calling Free and then Initialize on TDH except
    --  from the performance point of view: this re-uses allocated resources.
 
-   procedure Free (TDH : in out Token_Data_Handler);
+   procedure Free (TDH : in out Token_Data_Handler)
+      with Post => not Initialized (TDH);
    --  Free all the resources allocated to TDH. After then, one must call
    --  Initialize again in order to use the TDH.
 
-   procedure Move (Destination, Source : in out Token_Data_Handler);
+   procedure Move (Destination, Source : in out Token_Data_Handler)
+      with Pre  => Initialized (Source) and then not Initialized (Destination),
+           Post => Initialized (Destination) and then not Initialized (Source);
    --  Move data from the Source handler to the Destination one. All data in
    --  Destination is overriden, so call Free on it first. Source is reset to
    --  null.
