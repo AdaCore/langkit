@@ -673,8 +673,9 @@ class Lexer(object):
             nfa_start.add_transition(None, nfa)
 
         def get_action(labels):
-            # If this labels contains one or several actions, get the most
-            # prioritary one (and leave out the index from id_generator above).
+            # If this set of labels contain one or several actions, get the
+            # most prioritary one (and leave out the index from id_generator
+            # above).
             sorted_actions = sorted(labels)
             return sorted_actions[0][1] if sorted_actions else None
 
