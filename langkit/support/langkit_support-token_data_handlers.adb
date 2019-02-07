@@ -93,6 +93,24 @@ package body Langkit_Support.Token_Data_Handlers is
       return Before;
    end Floor;
 
+   -----------------
+   -- Initialized --
+   -----------------
+
+   function Initialized (TDH : Token_Data_Handler) return Boolean is
+   begin
+      return TDH.Symbols /= No_Symbol_Table;
+   end Initialized;
+
+   -----------------------
+   -- Has_Source_Buffer --
+   -----------------------
+
+   function Has_Source_Buffer (TDH : Token_Data_Handler) return Boolean is
+   begin
+      return TDH.Source_Buffer /= null;
+   end Has_Source_Buffer;
+
    ----------------
    -- Initialize --
    ----------------
@@ -114,11 +132,10 @@ package body Langkit_Support.Token_Data_Handlers is
    -----------
 
    procedure Reset
-     (TDH           : out Token_Data_Handler;
+     (TDH           : in out Token_Data_Handler;
       Source_Buffer : Text_Access;
       Source_First  : Positive;
-      Source_Last   : Natural)
-   is
+      Source_Last   : Natural) is
    begin
       Free (TDH.Source_Buffer);
       TDH.Source_Buffer := Source_Buffer;
@@ -150,7 +167,13 @@ package body Langkit_Support.Token_Data_Handlers is
    procedure Move (Destination, Source : in out Token_Data_Handler) is
    begin
       Destination := Source;
-      Initialize (Source, No_Symbol_Table);
+      Source := (Source_Buffer     => null,
+                 Source_First      => <>,
+                 Source_Last       => <>,
+                 Tokens            => <>,
+                 Symbols           => No_Symbol_Table,
+                 Tokens_To_Trivias => <>,
+                 Trivias           => <>);
    end Move;
 
    --------------------------
