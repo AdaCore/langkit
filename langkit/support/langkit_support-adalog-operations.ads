@@ -56,6 +56,8 @@ package Langkit_Support.Adalog.Operations is
       --  to re-evaluate it.
    end record;
 
+   type Base_Aggregate_Rel_Access is access all Base_Aggregate_Rel'Class;
+
    overriding procedure Reset (Self : in out Base_Aggregate_Rel);
    overriding procedure Cleanup (Self : in out Base_Aggregate_Rel);
    overriding function Children
