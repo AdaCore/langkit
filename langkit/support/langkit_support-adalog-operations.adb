@@ -313,7 +313,7 @@ package body Langkit_Support.Adalog.Operations is
       end if;
 
       declare
-         Result : constant access Any_Rel := new Any_Rel'
+         Result : constant Base_Aggregate_Rel_Access := new Any_Rel'
            (Ref_Count     => 1,
             Count         => Keep_Rels'Length,
             Next          => <>,
@@ -355,7 +355,7 @@ package body Langkit_Support.Adalog.Operations is
       end if;
 
       declare
-         Result : constant access All_Rel := new All_Rel'
+         Result : constant Base_Aggregate_Rel_Access := new All_Rel'
            (Ref_Count     => 1,
             Count         => Keep_Rels'Length,
             Next          => <>,
