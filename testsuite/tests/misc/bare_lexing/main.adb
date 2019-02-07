@@ -5,6 +5,7 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 
 with Libfoolang.Common; use Libfoolang.Common;
+use Libfoolang.Common.Symbols;
 use Libfoolang.Common.Token_Data_Handlers;
 with Libfoolang.Lexer;  use Libfoolang.Lexer;
 
@@ -14,16 +15,20 @@ procedure Main is
      ("# comment" & ASCII.LF
       & "example" & ASCII.LF);
 
+   Symbols     : Symbol_Table;
    TDH         : Token_Data_Handler;
    Diagnostics : Diagnostics_Vectors.Vector;
    Tok         : Token_Or_Trivia_Index;
 
 begin
+   Symbols := Create_Symbol_Table;
+   Initialize (TDH, Symbols);
+
    Extract_Tokens
-     (Input => (Kind        => Bytes_Buffer,
-                Charset     => To_Unbounded_String ("ascii"),
-                Read_BOM    => True,
-                Bytes       => To_Unbounded_String (Buffer)),
+     (Input => (Kind     => Bytes_Buffer,
+                Charset  => To_Unbounded_String ("ascii"),
+                Read_BOM => True,
+                Bytes    => To_Unbounded_String (Buffer)),
       Tab_Stop    => 8,
       With_Trivia => True,
       TDH         => TDH,
@@ -42,5 +47,6 @@ begin
    end loop;
 
    Free (TDH);
+   Destroy (Symbols);
    Put_Line ("main.adb: Done.");
 end Main;
