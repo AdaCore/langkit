@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 import os.path
-import sys
 import unicodedata
 
 
@@ -167,7 +166,7 @@ class CharSet(object):
             else:
                 result.add_int_range(last + 1, l - 1)
             last = h
-        result.add_int_range(last + 1, sys.maxunicode)
+        result.add_int_range(last + 1, MAXUNICODE)
         return result
 
     @property
