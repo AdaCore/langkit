@@ -5,7 +5,7 @@ Test that sloc-based token lookup works properly.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode
-from langkit.lexer import (Eof, Ignore, Lexer, LexerToken, Literal, Pattern,
+from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithText, WithTrivia)
 from langkit.parsers import Grammar, List
 
@@ -20,10 +20,8 @@ class Token(LexerToken):
 foo_lexer = Lexer(Token)
 foo_lexer.add_rules(
     (Pattern(r'[ \n\r\t]+'), Ignore()),
-    (Eof(),                  Token.Termination),
-
     (Literal('example'),     Token.Example),
-    (Pattern('#(.?)+'), Token.Comment),
+    (Pattern('#(.?)+'),      Token.Comment),
 )
 
 
