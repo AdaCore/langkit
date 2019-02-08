@@ -70,7 +70,7 @@ class CharSet(object):
     def __repr__(self):
         ranges = []
         for l, h in self.ranges:
-            if not self._repr_ellipsis or l <= 127:
+            if not self._repr_ellipsis or (l <= 127 and h <= 127):
                 ranges.append((unichr(l), unichr(h)))
             else:
                 ranges.append(None)
@@ -181,7 +181,7 @@ class CharSet(object):
         non_ascii = CharSet()
 
         def add_range(char_set, l, h):
-            char_set.add_range(unichr(l), unichr(h))
+            char_set.add_int_range(l, h)
 
         for l, h in self.ranges:
             if h < 128:
@@ -342,7 +342,9 @@ class CharSet(object):
 
 def compute_unicode_categories_char_sets():
     # We assume here that the Python interpreter is built to use UCS-4 to
-    # represent strings.
+    # represent strings. It's fine because this code runs only to precompute
+    # data that will be cached in source code, not on every script using
+    # Langkit.
     sets = {}
     for i in range(MAXUNICODE + 1):
         char = unichr(i)
