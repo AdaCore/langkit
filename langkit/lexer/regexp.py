@@ -552,8 +552,8 @@ class NFAState(object):
             if not states:
                 return
             states = NFAState.follow_spontaneous_transitions(states)
-            result[NFAState.hashable_state_set(states)].add_range(
-                unichr(low), unichr(high))
+            result[NFAState.hashable_state_set(states)].add_int_range(low,
+                                                                      high)
 
         # Set of states "active" for the current position in the events stream
         states = set()
