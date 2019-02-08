@@ -220,11 +220,10 @@ class RegexpCollection(object):
 
         return root
 
-    def add_patterns(self, **kwargs):
-        for name, regexp in kwargs.iteritems():
-            # Register the parser for regexp
-            assert name not in self.patterns
-            self.patterns[name] = self._parse(regexp)
+    def add_pattern(self, name, regexp):
+        # Register the parser for regexp
+        assert name not in self.patterns
+        self.patterns[name] = self._parse(regexp)
 
     def nfa_for(self, regexp):
         return self._parse(regexp).to_nfa(self)
