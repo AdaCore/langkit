@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.lexer import (
-    Eof, Lexer, LexerToken, Literal, Pattern, TokenFamily, WithSymbol,
-    WithText, WithTrivia
-)
+from langkit.lexer import (Lexer, LexerToken, Literal, Pattern, TokenFamily,
+                           WithSymbol, WithText, WithTrivia)
 
 
 class Token(LexerToken):
@@ -41,7 +39,6 @@ class Token(LexerToken):
 foo_lexer = Lexer(Token)
 foo_lexer.add_rules(
     (Pattern(r'[ \n\r\t]+'), Token.Whitespace),
-    (Eof(),                  Token.Termination),
 
     (Literal('def'),         Token.Def),
     (Literal('var'),         Token.Var),
