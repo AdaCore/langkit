@@ -408,22 +408,21 @@ class Lexer(object):
     will be used to identify the different kinds of tokens that your lexer can
     generate. This is a simple example for a simple calculator's lexer::
 
-        from enum import Enum
-        class TokenKind(Enum):
-            Plus = 1
-            Minus = 2
-            Times = 3
-            Div = 4
-            Number = 5
+        class Token(LexerToken):
+            Plus = WithText()
+            Minus = WithText()
+            Times = WithText()
+            Div = WithText()
+            Number = WithText()
 
-        l = Lexer(TokenKind)
+        l = Lexer(Token)
 
     You can add patterns to it, that are shortcuts to regex patterns, and that
     can refer to each others, like so::
 
         l.add_patterns(
-            ('digit', r"[0-9]"),
-            ('integer', r"({digit}(_?{digit})*)"),
+            ('digit',   r"[0-9]"),
+            ('integer', r"{digit}(_?{digit})*"),
         )
 
     Note that this is not necessary, just a convenient shortcut. After that
@@ -431,11 +430,11 @@ class Lexer(object):
     `add_rules` function::
 
         l.add_rules((
-            (Literal("+"),       WithText(TokenKind.Plus))
-            (Literal("-"),       WithText(TokenKind.Minus))
-            (Literal("*"),       WithText(TokenKind.Times))
-            (Literal("/"),       WithText(TokenKind.Div))
-            (l.patterns.integer, WithText(TokenKind.Number))
+            (Literal("+"),         Token.Plus),
+            (Literal("-"),         Token.Minus),
+            (Literal("*"),         Token.Times),
+            (Literal("/"),         Token.Div),
+            (Pattern('{integer}'), Token.Number),
         ))
 
     After that, your lexer is complete! You can use it in your parser to
