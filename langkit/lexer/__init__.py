@@ -537,10 +537,11 @@ class Lexer(object):
 
         :param list[(str, str)] patterns: The list of patterns to add.
         """
+        loc = extract_library_location()
         for k, v in patterns:
             assert isinstance(k, basestring)
             assert isinstance(v, basestring)
-            self.patterns.append((k, v))
+            self.patterns.append((k, v, loc))
 
     def add_rules(self, *rules):
         """
@@ -559,12 +560,13 @@ class Lexer(object):
         :param rules: The list of rules to add.
         :type rules: list[(Matcher, Action)|RuleAssoc]
         """
+        loc = extract_library_location()
 
         for matcher_assoc in rules:
             if type(matcher_assoc) is tuple:
                 assert len(matcher_assoc) == 2
                 matcher, action = matcher_assoc
-                rule_assoc = RuleAssoc(matcher, action)
+                rule_assoc = RuleAssoc(matcher, action, loc)
             else:
                 assert isinstance(matcher_assoc, RuleAssoc)
                 rule_assoc = matcher_assoc
@@ -716,15 +718,18 @@ class Lexer(object):
         regexps = RegexpCollection()
 
         # Import patterns into regexps
-        for name, pattern in self.patterns:
-            regexps.add_pattern(name, pattern)
+        for name, pattern, loc in self.patterns:
+            with Context('In definition of lexer pattern {}'.format(name),
+                         loc):
+                regexps.add_pattern(name, pattern)
 
         # Now turn each rule into a NFA
         nfas = []
 
         for i, a in enumerate(self.rules):
             assert isinstance(a, RuleAssoc)
-            nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
+            with Context('In definition of lexer rules', a.location):
+                nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfas.append(nfa_start)
 
             # The first rule that was added must have precedence when multiple
@@ -798,9 +803,10 @@ class RuleAssoc(object):
     used directly, since you can provide a tuple to add_rules, that will be
     expanded to a RuleAssoc.
     """
-    def __init__(self, matcher, action):
+    def __init__(self, matcher, action, location=None):
         self.matcher = matcher
         self.action = action
+        self.location = location or extract_library_location()
 
     @property
     def signature(self):
