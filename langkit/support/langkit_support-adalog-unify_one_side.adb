@@ -246,9 +246,11 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       Eq_Data : Equals_Data) return Relation
    is
    begin
+
       for V of Vals loop
          R_Inc_Ref (V);
       end loop;
+
       return new Member_T'
         (Left           => R,
          Values         => new R_Type_Array'(Vals),

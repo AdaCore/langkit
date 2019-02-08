@@ -10,7 +10,7 @@ from langkit.diagnostics import (
     check_source_language, extract_library_location, Context
 )
 from langkit.expressions import (FieldAccess, PropertyDef, Self, construct,
-                                 resolve_property)
+                                 resolve_property, unsugar)
 
 """
 This module contains the public API and the implementation for lexical
@@ -383,6 +383,11 @@ class AddEnv(EnvAction):
     def __init__(self, no_parent=False, transitive_parent=False):
         self.no_parent = no_parent
         self.transitive_parent = transitive_parent
+
+    def create_internal_properties(self, env_spec):
+        self.transitive_parent_prop = env_spec.create_internal_property(
+            'Env_Trans_Parent', unsugar(self.transitive_parent), T.Bool
+        )
 
 
 class AddToEnv(EnvAction):
