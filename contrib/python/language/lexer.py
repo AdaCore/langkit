@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.lexer import (
-    Eof, Lexer, LexerToken, Literal, WithText,
-    WithSymbol, Ignore, Pattern, WithTrivia
-)
+from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
+                           WithText, WithSymbol, WithTrivia)
 
 
 class Token(LexerToken):
@@ -107,7 +105,6 @@ python_lexer.add_rules(
              '|{STRING_SQ}|{STRING_DBQ})'), Token.String),
     (Pattern(r'[ \r\t]+'),   Ignore()),
     (Pattern(r"#(.?)+"),     Token.Comment),
-    (Eof(),                  Token.Termination),
 
     (Literal('>>='),         Token.RshAssign),
     (Literal('is'),          Token.Is),
