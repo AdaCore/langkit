@@ -608,42 +608,21 @@ class Lexer(object):
         """
         self.newline_after.update(tokens)
 
-    def build_dfa_code(self):
+    def build_dfa_code(self, context):
         """
         Build the DFA that implements this lexer (self.dfa_code).
         """
-        regexps = RegexpCollection()
-
-        # Import patterns into regexps
-        for name, pattern in self.patterns:
-            regexps.add_pattern(name, pattern)
-
-        # The first rule that was added must have precedence when multiple
-        # rules compete for the longest match. To implement this behavior, we
-        # associate increasing ids to each token action.
-        id_generator = count(0)
-
-        nfas = []
-        for i, a in enumerate(self.rules):
-            assert isinstance(a, RuleAssoc)
-            nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
-            nfa_end.label = (next(id_generator), a.action)
-            nfas.append(nfa_start)
-
-        # Create a big OR for all possible accepted patterns
-        nfa_start = NFAState()
-        for nfa in nfas:
-            nfa_start.add_transition(None, nfa)
+        assert context.nfa_start is not None
 
         def get_action(labels):
             # If this set of labels contain one or several actions, get the
-            # most prioritary one (and leave out the index from id_generator
-            # above).
+            # most prioritary one and leave out the integer used to encode
+            # priority. See compile_rules for how these integers are computed.
             sorted_actions = sorted(labels)
             return sorted_actions[0][1] if sorted_actions else None
 
         # Compute the corresponding DFA
-        return DFACodeGenHolder(nfa_start.to_dfa(), get_action)
+        return DFACodeGenHolder(context.nfa_start.to_dfa(), get_action)
 
     def get_token(self, literal):
         """
@@ -727,6 +706,36 @@ class Lexer(object):
         for tf in self.tokens.token_families:
             for t in tf.tokens:
                 self.tokens.token_to_family[t] = tf
+
+    def compile_rules(self, context):
+        """
+        Pass to turn the lexer DSL into our internal regexp objects.
+        """
+        assert context.nfa_start is None
+
+        regexps = RegexpCollection()
+
+        # Import patterns into regexps
+        for name, pattern in self.patterns:
+            regexps.add_pattern(name, pattern)
+
+        # Now turn each rule into a NFA
+        nfas = []
+
+        for i, a in enumerate(self.rules):
+            assert isinstance(a, RuleAssoc)
+            nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
+            nfas.append(nfa_start)
+
+            # The first rule that was added must have precedence when multiple
+            # rules compete for the longest match. To implement this behavior,
+            # we associate increasing ids to each token action.
+            nfa_end.label = (i, a.action)
+
+        # Create a big OR for all possible accepted patterns
+        context.nfa_start = NFAState()
+        for nfa in nfas:
+            context.nfa_start.add_transition(None, nfa)
 
 
 class Literal(Matcher):

@@ -725,6 +725,13 @@ class CompileCtx(object):
         :type: set[names.Name]
         """
 
+        self.nfa_start = None
+        """
+        Intermediate representation for the lexer state machine (NFA).
+
+        :type: langkit.lexer.regexp.NFAState
+        """
+
         self.dfa_code = None
         """
         Holder for the data structures used to generate code for the lexer
@@ -1504,9 +1511,13 @@ class CompileCtx(object):
 
         pass_manager = PassManager()
         pass_manager.add(
-            MajorStepPass('Compiling the grammar'),
+            MajorStepPass('Compiling the lexer'),
             GlobalPass('check token families',
                        self.lexer.check_token_families),
+            GlobalPass('compile lexer rules',
+                       self.lexer.compile_rules),
+
+            MajorStepPass('Compiling the grammar'),
             GlobalPass('check main parsing rule',
                        self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',
@@ -1680,7 +1691,7 @@ class CompileCtx(object):
         )
         if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
             generate_lexer_sm_body = True
-            self.dfa_code = self.lexer.build_dfa_code()
+            self.dfa_code = self.lexer.build_dfa_code(self)
 
         ada_modules = [
             # Top (pure) package
