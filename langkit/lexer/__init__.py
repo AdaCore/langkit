@@ -728,6 +728,26 @@ class Lexer(object):
 
         for i, a in enumerate(self.rules):
             assert isinstance(a, RuleAssoc)
+
+            # Check that actions never emit Termination and LexingFailure
+            # tokens. These tokens are supposed to be emitted by the lexing
+            # engine only.
+            def check(token):
+                check_source_language(
+                    token not in (self.tokens.Termination,
+                                  self.tokens.LexingFailure),
+                    '{} is reserved for automatic actions only'
+                    .format(token.dsl_name))
+
+            if isinstance(a.action, Case.CaseAction):
+                for alt in a.action.all_alts:
+                    check(alt.send)
+            elif isinstance(a.action, Ignore):
+                pass
+            else:
+                assert isinstance(a.action, TokenAction)
+                check(a.action)
+
             with Context('In definition of lexer rules', a.location):
                 nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfas.append(nfa_start)
@@ -866,6 +886,7 @@ class Case(RuleAssoc):
     class CaseAction(Action):
         def __init__(self, match_length, *alts):
             super(Case.CaseAction, self).__init__()
+            self.location = extract_library_location()
             self.match_length = match_length
 
             for i, alt in enumerate(alts):
