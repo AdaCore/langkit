@@ -495,13 +495,6 @@ class Lexer(object):
         for el in self.tokens:
             self.token_actions[type(el).__name__].add(el)
 
-        # These are automatic rules, useful for all lexers: handle end of input
-        # and invalid tokens.
-        self.add_rules(
-            (Eof(),     self.tokens.Termination),
-            (Failure(), self.tokens.LexingFailure),
-        )
-
         self.add_rules(*pre_rules)
 
         if self.track_indent:
@@ -653,16 +646,7 @@ class Lexer(object):
 
         nfas = []
         for i, a in enumerate(self.rules):
-            # TODO: handle all assocs
             assert isinstance(a, RuleAssoc)
-
-            if isinstance(a.matcher, Eof):
-                assert a.action == self.tokens.Termination
-                continue
-            elif isinstance(a.matcher, Failure):
-                assert a.action == self.tokens.LexingFailure
-                continue
-
             nfa_start, nfa_end = self.regexps.nfa_for(a.matcher.regexp)
             nfa_end.label = (next(id_generator), a.action)
             nfas.append(nfa_start)
@@ -808,30 +792,6 @@ class NoCaseLit(Literal):
     @property
     def signature(self):
         return ('NoCaseLiteral', self.to_match)
-
-
-class Eof(Matcher):
-    """
-    Matcher. Matches the end of the file/input stream.
-    """
-
-    @property
-    def match_length(self):
-        return 0
-
-    @property
-    def signature(self):
-        return 'Eof'
-
-
-class Failure(Matcher):
-    """
-    Matcher. Matches a case of failure in the lexer.
-    """
-
-    @property
-    def signature(self):
-        return 'Failure'
 
 
 class Ignore(Action):
