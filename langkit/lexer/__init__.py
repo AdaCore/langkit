@@ -11,10 +11,6 @@ from langkit.lexer.regexp import DFACodeGenHolder, NFAState, RegexpCollection
 from langkit.names import Name
 
 
-# TODO: create a compilation pass to lower the lexer specification to a DFA.
-# This will let us report errors and do the real work before generating
-# sources.
-
 # All "signature" properties in classes below are used to identify the whole
 # lexer specification, and thus implement a cache. If the signature does not
 # change from one run to another, we can avoid computing the DFA and generating
