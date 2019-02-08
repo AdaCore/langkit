@@ -1,0 +1,23 @@
+== test_invalid_pattern_1 ==
+File "test.py", line 13, In definition of lexer rules
+    Error: unbalanced square bracket
+
+== test_invalid_pattern_2 ==
+File "test.py", line 17, In definition of lexer rules
+    Error: unknown pattern: no_such_pattern
+
+== test_invalid_pattern_3 ==
+File "test.py", line 25, In definition of lexer rules
+    Error: infinite recursion in pat1
+
+== test_invalid_pattern_4 ==
+File "test.py", line 30, In definition of lexer pattern pat
+    Error: unbalanced square bracket
+
+== test_invalid_rule_1 ==
+Error: Termination is reserved for automatic actions only
+
+== test_invalid_rule_2 ==
+Error: LexingFailure is reserved for automatic actions only
+
+Done
