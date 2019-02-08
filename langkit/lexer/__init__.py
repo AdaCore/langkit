@@ -389,18 +389,6 @@ class LexerToken(object):
                        for t, tf in self.token_to_family.iteritems()))
 
 
-class Patterns(object):
-    """
-    This is just a wrapper class, instantiated so that we can setattr patterns
-    on it and the user can then type::
-
-        mylexer.patterns.my_pattern
-
-    To refer to a pattern.
-    """
-    pass
-
-
 class Lexer(object):
     """
     This is the main lexer object, through which you will define your Lexer.
@@ -441,16 +429,6 @@ class Lexer(object):
     generate parse trees.
     """
 
-    class PredefPattern(Pattern):
-        """
-        Class for a pattern defined in advance via the add_pattern method on
-        the lexer.
-        """
-
-        def __init__(self, name, pattern):
-            super(Lexer.PredefPattern, self).__init__(pattern)
-            self.name = name
-
     def __init__(self, tokens_class, track_indent=False, pre_rules=[]):
         """
         :param type tokens_class: The class for the lexer's tokens.
@@ -463,13 +441,11 @@ class Lexer(object):
             rules this way is the same as calling add_rules.
         :type pre_rules: list[(Matcher, Action)|RuleAssoc]
         """
-        self.regexps = RegexpCollection()
 
         self.tokens = tokens_class(track_indent)
         assert isinstance(self.tokens, LexerToken)
 
-        self.patterns = Patterns()
-        self.__patterns = []
+        self.patterns = []
         self.rules = []
         self.tokens_set = {el.name for el in self.tokens}
         self.track_indent = track_indent
@@ -526,7 +502,7 @@ class Lexer(object):
                 self.prefix,
                 self.tokens.signature,
 
-                sorted(p.signature for p in self.__patterns),
+                sorted(p.signature for p in self.patterns),
 
                 # Do not sort signatures for rules as their order matters
                 [r.signature for r in self.rules],
@@ -562,11 +538,9 @@ class Lexer(object):
         :param list[(str, str)] patterns: The list of patterns to add.
         """
         for k, v in patterns:
-            predef_pattern = Lexer.PredefPattern(k, v)
-            setattr(self.patterns, k.lower(), predef_pattern)
-            self.__patterns.append(predef_pattern)
-
-        self.regexps.add_patterns(**dict(patterns))
+            assert isinstance(k, basestring)
+            assert isinstance(v, basestring)
+            self.patterns.append((k, v))
 
     def add_rules(self, *rules):
         """
@@ -638,6 +612,12 @@ class Lexer(object):
         """
         Build the DFA that implements this lexer (self.dfa_code).
         """
+        regexps = RegexpCollection()
+
+        # Import patterns into regexps
+        for name, pattern in self.patterns:
+            regexps.add_pattern(name, pattern)
+
         # The first rule that was added must have precedence when multiple
         # rules compete for the longest match. To implement this behavior, we
         # associate increasing ids to each token action.
@@ -646,7 +626,7 @@ class Lexer(object):
         nfas = []
         for i, a in enumerate(self.rules):
             assert isinstance(a, RuleAssoc)
-            nfa_start, nfa_end = self.regexps.nfa_for(a.matcher.regexp)
+            nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfa_end.label = (next(id_generator), a.action)
             nfas.append(nfa_start)
 
