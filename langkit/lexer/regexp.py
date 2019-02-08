@@ -6,6 +6,7 @@ import itertools
 import re
 
 
+from langkit.diagnostics import check_source_language
 from langkit.lexer.char_set import CharSet
 from langkit.lexer.unicode_data import unicode_categories_char_sets
 
@@ -194,7 +195,11 @@ class RegexpCollection(object):
 
         def to_nfa(self, regexps):
             with regexps._visit_rule(self.name):
-                parser = regexps.patterns[self.name]
+                try:
+                    parser = regexps.patterns[self.name]
+                except KeyError:
+                    check_source_language(
+                        False, 'unknown pattern: {}'.format(self.name))
                 return parser.to_nfa(regexps)
 
         def __repr__(self):
@@ -230,8 +235,9 @@ class RegexpCollection(object):
 
     @contextmanager
     def _visit_rule(self, rule_name):
-        if rule_name in self._visiting_patterns:
-            raise ValueError('infinite recursion in {}'.format(rule_name))
+        check_source_language(
+            rule_name not in self._visiting_patterns,
+            'infinite recursion in {}'.format(rule_name))
         self._visiting_patterns.add(rule_name)
         yield
         self._visiting_patterns.remove(rule_name)
@@ -239,8 +245,7 @@ class RegexpCollection(object):
     @classmethod
     def _read_escape(cls, stream):
         assert stream.read() == '\\'
-        if stream.eof:
-            raise ValueError('bogus escape')
+        check_source_language(not stream.eof, 'bogus escape')
         char = stream.read()
         return cls.escape_chars.get(char, char)
 
@@ -265,8 +270,8 @@ class RegexpCollection(object):
             elif stream.next_is('('):
                 stream.read()
                 subparsers.append(cls._parse_or(stream))
-                if not stream.next_is(')'):
-                    raise ValueError('unbalanced parenthesis')
+                check_source_language(stream.next_is(')'),
+                                      'unbalanced parenthesis')
                 stream.read()
 
             elif stream.next_is('['):
@@ -277,18 +282,18 @@ class RegexpCollection(object):
                 name = ''
                 while not stream.eof and not stream.next_is('}'):
                     name += stream.read()
-                if not stream.next_is('}'):
-                    raise ValueError('unbalanced bracket')
+                check_source_language(stream.next_is('}'),
+                                      'unbalanced bracket')
                 stream.read()
-                if not rule_name_re.match(name):
-                    raise ValueError('invalid rule name: {}'.format(name))
+                check_source_language(rule_name_re.match(name),
+                                      'invalid rule name: {}'.format(name))
                 subparsers.append(cls.Defer(name))
 
             elif stream.next_is('*', '+', '?'):
-                if not subparsers:
-                    raise ValueError('nothing to repeat')
-                elif isinstance(subparsers[-1], cls.Repeat):
-                    raise ValueError('multiple repeat')
+                check_source_language(subparsers, 'nothing to repeat')
+                check_source_language(
+                    not isinstance(subparsers[-1], cls.Repeat),
+                    'multiple repeat')
                 wrapper = {
                     '*': lambda p: cls.Repeat(p),
                     '+': lambda p: cls.Sequence([p, cls.Repeat(p)]),
@@ -306,7 +311,8 @@ class RegexpCollection(object):
                 break
 
             elif stream.next_is('^', '$'):
-                raise ValueError('matching beginning or ending is unsupported')
+                check_source_language(
+                    False, 'matching beginning or ending is unsupported')
 
             elif stream.next_is('\\'):
                 stream.read()
@@ -319,21 +325,23 @@ class RegexpCollection(object):
                     # Read the category name, which must appear between curly
                     # brackets.
                     category = ''
-                    if not stream.next_is('{'):
-                        raise ValueError('incomplete Unicode category matcher')
+                    check_source_language(
+                        stream.next_is('{'),
+                        'incomplete Unicode category matcher')
                     stream.read()
                     while not stream.eof and not stream.next_is('}'):
                         category += stream.read()
-                    if not stream.next_is('}'):
-                        raise ValueError('incomplete Unicode category matcher')
+                    check_source_language(
+                        stream.next_is('}'),
+                        'incomplete Unicode category matcher')
                     stream.read()
 
                     try:
                         char_set = CharSet.for_category(category)
                     except KeyError:
-                        raise ValueError('invalid Unicode category: {}'.format(
-                            category
-                        ))
+                        check_source_language(
+                            False,
+                            'invalid Unicode category: {}'.format(category))
                     if action == 'P':
                         char_set = char_set.negation
                     subparsers.append(cls.Range(char_set))
@@ -365,8 +373,7 @@ class RegexpCollection(object):
         in_range = False
         while not stream.eof and not stream.next_is(']'):
             if stream.next_is('-'):
-                if in_range:
-                    raise ValueError('dangling dash')
+                check_source_language(not in_range, 'dangling dash')
                 in_range = True
                 stream.read()
             else:
@@ -379,10 +386,9 @@ class RegexpCollection(object):
                     ranges.append(char)
                 in_range = False
 
-        if in_range:
-            raise ValueError('dangling dash')
-        elif not stream.next_is(']'):
-            raise ValueError('unbalanced square bracket')
+        check_source_language(not in_range, 'dangling dash')
+        check_source_language(stream.next_is(']'),
+                              'unbalanced square bracket')
         assert stream.read() == ']'
 
         char_set = CharSet(*ranges)
@@ -668,9 +674,10 @@ class DFAState(object):
         # Check that ``chars`` does overlap with character sets for other
         # transitions.
         for other_chars, _ in self.transitions:
-            if chars.overlaps_with(other_chars):
-                raise ValueError('Overlapping input char sets: {} and {}'
-                                 .format(chars, other_chars))
+            check_source_language(
+                not chars.overlaps_with(other_chars),
+                'Overlapping input char sets: {} and {}'
+                .format(chars, other_chars))
 
         self.transitions.append((chars, next_state))
 
