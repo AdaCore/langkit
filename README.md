@@ -18,9 +18,6 @@ Dependencies
 
 To use Langkit:
 
-- [Quex version
-  0.65.4](http://sourceforge.net/projects/quex/files/HISTORY/0.65)
-  Follow the installation guide in the quex `README`
 - The mako template system for Python (see `REQUIREMENTS.dev`)
 - Clang-format
 

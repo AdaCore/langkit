@@ -35,9 +35,6 @@ install:
 * `GNATcoll <http://docs.adacore.com/gnatcoll-docs/>`_, an Ada library
   providing various utilities;
 
-* `Quex <http://sourceforge.net/projects/quex/files/HISTORY/0.64/>`_ (a lexer
-  generator), version 0.64.8;
-
 * Mako, a template system for Python which should already be installed if you
   used ``setup.py/easy_install/pip/...`` to install Langkit.
 
@@ -110,10 +107,9 @@ Lexing
 We are about to start with the most elementary piece of code that will handle
 our language: the lexer!  Also known as a scanner, a lexer will take a stream
 of text (i.e.  your source files) and split it into *tokens* (or *lexemes*),
-which are kind of "words" for programming languages. Langkit relies on Quex to
-generate an efficient lexer but hides the gory details and lets you just
-write a Python description for the lexer. Fire up your favorite code editor and
-open ``language/lexer.py``.
+which are kind of "words" for programming languages. Langkit hides the gory
+details and lets you just write a Python description for the lexer. Fire up
+your favorite code editor and open ``language/lexer.py``.
 
 This module contains three blocks:
 
