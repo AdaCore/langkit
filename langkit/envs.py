@@ -230,10 +230,17 @@ class EnvSpec(object):
     def create_internal_property(self, name, expr, type):
         """
         Create an internal property for this env spec.
+
+        If ``expr`` is None, do not create a property and return None.
+        Otherwise, unsugar it.
+
+        :param str name: Lower-case name to use to create this property name.
+            Since the property is internal, the name is decorated.
         """
         if expr is None:
             return None
 
+        expr = unsugar(expr)
         p = PropertyDef(
             expr, AbstractNodeData.PREFIX_INTERNAL,
             name=names.Name('_{}_{}'.format(name,
@@ -386,7 +393,7 @@ class AddEnv(EnvAction):
 
     def create_internal_properties(self, env_spec):
         self.transitive_parent_prop = env_spec.create_internal_property(
-            'Env_Trans_Parent', unsugar(self.transitive_parent), T.Bool
+            'Env_Trans_Parent', self.transitive_parent, T.Bool
         )
 
 
