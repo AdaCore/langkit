@@ -578,6 +578,12 @@ class Cond(AbstractExpression):
     def branches(self):
         """
         Return the branches for this cond expression.
+
+        This returns all couples of expressions (condition, return value), i.e.
+        all result expressions except the fallback one (the constructor's last
+        argument).
+
+        :rtype: list[(AbstractExpression, AbstractExpression)]
         """
         return funcy.partition(2, self.args)
 
@@ -585,6 +591,8 @@ class Cond(AbstractExpression):
     def else_expr(self):
         """
         Return the else expr for this expression.
+
+        :rtype: AbstractExpression
         """
         return self.args[-1]
 
@@ -598,8 +606,8 @@ class Cond(AbstractExpression):
         # Lower each pair of condition/expression in resolved expression
         pairs = [(
             construct(a_cond, T.Bool,
-                      custom_msg='Condition in Cond expression should '
-                                 'be {expected}, got {expr_type}'),
+                      custom_msg='Condition in Cond expression should be'
+                                 ' {expected}, got {expr_type}'),
             construct(a_expr)
         ) for a_cond, a_expr in self.branches]
 
