@@ -1422,6 +1422,14 @@ class CompileCtx(object):
         :param bool generate_gdb_hook: Whether to generate the
             ".debug_gdb_scripts" section. Good for debugging, but better to
             disable for releases.
+
+        :param list[str] plugin_passes: List of passes to add as plugins to the
+            compilation pass manager. List item must be a name matching the
+            following pattern: ``MODULE.CALLABLE`` where ``MODULE`` is the name
+            of a module that can be imported, and ``CALLABLE`` is the name of a
+            callable inside the module to import. This callable must accept no
+            argument and return an instance of a
+            ``langkit.passes.AbstractPass`` subclass.
         """
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
@@ -1682,11 +1690,17 @@ class CompileCtx(object):
                        disabled=not annotate_fields_types),
             errors_checkpoint_pass,
         )
+
+        # Append plugin-passes at the end of our pipeline
+        from langkit.passes import AbstractPass
+
         for pass_fqn in self.plugin_passes:
-            mod_name, klass_name = pass_fqn.rsplit(".", 1)
+            mod_name, klass_name = pass_fqn.rsplit('.', 1)
             mod = importlib.import_module(mod_name)
-            pass_fn = getattr(mod, klass_name)
-            pass_manager.add(pass_fn())
+            pass_constructor = getattr(mod, klass_name)
+            pass_object = pass_constructor()
+            assert isinstance(pass_object, AbstractPass)
+            pass_manager.add(pass_object)
 
         with names.camel_with_underscores:
             pass_manager.run(self)
