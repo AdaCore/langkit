@@ -1547,8 +1547,8 @@ class CompileCtx(object):
 
         from langkit.compiled_types import CompiledTypeRepo
         from langkit.envs import EnvSpec
-        from langkit.parsers import Parser
         from langkit.expressions import PropertyDef
+        from langkit.parsers import Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
             MajorStepPass, PassManager, PropertyPass, StopPipeline,
@@ -2298,7 +2298,7 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import Argument
         from langkit.expressions import (Entity, FieldAccess, LocalVars, Match,
-                                         Self, construct, PropertyDef)
+                                         PropertyDef, Self, construct)
 
         ignored_props = set()
         redirected_props = {}

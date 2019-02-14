@@ -29,11 +29,11 @@ import inspect
 
 from langkit import names
 from langkit.common import gen_name
-from langkit.compile_context import get_context, CompileCtx
+from langkit.compile_context import CompileCtx, get_context
 from langkit.compiled_types import ASTNodeType, T, resolve_type
 from langkit.diagnostics import (
-    Context, Location, check_source_language, extract_library_location,
-    Severity
+    Context, Location, Severity, check_source_language,
+    extract_library_location
 )
 from langkit.expressions import resolve_property
 from langkit.lexer import TokenAction, WithSymbol

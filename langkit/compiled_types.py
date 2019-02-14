@@ -8,7 +8,7 @@ import pipes
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import is_keyword
-from langkit.compile_context import get_context, CompileCtx
+from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
     Context, Severity, WarningSet, check_source_language,
     extract_library_location
