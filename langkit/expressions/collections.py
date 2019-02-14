@@ -511,13 +511,19 @@ class Map(CollectionExpression):
 
     @property
     def kind(self):
+        """
+        Identify the specific kind for this map expression: simple map, mapcat,
+        filter or take_while.
+
+        :rtype: str
+        """
         if self.expr_fn == collection_expr_identity:
             return (
                 'take_while'
                 if self.filter_fn == collection_expr_none else 'filter'
             )
         if self.filter_fn != collection_expr_none:
-            return "filter_map"
+            return 'filter_map'
         return 'mapcat' if self.do_concat else 'map'
 
     def __repr__(self):
