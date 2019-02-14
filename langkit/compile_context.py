@@ -1605,7 +1605,7 @@ class CompileCtx(object):
             PropertyPass('check overriding types',
                          PropertyDef.check_overriding_types),
             PropertyPass('check properties returning node types',
-                         PropertyDef.check_return_types),
+                         PropertyDef.check_returned_nodes),
             GlobalPass('compute uses entity info attribute',
                        CompileCtx.compute_uses_entity_info_attr),
             GlobalPass('compute uses envs attribute',
