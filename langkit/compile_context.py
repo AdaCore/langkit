@@ -1306,12 +1306,19 @@ class CompileCtx(object):
                 )
 
     _template_extensions_fns = []
+    """
+    List of functions to create the default template environment.
+
+    :type: list[(CompileCtx) -> dict[str, object]]
+    """
 
     @property
     @memoized
     def template_extensions(self):
         """
         Return the set of template extensions evaluated for this context.
+
+        :rtype: dict[str, object]
         """
         from langkit.common import string_repr
         base_env = {
@@ -1351,8 +1358,9 @@ class CompileCtx(object):
         """
         Register a set of mako template env extensions.
 
-        ``exts_fn`` is a function with signature ``(ctx) -> dict[str, Any]``
-        that will be evaluated the first time the renderer is created.
+        :param exts_fn: Function to be evaluated the first time the renderer is
+            created.
+        :type exts_fn: (CompileCtx) -> dict[str, object]
         """
         CompileCtx._template_extensions_fns.append(exts_fn)
 
