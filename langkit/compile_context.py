@@ -1315,18 +1315,18 @@ class CompileCtx(object):
         """
         from langkit.common import string_repr
         base_env = {
-            'string_repr':      string_repr,
-            'Name':             names.Name,
-            'ada_doc':          documentation.ada_doc,
-            'c_doc':            documentation.c_doc,
-            'py_doc':           documentation.py_doc,
-            'ada_c_doc':        documentation.ada_c_doc,
+            'string_repr': string_repr,
+            'Name':        names.Name,
+            'ada_doc':     documentation.ada_doc,
+            'c_doc':       documentation.c_doc,
+            'py_doc':      documentation.py_doc,
+            'ada_c_doc':   documentation.ada_c_doc,
         }
         for fn in CompileCtx._template_extensions_fns:
             ext_env = fn(self)
             for k, v in ext_env.items():
                 assert k not in base_env, (
-                    "Duplicate key in renderer env: {}".format(k)
+                    'Duplicate key in renderer env: {}'.format(k)
                 )
                 base_env[k] = v
         return base_env
