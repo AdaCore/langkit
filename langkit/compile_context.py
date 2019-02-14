@@ -1312,6 +1312,14 @@ class CompileCtx(object):
     :type: list[(CompileCtx) -> dict[str, object]]
     """
 
+    _template_extensions_frozen = False
+    """
+    Whether at least one context has requested the list of template extensions.
+    Once it's true, one cannot register template extensions anymore.
+
+    :type: bool
+    """
+
     @property
     @memoized
     def template_extensions(self):
@@ -1320,6 +1328,8 @@ class CompileCtx(object):
 
         :rtype: dict[str, object]
         """
+        CompileCtx._template_extensions_frozen = True
+
         from langkit.common import string_repr
         base_env = {
             'string_repr': string_repr,
@@ -1353,8 +1363,8 @@ class CompileCtx(object):
         """
         return self.renderer.render(*args, **kwargs)
 
-    @staticmethod
-    def register_template_extensions(exts_fn):
+    @classmethod
+    def register_template_extensions(cls, exts_fn):
         """
         Register a set of mako template env extensions.
 
@@ -1362,6 +1372,7 @@ class CompileCtx(object):
             created.
         :type exts_fn: (CompileCtx) -> dict[str, object]
         """
+        assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
     def emit(self, file_root='.', main_source_dirs=set(), main_programs=set(),
