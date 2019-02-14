@@ -182,10 +182,10 @@ class ManageScript(object):
         )
         args_parser.add_argument(
             '--plugin-pass', action='append', default=[],
-            help='Fully qualified name to a langkit plug-in pass function. '
-            'The function must return a langkit pass, whose type derives from '
-            'langkit.passes.AbstractPass. It will be ran at the end of the '
-            'pass preexisting order'
+            help='Fully qualified name to a Langkit plug-in pass constructor.'
+                 ' The function must return a Langkit pass, whose type derives'
+                 ' from langkit.passes.AbstractPass. It will be ran at the end'
+                 ' of the pass preexisting order.'
         )
 
         def create_parser(fn, needs_context=False):
