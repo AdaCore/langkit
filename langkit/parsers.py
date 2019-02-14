@@ -1745,16 +1745,18 @@ class Predicate(Parser):
 
     @property
     def property_name(self):
-        return (
-            self.property_ref.label
-            if isinstance(self.property_ref, T.Defer) else
-            self.property_ref.qualname
-        )
+        """
+        Informal representation for the property reference that this predicate
+        references.
+
+        :rtype: str
+        """
+        return (self.property_ref.label
+                if isinstance(self.property_ref, T.Defer) else
+                self.property_ref.qualname)
 
     def __repr__(self):
-        return 'Predicate({}, {})'.format(
-            self.parser, self.property_name
-        )
+        return 'Predicate({}, {})'.format(self.parser, self.property_name)
 
     def create_vars_after(self, start_pos):
         self.init_vars()
