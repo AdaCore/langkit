@@ -1356,7 +1356,7 @@ class CompileCtx(object):
         """
         CompileCtx._template_extensions_fns.append(exts_fn)
 
-    def emit(self, file_root='.', main_source_dirs=set(), main_programs=set(),
+    def emit(self, lib_root, main_source_dirs=set(), main_programs=set(),
              annotate_fields_types=False, check_only=False,
              no_property_checks=False, warnings=None, generate_unparser=False,
              generate_astdoc=True, generate_gdb_hook=True,
@@ -1366,7 +1366,7 @@ class CompileCtx(object):
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
 
-        :param str file_root: (optional) Path of the directory in which the
+        :param str lib_root: (optional) Path of the directory in which the
             library should be generated. The default is the current directory.
 
         :param set[str] main_source_dirs: List of source directories to use in
@@ -1447,7 +1447,7 @@ class CompileCtx(object):
         if check_only:
             return
         with global_context(self):
-            self._emit(file_root, main_source_dirs, main_programs)
+            self._emit(lib_root, main_source_dirs, main_programs)
 
         self.documentations.report_unused()
 
@@ -1666,7 +1666,7 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             pass_manager.run(self)
 
-    def _emit(self, file_root, main_source_dirs, main_programs):
+    def _emit(self, lib_root, main_source_dirs, main_programs):
         """
         Emit native code for all the rules in this grammar as a library:
         a library specification and the corresponding implementation.  Also
@@ -1675,13 +1675,13 @@ class CompileCtx(object):
         """
         lib_name_low = self.ada_api_settings.lib_name.lower()
 
-        include_path = path.join(file_root, "include")
-        src_path = path.join(file_root, "include", lib_name_low)
-        lib_path = path.join(file_root, "lib")
-        share_path = path.join(file_root, "share", lib_name_low)
+        include_path = path.join(lib_root, "include")
+        src_path = path.join(lib_root, "include", lib_name_low)
+        lib_path = path.join(lib_root, "lib")
+        share_path = path.join(lib_root, "share", lib_name_low)
 
-        if not path.exists(file_root):
-            os.mkdir(file_root)
+        if not path.exists(lib_root):
+            os.mkdir(lib_root)
 
         if self.verbosity.info:
             printcol("File setup...", Colors.OKBLUE)
@@ -1692,12 +1692,12 @@ class CompileCtx(object):
                   "share/{}".format(lib_name_low),
                   "obj", "src", "bin",
                   "lib", "lib/gnat"]:
-            p = path.join(file_root, d)
+            p = path.join(lib_root, d)
             if not path.exists(p):
                 os.mkdir(p)
 
         self.cache = caching.Cache(
-            os.path.join(file_root, 'obj', 'langkit_cache')
+            os.path.join(lib_root, 'obj', 'langkit_cache')
         )
 
         # Create the project file for the generated library
@@ -1736,7 +1736,7 @@ class CompileCtx(object):
         generate_lexer_sm_body = False
         stale_lexer_spec = write_source_file(
             os.path.join(
-                file_root, 'obj',
+                lib_root, 'obj',
                 '{}_lexer_signature.txt'
                 .format(self.short_name_or_long.lower)),
             json.dumps(self.lexer.signature, indent=2)
@@ -1791,12 +1791,12 @@ class CompileCtx(object):
 
         with names.camel_with_underscores:
             write_ada_file(
-                path.join(file_root, "src"), ADA_BODY, [names.Name('Parse')],
+                path.join(lib_root, "src"), ADA_BODY, [names.Name('Parse')],
                 self.render_template("main_parse_ada"),
                 self.post_process_ada
             )
 
-        imain_project_file = os.path.join(file_root, "src", "mains.gpr")
+        imain_project_file = os.path.join(lib_root, "src", "mains.gpr")
         write_source_file(
             imain_project_file,
             self.render_template(
@@ -1812,12 +1812,12 @@ class CompileCtx(object):
 
         # Emit python API
         if self.python_api_settings:
-            python_path = path.join(file_root, "python")
+            python_path = path.join(lib_root, "python")
             if not path.exists(python_path):
                 os.mkdir(python_path)
             self.emit_python_api(python_path)
 
-            playground_file = os.path.join(file_root, "bin", "playground")
+            playground_file = os.path.join(lib_root, "bin", "playground")
             write_source_file(
                 playground_file,
                 self.render_template(
@@ -1828,7 +1828,7 @@ class CompileCtx(object):
             )
             os.chmod(playground_file, 0o775)
 
-            setup_py_file = os.path.join(file_root, 'python', 'setup.py')
+            setup_py_file = os.path.join(lib_root, 'python', 'setup.py')
             write_source_file(
                 setup_py_file,
                 self.render_template('python_api/setup_py'),
@@ -1836,7 +1836,7 @@ class CompileCtx(object):
             )
 
         # Emit GDB helpers initialization script
-        gdbinit_path = os.path.join(file_root, 'gdbinit.py')
+        gdbinit_path = os.path.join(lib_root, 'gdbinit.py')
         lib_name = self.ada_api_settings.lib_name.lower()
         write_source_file(
             gdbinit_path,
