@@ -627,7 +627,7 @@ class ManageScript(object):
             for sdir in self.main_source_dirs
         }
 
-        self.context.emit(file_root=self.dirs.build_dir(),
+        self.context.emit(lib_root=self.dirs.build_dir(),
                           main_source_dirs=main_source_dirs,
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
