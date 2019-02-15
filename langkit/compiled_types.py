@@ -1653,9 +1653,6 @@ class Field(BaseField):
         return self._precise_types
 
     def _compute_precise_types(self):
-        if self.struct.is_ast_node and self.struct.synthetic:
-            types = TypeSet([self.type])
-
         if self.null:
             # Null fields have their type automatically computed from the
             # abstract field they override.
@@ -1663,7 +1660,7 @@ class Field(BaseField):
 
         elif self.abstract:
             # Abstract fields can contain anything the corresponding concrete
-            # one accept, thanks to the laws of inherittance.
+            # one accept, thanks to the laws of inheritance.
             types = TypeSet()
             for f in self.concrete_fields:
                 f._compute_precise_types()
