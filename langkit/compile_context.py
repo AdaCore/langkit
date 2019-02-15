@@ -1410,6 +1410,7 @@ class CompileCtx(object):
             add_template_dir(dirpath)
 
         self.plugin_passes = list(plugin_passes)
+        self.lib_root = lib_root
         self.no_property_checks = no_property_checks
         self.generate_unparser = generate_unparser
         self.generate_astdoc = generate_astdoc
