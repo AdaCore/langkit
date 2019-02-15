@@ -1555,6 +1555,11 @@ class CompileCtx(object):
             errors_checkpoint_pass
         )
 
+        # Create the file cache now so that plugin passes can emit files
+        self.cache = caching.Cache(
+            os.path.join(self.lib_root, 'obj', 'langkit_cache')
+        )
+
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
 
         pass_manager = PassManager()
@@ -1696,10 +1701,6 @@ class CompileCtx(object):
             p = path.join(lib_root, d)
             if not path.exists(p):
                 os.mkdir(p)
-
-        self.cache = caching.Cache(
-            os.path.join(lib_root, 'obj', 'langkit_cache')
-        )
 
         # Create the project file for the generated library
         main_project_file = os.path.join(
