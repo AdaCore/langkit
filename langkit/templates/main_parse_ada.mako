@@ -16,7 +16,6 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 with ${ada_lib_name}.Analysis;  use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;    use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Init;      use ${ada_lib_name}.Init;
 with ${ada_lib_name}.Unparsing; use ${ada_lib_name}.Unparsing;
 
 procedure Parse is
@@ -247,8 +246,6 @@ procedure Parse is
    end Process_File;
 
 begin
-   Initialize;
-
    Set_Usage
      (Config,
       Usage    => "[switches] [input] [lookups]");
