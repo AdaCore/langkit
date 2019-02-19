@@ -2,7 +2,7 @@ main.py: Running...
 u.root.p_count(None) = <TypeError: list instance expected, got <type 'NoneType'> instead>
 u.root.p_count(42) = <TypeError: list instance expected, got <type 'int'> instead>
 u.root.p_count(u.root.p_all_items) = 3
-u.root.p_example_items = [<Example 1:1-1:8>, <Example 1:14-1:21>]
+u.root.p_example_items = [<Example foo.txt:1:1-1:8>, <Example foo.txt:1:14-1:21>]
 u.root.p_count(u.root.p_example_items) = 2
 main.py: Done.
 Done

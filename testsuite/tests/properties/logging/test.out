@@ -1,6 +1,6 @@
 main.py: Running...
 Calling p_entity_items...
 [LANGKIT.PROPERTIES] Decl.entity_items (<Decl main.txt:1:1-1:5>):
-   [LANGKIT.PROPERTIES] Result: [<Ref 1:3-1:4>]
+   [LANGKIT.PROPERTIES] Result: [<Ref main.txt:1:3-1:4>]
 main.py: Done.
 Done

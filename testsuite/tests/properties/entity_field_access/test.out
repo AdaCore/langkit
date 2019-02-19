@@ -1,5 +1,5 @@
 main.py: Running...
-.test_main: <Couple 1:2-1:8> (is_first=True, is_second=False)
-.property_on_entity: <Couple 1:1-1:12> (is_first=False, is_second=False)
+.test_main: <Couple main.txt:1:2-1:8> (is_first=True, is_second=False)
+.property_on_entity: <Couple main.txt:1:1-1:12> (is_first=False, is_second=False)
 main.py: Done.
 Done

@@ -1,13 +1,13 @@
 main.py: Running...
-<Example 1:1-1:8>.p_before(<Example 1:9-1:16>) = True
-<Example 1:1-1:8>.p_before_or_equal(<Example 1:9-1:16>) = True
-<Example 1:9-1:16>.p_before(<Example 1:1-1:8>) = False
-<Example 1:9-1:16>.p_before_or_equal(<Example 1:1-1:8>) = False
-<Example 1:1-1:8>.p_before(<Example 1:1-1:8>) = False
-<Example 1:1-1:8>.p_before_or_equal(<Example 1:1-1:8>) = True
-<Example 1:1-1:8>.p_before(<Example 1:1-1:8>) = <PropertyError>
-<Example 1:1-1:8>.p_before_or_equal(<Example 1:1-1:8>) = <PropertyError>
-<Example 1:1-1:8>.p_before(None) = <PropertyError>
-<Example 1:1-1:8>.p_before_or_equal(None) = <PropertyError>
+<Example u1:1:1-1:8>.p_before(<Example u1:1:9-1:16>) = True
+<Example u1:1:1-1:8>.p_before_or_equal(<Example u1:1:9-1:16>) = True
+<Example u1:1:9-1:16>.p_before(<Example u1:1:1-1:8>) = False
+<Example u1:1:9-1:16>.p_before_or_equal(<Example u1:1:1-1:8>) = False
+<Example u1:1:1-1:8>.p_before(<Example u1:1:1-1:8>) = False
+<Example u1:1:1-1:8>.p_before_or_equal(<Example u1:1:1-1:8>) = True
+<Example u1:1:1-1:8>.p_before(<Example u2:1:1-1:8>) = <PropertyError>
+<Example u1:1:1-1:8>.p_before_or_equal(<Example u2:1:1-1:8>) = <PropertyError>
+<Example u1:1:1-1:8>.p_before(None) = <PropertyError>
+<Example u1:1:1-1:8>.p_before_or_equal(None) = <PropertyError>
 main.py: Done.
 Done

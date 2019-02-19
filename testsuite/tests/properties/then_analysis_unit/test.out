@@ -1,5 +1,5 @@
 main.py: Running...
-<Scope 1:1-1:6>.unit = None
-<Name 1:1-1:2>.unit = <AnalysisUnit 'main.txt'>
+<Scope main.txt:1:1-1:6>.unit = None
+<Name main.txt:1:1-1:2>.unit = <AnalysisUnit 'main.txt'>
 main.py: Done.
 Done
