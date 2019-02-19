@@ -1,5 +1,5 @@
 main.py: Running...
-processing <DefNodeList 2:5-17:6>
+processing <DefNodeList foo:2:5-17:6>
   processing scope_1
     processing a
       a resolves to scope_1

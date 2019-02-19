@@ -1,9 +1,9 @@
 main.py: Running...
-<VarDecl 1:1-1:10>.decl_kind = var
-<FuncDecl 1:12-1:25>.decl_kind = func
-<DeclList 1:1-1:26>.p_identity(None) = <TypeError: str expected but got <type 'NoneType'> instead>
-<DeclList 1:1-1:26>.p_identity(1) = <TypeError: str expected but got <type 'int'> instead>
-<DeclList 1:1-1:26>.p_identity('blah') = <ValueError: Invalid DeclKind: blah>
-<DeclList 1:1-1:26>.p_identity('func') = u'func'
+<VarDecl main.txt:1:1-1:10>.decl_kind = var
+<FuncDecl main.txt:1:12-1:25>.decl_kind = func
+<DeclList main.txt:1:1-1:26>.p_identity(None) = <TypeError: str expected but got <type 'NoneType'> instead>
+<DeclList main.txt:1:1-1:26>.p_identity(1) = <TypeError: str expected but got <type 'int'> instead>
+<DeclList main.txt:1:1-1:26>.p_identity('blah') = <ValueError: Invalid DeclKind: blah>
+<DeclList main.txt:1:1-1:26>.p_identity('func') = u'func'
 main.py: Done.
 Done

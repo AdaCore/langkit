@@ -1,9 +1,9 @@
 main.py: Running...
-<Decl 1:1-1:5> .test_env (<Decl 1:1-1:5>) = True
-<Decl 1:1-1:5> .test_struct (<Decl 1:1-1:5>) = True
-<Decl 1:1-1:5> .test_array (<Decl 1:1-1:5>) = True
-<Decl 1:1-1:5> .test_env (<Decl 1:6-1:12>) = False
-<Decl 1:1-1:5> .test_struct (<Decl 1:6-1:12>) = False
-<Decl 1:1-1:5> .test_array (<Decl 1:6-1:12>) = False
+<Decl main.txt:1:1-1:5> .test_env (<Decl main.txt:1:1-1:5>) = True
+<Decl main.txt:1:1-1:5> .test_struct (<Decl main.txt:1:1-1:5>) = True
+<Decl main.txt:1:1-1:5> .test_array (<Decl main.txt:1:1-1:5>) = True
+<Decl main.txt:1:1-1:5> .test_env (<Decl main.txt:1:6-1:12>) = False
+<Decl main.txt:1:1-1:5> .test_struct (<Decl main.txt:1:6-1:12>) = False
+<Decl main.txt:1:1-1:5> .test_array (<Decl main.txt:1:6-1:12>) = False
 main.py: Done.
 Done

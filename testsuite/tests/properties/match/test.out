@@ -3,44 +3,44 @@ File "test.py", line 39, in FooNode.find_exprs
     Warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
 main.py: Running...
 Atoms:
-   <Lit 3:6-3:7>
-   <Lit 3:11-3:12>
-   <Ref 3:15-3:16>
-   <Lit 5:7-5:9>
-   <Lit 5:13-5:15>
-   <Ref 5:18-5:19>
-   <Lit 5:24-5:26>
-   <Lit 7:5-7:8>
+   <Lit main.txt:3:6-3:7>
+   <Lit main.txt:3:11-3:12>
+   <Ref main.txt:3:15-3:16>
+   <Lit main.txt:5:7-5:9>
+   <Lit main.txt:5:13-5:15>
+   <Ref main.txt:5:18-5:19>
+   <Lit main.txt:5:24-5:26>
+   <Lit main.txt:7:5-7:8>
 Atoms or exprs:
-   <Plus 3:6-3:17>
-   <Lit 3:6-3:7>
-   <Plus 3:11-3:16>
-   <Lit 3:11-3:12>
-   <Ref 3:15-3:16>
-   <Plus 5:6-5:26>
-   <Plus 5:7-5:20>
-   <Lit 5:7-5:9>
-   <Plus 5:13-5:19>
-   <Lit 5:13-5:15>
-   <Ref 5:18-5:19>
-   <Lit 5:24-5:26>
-   <Lit 7:5-7:8>
+   <Plus main.txt:3:6-3:17>
+   <Lit main.txt:3:6-3:7>
+   <Plus main.txt:3:11-3:16>
+   <Lit main.txt:3:11-3:12>
+   <Ref main.txt:3:15-3:16>
+   <Plus main.txt:5:6-5:26>
+   <Plus main.txt:5:7-5:20>
+   <Lit main.txt:5:7-5:9>
+   <Plus main.txt:5:13-5:19>
+   <Lit main.txt:5:13-5:15>
+   <Ref main.txt:5:18-5:19>
+   <Lit main.txt:5:24-5:26>
+   <Lit main.txt:7:5-7:8>
 Exprs:
-   <Plus 3:6-3:17>
-   <Lit 3:6-3:7>
-   <Plus 3:11-3:16>
-   <Lit 3:11-3:12>
-   <Ref 3:15-3:16>
-   <Plus 5:6-5:26>
-   <Plus 5:7-5:20>
-   <Lit 5:7-5:9>
-   <Plus 5:13-5:19>
-   <Lit 5:13-5:15>
-   <Ref 5:18-5:19>
-   <Lit 5:24-5:26>
-   <Lit 7:5-7:8>
+   <Plus main.txt:3:6-3:17>
+   <Lit main.txt:3:6-3:7>
+   <Plus main.txt:3:11-3:16>
+   <Lit main.txt:3:11-3:12>
+   <Ref main.txt:3:15-3:16>
+   <Plus main.txt:5:6-5:26>
+   <Plus main.txt:5:7-5:20>
+   <Lit main.txt:5:7-5:9>
+   <Plus main.txt:5:13-5:19>
+   <Lit main.txt:5:13-5:15>
+   <Ref main.txt:5:18-5:19>
+   <Lit main.txt:5:24-5:26>
+   <Lit main.txt:7:5-7:8>
 Refs:
-   <Ref 3:15-3:16>
-   <Ref 5:18-5:19>
+   <Ref main.txt:3:15-3:16>
+   <Ref main.txt:5:18-5:19>
 main.py: Done.
 Done

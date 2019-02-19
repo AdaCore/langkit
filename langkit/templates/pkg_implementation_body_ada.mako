@@ -11,6 +11,7 @@
 
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Vectors;
+with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Finalization;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
@@ -2112,7 +2113,11 @@ package body ${ada_lib_name}.Implementation is
       </%def>
       <%def name="default()">
          return "<" & To_Text (Self.Kind_Name)
-                & " " & To_Text (Image (Self.Sloc_Range)) & ">";
+                & " "
+                & To_Text
+                  (Ada.Directories.Simple_Name 
+                     (Get_Filename (Unit (Self))))
+                & ":" & To_Text (Image (Self.Sloc_Range)) & ">";
       </%def>
       </%self:case_dispatch>
    end Short_Text_Image;
