@@ -3351,18 +3351,20 @@ def create_builtin_types():
 
     rebindings = EnvRebindingsType()
     rebindings_parent_field = BuiltinField(
-        rebindings, doc="Return the parent rebindings for `rebindings`.",
+        rebindings, doc='Return the parent rebindings for ``rebindings``.',
         internal_name=names.Name('Parent'))
 
     rebindings._init_fields([
         ('old_env', BuiltinField(
             lex_env_type,
-            doc="Return the lexical environment that is remapped by "
-            "`rebindings`."
+            doc="""
+            Return the lexical environment that is remapped by ``rebindings``.
+            """
         )),
         ('new_env', BuiltinField(
-            lex_env_type, doc="Return the lexical environment that "
-            "`rebindings` remaps to."
+            lex_env_type, doc="""
+            Return the lexical environment that ``rebindings`` remaps to.
+            """
         )),
         ('get_parent', rebindings_parent_field),
     ])
