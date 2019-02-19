@@ -17,7 +17,7 @@ is (raise Property_Error
     with "Property ${property.original_name} not implemented on type "
     & Kind_Name (${Self.type.name} (${property.self_arg_name})));
 
-% elif not property.abstract and not property.external:
+% elif not property.external and not property.abstract:
 ${gdb_property_start(property)}
 pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.overriding else ""} function ${property.name}
