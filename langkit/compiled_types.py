@@ -3272,7 +3272,8 @@ class AnalysisUnitType(CompiledType):
                 lambda unit=T.AnalysisUnit: None,
                 prefix=None, type=T.Bool, public=False,
                 external=True, uses_entity_info=False,
-                uses_envs=True, warn_on_unused=False, doc=''
+                uses_envs=True, warn_on_unused=False,
+                doc='Return whether this unit is referenced from ``unit``.'
             )),
         ])
 
