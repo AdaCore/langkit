@@ -3333,6 +3333,8 @@ class AnalysisUnitType(CompiledType):
 
 class SymbolType(CompiledType):
     def __init__(self):
+        from langkit.expressions import PropertyDef
+
         super(SymbolType, self).__init__(
             'SymbolType',
             dsl_name='Symbol',
@@ -3346,6 +3348,16 @@ class SymbolType(CompiledType):
             api_name='UnboundedTextType',
             hashable=True,
             conversion_requires_context=True)
+
+        self._init_fields([
+            ('image', PropertyDef(
+                lambda: None,
+                prefix=None, type=T.String, public=False,
+                external=True, uses_entity_info=False,
+                uses_envs=True, warn_on_unused=False,
+                doc='Return this symbol as a string'
+            )),
+        ])
 
     def to_public_expr(self, internal_expr):
         return 'To_Unbounded_Text (Image ({}))'.format(internal_expr)

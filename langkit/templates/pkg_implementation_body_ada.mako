@@ -170,6 +170,15 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
+   function Image (Self : Symbol_Type) return ${T.String.name} is
+      T      : Text_Type := Symbols.Image (Self);
+      Result : constant ${T.String.name} :=
+         ${T.String.constructor_name} (T'Length);
+   begin
+      Result.Items := T;
+      return Result;
+   end Image;
+
    ------------------
    -- Context_Pool --
    ------------------
