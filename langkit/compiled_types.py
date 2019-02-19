@@ -1825,13 +1825,6 @@ class BaseStructType(CompiledType):
 
         super(BaseStructType, self).__init__(name, location, doc, **kwargs)
 
-        self._abstract_node_data_dict_cache = {}
-        """
-        Cache for the get_abstract_node_data_dict class method.
-
-        :type: dict[(bool, AbstractNodeData), dict[str, BaseField]]
-        """
-
     @property
     def py_nullexpr(self):
         return self._py_nullexpr or '{}({})'.format(self.name.camel, ', '.join(
