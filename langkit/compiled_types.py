@@ -226,7 +226,8 @@ class AbstractNodeData(object):
 
     _abstract = False
 
-    def __init__(self, name=None, public=True, access_needs_incref=False):
+    def __init__(self, name=None, public=True, access_needs_incref=False,
+                 internal_name=None):
         """
         :param names.Name|None name: Name for this field. Most of the time,
             this is initially unknown at field creation, so it is filled only
@@ -243,6 +244,9 @@ class AbstractNodeData(object):
         :param bool access_needs_incref: If True, field access evaluation does
             not create an ownership share: callers must call Inc_Ref
             themselves. See the eponym property.
+
+        :param None|names.Name internal_name: If provided, override the default
+            name to use in code generation for this node data.
         """
         self._serial = next(self._counter)
         self._is_public = public
@@ -250,7 +254,9 @@ class AbstractNodeData(object):
         self.location = extract_library_location()
 
         self._name = name
-        self._internal_name = None
+
+        assert internal_name is None or isinstance(internal_name, names.Name)
+        self._internal_name = internal_name
 
         self._original_name = None
         """
@@ -421,8 +427,7 @@ class AbstractNodeData(object):
     @property
     def internal_name(self):
         """
-        Internal name is the name of the field as far as generated code is
-        concerned.
+        Name of the field in the generated code.
 
         :rtype: names.Name
         """
@@ -430,11 +435,6 @@ class AbstractNodeData(object):
             return self._internal_name
         else:
             return self.name
-
-    @internal_name.setter
-    def internal_name(self, name):
-        assert isinstance(name, names.Name)
-        self._internal_name = name
 
     @property
     def original_name(self):
@@ -1530,7 +1530,7 @@ class BaseField(AbstractNodeData):
     _null = False
 
     def __init__(self, repr=True, doc=None, type=None,
-                 access_needs_incref=False):
+                 access_needs_incref=False, internal_name=None):
         """
         Create an AST node field.
 
@@ -1538,12 +1538,15 @@ class BaseField(AbstractNodeData):
             pretty-printing the embedding AST node.
         :param str|None doc: User documentation for this field.
         :param bool access_needs_incref: See AbstractNodeData's constructor.
+        :param None|names.Name internal_name: See AbstractNodeData's
+            constructor.
         """
 
         assert self.concrete, 'BaseField itself cannot be instantiated'
 
         super(BaseField, self).__init__(
-            public=True, access_needs_incref=access_needs_incref
+            public=True, access_needs_incref=access_needs_incref,
+            internal_name=internal_name
         )
 
         self.repr = repr
@@ -1765,7 +1768,7 @@ class UserField(BaseField):
     prefix = None
 
     def __init__(self, type, repr=False, doc=None, public=True,
-                 access_needs_incref=True):
+                 access_needs_incref=True, internal_name=None):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -1779,9 +1782,13 @@ class UserField(BaseField):
             APIs.
 
         :param bool access_needs_incref: See AbstractNodeData's constructor.
+
+        :param None|names.Name internal_name: See AbstractNodeData's
+            constructor.
         """
         super(UserField, self).__init__(
-            repr, doc, type, access_needs_incref=access_needs_incref
+            repr, doc, type, access_needs_incref=access_needs_incref,
+            internal_name=internal_name
         )
         self._is_public = public
 
@@ -3254,10 +3261,9 @@ class AnalysisUnitType(CompiledType):
             api_name='AnalysisUnit',
             dsl_name='AnalysisUnit')
 
-        root_field = BuiltinField(T.defer_root_node, doc="")
-        root_field.internal_name = names.Name.from_camel_with_underscores(
-            "AST_Root"
-        )
+        root_field = BuiltinField(
+            T.defer_root_node, doc="",
+            internal_name=names.Name('AST_Root'))
         self._init_fields([
             ('root', root_field),
             ('is_referenced_from', PropertyDef(
@@ -3349,9 +3355,8 @@ def create_builtin_types():
 
     rebindings = EnvRebindingsType()
     rebindings_parent_field = BuiltinField(
-        rebindings, doc="Return the parent rebindings for `rebindings`."
-    )
-    rebindings_parent_field.internal_name = names.Name.from_lower("parent")
+        rebindings, doc="Return the parent rebindings for `rebindings`.",
+        internal_name=names.Name('Parent'))
 
     rebindings._init_fields([
         ('old_env', BuiltinField(
