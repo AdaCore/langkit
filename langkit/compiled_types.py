@@ -3262,8 +3262,10 @@ class AnalysisUnitType(CompiledType):
             dsl_name='AnalysisUnit')
 
         root_field = BuiltinField(
-            T.defer_root_node, doc="",
+            T.defer_root_node,
+            doc='Return the root node of this unit.',
             internal_name=names.Name('AST_Root'))
+
         self._init_fields([
             ('root', root_field),
             ('is_referenced_from', PropertyDef(
