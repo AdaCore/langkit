@@ -2986,7 +2986,7 @@ class ArrayType(CompiledType):
         # Text_Type is always defined, since it comes from
         # Langkit_Support.Text. To avoid discrepancies in code generation,
         # consider it is always exposed.
-        if element_type.is_character_type:
+        if self.is_string_type:
             self.exposed = True
 
     @property
