@@ -1392,8 +1392,8 @@ class CompileCtx(object):
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
 
-        :param str lib_root: (optional) Path of the directory in which the
-            library should be generated. The default is the current directory.
+        :param str lib_root: Path of the directory in which the library should
+            be generated.
 
         :param set[str] main_source_dirs: List of source directories to use in
             the project file for mains. Source directories must be relative to
