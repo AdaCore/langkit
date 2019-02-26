@@ -206,78 +206,96 @@ class Emitter(object):
                 self.extensions_src_dir = src_dir
                 for filename in os.listdir(src_dir):
                     filepath = path.join(src_dir, filename)
-                    if path.isfile(filepath) and not filename.startswith("."):
+                    if path.isfile(filepath) and not filename.startswith('.'):
                         self.context.additional_source_files.append(filepath)
 
         self.main_source_dirs = main_source_dirs
         self.main_programs = main_programs
 
-    def run(self):
+        self.lib_name_low = context.ada_api_settings.lib_name.lower()
         """
-        Emit native code for all the rules in this grammar as a library:
-        a library specification and the corresponding implementation.  Also
-        emit a tiny program that can parse starting with any parsing rule for
-        testing purposes.
+        Lower-case name for the generated library.
         """
-        ctx = self.context
 
-        lib_name_low = ctx.ada_api_settings.lib_name.lower()
+        # Paths for the various directories in which code is generated
+        self.include_path = path.join(self.lib_root, 'include')
+        self.src_path = path.join(self.lib_root, 'include', self.lib_name_low)
+        self.lib_path = path.join(self.lib_root, 'lib')
+        self.share_path = path.join(self.lib_root, 'share', self.lib_name_low)
+        self.python_path = path.join(self.lib_root, 'python')
 
-        include_path = path.join(self.lib_root, "include")
-        src_path = path.join(self.lib_root, "include", lib_name_low)
-        lib_path = path.join(self.lib_root, "lib")
-        share_path = path.join(self.lib_root, "share", lib_name_low)
+        self.dfa_code = None
+        """
+        Holder for the data structures used to generate code for the lexer
+        state machine (DFA). As an optimization, it is left to None if we
+        decide not to generate it (i.e. when the already generated sources are
+        up-to-date).
 
+        :type: langkit.lexer.regexp.DFACodeGenHolder
+        """
+
+    def setup_directories(self, ctx):
+        """
+        Make sure the tree of directories needed for code generation exists.
+        """
         if not path.exists(self.lib_root):
             os.mkdir(self.lib_root)
 
-        if self.verbosity.info:
-            printcol("File setup...", Colors.OKBLUE)
-
-        for d in ["include",
-                  "include/{}".format(lib_name_low),
-                  "share",
-                  "share/{}".format(lib_name_low),
-                  "obj", "src", "bin",
-                  "lib", "lib/gnat"]:
+        for d in ['include',
+                  'include/{}'.format(self.lib_name_low),
+                  'share',
+                  'share/{}'.format(self.lib_name_low),
+                  'obj', 'src', 'bin',
+                  'lib', 'lib/gnat']:
             p = path.join(self.lib_root, d)
             if not path.exists(p):
                 os.mkdir(p)
 
-        # Create the project file for the generated library
+        if ctx.python_api_settings:
+            if not path.exists(self.python_path):
+                os.mkdir(self.python_path)
+
+    def emit_lib_project_file(self, ctx):
+        """
+        Emit a project file for the generated library.
+        """
         main_project_file = os.path.join(
-            lib_path, "gnat",
-            "{}.gpr".format(ctx.ada_api_settings.lib_name.lower()),
+            self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
         )
         write_source_file(
             main_project_file,
             ctx.render_template(
-                "project_file",
+                'project_file',
                 lib_name=ctx.ada_api_settings.lib_name,
                 os_path=os.path,
             )
         )
 
-        if self.generate_astdoc:
-            from langkit import astdoc
+    def emit_astdoc(self, ctx):
+        """
+        If requested, generate the HTML documentation for node types.
+        """
+        if not self.generate_astdoc:
+            return
 
-            f = StringIO()
-            astdoc.write_astdoc(ctx, f)
-            write_source_file(os.path.join(share_path, 'ast-types.html'),
-                              f.read())
+        from langkit import astdoc
 
-        if self.verbosity.info:
-            printcol("Generating sources... ", Colors.OKBLUE)
+        f = StringIO()
+        astdoc.write_astdoc(ctx, f)
+        write_source_file(os.path.join(self.share_path, 'ast-types.html'),
+                          f.read())
 
-        if self.verbosity.debug:
-            printcol("Compiling the lexer specification", Colors.OKBLUE)
+    def generate_lexer_dfa(self, ctx):
+        """
+        Generate code for the lexer state machine.
+        """
+        # Source file that contains the state machine implementation
+        lexer_sm_body = ada_file_path(
+            self.src_path, ADA_BODY,
+            [ctx.lib_name, names.Name('Lexer_State_Machine')])
 
         # Generate the lexer state machine iff the file is missing or its
         # signature has changed since last time.
-        lexer_sm_body = ada_file_path(
-            src_path, ADA_BODY,
-            [ctx.lib_name, names.Name('Lexer_State_Machine')])
-        generate_lexer_sm_body = False
         stale_lexer_spec = write_source_file(
             os.path.join(
                 self.lib_root, 'obj',
@@ -286,8 +304,12 @@ class Emitter(object):
             json.dumps(ctx.lexer.signature, indent=2)
         )
         if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
-            generate_lexer_sm_body = True
-            ctx.dfa_code = ctx.lexer.build_dfa_code(ctx)
+            self.dfa_code = ctx.lexer.build_dfa_code(ctx)
+
+    def emit_ada_lib(self, ctx):
+        """
+        Emit Ada sources for the generated library.
+        """
 
         ada_modules = [
             # Top (pure) package
@@ -322,7 +344,7 @@ class Emitter(object):
             ('pkg_lexer', 'Lexer', True),
             ('pkg_lexer_impl', 'Lexer_Implementation', True),
             ('pkg_lexer_state_machine', 'Lexer_State_Machine',
-             generate_lexer_sm_body),
+             bool(self.dfa_code)),
             # Unit for debug helpers
             ('pkg_debug', 'Debug', True),
         ]
@@ -330,120 +352,68 @@ class Emitter(object):
         for template_base_name, qual_name, has_body in ada_modules:
             qual_name = ([names.Name(n) for n in qual_name.split('.')]
                          if qual_name else [])
-            self.write_ada_module(src_path, template_base_name, qual_name,
+            self.write_ada_module(self.src_path, template_base_name, qual_name,
                                   has_body)
 
+        # Add any sources in $lang_path/extensions/support if it exists
+        if ctx.ext('support'):
+            for f in glob(path.join(ctx.ext('support'), '*.ad*')):
+                copy_file(f, self.src_path)
+
+    def emit_mains(self, ctx):
+        """
+        Emit sources and the project file for mains.
+        """
         with names.camel_with_underscores:
             write_ada_file(
-                path.join(self.lib_root, "src"),
+                path.join(self.lib_root, 'src'),
                 ADA_BODY, [names.Name('Parse')],
-                ctx.render_template("main_parse_ada"),
+                ctx.render_template('main_parse_ada'),
                 self.post_process_ada
             )
 
-        imain_project_file = os.path.join(self.lib_root, "src", "mains.gpr")
+        imain_project_file = os.path.join(self.lib_root, 'src', 'mains.gpr')
         write_source_file(
             imain_project_file,
             ctx.render_template(
-                "mains_project_file",
+                'mains_project_file',
                 lib_name=ctx.ada_api_settings.lib_name,
                 source_dirs=self.main_source_dirs,
                 main_programs=self.main_programs
             )
         )
 
-        # Emit C API
-        self.emit_c_api(src_path, include_path)
-
-        # Emit python API
-        if ctx.python_api_settings:
-            python_path = path.join(self.lib_root, "python")
-            if not path.exists(python_path):
-                os.mkdir(python_path)
-            self.emit_python_api(python_path)
-
-            playground_file = os.path.join(self.lib_root, "bin", "playground")
-            write_source_file(
-                playground_file,
-                ctx.render_template(
-                    "python_api/playground_py",
-                    module_name=ctx.python_api_settings.module_name
-                ),
-                self.post_process_python
-            )
-            os.chmod(playground_file, 0o775)
-
-            setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
-            write_source_file(
-                setup_py_file,
-                ctx.render_template('python_api/setup_py'),
-                self.post_process_python
-            )
-
-        # Emit GDB helpers initialization script
-        gdbinit_path = os.path.join(self.lib_root, 'gdbinit.py')
-        lib_name = ctx.ada_api_settings.lib_name.lower()
-        write_source_file(
-            gdbinit_path,
-            ctx.render_template(
-                'gdb_py',
-                langkit_path=os.path.dirname(os.path.dirname(__file__)),
-                lib_name=lib_name,
-                prefix=ctx.short_name_or_long.lower,
-            ),
-            self.post_process_python
-        )
-
-        # Emit the ".debug_gdb_scripts" section if asked to
-        if self.generate_gdb_hook:
-            write_source_file(
-                os.path.join(src_path, 'gdb.c'),
-                ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                    os_name=os.name),
-                self.post_process_cpp
-            )
-
-        # Add any sources in $lang_path/extensions/support if it exists
-        if ctx.ext('support'):
-            for f in glob(path.join(ctx.ext('support'), "*.ad*")):
-                copy_file(f, src_path)
-
-        self.cache.save()
-
-    def emit_c_api(self, src_path, include_path):
+    def emit_c_api(self, ctx):
         """
         Generate header and binding body for the external C API.
-
-        :param str include_path: The include path.
-        :param str src_path: The source path.
         """
         def render(template_name):
-            return self.context.render_template(template_name)
+            return ctx.render_template(template_name)
 
         with names.lower:
             write_cpp_file(
                 path.join(
-                    include_path,
-                    "{}.h".format(self.context.c_api_settings.lib_name)),
-                render("c_api/header_c"),
+                    self.include_path,
+                    '{}.h'.format(ctx.c_api_settings.lib_name)),
+                render('c_api/header_c'),
                 self.post_process_cpp
             )
 
         self.write_ada_module(
-            src_path, "c_api/pkg_main",
+            self.src_path, 'c_api/pkg_main',
             [names.Name(n) for n in 'Implementation.C'.split('.')]
         )
 
-    def emit_python_api(self, python_path):
+    def emit_python_api(self, ctx):
         """
         Generate the Python binding module.
-
-        :param str python_path: The directory in which the Python module will
-            be generated.
         """
+        if not ctx.python_api_settings:
+            return
+
         package_dir = os.path.join(
-            python_path,
-            self.context.python_api_settings.module_name)
+            self.python_path,
+            ctx.python_api_settings.module_name)
         if not os.path.isdir(package_dir):
             os.mkdir(package_dir)
 
@@ -460,14 +430,12 @@ class Emitter(object):
                 for l in range(start_line + 1, end_line):
                     lines[l - 1][1] = True
 
-            return "\n".join(
+            return '\n'.join(
                 l[0] for l in lines
                 if (not all(c.isspace() for c in l[0])) or l[1]
             )
 
         def pretty_print(code):
-            if self.verbosity.debug:
-                printcol('Pretty printing Python code', Colors.OKBLUE)
             if not self.pretty_print:
                 return code
 
@@ -477,8 +445,8 @@ class Emitter(object):
             except ImportError:
                 check_source_language(
                     False,
-                    "Yapf not available, using autopep8 to pretty-print "
-                    "Python code",
+                    'Yapf not available, using autopep8 to pretty-print'
+                    ' Python code',
                     severity=Severity.warning
                 )
 
@@ -488,16 +456,16 @@ class Emitter(object):
             except ImportError:
                 check_source_language(
                     False,
-                    "autopep8 not available, cannot pretty-print Python code",
+                    'autopep8 not available, cannot pretty-print Python code',
                     severity=Severity.warning
                 )
                 return code
 
         with names.camel:
-            code = self.context.render_template(
-                "python_api/module_py",
-                c_api=self.context.c_api_settings,
-                pyapi=self.context.python_api_settings,
+            code = ctx.render_template(
+                'python_api/module_py',
+                c_api=ctx.c_api_settings,
+                pyapi=ctx.python_api_settings,
             )
 
             # If pretty-printing failed, write the original code anyway in
@@ -513,6 +481,61 @@ class Emitter(object):
                               self.post_process_python)
             if exc:
                 raise exc
+
+        # Emit the setup.py script to easily install the Python binding
+        setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
+        write_source_file(
+            setup_py_file,
+            ctx.render_template('python_api/setup_py'),
+            self.post_process_python
+        )
+
+    def emit_python_playground(self, ctx):
+        """
+        Emit sources for the Python playground script.
+        """
+        if not ctx.python_api_settings:
+            return
+
+        playground_file = os.path.join(self.lib_root, 'bin', 'playground')
+        write_source_file(
+            playground_file,
+            ctx.render_template(
+                'python_api/playground_py',
+                module_name=ctx.python_api_settings.module_name
+            ),
+            self.post_process_python
+        )
+        os.chmod(playground_file, 0o775)
+
+    def emit_gdb_helpers(self, ctx):
+        """
+        Emit support files for GDB helpers.
+        """
+        gdbinit_path = os.path.join(self.lib_root, 'gdbinit.py')
+
+        # Always emit the ".gdbinit.py" GDB script
+        lib_name = ctx.ada_api_settings.lib_name.lower()
+        write_source_file(
+            gdbinit_path,
+            ctx.render_template(
+                'gdb_py',
+                langkit_path=os.path.dirname(os.path.dirname(__file__)),
+                lib_name=lib_name,
+                prefix=ctx.short_name_or_long.lower,
+            ),
+            self.post_process_python
+        )
+
+        # Generate the C file to embed the absolute path to this script in the
+        # generated library only if requested.
+        if self.generate_gdb_hook:
+            write_source_file(
+                os.path.join(self.src_path, 'gdb.c'),
+                ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                    os_name=os.name),
+                self.post_process_cpp
+            )
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
                          has_body=True):
@@ -543,11 +566,11 @@ class Emitter(object):
                     source_kind=kind,
                     qual_name=[self.context.lib_name] + qual_name,
                     content=self.context.render_template(
-                        "{}{}_ada".format(
+                        '{}{}_ada'.format(
                             template_base_name +
                             # If the base name ends with a /, we don't
                             # put a "_" separator.
-                            ("" if template_base_name.endswith("/") else "_"),
+                            ('' if template_base_name.endswith('/') else '_'),
                             kind
                         ),
                         with_clauses=with_clauses,
