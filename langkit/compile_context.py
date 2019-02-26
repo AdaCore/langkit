@@ -1280,6 +1280,28 @@ class CompileCtx(object):
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
+    @staticmethod
+    def load_plugin_pass(pass_or_name):
+        """
+        Load a plug-in pass.
+
+        :param str|langkit.passes.AbstractPass pass_or_name: Name of the pass
+            to load (``MODULE.CALLABLE`` syntax). If it is already a pass
+            object, just return it.
+        :rtype: langkit.passes.AbstractPass
+        """
+        from langkit.passes import AbstractPass
+
+        if isinstance(pass_or_name, AbstractPass):
+            return pass_or_name
+
+        module_name, constructor_name = pass_or_name.rsplit('.', 1)
+        module = importlib.import_module(module_name)
+        constructor = getattr(module, constructor_name)
+        result = constructor()
+        assert isinstance(result, AbstractPass)
+        return result
+
     def emit(self, lib_root, check_only=False, warnings=None, **kwargs):
         """
         Compile the DSL and emit sources for the generated library.
@@ -1330,16 +1352,8 @@ class CompileCtx(object):
         assert self.emitter is None
         self.emitter = Emitter(self, lib_root, self.extensions_dir, **kwargs)
 
-        # Fetch plugin passes
-        from langkit.passes import AbstractPass
-        plugin_pass_objects = []
-        for pass_fqn in plugin_passes:
-            mod_name, klass_name = pass_fqn.rsplit('.', 1)
-            mod = importlib.import_module(mod_name)
-            pass_constructor = getattr(mod, klass_name)
-            pass_object = pass_constructor()
-            assert isinstance(pass_object, AbstractPass)
-            plugin_pass_objects.append(pass_object)
+        # Load plugin passes
+        plugin_passes = [self.load_plugin_pass(p) for p in plugin_passes]
 
         # Run passes for code emission and run plugin passes after them
         with names.camel_with_underscores, global_context(self):
