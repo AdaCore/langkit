@@ -495,7 +495,7 @@ class Map(CollectionExpression):
         check_source_language(
             not self.do_concat or r.inner_expr.type.is_collection,
             'Cannot mapcat with expressions returning {} values (collections'
-            ' expected instead)'.format(r.inner_expr.type.name)
+            ' expected instead)'.format(r.inner_expr.type.dsl_name)
         )
 
         with r.inner_scope.use():
@@ -830,8 +830,8 @@ class Concat(AbstractExpression):
         check_multiple([
             (array_1.type == array_2.type,
              "Got different array element types in concat: {} and {}".format(
-                 array_1.type.element_type.name,
-                 array_2.type.element_type.name
+                 array_1.type.element_type.dsl_name,
+                 array_2.type.element_type.dsl_name
              )),
         ])
 
