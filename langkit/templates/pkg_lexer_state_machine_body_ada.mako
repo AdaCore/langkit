@@ -89,7 +89,7 @@ package body ${ada_lib_name}.Lexer_State_Machine is
       return False;
    end Contains;
 
-${ctx.dfa_code.ada_table_decls('   ')}
+${emitter.dfa_code.ada_table_decls('   ')}
 
    ----------------
    -- Next_Token --
@@ -124,7 +124,7 @@ ${ctx.dfa_code.ada_table_decls('   ')}
       Match_Index := 0;
       Match_Ignore := False;
 
-      % for i, state in enumerate(ctx.dfa_code.states):
+      % for i, state in enumerate(emitter.dfa_code.states):
          ## No transition can go to the first state, so don't emit a label
          ## for it. This avoids an "unreferenced" warning.
          % if i > 0:

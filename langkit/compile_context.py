@@ -616,14 +616,6 @@ class CompileCtx(object):
         :type: langkit.lexer.regexp.NFAState
         """
 
-        self.dfa_code = None
-        """
-        Holder for the data structures used to generate code for the lexer
-        state machine (DFA).
-
-        :type: langkit.lexer.regexp.DFACodeGenHolder
-        """
-
         self.unparsers = Unparsers(self)
         """
         :type: langkit.unparsers.Unparsers
@@ -1353,9 +1345,7 @@ class CompileCtx(object):
         with names.camel_with_underscores, global_context(self):
             self.run_passes(self.code_emission_passes(annotate_fields_types)
                             + plugin_passes)
-
-            # TODO: integrate emitter in the pipeline
-            self.emitter.run()
+        self.emitter.cache.save()
 
         # Report unused documentation entries
         self.documentations.report_unused()
@@ -1548,6 +1538,18 @@ class CompileCtx(object):
             errors_checkpoint_pass,
 
             MajorStepPass('Generate library sources'),
+            GlobalPass('setup directories', self.emitter.setup_directories),
+            GlobalPass('emit library project file',
+                       self.emitter.emit_lib_project_file),
+            GlobalPass('emit astdoc', self.emitter.emit_astdoc),
+            GlobalPass('generate lexer DFA', self.emitter.generate_lexer_dfa),
+            GlobalPass('emit Ada sources', self.emitter.emit_ada_lib),
+            GlobalPass('emit mains', self.emitter.emit_mains),
+            GlobalPass('emit C API', self.emitter.emit_c_api),
+            GlobalPass('emit Python API', self.emitter.emit_python_api),
+            GlobalPass('emit Python playground',
+                       self.emitter.emit_python_playground),
+            GlobalPass('emit GDB helpers', self.emitter.emit_gdb_helpers),
         ]
 
     def run_passes(self, passes):
