@@ -1335,57 +1335,80 @@ class CompileCtx(object):
         See langkit.emitter.Emitter's constructor for other supported keyword
         arguments.
         """
-        from langkit.emitter import Emitter
+
+        assert self.emitter is None
 
         if warnings:
             self.warnings = warnings
 
-        # First compile the DSL
+        self.generate_unparser = kwargs.pop('generate_unparser', False)
         annotate_fields_types = kwargs.pop('annotate_fields_types', False)
-        generate_unparser = kwargs.pop('generate_unparser', False)
-        plugin_passes = kwargs.pop('plugin_passes', [])
-        self.compile(annotate_fields_types, generate_unparser, plugin_passes)
-        if check_only:
-            return
-
-        # Then, if requested, emit code for the generated library
-        assert self.emitter is None
-        self.emitter = Emitter(self, lib_root, self.extensions_dir, **kwargs)
 
         # Load plugin passes
-        plugin_passes = [self.load_plugin_pass(p) for p in plugin_passes]
+        plugin_passes = [self.load_plugin_pass(p)
+                         for p in kwargs.pop('plugin_passes', [])]
 
-        # Run passes for code emission and run plugin passes after them
+        # Compute the list of passes to run:
+
+        # First compile the DSL
+        all_passes = self.compilation_passes
+
+        # Then, if requested, emit code for the generated library
+        if not check_only:
+            all_passes.append(
+                self.prepare_code_emission_pass(lib_root, **kwargs))
+
+            all_passes.extend(self.code_emission_passes(annotate_fields_types))
+
+            # Run plugin passes at the end of the pipeline
+            all_passes.extend(plugin_passes)
+
+        # We can now run the pipeline
         with names.camel_with_underscores, global_context(self):
-            self.run_passes(self.code_emission_passes(annotate_fields_types)
-                            + plugin_passes)
-        self.emitter.cache.save()
+            try:
+                self.run_passes(all_passes)
+                if not check_only and self.emitter is not None:
+                    self.emitter.cache.save()
+            finally:
+                self.emitter = None
 
-        # Report unused documentation entries
-        self.documentations.report_unused()
-
-        self.emitter = None
-
-    def compile(self, annotate_fields_types=False, generate_unparser=False,
-                plugin_passes=[]):
+    def prepare_compilation(self):
         """
-        Compile the DSL.
-
-        See the ``emit`` method for keyword arguments.
+        Prepare this context to compile the DSL.
         """
         from langkit.compiled_types import CompiledTypeRepo
 
-        # Compile the first time, do nothing next times
-        if self.compiled:
-            return
-        self.compiled = True
+        # Compilation cannot happen more than once
+        assert not self.compiled
 
-        assert self.grammar, "Set grammar before compiling"
+        # Make sure user provided a grammar
+        assert self.grammar, 'Set grammar before compiling'
+
         self.root_grammar_class = CompiledTypeRepo.root_grammar_class
-        self.generate_unparser = generate_unparser
 
-        if generate_unparser:
+        if self.generate_unparser:
             self.warnings.enable(self.warnings.unparser_bad_grammar)
+
+    def prepare_code_emission_pass(self, lib_root, **kwargs):
+        """
+        Return a pass to prepare this context for code emission.
+        """
+        from langkit.emitter import Emitter
+        from langkit.passes import GlobalPass
+
+        def pass_fn(ctx):
+            ctx.emitter = Emitter(self, lib_root, ctx.extensions_dir, **kwargs)
+
+        return GlobalPass('prepare code emission', pass_fn)
+
+    def compile(self, generate_unparser=False):
+        """
+        Compile the DSL.
+
+        :param bool generate_unparser: If true, generate a pretty printer for
+            the given grammar. False by default.
+        """
+        self.generate_unparser = generate_unparser
 
         with global_context(self):
             self.run_passes(self.compilation_passes)
@@ -1439,6 +1462,8 @@ class CompileCtx(object):
         )
 
         return [
+            GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
+
             MajorStepPass('Compiling the lexer'),
             GlobalPass('check token families',
                        self.lexer.check_token_families),
@@ -1552,18 +1577,29 @@ class CompileCtx(object):
             errors_checkpoint_pass,
 
             MajorStepPass('Generate library sources'),
-            GlobalPass('setup directories', self.emitter.setup_directories),
+            GlobalPass('setup directories',
+                       lambda ctx: ctx.emitter.setup_directories(ctx)),
             GlobalPass('emit library project file',
-                       self.emitter.emit_lib_project_file),
-            GlobalPass('emit astdoc', self.emitter.emit_astdoc),
-            GlobalPass('generate lexer DFA', self.emitter.generate_lexer_dfa),
-            GlobalPass('emit Ada sources', self.emitter.emit_ada_lib),
-            GlobalPass('emit mains', self.emitter.emit_mains),
-            GlobalPass('emit C API', self.emitter.emit_c_api),
-            GlobalPass('emit Python API', self.emitter.emit_python_api),
+                       lambda ctx: ctx.emitter.emit_lib_project_file(ctx)),
+            GlobalPass('emit astdoc',
+                       lambda ctx: ctx.emitter.emit_astdoc(ctx)),
+            GlobalPass('generate lexer DFA',
+                       lambda ctx: ctx.emitter.generate_lexer_dfa(ctx)),
+            GlobalPass('emit Ada sources',
+                       lambda ctx: ctx.emitter.emit_ada_lib(ctx)),
+            GlobalPass('emit mains',
+                       lambda ctx: ctx.emitter.emit_mains(ctx)),
+            GlobalPass('emit C API',
+                       lambda ctx: ctx.emitter.emit_c_api(ctx)),
+            GlobalPass('emit Python API',
+                       lambda ctx: ctx.emitter.emit_python_api(ctx)),
             GlobalPass('emit Python playground',
-                       self.emitter.emit_python_playground),
-            GlobalPass('emit GDB helpers', self.emitter.emit_gdb_helpers),
+                       lambda ctx: ctx.emitter.emit_python_playground(ctx)),
+            GlobalPass('emit GDB helpers',
+                       lambda ctx: ctx.emitter.emit_gdb_helpers(ctx)),
+
+            GlobalPass('report unused documentation entries',
+                       lambda ctx: ctx.documentations.report_unused()),
         ]
 
     def run_passes(self, passes):
