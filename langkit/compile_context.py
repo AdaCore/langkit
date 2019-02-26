@@ -12,29 +12,19 @@ this is the way it is done for the Ada language::
 
 from __future__ import absolute_import, division, print_function
 
-import ast
 from collections import defaultdict
 from contextlib import contextmanager
-from distutils.spawn import find_executable
 from functools import reduce
-from glob import glob
 import importlib
-from io import StringIO
-import json
 import os
 from os import path
-import subprocess
 
-from funcy import keep
-
-from langkit import caching, documentation, names, utils
+from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
-from langkit.template_utils import add_template_dir
-from langkit.utils import (Colors, TopologicalSortError, printcol,
-                           topological_sort, memoized)
+from langkit.utils import TopologicalSortError, topological_sort, memoized
 
 
 compile_ctx = None
@@ -72,101 +62,8 @@ def global_context(ctx):
     compile_ctx = old_ctx
 
 
-def copy_file(from_path, to_path):
-    """
-    Helper to copy a source file.
-
-    Return whether the file has been updated.
-
-    :param str from_path: Path of the file to copy.
-    :param str to_path: Destination path.
-    """
-    with open(from_path, 'rb') as f:
-        content = f.read()
-    write_source_file(to_path, content)
-
-
-def write_source_file(file_path, source, post_process=None):
-    """
-    Helper to write a source file.
-
-    Return whether the file has been updated.
-
-    :param str file_path: Path of the file to write.
-    :param str source: Content of the file to write.
-    :param post_process: If provided, callable used to transform the source
-        file content just before writing it.
-    :type post_process: None | (str) -> str
-
-    :rtype: bool
-    """
-    context = get_context()
-    if post_process:
-        source = post_process(source)
-    if (not os.path.exists(file_path) or
-            context.cache.is_stale(file_path, source)):
-        if context.verbosity.debug:
-            printcol('Rewriting stale source: {}'.format(file_path),
-                     Colors.OKBLUE)
-        with open(file_path, 'wb') as f:
-            f.write(source)
-        return True
-    return False
-
-
-def write_cpp_file(file_path, source, post_process=None):
-    """
-    Helper to write a C/C++ source file.
-
-    :param str file_path: Path of the file to write.
-    :param str source: Content of the file to write.
-    """
-    if write_source_file(file_path, source, post_process):
-        if find_executable('clang-format'):
-            subprocess.check_call(['clang-format', '-i', file_path])
-
-
 ADA_SPEC = "spec"
 ADA_BODY = "body"
-
-
-def ada_file_path(out_dir, source_kind, qual_name):
-    """
-    Return the name of the Ada file for the given unit name/kind.
-
-    :param str out_dir: The complete path to the directory in which we want to
-        write the file.
-    :param str source_kind: One of the constants ADA_SPEC or ADA_BODY,
-        determining whether the source is a spec or a body.
-    :param list[names.Name] qual_name: The qualified name of the Ada spec/body,
-        as a list of Name components.
-    """
-    assert source_kind in (ADA_SPEC, ADA_BODY)
-    file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
-                               'ads' if source_kind == ADA_SPEC else 'adb')
-    return os.path.join(out_dir, file_name)
-
-
-def write_ada_file(out_dir, source_kind, qual_name, content,
-                   post_process=None):
-    """
-    Helper to write an Ada file.
-
-    :param out_dir: See ada_file_path.
-    :param source_kind: See ada_file_path.
-    :param qual_name: See ada_file_path.
-    :param str content: The source content to write to the file.
-    """
-    file_path = ada_file_path(out_dir, source_kind, qual_name)
-
-    # If there are too many lines, which triggers obscure debug info bugs,
-    # strip empty lines.
-    lines = content.splitlines()
-    if len(lines) > 200000:
-        content = '\n'.join(l for l in lines if l.strip())
-
-    # TODO: no tool is able to pretty-print a single Ada source file
-    write_source_file(file_path, content, post_process)
 
 
 class Verbosity(object):
@@ -387,6 +284,7 @@ class CompileCtx(object):
             available in code generation: see langkit.documentation.
         """
         from langkit.python_api import PythonAPISettings
+        from langkit.unparsers import Unparsers
 
         self.lang_name = names.Name(lang_name)
 
@@ -603,8 +501,6 @@ class CompileCtx(object):
         self.generated_parsers = []
         ":type: list[langkit.parsers.GeneratedParser]"
 
-        self.cache = None
-
         # Internal field for extensions directory
         self._extensions_dir = None
 
@@ -663,11 +559,6 @@ class CompileCtx(object):
         document in the generated library.
 
         :type: dict[str, mako.template.Template]
-        """
-
-        self.pretty_print = False
-        """
-        Whether to pretty print the generated code or not.
         """
 
         self.parsers_varcontext_stack = []
@@ -731,6 +622,19 @@ class CompileCtx(object):
         state machine (DFA).
 
         :type: langkit.lexer.regexp.DFACodeGenHolder
+        """
+
+        self.unparsers = Unparsers(self)
+        """
+        :type: langkit.unparsers.Unparsers
+        """
+
+        self.emitter = None
+        """
+        During code emission, corresponding instance of Emitter. None the rest
+        of the time.
+
+        :type: None|langkit.emitter.Emitter
         """
 
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
@@ -1338,6 +1242,7 @@ class CompileCtx(object):
         CompileCtx._template_extensions_frozen = True
 
         from langkit.common import string_repr
+        assert self.emitter
         base_env = {
             'string_repr': string_repr,
             'Name':        names.Name,
@@ -1345,6 +1250,7 @@ class CompileCtx(object):
             'c_doc':       documentation.c_doc,
             'py_doc':      documentation.py_doc,
             'ada_c_doc':   documentation.ada_c_doc,
+            'emitter':     self.emitter,
         }
         for fn in CompileCtx._template_extensions_fns:
             ext_env = fn(self)
@@ -1382,53 +1288,27 @@ class CompileCtx(object):
         assert not cls._template_extensions_frozen
         CompileCtx._template_extensions_fns.append(exts_fn)
 
-    def emit(self, lib_root, main_source_dirs=set(), main_programs=set(),
-             annotate_fields_types=False, check_only=False,
-             no_property_checks=False, warnings=None, generate_unparser=False,
-             generate_astdoc=True, generate_gdb_hook=True,
-             post_process_ada=None, post_process_cpp=None,
-             post_process_python=None, plugin_passes=[]):
+    def emit(self, lib_root, check_only=False, warnings=None, **kwargs):
         """
-        Generate sources for the analysis library. Also emit a tiny program
-        useful for testing purposes.
+        Compile the DSL and emit sources for the generated library.
 
         :param str lib_root: Path of the directory in which the library should
             be generated.
 
-        :param set[str] main_source_dirs: List of source directories to use in
-            the project file for mains. Source directories must be relative to
-            the mains project file directory (i.e. $BUILD/src).
-
-        :param set[str] main_programs: List of names for programs to build in
-            addition to the generated library. To each X program, there must be
-            a X.adb source file in the $BUILD/src directory.
-
-        :param bool annotate_fields_types: Whether to try and annotate the
-            type of fields in the grammar. If this is True, this will
-            actually modify the file in which ASTNodeType instances are
-            defined, and annotate empty field definitions.
-
         :param bool check_only: If true, only perform validity checks: stop
-            before code emission. This is useful for IDE hooks.
+             before code emission. This is useful for IDE hooks. False by
+             default.
 
-        :param bool no_property_checks: If True, do not emit safety checks in
-            the generated code for properties. Namely, this disables null
-            checks on field access.
+        :param None|WarningSet warnings: If provided, white list of warnings to
+            emit.
 
-        :param WarningSet warnings: Set of enabled warnings.
+        :param bool annotate_fields_types: If true, annotate the
+             type of fields in the grammar. This will actually modify the file
+             in which ASTNodeType instances are defined, and annotate empty
+             field definitions. False by default.
 
-        :param bool generate_unparser: Whether to generate a pretty printer for
-            the given grammar.
-
-        :param bool propeties_logging: Whether to instrument properties code to
-            do logging.
-
-        :param bool generate_astdoc: Whether to generate the HTML documentation
-            for AST nodes, their fields and their properties.
-
-        :param bool generate_gdb_hook: Whether to generate the
-            ".debug_gdb_scripts" section. Good for debugging, but better to
-            disable for releases.
+        :param bool generate_unparser: If true, generate a pretty printer for
+            the given grammar. False by default.
 
         :param list[str] plugin_passes: List of passes to add as plugins to the
             compilation pass manager. List item must be a name matching the
@@ -1437,99 +1317,74 @@ class CompileCtx(object):
             callable inside the module to import. This callable must accept no
             argument and return an instance of a
             ``langkit.passes.AbstractPass`` subclass.
-        """
-        if self.extensions_dir:
-            add_template_dir(self.extensions_dir)
-        for dirpath in keep(self.template_lookup_extra_dirs):
-            add_template_dir(dirpath)
 
-        self.plugin_passes = list(plugin_passes)
-        self.lib_root = lib_root
-        self.no_property_checks = no_property_checks
-        self.generate_unparser = generate_unparser
-        self.generate_astdoc = generate_astdoc
-        self.generate_gdb_hook = generate_gdb_hook
+        See langkit.emitter.Emitter's constructor for other supported keyword
+        arguments.
+        """
+        from langkit.emitter import Emitter
+
         if warnings:
             self.warnings = warnings
 
-        if post_process_ada:
-            self.post_process_ada = post_process_ada
-        if post_process_cpp:
-            self.post_process_cpp = post_process_cpp
-        if post_process_python:
-            self.post_process_python = post_process_python
-
-        from langkit.unparsers import Unparsers
-        self.unparsers = Unparsers(self)
-
-        if self.generate_unparser:
-            self.warnings.enable(self.warnings.unparser_bad_grammar)
-
-        # Automatically add all source files in the "extensions/src" directory
-        # to the generated library project.
-        self.extensions_src_dir = None
-        if self.extensions_dir:
-            src_dir = path.join(self.extensions_dir, 'src')
-            if path.isdir(src_dir):
-                self.extensions_src_dir = src_dir
-                for filename in os.listdir(src_dir):
-                    filepath = path.join(src_dir, filename)
-                    if path.isfile(filepath) and not filename.startswith("."):
-                        self.additional_source_files.append(filepath)
-
-        self.compile(check_only=check_only,
-                     annotate_fields_types=annotate_fields_types)
+        # First compile the DSL
+        annotate_fields_types = kwargs.pop('annotate_fields_types', False)
+        generate_unparser = kwargs.pop('generate_unparser', False)
+        plugin_passes = kwargs.pop('plugin_passes', [])
+        self.compile(annotate_fields_types, generate_unparser, plugin_passes)
         if check_only:
             return
-        with global_context(self):
-            self._emit(lib_root, main_source_dirs, main_programs)
 
+        # Then, if requested, emit code for the generated library
+        assert self.emitter is None
+        self.emitter = Emitter(self, lib_root, self.extensions_dir, **kwargs)
+
+        # Fetch plugin passes
+        from langkit.passes import AbstractPass
+        plugin_pass_objects = []
+        for pass_fqn in plugin_passes:
+            mod_name, klass_name = pass_fqn.rsplit('.', 1)
+            mod = importlib.import_module(mod_name)
+            pass_constructor = getattr(mod, klass_name)
+            pass_object = pass_constructor()
+            assert isinstance(pass_object, AbstractPass)
+            plugin_pass_objects.append(pass_object)
+
+        # Run passes for code emission and run plugin passes after them
+        with names.camel_with_underscores, global_context(self):
+            self.run_passes(self.code_emission_passes(annotate_fields_types)
+                            + plugin_passes)
+
+            # TODO: integrate emitter in the pipeline
+            self.emitter.run()
+
+        # Report unused documentation entries
         self.documentations.report_unused()
 
-    def compile(self, check_only=False, annotate_fields_types=False):
+        self.emitter = None
+
+    def compile(self, annotate_fields_types=False, generate_unparser=False,
+                plugin_passes=[]):
+        """
+        Compile the DSL.
+
+        See the ``emit`` method for keyword arguments.
+        """
+        from langkit.compiled_types import CompiledTypeRepo
+
+        # Compile the first time, do nothing next times
+        if self.compiled:
+            return
+        self.compiled = True
+
+        assert self.grammar, "Set grammar before compiling"
+        self.root_grammar_class = CompiledTypeRepo.root_grammar_class
+        self.generate_unparser = generate_unparser
+
+        if generate_unparser:
+            self.warnings.enable(self.warnings.unparser_bad_grammar)
+
         with global_context(self):
-            self._compile(check_only, annotate_fields_types)
-
-    def write_ada_module(self, out_dir, template_base_name, qual_name,
-                         has_body=True):
-        """
-        Write an Ada module (both spec and body) using a standardized scheme
-        for finding the corresponding templates.
-
-        :param str out_dir: The out directory for the generated module.
-
-        :param str template_base_name: The base name for the template,
-            basically everything that comes before the _body_ada/_spec_ada
-            component, including the directory.
-
-        :param list[names.Name] qual_name: Qualified name for the Ada module,
-            as a list of "simple" package names. The base library name is
-            automatically prepended to that list, so every generated module
-            will be a child module of the base library module.
-
-        :param bool has_body: If true, generate a body for this unit.
-        """
-        for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
-            qual_name_str = '.'.join(n.camel_with_underscores
-                                     for n in qual_name)
-            with_clauses = self.with_clauses[(qual_name_str, kind)]
-            with names.camel_with_underscores:
-                write_ada_file(
-                    out_dir=out_dir,
-                    source_kind=kind,
-                    qual_name=[self.lib_name] + qual_name,
-                    content=self.render_template(
-                        "{}{}_ada".format(
-                            template_base_name +
-                            # If the base name ends with a /, we don't
-                            # put a "_" separator.
-                            ("" if template_base_name.endswith("/") else "_"),
-                            kind
-                        ),
-                        with_clauses=with_clauses,
-                    ),
-                    post_process=self.post_process_ada
-                )
+            self.run_passes(self.compilation_passes)
 
     @property
     def composite_types(self):
@@ -1567,37 +1422,19 @@ class CompileCtx(object):
 
         return self._enum_types
 
-    def _compile(self, check_only=False, annotate_fields_types=False):
+    @property
+    def compilation_passes(self):
         """
-        Compile the language specification: perform legality checks and type
-        inference.
+        Return the list of passes to compile the DSL.
         """
-        # Compile the first time, do nothing next times
-        if self.compiled:
-            return
-        self.compiled = True
-
-        assert self.grammar, "Set grammar before compiling"
-
-        from langkit.compiled_types import CompiledTypeRepo
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
-        from langkit.parsers import Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
-            MajorStepPass, PassManager, PropertyPass, StopPipeline,
-            errors_checkpoint_pass
+            MajorStepPass, PropertyPass, errors_checkpoint_pass
         )
 
-        # Create the file cache now so that plugin passes can emit files
-        self.cache = caching.Cache(
-            os.path.join(self.lib_root, 'obj', 'langkit_cache')
-        )
-
-        self.root_grammar_class = CompiledTypeRepo.root_grammar_class
-
-        pass_manager = PassManager()
-        pass_manager.add(
+        return [
             MajorStepPass('Compiling the lexer'),
             GlobalPass('check token families',
                        self.lexer.check_token_families),
@@ -1614,8 +1451,10 @@ class CompileCtx(object):
                         iter_metaclass=True),
             GrammarRulePass('compute fields types',
                             lambda p: p.compute_fields_types()),
+            GrammarRulePass('check type of top-level grammar rules',
+                            lambda p: p.check_toplevel_rules()),
 
-            GrammarRulePass('Compute dont skip rules',
+            GrammarRulePass('compute dont skip rules',
                             lambda p: p.traverse_dontskip(self.grammar)),
 
             # This cannot be done before as the "compute fields type" pass will
@@ -1679,9 +1518,20 @@ class CompileCtx(object):
                        self.unparsers.check_nodes_to_rules),
             GlobalPass('finalize unparsers code generation',
                        self.unparsers.finalize),
+        ]
 
-            StopPipeline('check only', disabled=not check_only),
+    def code_emission_passes(self, annotate_fields_types):
+        """
+        Return the list of passes to emit sources for the generated library.
+        """
+        from langkit.expressions import PropertyDef
+        from langkit.parsers import Parser
+        from langkit.passes import (
+            GlobalPass, GrammarRulePass, MajorStepPass, PropertyPass,
+            errors_checkpoint_pass
+        )
 
+        return [
             MajorStepPass('Prepare code emission'),
 
             GrammarRulePass('register parsers symbol literals',
@@ -1696,318 +1546,21 @@ class CompileCtx(object):
                        CompileCtx.annotate_fields_types,
                        disabled=not annotate_fields_types),
             errors_checkpoint_pass,
-        )
 
-        # Append plugin-passes at the end of our pipeline
-        from langkit.passes import AbstractPass
-
-        for pass_fqn in self.plugin_passes:
-            mod_name, klass_name = pass_fqn.rsplit('.', 1)
-            mod = importlib.import_module(mod_name)
-            pass_constructor = getattr(mod, klass_name)
-            pass_object = pass_constructor()
-            assert isinstance(pass_object, AbstractPass)
-            pass_manager.add(pass_object)
-
-        with names.camel_with_underscores:
-            pass_manager.run(self)
-
-    def _emit(self, lib_root, main_source_dirs, main_programs):
-        """
-        Emit native code for all the rules in this grammar as a library:
-        a library specification and the corresponding implementation.  Also
-        emit a tiny program that can parse starting with any parsing rule for
-        testing purposes.
-        """
-        lib_name_low = self.ada_api_settings.lib_name.lower()
-
-        include_path = path.join(lib_root, "include")
-        src_path = path.join(lib_root, "include", lib_name_low)
-        lib_path = path.join(lib_root, "lib")
-        share_path = path.join(lib_root, "share", lib_name_low)
-
-        if not path.exists(lib_root):
-            os.mkdir(lib_root)
-
-        if self.verbosity.info:
-            printcol("File setup...", Colors.OKBLUE)
-
-        for d in ["include",
-                  "include/{}".format(lib_name_low),
-                  "share",
-                  "share/{}".format(lib_name_low),
-                  "obj", "src", "bin",
-                  "lib", "lib/gnat"]:
-            p = path.join(lib_root, d)
-            if not path.exists(p):
-                os.mkdir(p)
-
-        # Create the project file for the generated library
-        main_project_file = os.path.join(
-            lib_path, "gnat",
-            "{}.gpr".format(self.ada_api_settings.lib_name.lower()),
-        )
-        write_source_file(
-            main_project_file,
-            self.render_template(
-                "project_file",
-                lib_name=self.ada_api_settings.lib_name,
-                os_path=os.path,
-            )
-        )
-
-        if self.generate_astdoc:
-            from langkit import astdoc
-
-            f = StringIO()
-            astdoc.write_astdoc(self, f)
-            write_source_file(os.path.join(share_path, 'ast-types.html'),
-                              f.read())
-
-        if self.verbosity.info:
-            printcol("Generating sources... ", Colors.OKBLUE)
-
-        if self.verbosity.debug:
-            printcol("Compiling the lexer specification", Colors.OKBLUE)
-
-        # Generate the lexer state machine iff the file is missing or its
-        # signature has changed since last time.
-        lexer_sm_body = ada_file_path(
-            src_path, ADA_BODY,
-            [self.lib_name, names.Name('Lexer_State_Machine')])
-        generate_lexer_sm_body = False
-        stale_lexer_spec = write_source_file(
-            os.path.join(
-                lib_root, 'obj',
-                '{}_lexer_signature.txt'
-                .format(self.short_name_or_long.lower)),
-            json.dumps(self.lexer.signature, indent=2)
-        )
-        if not os.path.exists(lexer_sm_body) or stale_lexer_spec:
-            generate_lexer_sm_body = True
-            self.dfa_code = self.lexer.build_dfa_code(self)
-
-        ada_modules = [
-            # Top (pure) package
-            ('pkg_main', '', False),
-            # Unit for initialization primitives
-            ('pkg_init', 'Init', True),
-            # Unit for declarations used by Analysis and Implementation
-            ('pkg_common', 'Common', True),
-            # Unit for public analysis primitives
-            ('pkg_analysis', 'Analysis', True),
-            # Unit for converters between public Ada types and C API-level ones
-            ('pkg_c', 'C', True),
-            # Unit for converters between public and implementation types
-            ('pkg_converters', 'Converters', False),
-            # Unit for implementation of analysis primitives
-            ('pkg_implementation', 'Implementation', True),
-            # Unit for AST introspection
-            ('pkg_introspection', 'Introspection', True),
-            # Unit for AST node iteration primitives
-            ('pkg_iterators', 'Iterators', True),
-            # Unit for AST rewriting primitives
-            ('pkg_rewriting', 'Rewriting', True),
-            # Unit for AST rewriting implementation
-            ('pkg_rewriting_impl', 'Rewriting_Implementation', True),
-            # Unit for AST unparsing primitives
-            ('pkg_unparsing', 'Unparsing', True),
-            # Unit for AST implementation of unparsing primitives
-            ('pkg_unparsing_impl', 'Unparsing_Implementation', True),
-            # Unit for all parsers
-            ('parsers/pkg_main', 'Parsers', True),
-            # Units for the lexer
-            ('pkg_lexer', 'Lexer', True),
-            ('pkg_lexer_impl', 'Lexer_Implementation', True),
-            ('pkg_lexer_state_machine', 'Lexer_State_Machine',
-             generate_lexer_sm_body),
-            # Unit for debug helpers
-            ('pkg_debug', 'Debug', True),
+            MajorStepPass('Generate library sources'),
         ]
 
-        for template_base_name, qual_name, has_body in ada_modules:
-            qual_name = ([names.Name(n) for n in qual_name.split('.')]
-                         if qual_name else [])
-            self.write_ada_module(src_path, template_base_name, qual_name,
-                                  has_body)
-
-        with names.camel_with_underscores:
-            write_ada_file(
-                path.join(lib_root, "src"), ADA_BODY, [names.Name('Parse')],
-                self.render_template("main_parse_ada"),
-                self.post_process_ada
-            )
-
-        imain_project_file = os.path.join(lib_root, "src", "mains.gpr")
-        write_source_file(
-            imain_project_file,
-            self.render_template(
-                "mains_project_file",
-                lib_name=self.ada_api_settings.lib_name,
-                source_dirs=main_source_dirs,
-                main_programs=main_programs
-            )
-        )
-
-        # Emit C API
-        self.emit_c_api(src_path, include_path)
-
-        # Emit python API
-        if self.python_api_settings:
-            python_path = path.join(lib_root, "python")
-            if not path.exists(python_path):
-                os.mkdir(python_path)
-            self.emit_python_api(python_path)
-
-            playground_file = os.path.join(lib_root, "bin", "playground")
-            write_source_file(
-                playground_file,
-                self.render_template(
-                    "python_api/playground_py",
-                    module_name=self.python_api_settings.module_name
-                ),
-                self.post_process_python
-            )
-            os.chmod(playground_file, 0o775)
-
-            setup_py_file = os.path.join(lib_root, 'python', 'setup.py')
-            write_source_file(
-                setup_py_file,
-                self.render_template('python_api/setup_py'),
-                self.post_process_python
-            )
-
-        # Emit GDB helpers initialization script
-        gdbinit_path = os.path.join(lib_root, 'gdbinit.py')
-        lib_name = self.ada_api_settings.lib_name.lower()
-        write_source_file(
-            gdbinit_path,
-            self.render_template(
-                'gdb_py',
-                langkit_path=os.path.dirname(os.path.dirname(__file__)),
-                lib_name=lib_name,
-                prefix=self.short_name_or_long.lower,
-            ),
-            self.post_process_python
-        )
-
-        # Emit the ".debug_gdb_scripts" section if asked to
-        if self.generate_gdb_hook:
-            write_source_file(
-                os.path.join(src_path, 'gdb.c'),
-                self.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                     os_name=os.name),
-                self.post_process_cpp
-            )
-
-        # Add any sources in $lang_path/extensions/support if it exists
-        if self.ext('support'):
-            for f in glob(path.join(self.ext('support'), "*.ad*")):
-                copy_file(f, src_path)
-
-        self.cache.save()
-
-    def emit_c_api(self, src_path, include_path):
+    def run_passes(self, passes):
         """
-        Generate header and binding body for the external C API.
+        Run the given passes through the pass manager.
 
-        :param str include_path: The include path.
-        :param str src_path: The source path.
+        :param list[langkit.passes.AbstractPass]: List of compilation passes to
+            go through.
         """
-        def render(template_name):
-            return self.render_template(template_name)
-
-        with names.lower:
-            write_cpp_file(
-                path.join(include_path,
-                          "{}.h".format(self.c_api_settings.lib_name)),
-                render("c_api/header_c"),
-                self.post_process_cpp
-            )
-
-        self.write_ada_module(
-            src_path, "c_api/pkg_main",
-            [names.Name(n) for n in 'Implementation.C'.split('.')]
-        )
-
-    def emit_python_api(self, python_path):
-        """
-        Generate the Python binding module.
-
-        :param str python_path: The directory in which the Python module will
-            be generated.
-        """
-        package_dir = os.path.join(python_path,
-                                   self.python_api_settings.module_name)
-        if not os.path.isdir(package_dir):
-            os.mkdir(package_dir)
-
-        def strip_white_lines(code):
-            tree = ast.parse(code)
-            # Create an assoc of lines to a boolean flag indicating whether the
-            # line is in a multiline string literal or not.
-            lines = [[l, False] for l in code.splitlines()]
-
-            # Find all the strings in the AST
-            for s in (a for a in ast.walk(tree) if isinstance(a, ast.Str)):
-                end_line = s.lineno
-                start_line = end_line - len(s.s.splitlines()) + 1
-                for l in range(start_line + 1, end_line):
-                    lines[l - 1][1] = True
-
-            return "\n".join(
-                l[0] for l in lines
-                if (not all(c.isspace() for c in l[0])) or l[1]
-            )
-
-        def pretty_print(code):
-            if self.verbosity.debug:
-                printcol('Pretty printing Python code', Colors.OKBLUE)
-            if not self.pretty_print:
-                return code
-
-            try:
-                from yapf.yapflib.yapf_api import FormatCode
-                return FormatCode(code)[0]
-            except ImportError:
-                check_source_language(
-                    False,
-                    "Yapf not available, using autopep8 to pretty-print "
-                    "Python code",
-                    severity=Severity.warning
-                )
-
-            try:
-                from autopep8 import fix_code
-                return fix_code(code)
-            except ImportError:
-                check_source_language(
-                    False,
-                    "autopep8 not available, cannot pretty-print Python code",
-                    severity=Severity.warning
-                )
-                return code
-
-        with names.camel:
-            code = self.render_template(
-                "python_api/module_py",
-                c_api=self.c_api_settings,
-                pyapi=self.python_api_settings,
-            )
-
-            # If pretty-printing failed, write the original code anyway in
-            # order to ease debugging.
-            exc = None
-            try:
-                pp_code = pretty_print(strip_white_lines(code))
-            except SyntaxError as exc:
-                pp_code = code
-
-            write_source_file(os.path.join(package_dir, '__init__.py'),
-                              pp_code,
-                              self.post_process_python)
-            if exc:
-                raise exc
+        from langkit.passes import PassManager
+        pass_manager = PassManager()
+        pass_manager.add(*passes)
+        pass_manager.run(self)
 
     @property
     def extensions_dir(self):

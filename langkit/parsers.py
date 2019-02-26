@@ -648,6 +648,13 @@ class Parser(object):
         for child in self.children:
             child.compute_fields_types()
 
+    def check_toplevel_rules(self):
+        """
+        Make sure that top-level grammar rules yield nodes.
+        """
+        check_source_language(self.get_type().is_ast_node,
+                              'Grammar rules must yield a node')
+
     def compile(self):
         """
         Emit code for this parser as a function into the global context.
@@ -655,12 +662,6 @@ class Parser(object):
         :param langkit.compile_context.CompileCtx context: Global context.
         """
         context = get_context()
-
-        check_source_language(
-            self.get_type() is not None
-            and self.get_type().is_ast_node,
-            'Grammar rules must yield an AST node'
-        )
 
         # Don't emit code twice for the same parser
         if self in context.fns:

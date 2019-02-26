@@ -4,7 +4,7 @@
 
 ${operand.render_pre()}
 
-% if not ctx.no_property_checks:
+% if not emitter.no_property_checks:
 
    ## Output a null check only if the expression can be null
    <%
