@@ -63,13 +63,13 @@ library project ${lib_name} is
                            for p in ctx.additional_source_files):
       "${path}",
       % endfor
-      % if ctx.generate_gdb_hook:
+      % if emitter.generate_gdb_hook:
       "gdb.c"
       % endif
       );
 
    <% source_dirs = ['../../include/{}'.format(lib_name.lower()),
-                     ctx.extensions_src_dir] %>
+                     emitter.extensions_src_dir] %>
    for Source_Dirs use
      (${', '.join(string_repr(d) for d in source_dirs if d)});
 

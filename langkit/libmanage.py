@@ -569,11 +569,6 @@ class ManageScript(object):
             "extensions"
         )
 
-        # Context needs to know if we want to pretty print the generated
-        # code or not.
-        self.context.pretty_print = not getattr(parsed_args, 'no_pretty_print',
-                                                False)
-
     def do_generate(self, args):
         """
         Generate source code for the user language.
@@ -637,7 +632,8 @@ class ManageScript(object):
                           generate_unparser=args.generate_unparser,
                           generate_astdoc=not args.no_astdoc,
                           generate_gdb_hook=not args.no_gdb_hook,
-                          plugin_passes=args.plugin_pass)
+                          plugin_passes=args.plugin_pass,
+                          pretty_print=not args.no_pretty_print)
 
         if args.check_only:
             return
