@@ -60,7 +60,7 @@ class DocDatabase(object):
         unused = set(self._dict) - self._used
         if unused:
             print('The following documentation entries were not used in code'
-                  'generation:')
+                  ' generation:')
             for k in sorted(unused):
                 print('   ', k)
 
