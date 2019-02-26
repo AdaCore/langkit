@@ -2732,9 +2732,9 @@ class ArrayLiteral(AbstractExpression):
         else:
             return CallExpr(
                 'Array_Lit', array_type.constructor_name, array_type,
-                [aggregate_expr(str(array_type.array_type_name), [
-                    (i, el) for i, el in enumerate(elements, 1)
-                ])],
+                [aggregate_expr(
+                    array_type.array_type_name.camel_with_underscores,
+                    [(i, el) for i, el in enumerate(elements, 1)])],
                 abstract_expr=abstract_expr
             )
 
@@ -3939,7 +3939,8 @@ class PropertyDef(AbstractNodeData):
 
         # This id will uniquely identify both the generic package and the
         # closure data structure.
-        pred_id = "{}_{}_{}".format(self.struct.name, self.name, pred_num)
+        with names.camel_with_underscores:
+            pred_id = "{}_{}_{}".format(self.struct.name, self.name, pred_num)
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
@@ -4282,8 +4283,10 @@ def aggregate_expr(type, assocs):
 
     template = meta_template.format(
         type=type_name,
-        operands=(', '.join('{} => {{}}'.format(n) for n, _ in assocs)
-                  or 'null record')
+        operands=(', '.join(
+            '{} => {{}}'.format(n.camel_with_underscores
+                                if isinstance(n, names.Name) else n)
+            for n, _ in assocs) or 'null record')
     )
     return LiteralExpr(template, type, [e for _, e in assocs])
 
