@@ -1,8 +1,8 @@
 """
-This file contains the logic for the compilation context for langkit. This is
-the main hook into langkit, insofar as this is the gate through which an
+This file contains the logic for the compilation context for Langkit. This is
+the main hook into Langkit, insofar as this is the gate through which an
 external language creator will actually trigger the code emission. For example,
-this is the way it is done for the ada language::
+this is the way it is done for the Ada language::
 
     from ada_parser import ada_lexer, ada_grammar
     context = CompileCtx(... ada_lexer, ada_grammar...)
