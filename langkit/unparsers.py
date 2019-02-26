@@ -1085,7 +1085,7 @@ class Unparsers(object):
                     not node_type.abstract and
                     not node_type.synthetic,
                     '{} has no parser, and is marked neither abstract nor'
-                    ' synthetic'.format(node_type.name)
+                    ' synthetic'.format(node_type.dsl_name)
                 )
 
     def finalize(self, context):
