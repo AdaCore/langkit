@@ -248,8 +248,8 @@ class New(AbstractExpression):
 
         @property
         def subexprs(self):
-            result = {str(k): v for k, v in self.assocs.items()}
-            result['_type'] = self.static_type.name
+            result = {k.lower: v for k, v in self.assocs.items()}
+            result['_type'] = self.static_type.dsl_name
             return result
 
         def __repr__(self):

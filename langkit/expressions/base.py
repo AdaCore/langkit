@@ -3618,7 +3618,7 @@ class PropertyDef(AbstractNodeData):
                     arg.var.type == base_arg.var.type,
                     'Argument "{}" does not have the same type as in base'
                     ' property. Base has {}, derived has {}'.format(
-                        arg.name,
+                        arg.dsl_name,
                         arg.var.type.dsl_name,
                         base_arg.var.type.dsl_name
                     )
@@ -3631,7 +3631,7 @@ class PropertyDef(AbstractNodeData):
                         base_arg.default_value is None,
                         'Argument "{}" must have the same default value as in'
                         ' base property ({})'.format(
-                            arg.name, self.base_property.qualname
+                            arg.dsl_name, self.base_property.qualname
                         )
                     )
                 else:
@@ -3639,7 +3639,7 @@ class PropertyDef(AbstractNodeData):
                         base_arg.default_value is not None,
                         'Argument "{}" cannot have a default value, to be'
                         ' consistent with its base property ({})'.format(
-                            arg.name, self.base_property.qualname
+                            arg.dsl_name, self.base_property.qualname
                         )
                     )
 
@@ -3651,7 +3651,7 @@ class PropertyDef(AbstractNodeData):
                         match_default_values(val, base_val),
                         'Argument "{}" does not have the same default value'
                         ' ({}) as in base property ({})'.format(
-                            arg.name, val, base_val
+                            arg.dsl_name, val, base_val
                         )
                     )
 
