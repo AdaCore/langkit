@@ -9,8 +9,8 @@ try:
 except ImportError:  # no-code-coverage
     check_source_language(
         False,
-        "Missing docutils to properly render sphinx doc. Install the "
-        "docutils package",
+        'Missing docutils to properly render sphinx doc. Install the'
+        ' docutils package',
         severity=Severity.warning
     )
 
