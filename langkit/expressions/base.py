@@ -2248,6 +2248,9 @@ class SelfVariable(AbstractVariable):
     def construct(self):
         check_source_language(self._type is not None,
                               'Self is not bound in this context')
+        return self.construct_nocheck()
+
+    def construct_nocheck(self):
         return super(SelfVariable, self).construct()
 
 
