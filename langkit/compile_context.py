@@ -1553,11 +1553,12 @@ class CompileCtx(object):
         """
         Return the list of passes to emit sources for the generated library.
         """
+        from langkit.emitter import Emitter
         from langkit.expressions import PropertyDef
         from langkit.parsers import Parser
         from langkit.passes import (
-            GlobalPass, GrammarRulePass, MajorStepPass, PropertyPass,
-            errors_checkpoint_pass
+            EmitterPass, GlobalPass, GrammarRulePass, MajorStepPass,
+            PropertyPass, errors_checkpoint_pass
         )
 
         return [
@@ -1577,26 +1578,18 @@ class CompileCtx(object):
             errors_checkpoint_pass,
 
             MajorStepPass('Generate library sources'),
-            GlobalPass('setup directories',
-                       lambda ctx: ctx.emitter.setup_directories(ctx)),
-            GlobalPass('emit library project file',
-                       lambda ctx: ctx.emitter.emit_lib_project_file(ctx)),
-            GlobalPass('emit astdoc',
-                       lambda ctx: ctx.emitter.emit_astdoc(ctx)),
-            GlobalPass('generate lexer DFA',
-                       lambda ctx: ctx.emitter.generate_lexer_dfa(ctx)),
-            GlobalPass('emit Ada sources',
-                       lambda ctx: ctx.emitter.emit_ada_lib(ctx)),
-            GlobalPass('emit mains',
-                       lambda ctx: ctx.emitter.emit_mains(ctx)),
-            GlobalPass('emit C API',
-                       lambda ctx: ctx.emitter.emit_c_api(ctx)),
-            GlobalPass('emit Python API',
-                       lambda ctx: ctx.emitter.emit_python_api(ctx)),
-            GlobalPass('emit Python playground',
-                       lambda ctx: ctx.emitter.emit_python_playground(ctx)),
-            GlobalPass('emit GDB helpers',
-                       lambda ctx: ctx.emitter.emit_gdb_helpers(ctx)),
+            EmitterPass('setup directories', Emitter.setup_directories),
+            EmitterPass('emit library project file',
+                        Emitter.emit_lib_project_file),
+            EmitterPass('emit astdoc', Emitter.emit_astdoc),
+            EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
+            EmitterPass('emit Ada sources', Emitter.emit_ada_lib),
+            EmitterPass('emit mains', Emitter.emit_mains),
+            EmitterPass('emit C API', Emitter.emit_c_api),
+            EmitterPass('emit Python API', Emitter.emit_python_api),
+            EmitterPass('emit Python playground',
+                        Emitter.emit_python_playground),
+            EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
 
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused()),

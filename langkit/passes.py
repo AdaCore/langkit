@@ -112,6 +112,28 @@ class GlobalPass(AbstractPass):
         self.pass_fn(context)
 
 
+class EmitterPass(AbstractPass):
+    """
+    Concrete pass to run on the emitter (for code generation).
+    """
+
+    def __init__(self, name, pass_fn, disabled=False):
+        """
+        :param str name: See AbstractPass.
+
+        :param pass_fn: Function to be run when executing the pass.
+        :type (langkit.emitter.Emitter,
+               langkit.compile_context.CompileCtx) -> None
+
+        :param bool disabled: See AbstractPass.
+        """
+        super(EmitterPass, self).__init__(name, disabled)
+        self.pass_fn = pass_fn
+
+    def run(self, context):
+        self.pass_fn(context.emitter, context)
+
+
 class EmbedIpythonPass(AbstractPass):  # no-code-coverage
     """
     Small utility pass that allows to embed an IPython interpreter at a given
