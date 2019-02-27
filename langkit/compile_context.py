@@ -1389,6 +1389,8 @@ class CompileCtx(object):
         if self.generate_unparser:
             self.warnings.enable(self.warnings.unparser_bad_grammar)
 
+        self.c_api_settings.lib_name = self.lib_name.lower
+
     def prepare_code_emission_pass(self, lib_root, **kwargs):
         """
         Return a pass to prepare this context for code emission.
