@@ -62,6 +62,7 @@ class CAPISettings(AbstractAPISettings):
         """
         self.context = ctx
         self.symbol_prefix = symbol_prefix
+        self._lib_name = None
 
     @property
     def lib_name(self):
@@ -73,12 +74,14 @@ class CAPISettings(AbstractAPISettings):
         exception that dashes ("-") are allowed.  Case matters (but you still
         choose it).
         """
-        lib_name = self.context.lib_name.lower
-        check_source_language(
-            self.LIB_NAME_RE.match(lib_name),
-            'Invalid library name: {}'.format(lib_name)
-        )
-        return lib_name
+        assert self._lib_name
+        return self._lib_name
+
+    @lib_name.setter
+    def lib_name(self, lib_name):
+        check_source_language(self.LIB_NAME_RE.match(lib_name),
+                              'Invalid library name: {}'.format(lib_name))
+        self._lib_name = lib_name
 
     #
     # Helpers for templates
