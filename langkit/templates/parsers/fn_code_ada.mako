@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%
-ret_type = parser.get_type().storage_type_name
+ret_type = parser.type.storage_type_name
 memo = 'Parser.Private_Part.{}_Memo'.format(parser.gen_fn_name)
 %>
 
@@ -25,7 +25,7 @@ is
 
    % if parser.is_left_recursive():
       Mem_Pos : Token_Index := Pos;
-      Mem_Res : ${ret_type} := ${parser.get_type().storage_nullexpr};
+      Mem_Res : ${ret_type} := ${parser.type.storage_nullexpr};
    % endif
 
    M : Memo_Entry := Get (${memo}, Pos);

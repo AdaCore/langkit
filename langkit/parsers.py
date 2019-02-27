@@ -30,7 +30,7 @@ import inspect
 from langkit import names
 from langkit.common import gen_name
 from langkit.compile_context import CompileCtx, get_context
-from langkit.compiled_types import ASTNodeType, T, resolve_type
+from langkit.compiled_types import ASTNodeType, T, TokenType, resolve_type
 from langkit.diagnostics import (
     Context, Location, Severity, check_source_language,
     extract_library_location
@@ -415,6 +415,17 @@ class Parser(object):
         to scan the input to see if input should be skipped or not.
         """
 
+        self._type_computed = False
+        self._type = None
+        """
+        Type that this parser creates (see the `get_type` method).
+
+        It is computed during the type inference pass and, from there, must be
+        accessed using the "type" property.
+
+        :type: None|langkit.compiled_types.CompiledType
+        """
+
     def traverse_create_vars(self, start_pos):
         """
         This method will traverse the parser tree and create variables for
@@ -447,10 +458,15 @@ class Parser(object):
                 True
             )
             self.dontskip_parser.is_dont_skip_parser = True
+
+            # Add a named rule for the the DontSkip parsers. Don't forget to
+            # compile it (compute their types).
             grammar.add_rules(**{
                 gen_name('dontskip_{}'.format(self.name)).lower:
                 self.dontskip_parser
             })
+            self.dontskip_parser.compute_types()
+            self.dontskip_parser.freeze_types()
 
         for c in self.children:
             c.traverse_dontskip(grammar)
@@ -509,7 +525,7 @@ class Parser(object):
 
         self.pos_var = pos_var or VarDef('{}_pos'.format(base_name), T.Token)
         self.res_var = res_var or VarDef('{}_res'.format(base_name),
-                                         self.get_type())
+                                         self.type)
 
     @property
     def error_repr(self):
@@ -642,23 +658,24 @@ class Parser(object):
         """
         Make sure that top-level grammar rules yield nodes.
         """
-        check_source_language(self.get_type().is_ast_node,
+        check_source_language(self.type.is_ast_node,
                               'Grammar rules must yield a node')
 
-    def compute_fields_types(self):
+    def compute_types(self):
         """
         Infer parse fields from this parser tree.
         """
-        self._compute_fields_types()
+        self._eval_type()
         for child in self.children:
-            child.compute_fields_types()
+            child.compute_types()
 
-    def _compute_fields_types(self):
+    def freeze_types(self):
         """
-        Subclasses that contribute to parse fields type inference must override
-        this method.
+        Initialize `self.type` with the result of the `compute_types` pass.
         """
-        pass
+        self.type = self._eval_type()
+        for child in self.children:
+            child.freeze_types()
 
     def compile(self):
         """
@@ -707,14 +724,38 @@ class Parser(object):
                 context.render_template('parsers/fn_code_ada', t_env)
             ))
 
-    def get_type(self):
+    @property
+    def type(self):
         """
-        Return a descriptor for the type this parser returns in the generated
-        code.
+        Type that this parser creates.
 
-        Subclasses must override this method.
+        This can be either an ASTNodeType subclass, the token type, or None if
+        this parser does not yield a specific value itself (for instance Row
+        parsers).
 
-        :rtype: CompiledType
+        :rtype: None|langkit.compiled_types.CompiledType
+        """
+        assert self._type_computed
+        return self._type
+
+    @type.setter
+    def type(self, typ):
+        assert not self._type_computed
+        assert typ is None or isinstance(typ, (ASTNodeType, TokenType)), (
+            'Invalid parser type: {}'.format(typ)
+        )
+        self._type_computed = True
+        self._type = typ
+
+    def _eval_type(self):
+        """
+        Evaluate the type this parser creates.
+
+        Subclasses must override this method. Because of the recursive nature
+        of our type inference, this may return None when the type is still
+        unknown.
+
+        :rtype: None|langkit.compiled_types.CompiledType
         """
         raise NotImplementedError()
 
@@ -727,8 +768,8 @@ class Parser(object):
 
         :rtype: TypeSet
         """
-        assert self.get_type().is_ast_node, (
-            'Node expected, {} found'.format(self.get_type().dsl_name))
+        assert self.type.is_ast_node, (
+            'Node expected, {} found'.format(self.type.dsl_name))
         return self._precise_types()
 
     def _precise_types(self):
@@ -849,11 +890,11 @@ class _Token(Parser):
     def can_parse_token_node(self):
         return True
 
-    def get_type(self):
-        return T.Token
-
     def create_vars_after(self, start_pos):
         self.init_vars()
+
+    def _eval_type(self):
+        return T.Token
 
     def _compile(self):
         # Resolve the token action associated with this parser
@@ -917,14 +958,14 @@ class Skip(Parser):
     def children(self):
         return [self.dest_node_parser]
 
+    def _eval_type(self):
+        return resolve_type(self.dest_node)
+
     def generate_code(self):
         return self.render('skip_code_ada', exit_label=gen_name("Exit_Or"))
 
-    def get_type(self):
-        return resolve_type(self.dest_node)
-
     def _precise_types(self):
-        return TypeSet([self.get_type()])
+        return TypeSet([self.type])
 
     def create_vars_after(self, start_pos):
         self.init_vars(res_var=self.dest_node_parser.res_var)
@@ -957,6 +998,9 @@ class DontSkip(Parser):
     def children(self):
         return [self.subparser]
 
+    def _eval_type(self):
+        return self.subparser._eval_type()
+
     def generate_code(self):
         return """
         Parser.Private_Part.Dont_Skip.Append
@@ -967,9 +1011,6 @@ class DontSkip(Parser):
             subparser_code=self.subparser.generate_code(),
             dontskip_parser_fn=self.dontskip_parser.gen_fn_name
         )
-
-    def get_type(self):
-        return self.subparser.get_type()
 
     def _precise_types(self):
         return self.subparser.precise_types
@@ -1016,21 +1057,18 @@ class Or(Parser):
     def children(self):
         return self.parsers
 
-    def get_type(self):
-        if self.cached_type:
-            return self.cached_type
-
+    def _eval_type(self):
         # Callers are already visiting this node, so we cannot return its type
         # right now.  Return None so that it doesn't contribute to type
         # resolution.
         if self.is_processing_type:
-            return None
+            return
 
         try:
             self.is_processing_type = True
             types = set()
-            for m in self.parsers:
-                t = m.get_type()
+            for p in self.parsers:
+                t = p._eval_type()
                 if t:
                     types.add(t)
 
@@ -1201,7 +1239,7 @@ class _Row(Parser):
     def children(self):
         return self.parsers
 
-    def get_type(self):
+    def _eval_type(self):
         # A _Row parser never yields a concrete result itself
         return None
 
@@ -1287,36 +1325,37 @@ class List(Parser):
     def children(self):
         return keep([self.parser, self.sep])
 
-    def get_type(self):
+    def _eval_type(self):
         with self.diagnostic_context:
             if self.list_cls:
-                ret = resolve_type(self.list_cls)
+                result = resolve_type(self.list_cls)
                 check_source_language(
-                    ret.is_list_type,
+                    result.is_list_type,
                     'Invalid list type for List parser: {}. '
-                    'Not a list type'.format(ret.dsl_name)
+                    'Not a list type'.format(result.dsl_name)
                 )
-                return ret
             else:
-                item_type = self.parser.get_type()
+                item_type = self.parser._eval_type()
                 check_source_language(
                     item_type.is_ast_node,
                     'List parsers only accept subparsers that yield AST nodes'
                     ' ({} provided here)'.format(item_type.dsl_name)
                 )
-                return item_type.list
+                result = item_type.list
+
+        return result
 
     def _precise_types(self):
-        return TypeSet([self.get_type()])
+        return TypeSet([self.type])
 
     def _compile(self):
-        # Ensure this list parser will build concrete list nodes
-        typ = self.get_type()
+        # Ensure this list parser will build concrete list nodes.
+        # TODO: we should be able to do this in _eval_type directly.
         with self.diagnostic_context:
             check_source_language(
-                not typ.abstract,
+                not self.type.abstract,
                 'Please provide a concrete ASTnode subclass as list_cls'
-                ' ({} is abstract)'.format(typ.dsl_name)
+                ' ({} is abstract)'.format(self.type.dsl_name)
             )
 
     def create_vars_before(self):
@@ -1429,9 +1468,9 @@ class Opt(Parser):
     def children(self):
         return [self.parser]
 
-    def get_type(self):
+    def _eval_type(self):
         if self._booleanize is None:
-            return self.parser.get_type()
+            return self.parser._eval_type()
         else:
             assert self._booleanize._type
             return resolve_type(self._booleanize._type)
@@ -1439,7 +1478,7 @@ class Opt(Parser):
     def _precise_types(self):
         return (self.parser.precise_types
                 if self._booleanize is None else
-                TypeSet([self.get_type()]))
+                TypeSet([self.type]))
 
     def create_vars_after(self, start_pos):
         self.init_vars(
@@ -1482,8 +1521,8 @@ class _Extract(Parser):
     def children(self):
         return [self.parser]
 
-    def get_type(self):
-        return self.parser.parsers[self.index].get_type()
+    def _eval_type(self):
+        return self.parser.parsers[self.index]._eval_type()
 
     def _precise_types(self):
         return self.parser.parsers[self.index].precise_types
@@ -1521,8 +1560,8 @@ class Discard(Parser):
     def children(self):
         return [self.parser]
 
-    def get_type(self):
-        # Discard parsers return nothing!
+    def _eval_type(self):
+        # Discard parsers return nothing
         return None
 
     def create_vars_after(self, start_pos):
@@ -1580,8 +1619,8 @@ class Defer(Parser):
         self._parser = None
         ":type: Parser"
 
-    def get_type(self):
-        return self.parser.get_type()
+    def _eval_type(self):
+        return self.parser._eval_type()
 
     def _precise_types(self):
         return self.parser.precise_types
@@ -1635,15 +1674,14 @@ class _Transform(Parser):
         to keep track of whether the transform has failed or not.
         """
 
+        self.cached_type = None
+
     @property
     def children(self):
         return [self.parser]
 
-    def get_type(self):
-        return resolve_type(self.typ)
-
     def _precise_types(self):
-        return TypeSet([self.get_type()])
+        return TypeSet([self.type])
 
     @property
     def fields_parsers(self):
@@ -1653,7 +1691,7 @@ class _Transform(Parser):
 
         :rtype: list[Parser]
         """
-        typ = self.get_type()
+        typ = resolve_type(self.typ)
 
         # Sub-parsers for Token nodes must parse exactly one token
         if typ.is_token_node:
@@ -1679,22 +1717,29 @@ class _Transform(Parser):
         else:
             return [self.parser]
 
-    def _compute_fields_types(self):
+    def _eval_type(self):
+        if self.cached_type is not None:
+            return self.cached_type
+
+        result = resolve_type(self.typ)
+
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
-        typ = self.get_type()
         nb_transform_values = len(self.fields_parsers)
-        nb_fields = len(typ.get_parse_fields(
+        nb_fields = len(result.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null))
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
-            .format(nb_transform_values, typ.dsl_name, nb_fields)
+            .format(nb_transform_values, result.dsl_name, nb_fields)
         )
 
         # Register this parser to the constructed type, which will propagate
         # field types.
-        typ.add_transform(self)
+        result.add_transform(self)
+
+        self.cached_type = result
+        return result
 
     def create_vars_after(self, start_pos):
         self.init_vars(self.parser.pos_var)
@@ -1740,13 +1785,13 @@ class Null(Parser):
     def generate_code(self):
         return self.render('null_code_ada')
 
-    def get_type(self):
-        return (self.typ.get_type()
+    def _eval_type(self):
+        return (self.typ._eval_type()
                 if isinstance(self.typ, Parser) else
                 resolve_type(self.typ))
 
     def _precise_types(self):
-        return TypeSet([self.get_type()])
+        return TypeSet([self.type])
 
 
 _ = Discard
@@ -1795,8 +1840,8 @@ class Predicate(Parser):
     def children(self):
         return [self.parser]
 
-    def get_type(self):
-        return self.parser.get_type()
+    def _eval_type(self):
+        return self.parser._eval_type()
 
     def _precise_types(self):
         return self.parser.precise_types
@@ -1810,7 +1855,7 @@ class Predicate(Parser):
             'Property passed as predicate to Predicate parser must return'
             ' a boolean')
         check_source_language(
-            self.property_ref.struct.matches(self.parser.get_type()),
+            self.property_ref.struct.matches(self.parser.type),
             'Property passed as predicate to Predicate parser must take a node'
             ' with the type of the sub-parser')
 
@@ -1851,7 +1896,7 @@ class NoBacktrack(Parser):
         # backtrack.
         return '{} := True;'.format(self.no_backtrack)
 
-    def get_type(self):
+    def _eval_type(self):
         # A NoBacktrack parser never yields a concrete result itself
         return None
 

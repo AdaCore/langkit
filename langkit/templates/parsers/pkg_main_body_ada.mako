@@ -66,7 +66,7 @@ package body ${ada_lib_name}.Parsers is
       Parse_Lists : Free_Parse_List;
 
       % for parser in sorted_fns:
-      <% ret_type = parser.get_type().storage_type_name %>
+      <% ret_type = parser.type.storage_type_name %>
       ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
       % endfor
 
@@ -225,7 +225,7 @@ package body ${ada_lib_name}.Parsers is
 
       --  Reset the memo tables in the private part
       % for fn in sorted_fns:
-         ${fn.get_type().storage_type_name}_Memos.Clear
+         ${fn.type.storage_type_name}_Memos.Clear
            (Parser.Private_Part.${fn.gen_fn_name}_Memo);
       % endfor
    end Reset;
