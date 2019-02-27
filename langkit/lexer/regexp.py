@@ -674,10 +674,10 @@ class DFAState(object):
         # Check that ``chars`` does overlap with character sets for other
         # transitions.
         for other_chars, _ in self.transitions:
-            check_source_language(
-                not chars.overlaps_with(other_chars),
+            assert not chars.overlaps_with(other_chars), (
                 'Overlapping input char sets: {} and {}'
-                .format(chars, other_chars))
+                .format(chars, other_chars)
+            )
 
         self.transitions.append((chars, next_state))
 
