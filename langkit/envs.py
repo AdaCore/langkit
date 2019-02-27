@@ -9,7 +9,7 @@ from langkit.compile_context import get_context
 from langkit.compiled_types import AbstractNodeData, T
 from langkit.diagnostics import (check_source_language,
                                  extract_library_location, Context)
-from langkit.expressions import (FieldAccess, PropertyDef, Self, construct,
+from langkit.expressions import (FieldAccess, PropertyDef, Self,
                                  resolve_property, unsugar)
 
 """
@@ -321,7 +321,9 @@ class EnvSpec(object):
 
         with PropertyDef.bind_none(), \
                 Self.bind_type(self.ast_node):
-            return FieldAccess.Expr(construct(Self), p, []).render_expr()
+            return FieldAccess.Expr(
+                Self.construct_nocheck(), p, []
+            ).render_expr()
 
     @property
     def initial_env_expr(self):
