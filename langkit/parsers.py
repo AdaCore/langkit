@@ -855,6 +855,14 @@ class _Token(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
+    def _compile(self):
+        # Resolve the token action associated with this parser
+        if isinstance(self._val, basestring):
+            self._val = get_context().lexer.get_token(self._val)
+        else:
+            check_source_language(isinstance(self._val, TokenAction),
+                                  'Invalid token: {}'.format(self._val))
+
     @property
     def val(self):
         """
@@ -862,9 +870,11 @@ class _Token(Parser):
 
         :rtype: TokenAction
         """
-        return (get_context().lexer.get_token(self._val)
-                if isinstance(self._val, basestring)
-                else self._val)
+        # If this fails, it means we are trying to get the token action before
+        # it was resolved (i.e. before the Parser.compile pass). This is
+        # probably a bug in the compilation pipeline.
+        assert isinstance(self._val, TokenAction)
+        return self._val
 
     def generate_code(self):
         return self.render('tok_code_ada', token_kind=self.val.ada_name)
