@@ -1456,6 +1456,7 @@ class CompileCtx(object):
         """
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
+        from langkit.parsers import Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
             MajorStepPass, PropertyPass, errors_checkpoint_pass
@@ -1479,9 +1480,9 @@ class CompileCtx(object):
                         EnvSpec.create_properties,
                         iter_metaclass=True),
             GrammarRulePass('compute fields types',
-                            lambda p: p.compute_fields_types()),
+                            Parser.compute_fields_types),
             GrammarRulePass('check type of top-level grammar rules',
-                            lambda p: p.check_toplevel_rules()),
+                            Parser.check_toplevel_rules),
 
             GrammarRulePass('compute dont skip rules',
                             lambda p: p.traverse_dontskip(self.grammar)),
@@ -1538,6 +1539,7 @@ class CompileCtx(object):
                        CompileCtx.check_memoized),
             errors_checkpoint_pass,
 
+            GrammarRulePass('compile parsers', Parser.compile),
             GrammarRulePass('compute nodes parsers correspondence',
                             self.unparsers.compute),
             ASTNodePass('warn imprecise field type annotations',

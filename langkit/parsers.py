@@ -638,22 +638,45 @@ class Parser(object):
         """
         raise NotImplementedError()
 
-    def compute_fields_types(self):
-        """
-        Infer ASTNodeType's fields from this parsers tree.
-
-        This method recurses over child parsers.  Parser subclasses must
-        override this method if they contribute to fields typing.
-        """
-        for child in self.children:
-            child.compute_fields_types()
-
     def check_toplevel_rules(self):
         """
         Make sure that top-level grammar rules yield nodes.
         """
         check_source_language(self.get_type().is_ast_node,
                               'Grammar rules must yield a node')
+
+    def compute_fields_types(self):
+        """
+        Infer parse fields from this parser tree.
+        """
+        self._compute_fields_types()
+        for child in self.children:
+            child.compute_fields_types()
+
+    def _compute_fields_types(self):
+        """
+        Subclasses that contribute to parse fields type inference must override
+        this method.
+        """
+        pass
+
+    def compile(self):
+        """
+        Compile this parser tree.
+
+        Assuming that type inference on node parse fields already run, this
+        performs general validation on parsers.
+        """
+        self._compile()
+        for child in self.children:
+            child.compile()
+
+    def _compile(self):
+        """
+        Subclasses that need to perform specific actions during compilation
+        must override this method to implement these actions.
+        """
+        pass
 
     def render_parser(self):
         """
@@ -1276,9 +1299,8 @@ class List(Parser):
     def _precise_types(self):
         return TypeSet([self.get_type()])
 
-    def compute_fields_types(self):
-        Parser.compute_fields_types(self)
-
+    def _compile(self):
+        # Ensure this list parser will build concrete list nodes
         typ = self.get_type()
         with self.diagnostic_context:
             check_source_language(
@@ -1647,7 +1669,7 @@ class _Transform(Parser):
         else:
             return [self.parser]
 
-    def compute_fields_types(self):
+    def _compute_fields_types(self):
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
         typ = self.get_type()
@@ -1663,9 +1685,6 @@ class _Transform(Parser):
         # Register this parser to the constructed type, which will propagate
         # field types.
         typ.add_transform(self)
-
-        # Handle sub-parsers
-        Parser.compute_fields_types(self)
 
     def create_vars_after(self, start_pos):
         self.init_vars(self.parser.pos_var)
@@ -1772,21 +1791,20 @@ class Predicate(Parser):
     def _precise_types(self):
         return self.parser.precise_types
 
-    def generate_code(self):
+    def _compile(self):
+        # Resolve the property reference and make sure it has the expected
+        # signature: (parser-result-type) -> bool.
         self.property_ref = resolve_property(self.property_ref)
-
         check_source_language(
             self.property_ref.type.matches(T.Bool),
-            "Property passed as predicate to Predicate parser must return"
-            " a boolean"
-        )
-
+            'Property passed as predicate to Predicate parser must return'
+            ' a boolean')
         check_source_language(
             self.property_ref.struct.matches(self.parser.get_type()),
-            "Property passed as predicate to Predicate parser must take a node"
-            " with the type of the sub-parser"
-        )
+            'Property passed as predicate to Predicate parser must take a node'
+            ' with the type of the sub-parser')
 
+    def generate_code(self):
         return self.render('predicate_code_ada')
 
 
@@ -1821,7 +1839,7 @@ class NoBacktrack(Parser):
         # Generated code only consists of setting the no_backtrack variable to
         # True, so that other parsers know that from now on they should not
         # backtrack.
-        return "{} := True;".format(self.no_backtrack)
+        return '{} := True;'.format(self.no_backtrack)
 
     def get_type(self):
         # A NoBacktrack parser never yields a concrete result itself
