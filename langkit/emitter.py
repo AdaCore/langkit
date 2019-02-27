@@ -447,7 +447,8 @@ class Emitter(object):
                     False,
                     'Yapf not available, using autopep8 to pretty-print'
                     ' Python code',
-                    severity=Severity.warning
+                    severity=Severity.warning,
+                    ok_for_codegen=True
                 )
 
             try:
@@ -457,7 +458,8 @@ class Emitter(object):
                 check_source_language(
                     False,
                     'autopep8 not available, cannot pretty-print Python code',
-                    severity=Severity.warning
+                    severity=Severity.warning,
+                    ok_for_codegen=True
                 )
                 return code
 
