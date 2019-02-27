@@ -2338,66 +2338,76 @@ class ASTNodeType(BaseStructType):
         """
         self.transform_parsers.append(parser)
 
-        # Get parse fields except null ones, as parsers don't contribute to
-        # typing these.
-        #
-        # Parsers cannot build abstract types, and only abstract types can have
-        # abstract nodes, so in theory we should not have abstract nodes here.
-        # But at this point this DSL check has not happened yet...
-        fields = self.get_parse_fields(
-            predicate=lambda f: not f.abstract and not f.null
-        )
+    def check_inferred_field_types(self):
+        """
+        Check that inferred field types from the grammar are consistent with
+        annotations. If there was no type annotation, use the inferred type to
+        assign a type to the parse field.
+        """
+        for parser in self.transform_parsers:
+            # Get parse fields except null ones, as parsers don't contribute to
+            # typing these.
+            #
+            # Parsers cannot build abstract types, and only abstract types can
+            # have abstract nodes, so in theory we should not have abstract
+            # nodes here.  But at this point this DSL check has not happened
+            # yet...
+            fields = self.get_parse_fields(
+                predicate=lambda f: not f.abstract and not f.null
+            )
 
-        parsers = parser.fields_parsers
-        types = [p.get_type() for p in parsers]
+            parsers = parser.fields_parsers
+            types = [p.get_type() for p in parsers]
 
-        # Propagate sub-parsers to fields to let them compute precise types
-        for f, p in zip(fields, parsers):
-            f.parsers_from_transform.append(p)
+            # Propagate sub-parsers to fields to let them compute precise types
+            for f, p in zip(fields, parsers):
+                f.parsers_from_transform.append(p)
 
-        # Typing in the Transform parser is already supposed to check
-        # consistency in the DSL.
-        assert len(fields) == len(types)
+            # Typing in the Transform parser is already supposed to check
+            # consistency in the DSL.
+            assert len(fields) == len(types)
 
-        # TODO: instead of expecting types to be subtypes, we might want to
-        # perform type unification (take the nearest common ancestor for all
-        # field types). But then again, maybe not, it might be too confusing.
-        for field, f_type in zip(fields, types):
-            if field.type:
-                check_source_language(
-                    f_type.matches(field.type),
-                    "Field {} already had type {}, got {}".format(
-                        field.qualname, field.type.dsl_name, f_type.dsl_name
-                    )
-                )
-
-        # Only assign types if self was not yet typed. In the case where it
-        # was already typed, we checked above that the new types were
-        # consistent with the already present ones.
-        if not self.is_type_resolved:
-            self.is_type_resolved = True
-
-            for inferred_type, field in zip(types, fields):
-
-                # At this stage, if the field has a type, it means that the
-                # user assigned it one originally. In this case we will use the
-                # inferred type for checking only (raising an assertion if it
-                # does not correspond).
+            # TODO: instead of expecting types to be subtypes, we might want to
+            # perform type unification (take the nearest common ancestor for
+            # all field types). But then again, maybe not, it might be too
+            # confusing.
+            for field, f_type in zip(fields, types):
                 if field.type:
-                    with field.diagnostic_context:
-                        check_source_language(
-                            # Using matches here allows the user to annotate a
-                            # field with a more general type than the one
-                            # inferred.
-                            inferred_type.matches(field.type),
-                            'Expected type {} but type inferenced yielded type'
-                            ' {}'.format(
-                                field.type.dsl_name,
-                                inferred_type.dsl_name
-                            )
+                    check_source_language(
+                        f_type.matches(field.type),
+                        "Field {} already had type {}, got {}".format(
+                            field.qualname, field.type.dsl_name,
+                            f_type.dsl_name
                         )
-                else:
-                    field.type = inferred_type
+                    )
+
+            # Only assign types if self was not yet typed. In the case where it
+            # was already typed, we checked above that the new types were
+            # consistent with the already present ones.
+            if not self.is_type_resolved:
+                self.is_type_resolved = True
+
+                for inferred_type, field in zip(types, fields):
+
+                    # At this stage, if the field has a type, it means that the
+                    # user assigned it one originally. In this case we will use
+                    # the inferred type for checking only (raising an assertion
+                    # if it does not correspond).
+                    if field.type:
+                        with field.diagnostic_context:
+                            check_source_language(
+                                # Using matches here allows the user to
+                                # annotate a field with a more general type
+                                # than the one inferred.
+                                inferred_type.matches(field.type),
+                                'Expected type {} but type inferenced yielded'
+                                ' type {}'.format(
+                                    field.type.dsl_name,
+                                    inferred_type.dsl_name
+                                )
+                            )
+                    else:
+                        field.type = inferred_type
 
     def compute_precise_fields_types(self):
         for f in self.get_parse_fields(include_inherited=False):
@@ -2650,7 +2660,7 @@ class ASTNodeType(BaseStructType):
         # are type resolved: they don't need to be referenced by the grammar.
         self.is_type_resolved = (
             self.is_type_resolved
-            or all(f._type is not None for f in parse_fields)
+            or all(f.type is not None for f in parse_fields)
         )
         with self.diagnostic_context:
             check_source_language(
