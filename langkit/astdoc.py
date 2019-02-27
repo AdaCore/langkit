@@ -39,7 +39,8 @@ def trim_docstring_lines(docstring):
 
     # Check that the docstring is properly formed
     check_source_language(
-        not docstring[offset].isspace(), "Malformed docstring"
+        not docstring[offset].isspace(), 'Malformed docstring',
+        ok_for_codegen=True
     )
 
     # Trim every line of the computed offset value

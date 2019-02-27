@@ -278,7 +278,7 @@ def get_parsable_location():
 
 
 def check_source_language(predicate, message, severity=Severity.error,
-                          do_raise=True):
+                          do_raise=True, ok_for_codegen=False):
     """
     Check predicates related to the user's input in the input language
     definition. Show error messages and eventually terminate if those error
@@ -290,7 +290,18 @@ def check_source_language(predicate, message, severity=Severity.error,
     :param Severity severity: The severity of the diagnostic.
     :param bool do_raise: If True, raise a DiagnosticError if predicate happens
         to be false.
+    :param bool ok_for_codegen: If True, allow checks to be performed during
+        code generation. This is False by default as it should be an
+        exceptional situation: we want, when possible, most checks to be
+        performed before we attempt to emit the generated library (for
+        --check-only).
     """
+    from langkit.compile_context import get_context
+
+    if not ok_for_codegen:
+        ctx = get_context(or_none=True)
+        assert ctx is None or ctx.emitter is None
+
     severity = assert_type(severity, Severity)
     indent = ' ' * 4
 
