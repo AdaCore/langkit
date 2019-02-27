@@ -1490,6 +1490,8 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
+            ASTNodePass('check inferred field types',
+                        lambda _, node: node.check_inferred_field_types()),
             ASTNodePass('validate AST node fields',
                         lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),
