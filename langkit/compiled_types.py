@@ -2357,7 +2357,7 @@ class ASTNodeType(BaseStructType):
             )
 
             parsers = parser.fields_parsers
-            types = [p.get_type() for p in parsers]
+            types = [p.type for p in parsers]
 
             # Propagate sub-parsers to fields to let them compute precise types
             for f, p in zip(fields, parsers):

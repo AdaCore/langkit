@@ -5,7 +5,7 @@
 ${parser.parser.generate_code()}
 
 <%
-parser_type = parser.parser.get_type()
+parser_type = parser.parser.type
 if parser._booleanize:
    base = parser.booleanized_type
    if not base.is_bool_type:

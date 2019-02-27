@@ -10,7 +10,7 @@
     ${parser.pos_var} := No_Token_Index;
 % endif
 
-<% list_type = parser.get_type() %>
+<% list_type = parser.type %>
 
 ${parser.cpos} := ${parser.start_pos};
 ${parser.tmplist} := Get_Parse_List (Parser);

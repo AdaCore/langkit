@@ -567,8 +567,7 @@ class NodeUnparser(Unparser):
                 # Because we are in an Opt parser, we now know that this field
                 # is optionnal, so it can be absent.
                 field_unparser.always_absent = False
-                field_unparser.empty_list_is_absent = (parser.get_type()
-                                                       .is_list_type)
+                field_unparser.empty_list_is_absent = parser.type.is_list_type
 
                 # Starting from here, tokens to be unparsed in
                 # ``parser.parser`` must be unparsed iff the field is present,
@@ -595,7 +594,7 @@ class NodeUnparser(Unparser):
                 # importantly they trigger a parsing error, so unparsers can
                 # ignore them.
                 if not isinstance(subparser, (Defer, Skip)):
-                    NodeUnparser.from_parser(subparser.get_type(), subparser)
+                    NodeUnparser.from_parser(subparser.type, subparser)
 
         elif isinstance(parser, _Extract):
             field_unparser.always_absent = False
@@ -1038,7 +1037,7 @@ class Unparsers(object):
                 toplevel = False
 
             elif isinstance(p, (List, _Transform)):
-                append(p.get_type(), p)
+                append(p.type, p)
                 toplevel = False
 
             elif isinstance(p, (Null, Or)):

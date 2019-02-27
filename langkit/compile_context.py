@@ -1479,8 +1479,8 @@ class CompileCtx(object):
             EnvSpecPass('create internal properties for env specs',
                         EnvSpec.create_properties,
                         iter_metaclass=True),
-            GrammarRulePass('compute fields types',
-                            Parser.compute_fields_types),
+            GrammarRulePass('compute parser types', Parser.compute_types),
+            GrammarRulePass('freeze parser types', Parser.freeze_types),
             GrammarRulePass('check type of top-level grammar rules',
                             Parser.check_toplevel_rules),
 

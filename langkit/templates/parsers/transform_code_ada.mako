@@ -16,9 +16,9 @@ end if;
 if ${parser.pos_var} /= No_Token_Index then
 
    ## Create the transform wrapper node
-   ${parser.res_var} := ${parser.get_type().name}
-     (${parser.get_type().name}_Alloc.Alloc (Parser.Mem_Pool));
-   ${parser.res_var}.Kind := ${parser.get_type().ada_kind_name};
+   ${parser.res_var} := ${parser.type.name}
+     (${parser.type.name}_Alloc.Alloc (Parser.Mem_Pool));
+   ${parser.res_var}.Kind := ${parser.type.ada_kind_name};
 
    ## Compute and set the sloc range for this AST node. Reminders:
    ##   * start_pos the name for the position of the lexer before this parser
@@ -37,7 +37,7 @@ if ${parser.pos_var} /= No_Token_Index then
       then No_Token_Index
       else ${parser.pos_var} - 1);
    <% fields_n_args = zip(
-         parser.get_type().get_parse_fields(
+         parser.type.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null),
          args) %>
 
