@@ -1570,7 +1570,7 @@ class CompileCtx(object):
             GlobalPass('finalize symbol literals',
                        CompileCtx.finalize_symbol_literals),
 
-            GrammarRulePass('compile grammar rule', Parser.compile),
+            GrammarRulePass('render parsers code', Parser.render_parser),
             PropertyPass('render property', PropertyDef.render_property),
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types,

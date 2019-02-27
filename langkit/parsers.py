@@ -655,7 +655,7 @@ class Parser(object):
         check_source_language(self.get_type().is_ast_node,
                               'Grammar rules must yield a node')
 
-    def compile(self):
+    def render_parser(self):
         """
         Emit code for this parser as a function into the global context.
 
@@ -1560,7 +1560,7 @@ class Defer(Parser):
     def generate_code(self):
         # The call to compile will add the declaration and the definition
         # (body) of the function to the compile context.
-        self.parser.compile()
+        self.parser.render_parser()
 
         # Generate a call to the previously compiled function, and return
         # the context corresponding to this call.
