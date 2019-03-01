@@ -277,4 +277,20 @@ def bb (xx, # Separator comment
 # Trailing comment
 
 preserve_formatting.adb: Done.
+
+== clone_synthetic.adb ==
+Applying the diff...
+
+u.txt:
+DefList
+|  Def
+|  |name:
+|  |  Name: B
+|  |args:
+|  |  NameList: <empty list>
+|  |expr:
+|  |  Ref
+|  |  |name:
+|  |  |  Name: A
+clone_synthetic.adb: Done.
 Done
