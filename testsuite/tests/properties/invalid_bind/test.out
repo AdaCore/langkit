@@ -19,6 +19,9 @@ File "test.py", line 31, in BarNode.main_prop
     Error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
 
 == Correct bind eq_prop A ==
+File "test.py", line 31, in BarNode.main_prop
+  line 31, in bind expression
+    Warning: Useless bind of dynamic var 'env'
 Code generation was successful
 
 == Correct bind eq_prop B ==

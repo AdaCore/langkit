@@ -2112,7 +2112,7 @@ class DynamicVariable(AbstractVariable):
     @staticmethod
     def check_call_bindings(prop, context_msg):
         """
-        Emit an error diagnostic of there is at least one dynamic variable in
+        Emit an error diagnostic if there is at least one dynamic variable in
         `prop` that is not currently bound. `context_msg` is used to format the
         error message.
 
@@ -2152,6 +2152,8 @@ class DynamicVariableBindExpr(ComputingExpr):
             abstract_expr=abstract_expr
         )
 
+        self.check_bind_relevancy()
+
     def _render_pre(self):
         return '\n'.join([
             # First, compute the value to bind
@@ -2172,6 +2174,49 @@ class DynamicVariableBindExpr(ComputingExpr):
 
     def __repr__(self):
         return '<DynamicVariableBindExpr>'
+
+    def check_bind_relevancy(self):
+        """
+        Emit an error diagnostic if this bind expression is useless because the
+        expression to evaluate does not depend on the dynamic variable being
+        bound.
+        """
+        def is_expr_using_self(expr):
+            """
+            Returns True iff the given expression "uses" the dynamic variable
+            which is being bound by self.
+
+            It can either be a direct reference to the bound dynamic variable,
+            or be a call to a property which accepts it implicitly.
+            """
+            if isinstance(expr, VariableExpr):
+                if expr.name == self.value_var.name:
+                    return True
+
+            if isinstance(expr, PropertyDef):
+                if expr._dynamic_vars:
+                    if self.dynvar in expr._dynamic_vars:
+                        return True
+
+            return False
+
+        def traverse_expr(expr):
+            if len(expr.flat_subexprs(is_expr_using_self)) > 0:
+                return True
+
+            for subexpr in expr.flat_subexprs():
+                if traverse_expr(subexpr):
+                    return True
+
+            return False
+
+        WarningSet.unused_bindings.warn_if(
+            not (is_expr_using_self(self.to_eval_expr) or
+                 traverse_expr(self.to_eval_expr)),
+            "Useless bind of dynamic var '{}'".format(
+                self.dynvar.argument_name.lower
+            ),
+        )
 
 
 @auto_attr
