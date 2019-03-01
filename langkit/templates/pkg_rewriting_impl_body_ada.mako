@@ -763,8 +763,14 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       --  Make sure the original handle is expanded so we can iterate on it
       Expand_Children (Handle);
 
-      Result := Allocate (Handle.Node, Handle.Context_Handle,
-                          No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle);
+      --  If the input handle is associated to a node, so should be the cloned
+      --  handle, so that its formatting is copied as well.
+      Result :=
+        (if Handle.Node = null
+         then Allocate (Handle.Kind, Handle.Context_Handle,
+                        No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle)
+         else Allocate (Handle.Node, Handle.Context_Handle,
+                        No_Unit_Rewriting_Handle, No_Node_Rewriting_Handle));
       Nodes_Pools.Append (Handle.Context_Handle.New_Nodes, Result);
 
       --  Recursively clone children
