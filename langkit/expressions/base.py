@@ -2152,8 +2152,6 @@ class DynamicVariableBindExpr(ComputingExpr):
             abstract_expr=abstract_expr
         )
 
-        self.check_bind_relevancy()
-
     def _render_pre(self):
         return '\n'.join([
             # First, compute the value to bind
@@ -2240,9 +2238,11 @@ def bind(self, dynvar, value, expr):
         dynvar.type
     )
     with dynvar._bind(value_var.name):
-        return DynamicVariableBindExpr(dynvar, value_var, resolved_value,
-                                       construct(expr),
-                                       abstract_expr=self)
+        bind_expr = DynamicVariableBindExpr(dynvar, value_var, resolved_value,
+                                            construct(expr),
+                                            abstract_expr=self)
+        bind_expr.check_bind_relevancy()
+        return bind_expr
 
 
 @auto_attr
