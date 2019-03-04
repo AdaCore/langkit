@@ -15,33 +15,36 @@ from utils import emit_and_print_errors
 dyn_node = DynamicVariable('dyn_node', T.FooNode)
 dyn_node_2 = DynamicVariable('dyn_node_2', T.FooNode)
 
+
 class FooNode(ASTNode):
     @langkit_property(public=True)
-    def prop1():
-        return dyn_node.bind(Self, Self.prop2)
+    def test_prop_1():
+        return dyn_node.bind(Self, Self.helper_1)
 
     @langkit_property(public=True)
-    def prop2():
+    def helper_1():
         return True
 
     @langkit_property(public=True, dynamic_vars=[dyn_node_2])
-    def prop3():
-        return dyn_node.bind(Self, Self.prop4)
+    def test_prop_2():
+        return dyn_node.bind(Self, Self.helper_2)
 
     @langkit_property(public=True, dynamic_vars=[dyn_node_2])
-    def prop4():
+    def helper_2():
         return True
 
     @langkit_property(public=True)
-    def prop5():
+    def test_prop_3():
         return dyn_node.bind(Self, dyn_node)
 
     @langkit_property(public=True)
-    def prop6():
-        return dyn_node_2.bind(Self, Self.prop4)
+    def test_prop_4():
+        return dyn_node_2.bind(Self, Self.helper_2)
+
 
 class Example(FooNode):
     pass
+
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
