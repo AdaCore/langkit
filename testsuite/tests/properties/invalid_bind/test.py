@@ -1,11 +1,15 @@
 from __future__ import absolute_import, division, print_function
 
+from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, LexicalEnv, LogicVar, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  langkit_property, ignore)
 from langkit.parsers import Grammar, Or
 
-from utils import emit_and_print_errors
+from utils import emit_and_print_errors, default_warning_set
+
+
+warning_set = default_warning_set.with_disabled(WarningSet.unused_bindings)
 
 
 def run(name, eq_prop):
@@ -64,7 +68,7 @@ def run(name, eq_prop):
             BazNode('example'),
         )
     )
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(grammar, warning_set=warning_set)
     print('')
 
 

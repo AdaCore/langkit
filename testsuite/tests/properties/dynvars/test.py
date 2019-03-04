@@ -2,13 +2,16 @@ from __future__ import absolute_import, division, print_function
 
 import itertools
 
+from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, LexicalEnv, Bool, abstract
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
 from langkit.parsers import Grammar
 
-from utils import emit_and_print_errors
+from utils import emit_and_print_errors, default_warning_set
 
+
+warning_set = default_warning_set.with_disabled(WarningSet.unused_bindings)
 
 Env = DynamicVariable('env', LexicalEnv)
 
@@ -49,7 +52,7 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
         main_rule=ConcreteNode('example'),
     )
 
-    if emit_and_print_errors(grammar):
+    if emit_and_print_errors(grammar, warning_set=warning_set):
         for fld in (AbstractNode.prop, ConcreteNode.prop):
             print('  {}: {}'.format(fld.qualname,
                                     fmt_value(fld.dynamic_vars)))

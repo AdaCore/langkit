@@ -1,19 +1,13 @@
 == abstract: default, concrete: default ==
-File "test.py", line 42, in AbstractNode.use_prop
-  line 42, in bind expression
-    Warning: Useless bind of dynamic var 'env'
 Code generation was successful
   AbstractNode.prop: no dynamic variable
   ConcreteNode.prop: no dynamic variable
 
 == abstract: default, concrete: with dynamic variables ==
-File "test.py", line 45, in ConcreteNode.prop
+File "test.py", line 48, in ConcreteNode.prop
     Error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 
 == abstract: default, concrete: no dynamic variable ==
-File "test.py", line 42, in AbstractNode.use_prop
-  line 42, in bind expression
-    Warning: Useless bind of dynamic var 'env'
 Code generation was successful
   AbstractNode.prop: no dynamic variable
   ConcreteNode.prop: no dynamic variable
@@ -29,25 +23,19 @@ Code generation was successful
   ConcreteNode.prop: with dynamic variables
 
 == abstract: with dynamic variables, concrete: no dynamic variable ==
-File "test.py", line 45, in ConcreteNode.prop
+File "test.py", line 48, in ConcreteNode.prop
     Error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 
 == abstract: no dynamic variable, concrete: default ==
-File "test.py", line 42, in AbstractNode.use_prop
-  line 42, in bind expression
-    Warning: Useless bind of dynamic var 'env'
 Code generation was successful
   AbstractNode.prop: no dynamic variable
   ConcreteNode.prop: no dynamic variable
 
 == abstract: no dynamic variable, concrete: with dynamic variables ==
-File "test.py", line 45, in ConcreteNode.prop
+File "test.py", line 48, in ConcreteNode.prop
     Error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 
 == abstract: no dynamic variable, concrete: no dynamic variable ==
-File "test.py", line 42, in AbstractNode.use_prop
-  line 42, in bind expression
-    Warning: Useless bind of dynamic var 'env'
 Code generation was successful
   AbstractNode.prop: no dynamic variable
   ConcreteNode.prop: no dynamic variable
