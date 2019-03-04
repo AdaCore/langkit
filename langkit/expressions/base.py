@@ -2131,8 +2131,7 @@ class DynamicVariable(AbstractVariable):
             not unbound_dynvars,
             '{}, some dynamic variables need to be bound: {}'.format(
                 context_msg.format(prop=prop.qualname),
-                ', '.join(dynvar.argument_name.lower
-                          for dynvar in unbound_dynvars)
+                ', '.join(dynvar.dsl_name for dynvar in unbound_dynvars)
             )
         )
 
@@ -2175,13 +2174,13 @@ class DynamicVariableBindExpr(ComputingExpr):
 
     def check_bind_relevancy(self):
         """
-        Emit an error diagnostic if this bind expression is useless because the
+        Emit a warning if this bind expression is useless because the
         expression to evaluate does not depend on the dynamic variable being
         bound.
         """
         def is_expr_using_self(expr):
             """
-            Returns True iff the given expression "uses" the dynamic variable
+            Return True iff the given expression "uses" the dynamic variable
             which is being bound by self.
 
             It can either be a direct reference to the bound dynamic variable,
@@ -2212,7 +2211,7 @@ class DynamicVariableBindExpr(ComputingExpr):
             not (is_expr_using_self(self.to_eval_expr) or
                  traverse_expr(self.to_eval_expr)),
             "Useless bind of dynamic var '{}'".format(
-                self.dynvar.argument_name.lower
+                self.dynvar.dsl_name
             ),
         )
 
