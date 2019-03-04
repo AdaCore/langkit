@@ -417,6 +417,8 @@ class WarningSet(object):
 
     def enable(self, warning):
         """
+        Enable the given warning in this WarningSet instance.
+
         :type warning: WarningDescriptor|str
         """
         if isinstance(warning, str):
@@ -425,14 +427,45 @@ class WarningSet(object):
 
     def disable(self, warning):
         """
+        Disable the given warning in this WarningSet instance.
+
         :type warning: WarningDescriptor|str
         """
         if isinstance(warning, str):
             warning = self.lookup(warning)
-        try:
-            self.enabled_warnings.remove(warning)
-        except KeyError:
-            pass
+        self.enabled_warnings.discard(warning)
+
+    def clone(self):
+        """
+        Return a copy of this WarningSet instance.
+
+        :rtype: WarningSet
+        """
+        other = WarningSet()
+        other.enabled_warnings = set(self.enabled_warnings)
+        return other
+
+    def with_enabled(self, warning):
+        """
+        Return a copy of this WarningSet instance where `warning` is enabled.
+
+        :type warning: WarningDescriptor|str
+        :rtype WarningSet
+        """
+        other = self.clone()
+        other.enable(warning)
+        return other
+
+    def with_disabled(self, warning):
+        """
+        Return a copy of this WarningSet instance where `warning` is disabled.
+
+        :type warning: WarningDescriptor|str
+        :rtype WarningSet
+        """
+        other = self.clone()
+        other.disable(warning)
+        return other
 
     def __contains__(self, warning):
         """
