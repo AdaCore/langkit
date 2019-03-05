@@ -5,10 +5,9 @@ is not used in the expression.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LexicalEnv, LogicVar, T, UserField
-from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
-                                 langkit_property, ignore)
-from langkit.parsers import Grammar, Or
+from langkit.dsl import ASTNode, T
+from langkit.expressions import DynamicVariable, Self, langkit_property
+from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
