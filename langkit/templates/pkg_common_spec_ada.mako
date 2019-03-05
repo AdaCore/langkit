@@ -22,9 +22,7 @@ package ${ada_lib_name}.Common is
 
    Main_Trace : constant GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
-       ("${(ctx.short_name.upper
-            if ctx.short_name else ctx.lib_name.upper)}_MAIN_TRACE",
-        GNATCOLL.Traces.From_Config);
+       ("${ctx.lib_name.upper}.MAIN_TRACE", GNATCOLL.Traces.From_Config);
 
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
    --  Default charset to use when creating analysis contexts

@@ -106,7 +106,7 @@ private package ${ada_lib_name}.Implementation is
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
-           ("Properties", GNATCOLL.Traces.On, Stream => "&1");
+           ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On, Stream => "&1");
    % endif
 
    function Is_Null
