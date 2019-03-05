@@ -118,13 +118,13 @@ package Langkit_Support.Lexical_Env is
    Debug_Mode : constant Boolean := True;
 
    Me : constant Traces.Trace_Handle :=
-     Traces.Create ("LANGKIT_LEXICAL_ENV", Traces.From_Config);
+     Traces.Create ("LANGKIT.LEXICAL_ENV", Traces.From_Config);
 
    Rec : constant Traces.Trace_Handle :=
-     Traces.Create ("LANGKIT_LEXICAL_ENV.RECURSIVE", Traces.From_Config);
+     Traces.Create ("LANGKIT.LEXICAL_ENV.RECURSIVE", Traces.From_Config);
 
    Caches_Trace : constant Traces.Trace_Handle :=
-     Traces.Create ("LANGKIT_LEXICAL_ENV.CACHES", Traces.From_Config);
+     Traces.Create ("LANGKIT.LEXICAL_ENV.CACHES", Traces.From_Config);
 
    --  Traces to debug lexical envs. This trace is meant to be activated on
    --  demand, when the client of lexical env wants more information about
