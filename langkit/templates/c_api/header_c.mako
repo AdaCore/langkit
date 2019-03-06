@@ -119,16 +119,6 @@ typedef struct {
     ${text_type} message;
 } ${diagnostic_type};
 
-
-${c_doc('langkit.exception_type')}
-typedef struct {
-   ${c_doc('langkit.exception_type.is_fatal')}
-   int is_fatal;
-
-   ${c_doc('langkit.exception_type.information')}
-   const char *information;
-} ${exception_type};
-
 % for enum_type in ctx.enum_types:
    typedef enum {
       ${', '.join(v.c_name(capi) for v in enum_type.values)}
@@ -146,6 +136,18 @@ typedef enum {
       ${ctx.exception_kind_name(ctx.exception_types[exc_ref]).upper},
    % endfor
 } ${exception_kind_type};
+
+${c_doc('langkit.exception_type')}
+typedef struct {
+   ${c_doc('langkit.exception_type.is_fatal')}
+   int is_fatal;
+
+   ${c_doc('langkit.exception_type.kind')}
+   ${exception_kind_type} kind;
+
+   ${c_doc('langkit.exception_type.information')}
+   const char *information;
+} ${exception_type};
 
 ## Even when metadata and entity structures are not exposed, we need to
 ## emit their type definition them for low-level interfacing.
