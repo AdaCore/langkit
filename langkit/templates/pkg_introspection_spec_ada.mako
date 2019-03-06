@@ -20,9 +20,6 @@ with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 --     end;
 
 package ${ada_lib_name}.Introspection is
-
-   Invalid_Field : exception;
-
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
    type Field_Reference is

@@ -287,6 +287,12 @@ package ${ada_lib_name}.Common is
    --  Raised by lexing functions (``${ada_lib_name}.Lexer``) when the input
    --  contains an invalid byte sequence.
 
+   -------------------
+   -- Introspection --
+   -------------------
+
+   Invalid_Field : exception;
+
    ---------------
    -- Rewriting --
    ---------------
