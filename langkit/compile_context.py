@@ -416,6 +416,15 @@ class CompileCtx(object):
         :type: set[langkit.compiled_types.ASTNodeType]
         """
 
+        self.exception_types = {}
+        """
+        Dictionary of all exception types.
+
+        See method _register_exception_types.
+
+        :type: dict[str, names.Name]
+        """
+
         self._array_types = None
         """
         Sorted list of all ArrayType instances.
@@ -628,6 +637,28 @@ class CompileCtx(object):
 
         :type: None|langkit.emitter.Emitter
         """
+
+        # Register builtin exception types
+
+        self._register_exception_types()
+
+    def _register_exception_types(self):
+        def reg(namespace, camel_name):
+            name = names.Name.from_lower(camel_name)
+            ref = "{}.{}".format(namespace, name.lower)
+            self.exception_types[ref] = name
+
+        reg('langkit', 'native_exception')
+        reg('langkit', 'property_error')
+        reg('langkit', 'invalid_unit_name_error')
+        reg('langkit', 'invalid_symbol_error')
+        reg('langkit', 'stale_reference_error')
+        reg('langkit', 'unknown_charset')
+        reg('langkit', 'invalid_input')
+        reg('langkit', 'invalid_field')
+        reg('langkit.rewriting', 'template_format_error')
+        reg('langkit.rewriting', 'template_args_error')
+        reg('langkit.rewriting', 'template_instantiation_error')
 
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
                         is_private=False):

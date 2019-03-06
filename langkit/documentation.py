@@ -177,11 +177,19 @@ base_langkit_docs = {
         process sanity is no longer guaranteed by Libadalang. If it is not,
         performing further processing is safe.
     """,
+    'langkit.exception_type.kind': """
+        The kind of this exception.
+    """,
     'langkit.exception_type.information': """
         Message and context information associated with this exception.
     """,
     'langkit.invalid_unit_name_error': """
         Raised when an invalid unit name is provided.
+    """,
+    'langkit.native_exception': """
+        Exception that is raised when a builtin Ada exception (such as
+        a Constraint_Error) is raised in the generated Ada code and is not
+        catched by the interface layer to the C bindings.
     """,
     'langkit.property_error': """
         Exception that is raised when an error occurs while evaluating any
@@ -197,6 +205,27 @@ base_langkit_docs = {
         Exception raised while trying to access data that was deallocated. This
         happens when one tries to use a node whose unit has been reparsed, for
         instance.
+    """,
+    'langkit.unknown_charset': """
+        Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
+        charset is not supported.
+    """,
+    'langkit.invalid_input': """
+        Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
+        contains an invalid byte sequence.
+    """,
+    'langkit.invalid_field': """
+    """,
+    'langkit.rewriting.template_format_error': """
+        Exception raised when a template has an invalid syntax, such as badly
+        formatted holes.
+    """,
+    'langkit.rewriting.template_args_error': """
+        Exception raised when the provided arguments for a template don't match
+        what the template expects.
+    """,
+    'langkit.rewriting.template_instantiation_error': """
+        Exception raised when the instantiation of a template cannot be parsed.
     """,
 
     #
