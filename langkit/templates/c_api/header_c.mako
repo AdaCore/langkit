@@ -140,6 +140,13 @@ const ${grammar_rule_type} ${default_grammar_rule} = ${
     T.GrammarRule.values_dict[ctx.main_rule_api_name].c_name(capi)
 };
 
+${c_doc('langkit.exception_kind_type')}
+typedef enum {
+   % for exc_ref in sorted(ctx.exception_types.keys()):
+      ${ctx.exception_kind_name(ctx.exception_types[exc_ref]).upper},
+   % endfor
+} ${exception_kind_type};
+
 ## Even when metadata and entity structures are not exposed, we need to
 ## emit their type definition them for low-level interfacing.
 % for struct_type in ctx.struct_types:

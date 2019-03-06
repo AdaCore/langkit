@@ -99,6 +99,14 @@ private package ${ada_lib_name}.Implementation.C is
      with Convention => C;
    ${ada_c_doc('langkit.diagnostic_type', 3)}
 
+   type ${exception_kind_type} is (
+      ${", ".join(
+         str(ctx.exception_kind_name(ctx.exception_types[exc_ref]))
+         for exc_ref in sorted(ctx.exception_types.keys())
+      )}
+   ) with Convention => C;
+   ${ada_c_doc('langkit.exception_kind_type', 3)}
+
    type ${exception_type} is record
       Is_Fatal    : int;
       ${ada_c_doc('langkit.exception_type.is_fatal', 6)}

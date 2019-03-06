@@ -89,6 +89,7 @@ def template_extensions(ctx):
         'big_integer_type':      CAPIType(capi, 'big_integer').name,
         'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
         'exception_type':        CAPIType(capi, 'exception').name,
+        'exception_kind_type':   CAPIType(capi, 'exception_kind').name
     }
 
 

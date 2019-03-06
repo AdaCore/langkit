@@ -163,6 +163,10 @@ base_langkit_docs = {
         Diagnostic for an analysis unit: cannot open the source file, parsing
         error, ...
     """,
+    'langkit.exception_kind_type': """
+        Enumerated type describing all possible exceptions that need to be
+        handled in the C bindings.
+    """,
     'langkit.exception_type': """
         Holder for native exceptions-related information.  Memory management
         for this and all the fields is handled by the library: one just has to

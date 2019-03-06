@@ -715,6 +715,10 @@ class CompileCtx(object):
         self.logic_binders.add((convert_property, eq_property))
 
     @staticmethod
+    def exception_kind_name(exc_name):
+        return names.Name.from_lower('exception') + exc_name
+
+    @staticmethod
     def grammar_rule_api_name(rule):
         """
         Return the API name of the given grammar rule name.
