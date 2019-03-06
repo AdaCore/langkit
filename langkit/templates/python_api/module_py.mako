@@ -108,7 +108,7 @@ class _Exception(ctypes.Structure):
                 ("information", ctypes.c_char_p)]
 
     def _wrap(self):
-        return NativeException(self.information)
+        return _exception_kind_to_type[self.kind](self.information)
 
 
 def _raise_type_error(expected_type_name, actual_value):
@@ -358,35 +358,17 @@ _unit_provider = _hashable_c_pointer()
 #
 
 
-class NativeException(Exception):
-    """
-    Exception raised when the underlying C API reports an error that occurred
-    in the library.
-
-    This kind of exception is raised for internal errors: they should never
-    happen in normal situations and if they are raised at some point, it means
-    the state is potentially corrupted.
-
-    Nevertheless, the library does its best not to crash the program,
-    materializing internal errors as Python exceptions.
-    """
+% for exc_ref in sorted(ctx.exception_types.keys()):
+class ${ctx.exception_types[exc_ref]}(Exception):
+    ${py_doc(exc_ref, 4)}
     pass
+% endfor
 
-class InvalidUnitNameError(Exception):
-    ${py_doc('langkit.invalid_unit_name_error', 4)}
-    pass
-
-class PropertyError(Exception):
-    ${py_doc('langkit.property_error', 4)}
-    pass
-
-class InvalidSymbolError(Exception):
-    ${py_doc('langkit.invalid_symbol_error', 4)}
-    pass
-
-class StaleReferenceError(Exception):
-    ${py_doc('langkit.stale_reference_error', 4)}
-    pass
+_exception_kind_to_type = [
+% for exc_ref in sorted(ctx.exception_types.keys()):
+    ${ctx.exception_types[exc_ref]},
+% endfor
+]
 
 ${exts.include_extension(
    ctx.ext('python_api', 'exceptions')
