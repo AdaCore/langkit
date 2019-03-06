@@ -111,6 +111,9 @@ private package ${ada_lib_name}.Implementation.C is
       Is_Fatal    : int;
       ${ada_c_doc('langkit.exception_type.is_fatal', 6)}
 
+      Kind        : ${exception_kind_type};
+      ${ada_c_doc('langkit.exception_type.kind', 6)}
+
       Information : chars_ptr;
       ${ada_c_doc('langkit.exception_type.information', 6)}
    end record;

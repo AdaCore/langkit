@@ -681,6 +681,23 @@ package body ${ada_lib_name}.Implementation.C is
          Free (Last_Exception.Information);
       end if;
 
+      begin
+         Reraise_Occurrence (Exc);
+      exception
+         % for exc_ref in sorted(ctx.exception_types.keys()):
+         when ${ctx.exception_types[exc_ref]} =>
+            Last_Exception.Kind := ${
+               ctx.exception_kind_name(ctx.exception_types[exc_ref])
+            };
+         % endfor
+         when others =>
+            Last_Exception.Kind := ${
+               ctx.exception_kind_name(
+                  ctx.exception_types['langkit.native_exception']
+               )
+            };
+      end;
+
       Last_Exception.Is_Fatal := (if Is_Fatal then 1 else 0);
       Last_Exception.Information := New_String (Exception_Information (Exc));
    end Set_Last_Exception;
