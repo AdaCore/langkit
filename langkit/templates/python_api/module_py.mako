@@ -95,7 +95,7 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         exc = _get_last_exception()
-        if exc and exc.contents.is_fatal:
+        if exc:
             raise exc.contents._wrap()
         return result
 
@@ -603,11 +603,7 @@ class AnalysisUnit(object):
     def populate_lexical_env(self):
         ${py_doc('langkit.unit_populate_lexical_env', 8)}
         if not _unit_populate_lexical_env(self._c_value):
-            exc = _get_last_exception()
-            if exc:
-                raise PropertyError(*exc.contents._wrap().args)
-            else:
-                raise PropertyError()
+            raise PropertyError()
 
     @property
     def root(self):
@@ -1420,11 +1416,7 @@ class ${root_astnode_name}(object):
         """
         args = (self._unwrap(self), ) + c_args + (ctypes.byref(c_result), )
         if not c_accessor(*args):
-            exc = _get_last_exception()
-            if exc:
-                raise PropertyError(*exc.contents._wrap().args)
-            else:
-                raise PropertyError()
+            raise PropertyError()
         return c_result
 
     def _eval_astnode_field(self, c_accessor):
