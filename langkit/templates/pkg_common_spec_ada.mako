@@ -261,52 +261,16 @@ package ${ada_lib_name}.Common is
      ((Success => False, Size => Message'Length, Error_Message => Message));
    --  Shortcut to create failed symbolization results
 
-   Property_Error : exception;
-   ${ada_doc('langkit.property_error', 3)}
-
-   Invalid_Unit_Name_Error : exception;
-   ${ada_doc('langkit.invalid_unit_name_error', 3)}
-
-   Invalid_Symbol_Error : exception;
-   ${ada_doc('langkit.invalid_symbol_error', 3)}
-
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for ``T``
 
    procedure Raise_Property_Error (Message : String := "");
    --  Raise a ``Property_Error`` with the given message
 
-   Stale_Reference_Error : exception;
-   ${ada_doc('langkit.stale_reference_error', 3)}
-
-   Unknown_Charset : exception;
-   --  Raised by lexing functions (``${ada_lib_name}.Lexer``) when the input
-   --  charset is not supported.
-
-   Invalid_Input : exception;
-   --  Raised by lexing functions (``${ada_lib_name}.Lexer``) when the input
-   --  contains an invalid byte sequence.
-
-   -------------------
-   -- Introspection --
-   -------------------
-
-   Invalid_Field : exception;
-
-   ---------------
-   -- Rewriting --
-   ---------------
-
-   Template_Format_Error : exception;
-   --  Exception raised when a template has an invalid syntax, such as badly
-   --  formatted holes.
-
-   Template_Args_Error : exception;
-   --  Exception raised when the provided arguments for a template don't match
-   --  what the template expects.
-
-   Template_Instantiation_Error : exception;
-   --  Exception raised when the instantiation of a template cannot be parsed
+   % for exc_ref in sorted(ctx.exception_types.keys()):
+      ${ctx.exception_types[exc_ref]} : exception;
+      ${ada_doc(exc_ref, 6)}
+   % endfor
 
    ${exts.include_extension(ctx.ext('common', 'public_decls'))}
 
