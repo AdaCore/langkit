@@ -677,10 +677,10 @@ package body ${ada_lib_name}.Implementation.C is
       begin
          Reraise_Occurrence (Exc);
       exception
-         % for exc_ref in sorted(ctx.exception_types.keys()):
-         when ${ctx.exception_types[exc_ref]} =>
+         % for _, exc in ctx.sorted_exception_types:
+         when ${exc} =>
             Last_Exception.Kind := ${
-               ctx.exception_kind_name(ctx.exception_types[exc_ref])
+               ctx.exception_kind_name(exc)
             };
          % endfor
          when others =>

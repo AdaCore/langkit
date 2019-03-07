@@ -101,8 +101,8 @@ private package ${ada_lib_name}.Implementation.C is
 
    type ${exception_kind_type} is (
       ${", ".join(
-         str(ctx.exception_kind_name(ctx.exception_types[exc_ref]))
-         for exc_ref in sorted(ctx.exception_types.keys())
+         str(ctx.exception_kind_name(exc))
+         for _, exc in ctx.sorted_exception_types
       )}
    ) with Convention => C;
    ${ada_c_doc('langkit.exception_kind_type', 3)}
