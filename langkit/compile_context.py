@@ -701,6 +701,14 @@ class CompileCtx(object):
         """
         return sorted(type_set, key=lambda cls: cls.name)
 
+    @property
+    def sorted_exception_types(self):
+        """
+        :rtype: list[(str, names.Name)]
+        """
+        return [(k, self.exception_types[k])
+                for k in sorted(self.exception_types.keys())]
+
     def do_generate_logic_binder(self, convert_property=None,
                                  eq_property=None):
         """

@@ -357,15 +357,15 @@ _unit_provider = _hashable_c_pointer()
 #
 
 
-% for exc_ref in sorted(ctx.exception_types.keys()):
-class ${ctx.exception_types[exc_ref]}(Exception):
+% for exc_ref, exc in ctx.sorted_exception_types:
+class ${exc}(Exception):
     ${py_doc(exc_ref, 4)}
     pass
 % endfor
 
 _exception_kind_to_type = [
-% for exc_ref in sorted(ctx.exception_types.keys()):
-    ${ctx.exception_types[exc_ref]},
+% for _, exc in ctx.sorted_exception_types:
+    ${exc},
 % endfor
 ]
 

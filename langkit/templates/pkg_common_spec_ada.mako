@@ -267,8 +267,8 @@ package ${ada_lib_name}.Common is
    procedure Raise_Property_Error (Message : String := "");
    --  Raise a ``Property_Error`` with the given message
 
-   % for exc_ref in sorted(ctx.exception_types.keys()):
-      ${ctx.exception_types[exc_ref]} : exception;
+   % for exc_ref, exc in ctx.sorted_exception_types:
+      ${exc} : exception;
       ${ada_doc(exc_ref, 6)}
    % endfor
 
