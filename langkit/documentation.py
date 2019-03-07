@@ -176,11 +176,6 @@ base_langkit_docs = {
            information, but depending on possible future Ada runtime
            improvements, this might change.
     """,
-    'langkit.exception_type.is_fatal': """
-        Whether this exception is fatal for this process. If it is fatal, then
-        process sanity is no longer guaranteed by Libadalang. If it is not,
-        performing further processing is safe.
-    """,
     'langkit.exception_type.kind': """
         The kind of this exception.
     """,

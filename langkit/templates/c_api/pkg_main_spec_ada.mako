@@ -108,9 +108,6 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.exception_kind_type', 3)}
 
    type ${exception_type} is record
-      Is_Fatal    : int;
-      ${ada_c_doc('langkit.exception_type.is_fatal', 6)}
-
       Kind        : ${exception_kind_type};
       ${ada_c_doc('langkit.exception_type.kind', 6)}
 
@@ -535,8 +532,7 @@ private package ${ada_lib_name}.Implementation.C is
    --  Free the information contained in Last_Exception
 
    procedure Set_Last_Exception
-     (Exc      : Exception_Occurrence;
-      Is_Fatal : Boolean := True);
+     (Exc      : Exception_Occurrence);
    --  Free the information contained in Last_Exception and replace it with
    --  newly allocated information from Exc.
 

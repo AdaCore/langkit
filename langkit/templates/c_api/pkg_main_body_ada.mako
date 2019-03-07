@@ -419,12 +419,6 @@ package body ${ada_lib_name}.Implementation.C is
       Populate_Lexical_Env (Unit);
       return 1;
    exception
-      when Exc : Property_Error =>
-         ## If we reach this handler, it means the expression failed at some
-         ## point because of a safety check. Tell the user about it.
-         Set_Last_Exception (Exc, Is_Fatal => False);
-         return 0;
-
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
@@ -666,8 +660,7 @@ package body ${ada_lib_name}.Implementation.C is
    ------------------------
 
    procedure Set_Last_Exception
-     (Exc      : Exception_Occurrence;
-      Is_Fatal : Boolean := True) is
+     (Exc      : Exception_Occurrence) is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -698,7 +691,6 @@ package body ${ada_lib_name}.Implementation.C is
             };
       end;
 
-      Last_Exception.Is_Fatal := (if Is_Fatal then 1 else 0);
       Last_Exception.Information := New_String (Exception_Information (Exc));
    end Set_Last_Exception;
 

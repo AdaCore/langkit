@@ -139,9 +139,6 @@ typedef enum {
 
 ${c_doc('langkit.exception_type')}
 typedef struct {
-   ${c_doc('langkit.exception_type.is_fatal')}
-   int is_fatal;
-
    ${c_doc('langkit.exception_type.kind')}
    ${exception_kind_type} kind;
 
