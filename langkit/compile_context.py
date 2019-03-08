@@ -737,7 +737,13 @@ class CompileCtx(object):
 
     @staticmethod
     def exception_kind_name(exc_name):
-        return names.Name.from_lower('exception') + exc_name
+        """
+        Return the enumeration name corresponding to an exception.
+
+        :param names.Name exc_name: Name of the requested exception.
+        :rtype: names.Name
+        """
+        return names.Name('Exception') + exc_name
 
     @staticmethod
     def grammar_rule_api_name(rule):
