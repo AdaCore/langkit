@@ -668,6 +668,7 @@ class CompileCtx(object):
         """
         for namespace, exception_name in [
             ('langkit', 'native_exception'),
+            ('langkit', 'precondition_failure'),
             ('langkit', 'property_error'),
             ('langkit', 'invalid_unit_name_error'),
             ('langkit', 'invalid_symbol_error'),
