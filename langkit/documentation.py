@@ -223,7 +223,7 @@ base_langkit_docs = {
     """,
     'langkit.rewriting.template_format_error': """
         Exception raised when a template has an invalid syntax, such as badly
-        formatted holes.
+        formatted placeholders.
     """,
     'langkit.rewriting.template_args_error': """
         Exception raised when the provided arguments for a template don't match
@@ -818,8 +818,8 @@ base_langkit_docs = {
         given Kind. Besides, all given children must not be tied.
     """,
     'langkit.rewriting.create_from_template': """
-        Create a tree of new nodes from the given Template string, filling
-        holes in it with nodes in Arguments and parsed according to the given
+        Create a tree of new nodes from the given Template string, replacing
+        placeholders with nodes in Arguments and parsed according to the given
         grammar Rule.
     """,
 }
