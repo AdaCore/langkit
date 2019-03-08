@@ -38,6 +38,20 @@ def string_repr(string):
     return '"{0}"'.format(repr(string)[1:-1].replace('"', '""'))
 
 
+def comment_box(label, column=3):
+    """
+    Return an Ada comment for the given label.
+
+    :param str label: Single-line label.
+    :rtype: str
+    """
+    return ('{line}\n'
+            '{indent}-- {label} --\n'
+            '{indent}{line}'.format(line='-' * (6 + len(label)),
+                                    indent=' ' * column,
+                                    label=label))
+
+
 def is_keyword(name):
     """
     Returns wether `name` is an Ada keyword.

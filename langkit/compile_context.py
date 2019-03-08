@@ -673,6 +673,31 @@ class CompileCtx(object):
         ]:
             self._register_exception_type(namespace, exception_name)
 
+    @property
+    def exceptions_by_section(self):
+        """
+        Return exceptions grouped by "section".
+
+        We compute sections from documentation entries: none for
+        'langkit.EXCEPTION_NAME' and SECTION for
+        'langkit.SECTION.EXCEPTION_NAME'.
+
+        :rtype: list[(None|str, list[str, names.Name])]
+        """
+        sections = defaultdict(list)
+
+        for doc_name, exc_name in self.sorted_exception_types:
+            # Remove the 'langkit.' prefix
+            no_prefix = doc_name.split('.', 1)[1]
+
+            section_name = (
+                None if '.' not in no_prefix else
+                no_prefix.split('.')[0].replace('_', ' ').capitalize())
+
+            sections[section_name].append((doc_name, exc_name))
+
+        return sorted(sections.iteritems())
+
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
                         is_private=False):
         """
@@ -1298,9 +1323,10 @@ class CompileCtx(object):
         """
         CompileCtx._template_extensions_frozen = True
 
-        from langkit.common import string_repr
+        from langkit.common import comment_box, string_repr
         assert self.emitter
         base_env = {
+            'comment_box': comment_box,
             'string_repr': string_repr,
             'Name':        names.Name,
             'ada_doc':     documentation.ada_doc,
