@@ -186,9 +186,15 @@ base_langkit_docs = {
         Raised when an invalid unit name is provided.
     """,
     'langkit.native_exception': """
-        Exception that is raised when a builtin Ada exception (such as
-        a Constraint_Error) is raised in the generated Ada code and is not
-        catched by the interface layer to the C bindings.
+        Exception raised in language bindings when the underlying C API reports
+        an unexpected error that occurred in the library.
+
+        This kind of exception is raised for internal errors: they should never
+        happen in normal situations and if they are raised at some point, it
+        means the library state is potentially corrupted.
+
+        Nevertheless, the library does its best not to crash the program,
+        materializing internal errors using this kind of exception.
     """,
     'langkit.property_error': """
         Exception that is raised when an error occurs while evaluating any
