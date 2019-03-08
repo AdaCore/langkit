@@ -220,6 +220,8 @@ base_langkit_docs = {
         contains an invalid byte sequence.
     """,
     'langkit.invalid_field': """
+        Raised when introspection functions
+        (``${ctx.lib_name}.Introspection``) are requested an invalid field.
     """,
     'langkit.rewriting.template_format_error': """
         Exception raised when a template has an invalid syntax, such as badly
