@@ -262,15 +262,15 @@ package ${ada_lib_name}.Rewriting is
    --  individual node in a tree.
    --
    --  A template is text that represents source code, including zero or
-   --  multiple holes (stray "{}").
+   --  multiple placeholders (stray "{}").
    --
    --  Create a tree of new nodes from a template is called instantiating a
    --  template: just call Create_From_Template, passing to it the template
    --  itself, a sequence of nodes (the template arguments) to fill the
-   --  template holes and a grammar rule to parse the resulting source code.
-   --  This will unparse given nodes to replace holes in the template text, and
-   --  then parse the resulting source code in order to create a tree of node
-   --  rewriting handles.
+   --  template placeholders and a grammar rule to parse the resulting source
+   --  code. This will unparse given nodes to replace placeholders in the
+   --  template text, and then parse the resulting source code in order to
+   --  create a tree of node rewriting handles.
    --
    --  In order not to interfer with the template DSL, stray "{" and "}"
    --  characters in the source code must be doubled: for instance "{{"
