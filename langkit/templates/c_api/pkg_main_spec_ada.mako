@@ -529,8 +529,7 @@ private package ${ada_lib_name}.Implementation.C is
    procedure Clear_Last_Exception;
    --  Free the information contained in Last_Exception
 
-   procedure Set_Last_Exception
-     (Exc      : Exception_Occurrence);
+   procedure Set_Last_Exception (Exc : Exception_Occurrence);
    --  Free the information contained in Last_Exception and replace it with
    --  newly allocated information from Exc.
 
