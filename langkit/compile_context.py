@@ -717,10 +717,13 @@ class CompileCtx(object):
     @property
     def sorted_exception_types(self):
         """
+        Turn "exception_types" into a sorted list.
+
+        This is required during code generation to preserve a stable output.
+
         :rtype: list[(str, names.Name)]
         """
-        return [(k, self.exception_types[k])
-                for k in sorted(self.exception_types.keys())]
+        return sorted(self.exception_types.items())
 
     def do_generate_logic_binder(self, convert_property=None,
                                  eq_property=None):
