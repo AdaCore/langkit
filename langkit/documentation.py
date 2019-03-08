@@ -219,7 +219,7 @@ base_langkit_docs = {
         Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
         contains an invalid byte sequence.
     """,
-    'langkit.invalid_field': """
+    'langkit.introspection.invalid_field': """
         Raised when introspection functions
         (``${ctx.lib_name}.Introspection``) are requested an invalid field.
     """,
