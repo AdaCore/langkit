@@ -83,9 +83,9 @@ private package ${ada_lib_name}.Implementation.C is
       Token_Data                : System.Address;
       Token_Index, Trivia_Index : int;
 
-      Kind                      : int;
-      Text                      : ${text_type};
-      Sloc_Range                : ${sloc_range_type};
+      Kind       : int;
+      Text       : ${text_type};
+      Sloc_Range : ${sloc_range_type};
    end record
      with Convention => C;
    ${ada_c_doc('langkit.token_reference_type', 3)}
@@ -100,15 +100,13 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.diagnostic_type', 3)}
 
    type ${exception_kind_type} is (
-      ${", ".join(
-         str(ctx.exception_kind_name(exc))
-         for _, exc in ctx.sorted_exception_types
-      )}
+      ${', '.join(str(ctx.exception_kind_name(exc))
+                  for _, exc in ctx.sorted_exception_types)}
    ) with Convention => C;
    ${ada_c_doc('langkit.exception_kind_type', 3)}
 
    type ${exception_type} is record
-      Kind        : ${exception_kind_type};
+      Kind : ${exception_kind_type};
       ${ada_c_doc('langkit.exception_type.kind', 6)}
 
       Information : chars_ptr;
