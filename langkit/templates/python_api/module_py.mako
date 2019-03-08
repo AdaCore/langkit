@@ -103,8 +103,8 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
 
 
 class _Exception(ctypes.Structure):
-    _fields_ = [("kind", ctypes.c_int),
-                ("information", ctypes.c_char_p)]
+    _fields_ = [('kind', ctypes.c_int),
+                ('information', ctypes.c_char_p)]
 
     def _wrap(self):
         return _exception_kind_to_type[self.kind](self.information)
