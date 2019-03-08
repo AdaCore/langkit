@@ -267,9 +267,17 @@ package ${ada_lib_name}.Common is
    procedure Raise_Property_Error (Message : String := "");
    --  Raise a ``Property_Error`` with the given message
 
-   % for exc_ref, exc in ctx.sorted_exception_types:
-      ${exc} : exception;
-      ${ada_doc(exc_ref, 6)}
+   ## Emit declarations for all exceptions
+   % for section_name, exceptions in ctx.exceptions_by_section:
+   % if section_name:
+   ${comment_box(section_name, 3)}
+
+   % endif
+   % for doc_name, exc_name in exceptions:
+   ${exc_name} : exception;
+   ${ada_doc(doc_name, 3)}
+
+   % endfor
    % endfor
 
    ${exts.include_extension(ctx.ext('common', 'public_decls'))}
