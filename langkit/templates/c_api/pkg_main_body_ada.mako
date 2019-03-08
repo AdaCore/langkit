@@ -659,8 +659,7 @@ package body ${ada_lib_name}.Implementation.C is
    -- Set_Last_Exception --
    ------------------------
 
-   procedure Set_Last_Exception
-     (Exc      : Exception_Occurrence) is
+   procedure Set_Last_Exception (Exc : Exception_Occurrence) is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -674,21 +673,22 @@ package body ${ada_lib_name}.Implementation.C is
          Free (Last_Exception.Information);
       end if;
 
+      --  Get the kind corresponding to Exc
+
+      declare
+         Id : constant Exception_Id := Exception_Identity (Exc);
       begin
-         Reraise_Occurrence (Exc);
-      exception
-         % for _, exc in ctx.sorted_exception_types:
-         when ${exc} =>
-            Last_Exception.Kind := ${
-               ctx.exception_kind_name(exc)
-            };
+         % for i, (_, exc) in enumerate(ctx.sorted_exception_types):
+         ${'elsif' if i > 0 else 'if'} Id = ${exc}'Identity then
+            Last_Exception.Kind := ${ctx.exception_kind_name(exc)};
          % endfor
-         when others =>
+         else
             Last_Exception.Kind := ${
                ctx.exception_kind_name(
                   ctx.exception_types['langkit.native_exception']
                )
             };
+         end if;
       end;
 
       Last_Exception.Information := New_String (Exception_Information (Exc));
