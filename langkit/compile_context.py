@@ -420,7 +420,9 @@ class CompileCtx(object):
         """
         Dictionary of all exception types.
 
-        See method _register_exception_types.
+        This maps from keys in the documentation database for the exception
+        documentation (for instance 'langkit.*', see langkit.documentation) to
+        the name of exceptions.
 
         :type: dict[str, names.Name]
         """
@@ -639,26 +641,37 @@ class CompileCtx(object):
         """
 
         # Register builtin exception types
+        self._register_builtin_exception_types()
 
-        self._register_exception_types()
+    def _register_exception_type(self, namespace, exception_name):
+        """
+        Register an exception type.
 
-    def _register_exception_types(self):
-        def reg(namespace, camel_name):
-            name = names.Name.from_lower(camel_name)
-            ref = "{}.{}".format(namespace, name.lower)
-            self.exception_types[ref] = name
+        :param str namespace: Prefix for the name of the documentation entry.
+            For instance: 'langkit', or 'langkit.rewriting'.
+        :param str exception_name: Lower-case name for the exception type.
+        """
+        ref = '{}.{}'.format(namespace, exception_name)
+        self.exception_types[ref] = names.Name.from_lower(exception_name)
 
-        reg('langkit', 'native_exception')
-        reg('langkit', 'property_error')
-        reg('langkit', 'invalid_unit_name_error')
-        reg('langkit', 'invalid_symbol_error')
-        reg('langkit', 'stale_reference_error')
-        reg('langkit', 'unknown_charset')
-        reg('langkit', 'invalid_input')
-        reg('langkit', 'invalid_field')
-        reg('langkit.rewriting', 'template_format_error')
-        reg('langkit.rewriting', 'template_args_error')
-        reg('langkit.rewriting', 'template_instantiation_error')
+    def _register_builtin_exception_types(self):
+        """
+        Register exception types for all builtin exceptions.
+        """
+        for namespace, exception_name in [
+            ('langkit', 'native_exception'),
+            ('langkit', 'property_error'),
+            ('langkit', 'invalid_unit_name_error'),
+            ('langkit', 'invalid_symbol_error'),
+            ('langkit', 'stale_reference_error'),
+            ('langkit', 'unknown_charset'),
+            ('langkit', 'invalid_input'),
+            ('langkit', 'invalid_field'),
+            ('langkit.rewriting', 'template_format_error'),
+            ('langkit.rewriting', 'template_args_error'),
+            ('langkit.rewriting', 'template_instantiation_error')
+        ]:
+            self._register_exception_type(namespace, exception_name)
 
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
                         is_private=False):
