@@ -196,6 +196,10 @@ base_langkit_docs = {
         Nevertheless, the library does its best not to crash the program,
         materializing internal errors using this kind of exception.
     """,
+    'langkit.precondition_failure': """
+        Exception raised when an API is called while its preconditions are not
+        satisfied.
+    """,
     'langkit.property_error': """
         Exception that is raised when an error occurs while evaluating any
         ${'function' if lang == 'ada' else 'AST node method'}
