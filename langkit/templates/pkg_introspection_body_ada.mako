@@ -133,6 +133,77 @@ package body ${ada_lib_name}.Introspection is
       % endif
    end Fields;
 
+   % if ctx.sorted_properties:
+
+   type Property_Descriptor is record
+      Kind_First, Kind_Last : ${root_node_kind_name};
+      --  Kind range for nodes that implement this property
+   end record;
+
+   function Kind_Matches
+     (Kind       : ${root_node_kind_name};
+      Descriptor : Property_Descriptor)
+      return Boolean
+   is (Kind in Descriptor.Kind_First .. Descriptor.Kind_Last);
+
+   Property_Descriptors : constant
+      array (Property_Reference) of Property_Descriptor :=
+   (
+      % for i, p in enumerate(ctx.sorted_properties):
+         <% kind_first, kind_last = p.struct.ada_kind_range_bounds %>
+         ${', ' if i else ''}${p.introspection_enum_literal} =>
+           (Kind_First => ${kind_first},
+            Kind_Last  => ${kind_last})
+      % endfor
+   );
+
+   -------------------
+   -- Property_Name --
+   -------------------
+
+   function Property_Name (Property : Property_Reference) return String is
+   begin
+      return (case Property is
+         % for i, p in enumerate(ctx.sorted_properties):
+            ${',' if i else ''} when ${p.introspection_enum_literal} =>
+               ${string_repr(p._name.lower)}
+         % endfor
+      );
+   end Property_Name;
+
+   ----------------
+   -- Properties --
+   ----------------
+
+   function Properties
+     (Kind : ${root_node_kind_name}) return Property_Reference_Array
+   is
+      Count : Natural := 0;
+   begin
+      --  Count how many properties we will return
+      for Desc of Property_Descriptors loop
+         if Kind_Matches (Kind, Desc) then
+            Count := Count + 1;
+         end if;
+      end loop;
+
+      --  Now create the result array and fill it
+      return Result : Property_Reference_Array (1 .. Count) do
+         declare
+            Next : Positive := 1;
+         begin
+            for Property in Property_Descriptors'Range loop
+               if Kind_Matches (Kind, Property_Descriptors (Property)) then
+                  Result (Next) := Property;
+                  Next := Next + 1;
+               end if;
+            end loop;
+         end;
+      end return;
+   end Properties;
+
+   % endif
+
    ---------------------
    -- Token_Node_Kind --
    ---------------------
