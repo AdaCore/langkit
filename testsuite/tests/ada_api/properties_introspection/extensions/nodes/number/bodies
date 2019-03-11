@@ -1,0 +1,7 @@
+--  vim: ft=ada
+
+overriding function P_Eval (Node : access Bare_Number_Type) return Integer
+is
+begin
+    return Integer'Value (Image (Node.Text));
+end P_Eval;

@@ -1,0 +1,73 @@
+Properties for FOO_ADDITION:
+   parent
+   parents
+   children
+   token_start
+   token_end
+   previous_sibling
+   next_sibling
+   unit
+   is_ghost
+   eval
+
+Properties for FOO_NUMBER:
+   parent
+   parents
+   children
+   token_start
+   token_end
+   previous_sibling
+   next_sibling
+   unit
+   is_ghost
+   eval
+
+Properties for FOO_REF:
+   parent
+   parents
+   children
+   token_start
+   token_end
+   previous_sibling
+   next_sibling
+   unit
+   is_ghost
+   eval
+   referenced_var_decl
+
+Properties for FOO_VAR_DECL_LIST:
+   parent
+   parents
+   children
+   token_start
+   token_end
+   previous_sibling
+   next_sibling
+   unit
+   is_ghost
+
+Properties for FOO_NAME:
+   parent
+   parents
+   children
+   token_start
+   token_end
+   previous_sibling
+   next_sibling
+   unit
+   is_ghost
+
+Properties for FOO_VAR_DECL:
+   parent
+   parents
+   children
+   token_start
+   token_end
+   previous_sibling
+   next_sibling
+   unit
+   is_ghost
+   eval
+
+Done.
+Done
