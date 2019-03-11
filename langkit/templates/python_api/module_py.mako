@@ -82,6 +82,10 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     Import "name" from the C library, set its arguments/return types and return
     the binding.
 
+    :param str name: Name of the symbol for the function to import.
+    :param list[ctypes._CData] argtypes: Types for function argruments.
+    :param None|ctypes._CData restype: Function return type, or None if it
+        does not return anything.
     :param bool exc_wrap: If True, wrap the returned function to check for
       exceptions.
     """
