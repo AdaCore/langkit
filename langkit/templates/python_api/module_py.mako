@@ -1534,7 +1534,11 @@ _symbol_text = _import_func(
 # Analysis primitives
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
-    [ctypes.c_char_p, _unit_provider, ctypes.c_int], AnalysisContext._c_type
+    [ctypes.c_char_p, # charset
+     _unit_provider,  # unit_provider
+     ctypes.c_int,    # with_trivia
+     ctypes.c_int],   # tab_stop
+    AnalysisContext._c_type
 )
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',
