@@ -1563,7 +1563,8 @@ _get_analysis_unit_from_file = _import_func(
     [AnalysisContext._c_type,  # context
      ctypes.c_char_p,          # filename
      ctypes.c_char_p,          # charset
-     ctypes.c_int],            # reparse
+     ctypes.c_int,             # reparse
+     ctypes.c_int],            # grammar rule
     AnalysisUnit._c_type
 )
 _get_analysis_unit_from_buffer = _import_func(
