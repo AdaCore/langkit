@@ -600,6 +600,14 @@ class CompileCtx(object):
         :type: list[langkit.compiled_types.Field]
         """
 
+        self.sorted_properties = None
+        """
+        Sorted list of public properties. Used to generate the property
+        introspection API.
+
+        :type: list[langkit.expressions.PropertyDef]
+        """
+
         self.ple_unit_root = None
         """
         Node to be used as the PLE unit root, if any.
@@ -1593,8 +1601,6 @@ class CompileCtx(object):
             GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),
-            GlobalPass('compute AST node constants',
-                       CompileCtx.compute_astnode_constants),
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
@@ -1632,6 +1638,8 @@ class CompileCtx(object):
                        CompileCtx.lower_properties_dispatching),
             GlobalPass('check memoized properties',
                        CompileCtx.check_memoized),
+            GlobalPass('compute AST node constants',
+                       CompileCtx.compute_astnode_constants),
             errors_checkpoint_pass,
 
             GrammarRulePass('compile parsers', Parser.compile),
@@ -1825,9 +1833,10 @@ class CompileCtx(object):
             self.node_kind_constants[astnode] = i
             self.kind_constant_to_node[i] = astnode
 
-        # Compute the list of parse fields, for introspection. Also compute
-        # their indexes.
+        # Compute the list of parse fields and public properties, for
+        # introspection. Also compute parse field indexes.
         self.sorted_parse_fields = []
+        self.sorted_properties = []
         for n in self.astnode_types:
             i = 0
             for f in n.get_parse_fields():
@@ -1846,6 +1855,11 @@ class CompileCtx(object):
                 # Register the field
                 if (f.abstract or not f.overriding) and f.struct is n:
                     self.sorted_parse_fields.append(f)
+
+            for p in n.get_properties(predicate=lambda p: p.is_public,
+                                      include_inherited=False):
+                if not p.overriding:
+                    self.sorted_properties.append(p)
 
     def compute_composite_types(self):
         """
