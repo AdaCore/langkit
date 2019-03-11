@@ -513,6 +513,23 @@ class AbstractNodeData(object):
         """
         return self.type.is_refcounted and self._access_needs_incref
 
+    @property
+    def introspection_enum_literal(self):
+        """
+        Return the name of the enumeration literal to use to represent this
+        field. Note that this is valid only on syntax fields or properties, and
+        these must not be overriding.
+
+        :rtype: str
+        """
+        from langkit.expressions import PropertyDef
+
+        assert isinstance(self, (Field, PropertyDef))
+        assert self.abstract or not self.overriding, (
+            'Trying to get introspection enumeration literal for overriding'
+            ' field {}'.format(self.qualname))
+        return (self.struct.entity.api_name + self.name).camel_with_underscores
+
 
 class CompiledType(object):
     """
@@ -1742,19 +1759,6 @@ class Field(BaseField):
             'Trying to get index of abstract/null field {}'
             .format(self.qualname))
         return self._index
-
-    @property
-    def introspection_enum_literal(self):
-        """
-        Return the name of the enumeration literal to use to represent this
-        field. Note that this is not valid on abstract fields.
-
-        :rtype: str
-        """
-        assert self.abstract or not self.overriding, (
-            'Trying to get introspection enumeration literal for overriding'
-            ' field {}'.format(self.qualname))
-        return (self.struct.entity.api_name + self.name).camel_with_underscores
 
 
 class UserField(BaseField):
