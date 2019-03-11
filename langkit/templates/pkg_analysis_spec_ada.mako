@@ -11,6 +11,7 @@
 
 with Ada.Containers;
 private with Ada.Finalization;
+with Ada.Strings.Unbounded;
 % if any(a.used_in_public_struct for a in ctx.array_types):
    private with Ada.Unchecked_Deallocation;
 % endif
@@ -181,6 +182,15 @@ package ${ada_lib_name}.Analysis is
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
       with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
+
+   function Get_From_Buffer
+     (Context  : Analysis_Context'Class;
+      Filename : String;
+      Charset  : String := "";
+      Buffer   : Ada.Strings.Unbounded.Unbounded_String;
+      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
+      with Pre => not Has_Rewriting_Handle (Context);
+   --  Likewise, but working on an unbounded string
 
    function Get_With_Error
      (Context  : Analysis_Context'Class;
