@@ -8,7 +8,11 @@
 <%namespace name="public_properties"
             file="properties/public_wrappers_ada.mako" />
 
-with Ada.Containers; use Ada.Containers;
+with Ada.Containers;            use Ada.Containers;
+with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
+pragma Warnings (Off, "is an internal GNAT unit");
+with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
+pragma Warnings (On, "is an internal GNAT unit");
 with Ada.Unchecked_Conversion;
 
 with GNATCOLL.Traces;
@@ -206,6 +210,26 @@ package body ${ada_lib_name}.Analysis is
       return Wrap_Unit
         (Get_From_Buffer (Unwrap_Context (Context), Filename, Charset,
                           Buffer, Rule));
+   end Get_From_Buffer;
+
+   ---------------------
+   -- Get_From_Buffer --
+   ---------------------
+
+   function Get_From_Buffer
+     (Context  : Analysis_Context'Class;
+      Filename : String;
+      Charset  : String := "";
+      Buffer   : Ada.Strings.Unbounded.Unbounded_String;
+      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
+   is
+      Bytes       : Big_String_Access;
+      Bytes_Count : Natural;
+   begin
+      Get_String (Buffer, Bytes, Bytes_Count);
+      return Wrap_Unit
+        (Get_From_Buffer (Unwrap_Context (Context), Filename, Charset,
+                          Bytes (1 .. Bytes_Count), Rule));
    end Get_From_Buffer;
 
    --------------------
