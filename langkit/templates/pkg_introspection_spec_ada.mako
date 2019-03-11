@@ -20,6 +20,11 @@ with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 --     end;
 
 package ${ada_lib_name}.Introspection is
+
+   -------------------
+   -- Syntax fields --
+   -------------------
+
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
    type Field_Reference is
@@ -52,6 +57,32 @@ package ${ada_lib_name}.Introspection is
      (Kind : ${root_node_kind_name}) return Field_Reference_Array;
    --  Return the list of fields that nodes of the given ``Kind`` have. This
    --  returns an empty array for list nodes.
+
+   % if ctx.sorted_properties:
+   ----------------
+   -- Properties --
+   ----------------
+
+   type Property_Reference is
+      (${', '.join(p.introspection_enum_literal
+                   for p in ctx.sorted_properties)});
+   --  Enumeration of all available node properties
+
+   function Property_Name (Property : Property_Reference) return String;
+   --  Return a lower-case name for ``Property``
+
+   type Property_Reference_Array is
+      array (Positive range <>) of Property_Reference;
+
+   function Properties
+     (Kind : ${root_node_kind_name}) return Property_Reference_Array;
+   --  Return the list of properties that nodes of the given ``Kind`` have
+
+   % endif
+
+   ------------
+   -- Tokens --
+   ------------
 
    function Token_Node_Kind
      (Kind : ${root_node_kind_name}) return Token_Kind
