@@ -93,17 +93,30 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     func.argtypes = argtypes
     func.restype = restype
 
+    def check_argcount(args, kwargs):
+        argcount = len(args) + len(kwargs)
+        if argcount != len(argtypes):
+            raise TypeError(
+                '{} takes {} positional arguments but {} was given'
+                .format(name, len(argtypes), argcount))
+
     # Wrapper for "func" that raises a NativeException in case of internal
     # error.
 
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        exc = _get_last_exception()
-        if exc:
-            raise exc.contents._wrap()
-        return result
+    if exc_wrap:
+        def wrapper(*args, **kwargs):
+            check_argcount(args, kwargs)
+            result = func(*args, **kwargs)
+            exc = _get_last_exception()
+            if exc:
+                raise exc.contents._wrap()
+            return result
+    else:
+        def wrapper(*args, **kwargs):
+            check_argcount(args, kwargs)
+            return func(*args, **kwargs)
 
-    return wrapper if exc_wrap else func
+    return wrapper
 
 
 class _Exception(ctypes.Structure):
