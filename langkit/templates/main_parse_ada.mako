@@ -28,7 +28,8 @@ procedure Parse is
 
       Parser : Argument_Parser := Create_Argument_Parser
         (Help =>
-           "Run ${ada_lib_name}'s parser on an input string(s) or file(s)");
+           "Run ${ada_lib_name}'s"
+           & " parser on an input string(s) or file(s)");
 
       package Silent is new Parse_Flag
         (Parser, "-s", "--silent",
@@ -200,14 +201,16 @@ procedure Parse is
 
    procedure Process_File (Filename : String; Ctx : Analysis_Context)
    is
-      package Node_Sets is
-      new Ada.Containers.Hashed_Sets (${root_entity.api_name}, Hash, "=", "=");
+      package Node_Sets is new Ada.Containers.Hashed_Sets
+        (${root_entity.api_name}, Hash, "=", "=");
 
       Set : Node_Sets.Set;
 
-      procedure Check_Consistency (Node, Parent : ${root_entity.api_name});
+      procedure Check_Consistency
+        (Node, Parent : ${root_entity.api_name});
 
-      procedure Check_Consistency (Node, Parent : ${root_entity.api_name}) is
+      procedure Check_Consistency
+        (Node, Parent : ${root_entity.api_name}) is
       begin
          if Node.Parent /= Parent then
             Put_Line ("Invalid parent for node " & Node.Short_Image);
@@ -263,7 +266,8 @@ procedure Parse is
             Put_Line ("");
             Put_Line ("==== Checking tree consistency ====");
             if not AST.Is_Null then
-               Check_Consistency (AST, No_${root_entity.api_name});
+               Check_Consistency
+                 (AST, No_${root_entity.api_name});
             end if;
          end if;
 
