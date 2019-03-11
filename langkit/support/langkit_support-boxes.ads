@@ -24,6 +24,10 @@
 --  This package provides a simple implementation for boxing types: types that
 --  are dynamically allocated, handled by reference and with automatic memory
 --  management thanks to reference counting.
+--
+--  The main difference with GNATCOLL.Refcount is that here, Element_Type is
+--  limited and constrained while in GNATCOLL.Refcount, Element_Type is not
+--  limited and unconstrained.
 
 with Ada.Finalization;
 with Ada.Unchecked_Deallocation;
