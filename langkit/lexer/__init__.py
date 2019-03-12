@@ -23,6 +23,9 @@ class Matcher(object):
     input will trigger a match.
     """
 
+    def __init__(self, location=None):
+        self.location = location or extract_library_location()
+
     @property
     def match_length(self):
         """
@@ -90,7 +93,8 @@ class Pattern(Matcher):
     * ``^`` and ``$``, to match the very beginning of the input and its end.
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pattern, location=None):
+        super(Pattern, self).__init__(location)
         self.pattern = pattern
 
     @property
@@ -556,13 +560,11 @@ class Lexer(object):
         :param rules: The list of rules to add.
         :type rules: list[(Matcher, Action)|RuleAssoc]
         """
-        loc = extract_library_location()
-
         for matcher_assoc in rules:
             if type(matcher_assoc) is tuple:
                 assert len(matcher_assoc) == 2
                 matcher, action = matcher_assoc
-                rule_assoc = RuleAssoc(matcher, action, loc)
+                rule_assoc = RuleAssoc(matcher, action, matcher.location)
             else:
                 assert isinstance(matcher_assoc, RuleAssoc)
                 rule_assoc = matcher_assoc
@@ -768,7 +770,8 @@ class Literal(Matcher):
         Pattern("a+")   # Matches one or more a
         Literal("a+")   # Matches "a" followed by "+"
     """
-    def __init__(self, to_match):
+    def __init__(self, to_match, location=None):
+        super(Literal, self).__init__(location)
         self.to_match = to_match
 
     @property
