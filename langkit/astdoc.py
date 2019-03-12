@@ -1,5 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
+from contextlib import contextmanager
+from io import StringIO
+import sys
+
 from langkit import compiled_types, expressions
 from langkit.diagnostics import check_source_language, Severity
 from langkit.utils import dispatch_on_type
@@ -17,6 +21,31 @@ except ImportError:  # no-code-coverage
     # Provide a stub implementation for publish_parts
     def publish_parts(x, *args, **kwargs):
         return {'html_body': x}
+
+
+@contextmanager
+def substitute_stdio():
+    """
+    Context manager to temporarily substitute `sys.stdout` and `sys.stderr`.
+
+    The substitutions (one StringIO instance for stdout, one for stderr)
+    returned to be the bounded target.
+
+    :rtype: (StringIO, StringIO)
+    """
+    # Keep reference to the previous standard streams and create temporary new
+    # ones.
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    new_stdout = StringIO()
+    new_stderr = StringIO()
+
+    # Do the substitution before and after the managed scope
+    sys.stdout = new_stdout
+    sys.stderr = new_stderr
+    yield (new_stdout, new_stderr)
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
 
 
 def trim_docstring_lines(docstring):
@@ -54,10 +83,23 @@ def format_doc(entity):
     doc = entity.doc
     if doc:
         doc = trim_docstring_lines(doc)
-        ret = '<div class="doc">{}</div>'.format(
-            publish_parts(doc, writer_name='html')['html_body']
-        )
-        return ret
+
+        # Run docutils and intercept its warnings and errors
+        with substitute_stdio() as (stdout, stderr):
+            formatted_doc = publish_parts(doc, writer_name='html')['html_body']
+            stdout.seek(0)
+            stderr.seek(0)
+            out = stdout.read().strip()
+            err = stderr.read().strip()
+
+        # Turn docutils' diagonstic into our own diagnostic system
+        with entity.diagnostic_context:
+            for output in (out, err):
+                check_source_language(
+                    not output, output, severity=Severity.warning,
+                    ok_for_codegen=True)
+
+        return '<div class="doc">{}</div>'.format(formatted_doc)
     else:
         return '<div class="disabled">No documentation</div>'.format(doc)
 
