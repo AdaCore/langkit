@@ -160,10 +160,16 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    --  Implementation for Rewriting.Context
 
    function Start_Rewriting
-     (Context : Internal_Context) return Rewriting_Handle;
+     (Context : Internal_Context) return Rewriting_Handle
+      with Post => Handle (Context) /= No_Rewriting_Handle
+                   and then Has_With_Trivia (Context)
+                   and then Start_Rewriting'Result = Handle (Context)
+                   and then ${ada_lib_name}.Rewriting_Implementation.Context
+                             (Start_Rewriting'Result) = Context;
    --  Implementation for Rewriting.Start_Rewriting
 
-   procedure Abort_Rewriting (Handle : in out Rewriting_Handle);
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle)
+      with Post => Handle = No_Rewriting_Handle;
    --  Implementation for Rewriting.Abort_Rewriting
 
    type Apply_Result (Success : Boolean := True) is record
@@ -179,7 +185,10 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       end case;
    end record;
 
-   function Apply (Handle : in out Rewriting_Handle) return Apply_Result;
+   function Apply (Handle : in out Rewriting_Handle) return Apply_Result
+      with Post => (if Apply'Result.Success
+                    then Handle = No_Rewriting_Handle
+                    else Handle = Handle'Old);
    --  Implementation for Rewriting.Apply
 
    function Unit_Handles
@@ -262,12 +271,16 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    procedure Insert_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
-      Child  : Node_Rewriting_Handle);
+      Child  : Node_Rewriting_Handle)
+      with Post => Rewriting_Implementation.Child
+                     (Handle, Index) = Child;
    --  Implementation for Rewriting.Insert_Child
 
    procedure Append_Child
      (Handle : Node_Rewriting_Handle;
-      Child  : Node_Rewriting_Handle);
+      Child  : Node_Rewriting_Handle)
+      with Post => Rewriting_Implementation.Child
+                     (Handle, Children_Count (Handle)) = Child;
    --  Implementation for Rewriting.Append_Child
 
    procedure Remove_Child
