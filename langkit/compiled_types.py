@@ -888,6 +888,33 @@ class CompiledType(object):
         return self == T.Bool
 
     @property
+    def is_int_type(self):
+        """
+        Return whether this is the integer type.
+
+        :rtype: bool
+        """
+        return self == T.Int
+
+    @property
+    def is_big_int_type(self):
+        """
+        Return whether this is the big integer type.
+
+        :rtype: bool
+        """
+        return self == T.BigInt
+
+    @property
+    def is_enum_type(self):
+        """
+        Return whether this is an enumeration type.
+
+        :rtype: bool
+        """
+        return isinstance(self, EnumType)
+
+    @property
     def is_collection(self):
         """
         Return whether this is a collection type.
