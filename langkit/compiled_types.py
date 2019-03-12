@@ -737,7 +737,7 @@ class CompiledType(object):
     @property
     def memoization_kind(self):
         """
-        Return the enumerator name that correspond to this type for the
+        Return the enumerator name that corresponds to this type for the
         discriminated record to materialize memoization keys/values.
 
         :rtype: str
