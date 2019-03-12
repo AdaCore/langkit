@@ -83,12 +83,10 @@ package ${ada_lib_name}.Common is
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.
    % for cls in ctx.astnode_types:
-      <% subclasses = cls.concrete_subclasses %>
-      % if subclasses:
+      % if cls.concrete_subclasses:
          subtype ${cls.ada_kind_range_name} is
             ${root_node_kind_name} range
-               ${subclasses[0].ada_kind_name}
-               .. ${subclasses[-1].ada_kind_name};
+               ${'{} .. {}'.format(*cls.ada_kind_range_bounds)};
          --% no-document: True
       % endif
    % endfor
