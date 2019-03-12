@@ -47,16 +47,10 @@ package ${ada_lib_name}.Rewriting is
    ${ada_doc('langkit.rewriting.handle_context', 3)}
 
    function Start_Rewriting
-     (Context : Analysis_Context) return Rewriting_Handle
-     with Post => Handle (Context) /= No_Rewriting_Handle
-                  and then Has_With_Trivia (Context)
-                  and then Start_Rewriting'Result = Handle (Context)
-                  and then ${ada_lib_name}.Rewriting.Context
-                             (Start_Rewriting'Result) = Context;
+     (Context : Analysis_Context) return Rewriting_Handle;
    ${ada_doc('langkit.rewriting.start_rewriting', 3)}
 
-   procedure Abort_Rewriting (Handle : in out Rewriting_Handle)
-      with Post => Handle = No_Rewriting_Handle;
+   procedure Abort_Rewriting (Handle : in out Rewriting_Handle);
    ${ada_doc('langkit.rewriting.abort_rewriting', 3)}
 
    type Apply_Result (Success : Boolean := True) is record
@@ -72,10 +66,7 @@ package ${ada_lib_name}.Rewriting is
       end case;
    end record;
 
-   function Apply (Handle : in out Rewriting_Handle) return Apply_Result
-      with Post => (if Apply'Result.Success
-                    then Handle = No_Rewriting_Handle
-                    else Handle = Handle'Old);
+   function Apply (Handle : in out Rewriting_Handle) return Apply_Result;
    ${ada_doc('langkit.rewriting.apply', 3)}
 
    function Unit_Handles
@@ -158,14 +149,12 @@ package ${ada_lib_name}.Rewriting is
    procedure Insert_Child
      (Handle : Node_Rewriting_Handle;
       Index  : Positive;
-      Child  : Node_Rewriting_Handle)
-      with Post => Rewriting.Child (Handle, Index) = Child;
+      Child  : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.insert_child', 3)}
 
    procedure Append_Child
      (Handle : Node_Rewriting_Handle;
-      Child  : Node_Rewriting_Handle)
-      with Post => Rewriting.Child (Handle, Children_Count (Handle)) = Child;
+      Child  : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.append_child', 3)}
 
    procedure Remove_Child
