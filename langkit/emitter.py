@@ -282,6 +282,7 @@ class Emitter(object):
 
         f = StringIO()
         astdoc.write_astdoc(ctx, f)
+        f.seek(0)
         write_source_file(os.path.join(self.share_path, 'ast-types.html'),
                           f.read())
 
