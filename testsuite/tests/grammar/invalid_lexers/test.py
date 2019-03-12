@@ -32,6 +32,17 @@ def test_invalid_pattern_4(l):
     l.add_rules((Pattern('{pat}'), Token.Example))
 
 
+def test_invalid_pattern_5(l):
+    # Here, we just add one error in the middle of many correct rules to check
+    # that diagnostics have precise source locations.
+    l.add_rules(
+        (Pattern('a'), Token.Example),
+        (Pattern('b'), Token.Example),
+        (Pattern('+'), Token.Example),
+        (Pattern('c'), Token.Example),
+        (Pattern('d'), Token.Example))
+
+
 def test_invalid_rule_1(l):
     l.add_rules((Literal('def'), Token.Termination))
 

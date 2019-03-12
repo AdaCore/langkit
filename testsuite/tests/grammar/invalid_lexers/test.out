@@ -14,6 +14,10 @@ File "test.py", line 25, In definition of lexer rules
 File "test.py", line 30, In definition of lexer pattern pat
     Error: unbalanced square bracket
 
+== test_invalid_pattern_5 ==
+File "test.py", line 41, In definition of lexer rules
+    Error: nothing to repeat
+
 == test_invalid_rule_1 ==
 Error: Termination is reserved for automatic actions only
 
