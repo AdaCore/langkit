@@ -80,6 +80,13 @@ library project ${lib_name} is
 
    package Compiler is
 
+      ----------------------
+      -- Common_Ada_Cargs --
+      ----------------------
+
+      --  Compilation switches to use for Ada that do not depend on the build
+      --  mode.
+
       --  If asked to, enable all warnings and treat them as errors, except:
       --    * conditional expressions used in tests that are known to be True
       --      or False at compile time (C), as this is very common in generated
@@ -108,27 +115,50 @@ library project ${lib_name} is
          when others => null;
       end case;
 
+      ---------------
+      -- Mode_Args --
+      ---------------
+
+      --  Compilation switches for all languages that depend on the build mode
+
+      Mode_Args := ();
       case Build_Mode is
          when "dev" =>
-
-            for Default_Switches ("Ada") use
-               Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
+            Mode_Args := ("-g", "-O0");
 
          when "prod" =>
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
-            --
+            Mode_Args := ("-g", "-Ofast");
+      end case;
+
+      -------------------
+      -- Ada_Mode_Args --
+      -------------------
+
+      --  Compilation switches for Ada that depend on the build mode
+
+      Ada_Mode_Args := ();
+      case Build_Mode is
+         when "dev" =>
+            Ada_Mode_Args := ("-gnatwe", "-gnata");
+
+         when "prod" =>
             --  -fnon-call-exceptions: Make it possible to catch exception due
             --  to invalid memory accesses even though -gnatp is present.
-            for Default_Switches ("Ada") use
-               Common_Ada_Cargs & ("-g", "-Ofast", "-gnatp", "-gnatn2",
-                                   "-fnon-call-exceptions");
+            Ada_Mode_Args := ("-gnatp", "-gnatn2", "-fnon-call-exceptions");
+      end case;
 
+      for Default_Switches ("Ada") use
+         Mode_Args & Ada_Mode_Args & Common_Ada_Cargs;
+      for Default_Switches ("C") use Mode_Args;
+
+      case Build_Mode is
+         when "prod" =>
             ## TODO: This extension point is added to change the flags of
             ## Libadalang specific extension files. It is a temporary
             ## workaround, waiting for QC05-038 to be fixed.
             ${exts.include_extension(ctx.ext("prod_additional_flags"))}
-
       end case;
    end Compiler;
 
