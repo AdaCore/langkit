@@ -2500,6 +2500,19 @@ class ASTNodeType(BaseStructType):
 
         return result
 
+    @property
+    def ada_kind_range_bounds(self):
+        """
+        Return the name of the Ada enumerators for the range bounds (first and
+        last) of kinds that nodes of this type can have.
+
+        :rtype: (str, str)
+        """
+        subclasses = self.concrete_subclasses
+        return ((subclasses[0].ada_kind_name, subclasses[-1].ada_kind_name)
+                if subclasses else
+                (self.ada_kind_name, self.ada_kind_name))
+
     def get_parse_fields(self, predicate=None, include_inherited=True):
         """
         Return the list of all the parse fields `self` has, including its
