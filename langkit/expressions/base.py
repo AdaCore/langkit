@@ -4270,6 +4270,15 @@ class Literal(AbstractExpression):
 
 
 @dsl_document
+def String(strn):
+    """
+    Expression for a String literal.
+    """
+    return ArrayLiteral([CharacterLiteral(s) for s in strn],
+                        element_type=T.Character)
+
+
+@dsl_document
 class CharacterLiteral(AbstractExpression):
     """
     Literal for a single Unicode character.
