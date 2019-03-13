@@ -97,10 +97,18 @@ class RegexpCollection(object):
         """Base class for regexp components."""
 
         def to_nfa(self, regexps):
+            """
+            Turn this parser into a NFA.
+
+            :param RegexpCollection regexps: Collection of named patterns that
+                `self` can reference.
+            :rtype: NFAState
+            """
             raise NotImplementedError()
 
     class Sequence(Parser):
         """Consume input that sub-parsers can consume sequentially."""
+
         def __init__(self, subparsers):
             self.subparsers = subparsers
 
@@ -123,6 +131,7 @@ class RegexpCollection(object):
 
     class Repeat(Parser):
         """Accept input running the sub-parser multiple times."""
+
         def __init__(self, subparser):
             self.subparser = subparser
 
@@ -140,6 +149,7 @@ class RegexpCollection(object):
 
     class Or(Parser):
         """Accept input that at least one sub-parser accepts."""
+
         def __init__(self, subparsers):
             self.subparsers = subparsers
 
@@ -163,6 +173,7 @@ class RegexpCollection(object):
 
     class Opt(Parser):
         """Accept input that the sub-parser accepts, or the empty input."""
+
         def __init__(self, subparser):
             self.subparser = subparser
 
@@ -176,6 +187,7 @@ class RegexpCollection(object):
 
     class Range(Parser):
         """Accept any character in the given set."""
+
         def __init__(self, char_set):
             self.char_set = char_set
 
@@ -190,6 +202,7 @@ class RegexpCollection(object):
 
     class Defer(Parser):
         """Defer parsing to a named regexp."""
+
         def __init__(self, name):
             self.name = name
 
@@ -219,6 +232,12 @@ class RegexpCollection(object):
         self._visiting_patterns = set()
 
     def _parse(self, regexp):
+        """
+        Parse `regexp` as regular expression string.
+
+        :type str: regexp
+        :rtype: RegexpCollection.Parser
+        """
         stream = SequenceReader(regexp)
         root = self._parse_or(stream, toplevel=True)
         assert stream.eof
@@ -226,15 +245,37 @@ class RegexpCollection(object):
         return root
 
     def add_pattern(self, name, regexp):
+        """
+        Add a named pattern to this collection.
+
+        :param str name: Name for the pattern.
+        :param str regexp: Regular expression string for the pattern.
+        """
         # Register the parser for regexp
         assert name not in self.patterns
         self.patterns[name] = self._parse(regexp)
 
     def nfa_for(self, regexp):
+        """
+        Parse the given regular expression string and return a NFA for it.
+
+        :param str regexp: Regular expression to parse.
+        :rtype: NFAState
+        """
         return self._parse(regexp).to_nfa(self)
 
     @contextmanager
     def _visit_rule(self, rule_name):
+        """
+        Context manager to report cycles in named pattern references.
+
+        When trying to resolve a reference to a named pattern, use this context
+        manager: it will emit an error if the caller, or one of its caller
+        (recursively) is already trying to reference this named pattern (can
+        occur only if there is a cycle, which is illegal).
+
+        :param str rule_name: Name of the referenced pattern.
+        """
         check_source_language(
             rule_name not in self._visiting_patterns,
             'infinite recursion in {}'.format(rule_name))
@@ -244,6 +285,12 @@ class RegexpCollection(object):
 
     @classmethod
     def _read_escape(cls, stream):
+        """
+        Read an escaped character. Return the character that is meant.
+
+        :param file stream: Input regexp stream.
+        :rtype: basestring
+        """
         assert stream.read() == '\\'
         check_source_language(not stream.eof, 'bogus escape')
         char = stream.read()
@@ -251,6 +298,15 @@ class RegexpCollection(object):
 
     @classmethod
     def _parse_or(cls, stream, toplevel=False):
+        """
+        Read a sequence of alternatives. Stop at EOF or at the first unmatched
+        parenthesis.
+
+        :param file stream: Input regexp stream.
+        :param bool toplevel: If true, reject unmatched parentheses. Otherwise
+            accept them.
+        :rtype: RegexpCollection.Parser
+        """
         subparsers = []
         while True:
             subparsers.append(cls._parse_sequence(stream))
@@ -265,12 +321,20 @@ class RegexpCollection(object):
 
     @classmethod
     def _parse_sequence(cls, stream):
+        """
+        Parse a sequence of regexps. Stop at the first unmatched parenthesis or
+        at the first top-level pipe character.
+
+        :param file stream: Input regexp stream.
+        :rtype: RegexpCollection.Parser
+        """
         subparsers = []
         while True:
-            if stream.eof:
+            if stream.eof or stream.next_is('|', ')'):
                 break
 
             elif stream.next_is('('):
+                # Nested group: recursively parse alternatives
                 stream.read()
                 subparsers.append(cls._parse_or(stream))
                 check_source_language(stream.next_is(')'),
@@ -278,9 +342,11 @@ class RegexpCollection(object):
                 stream.read()
 
             elif stream.next_is('['):
+                # Parse a range of characters
                 subparsers.append(cls._parse_range(stream))
 
             elif stream.next_is('{'):
+                # Parse a reference to a named pattern
                 stream.read()
                 name = ''
                 while not stream.eof and not stream.next_is('}'):
@@ -293,6 +359,7 @@ class RegexpCollection(object):
                 subparsers.append(cls.Defer(name))
 
             elif stream.next_is('*', '+', '?'):
+                # Repeat the previous sequence item
                 check_source_language(subparsers, 'nothing to repeat')
                 check_source_language(
                     not isinstance(subparsers[-1], cls.Repeat),
@@ -310,14 +377,13 @@ class RegexpCollection(object):
                 stream.read()
                 subparsers.append(cls.Range(CharSet('\n').negation))
 
-            elif stream.next_is('|', ')'):
-                break
-
             elif stream.next_is('^', '$'):
                 check_source_language(
                     False, 'matching beginning or ending is unsupported')
 
             elif stream.next_is('\\'):
+                # Parse an escape sequence. In can be a Unicode character, a
+                # Unicode property or a simple escape sequence.
                 stream.read()
 
                 # \p and \P refer to character sets from Unicode general
@@ -361,6 +427,12 @@ class RegexpCollection(object):
 
     @classmethod
     def _parse_range(cls, stream):
+        """
+        Parse a regular expression for a character range.
+
+        :param file stream: Input regexp stream.
+        :rtype: RegexpCollection.Parser
+        """
         assert stream.read() == '['
         ranges = []
 
