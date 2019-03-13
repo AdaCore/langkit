@@ -2894,6 +2894,16 @@ class ASTNodeType(BaseStructType):
                 source, True otherwise.
                 """
             )),
+
+            ('text', PropertyDef(
+                lambda: None,
+                prefix=None, type=T.String, public=False,
+                external=True, uses_entity_info=False,
+                uses_envs=True, warn_on_unused=False, doc="""
+                Return the text corresponding to this node. Private property
+                (for internal DSL use).
+                """
+            )),
         ]
 
     def snaps(self, anchor_end):
