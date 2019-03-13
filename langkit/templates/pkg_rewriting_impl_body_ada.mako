@@ -1197,7 +1197,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                   Index : constant Natural := Natural (Node.Token_Start_Index);
                   Data  : constant Stored_Token_Data :=
                      Reparsed.TDH.Tokens.Get (Index);
-                  Text      : constant Text_Type := Reparsed.TDH.Source_Buffer
+                  Text  : constant Text_Type := Reparsed.TDH.Source_Buffer
                     (Data.Source_First .. Data.Source_Last);
                begin
                   Result.Children :=
