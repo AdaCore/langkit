@@ -170,7 +170,11 @@ class CharSet(object):
             else:
                 result.add_int_range(last + 1, l - 1)
             last = h
-        result.add_int_range(last + 1, MAXUNICODE)
+
+        # Handle the empty character set
+        result.add_int_range(
+            0 if last is None else last + 1,
+            MAXUNICODE)
         return result
 
     @property
