@@ -149,9 +149,24 @@ library project ${lib_name} is
             Ada_Mode_Args := ("-gnatp", "-gnatn2", "-fnon-call-exceptions");
       end case;
 
+      -----------------
+      -- C_Mode_Args --
+      -----------------
+
+      --  Compilation switches for C that depend on the build mode
+
+      C_Mode_Args := ();
+      case Build_Mode is
+         when "dev" =>
+            C_Mode_Args := ("-DDEBUG=1");
+
+         when "prod" =>
+            null;
+      end case;
+
       for Default_Switches ("Ada") use
          Mode_Args & Ada_Mode_Args & Common_Ada_Cargs;
-      for Default_Switches ("C") use Mode_Args;
+      for Default_Switches ("C") use Mode_Args & C_Mode_Args;
 
       case Build_Mode is
          when "prod" =>
