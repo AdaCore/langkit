@@ -3978,6 +3978,17 @@ package body ${ada_lib_name}.Implementation is
       end;
    end Reroot_Foreign_Node;
 
+   function Text
+     (Node : access ${root_node_value_type}'Class) return ${T.String.name}
+   is
+      T      : Text_Type := Text (Node);
+      Result : constant ${T.String.name} :=
+         ${T.String.constructor_name} (T'Length);
+   begin
+      Result.Items := T;
+      return Result;
+   end Text;
+
    ------------------------
    -- Destroy_Rebindings --
    ------------------------
