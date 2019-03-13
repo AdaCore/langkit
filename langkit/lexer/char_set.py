@@ -61,6 +61,10 @@ class CharSet(object):
                 raise TypeError('Invalid CharSet item: {}'.format(repr(item)))
 
     @classmethod
+    def from_int(cls, item):
+        return cls.from_int_ranges((item, item))
+
+    @classmethod
     def from_int_ranges(cls, *items):
         result = cls()
         for l, h in items:

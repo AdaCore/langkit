@@ -286,15 +286,35 @@ class RegexpCollection(object):
     @classmethod
     def _read_escape(cls, stream):
         """
-        Read an escaped character. Return the character that is meant.
+        Read an escaped character. Return the ordinal for the character that is
+        meant.
 
         :param file stream: Input regexp stream.
-        :rtype: basestring
+        :rtype: int
         """
         assert stream.read() == '\\'
         check_source_language(not stream.eof, 'bogus escape')
         char = stream.read()
-        return cls.escape_chars.get(char, char)
+
+        # If this encodes a Unicode code point, read the characters and turn
+        # them into a Unicode character.
+        codepoint_chars_count = {'u': 4, 'U': 8}.get(char, None)
+        if codepoint_chars_count is not None:
+            codepoint = 0
+            for i in range(codepoint_chars_count):
+                check_source_language(not stream.eof, 'bogus Unicode escape')
+                char = stream.read().lower()
+                if '0' <= char <= '9':
+                    digit = ord(char) - ord('0')
+                elif 'a' <= char <= 'f':
+                    digit = ord(char) - ord('a') + 0xa
+                else:
+                    check_source_language(
+                        False, 'invalid Unicode escape sequence')
+                codepoint = codepoint * 16 + digit
+            return codepoint
+
+        return ord(cls.escape_chars.get(char, char))
 
     @classmethod
     def _parse_or(cls, stream, toplevel=False):
@@ -418,7 +438,7 @@ class RegexpCollection(object):
                 else:
                     stream.go_back()
                     subparsers.append(
-                        cls.Range(CharSet(cls._read_escape(stream))))
+                        cls.Range(CharSet.from_int(cls._read_escape(stream))))
 
             else:
                 subparsers.append(cls.Range(CharSet(stream.read())))
@@ -448,17 +468,18 @@ class RegexpCollection(object):
         in_range = False
         while not stream.eof and not stream.next_is(']'):
             if stream.next_is('-'):
-                check_source_language(not in_range, 'dangling dash')
+                check_source_language(ranges and not in_range, 'dangling dash')
                 in_range = True
                 stream.read()
             else:
                 char = (cls._read_escape(stream)
-                        if stream.next_is('\\') else stream.read())
+                        if stream.next_is('\\') else ord(stream.read()))
                 if in_range:
-                    low = ranges.pop()
+                    low, high = ranges.pop()
+                    assert low == high
                     ranges.append((low, char))
                 else:
-                    ranges.append(char)
+                    ranges.append((char, char))
                 in_range = False
 
         check_source_language(not in_range, 'dangling dash')
@@ -466,7 +487,7 @@ class RegexpCollection(object):
                               'unbalanced square bracket')
         assert stream.read() == ']'
 
-        char_set = CharSet(*ranges)
+        char_set = CharSet.from_int_ranges(*ranges)
         if negate:
             char_set = char_set.negation
         return cls.Range(char_set)
