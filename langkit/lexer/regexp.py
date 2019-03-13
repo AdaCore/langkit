@@ -220,7 +220,7 @@ class RegexpCollection(object):
 
     def _parse(self, regexp):
         stream = SequenceReader(regexp)
-        root = self._parse_or(stream)
+        root = self._parse_or(stream, toplevel=True)
         assert stream.eof
 
         return root
@@ -250,11 +250,14 @@ class RegexpCollection(object):
         return cls.escape_chars.get(char, char)
 
     @classmethod
-    def _parse_or(cls, stream):
+    def _parse_or(cls, stream, toplevel=False):
         subparsers = []
         while True:
             subparsers.append(cls._parse_sequence(stream))
-            if stream.eof or stream.next_is(')'):
+            if stream.eof:
+                break
+            elif stream.next_is(')'):
+                check_source_language(not toplevel, 'unbalanced parentheses')
                 break
             else:
                 assert stream.read() == '|'
