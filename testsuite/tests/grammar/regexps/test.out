@@ -1,0 +1,55 @@
+== \ ==
+Error: bogus escape
+
+== \u ==
+Error: bogus Unicode escape
+
+== \u0 ==
+Error: bogus Unicode escape
+
+== \u1234 ==
+Or(Seq([\U1234]))
+
+== \U00012345 ==
+Or(Seq([\U12345]))
+
+== \U00012345a ==
+Or(Seq([\U12345], [a]))
+
+== [] ==
+Or(Seq([]))
+
+== [a] ==
+Or(Seq([a]))
+
+== [a-c] ==
+Or(Seq([a:c]))
+
+== [^a-c] ==
+Or(Seq([\U0:`, d:\U10ffff]))
+
+== [^] ==
+Or(Seq([\U0:\U10ffff]))
+
+== [a^] ==
+Or(Seq([^, a]))
+
+== [a-] ==
+Error: dangling dash
+
+== [-b] ==
+Error: dangling dash
+
+== [a-c-] ==
+Error: dangling dash
+
+== [\]] ==
+Or(Seq([]]))
+
+== [\u1234] ==
+Or(Seq([\U1234]))
+
+== [\u1234-\u1243] ==
+Or(Seq([\U1234:\U1243]))
+
+Done
