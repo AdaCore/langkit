@@ -43,6 +43,10 @@ def test_invalid_pattern_5(l):
         (Pattern('d'), Token.Example))
 
 
+def test_invalid_pattern_6(l):
+    l.add_rules((Pattern('a)'), Token.Example))
+
+
 def test_invalid_rule_1(l):
     l.add_rules((Literal('def'), Token.Termination))
 
