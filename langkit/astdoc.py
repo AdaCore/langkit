@@ -92,7 +92,7 @@ def format_doc(entity):
             out = stdout.read().strip()
             err = stderr.read().strip()
 
-        # Turn docutils' diagonstic into our own diagnostic system
+        # Turn docutils' diagnostic into our own diagnostic system
         with entity.diagnostic_context:
             for output in (out, err):
                 check_source_language(
