@@ -18,6 +18,10 @@ File "test.py", line 30, In definition of lexer pattern pat
 File "test.py", line 41, In definition of lexer rules
     Error: nothing to repeat
 
+== test_invalid_pattern_6 ==
+File "test.py", line 47, In definition of lexer rules
+    Error: unbalanced parentheses
+
 == test_invalid_rule_1 ==
 Error: Termination is reserved for automatic actions only
 
