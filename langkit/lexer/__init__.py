@@ -642,7 +642,7 @@ class Lexer(object):
         check_source_language(
             literal in self.literals_map,
             '{} token literal is not part of the valid tokens for this'
-            ' this grammar'.format(literal)
+            ' this grammar'.format(repr(literal))
         )
         return self.literals_map[literal]
 
