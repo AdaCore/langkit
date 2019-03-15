@@ -150,7 +150,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Context (Handle : Rewriting_Handle) return Internal_Context is
    begin
-      ${pre_check_rw_handle("Handle")}
+      ${pre_check_rw_handle('Handle')}
       return Handle.Context;
    end Context;
 
@@ -210,7 +210,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Start_Rewriting
      (Context : Internal_Context) return Rewriting_Handle is
    begin
-      ${pre_check_rw_no_handle ("Handle (Context)")}
+      ${pre_check_rw_no_handle ('Handle (Context)')}
       declare
          Result : constant Rewriting_Handle := new Rewriting_Handle_Type'
            (Context   => Context,
@@ -230,7 +230,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    procedure Abort_Rewriting (Handle : in out Rewriting_Handle) is
    begin
-      ${pre_check_rw_handle("Handle")}
+      ${pre_check_rw_handle('Handle')}
       Free_Handles (Handle);
    end Abort_Rewriting;
 
@@ -255,7 +255,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Result : Apply_Result := (Success => True);
 
    begin
-      ${pre_check_rw_handle("Handle")}
+      ${pre_check_rw_handle('Handle')}
 
       --  Try to reparse all units that were potentially modified
       for Unit_Handle of Handle.Units loop
@@ -317,7 +317,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Unit_Handles
      (Handle : Rewriting_Handle) return Unit_Rewriting_Handle_Array is
    begin
-      ${pre_check_rw_handle("Handle")}
+      ${pre_check_rw_handle('Handle')}
 
       declare
          Count  : constant Natural := Natural (Handle.Units.Length);
@@ -338,7 +338,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Handle (Unit : Internal_Unit) return Unit_Rewriting_Handle is
    begin
-      ${pre_check_rw_handle("Handle (Context (Unit))")}
+      ${pre_check_rw_handle('Handle (Context (Unit))')}
+      ${pre_check_unit_no_diags('Unit')}
 
       declare
          use Unit_Maps;
@@ -347,7 +348,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          Context_Handle : constant Rewriting_Handle := Handle (Context);
          Filename       : constant Unbounded_String :=
             To_Unbounded_String (Get_Filename (Unit));
-         Cur            : constant Cursor := Context_Handle.Units.Find (Filename);
+
+         Cur : constant Cursor := Context_Handle.Units.Find (Filename);
       begin
          if Cur /= No_Element then
             return Element (Cur);
@@ -374,7 +376,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Unit (Handle : Unit_Rewriting_Handle) return Internal_Unit
    is
    begin
-      ${pre_check_urw_handle("Handle")}
+      ${pre_check_urw_handle('Handle')}
       return Handle.Unit;
    end Unit;
 
@@ -385,7 +387,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Root (Handle : Unit_Rewriting_Handle) return Node_Rewriting_Handle
    is
    begin
-      ${pre_check_urw_handle("Handle")}
+      ${pre_check_urw_handle('Handle')}
       return Handle.Root;
    end Root;
 
@@ -397,8 +399,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
      (Handle : Unit_Rewriting_Handle;
       Root   : Node_Rewriting_Handle) is
    begin
-      ${pre_check_urw_handle("Handle")}
-      ${pre_check_null_or_untied("Root")}
+      ${pre_check_urw_handle('Handle')}
+      ${pre_check_null_or_untied('Root')}
 
       Untie (Handle.Root);
       Handle.Root := Root;
@@ -412,8 +414,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Handle
      (Node : ${root_node_type_name}) return Node_Rewriting_Handle is
    begin
-      ${pre_check_rw_handle("Handle (Context (Node.Unit))")}
-      ${pre_check_unit_no_diags("Node.Unit")}
+      ${pre_check_rw_handle('Handle (Context (Node.Unit))')}
+      ${pre_check_unit_no_diags('Node.Unit')}
 
       if Node = null then
          return No_Node_Rewriting_Handle;
@@ -452,7 +454,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Node
      (Handle : Node_Rewriting_Handle) return ${root_node_type_name} is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Handle.Node;
    end Node;
 
@@ -462,7 +464,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Handle.Context_Handle;
    end Context;
 
@@ -472,7 +474,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Unparsing_Implementation.Unparse
         (Handle, Preserve_Formatting => True);
    end Unparse;
@@ -716,9 +718,10 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    -- Kind --
    ----------
 
-   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name} is
+   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
+   is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Handle.Kind;
    end Kind;
 
@@ -728,7 +731,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Handle.Tied;
    end Tied;
 
@@ -739,7 +742,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Parent
      (Handle : Node_Rewriting_Handle) return Node_Rewriting_Handle is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Handle.Parent;
    end Parent;
 
@@ -749,7 +752,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
    begin
-      ${pre_check_nrw_handle("Handle")}
+      ${pre_check_nrw_handle('Handle')}
       return Handle.Abstract_Children_Count;
    end Children_Count;
 
@@ -761,8 +764,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) return Node_Rewriting_Handle is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_child_index("Handle", "Index", False)}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_child_index('Handle', 'Index', for_insertion=False)}
 
       --  If this handle represents an already existing node, make sure it is
       --  expanded so we have a handle to return.
@@ -780,8 +783,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Child  : Node_Rewriting_Handle)
    is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_child_index("Handle", "Index", False)}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_child_index('Handle', 'Index', for_insertion=False)}
+      ${pre_check_null_or_untied('Child')}
 
       --  If this handle represents an already existing node, make sure it is
       --  expanded so that its children vector can be modified.
@@ -807,8 +811,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Text (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_is_token_kind("Kind (Handle)")}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_is_token_kind('Kind (Handle)')}
 
       case Handle.Children.Kind is
          when Unexpanded =>
@@ -826,8 +830,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    procedure Set_Text (Handle : Node_Rewriting_Handle; Text : Text_Type) is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_is_token_kind("Kind (Handle)")}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_is_token_kind('Kind (Handle)')}
 
       --  Make sure Handle is expanded so we have a Text field to override
       Expand_Children (Handle);
@@ -841,9 +845,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    procedure Replace (Handle, New_Node : Node_Rewriting_Handle) is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_is_tied("Handle")}
-      ${pre_check_null_or_untied("New_Node")}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_is_tied('Handle')}
+      ${pre_check_null_or_untied('New_Node')}
 
       if Handle = New_Node then
          return;
@@ -881,10 +885,10 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Index  : Positive;
       Child  : Node_Rewriting_Handle) is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_is_list_kind("Kind (Handle)")}
-      ${pre_check_child_index("Handle", "Index", True)}
-      ${pre_check_null_or_untied("Child")}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_is_list_kind('Kind (Handle)')}
+      ${pre_check_child_index('Handle', 'Index', for_insertion=True)}
+      ${pre_check_null_or_untied('Child')}
 
       --  First, just create room for the new node and let Set_Child take care
       --  of tiding Child to Handle's tree.
@@ -901,9 +905,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
      (Handle : Node_Rewriting_Handle;
       Child  : Node_Rewriting_Handle) is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_is_list_kind("Kind (Handle)")}
-      ${pre_check_null_or_untied("Child")}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_is_list_kind('Kind (Handle)')}
+      ${pre_check_null_or_untied('Child')}
 
       Insert_Child (Handle, Children_Count (Handle) + 1, Child);
    end Append_Child;
@@ -916,9 +920,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
      (Handle : Node_Rewriting_Handle;
       Index  : Positive) is
    begin
-      ${pre_check_nrw_handle("Handle")}
-      ${pre_check_is_list_kind("Kind (Handle)")}
-      ${pre_check_child_index("Handle", "Index", True)}
+      ${pre_check_nrw_handle('Handle')}
+      ${pre_check_is_list_kind('Kind (Handle)')}
+      ${pre_check_child_index('Handle', 'Index', for_insertion=True)}
 
       --  First, let Set_Child take care of untiding the child to remove, and
       --  then actually remove the corresponding children list slot.
@@ -982,7 +986,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
      (Handle : Rewriting_Handle;
       Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle is
    begin
-      ${pre_check_rw_handle("Handle")}
+      ${pre_check_rw_handle('Handle')}
 
       if Is_Token_Node (Kind) then
          return Create_Token_Node (Handle, Kind, "");
@@ -1006,8 +1010,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Kind   : ${root_node_kind_name};
       Text   : Text_Type) return Node_Rewriting_Handle is
    begin
-      ${pre_check_rw_handle("Handle")}
-      ${pre_check_is_token_kind("Kind")}
+      ${pre_check_rw_handle('Handle')}
+      ${pre_check_is_token_kind('Kind')}
 
       declare
          Result : constant Node_Rewriting_Handle := Allocate
@@ -1029,10 +1033,10 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Kind     : ${root_node_kind_name};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle is
    begin
-      ${pre_check_rw_handle("Handle")}
-      ${pre_check_is_not_token_kind("Kind")}
-      for C of Children loop
-         ${pre_check_null_or_untied("C")}
+      ${pre_check_rw_handle('Handle')}
+      ${pre_check_is_not_token_kind('Kind')}
+      for One_Child of Children loop
+         ${pre_check_null_or_untied('One_Child')}
       end loop;
 
       declare
@@ -1080,8 +1084,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       State    : State_Type := Default;
       Next_Arg : Positive := Arguments'First;
    begin
-      for A of Arguments loop
-         ${pre_check_null_or_valid_context("A", "Handle")}
+      for One_Argument of Arguments loop
+         ${pre_check_null_or_valid_context('One_Argument', 'Handle')}
       end loop;
 
       --  Interpret the template looping over its characters with a state
@@ -1252,7 +1256,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             % endfor
             ) return Node_Rewriting_Handle is
          begin
-            ${pre_check_rw_handle("Handle")}
+            ${pre_check_rw_handle('Handle')}
 
             return Create_Regular_Node
               (Handle, ${n.ada_kind_name},

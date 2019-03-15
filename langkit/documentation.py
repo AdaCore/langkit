@@ -743,10 +743,12 @@ base_langkit_docs = {
         Set the root node for the unit Handle to Root. This unties the previous
         root handle. If Root is not No_Node_Rewriting_Handle, this also ties
         Root to Handle.
+
         Root must not already be tied to another analysis unit handle.
     """,
     'langkit.rewriting.node_handle': """
         Return the rewriting handle corresponding to Node.
+
         The owning unit of Node must be free of diagnostics.
     """,
     'langkit.rewriting.handle_node': """
@@ -793,18 +795,21 @@ base_langkit_docs = {
         If Handle is the root of an analysis unit, untie it and set New_Node as
         its new root. Otherwise, replace Handle with New_Node in Handle's
         parent node.
+
         Note that:
-         - Handle must be tied to an existing analysis unit handle.
-         - New_Node must not already be tied to another analysis unit handle.
+        * Handle must be tied to an existing analysis unit handle.
+        * New_Node must not already be tied to another analysis unit handle.
     """,
     'langkit.rewriting.insert_child': """
         Assuming Handle refers to a list node, insert the given Child node to
         be in the children list at the given index.
+
         The given Child node must not be tied to any analysis unit.
     """,
     'langkit.rewriting.append_child': """
         Assuming Handle refers to a list node, append the given Child node to
         the children list.
+
         The given Child node must not be tied to any analysis unit.
     """,
     'langkit.rewriting.remove_child': """
