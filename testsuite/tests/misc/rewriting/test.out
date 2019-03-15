@@ -1,9 +1,9 @@
 == general_api.adb ==
 Try to get a unit rewriting handle out of a rewriting session...
-   Got an assert failure
+   Got a precondition failure
 Create a rewriting handle
 Try to create a second rewriting handle...
-   Got an assert failure
+   Got a precondition failure
 Get a rewriting handle for the analysis unit
 Apply the rewriting
 Create a second rewriting handler
@@ -71,7 +71,7 @@ revert.adb: Done.
 
 == rewrite.adb ==
 Try assigning a child that is already tied to a tree...
-   Got an assert failure
+   Got a precondition failure
 
 Replace the middle definition (b) with a clone of the last definition (c)
 

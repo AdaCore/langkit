@@ -1,7 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with System.Assertions;
-
 with Langkit_Support.Text;     use Langkit_Support.Text;
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Common;        use Libfoolang.Common;
@@ -35,10 +33,10 @@ procedure Rewrite is
    begin
       Put_Line (Label & "...");
       Proc.all;
-      Put_Line ("   Done with no assert failure");
+      Put_Line ("   Done with no precondition failure");
    exception
-      when System.Assertions.Assert_Failure =>
-         Put_Line ("   Got an assert failure");
+      when Libfoolang.Common.Precondition_Failure =>
+         Put_Line ("   Got a precondition failure");
    end Try;
 
    -----------------------
