@@ -5,6 +5,8 @@ with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 with Libfoolang.Unparsing; use Libfoolang.Unparsing;
 
+with Libfoolang.Common;
+
 procedure Main is
    Buffer : constant String :=
       "def a = 1;"
@@ -45,7 +47,7 @@ begin
          URH := Handle (U);
          raise Program_Error;
       exception
-         when Assert_Failure =>
+         when Libfoolang.Common.Precondition_Failure =>
             Put_Line ("Assertion failure on getting badly parsed unit"
                       & " rewriting handle");
       end;
@@ -53,7 +55,7 @@ begin
          NRH := Handle (U.Root);
          raise Program_Error;
       exception
-         when Assert_Failure =>
+         when Libfoolang.Common.Precondition_Failure =>
             Put_Line ("Assertion failure on getting rewriting handle for root"
                       & " of badly parsed unit");
       end;
