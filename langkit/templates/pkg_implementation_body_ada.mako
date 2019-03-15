@@ -170,6 +170,10 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
+   -----------
+   -- Image --
+   -----------
+
    function Image (Self : Symbol_Type) return ${T.String.name} is
       T      : Text_Type := Symbols.Image (Self);
       Result : constant ${T.String.name} :=
@@ -3977,6 +3981,10 @@ package body ${ada_lib_name}.Implementation is
          Node.Post_Env_Actions (Env, Root_Scope);
       end;
    end Reroot_Foreign_Node;
+
+   ----------
+   -- Text --
+   ----------
 
    function Text
      (Node : access ${root_node_value_type}'Class) return ${T.String.name}
