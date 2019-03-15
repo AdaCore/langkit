@@ -175,7 +175,7 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    function Image (Self : Symbol_Type) return ${T.String.name} is
-      T      : Text_Type := Symbols.Image (Self);
+      T      : constant Text_Type := Symbols.Image (Self);
       Result : constant ${T.String.name} :=
          ${T.String.constructor_name} (T'Length);
    begin
@@ -3989,7 +3989,7 @@ package body ${ada_lib_name}.Implementation is
    function Text
      (Node : access ${root_node_value_type}'Class) return ${T.String.name}
    is
-      T      : Text_Type := Text (Node);
+      T      : constant Text_Type := Text (Node);
       Result : constant ${T.String.name} :=
          ${T.String.constructor_name} (T'Length);
    begin
