@@ -1,0 +1,22 @@
+env:
+  global:
+    - ADALIB_DIR=$HOME/adalib
+    - TOOLS_DIR=$HOME/build_tools
+    - INSTALL_DIR=$HOME/install
+
+matrix:
+  include:
+    - os: linux
+      language: python
+      python: "2.7"
+
+cache:
+  directories:
+  - $HOME/build_tools
+  - $HOME/install
+  - $HOME/.cache/pip
+  timeout: 1000
+
+install: utils/travis-install.sh
+script:  utils/travis-script.sh
+
