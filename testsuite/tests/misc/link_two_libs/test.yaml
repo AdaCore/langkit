@@ -1,2 +1,7 @@
 driver: python
 input_sources: []
+expect_failure:
+  - if: [gnat_community_2018]
+    then: >
+      A known issue in the gprbuild furnished with GNAT Community 2018
+      prevents this test from passing.
