@@ -33,6 +33,10 @@ class Testsuite(BaseTestsuite):
 
     def add_options(self):
         self.main.add_option(
+            '--discriminants',
+            help='Comma-separated list of additional discriminants')
+
+        self.main.add_option(
             '--with-python', default=None,
             help='If provided, use as the Python interpreter in testcases.')
 
