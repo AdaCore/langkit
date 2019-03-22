@@ -75,6 +75,9 @@ class BaseDriver(TestDriver):
         self.create_test_workspace()
         self.check_file(self.expected_file)
 
+        discriminants.add_discriminants(self.global_env['options']
+                                        .discriminants)
+
         # Load the expected failure matcher for this testcase
         try:
             expect_failure_matcher = discriminants.Matcher.from_json(
