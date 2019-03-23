@@ -123,8 +123,7 @@ package Langkit_Support.Adalog.Unify is
       R       : Right_Var.Var;
       L_Data  : Left_C_Data := No_L_Data;
       R_Data  : Right_C_Data := No_R_Data;
-      Eq_Data : Equals_Data := No_Equals_Data)
-      return access Base_Relation'Class
+      Eq_Data : Equals_Data := No_Equals_Data) return Relation
    is
      (new Unify_LR_Rel.Rel'
         (Rel    => Create (L, R, L_Data, R_Data, Eq_Data),
