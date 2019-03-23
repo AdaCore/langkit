@@ -59,7 +59,7 @@ package Langkit_Support.Adalog.Predicates is
    package Predicate is
 
       function Create
-        (R : Var.Var; Pred : Predicate_Type) return access Base_Relation'Class;
+        (R : Var.Var; Pred : Predicate_Type) return Relation;
       --  Return a predicate relation, where Pred is the actual implementation
       --  of the predicate logic. Pred will be called on the value of R when
       --  appropriate.
@@ -93,7 +93,7 @@ package Langkit_Support.Adalog.Predicates is
       --  only once, until it is reverted.
 
       function Create
-        (R : Var.Var; Pred : Predicate_Type) return access Base_Relation'Class
+        (R : Var.Var; Pred : Predicate_Type) return Relation
       is (new Impl.Rel'
             (Rel    => Predicate_Logic'(Ref => R, Pred => Pred),
              others => <>));

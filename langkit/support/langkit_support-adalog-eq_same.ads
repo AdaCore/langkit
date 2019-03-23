@@ -111,7 +111,7 @@ package Langkit_Support.Adalog.Eq_Same is
          Data    : Converter;
          Eq_Data : Equals_Data) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data, Data, Eq_Data)));
+        (Impl.Equals (L, R, Data, Data, Eq_Data));
 
       function Create
         (L       : Refs.Raw_Logic_Var.Var;
@@ -119,7 +119,7 @@ package Langkit_Support.Adalog.Eq_Same is
          Data    : Converter;
          Eq_Data : Equals_Data) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data, Eq_Data)));
+        (Impl.Equals (L, R, Data, Eq_Data));
 
       function Create
         (L       : LR_Type;
