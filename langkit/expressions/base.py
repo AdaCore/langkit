@@ -1585,6 +1585,15 @@ class LiteralExpr(ResolvedExpression):
         """
         raise not_implemented_error(self, self.render_introspection_constant)
 
+    def render_ocaml_constant(self):
+        """
+        assuming this expression is a valid constant, return ocaml code to
+        materialize it in the generated binding.
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_ocaml_constant)
+
     @property
     def subexprs(self):
         return {'0-type': self.static_type,
@@ -1639,6 +1648,15 @@ class BindableLiteralExpr(LiteralExpr):
         """
         raise not_implemented_error(self, self.render_introspection_constant)
 
+    def render_ocaml_constant(self):
+        """
+        assuming this expression is a valid constant, return ocaml code to
+        materialize it in the generated binding.
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_ocaml_constant)
+
 
 class BooleanLiteralExpr(BindableLiteralExpr):
 
@@ -1655,6 +1673,9 @@ class BooleanLiteralExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return str(self.value)
+
+    def render_ocaml_constant(self):
+        return "true" if self.value else "false"
 
     def render_introspection_constant(self):
         return 'Create_Boolean ({})'.format(self.value)
@@ -1675,6 +1696,9 @@ class IntegerLiteralExpr(BindableLiteralExpr):
         return str(self.value)
 
     def render_python_constant(self):
+        return str(self.value)
+
+    def render_ocaml_constant(self):
         return str(self.value)
 
     def render_introspection_constant(self):
@@ -1701,6 +1725,9 @@ class CharacterLiteralExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return repr(self.value)
+
+    def render_ocaml_constant(self):
+        return '(Char.code {})'.format(ord(self.value))
 
     def render_introspection_constant(self):
         return 'Create_Character ({})'.format(self.ada_value)
@@ -1736,6 +1763,9 @@ class NullExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return 'None' if self.type.is_entity_type else self.type.py_nullexpr
+
+    def render_ocaml_constant(self):
+        return 'None'
 
     def render_introspection_constant(self):
         entity_type = (self.type
