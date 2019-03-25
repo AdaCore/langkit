@@ -1,5 +1,3 @@
-with Ada.Text_IO; use Ada.Text_IO;
-
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 

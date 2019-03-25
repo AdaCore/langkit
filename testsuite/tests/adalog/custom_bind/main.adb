@@ -6,8 +6,6 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations;
 use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates;
-use Langkit_Support.Adalog.Predicates;
 
 with Support; use Support;
 
@@ -20,7 +18,7 @@ begin
    declare
       X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Relation :=
+      R : constant Relation :=
          +((+Member (X, (1, 2, 3, 4, 5, 6)))
            and (+Square (X, Y)));
    begin
@@ -35,7 +33,7 @@ begin
       X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-      R : Relation :=
+      R : constant Relation :=
          +(+(+Member (X, (1, 2, 3, 4, 5, 6))
            and (+Square (X, Y)))
            and (+Equals (Y, 36)));

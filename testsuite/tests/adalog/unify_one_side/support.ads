@@ -14,8 +14,9 @@ package Support is
    type Dummy_Data is null record;
    No_Data : constant Dummy_Data := (null record);
 
-   function Transform (D : Dummy_Data; I : Integer) return Integer is (I ** 2);
-   function Eq (D : Dummy_Data; A, B : Integer) return Boolean is (A = B);
+   function Transform (Dummy : Dummy_Data; I : Integer) return Integer
+   is (I ** 2);
+   function Eq (Dummy : Dummy_Data; A, B : Integer) return Boolean is (A = B);
 
    package Bind is new Eq_Int.Raw_Custom_Bind
      (Converter   => Dummy_Data, No_Data        => No_Data,
@@ -39,9 +40,10 @@ package Support is
    type Is_Even_Pred_Type is null record;
    Is_Even_Pred : constant Is_Even_Pred_Type := (null record);
 
-   function Call (Self : Is_Even_Pred_Type; L : Integer) return Boolean is
-     (L mod 2 = 0);
-   function Image (Self : Is_Even_Pred_Type) return String is ("is-even?");
+   function Call (Dummy_Self : Is_Even_Pred_Type; L : Integer) return Boolean
+   is (L mod 2 = 0);
+   function Image (Dummy_Self : Is_Even_Pred_Type) return String
+   is ("is-even?");
 
    package Is_Even_Predicate is new Predicate
      (El_Type        => Integer,

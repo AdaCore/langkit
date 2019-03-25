@@ -1,10 +1,5 @@
 --  Test that the Equivalence function for lexical envs works properly
 
-with Ada.Text_IO; use Ada.Text_IO;
-
-with Langkit_Support.Lexical_Env;
-with Langkit_Support.Text; use Langkit_Support.Text;
-
 with Support; use Support;
 
 procedure Main is

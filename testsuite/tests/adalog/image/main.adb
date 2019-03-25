@@ -4,8 +4,6 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations;
 use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates;
-use Langkit_Support.Adalog.Predicates;
 with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 
@@ -15,14 +13,14 @@ procedure Main is
    X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
    Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-   Ors : Relation :=
+   Ors : constant Relation :=
       +"or" (+Member (X, (1, 2, 3, 4, 5, 6)),
              +"or" (+Member (Y, (10, 11)),
                     +"or" (+Logic_Any ((1 => +False_Rel)),
                            +"or" (+Logic_Any (Empty_Array),
                                   +Logic_All (Empty_Array)))));
 
-   R : Relation :=
+   R : constant Relation :=
      +"and" (Ors,
              +"and" (+Equals (X, Y),
                      +"and" (+Logic_Any ((1 => +True_Rel)),

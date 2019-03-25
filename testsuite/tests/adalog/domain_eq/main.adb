@@ -5,7 +5,6 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
 
 --  Test that Member primitives goes along correctly with the "=" operator
 
@@ -14,7 +13,7 @@ procedure Main is
 begin
    declare
       X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Relation :=
+      R : constant Relation :=
         +(+(+Member (X, (1, 2, 3, 4, 5, 6))
             or (+Equals (X, 7)))
           or (+Equals (X, 8)));
@@ -30,7 +29,7 @@ begin
       X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-      X_Constraint : Relation :=
+      X_Constraint : constant Relation :=
          +"or" (+Equals (X, 1),
                 +"or" (+Equals (X, 2),
                        +"or" (+Equals (X, 3),
@@ -38,9 +37,9 @@ begin
                                      +"or" (+Equals (X, 5),
                                             +Equals (X, 6))))));
 
-      Y_Constraint : Relation :=
+      Y_Constraint : constant Relation :=
          +"or" (+Equals (Y, 3), +"or" (+Equals (Y, 2), +Equals (Y, 1)));
-      R : Relation :=
+      R : constant Relation :=
          +"and" (X_Constraint, +"and" (+Equals (X, Y), Y_Constraint));
    begin
       while Solve (R) loop

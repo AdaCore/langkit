@@ -6,8 +6,6 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations;
 use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates;
-use Langkit_Support.Adalog.Predicates;
 
 --  Test that when a variable has already a domain via the Member primitive, a
 --  second use of member will work correctly (eg. like a predicate checking the
@@ -18,8 +16,9 @@ procedure Main is
 begin
    declare
       X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Relation := +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
-                              +Member (X, (3, 4, 5)));
+      R : constant Relation :=
+         +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
+                 +Member (X, (3, 4, 5)));
    begin
       while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img);

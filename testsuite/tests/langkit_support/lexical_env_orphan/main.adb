@@ -3,9 +3,6 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with Langkit_Support.Lexical_Env;
-with Langkit_Support.Text; use Langkit_Support.Text;
-
 with Support; use Support;
 use Support.Envs, Support.Symbols;
 

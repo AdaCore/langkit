@@ -5,7 +5,6 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
 
 with Support; use Support;
 
@@ -20,7 +19,7 @@ procedure Main is
        then Integer'Image (Get_Value (V))
        else "<undefined>"));
 
-   Relations : array (Positive range <>) of Relation :=
+   Relations : constant array (Positive range <>) of Relation :=
      (+"and" (+Equals (X, Y), +Member (X, (1, 2, 3))),
       --  Simple dynamic scheduling: the second relation must be evaluated
       --  before the first one.
