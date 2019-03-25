@@ -281,6 +281,7 @@ class CompileCtx(object):
             available in code generation: see langkit.documentation.
         """
         from langkit.python_api import PythonAPISettings
+        from langkit.ocaml_api import OCamlAPISettings
         from langkit.unparsers import Unparsers
 
         self.lang_name = names.Name(lang_name)
@@ -321,6 +322,10 @@ class CompileCtx(object):
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
+
+        self.ocaml_api_settings = (
+            OCamlAPISettings(self, self.c_api_settings)
+        )
 
         self.fns = set()
         """
@@ -1395,6 +1400,7 @@ class CompileCtx(object):
             'ada_doc':     documentation.ada_doc,
             'c_doc':       documentation.c_doc,
             'py_doc':      documentation.py_doc,
+            'ocaml_doc':   documentation.ocaml_doc,
             'ada_c_doc':   documentation.ada_c_doc,
             'emitter':     self.emitter,
         }
@@ -1752,6 +1758,7 @@ class CompileCtx(object):
             EmitterPass('emit Python playground',
                         Emitter.emit_python_playground),
             EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
+            EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
 
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused()),

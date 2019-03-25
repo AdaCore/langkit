@@ -77,6 +77,18 @@ def write_cpp_file(file_path, source, post_process=None):
             subprocess.check_call(['clang-format', '-i', file_path])
 
 
+def write_ocaml_file(file_path, source, post_process=None):
+    """
+    Helper to write a OCaml source file.
+
+    :param str file_path: Path of the file to write.
+    :param str source: Content of the file to write.
+    """
+    if write_source_file(file_path, source, post_process):
+        if find_executable('ocamlformat'):
+            subprocess.check_call(['ocamlformat', '-i', file_path])
+
+
 def ada_file_path(out_dir, source_kind, qual_name):
     """
     Return the name of the Ada file for the given unit name/kind.
@@ -223,6 +235,7 @@ class Emitter(object):
         self.lib_path = path.join(self.lib_root, 'lib')
         self.share_path = path.join(self.lib_root, 'share', self.lib_name_low)
         self.python_path = path.join(self.lib_root, 'python')
+        self.ocaml_path = path.join(self.lib_root, 'ocaml')
 
         self.dfa_code = None
         """
@@ -533,6 +546,61 @@ class Emitter(object):
                 ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
                                     os_name=os.name),
                 self.post_process_cpp
+            )
+
+    def emit_ocaml_api(self, ctx):
+        """
+        Generate binding for the external OCaml API.
+
+        :param str ocaml_path: The directory in which the OCaml module will
+            be generated.
+        """
+        if not ctx.ocaml_api_settings:
+            return
+
+        if not os.path.isdir(self.ocaml_path):
+            os.mkdir(self.ocaml_path)
+
+        with names.camel:
+            ctx = get_context()
+            code = ctx.render_template(
+                "ocaml_api/module_ocaml",
+                c_api=ctx.c_api_settings,
+                ocaml_api=ctx.ocaml_api_settings
+            )
+
+            ocaml_filename = '{}.ml'.format(ctx.c_api_settings.lib_name)
+            write_ocaml_file(
+                os.path.join(self.ocaml_path, ocaml_filename),
+                code
+            )
+
+            code = ctx.render_template(
+                "ocaml_api/module_sig_ocaml",
+                c_api=ctx.c_api_settings,
+                ocaml_api=ctx.ocaml_api_settings
+            )
+
+            ocaml_filename = '{}.mli'.format(ctx.c_api_settings.lib_name)
+            write_ocaml_file(
+                os.path.join(self.ocaml_path, ocaml_filename),
+                code
+            )
+
+            # Emit dune file to easily compile and install bindings
+            code = ctx.render_template(
+                "ocaml_api/dune_ocaml",
+                c_api=ctx.c_api_settings,
+                ocaml_api=ctx.ocaml_api_settings
+            )
+
+            write_source_file(os.path.join(self.ocaml_path, 'dune'), code)
+
+            # Write an empty opam file to install the lib with dune
+            write_source_file(
+                os.path.join(self.ocaml_path,
+                             '{}.opam'.format(ctx.c_api_settings.lib_name)),
+                ''
             )
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,

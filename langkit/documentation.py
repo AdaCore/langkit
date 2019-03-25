@@ -869,11 +869,13 @@ null_names = {
     'ada':    'null',
     'c':      'NULL',
     'python': 'None',
+    'ocaml':  'None',
 }
 todo_markers = {
     'ada':    '???',
     'c':      'TODO:',
     'python': 'TODO:',
+    'ocaml':  'TODO:',
 }
 
 
@@ -1067,6 +1069,29 @@ def format_python(text, column, argtypes=[], rtype=None):
     return '\n'.join(lines)
 
 
+def format_ocaml(text, column):
+    """
+    Format some text as a OCaml multi-line comment.
+
+    :param str text: Text to format.
+    :param int column: Indentation level for the result.
+    :rtype str:
+    """
+    if not text.strip():
+        return ''
+
+    available_width = get_available_width(column)
+    lines = ['(**']
+    for i, paragraph in enumerate(split_paragraphs(text)):
+        if i > 0:
+            lines.append('')
+        for line in wrap(paragraph, available_width - 3):
+            lines.append(' * {}'.format(line))
+
+    lines.append(' *)')
+    return '\n{}'.format('  ' * column).join(lines)
+
+
 def create_doc_printer(lang, formatter):
     """
     Return a function that prints documentation.
@@ -1131,6 +1156,7 @@ def create_doc_printer(lang, formatter):
 ada_doc = create_doc_printer('ada', format_ada)
 c_doc = create_doc_printer('c', format_c)
 py_doc = create_doc_printer('python', format_python)
+ocaml_doc = create_doc_printer('ocaml', format_ocaml)
 
 
 def ada_c_doc(entity, column=0):
