@@ -3,9 +3,6 @@
 with Ada.Exceptions;
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Lexical_Env;
-with Langkit_Support.Text;    use Langkit_Support.Text;
-
 with Support; use Support;
 use Support.Envs, Support.Symbols;
 
@@ -34,9 +31,9 @@ begin
    Put_Line (Get (Rebound, Key_X));
 
    declare
-      R : Env_Rebindings;
+      Dummy : Env_Rebindings;
    begin
-      R := Append (Rebindings, Child, New_Env);
+      Dummy := Append (Rebindings, Child, New_Env);
       Put_Line ("Double rebinding: no error raised...");
    exception
       when Exc : Property_Error =>

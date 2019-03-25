@@ -5,7 +5,6 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
 
 with Support; use Support;
 
@@ -15,7 +14,7 @@ procedure Main is
    X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
    Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-   Relations : array (Positive range <>) of Relation :=
+   Relations : constant array (Positive range <>) of Relation :=
      (+Logic_All ((+Member (X, (6, 9)),
                    +Member (Y, (9, 16)),
                    +Square (X, 3),

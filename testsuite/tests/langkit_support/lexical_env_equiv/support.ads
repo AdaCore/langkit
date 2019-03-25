@@ -16,29 +16,30 @@ package Support is
 
    Default_MD : constant Metadata := (I => 0);
 
-   function Node_Hash (C : Character) return Hash_Type is (0);
-   function Metadata_Hash (MD : Metadata) return Hash_Type is (0);
+   function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
+   function Metadata_Hash (Dummy_MD : Metadata) return Hash_Type is (0);
    procedure Raise_Property_Error (Message : String := "");
    function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
-   function Parent (Node : Character) return Character is (' ');
-   function Can_Reach (Node, From : Character) return Boolean is (True);
-   function Is_Rebindable (Node : Character) return Boolean is (True);
+   function Parent (Dummy_Node : Character) return Character is (' ');
+   function Can_Reach (Dummy_Node, Dummy_From : Character) return Boolean
+   is (True);
+   function Is_Rebindable (Dummy_Node : Character) return Boolean is (True);
 
    function Node_Image
-     (Node : Character; Short : Boolean := True) return Text_Type
+     (Node : Character; Dummy_Short : Boolean := True) return Text_Type
    is (To_Text ("'" & Node & "'"));
 
    procedure Register_Rebinding (Node : Character; Rebinding : System.Address)
    is null;
 
-   function Get_Version (B : Boolean) return Version_Number is (0);
+   function Get_Version (Dummy : Boolean) return Version_Number is (0);
 
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
 
    type Precomputed_Symbol_Index is new Integer range 1 .. 0;
    function Precomputed_Symbol
-     (Index : Precomputed_Symbol_Index) return Text_Type
+     (Dummy : Precomputed_Symbol_Index) return Text_Type
    is (raise Program_Error);
 
    package Symbols is new Langkit_Support.Symbols

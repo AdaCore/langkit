@@ -2,15 +2,12 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Lexical_Env;
-with Langkit_Support.Text;    use Langkit_Support.Text;
-
 with Support; use Support;
 use Support.Envs;
 use Support.Symbols;
 
 procedure Main is
-   Symbols : Symbol_Table := Create_Symbol_Table;
+   Symbols : constant Symbol_Table := Create_Symbol_Table;
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
    A_Parent : Lexical_Env := Create_Lexical_Env

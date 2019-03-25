@@ -5,7 +5,6 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
 
 with Support; use Support;
 
@@ -27,7 +26,7 @@ procedure Main is
 
    D : Dummy_Data;
 
-   R3 : Relation :=
+   R3 : constant Relation :=
      +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
              +"and" (+Bind.Create (X, Y, D, Support.No_Data),
                      +"and" (+Pred_Int.Create (X, Is_Even'Unrestricted_Access),

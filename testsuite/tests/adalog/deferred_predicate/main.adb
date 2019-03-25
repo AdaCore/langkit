@@ -6,8 +6,6 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations;
 use Langkit_Support.Adalog.Operations;
-with Langkit_Support.Adalog.Predicates;
-use Langkit_Support.Adalog.Predicates;
 
 with Support; use Support;
 
@@ -21,8 +19,8 @@ procedure Main is
 
    X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-   R3 : Relation :=
-     +(+Support.Pred_Int.Create (X, Pred'(others => <>))
+   R3 : constant Relation :=
+     +(+Support.Pred_Int.Create (X, Pred'(null record))
        and (+Member (X, (1, 2, 3, 4, 5, 6))));
 
    Discard : Boolean;

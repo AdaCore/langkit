@@ -10,9 +10,9 @@ package Support is
    type Is_Even_Pred_Type is null record;
    Is_Even_Pred : constant Is_Even_Pred_Type := (null record);
 
-   function Call (Self : Is_Even_Pred_Type; L : Integer) return Boolean is
+   function Call (Dummy : Is_Even_Pred_Type; L : Integer) return Boolean is
      (L mod 2 = 0);
-   function Image (Self : Is_Even_Pred_Type) return String is ("is-even?");
+   function Image (Dummy : Is_Even_Pred_Type) return String is ("is-even?");
 
    package Is_Even_Predicate is new Predicate
      (El_Type        => Integer,
