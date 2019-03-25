@@ -120,7 +120,7 @@ class Testsuite(BaseTestsuite):
         # in parallel.
         if not self.global_env['options'].disable_tear_up_builds:
             gargs = ['-p', '-P', self.langkit_support_project_file]
-            cargs = ['-cargs', '-O0', '-g']
+            cargs = ['-cargs', '-O0', '-g', '-gnatwae']
             if self.coverage_enabled:
                 gargs.append('--subdirs=gnatcov')
                 cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
