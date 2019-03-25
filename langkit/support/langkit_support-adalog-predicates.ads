@@ -115,8 +115,7 @@ package Langkit_Support.Adalog.Predicates is
 
       function Create
         (R    : Var.Var;
-         Pred : access function (L : El_Type) return Boolean)
-         return access Base_Relation'Class;
+         Pred : access function (L : El_Type) return Boolean) return Relation;
 
    private
 
@@ -133,7 +132,7 @@ package Langkit_Support.Adalog.Predicates is
 
       function Create
         (R : Var.Var; Pred : access function (L : El_Type) return Boolean)
-         return access Base_Relation'Class
+         return Relation
       is (Internal_Pred.Create (R, (Pred => Pred'Unrestricted_Access.all)));
 
    end Dyn_Predicate;
@@ -168,7 +167,7 @@ package Langkit_Support.Adalog.Predicates is
 
       function Create
         (R    : Var.Var_Array;
-         Pred : Predicate_Type) return access Base_Relation'Class;
+         Pred : Predicate_Type) return Relation;
       --  Return a predicate relation, where Pred is the actual implementation
       --  of the predicate logic. Pred will be called on the value of R when
       --  appropriate.
@@ -208,9 +207,7 @@ package Langkit_Support.Adalog.Predicates is
       --  Stateful_Relation, that will return evaluation of the predicate
       --  only once, until it is reverted.
 
-      function Create
-        (R : Var_Array; Pred : Predicate_Type)
-         return access Base_Relation'Class
+      function Create (R : Var_Array; Pred : Predicate_Type) return Relation
       is (new Impl.Rel'
             (Rel    => Predicate_Logic'(Refs => R, Pred => Pred),
              others => <>));
