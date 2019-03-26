@@ -85,7 +85,7 @@ class Token(object):
         text_addr = (src_buffer['P_ARRAY'].cast(uint32_t) +
                      (first - src_buffer['P_BOUNDS']['LB0']))
 
-        char = gdb.lookup_type('char').pointer()
+        char = gdb.lookup_type('character').pointer()
         return (text_addr.cast(char)
                 .string('latin-1', length=4 * length)
                 .decode('utf32'))
