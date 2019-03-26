@@ -74,8 +74,8 @@ class Token(object):
         # Fetch the fat pointer, the bounds and then go subscript the
         # underlying array ourselves.
         src_buffer = self.tdh.value['source_buffer']
-        first = self.value['source_first']
-        last = self.value['source_last']
+        first = int(self.value['source_first'])
+        last = int(self.value['source_last'])
 
         length = last - first + 1
         if length <= 0:
