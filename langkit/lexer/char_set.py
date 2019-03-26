@@ -11,13 +11,19 @@ MAXUNICODE = 0x10FFFF
 
 
 def format_char(char):
-    ochar = ord(char)
-    return ('\\U{:x}'.format(ochar)
-            if ochar < ord(' ') or ord('~') < ochar else
-            str(char))
+    """
+    :type char: int
+    :rtype: str
+    """
+    return ('\\U{:x}'.format(char)
+            if char < ord(' ') or ord('~') < char else
+            unichr(char))
 
 
 def format_char_ranges(ranges):
+    """
+    :type ranges: list[None|int|(int, int)]
+    """
     def format_interval(interval):
         if interval is None:
             return '...'
@@ -75,7 +81,7 @@ class CharSet(object):
         ranges = []
         for l, h in self.ranges:
             if not self._repr_ellipsis or (l <= 127 and h <= 127):
-                ranges.append((unichr(l), unichr(h)))
+                ranges.append((l, h))
             else:
                 ranges.append(None)
                 break
