@@ -52,6 +52,13 @@ class Testsuite(BaseTestsuite):
             help='Run tests with Valgrind to check memory issues.'
         )
 
+        self.main.add_option(
+            '--no-auto-path', action='store_true',
+            help='Do not automatically add Langkit to PYTHONPATH. This is'
+                 ' useful to test that Langkit was properly installed in the'
+                 ' environment that runs the testsuite.'
+        )
+
         #
         # Convenience options for developpers
         #
