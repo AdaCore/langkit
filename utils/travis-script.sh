@@ -13,7 +13,10 @@ gcc -v
 gprbuild -v
 
 # Duplicate output of testsuite in file TESTSUITE_OUT
-./scripts/interactive_testsuite --discriminants gnat_community_2018| tee TESTSUITE_OUT
+./scripts/interactive_testsuite \
+    --discriminants gnat_community_2018 \
+    --no-auto-path \
+    | tee TESTSUITE_OUT
 
 # Exit with an error if there is a FAILED line in
 # TESTSUITE_OUT.
