@@ -20,9 +20,13 @@ class PythonDriver(BaseDriver):
         super(PythonDriver, self).tear_up()
         self.check_file('test.py')
 
+        # Unless this mechanism is specifically disabled, make the Langkit
+        # library relative to this testsuite available to tests.
+        if not self.global_env['options'].no_auto_path:
+            self.add_path(b'PYTHONPATH', self.langkit_root_dir)
+
         # Make the common Python modules available from the testcase script
         self.add_path(b'PYTHONPATH', self.support_dir)
-        self.add_path(b'PYTHONPATH', self.langkit_root_dir)
         self.add_path(
             b'PYTHONPATH',
             os.path.dirname(os.path.dirname(
