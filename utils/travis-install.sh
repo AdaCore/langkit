@@ -73,4 +73,4 @@ gcc -v
 )
 
 # Install Langkit itself and its Python dependencies
-python setup.py install
+pip install .
