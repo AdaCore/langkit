@@ -4,23 +4,11 @@ from contextlib import contextmanager
 from io import StringIO
 import sys
 
+from docutils.core import publish_parts
+
 from langkit import compiled_types, expressions
 from langkit.diagnostics import check_source_language, Severity
 from langkit.utils import dispatch_on_type
-
-try:
-    from docutils.core import publish_parts
-except ImportError:  # no-code-coverage
-    check_source_language(
-        False,
-        'Missing docutils to properly render sphinx doc. Install the'
-        ' docutils package',
-        severity=Severity.warning
-    )
-
-    # Provide a stub implementation for publish_parts
-    def publish_parts(x, *args, **kwargs):
-        return {'html_body': x}
 
 
 @contextmanager
