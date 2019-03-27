@@ -4,7 +4,6 @@ set -v
 set -e
 
 export PATH=$INSTALL_DIR/bin:$PATH
-export ADA_PROJECT_PATH=$ADALIB_DIR/share/gpr
 
 # Log the toolchain to use
 which gcc
