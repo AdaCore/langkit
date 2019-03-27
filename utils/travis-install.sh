@@ -44,9 +44,6 @@ else
     (cd $TOOLS_DIR && git clone https://github.com/AdaCore/gnatcoll-bindings)
 fi
 
-# Install requirements
-pip install -r REQUIREMENTS.dev
-
 # Log content
 pwd
 export PATH=$INSTALL_DIR/bin:$PATH
@@ -74,3 +71,6 @@ gcc -v
         )
     done
 )
+
+# Install Langkit itself and its Python dependencies
+python setup.py install
