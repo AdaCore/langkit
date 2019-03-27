@@ -18,11 +18,5 @@ gprbuild -v
     --no-auto-path \
     | tee TESTSUITE_OUT
 
-# Exit with an error if there is a FAILED line in
-# TESTSUITE_OUT.
-if grep "FAILED   " TESTSUITE_OUT; then
-    exit 1
-else
-    exit 0
-fi
-
+# Exit with an error if there is a FAILED line in TESTSUITE_OUT
+! grep "FAILED   " TESTSUITE_OUT > /dev/null
