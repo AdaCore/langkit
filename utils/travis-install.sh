@@ -47,14 +47,13 @@ fi
 # Log content
 pwd
 export PATH=$INSTALL_DIR/bin:$PATH
-export ADA_PROJECT_PATH=$ADALIB_DIR/share/gpr
 which gcc
 gcc -v
 
 # Build gnatcoll-core
 (
     cd $TOOLS_DIR/gnatcoll-core
-    make PROCESSORS=0 prefix="$ADALIB_DIR" ENABLE_SHARED=yes \
+    make PROCESSORS=0 prefix="$INSTALL_DIR" ENABLE_SHARED=yes \
        build install
 )
 
@@ -65,7 +64,7 @@ gcc -v
     do
         (
             cd $component
-            python setup.py build --reconfigure -j0 --prefix="$ADALIB_DIR" \
+            python setup.py build --reconfigure -j0 --prefix="$INSTALL_DIR" \
                --library-types=static,relocatable
             python setup.py install
         )

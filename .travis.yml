@@ -1,7 +1,10 @@
 env:
   global:
-    - ADALIB_DIR=$HOME/adalib
+    # Directory to contain binary packages, sources and build trees for
+    # dependencies (GNAT, GNATCOLL)
     - TOOLS_DIR=$HOME/build_tools
+
+    # Prefix in which to install dependencies
     - INSTALL_DIR=$HOME/install
 
 matrix:
