@@ -426,6 +426,21 @@ class Parser(object):
         :type: None|langkit.compiled_types.CompiledType
         """
 
+        self.pos_var = None
+        """
+        Variable to contain a token index (T.Token) during code generation.
+
+        Before this parser runs, this contains the index of the first token to
+        analyze. After it has run, it contains the next index after the last
+        token that was consumed by this parser.
+        """
+
+        self.res_var = None
+        """
+        Variable to contain the parser result (self.type) during code
+        generation.
+        """
+
     def traverse_create_vars(self, start_pos):
         """
         This method will traverse the parser tree and create variables for
@@ -521,6 +536,14 @@ class Parser(object):
         return cls.__name__.strip('_')
 
     def init_vars(self, pos_var=None, res_var=None):
+        """
+        Set or create variables for code generation.
+
+        :param None|VarDef pos_var: If provided, variable to use as
+            `self.pos_var`. Otherwise, create a new VarDef instance.
+        :param None|VarDef res_var: If provided, variable to use as
+            `self.res_var`. Otherwise, create a new VarDef instance.
+        """
         base_name = self.parser_cls_name().lower()
 
         self.pos_var = pos_var or VarDef('{}_pos'.format(base_name), T.Token)
