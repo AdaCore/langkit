@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import os.path
 import shutil
 import subprocess
 import sys
@@ -38,6 +39,14 @@ project Gen is
     end Compiler;
 end Gen;
 """
+
+
+# Determine where to find the root directory for Langkit sources
+langkit_root = os.environ.get('LANGKIT_ROOT_DIR')
+if not langkit_root:
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    testsuite_dir = os.path.dirname(test_dir)
+    langkit_root = os.path.dirname(testsuite_dir)
 
 
 def prepare_context(grammar, lexer=None, warning_set=default_warning_set,

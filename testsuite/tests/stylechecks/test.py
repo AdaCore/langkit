@@ -1,4 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-import langkit.stylechecks
-langkit.stylechecks.localmain()
+from langkit.stylechecks import main
+
+from utils import langkit_root
+
+
+main(langkit_root)
