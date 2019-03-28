@@ -261,7 +261,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
                --  Post_Tokens is the sequence that starts right after the last
                --  token of the node field, also sized from the unparser.
-               --  Beware of ghost nodes, which own to token.
+               --  Beware of ghost nodes, which own no token.
                Next_Token :=
                  (if Rewritten_Child.Is_Ghost
                   then Token_Start (Rewritten_Child)
