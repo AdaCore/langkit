@@ -9,17 +9,14 @@ import os.path
 import subprocess
 import sys
 
-import langkit
+from utils import langkit_root
 
 
 def python(script, *args):
     subprocess.check_call([sys.executable, script] + list(args))
 
 
-create_project_py = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(langkit.__file__))),
-    'scripts', 'create-project.py'
-)
+create_project_py = os.path.join(langkit_root, 'scripts', 'create-project.py')
 manage_py = os.path.join('mylang', 'manage.py')
 
 python(create_project_py, 'Mylang')
