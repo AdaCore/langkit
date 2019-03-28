@@ -11,6 +11,7 @@ handle, have a look at the testsuite in the stylechecks.tests module.
 
 from __future__ import (absolute_import, division, print_function)
 
+import argparse
 import ast
 import os
 import os.path
@@ -291,7 +292,6 @@ def check_generic(report, filename, content, lang):
     :param LanguageChecker lang: language checker corresponding to "text".
     :param str content: Text on which the checks must be performed.
     """
-
     # Line list for the current block of comments
     comment_block = []
 
@@ -633,46 +633,57 @@ def traverse(report, root, excludes):  # pragma: no cover
             check_file(report, os.path.relpath(path))
 
 
-def main(single_file, dirs, excludes):
+def main(langkit_root, files=[]):
     """
     Global purpose main procedure.
+
+    :param str langkit_root: Root directory for the Langkit source repository.
+    :param list[str] files: Source files to analyze. If empty, look for all
+        sources in the Langkit repositorynon.
     """
     report = Report(enable_colors=os.isatty(sys.stdout.fileno()))
-    if single_file:
-        check_file(report, single_file)
+
+    if files:
+        for f in args.files:
+            check_file(report, f)
     else:
+        os.chdir(langkit_root)
+        dirs = (os.path.join('contrib', 'python'),
+                os.path.join('langkit'),
+                os.path.join('scripts'),
+                os.path.join('testsuite'),
+                os.path.join('utils'))
+        excludes = (
+            '__pycache__',
+            os.path.join('contrib', 'python', 'build'),
+            os.path.join('langkit', 'support', 'obj'),
+            'out',
+            os.path.join('stylechecks', 'tests.py'),
+            os.path.join('testsuite', 'out'),
+        )
         for root in dirs:
             traverse(report, root, excludes)
+
     report.output()
 
 
-def localmain():
-    """
-    Local purpose main procedure, to be used in the testsuite and in the local
-    case when no single file argument is passed.
-    """
-    if sys.argv[1:]:
-        main(sys.argv[1], None, None)
-    else:
-        LANGKIT_DIR = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        )
-        os.chdir(LANGKIT_DIR)
-        dirs = (os.path.join(LANGKIT_DIR), )
-        excludes = (
-            b'__pycache__',
-            b'.git',
-            b'doc',
-            os.path.join(b'langkit', b'support', b'obj'),
-            b'misc',
-            os.path.join(b'contrib', b'python', b'build'),
-            b'out',
-            os.path.join(b'stylechecks', b'tests.py'),
-            os.path.join(b'testsuite', b'out'),
-            b'tmp',
-        )
-        main(None, dirs, excludes)
+args_parser = argparse.ArgumentParser(description="""
+    Check the coding style for the Langkit code base.
+""")
+args_parser.add_argument(
+    '--langkit-root',
+    default=os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+    help='Root directory for the Langkit source repository. Used to'
+         ' automatically look for source files to analyze. If not provided,'
+         ' default to a path relative to the `langkit.stylechecks` package.')
+args_parser.add_argument(
+    'files', nargs='*',
+    help='Source files to analyze. If none is provided, look for all sources'
+         ' in the Langkit repository.')
 
 
 if __name__ == '__main__':
-    localmain()
+    args = args_parser.parse_args()
+    main(args.langkit_root, args.files)
