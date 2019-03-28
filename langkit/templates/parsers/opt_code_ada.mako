@@ -15,6 +15,9 @@ if parser._booleanize:
 ${subparser.generate_code()}
 
 if ${subparser.pos_var} = No_Token_Index then
+    ## The subparser failed to match the input: produce result for the empty
+    ## sequence.
+
     % if parser._booleanize:
       % if base.is_bool_type:
          ${parser.res_var} := False;
@@ -37,7 +40,7 @@ if ${subparser.pos_var} = No_Token_Index then
            Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, 0);
         ${subparser.res_var}.Token_Start_Index := ${parser.start_pos} - 1;
         ${subparser.res_var}.Token_End_Index := No_Token_Index;
-         ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
+        ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
     % elif parser_type:
         ${subparser.res_var} :=
            ${parser_type.storage_nullexpr};
@@ -55,6 +58,9 @@ if ${subparser.pos_var} = No_Token_Index then
 
 % if parser._booleanize:
 else
+   ## The subparser succeeded: if this Opt parser must booleanize the result,
+   ## create a result for the "true" alternative.
+
    % if base.is_bool_type:
       ${parser.res_var} := True;
    % else:
