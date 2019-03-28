@@ -1,0 +1,4 @@
+Unparsing <HasErrorPresent foo.txt:1:1-1:6>:
+error
+main.adb: done
+Done
