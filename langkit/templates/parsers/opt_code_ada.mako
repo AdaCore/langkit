@@ -69,7 +69,7 @@ else
       ${parser.res_var}.Kind := ${alt_true.ada_kind_name};
       ${parser.res_var}.Unit := Parser.Unit;
       ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
-      ${parser.res_var}.Token_End_Index := No_Token_Index;
+      ${parser.res_var}.Token_End_Index := ${subparser.pos_var} - 1;
       ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
    % endif
 % endif
