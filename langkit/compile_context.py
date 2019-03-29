@@ -24,7 +24,9 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
-from langkit.utils import TopologicalSortError, topological_sort, memoized
+from langkit.utils import (
+    TopologicalSortError, topological_sort, memoized, memoized_with_default
+)
 
 
 compile_ctx = None
@@ -885,9 +887,40 @@ class CompileCtx(object):
     def compute_optional_field_info(self):
         """
         For every parse field, find out if it is an optional field or not, i.e.
-        whether it is ever produced from an Opt parser in the user grammar.
+        whether it is ever produced from a parser of the user grammar that can
+        create a null node.
         """
-        from langkit.parsers import Opt
+        from langkit.parsers import (
+            Opt, Or, Null, Defer, List, DontSkip, Skip, Predicate,
+            _Transform, _Extract
+        )
+
+        @memoized_with_default(False)
+        def can_produce_null(parser):
+            if isinstance(parser, Opt):
+                # If parser is an Opt parser and is not set to produce an enum
+                # alternative, it means that field is optional.
+                return not parser._booleanize
+            elif isinstance(parser, Null):
+                return True
+            elif isinstance(parser, Or):
+                return any(can_produce_null(p) for p in parser.parsers)
+            elif isinstance(parser, Defer):
+                return can_produce_null(parser.parser)
+            elif isinstance(parser, List):
+                return False
+            elif isinstance(parser, DontSkip):
+                return can_produce_null(parser.subparser)
+            elif isinstance(parser, Skip):
+                return False
+            elif isinstance(parser, Predicate):
+                return can_produce_null(parser.parser)
+            elif isinstance(parser, _Transform):
+                return False
+            elif isinstance(parser, _Extract):
+                return can_produce_null(parser.parser.parsers[parser.index])
+            else:
+                raise NotImplementedError("Unhandled parser {}".format(parser))
 
         all_parse_fields = [
             field
@@ -898,9 +931,7 @@ class CompileCtx(object):
         for field in all_parse_fields:
             field._is_optional = False
             for parser in field.parsers_from_transform:
-                # If parser is an Opt parser and is not set to produce an enum
-                # alternative, it means that field is optional.
-                if isinstance(parser, Opt) and not parser._booleanize:
+                if can_produce_null(parser):
                     field._is_optional = True
 
     def check_ple_unit_root(self):

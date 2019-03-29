@@ -1678,8 +1678,8 @@ class Field(BaseField):
 
         self._is_optional = None
         """
-        Whether this field is ever produced by an Opt parser in the user
-        grammar.
+        Whether this field is ever produced by a parser in the user grammar
+        which is allowed to return null nodes, meaning this field is optional.
 
         :type: bool
         """
@@ -1708,7 +1708,9 @@ class Field(BaseField):
     @property
     def is_optional(self):
         """
-        Return whether this field may be produced by an ``Opt`` parser.
+        Return whether this field is ever produced by a parser in the user
+        grammar which is allowed to return null nodes, meaning this field is
+        optional.
 
         :rtype: bool
         """
