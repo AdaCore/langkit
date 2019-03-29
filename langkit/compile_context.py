@@ -882,6 +882,27 @@ class CompileCtx(object):
                  value_names=[self.grammar_rule_api_name(n)
                               for n in self.grammar.user_defined_rules])
 
+    def compute_optional_field_info(self):
+        """
+        For every parse field, find out if it is an optional field or not, i.e.
+        whether it is ever produced from an Opt parser in the user grammar.
+        """
+        from langkit.parsers import Opt
+
+        all_parse_fields = [
+            field
+            for node_type in self.astnode_types
+            for field in node_type.get_parse_fields(include_inherited=False)
+        ]
+
+        for field in all_parse_fields:
+            field._is_optional = False
+            for parser in field.parsers_from_transform:
+                # If parser is an Opt parser and is not set to produce an enum
+                # alternative, it means that field is optional.
+                if isinstance(parser, Opt) and not parser._booleanize:
+                    field._is_optional = True
+
     def check_ple_unit_root(self):
         """
         Check that if the "ple_unit_root" node annotation is used, it is valid.
@@ -1599,6 +1620,8 @@ class CompileCtx(object):
                         auto_context=False),
             ASTNodePass('compute precise fields types',
                         lambda _, n: n.compute_precise_fields_types()),
+            GlobalPass('compute optional field info',
+                       CompileCtx.compute_optional_field_info),
             GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),

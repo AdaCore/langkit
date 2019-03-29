@@ -1,0 +1,4 @@
+Code generation was successful
+Field <ASTNode 28 Field(ExampleWrapper.opt_field)> is optional
+Field <ASTNode 29 Field(ExampleWrapper.non_opt_field)> is not optional
+Done

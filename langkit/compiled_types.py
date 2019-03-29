@@ -1676,6 +1676,14 @@ class Field(BaseField):
         :type: TypeSet
         """
 
+        self._is_optional = None
+        """
+        Whether this field is ever produced by an Opt parser in the user
+        grammar.
+
+        :type: bool
+        """
+
         self._index = None
         """
         0-based index for this parsing field in the owning AST node's children
@@ -1696,6 +1704,16 @@ class Field(BaseField):
         """
         assert self._precise_types is not None
         return self._precise_types
+
+    @property
+    def is_optional(self):
+        """
+        Return whether this field may be produced by an ``Opt`` parser.
+
+        :rtype: bool
+        """
+        assert self._is_optional is not None
+        return self._is_optional
 
     def _compute_precise_types(self):
         if self.null:
