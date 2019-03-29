@@ -1,4 +1,9 @@
 Code generation was successful
-Field <ASTNode 28 Field(ExampleWrapper.opt_field)> is optional
-Field <ASTNode 29 Field(ExampleWrapper.non_opt_field)> is not optional
+Field <ASTNode 28 Field(ExampleWrapper.field_opt)> is optional
+Field <ASTNode 29 Field(ExampleWrapper.field_or)> is optional
+Field <ASTNode 30 Field(ExampleWrapper.field_defer)> is optional
+Field <ASTNode 31 Field(ExampleWrapper.field_null)> is optional
+Field <ASTNode 32 Field(ExampleWrapper.field_dont_skip)> is optional
+Field <ASTNode 33 Field(ExampleWrapper.field_opt_bool)> is not optional
+Field <ASTNode 34 Field(ExampleWrapper.field_transform)> is not optional
 Done
