@@ -289,6 +289,11 @@ class ManageScript(object):
             help='Installation directory.'
         )
 
+        install_parser.add_argument(
+            '--force', '-f', action='store_true',
+            help='Force installation, overwrite files.'
+        )
+
         ##########
         # Setenv #
         ##########
@@ -831,6 +836,9 @@ class ManageScript(object):
             )))
         else:
             base_argv.append('--mode=usage')
+
+        if args.force:
+            base_argv.append('-f')
 
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
