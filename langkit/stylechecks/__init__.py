@@ -633,13 +633,16 @@ def traverse(report, root, excludes):  # pragma: no cover
             check_file(report, os.path.relpath(path))
 
 
-def main(langkit_root, files=[]):
+def main(src_root, files, dirs, excludes):
     """
     Global purpose main procedure.
 
     :param str langkit_root: Root directory for the Langkit source repository.
     :param list[str] files: Source files to analyze. If empty, look for all
-        sources in the Langkit repositorynon.
+        sources in the Langkit repository.
+    :param list[str] dirs: List of directories in which to find sources to
+        check.
+    :param list[str] excludes: List of directories to exclude from the search.
     """
     report = Report(enable_colors=os.isatty(sys.stdout.fileno()))
 
@@ -647,24 +650,29 @@ def main(langkit_root, files=[]):
         for f in args.files:
             check_file(report, f)
     else:
-        os.chdir(langkit_root)
-        dirs = (os.path.join('contrib', 'python'),
-                os.path.join('langkit'),
-                os.path.join('scripts'),
-                os.path.join('testsuite'),
-                os.path.join('utils'))
-        excludes = (
-            '__pycache__',
-            os.path.join('contrib', 'python', 'build'),
-            os.path.join('langkit', 'support', 'obj'),
-            'out',
-            os.path.join('stylechecks', 'tests.py'),
-            os.path.join('testsuite', 'out'),
-        )
+        os.chdir(src_root)
         for root in dirs:
             traverse(report, root, excludes)
 
     report.output()
+
+
+def langkit_main(langkit_root, files=[]):
+    """
+    Run main() on Langkit sources.
+    """
+    dirs = [os.path.join('contrib', 'python'),
+            os.path.join('langkit'),
+            os.path.join('scripts'),
+            os.path.join('testsuite'),
+            os.path.join('utils')]
+    excludes = ['__pycache__',
+                os.path.join('contrib', 'python', 'build'),
+                os.path.join('langkit', 'support', 'obj'),
+                'out',
+                os.path.join('stylechecks', 'tests.py'),
+                os.path.join('testsuite', 'out')]
+    main(langkit_root, files, dirs, excludes)
 
 
 args_parser = argparse.ArgumentParser(description="""
@@ -686,4 +694,4 @@ args_parser.add_argument(
 
 if __name__ == '__main__':
     args = args_parser.parse_args()
-    main(args.langkit_root, args.files)
+    langkit_main(args.langkit_root, args.files)
