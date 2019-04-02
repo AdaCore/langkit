@@ -1,0 +1,89 @@
+TYPE_FOO_NODE
+  abstract
+  is root node
+  derivations:
+    TYPE_FOO_NODE_BASE_LIST
+    TYPE_VAR_DECL
+    TYPE_NAME
+    TYPE_EXPR
+    TYPE_NULL_NODE
+
+TYPE_EXPR
+  abstract
+  base = TYPE_FOO_NODE
+  derivations:
+    TYPE_ADDITION
+    TYPE_NUMBER
+    TYPE_REF
+
+TYPE_ADDITION
+  concrete
+  base = TYPE_EXPR
+  kind = FOO_ADDITION
+  derivations:
+    <none>
+
+TYPE_NUMBER
+  concrete
+  base = TYPE_EXPR
+  kind = FOO_NUMBER
+  derivations:
+    <none>
+
+TYPE_REF
+  concrete
+  base = TYPE_EXPR
+  kind = FOO_REF
+  derivations:
+    <none>
+
+TYPE_FOO_NODE_BASE_LIST
+  abstract
+  base = TYPE_FOO_NODE
+  derivations:
+    TYPE_VAR_DECL_LIST
+
+TYPE_VAR_DECL_LIST
+  concrete
+  base = TYPE_FOO_NODE_BASE_LIST
+  kind = FOO_VAR_DECL_LIST
+  derivations:
+    <none>
+
+TYPE_NAME
+  concrete
+  base = TYPE_FOO_NODE
+  kind = FOO_NAME
+  derivations:
+    <none>
+
+TYPE_NULL_NODE
+  abstract
+  base = TYPE_FOO_NODE
+  derivations:
+    TYPE_NULL_PRESENT
+    TYPE_NULL_ABSENT
+
+TYPE_NULL_ABSENT
+  concrete
+  base = TYPE_NULL_NODE
+  kind = FOO_NULL_ABSENT
+  derivations:
+    <none>
+
+TYPE_NULL_PRESENT
+  concrete
+  base = TYPE_NULL_NODE
+  kind = FOO_NULL_PRESENT
+  derivations:
+    <none>
+
+TYPE_VAR_DECL
+  concrete
+  base = TYPE_FOO_NODE
+  kind = FOO_VAR_DECL
+  derivations:
+    <none>
+
+Done.
+Done
