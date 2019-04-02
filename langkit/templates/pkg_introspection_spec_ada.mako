@@ -32,6 +32,18 @@ package ${ada_lib_name}.Introspection is
       ${', '.join(n.introspection_name for n in ctx.astnode_types)}
    );
 
+   type Node_Type_Id_Array is array (Positive range <>) of Node_Type_Id;
+
+   function Is_Abstract (Id : Node_Type_Id) return Boolean;
+   --  Return whether Id designates an abstract node
+
+   function Is_Concrete (Id : Node_Type_Id) return Boolean
+   is (not Is_Abstract (Id));
+
+   function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name};
+   --  Return the node kind corresponding to Id. This raises a Constraint_Error
+   --  if Id designates an abstract node.
+
    -------------------
    -- Syntax fields --
    -------------------

@@ -7,6 +7,54 @@ use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
+   type Node_Type_Descriptor (Is_Abstract : Boolean) is record
+      case Is_Abstract is
+         when False =>
+            Kind : ${root_node_kind_name};
+            --  Kind corresponding this this node type
+         when True =>
+            null;
+      end case;
+   end record;
+
+   type Node_Type_Descriptor_Access is access constant Node_Type_Descriptor;
+
+   % for n in ctx.astnode_types:
+   Desc_For_${n.kwless_raw_name} : aliased constant Node_Type_Descriptor := (
+      Is_Abstract => ${n.abstract}
+      % if not n.abstract:
+      , Kind => ${n.ada_kind_name}
+      % endif
+   );
+   % endfor
+
+   Node_Type_Descriptors : constant
+      array (Node_Type_Id) of Node_Type_Descriptor_Access
+   := (${', '.join("Desc_For_{}'Access".format(n.kwless_raw_name)
+                   for n in ctx.astnode_types)});
+
+   -----------------
+   -- Is_Abstract --
+   -----------------
+
+   function Is_Abstract (Id : Node_Type_Id) return Boolean is
+   begin
+      return Node_Type_Descriptors (Id).Is_Abstract;
+   end Is_Abstract;
+
+   --------------
+   -- Kind_For --
+   --------------
+
+   function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name} is
+      Desc : Node_Type_Descriptor renames Node_Type_Descriptors (Id).all;
+   begin
+      if Desc.Is_Abstract then
+         raise Constraint_Error with "trying to get kind for abstract node";
+      end if;
+      return Desc.Kind;
+   end Kind_For;
+
    ----------------
    -- Field_Name --
    ----------------
