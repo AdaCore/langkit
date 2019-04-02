@@ -21,6 +21,17 @@ with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 
 package ${ada_lib_name}.Introspection is
 
+   ----------------
+   -- Node types --
+   ----------------
+
+   --  Unlike Analysis.${root_node_kind_name}, the following enumeration
+   --  contains entries for abstract nodes.
+
+   type Node_Type_Id is (
+      ${', '.join(n.introspection_name for n in ctx.astnode_types)}
+   );
+
    -------------------
    -- Syntax fields --
    -------------------

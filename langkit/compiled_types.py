@@ -2632,6 +2632,17 @@ class ASTNodeType(BaseStructType):
         else:
             return self.ada_kind_name + '_Range'
 
+    @property
+    def introspection_name(self):
+        """
+        Return the name of the Ada enumeraton to represent this node type in
+        the introspection API.
+
+        :rtype: str
+        """
+        return (names.Name('Type') +
+                self.kwless_raw_name).camel_with_underscores
+
     def value_type_name(self):
         """
         Return the name of the Ada type for the record that implements this AST
