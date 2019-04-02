@@ -28,9 +28,13 @@ package ${ada_lib_name}.Introspection is
    --  Unlike Analysis.${root_node_kind_name}, the following enumeration
    --  contains entries for abstract nodes.
 
-   type Node_Type_Id is (
-      ${', '.join(n.introspection_name for n in ctx.astnode_types)}
+   type Any_Node_Type_Id is (
+      None, ${', '.join(n.introspection_name for n in ctx.astnode_types)}
    );
+
+   subtype Node_Type_Id is Any_Node_Type_Id
+      range ${ctx.astnode_types[0].introspection_name}
+            .. ${ctx.astnode_types[-1].introspection_name};
 
    type Node_Type_Id_Array is array (Positive range <>) of Node_Type_Id;
 
@@ -43,6 +47,16 @@ package ${ada_lib_name}.Introspection is
    function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name};
    --  Return the node kind corresponding to Id. This raises a Constraint_Error
    --  if Id designates an abstract node.
+
+   function Is_Root_Node (Id : Node_Type_Id) return Boolean;
+   --  Return whether Id is a reference for the root node type
+
+   function Base_Type (Id : Node_Type_Id) return Node_Type_Id;
+   --  If Id is the root node type, raise a Constaint_Error. Otherwise, return
+   --  a reference to Id's base type.
+
+   function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array;
+   --  Return type references for all direct derivations for Id
 
    -------------------
    -- Syntax fields --
