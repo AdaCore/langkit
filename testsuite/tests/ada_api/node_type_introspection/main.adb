@@ -5,14 +5,22 @@ with Libfoolang.Introspection; use Libfoolang.Introspection;
 
 procedure Main is
 begin
+   if Lookup_DSL_Name ("unknown") /= None then
+      raise Program_Error;
+   end if;
+
    for Id in Node_Type_Id'Range loop
-      Put_Line (Id'Image);
+      Put_Line (DSL_Name (Id) & " (" & Id'Image & ")");
       Put_Line ("  " & (if Is_Abstract (Id) then "abstract" else "concrete"));
+
+      if Id /= Lookup_DSL_Name (DSL_Name (Id)) then
+         raise Program_Error;
+      end if;
 
       if Is_Root_Node (Id) then
          Put_Line ("  is root node");
       else
-         Put_Line ("  base = " & Base_Type (Id)'Image);
+         Put_Line ("  base = " & DSL_Name (Base_Type (Id)));
       end if;
 
       if Is_Concrete (Id) then
@@ -27,7 +35,7 @@ begin
             Put_Line ("    <none>");
          end if;
          for D of Derivations loop
-            Put_Line ("    " & D'Image);
+            Put_Line ("    " & DSL_Name (D));
          end loop;
       end;
 

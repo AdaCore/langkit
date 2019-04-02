@@ -2,6 +2,10 @@
 
 <% list_kind_range = ctx.generic_list_type.ada_kind_range_name %>
 
+with Ada.Containers.Hashed_Maps;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded.Hash;
+
 with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
 
@@ -16,6 +20,9 @@ package body ${ada_lib_name}.Introspection is
 
       Derivations : Node_Type_Id_Array (1 .. Derivations_Count);
       --  List of references for all node types that derives from this
+
+      DSL_Name : Unbounded_String;
+      --  Name for this type in the Langkit DSL
 
       case Is_Abstract is
          when False =>
@@ -38,7 +45,9 @@ package body ${ada_lib_name}.Introspection is
          ${('({})'.format(', '.join(
             '{} => {}'.format(i, child.introspection_name)
             for i, child in enumerate(n.subclasses, 1)
-         )) if n.subclasses else '(1 .. 0 => <>)')}
+         )) if n.subclasses else '(1 .. 0 => <>)')},
+
+      DSL_Name => To_Unbounded_String ("${n.dsl_name}")
 
       % if not n.abstract:
       , Kind => ${n.ada_kind_name}
@@ -50,6 +59,42 @@ package body ${ada_lib_name}.Introspection is
       array (Node_Type_Id) of Node_Type_Descriptor_Access
    := (${', '.join("Desc_For_{}'Access".format(n.kwless_raw_name)
                    for n in ctx.astnode_types)});
+
+   package Node_Type_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => Node_Type_Id,
+      Equivalent_Keys => "=",
+      Hash            => Hash);
+
+   DSL_Name_To_Node_Type : Node_Type_Id_Maps.Map;
+   --  Lookup table for DSL names to node type references. Created at
+   --  elaboration time and never updated after.
+
+   --------------
+   -- DSL_Name --
+   --------------
+
+   function DSL_Name (Id : Node_Type_Id) return String is
+   begin
+      return To_String (Node_Type_Descriptors (Id).DSL_Name);
+   end DSL_Name;
+
+   ---------------------
+   -- Lookup_DSL_Name --
+   ---------------------
+
+   function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id is
+      use Node_Type_Id_Maps;
+
+      Position : constant Cursor :=
+         DSL_Name_To_Node_Type.Find (To_Unbounded_String (Name));
+   begin
+      if Has_Element (Position) then
+         return Element (Position);
+      else
+         return None;
+      end if;
+   end Lookup_DSL_Name;
 
    -----------------
    -- Is_Abstract --
@@ -329,4 +374,9 @@ package body ${ada_lib_name}.Introspection is
       % endif
    end Token_Node_Kind;
 
+begin
+   for D in Node_Type_Descriptors'Range loop
+      DSL_Name_To_Node_Type.Insert
+        (Node_Type_Descriptors (D).DSL_Name, D);
+   end loop;
 end ${ada_lib_name}.Introspection;
