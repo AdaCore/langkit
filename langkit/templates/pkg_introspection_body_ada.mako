@@ -7,7 +7,16 @@ use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
-   type Node_Type_Descriptor (Is_Abstract : Boolean) is record
+   type Node_Type_Descriptor
+     (Is_Abstract       : Boolean;
+      Derivations_Count : Natural)
+   is record
+      Base_Type : Any_Node_Type_Id;
+      --  Reference to the node type from which this derives
+
+      Derivations : Node_Type_Id_Array (1 .. Derivations_Count);
+      --  List of references for all node types that derives from this
+
       case Is_Abstract is
          when False =>
             Kind : ${root_node_kind_name};
@@ -21,7 +30,16 @@ package body ${ada_lib_name}.Introspection is
 
    % for n in ctx.astnode_types:
    Desc_For_${n.kwless_raw_name} : aliased constant Node_Type_Descriptor := (
-      Is_Abstract => ${n.abstract}
+      Is_Abstract       => ${n.abstract},
+      Derivations_Count => ${len(n.subclasses)},
+
+      Base_Type   => ${n.base.introspection_name if n.base else 'None'},
+      Derivations =>
+         ${('({})'.format(', '.join(
+            '{} => {}'.format(i, child.introspection_name)
+            for i, child in enumerate(n.subclasses, 1)
+         )) if n.subclasses else '(1 .. 0 => <>)')}
+
       % if not n.abstract:
       , Kind => ${n.ada_kind_name}
       % endif
@@ -54,6 +72,36 @@ package body ${ada_lib_name}.Introspection is
       end if;
       return Desc.Kind;
    end Kind_For;
+
+   ------------------
+   -- Is_Root_Node --
+   ------------------
+
+   function Is_Root_Node (Id : Node_Type_Id) return Boolean is
+   begin
+      return Id = ${T.root_node.introspection_name};
+   end Is_Root_Node;
+
+   ---------------
+   -- Base_Type --
+   ---------------
+
+   function Base_Type (Id : Node_Type_Id) return Node_Type_Id is
+   begin
+      if Is_Root_Node (Id) then
+         raise Constraint_Error with "trying to get base type of root node";
+      end if;
+      return Node_Type_Descriptors (Id).Base_Type;
+   end Base_Type;
+
+   -------------------
+   -- Derived_Types --
+   -------------------
+
+   function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array is
+   begin
+      return Node_Type_Descriptors (Id).Derivations;
+   end Derived_Types;
 
    ----------------
    -- Field_Name --
