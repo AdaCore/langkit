@@ -85,6 +85,49 @@ def get_cpu_count():
         return 1
 
 
+class LibraryTypes(object):
+
+    types = {'static', 'static-pic', 'relocatable'}
+
+    def __init__(self, static=False, static_pic=False, relocatable=False):
+        self.static = static
+        self.static_pic = static_pic
+        self.relocatable = relocatable
+
+    def __str__(self):
+        return ','.join(
+            name for enabled, name in [(self.relocatable, 'relocatable'),
+                                       (self.static, 'static'),
+                                       (self.static_pic, 'static-pic')]
+            if enabled)
+
+    @classmethod
+    def parse(cls, arg):
+        """
+        Decode the value passed to the --library-types command-line argument.
+
+        :param str arg: Value to decode.
+        :rtype: LibraryTypes
+        """
+        library_types = arg.split(',')
+        library_type_set = set(library_types)
+
+        # Make sure that all requested library types are supported
+        unsupported = library_type_set - cls.types
+        if unsupported:
+            raise ValueError('Unsupported library types: {}'
+                             .format(', '.join(sorted(unsupported))))
+
+        # Make sure that the given list of library types contains no double
+        # entries.
+        if len(library_types) != len(library_type_set):
+            raise ValueError('Library types cannot be requested twice')
+
+        return cls(static='static' in library_type_set,
+                   static_pic='static-pic' in library_type_set,
+                   relocatable='relocatable' in library_type_set)
+
+
 class ManageScript(object):
 
     BUILD_MODES = ('dev', 'prod')
@@ -122,22 +165,11 @@ class ManageScript(object):
                  ' default, use "build" in the current directory.'
         )
         args_parser.add_argument(
-            '--enable-static', action='store_true',
-            help='Enable the generation of static libraries (default:'
-                 ' disabled).'
-        )
-        args_parser.add_argument(
-            '--disable-static', action='store_false', dest='enable_static',
-            help='Disable the generation of static libraries.'
-        )
-        args_parser.add_argument(
-            '--enable-shared', action='store_true', default=True,
-            help='Enable the generation (and testing) of shared libraries'
-                 ' (default: enabled).'
-        )
-        args_parser.add_argument(
-            '--disable-shared', action='store_false', dest='enable_shared',
-            help='Disable the generation (and testing) of shared libraries.'
+            '--library-types', default=LibraryTypes(relocatable=True),
+            type=LibraryTypes.parse,
+            help='Comma-separated list of library types to build (relocatable,'
+                 ' static-pic and pic). By default, build only shared'
+                 ' libraries.'
         )
         args_parser.add_argument(
             '--verbosity', '-v', nargs='?',
@@ -665,21 +697,24 @@ class ManageScript(object):
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
 
-        :param bool is_library: If true, build both relocatable and static
-            libraries (depending on modes enabled in "args"). Otherwise, use
-            relocatable if available or static mode otherwise.
+        :param bool is_library: If true, build all modes (depending on modes
+            enabled in `args`). Otherwise, use relocatable if allowed,
+            static-pic otherwise and static otherwise.
 
-        :return: Whether to build in shared mode and whether to build static
-            mode. Only one is True when is_library is False.
-        :rtype: (bool, bool)
+        :return: Whether to build in 1) shared mode 2) static-pic mode 3)
+            static mode. Only one is True when is_library is False.
+        :rtype: (bool, bool, bool)
         """
-        # The basic principle is: build shared unless disabled and build static
-        # unless disabled. But for programs, we can build only one mode: in
-        # this case, shared has priority over static.
-        build_shared = args.enable_shared
-        build_static = (args.enable_static and
-                        (is_library or not build_shared))
-        return (build_shared, build_static)
+        # Build libraries for all requested library types.
+        #
+        # Program are built only once, so build them as relocatable if
+        # allowed, otherwise as static-pic if allowed, otherwise as static.
+        build_shared = args.library_types.relocatable
+        build_static_pic = (args.library_types.static_pic and
+                            (is_library or not build_shared))
+        build_static = (args.library_types.static and
+                        (is_library or not build_static_pic))
+        return (build_shared, build_static_pic, build_static)
 
     def gpr_scenario_vars(self, args, build_mode=None,
                           library_type='relocatable'):
@@ -758,9 +793,12 @@ class ManageScript(object):
             argv.extend(gargs)
             self.check_call(args, 'Build', argv)
 
-        build_shared, build_static = self.what_to_build(args, is_library)
+        build_shared, build_static_pic, build_static = self.what_to_build(
+            args, is_library)
         if build_shared:
             run('relocatable')
+        if build_static_pic:
+            run('static-pic')
         if build_static:
             run('static')
 
@@ -805,11 +843,14 @@ class ManageScript(object):
 
         # Install the static libraries first, so that in the resulting project
         # files, "static" is the default library type.
-        build_shared, build_static = self.what_to_build(args, is_library)
-        if build_static:
-            run('static')
+        build_shared, build_static_pic, build_static = self.what_to_build(
+            args, is_library)
         if build_shared:
             run('relocatable')
+        if build_static_pic:
+            run('static-pic')
+        if build_static:
+            run('static')
 
     def do_build(self, args):
         """

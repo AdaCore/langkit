@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 import argparse
 
 from langkit.compile_context import Verbosity
-from langkit.libmanage import ManageScript, get_cpu_count
+from langkit.libmanage import LibraryTypes, ManageScript, get_cpu_count
 
 
 def main():
@@ -20,22 +20,11 @@ def main():
              ' default, use "build" in the current directory.'
     )
     args_parser.add_argument(
-        '--enable-static', action='store_true',
-        help='Enable the generation of static libraries (default:'
-             ' disabled)'
-    )
-    args_parser.add_argument(
-        '--disable-static', action='store_false', dest='enable_static',
-        help='Disable the generation of static libraries'
-    )
-    args_parser.add_argument(
-        '--enable-shared', action='store_true', default=True,
-        help='Enable the generation (and testing) of shared libraries'
-             ' (default: enabled)'
-    )
-    args_parser.add_argument(
-        '--disable-shared', action='store_false', dest='enable_shared',
-        help='Disable the generation (and testing) of shared libraries'
+        '--library-types', default=LibraryTypes(relocatable=True),
+        type=LibraryTypes.parse,
+        help='Comma-separated list of library types to build (relocatable,'
+             ' static-pic and pic). By default, build only shared'
+             ' libraries.'
     )
     args_parser.add_argument(
         '--verbosity', '-v', nargs='?',
@@ -90,11 +79,8 @@ def main():
     args = args_parser.parse_args()
 
     argv = ['-E', '--build-dir={}'.format(args.build_dir),
-            '--verbosity={}'.format(args.verbosity)]
-    if args.enable_static:
-        argv.append('--enable-static')
-    if not args.enable_shared:
-        argv.append('--disable-shared')
+            '--verbosity={}'.format(args.verbosity),
+            '--library-types={}'.format(args.library_types)]
 
     argv.append(args.cmd)
     if args.cmd == 'build-langkit-support':
