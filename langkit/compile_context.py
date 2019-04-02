@@ -24,9 +24,8 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
-from langkit.utils import (
-    TopologicalSortError, topological_sort, memoized, memoized_with_default
-)
+from langkit.utils import (TopologicalSortError, memoized,
+                           memoized_with_default, topological_sort)
 
 
 compile_ctx = None
