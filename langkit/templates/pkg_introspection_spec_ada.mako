@@ -38,6 +38,13 @@ package ${ada_lib_name}.Introspection is
 
    type Node_Type_Id_Array is array (Positive range <>) of Node_Type_Id;
 
+   function DSL_Name (Id : Node_Type_Id) return String;
+   --  Return the name corresponding to Id in the Langkit DSL
+
+   function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id;
+   --  Look for the node type for which Name is in the Lankgit DSL. Return it
+   --  if found, otherwise return None.
+
    function Is_Abstract (Id : Node_Type_Id) return Boolean;
    --  Return whether Id designates an abstract node
 
