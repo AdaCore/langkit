@@ -322,6 +322,10 @@ class ManageScript(object):
             'install-dir',
             help='Installation directory.'
         )
+        self.install_lksp_parser.add_argument(
+            '--force', '-f', action='store_true',
+            help='Force installation, overwrite files.'
+        )
 
         self.add_build_args(self.build_lksp_parser)
         self.add_build_args(self.install_lksp_parser)
