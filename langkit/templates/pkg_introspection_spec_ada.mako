@@ -55,6 +55,9 @@ package ${ada_lib_name}.Introspection is
    --  Return the node kind corresponding to Id. This raises a Constraint_Error
    --  if Id designates an abstract node.
 
+   function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id;
+   --  Return the node type corresponding to the given node Kind
+
    function Is_Root_Node (Id : Node_Type_Id) return Boolean;
    --  Return whether Id is a reference for the root node type
 

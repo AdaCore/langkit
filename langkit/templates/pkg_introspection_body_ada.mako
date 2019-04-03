@@ -70,6 +70,12 @@ package body ${ada_lib_name}.Introspection is
    --  Lookup table for DSL names to node type references. Created at
    --  elaboration time and never updated after.
 
+   Kind_To_Id : constant array (${root_node_kind_name}) of Node_Type_Id := (
+      ${', '.join('{n.ada_kind_name} => {n.introspection_name}'.format(n=n)
+                  for n in ctx.astnode_types
+                  if not n.abstract)}
+   );
+
    --------------
    -- DSL_Name --
    --------------
@@ -117,6 +123,15 @@ package body ${ada_lib_name}.Introspection is
       end if;
       return Desc.Kind;
    end Kind_For;
+
+   -----------------
+   -- Id_For_Kind --
+   -----------------
+
+   function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id is
+   begin
+      return Kind_To_Id (Kind);
+   end Id_For_Kind;
 
    ------------------
    -- Is_Root_Node --
