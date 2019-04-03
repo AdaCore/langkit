@@ -23,7 +23,7 @@ def main():
         '--library-types', default=LibraryTypes(relocatable=True),
         type=LibraryTypes.parse,
         help='Comma-separated list of library types to build (relocatable,'
-             ' static-pic and pic). By default, build only shared'
+             ' static-pic and static). By default, build only shared'
              ' libraries.'
     )
     args_parser.add_argument(
