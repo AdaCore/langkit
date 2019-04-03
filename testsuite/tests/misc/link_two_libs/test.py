@@ -38,7 +38,7 @@ for lang in ('Foo', 'Bar'):
     python(manage_py, '-vnone',
            # To simplify this test (in particular environment setup), do a
            # static link.
-           '--disable-shared', '--enable-static',
+           '--library-types=static',
 
            # Don't generate a project for Langkit_Support as we want to use the
            # one we built earlier.
