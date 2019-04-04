@@ -4,6 +4,22 @@ with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 
 procedure Main is
+
+   procedure Assert (Predicate : Boolean; Message : String);
+   --  Print Message and raise a Program_Error if Predicate is false
+
+   ------------
+   -- Assert --
+   ------------
+
+   procedure Assert (Predicate : Boolean; Message : String) is
+   begin
+      if not Predicate then
+         Put_Line ("Error: " & Message);
+         raise Program_Error;
+      end if;
+   end Assert;
+
 begin
    if Lookup_DSL_Name ("unknown") /= None then
       raise Program_Error;
@@ -41,6 +57,18 @@ begin
 
       New_Line;
    end loop;
+
+   Assert (Is_Derived_From (Type_Foo_Node, Type_Foo_Node),
+           "root derives from root");
+
+   Assert (Is_Derived_From (Type_Expr, Type_Foo_Node),
+           "expr derives from root");
+
+   Assert (Is_Derived_From (Type_Addition, Type_Foo_Node),
+           "addition derives from root");
+
+   Assert (not Is_Derived_From (Type_Ref, Type_Number),
+           "ref does not derive from number");
 
    Put_Line ("Done.");
 end Main;
