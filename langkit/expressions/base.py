@@ -773,6 +773,30 @@ class AbstractExpression(Frozable):
         from langkit.expressions.boolean import Eq
         return Eq(self, other)
 
+    @Frozable.protect
+    def __ne__(self, other):
+        """
+        Return the expression Not(Eq(self, other)). Be careful when using this
+        because, just as for '==', the '!=' operator priority in python is
+        lower than the '&' and '|' operators priority that we use for logic.
+        So it means that::
+
+            A != B | B != C
+
+        is actually interpreted as::
+
+            A != (B | B) != C
+
+        and not as what you would expect::
+
+            (A != B) | (B != C)
+
+        So be careful to parenthesize your expressions, or use non operator
+        overloaded boolean operators.
+        """
+        from langkit.expressions.boolean import Eq, Not
+        return Not(Eq(self, other))
+
 
 def dsl_document(cls):
     """
