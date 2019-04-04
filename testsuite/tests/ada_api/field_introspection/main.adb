@@ -10,7 +10,8 @@ begin
 
       Put_Line ("   Fields (with abstract ones):");
       for F of Fields (Id) loop
-         Put_Line ("   field " & Field_Name (F));
+         Put_Line ("   field " & Field_Name (F)
+                   & " (" & DSL_Name (Field_Type (F)) & ")");
       end loop;
       New_Line;
 
