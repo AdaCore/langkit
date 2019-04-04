@@ -340,6 +340,23 @@ package body ${ada_lib_name}.Introspection is
       return Node_Type_Descriptors (Id).Derivations;
    end Derived_Types;
 
+   ---------------------
+   -- Is_Derived_From --
+   ---------------------
+
+   function Is_Derived_From (Id, Parent : Node_Type_Id) return Boolean is
+      Cursor : Any_Node_Type_Id := Id;
+   begin
+      while Cursor /= None loop
+         if Cursor = Parent then
+            return True;
+         end if;
+
+         Cursor := Node_Type_Descriptors (Cursor).Base_Type;
+      end loop;
+      return False;
+   end Is_Derived_From;
+
    --------------------
    -- Node_Data_Name --
    --------------------
