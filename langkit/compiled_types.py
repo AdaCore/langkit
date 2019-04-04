@@ -304,21 +304,31 @@ class AbstractNodeData(object):
         return self._abstract
 
     @property
+    def base(self):
+        """
+        If this field overrides an inherited one in a base class, return the
+        inherited one, otherwise return None.
+
+        :rtype: AbstractNodeData|None
+        """
+        assert self._name and self.struct and self.struct.is_ast_node
+
+        # Look for a potential field which has the same name as `self` in the
+        # base struct.
+        name_key = self._name.lower
+        parent_cls = self.struct.base
+        parent_fields = (parent_cls.get_abstract_node_data_dict()
+                         if parent_cls else {})
+        return parent_fields.get(name_key, None)
+
+    @property
     def is_overriding(self):
         """
         Return whether this field overrides an inheritted one in a base class.
 
         :rtype: bool
         """
-        from langkit.expressions import PropertyDef
-
-        assert self._name and self.struct and self.struct.is_ast_node
-        parent_cls = self.struct.base
-        properties_to_override = ([p._name
-                                   for p in parent_cls.get_properties()]
-                                  if parent_cls else [])
-        return (isinstance(self, PropertyDef) and
-                self._name in properties_to_override)
+        return self.base is not None
 
     @property
     def uses_entity_info(self):
