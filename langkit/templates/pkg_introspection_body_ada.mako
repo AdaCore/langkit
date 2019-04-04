@@ -9,11 +9,38 @@ with Ada.Strings.Unbounded.Hash;
 with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
 
+<%def name="return_program_error()">
+   pragma Warnings (Off, "value not in range of type");
+   return (raise Program_Error);
+   pragma Warnings (On, "value not in range of type");
+</%def>
+
 package body ${ada_lib_name}.Introspection is
+
+   type Node_Field_Descriptor (Is_Abstract_Or_Null : Boolean) is record
+      Field : Field_Reference;
+      --  Reference to the field this describes
+
+      --  Only non-null concrete fields are assigned an index
+
+      case Is_Abstract_Or_Null is
+         when False =>
+            Index : Positive;
+            --  Index for this field
+
+         when True =>
+            null;
+      end case;
+   end record;
+
+   type Node_Field_Descriptor_Access is access constant Node_Field_Descriptor;
+   type Node_Field_Descriptor_Array is
+      array (Positive range <>) of Node_Field_Descriptor_Access;
 
    type Node_Type_Descriptor
      (Is_Abstract       : Boolean;
-      Derivations_Count : Natural)
+      Derivations_Count : Natural;
+      Fields_Count      : Natural)
    is record
       Base_Type : Any_Node_Type_Id;
       --  Reference to the node type from which this derives
@@ -24,10 +51,20 @@ package body ${ada_lib_name}.Introspection is
       DSL_Name : Unbounded_String;
       --  Name for this type in the Langkit DSL
 
+      Inherited_Fields : Natural;
+      --  Number of syntax field inherited from the base type
+
+      Fields : Node_Field_Descriptor_Array (1 .. Fields_Count);
+      --  For regular node types, list of syntax fields that are specific for
+      --  this derivation (i.e. excluding fields from the base type).
+
+      --  Only concrete nodes are assigned a node kind
+
       case Is_Abstract is
          when False =>
             Kind : ${root_node_kind_name};
             --  Kind corresponding this this node type
+
          when True =>
             null;
       end case;
@@ -36,9 +73,33 @@ package body ${ada_lib_name}.Introspection is
    type Node_Type_Descriptor_Access is access constant Node_Type_Descriptor;
 
    % for n in ctx.astnode_types:
+   <%
+      fields = n.get_parse_fields(include_inherited=False)
+
+      if n.is_root_node:
+         inherited_fields = []
+      else:
+         inherited_fields = n.base.get_parse_fields(
+            predicate=lambda f: not (f.abstract or f.null),
+            include_inherited=True)
+   %>
+
+   % for f in fields:
+   ${f.name}_For_${n.kwless_raw_name} : aliased constant Node_Field_Descriptor
+   := (
+      Is_Abstract_Or_Null => ${f.abstract or f.null},
+      Field               => ${(f.base or f).introspection_enum_literal}
+
+      % if not f.abstract and not f.null:
+         , Index => ${f.index + 1}
+      % endif
+   );
+   % endfor
+
    Desc_For_${n.kwless_raw_name} : aliased constant Node_Type_Descriptor := (
       Is_Abstract       => ${n.abstract},
       Derivations_Count => ${len(n.subclasses)},
+      Fields_Count      => ${len(fields)},
 
       Base_Type   => ${n.base.introspection_name if n.base else 'None'},
       Derivations =>
@@ -47,7 +108,18 @@ package body ${ada_lib_name}.Introspection is
             for i, child in enumerate(n.subclasses, 1)
          )) if n.subclasses else '(1 .. 0 => <>)')},
 
-      DSL_Name => To_Unbounded_String ("${n.dsl_name}")
+      DSL_Name => To_Unbounded_String ("${n.dsl_name}"),
+
+      Inherited_Fields => ${len(inherited_fields)},
+      Fields           => (
+         % if fields:
+            ${', '.join("{} => {}_For_{}'Access"
+                        .format(i, f.name, n.kwless_raw_name)
+                        for i, f in enumerate(fields, 1))}
+         % else:
+            1 .. 0 => <>
+         % endif
+      )
 
       % if not n.abstract:
       , Kind => ${n.ada_kind_name}
@@ -75,6 +147,12 @@ package body ${ada_lib_name}.Introspection is
                   for n in ctx.astnode_types
                   if not n.abstract)}
    );
+
+   function Fields
+     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
+   --  Return the list of fields associated to Id. If Concrete_Only is true,
+   --  collect only non-null and concrete fields. Otherwise, collect all
+   --  fields.
 
    --------------
    -- DSL_Name --
@@ -268,25 +346,92 @@ package body ${ada_lib_name}.Introspection is
    function Fields (Kind : ${root_node_kind_name}) return Field_Reference_Array
    is
    begin
-      % if ctx.generic_list_type.concrete_subclasses:
-         if Kind in ${ctx.generic_list_type.ada_kind_range_name} then
-            return (1 .. 0 => <>);
-         end if;
-      % endif
-
       % if ctx.sorted_parse_fields:
-         declare
-            Result : Field_Reference_Array
-              (1 .. Kind_To_Node_Children_Count (Kind));
-         begin
-            for I in Result'Range loop
-               Result (I) := Field_Reference_From_Index (Kind, I);
-            end loop;
-            return Result;
-         end;
+         return Fields (Id_For_Kind (Kind), Concrete_Only => True);
       % else:
-         return (raise Program_Error);
+         ${return_program_error()}
       % endif
+   end Fields;
+
+   ------------
+   -- Fields --
+   ------------
+
+   function Fields
+     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array
+   is
+      Cursor : Any_Node_Type_Id := Id;
+
+      Added_Fields : array (Field_Reference) of Boolean := (others => False);
+      --  Set of field references that were added to Result
+
+      Result : Field_Reference_Array (1 .. Added_Fields'Length);
+      --  Temporary to hold the result. We return Result (1 .. Last).
+
+      Last : Natural := 0;
+      --  Index of the last element in Result to return
+   begin
+      % if ctx.sorted_parse_fields:
+
+         --  Go through the derivation chain for Id and collect fields. Do
+         --  it in reverse order as we process base types last.
+         while Cursor /= None loop
+            declare
+               Node_Desc : Node_Type_Descriptor renames
+                  Node_Type_Descriptors (Cursor).all;
+            begin
+               for Field_Index in reverse Node_Desc.Fields'Range loop
+                  declare
+                     Field_Desc : Node_Field_Descriptor renames
+                        Node_Desc.Fields (Field_Index).all;
+                     Field      : Field_Reference renames Field_Desc.Field;
+                  begin
+                     --  Abstract fields share the same Field_Reference value
+                     --  with the corresponding concrete fields, so collect
+                     --  fields only once. We process fields in reverse order,
+                     --  so we know that concrete ones will be processed before
+                     --  the abstract fields they override.
+                     if not (Concrete_Only
+                             and then Field_Desc.Is_Abstract_Or_Null)
+                        and then not Added_Fields (Field)
+                     then
+                        Added_Fields (Field) := True;
+                        Last := Last + 1;
+                        Result (Last) := Field;
+                     end if;
+                  end;
+               end loop;
+               Cursor := Node_Desc.Base_Type;
+            end;
+         end loop;
+
+         --  At this point, Result contains elements in the opposite order as
+         --  expected, so reverse it.
+
+         for I in 1 .. Last / 2 loop
+            declare
+               Other_I : constant Positive := Last - I + 1;
+               Swap    : constant Field_Reference := Result (I);
+            begin
+               Result (I) := Result (Other_I);
+               Result (Other_I) := Swap;
+            end;
+         end loop;
+
+         return Result (1 .. Last);
+
+      % else:
+         ${return_program_error()}
+      % endif
+   end Fields;
+
+   ------------
+   -- Fields --
+   ------------
+
+   function Fields (Id : Node_Type_Id) return Field_Reference_Array is
+   begin
+      return Fields (Id, Concrete_Only => False);
    end Fields;
 
    % if ctx.sorted_properties:
