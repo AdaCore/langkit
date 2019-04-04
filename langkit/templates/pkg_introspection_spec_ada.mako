@@ -105,6 +105,9 @@ package ${ada_lib_name}.Introspection is
    --  Return the list of fields that nodes of the given ``Kind`` have. This
    --  returns an empty array for list nodes.
 
+   function Fields (Id : Node_Type_Id) return Field_Reference_Array;
+   --  Likewise, but taking a reference to a node type instead
+
    % if ctx.sorted_properties:
    ----------------
    -- Properties --
