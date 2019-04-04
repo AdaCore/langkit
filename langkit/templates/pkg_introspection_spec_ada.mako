@@ -68,21 +68,37 @@ package ${ada_lib_name}.Introspection is
    function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array;
    --  Return type references for all direct derivations for Id
 
+   <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
+
+   type Abstract_Node_Data_Reference is
+      (${', '.join(f.introspection_enum_literal for f in all_abstract)});
+   --  Enumeration of all data attached to nodes (syntax fields and properties)
+
+   type Abstract_Node_Data_Reference_Array is
+      array (Positive range <>) of Abstract_Node_Data_Reference;
+
    -------------------
    -- Syntax fields --
    -------------------
 
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
-   type Field_Reference is
+   subtype Field_Reference is Abstract_Node_Data_Reference range
       % if ctx.sorted_parse_fields:
-         (${', '.join(f.introspection_enum_literal
-                      for f in ctx.sorted_parse_fields)})
+         <%
+            first = ctx.sorted_parse_fields[0]
+            last = ctx.sorted_parse_fields[-1]
+         %>
       % else:
-         new Integer range 1 .. 0
+         <%
+            first = all_abstract[-1]
+            last = all_abstract[0]
+         %>
       % endif
+      ${first.introspection_enum_literal}
+      .. ${last.introspection_enum_literal}
    ;
-   --  Enumeration of all fields for regular nodes
+   --  Enumeration of all syntax fields for regular nodes
 
    function Field_Name (Field : Field_Reference) return String;
    --  Return a lower-case name for ``Field``
@@ -116,9 +132,9 @@ package ${ada_lib_name}.Introspection is
    -- Properties --
    ----------------
 
-   type Property_Reference is
-      (${', '.join(p.introspection_enum_literal
-                   for p in ctx.sorted_properties)});
+   subtype Property_Reference is Abstract_Node_Data_Reference
+      range ${ctx.sorted_properties[0].introspection_enum_literal}
+         .. ${ctx.sorted_properties[-1].introspection_enum_literal};
    --  Enumeration of all available node properties
 
    function Property_Name (Property : Property_Reference) return String;
