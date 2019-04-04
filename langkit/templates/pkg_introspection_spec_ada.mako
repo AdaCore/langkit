@@ -1,6 +1,12 @@
 ## vim: filetype=makoada
 
-with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+private with Ada.Finalization;
+private with Ada.Unchecked_Deallocation;
+
+with Langkit_Support.Text; use Langkit_Support.Text;
+
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 --  This package provides primitives to inspect the structure of parse trees.
 --  It answers questions such as: what is the index of a syntax field in a
@@ -73,6 +79,108 @@ package ${ada_lib_name}.Introspection is
    --
    --  * `Id = Parent`;
    --  * `Is_Derived_From (Base_Type (Id), Parent)`.
+
+   ------------------------
+   -- Polymorphic values --
+   ------------------------
+
+   type Any_Value_Kind is (
+      None,
+      Boolean_Value,
+      Integer_Value,
+      Big_Integer_Value,
+      Character_Value,
+      Token_Value,
+      Unbounded_Text_Value,
+      Analysis_Unit_Value,
+      Node_Value
+
+      % for enum_type in ctx.enum_types:
+      , ${enum_type.introspection_kind}
+      % endfor
+
+      % for t in ctx.composite_types:
+      % if t.exposed and not t.is_entity_type:
+      , ${t.introspection_kind}
+      % endif
+      % endfor
+   );
+   subtype Value_Kind is
+      Any_Value_Kind range Boolean_Value ..  Any_Value_Kind'Last;
+   --  Enumeration for all types used to interact with properties
+
+   type Any_Value_Type is private;
+   --  Polymorphic value to contain Kind values. This type has by-reference
+   --  semantics, so copying it is cheap.
+
+   No_Value : constant Any_Value_Type;
+   --  Special Any_Value_Type to mean: no reference to a value
+
+   subtype Value_Type is Any_Value_Type
+      with Dynamic_Predicate => Value_Type /= No_Value;
+
+   function Kind (Self : Value_Type) return Value_Kind;
+   --  Return the kind of values that Value holds
+
+   --  Accessors for inner value
+
+   function As_Boolean (Self : Value_Type) return Boolean
+      with Pre => Kind (Self) = Boolean_Value;
+
+   function As_Integer (Self : Value_Type) return Integer
+      with Pre => Kind (Self) = Integer_Value;
+
+   function As_Big_Integer (Self : Value_Type) return Big_Integer
+      with Pre => Kind (Self) = Big_Integer_Value;
+
+   function As_Character (Self : Value_Type) return Character_Type
+      with Pre => Kind (Self) = Character_Value;
+
+   function As_Token (Self : Value_Type) return Token_Reference
+      with Pre => Kind (Self) = Token_Value;
+
+   function As_Unbounded_Text (Self : Value_Type) return Unbounded_Text_Type
+      with Pre => Kind (Self) = Unbounded_Text_Value;
+
+   function As_Analysis_Unit (Self : Value_Type) return Analysis_Unit
+      with Pre => Kind (Self) = Analysis_Unit_Value;
+
+   function As_Node (Self : Value_Type) return ${root_entity.api_name}
+      with Pre => Kind (Self) = Node_Value;
+
+   % for enum_type in ctx.enum_types:
+      function As_${enum_type.api_name}
+        (Self : Value_Type) return ${enum_type.api_name}
+         with Pre => Kind (Self) = ${enum_type.introspection_kind};
+   % endfor
+
+   % for t in ctx.composite_types:
+      % if t.exposed and not t.is_entity_type:
+         function As_${t.api_name} (Self : Value_Type) return ${t.api_name}
+            with Pre => Kind (Self) = ${t.introspection_kind};
+      % endif
+   % endfor
+
+   type Value_Array is array (Positive range <>) of Value_Type;
+
+   type Value_Constraint (Kind : Value_Kind := Value_Kind'First) is record
+      case Kind is
+         when Node_Value =>
+            Node_Type : Node_Type_Id;
+            --  Base type for nodes that satisfy this constraint
+
+         when others =>
+            null;
+      end case;
+   end record;
+   --  Constraint for a polymorphic value
+
+   function Satisfies
+     (Value : Value_Type; Constraint : Value_Constraint) return Boolean;
+   --  Return whether the given Value satisfy the given Constraint
+
+   type Value_Constraint_Array is
+      array (Positive range <>) of Value_Constraint;
 
    ---------------
    -- Node data --
@@ -176,5 +284,92 @@ package ${ada_lib_name}.Introspection is
    --  As unparser are not generated, this always raises a ``Program_Error``
    --  exception.
    % endif
+
+private
+
+   type Value_Record;
+   type Value_Access is access all Value_Record;
+
+   --  In order to avoid Any_Value_Type to be tagged (which makes all its
+   --  primitives dispatching, which has awful consequences, such as making
+   --  some code patterns illegal, or making GNAT slow, wrap the access in a
+   --  dedicated controlled object and make Any_Value_Type contain this
+   --  wrapper.
+
+   type Value_Access_Wrapper is new Ada.Finalization.Controlled with record
+      Value : Value_Access;
+   end record;
+
+   overriding procedure Adjust (Self : in out Value_Access_Wrapper);
+   overriding procedure Finalize (Self : in out Value_Access_Wrapper);
+
+   type Any_Value_Type is record
+      Value : Value_Access_Wrapper;
+   end record;
+
+   No_Value : constant Any_Value_Type :=
+     (Value => (Ada.Finalization.Controlled with Value => null));
+
+   % for t in ctx.array_types:
+      % if t.exposed:
+         type ${t.api_name}_Access is access all ${t.api_name};
+         procedure Free is new Ada.Unchecked_Deallocation
+           (${t.api_name}, ${t.api_name}_Access);
+      % endif
+   % endfor
+
+   type Value_Record (Kind : Value_Kind := Value_Kind'First) is
+   limited record
+      Ref_Count : Natural;
+
+      case Kind is
+         when Boolean_Value =>
+            Boolean_Value : Boolean;
+
+         when Integer_Value =>
+            Integer_Value : Integer;
+
+         when Big_Integer_Value =>
+            Big_Integer_Value : Big_Integer;
+
+         when Character_Value =>
+            Character_Value : Character_Type;
+
+         when Token_Value =>
+            Token_Value : Token_Reference;
+
+         when Unbounded_Text_Value =>
+            Unbounded_Text_Value : Unbounded_Text_Type;
+
+         when Analysis_Unit_Value =>
+            Analysis_Unit_Value : Analysis_Unit;
+
+         when Node_Value =>
+            Node_Value : ${root_entity.api_name};
+
+         % for enum_type in ctx.enum_types:
+         when ${enum_type.api_name}_Value =>
+            ${enum_type.introspection_kind} : ${enum_type.api_name};
+         % endfor
+
+         ## Store records as in the public API, but store accesses to arrays as
+         ## they are unconstrained.
+
+         % for t in ctx.composite_types:
+         % if t.exposed and not t.is_entity_type:
+         when ${t.api_name}_Value =>
+            ${t.introspection_kind} :
+               % if t.is_array_type:
+                  ${t.api_name}_Access;
+               % else:
+                  ${t.api_name};
+               % endif
+         % endif
+         % endfor
+      end case;
+   end record;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Value_Record, Value_Access);
 
 end ${ada_lib_name}.Introspection;
