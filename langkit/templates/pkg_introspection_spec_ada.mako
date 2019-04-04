@@ -68,6 +68,10 @@ package ${ada_lib_name}.Introspection is
    function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array;
    --  Return type references for all direct derivations for Id
 
+   ---------------
+   -- Node data --
+   ---------------
+
    <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
 
    type Abstract_Node_Data_Reference is
@@ -76,6 +80,10 @@ package ${ada_lib_name}.Introspection is
 
    type Abstract_Node_Data_Reference_Array is
       array (Positive range <>) of Abstract_Node_Data_Reference;
+
+   function Node_Data_Name
+     (Node_Data : Abstract_Node_Data_Reference) return String;
+   --  Return a lower-case name for Node_Data
 
    -------------------
    -- Syntax fields --
