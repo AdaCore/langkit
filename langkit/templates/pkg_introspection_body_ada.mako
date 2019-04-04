@@ -148,6 +148,16 @@ package body ${ada_lib_name}.Introspection is
                   if not n.abstract)}
    );
 
+   Field_Types : constant array (Field_Reference) of Node_Type_Id := (
+      % if ctx.sorted_parse_fields:
+         ${', '.join('{} => {}'.format(f.introspection_enum_literal,
+                                       f.type.introspection_name)
+                     for f in ctx.sorted_parse_fields)}
+      % else:
+         1 .. 0 => <>
+      % endif
+   );
+
    function Fields
      (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
    --  Return the list of fields associated to Id. If Concrete_Only is true,
@@ -259,6 +269,15 @@ package body ${ada_lib_name}.Introspection is
          % endif
       );
    end Field_Name;
+
+   ----------------
+   -- Field_Type --
+   ----------------
+
+   function Field_Type (Field : Field_Reference) return Node_Type_Id is
+   begin
+      return Field_Types (Field);
+   end Field_Type;
 
    -----------
    -- Index --
