@@ -357,6 +357,152 @@ package body ${ada_lib_name}.Introspection is
       return False;
    end Is_Derived_From;
 
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind (Self : Value_Type) return Value_Kind is
+   begin
+      return Self.Value.Value.Kind;
+   end Kind;
+
+   ----------------
+   -- As_Boolean --
+   ----------------
+
+   function As_Boolean (Self : Value_Type) return Boolean is
+   begin
+      return Self.Value.Value.Boolean_Value;
+   end As_Boolean;
+
+   ----------------
+   -- As_Integer --
+   ----------------
+
+   function As_Integer (Self : Value_Type) return Integer is
+   begin
+      return Self.Value.Value.Integer_Value;
+   end As_Integer;
+
+   --------------------
+   -- As_Big_Integer --
+   --------------------
+
+   function As_Big_Integer (Self : Value_Type) return Big_Integer is
+   begin
+      return Result : Big_Integer do
+         Result.Set (Self.Value.Value.Big_Integer_Value);
+      end return;
+   end As_Big_Integer;
+
+   ------------------
+   -- As_Character --
+   ------------------
+
+   function As_Character (Self : Value_Type) return Character_Type is
+   begin
+      return Self.Value.Value.Character_Value;
+   end As_Character;
+
+   --------------
+   -- As_Token --
+   --------------
+
+   function As_Token (Self : Value_Type) return Token_Reference is
+   begin
+      return Self.Value.Value.Token_Value;
+   end As_Token;
+
+   -----------------------
+   -- As_Unbounded_Text --
+   -----------------------
+
+   function As_Unbounded_Text (Self : Value_Type) return Unbounded_Text_Type is
+   begin
+      return Self.Value.Value.Unbounded_Text_Value;
+   end As_Unbounded_Text;
+
+   ----------------------
+   -- As_Analysis_Unit --
+   ----------------------
+
+   function As_Analysis_Unit (Self : Value_Type) return Analysis_Unit is
+   begin
+      return Self.Value.Value.Analysis_Unit_Value;
+   end As_Analysis_Unit;
+
+   -------------
+   -- As_Node --
+   -------------
+
+   function As_Node (Self : Value_Type) return ${root_entity.api_name} is
+   begin
+      return Self.Value.Value.Node_Value;
+   end As_Node;
+
+   % for enum_type in ctx.enum_types:
+      function As_${enum_type.introspection_radix}
+        (Self : Value_Type) return ${enum_type.api_name} is
+      begin
+         return Self.Value.Value.${enum_type.introspection_kind};
+      end As_${enum_type.introspection_radix};
+
+   % endfor
+
+   % for t in ctx.composite_types:
+      % if t.exposed and not t.is_entity_type:
+         function As_${t.introspection_radix}
+           (Self : Value_Type) return ${t.api_name} is
+         begin
+            % if t.is_array_type:
+               ## If `t` is an array, first allocate the array and then
+               ## initialize it one item at a time.
+               return Result : ${t.api_name}
+                 (Self.Value.Value.${t.introspection_kind}'Range)
+               do
+                  for I in Result'Range loop
+                     ## Special case for big integer types: they are limited,
+                     ## so we cannot use mere assignment.
+                     % if t.element_type.is_big_integer_type:
+                        Result (I).Set
+                          (Self.Value.Value.${t.introspection_kind}.all (I));
+                     % else:
+                        Result (I) :=
+                           Self.Value.Value.${t.introspection_kind}.all (I);
+                     % endif
+                  end loop;
+               end return;
+
+            % else:
+               ## For other types, a mere assignment is fine
+               return Self.Value.Value.${t.introspection_kind};
+            % endif
+         end As_${t.introspection_radix};
+      % endif
+   % endfor
+
+   ---------------
+   -- Satisfies --
+   ---------------
+
+   function Satisfies
+     (Value : Value_Type; Constraint : Value_Constraint) return Boolean is
+   begin
+      if Value.Value.Value.Kind /= Constraint.Kind then
+         return False;
+      end if;
+
+      case Constraint.Kind is
+         when Node_Value =>
+            return Is_Derived_From
+              (Id_For_Kind (Value.Value.Value.Node_Value.Kind),
+               Constraint.Node_Type);
+
+         when others =>
+            return True;
+      end case;
+   end Satisfies;
+
    --------------------
    -- Node_Data_Name --
    --------------------
@@ -641,6 +787,60 @@ package body ${ada_lib_name}.Introspection is
          return (raise Program_Error);
       % endif
    end Token_Node_Kind;
+
+   ------------
+   -- Adjust --
+   ------------
+
+   overriding procedure Adjust (Self : in out Value_Access_Wrapper) is
+   begin
+      if Self.Value = null then
+         return;
+      end if;
+
+      declare
+         Rec : Value_Record renames Self.Value.all;
+      begin
+         Rec.Ref_Count := Rec.Ref_Count + 1;
+      end;
+   end Adjust;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out Value_Access_Wrapper) is
+   begin
+      if Self.Value = null then
+         return;
+      end if;
+
+      --  If Self is non-null, decrement the reference count of the referenced
+      --  value.
+
+      declare
+         Rec : Value_Record renames Self.Value.all;
+      begin
+         Rec.Ref_Count := Rec.Ref_Count - 1;
+
+         if Rec.Ref_Count = 0 then
+            --  Reference count dropped to 0: time to free the value and what
+            --  is inside.
+
+            case Rec.Kind is
+               % for t in ctx.array_types:
+                  % if t.exposed:
+                     when ${t.introspection_kind} =>
+                        Free (Rec.${t.introspection_kind});
+                  % endif
+               % endfor
+               when others => null;
+            end case;
+
+            Free (Self.Value);
+         end if;
+      end;
+   end Finalize;
 
 begin
    for D in Node_Type_Descriptors'Range loop
