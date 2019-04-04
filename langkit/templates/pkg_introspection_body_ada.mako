@@ -340,15 +340,31 @@ package body ${ada_lib_name}.Introspection is
       return Node_Type_Descriptors (Id).Derivations;
    end Derived_Types;
 
+   --------------------
+   -- Node_Data_Name --
+   --------------------
+
+   function Node_Data_Name
+     (Node_Data : Abstract_Node_Data_Reference) return String is
+   begin
+      case Node_Data is
+         when Field_Reference =>
+            pragma Warnings (Off, "value not in range of subtype");
+            return Syntax_Field_Descriptors (Node_Data).Name;
+            pragma Warnings (On, "value not in range of subtype");
+
+         when Property_Reference =>
+            return Property_Descriptors (Node_Data).Name;
+      end case;
+   end Node_Data_Name;
+
    ----------------
    -- Field_Name --
    ----------------
 
    function Field_Name (Field : Field_Reference) return String is
    begin
-      pragma Warnings (Off, "value not in range of subtype");
-      return Syntax_Field_Descriptors (Field).Name;
-      pragma Warnings (On, "value not in range of subtype");
+      return Node_Data_Name (Field);
    end Field_Name;
 
    ----------------
@@ -544,9 +560,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Property_Name (Property : Property_Reference) return String is
    begin
-      pragma Warnings (Off, "value not in range of subtype");
-      return Property_Descriptors (Property).Name;
-      pragma Warnings (On, "value not in range of subtype");
+      return Node_Data_Name (Property);
    end Property_Name;
 
    ----------------
