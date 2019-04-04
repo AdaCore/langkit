@@ -17,6 +17,88 @@ use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
+   ------------------------------
+   -- Syntax field descriptors --
+   ------------------------------
+
+   type Syntax_Field_Descriptor (Name_Length : Natural) is record
+      Field_Type : Node_Type_Id;
+      Name       : String (1 .. Name_Length);
+   end record;
+   --  General description of a field (independent of field implementations)
+
+   type Syntax_Field_Descriptor_Access is
+      access constant Syntax_Field_Descriptor;
+
+   --  Descriptors for syntax fields
+
+   % for f in ctx.sorted_parse_fields:
+      <% name = f._name.lower %>
+      Desc_For_${f.introspection_enum_literal} : aliased constant
+         Syntax_Field_Descriptor := (
+            Name_Length => ${len(name)},
+            Field_Type  => ${f.type.introspection_name},
+            Name        => ${string_repr(name)}
+         );
+   % endfor
+
+   Syntax_Field_Descriptors : constant
+      array (Field_Reference) of Syntax_Field_Descriptor_Access := (
+      % if ctx.sorted_parse_fields:
+         ${', '.join("{name} => Desc_For_{name}'Access"
+                     .format(name=f.introspection_enum_literal)
+                     for f in ctx.sorted_parse_fields)}
+      % else:
+         Field_Reference => <>
+      % endif
+   );
+
+   --------------------------
+   -- Property descriptors --
+   --------------------------
+
+   type Property_Descriptor (Name_Length : Natural) is record
+      Kind_First, Kind_Last : ${root_node_kind_name};
+      --  Kind range for nodes that implement this property
+
+      Name : String (1 .. Name_Length);
+   end record;
+
+   type Property_Descriptor_Access is access constant Property_Descriptor;
+
+   --  Descriptors for properties
+
+   % for p in ctx.sorted_properties:
+      <%
+         name = p._name.lower
+         kind_first, kind_last = p.struct.ada_kind_range_bounds
+      %>
+      Desc_For_${p.introspection_enum_literal} : aliased constant
+         Property_Descriptor := (
+            Name_Length => ${len(name)},
+            Kind_First  => ${kind_first},
+            Kind_Last   => ${kind_last},
+            Name        => ${string_repr(name)}
+         );
+   % endfor
+
+   % if ctx.sorted_properties:
+      Property_Descriptors : constant
+         array (Property_Reference) of Property_Descriptor_Access := (
+         % if ctx.sorted_properties:
+            ${', '.join("Desc_For_{}'Access"
+                        .format(p.introspection_enum_literal)
+                        for p in ctx.sorted_properties)}
+         % else:
+            Property_Reference => <>
+         % endif
+      );
+   % endif
+
+   ---------------------------
+   -- Node type descriptors --
+   ---------------------------
+
    type Node_Field_Descriptor (Is_Abstract_Or_Null : Boolean) is record
       Field : Field_Reference;
       --  Reference to the field this describes
@@ -32,6 +114,7 @@ package body ${ada_lib_name}.Introspection is
             null;
       end case;
    end record;
+   --  Description of a field as implemented by a specific node
 
    type Node_Field_Descriptor_Access is access constant Node_Field_Descriptor;
    type Node_Field_Descriptor_Array is
@@ -71,6 +154,8 @@ package body ${ada_lib_name}.Introspection is
    end record;
 
    type Node_Type_Descriptor_Access is access constant Node_Type_Descriptor;
+
+   --  Descriptors for node types and their syntax fields
 
    % for n in ctx.astnode_types:
    <%
@@ -132,6 +217,10 @@ package body ${ada_lib_name}.Introspection is
    := (${', '.join("Desc_For_{}'Access".format(n.kwless_raw_name)
                    for n in ctx.astnode_types)});
 
+   ----------------------
+   -- Various mappings --
+   ----------------------
+
    package Node_Type_Id_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
       Element_Type    => Node_Type_Id,
@@ -148,21 +237,21 @@ package body ${ada_lib_name}.Introspection is
                   if not n.abstract)}
    );
 
-   Field_Types : constant array (Field_Reference) of Node_Type_Id := (
-      % if ctx.sorted_parse_fields:
-         ${', '.join('{} => {}'.format(f.introspection_enum_literal,
-                                       f.type.introspection_name)
-                     for f in ctx.sorted_parse_fields)}
-      % else:
-         1 .. 0 => <>
-      % endif
-   );
+   -------------
+   -- Helpers --
+   -------------
 
    function Fields
      (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
    --  Return the list of fields associated to Id. If Concrete_Only is true,
    --  collect only non-null and concrete fields. Otherwise, collect all
    --  fields.
+
+   function Kind_Matches
+     (Kind       : ${root_node_kind_name};
+      Descriptor : Property_Descriptor)
+      return Boolean
+   is (Kind in Descriptor.Kind_First .. Descriptor.Kind_Last);
 
    --------------
    -- DSL_Name --
@@ -257,17 +346,9 @@ package body ${ada_lib_name}.Introspection is
 
    function Field_Name (Field : Field_Reference) return String is
    begin
-      return (
-         % if ctx.sorted_parse_fields:
-            case Field is
-                 % for i, f in enumerate(ctx.sorted_parse_fields):
-                    ${',' if i else ''} when ${f.introspection_enum_literal} =>
-                       ${string_repr(f._name.lower)}
-                 % endfor
-         % else:
-            raise Program_Error
-         % endif
-      );
+      pragma Warnings (Off, "value not in range of subtype");
+      return Syntax_Field_Descriptors (Field).Name;
+      pragma Warnings (On, "value not in range of subtype");
    end Field_Name;
 
    ----------------
@@ -276,7 +357,9 @@ package body ${ada_lib_name}.Introspection is
 
    function Field_Type (Field : Field_Reference) return Node_Type_Id is
    begin
-      return Field_Types (Field);
+      pragma Warnings (Off, "value not in range of subtype");
+      return Syntax_Field_Descriptors (Field).Field_Type;
+      pragma Warnings (On, "value not in range of subtype");
    end Field_Type;
 
    -----------
@@ -455,40 +538,15 @@ package body ${ada_lib_name}.Introspection is
 
    % if ctx.sorted_properties:
 
-   type Property_Descriptor is record
-      Kind_First, Kind_Last : ${root_node_kind_name};
-      --  Kind range for nodes that implement this property
-   end record;
-
-   function Kind_Matches
-     (Kind       : ${root_node_kind_name};
-      Descriptor : Property_Descriptor)
-      return Boolean
-   is (Kind in Descriptor.Kind_First .. Descriptor.Kind_Last);
-
-   Property_Descriptors : constant
-      array (Property_Reference) of Property_Descriptor :=
-   (
-      % for i, p in enumerate(ctx.sorted_properties):
-         <% kind_first, kind_last = p.struct.ada_kind_range_bounds %>
-         ${', ' if i else ''}${p.introspection_enum_literal} =>
-           (Kind_First => ${kind_first},
-            Kind_Last  => ${kind_last})
-      % endfor
-   );
-
    -------------------
    -- Property_Name --
    -------------------
 
    function Property_Name (Property : Property_Reference) return String is
    begin
-      return (case Property is
-         % for i, p in enumerate(ctx.sorted_properties):
-            ${',' if i else ''} when ${p.introspection_enum_literal} =>
-               ${string_repr(p._name.lower)}
-         % endfor
-      );
+      pragma Warnings (Off, "value not in range of subtype");
+      return Property_Descriptors (Property).Name;
+      pragma Warnings (On, "value not in range of subtype");
    end Property_Name;
 
    ----------------
@@ -502,7 +560,7 @@ package body ${ada_lib_name}.Introspection is
    begin
       --  Count how many properties we will return
       for Desc of Property_Descriptors loop
-         if Kind_Matches (Kind, Desc) then
+         if Kind_Matches (Kind, Desc.all) then
             Count := Count + 1;
          end if;
       end loop;
@@ -513,7 +571,7 @@ package body ${ada_lib_name}.Introspection is
             Next : Positive := 1;
          begin
             for Property in Property_Descriptors'Range loop
-               if Kind_Matches (Kind, Property_Descriptors (Property)) then
+               if Kind_Matches (Kind, Property_Descriptors (Property).all) then
                   Result (Next) := Property;
                   Next := Next + 1;
                end if;
