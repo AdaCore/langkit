@@ -75,10 +75,8 @@ package ${ada_lib_name}.Introspection is
    --  Return type references for all direct derivations for Id
 
    function Is_Derived_From (Id, Parent : Node_Type_Id) return Boolean;
-   --  Return whether true if at least one of the following is true:
-   --
-   --  * `Id = Parent`;
-   --  * `Is_Derived_From (Base_Type (Id), Parent)`.
+   --  Return whether the type that Id represents is derives (directly or
+   --  indirectly) from the type that Parent represents.
 
    ------------------------
    -- Polymorphic values --
