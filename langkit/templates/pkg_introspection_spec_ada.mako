@@ -283,6 +283,9 @@ package ${ada_lib_name}.Introspection is
      (Kind : ${root_node_kind_name}) return Property_Reference_Array;
    --  Return the list of properties that nodes of the given ``Kind`` have
 
+   function Properties (Id : Node_Type_Id) return Property_Reference_Array;
+   --  Likewise, but taking a reference to a node type instead
+
    % endif
 
    ------------
