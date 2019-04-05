@@ -42,6 +42,10 @@ class Expr(FooNode):
     def eval():
         pass
 
+    @langkit_property(public=True)
+    def eval_plus(addend=T.Expr):
+        return Self.eval() + addend.eval()
+
 
 class Addition(Expr):
     lhs = Field()

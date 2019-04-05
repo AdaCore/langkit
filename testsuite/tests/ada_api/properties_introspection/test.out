@@ -1,73 +1,327 @@
 Properties for FOO_ADDITION:
    parent
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    parents
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    children
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    token_start
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    token_end
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    previous_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    next_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      <none>
+
    is_ghost
+   return type: BOOLEAN_VALUE
+   arguments:
+      <none>
+
    eval
+   return type: INTEGER_VALUE
+   arguments:
+      <none>
+
+   eval_plus
+   return type: INTEGER_VALUE
+   arguments:
+      addend: NODE_VALUE (Expr)
+
+
 
 Properties for FOO_NUMBER:
    parent
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    parents
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    children
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    token_start
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    token_end
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    previous_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    next_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      <none>
+
    is_ghost
+   return type: BOOLEAN_VALUE
+   arguments:
+      <none>
+
    eval
+   return type: INTEGER_VALUE
+   arguments:
+      <none>
+
+   eval_plus
+   return type: INTEGER_VALUE
+   arguments:
+      addend: NODE_VALUE (Expr)
+
+
 
 Properties for FOO_REF:
    parent
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    parents
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    children
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    token_start
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    token_end
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    previous_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    next_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      <none>
+
    is_ghost
+   return type: BOOLEAN_VALUE
+   arguments:
+      <none>
+
    eval
+   return type: INTEGER_VALUE
+   arguments:
+      <none>
+
+   eval_plus
+   return type: INTEGER_VALUE
+   arguments:
+      addend: NODE_VALUE (Expr)
+
+
    referenced_var_decl
+   return type: NODE_VALUE (VarDecl)
+   arguments:
+      <none>
+
 
 Properties for FOO_VAR_DECL_LIST:
    parent
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    parents
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    children
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    token_start
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    token_end
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    previous_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    next_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      <none>
+
    is_ghost
+   return type: BOOLEAN_VALUE
+   arguments:
+      <none>
+
 
 Properties for FOO_NAME:
    parent
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    parents
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    children
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    token_start
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    token_end
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    previous_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    next_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      <none>
+
    is_ghost
+   return type: BOOLEAN_VALUE
+   arguments:
+      <none>
+
 
 Properties for FOO_VAR_DECL:
    parent
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    parents
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    children
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      <none>
+
    token_start
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    token_end
+   return type: TOKEN_VALUE
+   arguments:
+      <none>
+
    previous_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    next_sibling
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      <none>
+
    unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      <none>
+
    is_ghost
+   return type: BOOLEAN_VALUE
+   arguments:
+      <none>
+
    eval
+   return type: INTEGER_VALUE
+   arguments:
+      <none>
+
 
 Done.
 Done
