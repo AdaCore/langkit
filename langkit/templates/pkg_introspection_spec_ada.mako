@@ -276,6 +276,21 @@ package ${ada_lib_name}.Introspection is
    function Property_Name (Property : Property_Reference) return String;
    --  Return a lower-case name for ``Property``
 
+   function Property_Return_Type
+     (Property : Property_Reference) return Value_Constraint;
+   --  Return the type constraint for Property's return type
+
+   function Property_Argument_Types
+     (Property : Property_Reference) return Value_Constraint_Array
+      with Post => Property_Argument_Types'Result'Length = 0
+                   or else Property_Argument_Types'Result'First = 1;
+   --  Return the type constraints for Property's arguments
+
+   function Property_Argument_Name
+     (Property : Property_Reference; Argument_Number : Positive) return String;
+   --  Return the lower-cased name for Property's argument whose index is
+   --  Argument_Number.
+
    type Property_Reference_Array is
       array (Positive range <>) of Property_Reference;
 

@@ -17,6 +17,9 @@ use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
+   type String_Access is access constant String;
+   type String_Array is array (Positive range <>) of String_Access;
+
    ------------------------------
    -- Syntax field descriptors --
    ------------------------------
@@ -57,20 +60,71 @@ package body ${ada_lib_name}.Introspection is
    -- Property descriptors --
    --------------------------
 
-   type Property_Descriptor (Name_Length : Natural) is record
+   type Property_Descriptor (
+      Name_Length : Natural;
+      --  Length of the proprety name
+
+      Arity : Natural
+      --  Number of arguments this property takes (exclude the Self argument)
+   )
+   is record
       Name : String (1 .. Name_Length);
+      --  Lower-case name for this property
+
+      Return_Type : Value_Constraint;
+      --  Return type for this property
+
+      Argument_Types : Value_Constraint_Array (1 .. Arity);
+      --  Types of the arguments that this property takes
+
+      Argument_Names : String_Array (1 .. Arity);
+      --  Lower-case names for arguments that this property takes
    end record;
 
    type Property_Descriptor_Access is access constant Property_Descriptor;
 
    --  Descriptors for properties
 
+   <%
+      # First, generate constant for argument names, so that we can refer to
+      # them from property descriptors.
+      names = set()
+      for p in ctx.sorted_properties:
+         for arg in p.arguments:
+            names.add(arg.name.lower)
+   %>
+   % for n in sorted(names):
+   Name_For_${n} : aliased constant String := ${string_repr(n)};
+   % endfor
+
    % for p in ctx.sorted_properties:
       <% name = p._name.lower %>
       Desc_For_${p.introspection_enum_literal} : aliased constant
          Property_Descriptor := (
             Name_Length => ${len(name)},
-            Name        => ${string_repr(name)}
+            Arity       => ${len(p.arguments)},
+
+            Name => ${string_repr(name)},
+
+            Return_Type    => ${p.type.introspection_constraint},
+            Argument_Types => (
+               % if p.arguments:
+                  ${', '.join('{} => {}'
+                              .format(i, arg.type.introspection_constraint)
+                              for i, arg in enumerate(p.arguments, 1))}
+               % else:
+                  1 .. 0 => <>
+               % endif
+            ),
+            Argument_Names => (
+               % if p.arguments:
+                  ${', '.join("{} => Name_For_{}'Access"
+                              .format(i, arg.name.lower)
+                              for i, arg in enumerate(p.arguments, 1))}
+               % else:
+                  1 .. 0 => <>
+               % endif
+            )
          );
    % endfor
 
@@ -875,6 +929,38 @@ package body ${ada_lib_name}.Introspection is
    begin
       return Node_Data_Name (Property);
    end Property_Name;
+
+   --------------------------
+   -- Property_Return_Type --
+   --------------------------
+
+   function Property_Return_Type
+     (Property : Property_Reference) return Value_Constraint is
+   begin
+      return Property_Descriptors (Property).Return_Type;
+   end Property_Return_Type;
+
+   -----------------------------
+   -- Property_Argument_Types --
+   -----------------------------
+
+   function Property_Argument_Types
+     (Property : Property_Reference) return Value_Constraint_Array is
+   begin
+      return Property_Descriptors (Property).Argument_Types;
+   end Property_Argument_Types;
+
+   ----------------------------
+   -- Property_Argument_Name --
+   ----------------------------
+
+   function Property_Argument_Name
+     (Property : Property_Reference; Argument_Number : Positive) return String
+   is
+   begin
+      return Property_Descriptors (Property)
+             .Argument_Names (Argument_Number).all;
+   end Property_Argument_Name;
 
    ----------------
    -- Properties --

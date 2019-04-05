@@ -779,6 +779,20 @@ class CompiledType(object):
         return '{}_Value'.format(self.introspection_radix)
 
     @property
+    def introspection_constraint(self):
+        """
+        Return an Ada expression that computes the value constraint
+        corresponding to this type in the introspection API.
+
+        :rtype: str
+        """
+        result = '(Kind => {}'.format(self.introspection_kind)
+        if self.is_ast_node or self.is_entity_type:
+            node = self if self.is_ast_node else self.element_type
+            result += ', Node_Type => {}'.format(node.introspection_name)
+        return result + ')'
+
+    @property
     def name(self):
         """
         Name of the type for general values in the Ada generated code.
