@@ -58,9 +58,6 @@ package body ${ada_lib_name}.Introspection is
    --------------------------
 
    type Property_Descriptor (Name_Length : Natural) is record
-      Kind_First, Kind_Last : ${root_node_kind_name};
-      --  Kind range for nodes that implement this property
-
       Name : String (1 .. Name_Length);
    end record;
 
@@ -69,15 +66,10 @@ package body ${ada_lib_name}.Introspection is
    --  Descriptors for properties
 
    % for p in ctx.sorted_properties:
-      <%
-         name = p._name.lower
-         kind_first, kind_last = p.struct.ada_kind_range_bounds
-      %>
+      <% name = p._name.lower %>
       Desc_For_${p.introspection_enum_literal} : aliased constant
          Property_Descriptor := (
             Name_Length => ${len(name)},
-            Kind_First  => ${kind_first},
-            Kind_Last   => ${kind_last},
             Name        => ${string_repr(name)}
          );
    % endfor
@@ -123,7 +115,8 @@ package body ${ada_lib_name}.Introspection is
    type Node_Type_Descriptor
      (Is_Abstract       : Boolean;
       Derivations_Count : Natural;
-      Fields_Count      : Natural)
+      Fields_Count      : Natural;
+      Properties_Count  : Natural)
    is record
       Base_Type : Any_Node_Type_Id;
       --  Reference to the node type from which this derives
@@ -138,8 +131,12 @@ package body ${ada_lib_name}.Introspection is
       --  Number of syntax field inherited from the base type
 
       Fields : Node_Field_Descriptor_Array (1 .. Fields_Count);
-      --  For regular node types, list of syntax fields that are specific for
+      --  For regular node types, list of syntax fields that are specific to
       --  this derivation (i.e. excluding fields from the base type).
+
+      Properties : Property_Reference_Array (1 .. Properties_Count);
+      --  List of properties that this node provides that are specific to this
+      --  derivation (i.e. excluding fields from the base type).
 
       --  Only concrete nodes are assigned a node kind
 
@@ -160,6 +157,9 @@ package body ${ada_lib_name}.Introspection is
    % for n in ctx.astnode_types:
    <%
       fields = n.get_parse_fields(include_inherited=False)
+      properties = n.get_properties(
+         predicate=lambda p: p.is_public and not p.overriding,
+         include_inherited=False)
 
       if n.is_root_node:
          inherited_fields = []
@@ -185,6 +185,7 @@ package body ${ada_lib_name}.Introspection is
       Is_Abstract       => ${n.abstract},
       Derivations_Count => ${len(n.subclasses)},
       Fields_Count      => ${len(fields)},
+      Properties_Count  => ${len(properties)},
 
       Base_Type   => ${n.base.introspection_name if n.base else 'None'},
       Derivations =>
@@ -201,6 +202,15 @@ package body ${ada_lib_name}.Introspection is
             ${', '.join("{} => {}_For_{}'Access"
                         .format(i, f.name, n.kwless_raw_name)
                         for i, f in enumerate(fields, 1))}
+         % else:
+            1 .. 0 => <>
+         % endif
+      ),
+
+      Properties => (
+         % if properties:
+            ${', '.join("{} => {}".format(i, p.introspection_enum_literal)
+                        for i, p in enumerate(properties, 1))}
          % else:
             1 .. 0 => <>
          % endif
@@ -246,12 +256,6 @@ package body ${ada_lib_name}.Introspection is
    --  Return the list of fields associated to Id. If Concrete_Only is true,
    --  collect only non-null and concrete fields. Otherwise, collect all
    --  fields.
-
-   function Kind_Matches
-     (Kind       : ${root_node_kind_name};
-      Descriptor : Property_Descriptor)
-      return Boolean
-   is (Kind in Descriptor.Kind_First .. Descriptor.Kind_Last);
 
    function Allocate (Kind : Value_Kind) return Value_Type;
    --  Allocate a polymorphic value of the given kind
@@ -877,30 +881,54 @@ package body ${ada_lib_name}.Introspection is
    ----------------
 
    function Properties
-     (Kind : ${root_node_kind_name}) return Property_Reference_Array
-   is
-      Count : Natural := 0;
+     (Kind : ${root_node_kind_name}) return Property_Reference_Array is
    begin
-      --  Count how many properties we will return
-      for Desc of Property_Descriptors loop
-         if Kind_Matches (Kind, Desc.all) then
-            Count := Count + 1;
-         end if;
+      return Properties (Id_For_Kind (Kind));
+   end Properties;
+
+   ----------------
+   -- Properties --
+   ----------------
+
+   function Properties (Id : Node_Type_Id) return Property_Reference_Array is
+      Cursor : Any_Node_Type_Id := Id;
+
+      Result : Property_Reference_Array (1 .. Property_Descriptors'Length);
+      --  Temporary to hold the result. We return Result (1 .. Last).
+
+      Last : Natural := 0;
+      --  Index of the last element in Result to return
+   begin
+      --  Go through the derivation chain for Id and collect properties. Do
+      --  it in reverse order as we process base types last.
+
+      while Cursor /= None loop
+         declare
+            Node_Desc : Node_Type_Descriptor renames
+               Node_Type_Descriptors (Cursor).all;
+         begin
+            for Prop_Desc of reverse Node_Desc.Properties loop
+               Last := Last + 1;
+               Result (Last) := Prop_Desc;
+            end loop;
+            Cursor := Node_Desc.Base_Type;
+         end;
       end loop;
 
-      --  Now create the result array and fill it
-      return Result : Property_Reference_Array (1 .. Count) do
+      --  At this point, Result contains elements in the opposite order as
+      --  expected, so reverse it.
+
+      for I in 1 .. Last / 2 loop
          declare
-            Next : Positive := 1;
+            Other_I : constant Positive := Last - I + 1;
+            Swap    : constant Property_Reference := Result (I);
          begin
-            for Property in Property_Descriptors'Range loop
-               if Kind_Matches (Kind, Property_Descriptors (Property).all) then
-                  Result (Next) := Property;
-                  Next := Next + 1;
-               end if;
-            end loop;
+            Result (I) := Result (Other_I);
+            Result (Other_I) := Swap;
          end;
-      end return;
+      end loop;
+
+      return Result (1 .. Last);
    end Properties;
 
    % endif
