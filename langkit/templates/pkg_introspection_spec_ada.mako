@@ -122,42 +122,56 @@ package ${ada_lib_name}.Introspection is
    function Kind (Self : Value_Type) return Value_Kind;
    --  Return the kind of values that Value holds
 
-   --  Accessors for inner value
+   --  Accessors and constructors for inner value
 
    function As_Boolean (Self : Value_Type) return Boolean
       with Pre => Kind (Self) = Boolean_Value;
+   function Create_Boolean (Value : Boolean) return Value_Type;
 
    function As_Integer (Self : Value_Type) return Integer
       with Pre => Kind (Self) = Integer_Value;
+   function Create_Integer (Value : Integer) return Value_Type;
 
    function As_Big_Integer (Self : Value_Type) return Big_Integer
       with Pre => Kind (Self) = Big_Integer_Value;
+   function Create_Big_Integer (Value : Big_Integer) return Value_Type;
 
    function As_Character (Self : Value_Type) return Character_Type
       with Pre => Kind (Self) = Character_Value;
+   function Create_Character (Value : Character_Type) return Value_Type;
 
    function As_Token (Self : Value_Type) return Token_Reference
       with Pre => Kind (Self) = Token_Value;
+   function Create_Token (Value : Token_Reference) return Value_Type;
 
    function As_Unbounded_Text (Self : Value_Type) return Unbounded_Text_Type
       with Pre => Kind (Self) = Unbounded_Text_Value;
+   function Create_Unbounded_Text
+     (Value : Unbounded_Text_Type) return Value_Type;
 
    function As_Analysis_Unit (Self : Value_Type) return Analysis_Unit
       with Pre => Kind (Self) = Analysis_Unit_Value;
+   function Create_Analysis_Unit (Value : Analysis_Unit) return Value_Type;
 
    function As_Node (Self : Value_Type) return ${root_entity.api_name}
       with Pre => Kind (Self) = Node_Value;
+   function Create_Node
+     (Value : ${root_entity.api_name}'Class) return Value_Type;
 
    % for enum_type in ctx.enum_types:
       function As_${enum_type.api_name}
         (Self : Value_Type) return ${enum_type.api_name}
          with Pre => Kind (Self) = ${enum_type.introspection_kind};
+      function Create_${enum_type.api_name}
+        (Value : ${enum_type.api_name}) return Value_Type;
    % endfor
 
    % for t in ctx.composite_types:
       % if t.exposed and not t.is_entity_type:
          function As_${t.api_name} (Self : Value_Type) return ${t.api_name}
             with Pre => Kind (Self) = ${t.introspection_kind};
+         function Create_${t.api_name}
+           (Value : ${t.api_name}) return Value_Type;
       % endif
    % endfor
 

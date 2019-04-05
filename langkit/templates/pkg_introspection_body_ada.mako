@@ -253,6 +253,9 @@ package body ${ada_lib_name}.Introspection is
       return Boolean
    is (Kind in Descriptor.Kind_First .. Descriptor.Kind_Last);
 
+   function Allocate (Kind : Value_Kind) return Value_Type;
+   --  Allocate a polymorphic value of the given kind
+
    --------------
    -- DSL_Name --
    --------------
@@ -366,6 +369,18 @@ package body ${ada_lib_name}.Introspection is
       return Self.Value.Value.Kind;
    end Kind;
 
+   --------------
+   -- Allocate --
+   --------------
+
+   function Allocate (Kind : Value_Kind) return Value_Type is
+      Result : Any_Value_Type;
+   begin
+      Result.Value.Value := new Value_Record (Kind);
+      Result.Value.Value.Ref_Count := 1;
+      return Result;
+   end Allocate;
+
    ----------------
    -- As_Boolean --
    ----------------
@@ -375,6 +390,17 @@ package body ${ada_lib_name}.Introspection is
       return Self.Value.Value.Boolean_Value;
    end As_Boolean;
 
+   --------------------
+   -- Create_Boolean --
+   --------------------
+
+   function Create_Boolean (Value : Boolean) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Boolean_Value) do
+         Result.Value.Value.Boolean_Value := Value;
+      end return;
+   end Create_Boolean;
+
    ----------------
    -- As_Integer --
    ----------------
@@ -383,6 +409,17 @@ package body ${ada_lib_name}.Introspection is
    begin
       return Self.Value.Value.Integer_Value;
    end As_Integer;
+
+   --------------------
+   -- Create_Integer --
+   --------------------
+
+   function Create_Integer (Value : Integer) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Integer_Value) do
+         Result.Value.Value.Integer_Value := Value;
+      end return;
+   end Create_Integer;
 
    --------------------
    -- As_Big_Integer --
@@ -395,6 +432,17 @@ package body ${ada_lib_name}.Introspection is
       end return;
    end As_Big_Integer;
 
+   ------------------------
+   -- Create_Big_Integer --
+   ------------------------
+
+   function Create_Big_Integer (Value : Big_Integer) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Big_Integer_Value) do
+         Result.Value.Value.Big_Integer_Value.Set (Value);
+      end return;
+   end Create_Big_Integer;
+
    ------------------
    -- As_Character --
    ------------------
@@ -403,6 +451,17 @@ package body ${ada_lib_name}.Introspection is
    begin
       return Self.Value.Value.Character_Value;
    end As_Character;
+
+   ----------------------
+   -- Create_Character --
+   ----------------------
+
+   function Create_Character (Value : Character_Type) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Character_Value) do
+         Result.Value.Value.Character_Value := Value;
+      end return;
+   end Create_Character;
 
    --------------
    -- As_Token --
@@ -413,6 +472,18 @@ package body ${ada_lib_name}.Introspection is
       return Self.Value.Value.Token_Value;
    end As_Token;
 
+   ------------------
+   -- Create_Token --
+   ------------------
+
+   function Create_Token (Value : Token_Reference) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Token_Value)
+      do
+         Result.Value.Value.Token_Value := Value;
+      end return;
+   end Create_Token;
+
    -----------------------
    -- As_Unbounded_Text --
    -----------------------
@@ -421,6 +492,19 @@ package body ${ada_lib_name}.Introspection is
    begin
       return Self.Value.Value.Unbounded_Text_Value;
    end As_Unbounded_Text;
+
+   ---------------------------
+   -- Create_Unbounded_Text --
+   ---------------------------
+
+   function Create_Unbounded_Text
+     (Value : Unbounded_Text_Type) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Unbounded_Text_Value)
+      do
+         Result.Value.Value.Unbounded_Text_Value := Value;
+      end return;
+   end Create_Unbounded_Text;
 
    ----------------------
    -- As_Analysis_Unit --
@@ -431,6 +515,17 @@ package body ${ada_lib_name}.Introspection is
       return Self.Value.Value.Analysis_Unit_Value;
    end As_Analysis_Unit;
 
+   --------------------------
+   -- Create_Analysis_Unit --
+   --------------------------
+
+   function Create_Analysis_Unit (Value : Analysis_Unit) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Analysis_Unit_Value) do
+         Result.Value.Value.Analysis_Unit_Value := Value;
+      end return;
+   end Create_Analysis_Unit;
+
    -------------
    -- As_Node --
    -------------
@@ -440,6 +535,18 @@ package body ${ada_lib_name}.Introspection is
       return Self.Value.Value.Node_Value;
    end As_Node;
 
+   -----------------
+   -- Create_Node --
+   -----------------
+
+   function Create_Node
+     (Value : ${root_entity.api_name}'Class) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Node_Value) do
+         Result.Value.Value.Node_Value := Value.As_${root_entity.api_name};
+      end return;
+   end Create_Node;
+
    % for enum_type in ctx.enum_types:
       function As_${enum_type.introspection_radix}
         (Self : Value_Type) return ${enum_type.api_name} is
@@ -447,6 +554,15 @@ package body ${ada_lib_name}.Introspection is
          return Self.Value.Value.${enum_type.introspection_kind};
       end As_${enum_type.introspection_radix};
 
+      function Create_${enum_type.introspection_radix}
+        (Value : ${enum_type.api_name}) return Value_Type is
+      begin
+         return Result : constant Value_Type := Allocate
+           (${enum_type.introspection_kind})
+         do
+            Result.Value.Value.${enum_type.introspection_kind} := Value;
+         end return;
+      end Create_${enum_type.introspection_radix};
    % endfor
 
    % for t in ctx.composite_types:
@@ -478,6 +594,36 @@ package body ${ada_lib_name}.Introspection is
                return Self.Value.Value.${t.introspection_kind};
             % endif
          end As_${t.introspection_radix};
+
+         function Create_${t.introspection_radix}
+           (Value : ${t.api_name}) return Value_Type is
+         begin
+            return Result : constant Value_Type := Allocate
+              (${t.introspection_kind})
+            do
+               % if t.is_array_type:
+                  ## If `t` is an array, first allocate the array and then
+                  ## initialize it one item at a time.
+                  Result.Value.Value.${t.introspection_kind} :=
+                     new ${t.api_name} (Value'Range);
+                  for I in Value'Range loop
+                     ## Special case for big integer types: they are limited,
+                     ## so we cannot use mere assignment.
+                     % if t.element_type.is_big_integer_type:
+                        Result.Value.Value.${t.introspection_kind}
+                           .all (I).Set (Value (I));
+                     % else:
+                        Result.Value.Value.${t.introspection_kind}.all (I) :=
+                           Value (I);
+                     % endif
+                  end loop;
+
+               % else:
+                  ## For other types, a mere assignment is fine
+                  Result.Value.Value.${t.introspection_kind} := Value;
+               % endif
+            end return;
+         end Create_${t.introspection_radix};
       % endif
    % endfor
 
