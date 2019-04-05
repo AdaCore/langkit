@@ -711,8 +711,7 @@ package body ${ada_lib_name}.Introspection is
    -- Node_Data_Name --
    --------------------
 
-   function Node_Data_Name
-     (Node_Data : Abstract_Node_Data_Reference) return String is
+   function Node_Data_Name (Node_Data : Node_Data_Reference) return String is
    begin
       case Node_Data is
          when Field_Reference =>

@@ -202,15 +202,14 @@ package ${ada_lib_name}.Introspection is
 
    <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
 
-   type Abstract_Node_Data_Reference is
+   type Node_Data_Reference is
       (${', '.join(f.introspection_enum_literal for f in all_abstract)});
    --  Enumeration of all data attached to nodes (syntax fields and properties)
 
-   type Abstract_Node_Data_Reference_Array is
-      array (Positive range <>) of Abstract_Node_Data_Reference;
+   type Node_Data_Reference_Array is
+      array (Positive range <>) of Node_Data_Reference;
 
-   function Node_Data_Name
-     (Node_Data : Abstract_Node_Data_Reference) return String;
+   function Node_Data_Name (Node_Data : Node_Data_Reference) return String;
    --  Return a lower-case name for Node_Data
 
    -------------------
@@ -219,7 +218,7 @@ package ${ada_lib_name}.Introspection is
 
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
-   subtype Field_Reference is Abstract_Node_Data_Reference range
+   subtype Field_Reference is Node_Data_Reference range
       % if ctx.sorted_parse_fields:
          <%
             first = ctx.sorted_parse_fields[0]
@@ -268,7 +267,7 @@ package ${ada_lib_name}.Introspection is
    -- Properties --
    ----------------
 
-   subtype Property_Reference is Abstract_Node_Data_Reference
+   subtype Property_Reference is Node_Data_Reference
       range ${ctx.sorted_properties[0].introspection_enum_literal}
          .. ${ctx.sorted_properties[-1].introspection_enum_literal};
    --  Enumeration of all available node properties
