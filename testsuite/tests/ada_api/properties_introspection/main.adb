@@ -220,5 +220,28 @@ begin
       New_Line;
    end;
 
+   --  Test node data lookup by name
+
+   declare
+      procedure Test (Id : Node_Type_Id; Name : String);
+
+      ----------
+      -- Test --
+      ----------
+
+      procedure Test (Id : Node_Type_Id; Name : String) is
+      begin
+         Put_Line ("Lookup_Node_Data (" & Id'Image & ", " & Name & ") = "
+                   & Lookup_Node_Data (Id, Name)'Image);
+      end Test;
+   begin
+      Test (Type_Foo_Node, "name");
+      Test (Type_Foo_Node, "parent");
+
+      Test (Type_Var_Decl, "parent");
+      Test (Type_Var_Decl, "name");
+      Test (Type_Var_Decl, "eval");
+   end;
+
    Put_Line ("Done.");
 end Main;

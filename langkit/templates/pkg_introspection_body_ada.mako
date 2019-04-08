@@ -765,6 +765,44 @@ package body ${ada_lib_name}.Introspection is
       end case;
    end Evaluate_Node_Data;
 
+   ----------------------
+   -- Lookup_Node_Data --
+   ----------------------
+
+   function Lookup_Node_Data
+     (Id   : Node_Type_Id;
+      Name : String) return Any_Node_Data_Reference
+   is
+      Cursor : Any_Node_Type_Id := Id;
+   begin
+      --  Go through the derivation chain for Id and look for any field or
+      --  property whose name matches Name.
+
+      while Cursor /= None loop
+         declare
+            Node_Desc : Node_Type_Descriptor renames
+               Node_Type_Descriptors (Cursor).all;
+         begin
+            for F of Node_Desc.Fields loop
+               pragma Warnings (Off, "value not in range of type");
+               if Field_Name (F.Field) = Name then
+                  return F.Field;
+               end if;
+               pragma Warnings (On, "value not in range of type");
+            end loop;
+
+            for P of Node_Desc.Properties loop
+               if Property_Name (P) = Name then
+                  return P;
+               end if;
+            end loop;
+
+            Cursor := Node_Desc.Base_Type;
+         end;
+      end loop;
+      return None;
+   end Lookup_Node_Data;
+
    ----------------
    -- Field_Name --
    ----------------
