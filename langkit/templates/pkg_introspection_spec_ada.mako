@@ -200,8 +200,12 @@ package ${ada_lib_name}.Introspection is
 
    <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
 
-   type Node_Data_Reference is
-      (${', '.join(f.introspection_enum_literal for f in all_abstract)});
+   type Any_Node_Data_Reference is
+      (None${''.join((', ' + f.introspection_enum_literal)
+                      for f in all_abstract)});
+   subtype Node_Data_Reference is Any_Node_Data_Reference range
+      ${all_abstract[0].introspection_enum_literal}
+      ..  ${all_abstract[-1].introspection_enum_literal};
    --  Enumeration of all data attached to nodes (syntax fields and properties)
 
    type Node_Data_Reference_Array is
@@ -225,6 +229,13 @@ package ${ada_lib_name}.Introspection is
    --
    --  This raises a Node_Data_Evaluation_Error if Node has no such node data
    --  or if the provided arguments are invalid for it.
+
+   function Lookup_Node_Data
+     (Id   : Node_Type_Id;
+      Name : String) return Any_Node_Data_Reference;
+   --  Look for the node data corresponding to the given Name (lower-case
+   --  name) in the given node type reference (Id). Return it if found,
+   --  otherwise return None.
 
    -------------------
    -- Syntax fields --
