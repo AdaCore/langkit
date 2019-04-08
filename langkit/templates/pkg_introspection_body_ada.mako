@@ -715,14 +715,55 @@ package body ${ada_lib_name}.Introspection is
    begin
       case Node_Data is
          when Field_Reference =>
-            pragma Warnings (Off, "value not in range of subtype");
-            return Syntax_Field_Descriptors (Node_Data).Name;
-            pragma Warnings (On, "value not in range of subtype");
+            pragma Warnings (Off, "value not in range of type");
+            return Field_Name (Node_Data);
+            pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
-            return Property_Descriptors (Node_Data).Name;
+            return Property_Name (Node_Data);
       end case;
    end Node_Data_Name;
+
+   --------------------
+   -- Node_Data_Type --
+   --------------------
+
+   function Node_Data_Type
+     (Node_Data : Node_Data_Reference) return Value_Constraint is
+   begin
+      case Node_Data is
+         when Field_Reference =>
+            pragma Warnings (Off, "value not in range of type");
+            return (Kind => Node_Value, Node_Type => Field_Type (Node_Data));
+            pragma Warnings (On, "value not in range of type");
+
+         when Property_Reference =>
+            return Property_Return_Type (Node_Data);
+      end case;
+   end Node_Data_Type;
+
+   ------------------------
+   -- Evaluate_Node_Data --
+   ------------------------
+
+   function Evaluate_Node_Data
+     (Node      : ${T.entity.api_name}'Class;
+      Node_Data : Node_Data_Reference;
+      Arguments : Value_Array) return Value_Type is
+   begin
+      case Node_Data is
+         when Field_Reference =>
+            if Arguments'Length > 0 then
+               raise Node_Data_Evaluation_Error with "fields take no argument";
+            end if;
+            pragma Warnings (Off, "value not in range of type");
+            return Create_Node (Evaluate_Field (Node, Node_Data));
+            pragma Warnings (On, "value not in range of type");
+
+         when Property_Reference =>
+            return Evaluate_Property (Node, Node_Data, Arguments);
+      end case;
+   end Evaluate_Node_Data;
 
    ----------------
    -- Field_Name --
@@ -730,7 +771,9 @@ package body ${ada_lib_name}.Introspection is
 
    function Field_Name (Field : Field_Reference) return String is
    begin
-      return Node_Data_Name (Field);
+      pragma Warnings (Off, "value not in range of subtype");
+      return Syntax_Field_Descriptors (Field).Name;
+      pragma Warnings (On, "value not in range of subtype");
    end Field_Name;
 
    ----------------
@@ -966,7 +1009,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Property_Name (Property : Property_Reference) return String is
    begin
-      return Node_Data_Name (Property);
+      return Property_Descriptors (Property).Name;
    end Property_Name;
 
    --------------------------

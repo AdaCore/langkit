@@ -210,6 +210,22 @@ package ${ada_lib_name}.Introspection is
    function Node_Data_Name (Node_Data : Node_Data_Reference) return String;
    --  Return a lower-case name for Node_Data
 
+   function Node_Data_Type
+     (Node_Data : Node_Data_Reference) return Value_Constraint;
+   --  Return the constraint associated with Node_Data's type (or its return
+   --  type).
+
+   function Evaluate_Node_Data
+     (Node      : ${T.entity.api_name}'Class;
+      Node_Data : Node_Data_Reference;
+      Arguments : Value_Array) return Value_Type;
+   --  Evaluate Node_Data on the given Node and the given arguments. If node
+   --  data evaluation raises a Property_Error, forward it. Otherwise, return
+   --  its result.
+   --
+   --  This raises a Node_Data_Evaluation_Error if Node has no such node data
+   --  or if the provided arguments are invalid for it.
+
    -------------------
    -- Syntax fields --
    -------------------
