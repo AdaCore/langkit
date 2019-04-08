@@ -98,6 +98,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _:
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
+            (T.Token, lambda _: '{value}'),
             (T.Symbol, lambda _: '_symbol_type.unwrap({value}{context})'),
             (T.BigInt, lambda _: '_big_integer.unwrap({value})'),
         ], exception=TypeError(

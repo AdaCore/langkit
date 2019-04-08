@@ -73,7 +73,7 @@
             % elif arg.type.is_array and not arg.type.emit_c_type:
                Convert (${arg_ref})
             % elif arg.type.is_token_type:
-               Token (Node, Token_Index ({arg_ref}.Index))
+               Unwrap (${arg_ref})
             % elif arg.type.is_symbol_type:
                Unwrap_Symbol (${arg_ref})
             % elif arg.type.is_big_integer_type:
@@ -90,7 +90,9 @@
 
       % for arg in field.arguments:
          % if arg.type.is_token_type:
-            if Unwrap (${arg_ref}).Unit /= Unwrapped_Node.Unit then
+            if Converters.Get_Token_TDH.all (Unwrapped_${arg.name})
+               /= Unwrapped_Node.Unit.TDH'Access
+            then
                raise Constraint_Error with
                  ("The input token does not belong to the same unit as"
                   & " the input node");
