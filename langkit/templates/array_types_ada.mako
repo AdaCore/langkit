@@ -42,13 +42,20 @@
    % if cls.to_public_converter_required:
       function ${cls.to_public_converter}
          (Value : ${cls.name}) return ${cls.api_name} is
-         Result : ${cls.api_name} (1 .. Value.N);
       begin
-         for I in Result'Range loop
-            Result (I - Value.Items'First + Result'First) :=
-               ${cls.element_type.to_public_expr('Value.Items (I)')};
-         end loop;
-         return Result;
+         return Result : ${cls.api_name} (1 .. Value.N) do
+            for I in Result'Range loop
+               <% to_public_expr = cls.element_type.to_public_expr(
+                     'Value.Items (I)') %>
+               Result (I - Value.Items'First + Result'First)
+                  % if cls.element_type.is_big_int_type:
+                     .Set (${to_public_expr})
+                  % else:
+                     := ${to_public_expr}
+                  % endif
+               ;
+            end loop;
+         end return;
       end;
    % endif
 
