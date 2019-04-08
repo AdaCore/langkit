@@ -227,6 +227,10 @@ base_langkit_docs = {
         Raised when introspection functions
         (``${ctx.lib_name}.Introspection``) are requested an invalid field.
     """,
+    'langkit.introspection.node_data_evaluation_error': """
+        Raised when introspection functions (``${ctx.lib_name}.Introspection``)
+        are improperly used to evaluate a node data (field or property).
+    """,
     'langkit.rewriting.template_format_error': """
         Exception raised when a template has an invalid syntax, such as badly
         formatted placeholders.
