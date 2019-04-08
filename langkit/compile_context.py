@@ -2300,11 +2300,12 @@ class CompileCtx(object):
         :param str kind_var: Name of the variable that holds the kind of the
             AST node to process. Holding it in a variables is handy to avoid
             computing it multiple times.
-        :param (ASTNodeType) -> str actions_for_astnode: Function that return
-            the actions (i.e. Ada statements as a single string) to perform for
-            the given AST node type. Note that these actions should be specific
-            to the AST node, i.e. they should not overlap with actions for any
-            parent AST node.
+        :param (ASTNodeType, str) -> str actions_for_astnode: Function that
+            takes a specific node type to process and the name of the variable
+            to hold the node instance to process. It must return the actions
+            (i.e. Ada statements as a single string) to perform for this node.
+            Note that these actions should be specific to the node type, i.e.
+            they should not overlap with actions for any parent node.
         :type actions_for_astnode: (ASTNodeType) -> str
         """
 
