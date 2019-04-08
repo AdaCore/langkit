@@ -6,7 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import AbstractKind, New, Self, langkit_property
+from langkit.expressions import (AbstractKind, New, Property, Self,
+                                 langkit_property)
 from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
@@ -14,7 +15,22 @@ from utils import build_and_run
 
 
 class FooNode(ASTNode):
-    pass
+    id_bool = Property(lambda id=T.Bool: id, public=True)
+    id_int = Property(lambda id=T.Int: id, public=True)
+    id_bigint = Property(lambda id=T.BigInt: id, public=True)
+    id_char = Property(lambda id=T.Character: id, public=True)
+    id_token = Property(lambda id=T.Token: id, public=True)
+    id_sym = Property(lambda id=T.Symbol: id, public=True)
+    id_unit = Property(lambda id=T.AnalysisUnit: id, public=True)
+    id_root_node = Property(lambda id=T.FooNode: id, public=True)
+    id_name = Property(lambda id=T.Name: id, public=True)
+
+    # Test for enums
+    id_unit_kind = Property(lambda id=T.AnalysisUnitKind: id, public=True)
+
+    # Test for arrays
+    id_node_array = Property(lambda id=T.FooNode.entity.array: id, public=True)
+    id_bigint_array = Property(lambda id=T.BigInt.array: id, public=True)
 
 
 class VarDecl(FooNode):
