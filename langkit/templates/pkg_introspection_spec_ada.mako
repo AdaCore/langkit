@@ -295,6 +295,17 @@ package ${ada_lib_name}.Introspection is
    --  Return the lower-cased name for Property's argument whose index is
    --  Argument_Number.
 
+   function Evaluate_Property
+     (Node      : ${T.entity.api_name}'Class;
+      Property  : Property_Reference;
+      Arguments : Value_Array) return Value_Type;
+   --  Evaluate Property on the given Node and the given arguments. If the
+   --  property raises a Property_Error, forward it, otherwise return its
+   --  result.
+   --
+   --  This raises a Node_Data_Evaluation_Error if Node has no such property or
+   --  if the provided arguments are invalid for this property.
+
    type Property_Reference_Array is
       array (Positive range <>) of Property_Reference;
 

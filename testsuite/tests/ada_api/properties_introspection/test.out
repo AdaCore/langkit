@@ -1,4 +1,76 @@
 Properties for FOO_ADDITION:
+   id_bool
+   return type: BOOLEAN_VALUE
+   arguments:
+      id: BOOLEAN_VALUE
+
+
+   id_int
+   return type: INTEGER_VALUE
+   arguments:
+      id: INTEGER_VALUE
+
+
+   id_bigint
+   return type: BIG_INTEGER_VALUE
+   arguments:
+      id: BIG_INTEGER_VALUE
+
+
+   id_char
+   return type: CHARACTER_VALUE
+   arguments:
+      id: CHARACTER_VALUE
+
+
+   id_token
+   return type: TOKEN_VALUE
+   arguments:
+      id: TOKEN_VALUE
+
+
+   id_sym
+   return type: UNBOUNDED_TEXT_VALUE
+   arguments:
+      id: UNBOUNDED_TEXT_VALUE
+
+
+   id_unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_VALUE
+
+
+   id_root_node
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      id: NODE_VALUE (FooNode)
+
+
+   id_name
+   return type: NODE_VALUE (Name)
+   arguments:
+      id: NODE_VALUE (Name)
+
+
+   id_unit_kind
+   return type: ANALYSIS_UNIT_KIND_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_KIND_VALUE
+
+
+   id_node_array
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      id: FOO_NODE_ARRAY_VALUE
+
+
+   id_bigint_array
+   return type: BIG_INTEGER_ARRAY_VALUE
+   arguments:
+      id: BIG_INTEGER_ARRAY_VALUE
+
+
    parent
    return type: NODE_VALUE (FooNode)
    arguments:
@@ -57,6 +129,78 @@ Properties for FOO_ADDITION:
 
 
 Properties for FOO_NUMBER:
+   id_bool
+   return type: BOOLEAN_VALUE
+   arguments:
+      id: BOOLEAN_VALUE
+
+
+   id_int
+   return type: INTEGER_VALUE
+   arguments:
+      id: INTEGER_VALUE
+
+
+   id_bigint
+   return type: BIG_INTEGER_VALUE
+   arguments:
+      id: BIG_INTEGER_VALUE
+
+
+   id_char
+   return type: CHARACTER_VALUE
+   arguments:
+      id: CHARACTER_VALUE
+
+
+   id_token
+   return type: TOKEN_VALUE
+   arguments:
+      id: TOKEN_VALUE
+
+
+   id_sym
+   return type: UNBOUNDED_TEXT_VALUE
+   arguments:
+      id: UNBOUNDED_TEXT_VALUE
+
+
+   id_unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_VALUE
+
+
+   id_root_node
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      id: NODE_VALUE (FooNode)
+
+
+   id_name
+   return type: NODE_VALUE (Name)
+   arguments:
+      id: NODE_VALUE (Name)
+
+
+   id_unit_kind
+   return type: ANALYSIS_UNIT_KIND_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_KIND_VALUE
+
+
+   id_node_array
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      id: FOO_NODE_ARRAY_VALUE
+
+
+   id_bigint_array
+   return type: BIG_INTEGER_ARRAY_VALUE
+   arguments:
+      id: BIG_INTEGER_ARRAY_VALUE
+
+
    parent
    return type: NODE_VALUE (FooNode)
    arguments:
@@ -115,6 +259,78 @@ Properties for FOO_NUMBER:
 
 
 Properties for FOO_REF:
+   id_bool
+   return type: BOOLEAN_VALUE
+   arguments:
+      id: BOOLEAN_VALUE
+
+
+   id_int
+   return type: INTEGER_VALUE
+   arguments:
+      id: INTEGER_VALUE
+
+
+   id_bigint
+   return type: BIG_INTEGER_VALUE
+   arguments:
+      id: BIG_INTEGER_VALUE
+
+
+   id_char
+   return type: CHARACTER_VALUE
+   arguments:
+      id: CHARACTER_VALUE
+
+
+   id_token
+   return type: TOKEN_VALUE
+   arguments:
+      id: TOKEN_VALUE
+
+
+   id_sym
+   return type: UNBOUNDED_TEXT_VALUE
+   arguments:
+      id: UNBOUNDED_TEXT_VALUE
+
+
+   id_unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_VALUE
+
+
+   id_root_node
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      id: NODE_VALUE (FooNode)
+
+
+   id_name
+   return type: NODE_VALUE (Name)
+   arguments:
+      id: NODE_VALUE (Name)
+
+
+   id_unit_kind
+   return type: ANALYSIS_UNIT_KIND_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_KIND_VALUE
+
+
+   id_node_array
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      id: FOO_NODE_ARRAY_VALUE
+
+
+   id_bigint_array
+   return type: BIG_INTEGER_ARRAY_VALUE
+   arguments:
+      id: BIG_INTEGER_ARRAY_VALUE
+
+
    parent
    return type: NODE_VALUE (FooNode)
    arguments:
@@ -178,6 +394,78 @@ Properties for FOO_REF:
 
 
 Properties for FOO_VAR_DECL_LIST:
+   id_bool
+   return type: BOOLEAN_VALUE
+   arguments:
+      id: BOOLEAN_VALUE
+
+
+   id_int
+   return type: INTEGER_VALUE
+   arguments:
+      id: INTEGER_VALUE
+
+
+   id_bigint
+   return type: BIG_INTEGER_VALUE
+   arguments:
+      id: BIG_INTEGER_VALUE
+
+
+   id_char
+   return type: CHARACTER_VALUE
+   arguments:
+      id: CHARACTER_VALUE
+
+
+   id_token
+   return type: TOKEN_VALUE
+   arguments:
+      id: TOKEN_VALUE
+
+
+   id_sym
+   return type: UNBOUNDED_TEXT_VALUE
+   arguments:
+      id: UNBOUNDED_TEXT_VALUE
+
+
+   id_unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_VALUE
+
+
+   id_root_node
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      id: NODE_VALUE (FooNode)
+
+
+   id_name
+   return type: NODE_VALUE (Name)
+   arguments:
+      id: NODE_VALUE (Name)
+
+
+   id_unit_kind
+   return type: ANALYSIS_UNIT_KIND_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_KIND_VALUE
+
+
+   id_node_array
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      id: FOO_NODE_ARRAY_VALUE
+
+
+   id_bigint_array
+   return type: BIG_INTEGER_ARRAY_VALUE
+   arguments:
+      id: BIG_INTEGER_ARRAY_VALUE
+
+
    parent
    return type: NODE_VALUE (FooNode)
    arguments:
@@ -225,6 +513,78 @@ Properties for FOO_VAR_DECL_LIST:
 
 
 Properties for FOO_NAME:
+   id_bool
+   return type: BOOLEAN_VALUE
+   arguments:
+      id: BOOLEAN_VALUE
+
+
+   id_int
+   return type: INTEGER_VALUE
+   arguments:
+      id: INTEGER_VALUE
+
+
+   id_bigint
+   return type: BIG_INTEGER_VALUE
+   arguments:
+      id: BIG_INTEGER_VALUE
+
+
+   id_char
+   return type: CHARACTER_VALUE
+   arguments:
+      id: CHARACTER_VALUE
+
+
+   id_token
+   return type: TOKEN_VALUE
+   arguments:
+      id: TOKEN_VALUE
+
+
+   id_sym
+   return type: UNBOUNDED_TEXT_VALUE
+   arguments:
+      id: UNBOUNDED_TEXT_VALUE
+
+
+   id_unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_VALUE
+
+
+   id_root_node
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      id: NODE_VALUE (FooNode)
+
+
+   id_name
+   return type: NODE_VALUE (Name)
+   arguments:
+      id: NODE_VALUE (Name)
+
+
+   id_unit_kind
+   return type: ANALYSIS_UNIT_KIND_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_KIND_VALUE
+
+
+   id_node_array
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      id: FOO_NODE_ARRAY_VALUE
+
+
+   id_bigint_array
+   return type: BIG_INTEGER_ARRAY_VALUE
+   arguments:
+      id: BIG_INTEGER_ARRAY_VALUE
+
+
    parent
    return type: NODE_VALUE (FooNode)
    arguments:
@@ -272,6 +632,78 @@ Properties for FOO_NAME:
 
 
 Properties for FOO_VAR_DECL:
+   id_bool
+   return type: BOOLEAN_VALUE
+   arguments:
+      id: BOOLEAN_VALUE
+
+
+   id_int
+   return type: INTEGER_VALUE
+   arguments:
+      id: INTEGER_VALUE
+
+
+   id_bigint
+   return type: BIG_INTEGER_VALUE
+   arguments:
+      id: BIG_INTEGER_VALUE
+
+
+   id_char
+   return type: CHARACTER_VALUE
+   arguments:
+      id: CHARACTER_VALUE
+
+
+   id_token
+   return type: TOKEN_VALUE
+   arguments:
+      id: TOKEN_VALUE
+
+
+   id_sym
+   return type: UNBOUNDED_TEXT_VALUE
+   arguments:
+      id: UNBOUNDED_TEXT_VALUE
+
+
+   id_unit
+   return type: ANALYSIS_UNIT_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_VALUE
+
+
+   id_root_node
+   return type: NODE_VALUE (FooNode)
+   arguments:
+      id: NODE_VALUE (FooNode)
+
+
+   id_name
+   return type: NODE_VALUE (Name)
+   arguments:
+      id: NODE_VALUE (Name)
+
+
+   id_unit_kind
+   return type: ANALYSIS_UNIT_KIND_VALUE
+   arguments:
+      id: ANALYSIS_UNIT_KIND_VALUE
+
+
+   id_node_array
+   return type: FOO_NODE_ARRAY_VALUE
+   arguments:
+      id: FOO_NODE_ARRAY_VALUE
+
+
+   id_bigint_array
+   return type: BIG_INTEGER_ARRAY_VALUE
+   arguments:
+      id: BIG_INTEGER_ARRAY_VALUE
+
+
    parent
    return type: NODE_VALUE (FooNode)
    arguments:
@@ -322,6 +754,34 @@ Properties for FOO_VAR_DECL:
    arguments:
       <none>
 
+
+P_Id_Bool:
+  TRUE
+P_Id_Int:
+   1
+P_Id_Bigint:
+  12
+P_Id_Char:
+  A
+P_Id_Token:
+  <Token Kind=Var Text="var">
+P_Id_Sym:
+  a
+P_Id_Unit:
+  foo.txt
+P_Id_Root_Node:
+  <VarDeclList foo.txt:1:1-1:11>
+P_Id_Name:
+  <Name foo.txt:1:5-1:6>
+
+P_Id_Unit_Kind:
+  UNIT_BODY
+
+P_Id_Node_Array:
+  * <VarDeclList foo.txt:1:1-1:11>
+  * <Name foo.txt:1:5-1:6>
+
+P_Eval: <no such property>
 
 Done.
 Done

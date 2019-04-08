@@ -1001,6 +1001,108 @@ package body ${ada_lib_name}.Introspection is
              .Argument_Names (Argument_Number).all;
    end Property_Argument_Name;
 
+   -----------------------
+   -- Evaluate_Property --
+   -----------------------
+
+   function Evaluate_Property
+     (Node      : ${T.entity.api_name}'Class;
+      Property  : Property_Reference;
+      Arguments : Value_Array) return Value_Type
+   is
+      Kind   : constant ${root_node_kind_name} := Node.Kind;
+      Desc   : Property_Descriptor renames Property_Descriptors (Property).all;
+      Result : Any_Value_Type := No_Value;
+   begin
+      --  First, check that arguments match the property signature
+
+      if Arguments'Length /= Desc.Arity then
+         raise Node_Data_Evaluation_Error with "invalid number of arguments";
+      end if;
+
+      for I in Desc.Argument_Types'Range loop
+         declare
+            Arg : Value_Type renames Arguments (I - 1 + Arguments'First);
+         begin
+            if not Satisfies (Arg, Desc.Argument_Types (I)) then
+               raise Node_Data_Evaluation_Error with
+                  "invalid type for argument " & Desc.Argument_Names (I).all;
+            end if;
+         end;
+      end loop;
+
+      --  Now, we can proceed with the property evaluation
+
+      <%
+         def add_property_actions(result, node_expr, p):
+            """
+            Append to `result` the Ada code to call the `p` property on the
+            `node_expr` node.
+            """
+            if p.arguments:
+               # Unwrap arguments in local variables (convert Value_Type to
+               # contrete types).
+               result.append('declare')
+               for i, arg in enumerate(p.arguments):
+                  t = arg.public_type
+                  result.append('{} : constant {} :='
+                                .format(arg.name, t.api_name))
+                  result.append("As_{} (Arguments (Arguments'First + {}))"
+                                .format(t.introspection_radix, i))
+
+                  # Make sure we convert nodes to the precise type
+                  if t.is_entity_type and t != T.entity:
+                     result[-1] += '.As_{}'.format(t.api_name)
+
+                  result[-1] += ';'
+
+               result.append('begin')
+
+            # Format a call to the property itself, passing arguments if there
+            # are some.
+            property_call = '{}.{}{}'.format(
+               node_expr, p.name,
+               (' ({})'.format(', '.join(str(arg.name) for arg in p.arguments))
+                if p.arguments else ''))
+
+            # Wrap this call to convert its result (concrete type to
+            # Value_Type).
+            result.append('Result := Create_{} ({});'
+                          .format(p.type.introspection_radix, property_call))
+
+            if p.arguments:
+               result.append('end;')
+
+         def get_actions(astnode, node_expr):
+            properties = [
+                (p.base if p.overriding else p)
+                for p in astnode.get_properties(
+                   predicate=lambda p: p.is_public,
+                   include_inherited=False)]
+            result = []
+
+            if properties:
+               result.append('case Property is')
+               for p in properties:
+                  result.append('when {} =>'
+                                .format(p.introspection_enum_literal))
+                  add_property_actions(result, node_expr, p)
+               result.append('when others => null;')
+               result.append('end case;')
+
+            return '\n'.join(result)
+      %>
+      ${ctx.generate_actions_for_hierarchy('Node', 'Kind', get_actions,
+                                           public_nodes=True)}
+
+      ## If we haven't matched the requested field on Node, report an error,
+      ## otherwise, return the property result.
+      if Result = No_Value then
+         raise Node_Data_Evaluation_Error with "no such field on this node";
+      end if;
+      return Result;
+   end Evaluate_Property;
+
    ----------------
    -- Properties --
    ----------------
