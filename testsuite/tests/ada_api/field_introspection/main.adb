@@ -1,10 +1,14 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 
 procedure Main is
 begin
+   --  Do an exhaustive dump of all available fields (names, types, indexes)
+   --  for this language.
+
    for Id in Node_Type_Id'Range loop
       Put_Line (DSL_Name (Id) & " (" & Id'Image & ")");
 
@@ -41,6 +45,47 @@ begin
       end if;
 
    end loop;
+
+   --  Test that Evaluate_Fields works as expected
+
+   declare
+      procedure Test
+        (Label : String; Node : Foo_Node'Class; Field : Field_Reference);
+
+      ----------
+      -- Test --
+      ----------
+
+      procedure Test
+        (Label : String; Node : Foo_Node'Class; Field : Field_Reference)
+      is
+         Result : Foo_Node;
+         Error  : Boolean := False;
+      begin
+         begin
+            Result := Evaluate_Field (Node, Field);
+         exception
+            when Node_Data_Evaluation_Error =>
+               Error := True;
+         end;
+         Put_Line (Label & " = " & (if Error
+                                    then "<no such field>"
+                                    else Result.Short_Image));
+      end Test;
+
+      U : constant Analysis_Unit := Create_Context.Get_From_Buffer
+        (Filename => "foo.txt", Buffer => "def a; var b = 1;");
+      F : constant Fun_Decl := U.Root.Child (1).As_Fun_Decl;
+      V : constant Var_Decl := U.Root.Child (2).As_Var_Decl;
+   begin
+      Test ("F.F_Name", F, Decl_F_Name);
+      Test ("F.F_Value", F, Decl_F_Value);
+      Test ("F.F_Var_Kw", F, Var_Decl_F_Var_Kw);
+
+      Test ("V.F_Name", V, Decl_F_Name);
+      Test ("V.F_Value = ", V, Decl_F_Value);
+      Test ("V.F_Var_Kw", V, Var_Decl_F_Var_Kw);
+   end;
 
    Put_Line ("Done.");
 end Main;

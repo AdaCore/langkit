@@ -58,5 +58,11 @@ VarKeyword (TYPE_VAR_KEYWORD)
 
    Fields (only concrete ones):
 
+F.F_Name = <Name foo.txt:1:5-1:6>
+F.F_Value = None
+F.F_Var_Kw = <no such field>
+V.F_Name = <Name foo.txt:1:12-1:13>
+V.F_Value =  = <Number foo.txt:1:16-1:17>
+V.F_Var_Kw = <VarKeyword foo.txt:1:8-1:11>
 Done.
 Done

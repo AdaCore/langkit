@@ -744,6 +744,46 @@ package body ${ada_lib_name}.Introspection is
       pragma Warnings (On, "value not in range of subtype");
    end Field_Type;
 
+   --------------------
+   -- Evaluate_Field --
+   --------------------
+
+   function Evaluate_Field
+     (Node  : ${T.entity.api_name}'Class;
+      Field : Field_Reference) return ${T.entity.api_name}
+   is
+      Kind : constant ${root_node_kind_name} := Node.Kind;
+   begin
+      <%
+         def get_actions(astnode, node_expr):
+            fields = astnode.get_parse_fields(
+               predicate=lambda f: not f.overriding,
+               include_inherited=False)
+            result = []
+
+            if fields:
+               result.append('case Field is')
+               for f in fields:
+                  result.append('when {} => return {}.{}'.format(
+                     f.introspection_enum_literal,
+                     node_expr,
+                     f.name))
+                  if not f.type.is_root_node:
+                     result[-1] += '.As_{}'.format(T.entity.api_name)
+                  result[-1] += ';'
+               result.append('when others => null;')
+               result.append('end case;')
+
+            return '\n'.join(result)
+      %>
+      ${ctx.generate_actions_for_hierarchy('Node', 'Kind', get_actions,
+                                           public_nodes=True)}
+
+      ## If we haven't matched the requested field on Node, report an error
+      return (raise Node_Data_Evaluation_Error
+              with "no such field on this node");
+   end Evaluate_Field;
+
    -----------
    -- Index --
    -----------

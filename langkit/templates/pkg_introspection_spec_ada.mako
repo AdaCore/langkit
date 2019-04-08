@@ -239,6 +239,13 @@ package ${ada_lib_name}.Introspection is
    function Field_Type (Field : Field_Reference) return Node_Type_Id;
    --  Return a reference to the node type that covers what Field can contain
 
+   function Evaluate_Field
+     (Node  : ${T.entity.api_name}'Class;
+      Field : Field_Reference) return ${T.entity.api_name};
+   --  Evaluate Field on the given Node. Return the corresponding Node.
+   --
+   --  This raises a Node_Data_Evaluation_Error if Node has no such field.
+
    function Index
      (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive;
    --  Return the index in nodes to access the given ``Field`` considering the

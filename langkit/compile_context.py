@@ -677,6 +677,7 @@ class CompileCtx(object):
             ('langkit', 'unknown_charset'),
             ('langkit', 'invalid_input'),
             ('langkit.introspection', 'invalid_field'),
+            ('langkit.introspection', 'node_data_evaluation_error'),
             ('langkit.rewriting', 'template_format_error'),
             ('langkit.rewriting', 'template_args_error'),
             ('langkit.rewriting', 'template_instantiation_error')
