@@ -2283,7 +2283,8 @@ class CompileCtx(object):
                     env_action.rewrite_property_refs(redirected_props)
 
     def generate_actions_for_hierarchy(self, node_var, kind_var,
-                                       actions_for_astnode):
+                                       actions_for_astnode,
+                                       public_nodes=False):
         """
         Generate a sequence of Ada statements/nested CASE blocks to execute
         some actions on an AST node depending on its kind.
@@ -2307,6 +2308,8 @@ class CompileCtx(object):
             Note that these actions should be specific to the node type, i.e.
             they should not overlap with actions for any parent node.
         :type actions_for_astnode: (ASTNodeType) -> str
+        :param bool public_nodes: Whether `node_var` is a type from the public
+            API. Otherwise (the default), assume it is an internal node.
         """
 
         class Matcher(object):
@@ -2435,18 +2438,32 @@ class CompileCtx(object):
                 if node_var is None:
                     new_node_var = None
                 else:
-                    new_node_type = m.astnode.name.camel_with_underscores
+                    new_node_type = (
+                        m.astnode.entity.api_name.camel_with_underscores
+                        if public_nodes else
+                        m.astnode.name.camel_with_underscores)
                     new_node_var = m.new_node_var(m.astnode)
-                    result.append("""
-                       declare
-                          {new_node_var} : constant {new_node_type} :=
-                             {new_node_type} ({node_var});
-                       begin
-                    """.format(
-                        node_var=node_var,
-                        new_node_type=new_node_type,
-                        new_node_var=new_node_var,
-                    ))
+
+                    # Declare a new variable to hold the node subtype to
+                    # process in this matcher.
+                    new_node_expr = ('{node_var}.As_{new_node_type}'
+                                     if public_nodes else
+                                     '{new_node_type} ({node_var})')
+                    result.append('declare')
+                    result.append(
+                        ('{new_node_var} : constant'
+                         ' {namespace}{new_node_type} := ' +
+                         new_node_expr + ';').format(
+                            node_var=node_var,
+                            new_node_type=new_node_type,
+                            new_node_var=new_node_var,
+
+                            # Public node names sometimes clash with
+                            # introspection enumerations. Adding namespace
+                            # helps generating correct code.
+                            namespace='Analysis.' if public_nodes else ''))
+                    result.append('begin')
+
                 result.append(m.actions)
                 print_case(m.inner_case, new_node_var)
                 if node_var is not None:
