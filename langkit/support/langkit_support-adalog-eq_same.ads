@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Logic_Ref;
@@ -107,27 +109,30 @@ package Langkit_Support.Adalog.Eq_Same is
          One_Side_Convert => One_Side_Convert);
 
       function Create
-        (L, R    : Refs.Raw_Logic_Var.Var;
-         Data    : Converter;
-         Eq_Data : Equals_Data) return Relation
+        (L, R      : Refs.Raw_Logic_Var.Var;
+         Data      : Converter;
+         Eq_Data   : Equals_Data;
+         Sloc_Info : String_Access := null) return Relation
       is
-        (Impl.Equals (L, R, Data, Data, Eq_Data));
+        (Impl.Equals (L, R, Data, Data, Eq_Data, Sloc_Info));
 
       function Create
-        (L       : Refs.Raw_Logic_Var.Var;
-         R       : LR_Type;
-         Data    : Converter;
-         Eq_Data : Equals_Data) return Relation
+        (L         : Refs.Raw_Logic_Var.Var;
+         R         : LR_Type;
+         Data      : Converter;
+         Eq_Data   : Equals_Data;
+         Sloc_Info : String_Access := null) return Relation
       is
-        (Impl.Equals (L, R, Data, Eq_Data));
+        (Impl.Equals (L, R, Data, Eq_Data, Sloc_Info));
 
       function Create
-        (L       : LR_Type;
-         R       : Refs.Raw_Logic_Var.Var;
-         Data    : Converter;
-         Eq_Data : Equals_Data) return Relation
+        (L         : LR_Type;
+         R         : Refs.Raw_Logic_Var.Var;
+         Data      : Converter;
+         Eq_Data   : Equals_Data;
+         Sloc_Info : String_Access := null) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data, Eq_Data)));
+        (Relation (Impl.Equals (L, R, Data, Eq_Data, Sloc_Info)));
 
    end Raw_Custom_Bind;
 

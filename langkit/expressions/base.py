@@ -4941,3 +4941,9 @@ def resolve_property(propref):
 
     assert result is None or isinstance(result, PropertyDef)
     return result
+
+
+def sloc_info_arg(loc):
+    return ("(if Langkit_Support.Adalog.Debug.Debug"
+            " then new String'(\"{}\")"
+            " else null)".format(loc.short_repr))

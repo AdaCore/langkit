@@ -142,6 +142,9 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
          Start_Line (Level);
          Put (R.Custom_Image);
+         if R.Sloc_Info /= null then
+            Put (" " & R.Sloc_Info.all);
+         end if;
 
          declare
             Children : constant Relation_Array := R.Children;

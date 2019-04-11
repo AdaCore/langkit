@@ -98,6 +98,10 @@ class Location(object):
     def __repr__(self):
         return "<Location {} {}>".format(self.file, self.line)
 
+    @property
+    def short_repr(self):
+        return "({}:{})".format(os.path.basename(self.file), self.line)
+
 
 def extract_library_location(stack=None):
     """

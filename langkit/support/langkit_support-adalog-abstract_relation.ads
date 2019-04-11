@@ -24,6 +24,8 @@
 --  This file contains the base class representing a logic relation. Equations
 --  systems are basically a tree of Base_Relation subclasses instances.
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 package Langkit_Support.Adalog.Abstract_Relation is
 
    type Solving_Context is private;
@@ -42,7 +44,8 @@ package Langkit_Support.Adalog.Abstract_Relation is
      (if B then Satisfied else Unsatisfied);
 
    type Base_Relation is abstract tagged record
-      Ref_Count : Natural := 1;
+      Ref_Count  : Natural := 1;
+      Sloc_Info  : String_Access;
    end record;
 
    type Relation is access all Base_Relation'Class;
