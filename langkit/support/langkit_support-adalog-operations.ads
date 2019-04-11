@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 
@@ -95,13 +97,22 @@ package Langkit_Support.Adalog.Operations is
    --  for both L and R. As for all constructors, the created object has only
    --  one ownership share which is given to the caller.
 
-   function Logic_Or (L, R : Relation) return Relation;
-   function Logic_And (L, R : Relation) return Relation;
+   function Logic_Or
+     (L, R : Relation; Sloc_Info : String_Access := null) return Relation;
+   function Logic_And
+     (L, R : Relation; Sloc_Info : String_Access := null) return Relation;
 
-   function "or" (L, R : Relation) return Relation renames Logic_Or;
-   function "and" (L, R : Relation) return Relation renames Logic_And;
+   function "or" (L, R : Relation) return Relation
+   is (Logic_Or (L, R));
+   function "and" (L, R : Relation) return Relation
+   is (Logic_And (L, R));
 
-   function Logic_Any (Rels : Relation_Array) return Relation;
-   function Logic_All (Rels : Relation_Array) return Relation;
+   function Logic_Any
+     (Rels      : Relation_Array;
+      Sloc_Info : String_Access := null) return Relation;
+
+   function Logic_All
+     (Rels      : Relation_Array;
+      Sloc_Info : String_Access := null) return Relation;
 
 end Langkit_Support.Adalog.Operations;

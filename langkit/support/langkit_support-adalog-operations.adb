@@ -270,25 +270,34 @@ package body Langkit_Support.Adalog.Operations is
    -- Logic_Or --
    --------------
 
-   function Logic_Or (L, R : Relation) return Relation is
+   function Logic_Or
+     (L, R      : Relation;
+      Sloc_Info : String_Access := null) return Relation
+   is
    begin
-      return Logic_Any ((L, R));
+      return Logic_Any ((L, R), Sloc_Info);
    end Logic_Or;
 
    ---------------
    -- Logic_And --
    ---------------
 
-   function Logic_And (L, R : Relation) return Relation is
+   function Logic_And
+     (L, R      : Relation;
+      Sloc_Info : String_Access := null) return Relation
+   is
    begin
-      return Logic_All ((L, R));
+      return Logic_All ((L, R), Sloc_Info);
    end Logic_And;
 
    ---------------
    -- Logic_Any --
    ---------------
 
-   function Logic_Any (Rels : Relation_Array) return Relation is
+   function Logic_Any
+     (Rels : Relation_Array;
+      Sloc_Info : String_Access := null) return Relation
+   is
       function Process (Rel : Relation) return Relation_Array
       is
         (if Rel.all in False_Relation.Rel'Class then Empty_Array
@@ -301,7 +310,7 @@ package body Langkit_Support.Adalog.Operations is
    begin
 
       if Keep_Rels'Length = 0 then
-         return False_Rel;
+         return False_Rel (Sloc_Info => Sloc_Info);
       end if;
 
       for Rel of Keep_Rels loop
@@ -318,6 +327,7 @@ package body Langkit_Support.Adalog.Operations is
             Count         => Keep_Rels'Length,
             Next          => <>,
             Sub_Rels      => Keep_Rels,
+            Sloc_Info     => Sloc_Info,
             Working_Queue => <>);
       begin
          Initialize_Working_Queue (Result.all);
@@ -329,7 +339,9 @@ package body Langkit_Support.Adalog.Operations is
    -- Logic_All --
    ---------------
 
-   function Logic_All (Rels : Relation_Array) return Relation is
+   function Logic_All
+     (Rels : Relation_Array; Sloc_Info : String_Access := null) return Relation
+   is
 
       function Process (Rel : Relation) return Relation_Array
       is
@@ -343,7 +355,7 @@ package body Langkit_Support.Adalog.Operations is
 
    begin
       if Keep_Rels'Length = 0 then
-         return True_Rel;
+         return True_Rel (Sloc_Info => Sloc_Info);
       end if;
 
       for Rel of Keep_Rels loop
@@ -360,6 +372,7 @@ package body Langkit_Support.Adalog.Operations is
             Count         => Keep_Rels'Length,
             Next          => <>,
             Sub_Rels      => Keep_Rels,
+            Sloc_Info     => Sloc_Info,
             Working_Queue => <>);
       begin
          Initialize_Working_Queue (Result.all);

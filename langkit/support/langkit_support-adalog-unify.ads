@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Logic_Var;
@@ -119,35 +121,39 @@ package Langkit_Support.Adalog.Unify is
    ------------------
 
    function Equals
-     (L       : Left_Var.Var;
-      R       : Right_Var.Var;
-      L_Data  : Left_C_Data := No_L_Data;
-      R_Data  : Right_C_Data := No_R_Data;
-      Eq_Data : Equals_Data := No_Equals_Data) return Relation
+     (L         : Left_Var.Var;
+      R         : Right_Var.Var;
+      L_Data    : Left_C_Data := No_L_Data;
+      R_Data    : Right_C_Data := No_R_Data;
+      Eq_Data   : Equals_Data := No_Equals_Data;
+      Sloc_Info : String_Access := null) return Relation
    is
      (new Unify_LR_Rel.Rel'
         (Rel    => Create (L, R, L_Data, R_Data, Eq_Data),
+         Sloc_Info => Sloc_Info,
          others => <>))
-   with Inline;
+     with Inline;
 
    function Equals
-     (L       : Left_Var.Var;
-      R       : R_Type;
-      R_Data  : Right_C_Data := No_R_Data;
-      Eq_Data : Equals_Data := No_Equals_Data)
+     (L         : Left_Var.Var;
+      R         : R_Type;
+      R_Data    : Right_C_Data := No_R_Data;
+      Eq_Data   : Equals_Data := No_Equals_Data;
+      Sloc_Info : String_Access := null)
       return access Base_Relation'Class
    is
-     (Unify_Left.Create (L, R, R_Data, Eq_Data))
-   with Inline;
+     (Unify_Left.Create (L, R, R_Data, Eq_Data, Sloc_Info))
+       with Inline;
 
    function Equals
-     (L       : L_Type;
-      R       : Right_Var.Var;
-      L_Data  : Left_C_Data := No_L_Data;
-      Eq_Data : Equals_Data := No_Equals_Data)
+     (L         : L_Type;
+      R         : Right_Var.Var;
+      L_Data    : Left_C_Data := No_L_Data;
+      Eq_Data   : Equals_Data := No_Equals_Data;
+      Sloc_Info : String_Access := null)
       return access Base_Relation'Class
    is
-     (Unify_Right.Create (R, L, L_Data, Eq_Data))
+     (Unify_Right.Create (R, L, L_Data, Eq_Data, Sloc_Info))
    with Inline;
 
    ------------

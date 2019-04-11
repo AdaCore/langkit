@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Relations;
@@ -38,8 +40,10 @@ package Langkit_Support.Adalog.Pure_Relations is
    function Custom_Image (Self : False_Relation_Rec) return String;
    package False_Relation is new Pure_Relation (Ty => False_Relation_Rec);
 
-   function False_Rel return Relation
-   is (new False_Relation.Rel'(others => <>));
+   function False_Rel (Sloc_Info : String_Access := null) return Relation
+   is (new False_Relation.Rel'
+         (Sloc_Info => Sloc_Info,
+          others    => <>));
 
    -------------------
    -- True_Relation --
@@ -52,6 +56,9 @@ package Langkit_Support.Adalog.Pure_Relations is
 
    package True_Relation is new Pure_Relation (Ty => True_Relation_Rec);
 
-   function True_Rel return Relation is (new True_Relation.Rel'(others => <>));
+   function True_Rel (Sloc_Info : String_Access := null) return Relation is
+     (new True_Relation.Rel'
+        (Sloc_Info => Sloc_Info,
+         others    => <>));
 
 end Langkit_Support.Adalog.Pure_Relations;

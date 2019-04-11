@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Logic_Var;
@@ -86,10 +88,11 @@ package Langkit_Support.Adalog.Unify_One_Side is
 
    type Unify is new Base_Relation with private;
    function Create
-     (Left    : Var.Var;
-      Right   : R_Type;
-      R_Data  : R_Convert_Data;
-      Eq_Data : Equals_Data) return Relation;
+     (Left      : Var.Var;
+      Right     : R_Type;
+      R_Data    : R_Convert_Data;
+      Eq_Data   : Equals_Data;
+      Sloc_Info : String_Access := null) return Relation;
 
    ------------
    -- Member --

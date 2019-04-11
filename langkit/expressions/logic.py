@@ -14,7 +14,7 @@ from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
     NullExpr, PropertyDef, ResolvedExpression, Self, aggregate_expr, auto_attr,
-    construct, dsl_document, render, resolve_property
+    construct, dsl_document, render, resolve_property, sloc_info_arg
 )
 
 
@@ -82,6 +82,8 @@ class Bind(AbstractExpression):
                 ))
             else:
                 constructor_args.append('No_Equals_Data_Default')
+
+            constructor_args.append(sloc_info_arg(abstract_expr.location))
 
             super(Bind.Expr, self).__init__(
                 'Bind_Result',
@@ -622,9 +624,12 @@ class LogicBooleanOp(AbstractExpression):
             [construct(self.equation_array, T.Equation.array)]
         )
 
-        return CallExpr('Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
-                        T.Equation, [relation_array],
-                        abstract_expr=self)
+        return CallExpr(
+            'Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
+            T.Equation,
+            [relation_array, sloc_info_arg(self.location)],
+            abstract_expr=self
+        )
 
     def __repr__(self):
         return '<Logic{}>'.format(self.kind_name)
@@ -662,7 +667,10 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_True', 'True_Rel', T.Equation, [])
+        return CallExpr(
+            'Logic_True', 'True_Rel', T.Equation,
+            [sloc_info_arg(self.location)]
+        )
 
     def __repr__(self):
         return '<LogicTrue>'
@@ -678,7 +686,10 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_False', 'False_Rel', T.Equation, [])
+        return CallExpr(
+            'Logic_False', 'False_Rel', T.Equation,
+            [sloc_info_arg(self.location)]
+        )
 
     def __repr__(self):
         return '<LogicFalse>'

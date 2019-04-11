@@ -21,7 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
@@ -224,14 +223,16 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    end Create;
 
    function Create
-     (Left    : Var.Var;
-      Right   : R_Type;
-      R_Data  : R_Convert_Data;
-      Eq_Data : Equals_Data) return Relation is
+     (Left      : Var.Var;
+      Right     : R_Type;
+      R_Data    : R_Convert_Data;
+      Eq_Data   : Equals_Data;
+      Sloc_Info : String_Access := null) return Relation is
    begin
       --  Don't inc-ref Right here as the call to Create below will do it for
       --  us.
       return new Unify'(Rel => Create (Left, Right, R_Data, Eq_Data),
+                        Sloc_Info => Sloc_Info,
                         others => <>);
    end Create;
 
