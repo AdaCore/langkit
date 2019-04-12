@@ -78,12 +78,19 @@ class Diagnostics(object):
 class Location(object):
     """
     Holder for a location in the source code.
+
+    If the object was created through `extract_library_location`, its
+    `previous_in_callstack` field holds a link to the Location object
+    corresponding to the location of the previous frame in the stacktrace
+    that was used to generate this Location. This allows reconstructing the
+    whole callstack.
     """
 
     def __init__(self, file, line, text=""):
         self.file = file
         self.line = line
         self.text = text
+        self.previous_in_callstack = None
 
     @property
     def as_tuple(self):
@@ -100,7 +107,17 @@ class Location(object):
 
     @property
     def short_repr(self):
-        return "({}:{})".format(os.path.basename(self.file), self.line)
+        # reconstruct the callstack
+        stack = []
+        loc = self
+        while loc is not None:
+            stack.append(loc)
+            loc = loc.previous_in_callstack
+
+        return "[{}]".format(", ".join(
+            "{}:{}".format(os.path.basename(loc.file), loc.line)
+            for loc in stack
+        ))
 
 
 def extract_library_location(stack=None):
@@ -114,12 +131,20 @@ def extract_library_location(stack=None):
     :rtype: Location
     """
     stack = stack or traceback.extract_stack()
-    l = [Location(t[0], t[1], t[3])
-         for t in stack
-         if Diagnostics.is_under_langkit(t[0])
-         and "manage.py" not in t[0]]
+    locs = [
+        Location(t[0], t[1], t[3])
+        for t in stack
+        if Diagnostics.is_under_langkit(t[0])
+        and "manage.py" not in t[0]
+    ]
 
-    return l[-1] if l else None
+    if locs:
+        for prev_loc, loc in zip(locs[:-1], locs[1:]):
+            loc.previous_in_callstack = prev_loc
+
+        return locs[-1]
+
+    return None
 
 
 context_stack = []
