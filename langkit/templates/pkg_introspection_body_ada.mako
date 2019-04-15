@@ -742,11 +742,11 @@ package body ${ada_lib_name}.Introspection is
       end case;
    end Node_Data_Type;
 
-   ------------------------
-   -- Evaluate_Node_Data --
-   ------------------------
+   --------------------
+   -- Eval_Node_Data --
+   --------------------
 
-   function Evaluate_Node_Data
+   function Eval_Node_Data
      (Node      : ${T.entity.api_name}'Class;
       Node_Data : Node_Data_Reference;
       Arguments : Value_Array) return Value_Type is
@@ -757,13 +757,13 @@ package body ${ada_lib_name}.Introspection is
                raise Node_Data_Evaluation_Error with "fields take no argument";
             end if;
             pragma Warnings (Off, "value not in range of type");
-            return Create_Node (Evaluate_Field (Node, Node_Data));
+            return Create_Node (Eval_Field (Node, Node_Data));
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
-            return Evaluate_Property (Node, Node_Data, Arguments);
+            return Eval_Property (Node, Node_Data, Arguments);
       end case;
-   end Evaluate_Node_Data;
+   end Eval_Node_Data;
 
    ----------------------
    -- Lookup_Node_Data --
@@ -825,11 +825,11 @@ package body ${ada_lib_name}.Introspection is
       pragma Warnings (On, "value not in range of subtype");
    end Field_Type;
 
-   --------------------
-   -- Evaluate_Field --
-   --------------------
+   ----------------
+   -- Eval_Field --
+   ----------------
 
-   function Evaluate_Field
+   function Eval_Field
      (Node  : ${T.entity.api_name}'Class;
       Field : Field_Reference) return ${T.entity.api_name}
    is
@@ -863,7 +863,7 @@ package body ${ada_lib_name}.Introspection is
       ## If we haven't matched the requested field on Node, report an error
       return (raise Node_Data_Evaluation_Error
               with "no such field on this node");
-   end Evaluate_Field;
+   end Eval_Field;
 
    -----------
    -- Index --
@@ -1082,11 +1082,11 @@ package body ${ada_lib_name}.Introspection is
              .Argument_Names (Argument_Number).all;
    end Property_Argument_Name;
 
-   -----------------------
-   -- Evaluate_Property --
-   -----------------------
+   -------------------
+   -- Eval_Property --
+   -------------------
 
-   function Evaluate_Property
+   function Eval_Property
      (Node      : ${T.entity.api_name}'Class;
       Property  : Property_Reference;
       Arguments : Value_Array) return Value_Type
@@ -1182,7 +1182,7 @@ package body ${ada_lib_name}.Introspection is
          raise Node_Data_Evaluation_Error with "no such field on this node";
       end if;
       return Result;
-   end Evaluate_Property;
+   end Eval_Property;
 
    ----------------
    -- Properties --

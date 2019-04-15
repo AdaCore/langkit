@@ -46,7 +46,7 @@ begin
 
    end loop;
 
-   --  Test that Evaluate_Fields works as expected
+   --  Test that Eval_Fields works as expected
 
    declare
       procedure Test
@@ -63,7 +63,7 @@ begin
          Error  : Boolean := False;
       begin
          begin
-            Result := Evaluate_Field (Node, Field);
+            Result := Eval_Field (Node, Field);
          exception
             when Node_Data_Evaluation_Error =>
                Error := True;
