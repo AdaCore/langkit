@@ -12,25 +12,8 @@ with Libfoolang.Introspection; use Libfoolang.Introspection;
 
 procedure Main is
 
-   function Constraint_Image (C : Value_Constraint) return String;
-   --  Return a human readable text representation for C
-
    function Build_Big_Integer_Array return Big_Integer_Array;
    --  Helper to workaround a GNAT crash
-
-   ----------------------
-   -- Constraint_Image --
-   ----------------------
-
-   function Constraint_Image (C : Value_Constraint) return String is
-      Kind_Img : constant String := C.Kind'Image;
-   begin
-      if C.Kind = Node_Value then
-         return Kind_Img & " (" & DSL_Name (C.Node_Type) & ")";
-      else
-         return Kind_Img;
-      end if;
-   end Constraint_Image;
 
    -----------------------------
    -- Build_Big_Integer_Array --
@@ -59,7 +42,7 @@ begin
             for P of Properties (Kind) loop
                Put_Line ("   " & Property_Name (P));
                Put_Line ("   return type: "
-                         & Constraint_Image (Property_Return_Type (P)));
+                         & DSL_Name (Property_Return_Type (P)));
 
                Put_Line ("   arguments:");
                declare
@@ -71,7 +54,7 @@ begin
                   else
                      for I in A_List'Range loop
                         Put_Line ("      " & Property_Argument_Name (P, I)
-                                  & ": " & Constraint_Image (A_List (I)));
+                                  & ": " & DSL_Name (A_List (I)));
                      end loop;
                      New_Line;
                   end if;
@@ -241,6 +224,7 @@ begin
       Test (Type_Var_Decl, "parent");
       Test (Type_Var_Decl, "name");
       Test (Type_Var_Decl, "eval");
+      New_Line;
    end;
 
    Put_Line ("Done.");

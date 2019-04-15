@@ -1,756 +1,756 @@
 Properties for FOO_ADDITION:
    id_bool
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
-      id: BOOLEAN_VALUE
+      id: Bool
 
 
    id_int
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      id: INTEGER_VALUE
+      id: Int
 
 
    id_bigint
-   return type: BIG_INTEGER_VALUE
+   return type: BigInt
    arguments:
-      id: BIG_INTEGER_VALUE
+      id: BigInt
 
 
    id_char
-   return type: CHARACTER_VALUE
+   return type: Character
    arguments:
-      id: CHARACTER_VALUE
+      id: Character
 
 
    id_token
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
-      id: TOKEN_VALUE
+      id: Token
 
 
    id_sym
-   return type: UNBOUNDED_TEXT_VALUE
+   return type: Symbol
    arguments:
-      id: UNBOUNDED_TEXT_VALUE
+      id: Symbol
 
 
    id_unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
-      id: ANALYSIS_UNIT_VALUE
+      id: AnalysisUnit
 
 
    id_root_node
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
-      id: NODE_VALUE (FooNode)
+      id: FooNode
 
 
    id_name
-   return type: NODE_VALUE (Name)
+   return type: Name
    arguments:
-      id: NODE_VALUE (Name)
+      id: Name
 
 
    id_unit_kind
-   return type: ANALYSIS_UNIT_KIND_VALUE
+   return type: AnalysisUnitKind
    arguments:
-      id: ANALYSIS_UNIT_KIND_VALUE
+      id: AnalysisUnitKind
 
 
    id_node_array
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
-      id: FOO_NODE_ARRAY_VALUE
+      id: FooNode.entity.array
 
 
    id_bigint_array
-   return type: BIG_INTEGER_ARRAY_VALUE
+   return type: BigInt.array
    arguments:
-      id: BIG_INTEGER_ARRAY_VALUE
+      id: BigInt.array
 
 
    parent
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    parents
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    children
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    token_start
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    token_end
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    previous_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    next_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
       <none>
 
    is_ghost
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
       <none>
 
    eval
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
       <none>
 
    eval_plus
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      addend: NODE_VALUE (Expr)
+      addend: Expr
 
 
 
 Properties for FOO_NUMBER:
    id_bool
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
-      id: BOOLEAN_VALUE
+      id: Bool
 
 
    id_int
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      id: INTEGER_VALUE
+      id: Int
 
 
    id_bigint
-   return type: BIG_INTEGER_VALUE
+   return type: BigInt
    arguments:
-      id: BIG_INTEGER_VALUE
+      id: BigInt
 
 
    id_char
-   return type: CHARACTER_VALUE
+   return type: Character
    arguments:
-      id: CHARACTER_VALUE
+      id: Character
 
 
    id_token
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
-      id: TOKEN_VALUE
+      id: Token
 
 
    id_sym
-   return type: UNBOUNDED_TEXT_VALUE
+   return type: Symbol
    arguments:
-      id: UNBOUNDED_TEXT_VALUE
+      id: Symbol
 
 
    id_unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
-      id: ANALYSIS_UNIT_VALUE
+      id: AnalysisUnit
 
 
    id_root_node
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
-      id: NODE_VALUE (FooNode)
+      id: FooNode
 
 
    id_name
-   return type: NODE_VALUE (Name)
+   return type: Name
    arguments:
-      id: NODE_VALUE (Name)
+      id: Name
 
 
    id_unit_kind
-   return type: ANALYSIS_UNIT_KIND_VALUE
+   return type: AnalysisUnitKind
    arguments:
-      id: ANALYSIS_UNIT_KIND_VALUE
+      id: AnalysisUnitKind
 
 
    id_node_array
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
-      id: FOO_NODE_ARRAY_VALUE
+      id: FooNode.entity.array
 
 
    id_bigint_array
-   return type: BIG_INTEGER_ARRAY_VALUE
+   return type: BigInt.array
    arguments:
-      id: BIG_INTEGER_ARRAY_VALUE
+      id: BigInt.array
 
 
    parent
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    parents
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    children
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    token_start
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    token_end
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    previous_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    next_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
       <none>
 
    is_ghost
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
       <none>
 
    eval
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
       <none>
 
    eval_plus
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      addend: NODE_VALUE (Expr)
+      addend: Expr
 
 
 
 Properties for FOO_REF:
    id_bool
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
-      id: BOOLEAN_VALUE
+      id: Bool
 
 
    id_int
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      id: INTEGER_VALUE
+      id: Int
 
 
    id_bigint
-   return type: BIG_INTEGER_VALUE
+   return type: BigInt
    arguments:
-      id: BIG_INTEGER_VALUE
+      id: BigInt
 
 
    id_char
-   return type: CHARACTER_VALUE
+   return type: Character
    arguments:
-      id: CHARACTER_VALUE
+      id: Character
 
 
    id_token
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
-      id: TOKEN_VALUE
+      id: Token
 
 
    id_sym
-   return type: UNBOUNDED_TEXT_VALUE
+   return type: Symbol
    arguments:
-      id: UNBOUNDED_TEXT_VALUE
+      id: Symbol
 
 
    id_unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
-      id: ANALYSIS_UNIT_VALUE
+      id: AnalysisUnit
 
 
    id_root_node
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
-      id: NODE_VALUE (FooNode)
+      id: FooNode
 
 
    id_name
-   return type: NODE_VALUE (Name)
+   return type: Name
    arguments:
-      id: NODE_VALUE (Name)
+      id: Name
 
 
    id_unit_kind
-   return type: ANALYSIS_UNIT_KIND_VALUE
+   return type: AnalysisUnitKind
    arguments:
-      id: ANALYSIS_UNIT_KIND_VALUE
+      id: AnalysisUnitKind
 
 
    id_node_array
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
-      id: FOO_NODE_ARRAY_VALUE
+      id: FooNode.entity.array
 
 
    id_bigint_array
-   return type: BIG_INTEGER_ARRAY_VALUE
+   return type: BigInt.array
    arguments:
-      id: BIG_INTEGER_ARRAY_VALUE
+      id: BigInt.array
 
 
    parent
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    parents
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    children
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    token_start
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    token_end
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    previous_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    next_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
       <none>
 
    is_ghost
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
       <none>
 
    eval
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
       <none>
 
    eval_plus
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      addend: NODE_VALUE (Expr)
+      addend: Expr
 
 
    referenced_var_decl
-   return type: NODE_VALUE (VarDecl)
+   return type: VarDecl
    arguments:
       <none>
 
 
 Properties for FOO_VAR_DECL_LIST:
    id_bool
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
-      id: BOOLEAN_VALUE
+      id: Bool
 
 
    id_int
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      id: INTEGER_VALUE
+      id: Int
 
 
    id_bigint
-   return type: BIG_INTEGER_VALUE
+   return type: BigInt
    arguments:
-      id: BIG_INTEGER_VALUE
+      id: BigInt
 
 
    id_char
-   return type: CHARACTER_VALUE
+   return type: Character
    arguments:
-      id: CHARACTER_VALUE
+      id: Character
 
 
    id_token
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
-      id: TOKEN_VALUE
+      id: Token
 
 
    id_sym
-   return type: UNBOUNDED_TEXT_VALUE
+   return type: Symbol
    arguments:
-      id: UNBOUNDED_TEXT_VALUE
+      id: Symbol
 
 
    id_unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
-      id: ANALYSIS_UNIT_VALUE
+      id: AnalysisUnit
 
 
    id_root_node
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
-      id: NODE_VALUE (FooNode)
+      id: FooNode
 
 
    id_name
-   return type: NODE_VALUE (Name)
+   return type: Name
    arguments:
-      id: NODE_VALUE (Name)
+      id: Name
 
 
    id_unit_kind
-   return type: ANALYSIS_UNIT_KIND_VALUE
+   return type: AnalysisUnitKind
    arguments:
-      id: ANALYSIS_UNIT_KIND_VALUE
+      id: AnalysisUnitKind
 
 
    id_node_array
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
-      id: FOO_NODE_ARRAY_VALUE
+      id: FooNode.entity.array
 
 
    id_bigint_array
-   return type: BIG_INTEGER_ARRAY_VALUE
+   return type: BigInt.array
    arguments:
-      id: BIG_INTEGER_ARRAY_VALUE
+      id: BigInt.array
 
 
    parent
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    parents
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    children
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    token_start
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    token_end
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    previous_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    next_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
       <none>
 
    is_ghost
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
       <none>
 
 
 Properties for FOO_NAME:
    id_bool
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
-      id: BOOLEAN_VALUE
+      id: Bool
 
 
    id_int
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      id: INTEGER_VALUE
+      id: Int
 
 
    id_bigint
-   return type: BIG_INTEGER_VALUE
+   return type: BigInt
    arguments:
-      id: BIG_INTEGER_VALUE
+      id: BigInt
 
 
    id_char
-   return type: CHARACTER_VALUE
+   return type: Character
    arguments:
-      id: CHARACTER_VALUE
+      id: Character
 
 
    id_token
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
-      id: TOKEN_VALUE
+      id: Token
 
 
    id_sym
-   return type: UNBOUNDED_TEXT_VALUE
+   return type: Symbol
    arguments:
-      id: UNBOUNDED_TEXT_VALUE
+      id: Symbol
 
 
    id_unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
-      id: ANALYSIS_UNIT_VALUE
+      id: AnalysisUnit
 
 
    id_root_node
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
-      id: NODE_VALUE (FooNode)
+      id: FooNode
 
 
    id_name
-   return type: NODE_VALUE (Name)
+   return type: Name
    arguments:
-      id: NODE_VALUE (Name)
+      id: Name
 
 
    id_unit_kind
-   return type: ANALYSIS_UNIT_KIND_VALUE
+   return type: AnalysisUnitKind
    arguments:
-      id: ANALYSIS_UNIT_KIND_VALUE
+      id: AnalysisUnitKind
 
 
    id_node_array
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
-      id: FOO_NODE_ARRAY_VALUE
+      id: FooNode.entity.array
 
 
    id_bigint_array
-   return type: BIG_INTEGER_ARRAY_VALUE
+   return type: BigInt.array
    arguments:
-      id: BIG_INTEGER_ARRAY_VALUE
+      id: BigInt.array
 
 
    parent
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    parents
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    children
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    token_start
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    token_end
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    previous_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    next_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
       <none>
 
    is_ghost
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
       <none>
 
 
 Properties for FOO_VAR_DECL:
    id_bool
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
-      id: BOOLEAN_VALUE
+      id: Bool
 
 
    id_int
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
-      id: INTEGER_VALUE
+      id: Int
 
 
    id_bigint
-   return type: BIG_INTEGER_VALUE
+   return type: BigInt
    arguments:
-      id: BIG_INTEGER_VALUE
+      id: BigInt
 
 
    id_char
-   return type: CHARACTER_VALUE
+   return type: Character
    arguments:
-      id: CHARACTER_VALUE
+      id: Character
 
 
    id_token
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
-      id: TOKEN_VALUE
+      id: Token
 
 
    id_sym
-   return type: UNBOUNDED_TEXT_VALUE
+   return type: Symbol
    arguments:
-      id: UNBOUNDED_TEXT_VALUE
+      id: Symbol
 
 
    id_unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
-      id: ANALYSIS_UNIT_VALUE
+      id: AnalysisUnit
 
 
    id_root_node
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
-      id: NODE_VALUE (FooNode)
+      id: FooNode
 
 
    id_name
-   return type: NODE_VALUE (Name)
+   return type: Name
    arguments:
-      id: NODE_VALUE (Name)
+      id: Name
 
 
    id_unit_kind
-   return type: ANALYSIS_UNIT_KIND_VALUE
+   return type: AnalysisUnitKind
    arguments:
-      id: ANALYSIS_UNIT_KIND_VALUE
+      id: AnalysisUnitKind
 
 
    id_node_array
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
-      id: FOO_NODE_ARRAY_VALUE
+      id: FooNode.entity.array
 
 
    id_bigint_array
-   return type: BIG_INTEGER_ARRAY_VALUE
+   return type: BigInt.array
    arguments:
-      id: BIG_INTEGER_ARRAY_VALUE
+      id: BigInt.array
 
 
    parent
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    parents
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    children
-   return type: FOO_NODE_ARRAY_VALUE
+   return type: FooNode.entity.array
    arguments:
       <none>
 
    token_start
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    token_end
-   return type: TOKEN_VALUE
+   return type: Token
    arguments:
       <none>
 
    previous_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    next_sibling
-   return type: NODE_VALUE (FooNode)
+   return type: FooNode
    arguments:
       <none>
 
    unit
-   return type: ANALYSIS_UNIT_VALUE
+   return type: AnalysisUnit
    arguments:
       <none>
 
    is_ghost
-   return type: BOOLEAN_VALUE
+   return type: Bool
    arguments:
       <none>
 
    eval
-   return type: INTEGER_VALUE
+   return type: Int
    arguments:
       <none>
 
@@ -788,5 +788,6 @@ Lookup_Node_Data (TYPE_FOO_NODE, parent) = FOO_NODE_PARENT
 Lookup_Node_Data (TYPE_VAR_DECL, parent) = FOO_NODE_PARENT
 Lookup_Node_Data (TYPE_VAR_DECL, name) = VAR_DECL_F_NAME
 Lookup_Node_Data (TYPE_VAR_DECL, eval) = VAR_DECL_P_EVAL
+
 Done.
 Done
