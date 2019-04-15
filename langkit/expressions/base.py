@@ -4944,6 +4944,13 @@ def resolve_property(propref):
 
 
 def sloc_info_arg(loc):
-    return ("(if Langkit_Support.Adalog.Debug.Debug"
-            " then new String'(\"{}\")"
-            " else null)".format(loc.short_repr))
+    """
+    Return an Ada expression to that, if Adalog debug is not
+    enabled at runtime, returns null, or that allocates a String to contain the
+    DSL callstack corresponding to the given location.
+
+    :param Location loc:
+    """
+    return ('(if Langkit_Support.Adalog.Debug.Debug'
+            ' then new String\'("{}")'
+            ' else null)'.format(loc.short_repr))
