@@ -272,8 +272,7 @@ package body Langkit_Support.Adalog.Operations is
 
    function Logic_Or
      (L, R      : Relation;
-      Sloc_Info : String_Access := null) return Relation
-   is
+      Sloc_Info : String_Access := null) return Relation is
    begin
       return Logic_Any ((L, R), Sloc_Info);
    end Logic_Or;
@@ -284,8 +283,7 @@ package body Langkit_Support.Adalog.Operations is
 
    function Logic_And
      (L, R      : Relation;
-      Sloc_Info : String_Access := null) return Relation
-   is
+      Sloc_Info : String_Access := null) return Relation is
    begin
       return Logic_All ((L, R), Sloc_Info);
    end Logic_And;

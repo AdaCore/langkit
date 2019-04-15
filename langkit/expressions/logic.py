@@ -667,10 +667,8 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr(
-            'Logic_True', 'True_Rel', T.Equation,
-            [sloc_info_arg(self.location)]
-        )
+        return CallExpr('Logic_True', 'True_Rel', T.Equation,
+                        [sloc_info_arg(self.location)])
 
     def __repr__(self):
         return '<LogicTrue>'
@@ -686,10 +684,8 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr(
-            'Logic_False', 'False_Rel', T.Equation,
-            [sloc_info_arg(self.location)]
-        )
+        return CallExpr('Logic_False', 'False_Rel', T.Equation,
+                        [sloc_info_arg(self.location)])
 
     def __repr__(self):
         return '<LogicFalse>'

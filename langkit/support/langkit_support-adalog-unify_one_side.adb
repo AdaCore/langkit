@@ -231,9 +231,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    begin
       --  Don't inc-ref Right here as the call to Create below will do it for
       --  us.
-      return new Unify'(Rel => Create (Left, Right, R_Data, Eq_Data),
+      return new Unify'(Rel       => Create (Left, Right, R_Data, Eq_Data),
                         Sloc_Info => Sloc_Info,
-                        others => <>);
+                        others    => <>);
    end Create;
 
    ------------
