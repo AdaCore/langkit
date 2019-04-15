@@ -606,13 +606,13 @@ package body ${ada_lib_name}.Introspection is
    end Create_Node;
 
    % for enum_type in ctx.enum_types:
-      function As_${enum_type.introspection_radix}
+      function As_${enum_type.introspection_prefix}
         (Self : Value_Type) return ${enum_type.api_name} is
       begin
          return Self.Value.Value.${enum_type.introspection_kind};
-      end As_${enum_type.introspection_radix};
+      end As_${enum_type.introspection_prefix};
 
-      function Create_${enum_type.introspection_radix}
+      function Create_${enum_type.introspection_prefix}
         (Value : ${enum_type.api_name}) return Value_Type is
       begin
          return Result : constant Value_Type := Allocate
@@ -620,12 +620,12 @@ package body ${ada_lib_name}.Introspection is
          do
             Result.Value.Value.${enum_type.introspection_kind} := Value;
          end return;
-      end Create_${enum_type.introspection_radix};
+      end Create_${enum_type.introspection_prefix};
    % endfor
 
    % for t in ctx.composite_types:
       % if t.exposed and not t.is_entity_type:
-         function As_${t.introspection_radix}
+         function As_${t.introspection_prefix}
            (Self : Value_Type) return ${t.api_name} is
          begin
             % if t.is_array_type:
@@ -651,9 +651,9 @@ package body ${ada_lib_name}.Introspection is
                ## For other types, a mere assignment is fine
                return Self.Value.Value.${t.introspection_kind};
             % endif
-         end As_${t.introspection_radix};
+         end As_${t.introspection_prefix};
 
-         function Create_${t.introspection_radix}
+         function Create_${t.introspection_prefix}
            (Value : ${t.api_name}) return Value_Type is
          begin
             return Result : constant Value_Type := Allocate
@@ -681,7 +681,7 @@ package body ${ada_lib_name}.Introspection is
                   Result.Value.Value.${t.introspection_kind} := Value;
                % endif
             end return;
-         end Create_${t.introspection_radix};
+         end Create_${t.introspection_prefix};
       % endif
    % endfor
 
@@ -1129,7 +1129,7 @@ package body ${ada_lib_name}.Introspection is
                   result.append('{} : constant {} :='
                                 .format(arg.name, t.api_name))
                   result.append("As_{} (Arguments (Arguments'First + {}))"
-                                .format(t.introspection_radix, i))
+                                .format(t.introspection_prefix, i))
 
                   # Make sure we convert nodes to the precise type
                   if t.is_entity_type and t != T.entity:
@@ -1149,7 +1149,7 @@ package body ${ada_lib_name}.Introspection is
             # Wrap this call to convert its result (concrete type to
             # Value_Type).
             result.append('Result := Create_{} ({});'
-                          .format(p.type.introspection_radix, property_call))
+                          .format(p.type.introspection_prefix, property_call))
 
             if p.arguments:
                result.append('end;')

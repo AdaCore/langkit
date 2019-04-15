@@ -554,7 +554,7 @@ class CompiledType(object):
                  nullexpr=None, py_nullexpr=None, element_type=None,
                  hashable=False, has_equivalent_function=False,
                  type_repo_name=None, api_name=None, dsl_name=None,
-                 introspection_radix=None, conversion_requires_context=False):
+                 introspection_prefix=None, conversion_requires_context=False):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -639,8 +639,8 @@ class CompiledType(object):
         :param str|None dsl_name: If provided, name used to represent this type
             at the DSL level. Useful to format diagnostics.
 
-        :param str|None introspection_radix: If provided, override the default
-            value to return in the introspection_radix property.
+        :param str|None introspection_prefix: If provided, override the default
+            value to return in the introspection_prefix property.
 
         :param bool conversion_requires_context: Whether converting this type
             from public to internal values requires an analysis context.
@@ -672,7 +672,7 @@ class CompiledType(object):
         self._requires_hash_function = False
         self._api_name = api_name
         self._dsl_name = dsl_name
-        self._introspection_radix = introspection_radix
+        self._introspection_prefix = introspection_prefix
 
         type_repo_name = type_repo_name or dsl_name or name.camel
         CompiledTypeRepo.type_dict[type_repo_name] = self
@@ -759,14 +759,14 @@ class CompiledType(object):
         return (names.Name('Mmz') + self.name).camel_with_underscores
 
     @property
-    def introspection_radix(self):
+    def introspection_prefix(self):
         """
         Return the root name used to describe this type in the introspection
         API.
 
         :rtype: str
         """
-        return self._introspection_radix or self.api_name
+        return self._introspection_prefix or self.api_name
 
     @property
     def introspection_kind(self):
@@ -776,7 +776,7 @@ class CompiledType(object):
 
         :rtype: str
         """
-        return '{}_Value'.format(self.introspection_radix)
+        return '{}_Value'.format(self.introspection_prefix)
 
     @property
     def introspection_constraint(self):
@@ -1514,7 +1514,7 @@ class TokenType(CompiledType):
         super(TokenType, self).__init__(
             name='TokenReference',
             dsl_name='Token',
-            introspection_radix='Token',
+            introspection_prefix='Token',
             exposed=True,
             is_ptr=False,
             nullexpr='No_Token',
@@ -2087,7 +2087,7 @@ class EntityType(StructType):
              ('info', BuiltinField(self.astnode.entity_info(),
                                    access_needs_incref=True,
                                    doc='Entity info for this node'))],
-            introspection_radix='Node'
+            introspection_prefix='Node'
         )
         self.is_entity_type = True
         self._element_type = astnode
@@ -2264,7 +2264,7 @@ class ASTNodeType(BaseStructType):
             type_repo_name=self.raw_name.camel,
 
             dsl_name=dsl_name or self.raw_name.camel,
-            introspection_radix='Node'
+            introspection_prefix='Node'
         )
         self._base = base
         self.is_root_node = is_root
@@ -3430,7 +3430,7 @@ class SymbolType(CompiledType):
         super(SymbolType, self).__init__(
             'SymbolType',
             dsl_name='Symbol',
-            introspection_radix='Unbounded_Text',
+            introspection_prefix='Unbounded_Text',
             exposed=True,
             nullexpr='null',
             null_allowed=True,
@@ -3565,7 +3565,7 @@ def create_builtin_types():
 
     CompiledType('CharacterType',
                  dsl_name='Character',
-                 introspection_radix='Character',
+                 introspection_prefix='Character',
                  exposed=True,
                  nullexpr="Chars.NUL",
                  c_type_name='uint32_t',
