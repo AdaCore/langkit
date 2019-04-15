@@ -78,19 +78,38 @@ class Diagnostics(object):
 class Location(object):
     """
     Holder for a location in the source code.
-
-    If the object was created through `extract_library_location`, its
-    `previous_in_callstack` field holds a link to the Location object
-    corresponding to the location of the previous frame in the stacktrace
-    that was used to generate this Location. This allows reconstructing the
-    whole callstack.
     """
 
-    def __init__(self, file, line, text=""):
+    def __init__(self, file, line, text=''):
         self.file = file
+        """
+        Path to the file for this location.
+
+        :type: str
+        """
+
         self.line = line
+        """
+        Location line number (1-based).
+
+        :type: int
+        """
+
         self.text = text
+        """
+        Optional text for the line this location targets.
+
+        :type: str
+        """
+
         self.previous_in_callstack = None
+        """
+        If this location is created in the context of a call stack, link to the
+        location of the previous (i.e. caller) frame in this stack. Use the
+        `short_repr` property to format the whole call stack.
+
+        :type: None|Location
+        """
 
     @property
     def as_tuple(self):
@@ -103,21 +122,26 @@ class Location(object):
         return self.as_tuple < other.as_tuple
 
     def __repr__(self):
-        return "<Location {} {}>".format(self.file, self.line)
+        return '<Location {} {}>'.format(self.file, self.line)
 
     @property
     def short_repr(self):
-        # reconstruct the callstack
+        """
+        Return a representation for this location (and its callers, if this
+        info is present) as a human readable string.
+
+        :rtype: str
+        """
+        # Reconstruct the call stack
         stack = []
         loc = self
         while loc is not None:
             stack.append(loc)
             loc = loc.previous_in_callstack
 
-        return "[{}]".format(", ".join(
-            "{}:{}".format(os.path.basename(loc.file), loc.line)
-            for loc in stack
-        ))
+        return '[{}]'.format(', '.join(
+            '{}:{}'.format(os.path.basename(loc.file), loc.line)
+            for loc in stack))
 
 
 def extract_library_location(stack=None):
