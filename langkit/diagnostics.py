@@ -152,23 +152,20 @@ def extract_library_location(stack=None):
 
     This relies on `Diagnostics.set_lang_source_dir` being called.
 
-    :rtype: Location
+    :rtype: Location|None
     """
     stack = stack or traceback.extract_stack()
-    locs = [
-        Location(t[0], t[1], t[3])
-        for t in stack
-        if Diagnostics.is_under_langkit(t[0])
-        and "manage.py" not in t[0]
-    ]
 
-    if locs:
-        for prev_loc, loc in zip(locs[:-1], locs[1:]):
-            loc.previous_in_callstack = prev_loc
+    # Create Location instances for each stack frame
+    locs = [Location(t[0], t[1], t[3])
+            for t in stack
+            if Diagnostics.is_under_langkit(t[0]) and "manage.py" not in t[0]]
 
-        return locs[-1]
+    # Chain Location instances together
+    for prev_loc, loc in zip(locs[:-1], locs[1:]):
+        loc.previous_in_callstack = prev_loc
 
-    return None
+    return locs[-1] if locs else None
 
 
 context_stack = []
