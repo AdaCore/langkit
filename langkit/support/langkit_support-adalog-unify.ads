@@ -132,7 +132,7 @@ package Langkit_Support.Adalog.Unify is
         (Rel    => Create (L, R, L_Data, R_Data, Eq_Data),
          Sloc_Info => Sloc_Info,
          others => <>))
-     with Inline;
+      with Inline;
 
    function Equals
      (L         : Left_Var.Var;
@@ -143,7 +143,7 @@ package Langkit_Support.Adalog.Unify is
       return access Base_Relation'Class
    is
      (Unify_Left.Create (L, R, R_Data, Eq_Data, Sloc_Info))
-       with Inline;
+      with Inline;
 
    function Equals
      (L         : L_Type;
@@ -154,7 +154,7 @@ package Langkit_Support.Adalog.Unify is
       return access Base_Relation'Class
    is
      (Unify_Right.Create (R, L, L_Data, Eq_Data, Sloc_Info))
-   with Inline;
+      with Inline;
 
    ------------
    -- Member --

@@ -9,7 +9,7 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
     ComputingExpr, LiteralExpr, PropertyDef, attr_call, construct,
-    dsl_document, expr_or_null, render, unsugar, sloc_info_arg
+    dsl_document, expr_or_null, render, sloc_info_arg, unsugar
 )
 
 
