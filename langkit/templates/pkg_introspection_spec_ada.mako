@@ -219,7 +219,7 @@ package ${ada_lib_name}.Introspection is
    --  Return the constraint associated with Node_Data's type (or its return
    --  type).
 
-   function Evaluate_Node_Data
+   function Eval_Node_Data
      (Node      : ${T.entity.api_name}'Class;
       Node_Data : Node_Data_Reference;
       Arguments : Value_Array) return Value_Type;
@@ -266,7 +266,7 @@ package ${ada_lib_name}.Introspection is
    function Field_Type (Field : Field_Reference) return Node_Type_Id;
    --  Return a reference to the node type that covers what Field can contain
 
-   function Evaluate_Field
+   function Eval_Field
      (Node  : ${T.entity.api_name}'Class;
       Field : Field_Reference) return ${T.entity.api_name};
    --  Evaluate Field on the given Node. Return the corresponding Node.
@@ -322,7 +322,7 @@ package ${ada_lib_name}.Introspection is
    --  Return the lower-cased name for Property's argument whose index is
    --  Argument_Number.
 
-   function Evaluate_Property
+   function Eval_Property
      (Node      : ${T.entity.api_name}'Class;
       Property  : Property_Reference;
       Arguments : Value_Array) return Value_Type;

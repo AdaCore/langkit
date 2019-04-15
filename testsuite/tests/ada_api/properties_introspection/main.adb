@@ -84,7 +84,7 @@ begin
       New_Line;
    end loop;
 
-   --  Test that Evaluate_Property works as expected
+   --  Test that Eval_Property works as expected
 
    declare
       procedure Test
@@ -106,7 +106,7 @@ begin
          Result : Any_Value_Type := No_Value;
       begin
          begin
-            Result := Evaluate_Property (Node, Property, (1 => Argument));
+            Result := Eval_Property (Node, Property, (1 => Argument));
          exception
             when Node_Data_Evaluation_Error =>
                null;
@@ -207,7 +207,7 @@ begin
 
       Test ("P_Id_Node_Array", Root, Foo_Node_P_Id_Node_Array, NA);
 
-      --  TODO: there is an invalid read in Evaluate_Property and nothing looks
+      --  TODO: there is an invalid read in Eval_Property and nothing looks
       --  suspicious, there. There was already a GNAT bug workaround involved,
       --  so to be investigated, but not blocking.
       if False then
