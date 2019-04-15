@@ -187,6 +187,9 @@ package ${ada_lib_name}.Introspection is
    end record;
    --  Constraint for a polymorphic value
 
+   function DSL_Name (Constraint : Value_Constraint) return String;
+   --  Return the name corresponding to Constraint in the Langkit DSL
+
    function Satisfies
      (Value : Value_Type; Constraint : Value_Constraint) return Boolean;
    --  Return whether the given Value satisfy the given Constraint

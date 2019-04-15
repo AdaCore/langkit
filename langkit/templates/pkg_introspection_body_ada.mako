@@ -685,6 +685,27 @@ package body ${ada_lib_name}.Introspection is
       % endif
    % endfor
 
+   --------------
+   -- DSL_Name --
+   --------------
+
+   function DSL_Name (Constraint : Value_Constraint) return String is
+   begin
+      <% basic_types = [T.Bool, T.Int, T.BigInt, T.Character, T.Token,
+                        T.Symbol, T.AnalysisUnit] %>
+      case Constraint.Kind is
+         % for t in basic_types + ctx.enum_types + ctx.composite_types:
+            % if t.exposed and not t.is_entity_type:
+               when ${t.introspection_kind} =>
+                  return "${t.dsl_name}";
+            % endif
+         % endfor
+
+         when Node_Value =>
+            return DSL_Name (Constraint.Node_Type);
+      end case;
+   end DSL_Name;
+
    ---------------
    -- Satisfies --
    ---------------
