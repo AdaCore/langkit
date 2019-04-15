@@ -44,8 +44,16 @@ package Langkit_Support.Adalog.Abstract_Relation is
      (if B then Satisfied else Unsatisfied);
 
    type Base_Relation is abstract tagged record
-      Ref_Count  : Natural := 1;
-      Sloc_Info  : String_Access;
+      Ref_Count : Natural := 1;
+      --  Reference count for this relation record. When it reaches zero, the
+      --  record must be deallocated.
+
+      Sloc_Info : String_Access;
+      --  If Adalog-wide debug is enabled (see Langkit_Support.Adalog.Debug),
+      --  this contains miscellaneous information about this relation.
+      --  Typically: a call stack for the code that creates it. It can be then
+      --  used to display hints when debugging equation solving. Otherwise,
+      --  left to null.
    end record;
 
    type Relation is access all Base_Relation'Class;
