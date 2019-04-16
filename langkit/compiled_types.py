@@ -382,18 +382,13 @@ class AbstractNodeData(object):
         """
         raise not_implemented_error(self, type(self).type)
 
-    @property
-    def public_type(self):
-        """
-        Return the type to use when exposing this field in public APIs.
-
-        :rtype: langkit.compiled_types.CompiledType
-        """
-        return self.type.entity if self.type.is_ast_node else self.type
-
     @type.setter
     def type(self, type):
         raise not_implemented_error(self, type(self).type)
+
+    @property
+    def public_type(self):
+        return self.type.public_type
 
     def c_type_or_error(self, capi):
         """
@@ -705,6 +700,18 @@ class CompiledType(object):
     def __lt__(self, other):
         assert isinstance(other, CompiledType)
         return self.name < other.name
+
+    @property
+    def public_type(self):
+        """
+        Return the type to use when exposing values in public APIs.
+
+        This returns `self` for most types, but some (such as bare nodes) are
+        automatically wrapped as entity.
+
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        return self
 
     @property
     def conversion_requires_context(self):
@@ -1573,12 +1580,7 @@ class Argument(object):
 
     @property
     def public_type(self):
-        """
-        Return the type to use when exposing this argument in public APIs.
-
-        :rtype: CompiledType
-        """
-        return self.type.entity if self.type.is_ast_node else self.type
+        return self.type.public_type
 
     @property
     def public_default_value(self):
@@ -2411,6 +2413,10 @@ class ASTNodeType(BaseStructType):
         # "original" node name here, not keyword-escaped ones.
         result = self.annotations.repr_name or self.kwless_raw_name.camel
         return result
+
+    @property
+    def public_type(self):
+        return self.entity
 
     def is_builtin(self):
         """
