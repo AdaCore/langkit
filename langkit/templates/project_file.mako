@@ -169,6 +169,9 @@ library project ${lib_name} is
       for Default_Switches ("C") use Mode_Args & C_Mode_Args;
 
       case Build_Mode is
+         when "dev" =>
+            null;
+
          when "prod" =>
             ## TODO: This extension point is added to change the flags of
             ## Libadalang specific extension files. It is a temporary
