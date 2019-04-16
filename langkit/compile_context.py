@@ -2036,11 +2036,6 @@ class CompileCtx(object):
             elif isinstance(t, StructType):
                 # Expose all record fields
                 for f in t.get_fields():
-                    # Reject public arrays of bare AST nodes
-                    check(
-                        not f.type.is_ast_node,
-                        '{}, a bare AST node struct field'.format(f.qualname)
-                    )
                     expose(f.type, to_internal, for_field, 'field type',
                            traceback + ['{} structures'.format(t.dsl_name)])
                     f.type.used_in_public_struct = True
