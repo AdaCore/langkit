@@ -32,9 +32,9 @@
 <%def name="public_api_private_decl(cls)">
    type ${cls.public_record_type} is limited record
       % for f in cls.get_fields():
-      Internal_${f.name} : ${(f.type.api_access_name
-                              if f.type.public_requires_boxing else
-                              f.type.api_name)};
+      Internal_${f.name} : ${(f.public_type.api_access_name
+                              if f.public_type.public_requires_boxing else
+                              f.public_type.api_name)};
       % endfor
 
       Refcount : Positive;
@@ -183,7 +183,7 @@
          % elif f.type.is_array_type:
             ${field_expr} := new ${f.type.api_name}'(${f.name});
          % elif f.type.is_entity_type or f.type.is_ast_node:
-            ${field_expr} := ${f.name}.As_${f.type.api_name};
+            ${field_expr} := ${f.name}.As_${f.public_type.api_name};
          % else:
             ${field_expr} := ${f.name};
          % endif

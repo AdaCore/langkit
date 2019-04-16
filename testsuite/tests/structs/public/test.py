@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class MyStruct(Struct):
-    entity_field = UserField(type=T.FooNode.entity)
+    entity_field = UserField(type=T.FooNode)
     array_field = UserField(type=T.FooNode.entity.array)
     bigint_field = UserField(type=T.BigInt)
 
@@ -28,7 +28,7 @@ class Example(FooNode):
     @langkit_property(public=True)
     def get_struct():
         return New(MyStruct,
-                   entity_field=Self.as_bare_entity,
+                   entity_field=Self,
                    array_field=ArrayLiteral([
                        Self.cast(T.FooNode).as_bare_entity,
                        Self.parent.as_bare_entity]),
