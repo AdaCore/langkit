@@ -96,9 +96,9 @@ class LibraryTypes(object):
 
     def __str__(self):
         return ','.join(
-            name for enabled, name in [(self.relocatable, 'relocatable'),
-                                       (self.static, 'static'),
-                                       (self.static_pic, 'static-pic')]
+            name for enabled, name in [(self.static, 'static'),
+                                       (self.static_pic, 'static-pic'),
+                                       (self.relocatable, 'relocatable')]
             if enabled)
 
     @classmethod
@@ -857,12 +857,12 @@ class ManageScript(object):
         # files, "static" is the default library type.
         build_shared, build_static_pic, build_static = self.what_to_build(
             args, is_library)
-        if build_shared:
-            run('relocatable')
-        if build_static_pic:
-            run('static-pic')
         if build_static:
             run('static')
+        if build_static_pic:
+            run('static-pic')
+        if build_shared:
+            run('relocatable')
 
     def do_build(self, args):
         """
