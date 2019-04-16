@@ -5,9 +5,16 @@
 <%def name="create_prototype(cls)">
    function Create_${cls.api_name} (${'; '.join('{} : {}{}'.format(
       f.name,
-      f.type.api_name,
-      "'Class" if f.type.is_entity_type or f.type.is_ast_node else ''
+      f.public_type.api_name,
+      "'Class" if f.public_type.is_entity_type else ''
    ) for f in cls.get_fields())}) return ${cls.api_name}
+</%def>
+
+<%def name="accessor_prototype(cls, f)">
+   function ${f.name}
+     (Self : ${cls.api_name})
+      return ${f.public_type.api_name}${(
+         "'Class" if f.public_type.is_entity_type else '')}
 </%def>
 
 <%def name="public_api_decl(cls)">
@@ -15,11 +22,7 @@
    ${ada_doc(cls, 3)}
 
    % for f in cls.get_fields():
-      function ${f.name}
-        (Self : ${cls.api_name})
-         return ${f.type.api_name}${("'Class"
-                                     if f.type.is_entity_type or
-                                        f.type.is_ast_node else '')};
+      ${accessor_prototype(cls, f)};
       ${ada_doc(f, 6)}
    % endfor
 
@@ -68,12 +71,7 @@
 <%def name="public_api_body(cls)">
 
    % for f in cls.get_fields():
-      function ${f.name}
-        (Self : ${cls.api_name})
-         return ${f.type.api_name}${("'Class"
-                                     if f.type.is_entity_type or
-                                        f.type.is_ast_node else '')}
-      is
+      ${accessor_prototype(cls, f)} is
          Record_Ref : constant Boxed_${cls.api_name}.Element_Access :=
             Internal_Access (Self);
       begin
