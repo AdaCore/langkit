@@ -5,7 +5,7 @@ Test that the introspection API works as expected for properties introspection.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import (AbstractKind, New, Property, Self,
                                  langkit_property)
 from langkit.parsers import Grammar, List, Or
@@ -37,8 +37,8 @@ class VarDecl(FooNode):
     name = Field()
     value = Field()
 
-    env_spec = EnvSpec(add_to_env(
-        New(T.env_assoc, key=Self.name.symbol, val=Self)
+    env_spec = EnvSpec(add_to_env_kv(
+        key=Self.name.symbol, val=Self
     ))
 
     @langkit_property(public=True)

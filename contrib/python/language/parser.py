@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env, add_env
-from langkit.expressions import Self, Property, No
+from langkit.expressions import Self, Property, No, new_env_assoc
 from langkit.parsers import Grammar, List, Opt, Or, Pick, _
 from language.lexer import python_lexer as L
 
@@ -67,9 +67,9 @@ class SingleParam(PythonNode):
 
     env_spec = EnvSpec(
         add_to_env(Self.name.match(
-            lambda i=T.Id: T.env_assoc.new(key=i.sym, val=Self).singleton,
+            lambda i=T.Id: new_env_assoc(key=i.sym, val=Self).singleton,
             lambda l=T.Id.list: l.map(
-                lambda i: T.env_assoc.new(key=i.sym, val=Self)
+                lambda i: new_env_assoc(key=i.sym, val=Self)
             ),
             lambda _: No(T.env_assoc.array)
         ))
@@ -88,7 +88,7 @@ class AssignStmt(Stmt):
 
     env_spec = EnvSpec(
         add_to_env(Self.l_value.filtermap(
-            lambda e: T.env_assoc.new(key=e.cast_or_raise(T.Id).sym, val=Self),
+            lambda e: new_env_assoc(key=e.cast_or_raise(T.Id).sym, val=Self),
             lambda e: e.is_a(T.Id),
         ))
     )

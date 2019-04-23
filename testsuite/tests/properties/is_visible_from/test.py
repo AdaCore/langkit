@@ -6,7 +6,7 @@ invalid input.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool, T, has_abstract_list
-from langkit.envs import EnvSpec, add_to_env, add_env
+from langkit.envs import EnvSpec, add_to_env_kv, add_env
 from langkit.expressions import EmptyEnv, If, New, Self, Var, langkit_property
 from langkit.parsers import Grammar, List
 
@@ -28,7 +28,7 @@ class Name(FooNode):
     token_node = True
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.symbol, val=Self)),
+        add_to_env_kv(key=Self.symbol, val=Self),
         add_env()
     )
 

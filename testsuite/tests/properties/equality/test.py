@@ -6,7 +6,7 @@ equality.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, Struct, UserField, T
-from langkit.envs import EnvSpec, add_env, add_to_env
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt
 
@@ -44,7 +44,7 @@ class Decl(FooNode):
     items = Field()
 
     env_spec = EnvSpec(
-        add_to_env(mappings=New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
         add_env(),
     )
 

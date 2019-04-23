@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T
-from langkit.envs import EnvSpec, add_env, add_to_env
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Self, langkit_property
 from langkit.parsers import Grammar, List, Pick
 
@@ -35,8 +35,8 @@ class Block(FooNode):
 
     env_spec = EnvSpec(
         add_env(),
-        add_to_env(T.env_assoc.new(key=Self.name.symbol, val=Self),
-                   dest_env=Self.node_env),
+        add_to_env_kv(key=Self.name.symbol, val=Self,
+                      dest_env=Self.node_env),
     )
 
 

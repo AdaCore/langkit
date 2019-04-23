@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
                          env_metadata)
-from langkit.envs import EnvSpec, add_to_env, add_env
+from langkit.envs import EnvSpec, add_to_env_kv, add_env
 from langkit.expressions import AbstractKind, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt, Or
 
@@ -29,7 +29,7 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
         add_env()
     )
 
@@ -76,8 +76,8 @@ class ForeignDecl(FooNode):
     id = Field(type=T.Id)
 
     env_spec = EnvSpec(
-        add_to_env(
-            New(T.env_assoc, key=Self.id.simple_name.symbol, val=Self),
+        add_to_env_kv(
+            key=Self.id.simple_name.symbol, val=Self,
             dest_env=Self.id.match(
                 lambda simple=T.SimpleId:
                     simple.node_env,
@@ -93,10 +93,9 @@ class SelfDecl(FooNode):
     md_node = Field(type=T.Id)
 
     env_spec = EnvSpec(
-        add_to_env(
-            New(T.env_assoc,
-                key=Self.id.simple_name.symbol,
-                val=Self.id.resolve(Self.node_env)),
+        add_to_env_kv(
+            key=Self.id.simple_name.symbol,
+            val=Self.id.resolve(Self.node_env),
             metadata=New(
                 T.Metadata,
                 node=Self.md_node.then(lambda n: n.resolve(Self.node_env))

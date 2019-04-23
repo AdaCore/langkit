@@ -5,7 +5,7 @@ from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
-    GetSymbol, NullCheckExpr, NullExpr,
+    GetSymbol, No, NullCheckExpr, NullExpr,
     PropertyDef, Self, attr_call, auto_attr, construct
 )
 from langkit.expressions.utils import assign_var
@@ -310,6 +310,28 @@ def env_parent(self, env):
         'Env_Parent', 'AST_Envs.Parent', T.LexicalEnv,
         [construct(env, T.LexicalEnv)],
         abstract_expr=self,
+    )
+
+
+def new_env_assoc(key, val, dest_env=None, metadata=None):
+    """
+    Create a new env assoc, providing basic defaults when fields are not
+    specified.
+
+    :param AbstractExpression key: The symbol for which to associate a value.
+    :param AbstractExpression val: The node to associate to the key.
+    :param AbstractExpression dest_env: The environment in which to insert the
+        mapping. If this expression evaluates to the empty environment, the
+        mapping will be added to the initial env, e.g. the currently bound env
+        or whatever was specified using the set_initial_env construct.
+    :param AbstractExpression metadata: Additional metadata to associate to the
+        node.
+    """
+    return T.env_assoc.new(
+        key=key,
+        val=val,
+        dest_env=No(T.LexicalEnv) if dest_env is None else dest_env,
+        metadata=No(T.defer_env_md) if metadata is None else metadata
     )
 
 

@@ -3739,7 +3739,9 @@ class TypeRepo(object):
         return StructType(
             names.Name('Env_Assoc'), None, None,
             [('key', UserField(type=T.Symbol)),
-             ('val', UserField(type=self.defer_root_node))]
+             ('val', UserField(type=self.defer_root_node)),
+             ('dest_env', UserField(type=T.LexicalEnv)),
+             ('metadata', UserField(type=self.defer_env_md))]
         )
 
     @property

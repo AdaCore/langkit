@@ -303,25 +303,29 @@
       ## to the lexical environment.
 
       declare
-         Env : Lexical_Env :=
-           ${call_prop(exprs.dest_env_prop) \
-             if exprs.dest_env_prop else "Initial_Env"};
-
-         MD  : constant ${T.env_md.name} :=
-            ${(call_prop(exprs.metadata_prop)
-               if exprs.metadata else 'No_Metadata')};
-
+         % if exprs.mappings_prop.type.is_array:
          Mappings : ${exprs.mappings_prop.type.name} :=
             ${call_prop(exprs.mappings_prop)};
+         % else:
+         Mapping : ${exprs.mappings_prop.type.name} :=
+            ${call_prop(exprs.mappings_prop)};
+         % endif
 
          Resolver : constant Entity_Resolver :=
             ${("{}'Access".format(exprs.resolver.name)
                if exprs.resolver else 'null')};
-
       begin
+         % if exprs.mappings_prop.type.is_array_type:
+         for Mapping of Mappings.Items loop
+         % endif
+
          Add_To_Env (${root_node_type_name} (Self),
-                     Env, Mappings, MD, Resolver);
-         Dec_Ref (Env);
+                     Mapping, Initial_Env, Resolver);
+         Dec_Ref (Mapping.Dest_Env);
+
+         % if exprs.mappings_prop.type.is_array_type:
+         end loop;
+         % endif
       end;
    </%def>
 

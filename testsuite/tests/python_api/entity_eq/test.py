@@ -6,7 +6,7 @@ expected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, abstract, has_abstract_list
-from langkit.envs import EnvSpec, add_env, add_to_env
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (AbstractProperty, Entity, New, Property, Self,
                                  T, Var, langkit_property)
 from langkit.parsers import Grammar, List, Pick
@@ -26,9 +26,9 @@ class Name(FooNode):
 @abstract
 class DefNode(FooNode):
     name = AbstractProperty(T.Symbol, public=True)
-    env_spec = EnvSpec(add_to_env(mappings=New(T.env_assoc,
-                                               key=Self.name,
-                                               val=Self)))
+    env_spec = EnvSpec(
+        add_to_env_kv(key=Self.name, val=Self)
+    )
 
 
 class Block(DefNode):
@@ -53,7 +53,7 @@ class Block(DefNode):
         return New(Block.entity, node=Self, info=e_info)
 
     env_spec = EnvSpec(
-        add_to_env(mappings=New(T.env_assoc, key=Self.name, val=Self)),
+        add_to_env_kv(key=Self.name, val=Self),
         add_env()
     )
 

@@ -6,7 +6,7 @@ valid and correctly running code.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, UserField
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import Self, New, langkit_property
 from langkit.parsers import Grammar, List, Or
 
@@ -22,7 +22,7 @@ class Definition(FooNode):
     name = Field()
 
     env_spec = EnvSpec(
-        add_to_env(mappings=New(T.env_assoc, key=Self.name.symbol, val=Self))
+        add_to_env_kv(key=Self.name.symbol, val=Self)
     )
 
 

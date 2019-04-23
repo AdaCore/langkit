@@ -11,7 +11,7 @@ Test that the populate lexical env pass is resilent to errors:
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env, add_env, do
+from langkit.envs import EnvSpec, add_to_env_kv, add_env, do
 from langkit.expressions import (AbstractProperty, If, New, No, PropertyError,
                                  Self, langkit_property)
 from langkit.parsers import Grammar, List, Opt, Or
@@ -62,7 +62,7 @@ class Scope(DefNode):
     defs = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
         add_env(),
         do(If(Self.error.as_bool,
               PropertyError(T.FooNode),
@@ -75,7 +75,7 @@ class Var(DefNode):
     value = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
     )
 
 

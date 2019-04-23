@@ -5,7 +5,7 @@ Test the handling of analysis units in the properties DSL.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T
-from langkit.envs import EnvSpec, add_to_env, add_env
+from langkit.envs import EnvSpec, add_to_env_kv, add_env
 from langkit.expressions import New, No, Self, langkit_property
 from langkit.parsers import Grammar, List
 
@@ -32,8 +32,8 @@ class Decl(FooNode):
     refs = Field()
 
     env_spec = EnvSpec(
-        add_to_env(
-            New(T.env_assoc, key=Self.name.symbol, val=Self)
+        add_to_env_kv(
+            key=Self.name.symbol, val=Self
         ),
         add_env()
     )
@@ -42,8 +42,8 @@ class Decl(FooNode):
 class Ref(FooNode):
     name = Field()
 
-    env_spec = EnvSpec(add_to_env(
-        New(T.env_assoc, key=Self.name.symbol, val=Self),
+    env_spec = EnvSpec(add_to_env_kv(
+        key=Self.name.symbol, val=Self,
         resolver=FooNode.resolve_ref
     ))
 

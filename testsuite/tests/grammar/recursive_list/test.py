@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
-from langkit.envs import EnvSpec, add_env, add_to_env
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Self
 from langkit.parsers import Grammar, List, Pick
 
@@ -16,7 +16,7 @@ class FooNode(ASTNode):
 class Def(FooNode):
     name = Field()
     body = Field()
-    env_spec = EnvSpec(add_env(), add_to_env(Self.name, Self))
+    env_spec = EnvSpec(add_env(), add_to_env_kv(Self.name, Self))
 
 
 grammar = Grammar('stmt_rule')
