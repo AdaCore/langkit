@@ -5,7 +5,7 @@ Test that big integers work as expected in the DSL.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, BigInt, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import (
     AbstractProperty, BigIntLiteral, ExternalProperty, If, New, Self,
     langkit_property
@@ -27,8 +27,9 @@ class Decl(FooNode):
     name = Field(type=T.Identifier)
     expr_tree = Field(type=T.Expr)
 
-    env_spec = EnvSpec(add_to_env(
-        New(T.env_assoc, key=Self.name.symbol, val=Self)))
+    env_spec = EnvSpec(
+        add_to_env_kv(key=Self.name.symbol, val=Self)
+    )
 
 
 class Identifier(FooNode):

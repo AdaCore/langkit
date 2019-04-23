@@ -6,7 +6,7 @@ references to all transformed properties.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract, synthetic
-from langkit.envs import EnvSpec, add_env, add_to_env, reference
+from langkit.envs import EnvSpec, add_env, add_to_env_kv, reference
 from langkit.expressions import New, No, Self, langkit_property
 from langkit.parsers import Grammar, List, Or, Pick
 
@@ -77,7 +77,7 @@ class Var(FooNode):
     expr = Field()
 
     env_spec = EnvSpec(
-        add_to_env(mappings=New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
     )
 
 
@@ -88,7 +88,7 @@ class Def(FooNode):
     expr = Field()
 
     env_spec = EnvSpec(
-        add_to_env(mappings=New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
         add_env(),
         reference(Self.imports.map(lambda i: i.cast(T.FooNode)),
 

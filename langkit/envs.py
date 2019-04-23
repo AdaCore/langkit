@@ -10,7 +10,7 @@ from langkit.compiled_types import AbstractNodeData, T
 from langkit.diagnostics import (check_source_language,
                                  extract_library_location, Context)
 from langkit.expressions import (FieldAccess, PropertyDef, Self,
-                                 resolve_property, unsugar)
+                                 resolve_property, unsugar, No)
 
 """
 This module contains the public API and the implementation for lexical
@@ -104,25 +104,44 @@ def reference(nodes, through,
                    shed_rebindings=shed_corresponding_rebindings)
 
 
-def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
+def add_to_env(mappings, resolver=None):
     """
     Specify elements to add to the lexical environment.
 
     :param AbstractExpression mappings: One or several mappings of key to value
         to add to the environment. Must be either of type T.env_assoc, or
         T.env_assoc.array. All values must belong to the same unit as the node
-        that owns this EnvSpec.
-
-    :param AbstractExpression dest_env: The destination environment in which to
-        add the elements.
-    :param AbstractExpression metadata: Optional expression for metadata.
+        that owns this EnvSpec. See langkit.expressions.envs.new_env_assoc for
+        more precision on how to create an env assoc.
     :param PropertyDef|None resolver: Optional property that returns an AST
         node. If provided, the lexical environment lookup that will try to
         return the given mappings will first run this property on all nodes and
         return its result instead.
-    :return:
     """
-    return AddToEnv(mappings, dest_env, metadata, resolver)
+    return AddToEnv(mappings, resolver)
+
+
+def add_to_env_kv(key, val, dest_env=None, metadata=None, resolver=None):
+    """
+    Specify a single element to add to the lexical environment. See
+    langkit.expressions.envs.new_env_assoc for more precision about the first
+    four arguments.
+
+    :type key: AbstractExpression
+    :type val: AbstractExpression
+    :type dest_env: AbstractExpression
+    :type metadata: AbstractExpression metadata
+    :param PropertyDef|None resolver: Optional property that returns an AST
+        node. If provided, the lexical environment lookup that will try to
+        return the given mappings will first run this property on all nodes and
+        return its result instead.
+    """
+    from langkit.expressions import new_env_assoc
+
+    return add_to_env(
+        mappings=new_env_assoc(key, val, dest_env, metadata),
+        resolver=resolver
+    )
 
 
 def handle_children():
@@ -296,18 +315,6 @@ class EnvSpec(object):
                                           ' action per EnvSpec')
                     has_add_env = True
 
-            pre_addenv, post_addenv = split_by(
-                lambda a: not isinstance(a, AddEnv), self.pre_actions
-            )
-
-            if post_addenv:
-                check_source_language(
-                    all(a.dest_env for a in post_addenv
-                        if isinstance(a, AddToEnv)),
-                    "add_to_env actions happening after add_env must have an"
-                    " explicit destination env"
-                )
-
     def _render_field_access(self, p):
         """
         Helper to render a simple field access to the property P in the context
@@ -400,10 +407,8 @@ class AddEnv(EnvAction):
 
 
 class AddToEnv(EnvAction):
-    def __init__(self, mappings, dest_env, metadata, resolver):
+    def __init__(self, mappings, resolver):
         self.mappings = mappings
-        self.dest_env = dest_env
-        self.metadata = metadata
         self.resolver = resolver
 
     def check(self):
@@ -447,12 +452,6 @@ class AddToEnv(EnvAction):
     def create_internal_properties(self, env_spec):
         self.mappings_prop = env_spec.create_internal_property(
             'Env_Mappings', self.mappings, None
-        )
-        self.dest_env_prop = env_spec.create_internal_property(
-            'Env_Dest', self.dest_env, T.LexicalEnv
-        )
-        self.metadata_prop = env_spec.create_internal_property(
-            'MD', self.metadata, T.defer_env_md
         )
 
     def rewrite_property_refs(self, mapping):

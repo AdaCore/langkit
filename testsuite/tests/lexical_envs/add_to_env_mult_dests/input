@@ -1,0 +1,8 @@
+foo {
+    bar
+    baz {
+        x
+        y
+        z
+    }
+}

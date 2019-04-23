@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, Struct, abstract, env_metadata
-from langkit.envs import EnvSpec, add_to_env, add_env
+from langkit.envs import EnvSpec, add_to_env_kv, add_env
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List, Opt
 
@@ -32,7 +32,7 @@ class Def(Stmt):
     body = Field()
 
     env_spec = EnvSpec(
-        add_to_env(Self.id.symbol, Self),
+        add_to_env_kv(Self.id.symbol, Self),
         add_env()
     )
 

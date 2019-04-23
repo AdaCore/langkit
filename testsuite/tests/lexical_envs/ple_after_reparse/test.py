@@ -6,7 +6,7 @@ that 2) semantic analysis still works after that.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env, add_env, do, set_initial_env
+from langkit.envs import EnvSpec, add_to_env_kv, add_env, do, set_initial_env
 from langkit.expressions import AbstractProperty, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Or, Pick
 
@@ -74,7 +74,7 @@ class Scope(FooNode):
 
     env_spec = EnvSpec(
         set_initial_env(Self.initial_env),
-        add_to_env(New(T.env_assoc, key=Self.name.suffix_symbol, val=Self)),
+        add_to_env_kv(key=Self.name.suffix_symbol, val=Self),
         add_env(),
     )
 
@@ -90,7 +90,7 @@ class Var(FooNode):
     value = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
     )
 
 

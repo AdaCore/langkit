@@ -6,7 +6,7 @@ dispatchers.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env, add_env
+from langkit.envs import EnvSpec, add_to_env_kv, add_env
 from langkit.expressions import AbstractProperty, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Or
 
@@ -50,7 +50,7 @@ class Scope(DefNode):
     defs = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
         add_env(),
     )
 
@@ -60,7 +60,7 @@ class Var(DefNode):
     value = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
+        add_to_env_kv(key=Self.name.symbol, val=Self),
     )
 
 

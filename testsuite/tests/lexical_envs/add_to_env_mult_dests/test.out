@@ -1,0 +1,9 @@
+main.py: Running...
+Scope for <Id input:1:1-1:4>: None
+Scope for <Id input:2:5-2:8>: <Scope input:1:1-8:2>
+Scope for <Id input:3:5-3:8>: <Scope input:1:1-8:2>
+Scope for <Id input:4:9-4:10>: <Scope input:3:5-7:6>
+Scope for <Id input:5:9-5:10>: <Scope input:3:5-7:6>
+Scope for <Id input:6:9-6:10>: <Scope input:3:5-7:6>
+main.py: Done.
+Done

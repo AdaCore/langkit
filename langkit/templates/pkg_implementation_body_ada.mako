@@ -1054,24 +1054,12 @@ package body ${ada_lib_name}.Implementation is
 
    % if ctx.has_env_assoc:
       procedure Add_To_Env
-        (Self     : ${root_node_type_name};
-         Env      : Lexical_Env;
-         Mapping  : ${T.env_assoc.name};
-         MD       : ${T.env_md.name};
-         Resolver : Entity_Resolver);
+        (Self        : ${root_node_type_name};
+         Mapping     : ${T.env_assoc.name};
+         Initial_Env : Lexical_Env;
+         Resolver    : Entity_Resolver);
       --  Helper for Populate_Lexical_Env: add the key/element Mapping in the
       --  Env lexical environment using the given metadata (MD).
-   % endif
-
-   % if ctx.has_env_assoc_array:
-      procedure Add_To_Env
-        (Self     : ${root_node_type_name};
-         Env      : Lexical_Env;
-         Mappings : in out ${T.env_assoc.array.name};
-         MD       : ${T.env_md.name};
-         Resolver : Entity_Resolver);
-      --  Add_To_Env overload to work on an array of key/element mappings.
-      --  Calling this takes an ownership share for Mappings.
    % endif
 
    % if ctx.has_ref_env:
@@ -1115,13 +1103,18 @@ package body ${ada_lib_name}.Implementation is
       ----------------
 
       procedure Add_To_Env
-        (Self     : ${root_node_type_name};
-         Env      : Lexical_Env;
-         Mapping  : ${T.env_assoc.name};
-         MD       : ${T.env_md.name};
-         Resolver : Entity_Resolver)
+        (Self        : ${root_node_type_name};
+         Mapping     : ${T.env_assoc.name};
+         Initial_Env : Lexical_Env;
+         Resolver    : Entity_Resolver)
       is
          Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
+         MD         : ${T.env_md.name} renames Mapping.Metadata;
+
+         Dest_Env : Lexical_Env :=
+           (if Mapping.Dest_Env = Empty_Env
+            then Initial_Env
+            else Mapping.Dest_Env);
       begin
          if Mapping = No_Env_Assoc then
             return;
@@ -1150,7 +1143,7 @@ package body ${ada_lib_name}.Implementation is
          % endif
 
          --  Add the element to the environment
-         Add (Self  => Env,
+         Add (Self  => Dest_Env,
               Key   => Mapping.Key,
               Value => Mapping.Val,
               MD    => MD,
@@ -1158,44 +1151,24 @@ package body ${ada_lib_name}.Implementation is
 
          --  If we're adding the element to an environment that belongs to a
          --  different unit, then:
-         if Env /= Empty_Env
-            and then (Env = Root_Scope
-                      or else Env.Env.Node.Unit /= Self.Unit)
+         if Dest_Env /= Empty_Env
+            and then (Dest_Env = Root_Scope
+                      or else Dest_Env.Env.Node.Unit /= Self.Unit)
          then
             --  Add the environment, the key, and the value to the list of
             --  entries contained in other units, so we can remove them when
             --  reparsing Val's unit.
             Mapping.Val.Unit.Exiled_Entries.Append
-              ((Env, Mapping.Key, Mapping.Val));
+              ((Dest_Env, Mapping.Key, Mapping.Val));
 
-            if Env /= Root_Scope then
-               --  Add Val to the list of foreign nodes that Env's unit
+            if Dest_Env /= Root_Scope then
+               --  Add Val to the list of foreign nodes that Dest_Env's unit
                --  contains, so that when that unit is reparsed, we can call
                --  Add_To_Env again on those nodes.
-               Env.Env.Node.Unit.Foreign_Nodes.Append
+               Dest_Env.Env.Node.Unit.Foreign_Nodes.Append
                  ((Mapping.Val, Self.Unit));
             end if;
          end if;
-      end Add_To_Env;
-   % endif
-
-   % if ctx.has_env_assoc_array:
-      ----------------
-      -- Add_To_Env --
-      ----------------
-
-      procedure Add_To_Env
-        (Self     : ${root_node_type_name};
-         Env      : Lexical_Env;
-         Mappings : in out ${T.env_assoc.array.name};
-         MD       : ${T.env_md.name};
-         Resolver : Entity_Resolver)
-      is
-      begin
-         for M of Mappings.Items loop
-            Add_To_Env (Self, Env, M, MD, Resolver);
-         end loop;
-         Dec_Ref (Mappings);
       end Add_To_Env;
    % endif
 

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import (ASTNode, Bool, Field, Struct, UserField,
                          T, env_metadata)
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import Entity, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt
 
@@ -41,8 +41,8 @@ class Decl(FooNode):
     items = Field()
 
     env_spec = EnvSpec(
-        add_to_env(mappings=New(T.env_assoc, key=Self.name.symbol, val=Self),
-                   metadata=New(Metadata, b=Self.has_plus.as_bool))
+        add_to_env_kv(key=Self.name.symbol, val=Self,
+                      metadata=New(Metadata, b=Self.has_plus.as_bool))
     )
 
     @langkit_property(public=True, return_type=T.Ref.entity.array)
