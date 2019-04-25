@@ -2112,7 +2112,8 @@ class CompileCtx(object):
                 if prop in ignored_props:
                     continue
 
-                # `prop` must the ultimate base property: see the above comment
+                # `prop` must be the ultimate base property: see the above
+                # comment.
                 prop_set = prop.property_set()
                 assert prop_set[0] == prop
 
