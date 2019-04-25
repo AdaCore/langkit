@@ -2096,7 +2096,6 @@ class CompileCtx(object):
         from langkit.expressions import (Entity, FieldAccess, LocalVars, Match,
                                          PropertyDef, Self, construct)
 
-        ignored_props = set()
         redirected_props = {}
         wrapper_props = set()
 
@@ -2109,21 +2108,10 @@ class CompileCtx(object):
                 lambda p: p.dispatching,
                 include_inherited=False
             ):
-                if prop in ignored_props:
-                    continue
-
                 # `prop` must be the ultimate base property: see the above
                 # comment.
                 prop_set = prop.property_set()
                 assert prop_set[0] == prop
-
-                # Because of the way they integrate in code generation,
-                # external properties need to use tag-based dispatching, so
-                # don't lower dispatching for any set of properties that
-                # contain an external one.
-                if any(p.external for p in prop_set):
-                    ignored_props.update(prop_set)
-                    continue
 
                 def static_name(prop):
                     return prop.struct.name + prop.name
