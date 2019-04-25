@@ -3,12 +3,12 @@ from __future__ import absolute_import, division, print_function
 import itertools
 
 from langkit.diagnostics import WarningSet
-from langkit.dsl import ASTNode, LexicalEnv, Bool, abstract
+from langkit.dsl import ASTNode, Bool, LexicalEnv, abstract
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
 from langkit.parsers import Grammar
 
-from utils import emit_and_print_errors, default_warning_set
+from utils import default_warning_set, emit_and_print_errors
 
 
 warning_set = default_warning_set.with_disabled(WarningSet.unused_bindings)

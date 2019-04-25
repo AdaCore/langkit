@@ -18,7 +18,7 @@ import traceback
 
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import (
-    Context, Diagnostics, DiagnosticError, DiagnosticStyle, Location,
+    Context, DiagnosticError, DiagnosticStyle, Diagnostics, Location,
     WarningSet, check_source_language, extract_library_location
 )
 from langkit.langkit_support import LangkitSupport

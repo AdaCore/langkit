@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Int
-from langkit.expressions import Property, No
+from langkit.expressions import No, Property
 from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors

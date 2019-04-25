@@ -5,14 +5,11 @@ environments.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
-                         env_metadata, LookupKind)
-from langkit.envs import EnvSpec, add_to_env, add_env, handle_children
-from langkit.expressions import (
-    AbstractKind, New, Self, langkit_property, No, ArrayLiteral as Array,
-    new_env_assoc
-)
-from langkit.parsers import Grammar, List, Opt, Or
+from langkit.dsl import (ASTNode, Field, LookupKind, Struct, T, UserField,
+                         env_metadata)
+from langkit.envs import EnvSpec, add_env, add_to_env, handle_children
+from langkit.expressions import Self, langkit_property, new_env_assoc
+from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
 from utils import build_and_run

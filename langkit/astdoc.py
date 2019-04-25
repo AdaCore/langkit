@@ -7,7 +7,7 @@ import sys
 from docutils.core import publish_parts
 
 from langkit import compiled_types, expressions
-from langkit.diagnostics import check_source_language, Severity
+from langkit.diagnostics import Severity, check_source_language
 from langkit.utils import dispatch_on_type
 
 

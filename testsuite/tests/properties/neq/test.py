@@ -6,7 +6,7 @@ expected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool, Int, T
-from langkit.expressions import langkit_property, Self
+from langkit.expressions import Self, langkit_property
 from langkit.parsers import Grammar, List
 
 from utils import build_and_run

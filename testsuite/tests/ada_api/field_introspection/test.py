@@ -5,7 +5,7 @@ fields.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AbstractField, ASTNode, Field, NullField, T, abstract
+from langkit.dsl import ASTNode, AbstractField, Field, NullField, T, abstract
 from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token

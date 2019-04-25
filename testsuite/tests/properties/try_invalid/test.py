@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AnalysisUnitKind, ASTNode, T
+from langkit.dsl import ASTNode, AnalysisUnitKind, T
 from langkit.expressions import Try, langkit_property
 from langkit.parsers import Grammar
 

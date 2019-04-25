@@ -4,9 +4,9 @@ Check that Populate_Lexical_Env is automatically called in public properties.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec, add_to_env_kv
-from langkit.expressions import Entity, New, Self, langkit_property
+from langkit.expressions import Entity, Self, langkit_property
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token

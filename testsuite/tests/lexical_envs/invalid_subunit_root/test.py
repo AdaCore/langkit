@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import Annotations, ASTNode, Field, synthetic
+from langkit.dsl import ASTNode, Annotations, Field, synthetic
 from langkit.parsers import Grammar, List, Opt, Or
 
 from utils import emit_and_print_errors

@@ -13,7 +13,7 @@ from langkit.diagnostics import (
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
     FieldAccessExpr, NullCheckExpr, PropertyDef, SequenceExpr, T,
-    UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom, auto_attr,
+    UncheckedCastExpr, attr_call, attr_expr, auto_attr, auto_attr_custom,
     construct, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity

@@ -5,10 +5,9 @@ takes entities.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LogicVar, Int, UserField, T
-from langkit.expressions import (
-    AbstractProperty, Let, Property, Self, Bind, langkit_property
-)
+from langkit.dsl import ASTNode, Int, LogicVar, T, UserField
+from langkit.expressions import (AbstractProperty, Bind, Let, Property, Self,
+                                 langkit_property)
 from langkit.parsers import Grammar
 
 from lexer_example import Token

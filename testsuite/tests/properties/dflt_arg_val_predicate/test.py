@@ -5,8 +5,8 @@ Test that Prediate works well with default argument values.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool, LogicVar, T, UserField
-from langkit.expressions import (And, Predicate, Self, Var, langkit_property,
-                                 ignore)
+from langkit.expressions import (And, Predicate, Self, Var, ignore,
+                                 langkit_property)
 from langkit.parsers import Grammar
 
 from utils import build_and_run

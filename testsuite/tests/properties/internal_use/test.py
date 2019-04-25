@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, Struct, abstract, env_metadata
-from langkit.envs import EnvSpec, add_to_env_kv, add_env
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List, Opt
 

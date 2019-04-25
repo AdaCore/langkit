@@ -7,10 +7,10 @@ from itertools import count
 from langkit import names
 from langkit.compile_context import get_context
 from langkit.compiled_types import AbstractNodeData, T
-from langkit.diagnostics import (check_source_language,
-                                 extract_library_location, Context)
+from langkit.diagnostics import (Context, check_source_language,
+                                 extract_library_location)
 from langkit.expressions import (FieldAccess, PropertyDef, Self,
-                                 resolve_property, unsugar, No)
+                                 resolve_property, unsugar)
 
 """
 This module contains the public API and the implementation for lexical

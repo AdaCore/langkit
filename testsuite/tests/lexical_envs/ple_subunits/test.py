@@ -6,9 +6,9 @@ lexical environments created by list items that appear later.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import Annotations, ASTNode, Field, LookupKind, T, abstract
-from langkit.envs import EnvSpec, add_to_env_kv, add_env, do, set_initial_env
-from langkit.expressions import AbstractProperty, New, Self, langkit_property
+from langkit.dsl import ASTNode, Annotations, Field, LookupKind, T, abstract
+from langkit.envs import EnvSpec, add_env, add_to_env_kv, do, set_initial_env
+from langkit.expressions import AbstractProperty, Self, langkit_property
 from langkit.parsers import Grammar, List, Or, Pick
 
 from lexer_example import Token

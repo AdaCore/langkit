@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_env, do
-from langkit.expressions import PropertyError, Entity, langkit_property
+from langkit.expressions import Entity, PropertyError, langkit_property
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token

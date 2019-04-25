@@ -5,7 +5,7 @@ them.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AnalysisUnit, ASTNode, Field, T, abstract
+from langkit.dsl import ASTNode, AnalysisUnit, Field, T, abstract
 from langkit.expressions import No, Property, Self
 from langkit.parsers import Grammar, Or, Pick
 

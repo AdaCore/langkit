@@ -11,7 +11,7 @@ import funcy
 from langkit import names
 from langkit.common import string_repr
 from langkit.compiled_types import (
-    AbstractNodeData, Argument, ASTNodeType, CompiledType, EnumValue, T,
+    ASTNodeType, AbstractNodeData, Argument, CompiledType, EnumValue, T,
     TypeRepo, gdb_helper, get_context, no_compiled_type, resolve_type
 )
 from langkit.diagnostics import (
@@ -20,8 +20,8 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    assert_type, dispatch_on_type, inherited_property, not_implemented_error,
-    memoized, self_memoized, nested
+    assert_type, dispatch_on_type, inherited_property, memoized, nested,
+    not_implemented_error, self_memoized
 )
 
 
@@ -505,7 +505,7 @@ class AbstractExpression(Frozable):
 
             A.then(lambda real_a: real_a.b)
         """
-        from langkit.expressions import AbstractVariable, Then, FieldAccess
+        from langkit.expressions import AbstractVariable, FieldAccess, Then
 
         for k, v in self.__dict__.items():
             if isinstance(v, FieldAccess) and v.field == "_":
@@ -523,7 +523,7 @@ class AbstractExpression(Frozable):
 
             A._.b.c
         """
-        from langkit.expressions import Then, FieldAccess
+        from langkit.expressions import FieldAccess, Then
         if (isinstance(self, FieldAccess)
                 and isinstance(self.receiver, Then)
                 and self.receiver.underscore_then):

@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env, add_env
-from langkit.expressions import Self, Property, No, new_env_assoc
+from langkit.envs import EnvSpec, add_env, add_to_env
+from langkit.expressions import No, Property, Self, new_env_assoc
 from langkit.parsers import Grammar, List, Opt, Or, Pick, _
 from language.lexer import python_lexer as L
 

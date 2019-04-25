@@ -5,9 +5,9 @@ invalid input.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Bool, T, has_abstract_list
-from langkit.envs import EnvSpec, add_to_env_kv, add_env
-from langkit.expressions import EmptyEnv, If, New, Self, Var, langkit_property
+from langkit.dsl import ASTNode, Bool, has_abstract_list
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
+from langkit.expressions import EmptyEnv, If, Self, Var, langkit_property
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token

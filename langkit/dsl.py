@@ -4,7 +4,7 @@ import itertools
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
-    StructType, UserField as _UserField, T, resolve_type
+    StructType, T, UserField as _UserField, resolve_type
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
@@ -589,7 +589,7 @@ class _ASTNodeMetaclass(type):
     @classmethod
     def import_enum_node_attributes(mcs, dct, qualifier, alts, fields):
         from langkit.expressions import AbstractProperty
-        from langkit.parsers import _Row, _Transform, Opt
+        from langkit.parsers import Opt, _Row, _Transform
 
         def create_parser_bool_node(cls, *args):
             # If the node is a boolean node, then we want to parse the
