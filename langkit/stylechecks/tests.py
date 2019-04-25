@@ -518,6 +518,22 @@ testcases = (
                                 unicode_literals)
         dummy = 1
     ''', [(1, 0, 'Extraneous __future__ imports: unicode_literals')]),
+
+    #
+    # from X import Y testing
+    #
+
+    Testcase('from_import_1.py', """
+        from __future__ import absolute_import, division, print_function
+
+        from X import A, B
+    """, []),
+
+    Testcase('from_import_1.py', """
+        from __future__ import absolute_import, division, print_function
+
+        from X import B, A
+    """, [(3, 0, 'Imported entity "B" should appear after "A"')]),
 )
 
 
