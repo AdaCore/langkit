@@ -73,3 +73,6 @@ gcc -v
 
 # Install Langkit itself and its Python dependencies
 pip install .
+
+# Also install flake8 to have complete style checks
+pip install flake8
