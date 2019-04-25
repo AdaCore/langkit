@@ -127,30 +127,30 @@ testcases = (
         import foo
         import bar
     ''', [(4, 0, 'Imported package "foo" must appear after "bar"')]),
-    Testcase('package_3.py', '''
+    Testcase('package_4.py', '''
         from __future__ import absolute_import, division, print_function
 
         import foo
 
         import bar
     ''', []),
-    Testcase('package_3.py', '''
+    Testcase('package_5.py', '''
         from __future__ import absolute_import, division, print_function
 
         import foo
         import bar as zoo
     ''', [(4, 0, 'Imported package "foo" must appear after "bar"')]),
 
-    Testcase('package_4.adb', '''
+    Testcase('package_6.adb', '''
         with Foo;
         with Bar; use Bar;
     ''', [(2, 0, 'Imported package "Foo" must appear after "Bar"')]),
-    Testcase('package_5.adb', '''
+    Testcase('package_7.adb', '''
         with Foo;
         with ${blah};
         with Bar;
     ''', [(3, 0, 'Imported package "Foo" must appear after "Bar"')]),
-    Testcase('package_6.adb', '''
+    Testcase('package_8.adb', '''
         with AB;
         with Aa;
     ''', [(2, 0, 'Imported package "AB" must appear after "Aa"')]),
