@@ -24,8 +24,8 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
-from langkit.utils import (TopologicalSortError, memoized,
-                           memoized_with_default, topological_sort)
+from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
+                           memoized, memoized_with_default, topological_sort)
 
 
 compile_ctx = None
@@ -2093,11 +2093,9 @@ class CompileCtx(object):
         other ones non-dispatching and private.
         """
         from langkit.compiled_types import Argument
-        from langkit.expressions import (Entity, FieldAccess, LocalVars, Match,
-                                         PropertyDef, Self, construct)
+        from langkit.expressions import PropertyDef
 
         redirected_props = {}
-        wrapper_props = set()
 
         # Iterate on AST nodes in hierarchical order, so that we meet root
         # properties before the overriding ones. As processing root properties
@@ -2129,7 +2127,7 @@ class CompileCtx(object):
                     p._requires_untyped_wrapper = False
                 prop._requires_untyped_wrapper = requires_untyped_wrapper
 
-                # The root property will be re-purposed as dispatching
+                # The root property will be re-purposed as a dispatching
                 # function, so if it wasn't abstract, create a clone that the
                 # dispatcher will redirect to.
                 #
@@ -2163,10 +2161,11 @@ class CompileCtx(object):
                     prop.build_dynamic_var_arguments()
 
                     root_static.constructed_expr = prop.constructed_expr
+                    prop.expected_type = prop.type
                     prop.constructed_expr = None
 
                     root_static.vars = prop.vars
-                    prop.vars = LocalVars()
+                    prop.vars = None
 
                     root_static.abstract_runtime_check = (
                         prop.abstract_runtime_check)
@@ -2185,6 +2184,17 @@ class CompileCtx(object):
                     static_props.pop(0)
 
                 prop.is_dispatcher = True
+
+                # Determine for each static property the set of concrete nodes
+                # we should dispatch to it.
+                dispatch_types, remainder = collapse_concrete_nodes(
+                    prop.struct, reversed([p.struct for p in static_props]))
+                assert not remainder
+                prop.dispatch_table = zip(reversed(dispatch_types),
+                                          static_props)
+                # TODO: emit a warning for unreachable properties earlier in
+                # the compilation pipeline. Here we can see them with an empty
+                # set of types in the dispatch table.
 
                 # Make sure all static properties are public, not dispatching
                 # anymore, and assign them another name so that they don't
@@ -2207,8 +2217,8 @@ class CompileCtx(object):
                     redirected_props[p] = prop
 
                 # Now turn the root property into a dispatcher
-                wrapper_props.add(prop)
                 prop._abstract = False
+                prop.constructed_expr = None
 
                 # If at least one property this dispatcher calls uses entity
                 # info, then we must consider that the dispatcher itself uses
@@ -2219,40 +2229,6 @@ class CompileCtx(object):
                 prop._uses_entity_info = any(p.uses_entity_info
                                              for p in prop_set)
                 prop._uses_envs = any(p.uses_envs for p in prop_set)
-
-                with prop.bind(bind_dynamic_vars=True), \
-                        Self.bind_type(prop.struct):
-                    outer_scope = prop.get_scope()
-                    self_arg = construct(Entity
-                                         if prop.uses_entity_info else
-                                         Self)
-                    matchers = []
-                    for p in reversed(static_props):
-                        match_var = prop.vars.create_scopeless(
-                            'Match_Var',
-                            (p.struct.entity
-                             if prop.uses_entity_info
-                             else p.struct)
-                        )
-                        with outer_scope.new_child() as inner_scope:
-                            inner_scope.add(match_var)
-                            # When this field access gets evaluated, we know
-                            # that the receiver is not null as we already tried
-                            # to get its kind, so we can perform an unsafe
-                            # field access on it.
-                            static_call = FieldAccess.Expr(
-                                receiver_expr=match_var.ref_expr,
-                                node_data=p,
-                                arguments=[construct(arg.var)
-                                           for arg in prop.natural_arguments],
-                                implicit_deref=p.uses_entity_info,
-                                unsafe=True
-                            )
-                            matchers.append(Match.Matcher(
-                                match_var.ref_expr, static_call, inner_scope
-                            ))
-
-                    prop.constructed_expr = Match.Expr(self_arg, matchers)
 
         # Now that all relevant properties have been transformed, update all
         # references to them so that we always call the wrapper. Note that we
