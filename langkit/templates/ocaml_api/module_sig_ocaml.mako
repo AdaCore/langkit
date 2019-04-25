@@ -126,11 +126,6 @@ and ${ocaml_api.module_name(astnode)} : sig
 
   ${astnode_types.ast_type(astnode)}
 
-   % if astnode == T.root_node:
-  val equal : [< t ] -> [< t ] -> bool
-
-  val hash : [< t ] -> int
-   % endif
 end
 % endfor
 
@@ -193,6 +188,12 @@ module ${ocaml_api.node_name(astnode)} : sig
    % if not astnode.abstract:
   type fields = ${ocaml_api.fields_name(astnode)}
    % endif
+
+  val equal : [< t] -> [< t] -> bool
+
+  val hash : [< t] -> int
+
+  val compare : [< t] -> [< t] -> int
 
    % if astnode == T.root_node:
   val text : [< ${root_entity_type} ] -> string

@@ -539,10 +539,6 @@ module rec ${ocaml_api.module_name(T.root_node)} : sig
 
   val unwrap : [< t ] -> ${ocaml_api.c_value_type(root_entity)}
 
-  val equal : [< t ] -> [< t ] -> bool
-
-  val hash : [< t ] -> int
-
 end = struct
   ${astnode_types.ast_type(T.root_node)}
 
@@ -572,11 +568,6 @@ end = struct
    % endif
 % endfor
 
-  let equal node1 node2 =
-    Entity.equal (unwrap (node1 :> t)) (unwrap (node2 :> t))
-
-  let hash node =
-    Entity.hash (unwrap (node :> t))
 end
 
 % for astnode in ctx.astnode_types:
@@ -593,6 +584,8 @@ and Entity : sig
 
   val equal : t -> t -> bool
 
+  val compare : t -> t -> int
+
   val hash : t -> int
 end = struct
   type t = ${ocaml_api.c_value_type(root_entity)}
@@ -605,6 +598,17 @@ end = struct
     getf e1 EntityStruct.node = getf e2 EntityStruct.node
     && getf (getf e1 EntityStruct.info) EntityInfoStruct.rebindings
        = getf (getf e2 EntityStruct.info) EntityInfoStruct.rebindings
+
+  let compare e1 e2 =
+    let p1 =
+      (getf e1 EntityStruct.node,
+       getf (getf e1 EntityStruct.info) EntityInfoStruct.rebindings)
+    in
+    let p2 =
+      (getf e2 EntityStruct.node,
+       getf (getf e2 EntityStruct.info) EntityInfoStruct.rebindings)
+    in
+    Pervasives.compare p1 p2
 
   let hash e =
     Hashtbl.hash
@@ -759,6 +763,25 @@ module ${ocaml_api.node_name(astnode)} = struct
    % if not astnode.abstract:
   type fields = ${ocaml_api.fields_name(astnode)}
    % endif
+
+  let equal node1 node2 =
+    Entity.equal
+      (${ocaml_api.unwrap_value('(node1 :> {})'.format(root_entity_type),
+                                astnode.entity, None)})
+      (${ocaml_api.unwrap_value('(node2 :> {})'.format(root_entity_type),
+                                astnode.entity, None)})
+
+  let compare node1 node2 =
+    Entity.compare
+      (${ocaml_api.unwrap_value('(node1 :> {})'.format(root_entity_type),
+                                astnode.entity, None)})
+      (${ocaml_api.unwrap_value('(node2 :> {})'.format(root_entity_type),
+                                astnode.entity, None)})
+
+  let hash node =
+    Entity.hash
+      (${ocaml_api.unwrap_value('(node :> {})'.format(root_entity_type),
+                                astnode.entity, None)})
 
    % for field in ocaml_api.get_properties(astnode):
 let ${field.name.lower}
