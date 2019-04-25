@@ -5,8 +5,8 @@ Test the handling of analysis units in the properties DSL.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, LexicalEnv, T
-from langkit.envs import EnvSpec, add_to_env_kv, add_env
-from langkit.expressions import (DynamicVariable, New, Property, Self,
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
+from langkit.expressions import (DynamicVariable, Property, Self,
                                  langkit_property)
 from langkit.parsers import Grammar, List
 

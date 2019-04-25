@@ -4,7 +4,7 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import AnalysisUnit, ASTNode, Field, Int, T, abstract
+from langkit.dsl import ASTNode, AnalysisUnit, Field, Int, T, abstract
 from langkit.expressions import (AbstractProperty, ExternalProperty, Property,
                                  Self, langkit_property)
 from langkit.parsers import Grammar, Or

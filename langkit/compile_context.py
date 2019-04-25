@@ -808,9 +808,8 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (
-            CompiledTypeRepo, StructType, T, EnumType
-        )
+        from langkit.compiled_types import (CompiledTypeRepo, EnumType,
+                                            StructType, T)
         from langkit.dsl import _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -890,10 +889,8 @@ class CompileCtx(object):
         whether it is ever produced from a parser of the user grammar that can
         create a null node.
         """
-        from langkit.parsers import (
-            Opt, Or, Null, Defer, List, DontSkip, Skip, Predicate,
-            _Transform, _Extract
-        )
+        from langkit.parsers import (Defer, DontSkip, List, Null, Opt, Or,
+                                     Predicate, Skip, _Extract, _Transform)
 
         @memoized_with_default(False)
         def can_produce_null(parser):

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import langkit
-from langkit.dsl import ASTNode, Field, Annotations
+from langkit.dsl import ASTNode, Annotations, Field
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token

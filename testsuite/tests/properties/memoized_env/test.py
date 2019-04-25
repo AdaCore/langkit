@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Self, langkit_property
 from langkit.parsers import Grammar, List, Pick

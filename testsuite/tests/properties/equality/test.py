@@ -5,7 +5,7 @@ equality.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, Struct, UserField, T
+from langkit.dsl import ASTNode, Field, Struct, T, UserField
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt

@@ -3,10 +3,10 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, LexicalEnv, LogicVar, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
-                                 langkit_property, ignore)
+                                 ignore, langkit_property)
 from langkit.parsers import Grammar, Or
 
-from utils import emit_and_print_errors, default_warning_set
+from utils import default_warning_set, emit_and_print_errors
 
 
 warning_set = default_warning_set.with_disabled(WarningSet.unused_bindings)

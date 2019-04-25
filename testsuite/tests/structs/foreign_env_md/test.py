@@ -4,7 +4,7 @@ Test that foreign nodes in environment metadata are properly rejected.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Struct, Field, T, UserField, env_metadata
+from langkit.dsl import ASTNode, Field, Struct, T, UserField, env_metadata
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import New, No, Property, Self
 from langkit.parsers import Grammar, List, Opt

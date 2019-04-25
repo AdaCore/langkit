@@ -11,7 +11,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import (AbstractProperty, DynamicVariable, Entity,
-                                 New, Self, langkit_property)
+                                 Self, langkit_property)
 from langkit.parsers import Grammar, List, Or, Pick
 
 from lexer_example import Token

@@ -11,9 +11,9 @@ Test that the populate lexical env pass is resilent to errors:
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_to_env_kv, add_env, do
-from langkit.expressions import (AbstractProperty, If, New, No, PropertyError,
-                                 Self, langkit_property)
+from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
+from langkit.expressions import (AbstractProperty, If, No, PropertyError, Self,
+                                 langkit_property)
 from langkit.parsers import Grammar, List, Opt, Or
 
 from lexer_example import Token

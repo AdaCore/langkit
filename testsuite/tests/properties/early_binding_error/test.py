@@ -5,7 +5,7 @@ Property_Error exception.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, UserField, T
+from langkit.dsl import ASTNode, T, UserField
 from langkit.expressions import Predicate, Self, langkit_property
 from langkit.parsers import Grammar
 

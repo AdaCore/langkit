@@ -4,8 +4,8 @@ Test that Bind works when binding from entities.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, LogicVar, Int, UserField
-from langkit.expressions import AbstractProperty, Let, Property, Self, Bind
+from langkit.dsl import ASTNode, Int, LogicVar, UserField
+from langkit.expressions import AbstractProperty, Bind, Let, Property, Self
 from langkit.parsers import Grammar
 
 from lexer_example import Token

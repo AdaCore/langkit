@@ -15,8 +15,8 @@ from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import Ignore, LexerToken
 import langkit.names as names
 from langkit.parsers import (
-    Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Skip, _Extract, _Row,
-    _Token, _Transform, Predicate
+    Defer, DontSkip, List, NoBacktrack, Null, Opt, Or, Predicate, Skip,
+    _Extract, _Row, _Token, _Transform
 )
 from langkit.utils import not_implemented_error
 

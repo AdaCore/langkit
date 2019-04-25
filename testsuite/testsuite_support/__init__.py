@@ -8,14 +8,14 @@ import subprocess
 with_gnatpython = False
 if not os.environ.get('WITHOUT_GNATPYTHON'):
     try:
-        from gnatpython.ex import Run, PIPE
+        from gnatpython.ex import PIPE, Run
         from gnatpython.testsuite import Testsuite as BaseTestsuite
     except ImportError:
         pass
     else:
         with_gnatpython = True
 if not with_gnatpython:
-    from testsuite_support.polyfill import BaseTestsuite, Run, PIPE
+    from testsuite_support.polyfill import BaseTestsuite, PIPE, Run
 # pyflakes on
 
 
