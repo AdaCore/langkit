@@ -523,9 +523,13 @@ class PythonLang(LanguageChecker):
                                        docstring,
                                        False)
 
-                    if (isinstance(node, ast.ImportFrom)
-                            and node.module == '__future__'):
-                        future_seen.update(alias.name for alias in node.names)
+                    if isinstance(node, ast.ImportFrom):
+                        if node.module == '__future__':
+                            future_seen.update(alias.name
+                                               for alias in node.names)
+                        else:
+                            report.set_context(filename, node_lineno(node) - 1)
+                            self._check_imported_entities(report, node)
 
                 report.set_context(filename, 1)
                 if not future_seen:
@@ -541,6 +545,15 @@ class PythonLang(LanguageChecker):
                         report.add('Extraneous __future__ imports: {}'.format(
                             ', '.join(sorted(extraneous))
                         ))
+
+    def _check_imported_entities(self, report, import_node):
+        last = None
+        for alias in import_node.names:
+            name = alias.name
+            if last and last > name:
+                report.add('Imported entity "{}" should appear after "{}"'
+                           .format(last, name))
+            last = name
 
 
 class MakoLang(LanguageChecker):
