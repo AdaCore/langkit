@@ -21,7 +21,7 @@ ${assign_var(expr.prefix_var, expr.prefix_expr.render_expr())}
 case ${kind_expr} is
    % for m in expr.matchers:
       % if m.matched_concrete_nodes:
-         when ${kind_set(m.matched_concrete_nodes)} =>
+         when ${ctx.astnode_kind_set(m.matched_concrete_nodes)} =>
             ${m.match_expr.render_pre()}
             ${assign_var(expr.result_var, m.match_expr.render_expr())}
       % endif

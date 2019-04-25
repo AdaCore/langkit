@@ -43,31 +43,33 @@ is
 
    Property_Result : ${property.type.name};
 
-   ## For each scope, there is one of the following subprograms that finalizes
-   ## all the ref-counted local variables it contains, excluding variables from
-   ## children scopes.
-   <% all_scopes = property.vars.all_scopes %>
-   % for scope in all_scopes:
-      % if scope.has_refcounted_vars():
-         procedure ${scope.finalizer_name};
-      % endif
-   % endfor
+   % if not property.is_dispatcher:
+      ## For each scope, there is one of the following subprograms that
+      ## finalizes all the ref-counted local variables it contains, excluding
+      ## variables from children scopes.
+      <% all_scopes = property.vars.all_scopes %>
+      % for scope in all_scopes:
+         % if scope.has_refcounted_vars():
+            procedure ${scope.finalizer_name};
+         % endif
+      % endfor
 
-   ${property.vars.render()}
+      ${property.vars.render()}
 
-   % for scope in all_scopes:
-      % if scope.has_refcounted_vars():
-         procedure ${scope.finalizer_name} is
-         begin
-            ## Finalize the local variable for this scope
-            % for var in scope.variables:
-               % if var.type.is_refcounted:
-                  Dec_Ref (${var.name});
-               % endif
-            % endfor
-         end ${scope.finalizer_name};
-      % endif
-   % endfor
+      % for scope in all_scopes:
+         % if scope.has_refcounted_vars():
+            procedure ${scope.finalizer_name} is
+            begin
+               ## Finalize the local variable for this scope
+               % for var in scope.variables:
+                  % if var.type.is_refcounted:
+                     Dec_Ref (${var.name});
+                  % endif
+               % endfor
+            end ${scope.finalizer_name};
+         % endif
+      % endfor
+   % endif
 
    % if property.memoized:
          <%
@@ -185,14 +187,36 @@ begin
       % endif
    % endif
 
-   ${scopes.start_scope(property.vars.root_scope)}
-   ${property.constructed_expr.render_pre()}
+   % if property.is_dispatcher:
+      ## If this property is a dispatcher, it has no expression: just
+      ## materialize the dispatch table by hand.
+      case ${property.struct.ada_kind_range_name} (Self.Kind) is
+         % for types, static_prop in property.dispatch_table:
+            % if types:
+               when ${ctx.astnode_kind_set(types)} =>
+                  Property_Result := ${static_prop.name}
+                    (${static_prop.struct.name} (${property.self_arg_name})
+                     % for arg in property.arguments:
+                        , ${arg.name}
+                     % endfor
+                     % if property.uses_entity_info:
+                        , ${property.entity_info_name}
+                     % endif
+                    );
+            % endif
+         % endfor
+      end case;
 
-   Property_Result := ${property.constructed_expr.render_expr()};
-   % if property.type.is_refcounted:
-      Inc_Ref (Property_Result);
+   % else:
+      ${scopes.start_scope(property.vars.root_scope)}
+      ${property.constructed_expr.render_pre()}
+
+      Property_Result := ${property.constructed_expr.render_expr()};
+      % if property.type.is_refcounted:
+         Inc_Ref (Property_Result);
+      % endif
+      ${scopes.finalize_scope(property.vars.root_scope)}
    % endif
-   ${scopes.finalize_scope(property.vars.root_scope)}
 
    % if property.memoized:
       ## If memoization is enabled for this property, save the result for later
@@ -219,16 +243,19 @@ begin
 
    return Property_Result;
 
-% if property.vars.root_scope.has_refcounted_vars(True) or \
+% if (not property.is_dispatcher and \
+          property.vars.root_scope.has_refcounted_vars(True)) or \
      property.memoized or \
      has_logging:
    exception
       when Property_Error =>
-         % for scope in all_scopes:
-            % if scope.has_refcounted_vars():
-               ${scope.finalizer_name};
-            % endif
-         % endfor
+         % if not property.is_dispatcher:
+            % for scope in all_scopes:
+               % if scope.has_refcounted_vars():
+                  ${scope.finalizer_name};
+               % endif
+            % endfor
+         % endif
 
          % if property.memoized:
             % if not property.memoize_in_populate:

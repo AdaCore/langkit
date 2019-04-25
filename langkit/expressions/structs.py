@@ -1102,8 +1102,7 @@ class Match(AbstractExpression):
                                              abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            return render('properties/match_ada', expr=self,
-                          kind_set=get_context().astnode_kind_set)
+            return render('properties/match_ada', expr=self)
 
         @property
         def subexprs(self):
