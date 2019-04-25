@@ -1,7 +1,7 @@
 --  vim: ft=ada
 
-overriding function P_Evaluate
-  (Node : access Bare_Literal_Type) return Big_Integer_Type is
+function Bare_Literal_Evaluate
+  (Node : access Bare_Literal_Type'Class) return Big_Integer_Type is
 begin
    return Create_Big_Integer (Image (Node.Text));
-end P_Evaluate;
+end Bare_Literal_Evaluate;
