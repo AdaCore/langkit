@@ -274,9 +274,11 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Units.Append (PU);
 
             --  Reparse (i.e. unparse and then parse) this rewritten unit
-            Bytes := Unparse (Unit_Handle.Root, PU.Unit,
-                              Preserve_Formatting => True,
-                              As_Unit             => True);
+            Bytes := Unparse
+              (Create_Abstract_Node (Unit_Handle.Root),
+               PU.Unit,
+               Preserve_Formatting => True,
+               As_Unit             => True);
             Input.Bytes := Bytes.all'Address;
             Input.Bytes_Count := Bytes.all'Length;
             Do_Parsing (PU.Unit, Input, PU.New_Data);
@@ -476,7 +478,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    begin
       ${pre_check_nrw_handle('Handle')}
       return Unparsing_Implementation.Unparse
-        (Handle, Preserve_Formatting => True);
+        (Create_Abstract_Node (Handle),
+         Preserve_Formatting => True);
    end Unparse;
 
    --------------
@@ -552,7 +555,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          else
             Children := (Kind => Expanded_Regular, Vector => <>);
             declare
-               Count : constant Natural := N.Abstract_Children_Count;
+               Count : constant Natural := Children_Count (N);
             begin
                Children.Vector.Reserve_Capacity
                  (Ada.Containers.Count_Type (Count));
@@ -638,82 +641,6 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       end if;
    end Untie;
 
-   -------------------
-   -- Abstract_Kind --
-   -------------------
-
-   overriding function Abstract_Kind
-     (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name}
-   is
-   begin
-      return Node.Kind;
-   end Abstract_Kind;
-
-   -----------------------------
-   -- Abstract_Children_Count --
-   -----------------------------
-
-   overriding function Abstract_Children_Count
-     (Node : access Node_Rewriting_Handle_Type) return Natural is
-   begin
-      return
-        (case Node.Children.Kind is
-         when Unexpanded          => Node.Node.Abstract_Children_Count,
-         when Expanded_Regular    => Natural (Node.Children.Vector.Length),
-         when Expanded_Token_Node => 0);
-   end Abstract_Children_Count;
-
-   --------------------
-   -- Abstract_Child --
-   --------------------
-
-   overriding function Abstract_Child
-     (Node  : access Node_Rewriting_Handle_Type;
-      Index : Positive) return Implementation.Abstract_Node is
-   begin
-      return
-        (case Node.Children.Kind is
-         when Unexpanded          => Node.Node.Abstract_Child (Index),
-         when Expanded_Regular    =>
-            Implementation.Abstract_Node
-              (Node.Children.Vector.Element (Index)),
-         when Expanded_Token_Node => null);
-   end Abstract_Child;
-
-   -------------------
-   -- Abstract_Text --
-   -------------------
-
-   overriding function Abstract_Text
-     (Node : access Node_Rewriting_Handle_Type) return Text_Type is
-   begin
-      case Node.Children.Kind is
-         when Unexpanded =>
-            if Is_Token_Node (Node.Kind) then
-               return Node.Node.Text;
-            else
-               raise Program_Error;
-            end if;
-
-         when Expanded_Regular =>
-            raise Program_Error;
-
-         when Expanded_Token_Node =>
-            return To_Wide_Wide_String (Node.Children.Text);
-      end case;
-   end Abstract_Text;
-
-   -----------------------------
-   -- Abstract_Rewritten_Node --
-   -----------------------------
-
-   overriding function Abstract_Rewritten_Node
-     (Node : access Node_Rewriting_Handle_Type) return ${root_node_type_name}
-  is
-   begin
-      return Node.Node;
-   end Abstract_Rewritten_Node;
-
    ----------
    -- Kind --
    ----------
@@ -753,7 +680,11 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Children_Count (Handle : Node_Rewriting_Handle) return Natural is
    begin
       ${pre_check_nrw_handle('Handle')}
-      return Handle.Abstract_Children_Count;
+      return
+        (case Handle.Children.Kind is
+         when Unexpanded          => Handle.Node.Children_Count,
+         when Expanded_Regular    => Natural (Handle.Children.Vector.Length),
+         when Expanded_Token_Node => 0);
    end Children_Count;
 
    -----------
@@ -816,7 +747,11 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
       case Handle.Children.Kind is
          when Unexpanded =>
-            return Text (Handle.Node);
+            if Is_Token_Node (Handle.Kind) then
+               return Handle.Node.Text;
+            else
+               raise Program_Error;
+            end if;
          when Expanded_Regular =>
             return (raise Program_Error);
          when Expanded_Token_Node =>
@@ -1211,7 +1146,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
             else
                declare
-                  Count : constant Natural := Node.Abstract_Children_Count;
+                  Count : constant Natural := Node.Children_Count;
                begin
                   Result.Children := (Kind => Expanded_Regular, Vector => <>);
                   Result.Children.Vector.Reserve_Capacity

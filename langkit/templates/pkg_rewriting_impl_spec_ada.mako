@@ -110,7 +110,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
 
    Unexpanded_Children : constant Node_Children := (Kind => Unexpanded);
 
-   type Node_Rewriting_Handle_Type is new Abstract_Node_Type with record
+   type Node_Rewriting_Handle_Type is record
       Context_Handle : Rewriting_Handle;
       --  Rewriting handle for the analysis context that owns Node
 
@@ -345,21 +345,5 @@ private package ${ada_lib_name}.Rewriting_Implementation is
 
       % endif
    % endfor
-
-   overriding function Abstract_Kind
-     (Node : access Node_Rewriting_Handle_Type) return ${root_node_kind_name};
-
-   overriding function Abstract_Children_Count
-     (Node : access Node_Rewriting_Handle_Type) return Natural;
-
-   overriding function Abstract_Child
-     (Node  : access Node_Rewriting_Handle_Type;
-      Index : Positive) return Implementation.Abstract_Node;
-
-   overriding function Abstract_Text
-     (Node : access Node_Rewriting_Handle_Type) return Text_Type;
-
-   overriding function Abstract_Rewritten_Node
-     (Node : access Node_Rewriting_Handle_Type) return ${root_node_type_name};
 
 end ${ada_lib_name}.Rewriting_Implementation;

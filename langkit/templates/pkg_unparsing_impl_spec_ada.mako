@@ -8,8 +8,58 @@ with Langkit_Support.Text;  use Langkit_Support.Text;
 
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Rewriting_Implementation;
+use ${ada_lib_name}.Rewriting_Implementation;
 
 private package ${ada_lib_name}.Unparsing_Implementation is
+
+   --------------------
+   -- Abstract nodes --
+   --------------------
+
+   --  Unparsing deals with two kinds of nodes: regular ones, coming from the
+   --  parsing of an analysis unit, and rewriting ones, that were created using
+   --  the rewriting API. The following types provide an abstraction so that
+   --  unparsing code can handle both kinds of nodes.
+
+   type Abstract_Node_Kind is (From_Parsing, From_Rewriting);
+
+   type Abstract_Node (Kind : Abstract_Node_Kind := Abstract_Node_Kind'First)
+   is record
+      case Kind is
+         when From_Parsing   => Parsing_Node   : ${root_node_type_name};
+         when From_Rewriting => Rewriting_Node : Node_Rewriting_Handle;
+      end case;
+   end record;
+
+   function Create_Abstract_Node
+     (Parsing_Node : ${root_node_type_name}) return Abstract_Node;
+   function Create_Abstract_Node
+     (Rewriting_Node : Node_Rewriting_Handle) return Abstract_Node;
+   --  Wrapping shortcuts
+
+   function Is_Null (Node : Abstract_Node) return Boolean;
+   --  Return whether Node references a null node
+
+   function Kind (Node : Abstract_Node) return ${root_node_kind_name};
+   --  Return the kind for Node
+
+   function Children_Count (Node : Abstract_Node) return Natural;
+   --  Return the number of children that Node has
+
+   function Child
+     (Node : Abstract_Node; Index : Positive) return Abstract_Node;
+   --  Return the Node's child number Index. Index is a 1-based index. If it is
+   --  out of bounds, a Constraint_Error is raised.
+
+   function Text (Node : Abstract_Node) return Text_Type;
+   --  Assuming Node is a token node, return the associated text
+
+   function Rewritten_Node
+     (Node : Abstract_Node) return ${root_node_type_name};
+   --  If Node is a parsing node, return it. If Node is a rewritten node,
+   --  return the original node (i.e. of which Node is a rewritten version), or
+   --  null if there is no original node.
 
    type Unparsing_Buffer is limited record
       Content : Unbounded_Wide_Wide_String;
@@ -41,7 +91,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    --  given the next token to emit.
 
    function Unparse
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String;
@@ -57,7 +107,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    --  this has no effect unless Preserve_Formatting itself is true.
 
    function Unparse
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String_Access;
@@ -65,7 +115,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    --  when done with it.
 
    function Unparse
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Preserve_Formatting : Boolean) return Text_Type;
    --  Likewise, but return a text access. Callers must deallocate the result
    --  when done with it.
