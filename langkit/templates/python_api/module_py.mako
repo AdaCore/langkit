@@ -975,6 +975,15 @@ class Token(ctypes.Structure):
         self._check_same_unit(other)
         return self._identity_tuple < other._identity_tuple
 
+    def __le__(self, other):
+        return self == other or self < other
+
+    def __gt__(self, other):
+        return not (self <= other)
+
+    def __ge__(self, other):
+        return not (self < other)
+
     def to_data(self):
         """
         Return a dict representation of this Token.
