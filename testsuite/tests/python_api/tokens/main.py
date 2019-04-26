@@ -38,6 +38,10 @@ for t in tokens:
     print('  ', t)
 print('')
 
+# Print the whole text buffer
+print('Input source buffer:\n   {}'.format(repr(u.text)))
+print('')
+
 # Test Token's comparison operations
 assert tokens[0] != tokens[1]
 assert not (tokens[0] == tokens[1])
