@@ -643,6 +643,11 @@ class AnalysisUnit(object):
         return result._wrap()
 
     @property
+    def text(self):
+        ${py_doc('langkit.unit_text', 8)}
+        return Token.text_range(self.first_token, self.last_token)
+
+    @property
     def token_count(self):
         ${py_doc('langkit.unit_token_count', 8)}
         return _unit_token_count(self._c_value)
