@@ -765,7 +765,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Abstract_Children_Count;
+      return Node.Internal.Node.Children_Count;
    end Children_Count;
 
    -----------------------

@@ -9,7 +9,7 @@ is
    Requested_Name : Symbol_Type_Array_Access := Node.P_Symbols;
    Has_Errors     : Boolean := False;
 begin
-   for I in 1 .. Root.Abstract_Children_Count loop
+   for I in 1 .. Root.Children_Count loop
       declare
          S  : constant Bare_Scope := Bare_Scope (Root.Child (I));
          SN : constant Bare_Name := S.F_Name;

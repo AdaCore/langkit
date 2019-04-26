@@ -17,7 +17,7 @@ package body ${ada_lib_name}.Unparsing is
       N : constant ${root_node_type_name} := Unwrap_Node (Node);
    begin
       return Unparse
-        (${ada_lib_name}.Implementation.Abstract_Node (N),
+        (Create_Abstract_Node (N),
          Unwrap_Node (Node).Unit,
          Preserve_Formatting => False,
          As_Unit             => False);

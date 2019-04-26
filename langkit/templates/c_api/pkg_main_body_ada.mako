@@ -541,7 +541,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Node : ${entity_type}_Ptr) return unsigned is
    begin
       Clear_Last_Exception;
-      return unsigned (Node.Node.Abstract_Children_Count);
+      return unsigned (Node.Node.Children_Count);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);

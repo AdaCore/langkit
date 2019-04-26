@@ -75,34 +75,6 @@ private package ${ada_lib_name}.Implementation is
    No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
       Rewriting_Handle_Pointer (System.Null_Address);
 
-   type Abstract_Node_Type is abstract tagged null record;
-   type Abstract_Node is access all Abstract_Node_Type'Class;
-
-   function Abstract_Kind
-     (Node : access Abstract_Node_Type) return ${root_node_kind_name}
-     is abstract;
-   --  Return the kind for Node
-
-   function Abstract_Children_Count
-     (Node : access Abstract_Node_Type) return Natural is abstract;
-   --  Return the number of children that Node has
-
-   function Abstract_Child
-     (Node  : access Abstract_Node_Type;
-      Index : Positive) return Abstract_Node is abstract;
-   --  Return the Node's child number Index. Index is a 1-based index. If it is
-   --  out of bounds, a Constraint_Error is raised.
-
-   function Abstract_Text
-     (Node : access Abstract_Node_Type) return Text_Type is abstract;
-   --  Assuming Node is a token node, return the associated text
-
-   function Abstract_Rewritten_Node
-     (Node : access Abstract_Node_Type)
-      return ${root_node_type_name} is abstract;
-   --  If Node is a rewritten node, return the original node (i.e. of which
-   --  Node is a rewritten version). Return null otherwise.
-
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
@@ -361,6 +333,10 @@ private package ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class) return Natural;
    --  Return the index of the last child Node has, or 0 if there is no child
 
+   function Children_Count
+     (Node : access ${root_node_value_type}'Class) return Natural;
+   --  Return the number of children that Node has
+
    procedure Get_Child
      (Node            : access ${root_node_value_type}'Class;
       Index           : Positive;
@@ -587,7 +563,7 @@ private package ${ada_lib_name}.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
-   type ${root_node_value_type} is new Abstract_Node_Type with record
+   type ${root_node_value_type} is tagged record
       Parent : ${root_node_type_name} := null;
       --  Reference to the parent node, or null if this is the root one
 
@@ -614,22 +590,6 @@ private package ${ada_lib_name}.Implementation is
       --  0-based index for the last child we tried to parse for this node. -1
       --  if parsing for all children was successful.
    end record;
-
-   overriding function Abstract_Kind
-     (Node : access ${root_node_value_type}) return ${root_node_kind_name};
-
-   overriding function Abstract_Children_Count
-     (Node : access ${root_node_value_type}) return Natural;
-
-   overriding function Abstract_Child
-     (Node  : access ${root_node_value_type};
-      Index : Positive) return Abstract_Node;
-
-   overriding function Abstract_Text
-     (Node : access ${root_node_value_type}) return Text_Type;
-
-   overriding function Abstract_Rewritten_Node
-     (Node : access ${root_node_value_type}) return ${root_node_type_name};
 
    function Pre_Env_Actions
      (Self                : access ${root_node_value_type}'Class;

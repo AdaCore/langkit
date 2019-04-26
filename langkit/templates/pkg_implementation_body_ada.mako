@@ -688,7 +688,7 @@ package body ${ada_lib_name}.Implementation is
                return;
             end if;
             Reset_Caches (Node.Self_Env);
-            for I in 1 .. Node.Abstract_Children_Count loop
+            for I in 1 .. Node.Children_Count loop
                Internal (Node.Child (I));
             end loop;
          end Internal;
@@ -720,7 +720,7 @@ package body ${ada_lib_name}.Implementation is
             --  one of them.
             if Unit.AST_Root.Kind = ${ctx.ple_unit_root.list.ada_kind_name}
             then
-               for I in 1 .. Unit.AST_Root.Abstract_Children_Count loop
+               for I in 1 .. Unit.AST_Root.Children_Count loop
                   Has_Errors := Populate_Lexical_Env (Unit.AST_Root.Child (I))
                                 or else Has_Errors;
                end loop;
@@ -1336,7 +1336,7 @@ package body ${ada_lib_name}.Implementation is
 
       Node.Parent := ${root_node_type_name} (Parent);
 
-      for I in 1 .. Node.Abstract_Children_Count loop
+      for I in 1 .. Node.Children_Count loop
          Set_Parents (Node.Child (I), Node);
       end loop;
    end Set_Parents;
@@ -1352,7 +1352,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       Node.Reset_Logic_Vars;
-      for I in 1 .. Node.Abstract_Children_Count loop
+      for I in 1 .. Node.Children_Count loop
          Destroy (Node.Child (I));
       end loop;
    end Destroy;
@@ -1393,7 +1393,7 @@ package body ${ada_lib_name}.Implementation is
          --  must immediately stop processing the tree.
 
          if Status = Into then
-            for I in 1 .. Node.Abstract_Children_Count loop
+            for I in 1 .. Node.Children_Count loop
                declare
                   Cur_Child : constant ${root_node_type_name} :=
                      Child (Node, I);
@@ -1659,7 +1659,7 @@ package body ${ada_lib_name}.Implementation is
      return ${root_node_array.array_type_name}
    is
       First : constant Integer := ${root_node_array.index_type()}'First;
-      Last  : constant Integer := First + Node.Abstract_Children_Count - 1;
+      Last  : constant Integer := First + Node.Children_Count - 1;
    begin
       return A : ${root_node_array.array_type_name} (First .. Last)
       do
@@ -2188,7 +2188,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Last_Child_Index
      (Node : access ${root_node_value_type}'Class) return Natural
-   is (Node.Abstract_Children_Count);
+   is (Node.Children_Count);
 
    ---------------
    -- Get_Child --
@@ -2990,7 +2990,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Length
      (Node : access ${generic_list_value_type}'Class) return Natural
-   is (Node.Abstract_Children_Count);
+   is (Node.Children_Count);
 
    % if ctx.properties_logging:
 
@@ -3191,12 +3191,12 @@ package body ${ada_lib_name}.Implementation is
       return To_String (Kind_Names (Node.Kind));
    end Kind_Name;
 
-   -----------------------------
-   -- Abstract_Children_Count --
-   -----------------------------
+   --------------------
+   -- Children_Count --
+   --------------------
 
-   function Abstract_Children_Count
-     (Node : access ${root_node_value_type}) return Natural
+   function Children_Count
+     (Node : access ${root_node_value_type}'Class) return Natural
    is
       C : Integer := Kind_To_Node_Children_Count (Node.Kind);
    begin
@@ -3210,48 +3210,7 @@ package body ${ada_lib_name}.Implementation is
       else
          return C;
       end if;
-   end Abstract_Children_Count;
-
-   -------------------
-   -- Abstract_Kind --
-   -------------------
-
-   overriding function Abstract_Kind
-     (Node : access ${root_node_value_type}) return ${root_node_kind_name} is
-   begin
-      return Node.Kind;
-   end Abstract_Kind;
-
-   --------------------
-   -- Abstract_Child --
-   --------------------
-
-   overriding function Abstract_Child
-     (Node  : access ${root_node_value_type};
-      Index : Positive) return Abstract_Node is
-   begin
-      return Abstract_Node (${root_node_type_name}'(Node.Child (Index)));
-   end Abstract_Child;
-
-   -------------------
-   -- Abstract_Text --
-   -------------------
-
-   overriding function Abstract_Text
-     (Node : access ${root_node_value_type}) return Text_Type is
-   begin
-      return Node.Text;
-   end Abstract_Text;
-
-   -----------------------------
-   -- Abstract_Rewritten_Node --
-   -----------------------------
-
-   overriding function Abstract_Rewritten_Node
-     (Node : access ${root_node_value_type}) return ${root_node_type_name} is
-   begin
-      return ${root_node_type_name} (Node);
-   end Abstract_Rewritten_Node;
+   end Children_Count;
 
    ----------------------
    -- Reset_Logic_Vars --
@@ -3480,7 +3439,7 @@ package body ${ada_lib_name}.Implementation is
          end if;
 
          Deactivate_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Node.Abstract_Children_Count loop
+         for I in 1 .. Node.Children_Count loop
             Deactivate_Refd_Envs (Node.Child (I));
          end loop;
       end Deactivate_Refd_Envs;
@@ -3496,7 +3455,7 @@ package body ${ada_lib_name}.Implementation is
             return;
          end if;
          Recompute_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Node.Abstract_Children_Count loop
+         for I in 1 .. Node.Children_Count loop
             Recompute_Refd_Envs (Node.Child (I));
          end loop;
       end Recompute_Refd_Envs;

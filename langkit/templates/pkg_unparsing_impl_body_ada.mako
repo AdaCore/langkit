@@ -20,10 +20,6 @@ with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 
 package body ${ada_lib_name}.Unparsing_Implementation is
 
-   subtype Abstract_Node is ${ada_lib_name}.Implementation.Abstract_Node;
-   --  Subtype to avoid visibility conflict with an Abstract_Node type coming
-   --  from the Analysis package.
-
    --  The "template" data structures below are helpers for the original
    --  source code formatting preservation algorithms. A template can be
    --  thought as the instantiation of an unparser from an original AST node.
@@ -92,7 +88,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  are absent.
 
    function Field_Present
-     (Node     : access Abstract_Node_Type'Class;
+     (Node     : Abstract_Node;
       Unparser : Field_Unparser) return Boolean;
    --  Return whether the given field is to be considered present according to
    --  the given field unparser.
@@ -103,20 +99,20 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  inserting Char to a buffer.
 
    procedure Unparse_Node
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer);
    --  Using the Node_Unparsers unparsing tables, unparse the given Node
 
    procedure Unparse_Regular_Node
-     (Node           : access Abstract_Node_Type'Class;
+     (Node           : Abstract_Node;
       Unparser       : Regular_Node_Unparser;
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
 
    procedure Unparse_List_Node
-     (Node           : access Abstract_Node_Type'Class;
+     (Node           : Abstract_Node;
       Unparser       : List_Node_Unparser;
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer);
@@ -189,6 +185,126 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  A line break must be append during unparsing after a token T iff
    --  Token_Newline_Table (T) is true.
 
+   --------------------------
+   -- Create_Abstract_Node --
+   --------------------------
+
+   function Create_Abstract_Node
+     (Parsing_Node : ${root_node_type_name}) return Abstract_Node is
+   begin
+      return (From_Parsing, Parsing_Node);
+   end Create_Abstract_Node;
+
+   --------------------------
+   -- Create_Abstract_Node --
+   --------------------------
+
+   function Create_Abstract_Node
+     (Rewriting_Node : Node_Rewriting_Handle) return Abstract_Node is
+   begin
+      return (From_Rewriting, Rewriting_Node);
+   end Create_Abstract_Node;
+
+   -------------
+   -- Is_Null --
+   -------------
+
+   function Is_Null (Node : Abstract_Node) return Boolean is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return Node.Parsing_Node = null;
+         when From_Rewriting =>
+            return Node.Rewriting_Node = null;
+      end case;
+   end Is_Null;
+
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind (Node : Abstract_Node) return ${root_node_kind_name} is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return Node.Parsing_Node.Kind;
+         when From_Rewriting =>
+            return Node.Rewriting_Node.Kind;
+      end case;
+   end Kind;
+
+   --------------------
+   -- Children_Count --
+   --------------------
+
+   function Children_Count (Node : Abstract_Node) return Natural is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return Node.Parsing_Node.Children_Count;
+         when From_Rewriting =>
+            return Children_Count (Node.Rewriting_Node);
+      end case;
+   end Children_Count;
+
+   -----------
+   -- Child --
+   -----------
+
+   function Child
+     (Node : Abstract_Node; Index : Positive) return Abstract_Node is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return Create_Abstract_Node (Node.Parsing_Node.Child (Index));
+
+         when From_Rewriting =>
+            --  In the context of unparsing, it is pointless to expand the
+            --  rewritting tree (which is what Rewriting_Implementation.Child
+            --  does). If the node is not expanded, switch to the original
+            --  node instead.
+
+            declare
+               RN : constant Node_Rewriting_Handle := Node.Rewriting_Node;
+            begin
+               if RN.Children.Kind = Unexpanded then
+                  return Create_Abstract_Node (RN.Node.Child (Index));
+               else
+                  return Create_Abstract_Node (Child (RN, Index));
+               end if;
+            end;
+      end case;
+   end Child;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Node : Abstract_Node) return Text_Type is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return Node.Parsing_Node.Text;
+         when From_Rewriting =>
+            return Text (Node.Rewriting_Node);
+      end case;
+   end Text;
+
+   --------------------
+   -- Rewritten_Node --
+   --------------------
+
+   function Rewritten_Node
+     (Node : Abstract_Node) return ${root_node_type_name} is
+   begin
+      case Node.Kind is
+         when From_Parsing =>
+            return Node.Parsing_Node;
+         when From_Rewriting =>
+            return Node.Rewriting_Node.Node;
+      end case;
+   end Rewritten_Node;
+
    ---------------------------
    -- Create_Token_Sequence --
    ---------------------------
@@ -234,7 +350,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       --  For each field, recover the tokens that surround the field itself,
       --  but only if both the original node and the one to unparse are
       --  present.
-      for I in 1 .. Rewritten_Node.Abstract_Children_Count loop
+      for I in 1 .. Rewritten_Node.Children_Count loop
          declare
             U     : Field_Unparser_List renames Unparser.Field_Unparsers.all;
             F     : Field_Unparser renames U.Field_Unparsers (I);
@@ -244,7 +360,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
             Rewritten_Child : constant ${root_node_type_name} :=
                Rewritten_Node.Child (I);
             R_Child         : constant Abstract_Node :=
-               Abstract_Node (Rewritten_Child);
+               Create_Abstract_Node (Rewritten_Child);
          begin
             Result.Inter_Tokens (I) :=
               (if I = 1
@@ -288,12 +404,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------------
 
    function Field_Present
-     (Node     : access Abstract_Node_Type'Class;
+     (Node     : Abstract_Node;
       Unparser : Field_Unparser) return Boolean is
    begin
-      return (Node /= null
+      return (not Is_Null (Node)
               and then (not Unparser.Empty_List_Is_Absent
-                        or else Node.Abstract_Children_Count > 0));
+                        or else Children_Count (Node) > 0));
    end Field_Present;
 
    -----------------
@@ -367,7 +483,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------
 
    function Unparse
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String
@@ -385,7 +501,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------
 
    function Unparse
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
       As_Unit             : Boolean) return String_Access
@@ -472,13 +588,13 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -------------
 
    function Unparse
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Preserve_Formatting : Boolean) return Text_Type
    is
       Buffer : Unparsing_Buffer;
    begin
       % if ctx.generate_unparser:
-         if Node = null then
+         if Is_Null (Node) then
             return (raise Program_Error with "cannot unparse null node");
          end if;
 
@@ -495,16 +611,17 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    ------------------
 
    procedure Unparse_Node
-     (Node                : access Abstract_Node_Type'Class;
+     (Node                : Abstract_Node;
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
-      Kind     : constant ${root_node_kind_name} := Node.Abstract_Kind;
+      Kind     : constant ${root_node_kind_name} :=
+         Unparsing_Implementation.Kind (Node);
       Unparser : Node_Unparser renames Node_Unparsers (Kind);
 
       Rewritten_Node : constant ${root_node_type_name} :=
         (if Preserve_Formatting
-         then Node.Abstract_Rewritten_Node
+         then Unparsing_Implementation.Rewritten_Node (Node)
          else null);
    begin
       case Unparser.Kind is
@@ -520,7 +637,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
             begin
                --  Add the single token that materialize Node itself
                Apply_Spacing_Rules (Result, Tok_Kind);
-               Append (Result, Tok_Kind, Node.Abstract_Text);
+               Append (Result, Tok_Kind, Text (Node));
 
                --  If Node comes from an original node, also append the trivia
                --  that comes after.
@@ -544,7 +661,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --------------------------
 
    procedure Unparse_Regular_Node
-     (Node           : access Abstract_Node_Type'Class;
+     (Node           : Abstract_Node;
       Unparser       : Regular_Node_Unparser;
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer)
@@ -567,7 +684,8 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          for I in 1 .. U.N loop
             declare
                F     : Field_Unparser renames U.Field_Unparsers (I);
-               Child : constant Abstract_Node := Node.Abstract_Child (I);
+               Child : constant Abstract_Node :=
+                  Unparsing_Implementation.Child (Node, I);
             begin
                --  First unparse tokens that appear unconditionally between
                --  fields.
@@ -608,20 +726,19 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -----------------------
 
    procedure Unparse_List_Node
-     (Node           : access Abstract_Node_Type'Class;
+     (Node           : Abstract_Node;
       Unparser       : List_Node_Unparser;
       Rewritten_Node : ${root_node_type_name};
       Result         : in out Unparsing_Buffer)
    is
       Preserve_Formatting : constant Boolean := Rewritten_Node /= null;
    begin
-      for I in 1 .. Node.Abstract_Children_Count loop
+      for I in 1 .. Children_Count (Node) loop
          --  For all elements but the first one, emit the separator. If
          --  possible, preserve original formatting for the corresponding
          --  separator in the original source.
          if I > 1 and then Unparser.Has_Separator then
-            if Preserve_Formatting
-               and then Rewritten_Node.Abstract_Children_Count >= I
+            if Preserve_Formatting and then Rewritten_Node.Children_Count >= I
             then
                declare
                   R_Child : constant ${root_node_type_name} :=
@@ -636,7 +753,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
             end if;
          end if;
 
-         Unparse_Node (Node.Abstract_Child (I), Preserve_Formatting, Result);
+         Unparse_Node (Child (Node, I), Preserve_Formatting, Result);
       end loop;
    end Unparse_List_Node;
 
