@@ -851,6 +851,16 @@ class Token(ctypes.Structure):
     def _wrap(self):
         return self if self._token_data else None
 
+    @staticmethod
+    def _check_token(value):
+        if not isinstance(value, Token):
+            raise TypeError('invalid token: {}'.format(value))
+
+    def _check_same_unit(self, other):
+        if self._token_data != other._token_data:
+            raise ValueError('{} and {} come from different analysis units'
+                             .format(self, other))
+
     @property
     def next(self):
         ${py_doc('langkit.token_next', 8)}
@@ -867,21 +877,26 @@ class Token(ctypes.Structure):
 
     def range_until(self, other):
         ${py_doc('langkit.token_range_until', 8)}
-        if other is not None and self._token_data != other._token_data:
-            raise ValueError('{} and {} come from different analysis'
-                             ' units'.format(self, other))
+        self._check_token(other)
+        self._check_same_unit(other)
 
-        if other < self:
-            return
+        # Keep the generator as a nested function so that the above checks are
+        # executed when the generator is created, instead of only when its
+        # first item is requested.
+        def generator():
+            if other < self:
+                return
 
-        yield self
-        current = self
-        while current < other:
-            current = current.next
-            yield current
+            yield self
+            current = self
+            while current < other:
+                current = current.next
+                yield current
+        return generator()
 
     def is_equivalent(self, other):
         ${py_doc('langkit.token_is_equivalent', 8)}
+        self._check_token(other)
         return bool(_token_is_equivalent(
             ctypes.byref(self), ctypes.byref(other))
         )
@@ -915,16 +930,12 @@ class Token(ctypes.Structure):
     @classmethod
     def text_range(cls, first, last):
         ${py_doc('langkit.token_range_text', 8)}
+        cls._check_token(first)
+        cls._check_token(last)
+        first._check_same_unit(last)
         result = _text()
-        if not _token_range_text(
-            ctypes.byref(first), ctypes.byref(last),
-            ctypes.byref(result)
-        ):
-            raise ValueError(
-               "{} and {} don't belong to the same analysis unit".format(
-                  first, last
-               )
-            )
+        assert _token_range_text(ctypes.byref(first), ctypes.byref(last),
+                                 ctypes.byref(result))
         return result._wrap() or u''
 
     @property
@@ -938,7 +949,7 @@ class Token(ctypes.Structure):
 
         Note that this does not actually compares the token data.
         """
-        return (other is not None
+        return (isinstance(other, Token)
                 and self._identity_tuple == other._identity_tuple)
 
     def __hash__(self):
@@ -956,14 +967,13 @@ class Token(ctypes.Structure):
         Consider that None comes before all tokens. Then, sort by unit, token
         index, and trivia index.
         """
+        # None always comes first
         if other is None:
             return False
-        if self._token_data != other._token_data:
-            raise ValueError('{} and {} come from different units'.format(
-                self, other
-            ))
-        return (other is not None
-                and self._identity_tuple < other._identity_tuple)
+
+        self._check_token(other)
+        self._check_same_unit(other)
+        return self._identity_tuple < other._identity_tuple
 
     def to_data(self):
         """
