@@ -1,5 +1,5 @@
 """
-Test that Tokens' "container primitives" (hash and < operators) properly work.
+Test token-related primitives.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -23,43 +23,97 @@ def parse(filename, content):
 
 
 ctx = libfoolang.AnalysisContext()
-u = parse('foo.txt', '(a (b c d))')
+u = parse('foo.txt', ' (a (b c d)) ')
 u2 = parse('bar.txt', '()')
-r = u.root
-tokens = sorted(r.tokens)
 
+tokens = []
+t = u.first_token
+while t is not None:
+    tokens.append(t)
+    t = t.next
+
+# Print all tokens, for output clarity
 print('Tokens:')
 for t in tokens:
     print('  ', t)
+print('')
 
-# Test both that Token.range_until properly works and that the equality
-# operator also works.
-other_tokens = list(r.token_start.range_until(r.token_end))
-assert tokens == other_tokens
+# Test Token's comparison operations
+assert tokens[0] != tokens[1]
+assert not (tokens[0] == tokens[1])
+assert tokens[0] == tokens[0]
 
-# This tests both the hash operation (sets are hash-based) and the ordering
-# operators (sorted).
-token_set = set(tokens) | set(other_tokens)
+assert tokens[0] < tokens[1]
+assert not (tokens[0] < tokens[0])
+assert not (tokens[1] < tokens[0])
+
+assert tokens[0] <= tokens[1]
+assert tokens[0] <= tokens[0]
+assert not (tokens[1] <= tokens[0])
+
+assert tokens[1] > tokens[0]
+assert not (tokens[0] > tokens[0])
+assert not (tokens[0] > tokens[1])
+
+assert tokens[1] >= tokens[0]
+assert tokens[0] >= tokens[0]
+assert not (tokens[0] >= tokens[1])
+
+# Test Token.range_until
+assert list(tokens[0].range_until(tokens[-1])) == tokens
+assert list(tokens[1].range_until(tokens[0])) == []
+assert list(tokens[1].range_until(tokens[1])) == tokens[1:2]
+assert list(tokens[1].range_until(tokens[2])) == tokens[1:3]
+
+# Test the hash operation (sets are hash-based) and the ordering operators
+# (sorted).
+token_set = set(tokens) | set(tokens[0].range_until(tokens[-1]))
 assert sorted(token_set) == tokens
 
+print('== Test Token.text_range ==')
+for t1, t2 in [(tokens[1], tokens[0]),
+               (tokens[0], tokens[0]),
+               (tokens[0], tokens[1]),
+               (tokens[1], tokens[4])]:
+    print('Token.text_range({}, {}):\n   {}'
+          .format(t1, t2, repr(libfoolang.Token.text_range(t1, t2))))
+print('')
 
-# Test that ordering operators don't work for tokens that come from different
-# units.
-try:
-    u.first_token < u2.first_token
-except ValueError as exc:
-    print('< on incompatible tokens raised ValueError: {}'.format(exc))
-else:
-    print('< on incompatible tokens raised no exception: FAIL')
+# Ordering operations and .range_until must raise an error when working on
+# tokens from different analysis units.
+print('== Test unit consistency checks ==')
+for func in [libfoolang.Token.__lt__,
+             libfoolang.Token.range_until]:
+    try:
+        func(u.first_token, u2.first_token)
+    except ValueError as exc:
+        print('{} raised ValueError:\n   {}'.format(func.__name__, exc))
+    else:
+        assert False
+print('')
 
+# Ordering operations and .range_until must raise an error when provided
+# non-token values.
+print('== Test type consistency checks ==')
+for func in [libfoolang.Token.__lt__,
+             libfoolang.Token.__le__,
+             libfoolang.Token.__gt__,
+             libfoolang.Token.__ge__,
+             libfoolang.Token.range_until,
+             libfoolang.Token.text_range]:
+    for v1, v2 in [(42, u.first_token),
+                   (u.first_token, 42)]:
+        try:
+            func(v1, v2)
+        except TypeError as exc:
+            print('{} raised {}:\n   {}'.format(
+                func.__name__, type(exc).__name__, exc))
+        else:
+            assert False
+print('')
 
-# ... but the equality operator should work in this case
-try:
-    u.first_token == u2.first_token
-except ValueError as exc:
-    print('== on incompatible tokens raised ValueError: {}'.format(exc))
-else:
-    print('== on incompatible tokens raised no exception')
-
+# Equality operations must handle them correctly however
+assert not (u.first_token == u2.first_token)
+assert u.first_token != u2.first_token
 
 print('main.py: Done.')

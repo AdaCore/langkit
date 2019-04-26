@@ -1,15 +1,61 @@
 main.py: Running...
 Tokens:
-   <Token Identifier u'a' at 1:2-1:3>
-   <Token Whitespace u' ' at 1:3-1:4>
-   <Token L_Par u'(' at 1:4-1:5>
-   <Token Identifier u'b' at 1:5-1:6>
-   <Token Whitespace u' ' at 1:6-1:7>
-   <Token Identifier u'c' at 1:7-1:8>
-   <Token Whitespace u' ' at 1:8-1:9>
-   <Token Identifier u'd' at 1:9-1:10>
-   <Token R_Par u')' at 1:10-1:11>
-< on incompatible tokens raised ValueError: <Token L_Par u'(' at 1:1-1:2> and <Token L_Par u'(' at 1:1-1:2> come from different units
-== on incompatible tokens raised no exception
+   <Token Whitespace u' ' at 1:1-1:2>
+   <Token L_Par u'(' at 1:2-1:3>
+   <Token Identifier u'a' at 1:3-1:4>
+   <Token Whitespace u' ' at 1:4-1:5>
+   <Token L_Par u'(' at 1:5-1:6>
+   <Token Identifier u'b' at 1:6-1:7>
+   <Token Whitespace u' ' at 1:7-1:8>
+   <Token Identifier u'c' at 1:8-1:9>
+   <Token Whitespace u' ' at 1:9-1:10>
+   <Token Identifier u'd' at 1:10-1:11>
+   <Token R_Par u')' at 1:11-1:12>
+   <Token R_Par u')' at 1:12-1:13>
+   <Token Whitespace u' ' at 1:13-1:14>
+   <Token Termination at 1:14-1:14>
+
+== Test Token.text_range ==
+Token.text_range(<Token L_Par u'(' at 1:2-1:3>, <Token Whitespace u' ' at 1:1-1:2>):
+   u''
+Token.text_range(<Token Whitespace u' ' at 1:1-1:2>, <Token Whitespace u' ' at 1:1-1:2>):
+   u' '
+Token.text_range(<Token Whitespace u' ' at 1:1-1:2>, <Token L_Par u'(' at 1:2-1:3>):
+   u' ('
+Token.text_range(<Token L_Par u'(' at 1:2-1:3>, <Token L_Par u'(' at 1:5-1:6>):
+   u'(a ('
+
+== Test unit consistency checks ==
+__lt__ raised ValueError:
+   <Token Whitespace u' ' at 1:1-1:2> and <Token L_Par u'(' at 1:1-1:2> come from different analysis units
+range_until raised ValueError:
+   <Token Whitespace u' ' at 1:1-1:2> and <Token L_Par u'(' at 1:1-1:2> come from different analysis units
+
+== Test type consistency checks ==
+__lt__ raised TypeError:
+   unbound method __lt__() must be called with Token instance as first argument (got int instance instead)
+__lt__ raised TypeError:
+   invalid token: 42
+__le__ raised TypeError:
+   unbound method __le__() must be called with Token instance as first argument (got int instance instead)
+__le__ raised TypeError:
+   invalid token: 42
+__gt__ raised TypeError:
+   unbound method __gt__() must be called with Token instance as first argument (got int instance instead)
+__gt__ raised TypeError:
+   invalid token: 42
+__ge__ raised TypeError:
+   unbound method __ge__() must be called with Token instance as first argument (got int instance instead)
+__ge__ raised TypeError:
+   invalid token: 42
+range_until raised TypeError:
+   unbound method range_until() must be called with Token instance as first argument (got int instance instead)
+range_until raised TypeError:
+   invalid token: 42
+text_range raised TypeError:
+   invalid token: 42
+text_range raised TypeError:
+   invalid token: 42
+
 main.py: Done.
 Done
