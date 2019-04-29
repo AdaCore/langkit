@@ -1835,9 +1835,7 @@ package body ${ada_lib_name}.Implementation is
       % if not rebindable_nodes:
          return True;
       % else:
-         <% type_sum = ' | '.join("{}_Type'Class".format(n.name)
-                                  for n in rebindable_nodes) %>
-         return Node.all in ${type_sum};
+         return Node.Kind in ${ctx.astnode_kind_set(rebindable_nodes)};
       % endif
    end Is_Rebindable;
 
