@@ -105,7 +105,8 @@
                   % else:
                      declare
                         N : constant ${cf.struct.name} :=
-                           ${cf.struct.name} (Node);
+                           ${cf.struct.internal_conversion(field.struct,
+                                                           'Node')};
                      begin
                         ${return_value('N')}
                      end;
