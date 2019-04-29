@@ -175,9 +175,9 @@
                        .format(bare_type, field.name)) %>
 
       % if field.type.is_bool_node:
-         function ${field.name} (Node : ${type_name}'Class) return Boolean
-         is (${field_expr}.all in
-                ${field.type.alternatives[0].type.name}_Type'Class);
+         function ${field.name} (Node : ${type_name}'Class) return Boolean is
+           (${field_expr}.Kind
+            = ${field.type.alternatives[0].type.ada_kind_name});
 
       % elif field.type.is_enum_node:
          function ${field.name}
