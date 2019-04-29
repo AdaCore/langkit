@@ -1998,9 +1998,9 @@ class StructType(BaseStructType):
             # The env metadata struct is emitted separately from the others
             T.env_md,
 
-            # Entitiy info and the root node's entity type is not emitted per
-            # se, because it is a generic instantiation from
-            # Langkit_Support.Lexical_Env.
+            # Entity info and the root node's entity type are not emitted as
+            # regular types, because they come from the generic instantiation
+            # of Langkit_Support.Lexical_Env.
             CompiledTypeRepo.root_grammar_class.entity_info(),
             CompiledTypeRepo.root_grammar_class.entity,
         )
