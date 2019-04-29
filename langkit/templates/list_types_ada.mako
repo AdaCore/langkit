@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+
 ## This file provides templates for the code generation of root AST list types.
 ## Derived AST list types are handled directly in astnode_types_ada.mako, as
 ## their definition is much more like the ones of regular AST nodes.
@@ -12,6 +14,8 @@
    type ${list_type.name} is access all ${list_type.value_type_name()}'Class;
 
    ${list_type.null_constant} : constant ${list_type.name} := null;
+
+   ${astnode_types.bare_node_converters(list_type)}
 </%def>
 
 <%def name="private_decl(element_type)">

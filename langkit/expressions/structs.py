@@ -64,8 +64,40 @@ class Cast(AbstractExpression):
             return '<Cast.Expr {}>'.format(self.static_type.name.camel)
 
         @property
-        def is_downcast(self):
-            return self.expr.type.matches(self.static_type)
+        def dest_node(self):
+            """
+            Return the node type (not entity) that is the result of the cast
+            expression.
+            """
+            return (self.type.element_type
+                    if self.type.is_entity_type else self.type)
+
+        @property
+        def input_node(self):
+            """
+            Return the node type (not entity) that is the input of the cast
+            expression.
+            """
+            return (self.expr.type.element_type
+                    if self.expr.type.is_entity_type else self.expr.type)
+
+        @property
+        def check_needed(self):
+            """
+            Return whether we must generate a dynamic check on the kind of the
+            input expression before doing the cast.
+
+            :rtype: bool
+            """
+            # If asked to do an unsafe conversion, then by definition we must
+            # not generate a check.
+            if self.unsafe:
+                return False
+
+            # Don't generate a dynamic check if we know statically that there
+            # is no failure possible (this is an upcast, or a downcast when
+            # there is only one subclass, etc.).
+            return self.input_node not in TypeSet({self.dest_node})
 
     def __init__(self, node, dest_type, do_raise=False):
         """

@@ -1,17 +1,20 @@
 ## vim: filetype=makoada
 
 <%
-is_entity = expr.static_type.is_entity_type
-ast_node = expr.static_type.element_type if is_entity else expr.static_type
+is_entity = expr.type.is_entity_type
 %>
 
 <%def name="generate_cast(operand_expr)">
    % if is_entity:
       ${expr.result_var.name} := ${expr.type.constructor_name}
-        (Node => ${ast_node.name} (${operand_expr}.Node),
+        (Node => ${expr.dest_node.internal_conversion(
+                      expr.input_node,
+                      '{}.Node'.format(operand_expr))},
          Info => ${operand_expr}.Info);
    % else:
-      ${expr.result_var.name} := ${ast_node.name} (${operand_expr});
+      ${expr.result_var.name} := ${expr.dest_node.internal_conversion(
+                                      expr.input_node,
+                                      operand_expr)};
    % endif
 </%def>
 
@@ -22,16 +25,11 @@ ${expr.expr.render_pre()}
    node_expr = operand_expr + ('.Node' if is_entity else '')
 %>
 
-% if expr.is_downcast or expr.unsafe:
-   ## If we know statically that this is a downcast, or if asked to do an
-   ## unsafe conversion, then no need to generate checking code.
-   ${generate_cast(operand_expr)}
-
-% else:
+% if expr.check_needed:
    ## Before actually downcasting an access to an AST node, add a type
    ## check so that we raise a Property_Error if it's wrong.
    if ${node_expr} = null
-      or else ${node_expr}.all in ${ast_node.value_type_name()}'Class
+      or else ${node_expr}.Kind in ${expr.dest_node.ada_kind_range_name}
    then
       ${generate_cast(operand_expr)}
    else
@@ -41,4 +39,7 @@ ${expr.expr.render_pre()}
          ${expr.result_var.name} := ${expr.static_type.nullexpr};
       % endif
    end if;
+
+% else:
+   ${generate_cast(operand_expr)}
 % endif

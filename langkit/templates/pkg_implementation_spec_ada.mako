@@ -13,6 +13,7 @@ with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
+with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with System;

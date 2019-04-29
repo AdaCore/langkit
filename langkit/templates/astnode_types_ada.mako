@@ -3,11 +3,23 @@
 <%namespace name="exts"         file="extensions.mako" />
 <%namespace name="prop_helpers" file="properties/helpers.mako" />
 
+
+<%def name="bare_node_converters(cls)">
+   function ${cls.internal_converter(T.root_node)} is
+      new Ada.Unchecked_Conversion (${root_node_type_name}, ${cls.name});
+   function ${T.root_node.internal_converter(cls)} is
+      new Ada.Unchecked_Conversion (${cls.name}, ${root_node_type_name});
+</%def>
+
 <%def name="public_incomplete_decl(cls)">
    type ${cls.value_type_name()};
    type ${cls.name} is access all ${cls.value_type_name()}'Class;
 
    ${cls.null_constant} : constant ${cls.name} := null;
+
+   % if not cls.is_root_node:
+      ${bare_node_converters(cls)}
+   % endif
 </%def>
 
 <%def name="logic_helpers()">

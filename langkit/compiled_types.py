@@ -3055,6 +3055,39 @@ class ASTNodeType(BaseStructType):
         return ('{type} ({name}.Internal.Node)'
                 .format(type=self.name, name=public_expr))
 
+    def internal_converter(self, from_type):
+        """
+        Return the name of the converter from bare nodes of type `from_type` to
+        bare nodes of type `self`.
+
+        :rtype: str
+        """
+        return 'Convert_{}_To_{}'.format(from_type.kwless_raw_name,
+                                         self.kwless_raw_name)
+
+    def internal_conversion(self, expr_type, expr):
+        """
+        Ada code generation helper to convert bare nodes.
+
+        :param ASTNodeType|EntityType expr_type: Static type for `expr`'s
+            result. For convenience, entity types are accepted and interpreted
+            as the bare node they wrap.
+        :param str expr: Expression that returns a bare node.
+        :return str: Expression that returns a node whose `self` is the type.
+        """
+        if expr_type.is_entity_type:
+            expr_type = expr_type.element_type
+
+        root_node_expr = (
+            expr
+            if expr_type.is_root_node else
+            '{} ({})'.format(T.root_node.internal_converter(expr_type), expr))
+
+        return (root_node_expr
+                if self.is_root_node else
+                '{} ({})'.format(self.internal_converter(T.root_node),
+                                 root_node_expr))
+
 
 # We tag the ASTNodeType class as abstract here, because of the circular
 # dependency between the @abstract decorator and the ASTNodeType class, which
