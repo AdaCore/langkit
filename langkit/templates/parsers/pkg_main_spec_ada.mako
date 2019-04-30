@@ -39,7 +39,7 @@ private package ${ada_lib_name}.Parsers is
       end case;
    end record;
 
-   type Parsed_Node is access all Implementation.${root_node_value_type}'Class;
+   type Parsed_Node is access all Implementation.${root_node_value_type};
 
    type Parser_Private_Part is private;
 
