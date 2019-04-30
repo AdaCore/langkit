@@ -2590,6 +2590,8 @@ class CompileCtx(object):
                 check_source_language(False, message,
                                       severity=Severity.non_blocking_error)
 
+    TypeSet = utils.TypeSet
+
     astnode_kind_set = utils.astnode_kind_set
 
     collapse_concrete_nodes = staticmethod(

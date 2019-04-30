@@ -634,12 +634,32 @@ package body ${ada_lib_name}.Analysis is
          end if;
 
          Check_Safety_Net (Node.Safety_Net);
-         if N.all in ${e.element_type.value_type_name()}'Class then
+
+         <%def name="emit_return()">
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
-         else
+         </%def>
+         <%def name="emit_error()">
             raise Constraint_Error with "Invalid type conversion";
-         end if;
+         </%def>
+
+         % if ctx.TypeSet({e.element_type}) == ctx.TypeSet({T.root_node}):
+            ## Avoid tautological kind checks (is this a subclass of the root
+            ## node? obviously yes).
+            ${emit_return()}
+
+         % elif not e.element_type.concrete_subclasses:
+            ## If there are no concrete subclasses, then no kind can possibly
+            ## match this conversion.
+            ${emit_error()}
+
+         % else:
+            if N.Kind in ${e.element_type.ada_kind_range_name} then
+               ${emit_return()}
+            else
+               ${emit_error()}
+            end if;
+         % endif
       end;
    % endfor
 
