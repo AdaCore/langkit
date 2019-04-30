@@ -24,26 +24,28 @@ if ${subparser.pos_var} = No_Token_Index then
       % else:
          ${parser.res_var} := ${base.name}
            (${alt_false.name}_Alloc.Alloc (Parser.Mem_Pool));
-         ${parser.res_var}.Kind := ${alt_false.ada_kind_name};
-         ${parser.res_var}.Unit := Parser.Unit;
-         ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
-         ${parser.res_var}.Token_End_Index := No_Token_Index;
-         ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
+         Initialize
+           (Self              => ${parser.res_var},
+            Kind              => ${alt_false.ada_kind_name},
+            Unit              => Parser.Unit,
+            Token_Start_Index => ${parser.start_pos},
+            Token_End_Index   => No_Token_Index);
       % endif
     % elif parser_type and parser_type.is_list_type:
         ${subparser.res_var} :=
           (${parser_type.storage_type_name}_Alloc.Alloc (Parser.Mem_Pool));
-        ${parser.res_var}.Kind := ${parser_type.ada_kind_name};
-        ${subparser.res_var}.Unit := Parser.Unit;
-        ${subparser.res_var}.Count := 0;
-        ${subparser.res_var}.Nodes :=
-           Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, 0);
-        ${subparser.res_var}.Token_Start_Index := ${parser.start_pos} - 1;
-        ${subparser.res_var}.Token_End_Index := No_Token_Index;
-        ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
+         Initialize
+           (Self              => ${parser.res_var},
+            Kind              => ${parser_type.ada_kind_name},
+            Unit              => Parser.Unit,
+            Token_Start_Index => ${parser.start_pos} - 1,
+            Token_End_Index   => No_Token_Index);
+         Initialize_List
+           (Self   => ${subparser.res_var},
+            Parser => Parser,
+            Count  => 0);
     % elif parser_type:
-        ${subparser.res_var} :=
-           ${parser_type.storage_nullexpr};
+        ${subparser.res_var} := ${parser_type.storage_nullexpr};
     % endif
 
     % if parser._is_error:
@@ -66,11 +68,12 @@ else
    % else:
       ${parser.res_var} := ${base.name}
         (${alt_true.name}_Alloc.Alloc (Parser.Mem_Pool));
-      ${parser.res_var}.Kind := ${alt_true.ada_kind_name};
-      ${parser.res_var}.Unit := Parser.Unit;
-      ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
-      ${parser.res_var}.Token_End_Index := ${subparser.pos_var} - 1;
-      ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
+      Initialize
+        (Self              => ${parser.res_var},
+         Kind              => ${alt_true.ada_kind_name},
+         Unit              => Parser.Unit,
+         Token_Start_Index => ${parser.start_pos},
+         Token_End_Index   => ${subparser.pos_var} - 1);
    % endif
 % endif
 

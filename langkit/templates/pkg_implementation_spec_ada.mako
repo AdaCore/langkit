@@ -562,14 +562,14 @@ private package ${ada_lib_name}.Implementation is
    -------------------------------
 
    type ${root_node_value_type} is tagged record
-      Parent : ${root_node_type_name} := null;
+      Parent : ${root_node_type_name};
       --  Reference to the parent node, or null if this is the root one
 
-      Unit : Internal_Unit := No_Analysis_Unit;
+      Unit : Internal_Unit;
       --  Reference to the analysis unit that owns this node
 
-      Token_Start_Index : Token_Index  := No_Token_Index;
-      Token_End_Index   : Token_Index  := No_Token_Index;
+      Token_Start_Index : Token_Index;
+      Token_End_Index   : Token_Index;
       --  Reference to the start and end token that constitutes this node. If
       --  this node is a ghost, Token_Start_Index is the token that this AST
       --  node relates to and Token_End_Index is No_Token_Index. Otherwise,
@@ -584,10 +584,20 @@ private package ${ada_lib_name}.Implementation is
 
       ${astnode_types.node_fields(T.root_node, emit_null=False)}
 
-      Last_Attempted_Child : Integer := -1;
+      Last_Attempted_Child : Integer;
       --  0-based index for the last child we tried to parse for this node. -1
       --  if parsing for all children was successful.
    end record;
+
+   procedure Initialize
+     (Self              : access ${root_node_value_type}'Class;
+      Kind              : ${root_node_kind_name};
+      Unit              : Internal_Unit;
+      Token_Start_Index : Token_Index;
+      Token_End_Index   : Token_Index;
+      Parent            : ${root_node_type_name} := null;
+      Self_Env          : Lexical_Env := AST_Envs.Empty_Env);
+   --  Helper for parsers, to initialize a freshly allocated node
 
    function Pre_Env_Actions
      (Self                : access ${root_node_value_type}'Class;

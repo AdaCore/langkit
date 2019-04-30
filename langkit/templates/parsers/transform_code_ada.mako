@@ -18,24 +18,27 @@ if ${parser.pos_var} /= No_Token_Index then
    ## Create the transform wrapper node
    ${parser.res_var} := ${parser.type.name}
      (${parser.type.name}_Alloc.Alloc (Parser.Mem_Pool));
-   ${parser.res_var}.Kind := ${parser.type.ada_kind_name};
 
-   ## Compute and set the sloc range for this AST node. Reminders:
-   ##   * start_pos the name for the position of the lexer before this parser
-   ##     runs.
-   ##   * parser.pos_var is the name for the position of the lexer
-   ##     after this parser runs.
-   ## If they are equal then we know that this parser consumed no token. As a
-   ## result, the result must be a ghost node, i.e. with no token_end.
+   ## Initialize components common to all nodes
+   Initialize
+     (Self => ${parser.res_var},
+      Kind => ${parser.type.ada_kind_name},
+      Unit => Parser.Unit,
 
-   ${parser.res_var}.Unit := Parser.Unit;
-   ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
-   ${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
+      ## Compute and set the sloc range for this AST node. Reminders:
+      ##   * start_pos the name for the position of the lexer before this
+      ##     parser runs.
+      ##   * parser.pos_var is the name for the position of the lexer
+      ##     after this parser runs.
+      ## If they are equal then we know that this parser consumed no token.
+      ## As a result, the result must be a ghost node, i.e. with no
+      ## token_end.
+      Token_Start_Index => ${parser.start_pos},
+      Token_End_Index   => (if ${parser.pos_var} = ${parser.start_pos}
+                            then No_Token_Index
+                            else ${parser.pos_var} - 1));
 
-   ${parser.res_var}.Token_End_Index :=
-     (if ${parser.pos_var} = ${parser.start_pos}
-      then No_Token_Index
-      else ${parser.pos_var} - 1);
+   ## Initialize components for node fields
    <% fields_n_args = zip(
          parser.type.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null),
@@ -53,18 +56,19 @@ if ${parser.pos_var} /= No_Token_Index then
       end if;
    % endfor
 
+   ## Propagate parsing errors
    % if parser.no_backtrack:
    if ${parser.has_failed_var} then
-      ${parser.res_var}.Last_Attempted_Child :=
-        ${parser.parser.progress_var if is_row(parser.parser) else 1};
+      ${T.root_node.internal_conversion(parser.type, parser.res_var)}
+         .Last_Attempted_Child :=
+         ${parser.parser.progress_var if is_row(parser.parser) else 1};
 
-        Append (Parser.Diagnostics,
-                Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
-                To_Text ("Cannot parse <${parser.name}>"));
+      Append (Parser.Diagnostics,
+              Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
+              To_Text ("Cannot parse <${parser.name}>"));
 
-        Add_Last_Fail_Diagnostic (Parser);
+      Add_Last_Fail_Diagnostic (Parser);
    end if;
-
    % endif
 
 end if;
