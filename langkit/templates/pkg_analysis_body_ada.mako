@@ -569,7 +569,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Is_Token_Node;
+      return Is_Token_Node (Node.Internal.Node);
    end Is_Token_Node;
 
    ---------
@@ -591,7 +591,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Short_Text_Image;
+      return Short_Text_Image (Node.Internal.Node);
    end Short_Text_Image;
 
    -----------------
@@ -696,7 +696,7 @@ package body ${ada_lib_name}.Analysis is
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Kind_Name;
+      return Kind_Name (Node.Internal.Node);
    end Kind_Name;
 
    % for array_type in ctx.array_types:
@@ -785,7 +785,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Children_Count;
+      return Children_Count (Node.Internal.Node);
    end Children_Count;
 
    -----------------------
@@ -796,7 +796,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.First_Child_Index;
+      return First_Child_Index (Node.Internal.Node);
    end First_Child_Index;
 
    ----------------------
@@ -807,7 +807,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Last_Child_Index;
+      return Last_Child_Index (Node.Internal.Node);
    end Last_Child_Index;
 
    ---------------
@@ -823,7 +823,7 @@ package body ${ada_lib_name}.Analysis is
       N : ${root_node_type_name};
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Node.Internal.Node.Get_Child (Index, Index_In_Bounds, N);
+      Get_Child (Node.Internal.Node, Index, Index_In_Bounds, N);
       Result := Wrap_Node (N, Node.Internal.Info);
    end Get_Child;
 
@@ -837,7 +837,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Wrap_Node (Node.Internal.Node.Child (Index), Node.Internal.Info);
+      return Wrap_Node (Child (Node.Internal.Node, Index), Node.Internal.Info);
    end Child;
 
    ----------------
@@ -848,7 +848,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Source_Location_Range is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Sloc_Range;
+      return Sloc_Range (Node.Internal.Node);
    end Sloc_Range;
 
    -------------
@@ -860,7 +860,7 @@ package body ${ada_lib_name}.Analysis is
       Sloc : Source_Location) return Relative_Position is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Compare (Sloc);
+      return Compare (Node.Internal.Node, Sloc);
    end Compare;
 
    ------------
@@ -872,7 +872,7 @@ package body ${ada_lib_name}.Analysis is
       Sloc : Source_Location) return ${root_entity.api_name} is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Wrap_Node (Node.Internal.Node.Lookup (Sloc));
+      return Wrap_Node (Lookup (Node.Internal.Node, Sloc));
    end Lookup;
 
    ----------
@@ -916,7 +916,7 @@ package body ${ada_lib_name}.Analysis is
       Line_Prefix : String := "") is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Node.Internal.Node.Print (Show_Slocs, Line_Prefix);
+      Print (Node.Internal.Node, Show_Slocs, Line_Prefix);
    end Print;
 
    ---------------
@@ -927,7 +927,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class; Line_Prefix : String := "") is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Node.Internal.Node.PP_Trivia (Line_Prefix);
+      PP_Trivia (Node.Internal.Node, Line_Prefix);
    end PP_Trivia;
 
    --------------
@@ -957,7 +957,7 @@ package body ${ada_lib_name}.Analysis is
 
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Traverse (Wrapper'Access);
+      return Traverse (Node.Internal.Node, Wrapper'Access);
    end Traverse;
 
    --------------
@@ -983,7 +983,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Node.Internal.Node.Child_Index;
+      return Child_Index (Node.Internal.Node);
    end Child_Index;
 
    --------------------------------
