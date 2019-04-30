@@ -45,6 +45,13 @@ package body ${ada_lib_name}.Parsers is
    pragma Warnings (On, "is not referenced");
    pragma Warnings (On, "possible aliasing problem for type");
 
+   procedure Initialize_List
+     (Self   : access ${generic_list_value_type}'Class;
+      Parser : Parser_Type;
+      Count  : Natural);
+   --  Helper for parsers, to initialize the list of children in a freshly
+   --  allocated list node.
+
    type Dontskip_Parser_Function is access function
      (Parser : in out Parser_Type;
       Pos    : Token_Index)
@@ -97,6 +104,19 @@ package body ${ada_lib_name}.Parsers is
      (Parser : Parser_Type; List : in out Free_Parse_List);
    --  Release a parse list, putting it in Parsers' free list. Set List to
    --  null.
+
+   ---------------------
+   -- Initialize_List --
+   ---------------------
+
+   procedure Initialize_List
+     (Self   : access ${generic_list_value_type}'Class;
+      Parser : Parser_Type;
+      Count  : Natural) is
+   begin
+      Self.Count := Count;
+      Self.Nodes := Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, 0);
+   end Initialize_List;
 
    -----------------
    -- Init_Parser --

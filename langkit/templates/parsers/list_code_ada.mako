@@ -44,39 +44,49 @@ end loop;
 
 ## Create the result of this parser: an AST list node, and copy the elements
 ## from our temporary parse list to the result.
-${parser.res_var} := ${list_type.name}_Alloc.Alloc (Parser.Mem_Pool);
-${parser.res_var}.Kind := ${list_type.ada_kind_name};
-${parser.res_var}.Unit := Parser.Unit;
-${parser.res_var}.Count := ${parser.tmplist}.Nodes.Length;
-${parser.res_var}.Self_Env := AST_Envs.Empty_Env;
-
 declare
-   Vec : ${T.root_node.array.pkg_vector}.Vector renames
-      ${parser.tmplist}.Nodes;
-   Arr : Alloc_AST_List_Array.Element_Array_Access renames
-      ${parser.res_var}.Nodes;
+   Token_Start, Token_End : Token_Index;
+   Count                  : constant Natural := ${parser.tmplist}.Nodes.Length;
 begin
-   Arr := Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, Vec.Length);
-   for I in Vec.First_Index .. Vec.Last_Index loop
-      Arr (I) := Vec.Get (I);
-   end loop;
+   ${parser.res_var} := ${list_type.name}_Alloc.Alloc (Parser.Mem_Pool);
+
+   ## Depending on whether we have an empty list, initialize token start/end
+   ## information.
+   if Count > 0 then
+      Token_Start := ${parser.start_pos};
+      Token_End := (if ${parser.cpos} = ${parser.start_pos}
+                    then ${parser.start_pos}
+                    else ${parser.cpos} - 1);
+
+   else
+      Token_Start := Token_Index'Max (${parser.start_pos}, 1);
+      Token_End := No_Token_Index;
+   end if;
+
+   Initialize
+     (Self              => ${parser.res_var},
+      Kind              => ${list_type.ada_kind_name},
+      Unit              => Parser.Unit,
+      Token_Start_Index => Token_Start,
+      Token_End_Index   => Token_End);
+   Initialize_List
+     (Self   => ${parser.res_var},
+      Parser => Parser,
+      Count  => Count);
+
+   declare
+      Vec : ${T.root_node.array.pkg_vector}.Vector renames
+         ${parser.tmplist}.Nodes;
+      Arr : Alloc_AST_List_Array.Element_Array_Access renames
+         ${parser.res_var}.Nodes;
+   begin
+      Arr := Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, Vec.Length);
+      for I in Vec.First_Index .. Vec.Last_Index loop
+         Arr (I) := Vec.Get (I);
+      end loop;
+   end;
 end;
 
-## Depending on whether we have an empty list, initialize token start/end
-## information.
-if ${parser.res_var}.Count > 0 then
-   ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
-   ${parser.res_var}.Token_End_Index :=
-     (if ${parser.cpos} = ${parser.start_pos}
-      then ${parser.start_pos} else ${parser.cpos} - 1);
-
-else
-   ${parser.res_var}.Token_Start_Index :=
-      Token_Index'Max (${parser.start_pos}, 1);
-   ${parser.res_var}.Token_End_Index := No_Token_Index;
-end if;
-
 Release_Parse_List (Parser, ${parser.tmplist});
-
 
 --  End list_code

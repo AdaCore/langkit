@@ -1212,6 +1212,30 @@ package body ${ada_lib_name}.Implementation is
       Env := null;
    end Destroy;
 
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize
+     (Self              : access ${root_node_value_type}'Class;
+      Kind              : ${root_node_kind_name};
+      Unit              : Internal_Unit;
+      Token_Start_Index : Token_Index;
+      Token_End_Index   : Token_Index;
+      Parent            : ${root_node_type_name} := null;
+      Self_Env          : Lexical_Env := AST_Envs.Empty_Env) is
+   begin
+      Self.Parent := Parent;
+      Self.Kind := Kind;
+      Self.Unit := Unit;
+
+      Self.Token_Start_Index := Token_Start_Index;
+      Self.Token_End_Index := Token_End_Index;
+
+      Self.Self_Env := Self_Env;
+      Self.Last_Attempted_Child := -1;
+   end Initialize;
+
    ---------------------
    -- Pre_Env_Actions --
    ---------------------
