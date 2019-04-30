@@ -156,12 +156,21 @@ class TypeSet(object):
         for parent in reversed(parents):
             if not parent.abstract or parent in self.matched_types:
                 break
-            subclasses = set(parent.subclasses)
+
+            subclasses = set(parent.concrete_subclasses)
             if not subclasses.issubset(self.matched_types):
                 break
-            # If we reach this point, all parent's subclasses are matched,
-            # so we can state that parent itself is always matched.
+
+            # If we reach this point, all parent's concrete subclasses are
+            # matched, so we can state that parent itself is always matched.
             self.matched_types.add(parent)
+
+            # Also include subclasses: we may add abstract subclasses which
+            # have no concrete subclasses themselves. Typically: the generic
+            # list type (which is abstract) while there is no list in the
+            # grammar.
+            for s in parent.subclasses:
+                self.include(s)
 
         return False
 
