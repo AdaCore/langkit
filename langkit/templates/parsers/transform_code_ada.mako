@@ -39,19 +39,14 @@ if ${parser.pos_var} /= No_Token_Index then
                             else ${parser.pos_var} - 1));
 
    ## Initialize components for node fields
-   <% fields_n_args = zip(
-         parser.type.get_parse_fields(
-            predicate=lambda f: not f.abstract and not f.null),
-         args) %>
-
-   % for i, (field, arg) in enumerate(fields_n_args):
+   % for field, subparser, subresult in args:
       ## Set children fields into the created node
       ${parser.res_var}.${field.name} :=
-         ${field.type.storage_type_name} (${arg});
+         ${field.type.storage_type_name} (${subresult});
 
-      if ${arg} /= null and then ${arg}.Is_Incomplete then
+      if ${subresult} /= null and then ${subresult}.Is_Incomplete then
          ${parser.res_var}.Last_Attempted_Child := 0;
-      elsif ${arg} /= null and then not ${arg}.Is_Ghost then
+      elsif ${subresult} /= null and then not ${subresult}.Is_Ghost then
          ${parser.res_var}.Last_Attempted_Child := -1;
       end if;
    % endfor
