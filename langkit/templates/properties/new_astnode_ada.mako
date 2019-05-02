@@ -20,7 +20,8 @@ Initialize
    Self_Env => Self.Self_Env);
 Register_Destroyable (Self.Unit, ${root_node_type_name} (${result}));
 
-% for name, fld_expr in expr._iter_ordered():
-   ${result}.${name} :=
-      ${fld_expr.type.convert_to_storage_expr(result, fld_expr.render_expr())};
+% for field, field_expr in expr._iter_ordered():
+   ${result}.${field.name} :=
+      ${field_expr.type.convert_to_storage_expr(result,
+                                                field_expr.render_expr())};
 % endfor
