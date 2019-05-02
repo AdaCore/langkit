@@ -45,7 +45,10 @@
          ## Call the property
          <%
             actuals = [
-               '{} ({}.Internal.Node)'.format(property.struct.name, self_arg)
+               property.struct.internal_conversion(
+                  T.root_node,
+                  '{} ({}.Internal.Node)'.format(T.root_node.name, self_arg)
+               )
             ] + ['Internal_Arg_{}'.format(arg.name)
                  for arg in property.arguments]
             if property.uses_entity_info:
