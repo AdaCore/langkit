@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (BuiltinField, Field, UserField,
-                                    get_context, resolve_type)
+from langkit.compiled_types import (AbstractNodeData, BuiltinField, Field,
+                                    UserField, get_context, resolve_type)
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -227,13 +227,27 @@ class New(AbstractExpression):
                      abstract_expr=None):
             """
             :type struct_type: CompiledType
-            :type assocs: {names.Name: ResolvedExpression}
+            :type assocs: {names.Name|langkit.compiled_types.AbstractNodeData:
+                           ResolvedExpression}
             :type result_var_name: str|None
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
             self.static_type = struct_type
-            self.assocs = assocs
+
+            # Convert names in `assocs` to the corresponding field in
+            # struct_type. This lets callers use either names or fields,
+            # depending on what's the most convenient for them.
+
+            def field_or_lookup(field):
+                if isinstance(field, names.Name):
+                    fields = struct_type.get_abstract_node_data_dict()
+                    return fields[field.lower]
+                assert isinstance(field, AbstractNodeData)
+                return field
+
+            self.assocs = {field_or_lookup(field): expr
+                           for field, expr in assocs.items()}
 
             super(New.StructExpr, self).__init__(
                 result_var_name or 'New_Struct',
@@ -241,7 +255,9 @@ class New(AbstractExpression):
             )
 
         def _iter_ordered(self):
-            return ((k, self.assocs[k]) for k in sorted(self.assocs))
+            return sorted(
+                [(field, expr) for field, expr in self.assocs.items()],
+                key=lambda (field, _): field.name)
 
         def _render_fields(self):
             """
@@ -250,23 +266,23 @@ class New(AbstractExpression):
 
             :rtype: str
             """
-            fields = list(self._iter_ordered())
+            assocs = list(self._iter_ordered())
 
             return '\n'.join(
                 # Evaluate expressions for all operands
-                [expr.render_pre() for _, expr in fields]
+                [expr.render_pre() for _, expr in assocs]
 
                 # Only then, create ownership shares for the returned record
                 + ['Inc_Ref ({});'.format(expr.render_expr())
-                   for _, expr in fields
+                   for _, expr in assocs
                    if expr.type.is_refcounted]
             )
 
         def _render_pre(self):
             record_expr = '({})'.format(', '.join(
-                '{} => {}'.format(name.camel_with_underscores,
+                '{} => {}'.format(field.name.camel_with_underscores,
                                   expr.render_expr())
-                for name, expr in self._iter_ordered()
+                for field, expr in self._iter_ordered()
             ))
 
             return '{}\n{}'.format(
@@ -280,7 +296,8 @@ class New(AbstractExpression):
 
         @property
         def subexprs(self):
-            result = {k.lower: v for k, v in self.assocs.items()}
+            result = {field.name.lower: expr
+                      for field, expr in self.assocs.items()}
             result['_type'] = self.static_type.dsl_name
             return result
 
@@ -383,7 +400,7 @@ class New(AbstractExpression):
 
         # At this stage, we know that the user has only provided fields that
         # are valid for the struct type.
-        provided_fields = {required_fields[name].name: construct(
+        provided_fields = {required_fields[name]: construct(
             value, required_fields[name].type,
             'Wrong type for field {}: expected {{expected}}, '
             'got {{expr_type}}'.format(name)
