@@ -94,9 +94,14 @@
                      base_expr='{}.{}'.format(node_expr, field.name)
          )};
       </%def>
+
+      % if field.abstract:
+         Kind : constant ${field.struct.ada_kind_range_name} :=
+            ${T.root_node.internal_conversion(field.struct, 'Node')}.Kind;
+      % endif
    begin
       % if field.abstract:
-         case ${field.struct.ada_kind_name} (Node.Kind) is
+         case Kind is
             % for cf in field.concrete_fields:
                when ${' | '.join(n.ada_kind_name
                                  for n in cf.struct.concrete_subclasses)} =>
@@ -146,13 +151,14 @@
    <%
       type_name = field.struct.entity.api_name
       ret_type = field.type.entity if field.type.is_ast_node else field.type
-      bare_type = field.struct.name
+      bare_type = field.struct
    %>
 
    function ${field.name}
      (Node : ${type_name}'Class) return ${ret_type.api_name}
    is
-      Self   : constant ${bare_type} := ${bare_type} (Node.Internal.Node);
+      Self   : constant ${bare_type.name} := ${bare_type.internal_conversion(
+         T.root_node, 'Node.Internal.Node')};
       Result : constant ${field.type.name} := ${(
           field.type.extract_from_storage_expr(
               node_expr='Self',
@@ -162,7 +168,8 @@
    begin
       Check_Safety_Net (Node.Safety_Net);
       % if field.type.is_ast_node:
-         return (Internal   => (${root_node_type_name} (Result),
+         return (Internal   => (${T.root_node.internal_conversion(
+                                     field.type, 'Result')},
                                 Node.Internal.Info),
                  Safety_Net => Node.Safety_Net);
       % else:
@@ -171,18 +178,23 @@
    end ${field.name};
 
    % if field.type.is_ast_node:
-      <% field_expr = ('{} (Node.Internal.Node).{}'
-                       .format(bare_type, field.name)) %>
+      <%
+         node_expr = field.struct.internal_conversion(
+            T.root_node, 'Node.Internal.Node')
+         field_expr = '{}.{}'.format(node_expr, field.name)
+         root_field_expr = T.root_node.internal_conversion(field.type,
+                                                           field_expr)
+      %>
 
       % if field.type.is_bool_node:
          function ${field.name} (Node : ${type_name}'Class) return Boolean is
-           (${field_expr}.Kind
+           (${root_field_expr}.Kind
             = ${field.type.alternatives[0].type.ada_kind_name});
 
       % elif field.type.is_enum_node:
          function ${field.name}
            (Node : ${type_name}'Class) return ${field.type.ada_kind_name}
-         is (${field_expr}.Kind);
+         is (${root_field_expr}.Kind);
       % endif
    % endif
 </%def>
@@ -552,7 +564,8 @@
          ## Re-use the parent node's fields initializer, if any
          % if parent_fields:
             Initialize_Fields_For_${cls.base.kwless_raw_name}
-              (Self, ${', '.join(str(f.name) for f in parent_fields)});
+              (${cls.base.internal_conversion(cls, 'Self')},
+               ${', '.join(str(f.name) for f in parent_fields)});
          % endif
 
          ## Then initialize fields unique to this node
