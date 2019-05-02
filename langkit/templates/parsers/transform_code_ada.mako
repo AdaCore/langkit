@@ -21,7 +21,8 @@ if ${parser.pos_var} /= No_Token_Index then
 
    ## Initialize components common to all nodes
    Initialize
-     (Self => ${parser.res_var},
+     (Self => ${T.root_node.internal_conversion(parser.type,
+                                                parser.res_var)},
       Kind => ${parser.type.ada_kind_name},
       Unit => Parser.Unit,
 
@@ -50,13 +51,24 @@ if ${parser.pos_var} /= No_Token_Index then
 
       ## Update Last_Attempted_Child for the created node depending on the
       ## subparsers' results.
-      % for _, _, subresult in args:
-         if ${subresult} /= null and then ${subresult}.Is_Incomplete then
-            ${parser.res_var}.Last_Attempted_Child := 0;
-         elsif ${subresult} /= null and then not ${subresult}.Is_Ghost then
-            ${parser.res_var}.Last_Attempted_Child := -1;
-         end if;
-      % endfor
+      declare
+         N : constant ${root_node_type_name} :=
+            ${T.root_node.internal_conversion(parser.type, parser.res_var)};
+      begin
+         % for _, subparser, subresult in args:
+            declare
+               C : constant ${root_node_type_name} :=
+                  ${T.root_node.internal_conversion(subparser.type,
+                                                    subresult)};
+            begin
+               if C /= null and then Is_Incomplete (C) then
+                  N.Last_Attempted_Child := 0;
+               elsif C /= null and then not Is_Ghost (C) then
+                  N.Last_Attempted_Child := -1;
+               end if;
+            end;
+         % endfor
+      end;
    % endif
 
    ## Propagate parsing errors
