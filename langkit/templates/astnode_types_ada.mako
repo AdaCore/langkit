@@ -227,6 +227,18 @@
       ${node_fields(cls)}
    end record;
 
+   ## Fields initialization helper
+   <% fields = cls.get_parse_fields(
+         predicate = lambda f: not f.abstract and not f.null) %>
+   % if fields:
+      procedure Initialize_Fields_For_${cls.kwless_raw_name}
+        (Self : access ${cls.value_type_name()}'Class
+         % for f in fields:
+         ; ${f.name} : ${f.type.name}
+         % endfor
+        );
+   % endif
+
    ## Field getters
    % for field in cls.get_parse_fields( \
       include_inherited=False, \
@@ -512,6 +524,42 @@
       end;
    % endif
 
+   % endif
+
+   ## Fields initialization helper
+   <%
+      predicate = lambda f: not f.abstract and not f.null
+
+      # All fields to initialize
+      all_fields = cls.get_parse_fields(include_inherited=True,
+                                        predicate=predicate)
+
+      # Fields unique to this node (not inherited)
+      self_fields = cls.get_parse_fields(include_inherited=False,
+                                         predicate=predicate)
+
+      # Fields that are only inherited
+      parent_fields = all_fields[:len(all_fields) - len(self_fields)]
+   %>
+   % if all_fields:
+      procedure Initialize_Fields_For_${cls.kwless_raw_name}
+        (Self : access ${cls.value_type_name()}'Class
+         % for f in all_fields:
+         ; ${f.name} : ${f.type.name}
+         % endfor
+        ) is
+      begin
+         ## Re-use the parent node's fields initializer, if any
+         % if parent_fields:
+            Initialize_Fields_For_${cls.base.kwless_raw_name}
+              (Self, ${', '.join(str(f.name) for f in parent_fields)});
+         % endif
+
+         ## Then initialize fields unique to this node
+         % for f in self_fields:
+            Self.${f.name} := ${f.name};
+         % endfor
+      end Initialize_Fields_For_${cls.kwless_raw_name};
    % endif
 
    ## Field getters

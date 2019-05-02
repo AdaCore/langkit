@@ -38,18 +38,26 @@ if ${parser.pos_var} /= No_Token_Index then
                             then No_Token_Index
                             else ${parser.pos_var} - 1));
 
-   ## Initialize components for node fields
-   % for field, subparser, subresult in args:
-      ## Set children fields into the created node
-      ${parser.res_var}.${field.name} :=
-         ${field.type.storage_type_name} (${subresult});
+   % if args:
+      ## Initialize children fields in the created node
+      Initialize_Fields_For_${parser.type.kwless_raw_name}
+        (Self => ${parser.res_var},
+         ${', '.join(
+            '{} => {}'.format(
+               field.name,
+               field.type.internal_conversion(subparser.type, subresult))
+            for field, subparser, subresult in args)});
 
-      if ${subresult} /= null and then ${subresult}.Is_Incomplete then
-         ${parser.res_var}.Last_Attempted_Child := 0;
-      elsif ${subresult} /= null and then not ${subresult}.Is_Ghost then
-         ${parser.res_var}.Last_Attempted_Child := -1;
-      end if;
-   % endfor
+      ## Update Last_Attempted_Child for the created node depending on the
+      ## subparsers' results.
+      % for _, _, subresult in args:
+         if ${subresult} /= null and then ${subresult}.Is_Incomplete then
+            ${parser.res_var}.Last_Attempted_Child := 0;
+         elsif ${subresult} /= null and then not ${subresult}.Is_Ghost then
+            ${parser.res_var}.Last_Attempted_Child := -1;
+         end if;
+      % endfor
+   % endif
 
    ## Propagate parsing errors
    % if parser.no_backtrack:
