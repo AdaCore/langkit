@@ -223,6 +223,12 @@ class AbstractNodeData(object):
     :type: bool
     """
 
+    is_user_field = False
+    """
+    Whether this class is UserField.
+    :type: bool
+    """
+
     PREFIX_FIELD = names.Name('F')
     PREFIX_PROPERTY = names.Name('P')
     PREFIX_INTERNAL = names.Name('Internal')
@@ -1931,6 +1937,7 @@ class UserField(BaseField):
     """
 
     prefix = None
+    is_user_field = True
 
     def __init__(self, type, repr=False, doc='', public=True,
                  access_needs_incref=True, internal_name=None):

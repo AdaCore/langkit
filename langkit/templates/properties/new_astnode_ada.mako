@@ -20,8 +20,19 @@ Initialize
    Self_Env => Self.Self_Env);
 Register_Destroyable (Self.Unit, ${root_node_type_name} (${result}));
 
-% for field, field_expr in expr._iter_ordered():
-   ${result}.${field.name} :=
-      ${field_expr.type.convert_to_storage_expr(result,
-                                                field_expr.render_expr())};
-% endfor
+% if expr.assocs:
+   ## Initialize parse fields using the standard initialize procedure
+   Initialize_Fields_For_${expr.type.kwless_raw_name}
+     (Self => ${result},
+      ${', '.join('{} => {}'.format(field.name, field_expr.render_expr())
+                  for field, field_expr in expr._iter_ordered()
+                  if not field.is_user_field)});
+
+   ## Then initialize user fields individually
+   % for field, field_expr in expr._iter_ordered():
+      % if field.is_user_field:
+         ${result}.${field.name} := ${field.type.convert_to_storage_expr(
+            result, field_expr.render_expr())};
+      % endif
+   % endfor
+% endif
