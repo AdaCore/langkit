@@ -1301,6 +1301,14 @@ class _Row(Parser):
         the progress var.
         """
 
+        self.subresults = None
+        """
+        Holder for code generation. List of couple variables holding the parser
+        result for each sub-parser in this row.
+
+        :type: list[VarDef|None]
+        """
+
     def discard(self):
         return all(p.discard() for p in self.parsers)
 
@@ -1773,6 +1781,14 @@ class _Transform(Parser):
         self.parser = parser
         self.parser.containing_transform = self
         self.typ = typ
+
+        self.parse_fields = None
+        """
+        List of fields that this parser initializes in the result.
+
+        :type: list[langkit.compiled_types.Field]
+        """
+
         self.has_failed_var = None
         """
         :type: VarDef
@@ -1834,11 +1850,14 @@ class _Transform(Parser):
         result = resolve_type(self.typ)
         reject_synthetic(result)
 
+        self.parse_fields = result.get_parse_fields(
+            predicate=lambda f: not f.abstract and not f.null
+        )
+
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
         nb_transform_values = len(self.fields_parsers)
-        nb_fields = len(result.get_parse_fields(
-            predicate=lambda f: not f.abstract and not f.null))
+        nb_fields = len(self.parse_fields)
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
@@ -1858,11 +1877,18 @@ class _Transform(Parser):
             self.has_failed_var = VarDef('transform_has_failed', T.Bool)
 
     def generate_code(self):
-        return self.render(
-            'transform_code_ada',
-            args=(keep(self.parser.subresults)
-                  if isinstance(self.parser, _Row) else [self.parser.res_var]),
-        )
+        if isinstance(self.parser, _Row):
+            subparsers = zip(self.parser.parsers, self.parser.subresults)
+        else:
+            subparsers = [(self.parser, self.parser.res_var)]
+
+        # Remove subparsers that do not contribute to field creation
+        subparsers = filter(lambda (p, v): v, subparsers)
+        assert len(self.parse_fields) == len(subparsers)
+
+        return self.render('transform_code_ada',
+                           args=[(f, p, v) for f, (p, v)
+                                 in zip(self.parse_fields, subparsers)])
 
 
 class Null(Parser):
