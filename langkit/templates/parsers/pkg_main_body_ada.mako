@@ -214,9 +214,10 @@ package body ${ada_lib_name}.Parsers is
       case Rule is
       % for name in ctx.grammar.user_defined_rules:
          when ${ctx.grammar_rule_api_name(name)} =>
-            Result := ${root_node_type_name}
-              (${ctx.grammar.rules[name].gen_fn_name}
-                 (Parser, First_Token_Index));
+            Result := ${T.root_node.internal_conversion(
+               ctx.grammar.rules[name].type,
+               '{} (Parser, First_Token_Index)'
+               .format(ctx.grammar.rules[name].gen_fn_name))};
       % endfor
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
