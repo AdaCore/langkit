@@ -26,8 +26,7 @@ ${"overriding" if property.overriding else ""} function ${property.name}
 is
    ## We declare a variable Self, that has the named class wide access type
    ## that we can use to dispatch on other properties and all.
-   Self : ${Self.type.name} := ${Self.type.name}
-     (${property.self_arg_name});
+   Self : ${Self.type.name} := ${Self.type.name} (${property.self_arg_name});
 
    ## Dispatchers must not memoize because it will be done at the static
    ## property level: we do not want to do it twice.
