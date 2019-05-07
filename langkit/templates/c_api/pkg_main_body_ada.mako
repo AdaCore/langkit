@@ -486,7 +486,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Node : ${entity_type}_Ptr) return int is
    begin
       Clear_Last_Exception;
-      return Boolean'Pos (Node.Node.Is_Token_Node);
+      return Boolean'Pos (Is_Token_Node (Node.Node));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -509,7 +509,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         Img : constant Text_Type := Node.Node.Short_Text_Image;
+         Img : constant Text_Type := Short_Text_Image (Node.Node);
       begin
          return Wrap_Alloc (Img);
       end;
@@ -563,7 +563,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Node : ${entity_type}_Ptr) return unsigned is
    begin
       Clear_Last_Exception;
-      return unsigned (Node.Node.Children_Count);
+      return unsigned (Children_Count (Node.Node));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
