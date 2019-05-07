@@ -64,11 +64,13 @@
             % elif arg.type.is_analysis_unit_type:
                ${arg_ref}
             % elif arg.type.is_ast_node:
-               ${arg.type.name} (${arg_ref}.Node)
+               ${arg.type.internal_conversion(
+                    T.root_node, '{}.Node'.format(arg_ref))}
             % elif arg.type.is_entity_type:
                (if ${arg_ref}.Node = null
                 then ${arg.type.nullexpr}
-                else (${arg.type.element_type.name} (${arg_ref}.Node),
+                else (${arg.type.element_type.internal_conversion(
+                           T.root_node, '{}.Node'.format(arg_ref))},
                       ${arg_ref}.Info))
             % elif arg.type.is_array and not arg.type.emit_c_type:
                Convert (${arg_ref})
@@ -100,36 +102,24 @@
          % endif
       % endfor
 
-      if Unwrapped_Node.all in ${struct.value_type_name()}'Class then
+      % if not struct.equivalent_to_root:
+      if Unwrapped_Node.Kind in ${struct.ada_kind_range_name} then
+      % endif
+
          declare
             <%
-              # For properties, don't use the dot notation as it could conflict
-              # with homonym fields.
-              field_access = (str(field.name)
-                              if field.is_property else
-                              'Typed_Node.{}'.format(field.name))
-
-              actuals = ['{0.name} => Unwrapped_{0.name}'.format(a)
-                         for a in field.arguments]
-              if field.is_property:
-                  actuals.insert(0, 'Typed_Node')
+              actuals = ['Typed_Node'] + [
+                 '{0.name} => Unwrapped_{0.name}'.format(a)
+                 for a in field.arguments]
               if field.is_property and field.uses_entity_info:
                   actuals.append('{} => Node.Info'.format(
                       field.entity_info_name
                   ))
-              field_access = '{}{}'.format(
-                  field_access,
-                  ' ({})'.format(', '.join(actuals))
-                  if actuals else ''
-              )
-              if not field.is_property:
-                 field_access = field.type.extract_from_storage_expr(
-                    'Unwrapped_Node', field_access
-                 )
+              field_access = '{} ({})'.format(field.name, ', '.join(actuals))
             %>
 
             Typed_Node : constant ${struct.name} :=
-               ${struct.name} (Unwrapped_Node);
+               ${struct.internal_conversion(T.root_node, 'Unwrapped_Node')};
             Result     : ${field.type.name};
          begin
             ##  Keep this assignment after the BEGIN keyword above so that the
@@ -146,9 +136,12 @@
                % elif field.type.is_analysis_unit_type:
                    Result
                % elif field.type.is_ast_node:
-                   (${root_node_type_name} (Result), Node.Info)
+                   (${T.root_node.internal_conversion(field.type, 'Result')},
+                    Node.Info)
                % elif field.type.is_entity_type:
-                  (${root_node_type_name} (Result.Node), Result.Info)
+                  (${T.root_node.internal_conversion(
+                        field.type, 'Result.Node')},
+                   Result.Info)
                % elif field.type.is_array and not field.type.emit_c_type:
                   Convert (Result)
                % elif field.type.is_token_type:
@@ -173,9 +166,13 @@
                Set_Last_Exception (Exc);
                return 0;
          end;
+
+      % if not struct.equivalent_to_root:
       else
          return 0;
       end if;
+      % endif
+
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
