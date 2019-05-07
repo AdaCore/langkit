@@ -654,9 +654,7 @@ package body ${ada_lib_name}.Analysis is
             raise Constraint_Error with "Invalid type conversion";
          </%def>
 
-         % if ctx.TypeSet({e.element_type}) == ctx.TypeSet({T.root_node}):
-            ## Avoid tautological kind checks (is this a subclass of the root
-            ## node? obviously yes).
+         % if e.element_type.equivalent_to_root:
             ${emit_return()}
 
          % elif not e.element_type.concrete_subclasses:
