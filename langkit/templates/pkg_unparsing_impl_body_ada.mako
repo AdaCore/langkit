@@ -241,7 +241,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Node.Parsing_Node.Children_Count;
+            return Children_Count (Node.Parsing_Node);
          when From_Rewriting =>
             return Children_Count (Node.Rewriting_Node);
       end case;
@@ -256,7 +256,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Create_Abstract_Node (Node.Parsing_Node.Child (Index));
+            return Create_Abstract_Node (Child (Node.Parsing_Node, Index));
 
          when From_Rewriting =>
             --  In the context of unparsing, it is pointless to expand the
@@ -268,7 +268,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                RN : constant Node_Rewriting_Handle := Node.Rewriting_Node;
             begin
                if RN.Children.Kind = Unexpanded then
-                  return Create_Abstract_Node (RN.Node.Child (Index));
+                  return Create_Abstract_Node (Child (RN.Node, Index));
                else
                   return Create_Abstract_Node (Child (RN, Index));
                end if;
@@ -284,7 +284,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Node.Kind is
          when From_Parsing =>
-            return Node.Parsing_Node.Text;
+            return Text (Node.Parsing_Node);
          when From_Rewriting =>
             return Text (Node.Rewriting_Node);
       end case;
@@ -350,7 +350,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       --  For each field, recover the tokens that surround the field itself,
       --  but only if both the original node and the one to unparse are
       --  present.
-      for I in 1 .. Rewritten_Node.Children_Count loop
+      for I in 1 .. Children_Count (Rewritten_Node) loop
          declare
             U     : Field_Unparser_List renames Unparser.Field_Unparsers.all;
             F     : Field_Unparser renames U.Field_Unparsers (I);
@@ -358,7 +358,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
             FT    : Field_Template renames Result.Fields (I);
 
             Rewritten_Child : constant ${root_node_type_name} :=
-               Rewritten_Node.Child (I);
+               Child (Rewritten_Node, I);
             R_Child         : constant Abstract_Node :=
                Create_Abstract_Node (Rewritten_Child);
          begin
@@ -379,7 +379,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                --  token of the node field, also sized from the unparser.
                --  Beware of ghost nodes, which own no token.
                Next_Token :=
-                 (if Rewritten_Child.Is_Ghost
+                 (if Is_Ghost (Rewritten_Child)
                   then Token_Start (Rewritten_Child)
                   else Relative_Token (Token_End (Rewritten_Child), 1));
                FT.Post_Tokens :=
@@ -644,7 +644,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                if Rewritten_Node /= null then
                   declare
                      Token     : constant Token_Reference :=
-                        Rewritten_Node.Token_End;
+                        Token_End (Rewritten_Node);
                      Last_Triv : constant Token_Reference :=
                         Last_Trivia (Token);
                   begin
@@ -738,11 +738,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          --  possible, preserve original formatting for the corresponding
          --  separator in the original source.
          if I > 1 and then Unparser.Has_Separator then
-            if Preserve_Formatting and then Rewritten_Node.Children_Count >= I
+            if Preserve_Formatting
+               and then Children_Count (Rewritten_Node) >= I
             then
                declare
                   R_Child : constant ${root_node_type_name} :=
-                     Rewritten_Node.Child (I);
+                     Child (Rewritten_Node, I);
                   Tok : constant Token_Reference :=
                      Relative_Token (Token_Start (R_Child), -1);
                begin
