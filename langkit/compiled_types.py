@@ -2819,6 +2819,22 @@ class ASTNodeType(BaseStructType):
             return self.ada_kind_name + '_Range'
 
     @property
+    def equivalent_to_root(self):
+        """
+        Return whether this node type is equivalent to the root type.
+
+        For instance, if the root node has only one subclass, then this
+        subclass is equivalent to the root type, as all concrete nodes belong
+        to both types.
+
+        This property is useful to avoid emitting tautological kind checks
+        during code generation.
+
+        :rtype: bool
+        """
+        return self.is_root_node or TypeSet({self}) == TypeSet({T.root_node})
+
+    @property
     def introspection_simple_name(self):
         """
         Return the name of the Ada enumeration to represent this node type in
