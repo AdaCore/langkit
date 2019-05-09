@@ -188,6 +188,10 @@ begin
    % endif
 
    % if property.is_dispatcher:
+      if Self = null then
+         raise Property_Error with "dispatching on null node";
+      end if;
+
       ## If this property is a dispatcher, it has no expression: just
       ## materialize the dispatch table by hand.
       case ${property.struct.ada_kind_range_name} (Self.Kind) is
