@@ -648,9 +648,18 @@ class FieldAccess(AbstractExpression):
             :rtype: str
             """
             prefix = self.prefix
+            node_data_struct = self.node_data.struct
 
             if self.implicit_deref:
                 prefix = '{}.Node'.format(prefix)
+                node_data_struct = node_data_struct.element_type
+
+            # If this is a node field/property, we must pass the precise type
+            # it expects for "Self".
+            if node_data_struct.is_ast_node:
+                prefix = node_data_struct.internal_conversion(
+                    self.receiver_expr.type, prefix
+                )
 
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
