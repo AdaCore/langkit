@@ -688,8 +688,8 @@ package body ${ada_lib_name}.Implementation is
                return;
             end if;
             Reset_Caches (Node.Self_Env);
-            for I in 1 .. Node.Children_Count loop
-               Internal (Node.Child (I));
+            for I in 1 .. Children_Count (Node) loop
+               Internal (Child (Node, I));
             end loop;
          end Internal;
       begin
@@ -720,8 +720,8 @@ package body ${ada_lib_name}.Implementation is
             --  one of them.
             if Unit.AST_Root.Kind = ${ctx.ple_unit_root.list.ada_kind_name}
             then
-               for I in 1 .. Unit.AST_Root.Children_Count loop
-                  Has_Errors := Populate_Lexical_Env (Unit.AST_Root.Child (I))
+               for I in 1 .. Children_Count (Unit.AST_Root) loop
+                  Has_Errors := Populate_Lexical_Env (Child (Unit.AST_Root, I))
                                 or else Has_Errors;
                end loop;
 
@@ -935,7 +935,7 @@ package body ${ada_lib_name}.Implementation is
       if Unit.AST_Root = null then
          Put_Line ("<empty analysis unit>");
       else
-         Unit.AST_Root.Print (Show_Slocs);
+         Print (Unit.AST_Root, Show_Slocs);
       end if;
    end Print;
 
@@ -1093,7 +1093,7 @@ package body ${ada_lib_name}.Implementation is
       Context_Node : ${root_node_type_name}) return Boolean is
    begin
       if Context_Node /= null and then Langkit_Support.Adalog.Debug.Debug then
-         Context_Node.Assign_Names_To_Logic_Vars;
+         Assign_Names_To_Logic_Vars (Context_Node);
       end if;
 
       begin
@@ -1295,7 +1295,7 @@ package body ${ada_lib_name}.Implementation is
    function Get_Symbol
      (Node : access ${root_node_value_type}'Class) return Symbol_Type is
    begin
-      return Get_Symbol (Node.Token (Node.Token_Start_Index));
+      return Get_Symbol (Token (Node, Node.Token_Start_Index));
    end Get_Symbol;
 
    ----------
@@ -1303,7 +1303,11 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Text
-     (Node : access ${root_node_value_type}'Class) return Text_Type is
+     (Node : access ${root_node_value_type}'Class) return Text_Type
+   is
+      Start_T : constant Token_Reference :=
+         Token (Node, Node.Token_Start_Index);
+      End_T   : constant Token_Reference := Token (Node, Node.Token_End_Index);
    begin
       --  No text is associated to synthetic and ghost nodes
 
@@ -1382,8 +1386,8 @@ package body ${ada_lib_name}.Implementation is
 
       Node.Parent := ${root_node_type_name} (Parent);
 
-      for I in 1 .. Node.Children_Count loop
-         Set_Parents (Node.Child (I), Node);
+      for I in 1 .. Children_Count (Node) loop
+         Set_Parents (Child (Node, I), Node);
       end loop;
    end Set_Parents;
 
@@ -1397,9 +1401,9 @@ package body ${ada_lib_name}.Implementation is
          return;
       end if;
 
-      Node.Reset_Logic_Vars;
-      for I in 1 .. Node.Children_Count loop
-         Destroy (Node.Child (I));
+      Reset_Logic_Vars (Node);
+      for I in 1 .. Children_Count (Node) loop
+         Destroy (Child (Node, I));
       end loop;
    end Destroy;
 
@@ -1439,7 +1443,7 @@ package body ${ada_lib_name}.Implementation is
          --  must immediately stop processing the tree.
 
          if Status = Into then
-            for I in 1 .. Node.Children_Count loop
+            for I in 1 .. Children_Count (Node) loop
                declare
                   Cur_Child : constant ${root_node_type_name} :=
                      Child (Node, I);
@@ -1549,7 +1553,7 @@ package body ${ada_lib_name}.Implementation is
          return Sloc_Range (Node.Parent);
       end if;
 
-      if Node.Is_Ghost then
+      if Is_Ghost (Node) then
          Token_Start := (if Node.Token_Start_Index = 1
                          then (1, T_Start)
                          else (Node.Token_Start_Index - 1, T_End));
@@ -1560,7 +1564,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       if Snaps_At_Start (Node)
-         and then not Node.Is_Ghost
+         and then not Is_Ghost (Node)
          and then Token_Start.Pos /= 1
       then
          Token_Start := (Token_Start.Pos - 1, T_End);
@@ -1605,7 +1609,8 @@ package body ${ada_lib_name}.Implementation is
       --  assume that all lookups fall into this node's sloc range.
       pragma Assert (Compare (Sloc_Range (Node), Sloc) = Inside);
 
-      Children : constant ${root_node_array.array_type_name} := Node.Children;
+      Children : constant ${root_node_array.array_type_name} :=
+         Implementation.Children (Node);
       Pos      : Relative_Position;
       Result   : ${root_node_type_name};
    begin
@@ -1687,8 +1692,8 @@ package body ${ada_lib_name}.Implementation is
          raise Property_Error with "invalid node comparison";
       end if;
 
-      LS := Start_Sloc (Left.Sloc_Range);
-      RS := Start_Sloc (Right.Sloc_Range);
+      LS := Start_Sloc (Sloc_Range (Left));
+      RS := Start_Sloc (Sloc_Range (Right));
       return (case Relation is
               when Langkit_Support.Types.Less_Than        => LS < RS,
               when Langkit_Support.Types.Less_Or_Equal    => LS <= RS,
@@ -1705,7 +1710,7 @@ package body ${ada_lib_name}.Implementation is
      return ${root_node_array.array_type_name}
    is
       First : constant Integer := ${root_node_array.index_type()}'First;
-      Last  : constant Integer := First + Node.Children_Count - 1;
+      Last  : constant Integer := First + Children_Count (Node) - 1;
    begin
       return A : ${root_node_array.array_type_name} (First .. Last)
       do
@@ -1785,7 +1790,7 @@ package body ${ada_lib_name}.Implementation is
          Node.Self_Env := Bound_Env;
 
          begin
-            Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
+            Initial_Env := Pre_Env_Actions (Node, Bound_Env, Root_Env);
 
             if Initial_Env /= Null_Lexical_Env then
                Node.Self_Env := Initial_Env;
@@ -1796,7 +1801,7 @@ package body ${ada_lib_name}.Implementation is
                Result := Populate_Internal (C, Node.Self_Env) or else Result;
             end loop;
 
-            Node.Post_Env_Actions (Initial_Env, Root_Env);
+            Post_Env_Actions (Node, Initial_Env, Root_Env);
          exception
             when Property_Error =>
                return True;
@@ -1866,7 +1871,7 @@ package body ${ada_lib_name}.Implementation is
          return To_Text (Basename (Node.Unit))
            & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))));
       else
-         return Node.Short_Text_Image;
+         return Short_Text_Image (Node);
       end if;
    end AST_Envs_Node_Text_Image;
 
@@ -2142,12 +2147,12 @@ package body ${ada_lib_name}.Implementation is
          return ${node.name}_Short_Image (${node.name} (Self));
       </%def>
       <%def name="default()">
-         return "<" & To_Text (Self.Kind_Name)
+         return "<" & To_Text (Kind_Name (Self))
                 & " "
                 & To_Text
                   (Ada.Directories.Simple_Name 
                      (Get_Filename (Unit (Self))))
-                & ":" & To_Text (Image (Self.Sloc_Range)) & ">";
+                & ":" & To_Text (Image (Sloc_Range (Self))) & ">";
       </%def>
       </%self:case_dispatch>
    end Short_Text_Image;
@@ -2181,7 +2186,7 @@ package body ${ada_lib_name}.Implementation is
          return True;
       </%def>
       <%def name="default()">
-         return Self.Is_Incomplete;
+         return Is_Incomplete (Self);
       </%def>
       </%self:case_dispatch>
    end Snaps_At_End;
@@ -2232,7 +2237,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Last_Child_Index
      (Node : access ${root_node_value_type}'Class) return Natural
-   is (Node.Children_Count);
+   is (Children_Count (Node));
 
    ---------------
    -- Get_Child --
@@ -2284,11 +2289,14 @@ package body ${ada_lib_name}.Implementation is
 
                 result.append('case Index is')
                 for i, f in enumerate(specific_fields, first_field_index):
+                    converted_node = T.root_node.internal_conversion(
+                        f.type,
+                        '{}.{}'.format(node_expr, f.name))
                     result.append("""
                         when {} =>
-                            Result := {} ({}.{});
+                            Result := {};
                             return;
-                    """.format(i, root_type, node_expr, f.name))
+                    """.format(i, converted_node))
                 result.append("""
                         when others => null;
                     end case;
@@ -2319,19 +2327,23 @@ package body ${ada_lib_name}.Implementation is
       Children_Prefix : constant String := Line_Prefix & "|  ";
 
    begin
-      Put (Line_Prefix & Node.Kind_Name);
+      Put (Line_Prefix & Kind_Name (Node));
       if Show_Slocs then
-         Put ("[" & Image (Node.Sloc_Range) & "]");
+         Put ("[" & Image (Sloc_Range (Node)) & "]");
       end if;
 
-      if Node.Is_Incomplete then
+      if Is_Incomplete (Node) then
          Put (" <<INCOMPLETE>>");
       end if;
 
       if Is_Token_Node (Node.Kind) then
-         Put_Line (": " & Image (Node.Text));
-      elsif Node.all not in ${generic_list_value_type}'Class then
+         Put_Line (": " & Image (Text (Node)));
+
+      % if ctx.generic_list_type.concrete_subclasses:
+      elsif Node.Kind not in ${ctx.generic_list_type.ada_kind_range_name} then
          New_Line;
+      % endif
+
       end if;
 
       % if ctx.generic_list_type.concrete_subclasses:
@@ -2349,7 +2361,7 @@ package body ${ada_lib_name}.Implementation is
                New_Line;
                for Child of List.Nodes (1 .. List.Count) loop
                   if Child /= null then
-                     Child.Print (Show_Slocs, Line_Prefix & "|  ");
+                     Print (Child, Show_Slocs, Line_Prefix & "|  ");
                   end if;
                end loop;
             end;
@@ -2366,12 +2378,12 @@ package body ${ada_lib_name}.Implementation is
             for I in Field_List'Range loop
                declare
                   Child : constant ${root_node_type_name} :=
-                     Node.Child (I);
+                     Implementation.Child (Node, I);
                begin
                   Put (Attr_Prefix & Field_Name (Field_List (I)) & ":");
                   if Child /= null then
                      New_Line;
-                     Child.Print (Show_Slocs, Children_Prefix);
+                     Print (Child, Show_Slocs, Children_Prefix);
                   else
                      Put_Line (" <null>");
                   end if;
@@ -2462,14 +2474,14 @@ package body ${ada_lib_name}.Implementation is
          return ${root_node_array.array_type_name}
       is
          Children : constant ${root_node_array.array_type_name} :=
-            Parent.Children;
+            Implementation.Children (Parent);
          Result   : ${root_node_array.array_type_name} (Children'Range);
          Next     : Integer := Result'First;
       begin
          for I in Children'Range loop
             --  Get rid of null nodes and of nodes with no real existence in
             --  the source code.
-            if Children (I) /= null and then not Children (I).Is_Ghost then
+            if Children (I) /= null and then not Is_Ghost (Children (I)) then
                Result (Next) := Children (I);
                Next := Next + 1;
             end if;
@@ -2525,10 +2537,10 @@ package body ${ada_lib_name}.Implementation is
       LGC : ${root_node_type_name};
    begin
      if Is_List_Node (Node.Kind) then
-        LGC := (if Node.Last_Child_Index /= 0
-                then Node.Child (Node.Last_Child_Index)
+        LGC := (if Last_Child_Index (Node) /= 0
+                then Child (Node, Last_Child_Index (Node))
                 else null);
-        return LGC /= null and then LGC.Is_Incomplete;
+        return LGC /= null and then Is_Incomplete (LGC);
       else
          return Node.Last_Attempted_Child > -1;
       end if;
@@ -2540,7 +2552,7 @@ package body ${ada_lib_name}.Implementation is
 
    function Token_Start
      (Node : access ${root_node_value_type}'Class) return Token_Reference
-   is (Node.Token (Node.Token_Start_Index));
+   is (Token (Node, Node.Token_Start_Index));
 
    ---------------
    -- Token_End --
@@ -2550,8 +2562,8 @@ package body ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class) return Token_Reference
    is
      (if Node.Token_End_Index = No_Token_Index
-      then Node.Token_Start
-      else Node.Token (Node.Token_End_Index));
+      then Token_Start (Node)
+      else Token (Node, Node.Token_End_Index));
 
    -----------
    -- Token --
@@ -2585,7 +2597,8 @@ package body ${ada_lib_name}.Implementation is
             "Trying to get the child index of a root node";
       end if;
 
-      for I in Node.Parent.First_Child_Index .. Node.Parent.Last_Child_Index
+      for I in First_Child_Index (Node.Parent)
+            .. Last_Child_Index (Node.Parent)
       loop
          N := Child (Node.Parent, I);
          if N = Node then
@@ -2607,7 +2620,7 @@ package body ${ada_lib_name}.Implementation is
       E_Info : ${T.entity_info.name};
       Offset : Integer) return ${root_entity.name}
    is
-      Node_Index : constant Positive := Node.Child_Index + 1;
+      Node_Index : constant Positive := Child_Index (Node) + 1;
       --  Child_Index is 0-based, but the Child primitive expects a 1-based
       --  index.
 
@@ -2615,7 +2628,7 @@ package body ${ada_lib_name}.Implementation is
 
       Sibling : constant ${root_node_type_name} :=
         (if Sibling_Index >= 1
-         then Node.Parent.Child (Sibling_Index)
+         then Child (Node.Parent, Sibling_Index)
          else null);
       --  Child returns null for out-of-bound indexes
    begin
@@ -2632,7 +2645,7 @@ package body ${ada_lib_name}.Implementation is
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.name} is
    begin
-      return Node.Fetch_Sibling (E_Info, -1);
+      return Fetch_Sibling (Node, E_Info, -1);
    end Previous_Sibling;
 
    ------------------
@@ -2644,7 +2657,7 @@ package body ${ada_lib_name}.Implementation is
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.name} is
    begin
-      return Node.Fetch_Sibling (E_Info, 1);
+      return Fetch_Sibling (Node, E_Info, 1);
    end Next_Sibling;
 
    ## Env metadata's body
@@ -2836,7 +2849,7 @@ package body ${ada_lib_name}.Implementation is
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.array.name}
    is
-      Bare_Parents : ${root_node_array.name} := Node.Parents;
+      Bare_Parents : ${root_node_array.name} := Parents (Node);
       Result       : ${root_entity.array.name} :=
          ${root_entity.array.constructor_name} (Bare_Parents.N);
    begin
@@ -2857,7 +2870,7 @@ package body ${ada_lib_name}.Implementation is
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.array.name}
    is
-      Bare_Children : ${root_node_array.name} := Node.Children;
+      Bare_Children : ${root_node_array.name} := Children (Node);
       Result        : ${root_entity.array.name} :=
          ${root_entity.array.constructor_name} (Bare_Children.N);
    begin
@@ -2913,7 +2926,7 @@ package body ${ada_lib_name}.Implementation is
          Field : String) is
       begin
          LV.Dbg_Name := new String'
-           (Image (Node.Short_Text_Image) & "." & Field);
+           (Image (Short_Text_Image (Node)) & "." & Field);
       end Assign;
 
       K : constant ${root_node_kind_name} := Node.Kind;
@@ -2947,7 +2960,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       if Ent.Node /= null then
          declare
-            Node_Image : constant Text_Type := Ent.Node.Short_Text_Image;
+            Node_Image : constant Text_Type := Short_Text_Image (Ent.Node);
          begin
             return
             (if Ent.Info.Rebindings /= null
@@ -3026,7 +3039,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Length
      (Node : access ${generic_list_value_type}'Class) return Natural
-   is (Node.Children_Count);
+   is (Children_Count
+         (${T.root_node.internal_conversion(ctx.generic_list_type, 'Node')}));
 
    % if ctx.properties_logging:
 
@@ -3174,7 +3188,7 @@ package body ${ada_lib_name}.Implementation is
       --  Don't call Node.Destroy, as Node's children may be gone already: they
       --  have their own destructor and there is no specified order for the
       --  call of these destructors.
-      Node.Reset_Logic_Vars;
+      Reset_Logic_Vars (Node);
 
       Free (Node);
    end Destroy_Synthetic_Node;
@@ -3200,9 +3214,9 @@ package body ${ada_lib_name}.Implementation is
          else
             declare
                Result : constant String :=
-                 (Node.Kind_Name & " "
+                 (Kind_Name (Node) & " "
                   & Basename (Node.Unit) & ":"
-                  & Image (Node.Sloc_Range));
+                  & Image (Sloc_Range (Node)));
             begin
                return (if Decoration then "<" & Result & ">" else Result);
             end;
@@ -3237,12 +3251,8 @@ package body ${ada_lib_name}.Implementation is
       C : Integer := Kind_To_Node_Children_Count (Node.Kind);
    begin
       if C = -1 then
-         declare
-            N : constant ${root_node_type_name} :=
-               ${root_node_type_name} (Node);
-         begin
-            return ${generic_list_type_name} (N).Count;
-         end;
+         return ${ctx.generic_list_type.internal_conversion(
+                     T.root_node, 'Node')}.Count;
       else
          return C;
       end if;
@@ -3475,8 +3485,8 @@ package body ${ada_lib_name}.Implementation is
          end if;
 
          Deactivate_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Node.Children_Count loop
-            Deactivate_Refd_Envs (Node.Child (I));
+         for I in 1 .. Children_Count (Node) loop
+            Deactivate_Refd_Envs (Child (Node, I));
          end loop;
       end Deactivate_Refd_Envs;
 
@@ -3491,8 +3501,8 @@ package body ${ada_lib_name}.Implementation is
             return;
          end if;
          Recompute_Referenced_Envs (Node.Self_Env);
-         for I in 1 .. Node.Children_Count loop
-            Recompute_Refd_Envs (Node.Child (I));
+         for I in 1 .. Children_Count (Node) loop
+            Recompute_Refd_Envs (Child (Node, I));
          end loop;
       end Recompute_Refd_Envs;
 
@@ -3769,7 +3779,7 @@ package body ${ada_lib_name}.Implementation is
 
       --  Destroy the old AST node and replace it by the new one
       if Unit.AST_Root /= null then
-         Unit.AST_Root.Destroy;
+         Destroy (Unit.AST_Root);
       end if;
       Unit.AST_Root := Reparsed.AST_Root;
 
@@ -3822,7 +3832,7 @@ package body ${ada_lib_name}.Implementation is
 
          for FN of Foreign_Nodes loop
             declare
-               Node_Image : constant String := Image (FN.Short_Text_Image);
+               Node_Image : constant String := Image (Short_Text_Image (FN));
                Unit_Name  : constant String := +FN.Unit.Filename.Base_Name;
             begin
                GNATCOLL.Traces.Trace
@@ -3944,9 +3954,9 @@ package body ${ada_lib_name}.Implementation is
       declare
          Root_Scope : Lexical_Env renames Unit.Context.Root_Scope;
          Env        : constant Lexical_Env :=
-            Node.Pre_Env_Actions (Node.Self_Env, Root_Scope, True);
+            Pre_Env_Actions (Node, Node.Self_Env, Root_Scope, True);
       begin
-         Node.Post_Env_Actions (Env, Root_Scope);
+         Post_Env_Actions (Node, Env, Root_Scope);
       end;
    end Reroot_Foreign_Node;
 
