@@ -548,9 +548,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          Unit_Handle : constant Unit_Rewriting_Handle :=
             Handle (N.Unit);
       begin
-         if N.Is_Token_Node then
+         if Is_Token_Node (N) then
             Children := (Kind => Expanded_Token_Node,
-                         Text => To_Unbounded_Wide_Wide_String (N.Text));
+                         Text => To_Unbounded_Wide_Wide_String (Text (N)));
 
          else
             Children := (Kind => Expanded_Regular, Vector => <>);
@@ -561,7 +561,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                  (Ada.Containers.Count_Type (Count));
                for I in 1 .. Count loop
                   declare
-                     Child : constant ${root_node_type_name} := N.Child (I);
+                     Child : constant ${root_node_type_name} :=
+                        Implementation.Child (N, I);
                   begin
                      Children.Vector.Append
                        ((if Child = null
@@ -682,7 +683,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       ${pre_check_nrw_handle('Handle')}
       return
         (case Handle.Children.Kind is
-         when Unexpanded          => Handle.Node.Children_Count,
+         when Unexpanded          => Children_Count (Handle.Node),
          when Expanded_Regular    => Natural (Handle.Children.Vector.Length),
          when Expanded_Token_Node => 0);
    end Children_Count;
@@ -748,7 +749,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       case Handle.Children.Kind is
          when Unexpanded =>
             if Is_Token_Node (Handle.Kind) then
-               return Handle.Node.Text;
+               return Text (Handle.Node);
             else
                raise Program_Error;
             end if;
@@ -1131,7 +1132,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Result.Node := null;
             Nodes_Pools.Append (Handle.New_Nodes, Result);
 
-            if Node.Is_Token_Node then
+            if Is_Token_Node (Node) then
                declare
                   Index : constant Natural := Natural (Node.Token_Start_Index);
                   Data  : constant Stored_Token_Data :=
@@ -1146,14 +1147,14 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
             else
                declare
-                  Count : constant Natural := Node.Children_Count;
+                  Count : constant Natural := Children_Count (Node);
                begin
                   Result.Children := (Kind => Expanded_Regular, Vector => <>);
                   Result.Children.Vector.Reserve_Capacity
                     (Ada.Containers.Count_Type (Count));
                   for I in 1 .. Count loop
                      Result.Children.Vector.Append
-                       (Transform (Node.Child (I), Result));
+                       (Transform (Child (Node, I), Result));
                   end loop;
                end;
             end if;
