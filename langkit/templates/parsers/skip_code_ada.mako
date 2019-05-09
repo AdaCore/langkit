@@ -18,7 +18,9 @@ end loop;
 
 ${parser.pos_var} := ${parser.start_pos} + 1;
 ${parser.dest_node_parser.generate_code()}
-${parser.dest_node_parser.res_var}.Token_End_Index := ${parser.start_pos};
+${T.root_node.internal_conversion(
+     parser.dest_node_parser.type,
+     parser.dest_node_parser.res_var)}.Token_End_Index := ${parser.start_pos};
 
 Append (Parser.Diagnostics,
         Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,

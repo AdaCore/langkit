@@ -10,6 +10,9 @@ if parser._booleanize:
    base = parser.booleanized_type
    if not base.is_bool_type:
       alt_true, alt_false = base._alternatives
+
+if parser.type.is_ast_node:
+   as_root_node = T.root_node.internal_conversion(parser.type, parser.res_var)
 %>
 
 ${subparser.generate_code()}
@@ -22,10 +25,10 @@ if ${subparser.pos_var} = No_Token_Index then
       % if base.is_bool_type:
          ${parser.res_var} := False;
       % else:
-         ${parser.res_var} := ${base.name}
-           (${alt_false.name}_Alloc.Alloc (Parser.Mem_Pool));
+         ${parser.res_var} := ${parser.type.internal_conversion(alt_false,
+           '{}_Alloc.Alloc (Parser.Mem_Pool)'.format(alt_false.name))};
          Initialize
-           (Self              => ${parser.res_var},
+           (Self              => ${as_root_node},
             Kind              => ${alt_false.ada_kind_name},
             Unit              => Parser.Unit,
             Token_Start_Index => ${parser.start_pos},
@@ -35,13 +38,14 @@ if ${subparser.pos_var} = No_Token_Index then
         ${subparser.res_var} :=
           (${parser_type.storage_type_name}_Alloc.Alloc (Parser.Mem_Pool));
          Initialize
-           (Self              => ${parser.res_var},
+           (Self              => ${as_root_node},
             Kind              => ${parser_type.ada_kind_name},
             Unit              => Parser.Unit,
             Token_Start_Index => ${parser.start_pos} - 1,
             Token_End_Index   => No_Token_Index);
          Initialize_List
-           (Self   => ${subparser.res_var},
+           (Self   => ${ctx.generic_list_type.internal_conversion(
+                           subparser.type, subparser.res_var)},
             Parser => Parser,
             Count  => 0);
     % elif parser_type:
@@ -66,10 +70,10 @@ else
    % if base.is_bool_type:
       ${parser.res_var} := True;
    % else:
-      ${parser.res_var} := ${base.name}
-        (${alt_true.name}_Alloc.Alloc (Parser.Mem_Pool));
+      ${parser.res_var} := ${parser.type.internal_conversion(alt_true,
+        '{}_Alloc.Alloc (Parser.Mem_Pool)'.format(alt_true.name))};
       Initialize
-        (Self              => ${parser.res_var},
+        (Self              => ${as_root_node},
          Kind              => ${alt_true.ada_kind_name},
          Unit              => Parser.Unit,
          Token_Start_Index => ${parser.start_pos},
