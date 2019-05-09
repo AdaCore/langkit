@@ -62,13 +62,25 @@
       Or_Null : Boolean := False) return ${element_type.name}
    is
       function Absolute_Get
-        (L : ${type_name}; Index : Integer)
-         return ${element_type.name}
-      is
-        (${element_type.name} (L.Nodes (Index + 1)));
+        (L : ${type_name}; Index : Integer) return ${element_type.name};
       --  L.Nodes is 1-based but Index is 0-based
 
-      function Length (Node : ${type_name}) return Natural is (Node.Count);
+      ------------------
+      -- Absolute_Get --
+      ------------------
+
+      function Absolute_Get
+        (L : ${type_name}; Index : Integer) return ${element_type.name}
+      is
+         GL : constant ${ctx.generic_list_type.name} :=
+            ${ctx.generic_list_type.internal_conversion(list_type, 'L')};
+      begin
+         return ${element_type.internal_conversion(T.root_node,
+                                                   'GL.Nodes (Index + 1)')};
+      end Absolute_Get;
+
+      function Length (Node : ${type_name}) return Natural is
+        (${ctx.generic_list_type.internal_conversion(list_type, 'Node')}.Count);
       --  Wrapper around the Length primitive to get the compiler happy for the
       --  the package instantiation below.
 
@@ -80,7 +92,7 @@
 
       Result : ${element_type.name};
    begin
-      if Relative_Get (${type_name} (Node), Index, Result) then
+      if Relative_Get (Node, Index, Result) then
          return Result;
       elsif Or_Null then
          return null;
@@ -96,5 +108,10 @@
    function Item
      (Node  : access ${value_type}'Class; Index : Positive)
       return ${element_type.name}
-   is (${element_type.name} (Node.Child (Index)));
+   is
+      Result : constant ${root_node_type_name} :=
+        Child (${T.root_node.internal_conversion(list_type, 'Node')}, Index);
+   begin
+      return ${element_type.internal_conversion(T.root_node, 'Result')};
+   end Item;
 </%def>
