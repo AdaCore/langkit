@@ -58,48 +58,60 @@ begin
       % endif
 
       ## First, build a vector for all the resulting elements
-      <% coll_expr = map.collection.render_expr() %>
-      for ${codegen_element_var} of
-         % if map.collection.type.is_list_type:
-            ${coll_expr}.Nodes (1 .. ${coll_expr}.Count)
-         % else:
-            ${coll_expr}.Items
-         % endif
-      loop
-
-         ## Initialize all element variables
-         % for elt_var, init_expr in reversed(map.element_vars):
-            % if init_expr:
-               ${init_expr.render_pre()}
-               ${assign_var(elt_var, init_expr.render_expr())}
+      <%
+         coll_expr = map.collection.render_expr()
+         if map.collection.type.is_list_type:
+            coll_type = ctx.generic_list_type
+            coll_expr = coll_type.internal_conversion(map.collection.type,
+                                                      coll_expr)
+         else:
+            coll_type = map.collection.type
+      %>
+      declare
+         Collection : constant ${coll_type.name} := ${coll_expr};
+      begin
+         for ${codegen_element_var} of
+            % if map.collection.type.is_list_type:
+               Collection.Nodes (1 .. Collection.Count)
+            % else:
+               Collection.Items
             % endif
-         % endfor
+         loop
 
-         ${scopes.start_scope(map.iter_scope)}
+            ## Initialize all element variables
+            % for elt_var, init_expr in reversed(map.element_vars):
+               % if init_expr:
+                  ${init_expr.render_pre()}
+                  ${assign_var(elt_var, init_expr.render_expr())}
+               % endif
+            % endfor
 
-         ## Bind user iteration variables
-         % if user_element_var.source_name:
-            ${gdb_bind_var(user_element_var)}
-         % endif
-         % if map.index_var:
-            ${gdb_bind_var(map.index_var)}
-         % endif
+            ${scopes.start_scope(map.iter_scope)}
 
-         ## Emit the user body for the loop
-         % if map.filter:
-            ${map.filter.render_pre()}
-            if ${map.filter.render_expr()} then
+            ## Bind user iteration variables
+            % if user_element_var.source_name:
+               ${gdb_bind_var(user_element_var)}
+            % endif
+            % if map.index_var:
+               ${gdb_bind_var(map.index_var)}
+            % endif
+
+            ## Emit the user body for the loop
+            % if map.filter:
+               ${map.filter.render_pre()}
+               if ${map.filter.render_expr()} then
+                  ${build_loop_body()}
+               end if;
+            % else:
                ${build_loop_body()}
-            end if;
-         % else:
-            ${build_loop_body()}
-         % endif
+            % endif
 
-         % if map.index_var:
-            ${map.index_var.name} := ${map.index_var.name} + 1;
-         % endif
-         ${scopes.finalize_scope(map.iter_scope)}
-      end loop;
+            % if map.index_var:
+               ${map.index_var.name} := ${map.index_var.name} + 1;
+            % endif
+            ${scopes.finalize_scope(map.iter_scope)}
+         end loop;
+      end;
 
       ## Then convert the vector into the final array type
       ${array_var} := ${map.type.constructor_name}
