@@ -919,15 +919,15 @@ class IsA(AbstractExpression):
             super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            target = ('{}.Node' if self.expr.type.is_entity_type
-                      else '{}').format(self.expr.render_expr())
+            target = T.root_node.internal_conversion(
+                self.expr.type,
+                ('{}.Node' if self.expr.type.is_entity_type else '{}')
+                .format(self.expr.render_expr()))
             result_expr = (
-                '{target} /= null \nand then {target}.all in {nodes}'.format(
+                '{target} /= null \nand then {target}.Kind in {nodes}'.format(
                     target=target,
-                    nodes=' | '.join(
-                        "{}_Type'Class".format(a.name.camel_with_underscores)
-                        for a in self.astnodes
-                    )
+                    nodes=' | '.join(a.ada_kind_range_name
+                                     for a in self.astnodes)
                 )
             )
             return '{}\n{}'.format(
