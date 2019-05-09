@@ -274,6 +274,8 @@ private package ${ada_lib_name}.Implementation is
    ${ctx.generic_list_type.null_constant} :
       constant ${generic_list_type_name} := null;
 
+   ${astnode_types.bare_node_converters(ctx.generic_list_type)}
+
    % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.public_incomplete_decl(astnode)}
