@@ -24,7 +24,7 @@ package body ${ada_lib_name}.Debug is
 
    procedure PN (Node : ${root_node_type_name}) is
    begin
-      Put_Line (Image (Node.Short_Text_Image));
+      Put_Line (Image (Short_Text_Image (Node)));
    end PN;
 
    --------
@@ -33,7 +33,7 @@ package body ${ada_lib_name}.Debug is
 
    procedure PT (Node : ${root_node_type_name}) is
    begin
-      Node.Print (Show_Slocs => True);
+      Print (Node, Show_Slocs => True);
    end PT;
 
    ----------
