@@ -9,8 +9,6 @@ import docutils.parsers.rst
 from docutils.statemachine import StringList
 from sphinx.util.docstrings import prepare_docstring
 
-from langkit.expressions import AbstractExpression
-
 
 class AutoPropertiesDSL(docutils.parsers.rst.Directive):
     """
@@ -71,6 +69,16 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
         return def_list_item
 
     def run(self):
+        # Do not put this at the top-level to avoid nasty circular dependency
+        # issues.
+        #
+        # TODO: this is just a workaround. We should remove this circular
+        # dependency instead, but this deserves its own refactoring:
+        # compiled_types imports langkit.expressions at import time and
+        # conversely. This works only when loading compiled_types first
+        # "thanks" to the way the dependencies are used.
+        from langkit.expressions import AbstractExpression
+
         document = self.state.document
         def_list = nodes.definition_list()
         result = [def_list]
