@@ -3215,10 +3215,17 @@ class ASTNodeType(BaseStructType):
         Return the name of the converter from bare nodes of type `from_type` to
         bare nodes of type `self`.
 
+        Note that only conversions to or from the root node are supported.
+
         :rtype: str
         """
-        return 'Convert_{}_To_{}'.format(from_type.kwless_raw_name,
-                                         self.kwless_raw_name)
+        if self.is_root_node:
+            assert not from_type.is_root_node
+            return 'Convert_From_{}'.format(from_type.kwless_raw_name)
+        elif from_type.is_root_node:
+            return 'Convert_To_{}'.format(self.kwless_raw_name)
+        else:
+            assert False
 
     def internal_conversion(self, expr_type, expr):
         """
