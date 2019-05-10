@@ -3233,6 +3233,10 @@ class ASTNodeType(BaseStructType):
         if expr_type.is_entity_type:
             expr_type = expr_type.element_type
 
+        # Avoid useless conversions
+        if self == expr_type:
+            return expr
+
         root_node_expr = (
             expr
             if expr_type.is_root_node else
