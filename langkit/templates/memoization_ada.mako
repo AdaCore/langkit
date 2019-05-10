@@ -107,7 +107,8 @@ begin
       % for t in key_types:
          when ${t.memoization_kind} =>
             % if t.is_ast_node:
-               return Hash (${root_node_type_name} (Key.As_${t.name}));
+               return Hash (${T.root_node.internal_conversion(
+                  t, 'Key.As_{}'.format(t.name))});
             % else:
                return Hash (Key.As_${t.name});
             % endif
