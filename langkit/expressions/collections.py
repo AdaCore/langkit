@@ -30,6 +30,29 @@ def collection_expr_none(x):
 builtin_collection_functions = (collection_expr_identity, collection_expr_none)
 
 
+def canonicalize_list(coll_expr, to_root_list=False):
+    """
+    If `coll_expr` returns a bare node, return an expression that converts it
+    to the generic list type (if to_root_list=False) or the root list type (if
+    to_root_list=True). Also return the element type for this collection.
+
+    :type coll_expr: ResolvedExpression
+    :rtype: (ResolvedExpression, CompiledType)
+    """
+    element_type = coll_expr.type.element_type
+    if coll_expr.type.is_ast_node:
+        # Compute the result's type according to to_root_list
+        if to_root_list:
+            dest_type = coll_expr.type
+            while not dest_type.is_root_list_type:
+                dest_type = dest_type.base
+        else:
+            dest_type = get_context().generic_list_type
+
+        coll_expr = coll_expr.convert_node(dest_type)
+    return (coll_expr, element_type)
+
+
 class CollectionExpression(AbstractExpression):
     """
     Base class to provide common code for abstract expressions working on
@@ -706,13 +729,16 @@ def collection_get(self, collection, index, or_null):
         )
     )
 
+    # Insert a null check before getting the collection item
     if coll_expr.type.is_ast_node:
         coll_expr = NullCheckExpr(coll_expr)
     elif coll_expr.type.is_entity_type:
         coll_expr = NullCheckExpr(coll_expr, implicit_deref=True)
 
+    coll_expr, element_type = canonicalize_list(coll_expr, to_root_list=True)
+
     or_null = construct(or_null)
-    result = CallExpr('Get_Result', 'Get', coll_expr.type.element_type,
+    result = CallExpr('Get_Result', 'Get', element_type,
                       [coll_expr, index_expr, or_null])
 
     if as_entity:
@@ -731,16 +757,17 @@ def length(self, collection):
     coll_expr = construct(collection)
     orig_type = coll_expr.type
 
+    # Automatically unwrap entities
     if coll_expr.type.is_entity_type:
         coll_expr = FieldAccessExpr(coll_expr, 'Node', coll_expr.type.astnode,
                                     do_explicit_incref=False)
+
     check_source_language(
         coll_expr.type.is_collection,
-        'Collection expected but got {} instead'.format(orig_type.dsl_name)
-    )
+        'Collection expected but got {} instead'.format(orig_type.dsl_name))
 
-    return CallExpr('Len', 'Length', T.Int, [coll_expr],
-                    abstract_expr=self)
+    coll_expr, _ = canonicalize_list(coll_expr)
+    return CallExpr('Len', 'Length', T.Int, [coll_expr], abstract_expr=self)
 
 
 @attr_expr('singleton')
