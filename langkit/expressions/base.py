@@ -1376,6 +1376,18 @@ class ResolvedExpression(object):
         return (self if self.type == rtype else Cast.Expr(self, rtype),
                 expr if expr.type == rtype else Cast.Expr(expr, rtype))
 
+    def convert_node(self, dest_type):
+        """
+        Helper to wrap an expression computing a bare node into a type
+        conversion.
+        """
+        assert self.type.is_ast_node
+        if dest_type == self.type:
+            return self
+
+        return LiteralExpr(dest_type.internal_conversion(self.type, '{}'),
+                           dest_type, [self])
+
 
 class VariableExpr(ResolvedExpression):
     """
