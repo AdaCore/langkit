@@ -1750,6 +1750,11 @@ class UncheckedCastExpr(ResolvedExpression):
         return self.expr.render_pre()
 
     def _render_expr(self):
+        if self.dest_type.is_ast_node:
+            # Use unchecked conversions for nodes instead of regular Ada
+            # conversions.
+            return self.dest_type.internal_conversion(
+                self.expr.type, self.expr.render_expr())
         return '{} ({})'.format(self.dest_type.name, self.expr.render_expr())
 
     @property
