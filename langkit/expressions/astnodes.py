@@ -17,6 +17,34 @@ def get_builtin_field(name):
     return T.root_node.get_abstract_node_data_dict()[name]
 
 
+def build_field_access(self, node_expr, builtin_field_name,
+                       bare_node_expr_constructor):
+    """
+    Helper for abstract expressions below. Return a resolved expression to
+    evaluate either `node_expr`'s builtin property `field_name` (if `node_expr`
+    is an entity) or the builtin field `field_name` (if `node_expr` is a bare
+    node).
+
+    We don't use the builtin property in the bare node case as the expression
+    must return the same type as its input, while the property always returns
+    an entity.
+
+    :param langkit.expressions.ResolvedExpression node_expr: Expression for the
+        input node/entity.
+    :param str builtin_field_name: Name of the builtin field to access.
+    :param bare_node_expr_constructor: Callback used to build the expression
+        that computes the field access in the case we have a bare node input.
+    :rtype: langkit.expressions.ResolvedExpression
+    """
+    if node_expr.type.is_entity_type:
+        return FieldAccess.Expr(
+            node_expr, get_builtin_field(builtin_field_name), [],
+            implicit_deref=True, abstract_expr=self)
+    else:
+        return bare_node_expr_constructor(node_expr.convert_node(T.root_node),
+                                          abstract_expr=self)
+
+
 @auto_attr
 def parent(self, node):
     """
@@ -35,12 +63,11 @@ def parent(self, node):
         ' expected'.format(node_expr.type.dsl_name)
     )
 
-    if node_expr.type.is_entity_type:
-        return FieldAccess.Expr(node_expr, get_builtin_field('parent'),
-                                [], implicit_deref=True, abstract_expr=self)
-    else:
-        return FieldAccessExpr(node_expr, 'Parent', T.root_node,
-                               do_explicit_incref=False, abstract_expr=self)
+    return build_field_access(
+        self, node_expr, 'parent',
+        lambda node_expr, abstract_expr: FieldAccessExpr(
+            node_expr, 'Parent', T.root_node,
+            do_explicit_incref=False, abstract_expr=self))
 
 
 @auto_attr
@@ -62,12 +89,11 @@ def parents(self, node):
         ' expected'.format(node_expr.type.dsl_name)
     )
 
-    if node_expr.type.is_entity_type:
-        return FieldAccess.Expr(node_expr, get_builtin_field('parents'),
-                                [], implicit_deref=True, abstract_expr=self)
-    else:
-        return CallExpr('Node_Parents', 'Parents', T.root_node.array,
-                        [node_expr], abstract_expr=self)
+    return build_field_access(
+        self, node_expr, 'parents',
+        lambda node_expr, abstract_expr: CallExpr(
+            'Node_Parents', 'Parents', T.root_node.array, [node_expr],
+            abstract_expr=self))
 
 
 @auto_attr
@@ -84,9 +110,8 @@ def children(self, node):
         ' expected'.format(node_expr.type.dsl_name)
     )
 
-    if node_expr.type.is_entity_type:
-        return FieldAccess.Expr(node_expr, get_builtin_field('children'),
-                                [], implicit_deref=True, abstract_expr=self)
-    else:
-        return CallExpr('Node_Children', 'Children', T.root_node.array,
-                        [node_expr], abstract_expr=self)
+    return build_field_access(
+        self, node_expr, 'children',
+        lambda node_expr, abstract_expr: CallExpr(
+            'Node_Children', 'Children', T.root_node.array, [node_expr],
+            abstract_expr=self))
