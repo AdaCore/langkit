@@ -613,6 +613,13 @@ base_langkit_docs = {
         current thread. Will be automatically allocated on error and free'd on
         the next error.
     """,
+    'langkit.synthetic_nodes': """
+        Set of nodes that are synthetic.
+
+        Parsers cannot create synthetic nodes, so these correspond to no source
+        text. These nodes are created dynamically for convenience during
+        semantic analysis.
+    """,
     'langkit.token_kind_name': """
         Return a human-readable name for a token kind.
 
