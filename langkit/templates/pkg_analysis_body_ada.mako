@@ -882,7 +882,7 @@ package body ${ada_lib_name}.Analysis is
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Text (Node.Token_Start, Node.Token_End);
+      return Text (Node.Internal.Node);
    end Text;
 
    ----------------
