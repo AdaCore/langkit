@@ -177,6 +177,11 @@ def resolve(parser):
         raise Exception("Cannot resolve parser {}".format(parser))
 
 
+def reject_synthetic(node):
+    check_source_language(not node.synthetic,
+                          'Parsers cannot create synthetic nodes')
+
+
 class Grammar(object):
     """
     Holder for parsing rules.
@@ -982,7 +987,9 @@ class Skip(Parser):
         return [self.dest_node_parser]
 
     def _eval_type(self):
-        return resolve_type(self.dest_node)
+        result = resolve_type(self.dest_node)
+        reject_synthetic(result)
+        return result
 
     def generate_code(self):
         return self.render('skip_code_ada', exit_label=gen_name("Exit_Or"))
@@ -1352,6 +1359,7 @@ class List(Parser):
         with self.diagnostic_context:
             if self.list_cls:
                 result = resolve_type(self.list_cls)
+                reject_synthetic(result)
                 check_source_language(
                     result.is_list_type,
                     'Invalid list type for List parser: {}. '
@@ -1496,7 +1504,9 @@ class Opt(Parser):
             return self.parser._eval_type()
         else:
             assert self._booleanize._type
-            return resolve_type(self._booleanize._type)
+            result = resolve_type(self._booleanize._type)
+            reject_synthetic(result)
+            return result
 
     def _precise_types(self):
         return (self.parser.precise_types
@@ -1745,6 +1755,7 @@ class _Transform(Parser):
             return self.cached_type
 
         result = resolve_type(self.typ)
+        reject_synthetic(result)
 
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
@@ -1809,9 +1820,11 @@ class Null(Parser):
         return self.render('null_code_ada')
 
     def _eval_type(self):
-        return (self.typ._eval_type()
-                if isinstance(self.typ, Parser) else
-                resolve_type(self.typ))
+        result = (self.typ._eval_type()
+                  if isinstance(self.typ, Parser) else
+                  resolve_type(self.typ))
+        reject_synthetic(result)
+        return result
 
     def _precise_types(self):
         return TypeSet([self.type])
