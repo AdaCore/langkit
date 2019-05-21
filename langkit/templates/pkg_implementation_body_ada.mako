@@ -1294,13 +1294,22 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Text
-     (Node : access ${root_node_value_type}'Class) return Text_Type
-   is
-      Start_T : constant Token_Reference :=
-         Node.Token (Node.Token_Start_Index);
-      End_T   : constant Token_Reference := Node.Token (Node.Token_End_Index);
+     (Node : access ${root_node_value_type}'Class) return Text_Type is
    begin
-      return Text (Start_T, End_T);
+      % if ctx.synthetic_nodes:
+         if Node.Kind in Synthetic_Nodes then
+            return "";
+         end if;
+      % endif
+
+      declare
+         Start_T : constant Token_Reference :=
+            Node.Token (Node.Token_Start_Index);
+         End_T   : constant Token_Reference :=
+            Node.Token (Node.Token_End_Index);
+      begin
+         return Text (Start_T, End_T);
+      end;
    end Text;
 
    ---------------------
