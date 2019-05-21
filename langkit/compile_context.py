@@ -871,7 +871,7 @@ class CompileCtx(object):
         # Avoid a warning about unused documentation when there are no
         # synthetic nodes.
         if not self.synthetic_nodes:
-            _ = self.documentations['langkit.synthetic_nodes']
+            self.documentations['langkit.synthetic_nodes']
 
         # Check that the environment hook is bound if the language spec uses
         # it.
