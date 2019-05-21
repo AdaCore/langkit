@@ -1,0 +1,17 @@
+== List ==
+File "test.py", line 32, In definition of grammar rule main_rule
+    Error: Parsers cannot create synthetic nodes
+
+== Null ==
+File "test.py", line 32, In definition of grammar rule main_rule
+    Error: Parsers cannot create synthetic nodes
+
+== Skip ==
+File "test.py", line 32, In definition of grammar rule main_rule
+    Error: Parsers cannot create synthetic nodes
+
+== Transform ==
+File "test.py", line 32, In definition of grammar rule main_rule
+    Error: Parsers cannot create synthetic nodes
+
+Done
