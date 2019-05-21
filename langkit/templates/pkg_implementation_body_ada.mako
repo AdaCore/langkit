@@ -1523,9 +1523,11 @@ package body ${ada_lib_name}.Implementation is
          else End_Sloc (Get (T.Pos).Sloc_Range));
 
    begin
-      if Node.Is_Synthetic then
-         return Sloc_Range (Node.Parent);
-      end if;
+      % if ctx.synthetic_nodes:
+         if Node.Kind in Synthetic_Nodes then
+            return Sloc_Range (Node.Parent);
+         end if;
+      % endif
 
       if Node.Is_Ghost then
          Token_Start := (if Node.Token_Start_Index = 1
@@ -2511,14 +2513,6 @@ package body ${ada_lib_name}.Implementation is
          return Node.Last_Attempted_Child > -1;
       end if;
    end;
-
-   ------------------
-   -- Is_Synthetic --
-   ------------------
-
-   function Is_Synthetic
-     (Node : access ${root_node_value_type}'Class) return Boolean
-   is (Node.Token_Start_Index = No_Token_Index);
 
    -----------------
    -- Token_Start --

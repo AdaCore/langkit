@@ -355,6 +355,15 @@ class CompileCtx(object):
         :type: list[langkit.compiled_types.ASTNodeType]
         """
 
+        self.synthetic_nodes = None
+        """
+        Sub-sequence of `self.astnode_types` for all nodes that are synthetic.
+
+        This is computed right after `self.astnode_types`.
+
+        :type: list[langkit.compiled_types.ASTNodeType]
+        """
+
         self.node_kind_constants = {}
         """
         Mapping: ASTNodeType concrete (i.e. non abstract) instance -> int,
@@ -856,6 +865,13 @@ class CompileCtx(object):
         # relatively stable order. This is really useful for debugging
         # purposes.
         self.astnode_types.sort(key=lambda n: n.hierarchical_name)
+
+        self.synthetic_nodes = [n for n in self.astnode_types
+                                if n.synthetic]
+        # Avoid a warning about unused documentation when there are no
+        # synthetic nodes.
+        if not self.synthetic_nodes:
+            _ = self.documentations['langkit.synthetic_nodes']
 
         # Check that the environment hook is bound if the language spec uses
         # it.

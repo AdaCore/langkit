@@ -742,11 +742,6 @@ private package ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class) return Bare_Children_Array;
    --  Implementation for Analysis.Children_With_Trivia
 
-   function Is_Synthetic
-     (Node : access ${root_node_value_type}'Class) return Boolean;
-   --  Returns whether the node is a synthetic node, i.e. whether it was
-   --  generated for semantic analysis instead of parsing.
-
    % for astnode in no_builtins(ctx.astnode_types):
      % if astnode.is_root_list_type:
        ${list_types.private_decl(astnode.element_type)}
