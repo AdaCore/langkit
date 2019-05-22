@@ -1296,11 +1296,17 @@ package body ${ada_lib_name}.Implementation is
    function Text
      (Node : access ${root_node_value_type}'Class) return Text_Type is
    begin
+      --  No text is associated to synthetic and ghost nodes
+
       % if ctx.synthetic_nodes:
          if Node.Kind in Synthetic_Nodes then
             return "";
          end if;
       % endif
+
+      if Is_Ghost (Node) then
+         return "";
+      end if;
 
       declare
          Start_T : constant Token_Reference :=
