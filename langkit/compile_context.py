@@ -2155,7 +2155,7 @@ class CompileCtx(object):
                 prop.reset_inheritance_info()
                 if not prop.abstract or prop.abstract_runtime_check:
                     root_static = PropertyDef(
-                        expr=None, prefix=None, name=prop.name,
+                        expr=None, prefix=None, name=None,
                         type=prop.type,
                         doc=prop.doc,
                         public=False,
@@ -2165,6 +2165,11 @@ class CompileCtx(object):
                         optional_entity_info=prop.optional_entity_info,
                     )
                     static_props[0] = root_static
+
+                    # Manually assign names to the new static property to avoid
+                    # extra decorations.
+                    root_static._original_name = prop._original_name
+                    root_static._name = prop._name
 
                     # Transfer arguments from the dispatcher to the new static
                     # property, then regenerate arguments in the dispatcher.
