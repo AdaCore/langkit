@@ -1121,12 +1121,11 @@ class ${root_astnode_name}(object):
 
     @property
     def text(self):
-        """
-        Return the source buffer slice corresponding to the text that spans
-        between the first and the last tokens of `self`.
-        """
-        return ('' if self.is_ghost else
-                Token.text_range(self.token_start, self.token_end))
+        ${py_doc('langkit.node_text', 8)}
+        node = self._unwrap(self)
+        result = _text()
+        _node_text(ctypes.byref(node), ctypes.byref(result))
+        return result._wrap()
 
     @property
     def short_image(self):
@@ -1712,6 +1711,10 @@ _node_is_token_node = _import_func(
 _node_short_image = _import_func(
     '${capi.get_name("node_short_image")}',
     [ctypes.POINTER(${c_entity})], _text
+)
+_node_text = _import_func(
+    '${capi.get_name("node_text")}',
+    [ctypes.POINTER(${c_entity}), ctypes.POINTER(_text)], None
 )
 _node_sloc_range = _import_func(
     '${capi.get_name("node_sloc_range")}',

@@ -543,10 +543,7 @@ package ${ada_lib_name}.Analysis is
    -----------------------
 
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type;
-   --  Shortcut to get the source buffer slice corresponding to the text that
-   --  spans between the first and last tokens of an AST node.
-   --
-   --  Note that this returns the empty string for synthetic nodes.
+   ${ada_doc('langkit.node_text', 3)}
 
    function Debug_Text (Node : ${root_entity.api_name}'Class) return String;
    --  Like ``Text``, to get the source buffer slice as a string

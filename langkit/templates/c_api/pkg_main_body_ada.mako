@@ -508,6 +508,17 @@ package body ${ada_lib_name}.Implementation.C is
          return (System.Null_Address, 0, 0);
    end;
 
+   procedure ${capi.get_name('node_text')}
+     (Node : ${entity_type}_Ptr;
+      Text : access ${text_type}) is
+   begin
+      Clear_Last_Exception;
+      Text.all := Wrap_Alloc (Implementation.Text (Node.Node));
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    procedure ${capi.get_name('node_sloc_range')}
      (Node         : ${entity_type}_Ptr;
       Sloc_Range_P : access ${sloc_range_type}) is
