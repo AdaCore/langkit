@@ -1257,7 +1257,7 @@ class ${root_astnode_name}(object):
         """
         try:
             return next(self.finditer(ast_type_or_pred, **kwargs))
-        except Exception:
+        except StopIteration:
             return None
 
     @property
