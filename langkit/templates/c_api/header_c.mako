@@ -396,7 +396,7 @@ ${capi.get_name("destroy_text")}(${text_type} *text);
 ${c_doc('langkit.symbol_text')}
 extern void
 ${capi.get_name("symbol_text")}(${symbol_type} *symbol,
-                                    ${text_type} *text);
+                                ${text_type} *text);
 
 ${c_doc('langkit.create_big_integer')}
 extern ${big_integer_type}
