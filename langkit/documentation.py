@@ -463,6 +463,12 @@ base_langkit_docs = {
     'langkit.node_unit': """
         Return the analysis unit that owns this node.
     """,
+    'langkit.node_text': """
+        Return the source buffer slice corresponding to the text that spans
+        between the first and the last tokens of this node.
+
+        Note that this returns the empty string for synthetic nodes.
+    """,
     'langkit.node_sloc_range': """
         Return the spanning source location range for this node.
     """,

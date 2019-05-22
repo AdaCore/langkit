@@ -355,6 +355,11 @@ ${c_doc('langkit.node_short_image')}
 extern ${text_type}
 ${capi.get_name("node_short_image")}(${entity_type} *node);
 
+${c_doc('langkit.node_text')}
+extern void
+${capi.get_name("node_text")}(${entity_type} *node,
+                              ${text_type} *text);
+
 ${c_doc('langkit.node_sloc_range')}
 extern void
 ${capi.get_name("node_sloc_range")}(${entity_type} *node,

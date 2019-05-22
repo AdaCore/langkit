@@ -422,6 +422,13 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('node_short_image')}";
    ${ada_c_doc('langkit.node_short_image', 3)}
 
+   procedure ${capi.get_name('node_text')}
+     (Node : ${entity_type}_Ptr;
+      Text : access ${text_type})
+      with Export, Convention => C,
+           External_Name      => "${capi.get_name('node_text')}";
+   ${ada_c_doc('langkit.node_text', 3)}
+
    procedure ${capi.get_name('node_sloc_range')}
      (Node         : ${entity_type}_Ptr;
       Sloc_Range_P : access ${sloc_range_type})
