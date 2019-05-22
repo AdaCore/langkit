@@ -221,7 +221,7 @@ class _text(ctypes.Structure):
             # than characters.
             return self.chars[:4 * self.length].decode(self.encoding)
         else:
-            return None
+            return u''
 
     @classmethod
     def cast(cls, value):
