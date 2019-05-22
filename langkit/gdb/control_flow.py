@@ -3,24 +3,22 @@ from __future__ import absolute_import, division, print_function
 import gdb
 
 from langkit.gdb.breakpoints import BreakpointGroup
-from langkit.gdb.debug_info import (ExprDone, ExprStart, Property,
-                                    PropertyCall, Scope)
+from langkit.gdb.debug_info import ExprDone, ExprStart, Property, PropertyCall
 from langkit.gdb.utils import expr_repr
 
 
-def break_scope_start(context, scope, from_line_no=None):
+def scope_start_line_nos(scope, from_line_no=None):
     """
-    Create a breakpoint group for all entry points that are relevant (for
-    users) for the given `scope`. Return None if we could find no relevant
-    location to break on, otherwise return the breakpoint group.
+    Return line numbers for all entry points that are relevant (for users) for
+    the given `scope`. Return an empty list if we could find no relevant
+    location to break on.
 
-    :type context: langkit.gdb.context.Context
     :type scope: Scope
 
     :param int|None from_line_no: If given, don't consider line numbers lower
         than or equal to `from_line_no`.
 
-    :rtype: BreakpointGroup|None
+    :rtype: list[int]
     """
     candidates = []
 
@@ -46,6 +44,24 @@ def break_scope_start(context, scope, from_line_no=None):
     if from_line_no:
         candidates = [l for l in candidates if from_line_no < l]
 
+    return candidates
+
+
+def break_scope_start(context, scope, from_line_no=None):
+    """
+    Create a breakpoint group for all entry points that are relevant (for
+    users) for the given `scope`. Return None if we could find no relevant
+    location to break on, otherwise return the breakpoint group.
+
+    :type context: langkit.gdb.context.Context
+    :type scope: Scope
+
+    :param int|None from_line_no: If given, don't consider line numbers lower
+        than or equal to `from_line_no`.
+
+    :rtype: BreakpointGroup|None
+    """
+    candidates = scope_start_line_nos(scope, from_line_no)
     return BreakpointGroup(context, candidates) if candidates else None
 
 
@@ -199,7 +215,7 @@ def go_step_inside(context):
     scope_state, current_expr = state.lookup_current_expr()
     target = scope_state.called_property if scope_state else None
 
-    # If we are not inside a  property call already, look for all property
+    # If we are not inside a property call already, look for all property
     # calls in the current expression.
     if not target and scope_state:
         # Look for property calls that fall under the following line range...
@@ -242,34 +258,20 @@ def go_step_inside(context):
             go_next(context)
         return
 
-    # The target is a dispatcher. These have only one first-level scope, so:
-    # continue to its first-level scope.
-    outer_scopes = list(target.iter_events(recursive=False, filter=Scope))
-    if len(outer_scopes) != 1:
-        print('ERROR: dispatcher {} has none or multiple first-level'
-              ' scopes'.format(target))
-        return
-    outer_scope = outer_scopes[0]
-    continue_until(outer_scope.line_range.first_line, True)
+    def frame_signature(frame):
+        return str(frame.function())
 
-    # Step until we reach a nested scope, so that we let the dispatch occur
-    while True:
-        state = context.decode_state()
-        if not state or state.property != target:
-            print('ERROR: landed somewhere else that in {}'.format(target))
-            return
-        inner_scope = state.innermost_scope.scope
-
-        if inner_scope != outer_scope:
-            break
-        gdb.execute('next')
-
-    # We now reached the matcher that contains the call to the dispatched
-    # property: find it and follow the call.
-    targets = [call.property(context)
-               for call in inner_scope.iter_events(filter=PropertyCall)
-               if call.line_range.first_line in inner_scope.line_range]
-    target = targets[0] if len(targets) == 1 else None
-    bp_group = break_scope_start(context, target)
-    assert bp_group
+    # The target is a dispatcher. Look for all property calls it contains,
+    # create a breakpoint group for them and continue.
+    line_nos = []
+    for call in target.iter_events(filter=PropertyCall):
+        try:
+            prop = call.property(context)
+        except KeyError:
+            # This happens when the called property is actually a stub
+            # (abstract runtime check). No need to put a breakpoint, there.
+            pass
+        else:
+            line_nos.extend(scope_start_line_nos(prop))
+    BreakpointGroup(context, line_nos)
     gdb.execute('continue')

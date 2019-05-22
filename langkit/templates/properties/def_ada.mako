@@ -198,6 +198,7 @@ begin
          % for types, static_prop in property.dispatch_table:
             % if types:
                when ${ctx.astnode_kind_set(types)} =>
+                  ${gdb_property_call_start(static_prop)}
                   Property_Result := ${static_prop.name}
                     (${static_prop.struct.name} (${property.self_arg_name})
                      % for arg in property.arguments:
@@ -207,6 +208,7 @@ begin
                         , ${property.entity_info_name}
                      % endif
                     );
+                  ${gdb_end()}
             % endif
          % endfor
       end case;

@@ -2923,6 +2923,7 @@ def render(*args, **kwargs):
         assign_var=assign_var,
         gdb_property_start=gdb_property_start,
         gdb_property_body_start=gdb_property_body_start,
+        gdb_property_call_start=gdb_property_call_start,
         gdb_memoization_lookup=gdb_memoization_lookup,
         gdb_memoization_return=gdb_memoization_return,
         gdb_scope_start=gdb_scope_start,
