@@ -471,6 +471,8 @@ base_langkit_docs = {
     """,
     'langkit.node_sloc_range': """
         Return the spanning source location range for this node.
+
+        Note that this returns the sloc of the parent for synthetic nodes.
     """,
     'langkit.lookup_in_node': """
         Return the bottom-most node from in ``Node`` and its children which
