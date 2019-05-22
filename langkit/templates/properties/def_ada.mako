@@ -29,6 +29,10 @@ is
    Self : ${Self.type.name} := ${Self.type.name}
      (${property.self_arg_name});
 
+   ## Dispatchers must not memoize: it is the job of the static properties do
+   ## to it themselves.
+   <% memoized = property.memoized and not property.is_dispatcher %>
+
    % if property._has_self_entity:
    Ent : ${Self.type.entity.name} :=
      ${Self.type.entity.name}'(Node => Self, Info => E_Info);
@@ -71,7 +75,7 @@ is
       % endfor
    % endif
 
-   % if property.memoized:
+   % if memoized:
          <%
             key_length = 1 + len(property.arguments)
             if property.uses_entity_info:
@@ -116,7 +120,7 @@ begin
       end if;
    % endif
 
-   % if property.memoized:
+   % if memoized:
       ## If memoization is enabled for this property, look for an already
       ## computed result for this property. See the declaration of
       ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale about
@@ -224,7 +228,7 @@ begin
       ${scopes.finalize_scope(property.vars.root_scope)}
    % endif
 
-   % if property.memoized:
+   % if memoized:
       ## If memoization is enabled for this property, save the result for later
       ## re-use.
       % if not property.memoize_in_populate:
@@ -251,7 +255,7 @@ begin
 
 % if (not property.is_dispatcher and \
           property.vars.root_scope.has_refcounted_vars(True)) or \
-     property.memoized or \
+     memoized or \
      has_logging:
    exception
       when Property_Error =>
@@ -263,7 +267,7 @@ begin
             % endfor
          % endif
 
-         % if property.memoized:
+         % if memoized:
             % if not property.memoize_in_populate:
             if not Node.Unit.Context.In_Populate_Lexical_Env then
             % endif
