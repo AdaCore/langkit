@@ -1393,6 +1393,7 @@ class List(Parser):
                 )
                 result = item_type.list
 
+        result.add_list_element_parser(self.parser)
         return result
 
     def _precise_types(self):

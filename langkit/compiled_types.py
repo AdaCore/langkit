@@ -2380,6 +2380,21 @@ class ASTNodeType(BaseStructType):
         :type: list[langkit.parsers._Transform]
         """
 
+        self.list_element_parsers = [] if is_list else None
+        """
+        For list nodes, list of parsers that produce list elements. None for
+        all other nodes.
+
+        :type: list[langkit.parsers.Parser]
+        """
+
+        self.precise_list_element_types = None
+        """
+        For list nodes, precise set of types that this list can contain.
+
+        :rtype: TypeSet
+        """
+
         self.unparser = None
         """
         Unparser for this node. Computed during the NodesToParsers pass.
@@ -2403,6 +2418,42 @@ class ASTNodeType(BaseStructType):
         # Make sure we have one entity type for each AST node type
         entity_type = self.entity
         del entity_type
+
+    @property
+    def doc(self):
+        result = super(ASTNodeType, self).doc
+
+        # If this is a list node and that parsers build it, add a precise list
+        # of types it can contain: the element type might be too generic.
+        if self.is_list and not self.synthetic:
+            precise_types = (self.precise_list_element_types
+                             .minimal_matched_types)
+            if len(precise_types) > 1:
+                result_list = result.splitlines() if result else []
+                type_descr = [
+                    'This list node can contain one of the following nodes:'
+                ] + list(sorted('* {}'.format(t.dsl_name)
+                                for t in precise_types))
+
+                # Indent lines in `type_descr` as much as the first non-null
+                # line of `result`.
+                first_non_null_line = None
+                for line in result_list:
+                    if line.strip():
+                        first_non_null_line = line
+                        break
+
+                if first_non_null_line:
+                    indent = first_non_null_line[
+                        :-len(first_non_null_line.lstrip())]
+                    result_list.append('')
+                    result_list.extend(indent + line
+                                       for line in type_descr)
+                else:
+                    result = type_descr
+                result = '\n'.join(result_list)
+
+        return result
 
     def repr_name(self):
         """
@@ -2443,6 +2494,14 @@ class ASTNodeType(BaseStructType):
         :param langkit.parsers._Transform parser: Transform parser to register.
         """
         self.transform_parsers.append(parser)
+
+    def add_list_element_parser(self, parser):
+        """
+        Register ``parser`` as a parser that creates list elements.
+
+        :param langkit.parsers.Parser parser: Parser to register.
+        """
+        self.list_element_parsers.append(parser)
 
     def check_inferred_field_types(self):
         """
@@ -2516,8 +2575,23 @@ class ASTNodeType(BaseStructType):
                         field.type = inferred_type
 
     def compute_precise_fields_types(self):
-        for f in self.get_parse_fields(include_inherited=False):
-            f._compute_precise_types()
+        if self.is_list:
+            # Do not compute precise types twice
+            if self.precise_list_element_types:
+                return
+
+            # A list node can contain nodes coming from its own parsers, but
+            # also from subclasses' parsers.
+            self.precise_list_element_types = types = TypeSet()
+            for subcls in self.subclasses:
+                subcls.compute_precise_fields_types()
+                types.update(subcls.precise_list_element_types)
+            for p in self.list_element_parsers:
+                types.update(p.precise_types)
+
+        else:
+            for f in self.get_parse_fields(include_inherited=False):
+                f._compute_precise_types()
 
     def warn_imprecise_field_type_annotations(self):
         # The type of synthetic node fields are not inferred, so there is
