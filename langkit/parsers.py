@@ -1829,6 +1829,14 @@ class Null(Parser):
         # parser, it will not be used for parsing, just for typing.
         return []
 
+    def freeze_types(self):
+        Parser.freeze_types(self)
+
+        # Even though we don't consider the sub-parser as a children, we need
+        # its types to be freezed for the precise types machinery.
+        if self.has_parser:
+            self.type_or_parser.freeze_types()
+
     def _is_left_recursive(self, rule_name):
         return False
 
