@@ -1357,16 +1357,35 @@ class List(Parser):
 
     def _eval_type(self):
         with self.diagnostic_context:
+            # Compute the type of list elements
+            item_type = self.parser._eval_type()
+
             if self.list_cls:
+                # If a specific list class is to be used, check that...
                 result = resolve_type(self.list_cls)
+
+                # It is not synthetic
                 reject_synthetic(result)
+
+                # It is a list node
                 check_source_language(
                     result.is_list_type,
-                    'Invalid list type for List parser: {}. '
-                    'Not a list type'.format(result.dsl_name)
+                    'Invalid list type for List parser: {}.'
+                    ' Not a list type'.format(result.dsl_name)
                 )
+
+                # If we already know the type that the sub-parser returns,
+                # check that it fits in the requested list class.
+                if item_type is not None:
+                    check_source_language(
+                        item_type.matches(result.element_type),
+                        'Invalid list type for List parser: sub-parser'
+                        ' produces {} nodes while {} accepts only {} nodes'
+                        .format(item_type.dsl_name,
+                                result.dsl_name,
+                                result.element_type.dsl_name))
+
             else:
-                item_type = self.parser._eval_type()
                 check_source_language(
                     item_type.is_ast_node,
                     'List parsers only accept subparsers that yield AST nodes'
