@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-import langkit
 from langkit.dsl import ASTNode, Annotations, Field
 from langkit.parsers import Grammar, List
 
@@ -8,8 +7,8 @@ from lexer_example import Token
 from utils import emit_and_print_errors
 
 
-def create_nodes():
-    global FooNode, ListNode, Num
+def run(label, **kwargs):
+    print('== {} =='.format(label))
 
     class FooNode(ASTNode):
         annotations = Annotations(generic_list_type='FooList')
@@ -18,23 +17,25 @@ def create_nodes():
         items = Field()
 
     class Num(FooNode):
-        field = Field()
+        token_node = True
+
+    class T:
+        pass
+    T.FooNode = FooNode
+    T.ListNode = ListNode
+    T.Num = Num
+
+    g = Grammar('main_rule')
+    g.add_rules(**{name: parser(T, g) for name, parser in kwargs.items()})
+    emit_and_print_errors(g)
+    print('')
 
 
-create_nodes()
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=ListNode(List(Token.Number)),
-)
-emit_and_print_errors(grammar)
+run('Token element',
+    main_rule=lambda T, _: T.ListNode(List(Token.Number)))
 
-langkit.reset()
-create_nodes()
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    num=Num(Token.Number),
-    main_rule=List(grammar.num, list_cls=ListNode)
-)
-emit_and_print_errors(grammar)
+run('Non-list list_cls',
+    num=lambda T, _: T.Num(Token.Number),
+    main_rule=lambda T, g: List(g.num, list_cls=T.ListNode))
 
 print('Done')
