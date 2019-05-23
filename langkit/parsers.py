@@ -1820,10 +1820,13 @@ class Null(Parser):
         the same type as the other parser.
         """
         Parser.__init__(self)
-        self.typ = result_type
+        self.type_or_parser = result_type
+        self.has_parser = isinstance(result_type, Parser)
 
     @property
     def children(self):
+        # We don't consider self.type_or_parser as a child since, if it is
+        # parser, it will not be used for parsing, just for typing.
         return []
 
     def _is_left_recursive(self, rule_name):
@@ -1839,9 +1842,9 @@ class Null(Parser):
         return self.render('null_code_ada')
 
     def _eval_type(self):
-        result = (self.typ._eval_type()
-                  if isinstance(self.typ, Parser) else
-                  resolve_type(self.typ))
+        result = (self.type_or_parser._eval_type()
+                  if self.has_parser else
+                  resolve_type(self.type_or_parser))
         reject_synthetic(result)
         return result
 
