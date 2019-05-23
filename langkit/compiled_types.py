@@ -1727,6 +1727,13 @@ class Field(BaseField):
         :type: TypeSet
         """
 
+        self._precise_element_types = None
+        """
+        Cache for the precise_element_types property.
+
+        :type: TypeSet
+        """
+
         self._is_optional = None
         """
         Whether this field is ever produced by a parser in the user grammar
@@ -1757,6 +1764,18 @@ class Field(BaseField):
         return self._precise_types
 
     @property
+    def precise_element_types(self):
+        """
+        For fields that contain lists, return the precise set of types that
+        these list can contain.
+
+        :rtype: TypeSet
+        """
+        assert self.type.is_list_type
+        assert self._precise_element_types is not None
+        return self._precise_element_types
+
+    @property
     def is_optional(self):
         """
         Return whether this field is ever produced by a parser in the user
@@ -1769,46 +1788,85 @@ class Field(BaseField):
         return self._is_optional
 
     def _compute_precise_types(self):
+        etypes = None
+        is_list = self.type.is_list_type
+
         if self.null:
             # Null fields have their type automatically computed from the
             # abstract field they override.
             types = TypeSet([self.type])
+            if is_list:
+                etypes = TypeSet([self.type.element_type])
 
         elif self.abstract:
             # Abstract fields can contain anything the corresponding concrete
             # one accept, thanks to the laws of inheritance.
             types = TypeSet()
+            if is_list:
+                etypes = TypeSet()
             for f in self.concrete_fields:
                 f._compute_precise_types()
                 types.update(f.precise_types)
+                if is_list:
+                    etypes.update(f.precise_element_types)
 
         elif self.struct.synthetic:
             types = TypeSet([self.type])
+            if is_list:
+                etypes = TypeSet([self.type.element_type])
 
         else:
             # For regular
             types = TypeSet()
+            if is_list:
+                etypes = TypeSet()
             for p in self.parsers_from_transform:
                 types.update(p.precise_types)
+                if is_list:
+                    etypes.update(p.precise_element_types)
 
         self._precise_types = types
+        self._precise_element_types = etypes
 
     @property
     def doc(self):
-        result = super(Field, self).doc
-
         # If parsers build this field, add a precise list of types it can
         # contain: the field type might be too generic.
-        if not self.struct.synthetic:
-            precise_types = self.precise_types.minimal_matched_types
-            if len(precise_types) > 1:
-                type_descr = '\n'.join([
-                    'This field can contain one of the following nodes:'
+
+        result = super(Field, self).doc
+
+        # Synthetic nodes are not built by parsers, so for now we don't have
+        # precise type information for them.
+        if self.struct.synthetic:
+            return result
+
+        def amended(extra_lines):
+            extra_lines = '\n'.join(extra_lines)
+            return ('{}\n\n{}'.format(result, extra_lines)
+                    if result else
+                    extra_lines)
+
+        precise_types = self.precise_types.minimal_matched_types
+
+        # If the field always contains a list, try to give precise types
+        # for the list items.
+        if len(precise_types) == 1 and self.type.is_list_type:
+            precise_element_types = (self.precise_element_types
+                                     .minimal_matched_types)
+            if len(precise_element_types) > 1:
+                type_descr = [
+                    'This field contains a list that itself contains'
+                    ' one of the following nodes:'
                 ] + list(sorted('* {}'.format(t.dsl_name)
-                                for t in precise_types)))
-                result = ('{}\n\n{}'.format(result, type_descr)
-                          if result else
-                          type_descr)
+                                for t in precise_element_types))
+                return amended(type_descr)
+
+        if len(precise_types) > 1:
+            type_descr = [
+                'This field can contain one of the following nodes:'
+            ] + list(sorted('* {}'.format(t.dsl_name)
+                            for t in precise_types))
+            return amended(type_descr)
 
         return result
 

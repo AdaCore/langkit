@@ -807,6 +807,24 @@ class Parser(object):
         """
         raise NotImplementedError()
 
+    @property
+    def precise_element_types(self):
+        """
+        Return the precise set of nodes that the list nodes this parser return
+        can contain.
+
+        :rtype: TypeSet
+        """
+        assert self.type.is_ast_node and self.type.is_list_type
+        return self._precise_element_types()
+
+    def _precise_element_types(self):
+        """
+        Implementation for precise_element_types. Relevant subclasses must
+        override this.
+        """
+        raise NotImplementedError()
+
     def generate_code(self):
         """
         Return generated code for this parser into the global context.
@@ -997,6 +1015,9 @@ class Skip(Parser):
     def _precise_types(self):
         return TypeSet([self.type])
 
+    def _precise_element_types(self):
+        return TypeSet([self.type.element_type])
+
     def create_vars_after(self, start_pos):
         self.init_vars(res_var=self.dest_node_parser.res_var)
         self.dummy_node = VarDef('skip_dummy', T.root_node)
@@ -1044,6 +1065,9 @@ class DontSkip(Parser):
 
     def _precise_types(self):
         return self.subparser.precise_types
+
+    def _precise_element_types(self):
+        return self.subparser.precise_element_types
 
     def create_vars_after(self, start_pos):
         self.init_vars(self.subparser.pos_var, self.subparser.res_var)
@@ -1137,6 +1161,21 @@ class Or(Parser):
             result = TypeSet()
             for p in self.parsers:
                 result.update(p.precise_types)
+            return result
+        finally:
+            self.is_processing_type = False
+
+    def _precise_element_types(self):
+        # We need protection from infinite recursion the same way get_type
+        # does.
+        if self.is_processing_type:
+            return TypeSet()
+
+        try:
+            self.is_processing_type = True
+            result = TypeSet()
+            for p in self.parsers:
+                result.update(p.precise_element_types)
             return result
         finally:
             self.is_processing_type = False
@@ -1399,6 +1438,9 @@ class List(Parser):
     def _precise_types(self):
         return TypeSet([self.type])
 
+    def _precise_element_types(self):
+        return self.parser.precise_types
+
     def _compile(self):
         # Ensure this list parser will build concrete list nodes.
         # TODO: we should be able to do this in _eval_type directly.
@@ -1533,6 +1575,12 @@ class Opt(Parser):
                 if self._booleanize is None else
                 TypeSet([self.type]))
 
+    def _precise_element_types(self):
+        # If we booleanize, then we're not definitely not building a list, so
+        # asking for the element type makes no sense.
+        assert self._booleanize is None
+        return self.parser.precise_element_types
+
     def create_vars_after(self, start_pos):
         self.init_vars(
             self.parser.pos_var,
@@ -1579,6 +1627,9 @@ class _Extract(Parser):
 
     def _precise_types(self):
         return self.parser.parsers[self.index].precise_types
+
+    def _precise_element_types(self):
+        return self.parser.parsers[self.index].precise_element_types
 
     def create_vars_after(self, start_pos):
         self.init_vars(
@@ -1678,6 +1729,9 @@ class Defer(Parser):
     def _precise_types(self):
         return self.parser.precise_types
 
+    def _precise_element_types(self):
+        return self.parser.precise_element_types
+
     def create_vars_after(self, start_pos):
         self.init_vars()
 
@@ -1735,6 +1789,9 @@ class _Transform(Parser):
 
     def _precise_types(self):
         return TypeSet([self.type])
+
+    # Transform cannot be used to create a list type, so it makes no sense to
+    # ask its precise element types.
 
     @property
     def fields_parsers(self):
@@ -1860,6 +1917,9 @@ class Null(Parser):
     def _precise_types(self):
         return TypeSet([self.type])
 
+    def _precise_element_types(self):
+        return TypeSet([self.type.element_type])
+
 
 _ = Discard
 
@@ -1912,6 +1972,9 @@ class Predicate(Parser):
 
     def _precise_types(self):
         return self.parser.precise_types
+
+    def _precise_element_types(self):
+        return self.parser.precise_element_types
 
     def _compile(self):
         # Resolve the property reference and make sure it has the expected
