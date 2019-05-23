@@ -763,7 +763,7 @@ class Parser(object):
 
         :rtype: None|langkit.compiled_types.CompiledType
         """
-        assert self._type_computed
+        assert self._type_computed, 'Type not computed for {}'.format(self)
         return self._type
 
     @type.setter
