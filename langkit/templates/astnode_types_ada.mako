@@ -128,7 +128,7 @@
 
    function ${field.name}
      (Node : ${type_name}'Class) return ${ret_type.api_name};
-   ${ada_doc(field, 6)}
+   ${ada_doc(field, 3)}
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
@@ -200,7 +200,7 @@
       % for f in fields:
          ${f.name} : aliased ${f.type.storage_type_name}
             := ${f.type.storage_nullexpr};
-         ${ada_doc(f, 8)}
+         ${ada_doc(f, 9)}
       % endfor
 
       % if cls == ctx.ple_unit_root:
