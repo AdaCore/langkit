@@ -1806,7 +1806,7 @@ class Field(BaseField):
                     'This field can contain one of the following nodes:'
                 ] + list(sorted('* {}'.format(t.dsl_name)
                                 for t in precise_types)))
-                result = ('{}\n\n{}'.format(type_descr, type_descr)
+                result = ('{}\n\n{}'.format(result, type_descr)
                           if result else
                           type_descr)
 
