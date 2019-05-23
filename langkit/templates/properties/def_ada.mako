@@ -14,7 +14,7 @@ ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
 is (raise Property_Error
-    with "Property ${property.original_name} not implemented on type "
+    with "Property ${property.qualname} not implemented on type "
     & Kind_Name (${Self.type.name} (${property.self_arg_name})));
 
 % elif not property.external and not property.abstract:
