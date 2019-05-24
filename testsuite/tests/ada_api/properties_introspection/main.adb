@@ -1,4 +1,5 @@
 with Ada.Directories;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 
@@ -15,6 +16,9 @@ procedure Main is
    function Build_Big_Integer_Array return Big_Integer_Array;
    --  Helper to workaround a GNAT crash
 
+   function Image (Value : Value_Type; Indent : String := "") return String;
+   --  Helper to print a value
+
    -----------------------------
    -- Build_Big_Integer_Array --
    -----------------------------
@@ -27,6 +31,86 @@ procedure Main is
          Result (3).Set (300);
       end return;
    end Build_Big_Integer_Array;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Value : Value_Type; Indent : String := "") return String is
+      Result : Unbounded_String := To_Unbounded_String (Indent);
+   begin
+      case Kind (Value) is
+         when Boolean_Value =>
+            Append (Result, As_Boolean (Value)'Image);
+         when Integer_Value =>
+            Append (Result, As_Integer (Value)'Image);
+         when Big_Integer_Value =>
+            Append (Result, As_Big_Integer (Value).Image);
+         when Character_Value =>
+            Append
+              (Result,
+               Character'Val (Character_Type'Pos (As_Character (Value))));
+         when Token_Value =>
+            Append (Result, Image (As_Token (Value)));
+         when Unbounded_Text_Value =>
+            Append (Result, Image (To_Text (As_Unbounded_Text (Value))));
+         when Analysis_Unit_Value =>
+            Append
+              (Result, Ada.Directories.Simple_Name
+                 (As_Analysis_Unit (Value).Get_Filename));
+         when Node_Value =>
+            Append (Result, As_Node (Value).Short_Image);
+
+         when Analysis_Unit_Kind_Value =>
+            Append (Result, As_Analysis_Unit_Kind (Value)'Image);
+
+         when Foo_Node_Array_Value =>
+            declare
+               Array_Value : constant Foo_Node_Array :=
+                  As_Foo_Node_Array (Value);
+               First       : Boolean := True;
+            begin
+               if Array_Value'Length = 0 then
+                  Append (Result, "<none>");
+               else
+                  Result := Null_Unbounded_String;
+                  for V of Array_Value loop
+                     if First then
+                        First := False;
+                     else
+                        Append (Result, ASCII.LF);
+                     end if;
+                     Append (Result, Indent & "* " & V.Short_Image);
+                  end loop;
+               end if;
+            end;
+
+         when Big_Integer_Array_Value =>
+            declare
+               Array_Value : constant Big_Integer_Array :=
+                  As_Big_Integer_Array (Value);
+               First       : Boolean := True;
+            begin
+               if Array_Value'Length = 0 then
+                  Append (Result, "<none>");
+               else
+                  Result := Null_Unbounded_String;
+                  for V of Array_Value loop
+                     if First then
+                        First := False;
+                     else
+                        Append (Result, ASCII.LF);
+                     end if;
+                     Append (Result, Indent & "* " & V.Image);
+                  end loop;
+               end if;
+            end;
+
+         when others =>
+            raise Program_Error;
+      end case;
+      return To_String (Result);
+   end Image;
 
 begin
    --  Do an exhaustive dump of all available properties in this language
@@ -99,55 +183,7 @@ begin
             Put_Line (Label & ": <no such property>");
          else
             Put_Line (Label & ":");
-            case Kind (Result) is
-               when Boolean_Value =>
-                  Put_Line ("  " & As_Boolean (Result)'Image);
-               when Integer_Value =>
-                  Put_Line ("  " & As_Integer (Result)'Image);
-               when Big_Integer_Value =>
-                  Put_Line ("  " & As_Big_Integer (Result).Image);
-               when Character_Value =>
-                  Put_Line
-                    ("  " & Character'Val (Character_Type'Pos
-                       (As_Character (Result))));
-               when Token_Value =>
-                  Put_Line ("  " & Image (As_Token (Result)));
-               when Unbounded_Text_Value =>
-                  Put_Line
-                    ("  " & Image (To_Text (As_Unbounded_Text (Result))));
-               when Analysis_Unit_Value =>
-                  Put_Line
-                    ("  " & Ada.Directories.Simple_Name
-                       (As_Analysis_Unit (Result).Get_Filename));
-               when Node_Value =>
-                  Put_Line ("  " & As_Node (Result).Short_Image);
-
-               when Analysis_Unit_Kind_Value =>
-                  Put_Line ("  " & As_Analysis_Unit_Kind (Result)'Image);
-
-               when Foo_Node_Array_Value =>
-                  declare
-                     Value : constant Foo_Node_Array :=
-                        As_Foo_Node_Array (Result);
-                  begin
-                     for V of Value loop
-                        Put_Line ("  * " & V.Short_Image);
-                     end loop;
-                  end;
-
-               when Big_Integer_Array_Value =>
-                  declare
-                     Value : constant Big_Integer_Array :=
-                        As_Big_Integer_Array (Result);
-                  begin
-                     for V of Value loop
-                        Put_Line ("  * " & V.Image);
-                     end loop;
-                  end;
-
-               when others =>
-                  raise Program_Error;
-            end case;
+            Put_Line (Image (Result, "  "));
          end if;
       end Test;
 
