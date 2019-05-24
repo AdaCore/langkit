@@ -47,9 +47,16 @@ procedure Main is
          when Big_Integer_Value =>
             Append (Result, As_Big_Integer (Value).Image);
          when Character_Value =>
-            Append
-              (Result,
-               Character'Val (Character_Type'Pos (As_Character (Value))));
+            declare
+               C : constant Character :=
+                  Character'Val (Character_Type'Pos (As_Character (Value)));
+            begin
+               if C in ' ' .. '~' then
+                  Append (Result, "'" & C & "'");
+               else
+                  Append (Result, "[""" & Character'Pos (C)'Image & """]");
+               end if;
+            end;
          when Token_Value =>
             Append (Result, Image (As_Token (Value)));
          when Unbounded_Text_Value =>
