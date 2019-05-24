@@ -257,6 +257,30 @@ Properties for FOO_NUMBER:
       addend: Expr
 
 
+   id_dflt_bool
+   return type: Bool
+   arguments:
+      id: Bool := TRUE
+
+
+   id_dflt_int
+   return type: Int
+   arguments:
+      id: Int :=  42
+
+
+   id_dflt_char
+   return type: Character
+   arguments:
+      id: Character := [" 0"]
+
+
+   id_dflt_root_node
+   return type: FooNode
+   arguments:
+      id: FooNode := None
+
+
 
 Properties for FOO_REF:
    id_bool
