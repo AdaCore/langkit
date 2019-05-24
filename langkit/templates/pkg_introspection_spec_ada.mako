@@ -324,7 +324,8 @@ package ${ada_lib_name}.Introspection is
    function Property_Argument_Name
      (Property : Property_Reference; Argument_Number : Positive) return String;
    --  Return the lower-cased name for Property's argument whose index is
-   --  Argument_Number.
+   --  Argument_Number. This raises a Property_Error if Property has no such
+   --  argument.
 
    function Property_Argument_Default_Value
      (Property        : Property_Reference;
