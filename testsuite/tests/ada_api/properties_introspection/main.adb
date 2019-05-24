@@ -137,15 +137,25 @@ begin
 
                Put_Line ("   arguments:");
                declare
-                  A_List : constant Value_Constraint_Array :=
+                  A_Types          : constant Value_Constraint_Array :=
                      Property_Argument_Types (P);
+                  A_Default_Values : Any_Value_Array (A_Types'Range);
                begin
-                  if A_List'Length = 0 then
+                  for I in A_Default_Values'Range loop
+                     A_Default_Values (I) :=
+                        Property_Argument_Default_Value (P, I);
+                  end loop;
+
+                  if A_Types'Length = 0 then
                      Put_Line ("      <none>");
                   else
-                     for I in A_List'Range loop
-                        Put_Line ("      " & Property_Argument_Name (P, I)
-                                  & ": " & DSL_Name (A_List (I)));
+                     for I in A_Types'Range loop
+                        Put ("      " & Property_Argument_Name (P, I));
+                        Put (": " & DSL_Name (A_Types (I)));
+                        if A_Default_Values (I) /= No_Value then
+                           Put (" := " & Image (A_Default_Values (I)));
+                        end if;
+                        New_Line;
                      end loop;
                      New_Line;
                   end if;

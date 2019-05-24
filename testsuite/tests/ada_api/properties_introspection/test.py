@@ -6,8 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env_kv
-from langkit.expressions import (AbstractKind, Property, Self,
-                                 langkit_property)
+from langkit.expressions import (AbstractKind, CharacterLiteral, No, Property,
+                                 Self, langkit_property)
 from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
@@ -78,6 +78,15 @@ class Number(Expr):
     @langkit_property(external=True, uses_entity_info=False, uses_envs=False)
     def eval():
         pass
+
+    # Test for default values
+    id_dflt_bool = Property(lambda id=(T.Bool, True): id, public=True)
+    id_dflt_int = Property(lambda id=(T.Int, 42): id, public=True)
+    id_dflt_char = Property(
+        lambda id=(T.Character, CharacterLiteral('\x00')): id,
+        public=True)
+    id_dflt_root_node = Property(lambda id=(T.FooNode, No(T.FooNode)): id,
+                                 public=True)
 
 
 class Ref(Expr):
