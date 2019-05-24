@@ -1,7 +1,8 @@
 with Ada.Directories;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Exceptions;                  use Ada.Exceptions;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;                     use Ada.Text_IO;
 
 with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
 
@@ -167,6 +168,36 @@ begin
       end;
       New_Line;
    end loop;
+
+   --  Test that Property_Argument_Name and Property_Argument_Default_Value
+   --  reject out-of-bounds indexes.
+
+   begin
+      declare
+         Dummy : constant String :=
+            Property_Argument_Name (Foo_Node_P_Id_Bool, 3);
+      begin
+         Put_Line ("ERROR: no exception...");
+      end;
+   exception
+      when Exc : Property_Error =>
+         Put_Line
+           ("Property_Argument_Name rejected out-of-bound index:"
+            & Exception_Message (Exc));
+   end;
+
+   declare
+      Value : Any_Value_Type;
+   begin
+      Value := Property_Argument_Default_Value (Foo_Node_Parent, 2);
+      Put_Line ("ERROR: no exception...");
+   exception
+      when Exc : Property_Error =>
+         Put_Line
+           ("Property_Argument_Default_Value rejected out-of-bound index:"
+            & Exception_Message (Exc));
+   end;
+   New_Line;
 
    --  Test that Eval_Property works as expected
 

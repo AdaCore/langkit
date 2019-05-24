@@ -779,6 +779,9 @@ Properties for FOO_VAR_DECL:
       <none>
 
 
+Property_Argument_Name rejected out-of-bound index:out-of-bounds argument number
+Property_Argument_Default_Value rejected out-of-bound index:out-of-bounds argument number
+
 P_Id_Bool:
   TRUE
 P_Id_Int:
