@@ -1562,7 +1562,7 @@ class LiteralExpr(ResolvedExpression):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.rendrer_python_constant)
+        raise not_implemented_error(self, self.render_python_constant)
 
     @property
     def subexprs(self):
@@ -1607,7 +1607,7 @@ class BindableLiteralExpr(LiteralExpr):
 
         :rtype: str
         """
-        raise not_implemented_error(self, self.rendrer_python_constant)
+        raise not_implemented_error(self, self.render_python_constant)
 
 
 class BooleanLiteralExpr(BindableLiteralExpr):
