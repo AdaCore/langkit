@@ -1564,6 +1564,15 @@ class LiteralExpr(ResolvedExpression):
         """
         raise not_implemented_error(self, self.render_python_constant)
 
+    def render_introspection_constant(self):
+        """
+        Assuming this expression is a valid constant, return Ada code to
+        materialize it in the introspection API.
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_introspection_constant)
+
     @property
     def subexprs(self):
         return {'0-type': self.static_type,
@@ -1609,6 +1618,15 @@ class BindableLiteralExpr(LiteralExpr):
         """
         raise not_implemented_error(self, self.render_python_constant)
 
+    def render_introspection_constant(self):
+        """
+        Assuming this expression is a valid constant, return Ada code to
+        materialize it in the introspection API.
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_introspection_constant)
+
 
 class BooleanLiteralExpr(BindableLiteralExpr):
 
@@ -1625,6 +1643,9 @@ class BooleanLiteralExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return str(self.value)
+
+    def render_introspection_constant(self):
+        return 'Create_Boolean ({})'.format(self.value)
 
 
 class IntegerLiteralExpr(BindableLiteralExpr):
@@ -1643,6 +1664,9 @@ class IntegerLiteralExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return str(self.value)
+
+    def render_introspection_constant(self):
+        return 'Create_Integer ({})'.format(self.value)
 
 
 class CharacterLiteralExpr(BindableLiteralExpr):
@@ -1665,6 +1689,9 @@ class CharacterLiteralExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return repr(self.value)
+
+    def render_introspection_constant(self):
+        return 'Create_Character ({})'.format(self.ada_value)
 
 
 class NullExpr(BindableLiteralExpr):
@@ -1697,6 +1724,13 @@ class NullExpr(BindableLiteralExpr):
 
     def render_python_constant(self):
         return 'None' if self.type.is_entity_type else self.type.py_nullexpr
+
+    def render_introspection_constant(self):
+        entity_type = (self.type
+                       if self.type.is_entity_type else
+                       self.type.entity)
+        return ('Create_Node (No_{})'
+                .format(entity_type.api_name.camel_with_underscores))
 
 
 class UncheckedCastExpr(ResolvedExpression):

@@ -418,6 +418,10 @@ package body ${ada_lib_name}.Introspection is
 
       Argument_Names : String_Array (1 .. Arity);
       --  Lower-case names for arguments that this property takes
+
+      Argument_Default_Values : Any_Value_Array (1 .. Arity);
+      --  Default values (if any, otherwise No_Value) for arguments that this
+      --  property takes.
    end record;
 
    type Property_Descriptor_Access is access constant Property_Descriptor;
@@ -460,6 +464,18 @@ package body ${ada_lib_name}.Introspection is
                   ${', '.join("{} => Name_For_{}'Access"
                               .format(i, arg.name.lower)
                               for i, arg in enumerate(p.arguments, 1))}
+               % else:
+                  1 .. 0 => <>
+               % endif
+            ),
+            Argument_Default_Values => (
+               % if p.arguments:
+                  ${', '.join('{} => {}'.format(
+                     i,
+                     'No_Value'
+                     if arg.default_value is None else
+                     arg.default_value.render_introspection_constant())
+                     for i, arg in enumerate(p.arguments, 1))}
                % else:
                   1 .. 0 => <>
                % endif
@@ -1161,6 +1177,23 @@ package body ${ada_lib_name}.Introspection is
       return Property_Descriptors (Property)
              .Argument_Names (Argument_Number).all;
    end Property_Argument_Name;
+
+   -------------------------------------
+   -- Property_Argument_Default_Value --
+   -------------------------------------
+
+   function Property_Argument_Default_Value
+     (Property        : Property_Reference;
+      Argument_Number : Positive) return Any_Value_Type
+   is
+      Desc : Property_Descriptor renames Property_Descriptors (Property).all;
+   begin
+      if Argument_Number not in Desc.Argument_Names'Range then
+         raise Property_Error with "out-of-bounds argument number";
+      end if;
+
+      return Desc.Argument_Default_Values (Argument_Number);
+   end Property_Argument_Default_Value;
 
    -------------------
    -- Eval_Property --
