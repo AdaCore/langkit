@@ -656,6 +656,11 @@ package body ${ada_lib_name}.Introspection is
                   if not n.abstract)}
    );
 
+   procedure Check_Argument_Number
+     (Desc : Property_Descriptor; Argument_Number : Positive);
+   --  Raise a Property_Error if Argument_Number is not valid for the property
+   --  that Desc describes. Do nothing otherwise.
+
    --------------
    -- DSL_Name --
    --------------
@@ -1156,6 +1161,18 @@ package body ${ada_lib_name}.Introspection is
       return Property_Descriptors (Property).Return_Type;
    end Property_Return_Type;
 
+   ---------------------------
+   -- Check_Argument_Number --
+   ---------------------------
+
+   procedure Check_Argument_Number
+     (Desc : Property_Descriptor; Argument_Number : Positive) is
+   begin
+      if Argument_Number not in Desc.Argument_Names'Range then
+         raise Property_Error with "out-of-bounds argument number";
+      end if;
+   end Check_Argument_Number;
+
    -----------------------------
    -- Property_Argument_Types --
    -----------------------------
@@ -1173,7 +1190,9 @@ package body ${ada_lib_name}.Introspection is
    function Property_Argument_Name
      (Property : Property_Reference; Argument_Number : Positive) return String
    is
+      Desc : Property_Descriptor renames Property_Descriptors (Property).all;
    begin
+      Check_Argument_Number (Desc, Argument_Number);
       return Property_Descriptors (Property)
              .Argument_Names (Argument_Number).all;
    end Property_Argument_Name;
@@ -1188,10 +1207,7 @@ package body ${ada_lib_name}.Introspection is
    is
       Desc : Property_Descriptor renames Property_Descriptors (Property).all;
    begin
-      if Argument_Number not in Desc.Argument_Names'Range then
-         raise Property_Error with "out-of-bounds argument number";
-      end if;
-
+      Check_Argument_Number (Desc, Argument_Number);
       return Desc.Argument_Default_Values (Argument_Number);
    end Property_Argument_Default_Value;
 
