@@ -762,7 +762,7 @@ P_Id_Int:
 P_Id_Bigint:
   12
 P_Id_Char:
-  A
+  'A'
 P_Id_Token:
   <Token Kind=Var Text="var">
 P_Id_Sym:
