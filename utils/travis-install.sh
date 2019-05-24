@@ -11,6 +11,10 @@ if ! [ -d $INSTALL_DIR ]
 then
     mkdir -p $INSTALL_DIR
 fi
+if ! [ -d $LIB_INSTALL_DIR ]
+then
+    mkdir -p $LIB_INSTALL_DIR
+fi
 
 # Get and install GNAT
 if ! [ -d gnat_community_install_script ]
@@ -21,13 +25,21 @@ else
 fi
 if ! [ -f $INSTALL_DIR/bin/gcc ]
 then
-	GNAT_INSTALLER=$TOOLS_DIR/gnat-community-2018-20180528-x86_64-linux-bin
-	GNAT_INSTALLER_URL=http://mirrors.cdn.adacore.com/art/5b0d7bffa3f5d709751e3e04
+    GNAT_INSTALLER=$TOOLS_DIR/gnat-community-2018-20180528-x86_64-linux-bin
+    GNAT_INSTALLER_URL=http://mirrors.cdn.adacore.com/art/5b0d7bffa3f5d709751e3e04
 
     wget -O $GNAT_INSTALLER $GNAT_INSTALLER_URL
     sh gnat_community_install_script/install_package.sh \
         "$GNAT_INSTALLER" "$INSTALL_DIR"
     $INSTALL_DIR/bin/gprinstall --uninstall gnatcoll
+fi
+
+# Get gprbuild (to build libgpr)
+if [ -d "$TOOLS_DIR/gprbuild" ]
+then
+    (cd $TOOLS_DIR/gprbuild && git pull)
+else
+    (cd $TOOLS_DIR && git clone https://github.com/AdaCore/gprbuild)
 fi
 
 # Get gnatcoll-core and gnatcoll-bindings
@@ -47,13 +59,21 @@ fi
 # Log content
 pwd
 export PATH=$INSTALL_DIR/bin:$PATH
+export GPR_PROJECT_PATH=$LIB_INSTALL_DIR/share/gpr
 which gcc
 gcc -v
+
+# Build libgpr
+(
+    cd $TOOLS_DIR/gprbuild
+    make BUILD=production prefix="$LIB_INSTALL_DIR" libgpr.build
+    make BUILD=production prefix="$LIB_INSTALL_DIR" libgpr.install
+)
 
 # Build gnatcoll-core
 (
     cd $TOOLS_DIR/gnatcoll-core
-    make PROCESSORS=0 prefix="$INSTALL_DIR" ENABLE_SHARED=yes \
+    make PROCESSORS=0 prefix="$LIB_INSTALL_DIR" ENABLE_SHARED=yes \
        build install
 )
 
@@ -64,8 +84,9 @@ gcc -v
     do
         (
             cd $component
-            python setup.py build --reconfigure -j0 --prefix="$INSTALL_DIR" \
-               --library-types=static,relocatable
+            python setup.py build --reconfigure -j0 \
+                --prefix="$LIB_INSTALL_DIR" \
+                --library-types=static,relocatable
             python setup.py install
         )
     done
