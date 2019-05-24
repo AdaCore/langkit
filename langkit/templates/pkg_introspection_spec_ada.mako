@@ -174,6 +174,7 @@ package ${ada_lib_name}.Introspection is
    % endfor
 
    type Value_Array is array (Positive range <>) of Value_Type;
+   type Any_Value_Array is array (Positive range <>) of Any_Value_Type;
 
    type Value_Constraint (Kind : Value_Kind := Value_Kind'First) is record
       case Kind is
@@ -324,6 +325,13 @@ package ${ada_lib_name}.Introspection is
      (Property : Property_Reference; Argument_Number : Positive) return String;
    --  Return the lower-cased name for Property's argument whose index is
    --  Argument_Number.
+
+   function Property_Argument_Default_Value
+     (Property        : Property_Reference;
+      Argument_Number : Positive) return Any_Value_Type;
+   --  If the argument corresponding to Argument_Number of the given
+   --  Property has a default value, return it. Return No_Value otherwise.
+   --  This raises a Property_Error if Property has no such argument.
 
    function Eval_Property
      (Node      : ${T.entity.api_name}'Class;
