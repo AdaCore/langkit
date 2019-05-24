@@ -17,6 +17,345 @@ use ${ada_lib_name}.Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
+   -------------
+   -- Helpers --
+   -------------
+
+   function Fields
+     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
+   --  Return the list of fields associated to Id. If Concrete_Only is true,
+   --  collect only non-null and concrete fields. Otherwise, collect all
+   --  fields.
+
+   function Allocate (Kind : Value_Kind) return Value_Type;
+   --  Allocate a polymorphic value of the given kind
+
+   --  Define all that is needed to handle values first so that descriptor
+   --  tables can create them.
+
+   ------------
+   -- Adjust --
+   ------------
+
+   overriding procedure Adjust (Self : in out Value_Access_Wrapper) is
+   begin
+      if Self.Value = null then
+         return;
+      end if;
+
+      declare
+         Rec : Value_Record renames Self.Value.all;
+      begin
+         Rec.Ref_Count := Rec.Ref_Count + 1;
+      end;
+   end Adjust;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out Value_Access_Wrapper) is
+   begin
+      if Self.Value = null then
+         return;
+      end if;
+
+      --  If Self is non-null, decrement the reference count of the referenced
+      --  value.
+
+      declare
+         Rec : Value_Record renames Self.Value.all;
+      begin
+         Rec.Ref_Count := Rec.Ref_Count - 1;
+
+         if Rec.Ref_Count = 0 then
+            --  Reference count dropped to 0: time to free the value and what
+            --  is inside.
+
+            case Rec.Kind is
+               % for t in ctx.array_types:
+                  % if t.exposed:
+                     when ${t.introspection_kind} =>
+                        Free (Rec.${t.introspection_kind});
+                  % endif
+               % endfor
+               when others => null;
+            end case;
+
+            Free (Self.Value);
+         end if;
+      end;
+   end Finalize;
+
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind (Self : Value_Type) return Value_Kind is
+   begin
+      return Self.Value.Value.Kind;
+   end Kind;
+
+   --------------
+   -- Allocate --
+   --------------
+
+   function Allocate (Kind : Value_Kind) return Value_Type is
+      Result : Any_Value_Type;
+   begin
+      Result.Value.Value := new Value_Record (Kind);
+      Result.Value.Value.Ref_Count := 1;
+      return Result;
+   end Allocate;
+
+   ----------------
+   -- As_Boolean --
+   ----------------
+
+   function As_Boolean (Self : Value_Type) return Boolean is
+   begin
+      return Self.Value.Value.Boolean_Value;
+   end As_Boolean;
+
+   --------------------
+   -- Create_Boolean --
+   --------------------
+
+   function Create_Boolean (Value : Boolean) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Boolean_Value) do
+         Result.Value.Value.Boolean_Value := Value;
+      end return;
+   end Create_Boolean;
+
+   ----------------
+   -- As_Integer --
+   ----------------
+
+   function As_Integer (Self : Value_Type) return Integer is
+   begin
+      return Self.Value.Value.Integer_Value;
+   end As_Integer;
+
+   --------------------
+   -- Create_Integer --
+   --------------------
+
+   function Create_Integer (Value : Integer) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Integer_Value) do
+         Result.Value.Value.Integer_Value := Value;
+      end return;
+   end Create_Integer;
+
+   --------------------
+   -- As_Big_Integer --
+   --------------------
+
+   function As_Big_Integer (Self : Value_Type) return Big_Integer is
+   begin
+      return Result : Big_Integer do
+         Result.Set (Self.Value.Value.Big_Integer_Value);
+      end return;
+   end As_Big_Integer;
+
+   ------------------------
+   -- Create_Big_Integer --
+   ------------------------
+
+   function Create_Big_Integer (Value : Big_Integer) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Big_Integer_Value) do
+         Result.Value.Value.Big_Integer_Value.Set (Value);
+      end return;
+   end Create_Big_Integer;
+
+   ------------------
+   -- As_Character --
+   ------------------
+
+   function As_Character (Self : Value_Type) return Character_Type is
+   begin
+      return Self.Value.Value.Character_Value;
+   end As_Character;
+
+   ----------------------
+   -- Create_Character --
+   ----------------------
+
+   function Create_Character (Value : Character_Type) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Character_Value) do
+         Result.Value.Value.Character_Value := Value;
+      end return;
+   end Create_Character;
+
+   --------------
+   -- As_Token --
+   --------------
+
+   function As_Token (Self : Value_Type) return Token_Reference is
+   begin
+      return Self.Value.Value.Token_Value;
+   end As_Token;
+
+   ------------------
+   -- Create_Token --
+   ------------------
+
+   function Create_Token (Value : Token_Reference) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Token_Value)
+      do
+         Result.Value.Value.Token_Value := Value;
+      end return;
+   end Create_Token;
+
+   -----------------------
+   -- As_Unbounded_Text --
+   -----------------------
+
+   function As_Unbounded_Text (Self : Value_Type) return Unbounded_Text_Type is
+   begin
+      return Self.Value.Value.Unbounded_Text_Value;
+   end As_Unbounded_Text;
+
+   ---------------------------
+   -- Create_Unbounded_Text --
+   ---------------------------
+
+   function Create_Unbounded_Text
+     (Value : Unbounded_Text_Type) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Unbounded_Text_Value)
+      do
+         Result.Value.Value.Unbounded_Text_Value := Value;
+      end return;
+   end Create_Unbounded_Text;
+
+   ----------------------
+   -- As_Analysis_Unit --
+   ----------------------
+
+   function As_Analysis_Unit (Self : Value_Type) return Analysis_Unit is
+   begin
+      return Self.Value.Value.Analysis_Unit_Value;
+   end As_Analysis_Unit;
+
+   --------------------------
+   -- Create_Analysis_Unit --
+   --------------------------
+
+   function Create_Analysis_Unit (Value : Analysis_Unit) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Analysis_Unit_Value) do
+         Result.Value.Value.Analysis_Unit_Value := Value;
+      end return;
+   end Create_Analysis_Unit;
+
+   -------------
+   -- As_Node --
+   -------------
+
+   function As_Node (Self : Value_Type) return ${root_entity.api_name} is
+   begin
+      return Self.Value.Value.Node_Value;
+   end As_Node;
+
+   -----------------
+   -- Create_Node --
+   -----------------
+
+   function Create_Node
+     (Value : ${root_entity.api_name}'Class) return Value_Type is
+   begin
+      return Result : constant Value_Type := Allocate (Node_Value) do
+         Result.Value.Value.Node_Value := Value.As_${root_entity.api_name};
+      end return;
+   end Create_Node;
+
+   % for enum_type in ctx.enum_types:
+      function As_${enum_type.introspection_prefix}
+        (Self : Value_Type) return ${enum_type.api_name} is
+      begin
+         return Self.Value.Value.${enum_type.introspection_kind};
+      end As_${enum_type.introspection_prefix};
+
+      function Create_${enum_type.introspection_prefix}
+        (Value : ${enum_type.api_name}) return Value_Type is
+      begin
+         return Result : constant Value_Type := Allocate
+           (${enum_type.introspection_kind})
+         do
+            Result.Value.Value.${enum_type.introspection_kind} := Value;
+         end return;
+      end Create_${enum_type.introspection_prefix};
+   % endfor
+
+   % for t in ctx.composite_types:
+      % if t.exposed and not t.is_entity_type:
+         function As_${t.introspection_prefix}
+           (Self : Value_Type) return ${t.api_name} is
+         begin
+            % if t.is_array_type:
+               ## If `t` is an array, first allocate the array and then
+               ## initialize it one item at a time.
+               return Result : ${t.api_name}
+                 (Self.Value.Value.${t.introspection_kind}'Range)
+               do
+                  for I in Result'Range loop
+                     ## Special case for big integer types: they are limited,
+                     ## so we cannot use mere assignment.
+                     % if t.element_type.is_big_integer_type:
+                        Result (I).Set
+                          (Self.Value.Value.${t.introspection_kind}.all (I));
+                     % else:
+                        Result (I) :=
+                           Self.Value.Value.${t.introspection_kind}.all (I);
+                     % endif
+                  end loop;
+               end return;
+
+            % else:
+               ## For other types, a mere assignment is fine
+               return Self.Value.Value.${t.introspection_kind};
+            % endif
+         end As_${t.introspection_prefix};
+
+         function Create_${t.introspection_prefix}
+           (Value : ${t.api_name}) return Value_Type is
+         begin
+            return Result : constant Value_Type := Allocate
+              (${t.introspection_kind})
+            do
+               % if t.is_array_type:
+                  ## If `t` is an array, first allocate the array and then
+                  ## initialize it one item at a time.
+                  Result.Value.Value.${t.introspection_kind} :=
+                     new ${t.api_name} (Value'Range);
+                  for I in Value'Range loop
+                     ## Special case for big integer types: they are limited,
+                     ## so we cannot use mere assignment.
+                     % if t.element_type.is_big_integer_type:
+                        Result.Value.Value.${t.introspection_kind}
+                           .all (I).Set (Value (I));
+                     % else:
+                        Result.Value.Value.${t.introspection_kind}.all (I) :=
+                           Value (I);
+                     % endif
+                  end loop;
+
+               % else:
+                  ## For other types, a mere assignment is fine
+                  Result.Value.Value.${t.introspection_kind} := Value;
+               % endif
+            end return;
+         end Create_${t.introspection_prefix};
+      % endif
+   % endfor
+
+   --  Now we can emit descriptor tables
+
    type String_Access is access constant String;
    type String_Array is array (Positive range <>) of String_Access;
 
@@ -301,19 +640,6 @@ package body ${ada_lib_name}.Introspection is
                   if not n.abstract)}
    );
 
-   -------------
-   -- Helpers --
-   -------------
-
-   function Fields
-     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
-   --  Return the list of fields associated to Id. If Concrete_Only is true,
-   --  collect only non-null and concrete fields. Otherwise, collect all
-   --  fields.
-
-   function Allocate (Kind : Value_Kind) return Value_Type;
-   --  Allocate a polymorphic value of the given kind
-
    --------------
    -- DSL_Name --
    --------------
@@ -417,273 +743,6 @@ package body ${ada_lib_name}.Introspection is
       end loop;
       return False;
    end Is_Derived_From;
-
-   ----------
-   -- Kind --
-   ----------
-
-   function Kind (Self : Value_Type) return Value_Kind is
-   begin
-      return Self.Value.Value.Kind;
-   end Kind;
-
-   --------------
-   -- Allocate --
-   --------------
-
-   function Allocate (Kind : Value_Kind) return Value_Type is
-      Result : Any_Value_Type;
-   begin
-      Result.Value.Value := new Value_Record (Kind);
-      Result.Value.Value.Ref_Count := 1;
-      return Result;
-   end Allocate;
-
-   ----------------
-   -- As_Boolean --
-   ----------------
-
-   function As_Boolean (Self : Value_Type) return Boolean is
-   begin
-      return Self.Value.Value.Boolean_Value;
-   end As_Boolean;
-
-   --------------------
-   -- Create_Boolean --
-   --------------------
-
-   function Create_Boolean (Value : Boolean) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Boolean_Value) do
-         Result.Value.Value.Boolean_Value := Value;
-      end return;
-   end Create_Boolean;
-
-   ----------------
-   -- As_Integer --
-   ----------------
-
-   function As_Integer (Self : Value_Type) return Integer is
-   begin
-      return Self.Value.Value.Integer_Value;
-   end As_Integer;
-
-   --------------------
-   -- Create_Integer --
-   --------------------
-
-   function Create_Integer (Value : Integer) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Integer_Value) do
-         Result.Value.Value.Integer_Value := Value;
-      end return;
-   end Create_Integer;
-
-   --------------------
-   -- As_Big_Integer --
-   --------------------
-
-   function As_Big_Integer (Self : Value_Type) return Big_Integer is
-   begin
-      return Result : Big_Integer do
-         Result.Set (Self.Value.Value.Big_Integer_Value);
-      end return;
-   end As_Big_Integer;
-
-   ------------------------
-   -- Create_Big_Integer --
-   ------------------------
-
-   function Create_Big_Integer (Value : Big_Integer) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Big_Integer_Value) do
-         Result.Value.Value.Big_Integer_Value.Set (Value);
-      end return;
-   end Create_Big_Integer;
-
-   ------------------
-   -- As_Character --
-   ------------------
-
-   function As_Character (Self : Value_Type) return Character_Type is
-   begin
-      return Self.Value.Value.Character_Value;
-   end As_Character;
-
-   ----------------------
-   -- Create_Character --
-   ----------------------
-
-   function Create_Character (Value : Character_Type) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Character_Value) do
-         Result.Value.Value.Character_Value := Value;
-      end return;
-   end Create_Character;
-
-   --------------
-   -- As_Token --
-   --------------
-
-   function As_Token (Self : Value_Type) return Token_Reference is
-   begin
-      return Self.Value.Value.Token_Value;
-   end As_Token;
-
-   ------------------
-   -- Create_Token --
-   ------------------
-
-   function Create_Token (Value : Token_Reference) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Token_Value)
-      do
-         Result.Value.Value.Token_Value := Value;
-      end return;
-   end Create_Token;
-
-   -----------------------
-   -- As_Unbounded_Text --
-   -----------------------
-
-   function As_Unbounded_Text (Self : Value_Type) return Unbounded_Text_Type is
-   begin
-      return Self.Value.Value.Unbounded_Text_Value;
-   end As_Unbounded_Text;
-
-   ---------------------------
-   -- Create_Unbounded_Text --
-   ---------------------------
-
-   function Create_Unbounded_Text
-     (Value : Unbounded_Text_Type) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Unbounded_Text_Value)
-      do
-         Result.Value.Value.Unbounded_Text_Value := Value;
-      end return;
-   end Create_Unbounded_Text;
-
-   ----------------------
-   -- As_Analysis_Unit --
-   ----------------------
-
-   function As_Analysis_Unit (Self : Value_Type) return Analysis_Unit is
-   begin
-      return Self.Value.Value.Analysis_Unit_Value;
-   end As_Analysis_Unit;
-
-   --------------------------
-   -- Create_Analysis_Unit --
-   --------------------------
-
-   function Create_Analysis_Unit (Value : Analysis_Unit) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Analysis_Unit_Value) do
-         Result.Value.Value.Analysis_Unit_Value := Value;
-      end return;
-   end Create_Analysis_Unit;
-
-   -------------
-   -- As_Node --
-   -------------
-
-   function As_Node (Self : Value_Type) return ${root_entity.api_name} is
-   begin
-      return Self.Value.Value.Node_Value;
-   end As_Node;
-
-   -----------------
-   -- Create_Node --
-   -----------------
-
-   function Create_Node
-     (Value : ${root_entity.api_name}'Class) return Value_Type is
-   begin
-      return Result : constant Value_Type := Allocate (Node_Value) do
-         Result.Value.Value.Node_Value := Value.As_${root_entity.api_name};
-      end return;
-   end Create_Node;
-
-   % for enum_type in ctx.enum_types:
-      function As_${enum_type.introspection_prefix}
-        (Self : Value_Type) return ${enum_type.api_name} is
-      begin
-         return Self.Value.Value.${enum_type.introspection_kind};
-      end As_${enum_type.introspection_prefix};
-
-      function Create_${enum_type.introspection_prefix}
-        (Value : ${enum_type.api_name}) return Value_Type is
-      begin
-         return Result : constant Value_Type := Allocate
-           (${enum_type.introspection_kind})
-         do
-            Result.Value.Value.${enum_type.introspection_kind} := Value;
-         end return;
-      end Create_${enum_type.introspection_prefix};
-   % endfor
-
-   % for t in ctx.composite_types:
-      % if t.exposed and not t.is_entity_type:
-         function As_${t.introspection_prefix}
-           (Self : Value_Type) return ${t.api_name} is
-         begin
-            % if t.is_array_type:
-               ## If `t` is an array, first allocate the array and then
-               ## initialize it one item at a time.
-               return Result : ${t.api_name}
-                 (Self.Value.Value.${t.introspection_kind}'Range)
-               do
-                  for I in Result'Range loop
-                     ## Special case for big integer types: they are limited,
-                     ## so we cannot use mere assignment.
-                     % if t.element_type.is_big_integer_type:
-                        Result (I).Set
-                          (Self.Value.Value.${t.introspection_kind}.all (I));
-                     % else:
-                        Result (I) :=
-                           Self.Value.Value.${t.introspection_kind}.all (I);
-                     % endif
-                  end loop;
-               end return;
-
-            % else:
-               ## For other types, a mere assignment is fine
-               return Self.Value.Value.${t.introspection_kind};
-            % endif
-         end As_${t.introspection_prefix};
-
-         function Create_${t.introspection_prefix}
-           (Value : ${t.api_name}) return Value_Type is
-         begin
-            return Result : constant Value_Type := Allocate
-              (${t.introspection_kind})
-            do
-               % if t.is_array_type:
-                  ## If `t` is an array, first allocate the array and then
-                  ## initialize it one item at a time.
-                  Result.Value.Value.${t.introspection_kind} :=
-                     new ${t.api_name} (Value'Range);
-                  for I in Value'Range loop
-                     ## Special case for big integer types: they are limited,
-                     ## so we cannot use mere assignment.
-                     % if t.element_type.is_big_integer_type:
-                        Result.Value.Value.${t.introspection_kind}
-                           .all (I).Set (Value (I));
-                     % else:
-                        Result.Value.Value.${t.introspection_kind}.all (I) :=
-                           Value (I);
-                     % endif
-                  end loop;
-
-               % else:
-                  ## For other types, a mere assignment is fine
-                  Result.Value.Value.${t.introspection_kind} := Value;
-               % endif
-            end return;
-         end Create_${t.introspection_prefix};
-      % endif
-   % endfor
 
    --------------
    -- DSL_Name --
@@ -1290,60 +1349,6 @@ package body ${ada_lib_name}.Introspection is
          return (raise Program_Error);
       % endif
    end Token_Node_Kind;
-
-   ------------
-   -- Adjust --
-   ------------
-
-   overriding procedure Adjust (Self : in out Value_Access_Wrapper) is
-   begin
-      if Self.Value = null then
-         return;
-      end if;
-
-      declare
-         Rec : Value_Record renames Self.Value.all;
-      begin
-         Rec.Ref_Count := Rec.Ref_Count + 1;
-      end;
-   end Adjust;
-
-   --------------
-   -- Finalize --
-   --------------
-
-   overriding procedure Finalize (Self : in out Value_Access_Wrapper) is
-   begin
-      if Self.Value = null then
-         return;
-      end if;
-
-      --  If Self is non-null, decrement the reference count of the referenced
-      --  value.
-
-      declare
-         Rec : Value_Record renames Self.Value.all;
-      begin
-         Rec.Ref_Count := Rec.Ref_Count - 1;
-
-         if Rec.Ref_Count = 0 then
-            --  Reference count dropped to 0: time to free the value and what
-            --  is inside.
-
-            case Rec.Kind is
-               % for t in ctx.array_types:
-                  % if t.exposed:
-                     when ${t.introspection_kind} =>
-                        Free (Rec.${t.introspection_kind});
-                  % endif
-               % endfor
-               when others => null;
-            end case;
-
-            Free (Self.Value);
-         end if;
-      end;
-   end Finalize;
 
 begin
    for D in Node_Type_Descriptors'Range loop
