@@ -377,6 +377,10 @@ module Token = struct
     "${capi.get_name('token_range_text')}"
     (ptr c_type @-> ptr c_type @-> ptr Text.c_type @-> raisable int)
 
+  let token_next = foreign ~from:c_lib
+    "${capi.get_name('token_next')}"
+    (ptr c_type @-> ptr c_type @-> raisable void)
+
   let pp fmt token =
     Format.fprintf fmt "<Token %s%s at %a>"
       (kind_name token)
@@ -397,6 +401,14 @@ module Token = struct
           pp token_first
           pp token_last));
     !@ c_result_ptr
+
+  let next token =
+    let c_next_token_ptr = allocate_n c_type ~count:1 in
+    ignore (
+      token_next
+        (allocate c_type token)
+        c_next_token_ptr );
+    !@ c_next_token_ptr
 end
 
 module AnalysisUnitStruct = struct
@@ -884,6 +896,40 @@ let ${field.name.lower}
       (addr (${ocaml_api.unwrap_value('node', root_entity, 'context node')}))
       c_result_ptr;
     !@ c_result_ptr
+
+  let fold_tokens f init node =
+    let tok_start = token_start node in
+    let tok_end = token_end node in
+    let rec aux acc tok_curr =
+      let new_acc = f acc tok_curr in
+      if tok_curr = tok_end then
+        new_acc
+      else
+        aux new_acc (Token.next tok_curr)
+    in
+    aux init tok_start
+
+  let iter_tokens f node =
+    let tok_start = token_start node in
+    let tok_end = token_end node in
+    let rec aux tok_curr =
+      f tok_curr;
+      if not (tok_curr = tok_end) then
+        aux (Token.next tok_curr)
+    in
+    aux tok_start
+
+  let map_tokens f node =
+    let tok_start = token_start node in
+    let tok_end = token_end node in
+    let rec aux tok_curr =
+      let value = f tok_curr in
+      if tok_curr = tok_end then
+        [value]
+      else
+        value :: aux (Token.next tok_curr)
+    in
+    aux tok_start
 
   let children_opt node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
