@@ -208,6 +208,21 @@ module ${ocaml_api.node_name(astnode)} : sig
   val sloc_range : [< ${root_entity_type} ] -> SlocRange.t
   ${ocaml_doc('langkit.node_sloc_range', 1)}
 
+  val fold_tokens : ('a -> Token.t -> 'a) -> 'a -> [< ${root_entity_type} ] -> 'a
+  (**
+   * Fold all the token this node contains by calling f on each token.
+   *)
+
+  val iter_tokens : (Token.t -> unit) -> [< ${root_entity_type} ] -> unit
+  (**
+   * Iterate over all token this node contains by calling f on each token.
+   *)
+
+  val map_tokens : (Token.t -> 'a) -> [< ${root_entity_type} ] -> 'a list
+  (**
+   * Map each token calling the given function
+   *)
+
   val children_opt : [< ${root_entity_type} ] -> ${root_entity_type} option list
   (**
    * Return an optional list of nodes which are the children of the given node.
