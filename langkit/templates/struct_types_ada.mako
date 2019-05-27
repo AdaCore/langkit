@@ -199,7 +199,7 @@
 
 </%def>
 
-<%def name="decl(cls)">
+<%def name="decl(cls, incomplete_nullexpr=True)">
 
    <%
       fields = cls.get_fields(include_inherited=False)
@@ -211,8 +211,7 @@
 
       % if fields or extensions:
          % for f in fields:
-            ${f.name} : aliased ${f.type.storage_type_name}
-               := ${f.type.nullexpr};
+            ${f.name} : aliased ${f.type.storage_type_name};
              ${ada_doc(f, 6)}
             ${extensions}
          % endfor
@@ -221,11 +220,8 @@
       % endif
    end record
      with Convention => C;
-   ${cls.nullexpr} : constant ${cls.name} :=
-   % if fields or extensions:
-   (others => <>);
-   % else:
-   (null record);
+   % if incomplete_nullexpr:
+   ${cls.nullexpr} : constant ${cls.name};
    % endif
 
    % if cls.is_refcounted:
@@ -249,6 +245,25 @@
       function Trace_Image (R : ${cls.name}) return String;
    % endif
 
+</%def>
+
+<%def name="nullexpr_decl(cls)">
+   <%
+      fields = cls.get_fields(include_inherited=False)
+      ext = ctx.ext("nodes", cls.name, "components")
+      extensions = exts.include_extension(ext)
+   %>
+
+   ${cls.nullexpr} : constant ${cls.name} :=
+   % if fields or extensions:
+   (
+         % for f in fields:
+            ${f.name} => ${f.type.nullexpr}${", " if not loop.last else ""}
+         % endfor
+   );
+   % else:
+   (null record);
+   % endif
 </%def>
 
 
