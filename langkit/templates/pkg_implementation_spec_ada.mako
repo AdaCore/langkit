@@ -99,7 +99,8 @@ private package ${ada_lib_name}.Implementation is
    --  manage yet to put in a private part. Please don't use them.
 
    ${struct_types.incomplete_decl(T.env_md)}
-   ${struct_types.decl(T.env_md)}
+   ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
+   ${struct_types.nullexpr_decl(T.env_md)}
 
    function Combine
      (L, R : ${T.env_md.name}) return ${T.env_md.name};
@@ -1333,5 +1334,14 @@ private package ${ada_lib_name}.Implementation is
    procedure Check_Safety_Net (Self : Node_Safety_Net);
    --  Check that Self's node is still valid, raising a Stale_Reference_Error
    --  if it is not.
+
+private
+   --  We only have a private part to defer the initialization of struct
+   --  constants. This allows us to circumvent circularity problems between
+   --  arrays and structs.
+
+   % for struct_type in no_builtins(ctx.struct_types):
+   ${struct_types.nullexpr_decl(struct_type)}
+   % endfor
 
 end ${ada_lib_name}.Implementation;
