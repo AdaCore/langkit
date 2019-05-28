@@ -29,8 +29,8 @@ is
    Self : ${Self.type.name} := ${Self.type.name}
      (${property.self_arg_name});
 
-   ## Dispatchers must not memoize: it is the job of the static properties do
-   ## to it themselves.
+   ## Dispatchers must not memoize because it will be done at the static
+   ## property level: we do not want to do it twice.
    <% memoized = property.memoized and not property.is_dispatcher %>
 
    % if property._has_self_entity:
