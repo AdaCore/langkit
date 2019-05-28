@@ -91,6 +91,10 @@ private package ${ada_lib_name}.Implementation is
      (Node : access ${root_node_value_type}'Class) return Boolean;
    ${ada_doc('langkit.node_is_token_node', 3)}
 
+   function Is_Synthetic
+     (Node : access ${root_node_value_type}'Class) return Boolean;
+   ${ada_doc('langkit.node_is_synthetic', 3)}
+
    ---------------------------
    -- Environments handling --
    ---------------------------

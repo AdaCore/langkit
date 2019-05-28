@@ -491,6 +491,9 @@ base_langkit_docs = {
     'langkit.node_is_token_node': """
         Return whether this node is a node that contains only a single token.
     """,
+    'langkit.node_is_synthetic': """
+        Return whether this node is synthetic.
+    """,
     'langkit.node_short_image': """
         Return a representation of this node as a string.
     """,

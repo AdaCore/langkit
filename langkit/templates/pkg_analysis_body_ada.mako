@@ -572,6 +572,17 @@ package body ${ada_lib_name}.Analysis is
       return Is_Token_Node (Node.Internal.Node);
    end Is_Token_Node;
 
+   ------------------
+   -- Is_Synthetic --
+   ------------------
+
+   function Is_Synthetic (Node : ${root_entity.api_name}'Class) return Boolean
+   is
+   begin
+      Check_Safety_Net (Node.Safety_Net);
+      return Is_Synthetic (Node.Internal.Node);
+   end Is_Synthetic;
+
    ---------
    -- "=" --
    ---------

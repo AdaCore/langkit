@@ -493,6 +493,17 @@ package body ${ada_lib_name}.Implementation.C is
          return 0;
    end;
 
+   function ${capi.get_name('is_synthetic')}
+     (Node : ${entity_type}_Ptr) return int is
+   begin
+      Clear_Last_Exception;
+      return Boolean'Pos (Node.Node.Is_Synthetic);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
    function ${capi.get_name('node_short_image')}
      (Node : ${entity_type}_Ptr) return ${text_type} is
    begin
