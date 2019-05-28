@@ -541,7 +541,7 @@ class CompiledType(object):
     Descriptor for a type in the generated code.
     """
 
-    def __init__(self, name, location=None, doc=None, is_ptr=True,
+    def __init__(self, name, location=None, doc='', is_ptr=True,
                  has_special_storage=False, is_list_type=False,
                  is_entity_type=False, should_emit_array_type=True,
                  exposed=False, c_type_name=None, external=False,
@@ -558,7 +558,7 @@ class CompiledType(object):
             declaration of this compiled type, or None if this type does not
             come from a language specficication.
 
-        :param str|None doc: User documentation for this type.
+        :param str doc: User documentation for this type.
 
         :param bool is_ptr: Whether this type is handled through pointers only
             in the generated code.
@@ -1625,14 +1625,14 @@ class BaseField(AbstractNodeData):
 
     _null = False
 
-    def __init__(self, repr=True, doc=None, type=None,
+    def __init__(self, repr=True, doc='', type=None,
                  access_needs_incref=False, internal_name=None):
         """
         Create an AST node field.
 
         :param bool repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
-        :param str|None doc: User documentation for this field.
+        :param str doc: User documentation for this field.
         :param bool access_needs_incref: See AbstractNodeData's constructor.
         :param None|names.Name internal_name: See AbstractNodeData's
             constructor.
@@ -1700,7 +1700,7 @@ class Field(BaseField):
     """
     concrete = True
 
-    def __init__(self, repr=True, doc=None, type=None, abstract=False,
+    def __init__(self, repr=True, doc='', type=None, abstract=False,
                  null=False):
         super(Field, self).__init__(repr, doc, type)
 
@@ -1925,7 +1925,7 @@ class UserField(BaseField):
 
     prefix = None
 
-    def __init__(self, type, repr=False, doc=None, public=True,
+    def __init__(self, type, repr=False, doc='', public=True,
                  access_needs_incref=True, internal_name=None):
         """
         See inherited doc. In this version we just ensure that a type is
@@ -2426,7 +2426,7 @@ class ASTNodeType(BaseStructType):
             )
 
             self.generic_list_type = ASTNodeType(
-                name=generic_list_type_name, location=None, doc=None,
+                name=generic_list_type_name, location=None, doc='',
                 base=self, fields=[], is_generic_list_type=True,
                 is_abstract=True
             )
@@ -2855,7 +2855,7 @@ class ASTNodeType(BaseStructType):
         """
         result = ASTNodeType(
             name=self.kwless_raw_name + names.Name('List'),
-            location=None, doc=None,
+            location=None, doc='',
             base=CompiledTypeRepo.root_grammar_class.generic_list_type,
             fields=[], element_type=self,
             dsl_name='{}.list'.format(self.dsl_name)

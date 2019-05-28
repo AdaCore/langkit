@@ -50,7 +50,7 @@ class DSLType(object):
         """
         dct['_name'] = names.Name.from_camel(name)
         dct['_location'] = location
-        dct['_doc'] = dct.get('__doc__')
+        dct['_doc'] = dct.get('__doc__', '')
 
     @classmethod
     def _resolve(cls):
@@ -88,11 +88,11 @@ class DSLType(object):
     :type: langkit.diagnostics.Location|None
     """
 
-    _doc = None
+    _doc = ''
     """
     Docstring associated to this type.
 
-    :type: str|None
+    :type: str
     """
 
 
@@ -654,7 +654,7 @@ class _ASTNodeMetaclass(type):
                 fields.append(('as_bool', prop))
 
             alt_type = ASTNodeType(
-                name=alt_name, location=None, doc=None,
+                name=alt_name, location=None, doc='',
                 base=enum_type,
                 fields=fields
             )
@@ -840,7 +840,7 @@ class _EnumNodeAlternative(object):
         return self.enum_node_cls._create_parser(self.type_ref, *args)
 
 
-def Field(repr=True, doc=None, type=None):
+def Field(repr=True, doc='', type=None):
     """
     Create a field that is meant to store parsing results. Only AST nodes can
     hold such fields.
@@ -848,7 +848,7 @@ def Field(repr=True, doc=None, type=None):
     :param bool repr: Whether the field will be displayed when pretty-printing
         the embedding AST node.
 
-    :param str|None doc: User documentation for this field.
+    :param str doc: User documentation for this field.
 
     :param DSLType|CompiledType|None type: DSLType or CompiledType subclass for
         values this field holds. If left to None, the type will be inferred
@@ -857,7 +857,7 @@ def Field(repr=True, doc=None, type=None):
     return _Field(repr, doc, type)
 
 
-def AbstractField(type, doc=None):
+def AbstractField(type, doc=''):
     """
     Create an abstract field.
 
@@ -869,7 +869,7 @@ def AbstractField(type, doc=None):
     :param DSLType|CompiledType type: DSLType or CompiledType subclass for
         values this field holds.
 
-    :param str|None doc: User documentation for this field.
+    :param str doc: User documentation for this field.
     """
     return _Field(type=type, doc=doc, abstract=True)
 
@@ -885,7 +885,7 @@ def NullField():
     return _Field(null=True)
 
 
-def UserField(type, repr=False, doc=None, public=True):
+def UserField(type, repr=False, doc='', public=True):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
     and Struct can hold such types.
@@ -896,7 +896,7 @@ def UserField(type, repr=False, doc=None, public=True):
     :param bool repr: Whether the field will be displayed when pretty-printing
         the embedding AST node.
 
-    :param str|None doc: User documentation for this field.
+    :param str doc: User documentation for this field.
 
     :param bool is_public: Whether this field is public in the generated APIs.
     """
