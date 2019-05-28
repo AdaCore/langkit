@@ -1,0 +1,15 @@
+main.py: Running...
+root.is_synthetic = False
+<SynthNode main.txt:1:1-1:8>
+is_synthetic = True
+text = u''
+sloc_range = <SlocRange 1:1-1:8>
+main.py: Done.
+main.adb: Running...
+Root.Is_Synthetic = FALSE
+<SynthNode main.txt:1:1-1:8>
+Is_Synthetic = TRUE
+Text = No exception: ""
+Sloc_Range = No exception: 1:1-1:8
+main.adb: Done.
+Done
