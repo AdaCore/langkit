@@ -59,11 +59,6 @@ private package ${ada_lib_name}.Implementation is
    type Internal_Unit is access all Analysis_Unit_Type;
 
    type ${root_node_value_type};
-   --  This "by-value" type is public to expose the fact that the various
-   --  AST nodes are a hierarchy of tagged types, but it is not intended to be
-   --  used directly, hence the "_Type" suffix. Please use instead the
-   --  class-wide types such at the one below.
-
    type ${root_node_type_name} is access all ${root_node_value_type}'Class;
    --  Most generic AST node type
 
@@ -98,9 +93,6 @@ private package ${ada_lib_name}.Implementation is
    ---------------------------
    -- Environments handling --
    ---------------------------
-
-   --  The following types and operations are implementation details we did not
-   --  manage yet to put in a private part. Please don't use them.
 
    ${struct_types.incomplete_decl(T.env_md)}
    ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
