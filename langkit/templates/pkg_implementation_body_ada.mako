@@ -1005,8 +1005,7 @@ package body ${ada_lib_name}.Implementation is
    -------------------
 
    function Is_Token_Node
-     (Node : access ${root_node_value_type}'Class) return Boolean
-   is
+     (Node : access ${root_node_value_type}'Class) return Boolean is
    begin
       return Is_Token_Node (Node.Kind);
    end Is_Token_Node;
