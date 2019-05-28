@@ -1010,6 +1010,16 @@ package body ${ada_lib_name}.Implementation is
       return Is_Token_Node (Node.Kind);
    end Is_Token_Node;
 
+   ------------------
+   -- Is_Synthetic --
+   ------------------
+
+   function Is_Synthetic
+     (Node : access ${root_node_value_type}'Class) return Boolean is
+   begin
+      return Node.Kind in Synthetic_Nodes;
+   end Is_Synthetic;
+
    ------------------------------
    -- Register_Destroyable_Gen --
    ------------------------------

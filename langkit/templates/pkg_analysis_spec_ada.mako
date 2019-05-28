@@ -93,6 +93,10 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Boolean;
    ${ada_doc('langkit.node_is_token_node', 3)}
 
+   function Is_Synthetic
+     (Node : ${root_entity.api_name}'Class) return Boolean;
+   ${ada_doc('langkit.node_is_synthetic', 3)}
+
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
    --  Return whether L and R designate the same entity
 
