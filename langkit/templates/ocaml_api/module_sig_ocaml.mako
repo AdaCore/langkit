@@ -90,6 +90,9 @@ module Token : sig
   val text_range : t -> t -> string
   ${ocaml_doc('langkit.token_range_text', 1)}
 
+  val is_trivia : t -> bool
+  ${ocaml_doc('langkit.token_is_trivia', 1)}
+
   val pp : Format.formatter -> t -> unit
 end
 

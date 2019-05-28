@@ -409,6 +409,9 @@ module Token = struct
         (allocate c_type token)
         c_next_token_ptr );
     !@ c_next_token_ptr
+
+  let is_trivia token =
+    token.trivia_index != 0
 end
 
 module AnalysisUnitStruct = struct
