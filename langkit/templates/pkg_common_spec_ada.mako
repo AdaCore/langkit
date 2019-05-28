@@ -92,13 +92,16 @@ package ${ada_lib_name}.Common is
    % endfor
 
    ## Output a subtype to materialize the set of kinds for synthetic nodes
-   % if ctx.synthetic_nodes:
-      subtype Synthetic_Nodes is ${root_node_kind_name}
-         with Dynamic_Predicate =>
-            Synthetic_Nodes in
-            ${' | '.join(cls.ada_kind_name for cls in ctx.synthetic_nodes)};
-      ${ada_doc('langkit.synthetic_nodes', 6)}
-   % endif
+   subtype Synthetic_Nodes is ${root_node_kind_name}
+      with Static_Predicate =>
+      % if ctx.synthetic_nodes:
+         Synthetic_Nodes in
+         ${' | '.join(cls.ada_kind_name for cls in ctx.synthetic_nodes)}
+      % else:
+         False
+      % endif
+   ;
+   ${ada_doc('langkit.synthetic_nodes', 6)}
 
    % for enum_type in ctx.enum_types:
       type ${enum_type.api_name} is
