@@ -15,6 +15,8 @@ from langkit.diagnostics import (
 )
 from langkit.utils import (issubtype, memoized, not_implemented_error,
                            self_memoized)
+from langkit.utils.text import (append_paragraph, first_line_indentation,
+                                indent)
 from langkit.utils.types import TypeSet
 
 
@@ -26,6 +28,18 @@ def gdb_helper(*args):
     :rtype: str
     """
     return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
+
+
+def precise_types_doc(label, types):
+    """
+    Helper to format documentation about precise types.
+
+    :param str label: Label for the precise types.
+    :param list[CompiledType] types: List of precise types to describe.
+    :rtype: str
+    """
+    return '\n'.join([label, ''] + sorted('* {}'.format(t.dsl_name)
+                                          for t in types))
 
 
 @CompileCtx.register_template_extensions
@@ -1840,11 +1854,8 @@ class Field(BaseField):
         if self.struct.synthetic:
             return result
 
-        def amended(extra_lines):
-            extra_lines = '\n'.join(extra_lines)
-            return ('{}\n\n{}'.format(result, extra_lines)
-                    if result else
-                    extra_lines)
+        def amended(label, types):
+            return append_paragraph(result, precise_types_doc(label, types))
 
         precise_types = self.precise_types.minimal_matched_types
 
@@ -1854,19 +1865,15 @@ class Field(BaseField):
             precise_element_types = (self.precise_element_types
                                      .minimal_matched_types)
             if len(precise_element_types) > 1:
-                type_descr = [
+                return amended(
                     'This field contains a list that itself contains'
-                    ' one of the following nodes:'
-                ] + list(sorted('* {}'.format(t.dsl_name)
-                                for t in precise_element_types))
-                return amended(type_descr)
+                    ' one of the following nodes:',
+                    precise_element_types)
 
         if len(precise_types) > 1:
-            type_descr = [
-                'This field can contain one of the following nodes:'
-            ] + list(sorted('* {}'.format(t.dsl_name)
-                            for t in precise_types))
-            return amended(type_descr)
+            return amended(
+                'This field can contain one of the following nodes:',
+                precise_types)
 
         return result
 
@@ -2487,29 +2494,12 @@ class ASTNodeType(BaseStructType):
             precise_types = (self.precise_list_element_types
                              .minimal_matched_types)
             if len(precise_types) > 1:
-                result_list = result.splitlines() if result else []
-                type_descr = [
-                    'This list node can contain one of the following nodes:'
-                ] + list(sorted('* {}'.format(t.dsl_name)
-                                for t in precise_types))
-
-                # Indent lines in `type_descr` as much as the first non-null
-                # line of `result`.
-                first_non_null_line = None
-                for line in result_list:
-                    if line.strip():
-                        first_non_null_line = line
-                        break
-
-                if first_non_null_line:
-                    indent = first_non_null_line[
-                        :-len(first_non_null_line.lstrip())]
-                    result_list.append('')
-                    result_list.extend(indent + line
-                                       for line in type_descr)
-                else:
-                    result = type_descr
-                result = '\n'.join(result_list)
+                addition = indent(
+                    precise_types_doc(
+                        'This list node can contain one of the following'
+                        ' nodes:', precise_types),
+                    first_line_indentation(result))
+                return append_paragraph(result, addition)
 
         return result
 
