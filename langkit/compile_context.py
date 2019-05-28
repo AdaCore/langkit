@@ -868,10 +868,6 @@ class CompileCtx(object):
 
         self.synthetic_nodes = [n for n in self.astnode_types
                                 if n.synthetic]
-        # Avoid a warning about unused documentation when there are no
-        # synthetic nodes.
-        if not self.synthetic_nodes:
-            self.documentations['langkit.synthetic_nodes']
 
         # Check that the environment hook is bound if the language spec uses
         # it.
