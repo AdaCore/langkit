@@ -316,7 +316,12 @@
       ## to the lexical environment.
 
       declare
-         % if exprs.mappings_prop.type.is_array:
+         ## There are two modes: either the mappings expression returns an
+         ## array, in which case we must process all its elements, either it's
+         ## just one mapping.
+         <% is_array = exprs.mappings_prop.type.is_array %>
+
+         % if is_array:
          Mappings : ${exprs.mappings_prop.type.name} :=
             ${call_prop(exprs.mappings_prop)};
          % else:
@@ -328,16 +333,19 @@
             ${("{}'Access".format(exprs.resolver.name)
                if exprs.resolver else 'null')};
       begin
-         % if exprs.mappings_prop.type.is_array_type:
+         % if is_array:
          for Mapping of Mappings.Items loop
          % endif
 
          Add_To_Env (${root_node_type_name} (Self),
                      Mapping, Initial_Env, Resolver);
+         % if not is_array:
          Dec_Ref (Mapping.Dest_Env);
+         % endif
 
-         % if exprs.mappings_prop.type.is_array_type:
+         % if is_array:
          end loop;
+         Dec_Ref (Mappings);
          % endif
       end;
    </%def>
