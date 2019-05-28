@@ -212,7 +212,7 @@
       % if fields or extensions:
          % for f in fields:
             ${f.name} : aliased ${f.type.storage_type_name};
-             ${ada_doc(f, 6)}
+            ${ada_doc(f, 12)}
             ${extensions}
          % endfor
       % else:
