@@ -169,12 +169,12 @@ package body Langkit_Support.Lexical_Env is
    -- Resolve --
    -------------
 
-   procedure Resolve (Self : in out Env_Getter) is
+   procedure Resolve (Self : in out Env_Getter; Info : Entity_Info) is
       Env : Lexical_Env;
    begin
       case Self.Dynamic is
          when True =>
-            Env := Get_Env (Self);
+            Env := Get_Env (Self, Info);
 
             --  Get_Env returns an ownership share for the returned reference,
             --  but we don't use it here, so dec ref.
@@ -188,30 +188,38 @@ package body Langkit_Support.Lexical_Env is
    -- Get_Env --
    -------------
 
-   function Get_Env (Self : in out Env_Getter) return Lexical_Env is
+   function Get_Env (Self : in out Env_Getter;
+                     Info : Entity_Info) return Lexical_Env is
    begin
       if Self.Dynamic then
+         --  If simple case: No Entity_Info, and already cached env
+         if Self.Env /= Null_Lexical_Env and then Info = No_Entity_Info then
 
-         if Self.Env /= Null_Lexical_Env then
-
+            --  If it is not stale, return it
             if not Is_Stale (Self.Env) then
                Inc_Ref (Self.Env);
                return Self.Env;
             end if;
 
+            --  If it is stale, release it
             Dec_Ref (Self.Env);
          end if;
 
          declare
-            R : constant Lexical_Env_Resolver := Self.Resolver;
-            E : constant Entity :=
-              (Node => Self.Node, Info => No_Entity_Info);
+               R : constant Lexical_Env_Resolver := Self.Resolver;
+               E : constant Entity := (Node => Self.Node, Info => Info);
          begin
 
-            --  We use the share returned by the resolver, so no need for
-            --  inc ref here.
-            Self.Env := R.all (E);
-
+            if Info = No_Entity_Info then
+               --  We use the share returned by the resolver, so no need for
+               --  inc ref here.
+               Self.Env := R.all (E);
+            else
+               --  Don't cache when entity info is not null
+               return Ret : constant Lexical_Env := R.all (E) do
+                  Inc_Ref (Ret);
+               end return;
+            end if;
          end;
       end if;
 
@@ -490,7 +498,7 @@ package body Langkit_Support.Lexical_Env is
       if Self = Empty_Env then
          return;
       end if;
-      Resolve (Refd_Env.Getter);
+      Resolve (Refd_Env.Getter, No_Entity_Info);
       Refd_Env.State := Active;
 
       Referenced_Envs_Vectors.Append
@@ -684,7 +692,11 @@ package body Langkit_Support.Lexical_Env is
          end if;
 
          Self.Being_Visited := True;
-         Env := Get_Env (Self.Getter);
+
+         --  Get the env for the referenced env getter. Pass the metadata and
+         --  current_rebindings, if relevant.
+         Env := Get_Env
+           (Self.Getter, Entity_Info'(Metadata, Current_Rebindings, False));
 
          declare
             Refd_Results : constant Lookup_Result_Array :=
@@ -697,10 +709,7 @@ package body Langkit_Support.Lexical_Env is
                     then raise System.Assertions.Assert_Failure
                       with "Should not happen"
                     else Flat),
-                 Rebindings =>
-                   (if Self.Kind = Transitive
-                    then Current_Rebindings
-                    else Shed_Rebindings (Env, Current_Rebindings)),
+                 Rebindings => Shed_Rebindings (Env, Current_Rebindings),
                  Metadata    => Metadata,
                  Categories  => Categories);
          begin
@@ -1381,7 +1390,7 @@ package body Langkit_Support.Lexical_Env is
             Assoc_Ref_Env := Get_Env
               (First_Rebindable_Parent.Env.Referenced_Envs.Get_Access
                  (First_Rebindable_Parent.Env.Rebindings_Assoc_Ref_Env)
-               .Getter);
+               .Getter, No_Entity_Info);
 
             declare
                N : Node_Type renames Env_Node (Assoc_Ref_Env);
@@ -1766,7 +1775,7 @@ package body Langkit_Support.Lexical_Env is
                for I in Refs.First_Index .. Refs.Last_Index loop
                   declare
                      G   : Env_Getter renames Refs.Get_Access (I).Getter;
-                     Env : Lexical_Env := Get_Env (G);
+                     Env : Lexical_Env := Get_Env (G, No_Entity_Info);
                   begin
                      if Env /= Empty_Env then
                         Append (Result, Sub_Prefix & "Referenced: ");
@@ -1900,7 +1909,8 @@ package body Langkit_Support.Lexical_Env is
       case Self.Kind is
          when Primary =>
             declare
-               Ret : constant Lexical_Env := Get_Env (Self.Env.Parent);
+               Ret : constant Lexical_Env :=
+                 Get_Env (Self.Env.Parent, No_Entity_Info);
             begin
                return (if Ret = Null_Lexical_Env then Empty_Env else Ret);
             end;
@@ -1962,7 +1972,7 @@ package body Langkit_Support.Lexical_Env is
             .. Self.Env.Referenced_Envs.Last_Index
       loop
          R := Self.Env.Referenced_Envs.Get_Access (I);
-         Resolve (R.Getter);
+         Resolve (R.Getter, No_Entity_Info);
          R.State := Active;
       end loop;
    end Recompute_Referenced_Envs;
@@ -1997,7 +2007,9 @@ package body Langkit_Support.Lexical_Env is
             for I in Self.Env.Referenced_Envs.First_Index
                   .. Self.Env.Referenced_Envs.Last_Index
             loop
-               L := Get_Env (Self.Env.Referenced_Envs.Get_Access (I).Getter);
+               L := Get_Env
+                 (Self.Env.Referenced_Envs.Get_Access (I).Getter,
+                  No_Entity_Info);
                if Is_Stale (L) then
                   return True;
                end if;

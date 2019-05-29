@@ -881,8 +881,8 @@ package body ${ada_lib_name}.Implementation is
          if Env /= Null_Lexical_Env then
             Dump_One_Lexical_Env
               (Env, Get_Env_Id (Env, State),
-               Get_Env_Id (AST_Envs.Get_Env (Env.Env.Parent), State));
-            Explore_Parent_Chain (AST_Envs.Get_Env (Env.Env.Parent));
+               Get_Env_Id (Get_Env (Env.Env.Parent, No_Entity_Info), State));
+            Explore_Parent_Chain (Get_Env (Env.Env.Parent, No_Entity_Info));
          end if;
       end Explore_Parent_Chain;
 
@@ -904,7 +904,7 @@ package body ${ada_lib_name}.Implementation is
          --  envs we have already seen or not.
          if not State.Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
-            Parent := AST_Envs.Get_Env (Env.Env.Parent);
+            Parent := Get_Env (Env.Env.Parent, No_Entity_Info);
             Explore_Parent := not State.Env_Ids.Contains (Parent);
 
             Dump_One_Lexical_Env
@@ -2780,7 +2780,7 @@ package body ${ada_lib_name}.Implementation is
 
          function Get_Parent_Env return Lexical_Env is
             Parent : constant Lexical_Env :=
-               AST_Envs.Get_Env (Node.Self_Env.Env.Parent);
+               Get_Env (Node.Self_Env.Env.Parent, No_Entity_Info);
          begin
             --  If Node is the root scope or the empty environment, Parent can
             --  be a wrapper around the null node. Turn this into the
