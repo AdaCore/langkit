@@ -182,6 +182,12 @@ end
    % endif
 % endfor
 
+type _ node =
+% for astnode in ctx.astnode_types:
+  | ${ocaml_api.node_name(astnode)} :
+      ${ocaml_api.type_public_name(astnode)} node
+% endfor
+
 % for astnode in ctx.astnode_types:
 module ${ocaml_api.node_name(astnode)} : sig
   ${ocaml_doc(astnode, 1)}
@@ -296,6 +302,20 @@ module ${ocaml_api.node_name(astnode)} : sig
   (**
    * Fold the entire AST, below the given node, and return true if the given
    * predicate is evaluated to true for all nodes.
+   *)
+
+  val find : 'a node -> [< ${root_entity_type} ] -> 'a
+  (**
+   * Given the kind of node, return the first node found by walking the given
+   * node. The type of the resulting node depends on the desired kind
+   *)
+
+
+  val findall : 'a node -> [< ${root_entity_type} ] -> 'a list
+  (**
+   * Given the kind of node, return the all nodes of this kind found by walking
+   * the given node. The type of the resulting nodes depends on the desired
+   * kind
    *)
 
    % endif

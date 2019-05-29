@@ -771,6 +771,12 @@ let context node =
       % endif
    % endfor
 
+type _ node =
+% for astnode in ctx.astnode_types:
+  | ${ocaml_api.node_name(astnode)} :
+      ${ocaml_api.type_public_name(astnode)} node
+% endfor
+
 % for astnode in ctx.astnode_types:
 module ${ocaml_api.node_name(astnode)} = struct
   type t = ${ocaml_api.type_public_name(astnode)}
@@ -993,7 +999,43 @@ let ${field.name.lower}
     (* Use an auxiliary function here to have a better type for the function *)
     let rec aux node = p node && for_all_fields aux node in
     aux (node :> ${root_entity_type})
-     % endif
+
+  let find : type a. a node ->  [< ${root_entity_type} ] -> a =
+    fun node_type node ->
+      let exception Found of a in
+      let aux node =
+        match node_type, node with
+      % for astnode in ctx.astnode_types:
+        | ${ocaml_api.node_name(astnode)}
+          , (#${ocaml_api.type_public_name(astnode)} as node) ->
+            raise (Found node)
+      % endfor
+        | _ ->
+          ()
+      in
+      try
+        iter aux node;
+        raise Not_found
+      with (Found node) -> node
+
+
+
+  let findall : type a. a node ->  [< ${root_entity_type} ] -> a list =
+    fun node_type node ->
+      let aux : a list -> [< ${root_entity_type} ] -> a list =
+       fun acc node ->
+        match node_type, node with
+      % for astnode in ctx.astnode_types:
+        | ${ocaml_api.node_name(astnode)}
+          , (#${ocaml_api.type_public_name(astnode)} as node) ->
+            node :: acc
+      % endfor
+        | _ ->
+          acc
+      in
+      List.rev (fold aux [] node)
+
+   % endif
 
 end
 
