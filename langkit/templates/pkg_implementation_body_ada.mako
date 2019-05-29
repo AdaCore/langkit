@@ -1319,14 +1319,7 @@ package body ${ada_lib_name}.Implementation is
          return "";
       end if;
 
-      declare
-         Start_T : constant Token_Reference :=
-            Node.Token (Node.Token_Start_Index);
-         End_T   : constant Token_Reference :=
-            Node.Token (Node.Token_End_Index);
-      begin
-         return Text (Start_T, End_T);
-      end;
+      return Text (Start_T, End_T);
    end Text;
 
    ---------------------
