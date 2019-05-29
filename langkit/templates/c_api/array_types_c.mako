@@ -1,15 +1,20 @@
 ## vim: filetype=makocpp
 
+<%def name="incomplete_decl(cls)">
+<% type_name = cls.c_type(capi).name %>
+typedef struct ${type_name} *${type_name};
+</%def>
+
 <%def name="decl(cls)">
 
 <% type_name = cls.c_type(capi).name %>
 
 ${c_doc(cls)}
-typedef struct {
+struct ${type_name} {
    int n;
    int ref_count;
    ${cls.element_type.c_type(capi).name} items[1];
-} *${type_name};
+};
 
 /* Create a length-sized array.  */
 extern ${type_name}
