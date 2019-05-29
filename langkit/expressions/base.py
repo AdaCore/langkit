@@ -2447,10 +2447,9 @@ class SymbolLiteral(AbstractExpression):
         def _render_pre(self):
             return assign_var(
                 self.result_var,
-                'Precomputed_Symbol (Self.Unit.Context.Symbols, {})'.format(
-                    get_context().symbol_literals[self.name]
-                )
-            )
+                'Precomputed_Symbol'
+                ' (Self_As_Root_Node.Unit.Context.Symbols, {})'.format(
+                    get_context().symbol_literals[self.name]))
 
         @property
         def subexprs(self):
