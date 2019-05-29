@@ -2,7 +2,7 @@
 
 <%def name="decl(cls)">
 
-<% type_name = cls.c_type(capi).name >
+<% type_name = cls.c_type(capi).name %>
 
 typedef struct {
     % for f in cls.get_fields():
