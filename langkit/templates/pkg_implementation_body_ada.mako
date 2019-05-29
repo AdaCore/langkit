@@ -1311,7 +1311,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       --  No text is associated to synthetic and ghost nodes
 
-      if Node.Kind in Synthetic_Nodes then
+      if Is_Synthetic (Node) then
          return "";
       end if;
 
@@ -1549,7 +1549,7 @@ package body ${ada_lib_name}.Implementation is
          else End_Sloc (Get (T.Pos).Sloc_Range));
 
    begin
-      if Node.Kind in Synthetic_Nodes then
+      if Is_Synthetic (Node) then
          return Sloc_Range (Node.Parent);
       end if;
 
