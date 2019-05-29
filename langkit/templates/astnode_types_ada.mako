@@ -467,21 +467,22 @@
    ---------------------------
 
    function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
-      Self : constant ${cls.name} := ${cls.name} (E.Node);
+      Self_As_Root : constant ${root_node_type_name} := E.Node;
+      Self : constant ${cls.name} := ${cls.name} (Self_As_Root);
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
       ## environment.
       Bound_Env : constant Lexical_Env :=
-        (if Self.Parent /= null
-         then Self.Parent.Self_Env
-         else Self.Self_Env);
+        (if Self_As_Root.Parent /= null
+         then Self_As_Root.Parent.Self_Env
+         else Self_As_Root.Self_Env);
 
       Initial_Env : Lexical_Env := Bound_Env;
    begin
       % if cls.env_spec.env_hook_enabled:
          ${ctx.env_hook_subprogram.fqn}
-           (Self.Unit, ${cls.env_spec.env_hook_arg_expr});
+           (Self_As_Root.Unit, ${cls.env_spec.env_hook_arg_expr});
       % endif
       % if cls.env_spec.initial_env:
       Initial_Env := ${cls.env_spec.initial_env_expr};
@@ -498,7 +499,9 @@
    is
       use AST_Envs;
 
-      Initial_Env : Lexical_Env := Bound_Env;
+      Self_As_Root : constant ${root_node_type_name} :=
+         ${T.root_node.internal_conversion(cls, 'Self')};
+      Initial_Env  : Lexical_Env := Bound_Env;
 
       % if cls.env_spec.adds_env:
       G : Env_Getter;
@@ -506,7 +509,7 @@
    begin
       % if has_dyn_env:
          Initial_Env := ${env_getter}
-           ((Node => ${root_node_type_name} (Self),
+           ((Node => Self_As_Root,
              Info => ${T.entity_info.nullexpr}));
       % endif
 
