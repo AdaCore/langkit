@@ -146,6 +146,10 @@ typedef struct {
    const char *information;
 } ${exception_type};
 
+/*
+ * Struct types declarations
+ */
+
 ## Even when metadata and entity structures are not exposed, we need to
 ## emit their type definition them for low-level interfacing.
 % for struct_type in ctx.struct_types:
