@@ -190,7 +190,7 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
 
 
 /*
- * Data structures held in AST nodes
+ * Array types declarations
  */
 
 ${array_types.decl(T.root_node.array)}
