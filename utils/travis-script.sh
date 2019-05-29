@@ -4,6 +4,7 @@ set -v
 set -e
 
 export PATH=$INSTALL_DIR/bin:$PATH
+export GPR_PROJECT_PATH=$LIB_INSTALL_DIR/share/gpr
 
 # Log the toolchain to use
 which gcc
