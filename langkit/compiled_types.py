@@ -2224,10 +2224,22 @@ class EntityType(StructType):
         return names.Name('Create') + self.name
 
     def to_public_expr(self, internal_expr):
-        result = ('Wrap_Node ({expr}.Node, {expr}.Info)'
-                  .format(expr=internal_expr))
-        if not self.element_type.is_root_node:
+        requires_conversions = not self.element_type.is_root_node
+
+        # If needed, convert the input expression to the root bare node
+        node_expr = '{}.Node'.format(internal_expr)
+        if requires_conversions:
+            node_expr = T.root_node.internal_conversion(self.element_type,
+                                                        node_expr)
+
+        # Wrap the bare node into a public entity
+        result = 'Wrap_Node ({}, {}.Info)'.format(node_expr, internal_expr)
+
+        # If needed, convert the result expression to the appropriate public
+        # entity derivation.
+        if requires_conversions:
             result += '.As_{}'.format(self.api_name)
+
         return result
 
     def to_internal_expr(self, public_expr, context=None):
