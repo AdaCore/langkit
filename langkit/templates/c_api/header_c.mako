@@ -147,6 +147,21 @@ typedef struct {
 } ${exception_type};
 
 /*
+ * Array types incomplete declarations
+ */
+
+${array_types.incomplete_decl(T.root_node.array)}
+${array_types.incomplete_decl(T.entity.array)}
+
+% for array_type in ctx.array_types:
+    % if array_type.element_type.should_emit_array_type and \
+            array_type.exposed and \
+            array_type.emit_c_type:
+        ${array_types.incomplete_decl(array_type)}
+    % endif
+% endfor
+
+/*
  * Struct types declarations
  */
 
