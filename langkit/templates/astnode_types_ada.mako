@@ -511,7 +511,7 @@
       % endif
 
       % for action in cls.env_spec.pre_actions:
-      ${emit_env_action (action)}
+      ${emit_env_action(action)}
       % endfor
 
       return Initial_Env;
