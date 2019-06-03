@@ -1128,6 +1128,8 @@ package body ${ada_lib_name}.Analysis is
       return ${root_entity.api_name};
    function Unwrap_Node
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
+   function Unwrap_Entity
+     (Entity : ${root_entity.api_name}'Class) return ${root_entity.name};
 
    ------------------
    -- Wrap_Context --
@@ -1197,6 +1199,14 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name}
    is (Node.Internal.Node);
 
+   -------------------
+   -- Unwrap_Entity --
+   -------------------
+
+   function Unwrap_Entity
+     (Entity : ${root_entity.api_name}'Class) return ${root_entity.name}
+   is ((Entity.Internal));
+
    ${exts.include_extension(ctx.ext('analysis', 'bodies'))}
 
 begin
@@ -1206,4 +1216,5 @@ begin
    Converters.Unwrap_Unit := Unwrap_Unit'Access;
    Converters.Wrap_Node := Wrap_Node'Access;
    Converters.Unwrap_Node := Unwrap_Node'Access;
+   Converters.Unwrap_Entity := Unwrap_Entity'Access;
 end ${ada_lib_name}.Analysis;
