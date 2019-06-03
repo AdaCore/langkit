@@ -1,6 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
+with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 
 procedure Main is

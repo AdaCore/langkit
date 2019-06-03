@@ -290,6 +290,106 @@ package ${ada_lib_name}.Common is
    % endfor
    % endfor
 
+   -------------------
+   -- Introspection --
+   -------------------
+
+   --  Unlike ${root_node_kind_name}, the following enumeration contains
+   --  entries for abstract nodes.
+
+   type Any_Node_Type_Id is (
+      None, ${', '.join(n.introspection_simple_name
+                        for n in ctx.astnode_types)}
+   );
+
+   subtype Node_Type_Id is Any_Node_Type_Id
+      range ${ctx.astnode_types[0].introspection_simple_name}
+            .. ${ctx.astnode_types[-1].introspection_simple_name};
+
+   type Node_Type_Id_Array is array (Positive range <>) of Node_Type_Id;
+
+   type Any_Value_Kind is (
+      None,
+      Boolean_Value,
+      Integer_Value,
+      Big_Integer_Value,
+      Character_Value,
+      Token_Value,
+      Unbounded_Text_Value,
+      Analysis_Unit_Value,
+      Node_Value
+
+      % for enum_type in ctx.enum_types:
+      , ${enum_type.introspection_kind}
+      % endfor
+
+      % for t in ctx.composite_types:
+      % if t.exposed and not t.is_entity_type:
+      , ${t.introspection_kind}
+      % endif
+      % endfor
+   );
+   subtype Value_Kind is
+      Any_Value_Kind range Boolean_Value ..  Any_Value_Kind'Last;
+   --  Enumeration for all types used to interact with properties
+
+   type Value_Constraint (Kind : Value_Kind := Value_Kind'First) is record
+      case Kind is
+         when Node_Value =>
+            Node_Type : Node_Type_Id;
+            --  Base type for nodes that satisfy this constraint
+
+         when others =>
+            null;
+      end case;
+   end record;
+   --  Constraint for a polymorphic value
+
+   type Value_Constraint_Array is
+      array (Positive range <>) of Value_Constraint;
+
+   <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
+
+   type Any_Node_Data_Reference is
+      (None${''.join((', ' + f.introspection_enum_literal)
+                      for f in all_abstract)});
+   subtype Node_Data_Reference is Any_Node_Data_Reference range
+      ${all_abstract[0].introspection_enum_literal}
+      ..  ${all_abstract[-1].introspection_enum_literal};
+   --  Enumeration of all data attached to nodes (syntax fields and properties)
+
+   type Node_Data_Reference_Array is
+      array (Positive range <>) of Node_Data_Reference;
+
+   ## In a lot of testcases, there is a single concrete node that has no
+   ## field. For these, generate a type that has no valid value.
+   subtype Field_Reference is Node_Data_Reference range
+      % if ctx.sorted_parse_fields:
+         <%
+            first = ctx.sorted_parse_fields[0]
+            last = ctx.sorted_parse_fields[-1]
+         %>
+      % else:
+         <%
+            first = all_abstract[-1]
+            last = all_abstract[0]
+         %>
+      % endif
+      ${first.introspection_enum_literal}
+      .. ${last.introspection_enum_literal}
+   ;
+   --  Enumeration of all syntax fields for regular nodes
+
+   type Field_Reference_Array is array (Positive range <>) of Field_Reference;
+
+   subtype Property_Reference is Node_Data_Reference
+      range ${ctx.sorted_properties[0].introspection_enum_literal}
+         .. ${ctx.sorted_properties[-1].introspection_enum_literal};
+   --  Enumeration of all available node properties
+
+   type Property_Reference_Array is
+      array (Positive range <>) of Property_Reference;
+
    ${exts.include_extension(ctx.ext('common', 'public_decls'))}
 
 private

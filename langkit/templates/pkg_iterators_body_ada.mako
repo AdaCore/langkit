@@ -11,6 +11,8 @@ with Ada.Strings.Wide_Wide_Unbounded;
    pred_ref = '{}_Predicate'.format(node)
 %>
 
+with ${ada_lib_name}.Introspection; use ${ada_lib_name}.Introspection;
+
 ${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Iterators is
