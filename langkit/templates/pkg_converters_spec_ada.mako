@@ -38,6 +38,10 @@ private package ${ada_lib_name}.Converters is
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
    Unwrap_Node : Node_Unwrapper;
 
+   type Entity_Unwrapper is access function
+     (Entity : ${root_entity.api_name}'Class) return ${root_entity.name};
+   Unwrap_Entity : Entity_Unwrapper;
+
    type Token_Reference_Wrapper is access function
      (TDH   : Token_Data_Handler_Access;
       Index : Token_Or_Trivia_Index) return Token_Reference;
