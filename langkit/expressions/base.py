@@ -1729,8 +1729,7 @@ class NullExpr(BindableLiteralExpr):
         entity_type = (self.type
                        if self.type.is_entity_type else
                        self.type.entity)
-        return ('Create_Node (No_{})'
-                .format(entity_type.api_name.camel_with_underscores))
+        return 'Create_Node ({})'.format(entity_type.nullexpr)
 
 
 class UncheckedCastExpr(ResolvedExpression):

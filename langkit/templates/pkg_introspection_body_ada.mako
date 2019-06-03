@@ -1,37 +1,27 @@
 ## vim: filetype=makoada
 
-<% list_kind_range = ctx.generic_list_type.ada_kind_range_name %>
-
-with Ada.Containers.Hashed_Maps;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Strings.Unbounded.Hash;
-
-with ${ada_lib_name}.Implementation;
-use ${ada_lib_name}.Implementation;
-
-<%def name="return_program_error()">
-   pragma Warnings (Off, "value not in range of type");
-   return (raise Program_Error);
-   pragma Warnings (On, "value not in range of type");
-</%def>
+with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Introspection_Implementation;
 
 package body ${ada_lib_name}.Introspection is
 
-   -------------
-   -- Helpers --
-   -------------
+   package Impl renames Introspection_Implementation;
 
-   function Fields
-     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
-   --  Return the list of fields associated to Id. If Concrete_Only is true,
-   --  collect only non-null and concrete fields. Otherwise, collect all
-   --  fields.
+   --  TODO: move implementation of functions dealing with values (Satisfies,
+   --  Eval_Property, ...) to Impl. This is not not done yet as substantial
+   --  work is required in order to convert back and forth public values
+   --  (structures, symbols) to their internal representations.
 
    function Allocate (Kind : Value_Kind) return Value_Type;
    --  Allocate a polymorphic value of the given kind
 
-   --  Define all that is needed to handle values first so that descriptor
-   --  tables can create them.
+   pragma Warnings (Off, "is not referenced");
+   function To_Internal_Value
+     (Value : Any_Value_Type) return Impl.Internal_Value;
+   function From_Internal_Value
+     (Value : Impl.Internal_Value) return Any_Value_Type;
+   pragma Warnings (On, "is not referenced");
 
    ------------
    -- Adjust --
@@ -107,6 +97,66 @@ package body ${ada_lib_name}.Introspection is
       Result.Value.Value.Ref_Count := 1;
       return Result;
    end Allocate;
+
+   -----------------------
+   -- To_Internal_Value --
+   -----------------------
+
+   function To_Internal_Value
+     (Value : Any_Value_Type) return Impl.Internal_Value is
+   begin
+      if Value = No_Value then
+         return Impl.No_Internal_Value;
+      end if;
+
+      case Kind (Value) is
+         when Boolean_Value =>
+            return Impl.Create_Boolean (As_Boolean (Value));
+
+         when Integer_Value =>
+            return Impl.Create_Integer (As_Integer (Value));
+
+         when Character_Value =>
+            return Impl.Create_Character (As_Character (Value));
+
+         when Node_Value =>
+            return Impl.Create_Node (Unwrap_Entity (As_Node (Value)));
+
+         when others =>
+            --  For now we use this only to handle default values, so this
+            --  should be unreachable.
+            raise Program_Error;
+      end case;
+   end To_Internal_Value;
+
+   -------------------------
+   -- From_Internal_Value --
+   -------------------------
+
+   function From_Internal_Value
+     (Value : Impl.Internal_Value) return Any_Value_Type is
+   begin
+      case Value.Kind is
+         when None =>
+            return No_Value;
+
+         when Boolean_Value =>
+            return Create_Boolean (Impl.As_Boolean (Value));
+
+         when Integer_Value =>
+            return Create_Integer (Impl.As_Integer (Value));
+
+         when Character_Value =>
+            return Create_Character (Impl.As_Character (Value));
+
+         when Node_Value =>
+            declare
+               N : constant ${T.entity.name} := Impl.As_Node (Value);
+            begin
+               return Create_Node (Wrap_Node (N.Node, N.Info));
+            end;
+      end case;
+   end From_Internal_Value;
 
    ----------------
    -- As_Boolean --
@@ -354,320 +404,13 @@ package body ${ada_lib_name}.Introspection is
       % endif
    % endfor
 
-   --  Now we can emit descriptor tables
-
-   type String_Access is access constant String;
-   type String_Array is array (Positive range <>) of String_Access;
-
-   ------------------------------
-   -- Syntax field descriptors --
-   ------------------------------
-
-   type Syntax_Field_Descriptor (Name_Length : Natural) is record
-      Field_Type : Node_Type_Id;
-      Name       : String (1 .. Name_Length);
-   end record;
-   --  General description of a field (independent of field implementations)
-
-   type Syntax_Field_Descriptor_Access is
-      access constant Syntax_Field_Descriptor;
-
-   --  Descriptors for syntax fields
-
-   % for f in ctx.sorted_parse_fields:
-      <% name = f._name.lower %>
-      Desc_For_${f.introspection_enum_literal} : aliased constant
-         Syntax_Field_Descriptor := (
-            Name_Length => ${len(name)},
-            Field_Type  => ${f.type.introspection_name},
-            Name        => ${string_repr(name)}
-         );
-   % endfor
-
-   Syntax_Field_Descriptors : constant
-      array (Field_Reference) of Syntax_Field_Descriptor_Access := (
-      % if ctx.sorted_parse_fields:
-         ${', '.join("{name} => Desc_For_{name}'Access"
-                     .format(name=f.introspection_enum_literal)
-                     for f in ctx.sorted_parse_fields)}
-      % else:
-         Field_Reference => <>
-      % endif
-   );
-
-   --------------------------
-   -- Property descriptors --
-   --------------------------
-
-   type Property_Descriptor (
-      Name_Length : Natural;
-      --  Length of the proprety name
-
-      Arity : Natural
-      --  Number of arguments this property takes (exclude the Self argument)
-   )
-   is record
-      Name : String (1 .. Name_Length);
-      --  Lower-case name for this property
-
-      Return_Type : Value_Constraint;
-      --  Return type for this property
-
-      Argument_Types : Value_Constraint_Array (1 .. Arity);
-      --  Types of the arguments that this property takes
-
-      Argument_Names : String_Array (1 .. Arity);
-      --  Lower-case names for arguments that this property takes
-
-      Argument_Default_Values : Any_Value_Array (1 .. Arity);
-      --  Default values (if any, otherwise No_Value) for arguments that this
-      --  property takes.
-   end record;
-
-   type Property_Descriptor_Access is access constant Property_Descriptor;
-
-   --  Descriptors for properties
-
-   <%
-      # First, generate constant for argument names, so that we can refer to
-      # them from property descriptors.
-      names = set()
-      for p in ctx.sorted_properties:
-         for arg in p.arguments:
-            names.add(arg.name.lower)
-   %>
-   % for n in sorted(names):
-   Name_For_${n} : aliased constant String := ${string_repr(n)};
-   % endfor
-
-   % for p in ctx.sorted_properties:
-      <% name = p._name.lower %>
-      Desc_For_${p.introspection_enum_literal} : aliased constant
-         Property_Descriptor := (
-            Name_Length => ${len(name)},
-            Arity       => ${len(p.arguments)},
-
-            Name => ${string_repr(name)},
-
-            Return_Type    => ${p.type.introspection_constraint},
-            Argument_Types => (
-               % if p.arguments:
-                  ${', '.join('{} => {}'
-                              .format(i, arg.type.introspection_constraint)
-                              for i, arg in enumerate(p.arguments, 1))}
-               % else:
-                  1 .. 0 => <>
-               % endif
-            ),
-            Argument_Names => (
-               % if p.arguments:
-                  ${', '.join("{} => Name_For_{}'Access"
-                              .format(i, arg.name.lower)
-                              for i, arg in enumerate(p.arguments, 1))}
-               % else:
-                  1 .. 0 => <>
-               % endif
-            ),
-            Argument_Default_Values => (
-               % if p.arguments:
-                  ${', '.join('{} => {}'.format(
-                     i,
-                     'No_Value'
-                     if arg.default_value is None else
-                     arg.default_value.render_introspection_constant())
-                     for i, arg in enumerate(p.arguments, 1))}
-               % else:
-                  1 .. 0 => <>
-               % endif
-            )
-         );
-   % endfor
-
-   % if ctx.sorted_properties:
-      Property_Descriptors : constant
-         array (Property_Reference) of Property_Descriptor_Access := (
-         % if ctx.sorted_properties:
-            ${', '.join("Desc_For_{}'Access"
-                        .format(p.introspection_enum_literal)
-                        for p in ctx.sorted_properties)}
-         % else:
-            Property_Reference => <>
-         % endif
-      );
-   % endif
-
-   ---------------------------
-   -- Node type descriptors --
-   ---------------------------
-
-   type Node_Field_Descriptor (Is_Abstract_Or_Null : Boolean) is record
-      Field : Field_Reference;
-      --  Reference to the field this describes
-
-      --  Only non-null concrete fields are assigned an index
-
-      case Is_Abstract_Or_Null is
-         when False =>
-            Index : Positive;
-            --  Index for this field
-
-         when True =>
-            null;
-      end case;
-   end record;
-   --  Description of a field as implemented by a specific node
-
-   type Node_Field_Descriptor_Access is access constant Node_Field_Descriptor;
-   type Node_Field_Descriptor_Array is
-      array (Positive range <>) of Node_Field_Descriptor_Access;
-
-   type Node_Type_Descriptor
-     (Is_Abstract       : Boolean;
-      Derivations_Count : Natural;
-      Fields_Count      : Natural;
-      Properties_Count  : Natural)
-   is record
-      Base_Type : Any_Node_Type_Id;
-      --  Reference to the node type from which this derives
-
-      Derivations : Node_Type_Id_Array (1 .. Derivations_Count);
-      --  List of references for all node types that derives from this
-
-      DSL_Name : Unbounded_String;
-      --  Name for this type in the Langkit DSL
-
-      Inherited_Fields : Natural;
-      --  Number of syntax field inherited from the base type
-
-      Fields : Node_Field_Descriptor_Array (1 .. Fields_Count);
-      --  For regular node types, list of syntax fields that are specific to
-      --  this derivation (i.e. excluding fields from the base type).
-
-      Properties : Property_Reference_Array (1 .. Properties_Count);
-      --  List of properties that this node provides that are specific to this
-      --  derivation (i.e. excluding fields from the base type).
-
-      --  Only concrete nodes are assigned a node kind
-
-      case Is_Abstract is
-         when False =>
-            Kind : ${root_node_kind_name};
-            --  Kind corresponding this this node type
-
-         when True =>
-            null;
-      end case;
-   end record;
-
-   type Node_Type_Descriptor_Access is access constant Node_Type_Descriptor;
-
-   --  Descriptors for node types and their syntax fields
-
-   % for n in ctx.astnode_types:
-   <%
-      fields = n.get_parse_fields(include_inherited=False)
-      properties = n.get_properties(
-         predicate=lambda p: p.is_public and not p.overriding,
-         include_inherited=False)
-
-      if n.is_root_node:
-         inherited_fields = []
-      else:
-         inherited_fields = n.base.get_parse_fields(
-            predicate=lambda f: not (f.abstract or f.null),
-            include_inherited=True)
-   %>
-
-   % for f in fields:
-   ${f.name}_For_${n.kwless_raw_name} : aliased constant Node_Field_Descriptor
-   := (
-      Is_Abstract_Or_Null => ${f.abstract or f.null},
-      Field               => ${(f.base or f).introspection_enum_literal}
-
-      % if not f.abstract and not f.null:
-         , Index => ${f.index + 1}
-      % endif
-   );
-   % endfor
-
-   Desc_For_${n.kwless_raw_name} : aliased constant Node_Type_Descriptor := (
-      Is_Abstract       => ${n.abstract},
-      Derivations_Count => ${len(n.subclasses)},
-      Fields_Count      => ${len(fields)},
-      Properties_Count  => ${len(properties)},
-
-      Base_Type   => ${n.base.introspection_name if n.base else 'None'},
-      Derivations =>
-         ${('({})'.format(', '.join(
-            '{} => {}'.format(i, child.introspection_name)
-            for i, child in enumerate(n.subclasses, 1)
-         )) if n.subclasses else '(1 .. 0 => <>)')},
-
-      DSL_Name => To_Unbounded_String ("${n.dsl_name}"),
-
-      Inherited_Fields => ${len(inherited_fields)},
-      Fields           => (
-         % if fields:
-            ${', '.join("{} => {}_For_{}'Access"
-                        .format(i, f.name, n.kwless_raw_name)
-                        for i, f in enumerate(fields, 1))}
-         % else:
-            1 .. 0 => <>
-         % endif
-      ),
-
-      Properties => (
-         % if properties:
-            ${', '.join("{} => {}".format(i, p.introspection_enum_literal)
-                        for i, p in enumerate(properties, 1))}
-         % else:
-            1 .. 0 => <>
-         % endif
-      )
-
-      % if not n.abstract:
-      , Kind => ${n.ada_kind_name}
-      % endif
-   );
-   % endfor
-
-   Node_Type_Descriptors : constant
-      array (Node_Type_Id) of Node_Type_Descriptor_Access
-   := (${', '.join("Desc_For_{}'Access".format(n.kwless_raw_name)
-                   for n in ctx.astnode_types)});
-
-   ----------------------
-   -- Various mappings --
-   ----------------------
-
-   package Node_Type_Id_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Unbounded_String,
-      Element_Type    => Node_Type_Id,
-      Equivalent_Keys => "=",
-      Hash            => Hash);
-
-   DSL_Name_To_Node_Type : Node_Type_Id_Maps.Map;
-   --  Lookup table for DSL names to node type references. Created at
-   --  elaboration time and never updated after.
-
-   Kind_To_Id : constant array (${root_node_kind_name}) of Node_Type_Id := (
-      ${', '.join('{n.ada_kind_name} => {n.introspection_name}'.format(n=n)
-                  for n in ctx.astnode_types
-                  if not n.abstract)}
-   );
-
-   procedure Check_Argument_Number
-     (Desc : Property_Descriptor; Argument_Number : Positive);
-   --  Raise a Property_Error if Argument_Number is not valid for the property
-   --  that Desc describes. Do nothing otherwise.
-
    --------------
    -- DSL_Name --
    --------------
 
    function DSL_Name (Id : Node_Type_Id) return String is
    begin
-      return To_String (Node_Type_Descriptors (Id).DSL_Name);
+      return Impl.DSL_Name (Id);
    end DSL_Name;
 
    ---------------------
@@ -675,16 +418,8 @@ package body ${ada_lib_name}.Introspection is
    ---------------------
 
    function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id is
-      use Node_Type_Id_Maps;
-
-      Position : constant Cursor :=
-         DSL_Name_To_Node_Type.Find (To_Unbounded_String (Name));
    begin
-      if Has_Element (Position) then
-         return Element (Position);
-      else
-         return None;
-      end if;
+      return Impl.Lookup_DSL_Name (Name);
    end Lookup_DSL_Name;
 
    -----------------
@@ -693,7 +428,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Is_Abstract (Id : Node_Type_Id) return Boolean is
    begin
-      return Node_Type_Descriptors (Id).Is_Abstract;
+      return Impl.Is_Abstract (Id);
    end Is_Abstract;
 
    --------------
@@ -701,12 +436,8 @@ package body ${ada_lib_name}.Introspection is
    --------------
 
    function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name} is
-      Desc : Node_Type_Descriptor renames Node_Type_Descriptors (Id).all;
    begin
-      if Desc.Is_Abstract then
-         raise Constraint_Error with "trying to get kind for abstract node";
-      end if;
-      return Desc.Kind;
+      return Impl.Kind_For (Id);
    end Kind_For;
 
    -----------------
@@ -715,7 +446,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id is
    begin
-      return Kind_To_Id (Kind);
+      return Impl.Id_For_Kind (Kind);
    end Id_For_Kind;
 
    ------------------
@@ -724,7 +455,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Is_Root_Node (Id : Node_Type_Id) return Boolean is
    begin
-      return Id = ${T.root_node.introspection_name};
+      return Impl.Is_Root_Node (Id);
    end Is_Root_Node;
 
    ---------------
@@ -733,10 +464,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Base_Type (Id : Node_Type_Id) return Node_Type_Id is
    begin
-      if Is_Root_Node (Id) then
-         raise Constraint_Error with "trying to get base type of root node";
-      end if;
-      return Node_Type_Descriptors (Id).Base_Type;
+      return Impl.Base_Type (Id);
    end Base_Type;
 
    -------------------
@@ -745,7 +473,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array is
    begin
-      return Node_Type_Descriptors (Id).Derivations;
+      return Impl.Derived_Types (Id);
    end Derived_Types;
 
    ---------------------
@@ -753,16 +481,8 @@ package body ${ada_lib_name}.Introspection is
    ---------------------
 
    function Is_Derived_From (Id, Parent : Node_Type_Id) return Boolean is
-      Cursor : Any_Node_Type_Id := Id;
    begin
-      while Cursor /= None loop
-         if Cursor = Parent then
-            return True;
-         end if;
-
-         Cursor := Node_Type_Descriptors (Cursor).Base_Type;
-      end loop;
-      return False;
+      return Impl.Is_Derived_From (Id, Parent);
    end Is_Derived_From;
 
    --------------
@@ -814,15 +534,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Node_Data_Name (Node_Data : Node_Data_Reference) return String is
    begin
-      case Node_Data is
-         when Field_Reference =>
-            pragma Warnings (Off, "value not in range of type");
-            return Field_Name (Node_Data);
-            pragma Warnings (On, "value not in range of type");
-
-         when Property_Reference =>
-            return Property_Name (Node_Data);
-      end case;
+      return Impl.Node_Data_Name (Node_Data);
    end Node_Data_Name;
 
    --------------------
@@ -832,15 +544,7 @@ package body ${ada_lib_name}.Introspection is
    function Node_Data_Type
      (Node_Data : Node_Data_Reference) return Value_Constraint is
    begin
-      case Node_Data is
-         when Field_Reference =>
-            pragma Warnings (Off, "value not in range of type");
-            return (Kind => Node_Value, Node_Type => Field_Type (Node_Data));
-            pragma Warnings (On, "value not in range of type");
-
-         when Property_Reference =>
-            return Property_Return_Type (Node_Data);
-      end case;
+      return Impl.Node_Data_Type (Node_Data);
    end Node_Data_Type;
 
    --------------------
@@ -872,36 +576,9 @@ package body ${ada_lib_name}.Introspection is
 
    function Lookup_Node_Data
      (Id   : Node_Type_Id;
-      Name : String) return Any_Node_Data_Reference
-   is
-      Cursor : Any_Node_Type_Id := Id;
+      Name : String) return Any_Node_Data_Reference is
    begin
-      --  Go through the derivation chain for Id and look for any field or
-      --  property whose name matches Name.
-
-      while Cursor /= None loop
-         declare
-            Node_Desc : Node_Type_Descriptor renames
-               Node_Type_Descriptors (Cursor).all;
-         begin
-            for F of Node_Desc.Fields loop
-               pragma Warnings (Off, "value not in range of type");
-               if Field_Name (F.Field) = Name then
-                  return F.Field;
-               end if;
-               pragma Warnings (On, "value not in range of type");
-            end loop;
-
-            for P of Node_Desc.Properties loop
-               if Property_Name (P) = Name then
-                  return P;
-               end if;
-            end loop;
-
-            Cursor := Node_Desc.Base_Type;
-         end;
-      end loop;
-      return None;
+      return Impl.Lookup_Node_Data (Id, Name);
    end Lookup_Node_Data;
 
    ----------------
@@ -910,9 +587,9 @@ package body ${ada_lib_name}.Introspection is
 
    function Field_Name (Field : Field_Reference) return String is
    begin
-      pragma Warnings (Off, "value not in range of subtype");
-      return Syntax_Field_Descriptors (Field).Name;
-      pragma Warnings (On, "value not in range of subtype");
+      pragma Warnings (Off, "value not in range of type");
+      return Impl.Field_Name (Field);
+      pragma Warnings (On, "value not in range of type");
    end Field_Name;
 
    ----------------
@@ -921,9 +598,9 @@ package body ${ada_lib_name}.Introspection is
 
    function Field_Type (Field : Field_Reference) return Node_Type_Id is
    begin
-      pragma Warnings (Off, "value not in range of subtype");
-      return Syntax_Field_Descriptors (Field).Field_Type;
-      pragma Warnings (On, "value not in range of subtype");
+      pragma Warnings (Off, "value not in range of type");
+      return Impl.Field_Type (Field);
+      pragma Warnings (On, "value not in range of type");
    end Field_Type;
 
    ----------------
@@ -934,36 +611,14 @@ package body ${ada_lib_name}.Introspection is
      (Node  : ${T.entity.api_name}'Class;
       Field : Field_Reference) return ${T.entity.api_name}
    is
-      Kind : constant ${root_node_kind_name} := Node.Kind;
+      Ent : constant ${T.entity.name} := Unwrap_Entity (Node);
+
+      pragma Warnings (Off, "value not in range of type");
+      Result : constant ${root_node_type_name} :=
+         Impl.Eval_Field (Ent.Node, Field);
+      pragma Warnings (On, "value not in range of type");
    begin
-      <%
-         def get_actions(astnode, node_expr):
-            fields = astnode.get_parse_fields(
-               predicate=lambda f: not f.overriding,
-               include_inherited=False)
-            result = []
-
-            if fields:
-               result.append('case Field is')
-               for f in fields:
-                  result.append('when {} => return {}.{}'.format(
-                     f.introspection_enum_literal,
-                     node_expr,
-                     f.name))
-                  if not f.type.is_root_node:
-                     result[-1] += '.As_{}'.format(T.entity.api_name)
-                  result[-1] += ';'
-               result.append('when others => null;')
-               result.append('end case;')
-
-            return '\n'.join(result)
-      %>
-      ${ctx.generate_actions_for_hierarchy('Node', 'Kind', get_actions,
-                                           public_nodes=True)}
-
-      ## If we haven't matched the requested field on Node, report an error
-      return (raise Node_Data_Evaluation_Error
-              with "no such field on this node");
+      return Wrap_Node (Result, Ent.Info);
    end Eval_Field;
 
    -----------
@@ -974,29 +629,9 @@ package body ${ada_lib_name}.Introspection is
      (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive
    is
    begin
-      % if ctx.sorted_parse_fields:
-         <%
-            concrete_astnodes = [n for n in ctx.astnode_types
-                                 if not n.abstract]
-            def enum_literal(f):
-               return (f.overriding or f).introspection_enum_literal
-         %>
-         case Kind is
-            % for n in concrete_astnodes:
-               when ${n.ada_kind_name} =>
-               return (case Field is
-                       % for f in n.get_parse_fields( \
-                          predicate=lambda f: not f.null \
-                       ):
-                       when ${enum_literal(f)} => ${f.index + 1},
-                       % endfor
-                       when others => raise Constraint_Error);
-            % endfor
-         end case;
-
-      % else:
-         return (raise Program_Error);
-      % endif
+      pragma Warnings (Off, "value not in range of type");
+      return Impl.Index (Kind, Field);
+      pragma Warnings (On, "value not in range of type");
    end Index;
 
    --------------------------------
@@ -1007,41 +642,8 @@ package body ${ada_lib_name}.Introspection is
      (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference
    is
    begin
-      <%
-         def get_actions(astnode, node_expr):
-            fields = astnode.get_parse_fields(
-               predicate=lambda f: not f.abstract and not f.null,
-               include_inherited=False
-            )
-            result = []
-
-            # List types have no field, so just raise an error if a list kind
-            # is passed.
-            if astnode.is_generic_list_type:
-               result.append(
-                  'raise Invalid_Field with "List AST nodes have no field";'
-               )
-            elif astnode.is_list:
-               pass
-
-            # Otherwise, dispatch on the index to return the corresponding
-            # field enum value.
-            elif fields:
-               result.append('case Index is')
-               for f in fields:
-                  result.append('when {} => return {};'.format(
-                     f.index + 1,
-                     (f.overriding or f).introspection_enum_literal
-                  ))
-               result.append('when others => null;')
-               result.append('end case;')
-
-            return '\n'.join(result)
-      %>
-      ${ctx.generate_actions_for_hierarchy(None, 'Kind', get_actions)}
-
       pragma Warnings (Off, "value not in range of type");
-      return (raise Invalid_Field with "Index is out of bounds");
+      return Impl.Field_Reference_From_Index (Kind, Index);
       pragma Warnings (On, "value not in range of type");
    end Field_Reference_From_Index;
 
@@ -1052,83 +654,7 @@ package body ${ada_lib_name}.Introspection is
    function Fields (Kind : ${root_node_kind_name}) return Field_Reference_Array
    is
    begin
-      % if ctx.sorted_parse_fields:
-         return Fields (Id_For_Kind (Kind), Concrete_Only => True);
-      % else:
-         ${return_program_error()}
-      % endif
-   end Fields;
-
-   ------------
-   -- Fields --
-   ------------
-
-   function Fields
-     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array
-   is
-      Cursor : Any_Node_Type_Id := Id;
-
-      Added_Fields : array (Field_Reference) of Boolean := (others => False);
-      --  Set of field references that were added to Result
-
-      Result : Field_Reference_Array (1 .. Added_Fields'Length);
-      --  Temporary to hold the result. We return Result (1 .. Last).
-
-      Last : Natural := 0;
-      --  Index of the last element in Result to return
-   begin
-      % if ctx.sorted_parse_fields:
-
-         --  Go through the derivation chain for Id and collect fields. Do
-         --  it in reverse order as we process base types last.
-         while Cursor /= None loop
-            declare
-               Node_Desc : Node_Type_Descriptor renames
-                  Node_Type_Descriptors (Cursor).all;
-            begin
-               for Field_Index in reverse Node_Desc.Fields'Range loop
-                  declare
-                     Field_Desc : Node_Field_Descriptor renames
-                        Node_Desc.Fields (Field_Index).all;
-                     Field      : Field_Reference renames Field_Desc.Field;
-                  begin
-                     --  Abstract fields share the same Field_Reference value
-                     --  with the corresponding concrete fields, so collect
-                     --  fields only once. We process fields in reverse order,
-                     --  so we know that concrete ones will be processed before
-                     --  the abstract fields they override.
-                     if not (Concrete_Only
-                             and then Field_Desc.Is_Abstract_Or_Null)
-                        and then not Added_Fields (Field)
-                     then
-                        Added_Fields (Field) := True;
-                        Last := Last + 1;
-                        Result (Last) := Field;
-                     end if;
-                  end;
-               end loop;
-               Cursor := Node_Desc.Base_Type;
-            end;
-         end loop;
-
-         --  At this point, Result contains elements in the opposite order as
-         --  expected, so reverse it.
-
-         for I in 1 .. Last / 2 loop
-            declare
-               Other_I : constant Positive := Last - I + 1;
-               Swap    : constant Field_Reference := Result (I);
-            begin
-               Result (I) := Result (Other_I);
-               Result (Other_I) := Swap;
-            end;
-         end loop;
-
-         return Result (1 .. Last);
-
-      % else:
-         ${return_program_error()}
-      % endif
+      return Impl.Fields (Kind);
    end Fields;
 
    ------------
@@ -1137,7 +663,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Fields (Id : Node_Type_Id) return Field_Reference_Array is
    begin
-      return Fields (Id, Concrete_Only => False);
+      return Impl.Fields (Id);
    end Fields;
 
    % if ctx.sorted_properties:
@@ -1148,7 +674,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Property_Name (Property : Property_Reference) return String is
    begin
-      return Property_Descriptors (Property).Name;
+      return Impl.Property_Name (Property);
    end Property_Name;
 
    --------------------------
@@ -1158,20 +684,8 @@ package body ${ada_lib_name}.Introspection is
    function Property_Return_Type
      (Property : Property_Reference) return Value_Constraint is
    begin
-      return Property_Descriptors (Property).Return_Type;
+      return Impl.Property_Return_Type (Property);
    end Property_Return_Type;
-
-   ---------------------------
-   -- Check_Argument_Number --
-   ---------------------------
-
-   procedure Check_Argument_Number
-     (Desc : Property_Descriptor; Argument_Number : Positive) is
-   begin
-      if Argument_Number not in Desc.Argument_Names'Range then
-         raise Property_Error with "out-of-bounds argument number";
-      end if;
-   end Check_Argument_Number;
 
    -----------------------------
    -- Property_Argument_Types --
@@ -1180,7 +694,7 @@ package body ${ada_lib_name}.Introspection is
    function Property_Argument_Types
      (Property : Property_Reference) return Value_Constraint_Array is
    begin
-      return Property_Descriptors (Property).Argument_Types;
+      return Impl.Property_Argument_Types (Property);
    end Property_Argument_Types;
 
    ----------------------------
@@ -1190,11 +704,8 @@ package body ${ada_lib_name}.Introspection is
    function Property_Argument_Name
      (Property : Property_Reference; Argument_Number : Positive) return String
    is
-      Desc : Property_Descriptor renames Property_Descriptors (Property).all;
    begin
-      Check_Argument_Number (Desc, Argument_Number);
-      return Property_Descriptors (Property)
-             .Argument_Names (Argument_Number).all;
+      return Impl.Property_Argument_Name (Property, Argument_Number);
    end Property_Argument_Name;
 
    -------------------------------------
@@ -1205,10 +716,12 @@ package body ${ada_lib_name}.Introspection is
      (Property        : Property_Reference;
       Argument_Number : Positive) return Any_Value_Type
    is
-      Desc : Property_Descriptor renames Property_Descriptors (Property).all;
+      Desc : Impl.Property_Descriptor renames
+         Impl.Property_Descriptors (Property).all;
    begin
-      Check_Argument_Number (Desc, Argument_Number);
-      return Desc.Argument_Default_Values (Argument_Number);
+      Impl.Check_Argument_Number (Desc, Argument_Number);
+      return From_Internal_Value
+        (Desc.Argument_Default_Values (Argument_Number));
    end Property_Argument_Default_Value;
 
    -------------------
@@ -1221,7 +734,8 @@ package body ${ada_lib_name}.Introspection is
       Arguments : Value_Array) return Value_Type
    is
       Kind   : constant ${root_node_kind_name} := Node.Kind;
-      Desc   : Property_Descriptor renames Property_Descriptors (Property).all;
+      Desc   : Impl.Property_Descriptor renames
+         Impl.Property_Descriptors (Property).all;
       Result : Any_Value_Type := No_Value;
    begin
       --  First, check that arguments match the property signature
@@ -1284,11 +798,15 @@ package body ${ada_lib_name}.Introspection is
                result.append('end;')
 
          def get_actions(astnode, node_expr):
-            properties = [
-                (p.base if p.overriding else p)
-                for p in astnode.get_properties(
-                   predicate=lambda p: p.is_public,
-                   include_inherited=False)]
+            # TODO: due to what seems to be a Mako bug, we cannot create
+            # "properties" with a list comprehension.
+            properties = astnode.get_properties(
+               predicate=lambda p: p.is_public,
+               include_inherited=False)
+            for i, p in enumerate(properties):
+               if p.overriding:
+                  properties[i] = p.base
+
             result = []
 
             if properties:
@@ -1320,7 +838,7 @@ package body ${ada_lib_name}.Introspection is
    function Properties
      (Kind : ${root_node_kind_name}) return Property_Reference_Array is
    begin
-      return Properties (Id_For_Kind (Kind));
+      return Impl.Properties (Kind);
    end Properties;
 
    ----------------
@@ -1328,44 +846,8 @@ package body ${ada_lib_name}.Introspection is
    ----------------
 
    function Properties (Id : Node_Type_Id) return Property_Reference_Array is
-      Cursor : Any_Node_Type_Id := Id;
-
-      Result : Property_Reference_Array (1 .. Property_Descriptors'Length);
-      --  Temporary to hold the result. We return Result (1 .. Last).
-
-      Last : Natural := 0;
-      --  Index of the last element in Result to return
    begin
-      --  Go through the derivation chain for Id and collect properties. Do
-      --  it in reverse order as we process base types last.
-
-      while Cursor /= None loop
-         declare
-            Node_Desc : Node_Type_Descriptor renames
-               Node_Type_Descriptors (Cursor).all;
-         begin
-            for Prop_Desc of reverse Node_Desc.Properties loop
-               Last := Last + 1;
-               Result (Last) := Prop_Desc;
-            end loop;
-            Cursor := Node_Desc.Base_Type;
-         end;
-      end loop;
-
-      --  At this point, Result contains elements in the opposite order as
-      --  expected, so reverse it.
-
-      for I in 1 .. Last / 2 loop
-         declare
-            Other_I : constant Positive := Last - I + 1;
-            Swap    : constant Property_Reference := Result (I);
-         begin
-            Result (I) := Result (Other_I);
-            Result (Other_I) := Swap;
-         end;
-      end loop;
-
-      return Result (1 .. Last);
+      return Impl.Properties (Id);
    end Properties;
 
    % endif
@@ -1377,31 +859,8 @@ package body ${ada_lib_name}.Introspection is
    function Token_Node_Kind
      (Kind : ${root_node_kind_name}) return Token_Kind
    is
-      <% token_nodes = [n for n in ctx.astnode_types
-                        if not n.abstract and n.is_token_node] %>
    begin
-      % if ctx.generate_unparser:
-         case Kind is
-            % for n in token_nodes:
-               when ${n.ada_kind_name} =>
-                  return ${n.token_kind.ada_name};
-            % endfor
-
-            when others =>
-               --  Kind is not a token node, and thus the precondition does not
-               --  hold.
-               return (raise Program_Error);
-         end case;
-
-      % else:
-         pragma Unreferenced (Kind);
-         return (raise Program_Error);
-      % endif
+      return Impl.Token_Node_Kind (Kind);
    end Token_Node_Kind;
 
-begin
-   for D in Node_Type_Descriptors'Range loop
-      DSL_Name_To_Node_Type.Insert
-        (Node_Type_Descriptors (D).DSL_Name, D);
-   end loop;
 end ${ada_lib_name}.Introspection;
