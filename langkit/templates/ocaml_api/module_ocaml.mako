@@ -706,7 +706,8 @@ end = struct
     ?with_trivia:(with_trivia=true)
     ?tab_stop:(tab_stop=${ctx.default_tab_stop})
     ?unit_provider () : t =
-
+    if tab_stop < 1 then
+      raise (Invalid_argument "Invalid tab_stop (positive integer expected)") ;
     let c_context =
       match unit_provider with
       | Some provider ->
