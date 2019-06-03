@@ -205,6 +205,9 @@ module ${ocaml_api.node_name(astnode)} : sig
   val compare : [< t] -> [< t] -> int
 
    % if astnode == T.root_node:
+  val kind_name : [< ${root_entity_type}] -> string
+  ${ocaml_doc('langkit.node_kind', 1)}
+
   val text : [< ${root_entity_type} ] -> string
   (**
    * Return the source buffer slice corresponding to the text that spans

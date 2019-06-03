@@ -893,6 +893,17 @@ let ${field.name.lower}
    % endif
 
    % if astnode == T.root_node:
+
+  let kind_name = function
+      % for astnode in reversed(ctx.astnode_types):
+         ## We walk in reverse because some concrete types have subclasses,
+         ## but we want the subclasses to appear first
+         % if not astnode.abstract:
+    | #${ocaml_api.type_public_name(astnode)} ->
+        "${ocaml_api.node_name(astnode)}"
+         % endif
+      % endfor
+
   let text node =
     Token.text_range (token_start node) (token_end node)
 
