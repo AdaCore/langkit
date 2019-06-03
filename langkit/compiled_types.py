@@ -2812,15 +2812,25 @@ class ASTNodeType(BaseStructType):
             return self.ada_kind_name + '_Range'
 
     @property
-    def introspection_name(self):
+    def introspection_simple_name(self):
         """
-        Return the name of the Ada enumeraton to represent this node type in
+        Return the name of the Ada enumeration to represent this node type in
         the introspection API.
 
         :rtype: str
         """
         return (names.Name('Type') +
                 self.kwless_raw_name).camel_with_underscores
+
+    @property
+    def introspection_name(self):
+        """
+        Like `introspection_simple_name`, but with the `Common.` name prefix to
+        avoid ambiguities in generated code.
+
+        :rtype: str
+        """
+        return 'Common.{}'.format(self.introspection_simple_name)
 
     def value_type_name(self):
         """

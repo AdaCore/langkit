@@ -31,19 +31,6 @@ package ${ada_lib_name}.Introspection is
    -- Node types --
    ----------------
 
-   --  Unlike Analysis.${root_node_kind_name}, the following enumeration
-   --  contains entries for abstract nodes.
-
-   type Any_Node_Type_Id is (
-      None, ${', '.join(n.introspection_name for n in ctx.astnode_types)}
-   );
-
-   subtype Node_Type_Id is Any_Node_Type_Id
-      range ${ctx.astnode_types[0].introspection_name}
-            .. ${ctx.astnode_types[-1].introspection_name};
-
-   type Node_Type_Id_Array is array (Positive range <>) of Node_Type_Id;
-
    function DSL_Name (Id : Node_Type_Id) return String;
    --  Return the name corresponding to Id in the Langkit DSL
 
@@ -81,31 +68,6 @@ package ${ada_lib_name}.Introspection is
    ------------------------
    -- Polymorphic values --
    ------------------------
-
-   type Any_Value_Kind is (
-      None,
-      Boolean_Value,
-      Integer_Value,
-      Big_Integer_Value,
-      Character_Value,
-      Token_Value,
-      Unbounded_Text_Value,
-      Analysis_Unit_Value,
-      Node_Value
-
-      % for enum_type in ctx.enum_types:
-      , ${enum_type.introspection_kind}
-      % endfor
-
-      % for t in ctx.composite_types:
-      % if t.exposed and not t.is_entity_type:
-      , ${t.introspection_kind}
-      % endif
-      % endfor
-   );
-   subtype Value_Kind is
-      Any_Value_Kind range Boolean_Value ..  Any_Value_Kind'Last;
-   --  Enumeration for all types used to interact with properties
 
    type Any_Value_Type is private;
    --  Polymorphic value to contain Kind values. This type has by-reference
@@ -176,18 +138,6 @@ package ${ada_lib_name}.Introspection is
    type Value_Array is array (Positive range <>) of Value_Type;
    type Any_Value_Array is array (Positive range <>) of Any_Value_Type;
 
-   type Value_Constraint (Kind : Value_Kind := Value_Kind'First) is record
-      case Kind is
-         when Node_Value =>
-            Node_Type : Node_Type_Id;
-            --  Base type for nodes that satisfy this constraint
-
-         when others =>
-            null;
-      end case;
-   end record;
-   --  Constraint for a polymorphic value
-
    function DSL_Name (Constraint : Value_Constraint) return String;
    --  Return the name corresponding to Constraint in the Langkit DSL
 
@@ -195,25 +145,9 @@ package ${ada_lib_name}.Introspection is
      (Value : Value_Type; Constraint : Value_Constraint) return Boolean;
    --  Return whether the given Value satisfy the given Constraint
 
-   type Value_Constraint_Array is
-      array (Positive range <>) of Value_Constraint;
-
    ---------------
    -- Node data --
    ---------------
-
-   <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
-
-   type Any_Node_Data_Reference is
-      (None${''.join((', ' + f.introspection_enum_literal)
-                      for f in all_abstract)});
-   subtype Node_Data_Reference is Any_Node_Data_Reference range
-      ${all_abstract[0].introspection_enum_literal}
-      ..  ${all_abstract[-1].introspection_enum_literal};
-   --  Enumeration of all data attached to nodes (syntax fields and properties)
-
-   type Node_Data_Reference_Array is
-      array (Positive range <>) of Node_Data_Reference;
 
    function Node_Data_Name (Node_Data : Node_Data_Reference) return String;
    --  Return a lower-case name for Node_Data
@@ -245,25 +179,6 @@ package ${ada_lib_name}.Introspection is
    -- Syntax fields --
    -------------------
 
-   ## In a lot of testcases, there is a single concrete node that has no
-   ## field. For these, generate a type that has no valid value.
-   subtype Field_Reference is Node_Data_Reference range
-      % if ctx.sorted_parse_fields:
-         <%
-            first = ctx.sorted_parse_fields[0]
-            last = ctx.sorted_parse_fields[-1]
-         %>
-      % else:
-         <%
-            first = all_abstract[-1]
-            last = all_abstract[0]
-         %>
-      % endif
-      ${first.introspection_enum_literal}
-      .. ${last.introspection_enum_literal}
-   ;
-   --  Enumeration of all syntax fields for regular nodes
-
    function Field_Name (Field : Field_Reference) return String;
    --  Return a lower-case name for ``Field``
 
@@ -288,8 +203,6 @@ package ${ada_lib_name}.Introspection is
    --  of the given ``Kind``. Raise an ``Invalid_Field`` exception if there is
    --  no field corresponding to this index.
 
-   type Field_Reference_Array is array (Positive range <>) of Field_Reference;
-
    function Fields
      (Kind : ${root_node_kind_name}) return Field_Reference_Array;
    --  Return the list of fields that nodes of the given ``Kind`` have. This
@@ -302,11 +215,6 @@ package ${ada_lib_name}.Introspection is
    ----------------
    -- Properties --
    ----------------
-
-   subtype Property_Reference is Node_Data_Reference
-      range ${ctx.sorted_properties[0].introspection_enum_literal}
-         .. ${ctx.sorted_properties[-1].introspection_enum_literal};
-   --  Enumeration of all available node properties
 
    function Property_Name (Property : Property_Reference) return String;
    --  Return a lower-case name for ``Property``
@@ -344,9 +252,6 @@ package ${ada_lib_name}.Introspection is
    --
    --  This raises a Node_Data_Evaluation_Error if Node has no such property or
    --  if the provided arguments are invalid for this property.
-
-   type Property_Reference_Array is
-      array (Positive range <>) of Property_Reference;
 
    function Properties
      (Kind : ${root_node_kind_name}) return Property_Reference_Array;
