@@ -127,7 +127,8 @@ class TypeSet(object):
         :param TypeSet type_set: Types to include.
         """
         assert isinstance(type_set, TypeSet)
-        self.matched_types.update(type_set.matched_types)
+        for t in type_set.matched_types:
+            self.include(t)
 
     def include(self, t):
         """
