@@ -327,8 +327,10 @@ class Emitter(object):
             ('pkg_converters', 'Converters', False),
             # Unit for implementation of analysis primitives
             ('pkg_implementation', 'Implementation', True),
-            # Unit for AST introspection
+            # Unit for AST introspection public API
             ('pkg_introspection', 'Introspection', True),
+            # Unit for AST introspection internal API
+            ('pkg_introspection_impl', 'Introspection_Implementation', True),
             # Unit for AST node iteration primitives
             ('pkg_iterators', 'Iterators', True),
             # Unit for AST rewriting primitives
