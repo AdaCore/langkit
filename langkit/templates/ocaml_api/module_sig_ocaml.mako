@@ -168,6 +168,15 @@ and AnalysisContext : sig
     -> string
     -> AnalysisUnit.t
   ${ocaml_doc('langkit.get_unit_from_file', 1)}
+
+  val get_from_buffer :
+    ?charset:string
+    -> ?grammar_rule:GrammarRule.t
+    -> t
+    -> string
+    -> string
+    -> AnalysisUnit.t
+  ${ocaml_doc('langkit.get_unit_from_buffer', 1)}
 end
 
 % for struct_type in ctx.struct_types:

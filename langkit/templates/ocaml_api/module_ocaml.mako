@@ -464,6 +464,16 @@ module AnalysisContextStruct = struct
      @-> GrammarRule.c_type
      @-> raisable AnalysisUnitStruct.c_type)
 
+  let get_analysis_unit_from_buffer = foreign ~from:c_lib
+    "${capi.get_name('get_analysis_unit_from_buffer')}"
+    (c_type
+     @-> string (* Filename *)
+     @-> string (* Charset *)
+     @-> string (* Buffer *)
+     @-> size_t (* Buffer size *)
+     @-> GrammarRule.c_type
+     @-> raisable AnalysisUnitStruct.c_type)
+
 end
 
 module Symbol = struct
@@ -695,6 +705,14 @@ and AnalysisContext : sig
     -> t
     -> string
     -> AnalysisUnit.t
+
+  val get_from_buffer :
+    ?charset:string
+    -> ?grammar_rule:GrammarRule.t
+    -> t
+    -> string
+    -> string
+    -> AnalysisUnit.t
 end = struct
   type t = {
     c_value : AnalysisContextStruct.t;
@@ -743,6 +761,19 @@ end = struct
     ${ocaml_api.wrap_value(
       "AnalysisContextStruct.get_analysis_unit_from_file ctx.c_value"
       + " filename charset reparse grammar_rule", T.AnalysisUnit, "ctx")}
+
+  let get_from_buffer
+    ?charset:(charset="")
+    ?grammar_rule:(grammar_rule=default_grammar_rule)
+    ctx
+    filename
+    buffer : AnalysisUnit.t =
+
+    ${ocaml_api.wrap_value(
+      "AnalysisContextStruct.get_analysis_unit_from_buffer ctx.c_value"
+      + " filename charset buffer"
+      + " (Unsigned.Size_t.of_int (String.length buffer)) grammar_rule"
+      , T.AnalysisUnit, "ctx")}
 end
 
 % for struct_type in ctx.struct_types:
