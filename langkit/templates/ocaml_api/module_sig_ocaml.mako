@@ -1,6 +1,7 @@
-<%namespace name="struct_types"  file="struct_types_ocaml.mako"/>
-<%namespace name="astnode_types" file="astnode_types_ocaml.mako"/>
-<%namespace name="exts"          file="/extensions.mako" />
+<%namespace name="struct_types"   file="struct_types_ocaml.mako"/>
+<%namespace name="astnode_types"  file="astnode_types_ocaml.mako"/>
+<%namespace name="token_iterator" file="token_iterator_ocaml.mako" />
+<%namespace name="exts"           file="/extensions.mako" />
 
 <%
   root_entity_type = ocaml_api.type_public_name(root_entity)
@@ -93,6 +94,17 @@ module Token : sig
   val is_trivia : t -> bool
   ${ocaml_doc('langkit.token_is_trivia', 1)}
 
+  val index : t -> int
+  ${ocaml_doc('langkit.token_index', 1)}
+
+  val next : t -> t
+  ${ocaml_doc('langkit.unit_first_token', 1)}
+
+  val previous : t -> t
+  ${ocaml_doc('langkit.unit_last_token', 1)}
+
+  val equal : t -> t -> bool
+
   val pp : Format.formatter -> t -> unit
 end
 
@@ -144,6 +156,23 @@ and AnalysisUnit : sig
   (**
    * Diagnostics for this unit.
    *)
+
+  val reparse : ?charset:string -> ?buffer:string -> t -> unit
+  ${ocaml_doc('langkit.unit_reparse_generic', 1)}
+
+  val first_token : t -> Token.t
+  ${ocaml_doc('langkit.unit_first_token', 1)}
+
+  val last_token : t -> Token.t
+  ${ocaml_doc('langkit.unit_last_token', 1)}
+
+  val token_count : t -> int
+  ${ocaml_doc('langkit.unit_token_count', 1)}
+
+  val trivia_count : t -> int
+  ${ocaml_doc('langkit.unit_trivia_count', 1)}
+
+  ${token_iterator.sig("t")}
 end
 
 and AnalysisContext : sig
@@ -229,20 +258,12 @@ module ${ocaml_api.node_name(astnode)} : sig
   val sloc_range : [< ${root_entity_type} ] -> SlocRange.t
   ${ocaml_doc('langkit.node_sloc_range', 1)}
 
-  val fold_tokens : ('a -> Token.t -> 'a) -> 'a -> [< ${root_entity_type} ] -> 'a
-  (**
-   * Fold all the token this node contains by calling f on each token.
-   *)
+  val lookup : [< ${root_entity_type} ] -> Sloc.t -> ${root_entity_type} option
+  ${ocaml_doc('langkit.lookup_in_node', 1)}
 
-  val iter_tokens : (Token.t -> unit) -> [< ${root_entity_type} ] -> unit
-  (**
-   * Iterate over all token this node contains by calling f on each token.
-   *)
+  ${token_iterator.sig('[< {}]'.format(root_entity_type))}
 
-  val map_tokens : (Token.t -> 'a) -> [< ${root_entity_type} ] -> 'a list
-  (**
-   * Map each token calling the given function
-   *)
+  val entity_image : [< ${root_entity_type} ] -> string
 
   val children_opt : [< ${root_entity_type} ] -> ${root_entity_type} option list
   (**

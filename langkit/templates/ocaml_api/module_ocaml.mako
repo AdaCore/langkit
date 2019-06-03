@@ -1,7 +1,8 @@
-<%namespace name="struct_types"  file="struct_types_ocaml.mako"/>
-<%namespace name="array_types"   file="array_types_ocaml.mako"/>
-<%namespace name="astnode_types" file="astnode_types_ocaml.mako"/>
-<%namespace name="exts"          file="/extensions.mako" />
+<%namespace name="struct_types"   file="struct_types_ocaml.mako"/>
+<%namespace name="array_types"    file="array_types_ocaml.mako"/>
+<%namespace name="astnode_types"  file="astnode_types_ocaml.mako"/>
+<%namespace name="token_iterator" file="token_iterator_ocaml.mako" />
+<%namespace name="exts"           file="/extensions.mako" />
 
 <%
   root_entity_type = ocaml_api.type_public_name(root_entity)
@@ -381,10 +382,18 @@ module Token = struct
     "${capi.get_name('token_next')}"
     (ptr c_type @-> ptr c_type @-> raisable void)
 
+  let token_previous = foreign ~from:c_lib
+    "${capi.get_name('token_previous')}"
+    (ptr c_type @-> ptr c_type @-> raisable void)
+
   let pp fmt token =
-    Format.fprintf fmt "<Token %s%s at %a>"
+    let pp_text fmt = function
+      | "" -> Format.pp_print_string fmt ""
+      | _ as text -> Format.fprintf fmt " %S" text
+    in
+    Format.fprintf fmt "<Token %s%a at %a>"
       (kind_name token)
-      (if token.text = "" then "" else (" " ^ token.text))
+      pp_text token.text
       SlocRange.pp token.sloc_range
 
   let text_range token_first token_last =
@@ -404,14 +413,29 @@ module Token = struct
 
   let next token =
     let c_next_token_ptr = allocate_n c_type ~count:1 in
-    ignore (
-      token_next
-        (allocate c_type token)
-        c_next_token_ptr );
+    token_next (allocate c_type token) c_next_token_ptr ;
+    !@ c_next_token_ptr
+
+  let previous token =
+    let c_next_token_ptr = allocate_n c_type ~count:1 in
+    token_previous (allocate c_type token) c_next_token_ptr ;
     !@ c_next_token_ptr
 
   let is_trivia token =
     token.trivia_index != 0
+
+  let index token =
+    match token.trivia_index with
+    | 0 ->
+        token.token_index - 1
+    | _ ->
+        token.trivia_index - 1
+
+  let equal one other =
+    let identity_tuple token =
+      (token.token_data, token.token_index, token.trivia_index)
+    in
+    identity_tuple one = identity_tuple other
 end
 
 module AnalysisUnitStruct = struct
@@ -430,6 +454,40 @@ module AnalysisUnitStruct = struct
   let unit_diagnostic = foreign ~from:c_lib
     "${capi.get_name('unit_diagnostic')}"
     (c_type @-> int @-> ptr Diagnostic.c_type @-> raisable int)
+
+  let unit_reparse_from_file = foreign ~from:c_lib
+    "${capi.get_name('unit_reparse_from_file')}"
+    (c_type
+     @-> string
+     @-> raisable int)
+
+  let unit_reparse_from_buffer = foreign ~from:c_lib
+    "${capi.get_name('unit_reparse_from_buffer')}"
+    (c_type
+     @-> string
+     @-> string
+     @-> size_t
+     @-> raisable int)
+
+  let unit_first_token = foreign ~from:c_lib
+    "${capi.get_name('unit_first_token')}"
+    (c_type
+     @-> ptr Token.c_type
+     @-> raisable void)
+
+  let unit_last_token = foreign ~from:c_lib
+    "${capi.get_name('unit_last_token')}"
+    (c_type
+     @-> ptr Token.c_type
+     @-> raisable void)
+
+  let unit_token_count = foreign ~from:c_lib
+    "${capi.get_name('unit_token_count')}"
+    (c_type @-> raisable int)
+
+  let unit_trivia_count = foreign ~from:c_lib
+    "${capi.get_name('unit_trivia_count')}"
+    (c_type @-> raisable int)
 end
 
 module UnitProvider = struct
@@ -532,6 +590,18 @@ module CFunctions = struct
     (ptr ${ocaml_api.c_type(root_entity)}
      @-> ptr SlocRange.c_type
      @-> raisable void)
+
+  let lookup_in_node = foreign ~from:c_lib
+    "${capi.get_name('lookup_in_node')}"
+    (ptr ${ocaml_api.c_type(root_entity)}
+     @-> ptr Sloc.c_type
+     @-> ptr ${ocaml_api.c_type(root_entity)}
+     @-> raisable void)
+
+  let entity_image = foreign ~from:c_lib
+    "${capi.get_name('entity_image')}"
+    (ptr ${ocaml_api.c_type(root_entity)}
+     @-> raisable Text.c_type)
 
 % for astnode in ctx.astnode_types:
    % for field in astnode.fields_with_accessors():
@@ -649,6 +719,13 @@ and AnalysisUnit : sig
 
   val root : t -> ${root_entity_type} option
   val diagnostics : t -> Diagnostic.t list
+  val reparse : ?charset:string -> ?buffer:string -> t -> unit
+  val first_token : t -> Token.t
+  val last_token : t -> Token.t
+  val token_count : t -> int
+  val trivia_count : t -> int
+
+  ${token_iterator.sig("t")}
 
   val wrap : AnalysisContext.t -> AnalysisUnitStruct.t -> t
   val unwrap : t -> AnalysisUnitStruct.t
@@ -675,6 +752,37 @@ end = struct
       !@ diag
     in
     List.init length f
+
+  let reparse ?charset:(charset="") ?buffer ctx =
+    match buffer with
+    | None ->
+        ignore
+          (AnalysisUnitStruct.unit_reparse_from_file ctx.c_value charset)
+    | Some buffer ->
+        ignore (AnalysisUnitStruct.unit_reparse_from_buffer ctx.c_value
+          charset buffer (Unsigned.Size_t.of_int (String.length buffer)))
+
+  let first_token unit =
+    let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
+    let result_ptr = allocate_n Token.c_type ~count:1 in
+    AnalysisUnitStruct.unit_first_token c_unit result_ptr ;
+    !@ result_ptr
+
+  let last_token unit =
+    let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
+    let result_ptr = allocate_n Token.c_type ~count:1 in
+    AnalysisUnitStruct.unit_last_token c_unit result_ptr ;
+    !@ result_ptr
+
+  let token_count unit =
+    AnalysisUnitStruct.unit_token_count
+      (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)})
+
+  let trivia_count unit =
+    AnalysisUnitStruct.unit_trivia_count
+      (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)})
+
+  ${token_iterator.struct("first_token", "last_token")}
 
   let wrap context c_value = {
     c_value=c_value;
@@ -949,39 +1057,19 @@ let ${field.name.lower}
       c_result_ptr;
     !@ c_result_ptr
 
-  let fold_tokens f init node =
-    let tok_start = token_start node in
-    let tok_end = token_end node in
-    let rec aux acc tok_curr =
-      let new_acc = f acc tok_curr in
-      if tok_curr = tok_end then
-        new_acc
-      else
-        aux new_acc (Token.next tok_curr)
-    in
-    aux init tok_start
+  ${token_iterator.struct("token_start", "token_end")}
 
-  let iter_tokens f node =
-    let tok_start = token_start node in
-    let tok_end = token_end node in
-    let rec aux tok_curr =
-      f tok_curr;
-      if not (tok_curr = tok_end) then
-        aux (Token.next tok_curr)
-    in
-    aux tok_start
+  let lookup node sloc =
+    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
+    let sloc_ptr = allocate Sloc.c_type sloc in
+    let result_ptr = allocate_n ${ocaml_api.c_type(root_entity)} ~count:1 in
+    CFunctions.lookup_in_node
+      (addr node_c_value) sloc_ptr result_ptr;
+    ${ocaml_api.check_for_null('!@ result_ptr', root_entity, '(context node)')}
 
-  let map_tokens f node =
-    let tok_start = token_start node in
-    let tok_end = token_end node in
-    let rec aux tok_curr =
-      let value = f tok_curr in
-      if tok_curr = tok_end then
-        [value]
-      else
-        value :: aux (Token.next tok_curr)
-    in
-    aux tok_start
+  let entity_image node =
+    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
+    CFunctions.entity_image (addr node_c_value)
 
   let children_opt node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
