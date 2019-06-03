@@ -1032,6 +1032,7 @@ let ${field.name.lower}
 
   let filter p node =
     fold (fun acc node -> if p node then node :: acc else acc) [] node
+    |> List.rev
 
   let exists p node =
     (* Use an auxiliary function here to have a better type for the function *)
