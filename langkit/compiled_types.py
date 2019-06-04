@@ -2819,8 +2819,8 @@ class ASTNodeType(BaseStructType):
 
         :rtype: str
         """
-        return (names.Name('Type') +
-                self.kwless_raw_name).camel_with_underscores
+        return (self.kwless_raw_name
+                + names.Name('Type_Id')).camel_with_underscores
 
     @property
     def introspection_name(self):

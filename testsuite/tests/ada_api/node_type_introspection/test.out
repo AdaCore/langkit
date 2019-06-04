@@ -1,4 +1,4 @@
-FooNode (TYPE_FOO_NODE)
+FooNode (FOO_NODE_TYPE_ID)
   abstract
   is root node
   derivations:
@@ -8,7 +8,7 @@ FooNode (TYPE_FOO_NODE)
     Expr
     Null
 
-Expr (TYPE_EXPR)
+Expr (EXPR_TYPE_ID)
   abstract
   base = FooNode
   derivations:
@@ -16,69 +16,69 @@ Expr (TYPE_EXPR)
     Number
     Ref
 
-Addition (TYPE_ADDITION)
+Addition (ADDITION_TYPE_ID)
   concrete
   base = Expr
   kind = FOO_ADDITION
   derivations:
     <none>
 
-Number (TYPE_NUMBER)
+Number (NUMBER_TYPE_ID)
   concrete
   base = Expr
   kind = FOO_NUMBER
   derivations:
     <none>
 
-Ref (TYPE_REF)
+Ref (REF_TYPE_ID)
   concrete
   base = Expr
   kind = FOO_REF
   derivations:
     <none>
 
-FooNodeBaseList (TYPE_FOO_NODE_BASE_LIST)
+FooNodeBaseList (FOO_NODE_BASE_LIST_TYPE_ID)
   abstract
   base = FooNode
   derivations:
     VarDecl.list
 
-VarDecl.list (TYPE_VAR_DECL_LIST)
+VarDecl.list (VAR_DECL_LIST_TYPE_ID)
   concrete
   base = FooNodeBaseList
   kind = FOO_VAR_DECL_LIST
   derivations:
     <none>
 
-Name (TYPE_NAME)
+Name (NAME_TYPE_ID)
   concrete
   base = FooNode
   kind = FOO_NAME
   derivations:
     <none>
 
-Null (TYPE_NULL_NODE)
+Null (NULL_NODE_TYPE_ID)
   abstract
   base = FooNode
   derivations:
     NullPresent
     NullAbsent
 
-NullAbsent (TYPE_NULL_ABSENT)
+NullAbsent (NULL_ABSENT_TYPE_ID)
   concrete
   base = Null
   kind = FOO_NULL_ABSENT
   derivations:
     <none>
 
-NullPresent (TYPE_NULL_PRESENT)
+NullPresent (NULL_PRESENT_TYPE_ID)
   concrete
   base = Null
   kind = FOO_NULL_PRESENT
   derivations:
     <none>
 
-VarDecl (TYPE_VAR_DECL)
+VarDecl (VAR_DECL_TYPE_ID)
   concrete
   base = FooNode
   kind = FOO_VAR_DECL

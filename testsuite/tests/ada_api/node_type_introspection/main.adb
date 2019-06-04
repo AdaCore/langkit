@@ -58,16 +58,16 @@ begin
       New_Line;
    end loop;
 
-   Assert (Is_Derived_From (Type_Foo_Node, Type_Foo_Node),
+   Assert (Is_Derived_From (Foo_Node_Type_Id, Foo_Node_Type_Id),
            "root derives from root");
 
-   Assert (Is_Derived_From (Type_Expr, Type_Foo_Node),
+   Assert (Is_Derived_From (Expr_Type_Id, Foo_Node_Type_Id),
            "expr derives from root");
 
-   Assert (Is_Derived_From (Type_Addition, Type_Foo_Node),
+   Assert (Is_Derived_From (Addition_Type_Id, Foo_Node_Type_Id),
            "addition derives from root");
 
-   Assert (not Is_Derived_From (Type_Ref, Type_Number),
+   Assert (not Is_Derived_From (Ref_Type_Id, Number_Type_Id),
            "ref does not derive from number");
 
    Put_Line ("Done.");

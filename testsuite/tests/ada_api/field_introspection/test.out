@@ -1,12 +1,12 @@
-FooNode (TYPE_FOO_NODE)
+FooNode (FOO_NODE_TYPE_ID)
    Fields (with abstract ones):
 
-Decl (TYPE_DECL)
+Decl (DECL_TYPE_ID)
    Fields (with abstract ones):
    field name (Name)
    field value (Expr)
 
-FunDecl (TYPE_FUN_DECL)
+FunDecl (FUN_DECL_TYPE_ID)
    Fields (with abstract ones):
    field name (Name)
    field value (Expr)
@@ -14,7 +14,7 @@ FunDecl (TYPE_FUN_DECL)
    Fields (only concrete ones):
    name: 1
 
-VarDecl (TYPE_VAR_DECL)
+VarDecl (VAR_DECL_TYPE_ID)
    Fields (with abstract ones):
    field var_kw (VarKeyword)
    field name (Name)
@@ -25,35 +25,35 @@ VarDecl (TYPE_VAR_DECL)
    name: 2
    value: 3
 
-Expr (TYPE_EXPR)
+Expr (EXPR_TYPE_ID)
    Fields (with abstract ones):
 
-Number (TYPE_NUMBER)
+Number (NUMBER_TYPE_ID)
    Fields (with abstract ones):
 
    Fields (only concrete ones):
 
-Ref (TYPE_REF)
+Ref (REF_TYPE_ID)
    Fields (with abstract ones):
    field name (Name)
 
    Fields (only concrete ones):
    name: 1
 
-FooNodeBaseList (TYPE_FOO_NODE_BASE_LIST)
+FooNodeBaseList (FOO_NODE_BASE_LIST_TYPE_ID)
    Fields (with abstract ones):
 
-Decl.list (TYPE_DECL_LIST)
-   Fields (with abstract ones):
-
-   Fields (only concrete ones):
-
-Name (TYPE_NAME)
+Decl.list (DECL_LIST_TYPE_ID)
    Fields (with abstract ones):
 
    Fields (only concrete ones):
 
-VarKeyword (TYPE_VAR_KEYWORD)
+Name (NAME_TYPE_ID)
+   Fields (with abstract ones):
+
+   Fields (only concrete ones):
+
+VarKeyword (VAR_KEYWORD_TYPE_ID)
    Fields (with abstract ones):
 
    Fields (only concrete ones):
