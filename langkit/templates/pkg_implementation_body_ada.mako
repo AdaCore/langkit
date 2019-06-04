@@ -43,7 +43,7 @@ pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Introspection_Implementation;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False, False)
@@ -2360,7 +2360,7 @@ package body ${ada_lib_name}.Implementation is
       % if ctx.sorted_parse_fields:
          --  This is for regular nodes: display each field
          declare
-            use ${ada_lib_name}.Introspection;
+            use ${ada_lib_name}.Introspection_Implementation;
             Field_List : constant Field_Reference_Array := Fields (K);
          begin
             for I in Field_List'Range loop
