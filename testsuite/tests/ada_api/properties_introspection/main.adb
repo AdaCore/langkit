@@ -302,12 +302,12 @@ begin
                    & Lookup_Node_Data (Id, Name)'Image);
       end Test;
    begin
-      Test (Type_Foo_Node, "name");
-      Test (Type_Foo_Node, "parent");
+      Test (Foo_Node_Type_Id, "name");
+      Test (Foo_Node_Type_Id, "parent");
 
-      Test (Type_Var_Decl, "parent");
-      Test (Type_Var_Decl, "name");
-      Test (Type_Var_Decl, "eval");
+      Test (Var_Decl_Type_Id, "parent");
+      Test (Var_Decl_Type_Id, "name");
+      Test (Var_Decl_Type_Id, "eval");
       New_Line;
    end;
 
