@@ -1,11 +1,5 @@
 ## vim: filetype=makoada
 
---  This package provides support for tree-based source code rewriting.
---
---  .. ATTENTION:: This is an experimental feature, so even if it is exposed to
---  allow experiments, it is totally unsupported and the API is very likely to
---  change in the future.
-
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -19,6 +13,9 @@ with Langkit_Support.Text; use Langkit_Support.Text;
 
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+
+--  Internal package: low-level primitives to implement syntax-based source
+--  rewriting.
 
 private package ${ada_lib_name}.Rewriting_Implementation is
 
