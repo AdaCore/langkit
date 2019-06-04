@@ -234,7 +234,8 @@ package Langkit_Support.Lexical_Env is
    type Env_Getter (Dynamic : Boolean := False) is record
       Env : Lexical_Env := Null_Lexical_Env;
       --  If Dynamic, cache for the resolved lexical environment (valid iff
-      --  Computed is True).
+      --  Computed is True). To be used only when No_Entity_Info is used for
+      --  the resolution.
 
       case Dynamic is
          when True =>
