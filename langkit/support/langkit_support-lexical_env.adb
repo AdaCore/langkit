@@ -189,11 +189,15 @@ package body Langkit_Support.Lexical_Env is
    -------------
 
    function Get_Env (Self : in out Env_Getter;
-                     Info : Entity_Info) return Lexical_Env is
+                     Info : Entity_Info) return Lexical_Env
+   is
+      Cache_Enabled : constant Boolean := Info = No_Entity_Info;
+      --  The cache (Self.Env) can be used only if No_Entity_Info is passed
    begin
       if Self.Dynamic then
-         --  If simple case: No Entity_Info, and already cached env
-         if Self.Env /= Null_Lexical_Env and then Info = No_Entity_Info then
+         --  Resolve the dynamic lexical env getter. For this, use the cache if
+         --  possible.
+         if Cache_Enabled and then Self.Env /= Null_Lexical_Env then
 
             --  If it is not stale, return it
             if not Is_Stale (Self.Env) then
@@ -201,29 +205,29 @@ package body Langkit_Support.Lexical_Env is
                return Self.Env;
             end if;
 
-            --  If it is stale, release it
+            --  If it is stale, release and clear it
             Dec_Ref (Self.Env);
          end if;
 
+         --  For some reason we could not use the cache: do the resolution and
+         --  cache its result if applicable.
          declare
-               R : constant Lexical_Env_Resolver := Self.Resolver;
-               E : constant Entity := (Node => Self.Node, Info => Info);
+            E      : constant Entity := (Node => Self.Node, Info => Info);
+            Result : constant Lexical_Env := Self.Resolver.all (E);
          begin
-
-            if Info = No_Entity_Info then
-               --  We use the share returned by the resolver, so no need for
-               --  inc ref here.
-               Self.Env := R.all (E);
+            if Cache_Enabled then
+               --  The ownership share returned by the resolver goes to the
+               --  cache: the call to Inc_Ref below will create a new one for
+               --  the returned value.
+               Self.Env := Result;
             else
-               --  Don't cache when entity info is not null
-               return Ret : constant Lexical_Env := R.all (E) do
-                  Inc_Ref (Ret);
-               end return;
+               return Result;
             end if;
          end;
       end if;
 
-      --  Inc ref for the returned value
+      --  Return a copy of the cached resolved lexical env, so create a new
+      --  ownership share.
       Inc_Ref (Self.Env);
       return Self.Env;
    end Get_Env;
