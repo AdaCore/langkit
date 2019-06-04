@@ -534,7 +534,9 @@ class FieldAccess(AbstractExpression):
             # step.
             p = PropertyDef.get()
             self.simple_field_access = not p
-            assert not self.simple_field_access or not implicit_deref
+            if implicit_deref:
+                assert receiver_expr.type.is_entity_type
+                assert not self.simple_field_access
 
             self.implicit_deref = implicit_deref
             self.unsafe = unsafe
