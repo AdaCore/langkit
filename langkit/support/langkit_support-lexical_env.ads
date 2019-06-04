@@ -254,9 +254,8 @@ package Langkit_Support.Lexical_Env is
    No_Env_Getter : constant Env_Getter := (False, Null_Lexical_Env);
 
    procedure Resolve (Self : in out Env_Getter; Info : Entity_Info);
-   --  Resolve the reference for this env getter. If Info is passed, then it
-   --  corresponds to the entity info that should be associated to the node of
-   --  the env getter.
+   --  Resolve the reference for this env getter. Info is forwarded to the
+   --  resolver callback.
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
    --  Create a static Env_Getter (i.e. pointer to environment)
@@ -268,9 +267,8 @@ package Langkit_Support.Lexical_Env is
 
    function Get_Env
      (Self : in out Env_Getter; Info : Entity_Info) return Lexical_Env;
-   --  Return the environment associated to the Self env getter. If Info is
-   --  passed, then it corresponds to the entity info that should be
-   --  associated to the node of the env getter.
+   --  Return the environment associated to the Self env getter. If Self is
+   --  dynamic, Info is forwarded to the resolver callback.
 
    function Equivalent (L, R : Env_Getter) return Boolean;
    --  If at least one of L and R is a dynamic env getter, raise a
