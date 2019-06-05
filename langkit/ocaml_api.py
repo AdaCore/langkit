@@ -17,32 +17,24 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def is_empty_type(self, type):
         """
-        Test if the given type would end-up being empty, so that we can avoid
-        generating empty types.
+        Test if the given type is an empty type. An empty type is a structure
+        that does not contain any field, or the fields are also
+        empty structs. An empty type can also be an ASTNodeType that does not
+        contain any concrete subclasses. We Want to check this because we
+        cannot write empty sum types or empty structures in OCaml.
 
         :param ct.CompiledType: The type we want to check if it is empty.
         :rtype: bool
         """
         return dispatch_on_type(type, [
-            (T.Bool, lambda _: False),
-            (T.Int, lambda _: False),
-            (T.Character, lambda _: False),
-            (T.Token, lambda t: False),
-            (T.Symbol, lambda _: False),
-            (ct.EnumType, lambda t: False),
             (ct.ASTNodeType, lambda t:
                 len(t.concrete_subclasses) == 0),
             (ct.EntityType, lambda t: self.is_empty_type(t.astnode)),
-            (T.AnalysisUnit, lambda _: False),
             (ct.ArrayType, lambda t: self.is_empty_type(t.element_type)),
             (ct.StructType, lambda t:
-                len([
-                    t
-                    for field in t.get_fields()
-                    if not self.is_empty_type(field.type)
-                ]) == 0),
-            (T.BigInt, lambda _: False),
-            (T.EnvRebindings, lambda _: False),
+                all(self.is_empty_type(field.type)
+                    for field in t.get_fields())),
+            (ct.CompiledType, lambda _: False)
         ])
 
     def polymorphic_variant_name(self, type):
@@ -58,7 +50,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def fields_name(self, for_module, from_module=None):
         """
-        Return a string representing the name of the ocaml type for the
+        Return a string representing the name of the OCaml type for the
         fields of a node.
 
         :param ct.ASTNodeType for_module: The field comes from this module.
@@ -71,20 +63,20 @@ class OCamlAPISettings(AbstractAPISettings):
         else:
             return "{}.{}".format(self.module_name(for_module), 'fields')
 
-    def check_for_null(self, c_value, astnode, context):
+    def check_for_null(self, c_value, node, context):
         """
-        Return an ocaml expression that first check if the underlying node of
+        Return an OCaml expression that first checks if the underlying node of
         c_value is null. If it is the case, the expression is evaluated to
-        None, otherwise, wrap c_value to the given astnode type.
+        None, otherwise, wrap c_value to the given node type.
 
-        :param str c_value: The ocaml c value for a node.
-        :param ct.ASTNodeType: The type of c_value.
-        :param str context: The ocaml expression denoting the context.
+        :param str c_value: The OCaml c value for a node.
+        :param ct.ASTNodeType node: The type of c_value.
+        :param str context: The OCaml expression denoting the context.
         """
 
         return (
-            "if is_null (getf {} EntityStruct.node) then None else Some ({})".
-            format(c_value, self.wrap_value(c_value, astnode, context))
+            "if is_null (getf {} EntityStruct.node) then None else Some ({})"
+            .format(c_value, self.wrap_value(c_value, node, context))
         )
 
     def get_field_type(self, field):
@@ -100,9 +92,9 @@ class OCamlAPISettings(AbstractAPISettings):
 
         precise_types = field.precise_types
         concrete_precise_types = list(frozenset(
-            tpe
+            typ
             for precise_type in precise_types.matched_types
-            for tpe in precise_type.concrete_subclasses
+            for typ in precise_type.concrete_subclasses
         ))
 
         # If the list of concrete precise types has the same length as the list
@@ -115,39 +107,40 @@ class OCamlAPISettings(AbstractAPISettings):
 
         return concrete_precise_types
 
-    def get_parse_fields(self, tpe):
+    def get_parse_fields(self, node):
         """
-        Return all the parse fields to be exposed as a field in record of tpe.
+        Return all the parse fields to be exposed as a field in record of node.
 
-        :param ct.ASTNodeType tpe: The ast node type of which we want to get
-            the parse fields.
+        :param ct.ASTNodeType node: The node type of which we want to get the
+            parse fields.
         :rtype: list[ct.Field]
         """
-        return tpe.get_parse_fields(
+        return node.get_parse_fields(
             lambda x: not x.is_overriding and not x.abstract and not x.null
         )
 
-    def get_properties(self, tpe):
+    def get_properties(self, node):
         """
         Return the list of all properties that should be exposed to the user.
 
+        :param ct.ASTNodeType node: The node for which we want to get the
+            properties.
         :rtype: list[ct.BaseField]
         """
 
         return [
-            field
-            for field in tpe.fields_with_accessors()
+            field for field in node.fields_with_accessors()
             if field.is_property
         ]
 
     def array_wrapper(self, array_type):
         return (ct.T.entity.array
-                if array_type.element_type.is_entity_type else
-                array_type).api_name.camel
+                if array_type.element_type.is_entity_type
+                else array_type).api_name.camel
 
     def struct_name(self, type):
         """
-        Returns the ocaml module containing the low-level structure for the
+        Returns the OCaml module containing the low-level structure for the
         given type.
 
         :param ct.CompiledType type: Type we want to get the module name.
@@ -168,7 +161,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def node_name(self, type):
         """
-        Returns the OCaml name for an ast node type or an entity type.
+        Returns the OCaml name for an ASTNodeType or an EntityType.
 
         :param ct.EntityType | ct.ASTNodeType type: Type we want to get the
             name.
@@ -181,7 +174,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def module_name(self, type):
         """
-        Returns the ocaml module containing the definition for the given type.
+        Returns the OCaml module containing the definition for the given type.
 
         :param ct.CompiledType type: Type we want to get the module name.
         :rtype: str
@@ -203,7 +196,7 @@ class OCamlAPISettings(AbstractAPISettings):
     def wrap_requires_context(self, type):
         """
         Returns true if the given type need the context to be wrapped in an
-        ocaml value.
+        OCaml value.
 
         :param ct.CompiledType type: Type for which we want to know if the
             context is needed.
@@ -223,13 +216,12 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda t:
                 self.wrap_requires_context(t.element_type)),
             (ct.StructType, lambda t:
-                len([t
-                    for field in t.get_fields()
-                    if self.wrap_requires_context(field.type)]) != 0),
+                any(self.wrap_requires_context(field.type)
+                    for field in t.get_fields())),
             (T.BigInt, lambda _: False),
             (T.EnvRebindings, lambda _: False),
         ], exception=TypeError(
-            'Unhandled field type in the python binding'
+            'Unhandled field type in the OCaml binding'
             ' (wrapping): {}'.format(type)
         ))
 
@@ -244,14 +236,14 @@ class OCamlAPISettings(AbstractAPISettings):
             expression.
         :rtype: str
         """
-        def from_module(tpe):
+        def from_module(typ):
             context_arg = (
                 '{} '.format(context)
-                if self.wrap_requires_context(tpe) else ''
+                if self.wrap_requires_context(typ) else ''
             )
 
             return "{}.wrap {}({{}})".format(
-                self.module_name(tpe),
+                self.module_name(typ),
                 context_arg
             )
 
@@ -270,7 +262,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.BigInt, lambda _: '{}'),
             (T.EnvRebindings, lambda _: '{}'),
         ], exception=TypeError(
-            'Unhandled field type in the python binding'
+            'Unhandled field type in the OCaml binding'
             ' (wrapping): {}'.format(type)
         )).format(value)
 
@@ -285,14 +277,14 @@ class OCamlAPISettings(AbstractAPISettings):
             expression.
         :rtype: str
         """
-        def from_module(tpe):
+        def from_module(typ):
             context_arg = (
                 '{} '.format(context) if type.conversion_requires_context
                 else ''
             )
 
             return "{}.unwrap {}({{}})".format(
-                self.module_name(tpe),
+                self.module_name(typ),
                 context_arg
             )
 
@@ -346,7 +338,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     def c_type(self, type, from_module=None):
         """
-        Return the name of the ocaml ctypes value defining the type to use in
+        Return the name of the OCaml ctypes value defining the type to use in
         the C API for ``type``. For ctypes, types passed to the foreign
         function that import a c function are values. This returns the
         associated value for the given type.
