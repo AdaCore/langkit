@@ -1587,7 +1587,7 @@ class LiteralExpr(ResolvedExpression):
 
     def render_ocaml_constant(self):
         """
-        assuming this expression is a valid constant, return ocaml code to
+        Assuming this expression is a valid constant, return ocaml code to
         materialize it in the generated binding.
 
         :rtype: str
@@ -1650,7 +1650,7 @@ class BindableLiteralExpr(LiteralExpr):
 
     def render_ocaml_constant(self):
         """
-        assuming this expression is a valid constant, return ocaml code to
+        Assuming this expression is a valid constant, return ocaml code to
         materialize it in the generated binding.
 
         :rtype: str
@@ -1675,7 +1675,7 @@ class BooleanLiteralExpr(BindableLiteralExpr):
         return str(self.value)
 
     def render_ocaml_constant(self):
-        return "true" if self.value else "false"
+        return str(self.value).lower()
 
     def render_introspection_constant(self):
         return 'Create_Boolean ({})'.format(self.value)
