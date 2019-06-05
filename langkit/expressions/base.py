@@ -1727,7 +1727,9 @@ class CharacterLiteralExpr(BindableLiteralExpr):
         return repr(self.value)
 
     def render_ocaml_constant(self):
-        return '(Char.code {})'.format(ord(self.value))
+        # In OCaml bindings, a character is represented as a utf-8 string, not
+        # as char since OCaml char cannot represent unicode characters.
+        return '"{}"'.format(self.value)
 
     def render_introspection_constant(self):
         return 'Create_Character ({})'.format(self.ada_value)
