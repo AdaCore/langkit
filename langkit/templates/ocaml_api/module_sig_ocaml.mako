@@ -337,6 +337,12 @@ module ${ocaml_api.node_name(astnode)} : sig
    * predicate is evaluated to true for all nodes.
    *)
 
+  val as_a : 'a node -> [< ${root_entity_type} ] -> 'a option
+  (**
+   * Given the kind of a node, try to cast the given node to this kind. Return
+   * None if the node is not of this type and thus, cannot be cast.
+   *)
+
   val find : 'a node -> [< ${root_entity_type} ] -> 'a
   (**
    * Given the kind of node, return the first node found by walking the given

@@ -1132,6 +1132,17 @@ let ${field.name.lower}
     let rec aux node = p node && for_all_fields aux node in
     aux (node :> ${root_entity_type})
 
+  let as_a : type a. a node -> [< ${root_entity_type} ] -> a option =
+   fun node_type node ->
+    match node_type, (node :> ${root_entity_type}) with
+   % for astnode in ctx.astnode_types:
+    | ${ocaml_api.node_name(astnode)}
+      , (#${ocaml_api.type_public_name(astnode)} as node) ->
+        Some node
+   % endfor
+    | _ ->
+        None
+
   let find : type a. a node ->  [< ${root_entity_type} ] -> a =
     fun node_type node ->
       let exception Found of a in
