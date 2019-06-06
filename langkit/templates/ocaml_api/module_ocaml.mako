@@ -431,11 +431,30 @@ module Token = struct
     | _ ->
         token.trivia_index - 1
 
+  let compare one other =
+    let open Pervasives in
+    let compare_token_data = compare one.token_data other.token_data in
+    if compare_token_data = 0 then
+      let compare_token_index = compare one.token_index other.token_index in
+      if compare_token_index = 0 then
+        compare one.trivia_index other.trivia_index
+      else
+        compare_token_index
+    else
+      compare_token_data
+
   let equal one other =
-    let identity_tuple token =
-      (token.token_data, token.token_index, token.trivia_index)
-    in
-    identity_tuple one = identity_tuple other
+    compare one other = 0
+
+  let hash token =
+    Hashtbl.hash
+      (token.token_data
+       , token.token_index
+       , token.trivia_index)
+
+  let equiv one other =
+    one.kind = other.kind
+    && one.text = other.text
 end
 
 module AnalysisUnitStruct = struct
@@ -689,21 +708,20 @@ end = struct
     ${ocaml_api.wrap_value("getf value {}.info".format(
          ocaml_api.struct_name(root_entity)), T.entity_info, None)}
 
-  let equal e1 e2 =
-    getf e1 EntityStruct.node = getf e2 EntityStruct.node
-    && getf (getf e1 EntityStruct.info) EntityInfoStruct.rebindings
-       = getf (getf e2 EntityStruct.info) EntityInfoStruct.rebindings
-
   let compare e1 e2 =
-    let p1 =
-      (getf e1 EntityStruct.node,
-       getf (getf e1 EntityStruct.info) EntityInfoStruct.rebindings)
+    let open Pervasives in
+    let compare_node =
+      compare (getf e1 EntityStruct.node) (getf e2 EntityStruct.node)
     in
-    let p2 =
-      (getf e2 EntityStruct.node,
-       getf (getf e2 EntityStruct.info) EntityInfoStruct.rebindings)
-    in
-    Pervasives.compare p1 p2
+    if compare_node = 0 then
+      compare
+        (getf (getf e1 EntityStruct.info) EntityInfoStruct.rebindings)
+        (getf (getf e2 EntityStruct.info) EntityInfoStruct.rebindings)
+    else
+      compare_node
+
+  let equal e1 e2 =
+    compare e1 e2 = 0
 
   let hash e =
     Hashtbl.hash
