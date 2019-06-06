@@ -20,6 +20,9 @@ library project ${lib_name} is
    Enable_Warnings : Boolean :=
      external ("${lib_name.upper()}_WARNINGS", "false");
 
+   <% extra_source_files = sorted(
+         os_path.basename(p) for p in ctx.additional_source_files) %>
+
    for Languages use ("Ada", "C");
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
@@ -60,9 +63,8 @@ library project ${lib_name} is
       "${lib_name.lower()}-unparsing.ads",
       "${lib_name.lower()}-unparsing_implementation.adb",
       "${lib_name.lower()}-unparsing_implementation.ads",
-      % for path in sorted(os_path.basename(p) \
-                           for p in ctx.additional_source_files):
-      "${path}",
+      % for f in extra_source_files:
+      "${f}",
       % endfor
       % if emitter.generate_gdb_hook:
       "gdb.c"
@@ -87,8 +89,9 @@ library project ${lib_name} is
 
       --  Compilation switches to use for Ada that do not depend on the build
       --  mode.
-
-      --  If asked to, enable all warnings and treat them as errors, except:
+      --
+      --  For generated sources, enable all warnings and treat them as errors,
+      --  except:
       --    * conditional expressions used in tests that are known to be True
       --      or False at compile time (C), as this is very common in generated
       --      properties code;
@@ -110,10 +113,14 @@ library project ${lib_name} is
       --      corresponding defining identifiers (r);
       --    * check the token spacing (t).
 
-      Common_Ada_Cargs := ();
+      Manual_Ada_Cargs := ();
+      Generated_Ada_Cargs := ();
       case Enable_Warnings is
-         when "true" => Common_Ada_Cargs := ("-gnatwaCKMR", "-gnatyacknprt");
-         when others => null;
+         when "true" =>
+            Manual_Ada_Cargs := ("-gnatwa", "-gnatyg");
+            Generated_Ada_Cargs := ("-gnatwaCKMR", "-gnatyacknprt");
+         when others =>
+            null;
       end case;
 
       ---------------
@@ -166,8 +173,12 @@ library project ${lib_name} is
       end case;
 
       for Default_Switches ("Ada") use
-         Mode_Args & Ada_Mode_Args & Common_Ada_Cargs;
+         Mode_Args & Ada_Mode_Args & Generated_Ada_Cargs;
       for Default_Switches ("C") use Mode_Args & C_Mode_Args;
+
+      % for f in extra_source_files:
+      for Switches ("${f}") use Mode_Args & Ada_Mode_Args & Manual_Ada_Cargs;
+      % endfor
 
       case Build_Mode is
          when "dev" =>
