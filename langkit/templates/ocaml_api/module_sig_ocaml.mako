@@ -103,7 +103,16 @@ module Token : sig
   val previous : t -> t
   ${ocaml_doc('langkit.unit_last_token', 1)}
 
+  val compare : t -> t -> int
+
   val equal : t -> t -> bool
+
+  val hash : t -> int
+
+  val equiv : t -> t -> bool
+  (* Return true if the tokens are equivalent, meaning that they are of the
+   * same kind, and have the same text
+   *)
 
   val pp : Format.formatter -> t -> unit
 end
