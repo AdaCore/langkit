@@ -622,6 +622,11 @@ module CFunctions = struct
     (ptr ${ocaml_api.c_type(root_entity)}
      @-> raisable Text.c_type)
 
+  let node_is_token_node = foreign ~from:c_lib
+    "${capi.get_name('node_is_token_node')}"
+    (ptr ${ocaml_api.c_type(root_entity)}
+     @-> raisable bool)
+
 % for astnode in ctx.astnode_types:
    % for field in astnode.fields_with_accessors():
   let ${field.accessor_basename.lower} = foreign ~from:c_lib
@@ -1068,6 +1073,14 @@ let ${field.name.lower}
     CFunctions.short_image
       (addr (${ocaml_api.unwrap_value('node', root_entity, 'context node')}))
 
+  let entity_image node =
+    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
+    CFunctions.entity_image (addr node_c_value)
+
+  let is_token_node node =
+    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
+    CFunctions.node_is_token_node (addr node_c_value)
+
   let sloc_range node =
     let c_result_ptr = allocate_n SlocRange.c_type ~count:1 in
     CFunctions.node_sloc_range
@@ -1195,6 +1208,74 @@ let ${field.name.lower}
           acc
       in
       List.rev (fold aux [] node)
+
+  let fields_with_names node =
+    let aux i x =
+      (Format.sprintf "item_%d" i), x
+    in
+    match (node :> ${root_entity_type}) with
+      % for astnode in reversed(ctx.astnode_types):
+         % if not astnode.abstract:
+    | ${ocaml_api.polymorphic_variant_name(astnode)} value ->
+            % if astnode.is_list:
+        List.mapi aux (children_opt node)
+            % else:
+        [
+               % for field in ocaml_api.get_parse_fields(astnode):
+                  % if field.is_optional:
+        ("${field.name.lower[2:]}"
+        , (Lazy.force value.${field.name.lower}
+           :> ${root_entity_type} option));
+                  % else:
+        (try
+           ("${field.name.lower[2:]}"
+           , Some (Lazy.force value.${field.name.lower}
+                    :> ${root_entity_type}))
+        with SyntaxError ->
+          ("${field.name.lower[2:]}", None) );
+                  % endif
+               % endfor
+        ]
+            % endif
+         % endif
+      % endfor
+
+  let rec pp_tree fmt node =
+    let rec pp_node_field fmt (name, node) =
+      match node with
+      | Some node ->
+          Format.fprintf fmt "@[<v 2>%s:@ %a@]" name pp_node node
+      | None ->
+          Format.fprintf fmt "@[<v 2>%s: None@]" name
+    and pp_node_fields fmt node =
+      let name_field_list = fields_with_names node in
+      match name_field_list with
+      | [] ->
+          ()
+      | l ->
+          Format.fprintf fmt "@ @[<v>%a@]"
+            (Format.pp_print_list pp_node_field) l
+    and pp_node fmt node =
+      let repr = entity_image node in
+      let len = String.length repr in
+      let erepr = String.sub repr 1 (len - 2) in
+      Format.fprintf fmt "@[<v 2>%s%s%a@]"
+        erepr
+        (if is_token_node node then (": " ^ (text node)) else "")
+        pp_node_fields node
+    in
+    let default = Format.pp_get_formatter_out_functions fmt () in
+    let out_indent n =
+      let the_end = n in
+      let rec make n =
+        if n = the_end then ""
+        else (if n mod 4 = 2 then "|" else " ") ^ make (n + 1)
+      in
+      default.out_string (make 0) 0 n
+    in
+    Format.pp_set_formatter_out_functions fmt {default with out_indent} ;
+    Format.fprintf fmt "%a%!" pp_node (node :> ${root_entity_type});
+    Format.pp_set_formatter_out_functions fmt default
 
    % endif
 
