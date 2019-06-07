@@ -366,6 +366,19 @@ module ${ocaml_api.node_name(astnode)} : sig
    * kind
    *)
 
+  val fields_with_names :
+    [< ${root_entity_type} ] -> (string * ${root_entity_type} option) list
+  (**
+   * Given a node, return the list of it's fields, together with the name of
+   * the field. This function does not raise SyntaxError, but instead the
+   * returned node is None.
+   *)
+
+  val pp_tree : Format.formatter -> [< ${root_entity_type}] -> unit
+  (**
+   * Pretty print the whole tree by completely walking it.
+   *)
+
    % endif
 
    % for field in ocaml_api.get_properties(astnode):
