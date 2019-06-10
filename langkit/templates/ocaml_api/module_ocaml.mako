@@ -940,12 +940,27 @@ type _ node =
       ${ocaml_api.type_public_name(astnode)} node
 % endfor
 
-% for astnode in ctx.astnode_types:
+% for astnode in reversed(ctx.astnode_types):
 module ${ocaml_api.node_name(astnode)} = struct
-  type t = ${ocaml_api.type_public_name(astnode)}
+  type t =
+   % if astnode.abstract:
+    [
+      % for child in astnode.subclasses:
+      | ${ocaml_api.node_name(child)}.t
+      % endfor
+    ]
+   % else:
+    [
+      % for child in astnode.concrete_subclasses:
+      | ${ocaml_api.polymorphic_variant_name(child)} of
+          ${ocaml_api.fields_name(child)}
+      % endfor
+    ]
+   % endif
 
    % if not astnode.abstract:
-  type fields = ${ocaml_api.fields_name(astnode)}
+  type fields = ${ocaml_api.fields_name(astnode)} =
+    ${astnode_types.field_type(astnode)}
    % endif
 
   let equal node1 node2 =
