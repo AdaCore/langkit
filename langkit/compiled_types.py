@@ -2369,6 +2369,16 @@ class ASTNodeType(BaseStructType):
             fields = self.builtin_properties() + fields
         self._init_fields(fields)
 
+        # Make sure that all user fields for nodes are private
+        for _, f in fields:
+            with f.diagnostic_context:
+                check_source_language(
+                    not f.is_user_field or
+                    isinstance(f, BuiltinField) or
+                    f.is_private,
+                    'UserField on nodes must be private'
+                )
+
         # Associate concrete syntax fields to the corresponding abstract ones,
         # if any. Don't bother doing validity checking here: the valide_field
         # pass will take care of it.
