@@ -1,25 +1,5 @@
-<%def name="ast_type(astnode)">
-   ## Keep direct subclass type information, at least as a comment.
-   ## Do not print it, if it's redundant with the concrete_subclasses.
-   <%
-     subclasses_len = len(astnode.subclasses)
-     concrete_len = len(astnode.concrete_subclasses)
-   %>
-   % if astnode.abstract and subclasses_len != concrete_len:
-  (**
-      % for subclass in astnode.subclasses:
-    * ${ocaml_api.type_public_name(subclass)}
-      % endfor
-    *)
-   % endif
-  type t = [
-   % for subclass in astnode.concrete_subclasses:
-    | ${ocaml_api.polymorphic_variant_name(subclass)}
-        of ${ocaml_api.fields_name(subclass, astnode)}
-   % endfor
-  ]
-   % if not astnode.abstract:
-  and fields = {
+<%def name="field_type(astnode)">
+  {
       % for field in ocaml_api.get_parse_fields(astnode):
          <%
             precise_types = ocaml_api.get_field_type(field)
@@ -50,8 +30,31 @@
     c_value : Entity.t;
     context : AnalysisContext.t
   }
+</%def>
 
-% endif
+<%def name="ast_type(astnode)">
+   ## Keep direct subclass type information, at least as a comment.
+   ## Do not print it, if it's redundant with the concrete_subclasses.
+   <%
+     subclasses_len = len(astnode.subclasses)
+     concrete_len = len(astnode.concrete_subclasses)
+   %>
+   % if astnode.abstract and subclasses_len != concrete_len:
+  (**
+      % for subclass in astnode.subclasses:
+    * ${ocaml_api.type_public_name(subclass)}
+      % endfor
+    *)
+   % endif
+  type t = [
+   % for subclass in astnode.concrete_subclasses:
+    | ${ocaml_api.polymorphic_variant_name(subclass)}
+        of ${ocaml_api.fields_name(subclass, astnode)}
+   % endfor
+  ]
+   % if not astnode.abstract:
+  and fields = ${field_type(astnode)}
+   % endif
 </%def>
 
 <%def name='sig(astnode)'>
