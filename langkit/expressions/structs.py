@@ -652,7 +652,6 @@ class FieldAccess(AbstractExpression):
 
             if self.implicit_deref:
                 prefix = '{}.Node'.format(prefix)
-                node_data_struct = node_data_struct.element_type
 
             # If this is a node field/property, we must pass the precise type
             # it expects for "Self".
