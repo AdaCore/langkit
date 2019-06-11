@@ -178,7 +178,6 @@ class CompileCtx(object):
     def __init__(self, lang_name, lexer, grammar,
                  lib_name=None, short_name=None,
                  c_symbol_prefix=None,
-                 enable_python_api=True,
                  default_charset='utf-8',
                  default_tab_stop=8,
                  verbosity=Verbosity('none'),
@@ -214,9 +213,6 @@ class CompileCtx(object):
             set to the name of the language in lower case.  Empty string stands
             for no prefix.
         :type c_symbol_prefix: str or None
-
-        :param bool enable_python_api: If True (which is the default),
-            generates a Python API for the generated library.
 
         :param str default_charset: In the generated library, this will be the
             default charset to use to scan input source files.
@@ -324,10 +320,7 @@ class CompileCtx(object):
         self.grammar = grammar
         ":type: langkit.parsers.Grammar"
 
-        self.python_api_settings = (
-            PythonAPISettings(self, self.c_api_settings)
-            if enable_python_api else None
-        )
+        self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
 
         self.fns = set()
         """

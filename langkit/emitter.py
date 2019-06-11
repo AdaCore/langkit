@@ -251,9 +251,8 @@ class Emitter(object):
             if not path.exists(p):
                 os.mkdir(p)
 
-        if ctx.python_api_settings:
-            if not path.exists(self.python_path):
-                os.mkdir(self.python_path)
+         if not path.exists(self.python_path):
+             os.mkdir(self.python_path)
 
     def emit_lib_project_file(self, ctx):
         """
@@ -411,9 +410,6 @@ class Emitter(object):
         """
         Generate the Python binding module.
         """
-        if not ctx.python_api_settings:
-            return
-
         package_dir = os.path.join(
             self.python_path,
             ctx.python_api_settings.module_name)
@@ -499,9 +495,6 @@ class Emitter(object):
         """
         Emit sources for the Python playground script.
         """
-        if not ctx.python_api_settings:
-            return
-
         playground_file = os.path.join(self.lib_root, 'bin', 'playground')
         write_source_file(
             playground_file,
