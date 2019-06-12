@@ -577,9 +577,11 @@ module Symbol = struct
 
   let unwrap (ctx : AnalysisContextStruct.t) (value : t) : t structure =
     let result = make c_type in
-    let _ : int =
+    let code =
       context_symbol ctx (allocate Text.c_type value) (addr result)
     in
+    if code = 0 then
+      raise (InvalidSymbolError value) ;
     result
 end
 
