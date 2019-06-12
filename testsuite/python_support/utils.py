@@ -135,7 +135,7 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
 
 
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
-                  warning_set=default_warning_set,
+                  ocaml_main=None, warning_set=default_warning_set,
                   generate_unparser=False, symbol_canonicalizer=None):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
@@ -231,6 +231,10 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             if os.environ.get('VALGRIND_ENABLED'):
                 argv = valgrind_cmd(argv)
             run(*argv)
+
+    if ocaml_main is not None:
+        run('dune', 'exec', '--display', 'quiet', '--root', '.',
+            './{}.exe'.format(ocaml_main))
 
 
 def add_gpr_path(dirname):

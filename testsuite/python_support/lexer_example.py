@@ -25,6 +25,7 @@ class Token(LexerToken):
 
     Number = WithText()
     Identifier = WithSymbol()
+    String = WithText()
 
     Comment = WithTrivia()
     Whitespace = WithTrivia()
@@ -60,6 +61,7 @@ foo_lexer.add_rules(
 
     (Pattern('[0-9]+'),      Token.Number),
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
+    (Pattern(r'\"[^\"]*\"'), Token.String),
 
     (Pattern('#(.?)+'), Token.Comment),
 )

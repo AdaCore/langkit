@@ -1,0 +1,371 @@
+=======DIAGNOSTICS=======
+Cannot read unknown
+Expected '(', got Identifier
+=========================
+
+=======TOKEN FUNCTIONS=======
+With trivia:
+  root text=
+    "null example var (null example null) example null"
+  first_token = "null"
+  last_token = ""
+  token_start = "null"
+  token_end = "null"
+  token_count = 11
+  trivia_count = 8
+
+Without trivia:
+  root text=
+    "null example var (null example null) example null"
+  first_token = "null"
+  last_token = ""
+  token_start = "null"
+  token_end = "null"
+  token_count = 11
+  trivia_count = 0
+=============================
+
+=======TOKEN ITERATORS=======
+Unit fold tokens:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+  "\n"
+  ""
+
+Unit iter tokens:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+  "\n"
+  ""
+  
+Unit map tokens:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+  "\n"
+  ""
+
+Unit token list:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+  "\n"
+  ""
+
+Root node fold tokens:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+
+Root node iter tokens:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+  
+Root node map tokens:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+
+Root node token list:
+  "null"
+  " "
+  "example"
+  " "
+  "var"
+  " "
+  "("
+  "null"
+  " "
+  "example"
+  " "
+  "null"
+  ")"
+  " "
+  "example"
+  " "
+  "null"
+=============================
+
+=======NODE ITERATORS=======
+Children:
+  <NullNode foo.txt:1:1-1:5>
+  <Example foo.txt:1:6-1:13>
+  <Var foo.txt:1:14-1:37>
+  <Example foo.txt:1:38-1:45>
+  <NullNode foo.txt:1:46-1:50>
+
+Fold fields: 
+  <NullNode foo.txt:1:1-1:5>
+  <Example foo.txt:1:6-1:13>
+  <Var foo.txt:1:14-1:37>
+  <Example foo.txt:1:38-1:45>
+  <NullNode foo.txt:1:46-1:50>
+
+Iter fields:
+  <NullNode foo.txt:1:1-1:5>
+  <Example foo.txt:1:6-1:13>
+  <Var foo.txt:1:14-1:37>
+  <Example foo.txt:1:38-1:45>
+  <NullNode foo.txt:1:46-1:50>
+  
+proposition (for all fields f1 of root. exists fields f2 of root. f1 = f2) is true
+
+fields_with_names:
+root: <Sequence foo.txt:1:1-1:50>
+  item_0: <NullNode foo.txt:1:1-1:5>
+    
+  item_1: <Example foo.txt:1:6-1:13>
+    
+  item_2: <Var foo.txt:1:14-1:37>
+    arg: <Sequence foo.txt:1:19-1:36>
+      item_0: <NullNode foo.txt:1:19-1:23>
+        
+      item_1: <Example foo.txt:1:24-1:31>
+        
+      item_2: <NullNode foo.txt:1:32-1:36>
+        
+  item_3: <Example foo.txt:1:38-1:45>
+    
+  item_4: <NullNode foo.txt:1:46-1:50>
+    
+pp_tree:
+Sequence foo.txt:1:1-1:50
+  item_0:
+  | NullNode foo.txt:1:1-1:5
+  item_1:
+  | Example foo.txt:1:6-1:13
+  item_2:
+  | Var foo.txt:1:14-1:37
+  |   arg:
+  |   | Sequence foo.txt:1:19-1:36
+  |   |   item_0:
+  |   |   | NullNode foo.txt:1:19-1:23
+  |   |   item_1:
+  |   |   | Example foo.txt:1:24-1:31
+  |   |   item_2:
+  |   |   | NullNode foo.txt:1:32-1:36
+  item_3:
+  | Example foo.txt:1:38-1:45
+  item_4:
+  | NullNode foo.txt:1:46-1:50
+
+Fold: 
+  <Sequence foo.txt:1:1-1:50>
+  <NullNode foo.txt:1:1-1:5>
+  <Example foo.txt:1:6-1:13>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:19-1:36>
+  <NullNode foo.txt:1:19-1:23>
+  <Example foo.txt:1:24-1:31>
+  <NullNode foo.txt:1:32-1:36>
+  <Example foo.txt:1:38-1:45>
+  <NullNode foo.txt:1:46-1:50>
+
+Iter:
+  <Sequence foo.txt:1:1-1:50>
+  <NullNode foo.txt:1:1-1:5>
+  <Example foo.txt:1:6-1:13>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:19-1:36>
+  <NullNode foo.txt:1:19-1:23>
+  <Example foo.txt:1:24-1:31>
+  <NullNode foo.txt:1:32-1:36>
+  <Example foo.txt:1:38-1:45>
+  <NullNode foo.txt:1:46-1:50>
+  
+proposition (for all node n1. exists node n2. n1 = n2) is true
+============================
+
+=======PARENT(S)=======
+<Sequence foo.txt:1:1-1:50> parents:
+  <Sequence foo.txt:1:1-1:50>
+
+<NullNode foo.txt:1:1-1:5> parents:
+  <NullNode foo.txt:1:1-1:5>
+  <Sequence foo.txt:1:1-1:50>
+
+<Example foo.txt:1:6-1:13> parents:
+  <Example foo.txt:1:6-1:13>
+  <Sequence foo.txt:1:1-1:50>
+
+<Var foo.txt:1:14-1:37> parents:
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+<Sequence foo.txt:1:19-1:36> parents:
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+<NullNode foo.txt:1:19-1:23> parents:
+  <NullNode foo.txt:1:19-1:23>
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+<Example foo.txt:1:24-1:31> parents:
+  <Example foo.txt:1:24-1:31>
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+<NullNode foo.txt:1:32-1:36> parents:
+  <NullNode foo.txt:1:32-1:36>
+  <Sequence foo.txt:1:19-1:36>
+  <Var foo.txt:1:14-1:37>
+  <Sequence foo.txt:1:1-1:50>
+
+<Example foo.txt:1:38-1:45> parents:
+  <Example foo.txt:1:38-1:45>
+  <Sequence foo.txt:1:1-1:50>
+
+<NullNode foo.txt:1:46-1:50> parents:
+  <NullNode foo.txt:1:46-1:50>
+  <Sequence foo.txt:1:1-1:50>
+
+proposition (for all node n. for fields fields f of n. parent f = n) is true
+=======================
+
+=======SIBLINGS=======
+<NullNode foo.txt:1:1-1:5> previous sibling is None
+<Example foo.txt:1:6-1:13> previous sibling is <NullNode foo.txt:1:1-1:5>
+<Var foo.txt:1:14-1:37> previous sibling is <Example foo.txt:1:6-1:13>
+<Example foo.txt:1:38-1:45> previous sibling is <Var foo.txt:1:14-1:37>
+<NullNode foo.txt:1:46-1:50> previous sibling is <Example foo.txt:1:38-1:45>
+======================
+
+=======ARRAY=======
+p_count: 4
+all_items:
+  <Example foo.txt:1:1-1:8>
+  <NullNode foo.txt:1:9-1:13>
+  <NullNode foo.txt:1:14-1:18>
+  <Example foo.txt:1:19-1:26>
+  <Var foo.txt:1:27-1:53>
+
+example_items:
+  <Example foo.txt:1:1-1:8>
+  <Example foo.txt:1:19-1:26>
+===================
+
+=======SYMBOL=======
+p_sym root my_ident = my_ident
+p_sym root MY_IDENT = my_ident
+p_sym root no_such_symbol = no_such_symbol
+p_sym root invalid_symbol0 raise <InvalidSymbolError: invalid_symbol0>
+====================
+
+=======UNICODE=======
+Default charset: "\"H\195\168llo w\195\181rld!\""
+UTF-8 charset: "\"H\195\168llo w\195\181rld!\""
+ISO-8859-1 charset: "\"H\195\169llo w\195\182rld!\""
+=====================
+
+=======CHARACTER=======
+get_a: "a"
+get_eacute: "\195\169"
+identity é: "\195\169"
+double a: "aa"
+=======================
+Done
