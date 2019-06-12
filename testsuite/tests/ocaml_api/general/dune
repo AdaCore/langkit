@@ -1,0 +1,4 @@
+(executable
+   (name main)
+   (flags (-w -9))
+   (libraries libfoolang))
