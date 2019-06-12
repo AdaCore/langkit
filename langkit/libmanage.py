@@ -936,6 +936,10 @@ class ManageScript(object):
             os.path.join('share', lib_name, 'ast-types.html'),
             os.path.join('python', lib_name, '__init__.py'),
             os.path.join('python', 'setup.py'),
+            os.path.join('ocaml', lib_name + '.ml'),
+            os.path.join('ocaml', lib_name + '.mli'),
+            os.path.join('ocaml', 'dune'),
+            os.path.join('ocaml', lib_name + '.opam'),
         ]:
             build_path = self.dirs.build_dir(fpath)
             install_path = self.dirs.install_dir(fpath)
