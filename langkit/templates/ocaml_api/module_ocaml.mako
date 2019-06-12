@@ -155,10 +155,16 @@ module Character = struct
 
   module UCharEncoding = Camomile.CharEncoding.Make (Camomile.UText)
 
-  let wrap (c_value : Unsigned.UInt32.t) : t =
+  let of_int i =
     let open Camomile in
-    let uchar = UChar.chr (Unsigned.UInt32.to_int c_value) in
+    let uchar = UChar.chr i in
     UCharEncoding.encode CharEncoding.utf8 (UText.init 1 (fun _ -> uchar))
+
+  let of_int32 i =
+    of_int (Unsigned.UInt32.to_int i)
+
+  let wrap (c_value : Unsigned.UInt32.t) : t =
+    of_int32 c_value
 
   let unwrap (value : string) : Unsigned.UInt32.t =
     let open Camomile in
