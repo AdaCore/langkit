@@ -595,6 +595,8 @@ class Emitter(object):
             )
 
             write_source_file(os.path.join(self.ocaml_path, 'dune'), code)
+            write_source_file(os.path.join(self.ocaml_path, 'dune-project'),
+                              '(lang dune 1.6)')
 
             # Write an empty opam file to install the lib with dune
             write_source_file(

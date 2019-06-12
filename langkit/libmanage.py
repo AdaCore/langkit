@@ -939,6 +939,7 @@ class ManageScript(object):
             os.path.join('ocaml', lib_name + '.ml'),
             os.path.join('ocaml', lib_name + '.mli'),
             os.path.join('ocaml', 'dune'),
+            os.path.join('ocaml', 'dune-project'),
             os.path.join('ocaml', lib_name + '.opam'),
         ]:
             build_path = self.dirs.build_dir(fpath)
