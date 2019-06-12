@@ -251,8 +251,8 @@ class Emitter(object):
             if not path.exists(p):
                 os.mkdir(p)
 
-         if not path.exists(self.python_path):
-             os.mkdir(self.python_path)
+        if not path.exists(self.python_path):
+            os.mkdir(self.python_path)
 
     def emit_lib_project_file(self, ctx):
         """
