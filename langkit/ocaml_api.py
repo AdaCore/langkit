@@ -11,9 +11,37 @@ class OCamlAPISettings(AbstractAPISettings):
 
     name = 'ocaml'
 
+    class AnalysisContextType(object):
+        """
+        Placeholder to represent the analysis context type in our depedency
+        tracking system (see the type_graph and add_dep methods below).
+        """
+        pass
+
+    def add_dep(self, typ, dep):
+        """
+        Adds the dependency dep to the type typ in the type_graph.
+        """
+        if typ not in self.type_graph:
+            self.type_graph[typ] = []
+
+        if dep not in self.type_graph:
+            self.type_graph[dep] = []
+
+        self.type_graph[typ].append(dep)
+
     def __init__(self, ctx, c_api_settings):
         self.context = ctx
         self.c_api_settings = c_api_settings
+
+        self.AnalysisContext = self.AnalysisContextType()
+
+        # Dependency graph for types
+        self.type_graph = {}
+
+        self.add_dep(T.AnalysisUnit, T.root_node.entity)
+        self.add_dep(T.Symbol, self.AnalysisContext)
+        self.add_dep(self.AnalysisContext, T.AnalysisUnit)
 
     def is_empty_type(self, type):
         """
@@ -434,3 +462,65 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.BigInt, lambda t: '{}.t'.format(self.module_name(t))),
             (T.EnvRebindings, lambda _: 'Rebindings.t'),
         ])
+
+    def register_struct_type(self, typ):
+        """
+        Register a struct type together with all the types it depends on, to
+        the graph of type dependencies "type_graph".
+
+        :param CompiledType typ: The type we want to register in the graph.
+        """
+        for f in typ.get_fields(lambda t: not self.is_empty_type(t.type)):
+            if f.type.is_entity_type:
+                # For an entity type, we append the root entity since it is
+                # the only struct generated.
+                field_type = T.root_node.entity
+            else:
+                field_type = f.type
+
+            self.add_dep(typ, field_type)
+
+    def register_array_type(self, typ):
+        """
+        Register an array type in the graph of dependency, adding a dependency
+        between the array type and the element type.
+
+        :param CompiledType typ: The type we want to register in the graph.
+        """
+        if typ.element_type.is_entity_type:
+            self.add_dep(typ, T.root_node.entity)
+        else:
+            self.add_dep(typ, typ.element_type)
+
+    def ordered_types(self):
+        """
+        Return all the types sorted so that if type T1 depends on type T2, T2
+        appears before T1. Returns the topological order of the types.
+
+        :rtype: list[ct.CompiledType]
+        """
+        marks = {typ: 'white' for typ in self.type_graph}
+
+        def dfs(vertex, topo):
+            if marks[vertex] == 'black':
+                # Already visited
+                return
+            else:
+                # TODO: cycle detected, this is not yet implemented
+                assert marks[vertex] == 'white', 'cycle detected'
+
+                marks[vertex] = 'gray'
+
+                for succ in self.type_graph[vertex]:
+                    dfs(succ, topo)
+
+                topo.append(vertex)
+
+                marks[vertex] = 'black'
+
+        topo = []
+
+        for vertex in self.type_graph:
+            dfs(vertex, topo)
+
+        return topo
