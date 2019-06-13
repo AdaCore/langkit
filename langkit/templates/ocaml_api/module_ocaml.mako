@@ -233,21 +233,6 @@ end
 
 let default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.camel}
 
-% for struct_type in ctx.struct_types:
-   % if struct_type.is_entity_type:
-      % if struct_type == root_entity:
-         ## We want only one module defining the entity c structure
-   ${struct_types.decl_struct(struct_type)}
-      % endif
-   % elif struct_type is T.entity_info:
-   ${struct_types.decl_struct(struct_type)}
-   % elif struct_type is T.env_md:
-   ${struct_types.decl_struct(struct_type)}
-   % elif struct_type.exposed:
-   ${struct_types.decl_struct(struct_type)}
-   % endif
-% endfor
-
 module Sloc = struct
   type t = {
     line : int;
@@ -463,58 +448,6 @@ module Token = struct
     && one.text = other.text
 end
 
-module AnalysisUnitStruct = struct
-  (* Module defining the c structure of an analysis unit *)
-
-  type t = unit ptr
-  let c_type = ptr void
-
-  let unit_root = foreign ~from:c_lib "${capi.get_name("unit_root")}"
-    (c_type @-> ptr ${ocaml_api.c_type(root_entity)} @-> raisable void)
-
-  let unit_diagnostic_count = foreign ~from:c_lib
-    "${capi.get_name('unit_diagnostic_count')}"
-    (c_type @-> raisable int)
-
-  let unit_diagnostic = foreign ~from:c_lib
-    "${capi.get_name('unit_diagnostic')}"
-    (c_type @-> int @-> ptr Diagnostic.c_type @-> raisable int)
-
-  let unit_reparse_from_file = foreign ~from:c_lib
-    "${capi.get_name('unit_reparse_from_file')}"
-    (c_type
-     @-> string
-     @-> raisable int)
-
-  let unit_reparse_from_buffer = foreign ~from:c_lib
-    "${capi.get_name('unit_reparse_from_buffer')}"
-    (c_type
-     @-> string
-     @-> string
-     @-> size_t
-     @-> raisable int)
-
-  let unit_first_token = foreign ~from:c_lib
-    "${capi.get_name('unit_first_token')}"
-    (c_type
-     @-> ptr Token.c_type
-     @-> raisable void)
-
-  let unit_last_token = foreign ~from:c_lib
-    "${capi.get_name('unit_last_token')}"
-    (c_type
-     @-> ptr Token.c_type
-     @-> raisable void)
-
-  let unit_token_count = foreign ~from:c_lib
-    "${capi.get_name('unit_token_count')}"
-    (c_type @-> raisable int)
-
-  let unit_trivia_count = foreign ~from:c_lib
-    "${capi.get_name('unit_trivia_count')}"
-    (c_type @-> raisable int)
-end
-
 module UnitProvider = struct
   type t = unit ptr
   let c_type = ptr void
@@ -524,79 +457,6 @@ module UnitProvider = struct
   )}
 end
 
-module AnalysisContextStruct = struct
-  (* Module defining the c structure of an analysis context *)
-
-  type t = unit ptr
-  let c_type = ptr void
-
-  let create_analysis_context = foreign ~from:c_lib
-    "${capi.get_name('create_analysis_context')}"
-    (string @-> UnitProvider.c_type @-> bool @-> int @-> raisable c_type)
-
-  let context_decref = foreign ~from:c_lib
-    "${capi.get_name('context_decref')}"
-    (c_type @-> raisable void)
-
-  let get_analysis_unit_from_file = foreign ~from:c_lib
-    "${capi.get_name('get_analysis_unit_from_file')}"
-    (c_type
-     @-> string
-     @-> string
-     @-> bool
-     @-> GrammarRule.c_type
-     @-> raisable AnalysisUnitStruct.c_type)
-
-  let get_analysis_unit_from_buffer = foreign ~from:c_lib
-    "${capi.get_name('get_analysis_unit_from_buffer')}"
-    (c_type
-     @-> string (* Filename *)
-     @-> string (* Charset *)
-     @-> string (* Buffer *)
-     @-> size_t (* Buffer size *)
-     @-> GrammarRule.c_type
-     @-> raisable AnalysisUnitStruct.c_type)
-
-end
-
-module Symbol = struct
-  type t = string
-
-  let c_type : t structure typ = structure "symbol"
-  let data = field c_type "data" (ptr void)
-  let bounds = field c_type "bounds" (ptr void)
-  let () = seal c_type
-
-  let symbol_text = foreign ~from:c_lib "${capi.get_name('symbol_text')}"
-    (ptr c_type @-> ptr Text.c_type @-> raisable void)
-
-  let wrap (c_value : t structure) : t =
-    let c_result_ptr = allocate_n Text.c_type ~count:1 in
-    symbol_text (addr c_value) c_result_ptr;
-    !@ c_result_ptr
-
-  let context_symbol = foreign ~from:c_lib "${capi.get_name('context_symbol')}"
-    (AnalysisContextStruct.c_type
-     @-> ptr Text.c_type
-     @-> ptr c_type
-     @-> raisable int)
-
-  let unwrap (ctx : AnalysisContextStruct.t) (value : t) : t structure =
-    let result = make c_type in
-    let code =
-      context_symbol ctx (allocate Text.c_type value) (addr result)
-    in
-    if code = 0 then
-      raise (InvalidSymbolError value) ;
-    result
-end
-
-% for array_type in ctx.array_types:
-    % if array_type.exposed and array_type.emit_c_type:
-${array_types.decl_struct(array_type)}
-    % endif
-% endfor
-
 module BareNode = struct
   type t = unit ptr
 end
@@ -604,6 +464,40 @@ end
 module Rebindings = struct
   type t = unit ptr
 end
+
+<%
+   ## Register array and struct types to generate them in topogical ordering
+   for struct_type in ctx.struct_types:
+      ocaml_api.register_struct_type(struct_type)
+
+   for array_type in ctx.array_types:
+      ocaml_api.register_array_type(array_type)
+%>
+
+% for typ in ocaml_api.ordered_types():
+   % if typ is T.AnalysisUnit:
+      ${struct_types.analysis_unit()}
+   % elif typ is ocaml_api.AnalysisContext:
+      ${struct_types.analysis_context()}
+   % elif typ is T.Symbol:
+      ${struct_types.symbol()}
+   % elif typ.is_entity_type:
+      % if typ == root_entity:
+         ## We want only one module defining the entity c structure
+         ${struct_types.decl_struct(typ)}
+      % endif
+   % elif typ is T.entity_info:
+      ${struct_types.decl_struct(typ)}
+   % elif typ is T.env_md:
+      ${struct_types.decl_struct(typ)}
+   % elif typ.is_struct_type and typ.exposed:
+      ${struct_types.decl_struct(typ)}
+   % elif typ.is_array_type:
+      % if typ.exposed and typ.emit_c_type:
+         ${array_types.decl_struct(typ)}
+      % endif
+   % endif
+% endfor
 
 module CFunctions = struct
   let node_kind = foreign ~from:c_lib "${capi.get_name('node_kind')}"
@@ -915,22 +809,21 @@ end = struct
       , T.AnalysisUnit, "ctx")}
 end
 
-% for struct_type in ctx.struct_types:
-   % if not struct_type.is_entity_type:
-      % if struct_type is T.entity_info:
-   ${struct_types.decl_wrapper(struct_type)}
-      % elif struct_type is T.env_md:
-   ${struct_types.decl_wrapper(struct_type)}
-      % elif struct_type.exposed:
-   ${struct_types.decl_wrapper(struct_type)}
+${struct_types.decl_wrapper(T.entity_info, rec=True)}
+
+${struct_types.decl_wrapper(T.env_md, rec=True)}
+
+% for typ in ocaml_api.ordered_types():
+   % if typ not in [T.AnalysisUnit, ocaml_api.AnalysisContext, T.Symbol,\
+                    T.entity_info, T.env_md]:
+      % if not typ.is_entity_type:
+         % if typ.is_struct_type and typ.exposed:
+   ${struct_types.decl_wrapper(typ)}
+         % elif typ.is_array_type and typ.exposed:
+   ${array_types.decl_wrapper(typ)}
+         % endif
       % endif
    % endif
-% endfor
-
-% for array_type in ctx.array_types:
-    % if array_type.exposed:
-${array_types.decl_wrapper(array_type)}
-    % endif
 % endfor
 
 let context node =
