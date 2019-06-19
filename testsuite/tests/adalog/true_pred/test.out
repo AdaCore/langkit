@@ -1,6 +1,19 @@
-X = 1
-X = 2
-X = 3
-X = 4
-X = 5
-X = 6
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+
+    True
+
+Solution: [X = 1]
+Solution: [X = 2]
+Solution: [X = 3]
+Solution: [X = 4]
+Solution: [X = 5]
+Solution: [X = 6]
+Done.

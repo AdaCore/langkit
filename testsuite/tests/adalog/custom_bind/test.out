@@ -1,7 +1,33 @@
-X = 1, Y = 1
-X = 2, Y = 4
-X = 3, Y = 9
-X = 4, Y = 16
-X = 5, Y = 25
-X = 6, Y = 36
-X = 6, Y = 36
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+
+    Square(%X) -> %Y
+
+Solution: [Y = 1, X = 1]
+Solution: [Y = 4, X = 2]
+Solution: [Y = 9, X = 3]
+Solution: [Y = 16, X = 4]
+Solution: [Y = 25, X = 5]
+Solution: [Y = 36, X = 6]
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+
+    Square(%X) -> %Y
+    36 -> %Y
+
+Solution: [Y = 36, X = 6]
+Done.

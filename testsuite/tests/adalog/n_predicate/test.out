@@ -1,6 +1,24 @@
-X = 2
-Y = 1
-X = 4
-Y = 2
-X = 6
-Y = 3
+Solving relation:
+All:
+    Is_Double_Of?(%X, %Y)
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+
+    Any:
+        1 -> %Y
+        2 -> %Y
+        3 -> %Y
+        4 -> %Y
+        5 -> %Y
+        6 -> %Y
+
+
+Solution: [Y = 1, X = 2]
+Solution: [Y = 2, X = 4]
+Solution: [Y = 3, X = 6]
+Done.

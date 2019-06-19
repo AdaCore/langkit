@@ -1,11 +1,12 @@
-X = 1
-X = 2
-X = 3
-X = 4
-X = 5
-X = 6
-X = 7
-X = 8
-X = 1, Y = 1
-X = 2, Y = 2
-X = 3, Y = 3
+Solution: [X = 1]
+Solution: [X = 2]
+Solution: [X = 3]
+Solution: [X = 4]
+Solution: [X = 5]
+Solution: [X = 6]
+Solution: [X = 7]
+Solution: [X = 8]
+Solution: [Y = 3, X = 3]
+Solution: [Y = 2, X = 2]
+Solution: [Y = 1, X = 1]
+Done.

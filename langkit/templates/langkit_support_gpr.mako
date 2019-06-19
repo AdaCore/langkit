@@ -28,6 +28,7 @@ library project Langkit_Support is
       "Langkit_Support.Adalog.Predicates",
       "Langkit_Support.Adalog.Pure_Relations",
       "Langkit_Support.Adalog.Relations",
+      "Langkit_Support.Adalog.Solver",
       "Langkit_Support.Adalog.Unify",
       "Langkit_Support.Adalog.Unify_Lr",
       "Langkit_Support.Adalog.Unify_One_Side",

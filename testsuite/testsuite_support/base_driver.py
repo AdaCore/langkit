@@ -322,6 +322,10 @@ class BaseDriver(TestDriver):
                 for Source_Dirs use (".");
                 for Object_Dir use ".";
                 for Main use ({mains});
+
+                package Compiler is
+                   for Default_Switches ("Ada") use ("-g");
+                end Compiler;
             end P;
             """.format(
                 mains=', '.join('"{}"'.format(m) for m in mains),

@@ -1,3 +1,20 @@
-X = 3
-X = 4
-X = 5
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+
+    Any:
+        3 -> %X
+        4 -> %X
+        5 -> %X
+
+
+Solution: [X = 3]
+Solution: [X = 4]
+Solution: [X = 5]
+Done.

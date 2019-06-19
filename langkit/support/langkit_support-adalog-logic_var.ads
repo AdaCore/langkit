@@ -48,13 +48,13 @@ generic
    with procedure Inc_Ref (E : Element_Type);
    with procedure Dec_Ref (E : in out Element_Type);
 
-   with procedure Reset (Self : in out Logic_Var_Type) is <>;
+   with procedure Reset (Self : Logic_Var_Type) is <>;
    --  Reset the logic variable to an undefined state with no value
 
    with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
    --  Checks whether the logic variable has a value or not
 
-   with procedure Set_Value (Self : in out Logic_Var_Type; Data : Element_Type)
+   with procedure Set_Value (Self : Logic_Var_Type; Data : Element_Type)
      is <> with Inline => True;
    --  Set the value of the logic variable to Data. Low level function, not for
    --  use by clients.
@@ -72,13 +72,21 @@ generic
    with function Element_Image (Self : Element_Type) return String is <>;
    --  Return a string image of Self
 
+   with function Id (Self : Logic_Var_Type) return Natural is <>;
+   with procedure Set_Id (Self : Logic_Var_Type; Id : Natural) is <>;
+
+   with procedure Alias (Self, Other : Logic_Var_Type) is <>;
+
+   with function Get_Alias (Self : Logic_Var_Type) return Logic_Var_Type is <>;
+
+   No_Var : Logic_Var_Type;
 package Langkit_Support.Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
    --  Subtype so that the variable type is visible from the outside, since
    --  formals are not visible.
 
-   type Var_Array is array (Natural range <>) of Var;
-   type Val_Array is array (Natural range <>) of Element_Type;
+   type Var_Array is array (Positive range <>) of Var;
+   type Val_Array is array (Positive range <>) of Element_Type;
    --  Array types for array of variables and array of values of this variable,
    --  for convenience. To be used in other generic packages taking a formal
    --  Logic_Var package as argument.

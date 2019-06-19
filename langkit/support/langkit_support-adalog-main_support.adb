@@ -21,7 +21,21 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Text_IO; use Ada.Text_IO;
+with Langkit_Support.Images;
+
 package body Langkit_Support.Adalog.Main_Support is
+
+   ------------
+   -- Create --
+   ------------
+
+   function Create (Name : String) return Refs.Raw_Var is
+   begin
+      return R : constant Refs.Raw_Var := Refs.Create do
+         R.Dbg_Name := new String'(Name);
+      end return;
+   end Create;
 
    ---------
    -- "+" --
@@ -33,16 +47,90 @@ package body Langkit_Support.Adalog.Main_Support is
       return R;
    end "+";
 
-   -----------------------
-   -- Release_Relations --
-   -----------------------
+   -------------------
+   -- Element_Image --
+   -------------------
 
-   procedure Release_Relations is
+   function Element_Image (I : Integer) return String is
+      Img : constant String := I'Image;
    begin
-      for R of Relations loop
-         Dec_Ref (R);
-      end loop;
-      Relations := Relation_Vectors.Empty_Vector;
-   end Release_Relations;
+      return Img (2 .. Img'Length);
+   end Element_Image;
+
+   --------------------
+   -- Safe_Get_Value --
+   --------------------
+
+   use Refs;
+   use Refs.Raw_Logic_Var;
+
+   function Safe_Get_Value (V : Refs.Raw_Var) return String is
+     ((if Is_Defined (V)
+       then Element_Image (Get_Value (V))
+       else "<undefined>"));
+
+   ---------------
+   -- Solve_All --
+   ---------------
+
+   procedure Solve_All (Rel : Relation; Show_Relation : Boolean := False) is
+      function Solution_Callback (Vars : Var_Array) return Boolean;
+      function Solution_Callback (Vars : Var_Array) return Boolean is
+
+         function Image (L : Refs.Raw_Var) return String
+         is (L.Dbg_Name.all & " = " & Safe_Get_Value (L));
+
+         function Vars_Image is new Langkit_Support.Images.Array_Image
+           (Raw_Var, Positive, Var_Array);
+      begin
+         Put_Line ("Solution: " & Vars_Image (Vars));
+         return True;
+      end Solution_Callback;
+   begin
+      if Show_Relation then
+         Put_Line ("Solving relation:");
+         Put_Line (Image (Rel));
+      end if;
+      Solve (Rel, Solution_Callback'Unrestricted_Access);
+   end Solve_All;
+
+   package Control is
+      type C is new Ada.Finalization.Controlled with record
+         Destroyed : Boolean := False;
+      end record;
+      overriding procedure Finalize (Self : in out C);
+   end Control;
+
+   package body Control is
+
+      -------------
+      -- Release --
+      -------------
+
+      overriding procedure Finalize (Self : in out C) is
+         Used : Boolean := False;
+      begin
+         if not Self.Destroyed then
+            for R of Relations loop
+               Used := True;
+               Dec_Ref (R);
+            end loop;
+
+            for V of Variables loop
+               Refs.Destroy (V.all);
+               Refs.Free (V);
+            end loop;
+
+            Relations := Relation_Vectors.Empty_Vector;
+            Self.Destroyed := True;
+            if Used then
+               Put_Line ("Done.");
+            end if;
+         end if;
+      end Finalize;
+
+   end Control;
+
+   Dummy_Finalize : Control.C;
 
 end Langkit_Support.Adalog.Main_Support;

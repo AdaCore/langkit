@@ -1,56 +1,61 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
+with GNATCOLL.Traces;
+
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
-with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
 
-with Support; use Support;
+--  Test that Unify works correctly, specially that variable aliasing is well
+--  reset after evaluating a solution.
 
 procedure Main is
-   use Eq_Int, Eq_Int.Raw_Impl, Eq_Int.Refs;
+   use Int_Solver;
+   use Refs;
 
-   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   function Is_Even (Var : Refs.Raw_Var) return Relation
+   is (Predicate (Var, Langkit_Support.Adalog.Main_Support.Is_Even));
 
-   function Safe_Get_Value (V : Eq_Int.Refs.Raw_Var) return String is
+   X : Refs.Raw_Var := Create ("x");
+   Y : Refs.Raw_Var := Create ("y");
+
+   function Safe_Get_Value (V : Refs.Raw_Var) return String is
      ((if Is_Defined (V)
        then Integer'Image (Get_Value (V))
        else "<undefined>"));
 
    Relations : constant array (Positive range <>) of Relation :=
-     (+"and" (+Equals (X, Y), +Member (X, (1, 2, 3))),
+
+     (X = Y and Domain (X, (1, 2, 3)),
       --  Simple dynamic scheduling: the second relation must be evaluated
       --  before the first one.
 
-      +"and" (+Member (X, (1, 2, 3)),
-              +"and" (+"or" (+Member (X, (10, 20)),
-                             +Is_Even (Y)),
-                      +Member (Y, (1, 3, 5, 10)))),
+      (Domain (X, (1, 2, 3))
+       and
+         ((Domain (X, (10, 20)) or Is_Even (Y))
+          and Domain (Y, (1, 3, 5, 10)))),
       --  The second AND relation (OR) cannot be evaluated completely, but it
       --  makes progress.
 
-      +"and" (+Is_Even (Y), +Member (X, (1, 2, 3))),
+      "and" (Is_Even (Y), Domain (X, (1, 2, 3))),
       --  Unsolvable equation: nothing provides a value for Y, but the equation
       --  still makes progress.
 
-      +"and" (+Is_Even (Y), +Is_Even (X)),
+      "and" (Is_Even (Y), Is_Even (X)),
       --  Likewise, but the equation makes no progress at all
 
-      +"or" (+Is_Even (Y), +Member (X, (1, 2))),
+      "or" (Is_Even (Y), Domain (X, (1, 2))),
       --  Likewise, but for ANY relations
 
-      +"or" (+Is_Even (X), +Is_Even (Y)),
+      "or" (Is_Even (X), Is_Even (Y)),
 
-      +"or" (+Is_Even (X),
-             +"and" (+Member (X, (1, 2, 3)),
-                     +Is_Even (Y))),
+      "or" (Is_Even (X),
+             "and" (Domain (X, (1, 2, 3)),
+                     Is_Even (Y))),
 
-      +"and" (+Member (X, (1, 2, 3)),
-              +"and" (+Is_Even (Y),
-                      +"and" (+Member (X, (1 => 2)),
-                              +Equals (X, Y))))
+      "and" (Domain (X, (1, 2, 3)),
+              "and" (Is_Even (Y),
+                      "and" (Domain (X, (1 => 2)),
+                              X = Y)))
       --  Make sure that back-tracking, which happens for the second Member,
       --  properly resets the state so that the second evaluation of this
       --  second Member actually checks something. Without a proper reset, this
@@ -58,35 +63,19 @@ procedure Main is
      );
 
 begin
+   GNATCOLL.Traces.Parse_Config_File;
    X.Dbg_Name := new String'("X");
    Y.Dbg_Name := new String'("Y");
 
    for R of Relations loop
       Put_Line ((1 .. 72 => '='));
-      Print_Relation (R);
       declare
          N : Natural := 0;
       begin
          New_Line;
          Reset (X);
          Reset (Y);
-         while Solve (R) loop
-            Put_Line ("Solution: { X =" & Safe_Get_Value (X)
-                      & "; Y =" & Safe_Get_Value (Y) & " }");
-            N := N + 1;
-         end loop;
-         if N = 0 then
-            Put_Line ("No solution found");
-         end if;
-      exception
-         when Langkit_Support.Adalog.Early_Binding_Error =>
-            Put_Line ("Got an Early_Binding_Error exception");
+         Solve_All (R, Show_Relation => True);
       end;
    end loop;
-
-   Destroy (X.all);
-   Destroy (Y.all);
-   Free (X);
-   Free (Y);
-   Release_Relations;
 end Main;

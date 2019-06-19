@@ -1,59 +1,104 @@
 ========================================================================
-<All>:
-| | Bind X <=> Y
-| | Member X { 1,  2,  3}
 
-Solution: { X = 1; Y = 1 }
-Solution: { X = 2; Y = 2 }
-Solution: { X = 3; Y = 3 }
+Solving relation:
+All:
+    %X <-> %Y
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+
+
+Solution: [Y = 1, X = 1]
+Solution: [Y = 2, X = 2]
+Solution: [Y = 3, X = 3]
 ========================================================================
-<All>:
-| | Member X { 1,  2,  3}
-| | <Any>:
-| | | | Member X { 10,  20}
-| | | | Predicate is-even? on Y
-| | Member Y { 1,  3,  5,  10}
 
-Solution: { X = 1; Y = 10 }
-Solution: { X = 2; Y = 10 }
-Solution: { X = 3; Y = 10 }
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+
+    Any:
+        10 -> %X
+        20 -> %X
+        Is_Even?(%Y)
+
+    Any:
+        1 -> %Y
+        3 -> %Y
+        5 -> %Y
+        10 -> %Y
+
+
+Solution: [Y = 10, X = 1]
+Solution: [Y = 10, X = 2]
+Solution: [Y = 10, X = 3]
 ========================================================================
-<All>:
-| | Predicate is-even? on Y
-| | Member X { 1,  2,  3}
 
-Got an Early_Binding_Error exception
+Solving relation:
+All:
+    Is_Even?(%Y)
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+
+
 ========================================================================
-<All>:
-| | Predicate is-even? on Y
-| | Predicate is-even? on X
 
-Got an Early_Binding_Error exception
+Solving relation:
+All:
+    Is_Even?(%Y)
+    Is_Even?(%X)
+
 ========================================================================
-<Any>:
-| | Predicate is-even? on Y
-| | Member X { 1,  2}
 
-Got an Early_Binding_Error exception
+Solving relation:
+Any:
+    Is_Even?(%Y)
+    1 -> %X
+    2 -> %X
+
+Solution: [Y = <undefined>, X = 1]
+Solution: [Y = <undefined>, X = 2]
 ========================================================================
-<Any>:
-| | Predicate is-even? on X
-| | Predicate is-even? on Y
 
-Got an Early_Binding_Error exception
+Solving relation:
+Any:
+    Is_Even?(%X)
+    Is_Even?(%Y)
+
 ========================================================================
-<Any>:
-| | Predicate is-even? on X
-| | <All>:
-| | | | Member X { 1,  2,  3}
-| | | | Predicate is-even? on Y
 
-Got an Early_Binding_Error exception
+Solving relation:
+Any:
+    Is_Even?(%X)
+    All:
+        Any:
+            1 -> %X
+            2 -> %X
+            3 -> %X
+
+        Is_Even?(%Y)
+
+
 ========================================================================
-<All>:
-| | Member X { 1,  2,  3}
-| | Predicate is-even? on Y
-| | Member X { 2}
-| | Bind X <=> Y
 
-Solution: { X = 2; Y = 2 }
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+
+    Is_Even?(%Y)
+    Any:
+        2 -> %X
+
+    %X <-> %Y
+
+Solution: [Y = 2, X = 2]
+Done.

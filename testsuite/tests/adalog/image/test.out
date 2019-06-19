@@ -1,6 +1,31 @@
-<All>:
-| | <Any>:
-| | | | Member X { 1,  2,  3,  4,  5,  6}
-| | | | Member Y { 10,  11}
-| | | | <True>
-| | Bind X <=> Y
+Solving relation:
+All:
+    Any:
+        1 -> %X
+        2 -> %X
+        3 -> %X
+        4 -> %X
+        5 -> %X
+        6 -> %X
+        10 -> %Y
+        11 -> %Y
+        False
+        All:
+
+
+    %X <-> %Y
+    Any:
+        True
+
+    True
+
+Solution: [Y = 1, X = 1]
+Solution: [Y = 2, X = 2]
+Solution: [Y = 3, X = 3]
+Solution: [Y = 4, X = 4]
+Solution: [Y = 5, X = 5]
+Solution: [Y = 6, X = 6]
+Solution: [Y = 10, X = 10]
+Solution: [Y = 11, X = 11]
+Solution: [Y = <undefined>, X = <undefined>]
+Done.
