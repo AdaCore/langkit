@@ -45,6 +45,7 @@ library project Langkit_Support is
       "Langkit_Support.Generic_API",
       "Langkit_Support.Generic_API.Analysis",
       "Langkit_Support.File_Readers",
+      "Langkit_Support.Functional_Lists",
       "Langkit_Support.Hashes",
       "Langkit_Support.Images",
       "Langkit_Support.Internal",
