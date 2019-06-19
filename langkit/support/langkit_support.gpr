@@ -8,7 +8,7 @@ project Langkit_Support is
    for Object_Dir use "obj";
 
    package Compiler is
-      for Default_Switches ("Ada") use ("-gnatwae", "-gnatyg");
+      for Default_Switches ("Ada") use ("-gnatwae", "-gnatyg", "-g", "-O0");
    end Compiler;
 
 end Langkit_Support;
