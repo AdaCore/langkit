@@ -161,6 +161,12 @@ package Langkit_Support.Vectors is
      with Pre => Length (Self) > 0;
    --  Pop the last element from vector
 
+   procedure Cut (Self : in out Vector; Index : Iteration_Index_Type)
+     with
+       Pre  => Index <= Self.Last_Index,
+       Post => Self.Last_Index = Index;
+   --  Remove all elements after ``Index`` in ``Self``
+
    function Pop (Self : in out Vector; N : Index_Type) return Element_Type
       with Pre => N <= Self.Last_Index;
    procedure Pop (Self : in out Vector; N : Index_Type)
