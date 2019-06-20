@@ -14,6 +14,7 @@ package body Langkit_Support.Adalog.Solver is
    package Atomic_Relation_Vectors
    is new Langkit_Support.Vectors (Atomic_Relation);
    subtype Atomic_Relation_Vector is Atomic_Relation_Vectors.Vector;
+   type Atoms_Vector_Access is access all Atomic_Relation_Vector;
    --  Vectors of atomic relations
 
    function Image
@@ -60,7 +61,7 @@ package body Langkit_Support.Adalog.Solver is
 
    type Solving_Context is record
       Cb                : Callback_Type;
-      Atoms             : Atomic_Relation_Vector;
+      Atoms             : Atoms_Vector_Access;
       Anys              : Any_Relation_List := Any_Relation_Lists.No_List;
       Vars              : Logic_Var_Vector_Access;
       Vars_To_Atoms     : Var_Ids_To_Atoms;
@@ -164,11 +165,14 @@ package body Langkit_Support.Adalog.Solver is
    -------------
 
    procedure Destroy (Ctx : in out Solving_Context) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Atomic_Relation_Vector, Atoms_Vector_Access);
    begin
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
       Ctx.Vars.Destroy;
       Ctx.Vars_To_Atoms.Destroy;
+      Free (Ctx.Atoms);
    end Destroy;
 
    function Solve_Compound
@@ -505,23 +509,24 @@ package body Langkit_Support.Adalog.Solver is
          end;
       end Try_Solution;
 
-      V             : Var_Or_Null;
-      Id            : Positive;
-      Ignore        : Boolean;
-      Vars_To_Atoms : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
-      Atoms         : Atomic_Relation_Vector := Ctx.Atoms.Copy;
-      Anys          : Any_Relation_List := Ctx.Anys;
+      V                    : Var_Or_Null;
+      Id                   : Positive;
+      Ignore               : Boolean;
+      Vars_To_Atoms        : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
+      Anys                 : Any_Relation_List := Ctx.Anys;
+      Initial_Atoms_Length : Natural renames Ctx.Atoms.Last_Index;
 
       function Cleanup (Val : Boolean) return Boolean with Inline_Always
       is begin
          Vars_To_Atoms.Destroy;
-         Atoms.Destroy;
+         Ctx.Atoms.Cut (Initial_Atoms_Length);
          Solver_Trace.Decrease_Indent;
          return Val;
       end Cleanup;
 
    begin
       Solver_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
+
       case Self.Kind is
 
       --  This is a conjunction: We want to *inline* every possible combination
@@ -547,7 +552,7 @@ package body Langkit_Support.Adalog.Solver is
                Anys := Sub_Rel.Compound_Rel & Anys;
             when Atomic =>
                Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
-               Atoms.Append (Sub_Rel.Atomic_Rel);
+               Ctx.Atoms.Append (Sub_Rel.Atomic_Rel);
 
                if Ctx.Cut_Dead_Branches then
                   --  Exponential resolution optimization: If relevant, add
@@ -585,7 +590,7 @@ package body Langkit_Support.Adalog.Solver is
             --  recursion, so old atoms need to be checked again for
             --  completeness. But maybe there is a way. Investigate later.
 
-            for Atom of Atoms loop
+            for Atom of Ctx.Atoms.all loop
                if Atom.Kind = Assign then
                   V := Defined_Var (Atom);
                   Id := Get_Id (Ctx, V.Logic_Var);
@@ -614,10 +619,10 @@ package body Langkit_Support.Adalog.Solver is
          if Length (Anys) = 0 then
             --  We don't have any Any relation left: We have a complete
             --  potential solution. Try to solve it.
-            return Cleanup (Try_Solution (Atoms));
+            return Cleanup (Try_Solution (Ctx.Atoms.all));
          else
             Solver_Trace.Trace ("Before recursing in solve All");
-            Solver_Trace.Trace (Image (Atoms));
+            Solver_Trace.Trace (Image (Ctx.Atoms.all));
             Solver_Trace.Trace (Image (Anys));
 
             return Cleanup
@@ -625,43 +630,37 @@ package body Langkit_Support.Adalog.Solver is
                  (Head (Anys),
                   Ctx'Update
                     (Vars_To_Atoms => Vars_To_Atoms,
-                     Anys          => Tail (Anys),
-                     Atoms         => Atoms)));
+                     Anys          => Tail (Anys))));
          end if;
 
       when Kind_Any =>
          for Sub_Rel of Self.Rels loop
             case Sub_Rel.Kind is
                when Atomic =>
-                  declare
-                     Atoms : Atomic_Relation_Vector := Ctx.Atoms.Copy;
-                  begin
-                     Atoms.Append (Sub_Rel.Atomic_Rel);
-                     Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
-                     if Length (Ctx.Anys) > 0 then
-                        if not
-                          Solve_Compound
-                            (Head (Anys),
-                             Ctx'Update
-                               (Anys => Tail (Anys), Atoms => Atoms))
-                        then
-                           Atoms.Destroy;
-                           return Cleanup (False);
-                        end if;
-                     else
-                        if not Try_Solution (Atoms) then
-                           Atoms.Destroy;
-                           return Cleanup (False);
-                        end if;
+                  Ctx.Atoms.Append (Sub_Rel.Atomic_Rel);
+                  Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
+                  if Length (Ctx.Anys) > 0 then
+                     if not
+                       Solve_Compound
+                         (Head (Anys),
+                          Ctx'Update
+                            (Anys => Tail (Anys)))
+                     then
+                        return Cleanup (False);
                      end if;
-                     Atoms.Destroy;
-                  end;
+                  else
+                     if not Try_Solution (Ctx.Atoms.all) then
+                        return Cleanup (False);
+                     end if;
+                  end if;
                when Compound =>
                   pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_All);
                   if not Solve_Compound (Sub_Rel.Compound_Rel, Ctx) then
                      return Cleanup (False);
                   end if;
             end case;
+
+            Ctx.Atoms.Cut (Initial_Atoms_Length);
          end loop;
 
          return Cleanup (True);
@@ -685,6 +684,8 @@ package body Langkit_Support.Adalog.Solver is
       Solver_Trace.Trace (Image (Self));
 
       Ctx.Cb := Solution_Callback'Unrestricted_Access.all;
+      Ctx.Atoms := new Atomic_Relation_Vector;
+
       case Self.Kind is
          when Compound =>
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
