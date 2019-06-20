@@ -212,6 +212,15 @@ package body Langkit_Support.Vectors is
    end Pop;
 
    ---------
+   -- Cut --
+   ---------
+
+   procedure Cut (Self : in out Vector; Index : Iteration_Index_Type) is
+   begin
+      Self.Size := Index;
+   end Cut;
+
+   ---------
    -- Pop --
    ---------
 
