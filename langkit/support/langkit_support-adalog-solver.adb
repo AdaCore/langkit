@@ -304,9 +304,18 @@ package body Langkit_Support.Adalog.Solver is
       Ctx  : Solving_Context) return Boolean
    is
       function Topo_Sort
-        (Atoms : in out Atomic_Relation_Vector) return Boolean;
-      function Try_Solution
-        (Atoms : in out Atomic_Relation_Vector) return Boolean;
+        (Atoms : Atomic_Relation_Vector)
+         return Atomic_Relation_Vectors.Elements_Array;
+      --  Do a topological sort of the atomic relations in ``Atoms``. Atoms
+      --  with no dependencies will come first. Then, atoms will be sorted
+      --  according to their dependencies. Finally, ``N_Predicate``s will come
+      --  last, because they have multiple dependencies but nothing can depend
+      --  on them.
+      --
+      --  If an atom is an "orphan", that is to say it is not part of the
+      --  resulting sorted collection, then ``Topo_Sort`` returns ``False``.
+
+      function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean;
       --  Try to solve the current solution.
 
       use Any_Relation_Lists;
@@ -316,7 +325,8 @@ package body Langkit_Support.Adalog.Solver is
       ---------------
 
       function Topo_Sort
-        (Atoms : in out Atomic_Relation_Vector) return Boolean
+        (Atoms : Atomic_Relation_Vector)
+         return Atomic_Relation_Vectors.Elements_Array
       is
 
          type Atom_And_Index is record
@@ -327,16 +337,25 @@ package body Langkit_Support.Adalog.Solver is
          package Atom_Lists
          is new Langkit_Support.Functional_Lists (Atom_And_Index);
 
-         Old_Atoms      : constant Atomic_Relation_Vectors.Elements_Array
-           := Atoms.To_Array;
-         Appended       : array (Old_Atoms'Range) of Boolean
+         Sorted_Atoms      : Atomic_Relation_Vectors.Elements_Array
+           (Atoms.First_Index .. Atoms.Last_Index);
+
+         Current_Index     : Positive := 1;
+
+         procedure Append (Atom : Atomic_Relation) is
+         begin
+            Sorted_Atoms (Current_Index) := Atom;
+            Current_Index := Current_Index + 1;
+         end Append;
+
+         Appended       : array (Sorted_Atoms'Range) of Boolean
            := (others => False);
 
          Using_Atoms : array (1 .. Ctx.Vars.Length) of Atom_Lists.List
            := (others => Atom_Lists.Create);
 
-         Used_Id        : Natural;
          Working_Set    : Atom_Lists.List := Atom_Lists.Create;
+         N_Preds        : Atom_Lists.List := Atom_Lists.Create;
          Current_Atom   : Atomic_Relation;
          use Atom_Lists;
 
@@ -346,11 +365,10 @@ package body Langkit_Support.Adalog.Solver is
          function Defined (S : Atomic_Relation) return Natural
          is (Id (Defined_Var (S)));
       begin
-         Atoms.Clear;
 
          --  TODO ??? This pass is probably inefficient. We should alias unify
          --  variables when we are first appending them to the atoms queue.
-         for Atom of Old_Atoms loop
+         for Atom of Atoms loop
             if Atom.Kind = Unify then
                Solver_Trace.Trace ("Aliasing var " & Image (Atom.Unify_From)
                                    & " to " & Image (Atom.Target));
@@ -358,32 +376,48 @@ package body Langkit_Support.Adalog.Solver is
             end if;
          end loop;
 
-         --  Step 1: create a map of vars to all atoms that defines them.
-         for I in Old_Atoms'Range loop
-            Current_Atom := Old_Atoms (I);
+         --  Step 1: create:
+         --
+         --    1. A map of vars to all atoms that use them.
+         --
+         --    2. The base working set for the topo sort, constituted of all
+         --       atoms with no dependencies.
+
+         for I in Atoms.First_Index .. Atoms.Last_Index loop
+            Current_Atom := Atoms.Get (I);
+
             declare
+               --  Resolve the Id of the var used. If the var aliases to
+               --  another var, resolve to the aliased var's Id.
                Used_Logic_Var : constant Var_Or_Null :=
                  Used_Var (Current_Atom);
-            begin
-               if Used_Logic_Var.Exists then
-
-                  --  Resolve the Id of the var used. If the var aliases to
-                  --  another var, resolve to the aliased var's Id.
-                  Used_Id :=
+               Used_Id        : constant Natural :=
+                 (if Used_Logic_Var.Exists then
                     (if Get_Alias (Used_Logic_Var.Logic_Var) /= No_Var
                      then Get_Id (Ctx, Get_Alias (Used_Logic_Var.Logic_Var))
-                     else Get_Id (Ctx, Used_Logic_Var.Logic_Var));
-                  Solver_Trace.Trace (Image (Used_Logic_Var.Logic_Var)
-                                      & " Id = " & Used_Id'Image);
-               else
-                  Used_Id := 0;
-               end if;
-
+                     else Get_Id (Ctx, Used_Logic_Var.Logic_Var))
+                  else 0);
+            begin
                if Current_Atom.Kind = Unify then
+                  --  Unifys are handled by aliasing before. We don't need to
+                  --  ever explicitly solve them. Mark them as appended.
+
                   Appended (I) := True;
+
+               elsif Current_Atom.Kind = N_Predicate then
+                  --  N_Predicates are appended at the end separately
+
+                  N_Preds := (Current_Atom, I) & N_Preds;
+
                elsif Used_Id = 0 then
+
+                  --  Put atoms with no dependency in the working set
+
                   Working_Set := (Current_Atom, I) & Working_Set;
                else
+
+                  --  For other atoms, put them in the using atoms map, which
+                  --  represent the edges of the dependency graph.
                   Using_Atoms (Used_Id) :=
                     (Current_Atom, I) & Using_Atoms (Used_Id);
                end if;
@@ -392,12 +426,18 @@ package body Langkit_Support.Adalog.Solver is
 
          --  Step 2: Do the topo sort
          while Has_Element (Working_Set) loop
+            --  Take items from the working set in order. In the beginning, it
+            --  will only contain atoms with no dependencies.
             declare
                Atom : constant Atom_And_Index := Head (Working_Set);
             begin
                Working_Set := Tail (Working_Set);
-               Atoms.Append (Atom.Atom);
+
+               Append (Atom.Atom);
                Appended (Atom.Atom_Index) := True;
+
+               --  If the atom defines a variable that is used by other atoms,
+               --  put those other atoms in the working set.
                if Defined (Atom.Atom) /= 0 then
                   for El of Using_Atoms (Defined (Atom.Atom)) loop
                      Working_Set := El & Working_Set;
@@ -406,16 +446,24 @@ package body Langkit_Support.Adalog.Solver is
             end;
          end loop;
 
+         --  Append N_Predicates at the end
+         for N_Pred of N_Preds loop
+            Append (N_Pred.Atom);
+            Appended (N_Pred.Atom_Index) := True;
+         end loop;
+
+         --  Verify that every atom has been appended. TODO: This feels like
+         --  an inefficient way to handle this problem, but I haven't found a
+         --  better way yet.
          for I in Appended'Range loop
             if not Appended (I) then
-
                Solver_Trace.Trace
-                 ("Orphan relation: " & Image (Old_Atoms (I)));
-               return False;
+                 ("Orphan relation: " & Image (Atoms.Get (I)));
+               return Atomic_Relation_Vectors.Empty_Array;
             end if;
          end loop;
 
-         return True;
+         return Sorted_Atoms (1 .. Current_Index - 1);
 
       end Topo_Sort;
 
@@ -423,8 +471,7 @@ package body Langkit_Support.Adalog.Solver is
       -- Try_Solution --
       ------------------
 
-      function Try_Solution
-        (Atoms : in out Atomic_Relation_Vector) return Boolean
+      function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean
       is
          function Cleanup (Val : Boolean) return Boolean with Inline_Always
          is begin
@@ -436,20 +483,26 @@ package body Langkit_Support.Adalog.Solver is
          Solver_Trace.Increase_Indent ("In try solution");
          Solver_Trace.Trace (Image (Atoms));
 
-         if not Topo_Sort (Atoms) then
-            return Cleanup (True);
-         end if;
-
-         Solver_Trace.Trace ("After topo sort");
-         Solver_Trace.Trace (Image (Atoms));
-
-         for Atom of Atoms loop
-            if not Solve (Atom) then
+         declare
+            use Atomic_Relation_Vectors;
+            Sorted_Atoms : constant Elements_Array := Topo_Sort (Atoms);
+         begin
+            if Sorted_Atoms = Empty_Array then
                return Cleanup (True);
             end if;
-         end loop;
+            Solver_Trace.Trace ("After topo sort");
+            Solver_Trace.Trace (Image (Sorted_Atoms));
 
-         return Cleanup (Ctx.Cb (Var_Array (Ctx.Vars.To_Array)));
+            --  Once the topological sort has been done, we just have to solve
+            --  every relation in order. Abort if one doesn't solve.
+            for Atom of Sorted_Atoms loop
+               if not Solve (Atom) then
+                  return Cleanup (True);
+               end if;
+            end loop;
+
+            return Cleanup (Ctx.Cb (Var_Array (Ctx.Vars.To_Array)));
+         end;
       end Try_Solution;
 
       V             : Var_Or_Null;
