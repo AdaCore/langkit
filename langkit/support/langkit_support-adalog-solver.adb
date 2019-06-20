@@ -860,6 +860,8 @@ package body Langkit_Support.Adalog.Solver is
             Val    => Value,
             Target => Logic_Var))
       do
+         --  TODO: This is not inlined into the aggregate expression because of
+         --  a bug in GNAT.
          if Conv /= No_Converter then
             Rel.Atomic_Rel.Conv := new Converter_Type'Class'(Conv);
          end if;
@@ -912,6 +914,8 @@ package body Langkit_Support.Adalog.Solver is
       return Rel : constant Relation := Create_Propagate
         (From, To, null, null)
       do
+         --  TODO: This is not inlined into the aggregate expression because of
+         --  a bug in GNAT.
          if Conv /= No_Converter then
             Rel.Atomic_Rel.Conv :=  new Converter_Type'Class'(Conv);
          end if;
@@ -1041,10 +1045,6 @@ package body Langkit_Support.Adalog.Solver is
       --  ``Self.Target`` already has a value compatible with ``Val``, or if
       --  it had no value and the assignment succeeded.
 
-      ----------------
-      -- Assign_Val --
-      ----------------
-
       function Assign_Val (Val : Value_Type) return Boolean is
          Conv_Val : constant Value_Type :=
            (if Self.Conv /= null then Self.Conv.Convert (Val)
@@ -1068,9 +1068,6 @@ package body Langkit_Support.Adalog.Solver is
       case Self.Kind is
          when Assign =>
             return Assign_Val (Self.Val);
-
-            --  TODO ??? Maybe the Is_Defined checks in the two branches below
-            --  are not necessary, and the topo sort is enough.
          when Propagate =>
             pragma Assert (Is_Defined (Self.From));
             return Assign_Val (Get_Value (Self.From));
