@@ -637,24 +637,12 @@ package body Langkit_Support.Adalog.Solver is
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
             Reset_Vars (Ctx, Reset_Ids => True);
          when Atomic =>
-            declare
-               Vars : Logic_Var_Vector;
-               V    : Var_Or_Null;
-            begin
-               V := Used_Var (Self.Atomic_Rel);
-               if V.Exists then
-                  Vars.Append (V.Logic_Var);
-               end if;
-               V := Defined_Var (Self.Atomic_Rel);
-               if V.Exists then
-                  Vars.Append (V.Logic_Var);
-               end if;
-               if Solve (Self.Atomic_Rel) then
-                  Ignore := Solution_Callback (Var_Array (Vars.To_Array));
-                  Vars.Destroy;
-               end if;
-            end;
+            if Solve (Self.Atomic_Rel) then
+               Ignore := Solution_Callback
+                 ((1 => Defined_Var (Self.Atomic_Rel).Logic_Var));
+            end if;
       end case;
+
       Destroy (Ctx);
    end Solve;
 
