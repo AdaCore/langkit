@@ -34,6 +34,7 @@ package body Langkit_Support.Adalog.Main_Support is
    begin
       return R : constant Refs.Raw_Var := Refs.Create do
          R.Dbg_Name := new String'(Name);
+         Variables.Append (R);
       end return;
    end Create;
 

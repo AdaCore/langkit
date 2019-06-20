@@ -331,7 +331,7 @@ private
    type Relation_Kind is (Atomic, Compound);
 
    type Relation_Type (Kind : Relation_Kind := Atomic) is record
-      Ref_Count : Natural := 1;
+      Ref_Count : Integer range -1 .. Integer'Last := 1;
       case Kind is
          when Atomic   => Atomic_Rel   : Atomic_Relation;
          when Compound => Compound_Rel : Compound_Relation;

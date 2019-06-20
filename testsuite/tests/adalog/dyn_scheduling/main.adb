@@ -15,8 +15,8 @@ procedure Main is
    function Is_Even (Var : Refs.Raw_Var) return Relation
    is (Predicate (Var, Langkit_Support.Adalog.Main_Support.Is_Even));
 
-   X : Refs.Raw_Var := Create ("x");
-   Y : Refs.Raw_Var := Create ("y");
+   X : Refs.Raw_Var := Create ("X");
+   Y : Refs.Raw_Var := Create ("Y");
 
    function Safe_Get_Value (V : Refs.Raw_Var) return String is
      ((if Is_Defined (V)
@@ -64,8 +64,6 @@ procedure Main is
 
 begin
    GNATCOLL.Traces.Parse_Config_File;
-   X.Dbg_Name := new String'("X");
-   Y.Dbg_Name := new String'("Y");
 
    for R of Relations loop
       Put_Line ((1 .. 72 => '='));

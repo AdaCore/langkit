@@ -167,10 +167,13 @@ package body Langkit_Support.Adalog.Solver is
    procedure Destroy (Ctx : in out Solving_Context) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Atomic_Relation_Vector, Atoms_Vector_Access);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Logic_Var_Vector, Logic_Var_Vector_Access);
    begin
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
       Ctx.Vars.Destroy;
+      Free (Ctx.Vars);
       Ctx.Vars_To_Atoms.Destroy;
       Free (Ctx.Atoms);
    end Destroy;
@@ -276,7 +279,9 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Inc_Ref (Self : Relation) is
    begin
-      Self.Ref_Count := Self.Ref_Count + 1;
+      if Self.Ref_Count /= -1 then
+         Self.Ref_Count := Self.Ref_Count + 1;
+      end if;
    end Inc_Ref;
 
    -------------
@@ -287,7 +292,7 @@ package body Langkit_Support.Adalog.Solver is
       procedure Unchecked_Free
       is new Ada.Unchecked_Deallocation (Relation_Type, Relation);
    begin
-      if Self = null then
+      if Self = null or else Self.Ref_Count = -1 then
          return;
       end if;
 
@@ -466,6 +471,9 @@ package body Langkit_Support.Adalog.Solver is
                return Atomic_Relation_Vectors.Empty_Array;
             end if;
          end loop;
+
+         Destroy (Working_Set);
+         Destroy (N_Preds);
 
          return Sorted_Atoms (1 .. Current_Index - 1);
 
@@ -745,15 +753,23 @@ package body Langkit_Support.Adalog.Solver is
    -- Create_True --
    -----------------
 
-   function Create_True return Relation is
-     (To_Relation (Atomic_Relation'(Kind => True, Target => <>)));
+   True_Rel : aliased constant Relation_Type :=
+     (Atomic,
+      Atomic_Rel => (Kind => True, Target => <>),
+      Ref_Count  => -1);
+
+   function Create_True return Relation is (True_Rel'Unrestricted_Access);
 
    ------------------
    -- Create_False --
    ------------------
 
-   function Create_False return Relation is
-     (To_Relation (Atomic_Relation'(Kind => False, Target => <>)));
+   False_Rel : aliased constant Relation_Type :=
+     (Atomic,
+      Atomic_Rel => (Kind => False, Target => <>),
+      Ref_Count  => -1);
+
+   function Create_False return Relation is (False_Rel'Unrestricted_Access);
 
    ----------------------
    -- Create_Predicate --
@@ -939,7 +955,11 @@ package body Langkit_Support.Adalog.Solver is
          Rels (I) := Create_Assign (Logic_Var, Domain (I));
       end loop;
 
-      return Create_Any (Rels);
+      return R : constant Relation := Create_Any (Rels) do
+         for Rel of Rels loop
+            Dec_Ref (Rel);
+         end loop;
+      end return;
    end Create_Domain;
 
    ---------------------
