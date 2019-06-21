@@ -235,6 +235,17 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             run(*argv)
 
     if ocaml_main is not None:
+        # Set up a Dune project
+        with open('dune', 'w') as f:
+            f.write("""
+                (executable
+                  (name {})
+                  (flags (-w -9))
+                  (libraries {}))
+            """.format(ocaml_main, ctx.c_api_settings.lib_name))
+        with open('dune-project', 'w') as f:
+            f.write('(lang dune 1.6)')
+
         run('dune', 'exec', '--display', 'quiet', '--root', '.',
             './{}.exe'.format(ocaml_main))
 
