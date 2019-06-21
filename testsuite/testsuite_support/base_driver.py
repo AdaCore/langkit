@@ -72,6 +72,14 @@ class BaseDriver(TestDriver):
 
     def tear_up(self):
         super(BaseDriver, self).tear_up()
+
+        if (
+            self.test_env.get('require_ocaml', False) and
+            self.global_env['options'].disable_ocaml
+        ):
+            self.result.set_status('DEAD', 'Test requires OCaml')
+            return
+
         self.create_test_workspace()
         self.check_file(self.expected_file)
 
