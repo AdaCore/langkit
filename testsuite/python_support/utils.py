@@ -151,6 +151,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         source files for Ada programs to build and run with the generated
         library. If the input is a single string, consider it's a single mail
         source file.
+    :param None|str ocaml_main: If not None, name of the OCaml source file to
+        build and run with the built library available.
     :param WarningSet warning_set: Set of warnings to emit.
     :param bool generate_unparser: Whether to generate unparser.
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
