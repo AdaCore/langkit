@@ -37,9 +37,16 @@ package Langkit_Support.Adalog.Solver is
    --  Decrements the reference count of Self. If no reference left, deallocate
    --  ``Self.all`` and sets ``Self`` to ``null``.
 
+   type Solve_Options_Type is record
+      Cut_Dead_Branches : Boolean := True;
+   end record;
+
+   Default_Options : constant Solve_Options_Type := (others => <>);
+
    procedure Solve
      (Self              : Relation;
-      Solution_Callback : access function return Boolean);
+      Solution_Callback : access function return Boolean;
+      Solve_Options     : Solve_Options_Type := Default_Options);
    --  Tries to solve ``Self``. For every solution, ``Solution_Callback`` will
    --  be called.
 
@@ -48,19 +55,35 @@ package Langkit_Support.Adalog.Solver is
    procedure Solve
      (Self              : Relation;
       Solution_Callback : access function
-        (Vars : Logic_Var_Array) return Boolean);
+        (Vars : Logic_Var_Array) return Boolean;
+      Solve_Options     : Solve_Options_Type := Default_Options);
    --  Tries to solve ``Self``. For every solution, ``Solution_Callback`` will
    --  be called.
 
-   function Solve_First (Self : Relation) return Boolean;
+   function Solve_First
+     (Self          : Relation;
+      Solve_Options : Solve_Options_Type := Default_Options) return Boolean;
    --  Tries to solve ``Self``. If there is at least one valid solution to the
    --  relation, stops solving and return True. Else, return False.
+
+   -- Functor types --
+   -------------------
+
+   --  The solver contains a number of abstract functor types, that are meant
+   --  to be derived by the client to provide functionality.
+   --
+   --  The reason functor types are exposed is if you need to store state along
+   --  with your function. If you don't ,there are convenience constructors
+   --  that take access to functions.
+
+   type Base_Functor_Type is abstract tagged null record;
+   procedure Destroy (Self : in out Base_Functor_Type) is null;
 
    --------------------
    -- Predicate_Type --
    --------------------
 
-   type Predicate_Type is abstract tagged null record;
+   type Predicate_Type is abstract new Base_Functor_Type with null record;
    function Call
      (Self : Predicate_Type; Val : Value_Type) return Boolean is abstract;
    function Image (Self : Predicate_Type) return String is ("");
@@ -71,7 +94,7 @@ package Langkit_Support.Adalog.Solver is
    -- N_Predicate_Type --
    ----------------------
 
-   type N_Predicate_Type is abstract tagged null record;
+   type N_Predicate_Type is abstract new Base_Functor_Type with null record;
    function Call
      (Self : N_Predicate_Type; Vals : Logic_Vars.Val_Array) return Boolean
       is abstract;
@@ -83,7 +106,7 @@ package Langkit_Support.Adalog.Solver is
    -- Comparer_Type --
    -------------------
 
-   type Comparer_Type is abstract tagged null record;
+   type Comparer_Type is abstract new Base_Functor_Type with null record;
    function Compare
      (Self : Comparer_Type; L, R : Value_Type) return Boolean is abstract;
    --  Type to compare two values of Value_TYpe, returning whether they're
@@ -96,7 +119,7 @@ package Langkit_Support.Adalog.Solver is
    -- Converter_Type --
    --------------------
 
-   type Converter_Type is abstract tagged null record;
+   type Converter_Type is abstract new Base_Functor_Type with null record;
    function Convert
      (Self : Converter_Type; From : Value_Type) return Value_Type
          is abstract;
@@ -228,9 +251,6 @@ private
          when Assign | Propagate =>
             Conv     : Converter_Access := null;
             --  An access to the projection co nverter, if there is one
-
-            Eq       : Comparer_Access := null;
-            --  An access to the comparer, if there is one
 
             case Kind is
                when Assign =>

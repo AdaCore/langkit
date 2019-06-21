@@ -1,6 +1,6 @@
 Solving relation:
 All:
-    Is_Double_Of?(%X, %Y)
+    Double_Of?(%X, %Y)
     Any:
         1 -> %X
         2 -> %X

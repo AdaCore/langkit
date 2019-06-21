@@ -55,7 +55,7 @@ package body Langkit_Support.Adalog.Main_Support is
    function Element_Image (I : Integer) return String is
       Img : constant String := I'Image;
    begin
-      return Img (2 .. Img'Length);
+      return (if I > 0 then Img (2 .. Img'Length) else Img);
    end Element_Image;
 
    --------------------
@@ -92,7 +92,10 @@ package body Langkit_Support.Adalog.Main_Support is
          Put_Line ("Solving relation:");
          Put_Line (Image (Rel));
       end if;
-      Solve (Rel, Solution_Callback'Unrestricted_Access);
+      Solve
+        (Rel,
+         Solution_Callback'Unrestricted_Access,
+         (Cut_Dead_Branches => True));
    end Solve_All;
 
    package Control is

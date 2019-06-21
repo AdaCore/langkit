@@ -78,6 +78,41 @@ package body Langkit_Support.Adalog.Solver is
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation);
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
 
+   ----------------------------
+   --  Comparer pred wrapper --
+   ----------------------------
+
+   type Comparer_N_Pred is new N_Predicate_Type with record
+      Eq       : Comparer_Access;
+   end record;
+
+   function Call (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
+   is
+     (Self.Eq.Compare (Vals (1), Vals (2)));
+
+   function Image (Self : Comparer_N_Pred) return String is (Self.Eq.Image);
+
+   overriding procedure Destroy (Self : in out Comparer_N_Pred) is
+   begin
+      Free (Self.Eq);
+   end Destroy;
+
+   type Comparer_Pred is new Predicate_Type with record
+      Eq       : Comparer_Access;
+      Val      : Value_Type;
+   end record;
+
+   function Call (Self : Comparer_Pred; Val : Value_Type) return Boolean
+   is
+     (Self.Eq.Compare (Self.Val, Val));
+
+   function Image (Self : Comparer_Pred) return String is (Self.Eq.Image);
+
+   overriding procedure Destroy (Self : in out Comparer_Pred) is
+   begin
+      Free (Self.Eq);
+   end Destroy;
+
    ----------------------------------
    --  Stateless functors wrappers --
    ----------------------------------
@@ -683,11 +718,13 @@ package body Langkit_Support.Adalog.Solver is
    procedure Solve
      (Self              : Relation;
       Solution_Callback : access function
-        (Vars : Logic_Var_Array) return Boolean)
+        (Vars : Logic_Var_Array) return Boolean;
+      Solve_Options     : Solve_Options_Type := Default_Options)
    is
       Ctx    : Solving_Context := Create;
       Ignore : Boolean;
    begin
+      Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
       Solver_Trace.Trace ("Solving equation:");
       Solver_Trace.Trace (Image (Self));
 
@@ -714,21 +751,24 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Solve
      (Self              : Relation;
-      Solution_Callback : access function return Boolean)
+      Solution_Callback : access function return Boolean;
+      Solve_Options     : Solve_Options_Type := Default_Options)
    is
       function Internal_Callback (Dummy : Var_Array) return Boolean is
       begin
          return Solution_Callback.all;
       end Internal_Callback;
    begin
-      Solve (Self, Internal_Callback'Unrestricted_Access);
+      Solve (Self, Internal_Callback'Unrestricted_Access, Solve_Options);
    end Solve;
 
    -----------------
    -- Solve_First --
    -----------------
 
-   function Solve_First (Self : Relation) return Boolean is
+   function Solve_First
+     (Self          : Relation;
+      Solve_Options : Solve_Options_Type := Default_Options) return Boolean is
 
       Ret : Boolean := False;
 
@@ -745,7 +785,7 @@ package body Langkit_Support.Adalog.Solver is
          return False;
       end Callback;
    begin
-      Solve (Self, Callback'Access);
+      Solve (Self, Callback'Access, Solve_Options);
       return Ret;
    end Solve_First;
 
@@ -868,24 +908,40 @@ package body Langkit_Support.Adalog.Solver is
       Conv      : Converter_Type'Class := No_Converter;
       Eq        : Comparer_Type'Class := No_Comparer) return Relation
    is
+      Conv_Ptr : Converter_Access := null;
+      Eq_Ptr   : Comparer_Access := null;
+      Ass      : Relation;
    begin
-      return Rel : constant Relation := To_Relation
-        (Atomic_Relation'
-           (Kind   => Assign,
-            Conv   => null,
-            Eq     => null,
-            Val    => Value,
-            Target => Logic_Var))
-      do
-         --  TODO: This is not inlined into the aggregate expression because of
-         --  a bug in GNAT.
+      --  TODO: This is not inlined into the aggregate expression because of
+      --  a bug in GNAT.
          if Conv /= No_Converter then
-            Rel.Atomic_Rel.Conv := new Converter_Type'Class'(Conv);
+            Conv_Ptr :=  new Converter_Type'Class'(Conv);
          end if;
          if Eq /= No_Comparer then
-            Rel.Atomic_Rel.Eq := new Comparer_Type'Class'(Eq);
+            Eq_Ptr := new Comparer_Type'Class'(Eq);
          end if;
-      end return;
+
+      Ass := To_Relation
+        (Atomic_Relation'
+           (Kind   => Assign,
+            Conv   => Conv_Ptr,
+            Val    => Value,
+            Target => Logic_Var));
+
+      if Eq_Ptr /= null then
+         declare
+            N_Pred : Relation :=
+              Create_Predicate (Logic_Var, Comparer_Pred'(Eq_Ptr, Value));
+            Ret    : constant Relation := Create_Any ((Ass, N_Pred));
+         begin
+            Dec_Ref (N_Pred);
+            Dec_Ref (Ass);
+            return Ret;
+         end;
+      else
+         return Ass;
+      end if;
+
    end Create_Assign;
 
    ------------------
@@ -908,14 +964,27 @@ package body Langkit_Support.Adalog.Solver is
       Conv      : Converter_Access := null;
       Eq        : Comparer_Access := null) return Relation
    is
-   begin
-      return To_Relation
+      Propag : Relation :=
+        To_Relation
         (Atomic_Relation'
            (Kind   => Propagate,
             Conv   => Conv,
-            Eq     => Eq,
             From   => From,
             Target => To));
+   begin
+      if Eq /= null then
+         declare
+            N_Pred : Relation :=
+              Create_N_Predicate ((From, To), Comparer_N_Pred'(Eq => Eq));
+            Ret    : constant Relation := Create_Any ((Propag, N_Pred));
+         begin
+            Dec_Ref (N_Pred);
+            Dec_Ref (Propag);
+            return Ret;
+         end;
+      else
+         return Propag;
+      end if;
    end Create_Propagate;
 
    ----------------------
@@ -927,19 +996,18 @@ package body Langkit_Support.Adalog.Solver is
       Conv      : Converter_Type'Class := No_Converter;
       Eq        : Comparer_Type'Class := No_Comparer) return Relation
    is
+      Conv_Ptr : Converter_Access := null;
+      Eq_Ptr   : Comparer_Access := null;
    begin
-      return Rel : constant Relation := Create_Propagate
-        (From, To, null, null)
-      do
-         --  TODO: This is not inlined into the aggregate expression because of
-         --  a bug in GNAT.
+      --  TODO: This is not inlined into the aggregate expression because of
+      --  a bug in GNAT.
          if Conv /= No_Converter then
-            Rel.Atomic_Rel.Conv :=  new Converter_Type'Class'(Conv);
+            Conv_Ptr :=  new Converter_Type'Class'(Conv);
          end if;
          if Eq /= No_Comparer then
-            Rel.Atomic_Rel.Eq := new Comparer_Type'Class'(Eq);
+            Eq_Ptr := new Comparer_Type'Class'(Eq);
          end if;
-      end return;
+      return Create_Propagate (From, To, Conv_Ptr, Eq_Ptr);
    end Create_Propagate;
 
    -------------------
@@ -1016,13 +1084,17 @@ package body Langkit_Support.Adalog.Solver is
    begin
       case Self.Kind is
          when Assign | Propagate =>
+            if Self.Conv /= null then
+               Destroy (Self.Conv.all);
+            end if;
+
             Free (Self.Conv);
-            Free (Self.Eq);
          when Predicate =>
+            Destroy (Self.Pred.all);
             Free (Self.Pred);
          when N_Predicate =>
+            Destroy (Self.N_Pred.all);
             Free (Self.N_Pred);
-
          when True | False | Unify =>
             null;
       end case;
@@ -1075,9 +1147,7 @@ package body Langkit_Support.Adalog.Solver is
             declare
                Var_Val : Value_Type renames Get_Value (Self.Target);
             begin
-               return (Self.Eq /= null
-                       and then Self.Eq.Compare (Conv_Val, Var_Val))
-                 or else Conv_Val = Var_Val;
+               return Conv_Val = Var_Val;
             end;
          else
             Set_Value (Self.Target, Conv_Val);
@@ -1123,9 +1193,7 @@ package body Langkit_Support.Adalog.Solver is
             then Self.Conv.Image & "(" & Left & ")"
          else Left);
       function Prop_Image (Left, Right : String) return String is
-        (if Self.Eq /= null
-         then Self.Eq.Image & "->(" & Left_Image (Left) & ", " & Right & ")"
-         else Left_Image (Left) & " -> " & Right);
+        (Left_Image (Left) & " -> " & Right);
    begin
       case Self.Kind is
          when Propagate =>
