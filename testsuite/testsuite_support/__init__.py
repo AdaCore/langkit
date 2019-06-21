@@ -59,6 +59,12 @@ class Testsuite(BaseTestsuite):
                  ' environment that runs the testsuite.'
         )
 
+        self.main.add_option(
+            '--disable-ocaml', action='store_true',
+            help='Disable testcases that require OCaml (they are enabled by'
+                 ' default).'
+        )
+
         #
         # Convenience options for developpers
         #
