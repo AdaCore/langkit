@@ -382,8 +382,9 @@ class Predicate(AbstractExpression):
             self.pred_id = pred_id
             self.logic_var_exprs = logic_var_exprs
             if len(logic_var_exprs) > 1:
+                strn = "({})".format(", ".join(["{}"] * len(logic_var_exprs)))
                 vars_array = untyped_literal_expr(
-                    "({})".format(", ".join("{}")), operands=logic_var_exprs
+                    strn, operands=logic_var_exprs
                 )
                 super(Predicate.Expr, self).__init__(
                     'Pred', 'Solver.Create_N_Predicate',

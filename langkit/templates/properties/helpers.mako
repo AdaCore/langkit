@@ -144,7 +144,7 @@
         % if arity == 1:
         Entity  : Solver.Value_Type
         % else:
-        Entities : Solver.Logic_Vars.Var_Array
+        Entities : Solver.Value_Array
         % endif
         ) return Boolean
    </%def>
