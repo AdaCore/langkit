@@ -1468,6 +1468,7 @@ class NoCompiledType(CompiledType):
     def is_refcounted(self):
         raise NotImplementedError()
 
+
 no_compiled_type = NoCompiledType('NoCompiledType')
 
 

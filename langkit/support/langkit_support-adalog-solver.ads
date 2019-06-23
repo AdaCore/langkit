@@ -290,8 +290,7 @@ private
    --  Semantics of those are defined in the public, in the list of relation
    --  constructors.
 
-   function Solve (Self : Atomic_Relation) return Boolean
-    with Pre => Is_Defined_Or_Null (Used_Var (Self));
+   function Solve (Self : Atomic_Relation) return Boolean;
    --  Solve this atomic relation.
 
    function Image (Self : Atomic_Relation) return String;

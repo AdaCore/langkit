@@ -1191,6 +1191,11 @@ package body Langkit_Support.Adalog.Solver is
       end Assign_Val;
 
    begin
+      if not Is_Defined_Or_Null (Used_Var (Self)) then
+         raise Early_Binding_Error with "Relation " & Image (Self)
+           & " needs var " & Image (Used_Var (Self).Logic_Var)
+           & " to be defined";
+      end if;
       declare
          V : constant Var_Or_Null := Used_Var (Self);
       begin

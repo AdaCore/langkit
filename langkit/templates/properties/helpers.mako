@@ -129,26 +129,48 @@
    % for (args_types, default_passed_args, pred_id) in prop.logic_predicates:
 
    <%
-      type_name = "{}_Predicate_Caller".format(pred_id)
+      type_name = "{}_Predicate".format(pred_id)
       package_name = "{}_Pred".format(pred_id)
       root_class = T.root_node.name
       formal_node_types = prop.get_concrete_node_types(args_types,
                                                        default_passed_args)
+      arity = len(formal_node_types)
+      refcounted_args_types = filter(lambda t: t.is_refcounted, args_types)
    %>
 
-   type ${type_name} is record
+   <%def name="call_profile()">
+      overriding function Call
+        (Self       : ${type_name};
+        % if arity == 1:
+        Entity  : Solver.Value_Type
+        % else:
+        Entities : Solver.Logic_Vars.Var_Array
+        % endif
+        ) return Boolean
+   </%def>
+
+   type ${type_name} is new ${"Predicate_Type" if arity == 1 else "N_Predicate_Type"} with record
       % for i, arg_type in enumerate(args_types):
          Field_${i} : ${arg_type.name};
       % endfor
-      Dbg_Img : String_Access := null;
+      null;
    end record;
 
-   function Create_${pred_id}_Predicate (
+   ${call_profile()};
+   overriding function Image (Self : ${type_name}) return String;
+   % if refcounted_args_types:
+   overriding procedure Destroy (Self : in out ${type_name});
+   % endif
+
+   function Create_${pred_id}_Predicate
+   % if args_types:
+   (
       % for i, arg_type in enumerate(args_types):
          Field_${i} : ${arg_type.name};
       % endfor
-      Dbg_Img : String_Access := null
-   ) return ${type_name} is
+   )
+   % endif
+   return ${type_name} is
    begin
       % for i, arg_type in enumerate(args_types):
          % if arg_type.is_refcounted:
@@ -156,10 +178,13 @@
          % endif
       % endfor
       return ${type_name}'(
+         % if args_types:
          % for i, arg_type in enumerate(args_types):
             Field_${i} => Field_${i},
          % endfor
-         Dbg_Img => Dbg_Img
+         % else:
+         null record
+         % endif
       );
    end;
 
@@ -167,15 +192,13 @@
    -- Call --
    ----------
 
-   function Call
-     (Self       : ${type_name}
-     % for i in range(len(formal_node_types)):
-     ; Node_${i} : ${T.entity.name}
-     % endfor
-     ) return Boolean
+   ${call_profile()}
    is
+      % if arity > 1:
+      Entity : Solver.Value_Type := Entities (1);
+      % endif
       Node : constant ${formal_node_types[0].name} :=
-         ${formal_node_types[0].name} (Node_0.Node);
+         ${formal_node_types[0].name} (Entity.Node);
    begin
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user to
@@ -189,15 +212,15 @@
 
       <%
          args = ['Node'] + [
-            '(Node => {} (Node_{}.Node), Info => Node_{}.Info)'.format(
-                formal_type.element_type.name, i, i
+            '(Node => {} (Entities ({}).Node), Info => Entities ({}).Info)'.format(
+                formal_type.element_type.name, i + 1, i + 1
             ) for i, formal_type in enumerate(formal_node_types[1:], 1)
          ] + [
             'Self.Field_{}'.format(i)
             for i, _ in enumerate(args_types)
          ]
          if prop.uses_entity_info:
-            args.append('{} => Node_0.Info'.format(prop.entity_info_name))
+            args.append('{} => Entity.Info'.format(prop.entity_info_name))
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
       return ${prop.name} ${args_fmt};
@@ -207,30 +230,23 @@
    -- Image --
    -----------
 
-   function Image (Self : ${type_name}) return String
-   is (if Self.Dbg_Img /= null then Self.Dbg_Img.all else "");
+   overriding function Image (Self : ${type_name}) return String is
+   begin
+      return "${prop.qualname}";
+   end Image;
 
    ----------
    -- Free --
    ----------
 
-   procedure Free (Self : in out ${type_name}) is
-      procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
+   % if refcounted_args_types:
+   overriding procedure Destroy (Self : in out ${type_name}) is
    begin
-      % for i, arg_type in enumerate(args_types):
-         % if arg_type.is_refcounted:
-            Dec_Ref (Self.Field_${i});
-         % endif
+      % for i, arg_type in enumerate(refcounted_args_types):
+      Dec_Ref (Self.Field_${i});
       % endfor
-      Free (Self.Dbg_Img);
    end Free;
-
-   package ${package_name} is new Predicate_${len(formal_node_types)}
-     (El_Type        => ${T.entity.name},
-      Var            => Eq_Node.Refs.Raw_Logic_Var,
-      Predicate_Type => ${type_name},
-      Free           => Free,
-      Image          => Image);
+   % endif
 
    % endfor
 </%def>

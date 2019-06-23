@@ -240,10 +240,7 @@ class Bind(AbstractExpression):
                 self.eq_prop, "In Bind's eq_prop {prop}"
             )
 
-        cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
-        eprop_uid = (self.eq_prop.uid if self.eq_prop else "Default")
-
-        # Left operand must be a logic variable.
+        # Left operand must be a logic variable
         lhs = construct(self.from_expr, T.LogicVar)
 
         # Second one can be either a logic variable or an entity (or an AST
@@ -255,7 +252,8 @@ class Bind(AbstractExpression):
             rhs = make_as_entity(rhs)
         else:
             check_source_language(
-                rhs.type.matches(T.root_node.entity),
+                rhs.type.matches(T.root_node.entity)
+                or rhs.type.matches(T.LogicVar),
                 'Right operand must be either a logic variable or an entity,'
                 ' got {}'.format(rhs.type.dsl_name)
             )
@@ -280,8 +278,6 @@ class DomainExpr(ComputingExpr):
     static_type = T.Equation
 
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
-        from langkit.compile_context import get_context
-
         self.domain = domain
         ":type: ResolvedExpression"
 
@@ -381,16 +377,25 @@ class Predicate(AbstractExpression):
 
     class Expr(CallExpr):
         def __init__(self, pred_property, pred_id, logic_var_exprs,
-                     abstract_expr=None):
+                     predicate_expr, abstract_expr=None):
             self.pred_property = pred_property
             self.pred_id = pred_id
             self.logic_var_exprs = logic_var_exprs
-
-            super(Predicate.Expr, self).__init__(
-                'Pred', '{}_Pred.Create'.format(pred_id),
-                T.Equation, logic_var_exprs,
-                abstract_expr=abstract_expr
-            )
+            if len(logic_var_exprs) > 1:
+                vars_array = untyped_literal_expr(
+                    "({})".format(", ".join("{}")), operands=logic_var_exprs
+                )
+                super(Predicate.Expr, self).__init__(
+                    'Pred', 'Solver.Create_N_Predicate',
+                    T.Equation, [vars_array, predicate_expr],
+                    abstract_expr=abstract_expr
+                )
+            else:
+                super(Predicate.Expr, self).__init__(
+                    'Pred', 'Solver.Create_Predicate',
+                    T.Equation, [logic_var_exprs[0], predicate_expr],
+                    abstract_expr=abstract_expr
+                )
 
         @property
         def subexprs(self):
@@ -505,22 +510,17 @@ class Predicate(AbstractExpression):
             default_passed_args
         )
 
-        # Append the debug image for the predicate
-        closure_exprs.append(untyped_literal_expr('"{}.{}"'.format(
-            self.pred_property.struct.name.camel_with_underscores,
-            self.pred_property.name.camel_with_underscores
-        )))
-
-        logic_var_exprs.append(
-            untyped_literal_expr('Create_{}_Predicate ({})'.format(
+        predicate_expr = untyped_literal_expr(
+            'Create_{}_Predicate {}'.format(
                 pred_id,
-                ', '.join(['{}' for _ in range(len(closure_exprs) - 1)]
-                          + ["Dbg_Img => (if Debug then new String'({})"
-                             "            else null)"])
-            ), operands=closure_exprs)
+                "({})".format(
+                    ', '.join(['{}' for _ in range(len(closure_exprs) - 1)])
+                ) if closure_exprs else ""
+            ), operands=closure_exprs
         )
 
-        return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs,
+        return Predicate.Expr(self.pred_property, pred_id,
+                              logic_var_exprs, predicate_expr,
                               abstract_expr=self)
 
     def __repr__(self):
