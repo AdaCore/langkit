@@ -104,7 +104,7 @@ package body Langkit_Support.Adalog.Solver is
 
    function Call (Self : Comparer_Pred; Val : Value_Type) return Boolean
    is
-     (Self.Eq.Compare (Self.Val, Val));
+     (Self.Eq.Compare (Val, Self.Val));
 
    function Image (Self : Comparer_Pred) return String is (Self.Eq.Image);
 
@@ -237,6 +237,7 @@ package body Langkit_Support.Adalog.Solver is
    is
    begin
       if Id (Logic_Var) = 0 then
+         Solver_Trace.Trace ("No id for logic var " & Image (Logic_Var));
          Ctx.Vars.Append (Logic_Var);
          Set_Id (Logic_Var, Ctx.Vars.Last_Index);
       end if;
@@ -254,6 +255,8 @@ package body Langkit_Support.Adalog.Solver is
       begin
          if Var.Exists then
             Dummy := Get_Id (Ctx, Var.Logic_Var);
+            Solver_Trace.Trace ("Assigning Id " & Dummy'Image
+                                & "to var " & Image (Var.Logic_Var));
          end if;
       end Assign_Id;
    begin
@@ -482,11 +485,22 @@ package body Langkit_Support.Adalog.Solver is
 
                --  If the atom defines a variable that is used by other atoms,
                --  put those other atoms in the working set.
-               if Defined (Atom.Atom) /= 0 then
-                  for El of Using_Atoms (Defined (Atom.Atom)) loop
-                     Working_Set := El & Working_Set;
-                  end loop;
-               end if;
+               declare
+                  Defined_Var_Id : Natural renames Defined (Atom.Atom);
+               begin
+
+                  if Defined_Var_Id /= 0
+                    and then Using_Atoms'Length >= Defined_Var_Id
+                  then
+                     for El of Using_Atoms (Defined (Atom.Atom)) loop
+                        Working_Set := El & Working_Set;
+                     end loop;
+
+                     --  Remove items from Using_Atoms, so that they're not
+                     --  appended again to the working set.
+                     Destroy (Using_Atoms (Defined (Atom.Atom)));
+                  end if;
+               end;
             end;
          end loop;
 
@@ -708,7 +722,13 @@ package body Langkit_Support.Adalog.Solver is
 
          return Cleanup (True);
       end case;
-
+   exception
+      when others =>
+         declare
+            Dummy : Boolean := Cleanup (True);
+         begin
+            raise;
+         end;
    end Solve_Compound;
 
    -----------
@@ -723,6 +743,13 @@ package body Langkit_Support.Adalog.Solver is
    is
       Ctx    : Solving_Context := Create;
       Ignore : Boolean;
+
+      procedure Cleanup is
+      begin
+         Reset_Vars (Ctx, Reset_Ids => True);
+         Destroy (Ctx);
+      end Cleanup;
+
    begin
       Ctx.Cut_Dead_Branches := Solve_Options.Cut_Dead_Branches;
       Solver_Trace.Trace ("Solving equation:");
@@ -734,7 +761,6 @@ package body Langkit_Support.Adalog.Solver is
       case Self.Kind is
          when Compound =>
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
-            Reset_Vars (Ctx, Reset_Ids => True);
          when Atomic =>
             if Solve (Self.Atomic_Rel) then
                Ignore := Solution_Callback
@@ -742,7 +768,12 @@ package body Langkit_Support.Adalog.Solver is
             end if;
       end case;
 
-      Destroy (Ctx);
+      Cleanup;
+   exception
+      when others =>
+         Solver_Trace.Trace ("Exception during solving... Cleaning up");
+         Cleanup;
+         raise;
    end Solve;
 
    -----------
@@ -932,8 +963,10 @@ package body Langkit_Support.Adalog.Solver is
          declare
             N_Pred : Relation :=
               Create_Predicate (Logic_Var, Comparer_Pred'(Eq_Ptr, Value));
-            Ret    : constant Relation := Create_Any ((Ass, N_Pred));
+            Tmp    : Relation := Create_Any ((Ass, Create_True));
+            Ret    : constant Relation := Create_All ((Tmp, N_Pred));
          begin
+            Dec_Ref (Tmp);
             Dec_Ref (N_Pred);
             Dec_Ref (Ass);
             return Ret;
@@ -976,8 +1009,10 @@ package body Langkit_Support.Adalog.Solver is
          declare
             N_Pred : Relation :=
               Create_N_Predicate ((From, To), Comparer_N_Pred'(Eq => Eq));
-            Ret    : constant Relation := Create_Any ((Propag, N_Pred));
+            Tmp    : Relation := Create_Any ((Propag, Create_True));
+            Ret    : constant Relation := Create_All ((Tmp, N_Pred));
          begin
+            Dec_Ref (Tmp);
             Dec_Ref (N_Pred);
             Dec_Ref (Propag);
             return Ret;
@@ -1156,6 +1191,11 @@ package body Langkit_Support.Adalog.Solver is
       end Assign_Val;
 
    begin
+      declare
+         V : constant Var_Or_Null := Used_Var (Self);
+      begin
+         pragma Assert (Is_Defined_Or_Null (V));
+      end;
       case Self.Kind is
          when Assign =>
             return Assign_Val (Self.Val);
@@ -1163,7 +1203,7 @@ package body Langkit_Support.Adalog.Solver is
             pragma Assert (Is_Defined (Self.From));
             return Assign_Val (Get_Value (Self.From));
          when Predicate =>
-            pragma Assert (Is_Defined (Self.From));
+            pragma Assert (Is_Defined (Self.Target));
             return Self.Pred.Call (Get_Value (Self.Target));
          when N_Predicate =>
             pragma Assert (for all V of Self.Vars => Is_Defined (V));

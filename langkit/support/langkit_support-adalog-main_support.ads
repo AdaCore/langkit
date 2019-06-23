@@ -35,7 +35,7 @@ package Langkit_Support.Adalog.Main_Support is
    function Create (Name : String) return Refs.Raw_Var;
 
    package Int_Solver is new Langkit_Support.Adalog.Solver
-     (Integer, Refs.Raw_Logic_Var);
+     (Refs.Raw_Logic_Var);
 
    use Int_Solver;
 

@@ -24,29 +24,6 @@
 
 <%def name="logic_helpers()">
 
-   pragma Warnings (Off, "referenced");
-   type Logic_Converter_Default is null record;
-   No_Logic_Converter_Default : constant Logic_Converter_Default :=
-     (null record);
-
-   function Convert
-     (Self : Logic_Converter_Default;
-      From : ${T.entity.name}) return ${T.entity.name}
-   is
-      pragma Unreferenced (Self);
-   begin
-      return From;
-   end Convert;
-
-   type Equals_Data_Default is null record;
-   No_Equals_Data_Default : constant Equals_Data_Default := (null record);
-
-   function Eq_Default
-     (Data : Equals_Data_Default; L, R : ${T.entity.name}) return Boolean
-   is (Equivalent (L, R))
-      with Inline;
-   pragma Warnings (On, "referenced");
-
    ## Generate logic/predicate binders for the properties which require it.
    ## Note that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
@@ -57,19 +34,12 @@
       % endfor
    % endfor
 
-   <% emitted_eq_props = set() %>
    ## Generate logic converters, equality predicates, and binders
-   % for conv_prop, eq_prop in ctx.sorted_logic_binders:
-
-      % if conv_prop:
-         ${prop_helpers.logic_converter(conv_prop)}
-      % endif
-      % if eq_prop and eq_prop.uid not in emitted_eq_props:
-         <% emitted_eq_props.add(eq_prop.uid) %>
-         ${prop_helpers.logic_equal(eq_prop)}
-      % endif
-
-      ${prop_helpers.logic_binder(conv_prop, eq_prop)}
+   % for conv_prop in ctx.sorted_logic_converters:
+      ${prop_helpers.logic_converter(conv_prop)}
+   % endfor
+   % for eq_prop in ctx.sorted_logic_comparers:
+   ${prop_helpers.logic_equal(eq_prop)}
    % endfor
 </%def>
 

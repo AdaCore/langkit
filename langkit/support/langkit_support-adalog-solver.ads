@@ -6,11 +6,11 @@ with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Vectors;
 
 generic
-   type Value_Type is private;
    with package Logic_Vars
-     is new Langkit_Support.Adalog.Logic_Var (Element_Type => Value_Type,
-                                              others       => <>);
+     is new Langkit_Support.Adalog.Logic_Var (<>);
 package Langkit_Support.Adalog.Solver is
+
+   subtype Value_Type is Logic_Vars.Element_Type;
 
    Solver_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
      ("LANGKIT.SOLVER", Default => GNATCOLL.Traces.From_Config);
@@ -210,6 +210,12 @@ package Langkit_Support.Adalog.Solver is
    --  Create an All relation. An All relation solves successfully if all of
    --  its sub-relation solves successfully.
 
+   function Create_Or (L, R : Relation) return Relation
+   is (Create_Any ((L, R)));
+
+   function Create_And (L, R : Relation) return Relation
+   is (Create_All ((L, R)));
+
    function Create_True return Relation;
    function Create_False return Relation;
 
@@ -320,7 +326,7 @@ private
 
    function Is_Defined_Or_Null (Logic_Var : Var_Or_Null) return Boolean
    is
-     (Logic_Var.Exists and then Is_Defined (Logic_Var.Logic_Var));
+     ((not Logic_Var.Exists) or else Is_Defined (Logic_Var.Logic_Var));
    --  Shortcut predicate. Returns whether a variable is defined or is null.
 
    function Used_Var (Self : Atomic_Relation) return Var_Or_Null;

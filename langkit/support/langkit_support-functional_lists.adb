@@ -12,6 +12,7 @@ package body Langkit_Support.Functional_Lists is
    procedure Destroy (Self : in out List) is
    begin
       Bump.Free (Self.Pool);
+      Self := No_List;
    end Destroy;
 
    ---------
@@ -77,12 +78,20 @@ package body Langkit_Support.Functional_Lists is
    function To_Array (Self : List) return T_Array is
       Ret : T_Array (1 .. Self.Length);
       I : Positive := 1;
+      Current : List := Self;
    begin
-      for El of Self loop
-         Ret (I) := El;
+      while Has_Element (Current) loop
+         Ret (I) := Head (Current);
+         Current := Tail (Current);
          I := I + 1;
       end loop;
       return Ret;
+
+--        for El of Self loop
+--           Ret (I) := El;
+--           I := I + 1;
+--        end loop;
+--        return Ret;
    end To_Array;
 
 end Langkit_Support.Functional_Lists;

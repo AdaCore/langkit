@@ -21,8 +21,8 @@
   )
 </%def>
 
-<%def name="dynamic_vars_holder_decl(type_name, dynvars)">
-   type ${type_name} is
+<%def name="dynamic_vars_holder_decl(type_name, base_type_name, dynvars)">
+   type ${type_name} is new ${base_type_name} with
    % if dynvars:
       record
          % for dynvar in dynvars:
@@ -32,20 +32,6 @@
    % else:
       null record;
    % endif
-
-   No_${type_name} : constant ${type_name} := (
-      % if dynvars:
-         <%
-            items = [
-               '{} => {}'.format(dynvar.argument_name, dynvar.type.nullexpr)
-               for dynvar in dynvars
-            ]
-         %>
-         ${', '.join(items)}
-      % else:
-         null record
-      % endif
-   );
 </%def>
 
 <%def name="logic_converter(conv_prop)">
@@ -55,16 +41,16 @@
    entity = T.entity.name
    %>
 
-   ${dynamic_vars_holder_decl(type_name, conv_prop.dynamic_vars)}
+   ${dynamic_vars_holder_decl(type_name, "Solver.Converter_Type", conv_prop.dynamic_vars)}
 
-   function Convert (Self : ${type_name}; From : ${entity}) return ${entity}
+   overriding function Convert (Self : ${type_name}; From : ${entity}) return ${entity}
       with Inline;
 
    -------------
    -- Convert --
    -------------
 
-   function Convert (Self : ${type_name}; From : ${entity}) return ${entity} is
+   overriding function Convert (Self : ${type_name}; From : ${entity}) return ${entity} is
       % if not conv_prop.dynamic_vars:
          pragma Unreferenced (Self);
       % endif
@@ -86,15 +72,24 @@
    <%
       struct = eq_prop.struct.name
       struct_entity = eq_prop.struct.entity.name
-      type_name = 'Equals_Data_{}'.format(eq_prop.uid)
+      type_name = 'Comparer_{}'.format(eq_prop.uid)
    %>
 
-   ${dynamic_vars_holder_decl(type_name, eq_prop.dynamic_vars)}
+   ${dynamic_vars_holder_decl(type_name, "Solver.Comparer_Type", eq_prop.dynamic_vars)}
+   overriding function Image (Self : ${type_name}) return String;
+   overriding function Compare
+     (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean;
 
-   function Eq_${eq_prop.uid}
-     (Data : ${type_name}; L, R : ${T.entity.name}) return Boolean is
+   overriding function Image (Self : ${type_name}) return String
+   is
+   begin
+      return ("${eq_prop.qualname}");
+   end Image;
+
+   overriding function Compare
+     (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean is
      % if not eq_prop.dynamic_vars:
-        pragma Unreferenced (Data);
+        pragma Unreferenced (Self);
      % endif
    begin
       --  If any node pointer is null, then use that for equality
@@ -122,43 +117,12 @@
           (${eq_prop.self_arg_name}             => ${struct} (L.Node),
            ${eq_prop.natural_arguments[0].name} => R_Entity,
            % for dynvar in eq_prop.dynamic_vars:
-              ${dynvar.argument_name} => Data.${dynvar.argument_name},
+              ${dynvar.argument_name} => Self.${dynvar.argument_name},
            % endfor
            ${eq_prop.entity_info_name}          => L.Info);
        end;
-   end Eq_${eq_prop.uid};
+   end Compare;
 
-</%def>
-
-<%def name="logic_binder(conv_prop, eq_prop)">
-   <%
-   cprop_uid = conv_prop.uid if conv_prop else "Default"
-   eprop_uid = eq_prop.uid if eq_prop else "Default"
-   package_name = "Bind_{}_{}".format(cprop_uid, eprop_uid)
-   converter_type_name = "Logic_Converter_{}".format(cprop_uid)
-   equals_type_name = 'Equals_Data_{}'.format(eprop_uid)
-   %>
-   ## This package contains the necessary Adalog instantiations, so that we can
-   ## create an equation that will bind two logic variables A and B so that::
-   ##    B = PropertyCall (A.Value)
-   ##
-   ## Which is expressed as Bind (A, B, Property) in the DSL.
-   package ${package_name} is new Eq_Node.Raw_Custom_Bind
-     (Converter        => ${converter_type_name},
-      No_Data          => No_${converter_type_name},
-      Equals_Data      => ${equals_type_name},
-      No_Equals_Data   => No_${equals_type_name},
-      Convert          => Convert,
-      Equals           => Eq_${eprop_uid},
-      Convert_Image    =>
-        ${string_repr(conv_prop.qualname if conv_prop else '')},
-      Equals_Image     => ${string_repr(eq_prop.qualname if eq_prop else '')},
-
-      ## We don't support passing converters that works both ways (from left to
-      ## right and from right to left value) because it is confusing, so when a
-      ## converter is passed, we forbid two sided conversions.
-      One_Side_Convert => ${"True" if conv_prop else "False"}
-      );
 </%def>
 
 <%def name="logic_predicates(prop)">

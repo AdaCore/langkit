@@ -63,31 +63,37 @@ class Bind(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self, conv_prop, eq_prop, cprop_uid, eprop_uid, lhs, rhs,
-                     pred_func, abstract_expr=None):
+        def __init__(self, conv_prop, eq_prop, lhs, rhs, abstract_expr=None):
             self.conv_prop = conv_prop
             self.eq_prop = eq_prop
-            self.cprop_uid = cprop_uid
-            self.eprop_uid = eprop_uid
             self.lhs = lhs
             self.rhs = rhs
-            self.pred_func = pred_func
 
-            constructor_args = [lhs, rhs, pred_func]
+            constructor_args = [lhs, rhs]
+
+            if conv_prop:
+                constructor_args.append(self.dynamic_vars_to_holder(
+                    self.conv_prop,
+                    'Conv => Logic_Converter_{}'.format(self.conv_prop.uid)
+                ))
 
             if eq_prop:
                 constructor_args.append(self.dynamic_vars_to_holder(
                     eq_prop,
-                    'Equals_Data_{}'.format(eq_prop.uid)
+                    'Eq => Comparer_{}'.format(self.eq_prop.uid)
                 ))
-            else:
-                constructor_args.append('No_Equals_Data_Default')
 
-            constructor_args.append(sloc_info_arg(abstract_expr.location))
+            # constructor_args.append(sloc_info_arg(abstract_expr.location))
+
+            if rhs.type.matches(T.root_node.entity):
+                fn_name = 'Solver.Create_Assign'
+            elif conv_prop or eq_prop:
+                fn_name = 'Solver.Create_Propagate'
+            else:
+                fn_name = 'Solver.Create_Unify'
 
             super(Bind.Expr, self).__init__(
-                'Bind_Result',
-                'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
+                'Bind_Result', fn_name,
                 T.Equation, constructor_args,
                 abstract_expr=abstract_expr
             )
@@ -114,11 +120,8 @@ class Bind(AbstractExpression):
         def subexprs(self):
             return {'conv_prop': self.conv_prop,
                     'eq_prop':   self.eq_prop,
-                    'cprop_uid': self.cprop_uid,
-                    'eprop_uid': self.eprop_uid,
                     'lhs':       self.lhs,
-                    'rhs':       self.rhs,
-                    'pred_func': self.pred_func}
+                    'rhs':       self.rhs}
 
         def __repr__(self):
             return '<Bind.Expr>'
@@ -180,7 +183,7 @@ class Bind(AbstractExpression):
         from langkit.compile_context import get_context
         self.resolve_props()
 
-        get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
+        get_context().do_generate_logic_functors(self.conv_prop, self.eq_prop)
 
         # We have to wait for the construct pass for the following checks
         # because they rely on type information, which is not supposed to be
@@ -240,26 +243,14 @@ class Bind(AbstractExpression):
         cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
         eprop_uid = (self.eq_prop.uid if self.eq_prop else "Default")
 
-        if self.conv_prop:
-            pred_func = Bind.Expr.dynamic_vars_to_holder(
-                self.conv_prop, 'Logic_Converter_{}'.format(cprop_uid)
-            )
-        else:
-            pred_func = untyped_literal_expr('No_Logic_Converter_Default')
-
-        # Left operand must be a logic variable. Make sure the resulting
-        # equation will work on a clean logic variable.
-        lhs = ResetLogicVar(construct(self.from_expr, T.LogicVar))
+        # Left operand must be a logic variable.
+        lhs = construct(self.from_expr, T.LogicVar)
 
         # Second one can be either a logic variable or an entity (or an AST
         # node that is promoted to an entity).
         rhs = construct(self.to_expr)
 
-        if rhs.type.matches(T.LogicVar):
-            # For this operand too, make sure it will work on a clean logic
-            # variable.
-            rhs = ResetLogicVar(rhs)
-        elif rhs.type.matches(T.root_node):
+        if rhs.type.matches(T.root_node):
             from langkit.expressions import make_as_entity
             rhs = make_as_entity(rhs)
         else:
@@ -278,8 +269,8 @@ class Bind(AbstractExpression):
             from langkit.expressions import Cast
             rhs = Cast.Expr(rhs, T.root_node.entity)
 
-        return Bind.Expr(self.conv_prop, self.eq_prop, cprop_uid, eprop_uid,
-                         lhs, rhs, pred_func, abstract_expr=self)
+        return Bind.Expr(self.conv_prop, self.eq_prop,
+                         lhs, rhs, abstract_expr=self)
 
     def __repr__(self):
         return '<Bind>'
@@ -296,10 +287,6 @@ class DomainExpr(ComputingExpr):
 
         self.logic_var_expr = logic_var_expr
         ":type: ResolvedExpression"
-
-        # Generated code relies on the instantiation of a logic binder package
-        # for the default case (no convertion nor equality properties).
-        get_context().do_generate_logic_binder()
 
         super(DomainExpr, self).__init__('Domain_Equation',
                                          abstract_expr=abstract_expr)
@@ -361,7 +348,7 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection, "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        ResetLogicVar(construct(logic_var_expr, T.LogicVar)),
+        construct(logic_var_expr, T.LogicVar),
         abstract_expr=self,
     )
 
@@ -457,9 +444,6 @@ class Predicate(AbstractExpression):
             'Logic variable expressions should be grouped at the beginning,'
             ' and should not appear after non logic variable expressions'
         )
-
-        # Make sure this predicate will work on clean logic variables
-        logic_var_exprs = [ResetLogicVar(expr) for expr in logic_var_exprs]
 
         # Compute the list of arguments to pass to the property (Self
         # included).
@@ -667,7 +651,7 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_True', 'True_Rel', T.Equation,
+        return CallExpr('Create_True', 'True_Rel', T.Equation,
                         [sloc_info_arg(self.location)])
 
     def __repr__(self):
@@ -684,42 +668,8 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_False', 'False_Rel', T.Equation,
+        return CallExpr('Create_False', 'False_Rel', T.Equation,
                         [sloc_info_arg(self.location)])
 
     def __repr__(self):
         return '<LogicFalse>'
-
-
-class ResetLogicVar(ResolvedExpression):
-    """
-    Resolved expression wrapper to reset a logic variable.
-
-    We use this wrapper during logic equation construction so that they can
-    work on logic variables that don't hold stale results.
-    """
-
-    def __init__(self, logic_var_expr):
-        assert logic_var_expr.type == T.LogicVar
-        self.logic_var_expr = logic_var_expr
-        self.static_type = T.LogicVar
-        super(ResetLogicVar, self).__init__()
-
-    def _render_pre(self):
-        return '\n'.join([
-            '{pre}',
-            '{var}.Value := No_Entity;',
-            'Eq_Node.Refs.Reset ({var}.all);',
-            'Eq_Node.Refs.Destroy ({var}.all);',
-        ]).format(pre=self.logic_var_expr.render_pre(),
-                  var=self.logic_var_expr.render_expr())
-
-    def _render_expr(self):
-        return self.logic_var_expr.render_expr()
-
-    @property
-    def subexprs(self):
-        return {'logic_var': self.logic_var_expr}
-
-    def __repr__(self):
-        return '<ResetLogicVar>'

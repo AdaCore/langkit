@@ -24,9 +24,8 @@ with System;
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
-with Langkit_Support.Adalog.Eq_Same;
+with Langkit_Support.Adalog.Logic_Ref;
+with Langkit_Support.Adalog.Solver;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
@@ -488,15 +487,17 @@ private package ${ada_lib_name}.Implementation is
    function Image (Ent : ${T.entity.name}) return String;
    ${ada_doc('langkit.entity_image', 3)}
 
-   package Eq_Node is new Langkit_Support.Adalog.Eq_Same
-     (LR_Type       => ${T.entity.name},
-      Element_Image => Image);
-   subtype Logic_Var is Eq_Node.Refs.Raw_Var;
-   subtype Logic_Var_Record is Eq_Node.Refs.Var;
+   package Entity_Vars is new Langkit_Support.Adalog.Logic_Ref
+     (${T.entity.name}, Element_Image => Image);
+   package Solver is new Langkit_Support.Adalog.Solver
+     (Entity_Vars.Raw_Logic_Var);
+
+   subtype Logic_Var is Entity_Vars.Raw_Var;
+   subtype Logic_Var_Record is Entity_Vars.Var;
    Null_Var : constant Logic_Var := null;
    Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
 
-   subtype Logic_Equation is Relation;
+   subtype Logic_Equation is Solver.Relation;
    Null_Logic_Equation : constant Logic_Equation := null;
 
    % if ctx.properties_logging:

@@ -5,7 +5,7 @@ ${expr.logic_var_expr.render_pre()}
 
 declare
    Dom : ${expr.domain.type.name} := ${expr.domain.render_expr()};
-   A   : Bind_Default_Default.Impl.Unify_Left.R_Type_Array (1 .. Length (Dom));
+   A   : Solver.Value_Array (1 .. Length (Dom));
 begin
    for J in 0 .. Length (Dom) - 1 loop
       declare
@@ -26,6 +26,6 @@ begin
       end;
    end loop;
 
-   ${expr.result_var.name} := Bind_Default_Default.Impl.Member
+   ${expr.result_var.name} := Solver.Create_Domain
      (${expr.logic_var_expr.render_expr()}, A);
 end;
