@@ -180,6 +180,7 @@ package body Langkit_Support.Adalog.Solver is
    begin
       for V of Ctx.Vars.all loop
          if Reset_Ids then
+            Solver_Trace.Trace ("RESETTING VAR WITH ID " & Id (V)'Image);
             Set_Id (V, 0);
          else
             Reset (V);
@@ -259,7 +260,7 @@ package body Langkit_Support.Adalog.Solver is
          if Var.Exists then
             Dummy := Get_Id (Ctx, Var.Logic_Var);
             Solver_Trace.Trace ("Assigning Id " & Dummy'Image
-                                & "to var " & Image (Var.Logic_Var));
+                                & " to var " & Image (Var.Logic_Var));
          end if;
       end Assign_Id;
    begin
