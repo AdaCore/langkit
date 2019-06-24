@@ -547,9 +547,9 @@ def get_value(self, logic_var):
     logic_var_ref = logic_var_expr.create_result_var('Logic_Var_Value')
 
     return If.Expr(
-        cond=CallExpr('Is_Logic_Var_Defined', 'Eq_Node.Refs.Is_Defined',
+        cond=CallExpr('Is_Logic_Var_Defined', 'Entity_Vars.Is_Defined',
                       T.Bool, [logic_var_expr]),
-        then=CallExpr('Eq_Solution', 'Eq_Node.Refs.Get_Value', rtype,
+        then=CallExpr('Eq_Solution', 'Entity_Vars.Get_Value', rtype,
                       [logic_var_ref]),
         else_then=NullExpr(T.root_node.entity),
         abstract_expr=self
