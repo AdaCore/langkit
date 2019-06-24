@@ -173,13 +173,16 @@ package body Langkit_Support.Adalog.Solver is
    -- Reset_Vars --
    ----------------
 
-   procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False)
+   procedure Reset_Vars
+     (Ctx       : Solving_Context;
+      Reset_Ids : Boolean := False)
    is
    begin
       for V of Ctx.Vars.all loop
-         Reset (V);
          if Reset_Ids then
             Set_Id (V, 0);
+         else
+            Reset (V);
          end if;
       end loop;
    end Reset_Vars;
@@ -537,12 +540,12 @@ package body Langkit_Support.Adalog.Solver is
          function Cleanup (Val : Boolean) return Boolean with Inline_Always
          is begin
             Solver_Trace.Decrease_Indent;
-            Reset_Vars (Ctx);
             return Val;
          end Cleanup;
       begin
          Solver_Trace.Increase_Indent ("In try solution");
          Solver_Trace.Trace (Image (Atoms));
+         Reset_Vars (Ctx);
 
          declare
             use Atomic_Relation_Vectors;
@@ -651,6 +654,8 @@ package body Langkit_Support.Adalog.Solver is
                if Atom.Kind = Assign then
                   V := Defined_Var (Atom);
                   Id := Get_Id (Ctx, V.Logic_Var);
+
+                  Reset (V.Logic_Var);
                   if Vars_To_Atoms.Get (Id).Length > 0 then
                      --  We have some relations that apply on this variable.
                      --  Call the assign atom, then see if the relations solve.
@@ -762,10 +767,14 @@ package body Langkit_Support.Adalog.Solver is
          when Compound =>
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
          when Atomic =>
-            if Solve (Self.Atomic_Rel) then
-               Ignore := Solution_Callback
-                 ((1 => Defined_Var (Self.Atomic_Rel).Logic_Var));
-            end if;
+            declare
+               V : constant Var := Defined_Var (Self.Atomic_Rel).Logic_Var;
+            begin
+               Reset (V);
+               if Solve (Self.Atomic_Rel) then
+                  Ignore := Solution_Callback ((1 => V));
+               end if;
+            end;
       end case;
 
       Cleanup;
