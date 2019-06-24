@@ -402,7 +402,7 @@ module ${ocaml_api.node_name(astnode)} : sig
             arg for arg in field.arguments if arg.default_value is not None
          ]
       %>
-  val ${field.name.lower} :
+  val ${ocaml_api.field_name(field)} :
       % for i, arg in enumerate(default_fields):
     ${'-> ' if i != 0 else ''}?${arg.name.lower}:
     ${ocaml_api.type_public_name(arg.public_type)}
@@ -437,7 +437,7 @@ module ${ocaml_api.node_name(astnode)} : sig
          if field.is_optional:
             return_typ += ' option'
       %>
-  val ${field.name.lower} :
+  val ${ocaml_api.field_name(field)} :
     [< ${ocaml_api.type_public_name(astnode)}]
     -> ${return_typ}
 

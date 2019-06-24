@@ -884,7 +884,7 @@ module ${ocaml_api.node_name(astnode)} = struct
                                 astnode.entity, None)})
 
    % for field in ocaml_api.get_properties(astnode):
-let ${field.name.lower}
+let ${ocaml_api.field_name(field)}
       % for arg in field.arguments:
          % if arg.default_value is not None:
             % if arg.public_type.is_entity_type:
@@ -952,11 +952,11 @@ let ${field.name.lower}
    % endfor
 
    % for field in ocaml_api.get_parse_fields(astnode):
-  let ${field.name.lower} node =
+  let ${ocaml_api.field_name(field)} node =
     match (node :> ${ocaml_api.type_public_name(astnode)}) with
       % for concrete in astnode.concrete_subclasses:
     | ${ocaml_api.polymorphic_variant_name(concrete)} fields ->
-        Lazy.force fields.${field.name.lower}
+        Lazy.force fields.${ocaml_api.field_name(field)}
       % endfor
    % endfor
 
@@ -1139,16 +1139,16 @@ let ${field.name.lower}
         [
                % for field in ocaml_api.get_parse_fields(astnode):
                   % if field.is_optional:
-        ("${field.name.lower[2:]}"
-        , (Lazy.force value.${field.name.lower}
+        ("${ocaml_api.field_name(field)[2:]}"
+        , (Lazy.force value.${ocaml_api.field_name(field)}
            :> ${root_entity_type} option));
                   % else:
         (try
-           ("${field.name.lower[2:]}"
-           , Some (Lazy.force value.${field.name.lower}
+           ("${ocaml_api.field_name(field)[2:]}"
+           , Some (Lazy.force value.${ocaml_api.field_name(field)}
                     :> ${root_entity_type}))
         with SyntaxError ->
-          ("${field.name.lower[2:]}", None) );
+          ("${ocaml_api.field_name(field)[2:]}", None) );
                   % endif
                % endfor
         ]
