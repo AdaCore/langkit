@@ -1,8 +1,8 @@
 <%def name="ctype_fields(cls)">
   let c_type : t structure typ = structure "${cls.api_name.lower}"
    % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
-  let ${f.name.lower} =
-    field c_type "${f.name.lower}" ${ocaml_api.c_type(f.type, cls)}
+  let ${ocaml_api.field_name(f)} =
+    field c_type "${ocaml_api.field_name(f)}" ${ocaml_api.c_type(f.type, cls)}
    % endfor
   let () = seal c_type
 </%def>
@@ -21,9 +21,9 @@ end
   type t = {
    % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
       % if f.type.is_ast_node:
-    ${f.name.lower} : ${ocaml_api.c_value_type(f.type, cls)};
+    ${ocaml_api.field_name(f)} : ${ocaml_api.c_value_type(f.type, cls)};
       % else:
-    ${f.name.lower} : ${ocaml_api.type_public_name(f.type, cls)};
+    ${ocaml_api.field_name(f)} : ${ocaml_api.type_public_name(f.type, cls)};
       % endif
    % endfor
   }
@@ -55,9 +55,10 @@ end
   let wrap c_value = {
    % endif
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
-    ${f.name.lower} = ${ocaml_api.wrap_value('getf c_value {}.{}'.format(
-                              ocaml_api.struct_name(cls), f.name.lower),
-                           f.type, 'context')};
+    ${ocaml_api.field_name(f)} = ${ocaml_api.wrap_value(
+      'getf c_value {}.{}'.format(ocaml_api.struct_name(cls),
+                                  ocaml_api.field_name(f)),
+      f.type, 'context')};
       % endfor
   }
 
@@ -69,8 +70,8 @@ end
     let c_value = make ${ocaml_api.c_type(cls)} in
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
     setf c_value
-      ${ocaml_api.struct_name(cls)}.${f.name.lower}
-      (${ocaml_api.unwrap_value('value.{}'.format(f.name.lower),
+      ${ocaml_api.struct_name(cls)}.${ocaml_api.field_name(f)}
+      (${ocaml_api.unwrap_value('value.{}'.format(ocaml_api.field_name(f)),
                                 f.type, 'context')});
       % endfor
     c_value

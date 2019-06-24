@@ -524,3 +524,28 @@ class OCamlAPISettings(AbstractAPISettings):
             dfs(vertex, topo)
 
         return topo
+
+    def escape_ocaml_keyword(self, str):
+        """
+        Return a replacement for the given string if the string is an OCaml
+        keyword that cannot appear as an identifier.
+
+        :param string str: The string we want to replace if necessary.
+        :rtype: str
+        """
+        replacement = {
+            "val": "value",
+            "constraint": "constr"
+        }
+
+        return replacement.get(str, str)
+
+    def field_name(self, field):
+        """
+        Given a Field instance, return the name of the field to be used for an
+        OCaml identifier.
+
+        :param ct.Field field: The field for which we want it's name.
+        :rtype: str
+        """
+        return self.escape_ocaml_keyword(field.name.lower)

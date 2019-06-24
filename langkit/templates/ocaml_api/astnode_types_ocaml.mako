@@ -5,14 +5,14 @@
             precise_types = ocaml_api.get_field_type(field)
          %>
          % if len(precise_types) == 1:
-    ${field.name.lower}: ${ocaml_api.type_public_name(precise_types[0],
-                                                      astnode)}
+    ${ocaml_api.field_name(field)}: ${ocaml_api.type_public_name(
+                                         precise_types[0], astnode)}
             % if field.is_optional:
     option
             % endif
     Lazy.t;
          % else:
-    ${field.name.lower}: [
+    ${ocaml_api.field_name(field)}: [
             % for tpe in precise_types:
       | ${ocaml_api.polymorphic_variant_name(tpe)}
           of ${ocaml_api.fields_name(tpe, astnode)}
@@ -85,7 +85,7 @@
 
   let wrap context c_value =
       % for field in ocaml_api.get_parse_fields(astnode):
-    let ${field.name.lower} () =
+    let ${ocaml_api.field_name(field)} () =
       let field_c_value = make ${ocaml_api.c_type(field.public_type)} in
       let _ : int = CFunctions.${field.accessor_basename.lower}
         (addr c_value)
@@ -145,7 +145,8 @@
     else
       ${ocaml_api.polymorphic_variant_name(astnode)} {
       % for field in ocaml_api.get_parse_fields(astnode):
-        ${field.name.lower} = Lazy.from_fun ${field.name.lower};
+        ${ocaml_api.field_name(field)}
+          = Lazy.from_fun ${ocaml_api.field_name(field)} ;
       % endfor
       % if astnode.is_list:
         list = Lazy.from_fun list;
