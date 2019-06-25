@@ -8,7 +8,7 @@ use Langkit_Support.Adalog.Main_Support;
 --  both.
 
 procedure Main is
-   use Int_Solver; use Refs;
+   use T_Solver; use Refs;
 
    X : Raw_Var := Create ("X");
    R : constant Relation :=

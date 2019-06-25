@@ -1,6 +1,6 @@
 Solving relation:
-All:
-    Any:
+All: 
+    Any: 
         1 -> %X
         2 -> %X
         3 -> %X
@@ -8,13 +8,12 @@ All:
         5 -> %X
         6 -> %X
 
-    *3(%X) -> %Y
-    Is_Even?(%X)
-    Any:
-        12 -> %Y
-        18 -> %Y
+    *3(%X) -> %Y 
+    Is_Even?(%X) 
+    Any: 
+        12 -> %Y 
+        18 -> %Y 
 
 
 Solution: [Y = 12, X = 4]
 Solution: [Y = 18, X = 6]
-Done.

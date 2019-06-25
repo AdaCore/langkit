@@ -24,6 +24,7 @@ library project Langkit_Support is
       "Langkit_Support.Adalog.Logic_Ref",
       "Langkit_Support.Adalog.Logic_Var",
       "Langkit_Support.Adalog.Main_Support",
+      "Langkit_Support.Adalog.Generic_Main_Support",
       "Langkit_Support.Adalog.Operations",
       "Langkit_Support.Adalog.Predicates",
       "Langkit_Support.Adalog.Pure_Relations",

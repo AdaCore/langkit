@@ -9,7 +9,7 @@ use Langkit_Support.Adalog.Main_Support;
 --  reset after evaluating a solution.
 
 procedure Main is
-   use Int_Solver;
+   use T_Solver;
    use Refs;
 begin
    declare

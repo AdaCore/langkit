@@ -106,6 +106,8 @@ package body Langkit_Support.Adalog.Solver is
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation);
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
 
+   function Var_Image (V : Var) return String is ("%" & Image (V));
+
    ----------------------------
    --  Comparer pred wrapper --
    ----------------------------
@@ -117,9 +119,16 @@ package body Langkit_Support.Adalog.Solver is
 
    function Call (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
    is
-     (Self.Eq.Compare (Vals (1), Self.Conv.Convert (Vals (2))));
+     (Self.Eq.Compare ((if Self.Conv /= null
+                        then Self.Conv.Convert (Vals (1))
+                        else Vals (1)), Vals (2)));
 
-   function Image (Self : Comparer_N_Pred) return String is (Self.Eq.Image);
+   function Full_Image (Self : Comparer_N_Pred; Vars : Var_Array) return String
+   is (Self.Eq.Image & "?("
+       & (if Self.Conv /= null
+          then Self.Conv.Image & "(" & Var_Image (Vars (1)) & ")"
+          else Var_Image (Vars (1)))
+       & ", " & Var_Image (Vars (2)) & ")");
 
    overriding procedure Destroy (Self : in out Comparer_N_Pred) is
    begin
@@ -135,9 +144,15 @@ package body Langkit_Support.Adalog.Solver is
 
    function Call (Self : Comparer_Pred; Val : Value_Type) return Boolean
    is
-     (Self.Eq.Compare (Val, Self.Conv.Convert (Self.Val)));
+     (Self.Eq.Compare ((if Self.Conv /= null
+                        then Self.Conv.Convert (Self.Val)
+                        else Self.Val), Val));
 
-   function Image (Self : Comparer_Pred) return String is (Self.Eq.Image);
+   function Full_Image (Self : Comparer_Pred; Logic_Var : Var) return String
+   is (Self.Eq.Image & "?("
+       & (if Self.Conv /= null
+          then Self.Conv.Image & "(" & Element_Image (Self.Val) & ")"
+          else Element_Image (Self.Val)) & ", " & Var_Image (Logic_Var) & ")");
 
    overriding procedure Destroy (Self : in out Comparer_Pred) is
    begin
@@ -1338,7 +1353,6 @@ package body Langkit_Support.Adalog.Solver is
 
    function Image (Self : Atomic_Relation) return String
    is
-      function Var_Image (V : Var) return String is ("%" & Image (V));
       function Left_Image (Left : String) return String is
         (if Self.Conv /= null
             then Self.Conv.Image & "(" & Left & ")"
@@ -1353,11 +1367,23 @@ package body Langkit_Support.Adalog.Solver is
             return Prop_Image
               (Logic_Vars.Element_Image (Self.Val), Var_Image (Self.Target));
          when Predicate =>
-            return Self.Pred.Image & "?(" & Var_Image (Self.Target) & ")";
+            declare
+               Full_Img : constant String :=
+                 Self.Pred.Full_Image (Self.Target);
+            begin
+               return
+                 (if Full_Img /= "" then Full_Img
+                  else Self.Pred.Image & "?(" & Var_Image (Self.Target) & ")");
+            end;
          when N_Predicate =>
             declare
+               Full_Img : constant String :=
+                 Self.N_Pred.Full_Image (Var_Array (Self.Vars.To_Array));
                Vars_Image : XString_Array (1 .. Self.Vars.Length);
             begin
+               if Full_Img /= "" then
+                  return Full_Img;
+               end if;
                for I in Vars_Image'Range loop
                   Vars_Image (I) := To_XString (Var_Image (Self.Vars.Get (I)));
                end loop;

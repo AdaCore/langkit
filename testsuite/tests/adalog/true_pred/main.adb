@@ -6,7 +6,7 @@ use Langkit_Support.Adalog.Main_Support;
 --  Test true relation
 
 procedure Main is
-   use Int_Solver, Refs;
+   use T_Solver, Refs;
 
    X : Raw_Var := Create ("X");
    R : constant Relation := Domain (X, (1, 2, 3, 4, 5, 6)) and +Create_True;

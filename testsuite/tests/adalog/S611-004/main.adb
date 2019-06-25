@@ -9,13 +9,15 @@ use Langkit_Support.Adalog.Main_Support;
 
 procedure Main is
 
-   use Int_Solver, Refs;
+   use T_Solver, Refs;
 
    X : Raw_Var := Create ("X");
    Y : Raw_Var := Create ("Y");
 
+   function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
+
    R : constant Relation :=
-     (((Y = 1 and Predicate (X, Is_Even))
+     (((Y = 1 and Predicate (X, Predicate (Is_Even'Access, "Is_Even")))
       or X = 1)
       and X = 2);
 

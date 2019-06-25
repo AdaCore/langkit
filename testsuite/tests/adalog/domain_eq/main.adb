@@ -8,7 +8,7 @@ use Langkit_Support.Adalog.Main_Support;
 --  Test that Member primitives goes along correctly with the "=" operator
 
 procedure Main is
-   use Int_Solver;
+   use T_Solver;
    use Refs;
 begin
    GNATCOLL.Traces.Parse_Config_File;

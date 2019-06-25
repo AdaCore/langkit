@@ -9,11 +9,13 @@ use Langkit_Support.Adalog.Main_Support;
 --  reset after evaluating a solution.
 
 procedure Main is
-   use Int_Solver;
+   use T_Solver;
    use Refs;
 
+   function Is_Even (Val : Integer) return Boolean is (Val mod 2 = 0);
+
    function Is_Even (Var : Refs.Raw_Var) return Relation
-   is (Predicate (Var, Langkit_Support.Adalog.Main_Support.Is_Even));
+   is (Predicate (Var, Predicate (Is_Even'Access, "Is_Even")));
 
    X : Refs.Raw_Var := Create ("X");
    Y : Refs.Raw_Var := Create ("Y");

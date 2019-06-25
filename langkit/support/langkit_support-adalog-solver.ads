@@ -112,6 +112,8 @@ package Langkit_Support.Adalog.Solver is
    function Call
      (Self : Predicate_Type; Val : Value_Type) return Boolean is abstract;
    function Image (Self : Predicate_Type) return String is ("");
+   function Full_Image (Self : Predicate_Type; Dummy_Var : Var) return String
+   is ("");
    --  A predicate encapsulates the logic of applying a boolean predicate to a
    --  value, returning whether the predicate succeeds.
 
@@ -124,6 +126,9 @@ package Langkit_Support.Adalog.Solver is
      (Self : N_Predicate_Type; Vals : Logic_Vars.Val_Array) return Boolean
       is abstract;
    function Image (Self : N_Predicate_Type) return String is ("");
+   function Full_Image
+     (Self : N_Predicate_Type; Dummy_Vars : Var_Array) return String
+   is ("");
    --  A predicate encapsulates the logic of applying a boolean predicate to a
    --  value, returning whether the predicate succeeds.
 

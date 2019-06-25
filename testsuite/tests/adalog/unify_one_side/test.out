@@ -1,54 +1,54 @@
 ========================================================================
 
 Solving relation:
-All:
-    Any:
-        6 -> %X
-        9 -> %X
+All: 
+    Any: 
+        6 -> %X 
+        9 -> %X 
 
-    Any:
-        9 -> %Y
-        16 -> %Y
+    Any: 
+        9 -> %Y 
+        16 -> %Y 
 
-    Square(3) -> %X
-    Square(4) -> %Y
+    Square(3) -> %X 
+    Square(4) -> %Y 
 
 Solution: [X = 9, Y = 16]
 ========================================================================
 
 Solving relation:
-All:
-    Any:
-        2 -> %Y
-        3 -> %Y
+All: 
+    Any: 
+        2 -> %Y 
+        3 -> %Y 
 
-    Square(4) -> %X
+    Square(4) -> %X 
 
 Solution: [X = 16, Y = 2]
 Solution: [X = 16, Y = 3]
 ========================================================================
 
 Solving relation:
-All:
-    Is_Even?(%X)
-    Square(3) -> %X
-    Square(%X) -> %Y
+All: 
+    Is_Even?(%X) 
+    Square(3) -> %X 
+    Square(%X) -> %Y 
 
 ========================================================================
 
 Solving relation:
-All:
-    Any:
-        1 -> %X
-        2 -> %X
-        3 -> %X
-        4 -> %X
-        5 -> %X
-        6 -> %X
-        7 -> %X
-        8 -> %X
+All: 
+    Any: 
+        1 -> %X 
+        2 -> %X 
+        3 -> %X 
+        4 -> %X 
+        5 -> %X 
+        6 -> %X 
+        7 -> %X 
+        8 -> %X 
 
-    Square(%X) -> %Y
+    Square(%X) -> %Y 
 
 Solution: [Y = 1, X = 1]
 Solution: [Y = 4, X = 2]
@@ -58,4 +58,3 @@ Solution: [Y = 25, X = 5]
 Solution: [Y = 36, X = 6]
 Solution: [Y = 49, X = 7]
 Solution: [Y = 64, X = 8]
-Done.

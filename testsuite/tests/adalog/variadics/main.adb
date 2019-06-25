@@ -3,8 +3,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
-with Support; use Support;
-
 --  Test a combination of features at the same time:
 --  * Predicates
 --  * Custom bind
@@ -12,10 +10,13 @@ with Support; use Support;
 
 procedure Main is
 
-   use Int_Solver, Refs;
+   use T_Solver, Refs;
 
    X : Raw_Var := Create ("X");
    Y : Raw_Var := Create ("Y");
+
+   function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
+   function Convert (I : Integer) return Integer is (I * 3);
 
    R3 : constant Relation :=
      R_All
@@ -26,8 +27,8 @@ procedure Main is
              X = 4,
              X = 5,
              X = 6)),
-         Propagate (X, Y, Support.Transformer'(null record)),
-         Predicate (X, Is_Even),
+         Propagate (X, Y, Converter (Convert'Access, "*3")),
+         Predicate (X, Predicate (Is_Even'Access, "Is_Even")),
          Domain (Y, (12, 18))));
 
 begin

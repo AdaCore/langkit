@@ -31,7 +31,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 generic
    type T is private;
-   with function Image (I : T) return String;
+   with function Image (I : T) return String is <>;
 package Langkit_Support.Adalog.Generic_Main_Support is
 
    package Refs is new Langkit_Support.Adalog.Logic_Ref

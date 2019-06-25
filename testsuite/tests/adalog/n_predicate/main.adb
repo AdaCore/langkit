@@ -8,19 +8,21 @@ use Langkit_Support.Adalog.Main_Support;
 
 procedure Main is
 
-   use Int_Solver, Refs;
+   use T_Solver, Refs;
 
    function Times_3 (Val : Integer) return Integer
    is (Val * 3);
 
-   function Double_Of (Vals : Int_Solver.Value_Array) return Boolean
+   function Double_Of (Vals : T_Solver.Value_Array) return Boolean
    is (Vals (1) = Vals (2) * 2);
 
    X : Raw_Var := Create ("X");
    Y : Raw_Var := Create ("Y");
 
    R3   : constant Relation :=
-     "and" (+Create_N_Predicate ((X, Y), N_Predicate (Double_Of'Access, "Double_Of")),
+     "and" (+Create_N_Predicate 
+             ((X, Y),
+              N_Predicate (Double_Of'Access, "Double_Of")),
             "and" (Domain (X, (1, 2, 3, 4, 5, 6)),
               Domain (Y, (1, 2, 3, 4, 5, 6))));
 begin

@@ -7,7 +7,7 @@ use Langkit_Support.Adalog.Main_Support;
 --  Test stateless predicate constructor
 
 procedure Main is
-   use Int_Solver, Refs;
+   use T_Solver, Refs;
 
    function Is_Odd (X : Integer) return Boolean is (X mod 2 = 1);
    function Double (X : Integer) return Integer is (X * 2);
@@ -24,7 +24,6 @@ procedure Main is
      Propagate (X, Y, Eq => Comparer (Is_Eq'Access, "is_eq"))
      and Domain (X, (1, 2, 3, 4, 5, 6))
      and Domain (Y, (-1, -2, -3, -4, -5, -6))
-     --  Note: This is a useless
      and Predicate (X, Predicate (Is_Odd'Access, "is_odd"));
 begin
    GNATCOLL.Traces.Parse_Config_File;

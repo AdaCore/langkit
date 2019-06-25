@@ -2,7 +2,7 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 
 package Support is
-   use Int_Solver;
+   use T_Solver;
 
    ------------
    -- Square --
@@ -24,8 +24,10 @@ package Support is
    function Square (X : Integer; Y : Refs.Raw_Var) return Relation
    is (Square (Y, X));
 
+   function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
+
    function Is_Even
      (Var : Refs.Raw_Var) return Relation
-   is (Predicate (Var, Langkit_Support.Adalog.Main_Support.Is_Even));
+   is (Predicate (Var, Predicate (Is_Even'Access, "Is_Even")));
 
 end Support;
