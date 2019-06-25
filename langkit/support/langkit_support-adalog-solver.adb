@@ -88,6 +88,7 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------------
 
    type Comparer_N_Pred is new N_Predicate_Type with record
+      Conv     : Converter_Access;
       Eq       : Comparer_Access;
    end record;
 
@@ -104,6 +105,7 @@ package body Langkit_Support.Adalog.Solver is
 
    type Comparer_Pred is new Predicate_Type with record
       Eq       : Comparer_Access;
+      Conv     : Converter_Access;
       Val      : Value_Type;
    end record;
 
@@ -998,7 +1000,8 @@ package body Langkit_Support.Adalog.Solver is
       if Eq_Ptr /= null then
          declare
             N_Pred : Relation :=
-              Create_Predicate (Logic_Var, Comparer_Pred'(Eq_Ptr, Value),
+              Create_Predicate (Logic_Var,
+                                Comparer_Pred'(Eq_Ptr, Conv_Ptr, Value),
                                 New_Dbg_Info);
             Tmp    : Relation := Create_Any
               ((Ass, Create_True (New_Dbg_Info)), New_Dbg_Info);
@@ -1058,7 +1061,8 @@ package body Langkit_Support.Adalog.Solver is
       if Eq /= null then
          declare
             N_Pred : Relation :=
-              Create_N_Predicate ((From, To), Comparer_N_Pred'(Eq => Eq),
+              Create_N_Predicate ((From, To),
+                                  Comparer_N_Pred'(Eq => Eq, Conv => Conv),
                                   New_Dbg_Info);
             Tmp    : Relation := Create_Any ((Propag,
                                              Create_True (New_Dbg_Info)),
