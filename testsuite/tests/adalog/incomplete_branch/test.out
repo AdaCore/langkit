@@ -1,0 +1,10 @@
+Solving relation:
+Any:
+    1 -> %X
+    All:
+        Is_Even?(%X)
+        1 -> %Y
+
+
+Solution: [X = 1]
+Done.

@@ -1,0 +1,8 @@
+Solving relation:
+All:
+    2 -> %X
+    1 -> %Y
+    Is_Double_Of?(%X, %Y)
+
+Solution: [X = 2, Y = 1]
+Done.
