@@ -136,6 +136,7 @@
                                                        default_passed_args)
       arity = len(formal_node_types)
       refcounted_args_types = filter(lambda t: t.is_refcounted, args_types)
+      args = list(enumerate(args_types))
    %>
 
    <%def name="call_profile()">
@@ -150,10 +151,12 @@
    </%def>
 
    type ${type_name} is new ${"Predicate_Type" if arity == 1 else "N_Predicate_Type"} with record
-      % for i, arg_type in enumerate(args_types):
+      % for i, arg_type in args:
          Field_${i} : ${arg_type.name};
       % endfor
+      % if not args:
       null;
+      % endif
    end record;
 
    ${call_profile()};
@@ -163,24 +166,24 @@
    % endif
 
    function Create_${pred_id}_Predicate
-   % if args_types:
+   % if args:
    (
-      % for i, arg_type in enumerate(args_types):
-         Field_${i} : ${arg_type.name};
+      % for i, arg_type in args:
+         Field_${i} : ${arg_type.name}${"" if loop.last else ";"}
       % endfor
    )
    % endif
    return ${type_name} is
    begin
-      % for i, arg_type in enumerate(args_types):
+      % for i, arg_type in args:
          % if arg_type.is_refcounted:
             Inc_Ref (Field_${i});
          % endif
       % endfor
       return ${type_name}'(
-         % if args_types:
-         % for i, arg_type in enumerate(args_types):
-            Field_${i} => Field_${i},
+         % if args:
+         % for i, arg_type in args:
+            Field_${i} => Field_${i}${"" if loop.last else ","}
          % endfor
          % else:
          null record

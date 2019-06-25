@@ -1,7 +1,9 @@
+with Ada.Assertions; use Ada.Assertions;
+
+with GNATCOLL.Strings; use GNATCOLL.Strings;
+
 with Langkit_Support.Functional_Lists;
 with Langkit_Support.Images;
-with GNATCOLL.Strings; use GNATCOLL.Strings;
-with Ada.Assertions; use Ada.Assertions;
 
 pragma Style_Checks ("-s");
 
@@ -38,24 +40,27 @@ package body Langkit_Support.Adalog.Solver is
    package Var_Ids_To_Atoms_Vectors
    is new Langkit_Support.Vectors (Atomic_Relation_Vector);
    subtype Var_Ids_To_Atoms is Var_Ids_To_Atoms_Vectors.Vector;
-   --  Vector mapping logic var ids to atomic relations.
+   --  Vector mapping logic var ids to atomic relations
 
    --------------------------
    -- Supporting functions --
    --------------------------
 
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive);
-   --  Reserve ``N`` elements in ``V``. TODO ??? Add that to vectors.
+   --  Reserve ``N`` elements in ``V``. TODO??? Add that to vectors.
 
    function Create_Propagate
-     (From, To : Var;
-      Conv      : Converter_Access := null;
-      Eq        : Comparer_Access := null) return Relation;
+     (From, To     : Var;
+      Conv         : Converter_Access := null;
+      Eq           : Comparer_Access := null;
+      Debug_String : String_Access := null) return Relation;
    --  Helper function to create a Propagate relation
 
    function Create_Compound
-     (Relations : Relation_Array; Cmp_Kind : Compound_Kind) return Relation;
-   --  Helper to create a compound relationship.
+     (Relations    : Relation_Array;
+      Cmp_Kind     : Compound_Kind;
+      Debug_String : String_Access := null) return Relation;
+   --  Helper to create a compound relationship
 
    type Callback_Type is access function (Vars : Var_Array) return Boolean;
 
@@ -67,13 +72,13 @@ package body Langkit_Support.Adalog.Solver is
       Vars_To_Atoms     : Var_Ids_To_Atoms;
       Cut_Dead_Branches : Boolean := False;
    end record;
-   --  Context for the solving of a compound relation.
+   --  Context for the solving of a compound relation
 
    function Create return Solving_Context;
    procedure Destroy (Ctx : in out Solving_Context);
    function Get_Id
      (Ctx : Solving_Context; Logic_Var : Var) return Positive;
-   --  Get the id of variable ``Logic_Var`` in ``Ctx``.
+   --  Get the id of variable ``Logic_Var`` in ``Ctx``
 
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation);
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
@@ -276,8 +281,8 @@ package body Langkit_Support.Adalog.Solver is
    is
       --  We handle Unify here, even though it is not strictly treated in the
       --  dependency graph, so that the Unify_From variable is registered in
-      --  the list of variables of the equation. TODO ??? Might be cleaner to
-      --  have a separate function to return all variables a relation uses ?
+      --  the list of variables of the equation. TODO??? Might be cleaner to
+      --  have a separate function to return all variables a relation uses?
      (case Self.Kind is
          when Assign | True | False | N_Predicate => Null_Var,
          when Propagate => (True, Self.From),
@@ -291,8 +296,8 @@ package body Langkit_Support.Adalog.Solver is
    function Defined_Var (Self : Atomic_Relation) return Var_Or_Null is
       --  We handle Unify here, even though it is not strictly treated in the
       --  dependency graph, so that the Unify_From variable is registered in
-      --  the list of variables of the equation. TODO ??? Might be cleaner to
-      --  have a separate function to return all variables a relation uses ?
+      --  the list of variables of the equation. TODO??? Might be cleaner to
+      --  have a separate function to return all variables a relation uses?
      (case Self.Kind is
          when Assign | Propagate | Unify => (True, Self.Target),
          when Predicate | True | False | N_Predicate => Null_Var);
@@ -302,18 +307,28 @@ package body Langkit_Support.Adalog.Solver is
    -----------------
 
    function To_Relation
-     (Inner : Atomic_Relation) return Relation
+     (Inner        : Atomic_Relation;
+      Debug_String : String_Access := null) return Relation
    is
-      (new Relation_Type'(Atomic, Atomic_Rel => Inner, Ref_Count => <>));
+     (new Relation_Type'
+        (Atomic,
+         Atomic_Rel   => Inner,
+         Debug_Info => Debug_String,
+         Ref_Count    => <>));
 
    -----------------
    -- To_Relation --
    -----------------
 
    function To_Relation
-     (Inner : Compound_Relation) return Relation
+     (Inner        : Compound_Relation;
+      Debug_String : String_Access := null) return Relation
    is
-    (new Relation_Type'(Compound, Compound_Rel => Inner, Ref_Count => <>));
+     (new Relation_Type'
+        (Compound,
+         Compound_Rel => Inner,
+         Debug_Info   => Debug_String,
+         Ref_Count    => <>));
 
    -------------
    -- Inc_Ref --
@@ -367,7 +382,7 @@ package body Langkit_Support.Adalog.Solver is
       --  resulting sorted collection, then ``Topo_Sort`` returns ``False``.
 
       function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean;
-      --  Try to solve the current solution.
+      --  Try to solve the current solution
 
       use Any_Relation_Lists;
 
@@ -417,7 +432,7 @@ package body Langkit_Support.Adalog.Solver is
          is (Id (Defined_Var (S)));
       begin
 
-         --  TODO ??? This pass is probably inefficient. We should alias unify
+         --  TODO??? This pass is probably inefficient. We should alias unify
          --  variables when we are first appending them to the atoms queue.
          for Atom of Atoms loop
             if Atom.Kind = Unify then
@@ -604,7 +619,7 @@ package body Langkit_Support.Adalog.Solver is
       --  recursing on them.
 
       when Kind_All =>
-         --  First step: gather anys and atoms in their own vectors.
+         --  First step: gather anys and atoms in their own vectors
 
          for Sub_Rel of Self.Rels loop
             case Sub_Rel.Kind is
@@ -644,7 +659,7 @@ package body Langkit_Support.Adalog.Solver is
             --  on all atoms at every depth of the recursion. What we could do
             --  is:
             --
-            --  1. Either not activate this opt for certain trees
+            --  1. Either not activate this opt for certain trees.
             --
             --  2. Either try to check only for new atoms. This seems
             --  hard/impossible since new constraints are added at every
@@ -672,7 +687,7 @@ package body Langkit_Support.Adalog.Solver is
                         end if;
                      end loop;
 
-                     --  Else, reset the value of var for further solving.
+                     --  Else, reset the value of var for further solving
                      Reset (V.Logic_Var);
                   end if;
                end if;
@@ -768,6 +783,12 @@ package body Langkit_Support.Adalog.Solver is
          when Compound =>
             Ignore := Solve_Compound (Self.Compound_Rel, Ctx);
          when Atomic =>
+            --  If we're trying to eval a singleton relation that doesn't
+            --  define anything, then it's an early binding error.
+            if not Defined_Var (Self.Atomic_Rel).Exists then
+               raise Early_Binding_Error;
+            end if;
+
             declare
                V : constant Var := Defined_Var (Self.Atomic_Rel).Logic_Var;
             begin
@@ -814,7 +835,7 @@ package body Langkit_Support.Adalog.Solver is
       Ret : Boolean := False;
 
       function Callback return Boolean;
-      --  Simple callback that will stop on first solution.
+      --  Simple callback that will stop on first solution
 
       --------------
       -- Callback --
@@ -834,37 +855,34 @@ package body Langkit_Support.Adalog.Solver is
    -- Create_True --
    -----------------
 
-   True_Rel : aliased constant Relation_Type :=
-     (Atomic,
-      Atomic_Rel => (Kind => True, Target => <>),
-      Ref_Count  => -1);
-
-   function Create_True return Relation is (True_Rel'Unrestricted_Access);
+   function Create_True (Debug_String : String_Access := null) return Relation
+   is (To_Relation (Atomic_Relation'(True, Target => <>),
+                    Debug_String => Debug_String));
 
    ------------------
    -- Create_False --
    ------------------
 
-   False_Rel : aliased constant Relation_Type :=
-     (Atomic,
-      Atomic_Rel => (Kind => False, Target => <>),
-      Ref_Count  => -1);
-
-   function Create_False return Relation is (False_Rel'Unrestricted_Access);
+   function Create_False (Debug_String : String_Access := null) return Relation
+   is (To_Relation (Atomic_Relation'(False, Target => <>),
+                    Debug_String => Debug_String));
 
    ----------------------
    -- Create_Predicate --
    ----------------------
 
    function Create_Predicate
-     (Logic_Var : Var; Pred : Predicate_Type'Class) return Relation
+     (Logic_Var    : Var;
+      Pred         : Predicate_Type'Class;
+      Debug_String : String_Access := null) return Relation
    is
    begin
       return To_Relation
         (Atomic_Relation'
            (Kind   => Predicate,
             Target => Logic_Var,
-            Pred   => new Predicate_Type'Class'(Pred)));
+            Pred   => new Predicate_Type'Class'(Pred)),
+         Debug_String => Debug_String);
    end Create_Predicate;
 
    ----------------------
@@ -872,8 +890,9 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------
 
    function Create_N_Predicate
-     (Logic_Vars : Variable_Array;
-      Pred       : N_Predicate_Type'Class) return Relation
+     (Logic_Vars   : Variable_Array;
+      Pred         : N_Predicate_Type'Class;
+      Debug_String : String_Access := null) return Relation
    is
       Vars_Vec : Logic_Var_Vector;
    begin
@@ -883,7 +902,8 @@ package body Langkit_Support.Adalog.Solver is
            (Kind   => N_Predicate,
             N_Pred => new N_Predicate_Type'Class'(Pred),
             Vars   => Vars_Vec,
-            Target => <>));
+            Target => <>),
+         Debug_String => Debug_String);
    end Create_N_Predicate;
 
    ---------------
@@ -944,10 +964,11 @@ package body Langkit_Support.Adalog.Solver is
    -------------------
 
    function Create_Assign
-     (Logic_Var : Var;
-      Value     : Value_Type;
-      Conv      : Converter_Type'Class := No_Converter;
-      Eq        : Comparer_Type'Class := No_Comparer) return Relation
+     (Logic_Var    : Var;
+      Value        : Value_Type;
+      Conv         : Converter_Type'Class := No_Converter;
+      Eq           : Comparer_Type'Class := No_Comparer;
+      Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
       Eq_Ptr   : Comparer_Access := null;
@@ -967,15 +988,19 @@ package body Langkit_Support.Adalog.Solver is
            (Kind   => Assign,
             Conv   => Conv_Ptr,
             Val    => Value,
-            Target => Logic_Var));
+            Target => Logic_Var),
+         Debug_String => Debug_String);
 
       if Eq_Ptr /= null then
          declare
             N_Pred : Relation :=
               Create_Predicate (Logic_Var, Comparer_Pred'(Eq_Ptr, Value));
             Tmp    : Relation := Create_Any ((Ass, Create_True));
-            Ret    : constant Relation := Create_All ((Tmp, N_Pred));
+            Ret    : constant Relation :=
+              Create_All
+                ((Tmp, N_Pred), Debug_String => Debug_String);
          begin
+            Ass.Debug_Info := null;
             Dec_Ref (Tmp);
             Dec_Ref (N_Pred);
             Dec_Ref (Ass);
@@ -991,11 +1016,14 @@ package body Langkit_Support.Adalog.Solver is
    -- Create_Unify --
    ------------------
 
-   function Create_Unify (From, To : Var) return Relation is
+   function Create_Unify
+     (From, To     : Var;
+      Debug_String : String_Access := null) return Relation is
    begin
       return To_Relation
         (Atomic_Relation'
-           (Kind => Unify, Target => To, Unify_From => From));
+           (Kind => Unify, Target => To, Unify_From => From),
+         Debug_String => Debug_String);
    end Create_Unify;
 
    ----------------------
@@ -1003,9 +1031,10 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------
 
    function Create_Propagate
-     (From, To  : Var;
-      Conv      : Converter_Access := null;
-      Eq        : Comparer_Access := null) return Relation
+     (From, To     : Var;
+      Conv         : Converter_Access := null;
+      Eq           : Comparer_Access := null;
+      Debug_String : String_Access := null) return Relation
    is
       Propag : Relation :=
         To_Relation
@@ -1013,15 +1042,18 @@ package body Langkit_Support.Adalog.Solver is
            (Kind   => Propagate,
             Conv   => Conv,
             From   => From,
-            Target => To));
+            Target => To),
+         Debug_String => Debug_String);
    begin
       if Eq /= null then
          declare
             N_Pred : Relation :=
               Create_N_Predicate ((From, To), Comparer_N_Pred'(Eq => Eq));
             Tmp    : Relation := Create_Any ((Propag, Create_True));
-            Ret    : constant Relation := Create_All ((Tmp, N_Pred));
+            Ret    : constant Relation := Create_All
+              ((Tmp, N_Pred), Debug_String => Debug_String);
          begin
+            Propag.Debug_Info := null;
             Dec_Ref (Tmp);
             Dec_Ref (N_Pred);
             Dec_Ref (Propag);
@@ -1037,9 +1069,10 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------
 
    function Create_Propagate
-     (From, To  : Var;
-      Conv      : Converter_Type'Class := No_Converter;
-      Eq        : Comparer_Type'Class := No_Comparer) return Relation
+     (From, To     : Var;
+      Conv         : Converter_Type'Class := No_Converter;
+      Eq           : Comparer_Type'Class := No_Comparer;
+      Debug_String : String_Access := null) return Relation
    is
       Conv_Ptr : Converter_Access := null;
       Eq_Ptr   : Comparer_Access := null;
@@ -1052,7 +1085,8 @@ package body Langkit_Support.Adalog.Solver is
          if Eq /= No_Comparer then
             Eq_Ptr := new Comparer_Type'Class'(Eq);
          end if;
-      return Create_Propagate (From, To, Conv_Ptr, Eq_Ptr);
+      return Create_Propagate
+        (From, To, Conv_Ptr, Eq_Ptr, Debug_String => Debug_String);
    end Create_Propagate;
 
    -------------------
@@ -1060,7 +1094,9 @@ package body Langkit_Support.Adalog.Solver is
    -------------------
 
    function Create_Domain
-     (Logic_Var : Var; Domain : Value_Array) return Relation
+     (Logic_Var    : Var;
+      Domain       : Value_Array;
+      Debug_String : String_Access := null) return Relation
    is
       Rels : Relation_Array (Domain'Range);
    begin
@@ -1068,7 +1104,9 @@ package body Langkit_Support.Adalog.Solver is
          Rels (I) := Create_Assign (Logic_Var, Domain (I));
       end loop;
 
-      return R : constant Relation := Create_Any (Rels) do
+      return R : constant Relation := Create_Any
+        (Rels, Debug_String => Debug_String)
+      do
          for Rel of Rels loop
             Dec_Ref (Rel);
          end loop;
@@ -1080,7 +1118,9 @@ package body Langkit_Support.Adalog.Solver is
    ---------------------
 
    function Create_Compound
-     (Relations : Relation_Array; Cmp_Kind : Compound_Kind) return Relation
+     (Relations    : Relation_Array;
+      Cmp_Kind     : Compound_Kind;
+      Debug_String : String_Access := null) return Relation
    is
       Rels : Relation_Vectors.Vector;
 
@@ -1104,22 +1144,29 @@ package body Langkit_Support.Adalog.Solver is
          Append (El);
       end loop;
 
-      return To_Relation (Compound_Relation'(Cmp_Kind, Rels));
+      return To_Relation
+        (Compound_Relation'(Cmp_Kind, Rels), Debug_String => Debug_String);
    end Create_Compound;
 
    ----------------
    -- Create_Any --
    ----------------
 
-   function Create_Any (Relations : Relation_Array) return Relation is
-     (Create_Compound (Relations, Kind_Any));
+   function Create_Any
+     (Relations    : Relation_Array;
+      Debug_String : String_Access := null) return Relation
+   is
+     (Create_Compound (Relations, Kind_Any, Debug_String));
 
    ----------------
    -- Create_All --
    ----------------
 
-   function Create_All (Relations : Relation_Array) return Relation is
-     (Create_Compound (Relations, Kind_All));
+   function Create_All
+     (Relations    : Relation_Array;
+      Debug_String : String_Access := null) return Relation
+   is
+     (Create_Compound (Relations, Kind_All, Debug_String));
 
    -------------
    -- Destroy --
@@ -1171,6 +1218,7 @@ package body Langkit_Support.Adalog.Solver is
          when Atomic => Destroy (Self.Atomic_Rel);
          when Compound => Destroy (Self.Compound_Rel);
       end case;
+      Free (Self.Debug_Info);
    end Destroy;
 
    -----------

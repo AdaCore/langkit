@@ -1,3 +1,4 @@
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Traces;
@@ -31,7 +32,7 @@ package Langkit_Support.Adalog.Solver is
    --  the ref-count reaches 0, every sub-relation is destroyed.
 
    procedure Inc_Ref (Self : Relation);
-   --  Increments the reference count of Self.
+   --  Increments the reference count of Self
 
    procedure Dec_Ref (Self : in out Relation);
    --  Decrements the reference count of Self. If no reference left, deallocate
@@ -66,6 +67,7 @@ package Langkit_Support.Adalog.Solver is
    --  Tries to solve ``Self``. If there is at least one valid solution to the
    --  relation, stops solving and return True. Else, return False.
 
+   -------------------
    -- Functor types --
    -------------------
 
@@ -123,7 +125,7 @@ package Langkit_Support.Adalog.Solver is
    function Convert
      (Self : Converter_Type; From : Value_Type) return Value_Type
          is abstract;
-   --  Type to convert one value to another.
+   --  Type to convert one value to another
    function Image (Self : Converter_Type) return String is ("");
    function No_Converter return Converter_Type'Class;
 
@@ -165,59 +167,76 @@ package Langkit_Support.Adalog.Solver is
      renames Relation_Vectors.Empty_Array;
 
    function Create_Predicate
-     (Logic_Var : Var; Pred : Predicate_Type'Class) return Relation;
+     (Logic_Var    : Var;
+      Pred         : Predicate_Type'Class;
+      Debug_String : String_Access := null) return Relation;
    --  Create a Predicate relation. A Predicate relation will solve
    --  successfully if the ``Predicate`` applied to the value of
    --  ``Logic_Var`` yields ``True``.
 
    function Create_N_Predicate
-     (Logic_Vars : Variable_Array;
-      Pred       : N_Predicate_Type'Class) return Relation;
+     (Logic_Vars   : Variable_Array;
+      Pred         : N_Predicate_Type'Class;
+      Debug_String : String_Access := null) return Relation;
 
    function Create_Assign
-     (Logic_Var : Var;
-      Value     : Value_Type;
-      Conv      : Converter_Type'Class := No_Converter;
-      Eq        : Comparer_Type'Class := No_Comparer) return Relation;
+     (Logic_Var    : Var;
+      Value        : Value_Type;
+      Conv         : Converter_Type'Class := No_Converter;
+      Eq           : Comparer_Type'Class := No_Comparer;
+      Debug_String : String_Access := null) return Relation;
    --  Create an Assign relation. An Assign relation will solve successfully if
    --  we can assign the value ``Value`` to ``Logic_Var``.
 
    function Create_Unify
-     (From, To : Var) return Relation;
+     (From, To     : Var;
+     Debug_String : String_Access := null) return Relation;
    --  Create an Unify relation. An Unify relation will solve successfully if
    --  either the assignment of ``From.Value`` to ``To`` is successful, either
    --  the opposite assignment is successful.
 
    function Create_Propagate
-     (From, To : Var;
-      Conv      : Converter_Type'Class := No_Converter;
-      Eq        : Comparer_Type'Class := No_Comparer) return Relation;
+     (From, To     : Var;
+      Conv         : Converter_Type'Class := No_Converter;
+      Eq           : Comparer_Type'Class := No_Comparer;
+      Debug_String : String_Access := null) return Relation;
    --  Create an Unify relation. An Unify relation will solve successfully if
    --  the assignment of ``From.Value`` to ``To`` is successful.
 
    function Create_Domain
-     (Logic_Var : Var; Domain : Value_Array) return Relation;
-   --  Create a Domain relation. A Domain relation is a shortcut such that
+     (Logic_Var    : Var;
+      Domain       : Value_Array;
+      Debug_String : String_Access := null) return Relation;
+   --  Create a Domain relation. A Domain relation is a shortcut such that:
    --
    --  ``Domain (Var, (A, B, ...))`` is equivalent to
-   --  ``Any (Assign (Var, A), Assign (Var, B), ...)``
+   --  ``Any (Assign (Var, A), Assign (Var, B), ...)``.
 
-   function Create_Any (Relations : Relation_Array) return Relation;
+   function Create_Any
+     (Relations    : Relation_Array;
+     Debug_String : String_Access := null) return Relation;
    --  Create an Any relation. An Any relation solves successfully if any of
    --  its sub-relations solves successfully.
 
-   function Create_All (Relations : Relation_Array) return Relation;
+   function Create_All
+     (Relations    : Relation_Array;
+     Debug_String : String_Access := null) return Relation;
    --  Create an All relation. An All relation solves successfully if all of
    --  its sub-relation solves successfully.
 
-   function Create_Or (L, R : Relation) return Relation
-   is (Create_Any ((L, R)));
+   function Create_Or
+     (L, R         : Relation;
+     Debug_String : String_Access := null) return Relation
+   is (Create_Any ((L, R), Debug_String));
 
-   function Create_And (L, R : Relation) return Relation
-   is (Create_All ((L, R)));
+   function Create_And
+     (L, R         : Relation;
+     Debug_String : String_Access := null) return Relation
+   is (Create_All ((L, R), Debug_String));
 
-   function Create_True return Relation;
-   function Create_False return Relation;
+   function Create_True (Debug_String : String_Access := null) return Relation;
+   function Create_False
+     (Debug_String : String_Access := null) return Relation;
 
    function Image (Self : Relation; Level : Natural := 0) return String;
 private
@@ -291,7 +310,7 @@ private
    --  constructors.
 
    function Solve (Self : Atomic_Relation) return Boolean;
-   --  Solve this atomic relation.
+   --  Solve this atomic relation
 
    function Image (Self : Atomic_Relation) return String;
 
@@ -326,13 +345,13 @@ private
    function Is_Defined_Or_Null (Logic_Var : Var_Or_Null) return Boolean
    is
      ((not Logic_Var.Exists) or else Is_Defined (Logic_Var.Logic_Var));
-   --  Shortcut predicate. Returns whether a variable is defined or is null.
+   --  Shortcut predicate. Returns whether a variable is defined or is null
 
    function Used_Var (Self : Atomic_Relation) return Var_Or_Null;
-   --  Return the variable that this atomic relation uses, if there is one.
+   --  Return the variable that this atomic relation uses, if there is one
 
    function Defined_Var (Self : Atomic_Relation) return Var_Or_Null;
-   --  Return the variable that this atomic relation defines, if there is one.
+   --  Return the variable that this atomic relation defines, if there is one
 
    -----------------------
    -- Compound relation --
@@ -356,7 +375,8 @@ private
    type Relation_Kind is (Atomic, Compound);
 
    type Relation_Type (Kind : Relation_Kind := Atomic) is record
-      Ref_Count : Integer range -1 .. Integer'Last := 1;
+      Ref_Count  : Integer range -1 .. Integer'Last := 1;
+      Debug_Info : Ada.Strings.Unbounded.String_Access := null;
       case Kind is
          when Atomic   => Atomic_Rel   : Atomic_Relation;
          when Compound => Compound_Rel : Compound_Relation;

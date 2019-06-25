@@ -82,7 +82,7 @@ class BinaryBooleanOperator(AbstractExpression):
             kind_name = self.kind.capitalize()
             return CallExpr(
                 '{}_Pred'.format(kind_name), 'Create_{}'.format(kind_name),
-                T.Equation, [lhs, rhs], # , sloc_info_arg(self.location)],
+                T.Equation, [lhs, rhs, sloc_info_arg(self.location)],
                 abstract_expr=self
             )
 

@@ -83,7 +83,7 @@ class Bind(AbstractExpression):
                     'Eq => Comparer_{}'.format(self.eq_prop.uid)
                 ))
 
-            # constructor_args.append(sloc_info_arg(abstract_expr.location))
+            constructor_args.append(sloc_info_arg(abstract_expr.location))
 
             if rhs.type.matches(T.root_node.entity):
                 fn_name = 'Solver.Create_Assign'
@@ -288,7 +288,9 @@ class DomainExpr(ComputingExpr):
                                          abstract_expr=abstract_expr)
 
     def _render_pre(self):
-        return render('properties/domain_ada', expr=self)
+        return render('properties/domain_ada',
+                      expr=self,
+                      sloc_info_arg=sloc_info_arg(self.location))
 
     @property
     def subexprs(self):
@@ -511,12 +513,12 @@ class Predicate(AbstractExpression):
             default_passed_args
         )
 
+        args = " ({})".format(
+            ', '.join(['{}' for _ in range(len(closure_exprs))])
+        ) if closure_exprs else ""
         predicate_expr = untyped_literal_expr(
-            'Create_{}_Predicate {}'.format(
-                pred_id,
-                "({})".format(
-                    ', '.join(['{}' for _ in range(len(closure_exprs) - 1)])
-                ) if closure_exprs else ""
+            'Create_{}_Predicate{}'.format(
+                pred_id, args
             ), operands=closure_exprs
         )
 
@@ -610,7 +612,7 @@ class LogicBooleanOp(AbstractExpression):
         )
 
         return CallExpr(
-            'Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
+            'Logic_Boolean_Op', 'Solver.Create_{}'.format(self.kind_name),
             T.Equation,
             [relation_array, sloc_info_arg(self.location)],
             abstract_expr=self
@@ -652,8 +654,10 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('Create_True', 'True_Rel', T.Equation,
-                        [sloc_info_arg(self.location)])
+        return CallExpr(
+            'True_Rel', 'Solver.Create_True', T.Equation,
+            [sloc_info_arg(self.location)]
+        )
 
     def __repr__(self):
         return '<LogicTrue>'
@@ -669,8 +673,10 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('Create_False', 'False_Rel', T.Equation,
-                        [sloc_info_arg(self.location)])
+        return CallExpr(
+            'False_Rel', 'Solver.Create_False', T.Equation
+            [sloc_info_arg(self.location)]
+        )
 
     def __repr__(self):
         return '<LogicFalse>'
