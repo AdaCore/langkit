@@ -226,7 +226,6 @@ package body Langkit_Support.Adalog.Solver is
    begin
       for V of Ctx.Vars.all loop
          if Reset_Ids then
-            Solver_Trace.Trace ("RESETTING VAR WITH ID " & Id (V)'Image);
             Set_Id (V, 0);
          else
             Reset (V);
@@ -546,19 +545,17 @@ package body Langkit_Support.Adalog.Solver is
                --  If the atom defines a variable that is used by other atoms,
                --  put those other atoms in the working set.
                declare
-                  Defined_Var_Id : Natural renames Defined (Atom.Atom);
+                  Defd_Id : Natural renames Defined (Atom.Atom);
                begin
 
-                  if Defined_Var_Id /= 0
-                    and then Using_Atoms'Length >= Defined_Var_Id
-                  then
-                     for El of Using_Atoms (Defined (Atom.Atom)) loop
+                  if Defd_Id /= 0 and then Using_Atoms'Length >= Defd_Id then
+                     for El of Using_Atoms (Defd_Id) loop
                         Working_Set := El & Working_Set;
                      end loop;
 
                      --  Remove items from Using_Atoms, so that they're not
                      --  appended again to the working set.
-                     Destroy (Using_Atoms (Defined (Atom.Atom)));
+                     Destroy (Using_Atoms (Defd_Id));
                   end if;
                end;
             end;
