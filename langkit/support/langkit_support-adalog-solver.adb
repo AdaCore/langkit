@@ -89,7 +89,7 @@ package body Langkit_Support.Adalog.Solver is
 
    type Solving_Context is record
       Cb                : Callback_Type;
-      Atoms             : Atoms_Vector_Access;
+      Atoms, Aliases    : Atoms_Vector_Access;
       Anys              : Any_Relation_List := Any_Relation_Lists.No_List;
       Vars              : Logic_Var_Vector_Access;
       Vars_To_Atoms     : Var_Ids_To_Atoms;
@@ -105,8 +105,6 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation);
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
-
-   function Var_Image (V : Var) return String is ("%" & Image (V));
 
    ----------------------------
    --  Comparer pred wrapper --
@@ -126,9 +124,9 @@ package body Langkit_Support.Adalog.Solver is
    function Full_Image (Self : Comparer_N_Pred; Vars : Var_Array) return String
    is (Self.Eq.Image & "?("
        & (if Self.Conv /= null
-          then Self.Conv.Image & "(" & Var_Image (Vars (1)) & ")"
-          else Var_Image (Vars (1)))
-       & ", " & Var_Image (Vars (2)) & ")");
+          then Self.Conv.Image & "(" & Image (Vars (1)) & ")"
+          else Image (Vars (1)))
+       & ", " & Image (Vars (2)) & ")");
 
    overriding procedure Destroy (Self : in out Comparer_N_Pred) is
    begin
@@ -152,7 +150,7 @@ package body Langkit_Support.Adalog.Solver is
    is (Self.Eq.Image & "?("
        & (if Self.Conv /= null
           then Self.Conv.Image & "(" & Element_Image (Self.Val) & ")"
-          else Element_Image (Self.Val)) & ", " & Var_Image (Logic_Var) & ")");
+          else Element_Image (Self.Val)) & ", " & Image (Logic_Var) & ")");
 
    overriding procedure Destroy (Self : in out Comparer_Pred) is
    begin
@@ -254,12 +252,14 @@ package body Langkit_Support.Adalog.Solver is
       procedure Free is new Ada.Unchecked_Deallocation
         (Logic_Var_Vector, Logic_Var_Vector_Access);
    begin
+      Ctx.Aliases.Destroy;
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
       Ctx.Vars.Destroy;
       Free (Ctx.Vars);
       Ctx.Vars_To_Atoms.Destroy;
       Free (Ctx.Atoms);
+      Free (Ctx.Aliases);
    end Destroy;
 
    function Solve_Compound
@@ -460,9 +460,9 @@ package body Langkit_Support.Adalog.Solver is
          Using_Atoms : array (1 .. Ctx.Vars.Length) of Atom_Lists.List
            := (others => Atom_Lists.Create);
 
-         Working_Set    : Atom_Lists.List := Atom_Lists.Create;
-         N_Preds        : Atom_Lists.List := Atom_Lists.Create;
-         Current_Atom   : Atomic_Relation;
+         Working_Set  : Atom_Lists.List := Atom_Lists.Create;
+         N_Preds      : Atom_Lists.List := Atom_Lists.Create;
+         Current_Atom : Atomic_Relation;
          use Atom_Lists;
 
          function Id (S : Var_Or_Null) return Natural is
@@ -470,17 +470,8 @@ package body Langkit_Support.Adalog.Solver is
 
          function Defined (S : Atomic_Relation) return Natural
          is (Id (Defined_Var (S)));
-      begin
 
-         --  TODO??? This pass is probably inefficient. We should alias unify
-         --  variables when we are first appending them to the atoms queue.
-         for Atom of Atoms loop
-            if Atom.Kind = Unify then
-               Solver_Trace.Trace ("Aliasing var " & Image (Atom.Unify_From)
-                                   & " to " & Image (Atom.Target));
-               Alias (Atom.Unify_From, Atom.Target);
-            end if;
-         end loop;
+      begin
 
          --  Step 1: create:
          --
@@ -623,17 +614,28 @@ package body Langkit_Support.Adalog.Solver is
          end;
       end Try_Solution;
 
-      V                    : Var_Or_Null;
-      Id                   : Positive;
-      Ignore               : Boolean;
-      Vars_To_Atoms        : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
-      Anys                 : Any_Relation_List := Ctx.Anys;
-      Initial_Atoms_Length : Natural renames Ctx.Atoms.Last_Index;
+      V                      : Var_Or_Null;
+      Id                     : Positive;
+      Ignore                 : Boolean;
+      Vars_To_Atoms          : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
+      Anys                   : Any_Relation_List := Ctx.Anys;
+      Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
+      Initial_Aliases_Length : Natural renames Ctx.Aliases.Last_Index;
 
       function Cleanup (Val : Boolean) return Boolean with Inline_Always
       is begin
          Vars_To_Atoms.Destroy;
          Ctx.Atoms.Cut (Initial_Atoms_Length);
+
+         --  Unalias every var that was aliased
+         for I in Initial_Aliases_Length + 1 .. Ctx.Aliases.Last_Index loop
+
+            Solver_Trace.Trace
+              ("UNALIASING " & Image (Ctx.Aliases.Get_Access (I).Unify_From));
+            Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
+         end loop;
+
+         Ctx.Aliases.Cut (Initial_Aliases_Length);
          Solver_Trace.Decrease_Indent;
          return Val;
       end Cleanup;
@@ -665,25 +667,38 @@ package body Langkit_Support.Adalog.Solver is
                --  Implicit assertion: an all can only contain an Any
                Anys := Sub_Rel.Compound_Rel & Anys;
             when Atomic =>
-               Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
-               Ctx.Atoms.Append (Sub_Rel.Atomic_Rel);
+               declare
+                  Atom : constant Atomic_Relation := Sub_Rel.Atomic_Rel;
+               begin
+                  Assign_Ids (Ctx, Atom);
 
-               if Ctx.Cut_Dead_Branches then
-                  --  Exponential resolution optimization: If relevant, add
-                  --  atomic relation to the mappings of vars to atoms.
-                  case Sub_Rel.Atomic_Rel.Kind is
-                  when Predicate | Assign =>
-                     V := (if Sub_Rel.Atomic_Rel.Kind = Predicate
-                           then Used_Var (Sub_Rel.Atomic_Rel)
-                           else Defined_Var (Sub_Rel.Atomic_Rel));
-                     Id := Get_Id (Ctx, V.Logic_Var);
-                     Reserve (Vars_To_Atoms, Id);
-                     Vars_To_Atoms.Get_Access (Id)
-                       .Append (Sub_Rel.Atomic_Rel);
-                  when others => null;
-                  end case;
-               end if;
+                  if Atom.Kind = Unify then
+                     Solver_Trace.Trace
+                       ("Aliasing var " & Image (Atom.Unify_From)
+                        & " to " & Image (Atom.Target));
+                     Alias (Atom.Unify_From, Atom.Target);
+                     Ctx.Aliases.Append (Atom);
+                     goto Continue;
+                  end if;
 
+                  Ctx.Atoms.Append (Atom);
+
+                  if Ctx.Cut_Dead_Branches then
+                     --  Exponential resolution optimization: If relevant, add
+                     --  atomic relation to the mappings of vars to atoms.
+                     case Atom.Kind is
+                     when Predicate | Assign =>
+                        V := (if Atom.Kind = Predicate
+                              then Used_Var (Atom)
+                              else Defined_Var (Atom));
+                        Id := Get_Id (Ctx, V.Logic_Var);
+                        Reserve (Vars_To_Atoms, Id);
+                        Vars_To_Atoms.Get_Access (Id).Append (Atom);
+                     when others => null;
+                     end case;
+                  end if;
+               end;
+               <<Continue>>
             end case;
          end loop;
 
@@ -816,6 +831,7 @@ package body Langkit_Support.Adalog.Solver is
 
       Ctx.Cb := Solution_Callback'Unrestricted_Access.all;
       Ctx.Atoms := new Atomic_Relation_Vector;
+      Ctx.Aliases := new Atomic_Relation_Vector;
 
       case Self.Kind is
          when Compound =>
@@ -1359,10 +1375,10 @@ package body Langkit_Support.Adalog.Solver is
    begin
       case Self.Kind is
          when Propagate =>
-            return Prop_Image (Var_Image (Self.From), Var_Image (Self.Target));
+            return Prop_Image (Image (Self.From), Image (Self.Target));
          when Assign =>
             return Prop_Image
-              (Logic_Vars.Element_Image (Self.Val), Var_Image (Self.Target));
+              (Logic_Vars.Element_Image (Self.Val), Image (Self.Target));
          when Predicate =>
             declare
                Full_Img : constant String :=
@@ -1370,7 +1386,7 @@ package body Langkit_Support.Adalog.Solver is
             begin
                return
                  (if Full_Img /= "" then Full_Img
-                  else Self.Pred.Image & "?(" & Var_Image (Self.Target) & ")");
+                  else Self.Pred.Image & "?(" & Image (Self.Target) & ")");
             end;
          when N_Predicate =>
             declare
@@ -1382,7 +1398,7 @@ package body Langkit_Support.Adalog.Solver is
                   return Full_Img;
                end if;
                for I in Vars_Image'Range loop
-                  Vars_Image (I) := To_XString (Var_Image (Self.Vars.Get (I)));
+                  Vars_Image (I) := To_XString (Image (Self.Vars.Get (I)));
                end loop;
                return Self.N_Pred.Image
                  & "?(" & To_XString (", ").Join (Vars_Image).To_String & ")";
@@ -1390,8 +1406,8 @@ package body Langkit_Support.Adalog.Solver is
          when True => return "True";
          when False => return "False";
          when Unify =>
-            return Var_Image (Self.Unify_From)
-              & " <-> " & Var_Image (Self.Target);
+            return Image (Self.Unify_From)
+              & " <-> " & Image (Self.Target);
       end case;
    end Image;
 

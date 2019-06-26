@@ -13,7 +13,7 @@ All:
     Square(3) -> %X 
     Square(4) -> %Y 
 
-Solution: [X = 9, Y = 16]
+Solution: [%X = 9, %Y = 16]
 ========================================================================
 
 Solving relation:
@@ -24,8 +24,8 @@ All:
 
     Square(4) -> %X 
 
-Solution: [X = 16, Y = 2]
-Solution: [X = 16, Y = 3]
+Solution: [%X = 16, %Y = 2]
+Solution: [%X = 16, %Y = 3]
 ========================================================================
 
 Solving relation:
@@ -50,11 +50,11 @@ All:
 
     Square(%X) -> %Y 
 
-Solution: [Y = 1, X = 1]
-Solution: [Y = 4, X = 2]
-Solution: [Y = 9, X = 3]
-Solution: [Y = 16, X = 4]
-Solution: [Y = 25, X = 5]
-Solution: [Y = 36, X = 6]
-Solution: [Y = 49, X = 7]
-Solution: [Y = 64, X = 8]
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 4, %X = 2]
+Solution: [%Y = 9, %X = 3]
+Solution: [%Y = 16, %X = 4]
+Solution: [%Y = 25, %X = 5]
+Solution: [%Y = 36, %X = 6]
+Solution: [%Y = 49, %X = 7]
+Solution: [%Y = 64, %X = 8]

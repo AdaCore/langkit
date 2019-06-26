@@ -101,6 +101,11 @@ package body Langkit_Support.Adalog.Refcounted_Logic_Ref is
                   Other.Unchecked_Get.Content'Unrestricted_Access);
    end Alias;
 
+   procedure Unalias (Self : Ref) is
+   begin
+      LRef.Unalias (Self.Unchecked_Get.Content'Unrestricted_Access);
+   end Unalias;
+
    ---------------
    -- Get_Alias --
    ---------------

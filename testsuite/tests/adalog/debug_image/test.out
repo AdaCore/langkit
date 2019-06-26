@@ -9,9 +9,9 @@ All:
         3 -> %X main.adb:36
 
 
-Solution: [Y = 1, X = 1]
-Solution: [Y = 2, X = 2]
-Solution: [Y = 3, X = 3]
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
+Solution: [%Y = 3, %X = 3]
 ========================================================================
 
 Solving relation:
@@ -33,9 +33,9 @@ All: main.adb:42
         10 -> %Y main.adb:42
 
 
-Solution: [Y = 10, X = 1]
-Solution: [Y = 10, X = 2]
-Solution: [Y = 10, X = 3]
+Solution: [%Y = 10, %X = 1]
+Solution: [%Y = 10, %X = 2]
+Solution: [%Y = 10, %X = 3]
 ========================================================================
 
 Solving relation:
@@ -62,8 +62,8 @@ Any: main.adb:53
     1 -> %X main.adb:53
     2 -> %X main.adb:53
 
-Solution: [Y = <undefined>, X = 1]
-Solution: [Y = <undefined>, X = 2]
+Solution: [%Y = <undefined>, %X = 1]
+Solution: [%Y = <undefined>, %X = 2]
 ========================================================================
 
 Solving relation:
@@ -100,4 +100,4 @@ All: main.adb:64
 
     %X <-> %Y main.adb:64
 
-Solution: [Y = 2, X = 2]
+Solution: [%Y = 2, %X = 2]

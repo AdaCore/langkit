@@ -9,4 +9,4 @@ All:
 
     2 -> %X
 
-Solution: [X = 2, Y = 1]
+Solution: [%X = 2, %Y = 1]

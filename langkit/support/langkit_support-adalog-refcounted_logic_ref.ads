@@ -65,6 +65,7 @@ package Langkit_Support.Adalog.Refcounted_Logic_Ref is
    function Id (Self : Ref) return Natural;
    procedure Set_Id (Self : Ref; Id : Natural);
    procedure Alias (Self, Other : Ref);
+   procedure Unalias (Self : Ref);
    function Get_Alias (Self : Ref) return Ref;
 
    function Image (Self : Ref) return String is

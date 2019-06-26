@@ -6,4 +6,4 @@ Any:
         1 -> %Y
 
 
-Solution: [X = 1]
+Solution: [%X = 1]

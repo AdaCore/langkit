@@ -34,7 +34,6 @@ package body Langkit_Support.Adalog.Logic_Ref is
    procedure Reset (Self : in out Var) is
    begin
       Self.Reset := True;
-      Self.Aliased_To := null;
    end Reset;
 
    ----------------
@@ -131,6 +130,15 @@ package body Langkit_Support.Adalog.Logic_Ref is
    begin
       Self.Aliased_To := To;
    end Alias;
+
+   -------------
+   -- Unalias --
+   -------------
+
+   procedure Unalias (Self : Raw_Var) is
+   begin
+      Self.Aliased_To := null;
+   end Unalias;
 
    -----------
    -- Alias --

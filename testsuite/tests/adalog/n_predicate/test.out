@@ -18,6 +18,6 @@ All:
         6 -> %Y 
 
 
-Solution: [Y = 1, X = 2]
-Solution: [Y = 2, X = 4]
-Solution: [Y = 3, X = 6]
+Solution: [%Y = 1, %X = 2]
+Solution: [%Y = 2, %X = 4]
+Solution: [%Y = 3, %X = 6]

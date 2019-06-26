@@ -15,5 +15,5 @@ All:
         18 -> %Y 
 
 
-Solution: [Y = 12, X = 4]
-Solution: [Y = 18, X = 6]
+Solution: [%Y = 12, %X = 4]
+Solution: [%Y = 18, %X = 6]

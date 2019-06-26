@@ -90,7 +90,8 @@ package Langkit_Support.Adalog.Logic_Ref is
       with Pre => Is_Defined (Self);
    procedure Destroy (Self : in out Var);
    function Image (Self : Var) return String is
-     (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
+     (if Self.Dbg_Name /= null
+      then "%" &  Self.Dbg_Name.all else "%<unnamed>");
 
    -----------------------
    -- Raw variable type --
@@ -108,6 +109,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    function Id (Self : Raw_Var) return Natural;
    procedure Set_Id (Self : Raw_Var; Id : Natural);
    procedure Alias (Self, To : Raw_Var);
+   procedure Unalias (Self : Raw_Var);
    function Get_Alias (Self : Raw_Var) return Raw_Var;
 
    function Image (Self : Raw_Var) return String is

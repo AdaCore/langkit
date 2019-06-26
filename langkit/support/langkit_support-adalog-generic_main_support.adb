@@ -69,7 +69,7 @@ package body Langkit_Support.Adalog.Generic_Main_Support is
       function Solution_Callback (Vars : Var_Array) return Boolean is
 
          function Image (L : Refs.Raw_Var) return String
-         is (L.Dbg_Name.all & " = " & Safe_Get_Value (L));
+         is (Refs.Image (L) & " = " & Safe_Get_Value (L));
 
          function Vars_Image is new Langkit_Support.Images.Array_Image
            (Raw_Var, Positive, Var_Array);

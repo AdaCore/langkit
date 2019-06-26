@@ -4,4 +4,4 @@ All:
     1 -> %Y
     Is_Double_Of?(%X, %Y)
 
-Solution: [X = 2, Y = 1]
+Solution: [%X = 2, %Y = 1]

@@ -10,6 +10,6 @@ All:
         6 -> %X 
 
 
-Solution: [X = 2]
-Solution: [X = 4]
-Solution: [X = 6]
+Solution: [%X = 2]
+Solution: [%X = 4]
+Solution: [%X = 6]

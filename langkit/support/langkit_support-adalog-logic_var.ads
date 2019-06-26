@@ -83,6 +83,8 @@ generic
    with procedure Alias (Self, Other : Logic_Var_Type) is <>;
    --  Alias this variable to another variable. This
 
+   with procedure Unalias (Self : Logic_Var_Type) is <>;
+
    with function Get_Alias (Self : Logic_Var_Type) return Logic_Var_Type is <>;
    --  Get the alias for this logic variable, if there is one.
 

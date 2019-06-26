@@ -9,9 +9,9 @@ All:
         3 -> %X 
 
 
-Solution: [Y = 1, X = 1]
-Solution: [Y = 2, X = 2]
-Solution: [Y = 3, X = 3]
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
+Solution: [%Y = 3, %X = 3]
 ========================================================================
 
 Solving relation:
@@ -33,9 +33,9 @@ All:
         10 -> %Y 
 
 
-Solution: [Y = 10, X = 1]
-Solution: [Y = 10, X = 2]
-Solution: [Y = 10, X = 3]
+Solution: [%Y = 10, %X = 1]
+Solution: [%Y = 10, %X = 2]
+Solution: [%Y = 10, %X = 3]
 ========================================================================
 
 Solving relation:
@@ -62,8 +62,8 @@ Any:
     1 -> %X 
     2 -> %X 
 
-Solution: [Y = <undefined>, X = 1]
-Solution: [Y = <undefined>, X = 2]
+Solution: [%Y = <undefined>, %X = 1]
+Solution: [%Y = <undefined>, %X = 2]
 ========================================================================
 
 Solving relation:
@@ -100,4 +100,4 @@ All:
 
     %X <-> %Y
 
-Solution: [Y = 2, X = 2]
+Solution: [%Y = 2, %X = 2]
