@@ -1,0 +1,25 @@
+Solving relation:
+All: 
+    Any: 
+        1 -> %x 
+        2 -> %x 
+        3 -> %x 
+        4 -> %x 
+        5 -> %x 
+        6 -> %x 
+
+    Any: 
+        one -> %y 
+        five -> %y 
+        four -> %y 
+
+    Any: 
+        to_str(%x) -> %y 
+        True 
+
+    eq_str_lower?(to_str(%x), %y) 
+    is_odd?(%x) 
+
+Solution: [%x = 1, %y = one]
+Solution: [%x = 5, %y = five]
+Done.

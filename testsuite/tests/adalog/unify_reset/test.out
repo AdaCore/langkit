@@ -1,0 +1,14 @@
+Solving relation:
+Any: 
+    All: 
+        %X <-> %Y
+        1 -> %X
+        1 -> %Y
+
+    All: 
+        3 -> %X
+        12 -> %Y
+
+
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 12, %X = 3]
