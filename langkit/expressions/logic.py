@@ -676,7 +676,7 @@ class LogicFalse(AbstractExpression):
 
     def construct(self):
         return CallExpr(
-            'False_Rel', 'Solver.Create_False', T.Equation
+            'False_Rel', 'Solver.Create_False', T.Equation,
             [sloc_info_arg(self.location)]
         )
 
