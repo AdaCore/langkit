@@ -24,8 +24,6 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
-with GNATCOLL.Traces;
-
 with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Vectors;
 
@@ -35,9 +33,6 @@ generic
 package Langkit_Support.Adalog.Solver is
 
    subtype Value_Type is Logic_Vars.Element_Type;
-
-   Solver_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER", Default => GNATCOLL.Traces.From_Config);
 
    use Logic_Vars;
 
@@ -62,7 +57,7 @@ package Langkit_Support.Adalog.Solver is
    --  ``Self.all`` and sets ``Self`` to ``null``.
 
    type Solve_Options_Type is record
-      Cut_Dead_Branches : Boolean := True;
+      Cut_Dead_Branches : Boolean := False;
    end record;
 
    Default_Options : constant Solve_Options_Type := (others => <>);

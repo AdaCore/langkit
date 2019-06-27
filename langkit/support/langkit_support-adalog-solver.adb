@@ -131,7 +131,6 @@ package body Langkit_Support.Adalog.Solver is
    overriding procedure Destroy (Self : in out Comparer_N_Pred) is
    begin
       Free (Self.Eq);
-      Free (Self.Conv);
    end Destroy;
 
    type Comparer_Pred is new Predicate_Type with record
@@ -272,6 +271,7 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive) is
    begin
+      Solver_Trace.Trace ("Reserving " & Size'Image & " in vector");
       while V.Length < Size loop
          V.Append (Atomic_Relation_Vectors.Empty_Vector);
       end loop;
@@ -672,13 +672,19 @@ package body Langkit_Support.Adalog.Solver is
                begin
                   Assign_Ids (Ctx, Atom);
 
-                  if Atom.Kind = Unify then
+                  if Atom.Kind = Unify
+                    and then Atom.Unify_From /= Atom.Target
+                  then
                      Solver_Trace.Trace
                        ("Aliasing var " & Image (Atom.Unify_From)
                         & " to " & Image (Atom.Target));
                      Alias (Atom.Unify_From, Atom.Target);
                      Ctx.Aliases.Append (Atom);
                      goto Continue;
+                  elsif Atom.Kind = True then
+                     goto Continue;
+                  elsif Atom.Kind = False then
+                     return Cleanup (True);
                   end if;
 
                   Ctx.Atoms.Append (Atom);
@@ -768,8 +774,12 @@ package body Langkit_Support.Adalog.Solver is
          for Sub_Rel of Self.Rels loop
             case Sub_Rel.Kind is
                when Atomic =>
-                  Ctx.Atoms.Append (Sub_Rel.Atomic_Rel);
-                  Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
+                  if Sub_Rel.Atomic_Rel.Kind = False then
+                     return Cleanup (False);
+                  elsif Sub_Rel.Atomic_Rel.Kind /= True then
+                     Ctx.Atoms.Append (Sub_Rel.Atomic_Rel);
+                     Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
+                  end if;
                   if Length (Ctx.Anys) > 0 then
                      if not
                        Solve_Compound
@@ -784,6 +794,7 @@ package body Langkit_Support.Adalog.Solver is
                         return Cleanup (False);
                      end if;
                   end if;
+
                when Compound =>
                   pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_All);
                   if not Solve_Compound (Sub_Rel.Compound_Rel, Ctx) then
@@ -1255,7 +1266,6 @@ package body Langkit_Support.Adalog.Solver is
             if Self.Conv /= null then
                Destroy (Self.Conv.all);
             end if;
-
             Free (Self.Conv);
          when Predicate =>
             Destroy (Self.Pred.all);
@@ -1345,7 +1355,9 @@ package body Langkit_Support.Adalog.Solver is
             pragma Assert (Is_Defined (Self.Target));
             return Self.Pred.Call (Get_Value (Self.Target));
          when N_Predicate =>
-            pragma Assert (for all V of Self.Vars => Is_Defined (V));
+            if not (for all V of Self.Vars => Is_Defined (V)) then
+               return False;
+            end if;
             declare
                Vals : Val_Array (1 .. Self.Vars.Length);
             begin
