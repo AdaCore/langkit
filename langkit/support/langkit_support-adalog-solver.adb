@@ -271,7 +271,7 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive) is
    begin
-      Solver_Trace.Trace ("Reserving " & Size'Image & " in vector");
+      Verbose_Trace.Trace ("Reserving " & Size'Image & " in vector");
       while V.Length < Size loop
          V.Append (Atomic_Relation_Vectors.Empty_Vector);
       end loop;
@@ -286,7 +286,7 @@ package body Langkit_Support.Adalog.Solver is
    is
    begin
       if Id (Logic_Var) = 0 then
-         Solver_Trace.Trace ("No id for logic var " & Image (Logic_Var));
+         Verbose_Trace.Trace ("No id for logic var " & Image (Logic_Var));
          Ctx.Vars.Append (Logic_Var);
          Set_Id (Logic_Var, Ctx.Vars.Last_Index);
       end if;
@@ -304,8 +304,8 @@ package body Langkit_Support.Adalog.Solver is
       begin
          if Var.Exists then
             Dummy := Get_Id (Ctx, Var.Logic_Var);
-            Solver_Trace.Trace ("Assigning Id " & Dummy'Image
-                                & " to var " & Image (Var.Logic_Var));
+            Verbose_Trace.Trace ("Assigning Id " & Dummy'Image
+                                 & " to var " & Image (Var.Logic_Var));
          end if;
       end Assign_Id;
    begin
@@ -480,7 +480,7 @@ package body Langkit_Support.Adalog.Solver is
          --    2. The base working set for the topo sort, constituted of all
          --       atoms with no dependencies.
 
-         for I in Atoms.First_Index .. Atoms.Last_Index loop
+         for I in reverse Atoms.First_Index .. Atoms.Last_Index loop
             Current_Atom := Atoms.Get (I);
 
             declare
@@ -563,7 +563,7 @@ package body Langkit_Support.Adalog.Solver is
          --  better way yet.
          for I in Appended'Range loop
             if not Appended (I) then
-               Solver_Trace.Trace
+               Solv_Trace.Trace
                  ("Orphan relation: " & Image (Atoms.Get (I)));
                return Atomic_Relation_Vectors.Empty_Array;
             end if;
@@ -584,12 +584,12 @@ package body Langkit_Support.Adalog.Solver is
       is
          function Cleanup (Val : Boolean) return Boolean with Inline_Always
          is begin
-            Solver_Trace.Decrease_Indent;
+            Solv_Trace.Decrease_Indent;
             return Val;
          end Cleanup;
       begin
-         Solver_Trace.Increase_Indent ("In try solution");
-         Solver_Trace.Trace (Image (Atoms));
+         Solv_Trace.Increase_Indent ("In try solution");
+         Solv_Trace.Trace (Image (Atoms));
          Reset_Vars (Ctx);
 
          declare
@@ -599,16 +599,20 @@ package body Langkit_Support.Adalog.Solver is
             if Sorted_Atoms = Empty_Array then
                return Cleanup (True);
             end if;
-            Solver_Trace.Trace ("After topo sort");
-            Solver_Trace.Trace (Image (Sorted_Atoms));
+            Solv_Trace.Trace ("After topo sort");
+            Solv_Trace.Trace (Image (Sorted_Atoms));
 
             --  Once the topological sort has been done, we just have to solve
             --  every relation in order. Abort if one doesn't solve.
             for Atom of Sorted_Atoms loop
                if not Solve (Atom) then
+                  Solv_Trace.Trace ("Failed on " & Image (Atom));
                   return Cleanup (True);
                end if;
             end loop;
+
+            Sol_Trace.Trace ("Valid solution");
+            Sol_Trace.Trace (Image (Sorted_Atoms));
 
             return Cleanup (Ctx.Cb (Var_Array (Ctx.Vars.To_Array)));
          end;
@@ -630,18 +634,18 @@ package body Langkit_Support.Adalog.Solver is
          --  Unalias every var that was aliased
          for I in Initial_Aliases_Length + 1 .. Ctx.Aliases.Last_Index loop
 
-            Solver_Trace.Trace
-              ("UNALIASING " & Image (Ctx.Aliases.Get_Access (I).Unify_From));
+            Verbose_Trace.Trace
+              ("Unaliasing " & Image (Ctx.Aliases.Get_Access (I).Unify_From));
             Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
          end loop;
 
          Ctx.Aliases.Cut (Initial_Aliases_Length);
-         Solver_Trace.Decrease_Indent;
+         Trav_Trace.Decrease_Indent;
          return Val;
       end Cleanup;
 
    begin
-      Solver_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
+      Trav_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
 
       case Self.Kind is
 
@@ -675,7 +679,7 @@ package body Langkit_Support.Adalog.Solver is
                   if Atom.Kind = Unify
                     and then Atom.Unify_From /= Atom.Target
                   then
-                     Solver_Trace.Trace
+                     Trav_Trace.Trace
                        ("Aliasing var " & Image (Atom.Unify_From)
                         & " to " & Image (Atom.Target));
                      Alias (Atom.Unify_From, Atom.Target);
@@ -758,9 +762,9 @@ package body Langkit_Support.Adalog.Solver is
             --  potential solution. Try to solve it.
             return Cleanup (Try_Solution (Ctx.Atoms.all));
          else
-            Solver_Trace.Trace ("Before recursing in solve All");
-            Solver_Trace.Trace (Image (Ctx.Atoms.all));
-            Solver_Trace.Trace (Image (Anys));
+            Trav_Trace.Trace ("Before recursing in solve All");
+            Trav_Trace.Trace (Image (Ctx.Atoms.all));
+            Trav_Trace.Trace (Image (Anys));
 
             return Cleanup
               (Solve_Compound

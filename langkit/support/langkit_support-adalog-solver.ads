@@ -32,6 +32,18 @@ generic
      is new Langkit_Support.Adalog.Logic_Var (<>);
 package Langkit_Support.Adalog.Solver is
 
+   Verbose_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.VERBOSE", Default => GNATCOLL.Traces.From_Config);
+
+   Trav_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.TRAVERSAL", Default => GNATCOLL.Traces.From_Config);
+
+   Solv_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.SOLVE", Default => GNATCOLL.Traces.From_Config);
+
+   Sol_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
+     ("LANGKIT.SOLVER.SOLUTION", Default => GNATCOLL.Traces.From_Config);
+
    subtype Value_Type is Logic_Vars.Element_Type;
 
    use Logic_Vars;
