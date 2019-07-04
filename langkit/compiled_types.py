@@ -3154,9 +3154,12 @@ class ASTNodeType(BaseStructType):
                 external=True, uses_entity_info=False, uses_envs=False,
                 warn_on_unused=False,
                 doc="""
-                Return whether the node is a ghost node. In other words, return
-                False if it corresponds to a real chain of tokens in the
-                source, True otherwise.
+                Return whether the node is a ghost.
+
+                Unlike regular nodes, ghost nodes cover no token in the input
+                source: they are logically located instead between two tokens.
+                The "token_first" of all ghost nodes is the token right after
+                this logical position, while they have no "token_last".
                 """
             )),
 
