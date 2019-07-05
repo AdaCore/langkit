@@ -86,8 +86,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    procedure Reset (Self : in out Var);
    function Is_Defined (Self : Var) return Boolean;
    procedure Set_Value (Self : in out Var; Data : Element_Type);
-   function Get_Value (Self : Var) return Element_Type
-      with Pre => Is_Defined (Self);
+   function Get_Value (Self : Var) return Element_Type;
    procedure Destroy (Self : in out Var);
    function Image (Self : Var) return String is
      (if Self.Dbg_Name /= null

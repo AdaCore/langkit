@@ -99,6 +99,13 @@ package Langkit_Support.Adalog.Generic_Main_Support is
    is
      (+Create_Predicate (L, P, -Dbg_String));
 
+   function N_Predicate
+     (Vars       : Variable_Array;
+      P          : N_Predicate_Type'Class;
+      Dbg_String : String := "") return Relation
+   is
+     (+Create_N_Predicate (Vars, P, -Dbg_String));
+
    procedure Solve_All (Rel : Relation; Show_Relation : Boolean := False);
 
 private

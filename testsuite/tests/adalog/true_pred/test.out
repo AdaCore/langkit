@@ -1,13 +1,11 @@
 Solving relation:
-All: 
-    Any: 
-        1 -> %X 
-        2 -> %X 
-        3 -> %X 
-        4 -> %X 
-        5 -> %X 
-        6 -> %X 
-
+Any: 
+    1 -> %X 
+    2 -> %X 
+    3 -> %X 
+    4 -> %X 
+    5 -> %X 
+    6 -> %X 
 
 Solution: [%X = 1]
 Solution: [%X = 2]

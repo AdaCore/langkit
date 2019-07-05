@@ -29,6 +29,7 @@ with Langkit_Support.Functional_Lists;
 with Langkit_Support.Images;
 
 pragma Style_Checks ("-s");
+with Ada.Text_IO; use Ada.Text_IO;
 
 package body Langkit_Support.Adalog.Solver is
 
@@ -105,6 +106,8 @@ package body Langkit_Support.Adalog.Solver is
 
    type Sort_Context is access all Sort_Context_Type;
 
+   type Nat_Access is access all Natural;
+
    type Solving_Context is record
       Cb                : Callback_Type;
       Atoms, Aliases    : Atoms_Vector_Access;
@@ -113,6 +116,7 @@ package body Langkit_Support.Adalog.Solver is
       Vars_To_Atoms     : Var_Ids_To_Atoms;
       Cut_Dead_Branches : Boolean := False;
       Sort_Ctx          : Sort_Context;
+      Tried_Solutions   : Nat_Access := null;
    end record;
    --  Context for the solving of a compound relation
 
@@ -275,6 +279,7 @@ package body Langkit_Support.Adalog.Solver is
       return Ret : Solving_Context do
          Ret.Vars := new Logic_Var_Vector;
          Ret.Sort_Ctx := new Sort_Context_Type;
+         Ret.Tried_Solutions := new Natural'(0);
       end return;
    end Create;
 
@@ -289,7 +294,10 @@ package body Langkit_Support.Adalog.Solver is
         (Logic_Var_Vector, Logic_Var_Vector_Access);
       procedure Free is new Ada.Unchecked_Deallocation
         (Sort_Context_Type, Sort_Context);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Natural, Nat_Access);
    begin
+
       Ctx.Aliases.Destroy;
       Ctx.Atoms.Destroy;
       Any_Relation_Lists.Destroy (Ctx.Anys);
@@ -298,6 +306,7 @@ package body Langkit_Support.Adalog.Solver is
       Ctx.Vars_To_Atoms.Destroy;
       Free (Ctx.Atoms);
       Free (Ctx.Aliases);
+      Free (Ctx.Tried_Solutions);
 
       Atom_Lists.Destroy (Ctx.Sort_Ctx.N_Preds);
       Atom_Lists.Destroy (Ctx.Sort_Ctx.Working_Set);
@@ -474,6 +483,11 @@ package body Langkit_Support.Adalog.Solver is
       function Try_Solution (Atoms : Atomic_Relation_Vector) return Boolean;
       --  Try to solve the current solution
 
+      function Process_Atom (Atom : Atomic_Relation) return Boolean;
+      --  Process one atom, whether we are in an All or Any branch. Returns
+      --  whether we should abort current path or not, in the case of an All
+      --  relation.
+
       use Any_Relation_Lists;
 
       ---------------
@@ -639,6 +653,10 @@ package body Langkit_Support.Adalog.Solver is
          Clear (Ctx.Sort_Ctx);
          Reset_Vars (Ctx);
 
+         Ctx.Tried_Solutions.all := Ctx.Tried_Solutions.all + 1;
+
+         Sol_Trace.Trace ("Tried solutions: " & Ctx.Tried_Solutions.all'Image);
+
          declare
             use Atomic_Relation_Vectors;
             Sorting_Error : Boolean;
@@ -686,11 +704,9 @@ package body Langkit_Support.Adalog.Solver is
       Initial_Atoms_Length   : Natural renames Ctx.Atoms.Last_Index;
       Initial_Aliases_Length : Natural renames Ctx.Aliases.Last_Index;
 
-      function Cleanup (Val : Boolean) return Boolean with Inline_Always
-      is begin
-         Vars_To_Atoms.Destroy;
+      procedure Branch_Cleanup is
+      begin
          Ctx.Atoms.Cut (Initial_Atoms_Length);
-
          --  Unalias every var that was aliased
          for I in Initial_Aliases_Length + 1 .. Ctx.Aliases.Last_Index loop
             if Verbose_Trace.Is_Active then
@@ -700,12 +716,57 @@ package body Langkit_Support.Adalog.Solver is
             end if;
             Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
          end loop;
-
          Ctx.Aliases.Cut (Initial_Aliases_Length);
+      end Branch_Cleanup;
+
+      function Cleanup (Val : Boolean) return Boolean with Inline_Always
+      is
+      begin
+         Branch_Cleanup;
          Trav_Trace.Decrease_Indent;
          return Val;
       end Cleanup;
 
+      function Process_Atom (Atom : Atomic_Relation) return Boolean is
+      begin
+         Assign_Ids (Ctx, Atom);
+
+         if Atom.Kind = Unify
+           and then Atom.Unify_From /= Atom.Target
+         then
+            if Verbose_Trace.Is_Active then
+               Verbose_Trace.Trace
+                 ("Aliasing var " & Image (Atom.Unify_From)
+                  & " to " & Image (Atom.Target));
+            end if;
+            Alias (Atom.Unify_From, Atom.Target);
+            Ctx.Aliases.Append (Atom);
+            return True;
+         elsif Atom.Kind = True then
+            return True;
+         elsif Atom.Kind = False then
+            return False;
+         end if;
+
+         Ctx.Atoms.Append (Atom);
+
+         if Ctx.Cut_Dead_Branches then
+            --  Exponential resolution optimization: If relevant, add
+            --  atomic relation to the mappings of vars to atoms.
+            case Atom.Kind is
+               when Predicate | Assign =>
+                  V := (if Atom.Kind = Predicate
+                        then Used_Var (Atom)
+                        else Defined_Var (Atom));
+                  Id := Get_Id (Ctx, V.Logic_Var);
+                  Reserve (Vars_To_Atoms, Id);
+                  Vars_To_Atoms.Get_Access (Id).Append (Atom);
+               when others => null;
+            end case;
+         end if;
+
+         return True;
+      end Process_Atom;
    begin
       Trav_Trace.Increase_Indent ("In Solve_Compound " & Self.Kind'Image);
 
@@ -733,46 +794,9 @@ package body Langkit_Support.Adalog.Solver is
                --  Implicit assertion: an all can only contain an Any
                Anys := Sub_Rel.Compound_Rel & Anys;
             when Atomic =>
-               declare
-                  Atom : constant Atomic_Relation := Sub_Rel.Atomic_Rel;
-               begin
-                  Assign_Ids (Ctx, Atom);
-
-                  if Atom.Kind = Unify
-                    and then Atom.Unify_From /= Atom.Target
-                  then
-                     if Verbose_Trace.Is_Active then
-                        Verbose_Trace.Trace
-                          ("Aliasing var " & Image (Atom.Unify_From)
-                           & " to " & Image (Atom.Target));
-                     end if;
-                     Alias (Atom.Unify_From, Atom.Target);
-                     Ctx.Aliases.Append (Atom);
-                     goto Continue;
-                  elsif Atom.Kind = True then
-                     goto Continue;
-                  elsif Atom.Kind = False then
-                     return Cleanup (True);
-                  end if;
-
-                  Ctx.Atoms.Append (Atom);
-
-                  if Ctx.Cut_Dead_Branches then
-                     --  Exponential resolution optimization: If relevant, add
-                     --  atomic relation to the mappings of vars to atoms.
-                     case Atom.Kind is
-                     when Predicate | Assign =>
-                        V := (if Atom.Kind = Predicate
-                              then Used_Var (Atom)
-                              else Defined_Var (Atom));
-                        Id := Get_Id (Ctx, V.Logic_Var);
-                        Reserve (Vars_To_Atoms, Id);
-                        Vars_To_Atoms.Get_Access (Id).Append (Atom);
-                     when others => null;
-                     end case;
-                  end if;
-               end;
-               <<Continue>>
+               if not Process_Atom (Sub_Rel.Atomic_Rel) then
+                  return Cleanup (True);
+               end if;
             end case;
          end loop;
 
@@ -809,6 +833,7 @@ package body Langkit_Support.Adalog.Solver is
                         --  solving of this branch early.
 
                         if not Solve_Atomic (User) then
+                           Solv_Trace.Trace ("Aborting due to exp res optim");
                            Reset (V.Logic_Var);
                            return Cleanup (True);
                         end if;
@@ -836,26 +861,25 @@ package body Langkit_Support.Adalog.Solver is
               (Solve_Compound
                  (Head (Anys),
                   Ctx'Update
-                    (Vars_To_Atoms => Vars_To_Atoms,
-                     Anys          => Tail (Anys))));
+                    (Anys => Tail (Anys))));
          end if;
 
       when Kind_Any =>
          for Sub_Rel of Self.Rels loop
             case Sub_Rel.Kind is
                when Atomic =>
-                  if Sub_Rel.Atomic_Rel.Kind = False then
-                     return Cleanup (False);
-                  elsif Sub_Rel.Atomic_Rel.Kind /= True then
-                     Ctx.Atoms.Append (Sub_Rel.Atomic_Rel);
-                     Assign_Ids (Ctx, Sub_Rel.Atomic_Rel);
-                  end if;
+
+                  pragma Assert (Sub_Rel.Atomic_Rel.Kind /= False);
+
+                  declare
+                     Dummy : Boolean := Process_Atom (Sub_Rel.Atomic_Rel);
+                  begin
+                     null;
+                  end;
+
                   if Length (Ctx.Anys) > 0 then
-                     if not
-                       Solve_Compound
-                         (Head (Anys),
-                          Ctx'Update
-                            (Anys => Tail (Anys)))
+                     if not Solve_Compound
+                       (Head (Anys), Ctx'Update (Anys => Tail (Anys)))
                      then
                         return Cleanup (False);
                      end if;
@@ -872,7 +896,7 @@ package body Langkit_Support.Adalog.Solver is
                   end if;
             end case;
 
-            Ctx.Atoms.Cut (Initial_Atoms_Length);
+            Branch_Cleanup;
          end loop;
 
          return Cleanup (True);
@@ -1316,7 +1340,7 @@ package body Langkit_Support.Adalog.Solver is
          elsif Cmp_Kind = Kind_Any and then R.Kind = Atomic
            and then R.Atomic_Rel.Kind = False
          then
-            --  Remove False relations from Alls
+            --  Remove False relations from Anys
             null;
          else
             Inc_Ref (R);
@@ -1471,10 +1495,15 @@ package body Langkit_Support.Adalog.Solver is
 
          when N_Predicate =>
 
-            if not (for all V of Self.Vars => Is_Defined (V)) then
-               raise Early_Binding_Error
-                 with "Trying to call N_Predicate, but not all vars are def'd";
-            end if;
+            for V of Self.Vars loop
+               if not Is_Defined (V) then
+                  Solv_Trace.Trace
+                    ("Trying to apply " & Image (Self)
+                     & ", but " & Image (V) & " is not defined");
+                  return False;
+               end if;
+               Solv_Trace.Trace ("Var 1 = " & Element_Image (Get_Value (V)));
+            end loop;
 
             declare
                Vals : Val_Array (1 .. Self.Vars.Length);
@@ -1624,6 +1653,21 @@ package body Langkit_Support.Adalog.Solver is
                  else "");
       end case;
    end Image;
+
+   --------------------
+   -- Relation_Image --
+   --------------------
+
+   function Relation_Image (Self : Relation) return String is (Image (Self));
+
+   --------------------
+   -- Print_Relation --
+   --------------------
+
+   procedure Print_Relation (Self : Relation) is
+   begin
+      Put_Line (Relation_Image (Self));
+   end Print_Relation;
 
    ------------------
    -- Stub implems --
