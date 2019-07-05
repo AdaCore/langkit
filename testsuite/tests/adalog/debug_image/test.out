@@ -95,9 +95,7 @@ All: main.adb:64
         3 -> %X main.adb:61
 
     Is_Even?(%Y) main.adb:62
-    Any: main.adb:63
-        2 -> %X main.adb:63
-
+    2 -> %X main.adb:63
     %X <-> %Y main.adb:64
 
 Solution: [%Y = 2, %X = 2]

@@ -52,9 +52,9 @@ package body Langkit_Support.Adalog.Logic_Ref is
    procedure Set_Value (Self : in out Var; Data : Element_Type) is
    begin
       if Debug.Debug then
-         Solver_Trace.Trace ("Setting the value of " & Image (Self) & " to "
+         Verbose_Trace.Trace ("Setting the value of " & Image (Self) & " to "
                 & Element_Image (Data));
-         Solver_Trace.Trace ("Old value is " & Element_Image (Self.Value));
+         Verbose_Trace.Trace ("Old value is " & Element_Image (Self.Value));
       end if;
 
       Dec_Ref (Self.Value);

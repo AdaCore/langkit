@@ -190,6 +190,10 @@ package Langkit_Support.Vectors is
    function Copy (Self : Vector) return Vector;
    --  Return newly allocated copy of Self
 
+   procedure Reserve (Self : in out Vector; Capacity : Positive)
+     with Inline;
+   --  Reserve Capacity elements
+
 private
 
    subtype Internal_Elements_Array is Elements_Array (Index_Type);
@@ -209,10 +213,6 @@ private
       Capacity : Natural := Small_Vector_Capacity;
       SV       : Small_Array_Type;
    end record;
-
-   procedure Reserve (Self : in out Vector; Capacity : Positive)
-     with Inline;
-   --  Reserve Capacity elements
 
    Empty_Vector : constant Vector := (E => null, Size => 0, others => <>);
 

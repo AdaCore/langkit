@@ -32,18 +32,6 @@ generic
      is new Langkit_Support.Adalog.Logic_Var (<>);
 package Langkit_Support.Adalog.Solver is
 
-   Verbose_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.VERBOSE", Default => GNATCOLL.Traces.From_Config);
-
-   Trav_Trace : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.TRAVERSAL", Default => GNATCOLL.Traces.From_Config);
-
-   Solv_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.SOLVE", Default => GNATCOLL.Traces.From_Config);
-
-   Sol_Trace  : GNATCOLL.Traces.Trace_Handle := GNATCOLL.Traces.Create
-     ("LANGKIT.SOLVER.SOLUTION", Default => GNATCOLL.Traces.From_Config);
-
    subtype Value_Type is Logic_Vars.Element_Type;
 
    use Logic_Vars;
@@ -69,7 +57,7 @@ package Langkit_Support.Adalog.Solver is
    --  ``Self.all`` and sets ``Self`` to ``null``.
 
    type Solve_Options_Type is record
-      Cut_Dead_Branches : Boolean := False;
+      Cut_Dead_Branches : Boolean := True;
    end record;
 
    Default_Options : constant Solve_Options_Type := (others => <>);
@@ -312,6 +300,8 @@ private
             Conv     : Converter_Access := null;
             --  An access to the projection co nverter, if there is one
 
+            Can_Fail : Boolean := False;
+
             case Kind is
                when Assign =>
                   Val      : Value_Type;
@@ -344,7 +334,7 @@ private
    --  Semantics of those are defined in the public, in the list of relation
    --  constructors.
 
-   function Solve (Self : Atomic_Relation) return Boolean;
+   function Solve_Atomic (Self : Atomic_Relation) return Boolean;
    --  Solve this atomic relation
 
    function Image (Self : Atomic_Relation) return String;

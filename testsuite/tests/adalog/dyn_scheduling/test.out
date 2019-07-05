@@ -95,9 +95,7 @@ All:
         3 -> %X 
 
     Is_Even?(%Y) 
-    Any: 
-        2 -> %X 
-
+    2 -> %X 
     %X <-> %Y
 
 Solution: [%Y = 2, %X = 2]

@@ -13,13 +13,10 @@ All:
         five -> %y 
         four -> %y 
 
-    Any: 
-        to_str(%x) -> %y 
-        True 
-
+    to_str(%x) -?> %y 
     eq_str_lower?(to_str(%x), %y) 
     is_odd?(%x) 
 
-Solution: [%x = 1, %y = one]
-Solution: [%x = 5, %y = five]
+Solution: [%y = one, %x = 1]
+Solution: [%y = five, %x = 5]
 Done.

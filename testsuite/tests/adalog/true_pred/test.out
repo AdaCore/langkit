@@ -8,7 +8,6 @@ All:
         5 -> %X 
         6 -> %X 
 
-    True
 
 Solution: [%X = 1]
 Solution: [%X = 2]
