@@ -61,8 +61,11 @@ package body Langkit_Support.Adalog.Solver is
    --  Vectors of Anys
    function Image (Self : Any_Relation_Lists.List) return String;
 
+   package Atomic_Relation_Lists
+   is new Langkit_Support.Functional_Lists (Atomic_Relation);
+
    package Var_Ids_To_Atoms_Vectors
-   is new Langkit_Support.Vectors (Atomic_Relation_Vector);
+   is new Langkit_Support.Vectors (Atomic_Relation_Lists.List);
    subtype Var_Ids_To_Atoms is Var_Ids_To_Atoms_Vectors.Vector;
    --  Vector mapping logic var ids to atomic relations
 
@@ -71,7 +74,7 @@ package body Langkit_Support.Adalog.Solver is
    --------------------------
 
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive);
-   --  Reserve ``N`` elements in ``V``. TODO??? Add that to vectors.
+   --  Reserve ``N`` elements in ``V``. TODO: Add that to vectors.
 
    function Create_Propagate
      (From, To     : Var;
@@ -87,22 +90,42 @@ package body Langkit_Support.Adalog.Solver is
    --  Helper to create a compound relationship
 
    type Callback_Type is access function (Vars : Var_Array) return Boolean;
+   --  Type used to store the callback. TODO: This should make more data
+   --  accessible, like the numbers of solutions tried so far.
 
    type Atom_And_Index is record
       Atom       : Atomic_Relation;
       Atom_Index : Positive;
    end record;
+   --  Simple record storing an atom along with its index. Used to construct
+   --  the dependency graph during topo sort.
 
    package Atom_Lists
    is new Langkit_Support.Functional_Lists (Atom_And_Index);
-
    package Atom_Lists_Vectors is new Langkit_Support.Vectors (Atom_Lists.List);
+   --  Vectors of lists of ``Atom_And_Index``. Used to construct the
+   --  dependency graph during topo sort.
 
    type Sort_Context_Type is record
       Using_Atoms :  Atom_Lists_Vectors.Vector;
+      --  Maps var ids to lists of atoms. TODO: we could use a vector rather
+      --  than a list as the inner storing type. Would be more efficient.
+
       Working_Set  : Atom_Lists.List;
+      --  Working set of atoms. Used as a temporary list to store atoms in the
+      --  graph that need to be subsequently added.
+
       N_Preds      : Atom_Lists.List;
+      --  List of N_Predicates, to be applied at the end of solving. TODO: we
+      --  could apply this policy for all predicates, which would simplify the
+      --  code a bit.
    end record;
+   --  Type storing data used when doing a topological sort, when we reach a
+   --  complete potential solution. The data is stored in a shared variable
+   --  stored in the Solving_Context, so as to spare allocations.
+   --
+   --  TODO: Fix Functional_List.Clear, because we're leaking heaps of memory
+   --  at the moment.
 
    type Sort_Context is access all Sort_Context_Type;
 
@@ -110,26 +133,76 @@ package body Langkit_Support.Adalog.Solver is
 
    type Solving_Context is record
       Cb                : Callback_Type;
-      Atoms, Aliases    : Atoms_Vector_Access;
+      --  User callback, to be called when a solution is found.
+
+      Atoms             : Atoms_Vector_Access;
+      --  Current flat list of atoms that will at the end of the traversal of a
+      --  branch constitute a potential solution.
+
+      Aliases           : Atoms_Vector_Access;
+      --  List of alias relations. TODO: not clear why this is stored in the
+      --  context, and not as a local variable in Solve_Compound.
+
       Anys              : Any_Relation_List := Any_Relation_Lists.No_List;
+      --  Remaining list of Any relations to traverse
+
       Vars              : Logic_Var_Vector_Access;
+      --  Set of all variables. TODO: Store an array rt. a vector by traversing
+      --  the equation first
+
       Vars_To_Atoms     : Var_Ids_To_Atoms;
+      --  Stores a mapping of variables to atoms, used for exponential
+      --  resolution optimization.
+      --  TODO:
+      --
+      --  1. Store an array rt. a vector (traversing the equation first to find
+      --  out all variables).
+      --
+      --  2. Store vectors rt. than lists, to have a more bounded memory
+      --  behavior.
+      --
+      --  3. Try to not re-iterate on every atoms in the optimization.
+
       Cut_Dead_Branches : Boolean := False;
+      --  Optimization that will cut branches that necessarily contain falsy
+      --  solutions.
+
       Sort_Ctx          : Sort_Context;
+      --  Context used for the topological sort, when reaching a complete
+      --  potential solution. Stored once in the context to save ourselves
+      --  from reallocating data structures everytime.
+
       Tried_Solutions   : Nat_Access := null;
+      --  Number of tried solutions. Stored for analytics purpose, and
+      --  potentially for timeout.
    end record;
    --  Context for the solving of a compound relation
 
    procedure Clear (Sort_Ctx : Sort_Context);
+   --  Clear the data of the sorting context.
 
    function Create return Solving_Context;
+   --  Create a new instance of a solving context. The data will be cleaned up
+   --  and deallocated by a call to ``Destroy``.
+
    procedure Destroy (Ctx : in out Solving_Context);
+   --  Destroy a solving context, and associated data.
+
    function Get_Id
      (Ctx : Solving_Context; Logic_Var : Var) return Positive;
-   --  Get the id of variable ``Logic_Var`` in ``Ctx``
+   --  Get the id of variable ``Logic_Var`` in ``Ctx``.
+   --
+   --  TODO: Due to Aliasing, a logic variable can have several ids.
+   --  Consequently, things like exponential resolution optimization are
+   --  not complete.
 
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation);
+   --  Assign ids to variables that Atom uses or defines.
+
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
+   --  Reset all logic variables. If Reset_Ids is true, only reset ids.
+   --
+   --  TODO: Should really be two separate procedures.
 
    ----------------------------
    --  Comparer pred wrapper --
@@ -139,6 +212,8 @@ package body Langkit_Support.Adalog.Solver is
       Conv     : Converter_Access;
       Eq       : Comparer_Access;
    end record;
+   --  This is a wrapper type, constructed when we have a propagate
+   --  with an ``Eq`` predicate.
 
    function Call (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
    is
@@ -163,6 +238,8 @@ package body Langkit_Support.Adalog.Solver is
       Conv     : Converter_Access;
       Val      : Value_Type;
    end record;
+   --  This is a wrapper type, constructed when we have an assign
+   --  with an ``Eq`` predicate.
 
    function Call (Self : Comparer_Pred; Val : Value_Type) return Boolean
    is
@@ -184,6 +261,10 @@ package body Langkit_Support.Adalog.Solver is
    ----------------------------------
    --  Stateless functors wrappers --
    ----------------------------------
+
+   --  Those types are wrappers used to provide the helper constructors that
+   --  allow users of the solver to pass function converters/predicates rather
+   --  than functor objects, that are more cumbersome to define.
 
    type Predicate_Fn is access function (V : Value_Type) return Boolean;
    type Converter_Fn is access function (V : Value_Type) return Value_Type;
@@ -329,9 +410,8 @@ package body Langkit_Support.Adalog.Solver is
 
    procedure Reserve (V : in out Var_Ids_To_Atoms; Size : Positive) is
    begin
-      Verbose_Trace.Trace ("Reserving " & Size'Image & " in vector");
       while V.Length < Size loop
-         V.Append (Atomic_Relation_Vectors.Empty_Vector);
+         V.Append (Atomic_Relation_Lists.Create);
       end loop;
    end Reserve;
 
@@ -344,7 +424,9 @@ package body Langkit_Support.Adalog.Solver is
    is
    begin
       if Id (Logic_Var) = 0 then
-         Verbose_Trace.Trace ("No id for logic var " & Image (Logic_Var));
+         if Verbose_Trace.Active then
+            Verbose_Trace.Trace ("No id for logic var " & Image (Logic_Var));
+         end if;
          Ctx.Vars.Append (Logic_Var);
          Ctx.Sort_Ctx.Using_Atoms.Append (Atom_Lists.Create);
          Set_Id (Logic_Var, Ctx.Vars.Last_Index);
@@ -489,6 +571,7 @@ package body Langkit_Support.Adalog.Solver is
       --  relation.
 
       use Any_Relation_Lists;
+      use Atomic_Relation_Lists;
 
       ---------------
       -- Topo_Sort --
@@ -697,7 +780,6 @@ package body Langkit_Support.Adalog.Solver is
       end Try_Solution;
 
       V                      : Var_Or_Null;
-      Id                     : Positive;
       Ignore                 : Boolean;
       Vars_To_Atoms          : Var_Ids_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       Anys                   : Any_Relation_List := Ctx.Anys;
@@ -717,17 +799,21 @@ package body Langkit_Support.Adalog.Solver is
             Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
          end loop;
          Ctx.Aliases.Cut (Initial_Aliases_Length);
+         Vars_To_Atoms.Destroy;
+         Vars_To_Atoms := Ctx.Vars_To_Atoms.Copy;
       end Branch_Cleanup;
 
       function Cleanup (Val : Boolean) return Boolean with Inline_Always
       is
       begin
          Branch_Cleanup;
+         Vars_To_Atoms.Destroy;
          Trav_Trace.Decrease_Indent;
          return Val;
       end Cleanup;
 
       function Process_Atom (Atom : Atomic_Relation) return Boolean is
+         Id : Positive;
       begin
          Assign_Ids (Ctx, Atom);
 
@@ -740,7 +826,10 @@ package body Langkit_Support.Adalog.Solver is
                   & " to " & Image (Atom.Target));
             end if;
             Alias (Atom.Unify_From, Atom.Target);
+            Id := Get_Id (Ctx, Atom.Unify_From);
+            Reserve (Vars_To_Atoms, Id);
             Ctx.Aliases.Append (Atom);
+
             return True;
          elsif Atom.Kind = True then
             return True;
@@ -760,7 +849,11 @@ package body Langkit_Support.Adalog.Solver is
                         else Defined_Var (Atom));
                   Id := Get_Id (Ctx, V.Logic_Var);
                   Reserve (Vars_To_Atoms, Id);
-                  Vars_To_Atoms.Get_Access (Id).Append (Atom);
+
+                  Solv_Trace.Trace
+                    ("== Appending " & Image (Atom) & " to Vars_To_Atoms");
+                  Vars_To_Atoms.Get_Access (Id).all
+                    := Atom & Vars_To_Atoms.Get (Id);
                when others => null;
             end case;
          end if;
@@ -819,29 +912,50 @@ package body Langkit_Support.Adalog.Solver is
 
             for Atom of Ctx.Atoms.all loop
                if Atom.Kind = Assign then
-                  V := Defined_Var (Atom);
-                  Id := Get_Id (Ctx, V.Logic_Var);
+                  declare
+                     Id : Positive;
+                  begin
+                     V := Defined_Var (Atom);
 
-                  Reset (V.Logic_Var);
-                  if Vars_To_Atoms.Get (Id).Length > 0 then
-                     --  We have some relations that apply on this variable.
-                     --  Call the assign atom, then see if the relations solve.
-                     Ignore := Solve_Atomic (Atom);
-                     for User of Vars_To_Atoms.Get (Id) loop
+                     --  TODO: with aliasing, a variable can have several ids.
+                     Id := Get_Id (Ctx, V.Logic_Var);
 
-                        --  If applying a predicate fails, then we exit the
-                        --  solving of this branch early.
-
-                        if not Solve_Atomic (User) then
-                           Solv_Trace.Trace ("Aborting due to exp res optim");
-                           Reset (V.Logic_Var);
-                           return Cleanup (True);
-                        end if;
-                     end loop;
-
-                     --  Else, reset the value of var for further solving
                      Reset (V.Logic_Var);
-                  end if;
+
+                     pragma Assert (Vars_To_Atoms.Length >= Id);
+
+                     if Length (Vars_To_Atoms.Get (Id)) > 0 then
+
+                        --  We have some relations that apply on this variable.
+                        --  Call the assign atom, then see if the relations
+                        --  solve.
+
+                        Ignore := Solve_Atomic (Atom);
+                        for User of Vars_To_Atoms.Get (Id) loop
+
+                           --  If applying a predicate fails, then we exit the
+                           --  solving of this branch early.
+
+                           if not Solve_Atomic (User) then
+                              if Solv_Trace.Active then
+                                 Solv_Trace.Trace
+                                   ("Aborting due to exp res optim");
+                                 Solv_Trace.Trace
+                                   ("Current atoms: " & Image (Ctx.Atoms.all));
+                                 Solv_Trace.Trace
+                                   ("Stored atom: " & Image (User));
+                                 Solv_Trace.Trace
+                                   ("Current atom: " & Image (Atom));
+                              end if;
+                              Reset (V.Logic_Var);
+                              return Cleanup (True);
+                           end if;
+                        end loop;
+
+                        --  Else, reset the value of var for further solving
+                        Reset (V.Logic_Var);
+                     end if;
+                  end;
                end if;
             end loop;
          end if;
@@ -861,7 +975,8 @@ package body Langkit_Support.Adalog.Solver is
               (Solve_Compound
                  (Head (Anys),
                   Ctx'Update
-                    (Anys => Tail (Anys))));
+                    (Anys => Tail (Anys),
+                     Vars_To_Atoms => Vars_To_Atoms)));
          end if;
 
       when Kind_Any =>
@@ -879,7 +994,9 @@ package body Langkit_Support.Adalog.Solver is
 
                   if Length (Ctx.Anys) > 0 then
                      if not Solve_Compound
-                       (Head (Anys), Ctx'Update (Anys => Tail (Anys)))
+                       (Head (Anys), Ctx'Update
+                        (Anys          => Tail (Anys),
+                         Vars_To_Atoms => Vars_To_Atoms))
                      then
                         return Cleanup (False);
                      end if;
@@ -891,7 +1008,10 @@ package body Langkit_Support.Adalog.Solver is
 
                when Compound =>
                   pragma Assert (Sub_Rel.Compound_Rel.Kind = Kind_All);
-                  if not Solve_Compound (Sub_Rel.Compound_Rel, Ctx) then
+                  if not Solve_Compound
+                    (Sub_Rel.Compound_Rel,
+                     Ctx'Update (Vars_To_Atoms => Vars_To_Atoms))
+                  then
                      return Cleanup (False);
                   end if;
             end case;
@@ -1497,12 +1617,16 @@ package body Langkit_Support.Adalog.Solver is
 
             for V of Self.Vars loop
                if not Is_Defined (V) then
-                  Solv_Trace.Trace
-                    ("Trying to apply " & Image (Self)
-                     & ", but " & Image (V) & " is not defined");
+                  if Solv_Trace.Active then
+                     Solv_Trace.Trace
+                       ("Trying to apply " & Image (Self)
+                        & ", but " & Image (V) & " is not defined");
+                  end if;
                   return False;
                end if;
-               Solv_Trace.Trace ("Var 1 = " & Element_Image (Get_Value (V)));
+               if Solv_Trace.Active then
+                  Solv_Trace.Trace ("Var = " & Element_Image (Get_Value (V)));
+               end if;
             end loop;
 
             declare
@@ -1521,7 +1645,7 @@ package body Langkit_Support.Adalog.Solver is
          when Unify => raise Assertion_Error with "Should never happen";
       end case;
 
-      if not Ret then
+      if not Ret and then Solv_Trace.Active then
          Solv_Trace.Trace ("Solving " & Image (Self) & " failed!");
       end if;
 

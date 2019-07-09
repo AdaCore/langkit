@@ -37,6 +37,18 @@ package body Langkit_Support.Functional_Lists is
       Self := No_List;
    end Destroy;
 
+   -----------
+   -- Clear --
+   -----------
+
+   procedure Clear (Self : in out List) is
+   begin
+      Self.Length := 0;
+      Self.First := null;
+      --  TODO: this implementation is leaking, because we don't reuse the now
+      --  useless pages of memory already allocated.
+   end Clear;
+
    ---------
    -- "&" --
    ---------

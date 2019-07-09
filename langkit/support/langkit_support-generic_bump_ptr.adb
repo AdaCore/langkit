@@ -25,7 +25,7 @@ with Ada.Unchecked_Deallocation;
 with System;        use System;
 with System.Memory; use System.Memory;
 
-package body Langkit_Support.Bump_Ptr is
+package body Langkit_Support.Generic_Bump_Ptr is
 
    use Pages_Vector;
 
@@ -113,7 +113,8 @@ package body Langkit_Support.Bump_Ptr is
       --  page.
 
       if Page_Size - Pool.Current_Offset < S then
-         Pool.Current_Page := System.Memory.Alloc (Page_Size);
+         Pool.Current_Page := System.Memory.Alloc
+           (System.Memory.size_t (Page_Size));
          Append (Pool.Pages, Pool.Current_Page);
          Pool.Current_Offset := 0;
       end if;
@@ -164,7 +165,7 @@ package body Langkit_Support.Bump_Ptr is
       T : aliased Element_T;
 
       package Gen_Alloc is new
-         Langkit_Support.Bump_Ptr.Alloc (Element_T, Element_Access);
+         Langkit_Support.Generic_Bump_Ptr.Alloc (Element_T, Element_Access);
 
       function Dirty_Conv is new
          Ada.Unchecked_Conversion (Element_Access, Address_Access);
@@ -279,4 +280,4 @@ package body Langkit_Support.Bump_Ptr is
       Free (Bump_Ptr_Pool (Subpool));
    end Deallocate_Subpool;
 
-end Langkit_Support.Bump_Ptr;
+end Langkit_Support.Generic_Bump_Ptr;

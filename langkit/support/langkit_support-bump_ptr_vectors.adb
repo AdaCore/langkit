@@ -22,8 +22,9 @@
 ------------------------------------------------------------------------------
 
 with Ada.Unchecked_Conversion;
+with System;
 
-package body Langkit_Support.Bump_Ptr.Vectors is
+package body Langkit_Support.Bump_Ptr_Vectors is
 
    function Alloc_Chunk (P : Bump_Ptr_Pool; S : Natural) return Chunk_Access;
 
@@ -227,4 +228,4 @@ package body Langkit_Support.Bump_Ptr.Vectors is
       return Index_Type'First + Length (Self) - 1;
    end Last_Index;
 
-end Langkit_Support.Bump_Ptr.Vectors;
+end Langkit_Support.Bump_Ptr_Vectors;

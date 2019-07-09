@@ -21,7 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-private with Langkit_Support.Bump_Ptr;
+private with Langkit_Support.Generic_Bump_Ptr;
 
 --  This package defines a functional singly-linked list type. You can only
 --  prepend elements at the beginning of the list. Iterating on the list is
@@ -96,6 +96,7 @@ package Langkit_Support.Functional_Lists is
    function Head (Self : List) return T;
    function Tail (Self : List) return List;
    procedure Destroy (Self : in out List);
+   procedure Clear (Self : in out List);
    function Has_Element (Self : List) return Boolean;
    function Length (Self : List) return Natural;
 
@@ -115,7 +116,8 @@ package Langkit_Support.Functional_Lists is
 
 private
 
-   package Bump renames Langkit_Support.Bump_Ptr;
+   --  Init a bump pointer poool to be able to store 16 elements of a list.
+   package Bump is new Langkit_Support.Generic_Bump_Ptr (T'Size * 16);
 
    type List_Node;
    type Node_Ptr is access all List_Node;
