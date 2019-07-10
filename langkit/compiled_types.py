@@ -2407,7 +2407,6 @@ class ASTNodeType(BaseStructType):
 
         if env_spec:
             env_spec.ast_node = self
-        self.is_env_spec_inherited = env_spec is None
 
         self.env_spec = env_spec
         """

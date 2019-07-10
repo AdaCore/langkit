@@ -266,7 +266,7 @@
 
    ${exts.include_extension(ext)}
 
-   % if not cls.is_env_spec_inherited:
+   % if cls.env_spec:
 
       function ${cls.name}_Pre_Env_Actions
         (Self                : access ${type_name}'Class;
@@ -331,7 +331,7 @@
    ## Lexical Environments Handling ##
    ###################################
 
-   % if not cls.is_env_spec_inherited:
+   % if cls.env_spec:
 
    <% call_prop = cls.env_spec._render_field_access %>
 
