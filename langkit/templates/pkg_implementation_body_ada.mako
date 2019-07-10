@@ -2746,28 +2746,6 @@ package body ${ada_lib_name}.Implementation is
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return Lexical_Env
    is
-      <%
-         from langkit.utils.types import TypeSet
-
-         ## Env specs might be overriden, so node kind that don't add envs
-         ## might be derived from one that do. Thus, we need to blacklist
-         ## concrete nodes that we know are not adding envs.
-         nodes_adding_env = TypeSet()
-         for n in ctx.astnode_types:
-            if n.env_spec:
-               if n.env_spec.adds_env:
-                  nodes_adding_env.include(n)
-               else:
-                  nodes_adding_env.exclude(n)
-         sorted_nodes_adding_env = sorted(
-            n.ada_kind_name
-            for n in nodes_adding_env.minimal_matched_types
-         )
-         all_nodes_add_env = (
-            sorted_nodes_adding_env == [T.root_node.ada_kind_name]
-         )
-      %>
-
       function Get_Base_Env return Lexical_Env;
       --  Return the environment that we need to rebind before returning
 
@@ -2795,20 +2773,16 @@ package body ${ada_lib_name}.Implementation is
          end Get_Parent_Env;
 
       begin
-         % if sorted_nodes_adding_env:
-            % if not all_nodes_add_env:
-               if Node.Kind in ${' | '.join(sorted_nodes_adding_env)} then
-                  return Get_Parent_Env;
-               else
-                  return Node.Self_Env;
-               end if;
-            % else:
-               return Get_Parent_Env;
-            % endif
-
-         % else:
+         <% node_types = [n.ada_kind_name for n in ctx.astnode_types
+                          if not n.abstract
+                          and n.effective_env_spec
+                          and n.effective_env_spec.adds_env] %>
+         if Node.Kind in ${" | ".join(node_types)}
+         then
+            return Get_Parent_Env;
+         else
             return Node.Self_Env;
-         % endif
+         end if;
       end Get_Base_Env;
 
       Base_Env : Lexical_Env := Get_Base_Env;
