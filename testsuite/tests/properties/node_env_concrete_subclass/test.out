@@ -1,0 +1,5 @@
+main.py: Running...
+def_node lookup "a" <Decl main.txt:1:1-1:6>
+var node lookup "d" <SubDecl main.txt:1:8-1:13>
+main.py: Done.
+Done
