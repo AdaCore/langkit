@@ -2513,6 +2513,16 @@ class ASTNodeType(BaseStructType):
         del entity_type
 
     @property
+    def effective_env_spec(self):
+        """
+        Return the env spec, for this node, whether it's defined on this node
+        or inherited from a parent node.
+        """
+        return self.env_spec if self.env_spec else (
+            self.base.effective_env_spec if self.base else None
+        )
+
+    @property
     def doc(self):
         result = super(ASTNodeType, self).doc
 
