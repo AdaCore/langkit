@@ -2777,12 +2777,14 @@ package body ${ada_lib_name}.Implementation is
                           if not n.abstract
                           and n.effective_env_spec
                           and n.effective_env_spec.adds_env] %>
-         if Node.Kind in ${" | ".join(node_types)}
-         then
-            return Get_Parent_Env;
-         else
-            return Node.Self_Env;
-         end if;
+         return
+         % if node_types:
+           (if Node.Kind in ${" | ".join(node_types)}
+            then Get_Parent_Env
+            else Node.Self_Env);
+         % else:
+           Node.Self_Env;
+         % endif
       end Get_Base_Env;
 
       Base_Env : Lexical_Env := Get_Base_Env;
