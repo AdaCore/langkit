@@ -90,7 +90,39 @@ let initialize = foreign ~from:c_lib "${capi.lib_name}_initialize"
 let () = initialize ()
 
 (* Module used to encode/decode UTF32 strings *)
-module Camomile = CamomileLibrary.Make (CamomileLibrary.DefaultConfig)
+
+(* Camomile needs to know the location of its standard library to work,
+   so we use the following heuristic:
+   - if the directory chosen at build time exists, we assume the installation
+     is ok
+   - otherwise we look for a directory 'share/camomile' next to the binary
+   - otherwise we fail
+*)
+
+module CamomileDefaultConfig = CamomileLibrary.DefaultConfig
+
+module CamomileShareConfig = struct
+  let (^/) = Filename.concat
+  let bin_dir = Filename.dirname Sys.executable_name
+  let share_dir = bin_dir ^/ Filename.parent_dir_name ^/ "share" ^/ "camomile"
+  let datadir    = share_dir ^/ "database"
+  let localedir  = share_dir ^/ "locales"
+  let charmapdir = share_dir ^/ "charmaps"
+  let unimapdir  = share_dir ^/ "mappings"
+end
+
+module type CamomileConfig = module type of CamomileLibrary.DefaultConfig
+
+let camomile_config =
+  if Sys.file_exists CamomileDefaultConfig.datadir then
+    (module CamomileDefaultConfig : CamomileConfig)
+  else if Sys.file_exists CamomileShareConfig.datadir then
+    (module CamomileShareConfig: CamomileConfig)
+  else failwith "no camomile library found"
+
+module CamomileConfig = (val camomile_config)
+
+module Camomile = CamomileLibrary.Make (CamomileConfig)
 
 module Text = struct
   type t = string
