@@ -132,7 +132,7 @@ library project ${lib_name} is
       Mode_Args := ();
       case Build_Mode is
          when "dev" =>
-            Mode_Args := ("-g", "-O0");
+            Mode_Args := ("-g", "-O0", "-fsanitize=address");
 
          when "prod" =>
             --  Debug information is useful even with optimization for

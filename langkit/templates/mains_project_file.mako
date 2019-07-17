@@ -26,7 +26,7 @@ project Mains is
       case Build_Mode is
          when "dev" =>
             for Default_Switches ("Ada") use ("-g", "-O0", "-gnata", "-gnatyg",
-                                              "-gnatwae");
+                                              "-gnatwae", "-fsanitize=address");
 
          when "prod" =>
             --  Debug information is useful even with optimization for
@@ -39,5 +39,9 @@ project Mains is
    package Binder is
       for Switches ("ada") use ("-E");
    end Binder;
+
+   package Linker is
+      for Switches ("ada") use ("-fsanitize=address");
+   end Linker;
 
 end Mains;
