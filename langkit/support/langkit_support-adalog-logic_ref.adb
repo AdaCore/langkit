@@ -165,7 +165,9 @@ package body Langkit_Support.Adalog.Logic_Ref is
    procedure Set_Id (Self : Raw_Var; Id : Natural)
    is
    begin
-      if Self.Aliased_To /= null then
+      if Id = 0 then
+         Self.Aliased_To := null;
+      elsif Self.Aliased_To /= null then
          Set_Id (Self.Aliased_To, Id);
       end if;
       Self.Id := Id;
