@@ -532,6 +532,12 @@ private package ${ada_lib_name}.Implementation is
    % endif
    % endfor
 
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (C : Character_Type_Array_Access) return Hash_Type;
+
    ------------------------------
    -- Root AST node properties --
    ------------------------------

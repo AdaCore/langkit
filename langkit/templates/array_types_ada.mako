@@ -20,6 +20,7 @@
 <%def name="incomplete_decl(cls)">
    type ${cls.pointed};
    type ${cls.name} is access all ${cls.pointed};
+   ${decl_hash(cls)}
 </%def>
 
 <%def name="ada_api_converters_decl(cls)">
@@ -36,6 +37,36 @@
           % endif
           ) return ${cls.name};
    % endif
+</%def>
+
+<%def name="decl_hash(cls)">
+   % if cls.requires_hash_function and not cls.is_string_type:
+   function Hash (R : ${cls.name}) return Hash_Type;
+   % endif
+</%def>
+
+<%def name="body_hash(cls)">
+   % if cls.requires_hash_function and not cls.is_string_type :
+      ----------
+      -- Hash --
+      ----------
+
+      function Hash (R : ${cls.name}) return Hash_Type is
+         Result : Hash_Type := 0;
+      begin
+         for I in R.Items'Range loop
+            % if cls.element_type.is_entity_type:
+            Result := Result xor (Hash (R.Items (I).node)) + Hash_Type (I);
+            % else:
+            Result := Result xor (Hash (R.Items (I))) + Hash_Type (I);
+            % endif
+         end loop;
+
+         return Result;
+      end Hash;
+
+   % endif
+
 </%def>
 
 <%def name="ada_api_converters_body(cls)">
@@ -332,5 +363,7 @@
          % endif
       end Trace_Image;
    % endif
+
+   ${body_hash(cls)}
 
 </%def>

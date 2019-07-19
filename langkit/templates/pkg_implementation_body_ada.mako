@@ -15,6 +15,7 @@ with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Finalization;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Strings.Wide_Wide_Hash;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
@@ -1920,6 +1921,13 @@ package body ${ada_lib_name}.Implementation is
    % endif
 
    ${struct_types.body_hash(T.entity)}
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash(C : Character_Type_Array_Access) return Hash_Type is
+      (Ada.Strings.Wide_Wide_Hash (C.Items));
 
    --------------------------
    -- Big integers wrapper --
