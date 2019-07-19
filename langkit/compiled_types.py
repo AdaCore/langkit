@@ -1481,6 +1481,7 @@ class NoCompiledType(CompiledType):
     def is_refcounted(self):
         raise NotImplementedError()
 
+
 no_compiled_type = NoCompiledType('NoCompiledType')
 
 
@@ -3352,7 +3353,8 @@ class ArrayType(CompiledType):
             nullexpr=self.null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
-            has_equivalent_function=True)
+            has_equivalent_function=True,
+            hashable=element_type.hashable)
         CompiledTypeRepo.array_types.add(self)
 
         # Text_Type is always defined, since it comes from
@@ -3540,6 +3542,13 @@ class ArrayType(CompiledType):
     def require_unique_function(self):
         self.element_type.require_hash_function()
         self._requires_unique_function = True
+
+    def require_hash_function(self):
+        super(ArrayType, self).require_hash_function()
+
+        # Array hash functions uses the element type's hash function, so
+        # it has to be required.
+        self.element_type.require_hash_function()
 
 
 class EnumType(CompiledType):
