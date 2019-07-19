@@ -12,14 +12,16 @@ use Langkit_Support.Adalog.Main_Support;
 --  shown when printing a relation.
 
 procedure Main is
-   use Int_Solver;
+   use T_Solver;
    use Refs;
 
    function S return String renames GNAT.Source_Info.Source_Location;
 
+   function Is_Even (Val : Integer) return Boolean is (Val mod 2 = 0);
+
    function Is_Even (Var : Refs.Raw_Var; Dbg_String : String) return Relation
    is (Predicate
-        (Var, Langkit_Support.Adalog.Main_Support.Is_Even, Dbg_String));
+        (Var, Predicate (Is_Even'Access, "Is_Even"), Dbg_String));
 
    X : Refs.Raw_Var := Create ("X");
    Y : Refs.Raw_Var := Create ("Y");

@@ -2,11 +2,11 @@
 
 Solving relation:
 All: 
-    %X <-> %Y main.adb:34
-    Any: main.adb:34
-        1 -> %X main.adb:34
-        2 -> %X main.adb:34
-        3 -> %X main.adb:34
+    %X <-> %Y main.adb:36
+    Any: main.adb:36
+        1 -> %X main.adb:36
+        2 -> %X main.adb:36
+        3 -> %X main.adb:36
 
 
 Solution: [Y = 1, X = 1]
@@ -15,22 +15,22 @@ Solution: [Y = 3, X = 3]
 ========================================================================
 
 Solving relation:
-All: main.adb:40
-    Any: main.adb:38
-        1 -> %X main.adb:38
-        2 -> %X main.adb:38
-        3 -> %X main.adb:38
+All: main.adb:42
+    Any: main.adb:40
+        1 -> %X main.adb:40
+        2 -> %X main.adb:40
+        3 -> %X main.adb:40
 
-    Any: main.adb:39
+    Any: main.adb:41
         10 -> %X 
         20 -> %X 
-        Is_Even?(%Y) main.adb:39
+        Is_Even?(%Y) main.adb:41
 
-    Any: main.adb:40
-        1 -> %Y main.adb:40
-        3 -> %Y main.adb:40
-        5 -> %Y main.adb:40
-        10 -> %Y main.adb:40
+    Any: main.adb:42
+        1 -> %Y main.adb:42
+        3 -> %Y main.adb:42
+        5 -> %Y main.adb:42
+        10 -> %Y main.adb:42
 
 
 Solution: [Y = 10, X = 1]
@@ -39,66 +39,65 @@ Solution: [Y = 10, X = 3]
 ========================================================================
 
 Solving relation:
-All: main.adb:44
-    Is_Even?(%Y) main.adb:44
-    Any: main.adb:44
-        1 -> %X main.adb:44
-        2 -> %X main.adb:44
-        3 -> %X main.adb:44
+All: main.adb:46
+    Is_Even?(%Y) main.adb:46
+    Any: main.adb:46
+        1 -> %X main.adb:46
+        2 -> %X main.adb:46
+        3 -> %X main.adb:46
 
 
 ========================================================================
 
 Solving relation:
-All: main.adb:48
-    Is_Even?(%Y) main.adb:48
-    Is_Even?(%X) main.adb:48
+All: main.adb:50
+    Is_Even?(%Y) main.adb:50
+    Is_Even?(%X) main.adb:50
 
 ========================================================================
 
 Solving relation:
-Any: main.adb:51
-    Is_Even?(%Y) main.adb:51
-    1 -> %X main.adb:51
-    2 -> %X main.adb:51
+Any: main.adb:53
+    Is_Even?(%Y) main.adb:53
+    1 -> %X main.adb:53
+    2 -> %X main.adb:53
 
 Solution: [Y = <undefined>, X = 1]
 Solution: [Y = <undefined>, X = 2]
 ========================================================================
 
 Solving relation:
-Any: main.adb:54
-    Is_Even?(%X) main.adb:54
-    Is_Even?(%Y) main.adb:54
-
-========================================================================
-
-Solving relation:
-Any: main.adb:57
+Any: main.adb:56
     Is_Even?(%X) main.adb:56
-    All: main.adb:57
-        Any: main.adb:57
-            1 -> %X main.adb:57
-            2 -> %X main.adb:57
-            3 -> %X main.adb:57
+    Is_Even?(%Y) main.adb:56
 
-        Is_Even?(%Y) main.adb:57
+========================================================================
+
+Solving relation:
+Any: main.adb:59
+    Is_Even?(%X) main.adb:58
+    All: main.adb:59
+        Any: main.adb:59
+            1 -> %X main.adb:59
+            2 -> %X main.adb:59
+            3 -> %X main.adb:59
+
+        Is_Even?(%Y) main.adb:59
 
 
 ========================================================================
 
 Solving relation:
-All: main.adb:62
-    Any: main.adb:59
-        1 -> %X main.adb:59
-        2 -> %X main.adb:59
-        3 -> %X main.adb:59
-
-    Is_Even?(%Y) main.adb:60
+All: main.adb:64
     Any: main.adb:61
+        1 -> %X main.adb:61
         2 -> %X main.adb:61
+        3 -> %X main.adb:61
 
-    %X <-> %Y main.adb:62
+    Is_Even?(%Y) main.adb:62
+    Any: main.adb:63
+        2 -> %X main.adb:63
+
+    %X <-> %Y main.adb:64
 
 Solution: [Y = 2, X = 2]
-Done.
