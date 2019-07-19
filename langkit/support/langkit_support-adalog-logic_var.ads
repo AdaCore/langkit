@@ -73,11 +73,18 @@ generic
    --  Return a string image of Self
 
    with function Id (Self : Logic_Var_Type) return Natural is <>;
+   --  Return the Id of this variable. Variables have an Id of 0 by default, >
+   --  0 when set by the solver.
+
    with procedure Set_Id (Self : Logic_Var_Type; Id : Natural) is <>;
+   --  Set the Id for logic variable. If 0, resets the Id of logic variable.
+   --  Setting to 0 will also unalias the variable, if it was aliased.
 
    with procedure Alias (Self, Other : Logic_Var_Type) is <>;
+   --  Alias this variable to another variable. This
 
    with function Get_Alias (Self : Logic_Var_Type) return Logic_Var_Type is <>;
+   --  Get the alias for this logic variable, if there is one.
 
    No_Var : Logic_Var_Type;
 package Langkit_Support.Adalog.Logic_Var is
