@@ -117,13 +117,14 @@ package body Langkit_Support.Adalog.Solver is
 
    function Call (Self : Comparer_N_Pred; Vals : Value_Array) return Boolean
    is
-     (Self.Eq.Compare (Vals (1), Vals (2)));
+     (Self.Eq.Compare (Vals (1), Self.Conv.Convert (Vals (2))));
 
    function Image (Self : Comparer_N_Pred) return String is (Self.Eq.Image);
 
    overriding procedure Destroy (Self : in out Comparer_N_Pred) is
    begin
       Free (Self.Eq);
+      Free (Self.Conv);
    end Destroy;
 
    type Comparer_Pred is new Predicate_Type with record
@@ -134,7 +135,7 @@ package body Langkit_Support.Adalog.Solver is
 
    function Call (Self : Comparer_Pred; Val : Value_Type) return Boolean
    is
-     (Self.Eq.Compare (Val, Self.Val));
+     (Self.Eq.Compare (Val, Self.Conv.Convert (Self.Val)));
 
    function Image (Self : Comparer_Pred) return String is (Self.Eq.Image);
 
