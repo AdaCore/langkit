@@ -143,6 +143,10 @@
       --  Return a copy of A with duplicated elements removed
    % endif
 
+   % if cls.requires_hash_function:
+      function Hash (R : ${cls.name}) return Hash_Type;
+   % endif
+
   procedure Free is new Ada.Unchecked_Deallocation
     (${cls.pointed}, ${cls.name});
 </%def>
@@ -400,6 +404,21 @@
             return Result;
          end;
       end Make_Unique;
+   % endif
+
+   % if cls.requires_hash_function:
+      ----------
+      -- Hash --
+      ----------
+
+      function Hash (R : ${cls.name}) return Hash_Type is
+         Result : Hash_Type := Initial_Hash;
+      begin
+         for I in R.Items'Range loop
+            Result := Combine (Result, Hash (R.Items (I)));
+         end loop;
+         return Result;
+      end Hash;
    % endif
 
 </%def>
