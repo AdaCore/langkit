@@ -27,6 +27,7 @@ with Ada.Containers.Vectors;
 
 with Langkit_Support.Adalog.Logic_Ref;
 with Langkit_Support.Adalog.Solver;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 package Langkit_Support.Adalog.Main_Support is
 
@@ -43,37 +44,57 @@ package Langkit_Support.Adalog.Main_Support is
    --  Register R and return it. This is used to keep track of allocated
    --  relations in testcases.
 
-   function R_All (Rels : Relation_Array) return Relation
-   is (+Create_All (Rels));
-   function R_Any (Rels : Relation_Array) return Relation
-   is (+Create_Any (Rels));
+   function "-" (S : String) return String_Access is (new String'(S));
+
+   function R_All
+     (Rels : Relation_Array; Dbg_String : String := "") return Relation
+   is (+Create_All (Rels, -Dbg_String));
+
+   function R_Any
+     (Rels : Relation_Array; Dbg_String : String := "") return Relation
+   is (+Create_Any (Rels, -Dbg_String));
+
    function "or" (L, R : Relation) return Relation is (+Create_Any ((L, R)));
    function "and" (L, R : Relation) return Relation is (+Create_All ((L, R)));
-   function Domain (Var  : Refs.Raw_Var; Rels : Value_Array) return Relation
-   is (+Create_Domain (Var, Rels));
+
+   function Domain (Var        : Refs.Raw_Var;
+                    Rels       : Value_Array;
+                    Dbg_String : String := "") return Relation
+   is (+Create_Domain (Var, Rels, -Dbg_String));
+
    function "=" (Var  : Refs.Raw_Var; Val : Integer) return Relation
    is (+Create_Assign (Var, Val));
+
    function "=" (L, R : Refs.Raw_Var) return Relation
    is (+Create_Unify (L, R));
+
    function Propagate
      (L, R : Refs.Raw_Var;
       Conv : Converter_Type'Class := No_Converter;
-      Eq   : Comparer_Type'Class := No_Comparer) return Relation
+      Eq         : Comparer_Type'Class := No_Comparer;
+      Dbg_String : String := "") return Relation
    is
-      (+Create_Propagate (L, R, Conv, Eq));
+     (+Create_Propagate (L, R, Conv, Eq, -Dbg_String));
+
+   function Unify
+     (L, R : Refs.Raw_Var; Dbg_String : String := "") return Relation
+   is (+Create_Unify (L, R, -Dbg_String));
 
    function Assign
      (L    : Refs.Raw_Var;
       R    : Integer;
       Conv : Converter_Type'Class := No_Converter;
-      Eq   : Comparer_Type'Class := No_Comparer) return Relation
+      Eq         : Comparer_Type'Class := No_Comparer;
+      Dbg_String : String := "") return Relation
    is
-     (+Create_Assign (L, R, Conv, Eq));
+     (+Create_Assign (L, R, Conv, Eq, -Dbg_String));
 
    function Predicate
-     (L : Refs.Raw_Var; P : Predicate_Type'Class) return Relation
+     (L          : Refs.Raw_Var;
+      P          : Predicate_Type'Class;
+      Dbg_String : String := "") return Relation
    is
-     (+Create_Predicate (L, P));
+     (+Create_Predicate (L, P, -Dbg_String));
 
    procedure Solve_All (Rel : Relation; Show_Relation : Boolean := False);
 

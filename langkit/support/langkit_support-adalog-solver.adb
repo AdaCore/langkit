@@ -973,6 +973,10 @@ package body Langkit_Support.Adalog.Solver is
       Conv_Ptr : Converter_Access := null;
       Eq_Ptr   : Comparer_Access := null;
       Ass      : Relation;
+
+      function New_Dbg_Info return String_Access is
+        (if Debug_String /= null then new String'(Debug_String.all) else null)
+          with Inline_Always;
    begin
       --  TODO: This is not inlined into the aggregate expression because of
       --  a bug in GNAT.
@@ -994,13 +998,15 @@ package body Langkit_Support.Adalog.Solver is
       if Eq_Ptr /= null then
          declare
             N_Pred : Relation :=
-              Create_Predicate (Logic_Var, Comparer_Pred'(Eq_Ptr, Value));
-            Tmp    : Relation := Create_Any ((Ass, Create_True));
+              Create_Predicate (Logic_Var, Comparer_Pred'(Eq_Ptr, Value),
+                                New_Dbg_Info);
+            Tmp    : Relation := Create_Any
+              ((Ass, Create_True (New_Dbg_Info)), New_Dbg_Info);
             Ret    : constant Relation :=
               Create_All
                 ((Tmp, N_Pred), Debug_String => Debug_String);
          begin
-            Ass.Debug_Info := null;
+            Ass.Debug_Info := New_Dbg_Info;
             Dec_Ref (Tmp);
             Dec_Ref (N_Pred);
             Dec_Ref (Ass);
@@ -1044,16 +1050,23 @@ package body Langkit_Support.Adalog.Solver is
             From   => From,
             Target => To),
          Debug_String => Debug_String);
+
+      function New_Dbg_Info return String_Access is
+        (if Debug_String /= null then new String'(Debug_String.all) else null)
+          with Inline_Always;
    begin
       if Eq /= null then
          declare
             N_Pred : Relation :=
-              Create_N_Predicate ((From, To), Comparer_N_Pred'(Eq => Eq));
-            Tmp    : Relation := Create_Any ((Propag, Create_True));
+              Create_N_Predicate ((From, To), Comparer_N_Pred'(Eq => Eq),
+                                  New_Dbg_Info);
+            Tmp    : Relation := Create_Any ((Propag,
+                                             Create_True (New_Dbg_Info)),
+                                             New_Dbg_Info);
             Ret    : constant Relation := Create_All
               ((Tmp, N_Pred), Debug_String => Debug_String);
          begin
-            Propag.Debug_Info := null;
+            Propag.Debug_Info := New_Dbg_Info;
             Dec_Ref (Tmp);
             Dec_Ref (N_Pred);
             Dec_Ref (Propag);
@@ -1099,9 +1112,16 @@ package body Langkit_Support.Adalog.Solver is
       Debug_String : String_Access := null) return Relation
    is
       Rels : Relation_Array (Domain'Range);
+
+      function New_Dbg_Info return String_Access is
+        (if Debug_String /= null then new String'(Debug_String.all) else null)
+          with Inline_Always;
+
    begin
       for I in Domain'Range loop
-         Rels (I) := Create_Assign (Logic_Var, Domain (I));
+         Rels (I) := Create_Assign
+           (Logic_Var, Domain (I),
+            Debug_String => New_Dbg_Info);
       end loop;
 
       return R : constant Relation := Create_Any
@@ -1356,16 +1376,17 @@ package body Langkit_Support.Adalog.Solver is
    -----------
 
    function Image
-     (Self : Compound_Relation; Level : Natural := 0) return String
+     (Self         : Compound_Relation;
+      Level        : Natural := 0;
+      Debug_String : String_Access := null) return String
    is
       Ret : XString;
    begin
-      case Self.Kind is
-         when Kind_All =>
-            Ret.Append ("All:" & ASCII.LF);
-         when Kind_Any =>
-            Ret.Append ("Any:" & ASCII.LF);
-      end case;
+      Ret.Append
+        ((case Self.Kind is
+            when Kind_All => "All: ",
+            when Kind_Any => "Any: ")
+         & (if Debug_String /= null then Debug_String.all else "") & ASCII.LF);
 
       for Rel of Self.Rels loop
          Ret.Append ((1 .. Level + 4 => ' ')
@@ -1382,8 +1403,13 @@ package body Langkit_Support.Adalog.Solver is
    function Image (Self : Relation; Level : Natural := 0) return String is
    begin
       case Self.Kind is
-         when Compound => return Image (Self.Compound_Rel, Level);
-         when Atomic => return Image (Self.Atomic_Rel);
+         when Compound =>
+            return Image (Self.Compound_Rel, Level, Self.Debug_Info);
+         when Atomic => return
+              Image (Self.Atomic_Rel)
+              & (if Self.Debug_Info /= null
+                 then " " & Self.Debug_Info.all
+                 else "");
       end case;
    end Image;
 

@@ -366,7 +366,9 @@ private
 
    procedure Destroy (Self : in out Compound_Relation);
    function Image
-     (Self : Compound_Relation; Level : Natural := 0) return String;
+     (Self         : Compound_Relation;
+      Level        : Natural := 0;
+      Debug_String : String_Access := null) return String;
 
    --------------
    -- Relation --

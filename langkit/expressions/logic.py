@@ -83,7 +83,9 @@ class Bind(AbstractExpression):
                     'Eq => Comparer_{}'.format(self.eq_prop.uid)
                 ))
 
-            constructor_args.append(sloc_info_arg(abstract_expr.location))
+            constructor_args.append('Debug_String => {}'.format(
+                sloc_info_arg(abstract_expr.location)
+            ))
 
             if rhs.type.matches(T.root_node.entity):
                 fn_name = 'Solver.Create_Assign'
@@ -290,7 +292,7 @@ class DomainExpr(ComputingExpr):
     def _render_pre(self):
         return render('properties/domain_ada',
                       expr=self,
-                      sloc_info_arg=sloc_info_arg(self.location))
+                      sloc_info_arg=sloc_info_arg(self.abstract_expr.location))
 
     @property
     def subexprs(self):
