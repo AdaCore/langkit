@@ -24,7 +24,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Langkit_Support.Images;
 
-package body Langkit_Support.Adalog.Main_Support is
+package body Langkit_Support.Adalog.Generic_Main_Support is
 
    ------------
    -- Create --
@@ -48,16 +48,6 @@ package body Langkit_Support.Adalog.Main_Support is
       return R;
    end "+";
 
-   -------------------
-   -- Element_Image --
-   -------------------
-
-   function Element_Image (I : Integer) return String is
-      Img : constant String := I'Image;
-   begin
-      return (if I > 0 then Img (2 .. Img'Length) else Img);
-   end Element_Image;
-
    --------------------
    -- Safe_Get_Value --
    --------------------
@@ -67,7 +57,7 @@ package body Langkit_Support.Adalog.Main_Support is
 
    function Safe_Get_Value (V : Refs.Raw_Var) return String is
      ((if Is_Defined (V)
-       then Element_Image (Get_Value (V))
+       then Image (Get_Value (V))
        else "<undefined>"));
 
    ---------------
@@ -137,4 +127,4 @@ package body Langkit_Support.Adalog.Main_Support is
 
    Dummy_Finalize : Control.C;
 
-end Langkit_Support.Adalog.Main_Support;
+end Langkit_Support.Adalog.Generic_Main_Support;
