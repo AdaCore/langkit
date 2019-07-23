@@ -152,21 +152,20 @@
       type_name = field.struct.entity.api_name
       ret_type = field.type.entity if field.type.is_ast_node else field.type
       bare_type = field.struct
+
+      node_expr = field.struct.internal_conversion(
+         T.root_node, 'Node.Internal.Node'
+      )
+      field_expr = 'Implementation.{} ({})'.format(field.name, node_expr)
    %>
 
    function ${field.name}
      (Node : ${type_name}'Class) return ${ret_type.api_name}
    is
-      Self   : constant ${bare_type.name} := ${bare_type.internal_conversion(
-         T.root_node, 'Node.Internal.Node')};
-      Result : constant ${field.type.name} := ${(
-          field.type.extract_from_storage_expr(
-              node_expr='Self',
-              base_expr='Self.{}'.format(field.name)
-          )
-      )};
+      Result : ${field.type.name};
    begin
       Check_Safety_Net (Node.Safety_Net);
+      Result := ${field_expr};
       % if field.type.is_ast_node:
          return (Internal   => (${T.root_node.internal_conversion(
                                      field.type, 'Result')},
@@ -178,13 +177,8 @@
    end ${field.name};
 
    % if field.type.is_ast_node:
-      <%
-         node_expr = field.struct.internal_conversion(
-            T.root_node, 'Node.Internal.Node')
-         field_expr = '{}.{}'.format(node_expr, field.name)
-         root_field_expr = T.root_node.internal_conversion(field.type,
-                                                           field_expr)
-      %>
+      <% root_field_expr = T.root_node.internal_conversion(field.type,
+                                                           field_expr) %>
 
       % if field.type.is_bool_node:
          function ${field.name} (Node : ${type_name}'Class) return Boolean is
