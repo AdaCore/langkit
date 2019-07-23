@@ -2449,11 +2449,13 @@ class GetSymbol(AbstractExpression):
             'Token node expected, but the input {} node is not a token node'
             .format(node.type.dsl_name)
         )
+
         return self.construct_static(node, abstract_expr=self)
 
     @staticmethod
     def construct_static(node_expr, abstract_expr=None):
-        return CallExpr('Sym', 'Get_Symbol', T.Symbol, [node_expr],
+        return CallExpr('Sym', 'Get_Symbol', T.Symbol,
+                        [node_expr.convert_node(T.root_node)],
                         abstract_expr=abstract_expr)
 
     def __repr__(self):
