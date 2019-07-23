@@ -293,6 +293,8 @@ class OrderingTest(AbstractExpression):
                         self.LE: 'Less_Or_Equal',
                         self.GT: 'Greater_Than',
                         self.GE: 'Greater_Or_Equal'}[self.operator]
+            lhs = lhs.convert_node(T.root_node)
+            rhs = rhs.convert_node(T.root_node)
             return CallExpr('Node_Comp', 'Compare', T.Bool,
                             [lhs, rhs, relation], abstract_expr=self)
 
