@@ -23,6 +23,8 @@
 
 with Ada.Assertions; use Ada.Assertions;
 
+with GNAT.Traceback.Symbolic; use GNAT.Traceback.Symbolic;
+
 with GNATCOLL.Strings; use GNATCOLL.Strings;
 
 with Langkit_Support.Functional_Lists;
@@ -1083,8 +1085,11 @@ package body Langkit_Support.Adalog.Solver is
 
       Cleanup;
    exception
-      when others =>
+      when E : others =>
          Solver_Trace.Trace ("Exception during solving... Cleaning up");
+         if Verbose_Trace.Is_Active then
+            Verbose_Trace.Trace (Symbolic_Traceback (E));
+         end if;
          Cleanup;
          raise;
    end Solve;
