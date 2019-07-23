@@ -1259,7 +1259,8 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(node)">
          return ${node.name}_Pre_Env_Actions
-           (${node.name} (Self), Bound_Env, Root_Env, Add_To_Env_Only);
+           (${node.internal_conversion(T.root, 'Self')},
+            Bound_Env, Root_Env, Add_To_Env_Only);
       </%def>
       <%def name="default()"> return Null_Lexical_Env; </%def>
       </%self:case_dispatch>
@@ -1271,13 +1272,15 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    procedure Post_Env_Actions
-     (Self                : access ${root_node_value_type}'Class;
+     (Self                : access ${root_node_value_type};
       Bound_Env, Root_Env : AST_Envs.Lexical_Env) is
    begin
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.post_actions:
-         ${n.name}_Post_Env_Actions (${n.name} (Self), Bound_Env, Root_Env);
+         ${n.name}_Post_Env_Actions
+           (${n.internal_conversion(T.root, 'Self')},
+            Bound_Env, Root_Env);
          % else:
          null;
          % endif
