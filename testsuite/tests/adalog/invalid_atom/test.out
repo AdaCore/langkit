@@ -1,0 +1,3 @@
+Solving relation:
+Is_Even?(%X) 
+Invalid equation Is_Even?(%X): depends on undefined var %X
