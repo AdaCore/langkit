@@ -133,7 +133,7 @@ package body Langkit_Support.Adalog.Solver is
 
    type Solving_Context is record
       Cb                : Callback_Type;
-      --  User callback, to be called when a solution is found.
+      --  User callback, to be called when a solution is found
 
       Atoms             : Atoms_Vector_Access;
       --  Current flat list of atoms that will at the end of the traversal of a
@@ -148,7 +148,7 @@ package body Langkit_Support.Adalog.Solver is
 
       Vars              : Logic_Var_Vector_Access;
       --  Set of all variables. TODO: Store an array rt. a vector by traversing
-      --  the equation first
+      --  the equation first.
 
       Vars_To_Atoms     : Var_Ids_To_Atoms;
       --  Stores a mapping of variables to atoms, used for exponential
@@ -179,14 +179,14 @@ package body Langkit_Support.Adalog.Solver is
    --  Context for the solving of a compound relation
 
    procedure Clear (Sort_Ctx : Sort_Context);
-   --  Clear the data of the sorting context.
+   --  Clear the data of the sorting context
 
    function Create return Solving_Context;
    --  Create a new instance of a solving context. The data will be cleaned up
    --  and deallocated by a call to ``Destroy``.
 
    procedure Destroy (Ctx : in out Solving_Context);
-   --  Destroy a solving context, and associated data.
+   --  Destroy a solving context, and associated data
 
    function Get_Id
      (Ctx : Solving_Context; Logic_Var : Var) return Positive;
@@ -197,7 +197,7 @@ package body Langkit_Support.Adalog.Solver is
    --  not complete.
 
    procedure Assign_Ids (Ctx : Solving_Context; Atom : Atomic_Relation);
-   --  Assign ids to variables that Atom uses or defines.
+   --  Assign ids to variables that Atom uses or defines
 
    procedure Reset_Vars (Ctx : Solving_Context; Reset_Ids : Boolean := False);
    --  Reset all logic variables. If Reset_Ids is true, only reset ids.
@@ -917,7 +917,7 @@ package body Langkit_Support.Adalog.Solver is
                   begin
                      V := Defined_Var (Atom);
 
-                     --  TODO: with aliasing, a variable can have several ids.
+                     --  TODO: with aliasing, a variable can have several ids
                      Id := Get_Id (Ctx, V.Logic_Var);
 
                      Reset (V.Logic_Var);
