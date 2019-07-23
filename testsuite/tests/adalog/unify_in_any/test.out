@@ -1,0 +1,24 @@
+Solving relation:
+All: 
+    Any: 
+        %X <-> %Y
+        True
+
+    Any: 
+        1 -> %X 
+        2 -> %X 
+        True
+
+    Any: 
+        -1 -> %Y 
+        -2 -> %Y 
+        True
+
+    N_Predicate?(%X, %Y) 
+
+Solution: [%Y = -1, %X = 1]
+Solution: [%Y = -1, %X = -1]
+Solution: [%Y = -2, %X = 2]
+Solution: [%Y = -2, %X = -2]
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
