@@ -2241,8 +2241,10 @@ class EntityType(StructType):
         return result
 
     def to_internal_expr(self, public_expr, context=None):
-        return ('({type} ({name}.Internal.Node), {name}.Internal.Info)'
-                .format(type=self.element_type.name, name=public_expr))
+        return ('({internal_node}, {public_entity}.Internal.Info)'.format(
+            internal_node=self.element_type.to_internal_expr(public_expr),
+            public_entity=public_expr
+        ))
 
 
 class ASTNodeType(BaseStructType):
@@ -3241,8 +3243,10 @@ class ASTNodeType(BaseStructType):
         return result
 
     def to_internal_expr(self, public_expr, context=None):
-        return ('{type} ({name}.Internal.Node)'
-                .format(type=self.name, name=public_expr))
+        return self.internal_conversion(
+            T.root_node,
+            '{}.Internal.Node'.format(public_expr)
+        )
 
     def internal_converter(self, from_type):
         """
