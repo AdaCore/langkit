@@ -1152,10 +1152,10 @@ package body ${ada_lib_name}.Implementation is
          % endif
 
          --  Add the element to the environment
-         Add (Self  => Dest_Env,
-              Key   => Mapping.Key,
-              Value => Mapping.Val,
-              MD    => MD,
+         Add (Self     => Dest_Env,
+              Key      => Mapping.Key,
+              Value    => Mapping.Val,
+              MD       => MD,
               Resolver => Resolver);
 
          --  If we're adding the element to an environment that belongs to a
