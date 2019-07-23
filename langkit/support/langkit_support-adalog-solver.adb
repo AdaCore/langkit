@@ -1069,18 +1069,28 @@ package body Langkit_Support.Adalog.Solver is
          when Atomic =>
             --  If we're trying to eval a singleton relation that doesn't
             --  define anything, then it's an early binding error.
-            if not Defined_Var (Self.Atomic_Rel).Exists then
-               raise Early_Binding_Error;
+            if Used_Var (Self.Atomic_Rel).Exists then
+               --  TODO: This is incomplete or N_Preds, since they depend on
+               --  more than one var. Not very important.
+               raise Early_Binding_Error
+                 with "Invalid equation " & Image (Self.Atomic_Rel)
+                 & ": depends on undefined var "
+                 & Image (Used_Var (Self.Atomic_Rel).Logic_Var);
             end if;
 
-            declare
-               V : constant Var := Defined_Var (Self.Atomic_Rel).Logic_Var;
-            begin
-               Reset (V);
+            if Defined_Var (Self.Atomic_Rel).Exists then
+               --  Reset defined var if it exists, and solve
+               Reset (Defined_Var (Self.Atomic_Rel).Logic_Var);
                if Solve_Atomic (Self.Atomic_Rel) then
-                  Ignore := Solution_Callback ((1 => V));
+                  Ignore := Solution_Callback
+                    ((1 => Defined_Var (Self.Atomic_Rel).Logic_Var));
                end if;
-            end;
+            elsif Solve_Atomic (Self.Atomic_Rel) then
+               --  Solve with empty vars array. TODO: Maybe try to factor that
+               --  code ?
+               Ignore := Solution_Callback ((1 .. 0 => <>));
+            end if;
+
       end case;
 
       Cleanup;
