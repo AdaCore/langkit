@@ -361,8 +361,7 @@
          for Mapping of Mappings.Items loop
          % endif
 
-         Add_To_Env (${root_node_type_name} (Self),
-                     Mapping, Initial_Env, Resolver);
+         Add_To_Env (Self_As_Root, Mapping, Initial_Env, Resolver);
          % if not is_array:
          Dec_Ref (Mapping.Dest_Env);
          % endif
@@ -385,10 +384,10 @@
 
             Env : Lexical_Env :=
               ${(call_prop(ref_env.dest_env_prop)
-                 if ref_env.dest_env_prop else "Self.Self_Env")};
+                 if ref_env.dest_env_prop else "Self_As_Root.Self_Env")};
          begin
             Ref_Env
-              (${root_node_type_name} (Self),
+              (Self_As_Root,
                Env,
                Ref_Env_Nodes,
                ${ref_env.resolver.name}'Access,
@@ -413,21 +412,21 @@
       G := Simple_Env_Getter (Initial_Env);
       % if has_dyn_env:
       if Initial_Env not in Root_Env | Empty_Env
-         and then Initial_Env.Env.Node.Unit /= Self.Unit
+         and then Initial_Env.Env.Node.Unit /= Self_As_Root.Unit
       then
-         G := Dyn_Env_Getter (${env_getter}'Access, Self);
+         G := Dyn_Env_Getter (${env_getter}'Access, Self_As_Root);
       end if;
       % endif
 
-      Self.Self_Env := AST_Envs.Create_Lexical_Env
+      Self_As_Root.Self_Env := AST_Envs.Create_Lexical_Env
         (Parent            => ${"No_Env_Getter" if add_env.no_parent else "G"},
-         Node              => Self,
+         Node              => Self_As_Root,
          Transitive_Parent => ${call_prop(add_env.transitive_parent_prop)},
-         Owner             => Self.Unit);
+         Owner             => Self_As_Root.Unit);
 
-      Initial_Env := Self.Self_Env;
+      Initial_Env := Self_As_Root.Self_Env;
 
-      Register_Destroyable (Self.Unit, Self.Self_Env.Env);
+      Register_Destroyable (Self_As_Root.Unit, Self_As_Root.Self_Env.Env);
 
    </%def>
 
@@ -468,7 +467,8 @@
 
    function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
       Self_As_Root : constant ${root_node_type_name} := E.Node;
-      Self : constant ${cls.name} := ${cls.name} (Self_As_Root);
+      Self         : constant ${cls.name} :=
+         ${cls.internal_conversion(T.root_node, 'Self_As_Root')};
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
@@ -531,7 +531,9 @@
          Bound_Env, Root_Env : AST_Envs.Lexical_Env)
       is
          use AST_Envs;
-         Initial_Env : Lexical_Env := Bound_Env;
+         Self_As_Root : constant ${root_node_type_name} :=
+            ${T.root_node.internal_conversion(cls, 'Self')};
+         Initial_Env  : Lexical_Env := Bound_Env;
       begin
          % for action in cls.env_spec.post_actions:
          ${emit_env_action (action)}
