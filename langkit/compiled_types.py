@@ -3236,8 +3236,10 @@ class ASTNodeType(BaseStructType):
         return self.snaps(True)
 
     def to_public_expr(self, internal_expr):
-        result = 'Wrap_Node ({}, {})'.format(internal_expr,
-                                             T.entity_info.nullexpr)
+        result = 'Wrap_Node ({}, {})'.format(
+            T.root_node.internal_conversion(self, internal_expr),
+            T.entity_info.nullexpr
+        )
         if not self.is_root_node:
             result += '.As_{}'.format(self.entity.api_name)
         return result
