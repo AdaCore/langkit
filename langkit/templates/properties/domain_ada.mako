@@ -11,13 +11,13 @@ begin
       declare
          <%
             element_type = expr.domain.type.element_type
-            is_root_type = (element_type.is_root_type
-                            if element_type.is_entity_type else
-                            element_type.is_root_node)
-
-            node_expr = 'Item.Node' if element_type.is_entity_type else 'Item'
-            if not is_root_type:
-               node_expr = '{} ({})'.format(T.root_node.name, node_expr)
+            node_type = (element_type.element_type
+                         if element_type.is_entity_type else
+                         element_type)
+            node_expr = T.root_node.internal_conversion(
+               node_type,
+               'Item.Node' if element_type.is_entity_type else 'Item'
+            )
             info_expr = 'Item.Info' if element_type.is_entity_type else '<>'
          %>
          Item : constant ${element_type.name} := Get (Dom, J);
