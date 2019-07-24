@@ -2148,7 +2148,8 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch
          pred="${lambda n: n.annotations.custom_short_image}">
       <%def name="action(node)">
-         return ${node.name}_Short_Image (${node.name} (Self));
+         return ${node.name}_Short_Image
+           (${node.internal_conversion(T.root_node, 'Self')});
       </%def>
       <%def name="default()">
          return "<" & To_Text (Kind_Name (Self))
@@ -2355,7 +2356,8 @@ package body ${ada_lib_name}.Implementation is
          if K in ${ctx.generic_list_type.ada_kind_range_name} then
             declare
                List : constant ${ctx.generic_list_type.name} :=
-                  ${ctx.generic_list_type.name} (Node);
+                  ${ctx.generic_list_type.internal_conversion(T.root_node,
+                                                              'Node')};
             begin
                if List.Count = 0 then
                   Put_Line (": <empty list>");
@@ -2915,8 +2917,12 @@ package body ${ada_lib_name}.Implementation is
       <%
           def get_actions(astnode, node_expr):
               return '\n'.join(
-                  'Assign ({node}, {node}.{field}, "{field}");'.format(
-                     node=node_expr,
+                  'Assign ({root_node}, {field_node}.{field}, "{field}");'
+                  .format(
+                     root_node=T.root_node.internal_conversion(
+                        astnode, node_expr),
+                     field_node=field.struct.internal_conversion(
+                        astnode, node_expr),
                      field=field.name
                   )
                   for field in astnode.get_user_fields(
