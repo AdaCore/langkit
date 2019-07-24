@@ -15,7 +15,8 @@ ${"overriding" if property.overriding else ""} function ${property.name}
    return ${property.type.name}
 is (raise Property_Error
     with "Property ${property.qualname} not implemented on type "
-    & Kind_Name (${Self.type.name} (${property.self_arg_name})));
+    & Kind_Name (${T.root_node.internal_conversion(property.struct,
+                                                   property.self_arg_name)}));
 
 % elif not property.external and not property.abstract:
 ${gdb_property_start(property)}
