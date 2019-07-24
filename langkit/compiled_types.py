@@ -1970,9 +1970,7 @@ class UserField(BaseField):
 class BuiltinField(UserField):
     """
     A built-in field is just like a UserField, except that its name has no
-    prefix. It is disregarded by the parsing machinery too. It is typically
-    used for fields on the root node that don't really exist/are added
-    manually.
+    prefix. It is typically used for fields of built-in structs.
     """
 
     prefix = None
