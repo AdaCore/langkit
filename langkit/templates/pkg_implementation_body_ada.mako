@@ -1837,7 +1837,7 @@ package body ${ada_lib_name}.Implementation is
          --  this node.
          declare
             PLE_Unit_Root : constant ${ctx.ple_unit_root.name} :=
-               ${ctx.ple_unit_root.name} (Node);
+               ${ctx.ple_unit_root.internal_conversion(T.root_node, 'Node')};
          begin
             if PLE_Unit_Root.Is_Env_Populated then
                return False;
