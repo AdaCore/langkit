@@ -418,6 +418,20 @@ class Map(CollectionExpression):
                             self.expr.type)
             self.static_type = element_type.array
 
+            ctx = get_context()
+            prop = PropertyDef.get()
+
+            # If needed, create temporaries to hold intermediate lists as
+            # generic lists and as root nodes.
+            if self.do_concat and self.expr.type.is_list_type:
+                self.concat_var_root = prop.vars.create('Concat_As_Root',
+                                                        T.root_node)
+                self.concat_var_generic = prop.vars.create(
+                    'Concat', ctx.generic_list_type)
+            else:
+                self.concat_var_root = None
+                self.concat_var_generic = None
+
             with iter_scope.parent.use():
                 super(Map.Expr, self).__init__('Map_Result',
                                                abstract_expr=abstract_expr)
