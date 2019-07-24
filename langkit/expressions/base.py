@@ -3929,9 +3929,18 @@ class PropertyDef(AbstractNodeData):
 
     def require_untyped_wrapper(self):
         """
-        Tag this property as requiring an untyped wrapper function. This
-        wrapper is a function that takes Self and an Entity_Info record as
-        parameters and that return an entity.
+        Tag this property as requiring an untyped wrapper function.
+
+        Untyped wrappers take a root entity instead of a node as their first
+        formal. Regarding the return type::
+
+          * if the wrapped property returns an entity, the wrapper returns
+            the root entity;
+
+          * if the wrapped property returns a node, the wrapper returns the
+            root node.
+
+        These wrappers are used as callbacks in lexical environments.
         """
         self._requires_untyped_wrapper = True
 
