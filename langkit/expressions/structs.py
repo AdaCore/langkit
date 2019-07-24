@@ -660,8 +660,8 @@ class FieldAccess(AbstractExpression):
                     self.receiver_expr.type, prefix
                 )
 
-            # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
+                # If we're calling a property, then pass the arguments
 
                 # TODO: For the moment, the first argument is named Node for
                 # properties on node & entity types, and Self for other
@@ -711,6 +711,13 @@ class FieldAccess(AbstractExpression):
                     '{} => {}'.format(name, value)
                     for name, value in args
                 ))
+
+            elif self.node_data.abstract:
+                # Call the accessor for abstract fields
+                ret = 'Implementation.{} ({})'.format(
+                    self.node_data.internal_name,
+                    prefix
+                )
 
             else:
                 # If we reach this point, we know that we are accessing a
