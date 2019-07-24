@@ -16,6 +16,10 @@ ${map.collection.render_pre()}
 
 declare
    ${vec_var} : ${map.type.vector()};
+   % if map.concat_var_root:
+      ${map.concat_var_root.name}    : ${map.concat_var_root.type.name};
+      ${map.concat_var_generic.name} : ${map.concat_var_generic.type.name};
+   % endif
 begin
 
    <%def name="build_loop_body()">
@@ -27,9 +31,20 @@ begin
       ${map.expr.render_pre()}
       % if map.do_concat:
          <% expr = map.expr.render_expr() %>
+         % if map.concat_var_root:
+            ${map.concat_var_root.name} :=
+               ${T.root_node.internal_conversion(map.expr.type, expr)};
+            ${map.concat_var_generic.name} :=
+               ${ctx.generic_list_type.internal_conversion(
+                  T.root_node,
+                  map.concat_var_root.name
+               )};
+         % endif
+
          for Item_To_Append of
             % if map.expr.type.is_list_type:
-               ${expr}.Nodes (1 .. ${expr}.Count)
+               ${map.concat_var_generic}.Nodes
+                 (1 .. Children_Count (${map.concat_var_root}))
             % else:
                ${expr}.Items
             % endif
@@ -69,10 +84,14 @@ begin
       %>
       declare
          Collection : constant ${coll_type.name} := ${coll_expr};
+         % if map.collection.type.is_list_type:
+            Collection_As_Root : constant ${T.root_node.name} :=
+               ${T.root_node.internal_conversion(coll_type, 'Collection')};
+         % endif
       begin
          for ${codegen_element_var} of
             % if map.collection.type.is_list_type:
-               Collection.Nodes (1 .. Collection.Count)
+               Collection.Nodes (1 .. Children_Count (Collection_As_Root))
             % else:
                Collection.Items
             % endif
