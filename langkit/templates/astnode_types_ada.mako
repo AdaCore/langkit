@@ -74,6 +74,21 @@
 </%def>
 
 
+## Generate code to initialize user fields in the node returned by "node_expr"
+## (of type "node_type"). This does not take care of inherited fields.
+##
+## As we manually allocate memory for nodes, they don't benefit from the
+## automatic initialization for access fields, for instance. We rely on this
+## initialization for logic vars, so manually initialize them.
+
+<%def name="init_user_fields(node_type, node_expr)">
+   % for f in node_type.get_fields(predicate=lambda f: f.is_user_field, \
+                                   include_inherited=False):
+      ${node_expr}.${f.name} := ${f.type.storage_nullexpr};
+   % endfor
+</%def>
+
+
 <%def name="bare_field_decl(field)">
    <% type_name = field.struct.value_type_name() %>
 
@@ -234,12 +249,14 @@
    end record;
 
    ## Fields initialization helper
-   <% fields = cls.get_parse_fields(
-         predicate = lambda f: not f.abstract and not f.null) %>
-   % if fields:
+   % if cls.has_fields_initializer:
+      <%
+         fields = cls.fields_to_initialize(include_inherited=True)
+         parse_fields = [f for f in fields if not f.is_user_field]
+      %>
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
         (Self : access ${cls.value_type_name()}'Class
-         % for f in fields:
+         % for f in parse_fields:
          ; ${f.name} : ${f.type.name}
          % endfor
         );
@@ -538,39 +555,46 @@
    % endif
 
    ## Fields initialization helper
-   <%
-      predicate = lambda f: not f.abstract and not f.null
+   % if cls.has_fields_initializer:
+      <%
+         filter_parse_fields = (
+            lambda fields: [f for f in fields if not f.is_user_field]
+         )
 
-      # All fields to initialize
-      all_fields = cls.get_parse_fields(include_inherited=True,
-                                        predicate=predicate)
+         # All fields to initialize
+         all_fields = cls.fields_to_initialize(include_inherited=True)
+         all_parse_fields = filter_parse_fields(all_fields)
 
-      # Fields unique to this node (not inherited)
-      self_fields = cls.get_parse_fields(include_inherited=False,
-                                         predicate=predicate)
+         # Fields unique to this node (not inherited)
+         self_fields = cls.fields_to_initialize(include_inherited=False)
+         self_parse_fields = filter_parse_fields(self_fields)
 
-      # Fields that are only inherited
-      parent_fields = all_fields[:len(all_fields) - len(self_fields)]
-   %>
-   % if all_fields:
+         # Fields that are only inherited
+         parent_fields = all_fields[:len(all_fields) - len(self_fields)]
+         parent_parse_fields = filter_parse_fields(parent_fields)
+      %>
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
         (Self : access ${cls.value_type_name()}'Class
-         % for f in all_fields:
+         % for f in all_parse_fields:
          ; ${f.name} : ${f.type.name}
          % endfor
         ) is
       begin
-         ## Re-use the parent node's fields initializer, if any
-         % if parent_fields:
+         ## Re-use the parent node's fields initializer, if any. No need to
+         ## call the root node's initializer, as it must be called before any
+         ## kind-specific initializer.
+         % if parent_fields and not cls.base.is_root_node:
             Initialize_Fields_For_${cls.base.kwless_raw_name}
-              (${cls.base.internal_conversion(cls, 'Self')},
-               ${', '.join(str(f.name) for f in parent_fields)});
+              (${cls.base.internal_conversion(cls, 'Self')}${''.join(
+                    ', {}'.format(f.name) for f in parent_parse_fields
+                 )});
          % endif
 
          ## Then initialize fields unique to this node
-         % for f in self_fields:
+         % for f in self_parse_fields:
             Self.${f.name} := ${f.name};
          % endfor
+         ${init_user_fields(cls, 'Self')}
       end Initialize_Fields_For_${cls.kwless_raw_name};
    % endif
 

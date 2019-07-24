@@ -39,16 +39,17 @@ if ${parser.pos_var} /= No_Token_Index then
                             then No_Token_Index
                             else ${parser.pos_var} - 1));
 
-   % if args:
-      ## Initialize children fields in the created node
+   ## Run the kind-specific initializer, if any
+   % if parser.type.has_fields_initializer:
       Initialize_Fields_For_${parser.type.kwless_raw_name}
-        (Self => ${parser.res_var},
-         ${', '.join(
-            '{} => {}'.format(
+        (Self => ${parser.res_var}${''.join(
+            ', {} => {}'.format(
                field.name,
                field.type.internal_conversion(subparser.type, subresult))
             for field, subparser, subresult in args)});
+   % endif
 
+   % if args:
       ## Update Last_Attempted_Child for the created node depending on the
       ## subparsers' results.
       declare
