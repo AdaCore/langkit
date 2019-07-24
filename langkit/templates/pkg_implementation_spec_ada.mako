@@ -425,11 +425,6 @@ private package ${ada_lib_name}.Implementation is
    --  Traverse_With_Data returns no matter what Visit does. Visit can change
    --  it otherwise.
 
-   function Child_Index
-     (Node : access ${root_node_value_type}'Class)
-      return Natural;
-   --  Return the 0-based index for Node in its parent's children
-
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------

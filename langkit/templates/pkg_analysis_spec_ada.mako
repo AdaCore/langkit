@@ -517,9 +517,6 @@ package ${ada_lib_name}.Analysis is
    --  This is the same as Traverse function except that no result is returned
    --  i.e. the Traverse function is called and the result is simply discarded.
 
-   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the 0-based index for Node in its parent's children
-
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------
