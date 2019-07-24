@@ -1,7 +1,7 @@
 --  vim: ft=ada
 
 function Bare_Literal_Evaluate
-  (Node : access Bare_Literal_Type'Class) return Big_Integer_Type is
+  (Node : access Bare_Literal_Type) return Big_Integer_Type is
 begin
-   return Create_Big_Integer (Image (Node.Text));
+   return Create_Big_Integer (Image (Text (Convert_From_Literal (Node))));
 end Bare_Literal_Evaluate;

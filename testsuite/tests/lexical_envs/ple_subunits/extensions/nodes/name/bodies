@@ -1,22 +1,22 @@
 --  vim: ft=ada
 
 function P_Referenced_Unit_Or_Error
-  (Node     : access Bare_Name_Type'Class;
-   Or_Error : Boolean)
-   return Internal_Unit
+  (Node     : access Bare_Name_Type;
+   Or_Error : Boolean) return Internal_Unit
 is
-   Root           : constant Bare_Foo_Node := Node.Unit.AST_Root;
-   Requested_Name : Symbol_Type_Array_Access := Node.P_Symbols;
+   N              : constant Bare_Foo_Node := Convert_From_Name (Node);
+   Root           : constant Bare_Foo_Node := N.Unit.AST_Root;
+   Requested_Name : Symbol_Type_Array_Access := P_Symbols (Node);
    Has_Errors     : Boolean := False;
 begin
-   for I in 1 .. Root.Children_Count loop
+   for I in 1 .. Children_Count (Root) loop
       declare
-         S  : constant Bare_Scope := Bare_Scope (Root.Child (I));
-         SN : constant Bare_Name := S.F_Name;
-         N  : Symbol_Type_Array_Access := SN.P_Symbols;
+         S  : constant Bare_Foo_Node := Child (Root, I);
+         SN : constant Bare_Name := F_Name (Convert_To_Scope (S));
+         N  : Symbol_Type_Array_Access := P_Symbols (SN);
       begin
          if N.Items = Requested_Name.Items then
-            Has_Errors := S.Populate_Lexical_Env or else Has_Errors;
+            Has_Errors := Populate_Lexical_Env (S) or else Has_Errors;
          end if;
          Dec_Ref (N);
       end;
@@ -25,5 +25,5 @@ begin
    if Has_Errors then
       raise Property_Error;
    end if;
-   return Node.Unit;
+   return N.Unit;
 end P_Referenced_Unit_Or_Error;

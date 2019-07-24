@@ -1,12 +1,12 @@
 --  vim: ft=ada
 
 function P_Referenced_Unit_Or_Error
-  (Node     : access Bare_Name_Type'Class;
-   Or_Error : Boolean)
-   return Internal_Unit
+  (Node     : access Bare_Name_Type;
+   Or_Error : Boolean) return Internal_Unit
 is
-   Ctx       : constant Internal_Context := Node.Unit.Context;
-   Unit_Name : String := Image (Node.Text);
+   N         : constant Bare_Foo_Node := Convert_From_Name (Node);
+   Ctx       : constant Internal_Context := N.Unit.Context;
+   Unit_Name : String := Image (Text (N));
 begin
    for C of Unit_Name loop
       if C = '.' then
@@ -28,7 +28,7 @@ begin
             Unit : constant Internal_Unit := Get_From_File
               (Ctx, Filename, "", False, Default_Grammar_Rule);
          begin
-            Reference_Unit (From => Node.Unit, Referenced => Unit);
+            Reference_Unit (From => N.Unit, Referenced => Unit);
             Populate_Lexical_Env (Unit);
             return Unit;
          end;

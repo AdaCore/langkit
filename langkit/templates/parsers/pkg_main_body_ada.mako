@@ -22,9 +22,9 @@ package body ${ada_lib_name}.Parsers is
    --  of node (including lists). Likewise for bump ptr. allocators, except
    --  we need them only for non-abstract AST nodes.
    --
-   --  In the Tagged_Alloc instanciations, there are unchecked conversions to
-   --  wrap System.Address values from a low-level allocator. All read/writes
-   --  for the pointed values are made through values of the same access types
+   --  In the Alloc instanciations, there are unchecked conversions to wrap
+   --  System.Address values from a low-level allocator. All read/writes for
+   --  the pointed values are made through values of the same access types
    --  (i.e. AST node access). Thus, strict aliasing issues should not arise
    --  for these.
    --
@@ -38,15 +38,15 @@ package body ${ada_lib_name}.Parsers is
         (${cls.name}, Token_Index);
 
       % if not cls.abstract:
-         package ${cls.name}_Alloc is
-            new Tagged_Alloc (${cls.value_type_name()});
+         package ${cls.name}_Alloc is new Alloc
+           (${cls.value_type_name()}, ${cls.name});
       % endif
    % endfor
    pragma Warnings (On, "is not referenced");
    pragma Warnings (On, "possible aliasing problem for type");
 
    procedure Initialize_List
-     (Self   : access ${generic_list_value_type}'Class;
+     (Self   : access ${generic_list_value_type};
       Parser : Parser_Type;
       Count  : Natural);
    --  Helper for parsers, to initialize the list of children in a freshly
@@ -110,7 +110,7 @@ package body ${ada_lib_name}.Parsers is
    ---------------------
 
    procedure Initialize_List
-     (Self   : access ${generic_list_value_type}'Class;
+     (Self   : access ${generic_list_value_type};
       Parser : Parser_Type;
       Count  : Natural) is
    begin

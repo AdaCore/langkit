@@ -3,7 +3,7 @@
 <%def name="argument_list(property, dispatching)">
   (${property.self_arg_name} :
    % if Self.type.is_ast_node:
-      access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
+      access ${Self.type.value_type_name()}
    % else:
       ${Self.type.name}
    % endif
@@ -51,7 +51,6 @@
 <%def name="logic_converter(conv_prop)">
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
-   root_class = T.root_node.name
    entity = T.entity.name
    %>
 
@@ -73,19 +72,23 @@
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
       Ret := ${conv_prop.name}
-        (${conv_prop.self_arg_name}    => ${conv_prop.struct.name} (From.Node),
+        (${conv_prop.self_arg_name} =>
+            ${conv_prop.struct.internal_conversion(T.root_node, 'From.Node')},
          % for dynvar in conv_prop.dynamic_vars:
-            ${dynvar.argument_name}    => Self.${dynvar.argument_name},
+            ${dynvar.argument_name} => Self.${dynvar.argument_name},
          % endfor
          ${conv_prop.entity_info_name} => From.Info);
-      return (Node => ${root_class} (Ret.Node), Info => Ret.Info);
+
+      <%
+         ret_node = T.root_node.internal_conversion(conv_prop.type, 'Ret.Node')
+      %>
+      return (Node => ${ret_node}, Info => Ret.Info);
    end Convert;
 </%def>
 
 <%def name="logic_equal(eq_prop)">
    <%
-      struct = eq_prop.struct.name
-      struct_entity = eq_prop.struct.entity.name
+      struct = eq_prop.struct
       type_name = 'Equals_Data_{}'.format(eq_prop.uid)
    %>
 
@@ -104,10 +107,10 @@
 
       --  Check that both arguments have appropriate types for the property
       --  call.
-      if L.Node.all not in ${struct}_Type'Class then
+      if L.Node.Kind not in ${struct.ada_kind_range_name} then
          raise Property_Error with
             "Wrong type for ${eq_prop.qualname}'s ""self"" argument";
-      elsif R.Node.all not in ${struct}_Type'Class then
+      elsif R.Node.Kind not in ${struct.ada_kind_range_name} then
          raise Property_Error with
             "Wrong type for ${eq_prop.qualname}'s"
             & " ""${eq_prop.natural_arguments[0].dsl_name}"" argument";
@@ -115,11 +118,13 @@
 
       --  All is good: do the call
       declare
-         R_Entity : constant ${struct_entity} :=
-           (${struct} (R.Node), R.Info);
+         R_Entity : constant ${struct.entity.name} :=
+           (${struct.internal_conversion(T.root_node, 'R.Node')},
+            R.Info);
       begin
          return ${eq_prop.name}
-          (${eq_prop.self_arg_name}             => ${struct} (L.Node),
+          (${eq_prop.self_arg_name} =>
+              ${struct.internal_conversion(T.root, 'L.Node')},
            ${eq_prop.natural_arguments[0].name} => R_Entity,
            % for dynvar in eq_prop.dynamic_vars:
               ${dynvar.argument_name} => Data.${dynvar.argument_name},
@@ -167,7 +172,6 @@
    <%
       type_name = "{}_Predicate_Caller".format(pred_id)
       package_name = "{}_Pred".format(pred_id)
-      root_class = T.root_node.name
       formal_node_types = prop.get_concrete_node_types(args_types,
                                                        default_passed_args)
    %>
@@ -210,8 +214,9 @@
      % endfor
      ) return Boolean
    is
-      Node : constant ${formal_node_types[0].name} :=
-         ${formal_node_types[0].name} (Node_0.Node);
+      <% node0_type = formal_node_types[0] %>
+      Node : constant ${node0_type.name} :=
+         ${node0_type.internal_conversion(T.root_node, 'Node_0.Node')};
    begin
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user to
@@ -225,8 +230,10 @@
 
       <%
          args = ['Node'] + [
-            '(Node => {} (Node_{}.Node), Info => Node_{}.Info)'.format(
-                formal_type.element_type.name, i, i
+            '(Node => {}, Info => Node_{}.Info)'.format(
+                formal_type.element_type.internal_conversion(
+                  T.root_node, 'Node_{}.Node'.format(i)),
+                i
             ) for i, formal_type in enumerate(formal_node_types[1:], 1)
          ] + [
             'Self.Field_{}'.format(i)
