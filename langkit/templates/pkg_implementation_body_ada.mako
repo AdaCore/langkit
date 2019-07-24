@@ -140,10 +140,10 @@ package body ${ada_lib_name}.Implementation is
    procedure Destroy (Env : in out Lexical_Env_Access);
 
    function Snaps_At_Start
-     (Self : access ${root_node_value_type}'Class) return Boolean;
+     (Self : access ${root_node_value_type}) return Boolean;
 
    function Snaps_At_End
-     (Self : access ${root_node_value_type}'Class) return Boolean;
+     (Self : access ${root_node_value_type}) return Boolean;
 
    --  Those maps are used to give unique ids to lexical envs while pretty
    --  printing them.
@@ -682,7 +682,7 @@ package body ${ada_lib_name}.Implementation is
 
       procedure Reset_Envs_Caches (Unit : Internal_Unit) is
          procedure Internal
-           (Node : access ${root_node_value_type}'Class) is
+           (Node : access ${root_node_value_type}) is
          begin
             if Node = null then
                return;
@@ -1005,7 +1005,7 @@ package body ${ada_lib_name}.Implementation is
    -------------------
 
    function Is_Token_Node
-     (Node : access ${root_node_value_type}'Class) return Boolean is
+     (Node : access ${root_node_value_type}) return Boolean is
    begin
       return Is_Token_Node (Node.Kind);
    end Is_Token_Node;
@@ -1015,7 +1015,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Is_Synthetic
-     (Node : access ${root_node_value_type}'Class) return Boolean is
+     (Node : access ${root_node_value_type}) return Boolean is
    begin
       return Node.Kind in Synthetic_Nodes;
    end Is_Synthetic;
@@ -1226,7 +1226,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------
 
    procedure Initialize
-     (Self              : access ${root_node_value_type}'Class;
+     (Self              : access ${root_node_value_type};
       Kind              : ${root_node_kind_name};
       Unit              : Internal_Unit;
       Token_Start_Index : Token_Index;
@@ -1252,7 +1252,7 @@ package body ${ada_lib_name}.Implementation is
    ---------------------
 
    function Pre_Env_Actions
-     (Self                : access ${root_node_value_type}'Class;
+     (Self                : access ${root_node_value_type};
       Bound_Env, Root_Env : AST_Envs.Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
    is
@@ -1296,7 +1296,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------
 
    function Get_Symbol
-     (Node : access ${root_node_value_type}'Class) return Symbol_Type is
+     (Node : access ${root_node_value_type}) return Symbol_Type is
    begin
       return Get_Symbol (Token (Node, Node.Token_Start_Index));
    end Get_Symbol;
@@ -1306,7 +1306,7 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Text
-     (Node : access ${root_node_value_type}'Class) return Text_Type
+     (Node : access ${root_node_value_type}) return Text_Type
    is
       Start_T : constant Token_Reference :=
          Token (Node, Node.Token_Start_Index);
@@ -1350,7 +1350,7 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Unit
-     (Node : access ${root_node_value_type}'Class) return Internal_Unit is
+     (Node : access ${root_node_value_type}) return Internal_Unit is
    begin
       return Node.Unit;
    end Unit;
@@ -1373,7 +1373,7 @@ package body ${ada_lib_name}.Implementation is
    -----------------
 
    procedure Set_Parents
-     (Node, Parent : access ${root_node_value_type}'Class)
+     (Node, Parent : access ${root_node_value_type})
    is
    begin
       if Node = null then
@@ -1391,7 +1391,7 @@ package body ${ada_lib_name}.Implementation is
    -- Destroy --
    -------------
 
-   procedure Destroy (Node : access ${root_node_value_type}'Class) is
+   procedure Destroy (Node : access ${root_node_value_type}) is
    begin
       if Node = null then
          return;
@@ -1407,7 +1407,7 @@ package body ${ada_lib_name}.Implementation is
    -- Child --
    -----------
 
-   function Child (Node  : access ${root_node_value_type}'Class;
+   function Child (Node  : access ${root_node_value_type};
                    Index : Positive) return ${root_node_type_name}
    is
       Result          : ${root_node_type_name};
@@ -1422,8 +1422,8 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    function Traverse
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class)
+     (Node  : access ${root_node_value_type};
+      Visit : access function (Node : access ${root_node_value_type})
               return Visit_Status)
      return Visit_Status
    is
@@ -1470,8 +1470,8 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    procedure Traverse
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class)
+     (Node  : access ${root_node_value_type};
+      Visit : access function (Node : access ${root_node_value_type})
                                return Visit_Status)
    is
       Result_Status : Visit_Status;
@@ -1485,21 +1485,21 @@ package body ${ada_lib_name}.Implementation is
    ------------------------
 
    function Traverse_With_Data
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class;
+     (Node  : access ${root_node_value_type};
+      Visit : access function (Node : access ${root_node_value_type};
                                Data : in out Data_Type)
                                return Visit_Status;
       Data  : in out Data_Type)
       return Visit_Status
    is
-      function Helper (Node : access ${root_node_value_type}'Class)
+      function Helper (Node : access ${root_node_value_type})
                        return Visit_Status;
 
       ------------
       -- Helper --
       ------------
 
-      function Helper (Node : access ${root_node_value_type}'Class)
+      function Helper (Node : access ${root_node_value_type})
                        return Visit_Status
       is
       begin
@@ -1525,7 +1525,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------
 
    function Sloc_Range
-     (Node : access ${root_node_value_type}'Class) return Source_Location_Range
+     (Node : access ${root_node_value_type}) return Source_Location_Range
    is
       type Token_Anchor is (T_Start, T_End);
       type Token_Pos is record
@@ -1578,7 +1578,7 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Lookup
-     (Node : access ${root_node_value_type}'Class;
+     (Node : access ${root_node_value_type};
       Sloc : Source_Location) return ${root_node_type_name}
    is
       Position : Relative_Position;
@@ -1649,7 +1649,7 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Compare
-     (Node : access ${root_node_value_type}'Class;
+     (Node : access ${root_node_value_type};
       Sloc : Source_Location) return Relative_Position is
    begin
       return Compare (Sloc_Range (Node), Sloc);
@@ -1679,7 +1679,7 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Compare
-     (Left, Right : access ${root_node_value_type}'Class;
+     (Left, Right : access ${root_node_value_type};
       Relation    : Comparison_Relation) return Boolean
    is
       LS, RS : Source_Location;
@@ -1702,7 +1702,7 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    function Children
-     (Node : access ${root_node_value_type}'Class)
+     (Node : access ${root_node_value_type})
      return ${root_node_array.array_type_name}
    is
       First : constant Integer := ${root_node_array.index_type()}'First;
@@ -1717,7 +1717,7 @@ package body ${ada_lib_name}.Implementation is
    end Children;
 
    function Children
-     (Node : access ${root_node_value_type}'Class)
+     (Node : access ${root_node_value_type})
      return ${root_node_array.name}
    is
       C : ${root_node_array.array_type_name} := Children (Node);
@@ -1734,7 +1734,7 @@ package body ${ada_lib_name}.Implementation is
    ---------------
 
    procedure PP_Trivia
-     (Node        : access ${root_node_value_type}'Class;
+     (Node        : access ${root_node_value_type};
       Line_Prefix : String := "")
    is
       Children_Prefix : constant String := Line_Prefix & "|  ";
@@ -1755,14 +1755,14 @@ package body ${ada_lib_name}.Implementation is
    --------------------------
 
    function Populate_Lexical_Env
-     (Node : access ${root_node_value_type}'Class) return Boolean
+     (Node : access ${root_node_value_type}) return Boolean
    is
 
       Context  : constant Internal_Context := Node.Unit.Context;
       Root_Env : constant Lexical_Env := Context.Root_Scope;
 
       function Populate_Internal
-        (Node      : access ${root_node_value_type}'Class;
+        (Node      : access ${root_node_value_type};
          Bound_Env : Lexical_Env) return Boolean;
       --  Do the lexical env population on Node and recurse on its children
 
@@ -1771,7 +1771,7 @@ package body ${ada_lib_name}.Implementation is
       -----------------------
 
       function Populate_Internal
-        (Node      : access ${root_node_value_type}'Class;
+        (Node      : access ${root_node_value_type};
          Bound_Env : Lexical_Env) return Boolean
       is
          Result      : Boolean := False;
@@ -1913,10 +1913,10 @@ package body ${ada_lib_name}.Implementation is
    -- Hash --
    ----------
 
-   function Hash (Node : access ${root_node_value_type}'Class) return Hash_Type
+   function Hash (Node : access ${root_node_value_type}) return Hash_Type
    is
       function H is new Hash_Access
-        (${root_node_value_type}'Class, ${root_node_type_name});
+        (${root_node_value_type}, ${root_node_type_name});
    begin
       return H (Node);
    end Hash;
@@ -2139,7 +2139,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    function Short_Text_Image
-     (Self : access ${root_node_value_type}'Class) return Text_Type is
+     (Self : access ${root_node_value_type}) return Text_Type is
    begin
       if Self = null then
          return "None";
@@ -2167,7 +2167,7 @@ package body ${ada_lib_name}.Implementation is
    --------------------
 
    function Snaps_At_Start
-     (Self : access ${root_node_value_type}'Class) return Boolean is
+     (Self : access ${root_node_value_type}) return Boolean is
    begin
       <%self:case_dispatch pred="${lambda n: n.snaps_at_start}">
       <%def name="action(node)">
@@ -2184,7 +2184,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Snaps_At_End
-     (Self : access ${root_node_value_type}'Class) return Boolean is
+     (Self : access ${root_node_value_type}) return Boolean is
    begin
       <%self:case_dispatch pred="${lambda n: n.snaps_at_end}">
       <%def name="action(node)">
@@ -2201,7 +2201,7 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Parents
-     (Node         : access ${root_node_value_type}'Class;
+     (Node         : access ${root_node_value_type};
       Include_Self : Boolean := True)
       return ${root_node_array.name}
    is
@@ -2233,7 +2233,7 @@ package body ${ada_lib_name}.Implementation is
    -----------------------
 
    function First_Child_Index
-     (Node : access ${root_node_value_type}'Class) return Natural
+     (Node : access ${root_node_value_type}) return Natural
    is (1);
 
    ----------------------
@@ -2241,7 +2241,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    function Last_Child_Index
-     (Node : access ${root_node_value_type}'Class) return Natural
+     (Node : access ${root_node_value_type}) return Natural
    is (Children_Count (Node));
 
    ---------------
@@ -2249,7 +2249,7 @@ package body ${ada_lib_name}.Implementation is
    ---------------
 
    procedure Get_Child
-     (Node            : access ${root_node_value_type}'Class;
+     (Node            : access ${root_node_value_type};
       Index           : Positive;
       Index_In_Bounds : out Boolean;
       Result          : out ${root_node_type_name})
@@ -2323,7 +2323,7 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    procedure Print
-     (Node        : access ${root_node_value_type}'Class;
+     (Node        : access ${root_node_value_type};
       Show_Slocs  : Boolean;
       Line_Prefix : String := "")
    is
@@ -2404,8 +2404,7 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Parent
-     (Node : access ${root_node_value_type}'Class) return ${root_node_type_name}
-   is
+     (Node : access ${root_node_value_type}) return ${root_node_type_name} is
    begin
       return Node.Parent;
    end Parent;
@@ -2415,7 +2414,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Stored_Token
-     (Node  : access ${root_node_value_type}'Class;
+     (Node  : access ${root_node_value_type};
       Token : Token_Reference) return Token_Index
    is
       Index : constant Token_Or_Trivia_Index := Get_Token_Index (Token);
@@ -2437,7 +2436,7 @@ package body ${ada_lib_name}.Implementation is
    --------------------------
 
    function Children_With_Trivia
-     (Node : access ${root_node_value_type}'Class) return Bare_Children_Array
+     (Node : access ${root_node_value_type}) return Bare_Children_Array
    is
       package Children_Vectors is new Ada.Containers.Vectors
         (Positive, Bare_Child_Record);
@@ -2451,7 +2450,7 @@ package body ${ada_lib_name}.Implementation is
       --  the returned vector.
 
       function Filter_Children
-        (Parent : access ${root_node_value_type}'Class)
+        (Parent : access ${root_node_value_type})
          return ${root_node_array.array_type_name};
       --  Return an array for all children in Parent that are not null and that
       --  aren't ghost nodes.
@@ -2476,7 +2475,7 @@ package body ${ada_lib_name}.Implementation is
       ---------------------
 
       function Filter_Children
-        (Parent : access ${root_node_value_type}'Class)
+        (Parent : access ${root_node_value_type})
          return ${root_node_array.array_type_name}
       is
          Children : constant ${root_node_array.array_type_name} :=
@@ -2530,7 +2529,7 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    function Is_Ghost
-     (Node : access ${root_node_value_type}'Class) return Boolean
+     (Node : access ${root_node_value_type}) return Boolean
    is (Node.Token_End_Index = No_Token_Index);
 
    -------------------
@@ -2538,7 +2537,7 @@ package body ${ada_lib_name}.Implementation is
    -------------------
 
    function Is_Incomplete
-     (Node : access ${root_node_value_type}'Class) return Boolean
+     (Node : access ${root_node_value_type}) return Boolean
    is
       LGC : ${root_node_type_name};
    begin
@@ -2557,7 +2556,7 @@ package body ${ada_lib_name}.Implementation is
    -----------------
 
    function Token_Start
-     (Node : access ${root_node_value_type}'Class) return Token_Reference
+     (Node : access ${root_node_value_type}) return Token_Reference
    is (Token (Node, Node.Token_Start_Index));
 
    ---------------
@@ -2565,7 +2564,7 @@ package body ${ada_lib_name}.Implementation is
    ---------------
 
    function Token_End
-     (Node : access ${root_node_value_type}'Class) return Token_Reference
+     (Node : access ${root_node_value_type}) return Token_Reference
    is
      (if Node.Token_End_Index = No_Token_Index
       then Token_Start (Node)
@@ -2576,7 +2575,7 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    function Token
-     (Node  : access ${root_node_value_type}'Class;
+     (Node  : access ${root_node_value_type};
       Index : Token_Index) return Token_Reference
    is
      (Wrap_Token_Reference (Token_Data (Node.Unit), (Index, No_Token_Index)));
@@ -2586,15 +2585,14 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Is_Null
-     (Node : access ${root_node_value_type}'Class) return Boolean
+     (Node : access ${root_node_value_type}) return Boolean
    is (Node = null);
 
    -----------------
    -- Child_Index --
    -----------------
 
-   function Child_Index
-     (Node : access ${root_node_value_type}'Class) return Integer
+   function Child_Index (Node : access ${root_node_value_type}) return Integer
    is
       N : ${root_node_type_name} := null;
    begin
@@ -2622,7 +2620,7 @@ package body ${ada_lib_name}.Implementation is
    -------------------
 
    function Fetch_Sibling
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name};
       Offset : Integer) return ${root_entity.name}
    is
@@ -2647,7 +2645,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    function Previous_Sibling
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.name} is
    begin
@@ -2659,7 +2657,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Next_Sibling
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.name} is
    begin
@@ -2747,7 +2745,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    function Children_Env
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return Lexical_Env
    is (Rebind_Env (Node.Self_Env, E_Info));
@@ -2757,7 +2755,7 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    function Node_Env
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return Lexical_Env
    is
@@ -2814,7 +2812,7 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Parent
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.name} is
    begin
@@ -2827,7 +2825,7 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Parents
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.array.name}
    is
@@ -2848,7 +2846,7 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    function Children
-     (Node   : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type};
       E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.array.name}
    is
@@ -2887,11 +2885,11 @@ package body ${ada_lib_name}.Implementation is
    --------------------------------
 
    procedure Assign_Names_To_Logic_Vars
-     (Node : access ${root_node_value_type}'Class)
+     (Node : access ${root_node_value_type})
    is
 
       procedure Assign
-        (Node  : access ${root_node_value_type}'Class;
+        (Node  : access ${root_node_value_type};
          LV    : in out Logic_Var_Record;
          Field : String);
       --  Assign a name to the LV logic variable. Node must be the node that
@@ -2903,7 +2901,7 @@ package body ${ada_lib_name}.Implementation is
       ------------
 
       procedure Assign
-        (Node  : access ${root_node_value_type}'Class;
+        (Node  : access ${root_node_value_type};
          LV    : in out Logic_Var_Record;
          Field : String) is
       begin
@@ -3024,7 +3022,7 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Length
-     (Node : access ${generic_list_value_type}'Class) return Natural
+     (Node : access ${generic_list_value_type}) return Natural
    is (Children_Count
          (${T.root_node.internal_conversion(ctx.generic_list_type, 'Node')}));
 
@@ -3169,7 +3167,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name}) is
       procedure Free is new Ada.Unchecked_Deallocation
-        (${root_node_value_type}'Class, ${root_node_type_name});
+        (${root_node_value_type}, ${root_node_type_name});
    begin
       --  Don't call Node.Destroy, as Node's children may be gone already: they
       --  have their own destructor and there is no specified order for the
@@ -3192,7 +3190,7 @@ package body ${ada_lib_name}.Implementation is
       -----------------
 
       function Trace_Image
-        (Node       : access ${root_node_value_type}'Class;
+        (Node       : access ${root_node_value_type};
          Decoration : Boolean := True) return String is
       begin
          if Node = null then
@@ -3221,8 +3219,7 @@ package body ${ada_lib_name}.Implementation is
    ---------------
 
    function Kind_Name
-     (Node : access ${root_node_value_type}'Class) return String
-   is
+     (Node : access ${root_node_value_type}) return String is
    begin
       return To_String (Kind_Names (Node.Kind));
    end Kind_Name;
@@ -3232,7 +3229,7 @@ package body ${ada_lib_name}.Implementation is
    --------------------
 
    function Children_Count
-     (Node : access ${root_node_value_type}'Class) return Natural
+     (Node : access ${root_node_value_type}) return Natural
    is
       C : Integer := Kind_To_Node_Children_Count (Node.Kind);
    begin
@@ -3248,7 +3245,7 @@ package body ${ada_lib_name}.Implementation is
    -- Reset_Logic_Vars --
    ----------------------
 
-   procedure Reset_Logic_Vars (Node : access ${root_node_value_type}'Class) is
+   procedure Reset_Logic_Vars (Node : access ${root_node_value_type}) is
 
       procedure Reset (LV : in out Logic_Var_Record);
       --  Reset the LV logic variable, clearing the value it stores
@@ -3418,7 +3415,7 @@ package body ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Node : ${root_node_type_name})
    is
       procedure Helper is new Register_Destroyable_Gen
-        (${root_node_value_type}'Class,
+        (${root_node_value_type},
          ${root_node_type_name},
          Destroy_Synthetic_Node);
    begin
@@ -3455,16 +3452,16 @@ package body ${ada_lib_name}.Implementation is
    procedure Reset_Envs (Unit : Internal_Unit) is
 
       procedure Deactivate_Refd_Envs
-        (Node : access ${root_node_value_type}'Class);
+        (Node : access ${root_node_value_type});
       procedure Recompute_Refd_Envs
-        (Node : access ${root_node_value_type}'Class);
+        (Node : access ${root_node_value_type});
 
       --------------------------
       -- Deactivate_Refd_Envs --
       --------------------------
 
       procedure Deactivate_Refd_Envs
-        (Node : access ${root_node_value_type}'Class) is
+        (Node : access ${root_node_value_type}) is
       begin
          if Node = null then
             return;
@@ -3481,7 +3478,7 @@ package body ${ada_lib_name}.Implementation is
       -------------------------
 
       procedure Recompute_Refd_Envs
-        (Node : access ${root_node_value_type}'Class) is
+        (Node : access ${root_node_value_type}) is
       begin
          if Node = null then
             return;
@@ -3911,8 +3908,7 @@ package body ${ada_lib_name}.Implementation is
    -- Reroot_Foreign_Nodes --
    --------------------------
 
-   procedure Reroot_Foreign_Node (Node : access ${root_node_value_type}'Class)
-   is
+   procedure Reroot_Foreign_Node (Node : access ${root_node_value_type}) is
       Unit : constant Internal_Unit := Node.Unit;
    begin
 
@@ -3951,7 +3947,7 @@ package body ${ada_lib_name}.Implementation is
    ----------
 
    function Text
-     (Node : access ${root_node_value_type}'Class) return ${T.String.name}
+     (Node : access ${root_node_value_type}) return ${T.String.name}
    is
       T      : constant Text_Type := Text (Node);
       Result : constant ${T.String.name} :=

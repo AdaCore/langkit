@@ -11,7 +11,7 @@
    <% list_type = element_type.list %>
 
    type ${list_type.value_type_name()};
-   type ${list_type.name} is access all ${list_type.value_type_name()}'Class;
+   type ${list_type.name} is access all ${list_type.value_type_name()};
 
    ${list_type.null_constant} : constant ${list_type.name} := null;
 
@@ -26,18 +26,19 @@
       type_name = list_type.name
    %>
 
-   type ${value_type} is
-      ${'abstract' if element_type.has_abstract_list else ''}
-      new ${generic_list_value_type} with null record;
+   type ${value_type} is record
+      Base : ${generic_list_value_type};
+   end record
+      with Convention => C;
 
    ## Helpers generated for properties code. Used in CollectionGet's and
    ## Map/Quantifier's code.
    function Item
-     (Node  : access ${value_type}'Class; Index : Positive)
+     (Node : access ${value_type}; Index : Positive)
       return ${element_type.name};
 
    function Get
-     (Node    : access ${value_type}'Class;
+     (Node    : access ${value_type};
       Index   : Integer;
       Or_Null : Boolean := False) return ${element_type.name};
    --  When Index is positive, return the Index'th element in T. Otherwise,
@@ -57,7 +58,7 @@
    ---------
 
    function Get
-     (Node    : access ${value_type}'Class;
+     (Node    : access ${value_type};
       Index   : Integer;
       Or_Null : Boolean := False) return ${element_type.name}
    is
@@ -106,7 +107,7 @@
    ----------
 
    function Item
-     (Node  : access ${value_type}'Class; Index : Positive)
+     (Node : access ${value_type}; Index : Positive)
       return ${element_type.name}
    is
       Result : constant ${root_node_type_name} :=

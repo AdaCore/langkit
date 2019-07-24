@@ -353,10 +353,16 @@
                   & "null record"
                % else:
                   % for i, f in enumerate (cls.get_fields()):
+                     <%
+                        field_ref = 'R.{}'.format(f.name)
+                        if f.type.is_ast_node:
+                           field_ref = T.root_node.internal_conversion(
+                              f.type, field_ref)
+                     %>
                      % if i > 0:
                         & ", "
                      % endif
-                     & "${f.name} => " & Trace_Image (R.${f.name})
+                     & "${f.name} => " & Trace_Image (${field_ref})
                   % endfor
                % endif
                & ")");
