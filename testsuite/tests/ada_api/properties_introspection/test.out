@@ -96,6 +96,11 @@ Properties for FOO_ADDITION:
    arguments:
       <none>
 
+   child_index
+   return type: Int
+   arguments:
+      <none>
+
    previous_sibling
    return type: FooNode
    arguments:
@@ -223,6 +228,11 @@ Properties for FOO_NUMBER:
 
    token_end
    return type: Token
+   arguments:
+      <none>
+
+   child_index
+   return type: Int
    arguments:
       <none>
 
@@ -380,6 +390,11 @@ Properties for FOO_REF:
    arguments:
       <none>
 
+   child_index
+   return type: Int
+   arguments:
+      <none>
+
    previous_sibling
    return type: FooNode
    arguments:
@@ -515,6 +530,11 @@ Properties for FOO_VAR_DECL_LIST:
    arguments:
       <none>
 
+   child_index
+   return type: Int
+   arguments:
+      <none>
+
    previous_sibling
    return type: FooNode
    arguments:
@@ -634,6 +654,11 @@ Properties for FOO_NAME:
    arguments:
       <none>
 
+   child_index
+   return type: Int
+   arguments:
+      <none>
+
    previous_sibling
    return type: FooNode
    arguments:
@@ -750,6 +775,11 @@ Properties for FOO_VAR_DECL:
 
    token_end
    return type: Token
+   arguments:
+      <none>
+
+   child_index
+   return type: Int
    arguments:
       <none>
 

@@ -3135,8 +3135,10 @@ class ASTNodeType(BaseStructType):
                 uses_envs=False,
                 doc='Return the last token used to parse this node.'
             )),
-            ('child_index', BuiltinField(
-                type=T.Int,
+            ('child_index', PropertyDef(
+                expr=None, prefix=None, type=T.Int,
+                public=True, external=True, uses_entity_info=False,
+                uses_envs=False,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),

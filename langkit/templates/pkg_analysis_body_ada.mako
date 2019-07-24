@@ -984,17 +984,6 @@ package body ${ada_lib_name}.Analysis is
       Result_Status := Traverse (Node, Visit);
    end Traverse;
 
-   -----------------
-   -- Child_Index --
-   -----------------
-
-   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural
-   is
-   begin
-      Check_Safety_Net (Node.Safety_Net);
-      return Child_Index (Node.Internal.Node);
-   end Child_Index;
-
    --------------------------------
    -- Assign_Names_To_Logic_Vars --
    --------------------------------
