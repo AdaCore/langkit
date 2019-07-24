@@ -1243,6 +1243,8 @@ package body ${ada_lib_name}.Implementation is
 
       Self.Self_Env := Self_Env;
       Self.Last_Attempted_Child := -1;
+
+      ${astnode_types.init_user_fields(T.root_node, 'Self')}
    end Initialize;
 
    ---------------------

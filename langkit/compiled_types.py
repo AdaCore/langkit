@@ -2810,6 +2810,33 @@ class ASTNodeType(BaseStructType):
                 )
                 if not f.is_overriding]
 
+    def fields_to_initialize(self, include_inherited):
+        """
+        Return the list of fields to initialize for this node.
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+        :rtype: list[BaseField]
+        """
+        return self.get_fields(
+            include_inherited=include_inherited,
+            predicate=lambda f: not f.abstract and not f.null
+        )
+
+    @property
+    @memoized
+    def has_fields_initializer(self):
+        """
+        Return whether this node has a kind-specific fields initializer
+        procedure.
+        """
+        if self.is_root_node:
+            return False
+
+        return (self.fields_to_initialize(include_inherited=False) or
+                self.base.has_fields_initializer)
+
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, 'base_node')
 
