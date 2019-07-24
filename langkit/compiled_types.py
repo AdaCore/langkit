@@ -3300,15 +3300,15 @@ class ASTNodeType(BaseStructType):
 
         :param ASTNodeType|EntityType expr_type: Static type for `expr`'s
             result. For convenience, entity types are accepted and interpreted
-            as the bare node they wrap.
+            as the bare node they wrap, and non-nodes are returned as-is.
         :param str expr: Expression that returns a bare node.
         :return str: Expression that returns a node whose `self` is the type.
         """
         if expr_type.is_entity_type:
             expr_type = expr_type.element_type
 
-        # Avoid useless conversions
-        if self == expr_type:
+        # Avoid useless conversions and return as-is expressions for non-nodes
+        if not expr_type.is_ast_node or self == expr_type:
             return expr
 
         root_node_expr = (

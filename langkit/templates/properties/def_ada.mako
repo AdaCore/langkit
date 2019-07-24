@@ -100,10 +100,12 @@ begin
         % if property._has_self_entity:
          & Trace_Image (Ent)
          % else:
-         & Trace_Image (Self)
+         & Trace_Image (Self_As_Root_Node)
          % endif
          % for arg in property.arguments:
-            & ", " & Trace_Image (${arg.name})
+            & ", "
+            & Trace_Image
+                (${T.root_node.internal_conversion(arg.type, arg.name)})
          % endfor
          & "):");
       Properties_Traces.Increase_Indent;
@@ -181,7 +183,11 @@ begin
 
                % if has_logging:
                   Properties_Traces.Trace
-                    ("Result: " & Trace_Image (Property_Result));
+                    ("Result: "
+                     & Trace_Image
+                         (${T.root_node.internal_conversion(
+                               property.type, 'Property_Result'
+                            )}));
                   Properties_Traces.Decrease_Indent;
                % endif
                ${gdb_memoization_return()}
@@ -252,7 +258,11 @@ begin
    % endif
 
    % if has_logging:
-      Properties_Traces.Trace ("Result: " & Trace_Image (Property_Result));
+      Properties_Traces.Trace
+        ("Result: "
+         & Trace_Image (${T.root_node.internal_conversion(
+                             property.type, 'Property_Result'
+                          )}));
       Properties_Traces.Decrease_Indent;
    % endif
 
