@@ -56,7 +56,7 @@ package body Langkit_Support.Lexical_Env is
        Kind    => (if Env = null then Primary else Env.Kind),
        Owner   => Owner,
        Version => (if Owner /= No_Unit
-                   then Get_Version (Owner) else 0)));
+                   then Get_Unit_Version (Owner) else 0)));
 
    function OK_For_Rebindings (Self : Lexical_Env) return Boolean is
      (Self.Kind = Primary and then Env_Node (Self) /= No_Node);
@@ -1191,10 +1191,12 @@ package body Langkit_Support.Lexical_Env is
       return (if Rebindings = null
               then Base_Env
               else Wrap (new Lexical_Env_Type'
-                           (Kind        => Rebound,
-                            Ref_Count   => <>,
-                            Rebound_Env => Base_Env,
-                            Rebindings  => Rebindings),
+                           (Kind            => Rebound,
+                            Ref_Count       => <>,
+                            Rebound_Env     => Base_Env,
+                            Rebindings      => Rebindings,
+                            Context_Version =>
+                               Get_Context_Version (Base_Env.Owner)),
                          Owner => Base_Env.Owner));
    end Rebind_Env;
 
@@ -1998,7 +2000,15 @@ package body Langkit_Support.Lexical_Env is
       L : Lexical_Env;
    begin
       if Self.Owner /= No_Unit then
-         return Get_Version (Self.Owner) > Self.Version;
+         --  If there is an owner, check that the unit version has not been
+         --  incremented since then. Additionally, if this is a Rebound env,
+         --  check that the version of the context has not been incremented
+         --  either, to make sure that the rebindings stored in this env
+         --  are still valid.
+         return
+            Get_Unit_Version (Self.Owner) > Self.Version or else
+              (Self.Kind = Rebound and then
+               Get_Context_Version (Self.Owner) > Self.Env.Context_Version);
       elsif Self = Empty_Env then
          --  Empty_Env is always stale, because since it is not linked to any
          --  unit, we have no way to know if it is stale or not. TODO: Maybe we
@@ -2028,6 +2038,8 @@ package body Langkit_Support.Lexical_Env is
             return (for some E of Self.Env.Grouped_Envs.all => Is_Stale (E));
 
          when Rebound =>
+            --  If there is no owner, we only care about the fact that the
+            --  rebound_env is not stale.
             return Is_Stale (Self.Env.Rebound_Env);
       end case;
    end Is_Stale;

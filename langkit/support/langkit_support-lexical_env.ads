@@ -63,9 +63,12 @@ generic
 
    type Unit_T is private;
    No_Unit : Unit_T;
-   with function Get_Version (Unit : Unit_T) return Version_Number;
-   --  Unit is passed solely for the Get_Version function, that is used in
-   --  cache invalidation.
+   with function Get_Unit_Version (Unit : Unit_T) return Version_Number;
+   --  Used to retrieve the version number of the given Unit, for cache
+   --  invalidation purposes.
+   with function Get_Context_Version (Unit : Unit_T) return Integer;
+   --  Used to retrieve the version number of the context associated with the
+   --  given Unit, for cache invalidation purposes.
 
    type Node_Type is private;
    type Node_Metadata is private;
@@ -759,6 +762,12 @@ package Langkit_Support.Lexical_Env is
 
                   Rebindings : Env_Rebindings;
                   --  Rebindings for this rebound environment
+
+                  Context_Version : Integer;
+                  --  Version of the context at the time of creation of this
+                  --  rebound env. This is used to determine if its content
+                  --  (in particular the Rebindings field) has become stale
+                  --  or not.
             end case;
       end case;
    end record;
