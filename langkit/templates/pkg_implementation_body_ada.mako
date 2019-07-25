@@ -2112,15 +2112,23 @@ package body ${ada_lib_name}.Implementation is
       return Create_Big_Integer (Left.Value - Right.Value);
    end "-";
 
-   -------------
-   -- Version --
-   -------------
+   ------------------
+   -- Unit_Version --
+   ------------------
 
-   function Version (Unit : Internal_Unit) return Version_Number is
+   function Unit_Version (Unit : Internal_Unit) return Version_Number is
    begin
       return Unit.Unit_Version;
-   end Version;
+   end Unit_Version;
 
+   ---------------------
+   -- Context_Version --
+   ---------------------
+
+   function Context_Version (Unit : Internal_Unit) return Integer is
+   begin
+      return Unit.Context.Reparse_Cache_Version;
+   end Context_Version;
    ----------------------
    -- Short_Text_Image --
    ----------------------

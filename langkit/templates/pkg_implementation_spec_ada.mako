@@ -138,9 +138,12 @@ private package ${ada_lib_name}.Implementation is
 
    No_Analysis_Unit : constant Internal_Unit := null;
 
-   function Version (Unit : Internal_Unit) return Version_Number;
+   function Unit_Version (Unit : Internal_Unit) return Version_Number;
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.
+
+   function Context_Version (Unit : Internal_Unit) return Integer;
+   --  Return the version of the analysis context associated with Unit
 
    type Ref_Category is (${", ".join(str(cat) for cat in ctx.ref_cats)});
    type Ref_Categories is array (Ref_Category) of Boolean;
@@ -152,7 +155,8 @@ private package ${ada_lib_name}.Implementation is
       Symbols                  => Symbols,
       Unit_T                   => Internal_Unit,
       No_Unit                  => No_Analysis_Unit,
-      Get_Version              => Version,
+      Get_Unit_Version         => Unit_Version,
+      Get_Context_Version      => Context_Version,
       Node_Type                => ${root_node_type_name},
       Node_Metadata            => ${T.env_md.name},
       No_Node                  => null,

@@ -32,7 +32,8 @@ package Support is
    procedure Register_Rebinding
      (Dummy_Node : Character; Dummy_Rebinding : System.Address) is null;
 
-   function Get_Version (Dummy : Boolean) return Version_Number is (0);
+   function Get_Unit_Version (Dummy : Boolean) return Version_Number is (0);
+   function Get_Context_Version (Dummy : Boolean) return Integer is (0);
 
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
@@ -50,7 +51,8 @@ package Support is
       Precomputed_Symbol       => Precomputed_Symbol,
       Symbols                  => Symbols,
       Unit_T                   => Boolean,
-      Get_Version              => Get_Version,
+      Get_Unit_Version         => Get_Unit_Version,
+      Get_Context_Version      => Get_Context_Version,
       No_Unit                  => False,
       Node_Type                => Character,
       Node_Metadata            => Metadata,
