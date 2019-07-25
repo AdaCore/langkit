@@ -1,13 +1,7 @@
 ## vim: filetype=makoada
 
 <%def name="argument_list(property, dispatching)">
-  (${property.self_arg_name} :
-   % if Self.type.is_ast_node:
-      access ${Self.type.value_type_name()}
-   % else:
-      ${Self.type.name}
-   % endif
-
+  (${property.self_arg_name} : ${Self.type.name}
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
       % if arg.default_value is not None:

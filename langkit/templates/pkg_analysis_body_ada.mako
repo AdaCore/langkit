@@ -955,8 +955,7 @@ package body ${ada_lib_name}.Analysis is
       -- Wrapper --
       -------------
 
-      function Wrapper
-        (Node : access ${root_node_value_type}) return Visit_Status
+      function Wrapper (Node : ${root_node_type_name}) return Visit_Status
       is
          Public_Node : constant ${root_entity.api_name} :=
            Wrap_Node (${root_node_type_name} (Node), Info);
@@ -1110,7 +1109,7 @@ package body ${ada_lib_name}.Analysis is
    function Unwrap_Unit (Unit : Analysis_Unit'Class) return Internal_Unit;
 
    function Wrap_Node
-     (Node : access ${root_node_value_type};
+     (Node : ${root_node_type_name};
       Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.api_name};
    function Unwrap_Node
@@ -1158,7 +1157,7 @@ package body ${ada_lib_name}.Analysis is
    ---------------
 
    function Wrap_Node
-     (Node : access ${root_node_value_type};
+     (Node : ${root_node_type_name};
       Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.api_name} is
    begin
