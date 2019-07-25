@@ -65,7 +65,7 @@ begin
    end if;
 
    declare
-      As_Root_Node    : constant ${root_node_type_name} :=
+      As_Root_Node    : constant ${T.root_node.name} :=
          ${T.root_node.internal_conversion(parser.type, parser.res_var)};
       As_Generic_List : constant ${ctx.generic_list_type.name} :=
          ${ctx.generic_list_type.internal_conversion(T.root_node,

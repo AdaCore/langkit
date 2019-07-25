@@ -578,7 +578,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Result : ${root_node_type_name};
+         Result : ${T.root_node.name};
          Exists : Boolean;
       begin
          if N > unsigned (Natural'Last) then

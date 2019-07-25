@@ -29,13 +29,13 @@ private package ${ada_lib_name}.Converters is
    Unwrap_Unit : Unit_Unwrapper;
 
    type Node_Wrapper is access function
-     (Node : ${root_node_type_name};
+     (Node : ${T.root_node.name};
       Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.api_name};
    Wrap_Node : Node_Wrapper;
 
    type Node_Unwrapper is access function
-     (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
+     (Node : ${root_entity.api_name}'Class) return ${T.root_node.name};
    Unwrap_Node : Node_Unwrapper;
 
    type Entity_Unwrapper is access function

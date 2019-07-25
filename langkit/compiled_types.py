@@ -47,28 +47,14 @@ def template_extensions(ctx):
     capi = ctx.c_api_settings
     root_entity = ctx.root_grammar_class.entity
 
-    # Name of the root AST node access type
-    type_name = ctx.root_grammar_class.name
-
-    # Name of the root AST node record type
-    value_type = type_name + names.Name('Type')
-
     # Name of the root AST node kind type
     kind_name = root_entity.api_name + names.Name('Kind_Type')
-
-    # Likewise, for the generic list type
-    glist_type_name = ctx.generic_list_type.name
-    glist_value_type = ctx.generic_list_type.name + names.Name('Type')
 
     return {
         'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
         'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
         'default_grammar_rule':  capi.get_name('default_grammar_rule'),
-        'root_node_type_name':   type_name,
-        'root_node_value_type':  value_type,
         'root_node_kind_name':   kind_name,
-        'generic_list_type_name': glist_type_name,
-        'generic_list_value_type': glist_value_type,
         'root_entity':           root_entity,
         'entity_array':          root_entity.array.api_name,
         'ctx':                   ctx,

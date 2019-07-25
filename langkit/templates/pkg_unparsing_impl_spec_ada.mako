@@ -27,13 +27,13 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    type Abstract_Node (Kind : Abstract_Node_Kind := Abstract_Node_Kind'First)
    is record
       case Kind is
-         when From_Parsing   => Parsing_Node   : ${root_node_type_name};
+         when From_Parsing   => Parsing_Node   : ${T.root_node.name};
          when From_Rewriting => Rewriting_Node : Node_Rewriting_Handle;
       end case;
    end record;
 
    function Create_Abstract_Node
-     (Parsing_Node : ${root_node_type_name}) return Abstract_Node;
+     (Parsing_Node : ${T.root_node.name}) return Abstract_Node;
    function Create_Abstract_Node
      (Rewriting_Node : Node_Rewriting_Handle) return Abstract_Node;
    --  Wrapping shortcuts
@@ -56,7 +56,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    --  Assuming Node is a token node, return the associated text
 
    function Rewritten_Node
-     (Node : Abstract_Node) return ${root_node_type_name};
+     (Node : Abstract_Node) return ${T.root_node.name};
    --  If Node is a parsing node, return it. If Node is a rewritten node,
    --  return the original node (i.e. of which Node is a rewritten version), or
    --  null if there is no original node.

@@ -44,7 +44,7 @@
 
    ${accessor_profile(field)}
    is
-      Unwrapped_Node : constant ${root_node_type_name} := Node.Node;
+      Unwrapped_Node : constant ${T.root_node.name} := Node.Node;
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
       % for arg in field.arguments:

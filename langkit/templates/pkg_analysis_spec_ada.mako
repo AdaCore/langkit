@@ -669,7 +669,7 @@ private
    --  helpers at no cost.
 
    Version : String renames ${ada_lib_name}.Version;
-   procedure RN (Node : ${ada_lib_name}.Implementation.${root_node_type_name})
+   procedure RN (Node : ${ada_lib_name}.Implementation.${T.root_node.name})
       renames ${ada_lib_name}.Debug.PN;
 
 end ${ada_lib_name}.Analysis;

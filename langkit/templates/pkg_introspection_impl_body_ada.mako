@@ -250,8 +250,8 @@ package body ${ada_lib_name}.Introspection_Implementation is
    ----------------
 
    function Eval_Field
-     (Node  : ${root_node_type_name};
-      Field : Field_Reference) return ${root_node_type_name}
+     (Node  : ${T.root_node.name};
+      Field : Field_Reference) return ${T.root_node.name}
    is
       Kind : constant ${root_node_kind_name} := Node.Kind;
    begin

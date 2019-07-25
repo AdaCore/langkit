@@ -168,7 +168,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                    or else Parent_Handle.Context_Handle = Context);
 
    function Allocate
-     (Node          : ${root_node_type_name};
+     (Node          : ${T.root_node.name};
       Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
@@ -413,8 +413,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    -- Handle --
    ------------
 
-   function Handle
-     (Node : ${root_node_type_name}) return Node_Rewriting_Handle is
+   function Handle (Node : ${T.root_node.name}) return Node_Rewriting_Handle is
    begin
       ${pre_check_rw_handle('Handle (Context (Node.Unit))')}
       ${pre_check_unit_no_diags('Node.Unit')}
@@ -454,7 +453,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    ----------
 
    function Node
-     (Handle : Node_Rewriting_Handle) return ${root_node_type_name} is
+     (Handle : Node_Rewriting_Handle) return ${T.root_node.name} is
    begin
       ${pre_check_nrw_handle('Handle')}
       return Handle.Node;
@@ -513,7 +512,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    --------------
 
    function Allocate
-     (Node          : ${root_node_type_name};
+     (Node          : ${T.root_node.name};
       Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
@@ -544,7 +543,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       --  Otherwise, expand to the appropriate children form: token node or
       --  regular one.
       declare
-         N           : constant ${root_node_type_name} := Node.Node;
+         N           : constant ${T.root_node.name} := Node.Node;
          Unit_Handle : constant Unit_Rewriting_Handle :=
             Handle (N.Unit);
       begin
@@ -561,7 +560,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                  (Ada.Containers.Count_Type (Count));
                for I in 1 .. Count loop
                   declare
-                     Child : constant ${root_node_type_name} :=
+                     Child : constant ${T.root_node.name} :=
                         Implementation.Child (N, I);
                   begin
                      Children.Vector.Append
@@ -1103,7 +1102,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
             Text_Count => Text'Length);
 
          function Transform
-           (Node   : ${root_node_type_name};
+           (Node   : ${T.root_node.name};
             Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle;
          --  Turn a node from the Reparsed unit into a recursively expanded
          --  node rewriting handle.
@@ -1113,7 +1112,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          ---------------
 
          function Transform
-           (Node   : ${root_node_type_name};
+           (Node   : ${T.root_node.name};
             Parent : Node_Rewriting_Handle) return Node_Rewriting_Handle
          is
             Result : Node_Rewriting_Handle;

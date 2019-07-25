@@ -4,7 +4,7 @@
 
 ${result} := new ${expr.static_type.value_type_name()};
 declare
-   Result_As_Root_Node : constant ${root_node_type_name} :=
+   Result_As_Root_Node : constant ${T.root_node.name} :=
       ${T.root_node.internal_conversion(expr.static_type, result)};
 begin
    Initialize

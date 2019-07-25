@@ -6,9 +6,9 @@
 
 <%def name="bare_node_converters(cls)">
    function ${cls.internal_converter(T.root_node)} is
-      new Ada.Unchecked_Conversion (${root_node_type_name}, ${cls.name});
+      new Ada.Unchecked_Conversion (${T.root_node.name}, ${cls.name});
    function ${T.root_node.internal_converter(cls)} is
-      new Ada.Unchecked_Conversion (${cls.name}, ${root_node_type_name});
+      new Ada.Unchecked_Conversion (${cls.name}, ${T.root_node.name});
 </%def>
 
 <%def name="public_incomplete_decl(cls)">
@@ -473,7 +473,7 @@
    ---------------------------
 
    function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
-      Self_As_Root : constant ${root_node_type_name} := E.Node;
+      Self_As_Root : constant ${T.root_node.name} := E.Node;
       Self         : constant ${cls.name} :=
          ${cls.internal_conversion(T.root_node, 'Self_As_Root')};
 
@@ -506,7 +506,7 @@
    is
       use AST_Envs;
 
-      Self_As_Root : constant ${root_node_type_name} :=
+      Self_As_Root : constant ${T.root_node.name} :=
          ${T.root_node.internal_conversion(cls, 'Self')};
       Initial_Env  : Lexical_Env := Bound_Env;
 
@@ -538,7 +538,7 @@
          Bound_Env, Root_Env : AST_Envs.Lexical_Env)
       is
          use AST_Envs;
-         Self_As_Root : constant ${root_node_type_name} :=
+         Self_As_Root : constant ${T.root_node.name} :=
             ${T.root_node.internal_conversion(cls, 'Self')};
          Initial_Env  : Lexical_Env := Bound_Env;
       begin
