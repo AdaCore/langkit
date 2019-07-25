@@ -58,11 +58,11 @@ private package ${ada_lib_name}.Implementation is
    type Analysis_Unit_Type;
    type Internal_Unit is access all Analysis_Unit_Type;
 
-   type ${root_node_value_type};
-   type ${root_node_type_name} is access all ${root_node_value_type};
+   type ${T.root_node.value_type_name()};
+   type ${T.root_node.name} is access all ${T.root_node.value_type_name()};
    --  Most generic AST node type
 
-   ${T.root_node.null_constant} : constant ${root_node_type_name} := null;
+   ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
 
    type Rewriting_Handle_Pointer is new System.Address;
    No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
@@ -74,16 +74,16 @@ private package ${ada_lib_name}.Implementation is
            ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On, Stream => "&1");
    % endif
 
-   function Is_Null (Node : ${root_node_type_name}) return Boolean;
+   function Is_Null (Node : ${T.root_node.name}) return Boolean;
 
-   function Short_Text_Image (Self : ${root_node_type_name}) return Text_Type;
+   function Short_Text_Image (Self : ${T.root_node.name}) return Text_Type;
    --  Return a short representation of the node, containing just the kind
    --  name and the sloc, or "None" if Self is null.
 
-   function Is_Token_Node (Node : ${root_node_type_name}) return Boolean;
+   function Is_Token_Node (Node : ${T.root_node.name}) return Boolean;
    ${ada_doc('langkit.node_is_token_node', 3)}
 
-   function Is_Synthetic (Node : ${root_node_type_name}) return Boolean;
+   function Is_Synthetic (Node : ${T.root_node.name}) return Boolean;
    ${ada_doc('langkit.node_is_synthetic', 3)}
 
    ---------------------------
@@ -99,23 +99,23 @@ private package ${ada_lib_name}.Implementation is
    --  The combine function on environments metadata does a boolean Or on every
    --  boolean component of the env metadata.
 
-   function Can_Reach (El, From : ${root_node_type_name}) return Boolean;
+   function Can_Reach (El, From : ${T.root_node.name}) return Boolean;
    --  Return whether El can reach From, from a sequential viewpoint. If
    --  elements are declared in different units, it will always return True,
    --  eg this does not handle general visibility issues, just sequentiality of
    --  declarations.
 
    function AST_Envs_Node_Text_Image
-     (Node  : ${root_node_type_name};
+     (Node  : ${T.root_node.name};
       Short : Boolean := True) return Text_Type;
    --  Return a "sourcefile:lineno:columnno" corresponding to the starting sloc
    --  of Node. Used to create a human-readable representation for env.
    --  rebindings.
 
-   function Is_Rebindable (Node : ${root_node_type_name}) return Boolean;
+   function Is_Rebindable (Node : ${T.root_node.name}) return Boolean;
 
    procedure Register_Rebinding
-     (Node : ${root_node_type_name}; Rebinding : System.Address);
+     (Node : ${T.root_node.name}; Rebinding : System.Address);
    --  Register a rebinding to be destroyed when Node's analysis unit is
    --  destroyed or reparsed.
    --
@@ -125,10 +125,10 @@ private package ${ada_lib_name}.Implementation is
    --  Env_Rebindings and on the analysis unit record.
 
    function Element_Parent
-     (Node : ${root_node_type_name}) return ${root_node_type_name};
+     (Node : ${T.root_node.name}) return ${T.root_node.name};
 
-   function Hash (Node : ${root_node_type_name}) return Hash_Type;
-   function Named_Hash (Node : ${root_node_type_name}) return Hash_Type is
+   function Hash (Node : ${T.root_node.name}) return Hash_Type;
+   function Named_Hash (Node : ${T.root_node.name}) return Hash_Type is
      (Hash (Node));
 
    No_Analysis_Unit : constant Internal_Unit := null;
@@ -152,7 +152,7 @@ private package ${ada_lib_name}.Implementation is
       No_Unit                  => No_Analysis_Unit,
       Get_Unit_Version         => Unit_Version,
       Get_Context_Version      => Context_Version,
-      Node_Type                => ${root_node_type_name},
+      Node_Type                => ${T.root_node.name},
       Node_Metadata            => ${T.env_md.name},
       No_Node                  => null,
       Empty_Metadata           => No_Metadata,
@@ -175,7 +175,7 @@ private package ${ada_lib_name}.Implementation is
      (null, ${T.entity_info.nullexpr});
 
    function ${root_entity.constructor_name}
-     (Node : ${root_node_type_name};
+     (Node : ${T.root_node.name};
       Info : ${T.entity_info.name}) return ${root_entity.name};
 
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
@@ -264,13 +264,14 @@ private package ${ada_lib_name}.Implementation is
    -- AST node derived types (incomplete declarations) --
    ------------------------------------------------------
 
-   type ${generic_list_value_type};
+   type ${ctx.generic_list_type.value_type_name()};
    --  Base type for all lists of AST node subclasses
 
-   type ${generic_list_type_name} is access all ${generic_list_value_type};
+   type ${ctx.generic_list_type.name} is access all
+   ${ctx.generic_list_type.value_type_name()};
 
    ${ctx.generic_list_type.null_constant} :
-      constant ${generic_list_type_name} := null;
+      constant ${ctx.generic_list_type.name} := null;
 
    ${astnode_types.bare_node_converters(ctx.generic_list_type)}
 
@@ -290,16 +291,16 @@ private package ${ada_lib_name}.Implementation is
 
    % if ctx.properties_logging:
       function Trace_Image
-        (Node       : ${root_node_type_name};
+        (Node       : ${T.root_node.name};
          Decoration : Boolean := True) return String;
    % endif
 
-   function Is_Incomplete (Node : ${root_node_type_name}) return Boolean;
+   function Is_Incomplete (Node : ${T.root_node.name}) return Boolean;
    --  Return whether this node is incomplete or not.  Incomplete nodes are a
    --  result of the parsing of a node failing as a result of a NoBacktrack
    --  parser annotation.
 
-   function Kind_Name (Node : ${root_node_type_name}) return String;
+   function Kind_Name (Node : ${T.root_node.name}) return String;
    --  Return the concrete kind for Node
 
    -------------------------------
@@ -318,20 +319,20 @@ private package ${ada_lib_name}.Implementation is
    --  it has. For AST node lists, this is -1 as this number varies from one
    --  list instance to another.
 
-   function First_Child_Index (Node : ${root_node_type_name}) return Natural;
+   function First_Child_Index (Node : ${T.root_node.name}) return Natural;
    --  Return the index of the first child Node has
 
-   function Last_Child_Index (Node : ${root_node_type_name}) return Natural;
+   function Last_Child_Index (Node : ${T.root_node.name}) return Natural;
    --  Return the index of the last child Node has, or 0 if there is no child
 
-   function Children_Count (Node : ${root_node_type_name}) return Natural;
+   function Children_Count (Node : ${T.root_node.name}) return Natural;
    --  Return the number of children that Node has
 
    procedure Get_Child
-     (Node            : ${root_node_type_name};
+     (Node            : ${T.root_node.name};
       Index           : Positive;
       Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name});
+      Result          : out ${T.root_node.name});
    --  Return the Index'th child of node, storing it into Result.
    --
    --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
@@ -339,38 +340,36 @@ private package ${ada_lib_name}.Implementation is
    --  of Result is undefined.
 
    function Child
-     (Node  : ${root_node_type_name};
-      Index : Positive) return ${root_node_type_name};
+     (Node  : ${T.root_node.name};
+      Index : Positive) return ${T.root_node.name};
    --  Return the Index'th child of Node, or null if Node has no such child
 
    function Children
-     (Node : ${root_node_type_name}) return ${root_node_array.array_type_name};
+     (Node : ${T.root_node.name}) return ${root_node_array.array_type_name};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Children_Count pair, useful if you
    --  want the convenience of Ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
    function Parents
-     (Node         : ${root_node_type_name};
+     (Node         : ${T.root_node.name};
       Include_Self : Boolean := True)
       return ${root_node_array.name};
    --  Return the list of parents for this node. This node included in the list
    --  iff Include_Self.
 
-   function Parent
-     (Node : ${root_node_type_name}) return ${root_node_type_name};
+   function Parent (Node : ${T.root_node.name}) return ${T.root_node.name};
 
    function Fetch_Sibling
-     (Node   : ${root_node_type_name};
+     (Node   : ${T.root_node.name};
       E_Info : ${T.entity_info.name};
       Offset : Integer) return ${root_entity.name};
    --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
    --  child of the same parent, or No_Entity if there is no such sibling.
 
    function Traverse
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name})
-                               return Visit_Status)
+     (Node  : ${T.root_node.name};
+      Visit : access function (Node : ${T.root_node.name}) return Visit_Status)
       return Visit_Status;
    --  Given the parent node for a subtree, traverse all syntactic nodes of
    --  this tree, calling the given function on each node in prefix order (i.e.
@@ -389,8 +388,8 @@ private package ${ada_lib_name}.Implementation is
    --            original call to Traverse returns Stop.
 
    procedure Traverse
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name})
+     (Node  : ${T.root_node.name};
+      Visit : access function (Node : ${T.root_node.name})
                                return Visit_Status);
    --  This is the same as Traverse function except that no result is returned
    --  i.e. the Traverse function is called and the result is simply discarded.
@@ -399,8 +398,8 @@ private package ${ada_lib_name}.Implementation is
       type Data_Type is private;
       Reset_After_Traversal : Boolean := False;
    function Traverse_With_Data
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name};
+     (Node  : ${T.root_node.name};
+      Visit : access function (Node : ${T.root_node.name};
                                Data : in out Data_Type)
                                return Visit_Status;
       Data  : in out Data_Type)
@@ -417,23 +416,23 @@ private package ${ada_lib_name}.Implementation is
    ----------------------------------------
 
    function Sloc_Range
-     (Node : ${root_node_type_name}) return Source_Location_Range;
+     (Node : ${T.root_node.name}) return Source_Location_Range;
    --  Return the source location range corresponding to the set of tokens from
    --  which Node was parsed.
 
    function Compare
-     (Node : ${root_node_type_name};
+     (Node : ${T.root_node.name};
       Sloc : Source_Location) return Relative_Position;
    --  Compare Sloc to the sloc range of Node
 
    function Lookup
-     (Node : ${root_node_type_name};
-      Sloc : Source_Location) return ${root_node_type_name};
+     (Node : ${T.root_node.name};
+      Sloc : Source_Location) return ${T.root_node.name};
    --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
    --  it, or null if no such node was found.
 
    function Compare
-     (Left, Right : ${root_node_type_name};
+     (Left, Right : ${T.root_node.name};
       Relation    : Comparison_Relation) return Boolean;
    --  If Left and Right don't belong to the same analysis units or if one of
    --  them is null, raise a Property_Error. Otherwise, return the comparison
@@ -444,20 +443,20 @@ private package ${ada_lib_name}.Implementation is
    -------------------
 
    procedure Print
-     (Node        : ${root_node_type_name};
+     (Node        : ${T.root_node.name};
       Show_Slocs  : Boolean;
       Line_Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children.
    --  Line_Prefix is prepended to each output line.
 
    procedure PP_Trivia
-     (Node        : ${root_node_type_name};
+     (Node        : ${T.root_node.name};
       Line_Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children along
    --  with the trivia associated to them. Line_Prefix is prepended to each
    --  output line.
 
-   procedure Assign_Names_To_Logic_Vars (Node : ${root_node_type_name});
+   procedure Assign_Names_To_Logic_Vars (Node : ${T.root_node.name});
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.
 
@@ -545,8 +544,8 @@ private package ${ada_lib_name}.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
-   type ${root_node_value_type} is record
-      Parent : ${root_node_type_name};
+   type ${T.root_node.value_type_name()} is record
+      Parent : ${T.root_node.name};
       --  Reference to the parent node, or null if this is the root one
 
       Unit : Internal_Unit;
@@ -575,17 +574,17 @@ private package ${ada_lib_name}.Implementation is
       with Convention => C;
 
    procedure Initialize
-     (Self              : ${root_node_type_name};
+     (Self              : ${T.root_node.name};
       Kind              : ${root_node_kind_name};
       Unit              : Internal_Unit;
       Token_Start_Index : Token_Index;
       Token_End_Index   : Token_Index;
-      Parent            : ${root_node_type_name} := null;
+      Parent            : ${T.root_node.name} := null;
       Self_Env          : Lexical_Env := AST_Envs.Empty_Env);
    --  Helper for parsers, to initialize a freshly allocated node
 
    function Pre_Env_Actions
-     (Self                : ${root_node_type_name};
+     (Self                : ${T.root_node.name};
       Bound_Env, Root_Env : Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return Lexical_Env;
    --  Internal procedure that will execute all necessary lexical env actions
@@ -596,12 +595,12 @@ private package ${ada_lib_name}.Implementation is
    --  Post_Env_Actions.
 
    procedure Post_Env_Actions
-     (Self                : ${root_node_type_name};
+     (Self                : ${T.root_node.name};
       Bound_Env, Root_Env : Lexical_Env);
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
-   function Get_Symbol (Node : ${root_node_type_name}) return Symbol_Type
+   function Get_Symbol (Node : ${T.root_node.name}) return Symbol_Type
       with Pre => Is_Token_Node (Node);
    --  Assuming Node is a token node, return the corresponding symbol for the
    --  token it contains.
@@ -609,7 +608,7 @@ private package ${ada_lib_name}.Implementation is
    function Image (Self : Symbol_Type) return ${T.String.name};
    --  Transform a Symbol into an internal String
 
-   function Text (Node : ${root_node_type_name}) return Text_Type;
+   function Text (Node : ${T.root_node.name}) return Text_Type;
    --  Retun the fragment of text from which Node was parsed
 
    ------------------------------
@@ -629,34 +628,34 @@ private package ${ada_lib_name}.Implementation is
    -----------------------
 
    package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
-     (Element_T  => ${root_node_type_name},
+     (Element_T  => ${T.root_node.name},
       Index_Type => Positive);
 
-   type ${generic_list_value_type} is record
-      Base  : ${root_node_value_type};
+   type ${ctx.generic_list_type.value_type_name()} is record
+      Base  : ${T.root_node.value_type_name()};
       Count : Natural;
       Nodes : Alloc_AST_List_Array.Element_Array_Access;
    end record
       with Convention => C;
    --  Base type for all lists of AST node subclasses
 
-   function Length (Node : ${generic_list_type_name}) return Natural;
+   function Length (Node : ${ctx.generic_list_type.name}) return Natural;
 
    function Children
-     (Node : ${root_node_type_name}) return ${root_node_array.name};
+     (Node : ${T.root_node.name}) return ${root_node_array.name};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Children_Count pair, useful if you
    --  want the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
-   procedure Reset_Logic_Vars (Node : ${root_node_type_name});
+   procedure Reset_Logic_Vars (Node : ${T.root_node.name});
    --  Reset the logic variables attached to this node
 
-   procedure Set_Parents (Node, Parent : ${root_node_type_name});
+   procedure Set_Parents (Node, Parent : ${T.root_node.name});
    --  Set Node.Parent to Parent, and initialize recursively the parent of all
    --  child nodes.
 
-   procedure Destroy (Node : ${root_node_type_name});
+   procedure Destroy (Node : ${T.root_node.name});
    --  Free the resources allocated to this node and all its children
 
    --------------------------------------
@@ -682,8 +681,7 @@ private package ${ada_lib_name}.Implementation is
    --  environments does not belong to a particular analysis unit, this raises
    --  a Property_Error.
 
-   function Populate_Lexical_Env
-     (Node : ${root_node_type_name}) return Boolean;
+   function Populate_Lexical_Env (Node : ${T.root_node.name}) return Boolean;
    --  Populate the lexical environment for node and all its children. Return
    --  whether a Property_Error error occurred in the process.
 
@@ -692,13 +690,13 @@ private package ${ada_lib_name}.Implementation is
    -----------------------------------
 
    function Token
-     (Node  : ${root_node_type_name};
+     (Node  : ${T.root_node.name};
       Index : Token_Index) return Token_Reference;
    --  Helper for properties. This is used to turn token indexes as stored in
    --  AST nodes into Token_Reference values.
 
    function Stored_Token
-     (Node  : ${root_node_type_name};
+     (Node  : ${T.root_node.name};
       Token : Token_Reference) return Token_Index;
    --  Helper for properties. This is used to turn a Token_Reference value into
    --  a Token_Index value that can be stored as a field in Node. This raises a
@@ -708,7 +706,7 @@ private package ${ada_lib_name}.Implementation is
    type Bare_Child_Record (Kind : Child_Or_Trivia := Child) is record
       case Kind is
          when Child =>
-            Node : ${root_node_type_name};
+            Node : ${T.root_node.name};
          when Trivia =>
             Trivia : Token_Reference;
       end case;
@@ -718,7 +716,7 @@ private package ${ada_lib_name}.Implementation is
    type Bare_Children_Array is array (Positive range <>) of Bare_Child_Record;
 
    function Children_With_Trivia
-     (Node : ${root_node_type_name}) return Bare_Children_Array;
+     (Node : ${T.root_node.name}) return Bare_Children_Array;
    --  Implementation for Analysis.Children_With_Trivia
 
    % for astnode in no_builtins(ctx.astnode_types):
@@ -734,7 +732,7 @@ private package ${ada_lib_name}.Implementation is
    type Exiled_Entry is record
       Env  : Lexical_Env;
       Key  : Symbol_Type;
-      Node : ${root_node_type_name};
+      Node : ${T.root_node.name};
    end record;
    --  Tuple of values passed to AST_Envs.Add. Used in the lexical
    --  environment rerooting machinery: see Remove_Exiled_Entries and
@@ -743,7 +741,7 @@ private package ${ada_lib_name}.Implementation is
    package Exiled_Entry_Vectors is new Langkit_Support.Vectors (Exiled_Entry);
 
    type Foreign_Node_Entry is record
-      Node : ${root_node_type_name};
+      Node : ${T.root_node.name};
       --  The foreign node that has been added to an analysis unit's lexical
       --  environment.
 
@@ -755,7 +753,7 @@ private package ${ada_lib_name}.Implementation is
      (Foreign_Node_Entry);
 
    procedure Register_Destroyable
-     (Unit : Internal_Unit; Node : ${root_node_type_name});
+     (Unit : Internal_Unit; Node : ${T.root_node.name});
    --  Helper for synthetized nodes. We cannot use the generic
    --  Register_Destroyable because the root AST node is an abstract types, so
    --  this is implemented using the untyped (using System.Address)
@@ -951,7 +949,7 @@ private package ${ada_lib_name}.Implementation is
       Context : Internal_Context;
       --  The owning context for this analysis unit
 
-      AST_Root : ${root_node_type_name};
+      AST_Root : ${T.root_node.name};
 
       Filename : GNATCOLL.VFS.Virtual_File;
       --  The originating name for this analysis unit. This should be set even
@@ -1024,7 +1022,7 @@ private package ${ada_lib_name}.Implementation is
       TDH          : Token_Data_Handler;
       Diagnostics  : Diagnostics_Vectors.Vector;
       AST_Mem_Pool : Bump_Ptr_Pool;
-      AST_Root     : ${root_node_type_name};
+      AST_Root     : ${T.root_node.name};
    end record;
    --  Holder for fields affected by an analysis unit reparse. This makes it
    --  possible to separate the "reparsing" and the "replace" steps.
@@ -1176,7 +1174,7 @@ private package ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; D : Diagnostic) return String;
    --  Implementation for Analysis.Format_GNU_Diagnostic
 
-   function Root (Unit : Internal_Unit) return ${root_node_type_name};
+   function Root (Unit : Internal_Unit) return ${T.root_node.name};
    --  Implementation for Analysis.Root
 
    function First_Token (Unit : Internal_Unit) return Token_Reference;
@@ -1261,12 +1259,12 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Extract_Foreign_Nodes
      (Unit          : Internal_Unit;
-      Foreign_Nodes : in out ${root_node_type_name}_Vectors.Vector);
+      Foreign_Nodes : in out ${T.root_node.name}_Vectors.Vector);
    --  Collect from Unit all the foreign nodes that belong to an analysis unit
    --  which is not in the populate lexical env queue, appending them to
    --  Foreign_Nodes. Clear Unit.Foreign_Nodes afterwards.
 
-   procedure Reroot_Foreign_Node (Node : ${root_node_type_name});
+   procedure Reroot_Foreign_Node (Node : ${T.root_node.name});
    --  Re-create the lexical env entry for Node. This is to be used in
    --  Flush_Populate_Lexical_Env_Queue, after reparsing removed the target
    --  lexical environment.

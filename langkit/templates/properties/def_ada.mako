@@ -33,7 +33,7 @@ is
    ## property level: we do not want to do it twice.
    <% memoized = property.memoized and not property.is_dispatcher %>
 
-   Self_As_Root_Node : constant ${root_node_type_name} :=
+   Self_As_Root_Node : constant ${T.root_node.name} :=
       ${T.root_node.internal_conversion(Self.type, 'Self')};
 
    % if property._has_self_entity:

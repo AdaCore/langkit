@@ -664,9 +664,9 @@ private package ${ada_lib_name}.Implementation.C is
      (${symbol_type}, Symbol_Type);
 
    function Wrap is new Ada.Unchecked_Conversion
-     (${root_node_type_name}, ${node_type});
+     (${T.root_node.name}, ${node_type});
    function Unwrap is new Ada.Unchecked_Conversion
-     (${node_type}, ${root_node_type_name});
+     (${node_type}, ${T.root_node.name});
 
    function Wrap (Token : Token_Reference) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Reference;

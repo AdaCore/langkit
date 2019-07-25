@@ -53,12 +53,12 @@ if ${parser.pos_var} /= No_Token_Index then
       ## Update Last_Attempted_Child for the created node depending on the
       ## subparsers' results.
       declare
-         N : constant ${root_node_type_name} :=
+         N : constant ${T.root_node.name} :=
             ${T.root_node.internal_conversion(parser.type, parser.res_var)};
       begin
          % for _, subparser, subresult in args:
             declare
-               C : constant ${root_node_type_name} :=
+               C : constant ${T.root_node.name} :=
                   ${T.root_node.internal_conversion(subparser.type,
                                                     subresult)};
             begin

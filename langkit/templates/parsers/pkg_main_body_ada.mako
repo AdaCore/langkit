@@ -209,7 +209,7 @@ package body ${ada_lib_name}.Parsers is
       Check_Complete : Boolean := True;
       Rule           : Grammar_Rule) return Parsed_Node
    is
-      Result : ${root_node_type_name};
+      Result : ${T.root_node.name};
    begin
       case Rule is
       % for name in ctx.grammar.user_defined_rules:

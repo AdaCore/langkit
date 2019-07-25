@@ -14,12 +14,12 @@ use ${ada_lib_name}.Implementation;
 
 private package ${ada_lib_name}.Debug is
 
-   procedure PN (Node : ${root_node_type_name});
+   procedure PN (Node : ${T.root_node.name});
    --  "Print Node".  Shortcut for Put_Line (Node.Short_Image). This is useful
    --  because Short_Image takes an implicit accessibility level parameter,
    --  which is not convenient in GDB.
 
-   procedure PT (Node : ${root_node_type_name});
+   procedure PT (Node : ${T.root_node.name});
    --  "Print Tree". Shortcut for Node.Print. This is useful because Print is a
    --  dispatching primitive whereas these are difficult to call from GDB.
    --  Besides, it removes the Level parameter.
@@ -36,7 +36,7 @@ private package ${ada_lib_name}.Debug is
    --  Return whether the text associated to S matches Text. There is a bug in
    --  GDB that makes comparison with "=" always return false.
 
-   procedure PRel (Rel : Relation; Context_Node : ${root_node_type_name});
+   procedure PRel (Rel : Relation; Context_Node : ${T.root_node.name});
    --  "Print Relation". Print Rel as a tree of logic relations
 
 end ${ada_lib_name}.Debug;

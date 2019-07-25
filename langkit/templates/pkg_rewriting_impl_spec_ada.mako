@@ -39,7 +39,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       Equivalent_Keys => "=");
 
    package Node_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => ${root_node_type_name},
+     (Key_Type        => ${T.root_node.name},
       Element_Type    => Node_Rewriting_Handle,
       Hash            => Named_Hash,
       Equivalent_Keys => "=");
@@ -111,7 +111,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       Context_Handle : Rewriting_Handle;
       --  Rewriting handle for the analysis context that owns Node
 
-      Node : ${root_node_type_name};
+      Node : ${T.root_node.name};
       --  Bare AST node which this rewriting handle relates to
 
       Parent : Node_Rewriting_Handle;
@@ -215,11 +215,11 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    ---------------------------------------
 
    function Handle
-     (Node : ${root_node_type_name}) return Node_Rewriting_Handle;
+     (Node : ${T.root_node.name}) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Handle
 
    function Node
-     (Handle : Node_Rewriting_Handle) return ${root_node_type_name};
+     (Handle : Node_Rewriting_Handle) return ${T.root_node.name};
    --  Implementation for Rewriting.Node
 
    function Context (Handle : Node_Rewriting_Handle) return Rewriting_Handle;

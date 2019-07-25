@@ -22,7 +22,7 @@ package body ${ada_lib_name}.Debug is
    -- PN --
    --------
 
-   procedure PN (Node : ${root_node_type_name}) is
+   procedure PN (Node : ${T.root_node.name}) is
    begin
       Put_Line (Image (Short_Text_Image (Node)));
    end PN;
@@ -31,7 +31,7 @@ package body ${ada_lib_name}.Debug is
    -- PT --
    --------
 
-   procedure PT (Node : ${root_node_type_name}) is
+   procedure PT (Node : ${T.root_node.name}) is
    begin
       Print (Node, Show_Slocs => True);
    end PT;
@@ -86,7 +86,7 @@ package body ${ada_lib_name}.Debug is
    -- PRel --
    ----------
 
-   procedure PRel (Rel : Relation; Context_Node : ${root_node_type_name}) is
+   procedure PRel (Rel : Relation; Context_Node : ${T.root_node.name}) is
    begin
       Assign_Names_To_Logic_Vars (Context_Node);
       Print_Relation (Rel, null, False);

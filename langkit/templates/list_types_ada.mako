@@ -27,7 +27,7 @@
    %>
 
    type ${value_type} is record
-      Base : ${generic_list_value_type};
+      Base : ${ctx.generic_list_type.value_type_name()};
    end record
       with Convention => C;
 
@@ -108,7 +108,7 @@
    function Item
      (Node : ${type_name}; Index : Positive) return ${element_type.name}
    is
-      Result : constant ${root_node_type_name} :=
+      Result : constant ${T.root_node.name} :=
         Child (${T.root_node.internal_conversion(list_type, 'Node')}, Index);
    begin
       return ${element_type.internal_conversion(T.root_node, 'Result')};

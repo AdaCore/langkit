@@ -426,8 +426,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Implementation for Introspection.Field_Type
 
    function Eval_Field
-     (Node  : ${root_node_type_name};
-      Field : Field_Reference) return ${root_node_type_name};
+     (Node  : ${T.root_node.name};
+      Field : Field_Reference) return ${T.root_node.name};
    --  Implementation for Introspection.Eval_Field
 
    function Index

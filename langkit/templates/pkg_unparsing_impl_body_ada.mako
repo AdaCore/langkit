@@ -79,7 +79,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Extract_Regular_Node_Template
      (Unparser       : Regular_Node_Unparser;
-      Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template;
+      Rewritten_Node : ${T.root_node.name}) return Regular_Node_Template;
    --  Return the regular node template corresponding to the instatiation of
    --  Rewritten_Node according to Unparser.
    --
@@ -107,7 +107,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    procedure Unparse_Regular_Node
      (Node                : Abstract_Node;
       Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : ${root_node_type_name};
+      Rewritten_Node      : ${T.root_node.name};
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
@@ -115,7 +115,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    procedure Unparse_List_Node
      (Node                : Abstract_Node;
       Unparser            : List_Node_Unparser;
-      Rewritten_Node      : ${root_node_type_name};
+      Rewritten_Node      : ${T.root_node.name};
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on list nodes
@@ -192,7 +192,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --------------------------
 
    function Create_Abstract_Node
-     (Parsing_Node : ${root_node_type_name}) return Abstract_Node is
+     (Parsing_Node : ${T.root_node.name}) return Abstract_Node is
    begin
       return (From_Parsing, Parsing_Node);
    end Create_Abstract_Node;
@@ -297,7 +297,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --------------------
 
    function Rewritten_Node
-     (Node : Abstract_Node) return ${root_node_type_name} is
+     (Node : Abstract_Node) return ${T.root_node.name} is
    begin
       case Node.Kind is
          when From_Parsing =>
@@ -334,7 +334,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Extract_Regular_Node_Template
      (Unparser       : Regular_Node_Unparser;
-      Rewritten_Node : ${root_node_type_name}) return Regular_Node_Template
+      Rewritten_Node : ${T.root_node.name}) return Regular_Node_Template
    is
       Result     : Regular_Node_Template (True, Unparser.Field_Unparsers.N);
       Next_Token : Token_Reference;
@@ -359,7 +359,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
             T     : Token_Sequence_Access renames U.Inter_Tokens (I);
             FT    : Field_Template renames Result.Fields (I);
 
-            Rewritten_Child : constant ${root_node_type_name} :=
+            Rewritten_Child : constant ${T.root_node.name} :=
                Child (Rewritten_Node, I);
             R_Child         : constant Abstract_Node :=
                Create_Abstract_Node (Rewritten_Child);
@@ -621,7 +621,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          Unparsing_Implementation.Kind (Node);
       Unparser : Node_Unparser renames Node_Unparsers (Kind);
 
-      Rewritten_Node : constant ${root_node_type_name} :=
+      Rewritten_Node : constant ${T.root_node.name} :=
         (if Preserve_Formatting
          then Unparsing_Implementation.Rewritten_Node (Node)
          else null);
@@ -667,7 +667,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    procedure Unparse_Regular_Node
      (Node                : Abstract_Node;
       Unparser            : Regular_Node_Unparser;
-      Rewritten_Node      : ${root_node_type_name};
+      Rewritten_Node      : ${T.root_node.name};
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
@@ -733,7 +733,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    procedure Unparse_List_Node
      (Node                : Abstract_Node;
       Unparser            : List_Node_Unparser;
-      Rewritten_Node      : ${root_node_type_name};
+      Rewritten_Node      : ${T.root_node.name};
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer) is
    begin
@@ -746,7 +746,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                and then Children_Count (Rewritten_Node) >= I
             then
                declare
-                  R_Child : constant ${root_node_type_name} :=
+                  R_Child : constant ${T.root_node.name} :=
                      Child (Rewritten_Node, I);
                   Tok : constant Token_Reference :=
                      Relative_Token (Token_Start (R_Child), -1);

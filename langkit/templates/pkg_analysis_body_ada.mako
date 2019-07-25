@@ -638,7 +638,7 @@ package body ${ada_lib_name}.Analysis is
       function As_${e.element_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name}
       is
-         N : constant ${root_node_type_name} := Node.Internal.Node;
+         N : constant ${T.root_node.name} := Node.Internal.Node;
       begin
          if N = null then
             return No_${e.api_name};
@@ -829,7 +829,7 @@ package body ${ada_lib_name}.Analysis is
       Index_In_Bounds : out Boolean;
       Result          : out ${root_entity.api_name})
    is
-      N : ${root_node_type_name};
+      N : ${T.root_node.name};
    begin
       Check_Safety_Net (Node.Safety_Net);
       Get_Child (Node.Internal.Node, Index, Index_In_Bounds, N);
@@ -955,10 +955,10 @@ package body ${ada_lib_name}.Analysis is
       -- Wrapper --
       -------------
 
-      function Wrapper (Node : ${root_node_type_name}) return Visit_Status
+      function Wrapper (Node : ${T.root_node.name}) return Visit_Status
       is
          Public_Node : constant ${root_entity.api_name} :=
-           Wrap_Node (${root_node_type_name} (Node), Info);
+           Wrap_Node (${T.root_node.name} (Node), Info);
       begin
          return Visit (Public_Node);
       end Wrapper;
@@ -1109,11 +1109,11 @@ package body ${ada_lib_name}.Analysis is
    function Unwrap_Unit (Unit : Analysis_Unit'Class) return Internal_Unit;
 
    function Wrap_Node
-     (Node : ${root_node_type_name};
+     (Node : ${T.root_node.name};
       Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.api_name};
    function Unwrap_Node
-     (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
+     (Node : ${root_entity.api_name}'Class) return ${T.root_node.name};
    function Unwrap_Entity
      (Entity : ${root_entity.api_name}'Class) return ${root_entity.name};
 
@@ -1157,7 +1157,7 @@ package body ${ada_lib_name}.Analysis is
    ---------------
 
    function Wrap_Node
-     (Node : ${root_node_type_name};
+     (Node : ${T.root_node.name};
       Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.api_name} is
    begin
@@ -1182,7 +1182,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function Unwrap_Node
-     (Node : ${root_entity.api_name}'Class) return ${root_node_type_name}
+     (Node : ${root_entity.api_name}'Class) return ${T.root_node.name}
    is (Node.Internal.Node);
 
    -------------------

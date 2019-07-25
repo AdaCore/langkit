@@ -614,7 +614,7 @@ package body ${ada_lib_name}.Introspection is
       Ent : constant ${T.entity.name} := Unwrap_Entity (Node);
 
       pragma Warnings (Off, "value not in range of type");
-      Result : constant ${root_node_type_name} :=
+      Result : constant ${T.root_node.name} :=
          Impl.Eval_Field (Ent.Node, Field);
       pragma Warnings (On, "value not in range of type");
    begin
