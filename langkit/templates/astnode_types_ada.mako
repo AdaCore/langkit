@@ -90,18 +90,14 @@
 
 
 <%def name="bare_field_decl(field)">
-   <% type_name = field.struct.value_type_name() %>
-
    function ${field.name}
-     (Node : access ${type_name}) return ${field.type.name};
+     (Node : ${field.struct.name}) return ${field.type.name};
 </%def>
 
 
 <%def name="bare_field_body(field)">
-   <% type_name = field.struct.value_type_name() %>
-
    function ${field.name}
-     (Node : access ${type_name}) return ${field.type.name}
+     (Node : ${field.struct.name}) return ${field.type.name}
    is
       <%def name="return_value(node_expr)">
          return ${field.type.extract_from_storage_expr(
@@ -238,12 +234,11 @@
 <%def name="private_decl(cls)">
 
    <%
-      type_name = cls.value_type_name()
       base_name = cls.base.name
       ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
    %>
 
-   type ${type_name} is record
+   type ${cls.value_type_name()} is record
       Base : ${cls.base.value_type_name()};
       ${node_fields(cls, emit_null=False)}
    end record
@@ -256,7 +251,7 @@
          parse_fields = [f for f in fields if not f.is_user_field]
       %>
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
-        (Self : access ${cls.value_type_name()}
+        (Self : ${cls.name}
          % for f in parse_fields:
          ; ${f.name} : ${f.type.name}
          % endfor
@@ -281,13 +276,13 @@
    % if cls.env_spec:
 
       function ${cls.name}_Pre_Env_Actions
-        (Self                : access ${type_name};
+        (Self                : ${cls.name};
          Bound_Env, Root_Env : AST_Envs.Lexical_Env;
          Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env;
 
       % if cls.env_spec.post_actions:
          procedure ${cls.name}_Post_Env_Actions
-           (Self                : access ${type_name};
+           (Self                : ${cls.name};
             Bound_Env, Root_Env : AST_Envs.Lexical_Env);
       % endif
 
@@ -505,7 +500,7 @@
    % endif
 
    function ${cls.name}_Pre_Env_Actions
-     (Self                : access ${type_name};
+     (Self                : ${cls.name};
       Bound_Env, Root_Env : AST_Envs.Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
    is
@@ -539,7 +534,7 @@
 
    % if cls.env_spec.post_actions:
       procedure ${cls.name}_Post_Env_Actions
-        (Self                : access ${type_name};
+        (Self                : ${cls.name};
          Bound_Env, Root_Env : AST_Envs.Lexical_Env)
       is
          use AST_Envs;
@@ -575,7 +570,7 @@
          parent_parse_fields = filter_parse_fields(parent_fields)
       %>
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
-        (Self : access ${cls.value_type_name()}
+        (Self : ${cls.name}
          % for f in all_parse_fields:
          ; ${f.name} : ${f.type.name}
          % endfor

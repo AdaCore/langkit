@@ -46,7 +46,7 @@ package body ${ada_lib_name}.Parsers is
    pragma Warnings (On, "possible aliasing problem for type");
 
    procedure Initialize_List
-     (Self   : access ${generic_list_value_type};
+     (Self   : ${ctx.generic_list_type.name};
       Parser : Parser_Type;
       Count  : Natural);
    --  Helper for parsers, to initialize the list of children in a freshly
@@ -110,7 +110,7 @@ package body ${ada_lib_name}.Parsers is
    ---------------------
 
    procedure Initialize_List
-     (Self   : access ${generic_list_value_type};
+     (Self   : ${ctx.generic_list_type.name};
       Parser : Parser_Type;
       Count  : Natural) is
    begin

@@ -1,8 +1,7 @@
 --  vim: ft=ada
 
 function P_Referenced_Unit_Or_Error
-  (Node     : access Bare_Name_Type;
-   Or_Error : Boolean) return Internal_Unit
+  (Node : Bare_Name; Or_Error : Boolean) return Internal_Unit
 is
    N         : constant Bare_Foo_Node := Convert_From_Name (Node);
    Ctx       : constant Internal_Context := N.Unit.Context;

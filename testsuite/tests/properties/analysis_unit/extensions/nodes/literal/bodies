@@ -1,7 +1,6 @@
 --  vim: ft=ada
 
-function Bare_Literal_Result (Node : access Bare_Literal_Type) return Integer
-is
+function Bare_Literal_Result (Node : Bare_Literal) return Integer is
     N : constant Bare_Foo_Node := Convert_From_Literal (Node);
 begin
     return Integer'Value (Image (Text (N)));

@@ -34,11 +34,10 @@
    ## Helpers generated for properties code. Used in CollectionGet's and
    ## Map/Quantifier's code.
    function Item
-     (Node : access ${value_type}; Index : Positive)
-      return ${element_type.name};
+     (Node : ${type_name}; Index : Positive) return ${element_type.name};
 
    function Get
-     (Node    : access ${value_type};
+     (Node    : ${type_name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${element_type.name};
    --  When Index is positive, return the Index'th element in T. Otherwise,
@@ -58,7 +57,7 @@
    ---------
 
    function Get
-     (Node    : access ${value_type};
+     (Node    : ${type_name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${element_type.name}
    is
@@ -107,8 +106,7 @@
    ----------
 
    function Item
-     (Node : access ${value_type}; Index : Positive)
-      return ${element_type.name}
+     (Node : ${type_name}; Index : Positive) return ${element_type.name}
    is
       Result : constant ${root_node_type_name} :=
         Child (${T.root_node.internal_conversion(list_type, 'Node')}, Index);
