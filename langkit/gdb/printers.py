@@ -8,7 +8,7 @@ import gdb.printing
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
-from langkit.gdb.utils import adaify_name, tagged_field
+from langkit.gdb.utils import adaify_name
 from langkit.utils import memoized
 
 
@@ -124,23 +124,30 @@ class ASTNodePrinter(BasePrinter):
         return (t.code == gdb.TYPE_CODE_PTR
                 and t.target().code == gdb.TYPE_CODE_STRUCT
                 and (t.target().name
-                     in context.astnode_struct_names))
+                     in context.struct_name_to_astnodes))
+
+    @property
+    def as_root(self):
+        return self.value.cast(
+            self.type_for(self.context.root_node).pointer()
+        )
+
+    def type_for(self, node_name):
+        return gdb.lookup_type(self.context.astnode_to_struct_names[node_name])
 
     @property
     def kind(self):
-        result = None
-        tag = tagged_field(self.value.dereference(), '_tag')
-        m = self.tag_re.match(str(tag))
-        if m:
-            record_type_name = m.group(1)
-            result = (
-                self.context.astnode_struct_names.get(record_type_name).camel
-            )
-        return result or '???'
+        kind = int(self.as_root.dereference()['kind'])
+        try:
+            node_name = self.context.astnode_kinds[kind]
+        except KeyError:
+            return '???'
+        else:
+            return node_name.camel
 
     @property
     def unit(self):
-        return AnalysisUnit(tagged_field(self.value, 'unit'))
+        return AnalysisUnit(self.as_root['unit'])
 
     @property
     def synthetic(self):
@@ -149,7 +156,7 @@ class ASTNodePrinter(BasePrinter):
 
         :rtype: bool
         """
-        return int(tagged_field(self.value, 'token_start_index')) == 0
+        return int(self.as_root['token_start_index']) == 0
 
     def sloc(self, with_end=True):
         """
@@ -163,9 +170,9 @@ class ASTNodePrinter(BasePrinter):
         if filename:
             filename = os.path.basename(filename)
 
-        tdh = TDH(tagged_field(self.value, 'unit')['tdh'])
-        start = int(tagged_field(self.value, 'token_start_index'))
-        end = int(tagged_field(self.value, 'token_end_index'))
+        tdh = TDH(self.as_root['unit']['tdh'])
+        start = int(self.as_root['token_start_index'])
+        end = int(self.as_root['token_end_index'])
         return '{}{}{}'.format(
             '{}:'.format(filename) if filename else '',
 
@@ -182,7 +189,7 @@ class ASTNodePrinter(BasePrinter):
 
         :rtype: gdb.Value
         """
-        return tagged_field(self.value, 'parent')
+        return self.as_root['parent']
 
     def node_to_string(self):
         if not self.value:
