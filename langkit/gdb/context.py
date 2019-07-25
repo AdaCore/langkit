@@ -16,13 +16,13 @@ class Context(object):
         """
         :param str lib_name: Lower-case name for the generated library.
 
-        :param astnode_names: Set of lower-case names for all AST node types.
-        :type ast_node_names: set[str]
+        :param list[str] astnode_names: List of camel-with-mixed-case names for
+            all node types.
 
         :param str prefix: Prefix to use for command names.
         """
         self.lib_name = lib_name
-        self.astnode_names = astnode_names
+        self.astnode_names = [Name(name) for name in astnode_names]
         self.prefix = prefix
 
         self.astnode_struct_names = self._astnode_struct_names()
@@ -36,9 +36,8 @@ class Context(object):
         record names, as GDB will see them, to user-friendly ASTNode names.
         """
         return {
-            '{}__implementation__bare_{}_type'.format(
-                self.lib_name, name.lower()
-            ): Name.from_camel_with_underscores(name)
+            '{}__implementation__bare_{}_type'
+            .format(self.lib_name, name.lower): name
             for name in self.astnode_names
         }
 
@@ -48,10 +47,9 @@ class Context(object):
         corresponding entity records.
         """
         return {
-            '{}__implementation__internal_entity_{}'.format(
-                self.lib_name,
-                Name.from_camel_with_underscores(name).lower
-            ) for name in self.astnode_names
+            '{}__implementation__internal_entity_{}'
+            .format(self.lib_name, name.lower)
+            for name in self.astnode_names
         } | {
             '{}__implementation__internal_entity'.format(self.lib_name),
             '{}__implementation__ast_envs__entity'.format(self.lib_name),
