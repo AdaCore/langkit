@@ -26,7 +26,7 @@ def get_current_gdb_context():
     return global_context
 
 
-def setup(lib_name, astnode_names, prefix):
+def setup(lib_name, astnode_names, astnode_kinds, prefix):
     """
     Register helpers in GDB internals. This should be run when the generated
     library is actually loaded in GDB.
@@ -34,7 +34,7 @@ def setup(lib_name, astnode_names, prefix):
     global setup_done, gdb_printers, global_context
     setup_done = True
 
-    context = Context(lib_name, astnode_names, prefix)
+    context = Context(lib_name, astnode_names, astnode_kinds, prefix)
     global_context = context
 
     gdb_printers = printers.GDBPrettyPrinters(context)

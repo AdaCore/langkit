@@ -12,20 +12,33 @@ class Context(object):
     Holder for generated library-specific information.
     """
 
-    def __init__(self, lib_name, astnode_names, prefix):
+    def __init__(self, lib_name, astnode_names, astnode_kinds, prefix):
         """
         :param str lib_name: Lower-case name for the generated library.
 
         :param list[str] astnode_names: List of camel-with-mixed-case names for
             all node types.
 
+        :param dict[int, str] astnode_kinds: Mapping of kinds ('Enum_Rep) to
+            camel-with-mixed-case node names.
+
         :param str prefix: Prefix to use for command names.
         """
         self.lib_name = lib_name
         self.astnode_names = [Name(name) for name in astnode_names]
+        self.astnode_kinds = {kind: Name(name)
+                              for kind, name in astnode_kinds.items()}
         self.prefix = prefix
 
-        self.astnode_struct_names = self._astnode_struct_names()
+        self.root_node = self.astnode_names[0]
+        """
+        Name of the root node.
+        """
+
+        self.struct_name_to_astnodes = self._astnode_struct_names()
+        self.astnode_to_struct_names = {
+            v: k for k, v in self.struct_name_to_astnodes.items()
+        }
         self.entity_struct_names = self._entity_struct_names()
 
         self.reparse_debug_info()
