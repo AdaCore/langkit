@@ -26,6 +26,7 @@ from __future__ import (absolute_import, division, print_function,
 %>
 
 
+import argparse
 import collections
 import ctypes
 import json
@@ -1856,3 +1857,95 @@ def _field_address(struct, field_name):
 #
 
 ${exts.include_extension(ctx.ext("python"))}
+
+#
+# App base class
+#
+
+class App(object):
+    """
+    Base class to regroup logic for an app. We use a class so that
+    specific languages implementations can add specific arguments and
+    processing by overriding specific methods:
+
+    - `main`, which will be the main method of the app.
+
+    - `add_arguments` to add arguments to the argparse.Parser instance
+
+    - `create_unit_provider` to return a custom unit provider to be used by the
+      AnalysisContext.
+
+    - `description` to change the description of the app.
+
+    Inside of `main`, the user can access app specific state:
+
+    - `self.units` is a map of filenames to analysis units.
+    - `self.ctx` is the analysis context.
+    - `self.u` is the last parsed unit.
+
+    The user can then run the app by calling `App.run()`.
+
+    Here is a small example of an app subclassing `App`, that will simply print
+    the tree of every unit passed as argument:
+
+    .. code-block:: python
+
+        from ${module_name} import App
+
+
+        class ExampleApp(App):
+            def main(self):
+                for u in self.units.values():
+                    print u.filename
+                    print u.root.dump()
+
+        ExampleApp.run()
+    """
+
+    @property
+    def description(self):
+        """
+        Description for this app. Empty by default.
+        """
+        return ""
+
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(
+            description=self.description()
+        )
+        self.parser.add_argument('files', nargs='+', help='Files')
+        self.add_arguments()
+        self.args = self.parser.parse_args()
+        self.ctx = AnalysisContext(
+            'utf-8', with_trivia=True,
+            unit_provider=self.create_unit_provider()
+        )
+
+    def add_arguments(self):
+        """
+        Hook for subclasses to add arguments to self.parser. Default
+        implementation does nothing.
+        """
+        pass
+
+    def create_unit_provider(self):
+        """
+        Hook for subclasses to return a custom unit provider.
+        Default implementation returns None.
+        """
+        return None
+
+    def process_files(self):
+        self.units = {}
+        for file_name in self.args.files:
+            self.u = self.ctx.get_from_file(file_name)
+            self.units[file_name] = self.u
+
+
+    @classmethod
+    def run(klass):
+        instance = klass()
+        instance.process_files()
+        instance.main()
+
+    ${exts.include_extension(ctx.ext('python_api/app_exts'))}
