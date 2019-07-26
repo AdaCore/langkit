@@ -214,7 +214,8 @@ package Langkit_Support.Lexical_Env is
       --  unit.
 
       Owner : Unit_T := No_Unit;
-      --  Unit that owns this lexical environment
+      --  Unit that owns this lexical environment. Only Primary and Rebound
+      --  lexical env will have a non-null value for this field.
 
       Version : Version_Number := 0;
       --  Version of the unit when this reference was made. Used to determine
