@@ -4,6 +4,9 @@
 
 <%namespace name="exts" file="../extensions.mako" />
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import argparse
 
 from IPython import embed
@@ -26,75 +29,30 @@ there are multiple.
 Enjoy!
 """.strip()
 
+class Playground(${module_name}.App):
 
-
-class Playground(object):
-    """
-    Base class to regroup logic for the playground. We use a class so that
-    specific languages implementations can add specific arguments and
-    processing by overriding:
-
-    - add_arguments to add arguments to the argparse.Parser instance
-
-    - create_unit_provider to return a custom unit provider to be used by the
-      AnalysisContext.
-    """
-
-    def __init__(self):
-        self.parser = argparse.ArgumentParser(
-            description="${module_name} playground. Analyze files passed "
-            "as arguments."
-        )
-        self.parser.add_argument('files', nargs='+', help='Files')
+    def add_arguments(self):
         self.parser.add_argument(
             '-i', '--input-script', type=str, default='',
             help="Script to execute when playground has loaded the units"
         )
-
-    def add_arguments(self):
-        """
-        Hook for subclasses to add arguments to self.parser. Default
-        implementation does nothing.
-        """
-        pass
-
-    def create_unit_provider(self):
-        """
-        Hook for subclasses to return a custom unit provider.
-        Default implementation returns None.
-        """
-        return None
-
-    def process_file(self, file_name):
-        u = self.ctx.get_from_file(file_name)
-        return u
+        super(Playground, self).add_arguments()
 
     def main(self):
-        self.add_arguments()
-        self.args = self.parser.parse_args()
-        self.ctx = ${module_name}.AnalysisContext(
-            'utf-8', with_trivia=True,
-            unit_provider=self.create_unit_provider()
-        )
+        print(HEADER)
+        c = load_default_config()
 
+        if self.args.input_script:
+            execfile(self.args.input_script)
 
-class ${short_name}Playground(Playground):
-    ${exts.include_extension(ctx.ext('playground'))}
-    pass
+        # Put useful values in local variables, so that they're easily
+        # accessible from embed.
+        units = self.units
+        ctx = self.ctx
+        u = self.u
+
+        embed(header=HEADER, config=c, display_banner=False)
 
 
 if __name__ == '__main__':
-    pg = ${short_name}Playground()
-    pg.main()
-    units = {}
-    for file_path in pg.args.files:
-        u = pg.process_file(file_path)
-        units[file_path] = u
-
-    print HEADER
-    c = load_default_config()
-
-    if pg.args.input_script:
-        execfile(pg.args.input_script)
-
-    embed(header=HEADER, config=c, display_banner=False)
+    Playground.run()

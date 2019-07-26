@@ -480,6 +480,7 @@ class Emitter(object):
                 'python_api/module_py',
                 c_api=ctx.c_api_settings,
                 pyapi=ctx.python_api_settings,
+                module_name=ctx.python_api_settings.module_name
             )
 
             # If pretty-printing failed, write the original code anyway in
