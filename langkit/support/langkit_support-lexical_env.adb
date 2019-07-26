@@ -1999,17 +1999,7 @@ package body Langkit_Support.Lexical_Env is
    function Is_Stale (Self : Lexical_Env) return Boolean is
       L : Lexical_Env;
    begin
-      if Self.Owner /= No_Unit then
-         --  If there is an owner, check that the unit version has not been
-         --  incremented since then. Additionally, if this is a Rebound env,
-         --  check that the version of the context has not been incremented
-         --  either, to make sure that the rebindings stored in this env
-         --  are still valid.
-         return
-            Get_Unit_Version (Self.Owner) > Self.Version or else
-              (Self.Kind = Rebound and then
-               Get_Context_Version (Self.Owner) > Self.Env.Context_Version);
-      elsif Self = Empty_Env then
+      if Self = Empty_Env then
          --  Empty_Env is always stale, because since it is not linked to any
          --  unit, we have no way to know if it is stale or not. TODO: Maybe we
          --  should forbid its use in referenced envs.
@@ -2018,6 +2008,12 @@ package body Langkit_Support.Lexical_Env is
 
       case Self.Kind is
          when Primary =>
+            if Self.Owner /= No_Unit then
+               --  If there is an owner, check that the unit version has not
+               --  been incremented since then.
+               return Get_Unit_Version (Self.Owner) > Self.Version;
+            end if;
+
             for I in Self.Env.Referenced_Envs.First_Index
                   .. Self.Env.Referenced_Envs.Last_Index
             loop
@@ -2032,12 +2028,23 @@ package body Langkit_Support.Lexical_Env is
             return False;
 
          when Orphaned =>
+            pragma Assert (Self.Owner = No_Unit);
             return Is_Stale (Self.Env.Orphaned_Env);
 
          when Grouped =>
+            pragma Assert (Self.Owner = No_Unit);
             return (for some E of Self.Env.Grouped_Envs.all => Is_Stale (E));
 
          when Rebound =>
+            if Self.Owner /= No_Unit then
+               --  If there is an owner, check that the version of the context
+               --  has not been incremented to make sure that the rebindings
+               --  stored in this env are still valid. This also ensures that
+               --  the rebound env is not stale, so we can early return instead
+               --  of recursively check its state.
+               return
+                  Get_Context_Version (Self.Owner) > Self.Env.Context_Version;
+            end if;
             --  If there is no owner, we only care about the fact that the
             --  rebound_env is not stale.
             return Is_Stale (Self.Env.Rebound_Env);
