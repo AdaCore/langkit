@@ -2355,6 +2355,12 @@ class ASTNodeType(BaseStructType):
             fields = self.builtin_properties() + fields
         self._init_fields(fields)
 
+        # Encode all field names for nodes so that there is no name collision
+        # when considering all fields from all nodes.
+        for f in fields:
+            if isinstance(f, BaseField):
+                f._internal_name = self.name + f.name
+
         # Make sure that all user fields for nodes are private
         for _, f in fields:
             with f.diagnostic_context:
