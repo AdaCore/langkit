@@ -27,7 +27,7 @@ DefList[1:1-5:10]
 |  |expr:
 |  |  Plus[2:9-2:20]
 |  |  |lhs:
-|  |  |  ParentExpr[2:9-2:16]
+|  |  |  ParenExpr[2:9-2:16]
 |  |  |  |expr:
 |  |  |  |  Plus[2:10-2:15]
 |  |  |  |  |lhs:
@@ -135,7 +135,7 @@ DefList
 |  |args:
 |  |  NameList: <empty list>
 |  |expr:
-|  |  ParentExpr
+|  |  ParenExpr
 |  |  |expr:
 |  |  |  Plus
 |  |  |  |lhs:
@@ -143,7 +143,7 @@ DefList
 |  |  |  |  |name:
 |  |  |  |  |  Name: d
 |  |  |  |rhs:
-|  |  |  |  ParentExpr
+|  |  |  |  ParenExpr
 |  |  |  |  |expr:
 |  |  |  |  |  Plus
 |  |  |  |  |  |lhs:
@@ -237,7 +237,7 @@ DefList
 |  |args:
 |  |  NameList: <empty list>
 |  |expr:
-|  |  ParentExpr
+|  |  ParenExpr
 |  |  |expr:
 |  |  |  Plus
 |  |  |  |lhs:
@@ -245,7 +245,7 @@ DefList
 |  |  |  |  |name:
 |  |  |  |  |  Name: b
 |  |  |  |rhs:
-|  |  |  |  ParentExpr
+|  |  |  |  ParenExpr
 |  |  |  |  |expr:
 |  |  |  |  |  Plus
 |  |  |  |  |  |lhs:

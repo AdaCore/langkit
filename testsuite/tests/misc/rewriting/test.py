@@ -38,7 +38,7 @@ class Ref(Expr):
     name = Field()
 
 
-class ParentExpr(Expr):
+class ParenExpr(Expr):
     expr = Field()
 
 
@@ -58,7 +58,7 @@ g.add_rules(
                  '=', g.expr),
 
     expr=Or(Plus(g.expr, '+', g.expr),
-            ParentExpr('(', g.expr, ')'),
+            ParenExpr('(', g.expr, ')'),
             Ref(g.name),
             Literal(Token.Number))
 )
