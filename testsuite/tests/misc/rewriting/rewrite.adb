@@ -142,13 +142,13 @@ begin
    New_Line;
    Put_Line ("Replace the expression of the fifth definition");
    declare
-      Nested_Expr : constant Node_Rewriting_Handle := Create_Parent_Expr
+      Nested_Expr : constant Node_Rewriting_Handle := Create_Paren_Expr
         (RH, Create_Plus
                (RH,
                 Create_Token_Node (RH, Foo_Literal, "5"),
                 Create_Ref (RH, Create_Token_Node (RH, Foo_Name, "c"))));
 
-      Top_Expr : constant Node_Rewriting_Handle := Create_Parent_Expr
+      Top_Expr : constant Node_Rewriting_Handle := Create_Paren_Expr
         (RH, Create_Plus
                (RH,
                 Create_Ref (RH, Create_Token_Node (RH, Foo_Name, "d")),
