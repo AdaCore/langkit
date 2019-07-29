@@ -1,0 +1,7 @@
+def a = (
+   # Some comment
+
+      # Some other comment
+
+      1
+)

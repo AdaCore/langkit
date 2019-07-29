@@ -278,6 +278,22 @@ def bb (xx, # Separator comment
 
 preserve_formatting.adb: Done.
 
+== preserve_formatting_wrap.adb ==
+Wrap a's expression in a parenthesized expression...
+
+Applying the diff...
+
+Quoting source buffer for rewritten unit...
+def a = ((
+   # Some comment
+
+      # Some other comment
+
+      1
+)
+)
+preserve_formatting.adb: Done.
+
 == clone_synthetic.adb ==
 Applying the diff...
 
