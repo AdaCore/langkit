@@ -70,6 +70,7 @@ build_and_run(g, ada_main=['general_api.adb',
                            'apply_error.adb',
                            'templates.adb',
                            'preserve_formatting.adb',
+                           'preserve_formatting_wrap.adb',
                            'clone_synthetic.adb'],
               generate_unparser=True)
 print('Done')
