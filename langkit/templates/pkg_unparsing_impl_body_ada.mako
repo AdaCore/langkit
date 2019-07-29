@@ -105,17 +105,19 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --  Using the Node_Unparsers unparsing tables, unparse the given Node
 
    procedure Unparse_Regular_Node
-     (Node           : Abstract_Node;
-      Unparser       : Regular_Node_Unparser;
-      Rewritten_Node : ${root_node_type_name};
-      Result         : in out Unparsing_Buffer);
+     (Node                : Abstract_Node;
+      Unparser            : Regular_Node_Unparser;
+      Rewritten_Node      : ${root_node_type_name};
+      Preserve_Formatting : Boolean;
+      Result              : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on regular nodes
 
    procedure Unparse_List_Node
-     (Node           : Abstract_Node;
-      Unparser       : List_Node_Unparser;
-      Rewritten_Node : ${root_node_type_name};
-      Result         : in out Unparsing_Buffer);
+     (Node                : Abstract_Node;
+      Unparser            : List_Node_Unparser;
+      Rewritten_Node      : ${root_node_type_name};
+      Preserve_Formatting : Boolean;
+      Result              : in out Unparsing_Buffer);
    --  Helper for Unparse_Node, focuses on list nodes
 
    procedure Unparse_Token
@@ -626,10 +628,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    begin
       case Unparser.Kind is
          when Regular =>
-            Unparse_Regular_Node (Node, Unparser, Rewritten_Node, Result);
+            Unparse_Regular_Node
+              (Node, Unparser, Rewritten_Node, Preserve_Formatting, Result);
 
          when List =>
-            Unparse_List_Node (Node, Unparser, Rewritten_Node, Result);
+            Unparse_List_Node
+              (Node, Unparser, Rewritten_Node, Preserve_Formatting, Result);
 
          when Token =>
             declare
@@ -661,10 +665,11 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    --------------------------
 
    procedure Unparse_Regular_Node
-     (Node           : Abstract_Node;
-      Unparser       : Regular_Node_Unparser;
-      Rewritten_Node : ${root_node_type_name};
-      Result         : in out Unparsing_Buffer)
+     (Node                : Abstract_Node;
+      Unparser            : Regular_Node_Unparser;
+      Rewritten_Node      : ${root_node_type_name};
+      Preserve_Formatting : Boolean;
+      Result              : in out Unparsing_Buffer)
    is
       Template : constant Regular_Node_Template :=
          Extract_Regular_Node_Template (Unparser, Rewritten_Node);
@@ -699,12 +704,12 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                if Field_Present (Child, F) then
                   if Template.Present and then Template.Fields (I).Present then
                      Append_Tokens (Result, Template.Fields (I).Pre_Tokens);
-                     Unparse_Node (Child, Rewritten_Node /= null, Result);
+                     Unparse_Node (Child, Preserve_Formatting, Result);
                      Append_Tokens (Result, Template.Fields (I).Post_Tokens);
 
                   else
                      Unparse_Token_Sequence (F.Pre_Tokens, Result);
-                     Unparse_Node (Child, Rewritten_Node /= null, Result);
+                     Unparse_Node (Child, Preserve_Formatting, Result);
                      Unparse_Token_Sequence (F.Post_Tokens, Result);
                   end if;
                end if;
@@ -726,19 +731,18 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -----------------------
 
    procedure Unparse_List_Node
-     (Node           : Abstract_Node;
-      Unparser       : List_Node_Unparser;
-      Rewritten_Node : ${root_node_type_name};
-      Result         : in out Unparsing_Buffer)
-   is
-      Preserve_Formatting : constant Boolean := Rewritten_Node /= null;
+     (Node                : Abstract_Node;
+      Unparser            : List_Node_Unparser;
+      Rewritten_Node      : ${root_node_type_name};
+      Preserve_Formatting : Boolean;
+      Result              : in out Unparsing_Buffer) is
    begin
       for I in 1 .. Children_Count (Node) loop
          --  For all elements but the first one, emit the separator. If
          --  possible, preserve original formatting for the corresponding
          --  separator in the original source.
          if I > 1 and then Unparser.Has_Separator then
-            if Preserve_Formatting
+            if Rewritten_Node /= null
                and then Children_Count (Rewritten_Node) >= I
             then
                declare
