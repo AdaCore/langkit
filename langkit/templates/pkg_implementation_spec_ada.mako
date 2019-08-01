@@ -62,6 +62,11 @@ private package ${ada_lib_name}.Implementation is
    type ${T.root_node.name} is access all ${T.root_node.value_type_name()};
    --  Most generic AST node type
 
+   package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
+     (Element_T  => ${T.root_node.name},
+      Index_Type => Positive);
+   --  Allocator for array of nodes, used in list nodes
+
    ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
 
    type Rewriting_Handle_Pointer is new System.Address;
@@ -626,10 +631,6 @@ private package ${ada_lib_name}.Implementation is
    -----------------------
    -- Generic list type --
    -----------------------
-
-   package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
-     (Element_T  => ${T.root_node.name},
-      Index_Type => Positive);
 
    type ${ctx.generic_list_type.value_type_name()} is record
       Base  : ${T.root_node.value_type_name()};

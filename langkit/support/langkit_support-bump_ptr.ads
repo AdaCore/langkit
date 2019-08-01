@@ -109,7 +109,6 @@ package Langkit_Support.Bump_Ptr is
       type Element_T is private;
       type Index_Type is (<>);
    package Array_Alloc is
-
       type Element_Array is array (Index_Type) of Element_T;
       --  This package handles unsized array types to avoid having to deal with
       --  fat pointers.
