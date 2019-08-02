@@ -1,0 +1,8 @@
+Solving relation:
+All: 
+    %X <-> %Y
+    2 -> %Y_Ind
+    %Y <-> %Y_Ind
+    1 -> %Expr
+    %X <-> %Expr
+

@@ -128,7 +128,13 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
    procedure Alias (Self, To : Raw_Var) is
    begin
-      Self.Aliased_To := To;
+      if To = Self then
+         return;
+      elsif Self.Aliased_To = null then
+         Self.Aliased_To := To;
+      else
+         Alias (Self.Aliased_To, To);
+      end if;
    end Alias;
 
    -------------
