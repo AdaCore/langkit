@@ -23,20 +23,6 @@ from langkit.template_utils import add_template_dir
 from langkit.utils import Colors, printcol
 
 
-def copy_file(from_path, to_path):
-    """
-    Helper to copy a source file.
-
-    Return whether the file has been updated.
-
-    :param str from_path: Path of the file to copy.
-    :param str to_path: Destination path.
-    """
-    with open(from_path, 'rb') as f:
-        content = f.read()
-    write_source_file(to_path, content)
-
-
 def write_source_file(file_path, source, post_process=None):
     """
     Helper to write a source file.
@@ -369,11 +355,6 @@ class Emitter(object):
                          if qual_name else [])
             self.write_ada_module(self.src_path, template_base_name, qual_name,
                                   has_body)
-
-        # Add any sources in $lang_path/extensions/support if it exists
-        if ctx.ext('support'):
-            for f in glob(path.join(ctx.ext('support'), '*.ad*')):
-                copy_file(f, self.src_path)
 
     def emit_mains(self, ctx):
         """
