@@ -127,8 +127,18 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -----------
 
    procedure Alias (Self, To : Raw_Var) is
+
+      ---------------------
+      -- Already_Aliased --
+      ---------------------
+
+      function Already_Aliased (V : Raw_Var) return Boolean is
+        (V.Aliased_To = Self or else
+           (V.Aliased_To /= null and then Already_Aliased (V.Aliased_To)));
+      --  Return True if V is aliased to Self, directly or not.
+
    begin
-      if To = Self or else To.Aliased_To = Self then
+      if To = Self or else Already_Aliased (To) then
          return;
       elsif Self.Aliased_To = null then
          Self.Aliased_To := To;

@@ -519,9 +519,11 @@ package body ${ada_lib_name}.Introspection is
 
       case Constraint.Kind is
          when Node_Value =>
-            return Is_Derived_From
-              (Id_For_Kind (Value.Value.Value.Node_Value.Kind),
-               Constraint.Node_Type);
+            return
+              (if Value.Value.Value.Node_Value.Is_Null then True
+               else Is_Derived_From
+                     (Id_For_Kind (Value.Value.Value.Node_Value.Kind),
+                      Constraint.Node_Type));
 
          when others =>
             return True;
