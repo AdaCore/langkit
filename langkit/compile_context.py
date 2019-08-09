@@ -1808,7 +1808,7 @@ class CompileCtx(object):
     def ext(self, *args):
         """
         Return an extension path, relative to the extensions dir, given
-        strings/names arguments, only if the extension file exists, so that
+        strings/names arguments, only if the extension file/dir exists, so that
         you can do::
 
             ext('a', 'b', 'c')
@@ -1822,7 +1822,8 @@ class CompileCtx(object):
         args = [a.lower if isinstance(a, names.Name) else a for a in args]
         if self.extensions_dir:
             ret = path.join(*args)
-            if path.isfile(path.join(self.extensions_dir, ret)):
+            p = path.join(self.extensions_dir, ret)
+            if path.isfile(p) or path.isdir(p):
                 return ret
 
     def add_symbol_literal(self, name):
