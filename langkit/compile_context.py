@@ -944,7 +944,11 @@ class CompileCtx(object):
     def check_ple_unit_root(self):
         """
         Check that if the "ple_unit_root" node annotation is used, it is valid.
+
+        If so, add a "is_env_populated" field to it.
         """
+        from langkit.compiled_types import T, UserField
+
         # Locate the PLE_unit root (if any), checking that we at most one such
         # node annotation.
         for n in self.astnode_types:
@@ -999,6 +1003,17 @@ class CompileCtx(object):
                         ' of {} nodes'.format(self.ple_unit_root.dsl_name,
                                               ple_unit_root_list.dsl_name)
                     )
+
+        is_env_populated_name = names.Name('Is_Env_Populated')
+        is_env_populated_flag = UserField(
+            type=T.Bool,
+            doc='Whether this PLE unit root was processed by'
+                ' Populate_Lexical_Env',
+            public=False,
+            internal_name=is_env_populated_name
+        )
+        is_env_populated_flag.name = is_env_populated_name
+        self.ple_unit_root.add_field(is_env_populated_flag)
 
     def check_concrete_subclasses(self, astnode):
         """
