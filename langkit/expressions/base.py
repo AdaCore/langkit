@@ -3178,6 +3178,8 @@ class PropertyDef(AbstractNodeData):
         :type: bool
         """
 
+        self._base_property = 'not initialized'
+
         self.is_dispatcher = False
         """
         Whether this property is just a wrapper that, based on the kind of
@@ -3499,13 +3501,9 @@ class PropertyDef(AbstractNodeData):
                                        default_value=default_value,
                                        abstract_var=abstract_var))
 
-    @property
-    @self_memoized
-    def base_property(self):
+    def compute_base_property(self, context):
         """
         Get the base property for this property, if it exists.
-
-        :rtype: PropertyDef|None
         """
         if self.struct.is_ast_node and self.struct.base:
             result = self.struct.base.get_abstract_node_data_dict(
@@ -3521,9 +3519,20 @@ class PropertyDef(AbstractNodeData):
                         self.qualname, result.qualname
                     )
                 )
-            return result
+            self._base_property = result
+        else:
+            self._base_property = None
 
-        return None
+    @property
+    def base_property(self):
+        """
+        Retun the property that `self` overrides, if any.
+
+        :rtype: PropertyDef|None
+        """
+        assert (self._base_property is None or
+                isinstance(self._base_property, PropertyDef))
+        return self._base_property
 
     @property
     @self_memoized
@@ -3545,9 +3554,10 @@ class PropertyDef(AbstractNodeData):
 
         Must be called when modifying a tree of inherited properties.
         """
-        for prop in (PropertyDef.base_property, PropertyDef.root_property,
+        for prop in (PropertyDef.root_property,
                      PropertyDef.all_overriding_properties):
             prop.fget.reset(self)
+        self._base_property = None
         self.overriding_properties = set()
 
     @property
@@ -3641,7 +3651,6 @@ class PropertyDef(AbstractNodeData):
 
         :type context: langkit.compile_context.CompileCtx
         """
-
         if self.abstract and not self.abstract_runtime_check:
             # Look for concrete subclasses in self.struct which do not override
             # this property. Abstract nodes can keep inherited properties

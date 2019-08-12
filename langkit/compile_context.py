@@ -1682,6 +1682,8 @@ class CompileCtx(object):
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
+            PropertyPass('compute base properties',
+                         PropertyDef.compute_base_property),
             PropertyPass('prepare abstract expressions',
                          PropertyDef.prepare_abstract_expression),
             PropertyPass('freeze abstract expressions',
