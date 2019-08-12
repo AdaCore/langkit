@@ -13,8 +13,7 @@ from langkit.diagnostics import (
     Context, Severity, WarningSet, check_source_language,
     extract_library_location
 )
-from langkit.utils import (issubtype, memoized, not_implemented_error,
-                           self_memoized)
+from langkit.utils import issubtype, memoized, not_implemented_error
 from langkit.utils.text import (append_paragraph, first_line_indentation,
                                 indent)
 from langkit.utils.types import TypeSet
@@ -414,19 +413,20 @@ class AbstractNodeData(object):
         return self.prefix + radix if self.prefix else radix
 
     @property
-    @self_memoized
     def name(self):
         """
         :rtype: names.Name
         """
-        return self._prefixed_name(self._name)
+        return self._name
 
     @name.setter
     def name(self, name):
         assert isinstance(name, names.Name)
+
+        # Make sure that the original name is preserved
+        assert self._original_name
+
         self._name = name
-        if self._original_name is None:
-            self._original_name = name
 
     @property
     def internal_name(self):
@@ -1325,9 +1325,22 @@ class CompiledType(object):
             in this list.
         """
         for f_n, f_v in fields:
-            f_v.name = (f_n if isinstance(f_n, names.Name) else
-                        names.Name.from_lower(f_n))
-            f_v._indexing_name = f_v._name.lower
+            # Remember the original name for public APIs
+            f_v._original_name = (f_n if isinstance(f_n, names.Name) else
+                                  names.Name.from_lower(f_n))
+            f_v._indexing_name = f_v.original_name.lower
+
+            # In nodes, use a qualified name for code generation to avoid name
+            # conflicts between homonym properties. There is one exception:
+            # built-in properties (those with no prefix) must not be decorated
+            # for convenience in template code.
+            f_v._name = (
+                f_v._original_name
+                if (not self.is_ast_node or
+                    (f_v.is_property and f_v.prefix is None)) else
+                self.kwless_raw_name + f_v._prefixed_name(f_v.original_name)
+            )
+
             self.add_field(f_v)
 
     def add_field(self, field):
