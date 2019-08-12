@@ -1,8 +1,7 @@
 ## vim: filetype=makoada
 
 % if parser.type.is_list_type:
-   ${parser.res_var} :=
-     (${parser.type.storage_type_name}_Alloc.Alloc (Parser.Mem_Pool));
+   ${parser.res_var} := ${parser.type.parser_allocator} (Parser.Mem_Pool);
    Initialize
      (Self              => ${T.root_node.internal_conversion(parser.type,
                                                              parser.res_var)},

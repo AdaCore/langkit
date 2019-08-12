@@ -3313,6 +3313,16 @@ class ASTNodeType(BaseStructType):
                 '{} ({})'.format(self.internal_converter(T.root_node),
                                  root_node_expr))
 
+    @property
+    def parser_allocator(self):
+        """
+        Return the name of the function to call in parsers to allocate this
+        node.
+
+        :rtype: str
+        """
+        return '{}_Alloc.Alloc'.format(self.name)
+
 
 # We tag the ASTNodeType class as abstract here, because of the circular
 # dependency between the @abstract decorator and the ASTNodeType class, which
