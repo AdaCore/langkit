@@ -26,7 +26,7 @@ if ${subparser.pos_var} = No_Token_Index then
          ${parser.res_var} := False;
       % else:
          ${parser.res_var} := ${parser.type.internal_conversion(alt_false,
-           '{}_Alloc.Alloc (Parser.Mem_Pool)'.format(alt_false.name))};
+           '{} (Parser.Mem_Pool)'.format(alt_false.parser_allocator))};
          Initialize
            (Self              => ${as_root_node},
             Kind              => ${alt_false.ada_kind_name},
@@ -36,7 +36,7 @@ if ${subparser.pos_var} = No_Token_Index then
       % endif
     % elif parser_type and parser_type.is_list_type:
         ${subparser.res_var} :=
-          (${parser_type.storage_type_name}_Alloc.Alloc (Parser.Mem_Pool));
+           ${parser_type.parser_allocator} (Parser.Mem_Pool);
          Initialize
            (Self              => ${as_root_node},
             Kind              => ${parser_type.ada_kind_name},
@@ -71,7 +71,7 @@ else
       ${parser.res_var} := True;
    % else:
       ${parser.res_var} := ${parser.type.internal_conversion(alt_true,
-        '{}_Alloc.Alloc (Parser.Mem_Pool)'.format(alt_true.name))};
+        '{} (Parser.Mem_Pool)'.format(alt_true.parser_allocator))};
       Initialize
         (Self              => ${as_root_node},
          Kind              => ${alt_true.ada_kind_name},

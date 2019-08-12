@@ -16,8 +16,7 @@ end if;
 if ${parser.pos_var} /= No_Token_Index then
 
    ## Create the transform wrapper node
-   ${parser.res_var} := ${parser.type.name}
-     (${parser.type.name}_Alloc.Alloc (Parser.Mem_Pool));
+   ${parser.res_var} := (${parser.type.parser_allocator} (Parser.Mem_Pool));
 
    ## Initialize components common to all nodes
    Initialize
