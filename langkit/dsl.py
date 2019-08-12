@@ -157,8 +157,6 @@ class BaseStruct(DSLType):
                     f_n.lower() == f_n,
                     'Field names must be lower-case'
                 )
-
-            f_v.name = names.Name.from_lower(f_n)
             result.append((f_n, f_v))
 
         # Sort fields by creation time order so that users get fields in the

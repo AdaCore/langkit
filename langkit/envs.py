@@ -262,10 +262,11 @@ class EnvSpec(object):
         expr = unsugar(expr)
         p = PropertyDef(
             expr, AbstractNodeData.PREFIX_INTERNAL,
-            name=names.Name('_{}_{}'.format(name,
-                                            next(self.PROPERTY_COUNT))),
+            name=names.Name('{}_{}'.format(name, next(self.PROPERTY_COUNT))),
             public=False, type=type, ignore_warn_on_node=True
         )
+        p._indexing_name = '_{}'.format(p.original_name.lower)
+        p._original_name = names.Name.from_lower(p._indexing_name)
         p.location = getattr(expr, 'location') or self.location
         self.ast_node.add_field(p)
         return p

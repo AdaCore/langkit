@@ -99,11 +99,11 @@
    function ${field.name}
      (Node : ${field.struct.name}) return ${field.type.name}
    is
-      <%def name="return_value(node_expr)">
+      <%def name="return_value(cf, node_expr)">
          return ${field.type.extract_from_storage_expr(
                      node_expr=node_expr,
-                     base_expr='{}.{}'.format(node_expr, field.name)
-         )};
+                     base_expr='{}.{}'.format(node_expr, cf.name)
+                )};
       </%def>
 
       % if field.abstract:
@@ -124,13 +124,13 @@
                            ${cf.struct.internal_conversion(field.struct,
                                                            'Node')};
                      begin
-                        ${return_value('N')}
+                        ${return_value(cf, 'N')}
                      end;
                   % endif
             % endfor
          end case;
       % else:
-         ${return_value('Node')}
+         ${return_value(field, 'Node')}
       % endif
    end;
 </%def>

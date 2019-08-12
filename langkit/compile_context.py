@@ -1004,17 +1004,16 @@ class CompileCtx(object):
                                               ple_unit_root_list.dsl_name)
                     )
 
-        is_env_populated_name = names.Name('Is_Env_Populated')
         is_env_populated_flag = UserField(
             type=T.Bool,
             doc='Whether this PLE unit root was processed by'
                 ' Populate_Lexical_Env',
-            public=False,
-            internal_name=is_env_populated_name
+            public=False
         )
-        is_env_populated_flag.name = is_env_populated_name
+        is_env_populated_flag._original_name = names.Name('Is_Env_Populated')
+        is_env_populated_flag._name = is_env_populated_flag.original_name
         is_env_populated_flag._indexing_name = (
-            '[internal]{}'.format(is_env_populated_name.lower)
+            '[internal]{}'.format(is_env_populated_flag.original_name.lower)
         )
         self.ple_unit_root.add_field(is_env_populated_flag)
 
@@ -2143,9 +2142,6 @@ class CompileCtx(object):
                 prop_set = prop.property_set()
                 assert prop_set[0] == prop
 
-                def static_name(prop):
-                    return prop.struct.name + prop.name
-
                 static_props = list(prop_set)
                 static_props.sort(key=lambda p: p.struct.hierarchical_name)
 
@@ -2168,7 +2164,14 @@ class CompileCtx(object):
                 # for them. Because of this, we can here create a concrete
                 # property that has an abstract runtime check.
                 root_static = None
+                prop.is_dispatcher = True
                 prop.reset_inheritance_info()
+
+                # Assign the dispatcher a new name so that it does not conflict
+                # with the root property in the generated code.
+                prop_name = prop.name
+                prop._name = names.Name('Dispatcher') + prop.name
+
                 if not prop.abstract or prop.abstract_runtime_check:
                     root_static = PropertyDef(
                         expr=None, prefix=None, name=None,
@@ -2182,12 +2185,16 @@ class CompileCtx(object):
                     )
                     static_props[0] = root_static
 
-                    # Manually assign names to the new static property to avoid
-                    # extra decorations.
+                    # Add this new property to its structure for code
+                    # generation. Make sure it is registered under a name that
+                    # is different from the dispatcher so that both are present
+                    # in the structures' field dict.
+                    root_static._name = prop_name
                     root_static._original_name = prop._original_name
-                    root_static._name = prop._name
-                    root_static._indexing_name = ('[root-static]{}'
-                                                  .format(prop.indexing_name))
+                    root_static._indexing_name = (
+                        '[root-static]{}'.format(prop.indexing_name)
+                    )
+                    prop.struct.add_field(root_static)
 
                     # Transfer arguments from the dispatcher to the new static
                     # property, then regenerate arguments in the dispatcher.
@@ -2222,8 +2229,6 @@ class CompileCtx(object):
                     # the list of statically dispatched properties.
                     static_props.pop(0)
 
-                prop.is_dispatcher = True
-
                 # Determine for each static property the set of concrete nodes
                 # we should dispatch to it.
                 dispatch_types, remainder = collapse_concrete_nodes(
@@ -2235,24 +2240,15 @@ class CompileCtx(object):
                 # the compilation pipeline. Here we can see them with an empty
                 # set of types in the dispatch table.
 
-                # Make sure all static properties are public, not dispatching
-                # anymore, and assign them another name so that they don't
-                # override each other in the generated code.
+                # Make sure all static properties are private and not
+                # dispatching anymore. Also remove their prefixes: their names
+                # are already decorated and these properties will not be used
+                # in public APIs (only dispatching ones are).
                 for p in static_props:
-                    p._is_public = False
-
                     p.prefix = None
-                    p._name = static_name(p)
-                    PropertyDef.name.fget.reset(p)
-
-                    # Now that "root_static" is properly renamed, we can add it
-                    # to its owning ASTNodeType instance.
-                    if p == root_static:
-                        prop.struct.add_field(p)
-
+                    p._is_public = False
                     p._abstract = False
                     p.reset_inheritance_info()
-
                     redirected_props[p] = prop
 
                 # Now turn the root property into a dispatcher

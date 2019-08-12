@@ -1,6 +1,6 @@
 --  vim: ft=ada
 
-function Bare_Number_Eval (Node : Bare_Number) return Integer is
+function Number_P_Eval (Node : Bare_Number) return Integer is
 begin
     return Integer'Value (Image (Text (Convert_From_Number (Node))));
-end Bare_Number_Eval;
+end Number_P_Eval;
