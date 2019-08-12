@@ -785,7 +785,7 @@ package body ${ada_lib_name}.Introspection is
             # Format a call to the property itself, passing arguments if there
             # are some.
             property_call = '{}.{}{}'.format(
-               node_expr, p.name,
+               node_expr, p.api_name,
                (' ({})'.format(', '.join(str(arg.name) for arg in p.arguments))
                 if p.arguments else ''))
 

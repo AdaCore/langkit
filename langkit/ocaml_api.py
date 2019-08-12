@@ -548,4 +548,4 @@ class OCamlAPISettings(AbstractAPISettings):
         :param ct.Field field: The field for which we want it's name.
         :rtype: str
         """
-        return self.escape_ocaml_keyword(field.name.lower)
+        return self.escape_ocaml_keyword(field.api_name.lower)

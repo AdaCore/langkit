@@ -21,12 +21,12 @@
 </%def>
 
 <%def name="decl(property)">
-   function ${property.name} ${public_prototype(property)};
+   function ${property.api_name} ${public_prototype(property)};
    ${ada_doc(property, 3)}
 </%def>
 
 <%def name="body(property)">
-   function ${property.name} ${public_prototype(property)} is
+   function ${property.api_name} ${public_prototype(property)} is
       <%
          self_arg = property.self_arg_name
          context_expr = '{}.Internal.Node.Unit.Context'.format(self_arg)

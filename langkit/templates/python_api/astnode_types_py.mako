@@ -67,7 +67,7 @@
     % if not field.arguments:
     @property
     % endif
-    def ${field.name.lower}(${', '.join(arg_list)}):
+    def ${field.api_name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8,
                  argtypes=[(a.name.lower, a.type) for a in field.arguments],
                  rtype=field.type)}
@@ -80,7 +80,7 @@
             predicate=lambda f: not f.abstract and not f.null, \
             include_inherited=False \
         ):
-        "${field.name.lower}",
+        "${field.api_name.lower}",
         % endfor
     )
 
