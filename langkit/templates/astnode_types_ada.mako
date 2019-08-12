@@ -142,17 +142,17 @@
       ret_type = field.type.entity if field.type.is_ast_node else field.type
    %>
 
-   function ${field.name}
+   function ${field.api_name}
      (Node : ${type_name}'Class) return ${ret_type.api_name};
    ${ada_doc(field, 3)}
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
    % if field.type.is_bool_node:
-      function ${field.name} (Node : ${type_name}'Class) return Boolean;
+      function ${field.api_name} (Node : ${type_name}'Class) return Boolean;
 
    % elif field.type.is_enum_node:
-      function ${field.name}
+      function ${field.api_name}
         (Node : ${type_name}'Class) return ${field.type.ada_kind_name};
    % endif
 </%def>
@@ -170,7 +170,7 @@
       field_expr = 'Implementation.{} ({})'.format(field.name, node_expr)
    %>
 
-   function ${field.name}
+   function ${field.api_name}
      (Node : ${type_name}'Class) return ${ret_type.api_name}
    is
       Result : ${field.type.name};
@@ -185,19 +185,19 @@
       % else:
          return Result;
       % endif
-   end ${field.name};
+   end ${field.api_name};
 
    % if field.type.is_ast_node:
       <% root_field_expr = T.root_node.internal_conversion(field.type,
                                                            field_expr) %>
 
       % if field.type.is_bool_node:
-         function ${field.name} (Node : ${type_name}'Class) return Boolean is
-           (${root_field_expr}.Kind
-            = ${field.type.alternatives[0].type.ada_kind_name});
+         function ${field.api_name} (Node : ${type_name}'Class) return Boolean
+         is (${root_field_expr}.Kind
+             = ${field.type.alternatives[0].type.ada_kind_name});
 
       % elif field.type.is_enum_node:
-         function ${field.name}
+         function ${field.api_name}
            (Node : ${type_name}'Class) return ${field.type.ada_kind_name}
          is (${root_field_expr}.Kind);
       % endif

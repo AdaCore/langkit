@@ -261,19 +261,10 @@ class AbstractNodeData(object):
         self.location = extract_library_location()
 
         self._name = name
+        self._original_name = name
 
         assert internal_name is None or isinstance(internal_name, names.Name)
         self._internal_name = internal_name
-
-        self._original_name = None
-        """
-        Name for this property as specified in the DSL, if different from the
-        current name.
-
-        :type: names.Name
-        """
-        if name:
-            self._original_name = name
 
         self.struct = None
         """
@@ -451,10 +442,24 @@ class AbstractNodeData(object):
     @property
     def original_name(self):
         """
+        Name for this property as specified in the DSL.
+
         :rtype: names.Name
         """
         assert self._original_name
         return self._original_name
+
+    @property
+    @memoized
+    def api_name(self):
+        """
+        Return the name to use for this node data in public APIs.
+
+        :rtype: names.Name
+        """
+        assert self.is_public
+        assert self._original_name
+        return self._prefixed_name(self.original_name)
 
     @property
     def qualname(self):
@@ -498,7 +503,7 @@ class AbstractNodeData(object):
         :rtype: names.Name
         """
         assert self.struct
-        return self.struct.kwless_raw_name + self.name
+        return self.struct.kwless_raw_name + self.api_name
 
     @property
     def natural_arguments(self):
@@ -539,7 +544,8 @@ class AbstractNodeData(object):
         assert self.abstract or not self.overriding, (
             'Trying to get introspection enumeration literal for overriding'
             ' field {}'.format(self.qualname))
-        return (self.struct.entity.api_name + self.name).camel_with_underscores
+        return (self.struct.entity.api_name +
+                self.api_name).camel_with_underscores
 
 
 class CompiledType(object):
