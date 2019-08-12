@@ -1,6 +1,6 @@
 == Abstract overrides without runtime check ==
-File "test.py", line 34, in BaseNode.prop
-    Error: Abstract property p_prop is not overriden in all subclasses. Missing overriding properties on classes: Number, Identifier
+File "test.py", line 40, in Identifier.prop
+    Error: Abstract properties with no runtime check cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
 
 == Abstract overrides with runtime check ==
 Code generation was successful
