@@ -312,7 +312,7 @@ class AbstractNodeData(object):
 
         # Look for a potential field which has the same name as `self` in the
         # base struct.
-        name_key = self._name.lower
+        name_key = self._original_name.lower
         parent_cls = self.struct.base
         parent_fields = (parent_cls.get_abstract_node_data_dict()
                          if parent_cls else {})
@@ -339,7 +339,7 @@ class AbstractNodeData(object):
 
     @property
     def diagnostic_context(self):
-        ctx_message = 'in {}.{}'.format(self.struct.dsl_name, self._name.lower)
+        ctx_message = 'in {}'.format(self.qualname)
         return Context(ctx_message, self.location)
 
     @property
@@ -1324,7 +1324,7 @@ class CompiledType(object):
 
         :param AbstractNodeData field: Field to append.
         """
-        self._fields[field._name.lower] = field
+        self._fields[field.original_name.lower] = field
         field.struct = self
 
         # Invalidate the field lookup cache

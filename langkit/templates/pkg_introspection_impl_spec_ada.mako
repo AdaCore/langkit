@@ -84,7 +84,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Descriptors for syntax fields
 
    % for f in ctx.sorted_parse_fields:
-      <% name = f._name.lower %>
+      <% name = f.original_name.lower %>
       Desc_For_${f.introspection_enum_literal} : aliased constant
          Syntax_Field_Descriptor := (
             Name_Length => ${len(name)},
@@ -150,7 +150,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    % endfor
 
    % for p in ctx.sorted_properties:
-      <% name = p._name.lower %>
+      <% name = p.original_name.lower %>
       Desc_For_${p.introspection_enum_literal} : aliased constant
          Property_Descriptor := (
             Name_Length => ${len(name)},

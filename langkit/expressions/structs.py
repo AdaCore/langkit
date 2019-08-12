@@ -382,7 +382,7 @@ class New(AbstractExpression):
                 return isinstance(f, UserField)
 
         required_fields = {
-            f._name.lower: f
+            f.original_name.lower: f
             for f in self.struct_type.get_abstract_node_data()
             if is_required(f)
         }
