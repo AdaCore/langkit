@@ -3,7 +3,6 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
-<%namespace name="list_types"    file="list_types_ada.mako" />
 <%namespace name="memoization"   file="memoization_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
@@ -1228,8 +1227,8 @@ package body ${ada_lib_name}.Implementation is
       Parent            : ${T.root_node.name} := null;
       Self_Env          : Lexical_Env := AST_Envs.Empty_Env) is
    begin
+      pragma Unreferenced (Kind);
       Self.Parent := Parent;
-      Self.Kind := Kind;
       Self.Unit := Unit;
 
       Self.Token_Start_Index := Token_Start_Index;
@@ -1716,6 +1715,43 @@ package body ${ada_lib_name}.Implementation is
          Ret.Items := C;
       end return;
    end Children;
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get
+     (Node    : ${ctx.generic_list_type.name};
+      Index   : Integer;
+      Or_Null : Boolean := False) return ${T.root_node.name}
+   is
+      function Length (Node : ${ctx.generic_list_type.name}) return Natural
+      is (Node.Count);
+      --  Wrapper around the Length primitive to get the compiler happy for the
+      --  the package instantiation below.
+
+      function Absolute_Get
+        (L     : ${ctx.generic_list_type.name};
+         Index : Integer) return ${T.root_node.name}
+      is (L.Nodes.all (Index + 1));
+      --  L.Nodes is 1-based but Index is 0-based
+
+      function Relative_Get is new Langkit_Support.Relative_Get
+        (Item_Type     => ${T.root_node.name},
+         Sequence_Type => ${ctx.generic_list_type.name},
+         Length        => Length,
+         Get           => Absolute_Get);
+
+      Result : ${T.root_node.name};
+   begin
+      if Relative_Get (Node, Index, Result) then
+         return Result;
+      elsif Or_Null then
+         return null;
+      else
+         raise Property_Error with "out-of-bounds AST list access";
+      end if;
+   end Get;
 
    ---------------
    -- PP_Trivia --
@@ -2851,24 +2887,6 @@ package body ${ada_lib_name}.Implementation is
       return Result;
    end Children;
 
-   ## Generate the bodies of the root grammar class properties
-   % for prop in T.root_node.get_properties(include_inherited=False):
-   ${prop.prop_def}
-   % endfor
-
-   ## Generate the extensions for root node type
-
-   <% ext = ctx.ext('nodes', T.root_node.raw_name, 'bodies') %>
-   ${exts.include_extension(ext)}
-
-   ## Generate bodies of untyped wrappers
-   % for prop in T.root_node.get_properties( \
-      include_inherited=False, \
-      predicate=lambda f: f.requires_untyped_wrapper \
-   ):
-   ${prop.untyped_wrapper_def}
-   % endfor
-
    --------------------------------
    -- Assign_Names_To_Logic_Vars --
    --------------------------------
@@ -3135,18 +3153,8 @@ package body ${ada_lib_name}.Implementation is
 
    ${astnode_types.logic_helpers()}
 
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.body(astnode)}
-     % endif
-   % endfor
-
    % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.body(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.body(astnode)}
-      % endif
+      ${astnode_types.body(astnode)}
    % endfor
 
    ----------------------------
