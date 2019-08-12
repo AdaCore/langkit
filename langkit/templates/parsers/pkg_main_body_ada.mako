@@ -38,8 +38,34 @@ package body ${ada_lib_name}.Parsers is
         (${cls.name}, Token_Index);
 
       % if not cls.abstract:
+         <%
+            subtype = 'Subtype_For_{}'.format(cls.kwless_raw_name)
+            access = 'Access_To_{}'.format(subtype)
+         %>
+         subtype ${subtype} is
+            ${T.root_node.value_type_name} (${cls.ada_kind_name});
+         type ${access} is access all ${subtype};
          package ${cls.name}_Alloc is new Alloc
-           (${cls.value_type_name}, ${cls.name});
+           (${subtype}, ${access});
+
+         function ${cls.parser_allocator}
+           (Pool : Bump_Ptr_Pool) return ${cls.name};
+
+         function ${cls.parser_allocator}
+           (Pool : Bump_Ptr_Pool) return ${cls.name}
+         is
+            Result      : constant ${access} := ${cls.name}_Alloc.Alloc (Pool);
+            Result_Kind : ${T.node_kind}
+               with Import, Address => Result.Kind'Address;
+            --  Result.Kind is a discriminant, so we can't modify it directly.
+            --  We need to initialize it manually, though, as we don't use a
+            --  standard Ada allocator for nodes. Use an overlay to workaround
+            --  Ada's restrictions.
+         begin
+            Result_Kind := ${cls.ada_kind_name};
+            return ${cls.name} (Result);
+         end ${cls.parser_allocator};
+
       % endif
    % endfor
    pragma Warnings (On, "is not referenced");

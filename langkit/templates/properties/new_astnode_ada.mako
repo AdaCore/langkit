@@ -2,7 +2,8 @@
 
 <% result = expr.result_var.name %>
 
-${result} := new ${expr.static_type.value_type_name};
+${result} := new ${T.root_node.value_type_name}
+  (${expr.static_type.ada_kind_name});
 declare
    Result_As_Root_Node : constant ${T.root_node.name} :=
       ${T.root_node.internal_conversion(expr.static_type, result)};

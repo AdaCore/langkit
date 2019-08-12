@@ -3,7 +3,6 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
-<%namespace name="list_types"    file="list_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 <%namespace name="memoization"   file="memoization_ada.mako" />
 
@@ -60,16 +59,25 @@ private package ${ada_lib_name}.Implementation is
 
    type ${T.root_node.value_type_name};
    type ${T.root_node.name} is access all ${T.root_node.value_type_name};
+   ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
    --  Most generic AST node type
 
+   function Is_Null (Node : ${T.root_node.name}) return Boolean;
    function Kind (Node : ${T.root_node.name}) return ${T.node_kind};
+
+   % for node in ctx.astnode_types:
+      % if not node.is_root_node:
+         subtype ${node.name} is ${T.root_node.name}
+            with Dynamic_Predicate =>
+               Is_Null (${node.name})
+               or else Kind (${node.name}) in ${node.ada_kind_range_name};
+      % endif
+   % endfor
 
    package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
      (Element_T  => ${T.root_node.name},
       Index_Type => Positive);
    --  Allocator for array of nodes, used in list nodes
-
-   ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
 
    type Rewriting_Handle_Pointer is new System.Address;
    No_Rewriting_Handle_Pointer : constant Rewriting_Handle_Pointer :=
@@ -80,8 +88,6 @@ private package ${ada_lib_name}.Implementation is
          GNATCOLL.Traces.Create
            ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On, Stream => "&1");
    % endif
-
-   function Is_Null (Node : ${T.root_node.name}) return Boolean;
 
    function Short_Text_Image (Self : ${T.root_node.name}) return Text_Type;
    --  Return a short representation of the node, containing just the kind
@@ -271,29 +277,10 @@ private package ${ada_lib_name}.Implementation is
    -- AST node derived types (incomplete declarations) --
    ------------------------------------------------------
 
-   type ${ctx.generic_list_type.value_type_name};
-   --  Base type for all lists of AST node subclasses
-
-   type ${ctx.generic_list_type.name} is access all
-   ${ctx.generic_list_type.value_type_name};
-
-   ${ctx.generic_list_type.null_constant} :
-      constant ${ctx.generic_list_type.name} := null;
-
    ${astnode_types.bare_node_converters(ctx.generic_list_type)}
 
    % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.public_incomplete_decl(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.public_incomplete_decl(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.public_incomplete_decl(astnode)}
-      % endif
+      ${astnode_types.public_incomplete_decl(astnode)}
    % endfor
 
    % if ctx.properties_logging:
@@ -551,7 +538,7 @@ private package ${ada_lib_name}.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
-   type ${T.root_node.value_type_name} is record
+   type ${T.root_node.value_type_name} (Kind : ${T.node_kind}) is record
       Parent : ${T.root_node.name};
       --  Reference to the parent node, or null if this is the root one
 
@@ -569,16 +556,57 @@ private package ${ada_lib_name}.Implementation is
       --  Hold the environment this node defines, or the parent environment
       --  otherwise.
 
-      Kind : ${T.node_kind};
-      --  Kind for this node. This must reflect the object tag
-
-      ${astnode_types.node_fields(T.root_node, emit_null=False)}
-
       Last_Attempted_Child : Integer;
       --  0-based index for the last child we tried to parse for this node. -1
       --  if parsing for all children was successful.
-   end record
-      with Convention => C;
+
+      <%def name="node_fields(cls, or_null=True)">
+         <%
+            is_generic_list = cls is ctx.generic_list_type
+            fields = cls.get_fields(
+               include_inherited=False,
+               predicate=lambda f: (f.should_emit and
+                                    not f.abstract and
+                                    not f.null)
+            )
+            ext = ctx.ext('nodes', cls.raw_name, 'components')
+
+            null_required = (or_null and
+                             not is_generic_list and
+                             not fields and
+                             not cls.subclasses and
+                             not ext)
+         %>
+
+         % if is_generic_list:
+            Count : Natural;
+            Nodes : Alloc_AST_List_Array.Element_Array_Access;
+         % endif
+
+         % for f in fields:
+            ${f.name} : aliased ${f.type.storage_type_name} :=
+               ${f.type.storage_nullexpr};
+         % endfor
+
+         ${exts.include_extension(ext)}
+
+         % if cls.subclasses:
+            case Kind is
+               % for subcls in cls.subclasses:
+                  when ${subcls.ada_kind_range_name} =>
+                     ${node_fields(subcls)}
+               % endfor
+               when others => null;
+            end case;
+         % endif
+
+         % if null_required:
+            null;
+         % endif
+      </%def>
+
+      ${node_fields(T.root_node, or_null=False)}
+   end record;
 
    procedure Initialize
      (Self              : ${T.root_node.name};
@@ -634,13 +662,8 @@ private package ${ada_lib_name}.Implementation is
    -- Generic list type --
    -----------------------
 
-   type ${ctx.generic_list_type.value_type_name} is record
-      Base  : ${T.root_node.value_type_name};
-      Count : Natural;
-      Nodes : Alloc_AST_List_Array.Element_Array_Access;
-   end record
-      with Convention => C;
-   --  Base type for all lists of AST node subclasses
+   ## Helpers generated for properties code. Used in CollectionGet's and
+   ## Map/Quantifier's code.
 
    function Length (Node : ${ctx.generic_list_type.name}) return Natural;
 
@@ -650,6 +673,17 @@ private package ${ada_lib_name}.Implementation is
    --  This is an alternative to the Child/Children_Count pair, useful if you
    --  want the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
+
+   function Item
+     (Node  : ${ctx.generic_list_type.name};
+      Index : Positive) return ${T.root_node.name} renames Child;
+
+   function Get
+     (Node    : ${ctx.generic_list_type.name};
+      Index   : Integer;
+      Or_Null : Boolean := False) return ${T.root_node.name};
+   --  When Index is positive, return the Index'th element in T. Otherwise,
+   --  return the element at index (Size - Index - 1). Index is zero-based.
 
    procedure Reset_Logic_Vars (Node : ${T.root_node.name});
    --  Reset the logic variables attached to this node
@@ -723,11 +757,7 @@ private package ${ada_lib_name}.Implementation is
    --  Implementation for Analysis.Children_With_Trivia
 
    % for astnode in no_builtins(ctx.astnode_types):
-     % if astnode.is_root_list_type:
-       ${list_types.private_decl(astnode.element_type)}
-     % else:
-       ${astnode_types.private_decl(astnode)}
-     % endif
+      ${astnode_types.private_decl(astnode)}
    % endfor
 
    function "<" (Left, Right : Internal_Unit) return Boolean;

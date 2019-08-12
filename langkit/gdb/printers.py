@@ -127,17 +127,8 @@ class ASTNodePrinter(BasePrinter):
                      in context.struct_name_to_astnodes))
 
     @property
-    def as_root(self):
-        return self.value.cast(
-            self.type_for(self.context.root_node).pointer()
-        )
-
-    def type_for(self, node_name):
-        return gdb.lookup_type(self.context.astnode_to_struct_names[node_name])
-
-    @property
     def kind(self):
-        kind = int(self.as_root.dereference()['kind'])
+        kind = int(self.value['kind'])
         try:
             node_name = self.context.astnode_kinds[kind]
         except KeyError:
@@ -147,7 +138,7 @@ class ASTNodePrinter(BasePrinter):
 
     @property
     def unit(self):
-        return AnalysisUnit(self.as_root['unit'])
+        return AnalysisUnit(self.value['unit'])
 
     @property
     def synthetic(self):
@@ -156,7 +147,7 @@ class ASTNodePrinter(BasePrinter):
 
         :rtype: bool
         """
-        return int(self.as_root['token_start_index']) == 0
+        return int(self.value['token_start_index']) == 0
 
     def sloc(self, with_end=True):
         """
@@ -170,9 +161,9 @@ class ASTNodePrinter(BasePrinter):
         if filename:
             filename = os.path.basename(filename)
 
-        tdh = TDH(self.as_root['unit']['tdh'])
-        start = int(self.as_root['token_start_index'])
-        end = int(self.as_root['token_end_index'])
+        tdh = TDH(self.value['unit']['tdh'])
+        start = int(self.value['token_start_index'])
+        end = int(self.value['token_end_index'])
         return '{}{}{}'.format(
             '{}:'.format(filename) if filename else '',
 
@@ -189,7 +180,7 @@ class ASTNodePrinter(BasePrinter):
 
         :rtype: gdb.Value
         """
-        return self.as_root['parent']
+        return self.value['parent']
 
     def node_to_string(self):
         if not self.value:

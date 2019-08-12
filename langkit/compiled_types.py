@@ -2333,11 +2333,16 @@ class ASTNodeType(BaseStructType):
                                 self.raw_name)
 
         name = names.Name('Bare') + self.kwless_raw_name
-        self.null_constant = names.Name('No') + name
 
         is_root = base is None
         is_root_list = not is_root and base.is_generic_list_type
         is_list = not is_root and (is_root_list or base.is_list_type)
+
+        self.null_constant = (
+            names.Name('No') + name
+            if is_root else
+            CompiledTypeRepo.root_grammar_class.null_constant
+        )
 
         if is_root_list:
             assert element_type.is_ast_node
@@ -2380,6 +2385,13 @@ class ASTNodeType(BaseStructType):
         # Register this new subclass where appropriate in CompiledTypeRepo
         if is_root:
             CompiledTypeRepo.root_grammar_class = self
+
+            self.value_type_name = 'Root_Node_Record'
+            """
+            Name of the Ada type for the record that contains data for all
+            nodes.
+            """
+
         CompiledTypeRepo.astnode_types.append(self)
 
         # Now we have an official root node type, we can create its builtin
@@ -2938,17 +2950,6 @@ class ASTNodeType(BaseStructType):
         """
         return 'Common.{}'.format(self.introspection_simple_name)
 
-    @property
-    def value_type_name(self):
-        """
-        Return the name of the Ada type for the record that implements this AST
-        node. The main type name designates the class-wide access to this
-        record.
-
-        :rtype: str
-        """
-        return (self.name + names.Name('Type')).camel_with_underscores
-
     # We want structural equality on lists whose elements have the same types.
     # Memoization is one way to make sure that, for each CompiledType instance
     # X: X.list is X.list.
@@ -3355,7 +3356,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: str
         """
-        return '{}_Alloc.Alloc'.format(self.name)
+        return 'Allocate_{}'.format(self.kwless_raw_name)
 
 
 # We tag the ASTNodeType class as abstract here, because of the circular
