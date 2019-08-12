@@ -7,6 +7,6 @@ Code generation was successful
 
 == Abstract in root not overriden in list ==
 File "test.py", line 16, in FooNode.root_prop
-    Error: Abstract property p_root_prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
+    Error: Abstract property root_prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
 
 Done

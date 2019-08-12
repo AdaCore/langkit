@@ -3508,7 +3508,7 @@ class PropertyDef(AbstractNodeData):
         if self.struct.is_ast_node and self.struct.base:
             result = self.struct.base.get_abstract_node_data_dict(
                 field_class=PropertyDef
-            ).get(self._name.lower, None)
+            ).get(self._original_name.lower, None)
 
             if result:
                 check_source_language(
@@ -3666,7 +3666,7 @@ class PropertyDef(AbstractNodeData):
                         include_inherited=False
                     ):
                         if (
-                            prop._name == self._name and
+                            prop.original_name == self.original_name and
                             (not prop.abstract or prop.abstract_runtime_check)
                         ):
                             return
@@ -3686,7 +3686,7 @@ class PropertyDef(AbstractNodeData):
                 not concrete_types_not_overriding,
                 'Abstract property {} is not overriden in all subclasses.'
                 ' Missing overriding properties on classes: {}'.format(
-                    self.name.lower, ", ".join([
+                    self.original_name.lower, ", ".join([
                         t.dsl_name for t in concrete_types_not_overriding])
                 )
             )
