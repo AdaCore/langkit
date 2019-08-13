@@ -262,6 +262,7 @@ class AbstractNodeData(object):
 
         self._name = name
         self._original_name = name
+        self._indexing_name = name.lower if name else None
 
         assert internal_name is None or isinstance(internal_name, names.Name)
         self._internal_name = internal_name
@@ -448,6 +449,20 @@ class AbstractNodeData(object):
         """
         assert self._original_name
         return self._original_name
+
+    @property
+    def indexing_name(self):
+        """
+        Name to use for this node data in structure field dicts.
+
+        For user fields created by users, this should be the lower case form
+        that appears in the DSL. For fields created by the compilation process,
+        this is arbitrary.
+
+        :rtype: str
+        """
+        assert self._indexing_name
+        return self._indexing_name
 
     @property
     @memoized
@@ -1312,11 +1327,8 @@ class CompiledType(object):
         for f_n, f_v in fields:
             f_v.name = (f_n if isinstance(f_n, names.Name) else
                         names.Name.from_lower(f_n))
-            f_v.struct = self
-
-            # Use the "hidden" name so that lookups work on undecorated field
-            # names.
-            self._fields[f_v._name.lower] = f_v
+            f_v._indexing_name = f_v._name.lower
+            self.add_field(f_v)
 
     def add_field(self, field):
         """
@@ -1324,7 +1336,7 @@ class CompiledType(object):
 
         :param AbstractNodeData field: Field to append.
         """
-        self._fields[field.original_name.lower] = field
+        self._fields[field.indexing_name] = field
         field.struct = self
 
         # Invalidate the field lookup cache
