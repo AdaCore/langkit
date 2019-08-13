@@ -2135,7 +2135,7 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch
          pred="${lambda n: n.annotations.custom_short_image}">
       <%def name="action(node)">
-         return ${node.name}_Short_Image
+         return ${node.kwless_raw_name}_Short_Image
            (${node.internal_conversion(T.root_node, 'Self')});
       </%def>
       <%def name="default()">
