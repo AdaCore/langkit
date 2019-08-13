@@ -947,7 +947,7 @@ class CompileCtx(object):
 
         If so, add a "is_env_populated" field to it.
         """
-        from langkit.compiled_types import T, UserField
+        from langkit.compiled_types import ASTNodeType, T, UserField
 
         # Locate the PLE_unit root (if any), checking that we at most one such
         # node annotation.
@@ -1007,13 +1007,14 @@ class CompileCtx(object):
         is_env_populated_flag = UserField(
             type=T.Bool,
             doc='Whether this PLE unit root was processed by'
-                ' Populate_Lexical_Env',
+                ' Populate_Lexical_Env.',
             public=False
         )
-        is_env_populated_flag._original_name = names.Name('Is_Env_Populated')
-        is_env_populated_flag._name = is_env_populated_flag.original_name
+        is_env_populated_flag._name = is_env_populated_flag._original_name = (
+            ASTNodeType.is_env_populated_name
+        )
         is_env_populated_flag._indexing_name = (
-            '[internal]{}'.format(is_env_populated_flag.original_name.lower)
+            ASTNodeType.is_env_populated_indexing_name
         )
         self.ple_unit_root.add_field(is_env_populated_flag)
 

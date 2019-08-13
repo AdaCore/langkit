@@ -2265,6 +2265,12 @@ class ASTNodeType(BaseStructType):
     Type for an AST node.
     """
 
+    # Various names for the "is_env_populated" field for PLE unit roots
+    is_env_populated_name = names.Name('Is_Env_Populated')
+    is_env_populated_indexing_name = (
+        '[internal]{}'.format(is_env_populated_name.lower)
+    )
+
     def __init__(self, name, location, doc, base, fields,
                  env_spec=None, element_type=None, annotations=None,
                  is_generic_list_type=False, is_abstract=False,
