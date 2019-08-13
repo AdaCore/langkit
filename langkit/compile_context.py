@@ -1013,6 +1013,9 @@ class CompileCtx(object):
             internal_name=is_env_populated_name
         )
         is_env_populated_flag.name = is_env_populated_name
+        is_env_populated_flag._indexing_name = (
+            '[internal]{}'.format(is_env_populated_name.lower)
+        )
         self.ple_unit_root.add_field(is_env_populated_flag)
 
     def check_concrete_subclasses(self, astnode):
@@ -2183,6 +2186,8 @@ class CompileCtx(object):
                     # extra decorations.
                     root_static._original_name = prop._original_name
                     root_static._name = prop._name
+                    root_static._indexing_name = ('[root-static]{}'
+                                                  .format(prop.indexing_name))
 
                     # Transfer arguments from the dispatcher to the new static
                     # property, then regenerate arguments in the dispatcher.
