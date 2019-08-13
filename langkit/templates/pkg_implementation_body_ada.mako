@@ -3096,6 +3096,7 @@ package body ${ada_lib_name}.Implementation is
       -----------------
 
       function Trace_Image (Eq : Logic_Equation) return String is
+         pragma Unreferenced (Eq);
       begin
          return "<LogicEquation>";
       end Trace_Image;
@@ -3105,6 +3106,7 @@ package body ${ada_lib_name}.Implementation is
       -----------------
 
       function Trace_Image (Var : Logic_Var) return String is
+         pragma Unreferenced (Var);
       begin
          return "<LogicVariable>";
       end Trace_Image;

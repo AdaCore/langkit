@@ -208,6 +208,10 @@
      % endfor
      ) return Boolean
    is
+      % if not args_types:
+         pragma Unreferenced (Self);
+      % endif
+
       <% node0_type = formal_node_types[0] %>
       Node : constant ${node0_type.name} :=
          ${node0_type.internal_conversion(T.root_node, 'Node_0.Node')};
