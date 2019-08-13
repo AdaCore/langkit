@@ -118,7 +118,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       --  Rewriting handle for Node's parent, or No_Node_Rewriting_Handle if
       --  Node is a root node.
 
-      Kind : ${root_node_kind_name};
+      Kind : ${T.node_kind};
       --  Kind for the node this handle represents. When Node is not null (i.e.
       --  when this represents an already existing node, rather than a new
       --  one), this must be equal to Node.Kind.
@@ -228,7 +228,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type;
    --  Implementation for Rewriting.Unparse
 
-   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name};
+   function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind};
    --  Implementation for Rewriting.Kind
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
@@ -295,18 +295,18 @@ private package ${ada_lib_name}.Rewriting_Implementation is
 
    function Create_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle;
+      Kind   : ${T.node_kind}) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Create_Node
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name};
+      Kind   : ${T.node_kind};
       Text   : Text_Type) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Create_Token_Node
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
-      Kind     : ${root_node_kind_name};
+      Kind     : ${T.node_kind};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle;
    --  Implementation for Rewriting.Create_Regular_Node
 

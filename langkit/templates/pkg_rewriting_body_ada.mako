@@ -205,8 +205,7 @@ package body ${ada_lib_name}.Rewriting is
    -- Kind --
    ----------
 
-   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
-   is
+   function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind} is
    begin
       return Impl.Kind (Unwrap_Node_RH (Handle));
    end Kind;
@@ -363,7 +362,7 @@ package body ${ada_lib_name}.Rewriting is
 
    function Create_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle is
+      Kind   : ${T.node_kind}) return Node_Rewriting_Handle is
    begin
       return Wrap_Node_RH (Impl.Create_Node (Unwrap_RH (Handle), Kind));
    end Create_Node;
@@ -374,9 +373,8 @@ package body ${ada_lib_name}.Rewriting is
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name};
-      Text   : Text_Type) return Node_Rewriting_Handle
-   is
+      Kind   : ${T.node_kind};
+      Text   : Text_Type) return Node_Rewriting_Handle is
    begin
       return Wrap_Node_RH
         (Impl.Create_Token_Node (Unwrap_RH (Handle), Kind, Text));
@@ -388,9 +386,8 @@ package body ${ada_lib_name}.Rewriting is
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
-      Kind     : ${root_node_kind_name};
-      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle
-   is
+      Kind     : ${T.node_kind};
+      Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle is
    begin
       return Wrap_Node_RH (Impl.Create_Regular_Node
         (Unwrap_RH (Handle), Kind, Unwrap_Node_RH_Array (Children)));

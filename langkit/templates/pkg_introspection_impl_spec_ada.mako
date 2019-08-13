@@ -260,7 +260,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
       case Is_Abstract is
          when False =>
-            Kind : ${root_node_kind_name};
+            Kind : ${T.node_kind};
             --  Kind corresponding this this node type
 
          when True =>
@@ -359,7 +359,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Lookup table for DSL names to node type references. Created at
    --  elaboration time and never updated after.
 
-   Kind_To_Id : constant array (${root_node_kind_name}) of Node_Type_Id := (
+   Kind_To_Id : constant array (${T.node_kind}) of Node_Type_Id := (
       ${', '.join('{n.ada_kind_name} => {n.introspection_name}'.format(n=n)
                   for n in ctx.astnode_types
                   if not n.abstract)}
@@ -381,10 +381,10 @@ private package ${ada_lib_name}.Introspection_Implementation is
    function Is_Concrete (Id : Node_Type_Id) return Boolean
    is (not Is_Abstract (Id));
 
-   function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name};
+   function Kind_For (Id : Node_Type_Id) return ${T.node_kind};
    --  Implementation for Introspection.Kind_For
 
-   function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id;
+   function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id;
    --  Implementation for Introspection.Id_For_Kind
 
    function Is_Root_Node (Id : Node_Type_Id) return Boolean;
@@ -431,11 +431,11 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Implementation for Introspection.Eval_Field
 
    function Index
-     (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive;
+     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive;
    --  Implementation for Introspection.Index
 
    function Field_Reference_From_Index
-     (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference;
+     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference;
    --  Implementation for Introspection.Field_Reference_From_Index
 
    function Fields
@@ -444,8 +444,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  collect only non-null and concrete fields. Otherwise, collect all
    --  fields.
 
-   function Fields
-     (Kind : ${root_node_kind_name}) return Field_Reference_Array;
+   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array;
    --  Implementation for Introspection.Fields
 
    function Fields (Id : Node_Type_Id) return Field_Reference_Array;
@@ -476,8 +475,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
       Argument_Number : Positive) return Internal_Value;
    --  Implementation for Introspection.Property_Argument_Default_Value
 
-   function Properties
-     (Kind : ${root_node_kind_name}) return Property_Reference_Array;
+   function Properties (Kind : ${T.node_kind}) return Property_Reference_Array;
    --  Implementation for Introspection.Properties
 
    function Properties (Id : Node_Type_Id) return Property_Reference_Array;
@@ -494,8 +492,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    -- Tokens --
    ------------
 
-   function Token_Node_Kind
-     (Kind : ${root_node_kind_name}) return Token_Kind;
+   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind;
    --  Implementation for Introspection.Token_Node_Kind
 
 end ${ada_lib_name}.Introspection_Implementation;

@@ -13,7 +13,7 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 
 package body ${ada_lib_name}.Common is
 
-   Is_Token_Node_Kind : constant array (${root_node_kind_name}) of Boolean :=
+   Is_Token_Node_Kind : constant array (${T.node_kind}) of Boolean :=
      (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_token_node)
                   for n in ctx.astnode_types if not n.abstract)});
    --  For each node kind, return whether it is a node that contains only a
@@ -126,7 +126,7 @@ package body ${ada_lib_name}.Common is
    -- Is_Token_Node --
    -------------------
 
-   function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean is
+   function Is_Token_Node (Kind : ${T.node_kind}) return Boolean is
    begin
       return Is_Token_Node_Kind (Kind);
    end Is_Token_Node;
@@ -135,7 +135,7 @@ package body ${ada_lib_name}.Common is
    -- Is_List_Node --
    ------------------
 
-   function Is_List_Node (Kind : ${root_node_kind_name}) return Boolean is
+   function Is_List_Node (Kind : ${T.node_kind}) return Boolean is
    begin
       return ${('Kind in {}'.format(ctx.generic_list_type.ada_kind_range_name)
                 if ctx.generic_list_type.concrete_subclasses else

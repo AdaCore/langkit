@@ -225,7 +225,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -- Kind --
    ----------
 
-   function Kind (Node : Abstract_Node) return ${root_node_kind_name} is
+   function Kind (Node : Abstract_Node) return ${T.node_kind} is
    begin
       case Node.Kind is
          when From_Parsing =>
@@ -617,7 +617,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Preserve_Formatting : Boolean;
       Result              : in out Unparsing_Buffer)
    is
-      Kind     : constant ${root_node_kind_name} :=
+      Kind     : constant ${T.node_kind} :=
          Unparsing_Implementation.Kind (Node);
       Unparser : Node_Unparser renames Node_Unparsers (Kind);
 

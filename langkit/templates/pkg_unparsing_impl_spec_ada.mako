@@ -41,7 +41,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    function Is_Null (Node : Abstract_Node) return Boolean;
    --  Return whether Node references a null node
 
-   function Kind (Node : Abstract_Node) return ${root_node_kind_name};
+   function Kind (Node : Abstract_Node) return ${T.node_kind};
    --  Return the kind for Node
 
    function Children_Count (Node : Abstract_Node) return Natural;
@@ -211,7 +211,7 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    subtype List_Node_Unparser is Node_Unparser (List);
    subtype Token_Node_Unparser is Node_Unparser (Token);
 
-   type Node_Unparser_Map is array (${root_node_kind_name}) of Node_Unparser;
+   type Node_Unparser_Map is array (${T.node_kind}) of Node_Unparser;
    type Node_Unparser_Map_Access is access constant Node_Unparser_Map;
 
    Node_Unparsers : Node_Unparser_Map_Access;

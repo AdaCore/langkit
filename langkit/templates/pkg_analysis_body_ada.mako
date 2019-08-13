@@ -691,8 +691,8 @@ package body ${ada_lib_name}.Analysis is
    -- Kind --
    ----------
 
-   function Kind
-     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name} is
+   function Kind (Node : ${root_entity.api_name}'Class) return ${T.node_kind}
+   is
    begin
       Check_Safety_Net (Node.Safety_Net);
       return Node.Internal.Node.Kind;

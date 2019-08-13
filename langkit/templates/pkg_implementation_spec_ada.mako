@@ -312,7 +312,7 @@ private package ${ada_lib_name}.Implementation is
    -- Tree traversal operations --
    -------------------------------
 
-   Kind_To_Node_Children_Count : array (${root_node_kind_name}) of Integer :=
+   Kind_To_Node_Children_Count : array (${T.node_kind}) of Integer :=
      (${', \n'.join(
            '{} => {}'.format(
               cls.ada_kind_name,
@@ -567,7 +567,7 @@ private package ${ada_lib_name}.Implementation is
       --  Hold the environment this node defines, or the parent environment
       --  otherwise.
 
-      Kind : ${root_node_kind_name};
+      Kind : ${T.node_kind};
       --  Kind for this node. This must reflect the object tag
 
       ${astnode_types.node_fields(T.root_node, emit_null=False)}
@@ -580,7 +580,7 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Initialize
      (Self              : ${T.root_node.name};
-      Kind              : ${root_node_kind_name};
+      Kind              : ${T.node_kind};
       Unit              : Internal_Unit;
       Token_Start_Index : Token_Index;
       Token_End_Index   : Token_Index;

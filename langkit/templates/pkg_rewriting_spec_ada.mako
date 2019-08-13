@@ -109,7 +109,7 @@ package ${ada_lib_name}.Rewriting is
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type;
    ${ada_doc('langkit.rewriting.unparse', 3)}
 
-   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name};
+   function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind};
    ${ada_doc('langkit.rewriting.kind', 3)}
 
    function Tied (Handle : Node_Rewriting_Handle) return Boolean;
@@ -172,18 +172,18 @@ package ${ada_lib_name}.Rewriting is
 
    function Create_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle;
+      Kind   : ${T.node_kind}) return Node_Rewriting_Handle;
    ${ada_doc('langkit.rewriting.create_node', 3)}
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name};
+      Kind   : ${T.node_kind};
       Text   : Text_Type) return Node_Rewriting_Handle;
    ${ada_doc('langkit.rewriting.create_token_node', 3)}
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
-      Kind     : ${root_node_kind_name};
+      Kind     : ${T.node_kind};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle;
    ${ada_doc('langkit.rewriting.create_regular_node', 3)}
 

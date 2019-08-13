@@ -180,7 +180,7 @@ package ${ada_lib_name}.Iterators is
    -- Predicates --
    ----------------
 
-   function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref};
+   function Kind_Is (Kind : ${T.node_kind}) return ${pred_ref};
    --  Return a predicate that accepts only nodes of the given ``Kind``
    --
    --% belongs-to: ${pred_ref}
@@ -290,7 +290,7 @@ private
      (P : in out Child_With_Predicate; N : ${node}) return Boolean;
 
    type Kind_Predicate is new ${pred_iface} with record
-      Kind : ${root_node_kind_name};
+      Kind : ${T.node_kind};
    end record;
    --  Predicate that returns true for all nodes of some kind
 

@@ -193,7 +193,7 @@ package body ${ada_lib_name}.Iterators is
    -- Kind_Is --
    -------------
 
-   function Kind_Is (Kind : ${root_node_kind_name}) return ${pred_ref} is
+   function Kind_Is (Kind : ${T.node_kind}) return ${pred_ref} is
    begin
       return Result : ${pred_ref} do
          Result.Set (Kind_Predicate'(${pred_iface} with Kind => Kind));

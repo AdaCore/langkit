@@ -1221,7 +1221,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Initialize
      (Self              : ${T.root_node.name};
-      Kind              : ${root_node_kind_name};
+      Kind              : ${T.node_kind};
       Unit              : Internal_Unit;
       Token_Start_Index : Token_Index;
       Token_End_Index   : Token_Index;
@@ -2237,8 +2237,7 @@ package body ${ada_lib_name}.Implementation is
       Index_In_Bounds : out Boolean;
       Result          : out ${T.root_node.name})
    is
-      K : constant ${root_node_kind_name} := Node.Kind;
-
+      K : constant ${T.node_kind} := Node.Kind;
    begin
       <%
         root_type = ctx.root_grammar_class.name
@@ -2310,7 +2309,7 @@ package body ${ada_lib_name}.Implementation is
       Show_Slocs  : Boolean;
       Line_Prefix : String := "")
    is
-      K               : constant ${root_node_kind_name} := Node.Kind;
+      K               : constant ${T.node_kind} := Node.Kind;
       Attr_Prefix     : constant String := Line_Prefix & "|";
       Children_Prefix : constant String := Line_Prefix & "|  ";
 
@@ -2884,7 +2883,7 @@ package body ${ada_lib_name}.Implementation is
            (Image (Short_Text_Image (Node)) & "." & Field);
       end Assign;
 
-      K : constant ${root_node_kind_name} := Node.Kind;
+      K : constant ${T.node_kind} := Node.Kind;
 
    begin
       <%
@@ -3182,7 +3181,7 @@ package body ${ada_lib_name}.Implementation is
       end Trace_Image;
    % endif
 
-   Kind_Names : array (${root_node_kind_name}) of Unbounded_String :=
+   Kind_Names : array (${T.node_kind}) of Unbounded_String :=
      (${", \n".join(cls.ada_kind_name
                     + " => To_Unbounded_String (\""
                     + cls.repr_name() + "\")"
@@ -3234,7 +3233,7 @@ package body ${ada_lib_name}.Implementation is
          Eq_Node.Refs.Destroy (LV);
       end Reset;
 
-      K : constant ${root_node_kind_name} := Node.Kind;
+      K : constant ${T.node_kind} := Node.Kind;
 
    begin
       <%
