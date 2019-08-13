@@ -68,13 +68,13 @@ package ${ada_lib_name}.Common is
    ## Output enumerators so that all concrete AST_Node subclasses get their own
    ## kind. Nothing can be an instance of an abstract subclass, so these do not
    ## need their own kind.
-   type ${root_node_kind_name} is
+   type ${T.node_kind} is
      (${', '.join(cls.ada_kind_name
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
    --  Type for concrete nodes
 
-   for ${root_node_kind_name} use
+   for ${T.node_kind} use
      (${', '.join('{} => {}'.format(cls.ada_kind_name,
                                     ctx.node_kind_constants[cls])
                   for cls in ctx.astnode_types
@@ -85,14 +85,14 @@ package ${ada_lib_name}.Common is
    % for cls in ctx.astnode_types:
       % if cls.concrete_subclasses:
          subtype ${cls.ada_kind_range_name} is
-            ${root_node_kind_name} range
+            ${T.node_kind} range
                ${'{} .. {}'.format(*cls.ada_kind_range_bounds)};
          --% no-document: True
       % endif
    % endfor
 
    ## Output a subtype to materialize the set of kinds for synthetic nodes
-   subtype Synthetic_Nodes is ${root_node_kind_name}
+   subtype Synthetic_Nodes is ${T.node_kind}
       with Static_Predicate =>
       % if ctx.synthetic_nodes:
          Synthetic_Nodes in
@@ -159,10 +159,10 @@ package ${ada_lib_name}.Common is
    --  Return a string representation of ``Token_Id`` that is suitable in error
    --  messages.
 
-   function Is_Token_Node (Kind : ${root_node_kind_name}) return Boolean;
+   function Is_Token_Node (Kind : ${T.node_kind}) return Boolean;
    --  Return whether Kind corresponds to a token node
 
-   function Is_List_Node (Kind : ${root_node_kind_name}) return Boolean;
+   function Is_List_Node (Kind : ${T.node_kind}) return Boolean;
    --  Return whether Kind corresponds to a list node
 
    type Visit_Status is (Into, Over, Stop);
@@ -294,8 +294,8 @@ package ${ada_lib_name}.Common is
    -- Introspection --
    -------------------
 
-   --  Unlike ${root_node_kind_name}, the following enumeration contains
-   --  entries for abstract nodes.
+   --  Unlike ${T.node_kind}, the following enumeration contains entries for
+   --  abstract nodes.
 
    type Any_Node_Type_Id is (
       None, ${', '.join(n.introspection_simple_name

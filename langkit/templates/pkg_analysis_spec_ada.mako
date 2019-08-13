@@ -401,7 +401,7 @@ package ${ada_lib_name}.Analysis is
    -------------------------
 
    function Kind
-     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name};
+     (Node : ${root_entity.api_name}'Class) return ${T.node_kind};
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String;
    --  Return the concrete kind for Node
 

@@ -44,11 +44,11 @@ package ${ada_lib_name}.Introspection is
    function Is_Concrete (Id : Node_Type_Id) return Boolean
    is (not Is_Abstract (Id));
 
-   function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name};
+   function Kind_For (Id : Node_Type_Id) return ${T.node_kind};
    --  Return the node kind corresponding to Id. This raises a Constraint_Error
    --  if Id designates an abstract node.
 
-   function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id;
+   function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id;
    --  Return the node type corresponding to the given node Kind
 
    function Is_Root_Node (Id : Node_Type_Id) return Boolean;
@@ -193,18 +193,17 @@ package ${ada_lib_name}.Introspection is
    --  This raises a Node_Data_Evaluation_Error if Node has no such field.
 
    function Index
-     (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive;
+     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive;
    --  Return the index in nodes to access the given ``Field`` considering the
    --  given ``Kind`` of node.
 
    function Field_Reference_From_Index
-     (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference;
+     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference;
    --  Return the field reference corresponding to the given ``Index`` in nodes
    --  of the given ``Kind``. Raise an ``Invalid_Field`` exception if there is
    --  no field corresponding to this index.
 
-   function Fields
-     (Kind : ${root_node_kind_name}) return Field_Reference_Array;
+   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array;
    --  Return the list of fields that nodes of the given ``Kind`` have. This
    --  returns an empty array for list nodes.
 
@@ -253,8 +252,7 @@ package ${ada_lib_name}.Introspection is
    --  This raises a Node_Data_Evaluation_Error if Node has no such property or
    --  if the provided arguments are invalid for this property.
 
-   function Properties
-     (Kind : ${root_node_kind_name}) return Property_Reference_Array;
+   function Properties (Kind : ${T.node_kind}) return Property_Reference_Array;
    --  Return the list of properties that nodes of the given ``Kind`` have
 
    function Properties (Id : Node_Type_Id) return Property_Reference_Array;
@@ -266,8 +264,7 @@ package ${ada_lib_name}.Introspection is
    -- Tokens --
    ------------
 
-   function Token_Node_Kind
-     (Kind : ${root_node_kind_name}) return Token_Kind
+   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind
       with Pre => Is_Token_Node (Kind);
    --  Return the token kind corresponding to the given token node kind
    % if not ctx.generate_unparser:

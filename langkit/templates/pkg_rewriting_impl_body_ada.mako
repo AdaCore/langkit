@@ -155,7 +155,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    end Context;
 
    function Allocate
-     (Kind          : ${root_node_kind_name};
+     (Kind          : ${T.node_kind};
       Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
@@ -486,7 +486,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    --------------
 
    function Allocate
-     (Kind          : ${root_node_kind_name};
+     (Kind          : ${T.node_kind};
       Context       : Rewriting_Handle;
       Unit_Handle   : Unit_Rewriting_Handle;
       Parent_Handle : Node_Rewriting_Handle)
@@ -645,8 +645,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    -- Kind --
    ----------
 
-   function Kind (Handle : Node_Rewriting_Handle) return ${root_node_kind_name}
-   is
+   function Kind (Handle : Node_Rewriting_Handle) return ${T.node_kind} is
    begin
       ${pre_check_nrw_handle('Handle')}
       return Handle.Kind;
@@ -919,7 +918,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Create_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name}) return Node_Rewriting_Handle is
+      Kind   : ${T.node_kind}) return Node_Rewriting_Handle is
    begin
       ${pre_check_rw_handle('Handle')}
 
@@ -942,7 +941,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Create_Token_Node
      (Handle : Rewriting_Handle;
-      Kind   : ${root_node_kind_name};
+      Kind   : ${T.node_kind};
       Text   : Text_Type) return Node_Rewriting_Handle is
    begin
       ${pre_check_rw_handle('Handle')}
@@ -965,7 +964,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
 
    function Create_Regular_Node
      (Handle   : Rewriting_Handle;
-      Kind     : ${root_node_kind_name};
+      Kind     : ${T.node_kind};
       Children : Node_Rewriting_Handle_Array) return Node_Rewriting_Handle is
    begin
       ${pre_check_rw_handle('Handle')}

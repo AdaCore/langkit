@@ -85,7 +85,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Kind_For --
    --------------
 
-   function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name} is
+   function Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
       Desc : Node_Type_Descriptor renames Node_Type_Descriptors (Id).all;
    begin
       if Desc.Is_Abstract then
@@ -98,7 +98,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Id_For_Kind --
    -----------------
 
-   function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id is
+   function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id is
    begin
       return Kind_To_Id (Kind);
    end Id_For_Kind;
@@ -253,7 +253,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
      (Node  : ${T.root_node.name};
       Field : Field_Reference) return ${T.root_node.name}
    is
-      Kind : constant ${root_node_kind_name} := Node.Kind;
+      Kind : constant ${T.node_kind} := Node.Kind;
    begin
       <%
          def get_actions(astnode, node_expr):
@@ -287,8 +287,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -----------
 
    function Index
-     (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive
-   is
+     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive is
    begin
       % if ctx.sorted_parse_fields:
          <%
@@ -320,8 +319,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    --------------------------------
 
    function Field_Reference_From_Index
-     (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference
-   is
+     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference is
    begin
       <%
          def get_actions(astnode, node_expr):
@@ -365,8 +363,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Fields --
    ------------
 
-   function Fields (Kind : ${root_node_kind_name}) return Field_Reference_Array
-   is
+   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array is
    begin
       % if ctx.sorted_parse_fields:
          return Fields (Id_For_Kind (Kind), Concrete_Only => True);
@@ -531,8 +528,8 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Properties --
    ----------------
 
-   function Properties
-     (Kind : ${root_node_kind_name}) return Property_Reference_Array is
+   function Properties (Kind : ${T.node_kind}) return Property_Reference_Array
+   is
    begin
       return Properties (Id_For_Kind (Kind));
    end Properties;
@@ -588,9 +585,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Token_Node_Kind --
    ---------------------
 
-   function Token_Node_Kind
-     (Kind : ${root_node_kind_name}) return Token_Kind
-   is
+   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind is
       <% token_nodes = [n for n in ctx.astnode_types
                         if not n.abstract and n.is_token_node] %>
    begin

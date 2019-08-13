@@ -435,7 +435,7 @@ package body ${ada_lib_name}.Introspection is
    -- Kind_For --
    --------------
 
-   function Kind_For (Id : Node_Type_Id) return ${root_node_kind_name} is
+   function Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
    begin
       return Impl.Kind_For (Id);
    end Kind_For;
@@ -444,7 +444,7 @@ package body ${ada_lib_name}.Introspection is
    -- Id_For_Kind --
    -----------------
 
-   function Id_For_Kind (Kind : ${root_node_kind_name}) return Node_Type_Id is
+   function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id is
    begin
       return Impl.Id_For_Kind (Kind);
    end Id_For_Kind;
@@ -626,8 +626,7 @@ package body ${ada_lib_name}.Introspection is
    -----------
 
    function Index
-     (Kind : ${root_node_kind_name}; Field : Field_Reference) return Positive
-   is
+     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive is
    begin
       pragma Warnings (Off, "value not in range of type");
       return Impl.Index (Kind, Field);
@@ -639,8 +638,7 @@ package body ${ada_lib_name}.Introspection is
    --------------------------------
 
    function Field_Reference_From_Index
-     (Kind : ${root_node_kind_name}; Index : Positive) return Field_Reference
-   is
+     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference is
    begin
       pragma Warnings (Off, "value not in range of type");
       return Impl.Field_Reference_From_Index (Kind, Index);
@@ -651,8 +649,7 @@ package body ${ada_lib_name}.Introspection is
    -- Fields --
    ------------
 
-   function Fields (Kind : ${root_node_kind_name}) return Field_Reference_Array
-   is
+   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array is
    begin
       return Impl.Fields (Kind);
    end Fields;
@@ -733,7 +730,7 @@ package body ${ada_lib_name}.Introspection is
       Property  : Property_Reference;
       Arguments : Value_Array) return Value_Type
    is
-      Kind   : constant ${root_node_kind_name} := Node.Kind;
+      Kind   : constant ${T.node_kind} := Node.Kind;
       Desc   : Impl.Property_Descriptor renames
          Impl.Property_Descriptors (Property).all;
       Result : Any_Value_Type := No_Value;
@@ -835,8 +832,8 @@ package body ${ada_lib_name}.Introspection is
    -- Properties --
    ----------------
 
-   function Properties
-     (Kind : ${root_node_kind_name}) return Property_Reference_Array is
+   function Properties (Kind : ${T.node_kind}) return Property_Reference_Array
+   is
    begin
       return Impl.Properties (Kind);
    end Properties;
@@ -856,9 +853,7 @@ package body ${ada_lib_name}.Introspection is
    -- Token_Node_Kind --
    ---------------------
 
-   function Token_Node_Kind
-     (Kind : ${root_node_kind_name}) return Token_Kind
-   is
+   function Token_Node_Kind (Kind : ${T.node_kind}) return Token_Kind is
    begin
       return Impl.Token_Node_Kind (Kind);
    end Token_Node_Kind;

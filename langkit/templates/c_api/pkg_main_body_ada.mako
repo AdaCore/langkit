@@ -428,7 +428,7 @@ package body ${ada_lib_name}.Implementation.C is
    -- General AST node primitives --
    ---------------------------------
 
-   Node_Kind_Names : constant array (${root_node_kind_name}) of Text_Access :=
+   Node_Kind_Names : constant array (${T.node_kind}) of Text_Access :=
      (${', '.join('{} => new Text_Type\'(To_Text ("{}"))'.format(
                       cls.ada_kind_name,
                       cls.kwless_raw_name.camel
@@ -442,7 +442,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         K : ${root_node_kind_name} := Node.Node.Kind;
+         K : constant ${T.node_kind} := Node.Node.Kind;
       begin
          return ${node_kind_type} (K'Enum_Rep);
       end;
@@ -458,8 +458,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         K    : constant ${root_node_kind_name} :=
-            ${root_node_kind_name}'Enum_Val (Kind);
+         K    : constant ${T.node_kind} := ${T.node_kind}'Enum_Val (Kind);
          Name : Text_Access renames Node_Kind_Names (K);
       begin
          return (Chars => Name.all'Address, Length => Name'Length,
