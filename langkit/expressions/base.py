@@ -4113,7 +4113,7 @@ class PropertyDef(AbstractNodeData):
         # This id will uniquely identify both the generic package and the
         # closure data structure.
         with names.camel_with_underscores:
-            pred_id = "{}_{}_{}".format(self.struct.name, self.name, pred_num)
+            pred_id = "{}_{}".format(self.name, pred_num)
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
