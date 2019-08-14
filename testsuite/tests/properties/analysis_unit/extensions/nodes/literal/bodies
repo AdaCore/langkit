@@ -1,7 +1,7 @@
 --  vim: ft=ada
 
 function Literal_P_Result (Node : Bare_Literal) return Integer is
-    N : constant Bare_Foo_Node := Convert_From_Literal (Node);
+    N : constant Bare_Foo_Node := Node;
 begin
     return Integer'Value (Image (Text (N)));
 end Literal_P_Result;

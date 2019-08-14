@@ -648,17 +648,8 @@ class FieldAccess(AbstractExpression):
             :rtype: str
             """
             prefix = self.prefix
-            node_data_struct = self.node_data.struct
-
             if self.implicit_deref:
                 prefix = '{}.Node'.format(prefix)
-
-            # If this is a node field/property, we must pass the precise type
-            # it expects for "Self".
-            if node_data_struct.is_ast_node:
-                prefix = node_data_struct.internal_conversion(
-                    self.receiver_expr.type, prefix
-                )
 
             if isinstance(self.node_data, PropertyDef):
                 # If we're calling a property, then pass the arguments
@@ -925,10 +916,8 @@ class IsA(AbstractExpression):
             super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            target = T.root_node.internal_conversion(
-                self.expr.type,
-                ('{}.Node' if self.expr.type.is_entity_type else '{}')
-                .format(self.expr.render_expr()))
+            target = (('{}.Node' if self.expr.type.is_entity_type else '{}')
+                      .format(self.expr.render_expr()))
             result_expr = (
                 '{target} /= null \nand then {target}.Kind in {nodes}'.format(
                     target=target,

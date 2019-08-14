@@ -2,5 +2,5 @@
 
 function Literal_P_Evaluate (Node : Bare_Literal) return Big_Integer_Type is
 begin
-   return Create_Big_Integer (Image (Text (Convert_From_Literal (Node))));
+   return Create_Big_Integer (Image (Text (Node)));
 end Literal_P_Evaluate;

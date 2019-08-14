@@ -20,8 +20,7 @@ if ${parser.pos_var} /= No_Token_Index then
 
    ## Initialize components common to all nodes
    Initialize
-     (Self => ${T.root_node.internal_conversion(parser.type,
-                                                parser.res_var)},
+     (Self => ${parser.res_var},
       Kind => ${parser.type.ada_kind_name},
       Unit => Parser.Unit,
 
@@ -42,40 +41,26 @@ if ${parser.pos_var} /= No_Token_Index then
    % if parser.type.has_fields_initializer:
       Initialize_Fields_For_${parser.type.kwless_raw_name}
         (Self => ${parser.res_var}${''.join(
-            ', {} => {}'.format(
-               field.name,
-               field.type.internal_conversion(subparser.type, subresult))
+            ', {} => {}'.format(field.name, subresult)
             for field, subparser, subresult in args)});
    % endif
 
    % if args:
       ## Update Last_Attempted_Child for the created node depending on the
       ## subparsers' results.
-      declare
-         N : constant ${T.root_node.name} :=
-            ${T.root_node.internal_conversion(parser.type, parser.res_var)};
-      begin
-         % for _, subparser, subresult in args:
-            declare
-               C : constant ${T.root_node.name} :=
-                  ${T.root_node.internal_conversion(subparser.type,
-                                                    subresult)};
-            begin
-               if C /= null and then Is_Incomplete (C) then
-                  N.Last_Attempted_Child := 0;
-               elsif C /= null and then not Is_Ghost (C) then
-                  N.Last_Attempted_Child := -1;
-               end if;
-            end;
-         % endfor
-      end;
+      % for _, subparser, subresult in args:
+         if ${subresult} /= null and then Is_Incomplete (${subresult}) then
+            ${parser.res_var}.Last_Attempted_Child := 0;
+         elsif ${subresult} /= null and then not Is_Ghost (${subresult}) then
+            ${parser.res_var}.Last_Attempted_Child := -1;
+         end if;
+      % endfor
    % endif
 
    ## Propagate parsing errors
    % if parser.no_backtrack:
    if ${parser.has_failed_var} then
-      ${T.root_node.internal_conversion(parser.type, parser.res_var)}
-         .Last_Attempted_Child :=
+      ${parser.res_var}.Last_Attempted_Child :=
          ${parser.parser.progress_var if is_row(parser.parser) else 1};
 
       Append (Parser.Diagnostics,

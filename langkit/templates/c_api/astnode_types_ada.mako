@@ -64,14 +64,11 @@
             % elif arg.type.is_analysis_unit_type:
                ${arg_ref}
             % elif arg.type.is_ast_node:
-               ${arg.type.internal_conversion(
-                    T.root_node, '{}.Node'.format(arg_ref))}
+               ${arg_ref}.Node
             % elif arg.type.is_entity_type:
                (if ${arg_ref}.Node = null
                 then ${arg.type.nullexpr}
-                else (${arg.type.element_type.internal_conversion(
-                           T.root_node, '{}.Node'.format(arg_ref))},
-                      ${arg_ref}.Info))
+                else (${arg_ref}.Node, ${arg_ref}.Info))
             % elif arg.type.is_array and not arg.type.emit_c_type:
                Convert (${arg_ref})
             % elif arg.type.is_token_type:
@@ -108,7 +105,7 @@
 
          declare
             <%
-              actuals = ['Typed_Node'] + [
+              actuals = ['Unwrapped_Node'] + [
                  '{0.name} => Unwrapped_{0.name}'.format(a)
                  for a in field.arguments]
               if field.is_property and field.uses_entity_info:
@@ -118,9 +115,7 @@
               field_access = '{} ({})'.format(field.name, ', '.join(actuals))
             %>
 
-            Typed_Node : constant ${struct.name} :=
-               ${struct.internal_conversion(T.root_node, 'Unwrapped_Node')};
-            Result     : ${field.type.name};
+            Result : ${field.type.name};
          begin
             ##  Keep this assignment after the BEGIN keyword above so that the
             ##  exception handler covers it.
@@ -136,12 +131,9 @@
                % elif field.type.is_analysis_unit_type:
                    Result
                % elif field.type.is_ast_node:
-                   (${T.root_node.internal_conversion(field.type, 'Result')},
-                    Node.Info)
+                   (Result, Node.Info)
                % elif field.type.is_entity_type:
-                  (${T.root_node.internal_conversion(
-                        field.type, 'Result.Node')},
-                   Result.Info)
+                  (Result.Node, Result.Info)
                % elif field.type.is_array and not field.type.emit_c_type:
                   Convert (Result)
                % elif field.type.is_token_type:

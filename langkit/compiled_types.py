@@ -2235,20 +2235,13 @@ class EntityType(StructType):
         return names.Name('Create') + self.name
 
     def to_public_expr(self, internal_expr):
-        requires_conversions = not self.element_type.is_root_node
-
-        # If needed, convert the input expression to the root bare node
-        node_expr = '{}.Node'.format(internal_expr)
-        if requires_conversions:
-            node_expr = T.root_node.internal_conversion(self.element_type,
-                                                        node_expr)
-
         # Wrap the bare node into a public entity
-        result = 'Wrap_Node ({}, {}.Info)'.format(node_expr, internal_expr)
+        result = 'Wrap_Node ({}.Node, {}.Info)'.format(internal_expr,
+                                                       internal_expr)
 
         # If needed, convert the result expression to the appropriate public
         # entity derivation.
-        if requires_conversions:
+        if not self.element_type.is_root_node:
             result += '.As_{}'.format(self.api_name)
 
         return result
@@ -3290,19 +3283,14 @@ class ASTNodeType(BaseStructType):
         return self.snaps(True)
 
     def to_public_expr(self, internal_expr):
-        result = 'Wrap_Node ({}, {})'.format(
-            T.root_node.internal_conversion(self, internal_expr),
-            T.entity_info.nullexpr
-        )
+        result = 'Wrap_Node ({}, {})'.format(internal_expr,
+                                             T.entity_info.nullexpr)
         if not self.is_root_node:
             result += '.As_{}'.format(self.entity.api_name)
         return result
 
     def to_internal_expr(self, public_expr, context=None):
-        return self.internal_conversion(
-            T.root_node,
-            '{}.Internal.Node'.format(public_expr)
-        )
+        return '{}.Internal.Node'.format(public_expr)
 
     def internal_converter(self, from_type):
         """
@@ -3320,33 +3308,6 @@ class ASTNodeType(BaseStructType):
             return 'Convert_To_{}'.format(self.kwless_raw_name)
         else:
             assert False
-
-    def internal_conversion(self, expr_type, expr):
-        """
-        Ada code generation helper to convert bare nodes.
-
-        :param ASTNodeType|EntityType expr_type: Static type for `expr`'s
-            result. For convenience, entity types are accepted and interpreted
-            as the bare node they wrap, and non-nodes are returned as-is.
-        :param str expr: Expression that returns a bare node.
-        :return str: Expression that returns a node whose `self` is the type.
-        """
-        if expr_type.is_entity_type:
-            expr_type = expr_type.element_type
-
-        # Avoid useless conversions and return as-is expressions for non-nodes
-        if not expr_type.is_ast_node or self == expr_type:
-            return expr
-
-        root_node_expr = (
-            expr
-            if expr_type.is_root_node else
-            '{} ({})'.format(T.root_node.internal_converter(expr_type), expr))
-
-        return (root_node_expr
-                if self.is_root_node else
-                '{} ({})'.format(self.internal_converter(T.root_node),
-                                 root_node_expr))
 
     @property
     def parser_allocator(self):

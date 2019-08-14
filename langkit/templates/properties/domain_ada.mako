@@ -14,10 +14,7 @@ begin
             node_type = (element_type.element_type
                          if element_type.is_entity_type else
                          element_type)
-            node_expr = T.root_node.internal_conversion(
-               node_type,
-               'Item.Node' if element_type.is_entity_type else 'Item'
-            )
+            node_expr = 'Item.Node' if element_type.is_entity_type else 'Item'
             info_expr = 'Item.Info' if element_type.is_entity_type else '<>'
          %>
          Item : constant ${element_type.name} := Get (Dom, J);

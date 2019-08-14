@@ -2,5 +2,5 @@
 
 function Number_P_Eval (Node : Bare_Number) return Integer is
 begin
-    return Integer'Value (Image (Text (Convert_From_Number (Node))));
+    return Integer'Value (Image (Text (Node)));
 end Number_P_Eval;

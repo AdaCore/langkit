@@ -20,24 +20,13 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
    declare
       <%
          coll_expr = quantifier.collection.render_expr()
-         if quantifier.collection.type.is_list_type:
-            coll_type = ctx.generic_list_type
-            coll_expr = coll_type.internal_conversion(
-               quantifier.collection.type, coll_expr
-            )
-         else:
-            coll_type = quantifier.collection.type
-
+         coll_type = quantifier.collection.type
       %>
       Collection : constant ${coll_type.name} := ${coll_expr};
-      % if quantifier.collection.type.is_list_type:
-         Collection_As_Root : constant ${T.root_node.name} :=
-            ${T.root_node.internal_conversion(coll_type, 'Collection')};
-      % endif
    begin
       for ${codegen_element_var} of
          % if quantifier.collection.type.is_list_type:
-            Collection.Nodes (1 .. Children_Count (Collection_As_Root))
+            Collection.Nodes (1 .. Children_Count (Collection))
          % else:
             Collection.Items
          % endif

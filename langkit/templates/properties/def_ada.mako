@@ -15,8 +15,7 @@ ${"overriding" if property.overriding else ""} function ${property.name}
    return ${property.type.name}
 is (raise Property_Error
     with "Property ${property.qualname} not implemented on type "
-    & Kind_Name (${T.root_node.internal_conversion(property.struct,
-                                                   property.self_arg_name)}));
+    & Kind_Name (${property.self_arg_name}));
 
 % elif not property.external and not property.abstract:
 ${gdb_property_start(property)}
@@ -32,9 +31,6 @@ is
    ## Dispatchers must not memoize because it will be done at the static
    ## property level: we do not want to do it twice.
    <% memoized = property.memoized and not property.is_dispatcher %>
-
-   Self_As_Root_Node : constant ${T.root_node.name} :=
-      ${T.root_node.internal_conversion(Self.type, 'Self')};
 
    % if property._has_self_entity:
    Ent : ${Self.type.entity.name} :=
@@ -85,7 +81,7 @@ is
                key_length += 1
          %>
          use Memoization_Maps;
-         Mmz_Map : Map renames Self_As_Root_Node.Unit.Memoization_Map;
+         Mmz_Map : Map renames Self.Unit.Memoization_Map;
          Mmz_Cur : Cursor;
          Mmz_K   : Mmz_Key;
          Mmz_Val : Mmz_Value;
@@ -100,12 +96,10 @@ begin
         % if property._has_self_entity:
          & Trace_Image (Ent)
          % else:
-         & Trace_Image (Self_As_Root_Node)
+         & Trace_Image (Self)
          % endif
          % for arg in property.arguments:
-            & ", "
-            & Trace_Image
-                (${T.root_node.internal_conversion(arg.type, arg.name)})
+            & ", " & Trace_Image (${arg.name})
          % endfor
          & "):");
       Properties_Traces.Increase_Indent;
@@ -115,12 +109,12 @@ begin
    ## to date.
    % if property.uses_envs:
       if Node /= null then
-         Reset_Caches (Self_As_Root_Node.Unit);
+         Reset_Caches (Self.Unit);
 
          ## And if it is also public, we need to ensure that lexical
          ## environments are populated before executing the property itself.
          % if property.is_public:
-            Populate_Lexical_Env (Self_As_Root_Node.Unit);
+            Populate_Lexical_Env (Self.Unit);
          % endif
       end if;
    % endif
@@ -132,7 +126,7 @@ begin
       ## the test that follows.
 
       % if not property.memoize_in_populate:
-      if not Self_As_Root_Node.Unit.Context.In_Populate_Lexical_Env then
+      if not Self.Unit.Context.In_Populate_Lexical_Env then
       % endif
 
          Mmz_K :=
@@ -153,8 +147,7 @@ begin
                As_${T.entity_info.name} => ${property.entity_info_name});
          % endif
 
-         if not Lookup_Memoization_Map (Self_As_Root_Node.Unit, Mmz_K, Mmz_Cur)
-         then
+         if not Lookup_Memoization_Map (Self.Unit, Mmz_K, Mmz_Cur) then
             ${gdb_memoization_lookup()}
             Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
@@ -183,11 +176,7 @@ begin
 
                % if has_logging:
                   Properties_Traces.Trace
-                    ("Result: "
-                     & Trace_Image
-                         (${T.root_node.internal_conversion(
-                               property.type, 'Property_Result'
-                            )}));
+                    ("Result: " & Trace_Image (Property_Result));
                   Properties_Traces.Decrease_Indent;
                % endif
                ${gdb_memoization_return()}
@@ -208,14 +197,13 @@ begin
 
       ## If this property is a dispatcher, it has no expression: just
       ## materialize the dispatch table by hand.
-      case ${property.struct.ada_kind_range_name} (Self_As_Root_Node.Kind) is
+      case ${property.struct.ada_kind_range_name} (Self.Kind) is
          % for types, static_prop in property.dispatch_table:
             % if types:
                when ${ctx.astnode_kind_set(types)} =>
                   ${gdb_property_call_start(static_prop)}
                   Property_Result := ${static_prop.name}
-                    (${static_prop.struct.internal_conversion(property.struct,
-                                                              'Self')}
+                    (Self
                      % for arg in property.arguments:
                         , ${arg.name}
                      % endfor
@@ -243,7 +231,7 @@ begin
       ## If memoization is enabled for this property, save the result for later
       ## re-use.
       % if not property.memoize_in_populate:
-      if not Self_As_Root_Node.Unit.Context.In_Populate_Lexical_Env then
+      if not Self.Unit.Context.In_Populate_Lexical_Env then
       % endif
 
          Mmz_Val := (Kind => ${property.type.memoization_kind},
@@ -259,10 +247,7 @@ begin
 
    % if has_logging:
       Properties_Traces.Trace
-        ("Result: "
-         & Trace_Image (${T.root_node.internal_conversion(
-                             property.type, 'Property_Result'
-                          )}));
+        ("Result: " & Trace_Image (Property_Result));
       Properties_Traces.Decrease_Indent;
    % endif
 
@@ -284,7 +269,7 @@ begin
 
          % if memoized:
             % if not property.memoize_in_populate:
-            if not Self_As_Root_Node.Unit.Context.In_Populate_Lexical_Env then
+            if not Self.Unit.Context.In_Populate_Lexical_Env then
             % endif
 
                Mmz_Map.Replace_Element (Mmz_Cur, (Kind => Mmz_Property_Error));

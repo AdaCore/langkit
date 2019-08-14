@@ -1,9 +1,8 @@
 --  vim: ft=ada
 
 function Name_P_Designated_Unit (Node : Bare_Name) return Internal_Unit is
-    N        : constant Bare_Foo_Node := Convert_From_Name (Node);
-    Filename : constant String := Image (Text (N)) & ".txt";
-    Context  : constant Internal_Context := N.Unit.Context;
+    Filename : constant String := Image (Text (Node)) & ".txt";
+    Context  : constant Internal_Context := Node.Unit.Context;
 begin
     return Get_From_File (Context, Filename, Default_Charset,
                           Reparse => False,

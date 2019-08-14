@@ -4,27 +4,22 @@
 
 ${result} := new ${T.root_node.value_type_name}
   (${expr.static_type.ada_kind_name});
-declare
-   Result_As_Root_Node : constant ${T.root_node.name} :=
-      ${T.root_node.internal_conversion(expr.static_type, result)};
-begin
-   Initialize
-     (Self => Result_As_Root_Node,
-      Kind => ${expr.static_type.ada_kind_name},
-      Unit => Self_As_Root_Node.Unit,
+Initialize
+  (Self => ${result},
+   Kind => ${expr.static_type.ada_kind_name},
+   Unit => Self.Unit,
 
-      ## Keep the token start/end null, as expected for a synthetized node
-      Token_Start_Index => No_Token_Index,
-      Token_End_Index   => No_Token_Index,
+   ## Keep the token start/end null, as expected for a synthetized node
+   Token_Start_Index => No_Token_Index,
+   Token_End_Index   => No_Token_Index,
 
-      ## We consider the creator of a synthetized nodes as its parent even
-      ## though the latter is not a regular child.
-      Parent => Self_As_Root_Node,
+   ## We consider the creator of a synthetized nodes as its parent even
+   ## though the latter is not a regular child.
+   Parent => Self,
 
-      ## The node's env is the same as the parent
-      Self_Env => Self_As_Root_Node.Self_Env);
-   Register_Destroyable (Self_As_Root_Node.Unit, Result_As_Root_Node);
-end;
+   ## The node's env is the same as the parent
+   Self_Env => Self.Self_Env);
+Register_Destroyable (Self.Unit, ${result});
 
 <%
    parse_field_assocs = []
@@ -48,7 +43,7 @@ end;
 ## Then initialize user fields individually
 % if user_field_assocs:
    % for field, field_expr in user_field_assocs:
-      ${field.struct.internal_conversion(expr.type, result)}.${field.name} :=
+      ${result}.${field.name} :=
          ${field.type.convert_to_storage_expr(result,
                                               field_expr.render_expr())};
    % endfor

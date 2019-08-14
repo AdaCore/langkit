@@ -265,11 +265,10 @@ package body ${ada_lib_name}.Introspection_Implementation is
             if fields:
                result.append('case Field is')
                for f in fields:
-                  field_expr = '{} ({})'.format(f.name, node_expr)
-                  field_expr = T.root_node.internal_conversion(f.type,
-                                                               field_expr)
-                  result.append('when {} => return {};'.format(
-                     f.introspection_enum_literal, field_expr))
+                  result.append('when {} => return {} ({});'
+                                .format(f.introspection_enum_literal,
+                                        f.name,
+                                        node_expr))
                result.append('when others => null;')
                result.append('end case;')
 

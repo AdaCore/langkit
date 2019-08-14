@@ -343,9 +343,7 @@
       function Trace_Image (R : ${cls.name}) return String is
       begin
          % if cls.is_entity_type:
-            return Image (Entity'
-              (Node => ${T.root_node.internal_conversion(cls, 'R.Node')},
-               Info => R.Info));
+            return Image (Entity'(Node => R.Node, Info => R.Info));
          % else:
             return
               ("("
@@ -353,16 +351,10 @@
                   & "null record"
                % else:
                   % for i, f in enumerate (cls.get_fields()):
-                     <%
-                        field_ref = 'R.{}'.format(f.name)
-                        if f.type.is_ast_node:
-                           field_ref = T.root_node.internal_conversion(
-                              f.type, field_ref)
-                     %>
                      % if i > 0:
                         & ", "
                      % endif
-                     & "${f.name} => " & Trace_Image (${field_ref})
+                     & "${f.name} => " & Trace_Image (R.${f.name})
                   % endfor
                % endif
                & ")");
