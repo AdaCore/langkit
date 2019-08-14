@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function
 
 import ast
 from distutils.spawn import find_executable
-from glob import glob
 from io import StringIO
 import json
 import os
