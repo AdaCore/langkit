@@ -21,7 +21,6 @@ with GNATCOLL.Refcount;
 % if any(s.exposed and not s.is_entity_type for s in ctx.struct_types):
    private with Langkit_Support.Boxes;
 % endif
-with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Text;        use Langkit_Support.Text;
