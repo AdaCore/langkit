@@ -1909,7 +1909,7 @@ package body ${ada_lib_name}.Implementation is
    function Hash (Node : ${T.root_node.name}) return Hash_Type
    is
       function H is new Hash_Access
-        (${T.root_node.value_type_name()}, ${T.root_node.name});
+        (${T.root_node.value_type_name}, ${T.root_node.name});
    begin
       return H (Node);
    end Hash;
@@ -3155,7 +3155,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Destroy_Synthetic_Node (Node : in out ${T.root_node.name}) is
       procedure Free is new Ada.Unchecked_Deallocation
-        (${T.root_node.value_type_name()}, ${T.root_node.name});
+        (${T.root_node.value_type_name}, ${T.root_node.name});
    begin
       --  Don't call Node.Destroy, as Node's children may be gone already: they
       --  have their own destructor and there is no specified order for the
@@ -3400,7 +3400,7 @@ package body ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Node : ${T.root_node.name})
    is
       procedure Helper is new Register_Destroyable_Gen
-        (${T.root_node.value_type_name()},
+        (${T.root_node.value_type_name},
          ${T.root_node.name},
          Destroy_Synthetic_Node);
    begin

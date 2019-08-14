@@ -2938,6 +2938,7 @@ class ASTNodeType(BaseStructType):
         """
         return 'Common.{}'.format(self.introspection_simple_name)
 
+    @property
     def value_type_name(self):
         """
         Return the name of the Ada type for the record that implements this AST
