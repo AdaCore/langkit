@@ -46,8 +46,7 @@ use ${ada_lib_name}.Lexer_Implementation;
 ${exts.with_clauses(with_clauses)}
 
 --  Internal package: low-level primitives to implement public types and
---  operations in ${ada_lib_name}.Analysis. Plesae don't use this package
---  directly.
+--  operations in ${ada_lib_name}.Analysis.
 
 private package ${ada_lib_name}.Implementation is
 

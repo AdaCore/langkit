@@ -10,7 +10,7 @@ with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 
 --  Internal package to provide types and primitives to parse buffers and files
---  and get AST out of them. Plesae don't use this package directly.
+--  and get AST out of them.
 
 private package ${ada_lib_name}.Parsers is
 

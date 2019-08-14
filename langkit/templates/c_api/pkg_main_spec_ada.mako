@@ -27,7 +27,6 @@ ${exts.with_clauses(with_clauses)}
 
 --  Internal package: defines data types and subprograms to provide the
 --  implementation of the exported C API (see the corresponding C header file).
---  Please don't use this package directly.
 
 private package ${ada_lib_name}.Implementation.C is
 
