@@ -2441,10 +2441,9 @@ class CompileCtx(object):
 
                     # Declare a new variable to hold the node subtype to
                     # process in this matcher.
-                    new_node_expr = (
-                        '{node_var}.As_{new_node_type}'
-                        if public_nodes else
-                        m.astnode.internal_conversion(case.astnode, node_var))
+                    new_node_expr = ('{node_var}.As_{new_node_type}'
+                                     if public_nodes else
+                                     str(node_var))
                     result.append('declare')
                     result.append(
                         ('{new_node_var} : constant'

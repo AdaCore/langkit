@@ -41,8 +41,7 @@ def build_field_access(self, node_expr, builtin_field_name,
             node_expr, get_builtin_field(builtin_field_name), [],
             implicit_deref=True, abstract_expr=self)
     else:
-        return bare_node_expr_constructor(node_expr.convert_node(T.root_node),
-                                          abstract_expr=self)
+        return bare_node_expr_constructor(node_expr, abstract_expr=self)
 
 
 @auto_attr

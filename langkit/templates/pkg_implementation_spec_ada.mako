@@ -273,16 +273,6 @@ private package ${ada_lib_name}.Implementation is
    function Trace_Image (I : Big_Integer_Type) return String;
    % endif
 
-   ------------------------------------------------------
-   -- AST node derived types (incomplete declarations) --
-   ------------------------------------------------------
-
-   ${astnode_types.bare_node_converters(ctx.generic_list_type)}
-
-   % for astnode in no_builtins(ctx.astnode_types):
-      ${astnode_types.public_incomplete_decl(astnode)}
-   % endfor
-
    % if ctx.properties_logging:
       function Trace_Image
         (Node       : ${T.root_node.name};

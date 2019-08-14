@@ -26,9 +26,7 @@ loop
    ${parser.cpos} := ${parser.pos_var};
 
    ## Append the parsed result to the list
-   ${parser.tmplist}.Nodes.Append
-     (${T.root_node.internal_conversion(parser.parser.type,
-                                        parser.parser.res_var)});
+   ${parser.tmplist}.Nodes.Append (${parser.parser.res_var});
 
    ## Parse the separator, if there is one. The separator is always discarded.
    % if parser.sep:
@@ -65,35 +63,27 @@ begin
       Token_End := No_Token_Index;
    end if;
 
-   declare
-      As_Root_Node    : constant ${T.root_node.name} :=
-         ${T.root_node.internal_conversion(parser.type, parser.res_var)};
-      As_Generic_List : constant ${ctx.generic_list_type.name} :=
-         ${ctx.generic_list_type.internal_conversion(T.root_node,
-                                                     'As_Root_Node')};
-   begin
-      Initialize
-        (Self              => As_Root_Node,
-         Kind              => ${list_type.ada_kind_name},
-         Unit              => Parser.Unit,
-         Token_Start_Index => Token_Start,
-         Token_End_Index   => Token_End);
-      Initialize_List
-        (Self   => As_Generic_List,
-         Parser => Parser,
-         Count  => Count);
+   Initialize
+     (Self              => ${parser.res_var},
+      Kind              => ${list_type.ada_kind_name},
+      Unit              => Parser.Unit,
+      Token_Start_Index => Token_Start,
+      Token_End_Index   => Token_End);
+   Initialize_List
+     (Self   => ${parser.res_var},
+      Parser => Parser,
+      Count  => Count);
 
-      declare
-         Vec : ${T.root_node.array.pkg_vector}.Vector renames
-            ${parser.tmplist}.Nodes;
-         Arr : Alloc_AST_List_Array.Element_Array_Access renames
-            As_Generic_List.Nodes;
-      begin
-         Arr := Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, Vec.Length);
-         for I in Vec.First_Index .. Vec.Last_Index loop
-            Arr (I) := Vec.Get (I);
-         end loop;
-      end;
+   declare
+      Vec : ${T.root_node.array.pkg_vector}.Vector renames
+         ${parser.tmplist}.Nodes;
+      Arr : Alloc_AST_List_Array.Element_Array_Access renames
+         ${parser.res_var}.Nodes;
+   begin
+      Arr := Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, Vec.Length);
+      for I in Vec.First_Index .. Vec.Last_Index loop
+         Arr (I) := Vec.Get (I);
+      end loop;
    end;
 end;
 

@@ -4,19 +4,6 @@
 <%namespace name="prop_helpers" file="properties/helpers.mako" />
 
 
-<%def name="bare_node_converters(cls)">
-   function ${cls.internal_converter(T.root_node)} is
-      new Ada.Unchecked_Conversion (${T.root_node.name}, ${cls.name});
-   function ${T.root_node.internal_converter(cls)} is
-      new Ada.Unchecked_Conversion (${cls.name}, ${T.root_node.name});
-</%def>
-
-<%def name="public_incomplete_decl(cls)">
-   % if not cls.is_root_node:
-      ${bare_node_converters(cls)}
-   % endif
-</%def>
-
 <%def name="logic_helpers()">
 
    pragma Warnings (Off, "referenced");
@@ -102,8 +89,7 @@
       </%def>
 
       % if field.abstract:
-         Kind : constant ${field.struct.ada_kind_range_name} :=
-            ${T.root_node.internal_conversion(field.struct, 'Node')}.Kind;
+         Kind : constant ${field.struct.ada_kind_range_name} := Node.Kind;
       % endif
    begin
       % if field.abstract:
@@ -114,13 +100,7 @@
                   % if cf.null:
                      return ${cf.type.nullexpr};
                   % else:
-                     declare
-                        N : constant ${cf.struct.name} :=
-                           ${cf.struct.internal_conversion(field.struct,
-                                                           'Node')};
-                     begin
-                        ${return_value(cf, 'N')}
-                     end;
+                     ${return_value(cf, 'Node')}
                   % endif
             % endfor
          end case;
@@ -157,12 +137,6 @@
    <%
       type_name = field.struct.entity.api_name
       ret_type = field.type.entity if field.type.is_ast_node else field.type
-      bare_type = field.struct
-
-      node_expr = field.struct.internal_conversion(
-         T.root_node, 'Node.Internal.Node'
-      )
-      field_expr = 'Implementation.{} ({})'.format(field.name, node_expr)
    %>
 
    function ${field.api_name}
@@ -171,11 +145,9 @@
       Result : ${field.type.name};
    begin
       Check_Safety_Net (Node.Safety_Net);
-      Result := ${field_expr};
+      Result := Implementation.${field.name} (Node.Internal.Node);
       % if field.type.is_ast_node:
-         return (Internal   => (${T.root_node.internal_conversion(
-                                     field.type, 'Result')},
-                                Node.Internal.Info),
+         return (Internal   => (Result, Node.Internal.Info),
                  Safety_Net => Node.Safety_Net);
       % else:
          return Result;
@@ -183,18 +155,15 @@
    end ${field.api_name};
 
    % if field.type.is_ast_node:
-      <% root_field_expr = T.root_node.internal_conversion(field.type,
-                                                           field_expr) %>
-
       % if field.type.is_bool_node:
          function ${field.api_name} (Node : ${type_name}'Class) return Boolean
-         is (${root_field_expr}.Kind
+         is (${ret_type.api_name}'(Node.${field.api_name}).Kind
              = ${field.type.alternatives[0].type.ada_kind_name});
 
       % elif field.type.is_enum_node:
          function ${field.api_name}
            (Node : ${type_name}'Class) return ${field.type.ada_kind_name}
-         is (${root_field_expr}.Kind);
+         is (${ret_type.api_name}'(Node.${field.api_name}).Kind);
       % endif
    % endif
 </%def>
@@ -350,7 +319,7 @@
          for Mapping of Mappings.Items loop
          % endif
 
-         Add_To_Env (Self_As_Root, Mapping, Initial_Env, Resolver);
+         Add_To_Env (Self, Mapping, Initial_Env, Resolver);
          % if not is_array:
          Dec_Ref (Mapping.Dest_Env);
          % endif
@@ -373,10 +342,10 @@
 
             Env : Lexical_Env :=
               ${(call_prop(ref_env.dest_env_prop)
-                 if ref_env.dest_env_prop else "Self_As_Root.Self_Env")};
+                 if ref_env.dest_env_prop else "Self.Self_Env")};
          begin
             Ref_Env
-              (Self_As_Root,
+              (Self,
                Env,
                Ref_Env_Nodes,
                ${ref_env.resolver.name}'Access,
@@ -401,21 +370,21 @@
       G := Simple_Env_Getter (Initial_Env);
       % if has_dyn_env:
       if Initial_Env not in Root_Env | Empty_Env
-         and then Initial_Env.Env.Node.Unit /= Self_As_Root.Unit
+         and then Initial_Env.Env.Node.Unit /= Self.Unit
       then
-         G := Dyn_Env_Getter (${env_getter}'Access, Self_As_Root);
+         G := Dyn_Env_Getter (${env_getter}'Access, Self);
       end if;
       % endif
 
-      Self_As_Root.Self_Env := AST_Envs.Create_Lexical_Env
+      Self.Self_Env := AST_Envs.Create_Lexical_Env
         (Parent            => ${"No_Env_Getter" if add_env.no_parent else "G"},
-         Node              => Self_As_Root,
+         Node              => Self,
          Transitive_Parent => ${call_prop(add_env.transitive_parent_prop)},
-         Owner             => Self_As_Root.Unit);
+         Owner             => Self.Unit);
 
-      Initial_Env := Self_As_Root.Self_Env;
+      Initial_Env := Self.Self_Env;
 
-      Register_Destroyable (Self_As_Root.Unit, Self_As_Root.Self_Env.Env);
+      Register_Destroyable (Self.Unit, Self.Self_Env.Env);
 
    </%def>
 
@@ -455,23 +424,21 @@
    ---------------------------
 
    function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
-      Self_As_Root : constant ${T.root_node.name} := E.Node;
-      Self         : constant ${cls.name} :=
-         ${cls.internal_conversion(T.root_node, 'Self_As_Root')};
+      Self : constant ${cls.name} := E.Node;
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
       ## environment.
       Bound_Env : constant Lexical_Env :=
-        (if Self_As_Root.Parent /= null
-         then Self_As_Root.Parent.Self_Env
-         else Self_As_Root.Self_Env);
+        (if Self.Parent /= null
+         then Self.Parent.Self_Env
+         else Self.Self_Env);
 
       Initial_Env : Lexical_Env := Bound_Env;
    begin
       % if cls.env_spec.env_hook_enabled:
          ${ctx.env_hook_subprogram.fqn}
-           (Self_As_Root.Unit, ${cls.env_spec.env_hook_arg_expr});
+           (Self.Unit, ${cls.env_spec.env_hook_arg_expr});
       % endif
       % if cls.env_spec.initial_env:
       Initial_Env := ${cls.env_spec.initial_env_expr};
@@ -488,8 +455,6 @@
    is
       use AST_Envs;
 
-      Self_As_Root : constant ${T.root_node.name} :=
-         ${T.root_node.internal_conversion(cls, 'Self')};
       Initial_Env  : Lexical_Env := Bound_Env;
 
       % if cls.env_spec.adds_env:
@@ -498,8 +463,7 @@
    begin
       % if has_dyn_env:
          Initial_Env := ${env_getter}
-           ((Node => Self_As_Root,
-             Info => ${T.entity_info.nullexpr}));
+           ((Node => Self, Info => ${T.entity_info.nullexpr}));
       % endif
 
       % for action in cls.env_spec.pre_actions:
@@ -520,9 +484,7 @@
          Bound_Env, Root_Env : AST_Envs.Lexical_Env)
       is
          use AST_Envs;
-         Self_As_Root : constant ${T.root_node.name} :=
-            ${T.root_node.internal_conversion(cls, 'Self')};
-         Initial_Env  : Lexical_Env := Bound_Env;
+         Initial_Env : Lexical_Env := Bound_Env;
       begin
          % for action in cls.env_spec.post_actions:
          ${emit_env_action (action)}
@@ -563,7 +525,7 @@
          ## kind-specific initializer.
          % if parent_fields and not cls.base.is_root_node:
             Initialize_Fields_For_${cls.base.kwless_raw_name}
-              (${cls.base.internal_conversion(cls, 'Self')}${''.join(
+              (Self${''.join(
                     ', {}'.format(f.name) for f in parent_parse_fields
                  )});
          % endif

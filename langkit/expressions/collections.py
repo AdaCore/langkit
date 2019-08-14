@@ -48,8 +48,6 @@ def canonicalize_list(coll_expr, to_root_list=False):
                 dest_type = dest_type.base
         else:
             dest_type = get_context().generic_list_type
-
-        coll_expr = coll_expr.convert_node(dest_type)
     return (coll_expr, element_type)
 
 
@@ -417,20 +415,6 @@ class Map(CollectionExpression):
                             if self.do_concat else
                             self.expr.type)
             self.static_type = element_type.array
-
-            ctx = get_context()
-            prop = PropertyDef.get()
-
-            # If needed, create temporaries to hold intermediate lists as
-            # generic lists and as root nodes.
-            if self.do_concat and self.expr.type.is_list_type:
-                self.concat_var_root = prop.vars.create('Concat_As_Root',
-                                                        T.root_node)
-                self.concat_var_generic = prop.vars.create(
-                    'Concat', ctx.generic_list_type)
-            else:
-                self.concat_var_root = None
-                self.concat_var_generic = None
 
             with iter_scope.parent.use():
                 super(Map.Expr, self).__init__('Map_Result',

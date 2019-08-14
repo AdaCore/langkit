@@ -1373,18 +1373,6 @@ class ResolvedExpression(object):
         return (self if self.type == rtype else Cast.Expr(self, rtype),
                 expr if expr.type == rtype else Cast.Expr(expr, rtype))
 
-    def convert_node(self, dest_type):
-        """
-        Helper to wrap an expression computing a bare node into a type
-        conversion.
-        """
-        assert self.type.is_ast_node
-        if dest_type == self.type:
-            return self
-
-        return LiteralExpr(dest_type.internal_conversion(self.type, '{}'),
-                           dest_type, [self])
-
 
 class VariableExpr(ResolvedExpression):
     """
@@ -1792,10 +1780,9 @@ class UncheckedCastExpr(ResolvedExpression):
 
     def _render_expr(self):
         if self.dest_type.is_ast_node:
-            # Use unchecked conversions for nodes instead of regular Ada
-            # conversions.
-            return self.dest_type.internal_conversion(
-                self.expr.type, self.expr.render_expr())
+            # All node values are subtypes of the same access, so no explicit
+            # conversion needed in the generated Ada code.
+            return self.expr.render_expr()
         return '{} ({})'.format(self.dest_type.name, self.expr.render_expr())
 
     @property
@@ -2451,8 +2438,7 @@ class GetSymbol(AbstractExpression):
 
     @staticmethod
     def construct_static(node_expr, abstract_expr=None):
-        return CallExpr('Sym', 'Get_Symbol', T.Symbol,
-                        [node_expr.convert_node(T.root_node)],
+        return CallExpr('Sym', 'Get_Symbol', T.Symbol, [node_expr],
                         abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -2479,7 +2465,7 @@ class SymbolLiteral(AbstractExpression):
             return assign_var(
                 self.result_var,
                 'Precomputed_Symbol'
-                ' (Self_As_Root_Node.Unit.Context.Symbols, {})'.format(
+                ' (Self.Unit.Context.Symbols, {})'.format(
                     get_context().symbol_literals[self.name]))
 
         @property

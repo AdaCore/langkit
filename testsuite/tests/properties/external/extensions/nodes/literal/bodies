@@ -2,5 +2,5 @@
 
 function Literal_P_Result (Node : Bare_Literal) return Integer is
 begin
-    return Integer'Value (Image (Text (Convert_From_Literal (Node))));
+    return Integer'Value (Image (Text (Node)));
 end Literal_P_Result;

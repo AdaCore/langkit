@@ -319,13 +319,7 @@
                   if I > A.Items'First then
                      Append (Result, ", ");
                   end if;
-                  <%
-                     item_expr = 'A.Items (I)'
-                     if cls.element_type.is_ast_node:
-                        item_expr = T.root_node.internal_conversion(
-                           cls.element_type, item_expr)
-                  %>
-                  Append (Result, Trace_Image (${item_expr}));
+                  Append (Result, Trace_Image (A.Items (I)));
                end loop;
                Append (Result, "]");
                return To_String (Result);

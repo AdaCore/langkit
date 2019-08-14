@@ -106,12 +106,7 @@ begin
    case Key.Kind is
       % for t in key_types:
          when ${t.memoization_kind} =>
-            % if t.is_ast_node:
-               return Hash (${T.root_node.internal_conversion(
-                  t, 'Key.As_{}'.format(t.name))});
-            % else:
-               return Hash (Key.As_${t.name});
-            % endif
+            return Hash (Key.As_${t.name});
       % endfor
    end case;
 end Hash;

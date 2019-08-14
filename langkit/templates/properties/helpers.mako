@@ -66,17 +66,13 @@
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
       Ret := ${conv_prop.name}
-        (${conv_prop.self_arg_name} =>
-            ${conv_prop.struct.internal_conversion(T.root_node, 'From.Node')},
+        (${conv_prop.self_arg_name} => From.Node,
          % for dynvar in conv_prop.dynamic_vars:
             ${dynvar.argument_name} => Self.${dynvar.argument_name},
          % endfor
          ${conv_prop.entity_info_name} => From.Info);
 
-      <%
-         ret_node = T.root_node.internal_conversion(conv_prop.type, 'Ret.Node')
-      %>
-      return (Node => ${ret_node}, Info => Ret.Info);
+      return (Node => Ret.Node, Info => Ret.Info);
    end Convert;
 </%def>
 
@@ -112,13 +108,10 @@
 
       --  All is good: do the call
       declare
-         R_Entity : constant ${struct.entity.name} :=
-           (${struct.internal_conversion(T.root_node, 'R.Node')},
-            R.Info);
+         R_Entity : constant ${struct.entity.name} := (R.Node, R.Info);
       begin
          return ${eq_prop.name}
-          (${eq_prop.self_arg_name} =>
-              ${struct.internal_conversion(T.root, 'L.Node')},
+          (${eq_prop.self_arg_name}             => L.Node,
            ${eq_prop.natural_arguments[0].name} => R_Entity,
            % for dynvar in eq_prop.dynamic_vars:
               ${dynvar.argument_name} => Data.${dynvar.argument_name},
@@ -211,28 +204,21 @@
       % if not args_types:
          pragma Unreferenced (Self);
       % endif
-
-      <% node0_type = formal_node_types[0] %>
-      Node : constant ${node0_type.name} :=
-         ${node0_type.internal_conversion(T.root_node, 'Node_0.Node')};
    begin
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user to
       ## handle null however he wants.
       % if prop.dispatching and not ctx.no_property_checks:
-         if Node = null then
+         if Node_0.Node = null then
             raise Property_Error
               with "In predicate, calling dispatching property on a null node";
         end if;
       % endif
 
       <%
-         args = ['Node'] + [
-            '(Node => {}, Info => Node_{}.Info)'.format(
-                formal_type.element_type.internal_conversion(
-                  T.root_node, 'Node_{}.Node'.format(i)),
-                i
-            ) for i, formal_type in enumerate(formal_node_types[1:], 1)
+         args = ['Node_0.Node'] + [
+            '(Node => Node_{i}.Node, Info => Node_{i}.Info)'.format(i=i)
+            for i, formal_type in enumerate(formal_node_types[1:], 1)
          ] + [
             'Self.Field_{}'.format(i)
             for i, _ in enumerate(args_types)

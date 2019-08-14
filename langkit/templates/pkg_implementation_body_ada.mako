@@ -1254,8 +1254,7 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(node)">
          return ${node.name}_Pre_Env_Actions
-           (${node.internal_conversion(T.root, 'Self')},
-            Bound_Env, Root_Env, Add_To_Env_Only);
+           (Self, Bound_Env, Root_Env, Add_To_Env_Only);
       </%def>
       <%def name="default()"> return Null_Lexical_Env; </%def>
       </%self:case_dispatch>
@@ -1273,9 +1272,7 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.post_actions:
-         ${n.name}_Post_Env_Actions
-           (${n.internal_conversion(T.root, 'Self')},
-            Bound_Env, Root_Env);
+         ${n.name}_Post_Env_Actions (Self, Bound_Env, Root_Env);
          % else:
          null;
          % endif
@@ -1865,8 +1862,7 @@ package body ${ada_lib_name}.Implementation is
                   [ctx.ple_unit_root.is_env_populated_indexing_name]
                ).name
             %>
-            PLE_Unit_Root : constant ${ctx.ple_unit_root.name} :=
-               ${ctx.ple_unit_root.internal_conversion(T.root_node, 'Node')};
+            PLE_Unit_Root : constant ${ctx.ple_unit_root.name} := Node;
          begin
             if PLE_Unit_Root.${is_env_populated_field} then
                return False;
@@ -2177,8 +2173,7 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch
          pred="${lambda n: n.annotations.custom_short_image}">
       <%def name="action(node)">
-         return ${node.kwless_raw_name}_Short_Image
-           (${node.internal_conversion(T.root_node, 'Self')});
+         return ${node.kwless_raw_name}_Short_Image (Self);
       </%def>
       <%def name="default()">
          return "<" & To_Text (Kind_Name (Self))
@@ -2318,14 +2313,11 @@ package body ${ada_lib_name}.Implementation is
 
                 result.append('case Index is')
                 for i, f in enumerate(specific_fields, first_field_index):
-                    converted_node = T.root_node.internal_conversion(
-                        f.type,
-                        '{}.{}'.format(node_expr, f.name))
                     result.append("""
                         when {} =>
-                            Result := {};
+                            Result := {}.{};
                             return;
-                    """.format(i, converted_node))
+                    """.format(i, node_expr, f.name))
                 result.append("""
                         when others => null;
                     end case;
@@ -2378,23 +2370,17 @@ package body ${ada_lib_name}.Implementation is
       % if ctx.generic_list_type.concrete_subclasses:
          --  List nodes are displayed in a special way (they have no field)
          if K in ${ctx.generic_list_type.ada_kind_range_name} then
-            declare
-               List : constant ${ctx.generic_list_type.name} :=
-                  ${ctx.generic_list_type.internal_conversion(T.root_node,
-                                                              'Node')};
-            begin
-               if List.Count = 0 then
-                  Put_Line (": <empty list>");
-                  return;
-               end if;
+            if Node.Count = 0 then
+               Put_Line (": <empty list>");
+               return;
+            end if;
 
-               New_Line;
-               for Child of List.Nodes (1 .. List.Count) loop
-                  if Child /= null then
-                     Print (Child, Show_Slocs, Line_Prefix & "|  ");
-                  end if;
-               end loop;
-            end;
+            New_Line;
+            for Child of Node.Nodes (1 .. Node.Count) loop
+               if Child /= null then
+                  Print (Child, Show_Slocs, Line_Prefix & "|  ");
+               end if;
+            end loop;
             return;
          end if;
       % endif
@@ -2920,14 +2906,8 @@ package body ${ada_lib_name}.Implementation is
       <%
           def get_actions(astnode, node_expr):
               return '\n'.join(
-                  'Assign ({root_node}, {field_node}.{field}, "{field}");'
-                  .format(
-                     root_node=T.root_node.internal_conversion(
-                        astnode, node_expr),
-                     field_node=field.struct.internal_conversion(
-                        astnode, node_expr),
-                     field=field.name
-                  )
+                  'Assign ({node}, {node}.{field}, "{field}");'
+                  .format(node=node_expr, field=field.name)
                   for field in astnode.get_user_fields(
                       include_inherited=False)
                   if field.type.is_logic_var_type
@@ -3027,8 +3007,7 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Length (Node : ${ctx.generic_list_type.name}) return Natural
-   is (Children_Count
-         (${T.root_node.internal_conversion(ctx.generic_list_type, 'Node')}));
+   is (Children_Count (Node));
 
    % if ctx.properties_logging:
 
@@ -3227,8 +3206,7 @@ package body ${ada_lib_name}.Implementation is
       C : Integer := Kind_To_Node_Children_Count (Node.Kind);
    begin
       if C = -1 then
-         return ${ctx.generic_list_type.internal_conversion(
-                     T.root_node, 'Node')}.Count;
+         return Node.Count;
       else
          return C;
       end if;

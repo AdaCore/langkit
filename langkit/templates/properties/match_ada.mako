@@ -4,10 +4,10 @@
     prefix_node_type = expr.prefix_var.type
     if prefix_node_type.is_entity_type:
         prefix_node_type = prefix_node_type.element_type
-    prefix_node_expr = T.root_node.internal_conversion(
-        prefix_node_type,
-        '{}{}'.format(expr.prefix_var.name,
-                      '.Node' if expr.prefix_var.type.is_entity_type else ''))
+    prefix_node_expr = '{}{}'.format(
+      expr.prefix_var.name,
+      '.Node' if expr.prefix_var.type.is_entity_type else ''
+    )
 
     # Expression to compute the kind of the prefix, on which we dispatch. Take
     # care of converting it to the actual kind subrange so that we get full
