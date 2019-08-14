@@ -5,7 +5,6 @@
 with GNATCOLL.Refcount;
 
 with Langkit_Support.Iterators;
-with Langkit_Support.Text; use Langkit_Support.Text;
 private with Langkit_Support.Tree_Traversal_Iterator;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
@@ -51,11 +50,13 @@ ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Iterators is
 
+   use Support.Text;
+
    --------------------
    -- Iterators core --
    --------------------
 
-   package ${node}_Iterators is new Langkit_Support.Iterators
+   package ${node}_Iterators is new Support.Iterators
      (Element_Type  => ${node},
       Element_Array => ${root_entity.array.api_name});
 

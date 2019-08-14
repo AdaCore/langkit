@@ -2,18 +2,18 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
-with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
-with Langkit_Support.Token_Data_Handlers;
-
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
+
+with Langkit_Support.Symbols;
+with Langkit_Support.Token_Data_Handlers;
 
 --  This package provides types and functions used in the whole ${ada_lib_name}
 --  package tree.
 
 package ${ada_lib_name}.Common is
+
+   use Support.Slocs, Support.Text;
 
    <%
       lexer = ctx.lexer

@@ -4,12 +4,12 @@ with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 
-with Langkit_Support.Text;    use Langkit_Support.Text;
-
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 
 private package ${ada_lib_name}.Introspection_Implementation is
+
+   use Support.Text;
 
    ------------------------
    -- Polymorphic values --

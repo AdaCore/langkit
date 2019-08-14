@@ -8,8 +8,6 @@ with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Bump_Ptr.Vectors;
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Text; use Langkit_Support.Text;
 
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
@@ -18,6 +16,8 @@ with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 --  rewriting.
 
 private package ${ada_lib_name}.Rewriting_Implementation is
+
+   use Support.Diagnostics, Support.Text;
 
    type Rewriting_Handle_Type;
    type Unit_Rewriting_Handle_Type;

@@ -24,8 +24,6 @@ with GNATCOLL.Traces;
 with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
 with Langkit_Support.Images;  use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
-with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Text;    use Langkit_Support.Text;
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Adalog.Abstract_Relation;

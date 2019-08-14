@@ -17,9 +17,6 @@ with Ada.Unchecked_Conversion;
 with GNATCOLL.Traces;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
-with Langkit_Support.Text;  use Langkit_Support.Text;
-
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
@@ -429,7 +426,7 @@ package body ${ada_lib_name}.Analysis is
    function Diagnostics (Unit : Analysis_Unit'Class) return Diagnostics_Array
    is
    begin
-      return Diagnostics (Unwrap_Unit (Unit));
+      return Implementation.Diagnostics (Unwrap_Unit (Unit));
    end Diagnostics;
 
    ---------------------------
@@ -493,7 +490,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Text (Unit : Analysis_Unit'Class) return Text_Type is
    begin
-      return Text (Unwrap_Unit (Unit));
+      return Implementation.Text (Unwrap_Unit (Unit));
    end Text;
 
    ----------------
@@ -890,7 +887,7 @@ package body ${ada_lib_name}.Analysis is
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       Check_Safety_Net (Node.Safety_Net);
-      return Text (Node.Internal.Node);
+      return Implementation.Text (Node.Internal.Node);
    end Text;
 
    ----------------

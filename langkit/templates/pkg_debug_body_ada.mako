@@ -5,9 +5,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
-with Langkit_Support.Text;  use Langkit_Support.Text;
-
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 
@@ -17,6 +14,8 @@ ${(exts.with_clauses(with_clauses + [
 ]))}
 
 package body ${ada_lib_name}.Debug is
+
+   use Support.Slocs, Support.Text;
 
    --------
    -- PN --
@@ -51,7 +50,8 @@ package body ${ada_lib_name}.Debug is
             D : constant Stored_Token_Data := TDH.Tokens.Get (Index);
          begin
             Put (Token_Kind_Name (To_Token_Kind (D.Kind)));
-            Put (" " & Image (Text (TDH.all, D), With_Quotes => True));
+            Put (" " & Image (Common.Token_Data_Handlers.Text (TDH.all, D),
+                              With_Quotes => True));
             Put_Line (" [" & Image (D.Sloc_Range) & "]");
          end;
       end if;

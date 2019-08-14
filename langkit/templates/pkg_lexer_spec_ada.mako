@@ -6,9 +6,6 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNATCOLL.VFS;
 
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Text;        use Langkit_Support.Text;
-
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Token_Data_Handlers;
 
@@ -16,6 +13,8 @@ use ${ada_lib_name}.Common.Token_Data_Handlers;
 --  of tokens.
 
 package ${ada_lib_name}.Lexer is
+
+   use Support.Diagnostics, Support.Text;
 
    function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
       with Inline;
