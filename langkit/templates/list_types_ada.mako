@@ -10,8 +10,8 @@
 
    <% list_type = element_type.list %>
 
-   type ${list_type.value_type_name()};
-   type ${list_type.name} is access all ${list_type.value_type_name()};
+   type ${list_type.value_type_name};
+   type ${list_type.name} is access all ${list_type.value_type_name};
 
    ${list_type.null_constant} : constant ${list_type.name} := null;
 
@@ -22,12 +22,12 @@
 
    <%
       list_type = element_type.list
-      value_type = list_type.value_type_name()
+      value_type = list_type.value_type_name
       type_name = list_type.name
    %>
 
    type ${value_type} is record
-      Base : ${ctx.generic_list_type.value_type_name()};
+      Base : ${ctx.generic_list_type.value_type_name};
    end record
       with Convention => C;
 
@@ -48,7 +48,7 @@
 
    <%
       list_type = element_type.list
-      value_type = list_type.value_type_name()
+      value_type = list_type.value_type_name
       type_name = list_type.name
    %>
 

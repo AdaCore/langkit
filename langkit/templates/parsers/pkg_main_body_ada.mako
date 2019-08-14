@@ -39,7 +39,7 @@ package body ${ada_lib_name}.Parsers is
 
       % if not cls.abstract:
          package ${cls.name}_Alloc is new Alloc
-           (${cls.value_type_name()}, ${cls.name});
+           (${cls.value_type_name}, ${cls.name});
       % endif
    % endfor
    pragma Warnings (On, "is not referenced");

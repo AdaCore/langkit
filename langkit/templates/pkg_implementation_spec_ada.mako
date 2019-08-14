@@ -58,8 +58,8 @@ private package ${ada_lib_name}.Implementation is
    type Analysis_Unit_Type;
    type Internal_Unit is access all Analysis_Unit_Type;
 
-   type ${T.root_node.value_type_name()};
-   type ${T.root_node.name} is access all ${T.root_node.value_type_name()};
+   type ${T.root_node.value_type_name};
+   type ${T.root_node.name} is access all ${T.root_node.value_type_name};
    --  Most generic AST node type
 
    function Kind (Node : ${T.root_node.name}) return ${T.node_kind};
@@ -271,11 +271,11 @@ private package ${ada_lib_name}.Implementation is
    -- AST node derived types (incomplete declarations) --
    ------------------------------------------------------
 
-   type ${ctx.generic_list_type.value_type_name()};
+   type ${ctx.generic_list_type.value_type_name};
    --  Base type for all lists of AST node subclasses
 
    type ${ctx.generic_list_type.name} is access all
-   ${ctx.generic_list_type.value_type_name()};
+   ${ctx.generic_list_type.value_type_name};
 
    ${ctx.generic_list_type.null_constant} :
       constant ${ctx.generic_list_type.name} := null;
@@ -551,7 +551,7 @@ private package ${ada_lib_name}.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
-   type ${T.root_node.value_type_name()} is record
+   type ${T.root_node.value_type_name} is record
       Parent : ${T.root_node.name};
       --  Reference to the parent node, or null if this is the root one
 
@@ -634,8 +634,8 @@ private package ${ada_lib_name}.Implementation is
    -- Generic list type --
    -----------------------
 
-   type ${ctx.generic_list_type.value_type_name()} is record
-      Base  : ${T.root_node.value_type_name()};
+   type ${ctx.generic_list_type.value_type_name} is record
+      Base  : ${T.root_node.value_type_name};
       Count : Natural;
       Nodes : Alloc_AST_List_Array.Element_Array_Access;
    end record

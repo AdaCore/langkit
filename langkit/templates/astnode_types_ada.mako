@@ -12,8 +12,8 @@
 </%def>
 
 <%def name="public_incomplete_decl(cls)">
-   type ${cls.value_type_name()};
-   type ${cls.name} is access all ${cls.value_type_name()};
+   type ${cls.value_type_name};
+   type ${cls.name} is access all ${cls.value_type_name};
 
    ${cls.null_constant} : constant ${cls.name} := null;
 
@@ -233,8 +233,8 @@
       ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
    %>
 
-   type ${cls.value_type_name()} is record
-      Base : ${cls.base.value_type_name()};
+   type ${cls.value_type_name} is record
+      Base : ${cls.base.value_type_name};
       ${node_fields(cls, emit_null=False)}
    end record
       with Convention => C;
@@ -324,7 +324,7 @@
    # Keep a list of fields that are annotated with repr
    repr_fields = cls.get_parse_fields(lambda f: f.repr)
 
-   type_name = cls.value_type_name()
+   type_name = cls.value_type_name
 
    ext = ctx.ext('nodes', cls.raw_name, 'bodies')
    %>
