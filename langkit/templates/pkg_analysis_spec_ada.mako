@@ -21,9 +21,6 @@ with GNATCOLL.Refcount;
 % if any(s.exposed and not s.is_entity_type for s in ctx.struct_types):
    private with Langkit_Support.Boxes;
 % endif
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
-with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Token_Data_Handlers;
@@ -40,6 +37,8 @@ ${exts.with_clauses(with_clauses)}
 --  using the ``Get_From_*`` functions.
 
 package ${ada_lib_name}.Analysis is
+
+   use Support.Diagnostics, Support.Slocs, Support.Text;
 
    type Analysis_Context is tagged private;
    ${ada_doc('langkit.analysis_context_type', 3)}

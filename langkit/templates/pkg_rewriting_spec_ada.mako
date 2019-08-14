@@ -6,9 +6,6 @@
 --  allow experiments, it is totally unsupported and the API is very likely to
 --  change in the future.
 
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Text;        use Langkit_Support.Text;
-
 with System;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
@@ -16,6 +13,8 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 private with ${ada_lib_name}.Rewriting_Implementation;
 
 package ${ada_lib_name}.Rewriting is
+
+   use Support.Diagnostics, Support.Text;
 
    type Rewriting_Handle is private;
    ${ada_doc('langkit.rewriting.rewriting_handle_type', 3)}

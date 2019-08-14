@@ -23,7 +23,8 @@ ${parser.dest_node_parser.res_var}.Token_End_Index := ${parser.start_pos};
 Append (Parser.Diagnostics,
         Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
         To_Text ("Skipped token ")
-        & Text (Wrap_Token_Reference (Parser.TDH,
-                                      (${parser.start_pos}, No_Token_Index))));
+        & Common.Text
+            (Wrap_Token_Reference
+               (Parser.TDH, (${parser.start_pos}, No_Token_Index))));
 
 <<${exit_label}>>

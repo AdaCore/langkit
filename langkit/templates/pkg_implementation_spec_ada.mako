@@ -29,10 +29,7 @@ with Langkit_Support.Adalog.Eq_Same;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Lexical_Env;
-with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
-with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Types;       use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
@@ -49,6 +46,8 @@ ${exts.with_clauses(with_clauses)}
 --  operations in ${ada_lib_name}.Analysis.
 
 private package ${ada_lib_name}.Implementation is
+
+   use Support.Diagnostics, Support.Slocs, Support.Text;
 
    type Analysis_Context_Type;
    type Internal_Context is access all Analysis_Context_Type;

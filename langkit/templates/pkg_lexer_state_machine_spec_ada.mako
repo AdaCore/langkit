@@ -5,11 +5,11 @@
    termination = lexer.Termination.ada_name
 %>
 
-with Langkit_Support.Text; use Langkit_Support.Text;
-
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 
 private package ${ada_lib_name}.Lexer_State_Machine is
+
+   use Support.Text;
 
    type Lexer_State is limited private;
 
