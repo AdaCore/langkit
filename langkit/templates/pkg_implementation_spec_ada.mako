@@ -62,6 +62,8 @@ private package ${ada_lib_name}.Implementation is
    type ${T.root_node.name} is access all ${T.root_node.value_type_name()};
    --  Most generic AST node type
 
+   function Kind (Node : ${T.root_node.name}) return ${T.node_kind};
+
    package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
      (Element_T  => ${T.root_node.name},
       Index_Type => Positive);

@@ -2570,6 +2570,13 @@ package body ${ada_lib_name}.Implementation is
    function Is_Null (Node : ${T.root_node.name}) return Boolean
    is (Node = null);
 
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind (Node : ${T.root_node.name}) return ${T.node_kind}
+   is (Node.Kind);
+
    -----------------
    -- Child_Index --
    -----------------
