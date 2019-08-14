@@ -83,12 +83,14 @@ package ${ada_lib_name}.Common is
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.
    % for cls in ctx.astnode_types:
-      % if cls.concrete_subclasses:
-         subtype ${cls.ada_kind_range_name} is
-            ${T.node_kind} range
-               ${'{} .. {}'.format(*cls.ada_kind_range_bounds)};
-         --% no-document: True
-      % endif
+      subtype ${cls.ada_kind_range_name} is ${T.node_kind}
+         % if cls.concrete_subclasses:
+            range ${'{} .. {}'.format(*cls.ada_kind_range_bounds)};
+         % else:
+            with Static_Predicate => False;
+      --  This abstract node has no concrete derivations
+         % endif
+      --% no-document: True
    % endfor
 
    ## Output a subtype to materialize the set of kinds for synthetic nodes
