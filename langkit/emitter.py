@@ -318,8 +318,6 @@ class Emitter(object):
             ('pkg_common', 'Common', True),
             # Unit for public analysis primitives
             ('pkg_analysis', 'Analysis', True),
-            # Unit for converters between public Ada types and C API-level ones
-            ('pkg_c', 'C', True),
             # Unit for converters between public and implementation types
             ('pkg_converters', 'Converters', False),
             # Unit for implementation of analysis primitives
