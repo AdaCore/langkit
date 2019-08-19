@@ -3,14 +3,14 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 
-def type_check_instance(klass):
+def type_check_instance(cls):
     """
     Return a predicate that will return true if its parameter is a subclass
-    of `klass`.
-    :param type klass: Class to check against.
+    of `cls`.
+    :param type cls: Class to check against.
     :rtype: (T) -> bool
     """
-    return lambda t: isinstance(t, klass)
+    return lambda t: isinstance(t, cls)
 
 
 def dispatch_on_type(typ_or_inst, type_to_action_assocs, exception=None):
