@@ -41,12 +41,12 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
         return nodes
 
     def transform(self, node, results):
-        klass = node.parent.parent.parent.parent
-        assert klass.type == syms.classdef, (
+        cls = node.parent.parent.parent.parent
+        assert cls.type == syms.classdef, (
             "Internal error in the fields annotator"
         )
 
-        ast_node_name = klass.children[1].value
+        ast_node_name = cls.children[1].value
         ast_node = self.astnodes()[ast_node_name]
         ":type: langkit.compiled_types.ASTNodeType"
 

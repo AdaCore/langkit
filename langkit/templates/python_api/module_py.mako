@@ -1946,11 +1946,11 @@ class App(object):
             self.units[file_name] = self.u
 
     @classmethod
-    def run(klass):
+    def run(cls):
         """
         Instantiate and run this application.
         """
-        instance = klass()
+        instance = cls()
         instance.process_files()
         instance.main()
 

@@ -356,8 +356,8 @@ class LexerToken(object):
         for c in inspect.getmro(self.__class__):
             self.add_tokens(c)
 
-    def add_tokens(self, klass):
-        for fld_name, fld_value in klass.__dict__.items():
+    def add_tokens(self, cls):
+        for fld_name, fld_value in cls.__dict__.items():
             if isinstance(fld_value, TokenAction):
                 dest_list = self.tokens
             elif isinstance(fld_value, TokenFamily):
