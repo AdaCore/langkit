@@ -1936,14 +1936,20 @@ class App(object):
         return None
 
     def process_files(self):
+        """
+        Load units for all source files on the command-line in `self.units`.
+        Put the last one in `self.u`.
+        """
         self.units = {}
         for file_name in self.args.files:
             self.u = self.ctx.get_from_file(file_name)
             self.units[file_name] = self.u
 
-
     @classmethod
     def run(klass):
+        """
+        Instantiate and run this application.
+        """
         instance = klass()
         instance.process_files()
         instance.main()
