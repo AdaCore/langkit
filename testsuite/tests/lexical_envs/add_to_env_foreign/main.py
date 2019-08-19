@@ -1,12 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import sys
 
 import libfoolang
 
+
+print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
 ctx.discard_errors_in_populate_lexical_env(False)
@@ -54,6 +53,5 @@ process('add_foreign_md', """
     local {}
     +local (foo)
 """)
-
 
 print('main.py: Done.')

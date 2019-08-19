@@ -1,9 +1,8 @@
 from __future__ import absolute_import, division, print_function
-
-print('main.py: Starting...')
-
 import libfoolang
 
+
+print('main.py: Starting...')
 
 ctx = libfoolang.AnalysisContext()
 unit = ctx.get_from_file('leading_trivia.txt')

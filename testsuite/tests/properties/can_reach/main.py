@@ -1,13 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import os.path
 import sys
 
 import libfoolang
 
+
+print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
 

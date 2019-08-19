@@ -1,12 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import sys
 
 import libfoolang
 
+
+print('main.py: Running...')
 
 old_node_repr = libfoolang.FooNode.__repr__
 

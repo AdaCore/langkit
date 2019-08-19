@@ -2,6 +2,7 @@
 
 from setuptools import setup, find_packages
 
+
 <% name = ctx.python_api_settings.module_name %>
 
 setup(

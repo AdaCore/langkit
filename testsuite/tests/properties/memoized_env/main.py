@@ -1,11 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import sys
 
 import libfoolang
+
+
+print('main.py: Running...')
 
 
 def load_unit(filename, content):

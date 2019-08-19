@@ -1,12 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import sys
 
 import libfoolang
 
+
+print('main.py: Running...')
 
 u = libfoolang.AnalysisContext().get_from_buffer('main.txt', 'example')
 if u.diagnostics:

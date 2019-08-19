@@ -8,13 +8,13 @@ Please consider all exported entities whose names that start with an underscore
 directly.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 <%namespace name="array_types"   file="array_types_py.mako" />
 <%namespace name="astnode_types" file="astnode_types_py.mako" />
 <%namespace name="struct_types"  file="struct_types_py.mako" />
 <%namespace name="exts"          file="/extensions.mako" />
+
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 
 <%

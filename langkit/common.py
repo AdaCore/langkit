@@ -5,6 +5,7 @@ import itertools
 
 from langkit import names
 
+
 ada_keywords = set("""
     abort abs abstract accept access aliased all and array at
     begin body
