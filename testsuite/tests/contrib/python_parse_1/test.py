@@ -6,12 +6,14 @@ TODO: This is hackish and minimalistic. Since Langkit's python parser is a
 fully fledged Langkit generated lib, it would make sense to reuse Libadalang's
 parser test driver.
 """
+
 from __future__ import absolute_import, division, print_function
 
 import os
 from os import path as P
 import subprocess
 import sys
+
 
 LK_PYTHON_LIB_DIR = P.join(os.environ['LANGKIT_ROOT_DIR'], 'contrib', 'python')
 

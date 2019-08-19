@@ -483,10 +483,12 @@ class PythonLang(LanguageChecker):
 
     def custom_check(self, report, filename, content, parse):
         pcheck = PackageChecker(report)
+        last_import_line = None
         for i, line in iter_lines(content):
             report.set_context(filename, i)
             if not line.strip():
                 pcheck.reset()
+                continue
 
             m = self.import_re.match(line)
             if m:
@@ -498,6 +500,34 @@ class PythonLang(LanguageChecker):
             m = self.from_import_re.match(line)
             if m:
                 pcheck.add(m.group('name'))
+
+            # Expect exactly two blank lines between the last import statement
+            # and the next statement.
+            if (
+                line.startswith('import ') or
+                line.startswith('from ') or
+                (
+                    # Hack to match continuation lines for long ImportFrom
+                    # statements.
+                    last_import_line is not None and
+                    (line.startswith('    ') or line == ')')
+                )
+            ):
+                last_import_line = i
+            else:
+                if last_import_line and i != last_import_line + 3:
+                    # Consider that comments that appear too close to import
+                    # lines are part of these imports, so they must themselves
+                    # be separated from regular statements with two empty
+                    # lines.
+                    if line.startswith('#'):
+                        last_import_line = i
+                    else:
+                        report.add('Two empty lines required between the last'
+                                   ' import statement and this line.')
+                        last_import_line = None
+                else:
+                    last_import_line = None
 
         if parse:
             try:

@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import libfoolang
 
+
+print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
 u = ctx.get_from_buffer('main.txt', 'class')

@@ -1,8 +1,9 @@
-from __future__ import absolute_import, division, print_function
-
 """
 Generation of automatic unparsers for Langkit grammars.
 """
+
+
+from __future__ import absolute_import, division, print_function
 
 from collections import defaultdict
 import itertools

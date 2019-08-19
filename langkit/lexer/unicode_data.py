@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.lexer.char_set import CharSet
 
+
 # Character sets for Unicode general categories. The following
 # literal is precomputed from
 # langkit.lexer.char_set.compute_unicode_categories_char_sets to

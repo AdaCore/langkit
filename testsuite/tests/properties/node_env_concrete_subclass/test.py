@@ -1,3 +1,8 @@
+"""
+Test that node_env works correctly for a subclass of a concrete node with an
+add_env directive.
+"""
+
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, LookupKind as LK, T, abstract
@@ -7,11 +12,6 @@ from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import build_and_run
-
-"""
-Test that node_env works correctly for a subclass of a concrete node with an
-add_env directive.
-"""
 
 
 @abstract

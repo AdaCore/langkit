@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-print('main.py: Running...')
-
-
 import libfoolang
 
+
+print('main.py: Running...')
 
 for args, kwargs in [
     ([], {}),

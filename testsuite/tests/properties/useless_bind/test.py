@@ -11,6 +11,7 @@ from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
+
 dyn_node = DynamicVariable('dyn_node', T.FooNode)
 dyn_node_2 = DynamicVariable('dyn_node_2', T.FooNode)
 

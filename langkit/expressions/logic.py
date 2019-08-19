@@ -1,10 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
+
 # Python 2/3 compatibility
 try:
     from itertools import zip_longest
 except ImportError:
     from itertools import izip_longest as zip_longest
+
 
 import funcy
 

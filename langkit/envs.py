@@ -1,3 +1,22 @@
+"""
+This module contains the public API and the implementation for lexical
+environments specifications.
+
+At a high level, the user adds environment specifications to node types the
+following way::
+
+
+    class MyNode(RootNode):
+        ...
+
+        env_spec = EnvSpec([
+            list_of_actions
+        ], other_options)
+
+
+Read the documentation below for more details.
+"""
+
 from __future__ import absolute_import, division, print_function
 
 from enum import Enum
@@ -11,25 +30,6 @@ from langkit.diagnostics import (Context, check_source_language,
                                  extract_library_location)
 from langkit.expressions import (FieldAccess, PropertyDef, Self,
                                  resolve_property, unsugar)
-
-"""
-This module contains the public API and the implementation for lexical
-environments specifications.
-
-At a high level, the user adds environment specifications to node types the
-following way::
-
-
-class MyNode(RootNode):
-    ...
-
-    env_spec = EnvSpec([
-        list_of_actions
-    ], other_options)
-
-
-Read the documentation below for more details.
-"""
 
 
 # Public API for env actions

@@ -6,10 +6,10 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 
-print('main.py: Running...')
-
-
 import libfoolang
+
+
+print('main.py: Running...')
 
 
 def parse(filename, content):
