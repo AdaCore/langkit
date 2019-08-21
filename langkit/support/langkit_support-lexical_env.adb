@@ -21,6 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Generic_Array_Sort;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
@@ -574,10 +575,58 @@ package body Langkit_Support.Lexical_Env is
 
       use Internal_Envs;
 
+      procedure Append_All_Nodes
+        (Env : Lexical_Env; From_Rebound : Boolean);
+      --  Add all nodes of the given Env to the results. Make sure the output
+      --  is deterministic using a sorting procedure.
+
       function Get_Nodes
         (Env : Lexical_Env; From_Rebound : Boolean := False) return Boolean;
       --  Lookup for matching nodes in Env's internal map and append them to
       --  Local_Results. Return whether we found some.
+
+      ----------------------
+      -- Append_All_Nodes --
+      ----------------------
+
+      procedure Append_All_Nodes
+        (Env : Lexical_Env; From_Rebound : Boolean)
+      is
+         type Cursor_Array is array
+           (Natural range <>) of Internal_Envs.Cursor;
+
+         function "<" (A, B : Internal_Envs.Cursor) return Boolean is
+           (Internal_Envs.Key (A).all < Internal_Envs.Key (B).all);
+
+         procedure Cursor_Array_Sort is new Ada.Containers.Generic_Array_Sort
+           (Index_Type   => Natural,
+            Element_Type => Internal_Envs.Cursor,
+            Array_Type   => Cursor_Array);
+
+         All_Elements : Cursor_Array (1 .. Natural (Env.Env.Map.Length));
+
+         I : Positive := All_Elements'First;
+      begin
+         for C in Env.Env.Map.Iterate loop
+            All_Elements (I) := C;
+            I := I + 1;
+         end loop;
+
+         Cursor_Array_Sort (All_Elements);
+
+         for C of All_Elements loop
+            declare
+               Nodes : constant Internal_Map_Node_Vectors.Vector :=
+                  Internal_Envs.Element (C);
+            begin
+               for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
+                  Append_Result
+                    (Nodes.Get (I), Metadata, Current_Rebindings,
+                     From_Rebound);
+               end loop;
+            end;
+         end loop;
+      end Append_All_Nodes;
 
       ---------------
       -- Get_Nodes --
@@ -595,13 +644,7 @@ package body Langkit_Support.Lexical_Env is
             --  If Key is null, we want to get every entity stored in the map
             --  regardless of the symbol.
             if Key = null then
-               for Nodes of Env.Env.Map.all loop
-                  for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
-                     Append_Result
-                       (Nodes.Get (I), Metadata, Current_Rebindings,
-                        From_Rebound);
-                  end loop;
-               end loop;
+               Append_All_Nodes (Env, From_Rebound);
                return True;
             end if;
 
