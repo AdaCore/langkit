@@ -232,6 +232,26 @@ class Emitter(object):
         :type: langkit.lexer.regexp.DFACodeGenHolder
         """
 
+        self.library_interfaces = {os.path.basename(f)
+                                   for f in context.additional_source_files}
+        """
+        Set of source file base names for all sources that must appear in the
+        "Interfaces" attribute of the generated library project file.
+
+        :type: set[str]
+        """
+
+        self._project_file_emitted = False
+        """
+        Whether we emitted a project file for the generated library.
+
+        :type: bool
+        """
+
+    def add_library_interface(self, filename):
+        assert not self._project_file_emitted
+        self.library_interfaces.add(os.path.basename(filename))
+
     def setup_directories(self, ctx):
         """
         Make sure the tree of directories needed for code generation exists.
@@ -256,6 +276,7 @@ class Emitter(object):
         """
         Emit a project file for the generated library.
         """
+        self._project_file_emitted = True
         main_project_file = os.path.join(
             self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
         )
@@ -353,7 +374,8 @@ class Emitter(object):
             qual_name = ([names.Name(n) for n in qual_name.split('.')]
                          if qual_name else [])
             self.write_ada_module(self.src_path, template_base_name, qual_name,
-                                  has_body)
+                                  has_body,
+                                  in_library=True)
 
     def emit_mains(self, ctx):
         """
@@ -396,7 +418,8 @@ class Emitter(object):
 
         self.write_ada_module(
             self.src_path, 'c_api/pkg_main',
-            [names.Name(n) for n in 'Implementation.C'.split('.')]
+            [names.Name(n) for n in 'Implementation.C'.split('.')],
+            in_library=True
         )
 
     def emit_python_api(self, ctx):
@@ -587,7 +610,7 @@ class Emitter(object):
             )
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
-                         has_body=True):
+                         has_body=True, in_library=False):
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
@@ -609,11 +632,12 @@ class Emitter(object):
             qual_name_str = '.'.join(n.camel_with_underscores
                                      for n in qual_name)
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
+            full_qual_name = [self.context.lib_name] + qual_name
             with names.camel_with_underscores:
                 write_ada_file(
                     out_dir=out_dir,
                     source_kind=kind,
-                    qual_name=[self.context.lib_name] + qual_name,
+                    qual_name=full_qual_name,
                     content=self.context.render_template(
                         '{}{}_ada'.format(
                             template_base_name +
@@ -626,3 +650,7 @@ class Emitter(object):
                     ),
                     post_process=self.post_process_ada
                 )
+
+            if in_library:
+                self.add_library_interface(ada_file_path(out_dir, kind,
+                                                         full_qual_name))

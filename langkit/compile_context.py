@@ -1767,8 +1767,6 @@ class CompileCtx(object):
 
             MajorStepPass('Generate library sources'),
             EmitterPass('setup directories', Emitter.setup_directories),
-            EmitterPass('emit library project file',
-                        Emitter.emit_lib_project_file),
             EmitterPass('emit astdoc', Emitter.emit_astdoc),
             EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
             EmitterPass('emit Ada sources', Emitter.emit_ada_lib),
@@ -1779,6 +1777,8 @@ class CompileCtx(object):
                         Emitter.emit_python_playground),
             EmitterPass('emit GDB helpers', Emitter.emit_gdb_helpers),
             EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
+            EmitterPass('emit library project file',
+                        Emitter.emit_lib_project_file),
 
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused()),
