@@ -127,7 +127,7 @@ def emit_and_print_errors(grammar, lexer=None,
         langkit.reset()
 
 
-def build(grammar, lexer=None, warning_set=default_warning_set):
+def build(grammar, lexer=None, warning_set=default_warning_set, mains=False):
     """
     Shortcut for `build_and_run` to only build.
     """
@@ -136,7 +136,8 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
 
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
                   ocaml_main=None, warning_set=default_warning_set,
-                  generate_unparser=False, symbol_canonicalizer=None):
+                  generate_unparser=False, symbol_canonicalizer=None,
+                  mains=False):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -157,6 +158,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     :param bool generate_unparser: Whether to generate unparser.
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canoncalizes to use for this context, if any.
+    :param bool mains: Whether to build mains.
     """
 
     if lexer is None:
@@ -185,6 +187,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         argv.append('--no-pretty-print')
     if generate_unparser:
         argv.append('--generate-unparser')
+    if not mains:
+        argv.append('--disable-all-mains')
     m.run(argv)
 
     # Flush stdout and stderr, so that diagnostics appear deterministically
