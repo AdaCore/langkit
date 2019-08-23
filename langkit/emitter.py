@@ -534,10 +534,11 @@ class Emitter(object):
         """
         Emit support files for GDB helpers.
         """
+        lib_name = ctx.ada_api_settings.lib_name.lower()
         gdbinit_path = os.path.join(self.lib_root, 'gdbinit.py')
+        gdb_c_path = os.path.join(self.src_path, '{}-gdb.c'.format(lib_name))
 
         # Always emit the ".gdbinit.py" GDB script
-        lib_name = ctx.ada_api_settings.lib_name.lower()
         write_source_file(
             gdbinit_path,
             ctx.render_template(
@@ -553,7 +554,7 @@ class Emitter(object):
         # generated library only if requested.
         if self.generate_gdb_hook:
             write_source_file(
-                os.path.join(self.src_path, 'gdb.c'),
+                gdb_c_path,
                 ctx.render_template('gdb_c', gdbinit_path=gdbinit_path,
                                     os_name=os.name),
                 self.post_process_cpp
