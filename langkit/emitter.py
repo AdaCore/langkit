@@ -248,6 +248,13 @@ class Emitter(object):
         :type: bool
         """
 
+        self.project_languages = {'Ada'}
+        """
+        List of GPR names for languages used in the generated library.
+
+        :type: set[str]
+        """
+
     def add_library_interface(self, filename):
         assert not self._project_file_emitted
         self.library_interfaces.add(os.path.basename(filename))
@@ -551,6 +558,7 @@ class Emitter(object):
                                     os_name=os.name),
                 self.post_process_cpp
             )
+            self.project_languages.add('C')
 
     def emit_ocaml_api(self, ctx):
         """

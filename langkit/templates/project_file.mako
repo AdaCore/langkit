@@ -28,7 +28,7 @@ library project ${lib_name} is
    <% extra_source_files = sorted(
          os_path.basename(p) for p in ctx.additional_source_files) %>
 
-   for Languages use ("Ada", "C");
+   for Languages use ${format_str_set(emitter.project_languages)};
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
    for Interfaces use ${format_str_set(emitter.library_interfaces)};
