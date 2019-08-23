@@ -2,6 +2,11 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
+<%def name="format_str_set(strings)">
+   ${'({})'.format(', '.join('"{}"'.format(s)
+                             for s in sorted(strings)))}
+</%def>
+
 with "gnatcoll";
 with "gnatcoll_gmp";
 with "gnatcoll_iconv";
@@ -26,50 +31,7 @@ library project ${lib_name} is
    for Languages use ("Ada", "C");
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
-   for Interfaces use
-     ("${lib_name.lower()}.ads",
-      "${lib_name.lower()}-analysis.adb",
-      "${lib_name.lower()}-analysis.ads",
-      "${lib_name.lower()}-c.ads",
-      "${lib_name.lower()}-c.adb",
-      "${lib_name.lower()}-common.ads",
-      "${lib_name.lower()}-common.adb",
-      "${lib_name.lower()}-converters.ads",
-      "${lib_name.lower()}-debug.adb",
-      "${lib_name.lower()}-debug.ads",
-      "${lib_name.lower()}-implementation.adb",
-      "${lib_name.lower()}-implementation.ads",
-      "${lib_name.lower()}-implementation-c.adb",
-      "${lib_name.lower()}-implementation-c.ads",
-      "${lib_name.lower()}-init.adb",
-      "${lib_name.lower()}-init.ads",
-      "${lib_name.lower()}-introspection.ads",
-      "${lib_name.lower()}-introspection_implementation.ads",
-      "${lib_name.lower()}-iterators.adb",
-      "${lib_name.lower()}-iterators.ads",
-      "${lib_name.lower()}-lexer.adb",
-      "${lib_name.lower()}-lexer.ads",
-      "${lib_name.lower()}-lexer_implementation.adb",
-      "${lib_name.lower()}-lexer_implementation.ads",
-      "${lib_name.lower()}-lexer_state_machine.adb",
-      "${lib_name.lower()}-lexer_state_machine.ads",
-      "${lib_name.lower()}-parsers.adb",
-      "${lib_name.lower()}-parsers.ads",
-      "${lib_name.lower()}-rewriting_implementation.adb",
-      "${lib_name.lower()}-rewriting_implementation.ads",
-      "${lib_name.lower()}-rewriting.adb",
-      "${lib_name.lower()}-rewriting.ads",
-      "${lib_name.lower()}-unparsing.adb",
-      "${lib_name.lower()}-unparsing.ads",
-      "${lib_name.lower()}-unparsing_implementation.adb",
-      "${lib_name.lower()}-unparsing_implementation.ads",
-      % for f in extra_source_files:
-      "${f}",
-      % endfor
-      % if emitter.generate_gdb_hook:
-      "gdb.c"
-      % endif
-      );
+   for Interfaces use ${format_str_set(emitter.library_interfaces)};
 
    <% source_dirs = ['../../include/{}'.format(lib_name.lower()),
                      emitter.extensions_src_dir] %>
