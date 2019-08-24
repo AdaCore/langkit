@@ -323,7 +323,7 @@ class BaseDriver(TestDriver):
 
         with open(self.working_dir(project_file), 'w') as f:
             f.write("""
-            with "{lk_support}";
+            with "langkit_support";
 
             project P is
                 for Languages use ("Ada");
@@ -335,12 +335,8 @@ class BaseDriver(TestDriver):
                     for Default_Switches ("Ada") use ({cargs});
                 end Compiler;
             end P;
-            """.format(
-                mains=', '.join('"{}"'.format(m) for m in mains),
-                lk_support=os.path.join(self.testsuite_dir, '..', 'langkit',
-                                        'support', 'langkit_support.gpr'),
-                cargs=format_string_list(cargs)
-            ))
+            """.format(mains=', '.join('"{}"'.format(m) for m in mains),
+                       cargs=format_string_list(cargs)))
 
     def gprbuild(self, project_file):
         """

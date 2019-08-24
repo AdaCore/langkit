@@ -139,8 +139,21 @@ class Testsuite(BaseTestsuite):
                 gargs.append('--subdirs=gnatcov')
                 cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
 
-            p = Run(['gprbuild'] + gargs + cargs, output=PIPE)
+            for build in ('static', 'relocatable'):
+                p = Run(['gprbuild'] + gargs +
+                        ['-XLIBRARY_TYPE={}'.format(build)] +
+                        cargs, output=PIPE)
             report(p, "Langkit support")
+
+            # Make this build available to all testcases
+            gpr_path = os.environ.get('GPR_PROJECT_PATH')
+            lksp_dir = os.path.dirname(self.langkit_support_project_file)
+            gpr_path = (
+                '{}{}{}'.format(gpr_path, os.path.pathsep, lksp_dir)
+                if gpr_path else
+                lksp_dir
+            )
+            os.environ['GPR_PROJECT_PATH'] = gpr_path
 
     def tear_down(self):
         if self.coverage_enabled:
