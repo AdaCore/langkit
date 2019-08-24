@@ -179,8 +179,10 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         ctx.extensions_dir = extensions_dir
 
     # First build the library. Forward all test.py's arguments to the libmanage
-    # call so that manual testcase runs can pass "-g", for instance.
-    argv = sys.argv[1:] + ['--full-error-traces', '-vnone', 'make']
+    # call so that manual testcase runs can pass "-g", for instance. Also avoid
+    # rebuilding Langkit_Support, as the testsuite already built one for us.
+    argv = sys.argv[1:] + ['--full-error-traces', '-vnone',
+                           '--no-langkit-support', 'make']
     for w in WarningSet.available_warnings:
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     if not pretty_print:
