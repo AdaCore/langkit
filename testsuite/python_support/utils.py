@@ -182,15 +182,26 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     # call so that manual testcase runs can pass "-g", for instance. Also avoid
     # rebuilding Langkit_Support, as the testsuite already built one for us.
     argv = sys.argv[1:] + ['--full-error-traces', '-vnone',
-                           '--no-langkit-support', 'make']
+                           '--no-langkit-support']
+
+    # Generate the public Ada API only when necessary (i.e. if we have mains
+    # that do use this API). This reduces the time it takes to run tests.
+    if not mains and not ada_main:
+        argv.append('--no-ada-api')
+
+    argv.append('make')
+
     for w in WarningSet.available_warnings:
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     if not pretty_print:
         argv.append('--no-pretty-print')
     if generate_unparser:
         argv.append('--generate-unparser')
+
+    # For testsuite performance, do not generate mains unless told otherwise
     if not mains:
         argv.append('--disable-all-mains')
+
     m.run(argv)
 
     # Flush stdout and stderr, so that diagnostics appear deterministically

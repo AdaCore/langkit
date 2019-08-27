@@ -194,6 +194,11 @@ class ManageScript(object):
                  ' installed. This is useful to package the generated library'
                  ' only.'
         )
+        args_parser.add_argument(
+            '--no-ada-api', action='store_true',
+            help='Do not generate units to provide an Ada API, and disable the'
+                 ' generation of mains.'
+        )
 
         # Don't enable this by default so that errors will not make automated
         # tasks hang.
@@ -535,6 +540,8 @@ class ManageScript(object):
         # Set the verbosity
         self.verbosity = parsed_args.verbosity
 
+        self.no_ada_api = parsed_args.no_ada_api
+
         # If asked to, setup the exception hook as a last-chance handler to
         # invoke a debugger in case of uncaught exception.
         if parsed_args.debug:
@@ -667,15 +674,18 @@ class ManageScript(object):
             for sdir in self.main_source_dirs
         }
 
+        main_programs = ([] if self.no_ada_api else self.main_programs)
+
         self.context.emit(
             lib_root=self.dirs.build_dir(),
             main_source_dirs=main_source_dirs,
-            main_programs=self.main_programs,
+            main_programs=main_programs,
             annotate_fields_types=args.annotate_fields_types,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
             report_unused_documentation_entries=args.report_unused_doc_entries,
             no_property_checks=args.no_property_checks,
+            generate_ada_api=not args.no_ada_api,
             generate_unparser=args.generate_unparser,
             generate_astdoc=not args.no_astdoc,
             generate_gdb_hook=not args.no_gdb_hook,
@@ -888,14 +898,15 @@ class ManageScript(object):
         self.gprbuild(args, lib_project, True)
 
         # Then build the main programs, if any
-        disabled_mains = reduce(set.union, args.disable_mains, set())
-        mains = (set()
-                 if args.disable_all_mains else
-                 self.main_programs - disabled_mains)
-        if mains:
-            self.log_info("Building the main programs...", Colors.HEADER)
-            self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'), False,
-                          mains)
+        if not self.no_ada_api:
+            disabled_mains = reduce(set.union, args.disable_mains, set())
+            mains = (set()
+                     if args.disable_all_mains else
+                     self.main_programs - disabled_mains)
+            if mains:
+                self.log_info("Building the main programs...", Colors.HEADER)
+                self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'),
+                              False, mains)
 
         # On Windows, shared libraries (DLL) are looked up in the PATH, just
         # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
