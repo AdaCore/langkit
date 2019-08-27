@@ -452,8 +452,8 @@ package body ${ada_lib_name}.Implementation.C is
          return ${node_kind_type}'First;
    end;
 
-   function ${capi.get_name("kind_name")}
-     (Kind : ${node_kind_type}) return ${text_type} is
+   procedure ${capi.get_name('kind_name')}
+     (Kind : ${node_kind_type}; Result : access ${text_type}) is
    begin
       Clear_Last_Exception;
 
@@ -461,13 +461,13 @@ package body ${ada_lib_name}.Implementation.C is
          K    : constant ${T.node_kind} := ${T.node_kind}'Enum_Val (Kind);
          Name : Text_Access renames Node_Kind_Names (K);
       begin
-         return (Chars => Name.all'Address, Length => Name'Length,
-                 Is_Allocated => 0);
+         Result.all := (Chars        => Name.all'Address,
+                        Length       => Name'Length,
+                        Is_Allocated => 0);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
    function ${capi.get_name('node_unit')}
@@ -503,19 +503,18 @@ package body ${ada_lib_name}.Implementation.C is
          return 0;
    end;
 
-   function ${capi.get_name('node_short_image')}
-     (Node : ${entity_type}_Ptr) return ${text_type} is
+   procedure ${capi.get_name('node_short_image')}
+     (Node : ${entity_type}_Ptr; Result : access ${text_type}) is
    begin
       Clear_Last_Exception;
       declare
          Img : constant Text_Type := Short_Text_Image (Node.Node);
       begin
-         return Wrap_Alloc (Img);
+         Result.all := Wrap_Alloc (Img);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return (System.Null_Address, 0, 0);
    end;
 
    procedure ${capi.get_name('node_text')}
@@ -835,19 +834,18 @@ package body ${ada_lib_name}.Implementation.C is
          return 0;
    end;
 
-   function ${capi.get_name('entity_image')}
-     (Ent : ${entity_type}_Ptr) return ${text_type} is
+   procedure ${capi.get_name('entity_image')}
+     (Ent : ${entity_type}_Ptr; Result : access ${text_type}) is
    begin
       Clear_Last_Exception;
       declare
          Img : constant Text_Type := Text_Image (Ent.all);
       begin
-         return Wrap_Alloc (Img);
+         Result.all := Wrap_Alloc (Img);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return (System.Null_Address, 0, 0);
    end;
 
    ----------------

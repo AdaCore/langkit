@@ -536,7 +536,9 @@ module CFunctions = struct
     (ptr ${ocaml_api.c_type(root_entity)} @-> raisable int)
 
   let short_image = foreign ~from:c_lib "${capi.get_name('node_short_image')}"
-    (ptr ${ocaml_api.c_type(root_entity)} @-> raisable Text.c_type)
+    (ptr ${ocaml_api.c_type(root_entity)}
+     @-> ptr Text.c_type
+     @-> raisable void)
 
   let node_sloc_range = foreign ~from:c_lib
     "${capi.get_name('node_sloc_range')}"
@@ -554,7 +556,8 @@ module CFunctions = struct
   let entity_image = foreign ~from:c_lib
     "${capi.get_name('entity_image')}"
     (ptr ${ocaml_api.c_type(root_entity)}
-     @-> raisable Text.c_type)
+     @-> ptr Text.c_type
+     @-> raisable void)
 
   let node_is_token_node = foreign ~from:c_lib
     "${capi.get_name('node_is_token_node')}"
@@ -1018,12 +1021,17 @@ let ${ocaml_api.field_name(field)}
     Token.text_range (token_start node) (token_end node)
 
   let short_image node =
+    let c_result_ptr = allocate_n Text.c_type ~count:1 in
     CFunctions.short_image
       (addr (${ocaml_api.unwrap_value('node', root_entity, 'context node')}))
+      c_result_ptr;
+    !@ c_result_ptr
 
   let entity_image node =
+    let c_result_ptr = allocate_n Text.c_type ~count:1 in
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
-    CFunctions.entity_image (addr node_c_value)
+    CFunctions.entity_image (addr node_c_value) c_result_ptr;
+    !@ c_result_ptr
 
   let is_token_node node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
@@ -1045,10 +1053,6 @@ let ${ocaml_api.field_name(field)}
     CFunctions.lookup_in_node
       (addr node_c_value) sloc_ptr result_ptr;
     ${ocaml_api.check_for_null('!@ result_ptr', root_entity, '(context node)')}
-
-  let entity_image node =
-    let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
-    CFunctions.entity_image (addr node_c_value)
 
   let children_opt node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
