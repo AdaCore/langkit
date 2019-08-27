@@ -337,52 +337,68 @@ class Emitter(object):
         Emit Ada sources for the generated library.
         """
 
-        ada_modules = [
-            # Top (pure) package
-            ('pkg_main', '', False),
-            # Unit for initialization primitives
-            ('pkg_init', 'Init', True),
-            # Unit for declarations used by Analysis and Implementation
-            ('pkg_common', 'Common', True),
-            # Unit for public analysis primitives
-            ('pkg_analysis', 'Analysis', True),
-            # Unit for converters between public Ada types and C API-level ones
-            ('pkg_c', 'C', True),
-            # Unit for converters between public and implementation types
-            ('pkg_converters', 'Converters', False),
-            # Unit for implementation of analysis primitives
-            ('pkg_implementation', 'Implementation', True),
-            # Unit for AST introspection public API
-            ('pkg_introspection', 'Introspection', True),
-            # Unit for AST introspection internal API
-            ('pkg_introspection_impl', 'Introspection_Implementation', True),
-            # Unit for AST node iteration primitives
-            ('pkg_iterators', 'Iterators', True),
-            # Unit for AST rewriting primitives
-            ('pkg_rewriting', 'Rewriting', True),
-            # Unit for AST rewriting implementation
-            ('pkg_rewriting_impl', 'Rewriting_Implementation', True),
-            # Unit for AST unparsing primitives
-            ('pkg_unparsing', 'Unparsing', True),
-            # Unit for AST implementation of unparsing primitives
-            ('pkg_unparsing_impl', 'Unparsing_Implementation', True),
-            # Unit for all parsers
-            ('parsers/pkg_main', 'Parsers', True),
-            # Units for the lexer
-            ('pkg_lexer', 'Lexer', True),
-            ('pkg_lexer_impl', 'Lexer_Implementation', True),
-            ('pkg_lexer_state_machine', 'Lexer_State_Machine',
-             bool(self.dfa_code)),
-            # Unit for debug helpers
-            ('pkg_debug', 'Debug', True),
-        ]
+        class Unit(object):
+            def __init__(self, template_base_name, rel_qual_name,
+                         has_body=True):
+                """
+                :param str template_base_name: Common prefix for the name of
+                    the templates to use in order to generate spec/body sources
+                    for this unit.
 
-        for template_base_name, qual_name, has_body in ada_modules:
-            qual_name = ([names.Name(n) for n in qual_name.split('.')]
-                         if qual_name else [])
-            self.write_ada_module(self.src_path, template_base_name, qual_name,
-                                  has_body,
-                                  in_library=True)
+                :param str rel_qual_name: Qualified name for the unit to
+                    generate, without the top-level library name.
+
+                :param bool has_body: Whether this unit has a body (otherwise,
+                    it's just a spec).
+                """
+                self.template_base_name = template_base_name
+                self.qual_name = (
+                    [names.Name(n) for n in rel_qual_name.split('.')]
+                    if rel_qual_name else []
+                )
+                self.has_body = has_body
+
+        for u in [
+            # Top (pure) package
+            Unit('pkg_main', '', has_body=False),
+            # Unit for initialization primitives
+            Unit('pkg_init', 'Init'),
+            # Unit for declarations used by Analysis and Implementation
+            Unit('pkg_common', 'Common'),
+            # Unit for public analysis primitives
+            Unit('pkg_analysis', 'Analysis'),
+            # Unit for converters between public Ada types and C API-level ones
+            Unit('pkg_c', 'C'),
+            # Unit for converters between public and implementation types
+            Unit('pkg_converters', 'Converters', has_body=False),
+            # Unit for implementation of analysis primitives
+            Unit('pkg_implementation', 'Implementation'),
+            # Unit for AST introspection public API
+            Unit('pkg_introspection', 'Introspection'),
+            # Unit for AST introspection internal API
+            Unit('pkg_introspection_impl', 'Introspection_Implementation'),
+            # Unit for AST node iteration primitives
+            Unit('pkg_iterators', 'Iterators'),
+            # Unit for AST rewriting primitives
+            Unit('pkg_rewriting', 'Rewriting'),
+            # Unit for AST rewriting implementation
+            Unit('pkg_rewriting_impl', 'Rewriting_Implementation'),
+            # Unit for AST unparsing primitives
+            Unit('pkg_unparsing', 'Unparsing'),
+            # Unit for AST implementation of unparsing primitives
+            Unit('pkg_unparsing_impl', 'Unparsing_Implementation'),
+            # Unit for all parsers
+            Unit('parsers/pkg_main', 'Parsers'),
+            # Units for the lexer
+            Unit('pkg_lexer', 'Lexer'),
+            Unit('pkg_lexer_impl', 'Lexer_Implementation'),
+            Unit('pkg_lexer_state_machine', 'Lexer_State_Machine',
+                 has_body=bool(self.dfa_code)),
+            # Unit for debug helpers
+            Unit('pkg_debug', 'Debug'),
+        ]:
+            self.write_ada_module(self.src_path, u.template_base_name,
+                                  u.qual_name, u.has_body, in_library=True)
 
     def emit_mains(self, ctx):
         """
