@@ -21,7 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
@@ -1638,37 +1637,38 @@ package body Langkit_Support.Lexical_Env is
       end case;
    end Hash;
 
-   -----------------
-   -- Sorted_Envs --
-   -----------------
+   --  We want lexical env dumps to be deterministic, so sort maps before
+   --  iterating through their key/value pairs.
 
-   --  Those ordered maps are used to have a stable representation of internal
-   --  lexical environments, which is not the case with hashed maps.
+   type Env_Pair is record
+      Key   : Symbol_Type;
+      Value : Internal_Map_Node_Vectors.Vector;
+   end record;
 
-   function "<" (L, R : Symbol_Type) return Boolean
-   is
-     (L.all < R.all);
+   function "<" (L, R : Env_Pair) return Boolean
+   is (L.Key.all < R.Key.all);
 
-   package Sorted_Envs is new Ada.Containers.Ordered_Maps
-     (Key_Type     => Symbol_Type,
-      Element_Type => Internal_Map_Node_Vectors.Vector,
-      "<"          => "<",
-      "="          => Internal_Map_Node_Vectors."=");
+   package Env_Pair_Vectors is new Langkit_Support.Vectors (Env_Pair);
+   procedure Sort is new Env_Pair_Vectors.Generic_Sort;
 
-   function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map;
+   function To_Sorted_Env
+     (Env : Internal_Envs.Map) return Env_Pair_Vectors.Vector;
 
    -------------------
    -- To_Sorted_Env --
    -------------------
 
-   function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map is
-      Ret_Env : Sorted_Envs.Map;
+   function To_Sorted_Env
+     (Env : Internal_Envs.Map) return Env_Pair_Vectors.Vector
+   is
       use Internal_Envs;
    begin
-      for El in Env.Iterate loop
-         Ret_Env.Include (Key (El), Element (El));
-      end loop;
-      return Ret_Env;
+      return Vector : Env_Pair_Vectors.Vector do
+         for El in Env.Iterate loop
+            Vector.Append ((Key (El), Element (El)));
+         end loop;
+         Sort (Vector);
+      end return;
    end To_Sorted_Env;
 
    ----------
@@ -1683,8 +1683,6 @@ package body Langkit_Support.Lexical_Env is
       Dump_Content   : Boolean := True;
       Prefix         : String := "") return String
    is
-      use Sorted_Envs;
-
       Result : Unbounded_String;
 
       Sub_Prefix : constant String := Prefix & "  ";
@@ -1804,14 +1802,20 @@ package body Langkit_Support.Lexical_Env is
             if Self.Env.Map.Is_Empty then
                Append (Result, Sub_Prefix & "  <empty>" & ASCII.LF);
             else
-               for El in To_Sorted_Env (Self.Env.Map.all).Iterate loop
-                  Append
-                    (Result,
-                     Sub_Prefix & "  "
-                     & Langkit_Support.Text.Image (Key (El).all) & ": "
-                     & Image (Element (El))
-                     & ASCII.LF);
-               end loop;
+               declare
+                  V : Env_Pair_Vectors.Vector :=
+                     To_Sorted_Env (Self.Env.Map.all);
+               begin
+                  for Pair of V loop
+                     Append
+                       (Result,
+                        Sub_Prefix & "  "
+                        & Langkit_Support.Text.Image (Pair.Key.all) & ": "
+                        & Image (Pair.Value)
+                        & ASCII.LF);
+                  end loop;
+                  V.Destroy;
+               end;
             end if;
 
          when Orphaned =>
