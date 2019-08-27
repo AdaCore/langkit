@@ -23,6 +23,7 @@
 
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
+
 with System;
 
 --  This package implements a very simple Vector type. It has the following
@@ -183,6 +184,11 @@ package Langkit_Support.Vectors is
 
    function Copy (Self : Vector) return Vector;
    --  Return newly allocated copy of Self
+
+   generic
+      with function "<" (Left, Right : Element_Type) return Boolean is <>;
+   procedure Generic_Sort (Self : in out Vector);
+   --  Sort elements in Self so that Self.Element (1) < Self.Element (2) < ...
 
 private
 

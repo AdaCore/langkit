@@ -21,6 +21,8 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Generic_Array_Sort;
+
 with System;        use System;
 with System.Memory; use System.Memory;
 
@@ -331,5 +333,20 @@ package body Langkit_Support.Vectors is
       end loop;
       return N;
    end Copy;
+
+   ------------------
+   -- Generic_Sort --
+   ------------------
+
+   procedure Generic_Sort (Self : in out Vector) is
+      procedure Sort is new Ada.Containers.Generic_Array_Sort
+        (Positive, Element_Type, Elements_Array, "<");
+   begin
+      if Self.Capacity = Small_Vector_Capacity then
+         Sort (Self.SV (1 .. Self.Size));
+      else
+         Sort (Self.E.all (1 .. Self.Size));
+      end if;
+   end Generic_Sort;
 
 end Langkit_Support.Vectors;
