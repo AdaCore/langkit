@@ -120,10 +120,10 @@ class Emitter(object):
 
     def __init__(self, context, lib_root, extensions_dir,
                  main_source_dirs=set(), main_programs=set(),
-                 no_property_checks=False, generate_astdoc=True,
-                 generate_gdb_hook=True, pretty_print=False,
-                 post_process_ada=None, post_process_cpp=None,
-                 post_process_python=None):
+                 no_property_checks=False, generate_ada_api=True,
+                 generate_astdoc=True, generate_gdb_hook=True,
+                 pretty_print=False, post_process_ada=None,
+                 post_process_cpp=None, post_process_python=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -145,6 +145,10 @@ class Emitter(object):
         :param bool no_property_checks: If True, do not emit safety checks in
             the generated code for properties. Namely, this disables null
             checks on field access.
+
+        :param bool generate_ada_api: If True, generate the public Ada API. If
+            False and there is no main to generate, do not generate this Ada
+            API.
 
         :param bool generate_astdoc: Whether to generate the HTML documentation
             for AST nodes, their fields and their properties.
@@ -187,6 +191,7 @@ class Emitter(object):
             add_template_dir(dirpath)
 
         self.no_property_checks = no_property_checks
+        self.generate_ada_api = generate_ada_api or bool(main_programs)
         self.generate_astdoc = generate_astdoc
         self.generate_gdb_hook = generate_gdb_hook
         self.pretty_print = pretty_print
@@ -339,7 +344,7 @@ class Emitter(object):
 
         class Unit(object):
             def __init__(self, template_base_name, rel_qual_name,
-                         has_body=True):
+                         has_body=True, ada_api=False):
                 """
                 :param str template_base_name: Common prefix for the name of
                     the templates to use in order to generate spec/body sources
@@ -347,6 +352,9 @@ class Emitter(object):
 
                 :param str rel_qual_name: Qualified name for the unit to
                     generate, without the top-level library name.
+
+                :param bool ada_api: Whether we can avoid generating this unit
+                    if the Ada API is disabled.
 
                 :param bool has_body: Whether this unit has a body (otherwise,
                     it's just a spec).
@@ -356,6 +364,7 @@ class Emitter(object):
                     [names.Name(n) for n in rel_qual_name.split('.')]
                     if rel_qual_name else []
                 )
+                self.ada_api = ada_api
                 self.has_body = has_body
 
         for u in [
@@ -366,39 +375,42 @@ class Emitter(object):
             # Unit for declarations used by Analysis and Implementation
             Unit('pkg_common', 'Common'),
             # Unit for public analysis primitives
-            Unit('pkg_analysis', 'Analysis'),
+            Unit('pkg_analysis', 'Analysis', ada_api=True),
             # Unit for converters between public Ada types and C API-level ones
-            Unit('pkg_c', 'C'),
+            Unit('pkg_c', 'C', ada_api=True),
             # Unit for implementation of analysis primitives
             Unit('pkg_implementation', 'Implementation'),
             # Unit for AST introspection public API
-            Unit('pkg_introspection', 'Introspection'),
+            Unit('pkg_introspection', 'Introspection', ada_api=True),
             # Unit for AST introspection internal API
             Unit('pkg_introspection_impl', 'Introspection_Implementation'),
             # Unit for AST node iteration primitives
-            Unit('pkg_iterators', 'Iterators'),
+            Unit('pkg_iterators', 'Iterators', ada_api=True),
             # Unit for converters between public and implementation types
-            Unit('pkg_public_converters', 'Public_Converters', has_body=True),
+            Unit('pkg_public_converters', 'Public_Converters', has_body=True,
+                 ada_api=True),
             Unit('pkg_private_converters', 'Private_Converters',
                  has_body=False),
             # Unit for AST rewriting primitives
-            Unit('pkg_rewriting', 'Rewriting'),
+            Unit('pkg_rewriting', 'Rewriting', ada_api=True),
             # Unit for AST rewriting implementation
             Unit('pkg_rewriting_impl', 'Rewriting_Implementation'),
             # Unit for AST unparsing primitives
-            Unit('pkg_unparsing', 'Unparsing'),
+            Unit('pkg_unparsing', 'Unparsing', ada_api=True),
             # Unit for AST implementation of unparsing primitives
             Unit('pkg_unparsing_impl', 'Unparsing_Implementation'),
             # Unit for all parsers
             Unit('parsers/pkg_main', 'Parsers'),
             # Units for the lexer
-            Unit('pkg_lexer', 'Lexer'),
+            Unit('pkg_lexer', 'Lexer', ada_api=True),
             Unit('pkg_lexer_impl', 'Lexer_Implementation'),
             Unit('pkg_lexer_state_machine', 'Lexer_State_Machine',
                  has_body=bool(self.dfa_code)),
             # Unit for debug helpers
             Unit('pkg_debug', 'Debug'),
         ]:
+            if not self.generate_ada_api and u.ada_api:
+                continue
             self.write_ada_module(self.src_path, u.template_base_name,
                                   u.qual_name, u.has_body, in_library=True)
 
