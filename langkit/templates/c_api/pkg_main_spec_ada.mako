@@ -393,8 +393,8 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('node_kind')}";
    ${ada_c_doc('langkit.node_kind', 3)}
 
-   function ${capi.get_name('kind_name')} (Kind : ${node_kind_type})
-                                           return ${text_type}
+   procedure ${capi.get_name('kind_name')}
+     (Kind : ${node_kind_type}; Result : access ${text_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('kind_name')}";
@@ -421,8 +421,8 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('node_is_synthetic')}";
    ${ada_c_doc('langkit.node_is_synthetic', 3)}
 
-   function ${capi.get_name('node_short_image')}
-     (Node : ${entity_type}_Ptr) return ${text_type}
+   procedure ${capi.get_name('node_short_image')}
+     (Node : ${entity_type}_Ptr; Result : access ${text_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_short_image')}";
@@ -584,8 +584,8 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('token_is_equivalent')}";
    ${ada_c_doc('langkit.token_is_equivalent', 3)}
 
-   function ${capi.get_name('entity_image')}
-     (Ent : ${entity_type}_Ptr) return ${text_type}
+   procedure ${capi.get_name('entity_image')}
+     (Ent : ${entity_type}_Ptr; Result : access ${text_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('entity_image')}";

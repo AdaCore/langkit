@@ -1137,9 +1137,10 @@ class ${root_astnode_name}(object):
     @property
     def short_image(self):
         ${py_doc('langkit.node_short_image', 8)}
-        node = self._unwrap(self)
-        text = _node_short_image(ctypes.byref(node))
-        return text._wrap()
+        c_node = self._unwrap(self)
+        c_result = _text()
+        _node_short_image(ctypes.byref(c_node), ctypes.byref(c_result))
+        return c_result._wrap()
 
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
@@ -1343,7 +1344,9 @@ class ${root_astnode_name}(object):
     @property
     def entity_repr(self):
         c_value = self._unwrap(self)
-        return _entity_image(ctypes.byref(c_value))._wrap()
+        c_result = _text()
+        _entity_image(ctypes.byref(c_value), ctypes.byref(c_result))
+        return c_result._wrap()
 
     @property
     def tokens(self):
@@ -1717,7 +1720,7 @@ _node_is_synthetic = _import_func(
 )
 _node_short_image = _import_func(
     '${capi.get_name("node_short_image")}',
-    [ctypes.POINTER(${c_entity})], _text
+    [ctypes.POINTER(${c_entity}), ctypes.POINTER(_text)], None
 )
 _node_text = _import_func(
     '${capi.get_name("node_text")}',
@@ -1796,7 +1799,7 @@ _token_range_text = _import_func(
 % if T.entity.exposed:
 _entity_image = _import_func(
     "${capi.get_name('entity_image')}",
-    [ctypes.POINTER(${c_entity})], _text
+    [ctypes.POINTER(${c_entity}), ctypes.POINTER(_text)], None
 )
 % endif
 
