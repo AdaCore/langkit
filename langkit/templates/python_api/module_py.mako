@@ -1703,10 +1703,6 @@ _node_kind = _import_func(
     '${capi.get_name("node_kind")}',
     [ctypes.POINTER(${c_entity})], ctypes.c_int
 )
-_kind_name = _import_func(
-    '${capi.get_name("kind_name")}',
-    [ctypes.c_int], _text
-)
 _node_unit = _import_func(
     '${capi.get_name("node_unit")}',
     [ctypes.POINTER(${c_entity})], AnalysisUnit._c_type
