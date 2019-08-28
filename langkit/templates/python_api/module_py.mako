@@ -1796,12 +1796,10 @@ _token_range_text = _import_func(
     [ctypes.POINTER(Token), ctypes.POINTER(Token), ctypes.POINTER(_text)],
     ctypes.c_int
 )
-% if T.entity.exposed:
 _entity_image = _import_func(
     "${capi.get_name('entity_image')}",
     [ctypes.POINTER(${c_entity}), ctypes.POINTER(_text)], None
 )
-% endif
 
 
 #
