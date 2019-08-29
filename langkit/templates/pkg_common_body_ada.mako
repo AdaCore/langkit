@@ -2,9 +2,9 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
+with ${ada_lib_name}.Private_Converters;
 
 % if ctx.symbol_canonicalizer:
 with ${ctx.symbol_canonicalizer.unit_fqn};
@@ -427,8 +427,8 @@ package body ${ada_lib_name}.Common is
    end Extract_Token_Text;
 
 begin
-   Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
-   Converters.Get_Token_TDH := Get_Token_TDH'Access;
-   Converters.Get_Token_Index := Get_Token_Index'Access;
-   Converters.Extract_Token_Text := Extract_Token_Text'Access;
+   Private_Converters.Wrap_Token_Reference := Wrap_Token_Reference'Access;
+   Private_Converters.Get_Token_TDH := Get_Token_TDH'Access;
+   Private_Converters.Get_Token_Index := Get_Token_Index'Access;
+   Private_Converters.Extract_Token_Text := Extract_Token_Text'Access;
 end ${ada_lib_name}.Common;

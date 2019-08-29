@@ -89,7 +89,7 @@
 
       % for arg in field.arguments:
          % if arg.type.is_token_type:
-            if Converters.Get_Token_TDH.all (Unwrapped_${arg.name})
+            if Private_Converters.Get_Token_TDH.all (Unwrapped_${arg.name})
                /= Unwrapped_Node.Unit.TDH'Access
             then
                raise Constraint_Error with

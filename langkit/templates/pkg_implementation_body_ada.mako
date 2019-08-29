@@ -38,7 +38,8 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
-with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Private_Converters;
+use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Introspection_Implementation;
 
 ${(exts.with_clauses(with_clauses + [

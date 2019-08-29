@@ -32,7 +32,9 @@ pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Symbols;
-with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Private_Converters;
+use ${ada_lib_name}.Private_Converters;
+with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.default_unit_provider.unit_fqn, False, False)
@@ -1192,11 +1194,11 @@ package body ${ada_lib_name}.Analysis is
    ${exts.include_extension(ctx.ext('analysis', 'bodies'))}
 
 begin
-   Converters.Wrap_Context := Wrap_Context'Access;
-   Converters.Unwrap_Context := Unwrap_Context'Access;
-   Converters.Wrap_Unit := Wrap_Unit'Access;
-   Converters.Unwrap_Unit := Unwrap_Unit'Access;
-   Converters.Wrap_Node := Wrap_Node'Access;
-   Converters.Unwrap_Node := Unwrap_Node'Access;
-   Converters.Unwrap_Entity := Unwrap_Entity'Access;
+   Public_Converters.Wrap_Context := Wrap_Context'Access;
+   Public_Converters.Unwrap_Context := Unwrap_Context'Access;
+   Public_Converters.Wrap_Unit := Wrap_Unit'Access;
+   Public_Converters.Unwrap_Unit := Unwrap_Unit'Access;
+   Public_Converters.Wrap_Node := Wrap_Node'Access;
+   Public_Converters.Unwrap_Node := Unwrap_Node'Access;
+   Public_Converters.Unwrap_Entity := Unwrap_Entity'Access;
 end ${ada_lib_name}.Analysis;

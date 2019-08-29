@@ -369,8 +369,6 @@ class Emitter(object):
             Unit('pkg_analysis', 'Analysis'),
             # Unit for converters between public Ada types and C API-level ones
             Unit('pkg_c', 'C'),
-            # Unit for converters between public and implementation types
-            Unit('pkg_converters', 'Converters', has_body=False),
             # Unit for implementation of analysis primitives
             Unit('pkg_implementation', 'Implementation'),
             # Unit for AST introspection public API
@@ -379,6 +377,10 @@ class Emitter(object):
             Unit('pkg_introspection_impl', 'Introspection_Implementation'),
             # Unit for AST node iteration primitives
             Unit('pkg_iterators', 'Iterators'),
+            # Unit for converters between public and implementation types
+            Unit('pkg_public_converters', 'Public_Converters', has_body=False),
+            Unit('pkg_private_converters', 'Private_Converters',
+                 has_body=False),
             # Unit for AST rewriting primitives
             Unit('pkg_rewriting', 'Rewriting'),
             # Unit for AST rewriting implementation
