@@ -7,7 +7,6 @@ with System;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 
@@ -926,8 +925,8 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          return Create_Token_Node (Handle, Kind, "");
       else
          declare
-            Refs     : constant Field_Reference_Array := Fields (Kind);
-            Children : constant Node_Rewriting_Handle_Array (Refs'Range) :=
+            Count    : constant Integer := Kind_To_Node_Children_Count (Kind);
+            Children : constant Node_Rewriting_Handle_Array (1 ..  Count) :=
                (others => No_Node_Rewriting_Handle);
          begin
             return Create_Regular_Node (Handle, Kind, Children);
