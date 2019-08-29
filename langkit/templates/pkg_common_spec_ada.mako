@@ -161,6 +161,11 @@ package ${ada_lib_name}.Common is
    --  Return a string representation of ``Token_Id`` that is suitable in error
    --  messages.
 
+   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
+      with Inline;
+   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
+      with Inline;
+
    function Is_Token_Node (Kind : ${T.node_kind}) return Boolean;
    --  Return whether Kind corresponds to a token node
 

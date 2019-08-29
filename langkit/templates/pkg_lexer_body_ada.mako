@@ -13,11 +13,6 @@ use ${ada_lib_name}.Lexer_Implementation;
 
 package body ${ada_lib_name}.Lexer is
 
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind is
-     (Token_Kind'Val (Raw));
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind is
-     (Token_Kind'Pos (Kind));
-
    --------------------
    -- Extract_Tokens --
    --------------------
