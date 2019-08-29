@@ -3,7 +3,6 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 
@@ -121,6 +120,12 @@ package body ${ada_lib_name}.Common is
               then "'" & Image (Literal) & "'"
               else Token_Kind_Name (Token_Id));
    end Token_Error_Image;
+
+   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
+   is (Token_Kind'Val (Raw));
+
+   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
+   is (Token_Kind'Pos (Kind));
 
    -------------------
    -- Is_Token_Node --

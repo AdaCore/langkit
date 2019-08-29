@@ -6,7 +6,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Lexer;  use ${ada_lib_name}.Lexer;
 
 ${(exts.with_clauses(with_clauses + [
    ((ctx.symbol_canonicalizer.unit_fqn, False, False)

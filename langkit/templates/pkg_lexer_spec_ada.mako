@@ -16,11 +16,6 @@ package ${ada_lib_name}.Lexer is
 
    use Support.Diagnostics, Support.Text;
 
-   function To_Token_Kind (Raw : Raw_Token_Kind) return Token_Kind
-      with Inline;
-   function From_Token_Kind (Kind : Token_Kind) return Raw_Token_Kind
-      with Inline;
-
    type Lexer_Input (Kind : Lexer_Input_Kind) is record
       case Kind is
       when File | Bytes_Buffer =>

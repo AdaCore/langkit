@@ -11,7 +11,6 @@ with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Symbols;
 with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Lexer;          use ${ada_lib_name}.Lexer;
 
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
