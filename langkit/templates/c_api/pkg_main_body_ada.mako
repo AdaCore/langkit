@@ -20,8 +20,10 @@ with GNATCOLL.Iconv;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ada_lib_name}.Analysis;   use ${ada_lib_name}.Analysis;
-with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Analysis;          use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Private_Converters;
+use ${ada_lib_name}.Private_Converters;
+with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 ${exts.with_clauses(with_clauses)}
 

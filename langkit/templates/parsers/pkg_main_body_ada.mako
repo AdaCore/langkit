@@ -7,10 +7,10 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+with ${ada_lib_name}.Common;             use ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Symbols;
-with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Implementation;     use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;
 
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 

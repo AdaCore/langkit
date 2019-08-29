@@ -11,12 +11,12 @@ pragma Warnings (On, "internal");
 
 with GNATCOLL.Iconv;
 
-with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
-with ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
-with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
+use ${ada_lib_name}.Common.Token_Data_Handlers;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Introspection;  use ${ada_lib_name}.Introspection;
+with ${ada_lib_name}.Private_Converters;
+use ${ada_lib_name}.Private_Converters;
 
 package body ${ada_lib_name}.Unparsing_Implementation is
 

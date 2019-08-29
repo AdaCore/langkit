@@ -5,7 +5,7 @@ with Ada.Unchecked_Conversion;
 with ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Token_Data_Handlers;
 
-with ${ada_lib_name}.Converters; use ${ada_lib_name}.Converters;
+with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 package body ${ada_lib_name}.Rewriting is
 

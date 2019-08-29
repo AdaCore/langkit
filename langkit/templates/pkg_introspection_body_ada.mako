@@ -1,8 +1,8 @@
 ## vim: filetype=makoada
 
-with ${ada_lib_name}.Converters;     use ${ada_lib_name}.Converters;
-with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
+with ${ada_lib_name}.Implementation;    use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Introspection_Implementation;
+with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 package body ${ada_lib_name}.Introspection is
 
