@@ -289,7 +289,7 @@ private package ${ada_lib_name}.Implementation is
    -- Tree traversal operations --
    -------------------------------
 
-   Kind_To_Node_Children_Count : array (${T.node_kind}) of Integer :=
+   Kind_To_Node_Children_Count : constant array (${T.node_kind}) of Integer :=
      (${', \n'.join(
            '{} => {}'.format(
               cls.ada_kind_name,
