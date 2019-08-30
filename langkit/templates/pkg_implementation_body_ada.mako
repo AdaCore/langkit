@@ -42,12 +42,14 @@ with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Introspection_Implementation;
 
-${(exts.with_clauses(with_clauses + [
+${exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False, False)
     if ctx.env_hook_subprogram else None),
    ((ctx.symbol_canonicalizer.unit_fqn, False, False)
-    if ctx.symbol_canonicalizer else None)
-]))}
+    if ctx.symbol_canonicalizer else None),
+   ((ctx.default_unit_provider.unit_fqn, False, False)
+    if ctx.default_unit_provider else None)
+])}
 
 ## Generate a dispatching case statement for the root node class. It will keep
 ## all the node classes which pass the predicate 'pred'. The caller needs to
@@ -292,6 +294,11 @@ package body ${ada_lib_name}.Implementation is
          Owner  => No_Analysis_Unit);
 
       Context.Unit_Provider := Unit_Provider;
+      % if ctx.default_unit_provider:
+         if Context.Unit_Provider = null then
+            Context.Unit_Provider := ${ctx.default_unit_provider.fqn};
+         end if;
+      % endif
 
       Initialize (Context.Parser);
 

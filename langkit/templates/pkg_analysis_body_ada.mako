@@ -36,10 +36,7 @@ with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
-${(exts.with_clauses(with_clauses + [
-   ((ctx.default_unit_provider.unit_fqn, False, False)
-    if ctx.default_unit_provider else None),
-]))}
+${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Analysis is
 
@@ -91,18 +88,9 @@ package body ${ada_lib_name}.Analysis is
    is
       use Unit_Provider_References;
 
-      Provider : Unit_Provider_Reference := Unit_Provider;
-      Result   : Internal_Context;
+      Result : Internal_Context := Create_Context
+        (Charset, Wrap_Public_Provider (Unit_Provider), With_Trivia, Tab_Stop);
    begin
-      % if ctx.default_unit_provider:
-         if Provider = No_Unit_Provider_Reference then
-            Provider.Set (${ctx.default_unit_provider.fqn});
-         end if;
-      % endif
-
-      Result := Create_Context
-        (Charset, Wrap_Public_Provider (Provider), With_Trivia, Tab_Stop);
-
       return Context : constant Analysis_Context := Wrap_Context (Result)
       do
          --  Result has one ownership share and the call to Wrap_Context
