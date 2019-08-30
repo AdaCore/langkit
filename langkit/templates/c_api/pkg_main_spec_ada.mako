@@ -20,7 +20,6 @@ with Interfaces.C.Strings; use Interfaces.C.Strings;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
-with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 
 ${exts.with_clauses(with_clauses)}
@@ -163,13 +162,6 @@ private package ${ada_lib_name}.Implementation.C is
 
    type ${unit_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_provider_type', 3)}
-
-   type Unit_Provider_Access is access all Unit_Provider_Reference;
-   procedure Free is new Ada.Unchecked_Deallocation
-     (Unit_Provider_Reference, Unit_Provider_Access);
-
-   function Create_Unit_Provider_C_Reference
-     (Provider : Unit_Provider_Interface'Class) return ${unit_provider_type};
 
    type ${unit_provider_destroy_type} is access procedure
      (Data : System.Address)
@@ -671,9 +663,9 @@ private package ${ada_lib_name}.Implementation.C is
    function Unwrap (Token : ${token_type}) return Token_Reference;
 
    function Wrap_Private_Provider is new Ada.Unchecked_Conversion
-     (Unit_Provider_Access, ${unit_provider_type});
+     (Internal_Unit_Provider_Access, ${unit_provider_type});
    function Unwrap_Private_Provider is new Ada.Unchecked_Conversion
-     (${unit_provider_type}, Unit_Provider_Access);
+     (${unit_provider_type}, Internal_Unit_Provider_Access);
 
    function Convert is new Ada.Unchecked_Conversion
      (chars_ptr, System.Address);

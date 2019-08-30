@@ -7,6 +7,7 @@
 
 <% entity_type = root_entity.c_type(capi).name %>
 
+with Ada.Finalization;
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
 use Ada.Strings.Wide_Wide_Unbounded.Aux;
@@ -20,10 +21,8 @@ with GNATCOLL.Iconv;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ada_lib_name}.Analysis;          use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
-with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;
 
 ${exts.with_clauses(with_clauses)}
 
@@ -32,12 +31,19 @@ package body ${ada_lib_name}.Implementation.C is
    --  Avoid hiding from $.Lexer
    subtype Token_Data_Type is Common.Token_Data_Type;
 
-   type C_Unit_Provider is new Unit_Provider_Interface with record
+   type C_Unit_Provider is limited new
+      Ada.Finalization.Limited_Controlled
+      and Internal_Unit_Provider
+   with record
       Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
       Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type};
    end record;
+
+   type C_Unit_Provider_Access is access all C_Unit_Provider;
+
+   overriding procedure Finalize (Provider : in out C_Unit_Provider);
 
    overriding function Get_Unit_Filename
      (Provider : C_Unit_Provider;
@@ -46,13 +52,11 @@ package body ${ada_lib_name}.Implementation.C is
 
    overriding function Get_Unit
      (Provider : C_Unit_Provider;
-      Context  : Analysis_Context'Class;
+      Context  : Internal_Context;
       Name     : Text_Type;
       Kind     : Analysis_Unit_Kind;
       Charset  : String := "";
-      Reparse  : Boolean := False) return Analysis_Unit'Class;
-
-   overriding procedure Release (Provider : in out C_Unit_Provider);
+      Reparse  : Boolean := False) return Internal_Unit;
 
    function Value_Or_Empty (S : chars_ptr) return String
    --  If S is null, return an empty string. Return Value (S) otherwise.
@@ -93,17 +97,11 @@ package body ${ada_lib_name}.Implementation.C is
             then ${string_repr(ctx.default_charset)}
             else Value (Charset));
 
-         Provider     : constant Unit_Provider_Reference :=
-            (if Unit_Provider = ${unit_provider_type} (System.Null_Address)
-             then No_Unit_Provider_Reference
-             else Unwrap_Private_Provider (Unit_Provider).all);
-         Context      : constant Analysis_Context := Create_Context
-           (Charset       => C,
-            Unit_Provider => Provider,
-            With_Trivia   => With_Trivia /= 0,
-            Tab_Stop      => Natural (Tab_Stop));
-         Internal_Ctx : constant Internal_Context := Unwrap_Context (Context);
-
+         Internal_Ctx : constant Internal_Context := Create_Context
+            (Charset       => C,
+             Unit_Provider => Unwrap_Private_Provider (Unit_Provider),
+             With_Trivia   => With_Trivia /= 0,
+             Tab_Stop      => Natural (Tab_Stop));
       begin
          --  Create a new ownership share for the result since the one Context
          --  owns will disappear once we return.
@@ -965,20 +963,6 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
-   --------------------------------------
-   -- Create_Unit_Provider_C_Reference --
-   --------------------------------------
-
-   function Create_Unit_Provider_C_Reference
-     (Provider : Unit_Provider_Interface'Class) return ${unit_provider_type}
-   is
-      Result : constant Unit_Provider_Access :=
-         new Unit_Provider_Reference'
-           (Create_Unit_Provider_Reference (Provider));
-   begin
-      return Wrap_Private_Provider (Result);
-   end Create_Unit_Provider_C_Reference;
-
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
@@ -987,12 +971,16 @@ package body ${ada_lib_name}.Implementation.C is
       return ${unit_provider_type} is
    begin
       Clear_Last_Exception;
-      return Create_Unit_Provider_C_Reference
-        (C_Unit_Provider'
-           (Data                    => Data,
+      declare
+         Result : constant C_Unit_Provider_Access := new C_Unit_Provider'
+           (Ada.Finalization.Limited_Controlled with
+            Data                    => Data,
             Destroy_Func            => Destroy_Func,
             Get_Unit_Filename_Func  => Get_Unit_Filename_Func,
-            Get_Unit_From_Name_Func => Get_Unit_From_Name_Func));
+            Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
+      begin
+         return Wrap_Private_Provider (Internal_Unit_Provider_Access (Result));
+      end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -1004,14 +992,24 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         P : Unit_Provider_Access := Unwrap_Private_Provider (Provider);
+         P : Internal_Unit_Provider_Access :=
+            Unwrap_Private_Provider (Provider);
       begin
-         Free (P);
+         Destroy (P);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
    end;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Provider : in out C_Unit_Provider) is
+   begin
+      Provider.Destroy_Func (Provider.Data);
+   end Finalize;
 
    -----------------------
    -- Get_Unit_Filename --
@@ -1045,38 +1043,28 @@ package body ${ada_lib_name}.Implementation.C is
 
    overriding function Get_Unit
      (Provider : C_Unit_Provider;
-      Context  : Analysis_Context'Class;
+      Context  : Internal_Context;
       Name     : Text_Type;
       Kind     : Analysis_Unit_Kind;
       Charset  : String := "";
-      Reparse  : Boolean := False) return Analysis_Unit'Class
+      Reparse  : Boolean := False) return Internal_Unit
    is
-      Ctx         : constant ${analysis_context_type} :=
-         Unwrap_Context (Context);
       Name_Access : constant Text_Cst_Access := Name'Unrestricted_Access;
       C_Charset   : chars_ptr := (if Charset'Length = 0
                                   then Null_Ptr
                                   else New_String (Charset));
-
-      C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
-        (Provider.Data, Ctx, Wrap (Name_Access), Kind,
-         C_Charset, Boolean'Pos (Reparse));
    begin
-      Free (C_Charset);
-      if C_Result = null then
-         raise Property_Error with "invalid AST node for unit name";
-      end if;
-      return Wrap_Unit (C_Result);
+      return C_Result : constant ${analysis_unit_type} :=
+         Provider.Get_Unit_From_Name_Func
+           (Provider.Data, Context, Wrap (Name_Access), Kind,
+            C_Charset, Boolean'Pos (Reparse))
+      do
+         Free (C_Charset);
+         if C_Result = null then
+            raise Property_Error with "invalid AST node for unit name";
+         end if;
+      end return;
    end Get_Unit;
-
-   -------------
-   -- Release --
-   -------------
-
-   overriding procedure Release (Provider : in out C_Unit_Provider) is
-   begin
-      Provider.Destroy_Func (Provider.Data);
-   end Release;
 
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'body')
