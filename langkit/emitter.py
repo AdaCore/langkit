@@ -378,7 +378,7 @@ class Emitter(object):
             # Unit for AST node iteration primitives
             Unit('pkg_iterators', 'Iterators'),
             # Unit for converters between public and implementation types
-            Unit('pkg_public_converters', 'Public_Converters', has_body=False),
+            Unit('pkg_public_converters', 'Public_Converters', has_body=True),
             Unit('pkg_private_converters', 'Private_Converters',
                  has_body=False),
             # Unit for AST rewriting primitives

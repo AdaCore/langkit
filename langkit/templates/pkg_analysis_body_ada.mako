@@ -46,28 +46,6 @@ package body ${ada_lib_name}.Analysis is
    use ${ada_lib_name}.Implementation;
    use AST_Envs;
 
-   ---------------------------
-   -- Unit_Provider_Wrapper --
-   ---------------------------
-
-   type Unit_Provider_Wrapper is new Internal_Unit_Provider with record
-      Internal : Unit_Provider_Reference;
-   end record;
-
-   type Unit_Provider_Wrapper_Access is access all Unit_Provider_Wrapper;
-
-   overriding function Get_Unit_Filename
-     (Provider : Unit_Provider_Wrapper;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String;
-   overriding function Get_Unit
-     (Provider    : Unit_Provider_Wrapper;
-      Context     : Internal_Context;
-      Name        : Text_Type;
-      Kind        : Analysis_Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Internal_Unit;
-
    % for array_type in ctx.array_types:
       ${array_types.ada_api_converters_decl(array_type)}
    % endfor
@@ -77,34 +55,6 @@ package body ${ada_lib_name}.Analysis is
          ${struct_types.ada_api_converters_decl(struct_type)}
       % endif
    % endfor
-
-   -----------------------
-   -- Get_Unit_Filename --
-   -----------------------
-
-   overriding function Get_Unit_Filename
-     (Provider : Unit_Provider_Wrapper;
-      Name     : Text_Type;
-      Kind     : Analysis_Unit_Kind) return String
-   is (Provider.Internal.Get.Get_Unit_Filename (Name, Kind));
-
-   --------------
-   -- Get_Unit --
-   --------------
-
-   overriding function Get_Unit
-     (Provider    : Unit_Provider_Wrapper;
-      Context     : Internal_Context;
-      Name        : Text_Type;
-      Kind        : Analysis_Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Internal_Unit
-   is
-      Ctx : constant Analysis_Context := Wrap_Context (Context);
-   begin
-      return Unwrap_Unit (Provider.Internal.Get.Get_Unit
-        (Ctx, Name, Kind, Charset, Reparse));
-   end Get_Unit;
 
    ----------------
    -- Do_Release --
@@ -150,14 +100,8 @@ package body ${ada_lib_name}.Analysis is
          end if;
       % endif
 
-      declare
-         Provider_Wrapper : constant Unit_Provider_Wrapper_Access :=
-            new Unit_Provider_Wrapper'(Internal => Provider);
-      begin
-         Result := Create_Context
-           (Charset, Internal_Unit_Provider_Access (Provider_Wrapper),
-            With_Trivia, Tab_Stop);
-      end;
+      Result := Create_Context
+        (Charset, Wrap_Public_Provider (Provider), With_Trivia, Tab_Stop);
 
       return Context : constant Analysis_Context := Wrap_Context (Result)
       do
