@@ -314,6 +314,13 @@ class BaseDriver(TestDriver):
         :param str project_file: Project file name to create.
         :param list[str] mains: List of main source files.
         """
+        def format_string_list(strings):
+            return ', '.join('"{}"'.format(s) for s in strings)
+
+        cargs = ['-O0', '-g', '-gnata']
+        if self.coverage_enabled:
+            cargs += ['-fdump-scos', '-fpreserve-control-flow']
+
         with open(self.working_dir(project_file), 'w') as f:
             f.write("""
             with "{lk_support}";
@@ -321,13 +328,18 @@ class BaseDriver(TestDriver):
             project P is
                 for Languages use ("Ada");
                 for Source_Dirs use (".");
-                for Object_Dir use ".";
+                for Object_Dir use "obj";
                 for Main use ({mains});
+
+                package Compiler is
+                    for Default_Switches ("Ada") use ({cargs});
+                end Compiler;
             end P;
             """.format(
                 mains=', '.join('"{}"'.format(m) for m in mains),
                 lk_support=os.path.join(self.testsuite_dir, '..', 'langkit',
-                                        'support', 'langkit_support.gpr')
+                                        'support', 'langkit_support.gpr'),
+                cargs=format_string_list(cargs)
             ))
 
     def gprbuild(self, project_file):
@@ -337,11 +349,9 @@ class BaseDriver(TestDriver):
         :param str project_file: Project file name.
         """
         argv = ['gprbuild', '-P', project_file, '-p']
-        cargs = ['-O0', '-g', '-gnata']
         if self.coverage_enabled:
             argv.append('--subdirs=gnatcov')
-            cargs += ['-fdump-scos', '-fpreserve-control-flow']
-        self.run_and_check(argv + ['-cargs'] + cargs)
+        self.run_and_check(argv)
 
     def program_path(self, main_source_file):
         """
@@ -353,9 +363,9 @@ class BaseDriver(TestDriver):
         """
         assert main_source_file.endswith('.adb')
         program_name = main_source_file[:-4]
-        return (self.working_dir('gnatcov', program_name)
+        return (self.working_dir('obj', 'gnatcov', program_name)
                 if self.coverage_enabled else
-                self.working_dir(program_name))
+                self.working_dir('obj', program_name))
 
     #
     # Analysis helpers
