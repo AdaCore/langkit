@@ -670,9 +670,9 @@ private package ${ada_lib_name}.Implementation.C is
    function Wrap (Token : Token_Reference) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Reference;
 
-   function Wrap is new Ada.Unchecked_Conversion
+   function Wrap_Private_Provider is new Ada.Unchecked_Conversion
      (Unit_Provider_Access, ${unit_provider_type});
-   function Unwrap is new Ada.Unchecked_Conversion
+   function Unwrap_Private_Provider is new Ada.Unchecked_Conversion
      (${unit_provider_type}, Unit_Provider_Access);
 
    function Convert is new Ada.Unchecked_Conversion
