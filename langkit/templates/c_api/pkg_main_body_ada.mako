@@ -96,7 +96,7 @@ package body ${ada_lib_name}.Implementation.C is
          Provider     : constant Unit_Provider_Reference :=
             (if Unit_Provider = ${unit_provider_type} (System.Null_Address)
              then No_Unit_Provider_Reference
-             else Unwrap (Unit_Provider).all);
+             else Unwrap_Private_Provider (Unit_Provider).all);
          Context      : constant Analysis_Context := Create_Context
            (Charset       => C,
             Unit_Provider => Provider,
@@ -976,7 +976,7 @@ package body ${ada_lib_name}.Implementation.C is
          new Unit_Provider_Reference'
            (Create_Unit_Provider_Reference (Provider));
    begin
-      return Wrap (Result);
+      return Wrap_Private_Provider (Result);
    end Create_Unit_Provider_C_Reference;
 
    function ${capi.get_name('create_unit_provider')}
@@ -1004,7 +1004,7 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Clear_Last_Exception;
       declare
-         P : Unit_Provider_Access := Unwrap (Provider);
+         P : Unit_Provider_Access := Unwrap_Private_Provider (Provider);
       begin
          Free (P);
       end;
