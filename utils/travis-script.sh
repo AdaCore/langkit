@@ -12,10 +12,14 @@ which gprbuild
 gcc -v
 gprbuild -v
 
-# Duplicate output of testsuite in file TESTSUITE_OUT
+# Duplicate output of testsuite in file TESTSUITE_OUT.
+#
+# TODO: adjust the Travis CI setup to provide a viable OCaml environment and
+# enable the corresponding testcases.
 ./scripts/interactive_testsuite \
     --discriminants gnat_community_2018 \
     --no-auto-path \
+    --disable-ocaml \
     | tee TESTSUITE_OUT
 
 # Exit with an error if there is a FAILED line in TESTSUITE_OUT
