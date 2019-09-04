@@ -194,6 +194,7 @@ class Emitter(object):
         self.generate_ada_api = generate_ada_api or bool(main_programs)
         self.generate_astdoc = generate_astdoc
         self.generate_gdb_hook = generate_gdb_hook
+        self.generate_unparser = context.generate_unparser
         self.pretty_print = pretty_print
         self.post_process_ada = post_process_ada
         self.post_process_cpp = post_process_cpp
@@ -344,7 +345,7 @@ class Emitter(object):
 
         class Unit(object):
             def __init__(self, template_base_name, rel_qual_name,
-                         has_body=True, ada_api=False):
+                         has_body=True, ada_api=False, unparser=False):
                 """
                 :param str template_base_name: Common prefix for the name of
                     the templates to use in order to generate spec/body sources
@@ -356,6 +357,9 @@ class Emitter(object):
                 :param bool ada_api: Whether we can avoid generating this unit
                     if the Ada API is disabled.
 
+                :param bool unparser: Whether we can avoid generating this unit
+                    if unparsing is disabled.
+
                 :param bool has_body: Whether this unit has a body (otherwise,
                     it's just a spec).
                 """
@@ -365,6 +369,7 @@ class Emitter(object):
                     if rel_qual_name else []
                 )
                 self.ada_api = ada_api
+                self.unparser = unparser
                 self.has_body = has_body
 
         for u in [
@@ -392,13 +397,15 @@ class Emitter(object):
             Unit('pkg_private_converters', 'Private_Converters',
                  has_body=False),
             # Unit for AST rewriting primitives
-            Unit('pkg_rewriting', 'Rewriting', ada_api=True),
+            Unit('pkg_rewriting', 'Rewriting', ada_api=True, unparser=True),
             # Unit for AST rewriting implementation
-            Unit('pkg_rewriting_impl', 'Rewriting_Implementation'),
+            Unit('pkg_rewriting_impl', 'Rewriting_Implementation',
+                 unparser=True),
             # Unit for AST unparsing primitives
-            Unit('pkg_unparsing', 'Unparsing', ada_api=True),
+            Unit('pkg_unparsing', 'Unparsing', ada_api=True, unparser=True),
             # Unit for AST implementation of unparsing primitives
-            Unit('pkg_unparsing_impl', 'Unparsing_Implementation'),
+            Unit('pkg_unparsing_impl', 'Unparsing_Implementation',
+                 unparser=True),
             # Unit for all parsers
             Unit('parsers/pkg_main', 'Parsers'),
             # Units for the lexer
@@ -409,7 +416,10 @@ class Emitter(object):
             # Unit for debug helpers
             Unit('pkg_debug', 'Debug'),
         ]:
-            if not self.generate_ada_api and u.ada_api:
+            if (
+                (not self.generate_ada_api and u.ada_api) or
+                (not self.generate_unparser and u.unparser)
+            ):
                 continue
             self.write_ada_module(self.src_path, u.template_base_name,
                                   u.qual_name, u.has_body, in_library=True)
