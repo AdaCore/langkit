@@ -1480,7 +1480,8 @@ class CompileCtx(object):
         assert isinstance(result, AbstractPass)
         return result
 
-    def emit(self, lib_root, check_only=False, warnings=None, **kwargs):
+    def emit(self, lib_root, check_only=False, warnings=None,
+             report_unused_documentation_entries=False, **kwargs):
         """
         Compile the DSL and emit sources for the generated library.
 
@@ -1510,6 +1511,9 @@ class CompileCtx(object):
             argument and return an instance of a
             ``langkit.passes.AbstractPass`` subclass.
 
+        :param bool report_unused_documentation_entries: Whether to emit
+            warnings about unused documentation entries.
+
         See langkit.emitter.Emitter's constructor for other supported keyword
         arguments.
         """
@@ -1521,6 +1525,10 @@ class CompileCtx(object):
 
         self.generate_unparser = kwargs.pop('generate_unparser', False)
         annotate_fields_types = kwargs.pop('annotate_fields_types', False)
+
+        self.report_unused_documentation_entries = (
+            report_unused_documentation_entries
+        )
 
         # Load plugin passes
         plugin_passes = [self.load_plugin_pass(p)
@@ -1781,7 +1789,8 @@ class CompileCtx(object):
                         Emitter.emit_lib_project_file),
 
             GlobalPass('report unused documentation entries',
-                       lambda ctx: ctx.documentations.report_unused()),
+                       lambda ctx: ctx.documentations.report_unused(),
+                       disabled=not self.report_unused_documentation_entries),
         ]
 
     def run_passes(self, passes):

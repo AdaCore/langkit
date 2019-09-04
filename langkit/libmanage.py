@@ -395,6 +395,10 @@ class ManageScript(object):
                  ' affecting lexing.'
         )
         subparser.add_argument(
+            '--report-unused-doc-entries', action='store_true', default=False,
+            help='Emit warnings for unused documentation entries .'
+        )
+        subparser.add_argument(
             '--no-gdb-hook', action='store_true',
             help='Do not generate the ".debug_gdb_script" section. This'
                  ' section is used to automatically run Langkit GDB helpers'
@@ -663,18 +667,21 @@ class ManageScript(object):
             for sdir in self.main_source_dirs
         }
 
-        self.context.emit(lib_root=self.dirs.build_dir(),
-                          main_source_dirs=main_source_dirs,
-                          main_programs=self.main_programs,
-                          annotate_fields_types=args.annotate_fields_types,
-                          check_only=args.check_only,
-                          warnings=args.enabled_warnings,
-                          no_property_checks=args.no_property_checks,
-                          generate_unparser=args.generate_unparser,
-                          generate_astdoc=not args.no_astdoc,
-                          generate_gdb_hook=not args.no_gdb_hook,
-                          plugin_passes=args.plugin_pass,
-                          pretty_print=not args.no_pretty_print)
+        self.context.emit(
+            lib_root=self.dirs.build_dir(),
+            main_source_dirs=main_source_dirs,
+            main_programs=self.main_programs,
+            annotate_fields_types=args.annotate_fields_types,
+            check_only=args.check_only,
+            warnings=args.enabled_warnings,
+            report_unused_documentation_entries=args.report_unused_doc_entries,
+            no_property_checks=args.no_property_checks,
+            generate_unparser=args.generate_unparser,
+            generate_astdoc=not args.no_astdoc,
+            generate_gdb_hook=not args.no_gdb_hook,
+            plugin_passes=args.plugin_pass,
+            pretty_print=not args.no_pretty_print
+        )
 
         if args.check_only:
             return
