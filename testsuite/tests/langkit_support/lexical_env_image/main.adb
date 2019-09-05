@@ -83,16 +83,16 @@ begin
 
    Destroy (Symbols);
 
-   Destroy(Name_Old_Env_1);
-   Destroy(Name_New_Env_1);
-   Destroy(Name_Old_Env_2);
-   Destroy(Name_New_Env_2);
-   Destroy(Name_Prim_A);
-   Destroy(Name_Prim_B);
-   Destroy(Name_Item_X1);
-   Destroy(Name_Item_X2);
-   Destroy(Name_Item_Y1);
-   Destroy(Name_Item_Y2);
+   Destroy (Name_Old_Env_1);
+   Destroy (Name_New_Env_1);
+   Destroy (Name_Old_Env_2);
+   Destroy (Name_New_Env_2);
+   Destroy (Name_Prim_A);
+   Destroy (Name_Prim_B);
+   Destroy (Name_Item_X1);
+   Destroy (Name_Item_X2);
+   Destroy (Name_Item_Y1);
+   Destroy (Name_Item_Y2);
 
    New_Line;
    Put_Line ("Done.");
