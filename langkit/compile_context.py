@@ -1481,7 +1481,8 @@ class CompileCtx(object):
         return result
 
     def emit(self, lib_root, check_only=False, warnings=None,
-             report_unused_documentation_entries=False, **kwargs):
+             report_unused_documentation_entries=False,
+             default_max_call_depth=1000, **kwargs):
         """
         Compile the DSL and emit sources for the generated library.
 
@@ -1514,6 +1515,10 @@ class CompileCtx(object):
         :param bool report_unused_documentation_entries: Whether to emit
             warnings about unused documentation entries.
 
+        :param int max_call_depth: Default maximum number of recursive calls
+            allowed in property calls. This is used as a mitigation against
+            infinite recursions.
+
         See langkit.emitter.Emitter's constructor for other supported keyword
         arguments.
         """
@@ -1525,6 +1530,7 @@ class CompileCtx(object):
 
         self.generate_unparser = kwargs.pop('generate_unparser', False)
         annotate_fields_types = kwargs.pop('annotate_fields_types', False)
+        self.default_max_call_depth = default_max_call_depth
 
         self.report_unused_documentation_entries = (
             report_unused_documentation_entries
