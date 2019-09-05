@@ -1728,6 +1728,10 @@ class CompileCtx:
         :param explicit_passes_triggers: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
 
+        :param int max_call_depth: Default maximum number of recursive calls
+            allowed in properties calls. This is used as a mitigation against
+            infinite recursions.
+
         :param plugin_passes: List of passes to add as plugins to the
             compilation pass manager. List items must be either:
 
