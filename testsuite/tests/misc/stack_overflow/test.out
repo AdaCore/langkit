@@ -1,0 +1,10 @@
+main.py: Running...
+
+== No overflow: property calls ==
+Returned: 1
+
+== Overflow: property calls ==
+PropertyError raised: raised LIBFOOLANG.COMMON.PROPERTY_ERROR : stack overflow
+
+main.py: Done.
+Done
