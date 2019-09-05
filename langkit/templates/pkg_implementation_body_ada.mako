@@ -166,6 +166,39 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
+   ----------------
+   -- Enter_Call --
+   ----------------
+
+   procedure Enter_Call
+     (Context : Internal_Context; Call_Depth : access Natural)
+   is
+      Max             : Natural renames Context.Max_Call_Depth;
+      Current         : Natural renames Context.Current_Call_Depth;
+      High_Water_Mark : Natural renames Context.Call_Depth_High_Water_Mark;
+   begin
+      Current := Current + 1;
+      High_Water_Mark := Natural'Max (High_Water_Mark, Current);
+      Call_Depth.all := Current;
+      if Current > Max then
+         raise Property_Error with "stack overflow";
+      end if;
+   end Enter_Call;
+
+   ---------------
+   -- Exit_Call --
+   ---------------
+
+   procedure Exit_Call (Context : Internal_Context; Call_Depth : Natural) is
+      Current : Natural renames Context.Current_Call_Depth;
+   begin
+      if Call_Depth /= Current then
+         raise Unexpected_Call_Depth with
+            "Langkit code generation bug for call depth handling detected";
+      end if;
+      Current := Current - 1;
+   end Exit_Call;
+
    -----------
    -- Image --
    -----------
@@ -275,7 +308,9 @@ package body ${ada_lib_name}.Implementation is
      (Charset       : String;
       Unit_Provider : Internal_Unit_Provider_Access;
       With_Trivia   : Boolean;
-      Tab_Stop      : Positive) return Internal_Context
+      Tab_Stop       : Positive;
+      Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
+      return Internal_Context
    is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
@@ -310,6 +345,8 @@ package body ${ada_lib_name}.Implementation is
 
       Context.Rewriting_Handle := No_Rewriting_Handle_Pointer;
       Context.Templates_Unit := No_Analysis_Unit;
+
+      Context.Max_Call_Depth := Max_Call_Depth;
 
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
 

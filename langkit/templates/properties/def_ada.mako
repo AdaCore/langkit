@@ -28,6 +28,8 @@ is
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name} := ${Self.type.name} (${property.self_arg_name});
 
+   Call_Depth : aliased Natural;
+
    ## Dispatchers must not memoize because it will be done at the static
    ## property level: we do not want to do it twice.
    <% memoized = property.memoized and not property.is_dispatcher %>
@@ -89,6 +91,12 @@ is
 
 begin
    ${gdb_property_body_start()}
+
+   ## Because they can be used this way in equation solving, properties must
+   ## not crash when called on a null node.
+   if Self /= null then
+      Enter_Call (Self.Unit.Context, Call_Depth'Access);
+   end if;
 
    % if has_logging:
       Properties_Traces.Trace
@@ -180,6 +188,7 @@ begin
                   Properties_Traces.Decrease_Indent;
                % endif
                ${gdb_memoization_return()}
+               Exit_Call (Self.Unit.Context, Call_Depth);
                return Property_Result;
             end if;
             ${gdb_end()}
@@ -251,41 +260,57 @@ begin
       Properties_Traces.Decrease_Indent;
    % endif
 
+   if Self /= null then
+      Exit_Call (Self.Unit.Context, Call_Depth);
+   end if;
    return Property_Result;
 
+exception
+
+## Install an exception handler for Property_Error only if we have specific
+## actions to do in this case.
 % if (not property.is_dispatcher and \
           property.vars.root_scope.has_refcounted_vars(True)) or \
      memoized or \
      has_logging:
-   exception
-      when Property_Error =>
-         % if not property.is_dispatcher:
-            % for scope in all_scopes:
-               % if scope.has_refcounted_vars():
-                  ${scope.finalizer_name};
-               % endif
-            % endfor
-         % endif
-
-         % if memoized:
-            % if not property.memoize_in_populate:
-            if not Self.Unit.Context.In_Populate_Lexical_Env then
+   when Property_Error =>
+      % if not property.is_dispatcher:
+         % for scope in all_scopes:
+            % if scope.has_refcounted_vars():
+               ${scope.finalizer_name};
             % endif
+         % endfor
+      % endif
 
-               Mmz_Map.Replace_Element (Mmz_Cur, (Kind => Mmz_Property_Error));
-
-            % if not property.memoize_in_populate:
-            end if;
-            % endif
+      % if memoized:
+         % if not property.memoize_in_populate:
+         if not Self.Unit.Context.In_Populate_Lexical_Env then
          % endif
 
-         % if has_logging:
-            Properties_Traces.Trace ("Result: Properties_Error");
-            Properties_Traces.Decrease_Indent;
-         % endif
+            Mmz_Map.Replace_Element (Mmz_Cur, (Kind => Mmz_Property_Error));
 
-         raise;
+         % if not property.memoize_in_populate:
+         end if;
+         % endif
+      % endif
+
+      % if has_logging:
+         Properties_Traces.Trace ("Result: Properties_Error");
+         Properties_Traces.Decrease_Indent;
+      % endif
+
+      if Self /= null then
+         Exit_Call (Self.Unit.Context, Call_Depth);
+      end if;
+      raise;
 % endif
+
+   when others =>
+      if Self /= null then
+         Exit_Call (Self.Unit.Context, Call_Depth);
+      end if;
+      raise;
+
 end ${property.name};
 ${gdb_end()}
 % endif

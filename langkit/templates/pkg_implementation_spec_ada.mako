@@ -52,6 +52,26 @@ private package ${ada_lib_name}.Implementation is
    type Analysis_Context_Type;
    type Internal_Context is access all Analysis_Context_Type;
 
+   Unexpected_Call_Depth : exception;
+   --  Raised when the Call_Depth for two matching calls to Enter_Call and
+   --  Exit_Call don't match, i.e. when there is a bug in the counting of
+   --  recursive calls.
+
+   procedure Enter_Call
+     (Context : Internal_Context; Call_Depth : access Natural);
+   --  Increment the call depth in Context. If the depth exceeds Context's
+   --  maximum, raise a Property_Error for "stack overflow".
+   --
+   --  Note that in the case of an exception, the depth is still incremented.
+   --  This means that all calls to Enter_Call must be wrapped in an exception
+   --  handler which calls Exit_Call on exception.
+   --
+   --  Put in Call_Depth the incremented call depth.
+
+   procedure Exit_Call (Context : Internal_Context; Call_Depth : Natural);
+   --  Decrement the call depth in Context. If Call_Depth does not match the
+   --  current call depth, raise an Unexpected_Call_Depth.
+
    type Analysis_Unit_Type;
    type Internal_Unit is access all Analysis_Unit_Type;
 
@@ -953,6 +973,16 @@ private package ${ada_lib_name}.Implementation is
       Released : Boolean;
       --  Whether this context has been released and thus is available in
       --  Context_Pool.
+
+      Current_Call_Depth : Natural := 0;
+      --  Number of recursive property calls currently running. This counter is
+      --  used as a mitigation against infinite recursions.
+
+      Call_Depth_High_Water_Mark : Natural := 0;
+      --  Maximum number of recursive calls seen in this context so far
+
+      Max_Call_Depth : Natural := 0;
+      --  Maximum number of recursive calls allowed
    end record;
 
    type Analysis_Unit_Type is limited record
@@ -1059,10 +1089,12 @@ private package ${ada_lib_name}.Implementation is
    ----------------------------------------------------
 
    function Create_Context
-     (Charset       : String;
-      Unit_Provider : Internal_Unit_Provider_Access;
-      With_Trivia   : Boolean;
-      Tab_Stop      : Positive) return Internal_Context;
+     (Charset        : String;
+      Unit_Provider  : Internal_Unit_Provider_Access;
+      With_Trivia    : Boolean;
+      Tab_Stop       : Positive;
+      Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
+      return Internal_Context;
    --  Implementation for Analysis.Create_Context
 
    function Create_Unit
