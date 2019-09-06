@@ -3657,10 +3657,12 @@ package body ${ada_lib_name}.Implementation is
 
       declare
          use Ada.Exceptions;
+         Actual_Input : Internal_Lexer_Input := Input;
       begin
+         Set_Default_Charset (Actual_Input, Unit.Charset);
          Init_Parser
-           (Input, Context.Tab_Stop, Context.With_Trivia, Unit, Unit_TDH,
-            Unit.Context.Parser);
+           (Actual_Input, Context.Tab_Stop, Context.With_Trivia, Unit,
+            Unit_TDH, Unit.Context.Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
