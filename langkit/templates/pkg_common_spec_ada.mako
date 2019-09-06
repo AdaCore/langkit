@@ -127,6 +127,9 @@ package ${ada_lib_name}.Common is
    );
    --  Kind of lexer input
 
+   subtype Undecoded_Lexer_Input is
+      Lexer_Input_Kind range File ..  Bytes_Buffer;
+
    type Token_Kind is (
       ${',\n'.join(t.ada_name for t in tokens)}
    );

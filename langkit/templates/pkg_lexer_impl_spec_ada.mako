@@ -37,6 +37,11 @@ private package ${ada_lib_name}.Lexer_Implementation is
    --  access types must be free'd by Extract_Tokens's caller when done with
    --  it.
 
+   procedure Set_Default_Charset
+     (Input : in out Internal_Lexer_Input; Charset : Unbounded_String);
+   --  If Input contains undecoded lexer input and has no charset information
+   --  associated, set it to Charset. Do nothing otherwise.
+
    procedure Extract_Tokens
      (Input       : Internal_Lexer_Input;
       Tab_Stop    : Positive;
