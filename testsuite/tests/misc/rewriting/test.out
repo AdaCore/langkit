@@ -190,6 +190,15 @@ DefList
 |  |  Literal: 3
 rewrite_lists.adb: Done.
 
+== rewrite_non_ascii.adb ==
+Appending a def node...
+
+Applying the diff...
+
+main.txt:
+def a = 1 # H\xe9llo\x0adef b=1
+rewrite_non_ascii.adb: Done.
+
 == iter_units.adb ==
 Rewritten unit a.txt: def a = 11
 Rewritten unit b.txt: def b = 22
