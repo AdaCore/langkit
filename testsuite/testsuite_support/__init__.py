@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import glob
 import os
+import shutil
 import subprocess
 
 
@@ -131,8 +132,15 @@ class Testsuite(BaseTestsuite):
                 )
 
         # Build Langkit_Support so that each testcase does not try to build it
-        # in parallel.
+        # in parallel. To achieve this, we build+install it with all library
+        # kinds, and then update the environment so that testcases can assume
+        # it is installed.
         if not self.global_env['options'].disable_tear_up_builds:
+            install_prefix = os.path.join(self.global_env['working_dir'],
+                                          'install')
+            if os.path.exists(install_prefix):
+                shutil.rmtree(install_prefix)
+
             gargs = ['-p', '-P', self.langkit_support_project_file]
             cargs = ['-cargs', '-O0', '-g', '-gnatwae']
             if self.coverage_enabled:
@@ -143,17 +151,21 @@ class Testsuite(BaseTestsuite):
                 p = Run(['gprbuild'] + gargs +
                         ['-XLIBRARY_TYPE={}'.format(build)] +
                         cargs, output=PIPE)
-            report(p, "Langkit support")
+                report(p, 'Langkit support - build {}'.format(build))
 
-            # Make this build available to all testcases
-            gpr_path = os.environ.get('GPR_PROJECT_PATH')
-            lksp_dir = os.path.dirname(self.langkit_support_project_file)
-            gpr_path = (
-                '{}{}{}'.format(gpr_path, os.path.pathsep, lksp_dir)
-                if gpr_path else
-                lksp_dir
-            )
-            os.environ['GPR_PROJECT_PATH'] = gpr_path
+                p = Run(['gprinstall', '-P', self.langkit_support_project_file,
+                        '-p', '--sources-subdir=include/langkit_support',
+                         '-XLIBRARY_TYPE={}'.format(build),
+                         '--prefix={}'.format(install_prefix),
+                         '--build-var=LIBRARY_TYPE',
+                         '--build-name={}'.format(build)])
+                report(p, 'Langkit support - install {}'.format(build))
+
+            # Make the installed library available to all testcases
+            add_to_path('PATH', os.path.join(install_prefix, 'bin'))
+            add_to_path('LD_LIBRARY_PATH', os.path.join(install_prefix, 'lib'))
+            add_to_path('GPR_PROJECT_PATH',
+                        os.path.join(install_prefix, 'share', 'gpr'))
 
     def tear_down(self):
         if self.coverage_enabled:
@@ -204,3 +216,14 @@ class Testsuite(BaseTestsuite):
                       ' to produce')
 
         super(Testsuite, self).tear_down()
+
+
+def add_to_path(env_var, directory):
+    """
+    Add the given directory to the `env_var` path.
+    """
+    path = os.environ.get(env_var)
+    path = ('{}{}{}'.format(directory, os.path.pathsep, path)
+            if path else
+            env_var)
+    os.environ[env_var] = path
