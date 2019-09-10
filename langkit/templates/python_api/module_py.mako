@@ -1020,7 +1020,7 @@ class UnitProvider(object):
         self._c_value = c_value
 
     def __del__(self):
-        _destroy_unit_provider(self._c_value)
+        _dec_ref_unit_provider(self._c_value)
 
 ${exts.include_extension(
    ctx.ext('python_api', 'unit_providers', 'methods')
@@ -1766,8 +1766,8 @@ _${field.accessor_basename.lower} = _import_func(
 % endfor
 
 # Unit providers
-_destroy_unit_provider = _import_func(
-    '${capi.get_name("destroy_unit_provider")}',
+_dec_ref_unit_provider = _import_func(
+    '${capi.get_name("dec_ref_unit_provider")}',
     [_unit_provider], None
 )
 ${exts.include_extension(

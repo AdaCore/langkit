@@ -874,6 +874,13 @@ private package ${ada_lib_name}.Implementation is
    type Internal_Unit_Provider_Access is
       access all Internal_Unit_Provider'Class;
 
+   procedure Inc_Ref (Provider : in out Internal_Unit_Provider) is abstract;
+   ${ada_doc('langkit.unit_provider_inc_ref', 3)}
+
+   function Dec_Ref (Provider : in out Internal_Unit_Provider) return Boolean
+   is abstract;
+   ${ada_doc('langkit.unit_provider_dec_ref', 3)}
+
    function Get_Unit_Filename
      (Provider : Internal_Unit_Provider;
       Name     : Text_Type;
@@ -889,8 +896,7 @@ private package ${ada_lib_name}.Implementation is
       Reparse     : Boolean := False) return Internal_Unit is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
 
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Internal_Unit_Provider'Class, Internal_Unit_Provider_Access);
+   procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access);
 
    type Analysis_Context_Type is limited record
       --  Start of ABI area. In order to perform fast checks from foreign

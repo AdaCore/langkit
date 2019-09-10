@@ -575,8 +575,16 @@ base_langkit_docs = {
         % endif
         if the given unit name is not valid.
     """,
-    'langkit.unit_provider_destroy': """
-        Free any resources that needs to be free'd in ``data``.
+    'langkit.unit_provider_inc_ref': """
+        Create an ownership share for this unit provider.
+    """,
+    'langkit.unit_provider_dec_ref': """
+        Release an ownership share for this unit provider. This destroys the
+        unit provider if there are no shares left.
+
+        % if lang == 'ada':
+            Return whether there are no ownership shares left.
+        % endif
     """,
 
     'langkit.create_unit_provider': """
@@ -596,10 +604,6 @@ base_langkit_docs = {
 
         ``get_unit_from_name`` is a callback similar to ``get_unit_from_node``
         except it takes an analysis unit reference represented as a string.
-    """,
-    'langkit.destroy_unit_provider': """
-        Destroy a unit provider. This calls the ``destroy`` callback: see
-        ``${capi.get_name('create_unit_provider')}`` for more information.
     """,
 
     'langkit.unit_provider_destroy_type': """

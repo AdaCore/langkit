@@ -4,6 +4,30 @@ package body ${ada_lib_name}.Public_Converters is
 
    type Unit_Provider_Wrapper_Access is access all Unit_Provider_Wrapper;
 
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Provider : in out Unit_Provider_Wrapper) is
+   begin
+      Provider.Ref_Count := Provider.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref
+     (Provider : in out Unit_Provider_Wrapper) return Boolean is
+   begin
+      Provider.Ref_Count := Provider.Ref_Count - 1;
+      if Provider.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
+
    -----------------------
    -- Get_Unit_Filename --
    -----------------------
@@ -47,7 +71,7 @@ package body ${ada_lib_name}.Public_Converters is
 
       declare
          Result : constant Unit_Provider_Wrapper_Access :=
-            new Unit_Provider_Wrapper'(Internal => Provider);
+            new Unit_Provider_Wrapper'(Ref_Count => 1, Internal => Provider);
       begin
          return Internal_Unit_Provider_Access (Result);
       end;
