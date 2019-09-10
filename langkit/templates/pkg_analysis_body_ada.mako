@@ -88,9 +88,15 @@ package body ${ada_lib_name}.Analysis is
    is
       use Unit_Provider_References;
 
+      UP     : Internal_Unit_Provider_Access :=
+         Wrap_Public_Provider (Unit_Provider);
       Result : Internal_Context := Create_Context
-        (Charset, Wrap_Public_Provider (Unit_Provider), With_Trivia, Tab_Stop);
+        (Charset, UP, With_Trivia, Tab_Stop);
    begin
+      --  Create_Context created an owneship for itself, so don't forget to
+      --  remove the share on UP.
+      Dec_Ref (UP);
+
       return Context : constant Analysis_Context := Wrap_Context (Result)
       do
          --  Result has one ownership share and the call to Wrap_Context

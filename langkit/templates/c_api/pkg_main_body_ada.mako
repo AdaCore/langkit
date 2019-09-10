@@ -35,6 +35,7 @@ package body ${ada_lib_name}.Implementation.C is
       Ada.Finalization.Limited_Controlled
       and Internal_Unit_Provider
    with record
+      Ref_Count               : Natural;
       Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
       Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
@@ -44,6 +45,9 @@ package body ${ada_lib_name}.Implementation.C is
    type C_Unit_Provider_Access is access all C_Unit_Provider;
 
    overriding procedure Finalize (Provider : in out C_Unit_Provider);
+   overriding procedure Inc_Ref (Provider : in out C_Unit_Provider);
+   overriding function Dec_Ref
+     (Provider : in out C_Unit_Provider) return Boolean;
 
    overriding function Get_Unit_Filename
      (Provider : C_Unit_Provider;
@@ -974,6 +978,7 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          Result : constant C_Unit_Provider_Access := new C_Unit_Provider'
            (Ada.Finalization.Limited_Controlled with
+            Ref_Count               => 1,
             Data                    => Data,
             Destroy_Func            => Destroy_Func,
             Get_Unit_Filename_Func  => Get_Unit_Filename_Func,
@@ -987,7 +992,7 @@ package body ${ada_lib_name}.Implementation.C is
          return ${unit_provider_type} (System.Null_Address);
    end;
 
-   procedure ${capi.get_name('destroy_unit_provider')}
+   procedure ${capi.get_name('dec_ref_unit_provider')}
      (Provider : ${unit_provider_type}) is
    begin
       Clear_Last_Exception;
@@ -995,7 +1000,7 @@ package body ${ada_lib_name}.Implementation.C is
          P : Internal_Unit_Provider_Access :=
             Unwrap_Private_Provider (Provider);
       begin
-         Destroy (P);
+         Dec_Ref (P);
       end;
    exception
       when Exc : others =>
@@ -1010,6 +1015,30 @@ package body ${ada_lib_name}.Implementation.C is
    begin
       Provider.Destroy_Func (Provider.Data);
    end Finalize;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Provider : in out C_Unit_Provider) is
+   begin
+      Provider.Ref_Count := Provider.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref
+     (Provider : in out C_Unit_Provider) return Boolean is
+   begin
+      Provider.Ref_Count := Provider.Ref_Count - 1;
+      if Provider.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
 
    -----------------------
    -- Get_Unit_Filename --

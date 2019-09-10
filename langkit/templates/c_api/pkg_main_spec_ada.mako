@@ -485,13 +485,13 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('create_unit_provider')}";
    ${ada_c_doc('langkit.create_unit_provider', 3)}
 
-   procedure ${capi.get_name('destroy_unit_provider')}
+   procedure ${capi.get_name('dec_ref_unit_provider')}
      (Provider : ${unit_provider_type})
       with Export        => True,
            Convention    => C,
            External_name =>
-              "${capi.get_name('destroy_unit_provider')}";
-   ${ada_c_doc('langkit.destroy_unit_provider', 3)}
+              "${capi.get_name('dec_ref_unit_provider')}";
+   ${ada_c_doc('langkit.unit_provider_dec_ref', 3)}
 
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_providers', 'spec')

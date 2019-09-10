@@ -269,6 +269,19 @@ package body ${ada_lib_name}.Implementation is
       Context_Pool.Free;
    end Finalize;
 
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access) is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (Internal_Unit_Provider'Class, Internal_Unit_Provider_Access);
+   begin
+      if Provider /= null and then Provider.all.Dec_Ref then
+         Destroy (Provider);
+      end if;
+   end Dec_Ref;
+
    ----------------
    -- Get_Env_Id --
    ----------------
@@ -329,6 +342,13 @@ package body ${ada_lib_name}.Implementation is
          Owner  => No_Analysis_Unit);
 
       Context.Unit_Provider := Unit_Provider;
+
+      --  Create an ownership share for the unit provider so that it lives at
+      --  least as long as this analysis context lives.
+      if Context.Unit_Provider /= null then
+         Context.Unit_Provider.Inc_Ref;
+      end if;
+
       % if ctx.default_unit_provider:
          if Context.Unit_Provider = null then
             Context.Unit_Provider := ${ctx.default_unit_provider.fqn};
@@ -657,7 +677,7 @@ package body ${ada_lib_name}.Implementation is
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
       Destroy (Context.Parser);
-      Destroy (Context.Unit_Provider);
+      Dec_Ref (Context.Unit_Provider);
       Context_Pool.Release (Context);
    end Destroy;
 

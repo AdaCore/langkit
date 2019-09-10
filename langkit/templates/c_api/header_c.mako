@@ -463,9 +463,9 @@ ${capi.get_name('create_unit_provider')}(
    ${unit_provider_get_unit_from_name_type} get_unit_from_name_func
 );
 
-${c_doc('langkit.unit_provider_destroy')}
+${c_doc('langkit.unit_provider_dec_ref')}
 extern void
-${capi.get_name('destroy_unit_provider')}(void *data);
+${capi.get_name('dec_ref_unit_provider')}(void *data);
 
 ${exts.include_extension(
    ctx.ext('analysis', 'c_api', 'unit_providers', 'header')

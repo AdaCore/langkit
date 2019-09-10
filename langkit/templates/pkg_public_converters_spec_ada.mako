@@ -49,8 +49,13 @@ private package ${ada_lib_name}.Public_Converters is
    --  our internal APIs.
 
    type Unit_Provider_Wrapper is new Internal_Unit_Provider with record
-      Internal : Unit_Provider_Reference;
+      Ref_Count : Natural;
+      Internal  : Unit_Provider_Reference;
    end record;
+
+   overriding procedure Inc_Ref (Provider : in out Unit_Provider_Wrapper);
+   overriding function Dec_Ref
+     (Provider : in out Unit_Provider_Wrapper) return Boolean;
 
    overriding function Get_Unit_Filename
      (Provider : Unit_Provider_Wrapper;
