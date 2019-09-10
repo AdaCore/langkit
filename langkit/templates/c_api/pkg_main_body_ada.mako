@@ -100,17 +100,12 @@ package body ${ada_lib_name}.Implementation.C is
            (if Charset = Null_Ptr
             then ${string_repr(ctx.default_charset)}
             else Value (Charset));
-
-         Internal_Ctx : constant Internal_Context := Create_Context
+      begin
+         return Create_Context
             (Charset       => C,
              Unit_Provider => Unwrap_Private_Provider (Unit_Provider),
              With_Trivia   => With_Trivia /= 0,
              Tab_Stop      => Natural (Tab_Stop));
-      begin
-         --  Create a new ownership share for the result since the one Context
-         --  owns will disappear once we return.
-         Inc_Ref (Internal_Ctx);
-         return Internal_Ctx;
       end;
    exception
       when Exc : others =>
