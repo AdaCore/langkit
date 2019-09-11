@@ -1907,9 +1907,7 @@ class App(object):
         return ""
 
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
-            description=self.description()
-        )
+        self.parser = argparse.ArgumentParser(description=self.description)
         self.parser.add_argument('files', nargs='+', help='Files')
         self.add_arguments()
         self.args = self.parser.parse_args()
