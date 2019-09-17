@@ -114,8 +114,6 @@ class ASTNodePrinter(BasePrinter):
 
     name = 'ASTNode'
 
-    tag_re = re.compile(r'0x[0-9a-f]+ <([a-z_]+).*>( \(.*\))?')
-
     @classmethod
     def matches(cls, value, context):
         t = value.type
