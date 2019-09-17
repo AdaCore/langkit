@@ -121,8 +121,7 @@ class ASTNodePrinter(BasePrinter):
             t = t.target()
         return (t.code == gdb.TYPE_CODE_PTR
                 and t.target().code == gdb.TYPE_CODE_STRUCT
-                and (t.target().name
-                     in context.struct_name_to_astnodes))
+                and t.target().name == context.node_record)
 
     @property
     def kind(self):

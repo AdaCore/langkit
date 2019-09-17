@@ -30,29 +30,15 @@ class Context(object):
                               for kind, name in astnode_kinds.items()}
         self.prefix = prefix
 
-        self.root_node = self.astnode_names[0]
+        self.node_record = ('{}__implementation__root_node_record'
+                            .format(self.lib_name))
         """
-        Name of the root node.
+        Name of the record type used to represent node data.
         """
 
-        self.struct_name_to_astnodes = self._astnode_struct_names()
-        self.astnode_to_struct_names = {
-            v: k for k, v in self.struct_name_to_astnodes.items()
-        }
         self.entity_struct_names = self._entity_struct_names()
 
         self.reparse_debug_info()
-
-    def _astnode_struct_names(self):
-        """
-        Turn the set of ASTNode subclass names into a mapping from ASTNode
-        record names, as GDB will see them, to user-friendly ASTNode names.
-        """
-        return {
-            '{}__implementation__bare_{}_type'
-            .format(self.lib_name, name.lower): name
-            for name in self.astnode_names
-        }
 
     def _entity_struct_names(self):
         """
