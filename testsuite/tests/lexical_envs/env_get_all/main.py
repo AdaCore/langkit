@@ -7,6 +7,7 @@ import libfoolang
 
 print('main.py: Running...')
 
+
 def test_case(content):
     ctx = libfoolang.AnalysisContext()
     u = ctx.get_from_buffer('input', content)

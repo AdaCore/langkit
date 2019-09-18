@@ -1,5 +1,6 @@
 """
-Test the "get all" procedure of lexical envs, and in particular its determinism.
+Test the "get all" procedure of lexical envs, and in particular its
+determinism.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -43,7 +44,7 @@ class Id(FooNode):
 
 @has_abstract_list
 class Insert(FooNode):
-    sym  = Field(type=T.Id)
+    sym = Field(type=T.Id)
     node = Field(type=T.Id)
 
     env_spec = EnvSpec(add_to_env_kv(
@@ -53,9 +54,7 @@ class Insert(FooNode):
 
 
 class Program(Insert.list):
-    env_spec=EnvSpec(
-        add_env()
-    )
+    env_spec = EnvSpec(add_env())
 
 
 G = Grammar('main_rule')
