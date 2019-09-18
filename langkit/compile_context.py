@@ -1141,7 +1141,14 @@ class CompileCtx(object):
         for prop in self.all_properties(include_inherited=False):
             forwards.setdefault(prop, set())
             backwards.setdefault(prop, set())
-            if prop.constructed_expr:
+
+            # For dispatchers, add calls to the dispatched properties
+            if prop.is_dispatcher:
+                for _, static_prop in prop.dispatch_table:
+                    add_forward(prop, static_prop)
+
+            # For regular properties, add calls from the property expression
+            elif prop.constructed_expr:
                 traverse_expr(prop.constructed_expr)
 
         return (forwards, backwards)
