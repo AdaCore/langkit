@@ -1088,10 +1088,7 @@ class CompileCtx(object):
         """
         return any(prop.activate_tracing for prop in self.all_properties)
 
-    def properties_callgraphs(
-        self, forwards_converter=lambda expr, to_prop: to_prop,
-        backwards_converter=lambda expr, from_prop: from_prop,
-    ):
+    def properties_callgraphs(self):
         """
         Compute forwards and backwards properties callgraphs.
 
@@ -1123,18 +1120,18 @@ class CompileCtx(object):
         """
         from langkit.expressions import PropertyDef
 
-        def add_forward(from_prop, to_prop, expr):
+        def add_forward(from_prop, to_prop):
             backwards.setdefault(to_prop, set())
-            forwards[from_prop].add(forwards_converter(expr, to_prop))
-            backwards[to_prop].add(backwards_converter(expr, from_prop))
+            forwards[from_prop].add(to_prop)
+            backwards[to_prop].add(from_prop)
             for over_prop in to_prop.all_overriding_properties:
-                add_forward(from_prop, over_prop, expr)
+                add_forward(from_prop, over_prop)
 
         def traverse_expr(expr):
             for ref_prop in expr.flat_subexprs(
                 lambda e: isinstance(e, PropertyDef)
             ):
-                add_forward(prop, ref_prop, expr)
+                add_forward(prop, ref_prop)
             for subexpr in expr.flat_subexprs():
                 traverse_expr(subexpr)
 
