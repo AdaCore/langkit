@@ -89,7 +89,8 @@ def emit_and_print_errors(grammar, lexer=None,
                           warning_set=default_warning_set,
                           generate_unparser=False, symbol_canonicalizer=None):
     """
-    Compile and emit code for CTX. Return whether this was successful.
+    Compile and emit code for CTX. Return the compile context if this was
+    successful, None otherwise.
 
     :param langkit.parsers.Grammar grammar_fn: The language grammar to use.
 
@@ -103,7 +104,7 @@ def emit_and_print_errors(grammar, lexer=None,
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canoncalizes to use for this context, if any.
 
-    :rtype: bool
+    :rtype: None|langkit.compile_context.CompileCtx
     """
 
     if lexer is None:
@@ -118,10 +119,10 @@ def emit_and_print_errors(grammar, lexer=None,
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
         # are enough.
-        return False
+        return None
     else:
         print('Code generation was successful')
-        return True
+        return ctx
     finally:
         lexer._dfa_code = None
         langkit.reset()
