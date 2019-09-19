@@ -487,6 +487,32 @@ package body ${ada_lib_name}.Unparsing_Implementation is
    -- Unparse --
    -------------
 
+   procedure Unparse
+     (Node                : Abstract_Node;
+      Unit                : Internal_Unit;
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean;
+      Result              : out Unparsing_Buffer) is
+   begin
+      --  Unparse Node, and the leading trivia if we are unparsing the unit as
+      --  a whole.
+      if As_Unit then
+         declare
+            First : constant Token_Reference := First_Token (Unit);
+         begin
+            if Is_Trivia (First) then
+               Append_Tokens (Result, First, Last_Trivia (First),
+                              With_Trailing_Trivia => False);
+            end if;
+         end;
+      end if;
+      Unparse_Node (Node, Preserve_Formatting, Result);
+   end Unparse;
+
+   -------------
+   -- Unparse --
+   -------------
+
    function Unparse
      (Node                : Abstract_Node;
       Unit                : Internal_Unit;
@@ -520,21 +546,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
       Length        : Natural;
       --  Buffer internals, to avoid costly buffer copies
    begin
-
-      --  Unparse Node, and the leading trivia if we are unparsing the unit as
-      --  a whole.
-      if As_Unit then
-         declare
-            First : constant Token_Reference := First_Token (Unit);
-         begin
-            if Is_Trivia (First) then
-               Append_Tokens (Buffer, First, Last_Trivia (First),
-                              With_Trailing_Trivia => False);
-            end if;
-         end;
-      end if;
-      Unparse_Node (Node, Preserve_Formatting, Buffer);
-
+      Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
       Get_Wide_Wide_String (Buffer.Content, Buffer_Access, Length);
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
