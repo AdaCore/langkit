@@ -89,14 +89,14 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    --  Add a whitespace or a newline to buffer if mandated by spacing rules
    --  given the next token to emit.
 
-   function Unparse
+   procedure Unparse
      (Node                : Abstract_Node;
       Unit                : Internal_Unit;
       Preserve_Formatting : Boolean;
-      As_Unit             : Boolean) return String;
-   --  Turn the Node tree into a string that can be re-parsed to yield the same
-   --  tree (source locations excepted). The encoding used is the same as the
-   --  one that was used to parse Node's analysis unit.
+      As_Unit             : Boolean;
+      Result              : out Unparsing_Buffer);
+   --  Turn the Node tree into a buffer that can be re-parsed to yield the same
+   --  tree (source locations excepted).
    --
    --  If Preserve_Formatting is true, use token/trivia information when
    --  available to preserve original source code formatting.
@@ -104,6 +104,14 @@ private package ${ada_lib_name}.Unparsing_Implementation is
    --  If As_Unit is true, consider that Node is the root of Unit in order to
    --  preserve the formatting of leading/trailing tokens/trivia. Note that
    --  this has no effect unless Preserve_Formatting itself is true.
+
+   function Unparse
+     (Node                : Abstract_Node;
+      Unit                : Internal_Unit;
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return String;
+   --  Likewise, but directly return a string. The encoding used is the same as
+   --  the one that was used to parse Unit.
 
    function Unparse
      (Node                : Abstract_Node;
