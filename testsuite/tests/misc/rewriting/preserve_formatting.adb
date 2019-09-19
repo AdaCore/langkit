@@ -1,4 +1,5 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Text_IO;                     use Ada.Text_IO;
 
 with Langkit_Support.Text; use Langkit_Support.Text;
 
@@ -61,6 +62,10 @@ begin
 
    Put_Line ("Running the double text substitution...");
    Traverse (Handle (Root (U)), Double_Text'Access);
+
+   New_Line;
+   Put_Line ("Running the unit's Unparse...");
+   Put_Line (Encode (To_Wide_Wide_String (Unparse (Handle (U))), "ASCII"));
 
    New_Line;
    Put_Line ("Applying the diff...");

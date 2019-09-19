@@ -606,16 +606,21 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Preserve_Formatting : Boolean) return Unbounded_Text_Type
+      Unit                : Internal_Unit;
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return Unbounded_Text_Type
    is
       Buffer : Unparsing_Buffer;
    begin
       % if ctx.generate_unparser:
          if Is_Null (Node) then
             return (raise Program_Error with "cannot unparse null node");
+         elsif As_Unit and then Unit = null then
+            return (raise Program_Error
+                    with "cannot unparse node as unit without a unit");
          end if;
 
-         Unparse_Node (Node, Preserve_Formatting, Buffer);
+         Unparse (Node, Unit, Preserve_Formatting, As_Unit, Buffer);
          return Buffer.Content;
       % else:
          pragma Unreferenced (Buffer);
