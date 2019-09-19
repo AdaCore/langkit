@@ -115,9 +115,8 @@ private package ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Preserve_Formatting : Boolean) return Text_Type;
-   --  Likewise, but return a text access. Callers must deallocate the result
-   --  when done with it.
+      Preserve_Formatting : Boolean) return Unbounded_Text_Type;
+   --  Likewise, but return an unbounded text value
 
    ----------------------
    -- Unparsing tables --

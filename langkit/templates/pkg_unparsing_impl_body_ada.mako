@@ -594,7 +594,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Preserve_Formatting : Boolean) return Text_Type
+      Preserve_Formatting : Boolean) return Unbounded_Text_Type
    is
       Buffer : Unparsing_Buffer;
    begin
@@ -604,7 +604,7 @@ package body ${ada_lib_name}.Unparsing_Implementation is
          end if;
 
          Unparse_Node (Node, Preserve_Formatting, Buffer);
-         return To_Wide_Wide_String (Buffer.Content);
+         return Buffer.Content;
       % else:
          pragma Unreferenced (Buffer);
          return (raise Program_Error with "Unparser not generated");

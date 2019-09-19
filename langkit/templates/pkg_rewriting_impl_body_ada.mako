@@ -475,9 +475,10 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    function Unparse (Handle : Node_Rewriting_Handle) return Text_Type is
    begin
       ${pre_check_nrw_handle('Handle')}
-      return Unparsing_Implementation.Unparse
-        (Create_Abstract_Node (Handle),
-         Preserve_Formatting => True);
+      return To_Wide_Wide_String
+        (Unparsing_Implementation.Unparse
+           (Create_Abstract_Node (Handle),
+            Preserve_Formatting => True));
    end Unparse;
 
    --------------
