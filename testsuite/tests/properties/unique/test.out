@@ -1,0 +1,7 @@
+main.py: Running...
+[].unique = []
+[a, b, c, d].unique = [a, b, c, d]
+[d, c, b, a].unique = [d, c, b, a]
+[a, a, b, a, b, c, d, d].unique = [a, b, c, d]
+main.py: Done.
+Done

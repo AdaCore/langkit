@@ -138,6 +138,11 @@
       function Trace_Image (A : ${cls.name}) return String;
    % endif
 
+   % if cls.requires_unique_function:
+      function Make_Unique (A : ${cls.name}) return ${cls.name};
+      --  Return a copy of A with duplicated elements removed
+   % endif
+
   procedure Free is new Ada.Unchecked_Deallocation
     (${cls.pointed}, ${cls.name});
 </%def>
@@ -325,6 +330,76 @@
                return To_String (Result);
          % endif
       end Trace_Image;
+   % endif
+
+   % if cls.requires_unique_function:
+      function Make_Unique (A : ${cls.name}) return ${cls.name} is
+         <%
+            elt_type = cls.element_type
+            elt_equiv_func = ('Equivalent'
+                              if elt_type.has_equivalent_function else
+                              '"="')
+         %>
+
+         --  To keep the order of the result deterministic, this function works
+         --  in two steps. First, determine for each item in A whether it
+         --  duplicate a previous item. Only then, go through all items in A
+         --  and add only non-duplicated ones to the result.
+
+         Duplicates : array (A.Items'Range) of Boolean := (others => False);
+         --  For each item in A, indicate whether the value is a duplicate of a
+         --  previous one in the array.
+
+         Unique_Elements : Natural;
+         --  Number of unique elements in A
+      begin
+         --  Step 1: compute Duplicates
+         declare
+            package Sets is new Ada.Containers.Hashed_Sets
+              (Element_Type        => ${elt_type.name},
+               "="                 => ${elt_equiv_func},
+               Equivalent_Elements => ${elt_equiv_func},
+               Hash                => Hash);
+            Set : Sets.Set;
+         begin
+            for I in A.Items'Range loop
+               declare
+                  Item : ${elt_type.name} renames A.Items (I);
+               begin
+                  if Set.Contains (Item) then
+                     Duplicates (I) := True;
+                  else
+                     Set.Insert (Item);
+                  end if;
+               end;
+            end loop;
+            Unique_Elements := Natural (Set.Length);
+         end;
+
+         --  Step 2: create the result
+         declare
+            Next   : Positive := 1;
+            Result : constant ${cls.name} :=
+               ${cls.constructor_name} (Unique_Elements);
+         begin
+            for I in A.Items'Range loop
+               declare
+                  Item : ${elt_type.name} renames A.Items (I);
+               begin
+                  if not Duplicates (I) then
+                     Result.Items (Next) := Item;
+                     % if elt_type.is_refcounted:
+                        Inc_Ref (Item);
+                     % endif
+                     Next := Next + 1;
+                  end if;
+               end;
+            end loop;
+            pragma Assert (Next = Result.N + 1);
+
+            return Result;
+         end;
+      end Make_Unique;
    % endif
 
 </%def>

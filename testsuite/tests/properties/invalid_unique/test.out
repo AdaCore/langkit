@@ -1,0 +1,9 @@
+== Not an array ==
+File "test.py", line 23, in Example.test
+  line 25, in unique expression
+    Error: Array expected but got Example instead
+== Not hashable array element ==
+File "test.py", line 23, in Example.test
+  line 25, in unique expression
+    Error: Element type (here Token) must be hashable
+Done

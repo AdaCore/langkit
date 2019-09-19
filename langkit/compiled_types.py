@@ -3351,6 +3351,12 @@ class ArrayType(CompiledType):
         if self.is_string_type:
             self.exposed = True
 
+        self._requires_unique_function = False
+        """
+        Whether we need to generate a "Unique" function to remove duplicates
+        from such arrays.
+        """
+
     @property
     def name(self):
         return self.element_type.name + names.Name('Array_Access')
@@ -3516,6 +3522,14 @@ class ArrayType(CompiledType):
     @property
     def exposed_types(self):
         return [self.element_type]
+
+    @property
+    def requires_unique_function(self):
+        return self._requires_unique_function
+
+    def require_unique_function(self):
+        self.element_type.require_hash_function()
+        self._requires_unique_function = True
 
 
 class EnumType(CompiledType):

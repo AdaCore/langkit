@@ -768,6 +768,34 @@ def length(self, collection):
     return CallExpr('Len', 'Length', T.Int, [coll_expr], abstract_expr=self)
 
 
+@auto_attr
+def unique(self, array):
+    """
+    Return a copy of `array` with duplicated elements removed.
+    """
+    from langkit.compile_context import ADA_BODY
+
+    array_expr = construct(array)
+    array_type = array_expr.type
+    check_source_language(
+        array_type.is_array_type,
+        'Array expected but got {} instead'.format(array_type.dsl_name)
+    )
+    element_type = array_type.element_type
+    check_source_language(
+        element_type.hashable,
+        'Element type (here {}) must be hashable'.format(element_type.dsl_name)
+    )
+
+    # Enable the generation of the function that does the actual work
+    get_context().add_with_clause('Implementation', ADA_BODY,
+                                  'Ada.Containers.Hashed_Sets')
+    array_type.require_unique_function()
+
+    return CallExpr('Unique_Array', 'Make_Unique', array_type, [array_expr],
+                    abstract_expr=self)
+
+
 @attr_expr('singleton')
 class CollectionSingleton(AbstractExpression):
     """
