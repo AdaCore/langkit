@@ -123,7 +123,9 @@ private package ${ada_lib_name}.Unparsing_Implementation is
 
    function Unparse
      (Node                : Abstract_Node;
-      Preserve_Formatting : Boolean) return Unbounded_Text_Type;
+      Unit                : Internal_Unit;
+      Preserve_Formatting : Boolean;
+      As_Unit             : Boolean) return Unbounded_Text_Type;
    --  Likewise, but return an unbounded text value
 
    ----------------------

@@ -210,6 +210,9 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       Root   : Node_Rewriting_Handle);
    --  Implementation for Rewriting.Set_Root
 
+   function Unparse (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type;
+   --  Implementation for Rewriting.Unparse
+
    ---------------------------------------
    -- Implementation for node rewriting --
    ---------------------------------------

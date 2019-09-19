@@ -90,6 +90,9 @@ package ${ada_lib_name}.Rewriting is
       Root   : Node_Rewriting_Handle);
    ${ada_doc('langkit.rewriting.set_root', 3)}
 
+   function Unparse (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type;
+   ${ada_doc('langkit.rewriting.unit_unparse', 3)}
+
    --------------------
    -- Node rewriting --
    --------------------

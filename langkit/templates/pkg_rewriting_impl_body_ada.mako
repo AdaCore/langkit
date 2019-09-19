@@ -408,6 +408,21 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Tie (Root, No_Node_Rewriting_Handle, Handle);
    end Set_Root;
 
+   -------------
+   -- Unparse --
+   -------------
+
+   function Unparse
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
+   begin
+      ${pre_check_urw_handle('Handle')}
+      return Unparsing_Implementation.Unparse
+        (Node                => Create_Abstract_Node (Handle.Root),
+         Unit                => Handle.Unit,
+         Preserve_Formatting => True,
+         As_Unit             => True);
+   end Unparse;
+
    ------------
    -- Handle --
    ------------
@@ -478,7 +493,9 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       return To_Wide_Wide_String
         (Unparsing_Implementation.Unparse
            (Create_Abstract_Node (Handle),
-            Preserve_Formatting => True));
+            Unit                => null,
+            Preserve_Formatting => True,
+            As_Unit             => False));
    end Unparse;
 
    --------------

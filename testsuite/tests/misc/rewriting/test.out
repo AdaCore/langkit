@@ -268,6 +268,22 @@ templates.adb: Done.
 == preserve_formatting.adb ==
 Running the double text substitution...
 
+Running the unit's Unparse...
+# First comment
+def aa =
+   # Middle "a" comment
+   11
+# Post "a" comment
+
+def bb (xx, # Separator comment
+       yy) =
+   ((11
+     + (22
+        + 33))
+    + (xx + yy))
+# Trailing comment
+
+
 Applying the diff...
 
 Quoting source buffer for rewritten unit...

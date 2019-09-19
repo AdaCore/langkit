@@ -772,6 +772,9 @@ base_langkit_docs = {
 
         Root must not already be tied to another analysis unit handle.
     """,
+    'langkit.rewriting.unit_unparse': """
+        Return the text associated to the given unit.
+    """,
     'langkit.rewriting.node_handle': """
         Return the rewriting handle corresponding to Node.
 
@@ -812,10 +815,10 @@ base_langkit_docs = {
         have no parent as it will be tied to Handle's tree.
     """,
     'langkit.rewriting.text': """
-        Return the text associated to the given token node
+        Return the text associated to the given token node.
     """,
     'langkit.rewriting.set_text': """
-        Override text associated to the given token node
+        Override text associated to the given token node.
     """,
     'langkit.rewriting.replace': """
         If Handle is the root of an analysis unit, untie it and set New_Node as

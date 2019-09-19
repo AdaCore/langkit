@@ -302,6 +302,16 @@ package body ${ada_lib_name}.Rewriting is
    end Set_Root;
 
    -------------
+   -- Unparse --
+   -------------
+
+   function Unparse
+     (Handle : Unit_Rewriting_Handle) return Unbounded_Text_Type is
+   begin
+      return Impl.Unparse (Unwrap_Unit_RH (Handle));
+   end Unparse;
+
+   -------------
    -- Replace --
    -------------
 
