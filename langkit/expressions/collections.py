@@ -272,7 +272,7 @@ class CollectionExpression(AbstractExpression):
         )
 
 
-@attr_call("contains")
+@attr_call('contains')
 class Contains(CollectionExpression):
     """
     Return whether `item` is an existing element in `collection`.
