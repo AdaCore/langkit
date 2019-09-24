@@ -368,4 +368,10 @@ get_eacute: "\195\169"
 identity é: "\195\169"
 double a: "aa"
 =======================
+
+=======ENUM=======
+color: Red; same_color: Red
+color: Green; same_color: Green
+color: Blue; same_color: Blue
+=======================
 Done

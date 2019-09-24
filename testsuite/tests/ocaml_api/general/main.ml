@@ -343,4 +343,28 @@ let () =
     (FooNode.p_get_eacute root)
     (FooNode.p_identity root "é")
     (FooNode.p_double root "a") ;
+  Format.printf "@[<v>=======================@ @ @]"
+
+let () =
+  Format.printf "@[<v>=======ENUM=======@ @]" ;
+  let open Color in
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_buffer ctx "foo.txt" "my_ident" in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  let pp_color fmt = function
+    | Red ->
+        Format.pp_print_string fmt "Red"
+    | Green ->
+        Format.pp_print_string fmt "Green"
+    | Blue ->
+        Format.pp_print_string fmt "Blue"
+  in
+  let print c =
+    Format.printf "@[<v>@[color: %a;@ same_color: %a@]@ @]" pp_color c pp_color
+      (FooNode.p_same_color root c)
+  in
+  print Red ;
+  print Green ;
+  print Blue ;
   Format.printf "@[<v>=======================@ @]"

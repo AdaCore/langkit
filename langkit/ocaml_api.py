@@ -253,6 +253,34 @@ class OCamlAPISettings(AbstractAPISettings):
             ' (wrapping): {}'.format(type)
         ))
 
+    def has_ctype_view(self, type):
+        """
+        Given a type, return true if it has a ctype view. Having a ctype view
+        means that wrap and unwrap operations are not needed explicitely.
+
+        :param ct.CompiledType type: The type to check.
+        :rtype: bool
+        """
+
+        return dispatch_on_type(type, [
+            (T.AnalysisUnit, lambda _: False),
+            (ct.EnumType, lambda _: True),
+            (ct.ASTNodeType, lambda _: True),
+            (ct.EntityType, lambda _: False),
+            (T.Token, lambda _: True),
+            (T.Symbol, lambda _: False),
+            (T.Bool, lambda _: True),
+            (T.Int, lambda _: True),
+            (T.Character, lambda _: True),
+            (ct.ArrayType, lambda _: False),
+            (ct.StructType, lambda _: False),
+            (T.BigInt, lambda _: True),
+            (T.EnvRebindings, lambda _: True),
+        ], exception=TypeError(
+            'Unhandled field type in the OCaml binding'
+            ' (has_ctype_view): {}'.format(type)
+        ))
+
     def wrap_value(self, value, type, context):
         """
         Given an expression for a low-level value and the associated type,
@@ -264,35 +292,22 @@ class OCamlAPISettings(AbstractAPISettings):
             expression.
         :rtype: str
         """
-        def from_module(typ):
+        def from_module(typ, value):
             context_arg = (
                 '{} '.format(context)
                 if self.wrap_requires_context(typ) else ''
             )
 
-            return "{}.wrap {}({{}})".format(
+            return "{}.wrap {}({})".format(
                 self.module_name(typ),
-                context_arg
+                context_arg,
+                value
             )
 
-        return dispatch_on_type(type, [
-            (T.AnalysisUnit, lambda t: from_module(t)),
-            (ct.EnumType, lambda _: '{}'),
-            (ct.ASTNodeType, lambda _: '{}'),
-            (ct.EntityType, lambda t: from_module(t)),
-            (T.Token, lambda _: '{}'),
-            (T.Symbol, lambda t: from_module(t)),
-            (T.Bool, lambda _: '{}'),
-            (T.Int, lambda _: '{}'),
-            (T.Character, lambda _: '{}'),
-            (ct.ArrayType, lambda t: from_module(t)),
-            (ct.StructType, lambda t: from_module(t)),
-            (T.BigInt, lambda _: '{}'),
-            (T.EnvRebindings, lambda _: '{}'),
-        ], exception=TypeError(
-            'Unhandled field type in the OCaml binding'
-            ' (wrapping): {}'.format(type)
-        )).format(value)
+        if self.has_ctype_view(type):
+            return value
+        else:
+            return from_module(type, value)
 
     def unwrap_value(self, value, type, context):
         """
@@ -305,35 +320,25 @@ class OCamlAPISettings(AbstractAPISettings):
             expression.
         :rtype: str
         """
-        def from_module(typ):
+        def from_module(typ, value):
             context_arg = (
                 '{} '.format(context) if type.conversion_requires_context
                 else ''
             )
 
-            return "{}.unwrap {}({{}})".format(
+            return "{}.unwrap {}({})".format(
                 self.module_name(typ),
-                context_arg
+                context_arg,
+                value
             )
 
-        return dispatch_on_type(type, [
-            (T.AnalysisUnit, lambda t: from_module(t)),
-            (ct.EnumType, lambda t: from_module(t)),
-            (ct.ASTNodeType, lambda _: '{}'),
-            (ct.EntityType, lambda _: from_module(T.root_node)),
-            (T.Token, lambda _: '{}'),
-            (T.Symbol, lambda t: from_module(t)),
-            (T.Bool, lambda _: '{}'),
-            (T.Int, lambda _: '{}'),
-            (T.Character, lambda _: '{}'),
-            (ct.ArrayType, lambda t: from_module(t)),
-            (ct.StructType, lambda t: from_module(t)),
-            (T.BigInt, lambda _: '{}'),
-            (T.EnvRebindings, lambda _: '{}'),
-        ], exception=TypeError(
-            'Unhandled field type in the python binding'
-            ' (wrapping): {}'.format(type)
-        )).format(value)
+        if isinstance(type, ct.EntityType):
+            # For entity type, the unwrap function is inside the root node
+            return from_module(T.root_node, value)
+        elif self.has_ctype_view(type):
+            return value
+        else:
+            return from_module(type, value)
 
     def is_struct(self, type, from_module=None):
         """

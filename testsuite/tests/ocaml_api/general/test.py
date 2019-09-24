@@ -5,7 +5,9 @@ Test that OCaml API is properly working.
 from __future__ import absolute_import, division, print_function
 
 from langkit.compile_context import LibraryEntity
-from langkit.dsl import ASTNode, Field, Symbol, T, has_abstract_list
+from langkit.dsl import (
+    ASTNode, Enum, EnumValue, Field, Symbol, T, has_abstract_list
+)
 from langkit.expressions import (
     ArrayLiteral, CharacterLiteral, Entity, Property, langkit_property
 )
@@ -13,6 +15,12 @@ from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
 from utils import build_and_run
+
+
+class Color(Enum):
+    Red = EnumValue()
+    Green = EnumValue()
+    Blue = EnumValue()
 
 
 @has_abstract_list
@@ -37,6 +45,10 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def double(c=T.Character):
         return ArrayLiteral([c, c], T.Character)
+
+    @langkit_property(public=True)
+    def same_color(c=Color):
+        return c
 
 
 class Sequence(FooNode.list):
