@@ -9,4 +9,14 @@ f evaluates to 1 (1)
 g evaluates to 0 (0)
 .p_identity(1234) = 1234
 main.py: Done.
+main.adb: Running...
+a0 evaluates to 2
+a evaluates to 10000000000000000000000000000000
+b evaluates to 10000000000000000000000000000001
+c evaluates to 10000000000000000000000000000000
+d evaluates to 0
+e evaluates to 1
+f evaluates to 1
+g evaluates to 0
+main.adb: Done.
 Done
