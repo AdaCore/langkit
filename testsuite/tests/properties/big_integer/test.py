@@ -116,5 +116,7 @@ g.add_rules(
     name=Identifier(Token.Identifier),
     literal=Literal(Token.Number),
 )
-build_and_run(g, 'main.py')
+# The real test is the Python script, but we use the Ada program to check for
+# memory leaks in properties implementation.
+build_and_run(g, py_script='main.py', ada_main='main.adb')
 print('Done')
