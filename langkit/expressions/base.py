@@ -4983,7 +4983,7 @@ class Arithmetic(AbstractExpression):
 
         return BasicExpr('Arith_Result', '({} %s {})' % self.op, l.type,
                          [l, r],
-                         abstract_expr=self)
+                         requires_incref=False, abstract_expr=self)
 
     def __repr__(self):
         return '<Op {}>'.format(self.op)
