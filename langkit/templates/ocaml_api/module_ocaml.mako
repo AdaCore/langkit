@@ -212,14 +212,16 @@ module BigInteger = struct
   (* TODO: use a int for now, should switch to a big integer. *)
   type t = int
 
+  let c_type = ptr void
+
   let create = foreign ~from:c_lib "${capi.get_name('create_big_integer')}"
-    (ptr Text.c_type @-> raisable (ptr void))
+    (ptr Text.c_type @-> raisable c_type)
 
   let text = foreign ~from:c_lib "${capi.get_name('big_integer_text')}"
-    (ptr void @-> ptr Text.c_type @-> raisable void)
+    (c_type @-> ptr Text.c_type @-> raisable void)
 
   let decref = foreign ~from:c_lib "${capi.get_name('big_integer_decref')}"
-    (ptr void @-> raisable void)
+    (c_type @-> raisable void)
 
   let wrap (c_value : unit ptr) : t =
     let c_text_ptr = allocate_n Text.c_type ~count:1 in
@@ -228,12 +230,7 @@ module BigInteger = struct
     int_of_string (!@ c_text_ptr)
 
   let unwrap (value : t) : unit ptr =
-    let result = create (allocate Text.c_type (string_of_int value)) in
-    (* Register decref to Gc so that the variable is freed when unreachable *)
-    Gc.finalise decref result;
-    result
-
-  let c_type = view (ptr void) ~read:wrap ~write:unwrap
+    create (allocate Text.c_type (string_of_int value))
 end
 
 % for enum_type in ctx.enum_types:
@@ -481,8 +478,13 @@ module Token = struct
 end
 
 module UnitProvider = struct
-  type t = unit ptr
+  (* The real C type of a context is a void*. But we use a pointer to this
+     type, to be able to allocate a value of t and attach a finalizer to it. *)
+  type t = unit ptr ptr
+
   let c_type = ptr void
+
+  let null = allocate c_type null
 
   ${exts.include_extension(
      ctx.ext('ocaml_api', 'unit_providers', 'module_struct')
@@ -755,8 +757,7 @@ end
 and AnalysisContext : sig
   type t = {
     c_value : AnalysisContextStruct.t;
-    unit_provider : UnitProvider.t option
-  }
+    unit_provider : UnitProvider.t }
 
   val create :
     ?charset:string
@@ -784,40 +785,24 @@ and AnalysisContext : sig
 end = struct
   type t = {
     c_value : AnalysisContextStruct.t;
-    unit_provider : UnitProvider.t option
-  }
+    unit_provider : UnitProvider.t }
 
   let create
     ?charset:(charset="")
     ?with_trivia:(with_trivia=true)
     ?tab_stop:(tab_stop=${ctx.default_tab_stop})
-    ?unit_provider () : t =
+    ?unit_provider:(unit_provider=UnitProvider.null) () : t =
     if tab_stop < 1 then
       raise (Invalid_argument "Invalid tab_stop (positive integer expected)") ;
     let c_context =
-      match unit_provider with
-      | Some provider ->
-          AnalysisContextStruct.create_analysis_context
-            charset
-            provider
-            with_trivia
-            tab_stop
-      | None ->
-          AnalysisContextStruct.create_analysis_context
-            charset
-            null
-            with_trivia
-            tab_stop
+       AnalysisContextStruct.create_analysis_context
+         charset
+         (!@unit_provider)
+         with_trivia
+         tab_stop
     in
-    let context = {
-      c_value = c_context;
-      unit_provider = unit_provider
-    }
-    in
-    Gc.finalise
-      (fun x -> AnalysisContextStruct.context_decref x.c_value)
-      context;
-    context
+    { c_value= c_context
+      ; unit_provider= unit_provider }
 
   let get_from_file
     ?charset:(charset="")
@@ -945,19 +930,17 @@ let ${ocaml_api.field_name(field)}
       in
       (* The result of this call should already be checked by the raisable
          mechanism *)
-      let _ : int =
-        CFunctions.${field.accessor_basename.lower}
-          (addr (${ocaml_api.unwrap_value('node', astnode.entity, None)}))
       % for arg in field.arguments:
+      let c_${arg.name.lower} =
          % if arg.default_value is not None and arg.public_type.is_entity_type:
          ## for entity default argument with use the optional label
          ## construction that hides the fact that an ommited parameter is the
          ## value None.
-           (match ${arg.name.lower} with
+           match ${arg.name.lower} with
            | Some node ->
                addr (${ocaml_api.unwrap_value('node', arg.public_type,
                                               '(context node).c_value')})
-           | None -> allocate_n ${ocaml_api.c_type(root_entity)} ~count:1)
+           | None -> allocate_n ${ocaml_api.c_type(root_entity)} ~count:1
          % else:
             <%
                value = ocaml_api.unwrap_value(arg.name.lower, arg.public_type,
@@ -969,11 +952,30 @@ let ${ocaml_api.field_name(field)}
                      value = 'allocate {} ({})'.format(
                         ocaml_api.c_type(arg.public_type), value)
             %>
-          (${value})
+        ${value}
          % endif
+      in
+      % endfor
+      let _ : int =
+        CFunctions.${field.accessor_basename.lower}
+          (addr (${ocaml_api.unwrap_value('node', astnode.entity, None)}))
+      % for arg in field.arguments:
+          c_${arg.name.lower}
       % endfor
           (result_ptr)
       in
+      % for arg in field.arguments:
+         <%
+            finalize_name = ocaml_api.finalize_function(arg.public_type)
+         %>
+         % if finalize_name is not None:
+            % if arg.public_type.is_ada_record:
+               ${finalize_name} (!@ c_${arg.name.lower}) ;
+            % else:
+               ${finalize_name} c_${arg.name.lower} ;
+            % endif
+         % endif
+      % endfor
       % if field.public_type.is_entity_type:
       ## For entity types, we return an optional argument instead of calling
       ## the wrapper, that would raise an exception.

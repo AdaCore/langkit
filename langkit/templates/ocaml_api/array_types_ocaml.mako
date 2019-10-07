@@ -125,7 +125,6 @@ end
     in
     List.iteri f value;
    % endif
-    Gc.finalise (fun x -> ${ocaml_api.struct_name(cls)}.dec_ref x) result;
     result
 
 </%def>
