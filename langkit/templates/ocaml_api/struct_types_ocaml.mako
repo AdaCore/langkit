@@ -229,21 +229,14 @@ end
 
 <%def name="analysis_context()">
 module AnalysisContextStruct : sig
-  type t = unit ptr
+  type t
 
   val c_type : t typ
 
-  val create_analysis_context : string -> UnitProvider.t -> bool -> int -> t
-
-  val context_decref : t -> unit
+  val create_analysis_context : string -> unit ptr -> bool -> int -> t
 
   val get_analysis_unit_from_file :
-    t
-    -> string
-    -> string
-    -> bool
-    -> GrammarRule.t
-    -> AnalysisUnitStruct.t
+    t -> string -> string -> bool -> GrammarRule.t -> AnalysisUnitStruct.t
 
   val get_analysis_unit_from_buffer :
     t
@@ -256,35 +249,42 @@ module AnalysisContextStruct : sig
 end = struct
   (* Module defining the c structure of an analysis context *)
 
-  type t = unit ptr
-  let c_type = ptr void
+  (* The real C type of a context is a void*. But we use a pointer to this
+     type, to be able to allocate a value of t and attach a finalizer to it.
+     See wrap function *)
+  type t = unit ptr ptr
 
-  let create_analysis_context = foreign ~from:c_lib
-    "${capi.get_name('create_analysis_context')}"
-    (string @-> UnitProvider.c_type @-> bool @-> int @-> raisable c_type)
+  let unwrap (value : t) : unit ptr = !@value
 
-  let context_decref = foreign ~from:c_lib
-    "${capi.get_name('context_decref')}"
-    (c_type @-> raisable void)
+  let context_decref =
+    let f =
+      foreign ~from:c_lib "${capi.get_name('context_decref')}"
+        (ptr void @-> raisable void)
+    in
+    fun ctx -> f (unwrap ctx)
 
-  let get_analysis_unit_from_file = foreign ~from:c_lib
-    "${capi.get_name('get_analysis_unit_from_file')}"
-    (c_type
-     @-> string
-     @-> string
-     @-> bool
-     @-> GrammarRule.c_type
-     @-> raisable AnalysisUnitStruct.c_type)
+  let wrap (c_value : unit ptr) : t =
+    (* To deallocate cleanly the context, we need to call context_decref.
+       Allocate a value and attach a finalizer to it *)
+    allocate ~finalise:context_decref (ptr void) c_value
 
-  let get_analysis_unit_from_buffer = foreign ~from:c_lib
-    "${capi.get_name('get_analysis_unit_from_buffer')}"
-    (c_type
-     @-> string (* Filename *)
-     @-> string (* Charset *)
-     @-> string (* Buffer *)
-     @-> size_t (* Buffer size *)
-     @-> GrammarRule.c_type
-     @-> raisable AnalysisUnitStruct.c_type)
+  let c_type = view (ptr void) ~read:wrap ~write:unwrap
+
+  let create_analysis_context =
+    foreign ~from:c_lib "${capi.get_name('create_analysis_context')}"
+      (string @-> UnitProvider.c_type @-> bool @-> int @-> raisable c_type)
+
+  let get_analysis_unit_from_file =
+    foreign ~from:c_lib "${capi.get_name('get_analysis_unit_from_file')}"
+      ( c_type @-> string @-> string @-> bool @-> GrammarRule.c_type
+      @-> raisable AnalysisUnitStruct.c_type )
+
+  let get_analysis_unit_from_buffer =
+    foreign ~from:c_lib "${capi.get_name('get_analysis_unit_from_buffer')}"
+      ( c_type @-> string (* Filename *) @-> string (* Charset *)
+      @-> string (* Buffer *) @-> size_t (* Buffer size *)
+      @-> GrammarRule.c_type
+      @-> raisable AnalysisUnitStruct.c_type )
 
 end
 </%def>

@@ -274,7 +274,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Character, lambda _: True),
             (ct.ArrayType, lambda _: False),
             (ct.StructType, lambda _: False),
-            (T.BigInt, lambda _: True),
+            (T.BigInt, lambda _: False),
             (T.EnvRebindings, lambda _: True),
         ], exception=TypeError(
             'Unhandled field type in the OCaml binding'
@@ -367,6 +367,34 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _: True),
             (T.BigInt, lambda _: False),
             (T.EnvRebindings, lambda _: False),
+        ])
+
+    def finalize_function(self, type):
+        """
+        Return the name of the finalization function if a value of the given
+        type must be finalized. A value needs a finalization if it is
+        completly converted to an OCaml value. This function is used
+        when calling a C API function, where, we allocated a C value when
+        unwrapping an OCaml value. Thus, we need to finalize it after the call
+        to the C API function.
+
+        :param CompiledType type: The type for which we want to get the
+            finalization function name.
+        :rtype: str
+        """
+
+        def dec_ref(type):
+            if type.is_refcounted:
+                return '{}.dec_ref'.format(self.struct_name(type))
+            else:
+                return None
+
+        return dispatch_on_type(type, [
+            (T.BigInt, lambda t: '{}.decref'.format(self.struct_name(t))),
+            (ct.ASTNodeType, lambda _: None),
+            (ct.EntityType, lambda _: None),
+            (T.AnalysisUnit, lambda _: None),
+            (ct.CompiledType, lambda t: dec_ref(t))
         ])
 
     def c_type(self, type, from_module=None):
