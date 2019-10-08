@@ -50,6 +50,10 @@ class FooNode(ASTNode):
     def same_color(c=Color):
         return c
 
+    @langkit_property(public=True)
+    def int_double(c=T.BigInt):
+        return c + c
+
 
 class Sequence(FooNode.list):
     all_items = Property(Entity.map(lambda i: i), public=True)

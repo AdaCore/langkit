@@ -373,5 +373,9 @@ double a: "aa"
 color: Red; same_color: Red
 color: Green; same_color: Green
 color: Blue; same_color: Blue
+=================
+
+========BIG INT========
+int_double 42: 84
 =======================
 Done
