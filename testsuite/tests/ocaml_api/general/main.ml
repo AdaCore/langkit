@@ -1,7 +1,5 @@
 open Libfoolang
 
-let ctx = AnalysisContext.create ()
-
 let pp_diag fmt {Diagnostic.message} = Format.pp_print_string fmt message
 
 let pp_diags fmt diags =
@@ -36,18 +34,6 @@ let pp_text fmt node = Format.pp_print_string fmt (FooNode.text node)
 
 let pp_entity fmt node = Format.pp_print_string fmt (FooNode.entity_image node)
 
-let () =
-  (* Diagnostics *)
-  Format.printf "@[<v>=======DIAGNOSTICS=======@ @]" ;
-  (* No file *)
-  let ctx = AnalysisContext.create () in
-  let u = AnalysisContext.get_from_file ctx "unknown" in
-  Format.printf "%a" pp_diags (AnalysisUnit.diagnostics u) ;
-  (* Parsing error *)
-  let u = AnalysisContext.get_from_buffer ctx "foo.txt" "var identifier" in
-  Format.printf "%a" pp_diags (AnalysisUnit.diagnostics u) ;
-  Format.printf "@[<v>=========================@ @ @]"
-
 let pp_token_info fmt with_trivia =
   (* read foo.txt and print information, with or without trivia about tokens *)
   let ctx = AnalysisContext.create ~with_trivia () in
@@ -67,15 +53,25 @@ let pp_token_info fmt with_trivia =
     first_token.text last_token.text token_start.text token_end.text
     token_count trivia_count
 
-let () =
+let test_diagnostics () =
+  (* Diagnostics *)
+  Format.printf "@[<v>=======DIAGNOSTICS=======@ @]" ;
+  (* No file *)
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ctx "unknown" in
+  Format.printf "%a" pp_diags (AnalysisUnit.diagnostics u) ;
+  (* Parsing error *)
+  let u = AnalysisContext.get_from_buffer ctx "foo.txt" "var identifier" in
+  Format.printf "%a" pp_diags (AnalysisUnit.diagnostics u) ;
+  Format.printf "@[<v>=========================@ @ @]"
+
+let test_token () =
   (* Test token functions *)
   Format.printf "@[<v>=======TOKEN FUNCTIONS=======@ @]" ;
   Format.printf
     "@[<v>@[<v 2>With trivia:@ %a@]@ @ @[<v 2>Without trivia:@ %a@]@ @]"
     pp_token_info true pp_token_info false ;
-  Format.printf "@[<v>=============================@ @ @]"
-
-let () =
+  Format.printf "@[<v>=============================@ @ @]" ;
   (* Test Token iterators *)
   Format.printf "@[<v>=======TOKEN ITERATORS=======@ @]" ;
   let ctx = AnalysisContext.create () in
@@ -124,7 +120,7 @@ let () =
     (FooNode.tokens root) ;
   Format.printf "@[<v>=============================@ @ @]"
 
-let () =
+let test_node () =
   Format.printf "@[<v>=======NODE ITERATORS=======@ @]" ;
   (* Test all iterators *)
   let ctx = AnalysisContext.create () in
@@ -183,7 +179,7 @@ let () =
     (FooNode.for_all aux root) ;
   Format.printf "@[<v>============================@ @ @]"
 
-let () =
+let test_parent () =
   Format.printf "@[<v>=======PARENT(S)=======@ @]" ;
   let ctx = AnalysisContext.create () in
   let u = AnalysisContext.get_from_file ~reparse:true ctx "foo.txt" in
@@ -218,7 +214,7 @@ let () =
     (FooNode.for_all aux root) ;
   Format.printf "@[<v>=======================@ @ @]"
 
-let () =
+let test_siblings () =
   Format.printf "@[<v>=======SIBLINGS=======@ @]" ;
   let ctx = AnalysisContext.create () in
   let u = AnalysisContext.get_from_file ~reparse:true ctx "foo.txt" in
@@ -252,7 +248,7 @@ let () =
       Format.printf "ERROR\n%!" ; exit 1 ) ;
   Format.printf "@[<v>======================@ @ @]"
 
-let () =
+let test_array () =
   Format.printf "@[<v>=======ARRAY=======@ @]" ;
   let ctx = AnalysisContext.create () in
   let u =
@@ -280,7 +276,7 @@ let () =
       exit 1 ) ;
   Format.printf "@[<v>===================@ @ @]"
 
-let () =
+let test_symbol () =
   Format.printf "@[<v>=======SYMBOL=======@ @]" ;
   let ctx = AnalysisContext.create () in
   let u = AnalysisContext.get_from_buffer ctx "foo.txt" "my_ident" in
@@ -303,7 +299,7 @@ let () =
   print_sym "invalid_symbol0" ;
   Format.printf "@[<v>====================@ @ @]"
 
-let () =
+let test_unicode () =
   Format.printf "@[<v>=======UNICODE=======@ @]" ;
   let ctx = AnalysisContext.create () in
   let pp_string_lit fmt node =
@@ -331,7 +327,7 @@ let () =
   Format.printf "@[<v>@[<2>ISO-8859-1 charset:@ %a@]@ @]" pp_string_lit root ;
   Format.printf "@[<v>=====================@ @ @]"
 
-let () =
+let test_character () =
   Format.printf "@[<v>=======CHARACTER=======@ @]" ;
   let ctx = AnalysisContext.create () in
   let u = AnalysisContext.get_from_buffer ctx "foo.txt" "my_ident" in
@@ -345,7 +341,7 @@ let () =
     (FooNode.p_double root "a") ;
   Format.printf "@[<v>=======================@ @ @]"
 
-let () =
+let test_enum () =
   Format.printf "@[<v>=======ENUM=======@ @]" ;
   let open Color in
   let ctx = AnalysisContext.create () in
@@ -368,3 +364,18 @@ let () =
   print Green ;
   print Blue ;
   Format.printf "@[<v>=======================@ @]"
+
+let () =
+  test_diagnostics () ;
+  test_token () ;
+  test_node () ;
+  test_parent () ;
+  test_siblings () ;
+  test_array () ;
+  test_symbol () ;
+  test_unicode () ;
+  test_character () ;
+  test_enum () ;
+  (* Call to compact to force Gc to collect everything so we can test with
+   valgrind *)
+  Gc.compact ()

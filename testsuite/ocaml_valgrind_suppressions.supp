@@ -1,0 +1,53 @@
+{
+   allocate_n implementation is supposed to free the allocated pointer itself
+   Memcheck:Leak
+   fun:calloc
+   fun:ctypes_allocate
+   fun:camlCtypes_memory__allocate_n_*
+   ...
+}
+{
+   false positives with camlForeign
+   Memcheck:Leak
+   fun:malloc
+   fun:caml_stat_alloc
+   fun:ctypes_prep_callspec
+   fun:camlForeign__prep_callspec_*
+   ...
+}
+{
+   false positives with camlForeign
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:caml_stat_resize
+   fun:ctypes_add_argument
+   fun:camlForeign__add_argument_*
+   ...
+}
+{
+   false positives with caml mutex
+   Memcheck:Leak
+   fun:malloc
+   fun:st_mutex_create
+   fun:caml_mutex_new
+   ...
+}
+{
+   false positives with caml thread
+   Memcheck:Leak
+   fun:malloc
+   fun:caml_thread_new_descriptor
+   fun:caml_thread_initialize
+   ...
+}
+{
+   false positive when calling Gc.compact
+   Memcheck:Leak
+   fun:malloc
+   fun:caml_stat_alloc_aligned_noexc
+   fun:caml_alloc_for_heap
+   fun:caml_compact_heap
+   fun:caml_gc_compaction
+   ...
+}
