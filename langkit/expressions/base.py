@@ -3040,7 +3040,7 @@ class PropertyDef(AbstractNodeData):
                  optional_entity_info=False, warn_on_unused=True,
                  ignore_warn_on_node=None,
                  call_non_memoizable_because=None,
-                 activate_tracing=False):
+                 activate_tracing=False, dump_ir=False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3146,6 +3146,9 @@ class PropertyDef(AbstractNodeData):
 
         :param bool activate_tracing: Whether we want to activate tracing for
             this property's execution.
+
+        :param bool dump_ir: If true, dump the tree of resolved expressions for
+            this property.
         """
 
         self.prefix = prefix
@@ -3307,6 +3310,7 @@ class PropertyDef(AbstractNodeData):
         """
 
         self.activate_tracing = activate_tracing
+        self.dump_ir = dump_ir
 
     @property
     def has_debug_info(self):
@@ -3997,6 +4001,8 @@ class PropertyDef(AbstractNodeData):
                 self.constructed_expr = construct(self.expr,
                                                   self.expected_type,
                                                   message)
+                if self.dump_ir:
+                    print(self.constructed_expr.ir_dump)
             finally:
                 self.in_type = False
 
@@ -4317,7 +4323,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      external=False, uses_entity_info=None, uses_envs=None,
                      warn_on_unused=True, ignore_warn_on_node=None,
                      call_non_memoizable_because=None,
-                     activate_tracing=False):
+                     activate_tracing=False, dump_ir=False):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -4346,6 +4352,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             ignore_warn_on_node=ignore_warn_on_node,
             call_non_memoizable_because=call_non_memoizable_because,
             activate_tracing=activate_tracing,
+            dump_ir=dump_ir
         )
     return decorator
 
