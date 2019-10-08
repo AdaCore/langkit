@@ -264,8 +264,12 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         with open('dune-project', 'w') as f:
             f.write('(lang dune 1.6)')
 
-        run('dune', 'exec', '--display', 'quiet', '--root', '.',
+        # Build the ocaml executable
+        run('dune', 'build', '--display', 'quiet', '--root', '.',
             './{}.exe'.format(ocaml_main))
+
+        # Run the ocaml executable
+        run('./_build/default/{}.exe'.format(ocaml_main))
 
 
 def add_gpr_path(dirname):
