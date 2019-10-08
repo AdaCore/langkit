@@ -363,6 +363,15 @@ let test_enum () =
   print Red ;
   print Green ;
   print Blue ;
+  Format.printf "@[<v>=================@ @ @]"
+
+let test_big_int () =
+  Format.printf "@[<v>========BIG INT========@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ctx "foo.txt" in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  Format.printf "@[<v>int_double 42: %d@ @]" (FooNode.p_int_double root 42) ;
   Format.printf "@[<v>=======================@ @]"
 
 let () =
@@ -376,6 +385,7 @@ let () =
   test_unicode () ;
   test_character () ;
   test_enum () ;
+  test_big_int () ;
   (* Call to compact to force Gc to collect everything so we can test with
    valgrind *)
   Gc.compact ()
