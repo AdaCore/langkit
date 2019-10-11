@@ -51,3 +51,23 @@
    fun:caml_gc_compaction
    ...
 }
+
+{
+   false positives with camlCtypes_ffi
+   Memcheck:Leak
+   fun:malloc
+   fun:caml_stat_alloc
+   fun:ctypes_prep_callspec
+   fun:camlCtypes_ffi__prep_callspec_*
+   ...
+}
+{
+   false positives with camlCtypes_ffi
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:caml_stat_resize
+   fun:ctypes_add_argument
+   fun:camlCtypes_ffi__add_argument_*
+   ...
+}
