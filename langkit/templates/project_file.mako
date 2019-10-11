@@ -134,12 +134,14 @@ library project ${lib_name} is
             null;
       end case;
 
-      for Default_Switches ("Ada") use
-         Mode_Args & Ada_Mode_Args & Generated_Ada_Cargs;
-      for Default_Switches ("C") use Mode_Args & C_Mode_Args;
+      Common_Ada_Cargs := Mode_Args & Ada_Mode_Args;
+      Common_C_Cargs := Mode_Args & C_Mode_Args;
+
+      for Default_Switches ("Ada") use Common_Ada_Cargs & Generated_Ada_Cargs;
+      for Default_Switches ("C") use Common_C_Cargs;
 
       % for f in extra_source_files:
-      for Switches ("${f}") use Mode_Args & Ada_Mode_Args & Manual_Ada_Cargs;
+      for Switches ("${f}") use Common_Ada_Cargs & Manual_Ada_Cargs;
       % endfor
 
       case Build_Mode is
