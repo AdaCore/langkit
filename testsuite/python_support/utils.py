@@ -41,6 +41,9 @@ end Gen;
 """
 
 
+valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
+
+
 # Determine where to find the root directory for Langkit sources
 langkit_root = os.environ.get('LANGKIT_ROOT_DIR')
 if not langkit_root:
@@ -216,7 +219,14 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
 
     env = m.derived_env()
 
-    def run(*argv):
+    def run(*argv, **kwargs):
+        valgrind = kwargs.pop('valgrind', False)
+        suppressions = kwargs.pop('valgrind_suppressions', [])
+        assert not kwargs
+
+        if valgrind_enabled and valgrind:
+            argv = valgrind_cmd(list(argv), suppressions)
+
         subprocess.check_call(argv, env=env)
 
     if py_script is not None:
@@ -247,10 +257,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             if len(ada_main) > 1:
                 print('== {} =='.format(m))
             sys.stdout.flush()
-            argv = [os.path.join('obj', m[:-4])]
-            if os.environ.get('VALGRIND_ENABLED'):
-                argv = valgrind_cmd(argv)
-            run(*argv)
+            run(os.path.join('obj', m[:-4]), valgrind=True)
 
     if ocaml_main is not None:
         # Set up a Dune project
@@ -269,7 +276,9 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             './{}.exe'.format(ocaml_main))
 
         # Run the ocaml executable
-        run('./_build/default/{}.exe'.format(ocaml_main))
+        run('./_build/default/{}.exe'.format(ocaml_main),
+            valgrind=True,
+            valgrind_suppressions=['ocaml'])
 
 
 def add_gpr_path(dirname):
