@@ -1753,6 +1753,13 @@ class Field(BaseField):
         :type: list[langkit.parsers.Parser]
         """
 
+        self.types_from_synthesis = TypeSet()
+        """
+        Set of types coming from node synthetization in properties.
+
+        :type: TypeSet[ASTNodeType]
+        """
+
         self._precise_types = None
         """
         Cache for the precise_types property.
@@ -1844,12 +1851,13 @@ class Field(BaseField):
                     etypes.update(f.precise_element_types)
 
         elif self.struct.synthetic:
-            types = TypeSet([self.type])
+            types = self.types_from_synthesis
+            assert types.matched_types
             if is_list:
                 etypes = TypeSet([self.type.element_type])
 
         else:
-            # For regular
+            # For fields in regular nodes
             types = TypeSet()
             if is_list:
                 etypes = TypeSet()
@@ -1857,6 +1865,13 @@ class Field(BaseField):
                 types.update(p.precise_types)
                 if is_list:
                     etypes.update(p.precise_element_types)
+
+            # Due to inheritance, even fields of regular nodes can appear in a
+            # synthetic node, so take types from node synthesis into account.
+            types.update(self.types_from_synthesis)
+            if is_list:
+                for t in self.types_from_synthesis.matched_types:
+                    etypes.update(t.element_type)
 
         self._precise_types = types
         self._precise_element_types = etypes
@@ -2710,11 +2725,6 @@ class ASTNodeType(BaseStructType):
                 f._compute_precise_types()
 
     def warn_imprecise_field_type_annotations(self):
-        # The type of synthetic node fields are not inferred, so there is
-        # nothing to do for them.
-        if self.synthetic:
-            return
-
         for field in self.get_parse_fields():
 
             # We want to compare the type annotation to the type that was

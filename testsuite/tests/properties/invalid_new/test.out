@@ -10,8 +10,8 @@ File "test.py", line 29, in BarNode.public_prop
 == Incorrect new 2 ==
 File "test.py", line 29, in BarNode.public_prop
   line 34, in BarNode.prop
-  line 46, in No expression
-    Error: Wrong type for field b: expected Int, got FooNode
+  line 46, in New expression
+    Error: Wrong type for field B: expected Int, got FooNode
 
 == Incorrect new 1 ==
 File "test.py", line 29, in BarNode.public_prop

@@ -1693,11 +1693,8 @@ class CompileCtx(object):
             ASTNodePass('validate AST node fields',
                         lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),
-            ASTNodePass('compute precise fields types',
-                        lambda _, n: n.compute_precise_fields_types()),
             GlobalPass('compute optional field info',
                        CompileCtx.compute_optional_field_info),
-            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),
             errors_checkpoint_pass,
@@ -1742,6 +1739,11 @@ class CompileCtx(object):
             GlobalPass('compute AST node constants',
                        CompileCtx.compute_astnode_constants),
             errors_checkpoint_pass,
+
+            MajorStepPass('Computing precise types'),
+            ASTNodePass('compute precise fields types',
+                        lambda _, n: n.compute_precise_fields_types()),
+            GlobalPass('check PLE unit root', CompileCtx.check_ple_unit_root),
 
             GrammarRulePass('compile parsers', Parser.compile),
             GrammarRulePass('compute nodes parsers correspondence',
