@@ -399,17 +399,32 @@ class New(AbstractExpression):
         )
 
         # At this stage, we know that the user has only provided fields that
-        # are valid for the struct type.
-        provided_fields = {required_fields[name]: construct(
-            value, required_fields[name].type,
-            'Wrong type for field {}: expected {{expected}}, '
-            'got {{expr_type}}'.format(name)
-        ) for name, value in self.field_values.items()}
+        # are valid for the struct type. First, construct expression for field
+        # values.
+        field_values = {required_fields[name]: construct(expr)
+                        for name, expr in self.field_values.items()}
+
+        # Then check that the type of these expressions match field types
+        for field, expr in field_values.items():
+            check_source_language(
+                expr.type.matches(field.type),
+                'Wrong type for field {}: expected {}, got {}'
+                .format(field.name, field.type.dsl_name, expr.type.dsl_name)
+            )
+
+            # Annotate parsing/synthetic fields with precise type information
+            if isinstance(field, Field):
+                field.types_from_synthesis.include(expr.type)
+
+            # Make sure we downcast input values so that they fit in the
+            # fields.
+            if field.type != expr.type:
+                field_values[field] = Cast.Expr(expr, field.type)
 
         expr_cls = (New.NodeExpr
                     if self.struct_type.is_ast_node else
                     New.StructExpr)
-        return expr_cls(self.struct_type, provided_fields, abstract_expr=self)
+        return expr_cls(self.struct_type, field_values, abstract_expr=self)
 
     def __repr__(self):
         return '<New {}>'.format(resolve_type(self.struct_type).name.camel)
