@@ -406,6 +406,10 @@ module Token = struct
     "${capi.get_name('token_previous')}"
     (ptr c_type @-> ptr c_type @-> raisable void)
 
+  let is_equivalent = foreign ~from:c_lib
+    "${capi.get_name('token_is_equivalent')}"
+    (ptr c_type @-> ptr c_type @-> raisable bool)
+
   let pp fmt token =
     let pp_text fmt = function
       | "" -> Format.pp_print_string fmt ""
@@ -472,9 +476,9 @@ module Token = struct
        , token.token_index
        , token.trivia_index)
 
-  let equiv one other =
-    one.kind = other.kind
-    && one.text = other.text
+  let is_equivalent one other =
+    is_equivalent (allocate c_type one) (allocate c_type other)
+
 end
 
 module UnitProvider = struct
