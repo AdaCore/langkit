@@ -118,7 +118,36 @@ let test_token () =
   (* Tokens *)
   Format.printf "@[<v>@[<v 2>Root node token list:@ %a@]@ @]" pp_toks
     (FooNode.tokens root) ;
-  Format.printf "@[<v>=============================@ @ @]"
+  Format.printf "@[<v>=============================@ @ @]" ;
+  Format.printf "@[<v>========TOKEN EQUIVALENT========@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u =
+    AnalysisContext.get_from_buffer ctx "foo.txt"
+      "null identifier example identifier example"
+  in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  let pp_tok fmt tok = Format.pp_print_string fmt tok.Token.text in
+  let pp_tok_list fmt ltok =
+    let pp_sep fmt () = Format.fprintf fmt "@ " in
+    Format.fprintf fmt "@[<2>Equivalent tokens: %a@]"
+      (Format.pp_print_list ~pp_sep pp_tok)
+      ltok
+  in
+  let rec compute_equiv_tokens = function
+    | h :: q ->
+        (h :: List.filter (Token.is_equivalent h) q) :: compute_equiv_tokens q
+    | [] ->
+        []
+  in
+  let equiv_tokens =
+    FooNode.tokens root
+    |> List.filter (fun t -> not (Token.is_trivia t))
+    |> compute_equiv_tokens
+    |> List.filter (fun l -> List.length l > 1)
+  in
+  Format.printf "@[<v>%a@ @]" (Format.pp_print_list pp_tok_list) equiv_tokens ;
+  Format.printf "@[<v>================================@ @ @]"
 
 let test_node () =
   Format.printf "@[<v>=======NODE ITERATORS=======@ @]" ;

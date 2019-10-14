@@ -187,6 +187,11 @@ Root node token list:
   "null"
 =============================
 
+========TOKEN EQUIVALENT========
+Equivalent tokens: identifier identifier
+Equivalent tokens: example example
+================================
+
 =======NODE ITERATORS=======
 Children:
   <NullNode foo.txt:1:1-1:5>

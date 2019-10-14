@@ -109,10 +109,8 @@ module Token : sig
 
   val hash : t -> int
 
-  val equiv : t -> t -> bool
-  (* Return true if the tokens are equivalent, meaning that they are of the
-   * same kind, and have the same text
-   *)
+  val is_equivalent : t -> t -> bool
+  ${ocaml_doc('langkit.token_is_equivalent', 1)}
 
   val pp : Format.formatter -> t -> unit
 end
