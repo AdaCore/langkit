@@ -3352,7 +3352,8 @@ class ArrayType(CompiledType):
             nullexpr=self.null_constant.camel_with_underscores,
             element_type=element_type,
             null_allowed=True,
-            has_equivalent_function=True)
+            has_equivalent_function=True,
+            hashable=element_type.hashable)
         CompiledTypeRepo.array_types.add(self)
 
         # Text_Type is always defined, since it comes from

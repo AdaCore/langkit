@@ -134,6 +134,10 @@
 
    function Equivalent (L, R : ${cls.name}) return Boolean;
 
+   % if cls.requires_hash_function:
+      function Hash (A : ${cls.name}) return Hash_Type;
+   % endif
+
    % if ctx.properties_logging:
       function Trace_Image (A : ${cls.name}) return String;
    % endif
@@ -306,6 +310,17 @@
 
       return True;
    end Equivalent;
+
+   % if cls.requires_hash_function:
+      function Hash (A : ${cls.name}) return Hash_Type is
+         Hashes : Hash_Array (1 .. A.Items'Length);
+      begin
+         for I in 1 .. A.Items'Length loop
+            Hashes  (I) := Hash (A.Items (A.Items'First - 1 + I));
+         end loop;
+         return Combine (Hashes);
+      end Hash;
+   % endif
 
    % if ctx.properties_logging:
       -----------------
