@@ -3864,7 +3864,8 @@ def create_builtin_types():
                  nullexpr="Chars.NUL",
                  c_type_name='uint32_t',
                  external=True,
-                 api_name='CharacterType')
+                 api_name='CharacterType',
+                 hashable=True)
 
 
 class TypeRepo(object):

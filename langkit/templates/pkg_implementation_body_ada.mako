@@ -2016,6 +2016,11 @@ package body ${ada_lib_name}.Implementation is
       function Hash (I : Integer) return Hash_Type is (Hash_Type'Mod (I));
    % endif
 
+   % if T.Character.requires_hash_function:
+      function Hash (I : Character_Type) return Hash_Type
+      is (Hash_Type'Mod (Character_Type'Pos(I)));
+   % endif
+
    % if T.entity_info.requires_hash_function:
       function Hash (Info : ${T.entity_info.name}) return Hash_Type is
         (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
