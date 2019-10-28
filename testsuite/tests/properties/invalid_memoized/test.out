@@ -1,5 +1,3 @@
-== Invalid uses entity info ==
-File "test.py", line 35, in Example.p
-    Error: This property cannot be memoized because argument a (of type FooNode.entity.array) is not hashable
-
+File "test.py", line 21, in Example.prop
+    Error: This property cannot be memoized because argument a (of type Token.array) is not hashable
 Done
