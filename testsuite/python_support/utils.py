@@ -195,6 +195,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
 
     argv.append('make')
 
+    build_mode = 'dev'
+    argv.append('--build-mode={}'.format(build_mode))
     for w in WarningSet.available_warnings:
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     if not pretty_print:
@@ -215,9 +217,9 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
-        m.write_setenv(f)
+        m.write_setenv(build_mode, f)
 
-    env = m.derived_env()
+    env = m.derived_env(build_mode)
 
     def run(*argv, **kwargs):
         valgrind = kwargs.pop('valgrind', False)
