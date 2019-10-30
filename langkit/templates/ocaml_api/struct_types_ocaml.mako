@@ -20,10 +20,16 @@ end
 <%def name="ocaml_fields(cls)">
   type t = {
    % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
+      ${ocaml_api.field_name(f)} :
       % if f.type.is_ast_node:
-    ${ocaml_api.field_name(f)} : ${ocaml_api.c_value_type(f.type, cls)};
+         ${ocaml_api.c_value_type(f.type, cls)};
+      % elif f.type.is_entity_type:
+         ## If the type is an entity type, we want an optional type instead.
+         ## This is because we have no way to know if the node will be null
+         ## or not.
+         ${ocaml_api.type_public_name(f.type, cls)} option;
       % else:
-    ${ocaml_api.field_name(f)} : ${ocaml_api.type_public_name(f.type, cls)};
+         ${ocaml_api.type_public_name(f.type, cls)};
       % endif
    % endfor
   }
@@ -56,9 +62,9 @@ end
    % endif
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
     ${ocaml_api.field_name(f)} = ${ocaml_api.wrap_value(
-      'getf c_value {}.{}'.format(ocaml_api.struct_name(cls),
-                                  ocaml_api.field_name(f)),
-      f.type, 'context')};
+      '(getf c_value {}.{})'.format(ocaml_api.struct_name(cls),
+                                    ocaml_api.field_name(f)),
+      f.type, 'context', check_for_null=True)};
       % endfor
   }
 
@@ -72,7 +78,7 @@ end
     setf c_value
       ${ocaml_api.struct_name(cls)}.${ocaml_api.field_name(f)}
       (${ocaml_api.unwrap_value('value.{}'.format(ocaml_api.field_name(f)),
-                                f.type, 'context')});
+                                f.type, 'context', check_for_none=True)});
       % endfor
     c_value
 
