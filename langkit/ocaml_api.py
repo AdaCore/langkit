@@ -91,22 +91,6 @@ class OCamlAPISettings(AbstractAPISettings):
         else:
             return "{}.{}".format(self.module_name(for_module), 'fields')
 
-    def check_for_null(self, c_value, node, context):
-        """
-        Return an OCaml expression that first checks if the underlying node of
-        c_value is null. If it is the case, the expression is evaluated to
-        None, otherwise, wrap c_value to the given node type.
-
-        :param str c_value: The OCaml c value for a node.
-        :param ct.ASTNodeType node: The type of c_value.
-        :param str context: The OCaml expression denoting the context.
-        """
-
-        return (
-            "if is_null (getf {} EntityStruct.node) then None else Some ({})"
-            .format(c_value, self.wrap_value(c_value, node, context))
-        )
-
     def get_field_type(self, field):
         """
         Return a precice type for the given Field instance. The list contains
@@ -281,7 +265,7 @@ class OCamlAPISettings(AbstractAPISettings):
             ' (has_ctype_view): {}'.format(type)
         ))
 
-    def wrap_value(self, value, type, context):
+    def wrap_value(self, value, type, context, check_for_null=False):
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -290,6 +274,10 @@ class OCamlAPISettings(AbstractAPISettings):
         :param str value: Expression yielding a low-level value.
         :param ct.CompiledType type: Type corresponding to the "value"
             expression.
+        :param bool check_for_null: If true, return an OCaml expression that
+            first checks if the underlying node value is null. If it is the
+            case, the expression is evaluated to None. We check null only for
+            entity types.
         :rtype: str
         """
         def from_module(typ, value):
@@ -304,10 +292,17 @@ class OCamlAPISettings(AbstractAPISettings):
                 value
             )
 
-        if self.has_ctype_view(type):
-            return value
+        wrapped_result = (
+            value
+            if self.has_ctype_view(type)
+            else from_module(type, value)
+        )
+
+        if check_for_null and type.is_entity_type:
+            return ("if is_null (getf {} EntityStruct.node) then None "
+                    + "else Some ({})").format(value, wrapped_result)
         else:
-            return from_module(type, value)
+            return wrapped_result
 
     def unwrap_value(self, value, type, context):
         """
