@@ -706,8 +706,8 @@ end = struct
     AnalysisUnitStruct.unit_root
       (${ocaml_api.unwrap_value("analysis_unit", T.AnalysisUnit, None)})
       (addr c_value);
-    ${ocaml_api.check_for_null('c_value', root_entity,
-        "analysis_unit.context")}
+    ${ocaml_api.wrap_value('c_value', root_entity, "analysis_unit.context",
+         check_for_null=True)}
 
   let diagnostics unit =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
@@ -980,15 +980,11 @@ let ${ocaml_api.field_name(field)}
             % endif
          % endif
       % endfor
-      % if field.public_type.is_entity_type:
       ## For entity types, we return an optional argument instead of calling
-      ## the wrapper, that would raise an exception.
-      ${ocaml_api.check_for_null('!@ result_ptr', field.public_type,
-                                 '(context node)')}
-      % else:
+      ## the wrapper, that would raise an exception. This is why we set
+      ## check_for_null to true.
       ${ocaml_api.wrap_value('!@ result_ptr', field.public_type,
-                             '(context node)')}
-      % endif
+         '(context node)', check_for_null=True)}
 
    % endfor
 
@@ -1058,7 +1054,8 @@ let ${ocaml_api.field_name(field)}
     let result_ptr = allocate_n ${ocaml_api.c_type(root_entity)} ~count:1 in
     CFunctions.lookup_in_node
       (addr node_c_value) sloc_ptr result_ptr;
-    ${ocaml_api.check_for_null('!@ result_ptr', root_entity, '(context node)')}
+    ${ocaml_api.wrap_value('!@ result_ptr', root_entity, '(context node)',
+         check_for_null=True)}
 
   let children_opt node =
     let node_c_value = ${ocaml_api.unwrap_value('node', root_entity, None)} in
@@ -1074,7 +1071,8 @@ let ${ocaml_api.field_name(field)}
     let items = c_value @. ${ocaml_api.struct_name(T.entity.array)}.items in
     let f i =
       let fresh = allocate EntityStruct.c_type !@(items +@ i) in
-      ${ocaml_api.check_for_null('!@ fresh', root_entity, 'context')}
+      ${ocaml_api.wrap_value('!@ fresh', root_entity, 'context',
+         check_for_null=True)}
     in
     let result = List.init length f in
     ${ocaml_api.struct_name(T.entity.array)}.dec_ref (!@ c_value_ptr);

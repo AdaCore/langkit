@@ -92,12 +92,8 @@
         (addr field_c_value)
       in
       let node =
-         % if field.is_optional:
-         ${ocaml_api.check_for_null('field_c_value', field.public_type,
-                                    'context')}
-         % else:
-         ${ocaml_api.wrap_value('field_c_value', field.public_type, 'context')}
-         % endif
+         ${ocaml_api.wrap_value('field_c_value', field.public_type, 'context',
+             check_for_null=field.is_optional)}
       in
          <%
             precise_types = ocaml_api.get_field_type(field)
