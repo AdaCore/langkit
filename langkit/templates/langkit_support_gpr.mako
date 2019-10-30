@@ -52,8 +52,10 @@ library project Langkit_Support is
       "Langkit_Support.Vectors");
 
    for Source_Dirs use (${string_repr(source_dir)});
-   for Library_Dir use "../langkit_support." & Library_Kind_Param;
-   for Object_Dir use "../../obj/langkit_support." & Library_Kind_Param;
+   for Library_Dir use
+      "../langkit_support/" & Library_Kind_Param & "/" & Build_Mode;
+   for Object_Dir use
+      "../../obj/langkit_support/" & Library_Kind_Param & "/" & Build_Mode;
 
    Common_Ada_Cargs := ("-gnatwa", "-gnatyg");
 

@@ -294,6 +294,7 @@ class ManageScript(object):
             help='Installation directory.'
         )
 
+        self.add_build_mode_arg(install_parser)
         install_parser.add_argument(
             '--force', '-f', action='store_true',
             help='Force installation, overwrite files.'
@@ -305,6 +306,7 @@ class ManageScript(object):
 
         self.setenv_parser = create_parser(self.do_setenv, True)
 
+        self.add_build_mode_arg(self.setenv_parser)
         self.setenv_parser.add_argument(
             '--json', '-J', action='store_true',
             help='Output necessary env keys to JSON.'
@@ -412,6 +414,13 @@ class ManageScript(object):
                  ' hardcodes source paths in the sources.'
         )
 
+    def add_build_mode_arg(self, subparser):
+        subparser.add_argument(
+            '--build-mode', '-b', choices=list(self.BUILD_MODES),
+            default='dev',
+            help='Selects a preset for build options.'
+        )
+
     def add_build_args(self, subparser):
         """
         Add arguments to tune code compilation to "subparser".
@@ -423,11 +432,7 @@ class ManageScript(object):
             help='Number of parallel jobs to spawn in parallel (default: your'
                  ' number of cpu).'
         )
-        subparser.add_argument(
-            '--build-mode', '-b', choices=list(self.BUILD_MODES),
-            default='dev',
-            help='Selects a preset for build options.'
-        )
+        self.add_build_mode_arg(subparser)
         subparser.add_argument(
             '--enable-build-warnings',
             action='store_true', dest='enable_build_warnings',
@@ -629,6 +634,11 @@ class ManageScript(object):
             line invocation of manage.py.
         """
 
+        # The call to "check_call" in gnatpp does a setenv only so that gnatpp
+        # sees the project files, i.e. access to build artifacts is not
+        # requested, so we can provide a dummy build mode.
+        args.build_mode = self.BUILD_MODES[0]
+
         def gnatpp(project_file, glob_pattern):
             """
             Helper function to pretty-print files from a GPR project.
@@ -654,7 +664,7 @@ class ManageScript(object):
 
             self.check_call(
                 args, 'Pretty-printing',
-                argv + self.gpr_scenario_vars(args, 'prod', 'relocatable')
+                argv + self.gpr_scenario_vars(args, 'relocatable')
                 + glob.glob(glob_pattern),
                 abort_on_error=False
             )
@@ -742,24 +752,17 @@ class ManageScript(object):
                         (is_library or not build_static_pic))
         return (build_shared, build_static_pic, build_static)
 
-    def gpr_scenario_vars(self, args, build_mode=None,
-                          library_type='relocatable'):
+    def gpr_scenario_vars(self, args, library_type='relocatable'):
         """
         Return the project scenario variables to pass to GPRbuild.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
 
-        :param str|None build_mode: Build mode to use. If left to None, use the
-            one selected in `args`.
-
         :param str library_type: Library flavor to use. Must be "relocatable"
             or "static".
         """
-        if build_mode is None:
-            build_mode = args.build_mode
-
-        result = ['-XBUILD_MODE={}'.format(build_mode),
+        result = ['-XBUILD_MODE={}'.format(args.build_mode),
                   '-XLIBRARY_TYPE={}'.format(library_type),
                   '-XGPR_BUILD={}'.format(library_type),
                   '-XXMLADA_BUILD={}'.format(library_type)]
@@ -810,8 +813,9 @@ class ManageScript(object):
 
         def run(library_type):
             argv = list(base_argv)
-            argv.extend(self.gpr_scenario_vars(args,
-                                               library_type=library_type))
+            argv.extend(
+                self.gpr_scenario_vars(args, library_type=library_type)
+            )
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
@@ -867,7 +871,7 @@ class ManageScript(object):
         def run(library_type):
             argv = list(base_argv)
             argv.append('--build-name={}'.format(library_type))
-            argv.extend(self.gpr_scenario_vars(args, 'prod', library_type))
+            argv.extend(self.gpr_scenario_vars(args, library_type))
             self.check_call(args, 'Install', argv)
 
         # Install the static libraries first, so that in the resulting project
@@ -989,10 +993,10 @@ class ManageScript(object):
                 except KeyError:
                     result[name] = path
 
-            self.setup_environment(add_json)
+            self.setup_environment(args.build_mode, add_json)
             print(json.dumps(result))
         else:
-            self.write_setenv()
+            self.write_setenv(args.build_mode)
 
     def lksp(self, args):
         return LangkitSupport(args.build_dir)
@@ -1025,26 +1029,28 @@ class ManageScript(object):
         del args  # Unused in this implementation
         self.args_parser.print_help()
 
-    def setup_environment(self, add_path):
+    def setup_environment(self, build_mode, add_path):
         add_path('PATH', self.dirs.build_dir('bin'))
         add_path('C_INCLUDE_PATH', self.dirs.build_dir('include'))
+
+        def lib_subdir(lib_name, lib_type):
+            return self.dirs.build_dir(
+                'lib', lib_name, lib_type, build_mode
+            )
 
         libs = ['langkit_support']
         if self.context:
             libs.append(self.lib_name.lower())
         for lib in libs:
-            add_path('LIBRARY_PATH',
-                     self.dirs.build_dir('lib', lib + '.static'))
-            add_path('LD_LIBRARY_PATH',
-                     self.dirs.build_dir('lib', lib + '.relocatable'))
-            add_path('PATH',
-                     self.dirs.build_dir('lib', lib + '.relocatable'))
+            add_path('LIBRARY_PATH', lib_subdir(lib, 'static'))
+            add_path('LD_LIBRARY_PATH', lib_subdir(lib, 'relocatable'))
+            add_path('PATH', lib_subdir(lib, 'relocatable'))
 
         add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
         add_path('PYTHONPATH', self.dirs.build_dir('python'))
         add_path('PYTHONPATH', self.dirs.lang_source_dir('python_src'))
 
-    def derived_env(self):
+    def derived_env(self, build_mode):
         """
         Return a copy of the environment after an update using
         setup_environment.
@@ -1058,10 +1064,10 @@ class ManageScript(object):
                 p = p.encode('ascii')
             env[name] = path.pathsep.join(keep([p, env.get(name, b'')]))
 
-        self.setup_environment(add_path)
+        self.setup_environment(build_mode, add_path)
         return env
 
-    def write_setenv(self, output_file=sys.stdout):
+    def write_setenv(self, build_mode, output_file=sys.stdout):
         """
         Display Bourne shell commands that setup environment in order to make
         the generated library available.
@@ -1078,7 +1084,7 @@ class ManageScript(object):
                     sep=':' if name == 'PATH' else os.path.pathsep,
                 )
             )
-        self.setup_environment(add_path)
+        self.setup_environment(build_mode, add_path)
 
     def check_call(self, args, name, argv, env=None, abort_on_error=True):
         """
@@ -1100,7 +1106,7 @@ class ManageScript(object):
         """
         self.log_exec(args, argv)
         if env is None:
-            env = self.derived_env()
+            env = self.derived_env(args.build_mode)
         try:
             subprocess.check_call(argv, env=env)
         except (subprocess.CalledProcessError, OSError) as exc:
