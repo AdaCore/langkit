@@ -401,7 +401,24 @@ let test_big_int () =
   print_exit_if_diags u ;
   let root = root_exn u in
   Format.printf "@[<v>int_double 42: %d@ @]" (FooNode.p_int_double root 42) ;
-  Format.printf "@[<v>=======================@ @]"
+  Format.printf "@[<v>=======================@ @ @]"
+
+let test_struct () =
+  Format.printf "@[<v>=======STRUCT=======@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ctx "foo.txt" in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  let pp_foonode_struct fmt {FooNodeStruct.node} = pp_image_opt fmt node in
+  let false_node_struct = FooNode.p_me root false in
+  let true_node_struct = FooNode.p_me root true in
+  Format.printf "@[<v>me(false): %a@ @]" pp_foonode_struct false_node_struct ;
+  Format.printf "@[<v>me(true): %a@ @]" pp_foonode_struct true_node_struct ;
+  Format.printf "@[<v>get_node(false_node_struct): %a@ @]" pp_image_opt
+    (FooNode.p_get_node root false_node_struct) ;
+  Format.printf "@[<v>get_node(true_node_struct): %a@ @]" pp_image_opt
+    (FooNode.p_get_node root true_node_struct) ;
+  Format.printf "@[<v>====================@ @]"
 
 let () =
   test_diagnostics () ;
@@ -415,6 +432,7 @@ let () =
   test_character () ;
   test_enum () ;
   test_big_int () ;
+  test_struct () ;
   (* Call to compact to force Gc to collect everything so we can test with
    valgrind *)
   Gc.compact ()

@@ -383,4 +383,11 @@ color: Blue; same_color: Blue
 ========BIG INT========
 int_double 42: 84
 =======================
+
+=======STRUCT=======
+me(false): None
+me(true): <Sequence foo.txt:1:1-1:50>
+get_node(false_node_struct): None
+get_node(true_node_struct): <Sequence foo.txt:1:1-1:50>
+====================
 Done

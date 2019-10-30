@@ -280,6 +280,7 @@ class OCamlAPISettings(AbstractAPISettings):
             entity types.
         :rtype: str
         """
+
         def from_module(typ, value):
             context_arg = (
                 '{} '.format(context)
@@ -304,7 +305,7 @@ class OCamlAPISettings(AbstractAPISettings):
         else:
             return wrapped_result
 
-    def unwrap_value(self, value, type, context):
+    def unwrap_value(self, value, type, context, check_for_none=False):
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -313,6 +314,10 @@ class OCamlAPISettings(AbstractAPISettings):
         :param str value: Expression yielding a low-level value.
         :param ct.CompiledType type: Type corresponding to the "value"
             expression.
+        :param bool check_for_none: If true, check if the value is None before
+            returning a C API value. If it is the case, the expression is
+            evaluated to an empty struct. We check for None only for entity
+            types.
         :rtype: str
         """
         def from_module(typ, value):
@@ -327,9 +332,15 @@ class OCamlAPISettings(AbstractAPISettings):
                 value
             )
 
-        if isinstance(type, ct.EntityType):
+        if type.is_entity_type:
             # For entity type, the unwrap function is inside the root node
-            return from_module(T.root_node, value)
+            if check_for_none:
+                return ('match {} with'
+                        ' Some n -> {}'
+                        ' | None -> make EntityStruct.c_type'
+                        .format(value, from_module(T.root_node, 'n')))
+            else:
+                return from_module(T.root_node, value)
         elif self.has_ctype_view(type):
             return value
         else:

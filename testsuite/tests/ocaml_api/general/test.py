@@ -6,10 +6,11 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.compile_context import LibraryEntity
 from langkit.dsl import (
-    ASTNode, Enum, EnumValue, Field, Symbol, T, has_abstract_list
+    ASTNode, Bool, Enum, EnumValue, Field, Struct, Symbol, T, UserField,
+    has_abstract_list
 )
 from langkit.expressions import (
-    ArrayLiteral, CharacterLiteral, Entity, Property, langkit_property
+    ArrayLiteral, CharacterLiteral, Entity, If, No, Property, langkit_property
 )
 from langkit.parsers import Grammar, List, Or
 
@@ -21,6 +22,10 @@ class Color(Enum):
     Red = EnumValue()
     Green = EnumValue()
     Blue = EnumValue()
+
+
+class FooNodeStruct(Struct):
+    node = UserField(T.FooNode.entity)
 
 
 @has_abstract_list
@@ -53,6 +58,14 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def int_double(c=T.BigInt):
         return c + c
+
+    @langkit_property(public=True)
+    def me(b=Bool):
+        return FooNodeStruct.new(node=If(b, Entity, No(FooNode.entity)))
+
+    @langkit_property(public=True)
+    def get_node(node_struct=FooNodeStruct):
+        return node_struct.node
 
 
 class Sequence(FooNode.list):
