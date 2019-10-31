@@ -741,15 +741,22 @@ class ManageScript(object):
             static mode. Only one is True when is_library is False.
         :rtype: (bool, bool, bool)
         """
-        # Build libraries for all requested library types.
-        #
-        # Program are built only once, so build them as relocatable if
-        # allowed, otherwise as static-pic if allowed, otherwise as static.
-        build_shared = args.library_types.relocatable
-        build_static_pic = (args.library_types.static_pic and
-                            (is_library or not build_shared))
-        build_static = (args.library_types.static and
-                        (is_library or not build_static_pic))
+        lt = args.library_types
+        if is_library:
+            # Build libraries for all requested library types
+            build_shared = lt.relocatable
+            build_static_pic = lt.static_pic
+            build_static = lt.static
+        else:
+            # Program are built only once, so build them as relocatable if
+            # allowed, otherwise as static-pic if allowed, otherwise as static.
+            build_shared = build_static_pic = build_static = False
+            if lt.relocatable:
+                build_shared = True
+            elif lt.static_pic:
+                build_static_pic = True
+            elif lt.static:
+                build_static = True
         return (build_shared, build_static_pic, build_static)
 
     def gpr_scenario_vars(self, args, library_type='relocatable'):
