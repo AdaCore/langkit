@@ -69,7 +69,7 @@ library project Langkit_Support is
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
             for Default_Switches ("Ada") use
-               Common_Ada_Cargs & ("-g", "-Ofast", "-gnatp");
+               Common_Ada_Cargs & ("-g", "-Ofast");
       end case;
    end Compiler;
 
