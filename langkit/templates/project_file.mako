@@ -116,9 +116,8 @@ library project ${lib_name} is
             Ada_Mode_Args := ("-gnatwe", "-gnata");
 
          when "prod" =>
-            --  -fnon-call-exceptions: Make it possible to catch exception due
-            --  to invalid memory accesses even though -gnatp is present.
-            Ada_Mode_Args := ("-gnatp", "-gnatn2", "-fnon-call-exceptions");
+            --  Enable aggressive inlining
+            Ada_Mode_Args := ("-gnatn2");
       end case;
 
       -----------------

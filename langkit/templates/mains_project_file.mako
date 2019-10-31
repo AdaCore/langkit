@@ -31,7 +31,7 @@ project Mains is
          when "prod" =>
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
-            for Default_Switches ("Ada") use ("-g", "-Ofast", "-gnatp");
+            for Default_Switches ("Ada") use ("-g", "-Ofast");
       end case;
    end Compiler;
 
