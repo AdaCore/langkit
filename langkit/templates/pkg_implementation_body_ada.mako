@@ -3005,6 +3005,24 @@ package body ${ada_lib_name}.Implementation is
       end if;
    end Text_Image;
 
+   ---------------------
+   -- Full_Sloc_Image --
+   ---------------------
+
+   function Full_Sloc_Image (Node : ${T.root_node.name}) return ${T.String.name}
+   is
+      Res      : constant Text_Type :=
+        To_Text
+          (Ada.Directories.Simple_Name
+             (Get_Filename (Unit (Node))))
+           & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))) & ": ";
+      Result : constant ${T.String.name} :=
+         ${T.String.constructor_name} (Res'Length);
+   begin
+      Result.Items := Res;
+      return Result;
+   end Full_Sloc_Image;
+
    -----------
    -- Image --
    -----------

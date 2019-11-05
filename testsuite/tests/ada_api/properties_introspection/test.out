@@ -121,6 +121,11 @@ Properties for FOO_ADDITION:
    arguments:
       <none>
 
+   full_sloc_image
+   return type: Character.array
+   arguments:
+      <none>
+
    eval
    return type: Int
    arguments:
@@ -253,6 +258,11 @@ Properties for FOO_NUMBER:
 
    is_ghost
    return type: Bool
+   arguments:
+      <none>
+
+   full_sloc_image
+   return type: Character.array
    arguments:
       <none>
 
@@ -415,6 +425,11 @@ Properties for FOO_REF:
    arguments:
       <none>
 
+   full_sloc_image
+   return type: Character.array
+   arguments:
+      <none>
+
    eval
    return type: Int
    arguments:
@@ -555,6 +570,11 @@ Properties for FOO_VAR_DECL_LIST:
    arguments:
       <none>
 
+   full_sloc_image
+   return type: Character.array
+   arguments:
+      <none>
+
 
 Properties for FOO_NAME:
    id_bool
@@ -679,6 +699,11 @@ Properties for FOO_NAME:
    arguments:
       <none>
 
+   full_sloc_image
+   return type: Character.array
+   arguments:
+      <none>
+
 
 Properties for FOO_VAR_DECL:
    id_bool
@@ -800,6 +825,11 @@ Properties for FOO_VAR_DECL:
 
    is_ghost
    return type: Bool
+   arguments:
+      <none>
+
+   full_sloc_image
+   return type: Character.array
    arguments:
       <none>
 

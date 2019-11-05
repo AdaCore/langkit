@@ -3243,6 +3243,16 @@ class ASTNodeType(BaseStructType):
                 (for internal DSL use).
                 """
             )),
+
+            ('full_sloc_image', PropertyDef(
+                lambda: None,
+                prefix=None, type=T.String, public=True,
+                external=True, uses_entity_info=False,
+                uses_envs=True, warn_on_unused=False, doc="""
+                Return a string containing the filename + the sloc in GNU
+                conformant format. Useful to create diagnostics from a node.
+                """
+            )),
         ]
 
     def snaps(self, anchor_end):
