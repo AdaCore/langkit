@@ -159,8 +159,6 @@ package body Langkit_Support.Bump_Ptr is
 
    package body Tagged_Alloc is
 
-      type Element_Access is access all Element_T;
-
       T : aliased Element_T;
 
       package Gen_Alloc is new
@@ -169,7 +167,7 @@ package body Langkit_Support.Bump_Ptr is
       function Dirty_Conv is new
          Ada.Unchecked_Conversion (Element_Access, Address_Access);
 
-      function Alloc (Pool : Bump_Ptr_Pool) return access Element_T is
+      function Alloc (Pool : Bump_Ptr_Pool) return Element_Access is
          --  This bit of code is actually quite funny. It is born out of the
          --  conflation of several unfortunate design choices in Ada:
 

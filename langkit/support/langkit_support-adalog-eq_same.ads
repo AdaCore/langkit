@@ -132,7 +132,7 @@ package Langkit_Support.Adalog.Eq_Same is
          Eq_Data   : Equals_Data;
          Sloc_Info : String_Access := null) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data, Eq_Data, Sloc_Info)));
+        (Impl.Equals (L, R, Data, Eq_Data, Sloc_Info));
 
    end Raw_Custom_Bind;
 
