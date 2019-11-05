@@ -140,7 +140,7 @@ package Langkit_Support.Adalog.Unify is
       R_Data    : Right_C_Data := No_R_Data;
       Eq_Data   : Equals_Data := No_Equals_Data;
       Sloc_Info : String_Access := null)
-      return access Base_Relation'Class
+      return Relation
    is
      (Unify_Left.Create (L, R, R_Data, Eq_Data, Sloc_Info))
       with Inline;
@@ -151,7 +151,7 @@ package Langkit_Support.Adalog.Unify is
       L_Data    : Left_C_Data := No_L_Data;
       Eq_Data   : Equals_Data := No_Equals_Data;
       Sloc_Info : String_Access := null)
-      return access Base_Relation'Class
+      return Relation
    is
      (Unify_Right.Create (R, L, L_Data, Eq_Data, Sloc_Info))
       with Inline;
