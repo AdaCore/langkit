@@ -24,6 +24,8 @@
 with Ada.Strings; use Ada.Strings;
 with Ada.Strings.Fixed;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 package Langkit_Support.Slocs is
 
    type Line_Number is mod 2 ** 32;
@@ -91,5 +93,9 @@ package Langkit_Support.Slocs is
    function Image (Sloc_Range : Source_Location_Range) return String is
      (Image (Start_Sloc (Sloc_Range)) & '-'
       & Image (End_Sloc (Sloc_Range)));
+
+   function Image (Sloc : Source_Location) return Text_Type
+   is
+     (To_Text (Image (Sloc)));
 
 end Langkit_Support.Slocs;
