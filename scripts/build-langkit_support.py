@@ -11,6 +11,13 @@ from langkit.libmanage import LibraryTypes, ManageScript, get_cpu_count
 def main():
     m = ManageScript()
 
+    def add_build_mode_arg(parser):
+        parser.add_argument(
+            '--build-mode', '-b', choices=list(m.BUILD_MODES),
+            default='dev',
+            help='Selects a preset for build options'
+        )
+
     args_parser = argparse.ArgumentParser(
         description='Helper to build and install Langkit_Support'
     )
@@ -54,11 +61,7 @@ def main():
         help='Number of parallel jobs to spawn in parallel '
              '(default: your number of cpu)'
     )
-    build_parser.add_argument(
-        '--build-mode', '-b', choices=list(m.BUILD_MODES),
-        default='dev',
-        help='Selects a preset for build options'
-    )
+    add_build_mode_arg(build_parser)
     build_parser.add_argument(
         '--gargs',
         help='Additional arguments to pass to GPRbuild'
@@ -70,6 +73,7 @@ def main():
         'install',
         help='Install Langkit_Support.'
     )
+    add_build_mode_arg(install_parser)
     install_parser.add_argument(
         'install-dir',
         help='Installation directory.'
@@ -82,12 +86,16 @@ def main():
             '--verbosity={}'.format(args.verbosity),
             '--library-types={}'.format(args.library_types)]
 
+    def add_build_mode():
+        argv.append('--build-mode={}'.format(args.build_mode))
+
     argv.append(args.cmd)
     if args.cmd == 'build-langkit-support':
-        argv.append('--build-mode={}'.format(args.build_mode))
+        add_build_mode()
         if args.gargs:
             argv.append('--gargs={}'.format(args.gargs))
     if args.cmd == 'install-langkit-support':
+        add_build_mode()
         argv.append(getattr(args, 'install-dir'))
 
     m.run(argv)
