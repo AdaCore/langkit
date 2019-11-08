@@ -33,7 +33,7 @@
    ## Note that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
 
-   % for cls in no_builtins(ctx.astnode_types):
+   % for cls in ctx.astnode_types:
       % for prop in cls.get_properties(include_inherited=False):
          ${prop_helpers.logic_predicates(prop)}
       % endfor
