@@ -60,6 +60,8 @@ package ${ada_lib_name}.Analysis is
    % for e in ctx.entity_types:
       % if e.is_root_type:
       type ${e.api_name} is tagged private;
+      ${ada_doc('langkit.node_type', 6)}
+      --
       % else:
       type ${e.api_name} is new ${e.base.api_name} with private
       % if e.element_type.is_root_list_type:
