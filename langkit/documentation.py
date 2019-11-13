@@ -95,12 +95,12 @@ base_langkit_docs = {
         You can create several analysis contexts if you need to, which enables
         you, for example to:
 
-        - Analyze several different projects at the same time
-        - Analyze different parts of the same projects in parallel
+        * analyze several different projects at the same time;
+        * analyze different parts of the same projects in parallel.
 
-        In its current design, ${ctx.lib_name} will keep all the data it
-        analyzes for-ever, so if you need to get memory back, the only option
-        at your disposal is to destroy your ``Analysis_Context`` instance.
+        In the current design, contexts always keep all of their analysis units
+        allocated. If you need to get this memory released, the only option at
+        your disposal is to destroy your analysis context instance.
 
         % if lang == 'c':
         This structure is partially opaque: some fields are exposed to allow
@@ -112,7 +112,10 @@ base_langkit_docs = {
         This type represents the analysis of a single file.
 
         % if lang != 'python':
-        References are ref-counted.
+        This type has strong-reference semantics and is ref-counted.
+        Furthermore, a reference to a unit contains an implicit reference to
+        the context that owns it. This means that keeping a reference to a unit
+        will keep the context and all the unit it contains allocated.
         % endif
 
         % if lang == 'c':
@@ -123,6 +126,19 @@ base_langkit_docs = {
     'langkit.node_type': """
         Data type for all nodes. Nodes are assembled to make up a tree.  See
         the node primitives below to inspect such trees.
+
+        % if lang != 'python':
+        Unlike for contexts and units, this type has weak-reference semantics:
+        keeping a reference to a node has no effect on the decision to keep the
+        unit that it owns allocated. This means that once all references to the
+        context and units related to a node are dropped, the context and its
+        units are deallocated and the node becomes a stale reference: most
+        operations on it will raise a ``Stale_Reference_Error``.
+
+        Note that since reparsing an analysis unit deallocates all the nodes it
+        contains, this operation makes all reference to these nodes stale as
+        well.
+        % endif
     """,
     'langkit.node_kind_type': """
         Kind of AST nodes in parse trees.
