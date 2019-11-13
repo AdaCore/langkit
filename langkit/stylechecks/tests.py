@@ -317,6 +317,14 @@ testcases = (
         #
         # This is the end of the comment.
     ''', []),
+    Testcase('comment_multi_12.py', '''
+        from __future__ import absolute_import, division, print_function
+
+
+        # Allow empty comments: they are useful in Mako templates
+
+        #
+    ''', []),
 
     #
     # Docstring testing
