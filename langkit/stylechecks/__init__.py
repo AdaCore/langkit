@@ -308,19 +308,20 @@ def check_generic(report, filename, content, lang):
 
         Reset "comment_block" afterwards.
         """
-        # Remove common indentation for this block of comment
-        indent = min(len(l) - len(l.lstrip())
-                     for l in comment_block
-                     if l.strip())
+        nonempty_lines = [l for l in comment_block if l.strip()]
+        if nonempty_lines:
+            # Remove common indentation for this block of comment
+            indent = min(len(l) - len(l.lstrip())
+                         for l in nonempty_lines)
 
-        check_text(report, filename, lang,
-                   comment_first_line,
+            check_text(report, filename, lang,
+                       comment_first_line,
 
-                   # Ignored lines starting with '%': they are directives for
-                   # documentation generators.
-                   b'\n'.join(l[indent:] for l in comment_block
-                              if not l.startswith('%')),
-                   True)
+                       # Ignored lines starting with '%': they are directives
+                       # for documentation generators.
+                       b'\n'.join(l[indent:] for l in comment_block
+                                  if not l.startswith('%')),
+                       True)
         comment_block[:] = []
 
     def start_comment():
