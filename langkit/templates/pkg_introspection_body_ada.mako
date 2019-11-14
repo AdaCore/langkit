@@ -519,9 +519,16 @@ package body ${ada_lib_name}.Introspection is
 
       case Constraint.Kind is
          when Node_Value =>
-            return Is_Derived_From
-              (Id_For_Kind (Value.Value.Value.Node_Value.Kind),
-               Constraint.Node_Type);
+            return
+
+              --  A null node always satisfies the type constraint
+              Value.Value.Value.Node_Value.Is_Null
+
+              --  Else, check that the type of the node is derived from the
+              --  type of the constraint.
+              or else Is_Derived_From
+                (Id_For_Kind (Value.Value.Value.Node_Value.Kind),
+                 Constraint.Node_Type);
 
          when others =>
             return True;
