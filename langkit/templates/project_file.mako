@@ -38,14 +38,14 @@ library project ${lib_name} is
    for Source_Dirs use
      (${', '.join(string_repr(d) for d in source_dirs if d)});
 
-   for Library_Dir use
-      "../${lib_name.lower()}/" & Library_Kind_Param & "/" & Build_Mode;
-   for Object_Dir use
-      "../../obj/${lib_name.lower()}/" & Library_Kind_Param & "/" & Build_Mode;
+   for Library_Dir use "../${lib_name.lower()}/" & Build_Mode;
+   for Object_Dir use "../../obj/${lib_name.lower()}/" & Build_Mode;
 
    Target := ${lib_name}'Target;
 
    package Compiler is
+
+      For_All_Cargs := ("-fPIC");
 
       ----------------------
       -- Common_Ada_Cargs --
@@ -135,8 +135,8 @@ library project ${lib_name} is
             null;
       end case;
 
-      Common_Ada_Cargs := Mode_Args & Ada_Mode_Args;
-      Common_C_Cargs := Mode_Args & C_Mode_Args;
+      Common_Ada_Cargs := For_All_Cargs & Mode_Args & Ada_Mode_Args;
+      Common_C_Cargs := For_All_Cargs & Mode_Args & C_Mode_Args;
 
       for Default_Switches ("Ada") use Common_Ada_Cargs & Generated_Ada_Cargs;
       for Default_Switches ("C") use Common_C_Cargs;
