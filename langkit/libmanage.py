@@ -1040,19 +1040,18 @@ class ManageScript(object):
         add_path('PATH', self.dirs.build_dir('bin'))
         add_path('C_INCLUDE_PATH', self.dirs.build_dir('include'))
 
-        def lib_subdir(lib_name):
+        def lib_subdir(lib_name, lib_type):
             return self.dirs.build_dir(
-                'lib', lib_name, build_mode
+                'lib', lib_name, lib_type, build_mode
             )
 
         libs = ['langkit_support']
         if self.context:
             libs.append(self.lib_name.lower())
         for lib in libs:
-            subdir = lib_subdir(lib)
-            add_path('LIBRARY_PATH', subdir)
-            add_path('LD_LIBRARY_PATH', subdir)
-            add_path('PATH', subdir)
+            add_path('LIBRARY_PATH', lib_subdir(lib, 'static'))
+            add_path('LD_LIBRARY_PATH', lib_subdir(lib, 'relocatable'))
+            add_path('PATH', lib_subdir(lib, 'relocatable'))
 
         add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
         add_path('PYTHONPATH', self.dirs.build_dir('python'))
