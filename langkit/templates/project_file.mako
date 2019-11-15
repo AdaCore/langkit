@@ -38,7 +38,8 @@ library project ${lib_name} is
    for Source_Dirs use
      (${', '.join(string_repr(d) for d in source_dirs if d)});
 
-   for Library_Dir use "../${lib_name.lower()}/" & Build_Mode;
+   for Library_Dir use
+      "../${lib_name.lower()}/" & Library_Kind_Param & "/" & Build_Mode;
    for Object_Dir use "../../obj/${lib_name.lower()}/" & Build_Mode;
 
    Target := ${lib_name}'Target;
