@@ -782,7 +782,8 @@ class ManageScript(object):
 
         return result
 
-    def gprbuild(self, args, project_file, is_library, mains=None):
+    def gprbuild(self, args, project_file, is_library, mains=None,
+                 obj_dirs=[]):
         """
         Run GPRbuild on a project file.
 
@@ -793,10 +794,25 @@ class ManageScript(object):
 
         :param bool is_library: See the "what_to_build" method.
 
+        :param list[str] obj_dirs: List of paths (relative to the project file
+            directory) to the object directory where gprbuild creates the
+            "*.lexch" files. We will remove all such files before each gprbuild
+            run.
+
+            This allows us to workaround a GPRbuild bug (see SB18-035).
+            Library types share the same object directory, however GPRbuild
+            uses a file in the object directory (*.lexch) to know if the
+            library must be rebuilt. Not removing it will make it skip the
+            "static" build after the "static-pic" was built. So we remove it.
+
         :param set[str]|None mains: If provided, list of main programs to
             build. By default, GPRbuild builds them all, so this arguments
             makes it possible to build only a subset of them.
         """
+        lexch_patterns = [os.path.join(os.path.dirname(project_file),
+                                       obj_dir, '*.lexch')
+                          for obj_dir in obj_dirs]
+
         base_argv = [
             'gprbuild', '-p', '-j{}'.format(args.jobs),
             '-P{}'.format(project_file),
@@ -819,6 +835,16 @@ class ManageScript(object):
         gargs = sum((shlex.split(args) for args in gargs), [])
 
         def run(library_type):
+            # Remove the "*.lexch" file
+            for pattern in lexch_patterns:
+                files = glob.glob(pattern)
+                for f in files:
+                    self.log_debug('Removing {}'.format(f), Colors.CYAN)
+                    os.remove(f)
+                if not files:
+                    self.log_debug('No *.lexch file to remove from {}'
+                                   .format(pattern), Colors.CYAN)
+
             argv = list(base_argv)
             argv.extend(
                 self.gpr_scenario_vars(args, library_type=library_type)
@@ -906,7 +932,11 @@ class ManageScript(object):
         lib_project = self.dirs.build_dir(
             'lib', 'gnat', '{}.gpr'.format(self.lib_name.lower())
         )
-        self.gprbuild(args, lib_project, True)
+        obj_dirs = [
+            self.dirs.build_dir('obj', self.lib_name.lower(), args.build_mode),
+            self.dirs.build_dir('obj', 'langkit_support', args.build_mode)
+        ]
+        self.gprbuild(args, lib_project, is_library=True, obj_dirs=obj_dirs)
 
         # Then build the main programs, if any
         if not self.no_ada_api:
@@ -917,7 +947,7 @@ class ManageScript(object):
             if mains:
                 self.log_info("Building the main programs...", Colors.HEADER)
                 self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'),
-                              False, mains)
+                              is_library=False, mains=mains)
 
         # On Windows, shared libraries (DLL) are looked up in the PATH, just
         # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
@@ -1018,7 +1048,10 @@ class ManageScript(object):
         """
         Build Langkit_Support.
         """
-        self.gprbuild(args, self.lksp(args).lksp_project_file, True)
+        lksp = self.lksp(args)
+        self.gprbuild(args, lksp.lksp_project_file,
+                      is_library=True,
+                      obj_dirs=[lksp.lksp_obj_dir(args.build_mode)])
 
     def do_install_langkit_support(self, args):
         """

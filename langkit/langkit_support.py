@@ -21,6 +21,10 @@ class LangkitSupport(object):
         return os.path.join(self.build_dir, 'lib', 'gnat',
                             'langkit_support.gpr')
 
+    def lksp_obj_dir(self, build_mode):
+        return os.path.join(self.build_dir, 'obj', 'langkit_support',
+                            build_mode)
+
     @property
     def lksp_source_dir(self):
         """
