@@ -1153,3 +1153,10 @@ class ManageScript(object):
         """
         if self.verbosity.info:
             printcol(msg, color)
+
+    def log_debug(self, msg, color):
+        """
+        If verbosity level is debug, log a message with given color.
+        """
+        if self.verbosity.debug:
+            printcol(msg, color)
