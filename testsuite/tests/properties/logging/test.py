@@ -62,5 +62,5 @@ fg.add_rules(
     ref=Ref(fg.name),
     name=Name(Token.Identifier),
 )
-build_and_run(fg, 'main.py')
+build_and_run(fg, ada_main='main.adb')
 print('Done')

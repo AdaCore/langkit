@@ -1,6 +1,6 @@
-main.py: Running...
-Calling p_entity_items...
+main.adb: Running...
+Calling P_Entity_Items..
 [LANGKIT.PROPERTIES] Decl.entity_items (<Decl main.txt:1:1-1:5>):
    [LANGKIT.PROPERTIES] Result: [<Ref main.txt:1:3-1:4>]
-main.py: Done.
+main.adb: Done.
 Done
