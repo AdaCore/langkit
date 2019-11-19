@@ -634,10 +634,14 @@ class ManageScript(object):
             line invocation of manage.py.
         """
 
-        # The call to "check_call" in gnatpp does a setenv only so that gnatpp
-        # sees the project files, i.e. access to build artifacts is not
-        # requested, so we can provide a dummy build mode.
-        args.build_mode = self.BUILD_MODES[0]
+        # The call to "check_call" in gnatpp does a setenv, so we need a build
+        # mode. Given that do_make (which already have a build mode) calls
+        # do_generate, we must provide a dummy build mode iff there isn't
+        # already a build mode. The setenv is required for gnatpp to see the
+        # project files, i.e. access to build artifacts is not requested, so we
+        # can provide a dummy build mode.
+        if not getattr(args, 'build_mode', None):
+            args.build_mode = self.BUILD_MODES[0]
 
         def gnatpp(project_file, glob_pattern):
             """
