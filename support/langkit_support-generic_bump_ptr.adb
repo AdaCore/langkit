@@ -25,7 +25,7 @@ with Ada.Unchecked_Deallocation;
 with System;        use System;
 with System.Memory; use System.Memory;
 
-package body Langkit_Support.Bump_Ptr is
+package body Langkit_Support.Generic_Bump_Ptr is
 
    use Pages_Vector;
 
@@ -69,7 +69,7 @@ package body Langkit_Support.Bump_Ptr is
       end if;
 
       --  Free every page allocated
-
+      --
       --  TODO: Might be interresting at some point to keep a global cache of
       --  pages ourself, since we always use the same size.
 
@@ -99,7 +99,6 @@ package body Langkit_Support.Bump_Ptr is
          declare
             Mem : constant System.Address := System.Memory.Alloc (size_t (S));
          begin
-
             --  Append the allocated memory to the pool pages, so that it is
             --  freed on pool free, but don't touch at the current_page, so
             --  it can keep being used next time.
@@ -113,7 +112,8 @@ package body Langkit_Support.Bump_Ptr is
       --  page.
 
       if Page_Size - Pool.Current_Offset < S then
-         Pool.Current_Page := System.Memory.Alloc (Page_Size);
+         Pool.Current_Page := System.Memory.Alloc
+           (System.Memory.size_t (Page_Size));
          Append (Pool.Pages, Pool.Current_Page);
          Pool.Current_Offset := 0;
       end if;
@@ -126,33 +126,31 @@ package body Langkit_Support.Bump_Ptr is
       return Pool.Current_Page + Obj_Offset;
    end Allocate;
 
+   Pointer_Size : constant Storage_Offset :=
+     System.Address'Size / Storage_Unit;
+
    -----------
    -- Alloc --
    -----------
 
-   Pointer_Size : constant Storage_Offset
-     := System.Address'Size / Storage_Unit;
-
    package body Alloc is
+
+      function To_Pointer is new Ada.Unchecked_Conversion
+        (System.Address, Element_Access);
 
       -----------
       -- Alloc --
       -----------
-
-      function Alloc (Pool : Bump_Ptr_Pool) return System.Address is
-      begin
-         return
-           Allocate
-             (Pool,
-              Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size));
-      end Alloc;
 
       function Alloc (Pool : Bump_Ptr_Pool) return Element_Access is
       begin
          --  This function just queries the proper size of the Element_T type,
          --  and converts the return value to the proper access type.
 
-         return To_Pointer (Alloc (Pool));
+         return To_Pointer
+           (Allocate
+              (Pool,
+               Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size)));
       end Alloc;
 
    end Alloc;
@@ -168,10 +166,14 @@ package body Langkit_Support.Bump_Ptr is
       T : aliased Element_T;
 
       package Gen_Alloc is new
-         Langkit_Support.Bump_Ptr.Alloc (Element_T, Element_Access);
+        Langkit_Support.Generic_Bump_Ptr.Alloc (Element_T, Element_Access);
 
       function Dirty_Conv is new
-         Ada.Unchecked_Conversion (Element_Access, Address_Access);
+        Ada.Unchecked_Conversion (Element_Access, Address_Access);
+
+      -----------
+      -- Alloc --
+      -----------
 
       function Alloc (Pool : Bump_Ptr_Pool) return Element_Access is
          --  This bit of code is actually quite funny. It is born out of the
@@ -223,6 +225,10 @@ package body Langkit_Support.Bump_Ptr is
 
    end Tagged_Alloc;
 
+   -----------------
+   -- Array_Alloc --
+   -----------------
+
    package body Array_Alloc is
 
       -----------
@@ -232,22 +238,13 @@ package body Langkit_Support.Bump_Ptr is
       function Alloc
         (Pool : Bump_Ptr_Pool; Length : Natural) return Element_Array_Access
       is
-      begin
-         return (if Length = 0
-                 then Empty_Array_Access
-                 else To_Pointer (Alloc (Pool, Length)));
-      end Alloc;
-
-      function Alloc
-        (Pool : Bump_Ptr_Pool; Length : Natural) return System.Address
-      is
          Stride : constant Storage_Offset :=
            Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size);
          Size   : constant Storage_Offset := Stride * Storage_Offset (Length);
       begin
          return (if Length = 0
-                 then System.Null_Address
-                 else Allocate (Pool, Size));
+                 then Empty_Array_Access
+                 else To_Pointer (Allocate (Pool, Size)));
       end Alloc;
 
    end Array_Alloc;
@@ -296,4 +293,4 @@ package body Langkit_Support.Bump_Ptr is
       Free (Bump_Ptr_Pool (Subpool));
    end Deallocate_Subpool;
 
-end Langkit_Support.Bump_Ptr;
+end Langkit_Support.Generic_Bump_Ptr;

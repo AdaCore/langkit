@@ -7,7 +7,7 @@ with Ada.Strings.Unbounded.Hash;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Bump_Ptr.Vectors;
+with Langkit_Support.Bump_Ptr_Vectors;
 
 with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
@@ -44,7 +44,7 @@ private package ${ada_lib_name}.Rewriting_Implementation is
       Hash            => Named_Hash,
       Equivalent_Keys => "=");
 
-   package Nodes_Pools is new Langkit_Support.Bump_Ptr.Vectors
+   package Nodes_Pools is new Langkit_Support.Bump_Ptr_Vectors
      (Node_Rewriting_Handle);
 
    type Rewriting_Handle_Type is record
