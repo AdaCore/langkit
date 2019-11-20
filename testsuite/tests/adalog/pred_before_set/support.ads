@@ -18,6 +18,8 @@ package Support is
       Convert     => Transform,
       Equals      => Eq);
 
+   package Unify renames Eq_Int.Raw_Impl;
+
    type Pred is null record;
    function Call (Dummy_P : Pred; X : Integer) return Boolean
    is ((X mod 2) = 0);

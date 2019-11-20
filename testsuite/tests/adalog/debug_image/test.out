@@ -1,0 +1,137 @@
+Solving with new solver
+=======================
+
+========================================================================
+
+Solving relation:
+All: 
+    %X <-> %Y main.adb:30
+    Any: main.adb:30
+        1 -> %X main.adb:30
+        2 -> %X main.adb:30
+        3 -> %X main.adb:30
+
+
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 2, %X = 2]
+Solution: [%Y = 3, %X = 3]
+========================================================================
+
+Solving relation:
+All: main.adb:36
+    Any: main.adb:34
+        1 -> %X main.adb:34
+        2 -> %X main.adb:34
+        3 -> %X main.adb:34
+
+    Any: main.adb:35
+        10 -> %X 
+        20 -> %X 
+        Is_Even?(%Y) main.adb:35
+
+    Any: main.adb:36
+        1 -> %Y main.adb:36
+        3 -> %Y main.adb:36
+        5 -> %Y main.adb:36
+        10 -> %Y main.adb:36
+
+
+Solution: [%Y = 10, %X = 1]
+Solution: [%Y = 10, %X = 2]
+Solution: [%Y = 10, %X = 3]
+========================================================================
+
+Solving relation:
+All: main.adb:40
+    Is_Even?(%Y) main.adb:40
+    Any: main.adb:40
+        1 -> %X main.adb:40
+        2 -> %X main.adb:40
+        3 -> %X main.adb:40
+
+
+========================================================================
+
+Solving relation:
+All: main.adb:44
+    Is_Even?(%Y) main.adb:44
+    Is_Even?(%X) main.adb:44
+
+========================================================================
+
+Solving relation:
+Any: main.adb:47
+    Is_Even?(%Y) main.adb:47
+    1 -> %X main.adb:47
+    2 -> %X main.adb:47
+
+Solution: [%Y = <undefined>, %X = 1]
+Solution: [%Y = <undefined>, %X = 2]
+========================================================================
+
+Solving relation:
+Any: main.adb:50
+    Is_Even?(%X) main.adb:50
+    Is_Even?(%Y) main.adb:50
+
+========================================================================
+
+Solving relation:
+Any: main.adb:53
+    Is_Even?(%X) main.adb:52
+    All: main.adb:53
+        Any: main.adb:53
+            1 -> %X main.adb:53
+            2 -> %X main.adb:53
+            3 -> %X main.adb:53
+
+        Is_Even?(%Y) main.adb:53
+
+
+========================================================================
+
+Solving relation:
+All: main.adb:58
+    Any: main.adb:55
+        1 -> %X main.adb:55
+        2 -> %X main.adb:55
+        3 -> %X main.adb:55
+
+    Is_Even?(%Y) main.adb:56
+    2 -> %X main.adb:57
+    %X <-> %Y main.adb:58
+
+Solution: [%Y = 2, %X = 2]
+
+Solving with old solver
+=======================
+
+========================================================================
+
+Solving relation:
+<All>:
+| | Bind %X <=> %Y main.adb:30
+| | Member %X {1, 2, 3}
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 2]
+Solution: [%X = 3, %Y = 3]
+========================================================================
+
+Solving relation:
+<All> main.adb:36:
+| | Member %X {1, 2, 3}
+| | <Any> main.adb:35:
+| | | | Member %X {10, 20}
+| | | | Predicate Is_Even on %Y
+| | Member %Y {1, 3, 5, 10}
+Solution: [%X = 1, %Y = 10]
+Solution: [%X = 2, %Y = 10]
+Solution: [%X = 3, %Y = 10]
+========================================================================
+
+Solving relation:
+<All> main.adb:40:
+| | Predicate Is_Even on %Y
+| | Member %X {1, 2, 3}
+Resolution failed with Early_Binding_Error
+Done.

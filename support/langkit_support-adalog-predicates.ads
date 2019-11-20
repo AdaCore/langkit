@@ -152,8 +152,6 @@ package Langkit_Support.Adalog.Predicates is
       with package Var is new Logic_Var
         (Element_Type => El_Type, others => <>);
 
-      Arity : Natural;
-
       type Predicate_Type is private;
 
       with function Call
@@ -176,7 +174,12 @@ package Langkit_Support.Adalog.Predicates is
 
       use Var;
 
-      type Predicate_Logic is record
+      --  HACK: We constrain the max arity to 4, so as to not have to refactor
+      --  all the code underneath. Before, arity was a generic parameter, which
+      --  is unpractical in the new solver framework.
+      subtype Arity_Type is Positive range 1 .. 4;
+
+      type Predicate_Logic (Arity : Arity_Type := 4) is record
          Refs  : Var_Array (1 .. Arity);
          Pred  : Predicate_Type;
       end record;
@@ -209,7 +212,9 @@ package Langkit_Support.Adalog.Predicates is
 
       function Create (R : Var_Array; Pred : Predicate_Type) return Relation
       is (new Impl.Rel'
-            (Rel    => Predicate_Logic'(Refs => R, Pred => Pred),
+            (Rel    => Predicate_Logic'
+               (Arity => R'Last,
+                Refs  => R, Pred => Pred),
              others => <>));
 
    end N_Predicate;
@@ -259,7 +264,7 @@ package Langkit_Support.Adalog.Predicates is
       procedure Free (Self : in out Predicate_Wrapper);
 
       package Predicate_2_Internal is new N_Predicate
-        (El_Type, Var, 2, Predicate_Wrapper, Call, Image, Free);
+        (El_Type, Var, Predicate_Wrapper, Call, Image, Free);
 
    end Predicate_2;
 

@@ -29,10 +29,11 @@ with System; use System;
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.VFS; use GNATCOLL.VFS;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
-with Langkit_Support.Adalog.Eq_Same;
-with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Adalog.Logic_Ref;
+with Langkit_Support.Adalog.Solver;
+with Langkit_Support.Adalog.Solver_Interface;
+
+with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -418,16 +419,19 @@ private package ${ada_lib_name}.Implementation is
    function Image (Ent : ${T.entity.name}) return String;
    ${ada_doc('langkit.entity_image', 3)}
 
-   package Eq_Node is new Langkit_Support.Adalog.Eq_Same
-     (LR_Type       => ${T.entity.name},
-      Element_Image => Image);
-   subtype Logic_Var is Eq_Node.Refs.Raw_Var;
-   subtype Logic_Var_Record is Eq_Node.Refs.Var;
+   package Entity_Vars is new Langkit_Support.Adalog.Logic_Ref
+     (${T.entity.name}, Element_Image => Image);
+   package Solver_Ifc is new Langkit_Support.Adalog.Solver_Interface
+     (Entity_Vars.Raw_Logic_Var);
+   package Solver is new Langkit_Support.Adalog.Solver (Solver_Ifc);
+
+   subtype Logic_Var is Entity_Vars.Raw_Var;
+   subtype Logic_Var_Record is Entity_Vars.Var;
    Null_Var : constant Logic_Var := null;
    Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
 
-   subtype Logic_Equation is Relation;
-   Null_Logic_Equation : constant Logic_Equation := null;
+   subtype Logic_Equation is Solver.Relation;
+   Null_Logic_Equation : constant Logic_Equation := Solver.No_Relation;
 
    % if ctx.properties_logging:
       function Trace_Image (K : Analysis_Unit_Kind) return String;
@@ -1961,7 +1965,7 @@ private package ${ada_lib_name}.Implementation is
    --  symbol canonicalization fails. If S is empty, just return null.
 
    function Solve_Wrapper
-     (R            : Relation;
+     (R            : Solver.Relation;
       Context_Node : ${T.root_node.name}) return Boolean;
    --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
    --  strings in the equation if in debug mode.

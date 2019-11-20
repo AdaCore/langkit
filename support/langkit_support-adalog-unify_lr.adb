@@ -26,6 +26,28 @@ with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 package body Langkit_Support.Adalog.Unify_LR is
    use Left_Var; use Right_Var;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+     (Left    : Left_Var.Var;
+      Right   : Right_Var.Var;
+      L_Data  : Left_C_Data;
+      R_Data  : Right_C_Data;
+      Eq_Data : Equals_Data) return Unify_LR is
+   begin
+      Left_C_Data_Inc_Ref (L_Data);
+      Right_C_Data_Inc_Ref (R_Data);
+      Equals_Data_Inc_Ref (Eq_Data);
+      return (Left    => Left,
+              Right   => Right,
+              L_Data  => L_Data,
+              R_Data  => R_Data,
+              Eq_Data => Eq_Data,
+              State   => No_Change);
+   end Create;
+
    -----------
    -- Apply --
    -----------
@@ -120,11 +142,26 @@ package body Langkit_Support.Adalog.Unify_LR is
       Self.State := No_Change;
    end Revert;
 
+   ----------
+   -- Free --
+   ----------
+
+   procedure Free (Self : in out Unify_LR) is
+   begin
+      Left_C_Data_Dec_Ref (Self.L_Data);
+      Right_C_Data_Dec_Ref (Self.R_Data);
+      Equals_Data_Dec_Ref (Self.Eq_Data);
+   end Free;
+
    ------------------
    -- Custom_Image --
    ------------------
 
    function Custom_Image (Self : Unify_LR) return String is
+
+      Convert_Image : constant String := Image (Self.R_Data);
+      Equals_Image  : constant String := Image (Self.Eq_Data);
+
       C : constant String :=
         (if Convert_Image = "" then ""
          else " (convert: " & Convert_Image & ")");

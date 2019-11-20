@@ -1,53 +1,34 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
+with GNATCOLL.Traces;
+
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
-with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
-
-with Support; use Support;
 
 procedure Main is
-   use Eq_Int, Eq_Int.Raw_Impl, Eq_Int.Refs;
+   use T_Solver; use Refs; use Solver_Ifc;
 
-   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+   X : constant Raw_Var := Create ("X");
+   Y : constant Raw_Var := Create ("Y");
+
+   function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
+   function Is_Even (V : Raw_Var) return Relation is
+     (Predicate (V, Predicate (Is_Even'Access, "Is_Even")));
 
    Relations : constant array (Positive range <>) of Relation :=
-     (+"and" (+Member (X, (1, 2)),
-              +"and" (+Member (Y, (2, 3)), +Equals (X, Y))),
-      +"and" (+Member (X, (1, 2)), +Equals (X, Y)),
-      +"and" (+Member (X, (1, 2)), +Equals (Y, X)),
-      +"and" (+Member (X, (1, 2)),
-              +"and" (+Is_Even (Y), +Equals (X, Y))),
-      +"and" (+Member (Y, (1, 2)),
-              +"and" (+Is_Even (X), +Equals (X, Y))));
+     ("and" (Domain (X, (1, 2)),
+              "and" (Domain (Y, (2, 3)), X = Y)),
+      "and" (Domain (X, (1, 2)), X = Y),
+      "and" (Domain (X, (1, 2)), Y = X),
+      "and" (Domain (X, (1, 2)),
+              "and" (Is_Even (Y), X = Y)),
+      "and" (Domain (Y, (1, 2)),
+              "and" (Is_Even (X), X = Y)));
 begin
-   X.Dbg_Name := new String'("X");
-   Y.Dbg_Name := new String'("Y");
-
+   GNATCOLL.Traces.Parse_Config_File;
    for R of Relations loop
       Put_Line ((1 .. 72 => '='));
-      Print_Relation (R);
       New_Line;
-      declare
-         N : Natural := 0;
-      begin
-         while Solve (R) loop
-            Put_Line ("Solution: { X =" & Get_Value (X)'Img
-                      & "; Y =" & Get_Value (Y)'Img & " }");
-            N := N + 1;
-         end loop;
-         if N = 0 then
-            Put_Line ("No solution found");
-         end if;
-      end;
+      Solve_All (R, Show_Relation => True);
    end loop;
-
-   Destroy (X.all);
-   Destroy (Y.all);
-   Free (X);
-   Free (Y);
-   Release_Relations;
 end Main;

@@ -48,15 +48,16 @@ generic
      (C_Data : R_Convert_Data; From : R_Type) return L_Type is <>;
    --  Conversion function, to get an L_Type from an R_Type
 
+   with function Image (C_Data : R_Convert_Data) return String;
+
    type Equals_Data is private;
    --  Private type containing data associated to the Equals function. Not
    --  necessary, but useful if your equality function has state.
 
    with function Equals (Data : Equals_Data; L, R : L_Type) return Boolean
-   is <>;
+     is <>;
 
-   Convert_Image : String := "";
-   Equals_Image  : String := "";
+   with function Image (Data : Equals_Data) return String;
 
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
    --  Logic variable formal package
@@ -70,9 +71,13 @@ generic
    --  L) If this is passed, it will be done by Equals (L, Convert (R)). This
    --  can be useful if order is important in your equality function.
 
-   with procedure R_Inc_Ref (R : R_Type);
-   with procedure L_Dec_Ref (L : in out L_Type);
-   with procedure R_Dec_Ref (R : in out R_Type);
+   with procedure R_Inc_Ref (Self : R_Type);
+   with procedure R_Convert_Data_Inc_Ref (Self : R_Convert_Data);
+   with procedure Equals_Data_Inc_Ref (Self : Equals_Data);
+   with procedure L_Dec_Ref (Self : in out L_Type);
+   with procedure R_Dec_Ref (Self : in out R_Type);
+   with procedure Equals_Data_Dec_Ref (Self : in out Equals_Data);
+   with procedure R_Convert_Data_Dec_Ref (Self : in out R_Convert_Data);
 
 package Langkit_Support.Adalog.Unify_One_Side is
 

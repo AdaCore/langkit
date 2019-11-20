@@ -1,0 +1,67 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    Any: 
+        1 -> %x 
+        2 -> %x 
+        3 -> %x 
+        4 -> %x 
+        5 -> %x 
+        6 -> %x 
+
+    double(%x) -> %y 
+    is_odd?(%x) 
+
+Solution: [%y = 2, %x = 1]
+Solution: [%y = 6, %x = 3]
+Solution: [%y = 10, %x = 5]
+Solving relation:
+All: 
+    %x -?> %y 
+    is_eq?(%x, %y) 
+    Any: 
+        1 -> %x 
+        2 -> %x 
+        3 -> %x 
+        4 -> %x 
+        5 -> %x 
+        6 -> %x 
+
+    Any: 
+        -1 -> %y 
+        -2 -> %y 
+        -3 -> %y 
+        -4 -> %y 
+        -5 -> %y 
+        -6 -> %y 
+
+    is_odd?(%x) 
+
+Solution: [%y = -1, %x = 1]
+Solution: [%y = -3, %x = 3]
+Solution: [%y = -5, %x = 5]
+
+Solving with old solver
+=======================
+
+Solving relation:
+<All>:
+| | Member %x {1, 2, 3, 4, 5, 6}
+| | Bind %x <=> %y (convert: double) 
+| | Predicate is_odd on %x
+Solution: [%x = 1, %y = 2]
+Solution: [%x = 3, %y = 6]
+Solution: [%x = 5, %y = 10]
+Solving relation:
+<All>:
+| | Bind %x <=> %y (equals: is_eq) 
+| | Member %x {1, 2, 3, 4, 5, 6}
+| | Member %y {-1, -2, -3, -4, -5, -6}
+| | Predicate is_odd on %x
+Solution: [%x = 1, %y = -1]
+Solution: [%x = 3, %y = -3]
+Solution: [%x = 5, %y = -5]
+
+Done.
