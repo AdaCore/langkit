@@ -36,9 +36,11 @@
 --  Beware though, random access is still on the average of 100x slower than in
 --  order iteration, so *never* use Get_At_Index to iterate over the vector!
 
+with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
+
 generic
    type Element_Type is private;
-package Langkit_Support.Bump_Ptr.Vectors is
+package Langkit_Support.Bump_Ptr_Vectors is
 
    subtype Index_Type is Positive;
 
@@ -129,4 +131,4 @@ private
 
    Empty_Cursor : constant Cursor := (null, 0);
 
-end Langkit_Support.Bump_Ptr.Vectors;
+end Langkit_Support.Bump_Ptr_Vectors;
