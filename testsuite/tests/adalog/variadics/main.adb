@@ -1,12 +1,5 @@
-with Ada.Text_IO; use Ada.Text_IO;
-
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
-with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
-
-with Support; use Support;
 
 --  Test a combination of features at the same time:
 --  * Predicates
@@ -14,40 +7,27 @@ with Support; use Support;
 --  * Domains.
 
 procedure Main is
+   use T_Solver, Refs, Solver_Ifc;
 
-   pragma Warnings (Off, "reference");
+   X : constant Raw_Var := Create ("X");
+   Y : constant Raw_Var := Create ("Y");
 
-   function Is_Even (X : Integer) return Boolean is ((X mod 2) = 0);
-
-   use Eq_Int; use Eq_Int.Raw_Impl;
-
-   X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-
-   D : Dummy_Data;
+   function Is_Even (V : Integer) return Boolean is (V mod 2 = 0);
+   function Convert (I : Integer) return Integer is (I * 3);
 
    R3 : constant Relation :=
-     +Logic_All
-       ((+Logic_Any
-           ((+Equals (X, 1),
-             +Equals (X, 2),
-             +Equals (X, 3),
-             +Equals (X, 4),
-             +Equals (X, 5),
-             +Equals (X, 6))),
-         +Bind.Create (X, Y, D, D),
-         +Pred_Int.Create (X, Is_Even'Unrestricted_Access),
-         +Member (Y, (12, 18))));
-
-   Discard : Boolean;
-
-   use Eq_Int.Refs;
+     R_All
+       ((R_Any
+           ((X = 1,
+             X = 2,
+             X = 3,
+             X = 4,
+             X = 5,
+             X = 6)),
+         Propagate (X, Y, Converter (Convert'Access, "*3")),
+         Predicate (X, Predicate (Is_Even'Access, "Is_Even")),
+         Domain (Y, (12, 18))));
 
 begin
-   while Solve (R3) loop
-      Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
-   end loop;
-   Free (X);
-   Free (Y);
-   Release_Relations;
+   Solve_All (R3, Show_Relation => True);
 end Main;

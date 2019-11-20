@@ -1,0 +1,21 @@
+Solving with new solver
+=======================
+
+%X = 1
+%Y = 1
+%Z = <undefined>
+%X = 1
+%Y = 3
+%Z = <undefined>
+%X = 1
+%Y = 2
+%Z = 2
+
+Solving with old solver
+=======================
+
+%X = 1
+%Y = 1
+%Z = <undefined>
+
+Done.

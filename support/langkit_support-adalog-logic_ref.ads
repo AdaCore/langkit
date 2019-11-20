@@ -41,9 +41,9 @@ with Langkit_Support.Adalog.Logic_Var;
 
 generic
    type Element_Type is private;
-   with procedure Inc_Ref (E : Element_Type);
-   with procedure Dec_Ref (E : in out Element_Type);
-   with function Element_Image (E : Element_Type) return String;
+   with procedure Inc_Ref (E : Element_Type) is null;
+   with procedure Dec_Ref (E : in out Element_Type) is null;
+   with function Element_Image (E : Element_Type) return String is <>;
 package Langkit_Support.Adalog.Logic_Ref is
 
    ------------------------------
@@ -57,19 +57,26 @@ package Langkit_Support.Adalog.Logic_Ref is
    --  This type, however, has by-value semantics, where we want the end
    --  implementations to have by-reference semantics.
 
+   type Var;
+   type Raw_Var is access all Var;
+
    type Var is record
-      Reset             : Boolean := True;
+      Reset : Boolean := True;
       --  Whether this variable is set or not. Reset is True when the variable
       --  has no value.
 
-      Value             : Element_Type;
+      Value : Element_Type;
       --  The value of this logic variable, when it is set
 
-      Dbg_Name          : String_Access;
+      Dbg_Name : String_Access;
       --  Access to a string representing the name of this variable. Using
       --  this, you can name your variable with human readable names, and
       --  the debugging facilities of Adalog will use it to display it in
       --  equations.
+
+      Id : Natural := 0;
+
+      Aliased_To : Raw_Var := null;
    end record;
 
    -------------------------------
@@ -79,11 +86,11 @@ package Langkit_Support.Adalog.Logic_Ref is
    procedure Reset (Self : in out Var);
    function Is_Defined (Self : Var) return Boolean;
    procedure Set_Value (Self : in out Var; Data : Element_Type);
-   function Get_Value (Self : Var) return Element_Type
-      with Pre => Is_Defined (Self);
+   function Get_Value (Self : Var) return Element_Type;
    procedure Destroy (Self : in out Var);
    function Image (Self : Var) return String is
-     (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
+     (if Self.Dbg_Name /= null
+      then "%" &  Self.Dbg_Name.all else "%<unnamed>");
 
    -----------------------
    -- Raw variable type --
@@ -93,23 +100,28 @@ package Langkit_Support.Adalog.Logic_Ref is
    --  unsafe access. To use if you want maximum performance and are ready
    --  to manage your memory manually.
 
-   type Raw_Var is access all Var;
-   procedure Reset (Self : in out Raw_Var);
+   procedure Reset (Self : Raw_Var);
    function Is_Defined (Self : Raw_Var) return Boolean;
-   procedure Set_Value (Self : in out Raw_Var; Data : Element_Type);
+   procedure Set_Value (Self : Raw_Var; Data : Element_Type);
    function Get_Value (Self : Raw_Var) return Element_Type;
    function Create return Raw_Var;
+   function Id (Self : Raw_Var) return Natural;
+   procedure Set_Id (Self : Raw_Var; Id : Natural);
+   procedure Alias (Self, To : Raw_Var);
+   procedure Unalias (Self : Raw_Var);
+   function Get_Alias (Self : Raw_Var) return Raw_Var;
 
    function Image (Self : Raw_Var) return String is
      (Image (Self.all));
 
    procedure Free is new Ada.Unchecked_Deallocation (Var, Raw_Var);
 
+   No_Var : Raw_Var := null;
    ------------------------------------
    -- Formal packages instantiations --
    ------------------------------------
 
    package Raw_Logic_Var is new Adalog.Logic_Var
-     (Raw_Var, Element_Type, Inc_Ref, Dec_Ref);
+     (Raw_Var, Element_Type, Inc_Ref, Dec_Ref, No_Var => No_Var);
 
 end Langkit_Support.Adalog.Logic_Ref;

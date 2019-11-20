@@ -105,6 +105,8 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    procedure Free (Self : in out Unify_Rec) is
    begin
       R_Dec_Ref (Self.Right);
+      R_Convert_Data_Dec_Ref (Self.R_Data);
+      Equals_Data_Dec_Ref (Self.Eq_Data);
    end Free;
 
    ------------------
@@ -112,6 +114,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    ------------------
 
    function Custom_Image (Self : Unify_Rec) return String is
+      Convert_Image : constant String := Image (Self.R_Data);
+      Equals_Image  : constant String := Image (Self.Eq_Data);
+
       C : constant String :=
         (if Convert_Image = "" then ""
          else " (convert: " & Convert_Image & ")");
@@ -215,6 +220,8 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       Eq_Data : Equals_Data) return Unify_Rec is
    begin
       R_Inc_Ref (Right);
+      R_Convert_Data_Inc_Ref (R_Data);
+      Equals_Data_Inc_Ref (Eq_Data);
       return (Left    => Left,
               Right   => Right,
               Changed => False,
@@ -229,8 +236,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       Eq_Data   : Equals_Data;
       Sloc_Info : String_Access := null) return Relation is
    begin
-      --  Don't inc-ref Right here as the call to Create below will do it for
-      --  us.
+      --  Don't inc-ref Right/R_Data/Eq_Data here as the call to Create below
+      --  will do it for us.
+
       return new Unify'(Rel       => Create (Left, Right, R_Data, Eq_Data),
                         Sloc_Info => Sloc_Info,
                         others    => <>);
@@ -244,13 +252,13 @@ package body Langkit_Support.Adalog.Unify_One_Side is
      (R       : Var.Var;
       Vals    : R_Type_Array;
       R_Data  : R_Convert_Data;
-      Eq_Data : Equals_Data) return Relation
-   is
+      Eq_Data : Equals_Data) return Relation is
    begin
-
       for V of Vals loop
          R_Inc_Ref (V);
       end loop;
+      R_Convert_Data_Inc_Ref (R_Data);
+      Equals_Data_Inc_Ref (Eq_Data);
 
       return new Member_T'
         (Left           => R,
@@ -275,6 +283,8 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          R_Dec_Ref (V);
       end loop;
       Unchecked_Free (Self.Values);
+      R_Convert_Data_Dec_Ref (Self.R_Data);
+      Equals_Data_Dec_Ref (Self.Eq_Data);
    end Cleanup;
 
    ------------------

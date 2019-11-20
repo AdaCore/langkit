@@ -1,0 +1,52 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    Any: 
+        All: 
+            12 -> %X
+            15 -> %Y
+
+        All: 
+            18 -> %X
+            %X <-> %Y
+
+        All: 
+            2 -> %X
+            3 -> %Y
+            %X <-> %Y
+
+
+    Any: 
+        15 -> %Y 
+        16 -> %Y 
+        16 -> %Y 
+        18 -> %Y 
+        19 -> %Y 
+
+
+Solution: [%Y = 15, %X = 12]
+Solution: [%Y = 18, %X = 18]
+
+Solving with old solver
+=======================
+
+Solving relation:
+<All>:
+| | <Any>:
+| | | | <All>:
+| | | | | | Unify %X <= 12
+| | | | | | Unify %Y <= 15
+| | | | <All>:
+| | | | | | Unify %X <= 18
+| | | | | | Bind %X <=> %Y
+| | | | <All>:
+| | | | | | Unify %X <= 2
+| | | | | | Unify %Y <= 3
+| | | | | | Bind %X <=> %Y
+| | Member %Y {15, 16, 16, 18, 19}
+Solution: [%X = 12, %Y = 15]
+Solution: [%X = 18, %Y = 18]
+
+Done.

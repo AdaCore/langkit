@@ -16,6 +16,7 @@ import sys
 
 from e3.testsuite import Testsuite
 
+import drivers.adalog_driver
 import drivers.langkit_support_driver
 import drivers.lkt_toolbox_driver
 import drivers.python_driver
@@ -35,9 +36,10 @@ def add_to_path(env_var, directory):
 class LangkitTestsuite(Testsuite):
     tests_subdir = 'tests'
     test_driver_map = {
-        'python': drivers.python_driver.PythonDriver,
+        'adalog': drivers.adalog_driver.AdalogDriver,
         'langkit_support': drivers.langkit_support_driver.LangkitSupportDriver,
         'lkt': drivers.lkt_toolbox_driver.LktToolboxDriver,
+        'python': drivers.python_driver.PythonDriver,
     }
 
     def add_options(self, parser):

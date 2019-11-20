@@ -1,0 +1,38 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    Any: 
+        1 -> %x 
+        2 -> %x 
+        3 -> %x 
+        4 -> %x 
+        5 -> %x 
+        6 -> %x 
+
+    Any: 
+        one -> %y 
+        five -> %y 
+        four -> %y 
+
+    to_str(%x) -?> %y 
+    eq_str_lower?(to_str(%x), %y) 
+    is_odd?(%x) 
+
+Solution: [%y = one, %x = 1]
+Solution: [%y = five, %x = 5]
+
+Solving with old solver
+=======================
+
+Solving relation:
+<All> :
+| | Member %x {1, 2, 3, 4, 5, 6}
+| | Member %y {one, five, four}
+| | Bind %x <=> %y (convert: to_str) (equals: eq_str_lower) 
+| | Predicate is_odd on %x
+Solution: [%x = 1, %y = one]
+Solution: [%x = 5, %y = five]
+
+Done.

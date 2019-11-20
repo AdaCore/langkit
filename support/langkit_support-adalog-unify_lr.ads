@@ -40,13 +40,14 @@ generic
      (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
    with function Convert
      (C_Data : Left_C_Data; From : L_Type) return R_Type is <>;
+   with function Image
+     (C_Data : Right_C_Data) return String is <>;
 
    type Equals_Data is private;
    with function Equals (Eq_Data : Equals_Data; L, R : R_Type) return Boolean
-   is <>;
-
-   Convert_Image : String := "";
-   Equals_Image  : String := "";
+     is <>;
+   with function Image
+     (C_Data : Equals_Data) return String is <>;
 
    with package Left_Var is new Adalog.Logic_Var
      (Element_Type => L_Type, others => <>);
@@ -54,8 +55,15 @@ generic
    with package Right_Var is new Logic_Var
      (Element_Type => R_Type, others => <>);
 
-   with procedure L_Dec_Ref (L : in out L_Type);
-   with procedure R_Dec_Ref (R : in out R_Type);
+   with procedure Left_C_Data_Inc_Ref (Self : Left_C_Data);
+   with procedure Right_C_Data_Inc_Ref (Self : Right_C_Data);
+   with procedure Equals_Data_Inc_Ref (Self : Equals_Data);
+
+   with procedure L_Dec_Ref (Self : in out L_Type);
+   with procedure R_Dec_Ref (Self : in out R_Type);
+   with procedure Left_C_Data_Dec_Ref (Self : in out Left_C_Data);
+   with procedure Right_C_Data_Dec_Ref (Self : in out Right_C_Data);
+   with procedure Equals_Data_Dec_Ref (Self : in out Equals_Data);
 
    One_Side_Convert : Boolean := False;
 
@@ -77,20 +85,14 @@ package Langkit_Support.Adalog.Unify_LR is
 
    function Apply (Self : in out Unify_LR) return Solving_State;
    procedure Revert (Self : in out Unify_LR);
-   procedure Free (Self : in out Unify_LR) is null;
+   procedure Free (Self : in out Unify_LR);
 
    function Create
      (Left    : Left_Var.Var;
       Right   : Right_Var.Var;
       L_Data  : Left_C_Data;
       R_Data  : Right_C_Data;
-      Eq_Data : Equals_Data) return Unify_LR
-   is ((Left    => Left,
-        Right   => Right,
-        L_Data  => L_Data,
-        R_Data  => R_Data,
-        Eq_Data => Eq_Data,
-        State   => No_Change));
+      Eq_Data : Equals_Data) return Unify_LR;
 
    function Custom_Image (Self : Unify_LR) return String;
 

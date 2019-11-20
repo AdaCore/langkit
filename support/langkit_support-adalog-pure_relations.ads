@@ -42,7 +42,8 @@ package Langkit_Support.Adalog.Pure_Relations is
 
    function False_Rel (Sloc_Info : String_Access := null) return Relation
    is (new False_Relation.Rel'
-         (Sloc_Info => Sloc_Info,
+         (Ref_Count => 1,
+          Sloc_Info => Sloc_Info,
           others    => <>));
 
    -------------------
@@ -56,9 +57,10 @@ package Langkit_Support.Adalog.Pure_Relations is
 
    package True_Relation is new Pure_Relation (Ty => True_Relation_Rec);
 
-   function True_Rel (Sloc_Info : String_Access := null) return Relation is
-     (new True_Relation.Rel'
-        (Sloc_Info => Sloc_Info,
-         others    => <>));
+   function True_Rel (Sloc_Info : String_Access := null) return Relation
+   is (new True_Relation.Rel'
+         (Ref_Count => 1,
+          Sloc_Info => Sloc_Info,
+          others    => <>));
 
 end Langkit_Support.Adalog.Pure_Relations;

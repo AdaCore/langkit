@@ -1,0 +1,25 @@
+Solving with new solver
+=======================
+
+Solving relation:
+Any: 
+    1 -> %X
+    All: 
+        Is_Even?(%X) 
+        1 -> %Y
+
+
+Solution: [%X = 1]
+
+Solving with old solver
+=======================
+
+Solving relation:
+<Any>:
+| | Unify %X <= 1
+| | <All>:
+| | | | Predicate Is_Even on %X
+| | | | Unify %Y <= 1
+Solution: [%X = 1, %Y = <undefined>]
+Resolution failed with Early_Binding_Error
+Done.

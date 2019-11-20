@@ -15,8 +15,8 @@
   )
 </%def>
 
-<%def name="dynamic_vars_holder_decl(type_name, dynvars)">
-   type ${type_name} is
+<%def name="dynamic_vars_holder_decl(type_name, base_type_name, dynvars)">
+   type ${type_name} is new ${base_type_name} with
    % if dynvars:
       record
          % for dynvar in dynvars:
@@ -26,20 +26,6 @@
    % else:
       null record;
    % endif
-
-   No_${type_name} : constant ${type_name} := (
-      % if dynvars:
-         <%
-            items = [
-               '{} => {}'.format(dynvar.argument_name, dynvar.type.nullexpr)
-               for dynvar in dynvars
-            ]
-         %>
-         ${', '.join(items)}
-      % else:
-         null record
-      % endif
-   );
 </%def>
 
 <%def name="logic_converter(conv_prop)">
@@ -48,16 +34,23 @@
    entity = T.entity.name
    %>
 
-   ${dynamic_vars_holder_decl(type_name, conv_prop.dynamic_vars)}
+   ${dynamic_vars_holder_decl(
+         type_name, "Solver_Ifc.Converter_Type", conv_prop.dynamic_vars
+     )}
 
-   function Convert (Self : ${type_name}; From : ${entity}) return ${entity}
-      with Inline;
+   overriding function Convert
+     (Self : ${type_name}; From : ${entity}) return ${entity}
+     with Inline;
+
+   overriding function Image (Self : ${type_name}) return String;
 
    -------------
    -- Convert --
    -------------
 
-   function Convert (Self : ${type_name}; From : ${entity}) return ${entity} is
+   overriding function Convert
+     (Self : ${type_name}; From : ${entity}) return ${entity} 
+   is
       % if not conv_prop.dynamic_vars:
          pragma Unreferenced (Self);
       % endif
@@ -92,20 +85,41 @@
 
       return (Node => Ret.Node, Info => Ret.Info);
    end Convert;
+
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image (Self : ${type_name}) return String is
+   begin
+      return ("${conv_prop.qualname}");
+   end Image;
 </%def>
 
 <%def name="logic_equal(eq_prop)">
    <%
       struct = eq_prop.struct
-      type_name = 'Equals_Data_{}'.format(eq_prop.uid)
+      type_name = 'Comparer_{}'.format(eq_prop.uid)
    %>
 
-   ${dynamic_vars_holder_decl(type_name, eq_prop.dynamic_vars)}
+   ${dynamic_vars_holder_decl(
+         type_name, "Solver_Ifc.Comparer_Type", eq_prop.dynamic_vars
+     )}
 
-   function Eq_${eq_prop.uid}
-     (Data : ${type_name}; L, R : ${T.entity.name}) return Boolean is
+   overriding function Image (Self : ${type_name}) return String;
+   overriding function Compare
+     (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean;
+
+   overriding function Image (Self : ${type_name}) return String
+   is
+   begin
+      return ("${eq_prop.qualname}");
+   end Image;
+
+   overriding function Compare
+     (Self : ${type_name}; L, R : ${T.entity.name}) return Boolean is
      % if not eq_prop.dynamic_vars:
-        pragma Unreferenced (Data);
+        pragma Unreferenced (Self);
      % endif
    begin
       --  If any node pointer is null, then use that for equality
@@ -132,96 +146,90 @@
           (${eq_prop.self_arg_name}             => L.Node,
            ${eq_prop.natural_arguments[0].name} => R_Entity,
            % for dynvar in eq_prop.dynamic_vars:
-              ${dynvar.argument_name} => Data.${dynvar.argument_name},
+              ${dynvar.argument_name} => Self.${dynvar.argument_name},
            % endfor
            ${eq_prop.entity_info_name}          => L.Info);
        end;
-   end Eq_${eq_prop.uid};
+   end Compare;
 
-</%def>
-
-<%def name="logic_binder(conv_prop, eq_prop)">
-   <%
-   cprop_uid = conv_prop.uid if conv_prop else "Default"
-   eprop_uid = eq_prop.uid if eq_prop else "Default"
-   package_name = "Bind_{}_{}".format(cprop_uid, eprop_uid)
-   converter_type_name = "Logic_Converter_{}".format(cprop_uid)
-   equals_type_name = 'Equals_Data_{}'.format(eprop_uid)
-   %>
-   ## This package contains the necessary Adalog instantiations, so that we can
-   ## create an equation that will bind two logic variables A and B so that::
-   ##    B = PropertyCall (A.Value)
-   ##
-   ## Which is expressed as Bind (A, B, Property) in the DSL.
-   package ${package_name} is new Eq_Node.Raw_Custom_Bind
-     (Converter        => ${converter_type_name},
-      No_Data          => No_${converter_type_name},
-      Equals_Data      => ${equals_type_name},
-      No_Equals_Data   => No_${equals_type_name},
-      Convert          => Convert,
-      Equals           => Eq_${eprop_uid},
-      Convert_Image    =>
-        ${ascii_repr(conv_prop.qualname if conv_prop else '')},
-      Equals_Image     => ${ascii_repr(eq_prop.qualname if eq_prop else '')},
-
-      ## We don't support passing converters that works both ways (from left to
-      ## right and from right to left value) because it is confusing, so when a
-      ## converter is passed, we forbid two sided conversions.
-      One_Side_Convert => ${"True" if conv_prop else "False"}
-      );
 </%def>
 
 <%def name="logic_predicates(prop)">
    % for (args_types, default_passed_args, pred_id) in prop.logic_predicates:
 
    <%
-      type_name = "{}_Predicate_Caller".format(pred_id)
+      type_name = "{}_Predicate".format(pred_id)
       package_name = "{}_Pred".format(pred_id)
       formal_node_types = prop.get_concrete_node_types(args_types,
                                                        default_passed_args)
+      arity = len(formal_node_types)
+      refcounted_args_types = filter(lambda t: t.is_refcounted, args_types)
+      args = list(enumerate(args_types))
    %>
 
-   type ${type_name} is record
-      % for i, arg_type in enumerate(args_types):
+   <%def name="call_profile()">
+      overriding function Call
+        (Self       : ${type_name};
+        % if arity == 1:
+        Entity  : Solver_Ifc.Value_Type
+        % else:
+        Entities : Solver_Ifc.Value_Array
+        % endif
+        ) return Boolean
+   </%def>
+
+   type ${type_name} is
+   new Solver_Ifc.${"Predicate_Type" if arity == 1 else "N_Predicate_Type"}
+   with record
+      % for i, arg_type in args:
          Field_${i} : ${arg_type.name};
       % endfor
-      Dbg_Img : String_Access := null;
+      % if not args:
+      null;
+      % endif
    end record;
 
-   function Create_${pred_id}_Predicate (
-      % for i, arg_type in enumerate(args_types):
-         Field_${i} : ${arg_type.name};
+   ${call_profile()};
+   overriding function Image (Self : ${type_name}) return String;
+   % if refcounted_args_types:
+   overriding procedure Destroy (Self : in out ${type_name});
+   % endif
+
+   function Create_${pred_id}_Predicate
+   % if args:
+   (
+      % for i, arg_type in args:
+         Field_${i} : ${arg_type.name}${"" if loop.last else ";"}
       % endfor
-      Dbg_Img : String_Access := null
-   ) return ${type_name} is
+   )
+   % endif
+   return ${type_name} is
    begin
-      % for i, arg_type in enumerate(args_types):
+      <% components = ["Ref_Count => 1"] %>
+      % for i, arg_type in args:
          % if arg_type.is_refcounted:
             Inc_Ref (Field_${i});
          % endif
+         <% components.append(f"Field_{i} => Field_{i}") %>
       % endfor
-      return ${type_name}'(
-         % for i, arg_type in enumerate(args_types):
-            Field_${i} => Field_${i},
-         % endfor
-         Dbg_Img => Dbg_Img
-      );
+      return ${type_name}'(${", ".join(components)});
    end;
 
    ----------
    -- Call --
    ----------
 
-   function Call
-     (Self       : ${type_name}
-     % for i in range(len(formal_node_types)):
-     ; Node_${i} : ${T.entity.name}
-     % endfor
-     ) return Boolean
+   ${call_profile()}
    is
       % if not args_types:
          pragma Unreferenced (Self);
       % endif
+
+      % if arity > 1:
+      Entity : Solver_Ifc.Value_Type := Entities (1);
+      % endif
+      <% node0_type = formal_node_types[0] %>
+      Node : constant ${node0_type.name} := Entity.Node;
    begin
       ## Here, we'll raise a property error, but only for dispatching
       ## properties. For non dispatching properties we'll allow the user to
@@ -234,15 +242,17 @@
       % endif
 
       <%
-         args = ['Node_0.Node'] + [
-            '(Node => Node_{i}.Node, Info => Node_{i}.Info)'.format(i=i)
-            for i, formal_type in enumerate(formal_node_types[1:], 1)
-         ] + [
+         args = ['Node'] + [
+            '(Node => {}, Info => Entities ({}).Info)'.format(
+                'Entities ({}).Node'.format(i + 1),
+                i + 1
+            ) for i, formal_type in enumerate(formal_node_types[1:], 1)
+      ] + [
             'Self.Field_{}'.format(i)
             for i, _ in enumerate(args_types)
          ]
          if prop.uses_entity_info:
-            args.append('{} => Node_0.Info'.format(prop.entity_info_name))
+            args.append('{} => Entity.Info'.format(prop.entity_info_name))
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
       return ${prop.name} ${args_fmt};
@@ -252,30 +262,24 @@
    -- Image --
    -----------
 
-   function Image (Self : ${type_name}) return String
-   is (if Self.Dbg_Img /= null then Self.Dbg_Img.all else "");
+   overriding function Image (Self : ${type_name}) return String is
+   begin
+      return "${prop.qualname}";
+   end Image;
 
    ----------
    -- Free --
    ----------
 
-   procedure Free (Self : in out ${type_name}) is
-      procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
+   % if refcounted_args_types:
+   overriding procedure Destroy (Self : in out ${type_name}) is
    begin
-      % for i, arg_type in enumerate(args_types):
-         % if arg_type.is_refcounted:
-            Dec_Ref (Self.Field_${i});
-         % endif
+      % for i, arg_type in enumerate(refcounted_args_types):
+      Dec_Ref (Self.Field_${i});
       % endfor
-      Free (Self.Dbg_Img);
-   end Free;
-
-   package ${package_name} is new Predicate_${len(formal_node_types)}
-     (El_Type        => ${T.entity.name},
-      Var            => Eq_Node.Refs.Raw_Logic_Var,
-      Predicate_Type => ${type_name},
-      Free           => Free,
-      Image          => Image);
+      null;
+   end Destroy;
+   % endif
 
    % endfor
 </%def>

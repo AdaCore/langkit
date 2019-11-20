@@ -1,22 +1,107 @@
-========================================================================
-<All>:
-| | Member X { 6,  9}
-| | Member Y { 9,  16}
-| | Unify X <=  3
-| | Unify Y <=  4
+Solving with new solver
+=======================
 
-Solution: { X = 9; Y = 16 }
 ========================================================================
-<All>:
-| | Member Y { 2,  3}
-| | Unify X <=  4
 
-Solution: { X = 16; Y = 2 }
-Solution: { X = 16; Y = 3 }
+Solving relation:
+All: 
+    Any: 
+        6 -> %X 
+        9 -> %X 
+
+    Any: 
+        9 -> %Y 
+        16 -> %Y 
+
+    Square(3) -> %X 
+    Square(4) -> %Y 
+
+Solution: [%X = 9, %Y = 16]
 ========================================================================
-<All>:
-| | Predicate is-even? on X
-| | Unify X <=  3
-| | Bind X <=> Y
 
-No solution found
+Solving relation:
+All: 
+    Any: 
+        2 -> %Y 
+        3 -> %Y 
+
+    Square(4) -> %X 
+
+Solution: [%X = 16, %Y = 2]
+Solution: [%X = 16, %Y = 3]
+========================================================================
+
+Solving relation:
+All: 
+    Is_Even?(%X) 
+    Square(3) -> %X 
+    Square(%X) -> %Y 
+
+========================================================================
+
+Solving relation:
+All: 
+    Any: 
+        1 -> %X 
+        2 -> %X 
+        3 -> %X 
+        4 -> %X 
+        5 -> %X 
+        6 -> %X 
+        7 -> %X 
+        8 -> %X 
+
+    Square(%X) -> %Y 
+
+Solution: [%Y = 1, %X = 1]
+Solution: [%Y = 4, %X = 2]
+Solution: [%Y = 9, %X = 3]
+Solution: [%Y = 16, %X = 4]
+Solution: [%Y = 25, %X = 5]
+Solution: [%Y = 36, %X = 6]
+Solution: [%Y = 49, %X = 7]
+Solution: [%Y = 64, %X = 8]
+
+Solving with old solver
+=======================
+
+========================================================================
+
+Solving relation:
+<All> :
+| | Member %X {6, 9}
+| | Member %Y {9, 16}
+| | Unify %X <= 3 (convert: Square) 
+| | Unify %Y <= 4 (convert: Square) 
+Solution: [%X = 9, %Y = 16]
+========================================================================
+
+Solving relation:
+<All>:
+| | Member %Y {2, 3}
+| | Unify %X <= 4 (convert: Square) 
+Solution: [%X = 16, %Y = 2]
+Solution: [%X = 16, %Y = 3]
+========================================================================
+
+Solving relation:
+<All> :
+| | Predicate Is_Even on %X
+| | Unify %X <= 3 (convert: Square) 
+| | Bind %X <=> %Y (convert: Square) 
+========================================================================
+
+Solving relation:
+<All> :
+| | Member %X {1, 2, 3, 4, 5, 6, 7, 8}
+| | Bind %X <=> %Y (convert: Square) 
+Solution: [%X = 1, %Y = 1]
+Solution: [%X = 2, %Y = 4]
+Solution: [%X = 3, %Y = 9]
+Solution: [%X = 4, %Y = 16]
+Solution: [%X = 5, %Y = 25]
+Solution: [%X = 6, %Y = 36]
+Solution: [%X = 7, %Y = 49]
+Solution: [%X = 8, %Y = 64]
+
+Done.

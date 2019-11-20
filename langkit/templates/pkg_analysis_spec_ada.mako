@@ -20,6 +20,7 @@ with GNATCOLL.Refcount;
 % if any(s.exposed and not s.is_entity_type for s in ctx.struct_types):
    private with Langkit_Support.Boxes;
 % endif
+with Langkit_Support.Adalog;
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
@@ -296,6 +297,9 @@ package ${ada_lib_name}.Analysis is
    procedure Set_Lookup_Cache_Mode (Mode : Lookup_Cache_Kind);
    --  Set the lexical environments lookup cache mode according to ``Mode``.
    --  Note: Mainly meant for debugging the default mode.
+
+   procedure Set_Solver_Kind (Kind : Langkit_Support.Adalog.Solver_Kind);
+   --  Set the library's solver kind
 
    function Has_Rewriting_Handle
      (Context : Analysis_Context'Class) return Boolean;
