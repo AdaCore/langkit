@@ -23,6 +23,10 @@
 
 package body Langkit_Support.Images is
 
+   --------------------
+   -- Stripped_Image --
+   --------------------
+
    function Stripped_Image (I : Integer) return String is
       Result : constant String := Integer'Image (I);
    begin
