@@ -25,7 +25,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
-with Langkit_Support.Adalog.Logic_Ref;
+with Langkit_Support.Adalog.Solver_Interface;
 with Langkit_Support.Adalog.Unify;
 
 --  Convenience wrapper generic package that, from a type implementing
@@ -39,34 +39,41 @@ with Langkit_Support.Adalog.Unify;
 --  between logic references and real instances of the type.
 
 generic
-   type LR_Type is private;
-   with function Element_Image (E : LR_Type) return String is <>;
-   with procedure Inc_Ref (E : LR_Type) is null;
-   with procedure Dec_Ref (E : in out LR_Type) is null;
+   with package Solver_Ifc
+     is new Langkit_Support.Adalog.Solver_Interface (<>);
 package Langkit_Support.Adalog.Eq_Same is
 
-   package Refs is new Logic_Ref (LR_Type, Inc_Ref, Dec_Ref, Element_Image);
+   use Solver_Ifc;
+   use type Value_Type;
 
    type Dummy_Convert_Data is null record;
    No_Data : constant Dummy_Convert_Data := (null record);
 
    function Convert
-     (C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
-      with Inline;
+     (C_Data : Dummy_Convert_Data;
+      From   : Value_Type) return Value_Type
+     with Inline;
+
+   function Image (Dummy : Dummy_Convert_Data) return String is ("");
 
    type Dummy_Equals_Data is null record;
    No_Equals_Data : constant Dummy_Equals_Data := (null record);
 
    function Equals
-     (Dummy_Data : Dummy_Equals_Data; L, R : LR_Type) return Boolean
+     (Dummy_Data : Dummy_Equals_Data; L, R : Value_Type) return Boolean
    is (L = R);
 
+   function Image (Dummy_Data : Dummy_Equals_Data) return String is ("");
+
+   procedure Inc_Ref (Val : Value_Type) is null;
+   procedure Dec_Ref (Val : in out Value_Type) is null;
+
    package Raw_Impl is new Unify
-     (LR_Type, LR_Type,
+     (Value_Type, Value_Type,
       Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Dummy_Equals_Data, No_Equals_Data,
-      Left_Var  => Refs.Raw_Logic_Var,
-      Right_Var => Refs.Raw_Logic_Var,
+      Left_Var  => Solver_Ifc.Logic_Vars,
+      Right_Var => Solver_Ifc.Logic_Vars,
       L_Inc_Ref => Inc_Ref,
       R_Inc_Ref => Inc_Ref,
       L_Dec_Ref => Dec_Ref,
@@ -75,33 +82,35 @@ package Langkit_Support.Adalog.Eq_Same is
    subtype Raw_Member_Array is Raw_Impl.Unify_Left.R_Type_Array;
 
    --  This package can be used to provide custom bind operations, with a
-   --  custom conversion from LR_Type to LR_Type.
+   --  custom conversion from Value_Type to Value_Type.
 
    generic
       type Converter is private;
       No_Data : Converter;
 
+      with function Convert
+        (Data : Converter; From : Value_Type) return Value_Type;
+
+      with function Image (Data : Converter) return String is <>;
+
       type Equals_Data is private;
       No_Equals_Data : Equals_Data;
 
-      with function Convert (Data : Converter; From : LR_Type) return LR_Type;
       with function Equals
-        (Eq_Data : Equals_Data; L, R : LR_Type) return Boolean is <>;
+        (Eq_Data : Equals_Data; L, R : Value_Type) return Boolean is <>;
 
-      Convert_Image : String := "";
-      Equals_Image  : String := "";
+      with function Image (Eq_Data : Equals_Data) return String is <>;
 
       One_Side_Convert : Boolean := False;
 
    package Raw_Custom_Bind is
 
       package Impl is new Unify
-        (LR_Type, LR_Type,
+        (Value_Type, Value_Type,
          Converter, Converter, No_Data, No_Data,
          Equals_Data, No_Equals_Data,
-         Convert, Convert, Equals, Equals,
-         Convert_Image, Equals_Image,
-         Refs.Raw_Logic_Var, Refs.Raw_Logic_Var,
+         Convert, Convert, Image, Image, Equals, Equals, Image,
+         Logic_Vars, Logic_Vars,
          L_Inc_Ref => Inc_Ref,
          R_Inc_Ref => Inc_Ref,
          L_Dec_Ref => Dec_Ref,
@@ -109,7 +118,7 @@ package Langkit_Support.Adalog.Eq_Same is
          One_Side_Convert => One_Side_Convert);
 
       function Create
-        (L, R      : Refs.Raw_Logic_Var.Var;
+        (L, R      : Logic_Vars.Var;
          Data      : Converter;
          Eq_Data   : Equals_Data;
          Sloc_Info : String_Access := null) return Relation
@@ -117,8 +126,8 @@ package Langkit_Support.Adalog.Eq_Same is
         (Impl.Equals (L, R, Data, Data, Eq_Data, Sloc_Info));
 
       function Create
-        (L         : Refs.Raw_Logic_Var.Var;
-         R         : LR_Type;
+        (L         : Logic_Vars.Var;
+         R         : Value_Type;
          Data      : Converter;
          Eq_Data   : Equals_Data;
          Sloc_Info : String_Access := null) return Relation
@@ -126,8 +135,8 @@ package Langkit_Support.Adalog.Eq_Same is
         (Impl.Equals (L, R, Data, Eq_Data, Sloc_Info));
 
       function Create
-        (L         : LR_Type;
-         R         : Refs.Raw_Logic_Var.Var;
+        (L         : Value_Type;
+         R         : Logic_Vars.Var;
          Data      : Converter;
          Eq_Data   : Equals_Data;
          Sloc_Info : String_Access := null) return Relation

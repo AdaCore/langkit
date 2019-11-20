@@ -1,0 +1,20 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    2 -> %X
+    1 -> %Y
+    Is_Double_Of?(%X, %Y)
+
+Solution: [%X = 2, %Y = 1]
+Solving with old solver
+=======================
+
+Solving relation:
+<All> :
+| | Unify %X <= 2
+| | Unify %Y <= 1
+| | PREDICATE Is_Double_Of ON %X%Y
+Solution: [%X = 2, %Y = 1]
+Done.

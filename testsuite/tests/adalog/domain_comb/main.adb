@@ -1,29 +1,22 @@
-with Ada.Text_IO;              use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
+with GNATCOLL.Traces;
+
 with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
-with Langkit_Support.Adalog.Operations;
-use Langkit_Support.Adalog.Operations;
 
---  Test that when a variable has already a domain via the Member primitive, a
---  second use of member will work correctly (eg. like a predicate checking the
---  value of the variable).
+--  Test that Unify works correctly, specially that variable aliasing is well
+--  reset after evaluating a solution.
 
 procedure Main is
-   use Eq_Int; use Eq_Int.Raw_Impl; use Eq_Int.Refs;
+   use T_Solver;
+   use Refs;
 begin
    declare
-      X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
+      X : Refs.Raw_Var := Create ("X");
       R : constant Relation :=
-         +"and" (+Member (X, (1, 2, 3, 4, 5, 6)),
-                 +Member (X, (3, 4, 5)));
+        Domain (X, (1, 2, 3, 4, 5, 6)) and Domain (X, (3, 4, 5));
    begin
-      while Solve (R) loop
-         Put_Line ("X =" & Get_Value (X)'Img);
-      end loop;
-      Free (X);
+      Solve_All (R, Show_Relation => True);
    end;
-   Release_Relations;
 end Main;

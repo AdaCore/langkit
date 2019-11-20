@@ -48,14 +48,14 @@ generic
    with procedure Inc_Ref (E : Element_Type);
    with procedure Dec_Ref (E : in out Element_Type);
 
-   with procedure Reset (Self : in out Logic_Var_Type) is <>;
+   with procedure Reset (Self : Logic_Var_Type) is <>;
    --  Reset the logic variable to an undefined state with no value
 
    with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
    --  Checks whether the logic variable has a value or not
 
    with procedure Set_Value
-     (Self : in out Logic_Var_Type; Data : Element_Type) is <>;
+     (Self : Logic_Var_Type; Data : Element_Type) is <>;
    --  Set the value of the logic variable to Data. Low level function, not for
    --  use by clients.
 
@@ -72,13 +72,30 @@ generic
    with function Element_Image (Self : Element_Type) return String is <>;
    --  Return a string image of Self
 
+   with function Id (Self : Logic_Var_Type) return Natural is <>;
+   --  Return the Id of this variable. Variables have an Id of 0 by default, >
+   --  0 when set by the solver.
+
+   with procedure Set_Id (Self : Logic_Var_Type; Id : Natural) is <>;
+   --  Set the Id for logic variable. If 0, resets the Id of logic variable.
+   --  Setting to 0 will also unalias the variable, if it was aliased.
+
+   with procedure Alias (Self, Other : Logic_Var_Type) is <>;
+   --  Alias this variable to another variable. This
+
+   with procedure Unalias (Self : Logic_Var_Type) is <>;
+
+   with function Get_Alias (Self : Logic_Var_Type) return Logic_Var_Type is <>;
+   --  Get the alias for this logic variable, if there is one
+
+   No_Var : Logic_Var_Type;
 package Langkit_Support.Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
    --  Subtype so that the variable type is visible from the outside, since
    --  formals are not visible.
 
-   type Var_Array is array (Natural range <>) of Var;
-   type Val_Array is array (Natural range <>) of Element_Type;
+   type Var_Array is array (Positive range <>) of Var;
+   type Val_Array is array (Positive range <>) of Element_Type;
    --  Array types for array of variables and array of values of this variable,
    --  for convenience. To be used in other generic packages taking a formal
    --  Logic_Var package as argument.

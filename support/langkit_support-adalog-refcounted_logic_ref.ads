@@ -53,24 +53,30 @@ package Langkit_Support.Adalog.Refcounted_Logic_Ref is
    end record;
 
    package Refs is new GNATCOLL.Refcount.Shared_Pointers (Refcounted_El);
-   type Ref is new Refs.Ref with null record;
+   subtype Ref is Refs.Ref;
 
    procedure Inc_Ref (Self : Ref) is null;
    procedure Dec_Ref (Self : in out Ref) is null;
 
-   procedure Reset (Self : in out Ref);
+   procedure Reset (Self : Ref);
    function Is_Defined (Self : Ref) return Boolean;
-   procedure Set_Value (Self : in out Ref; Data : Element_Type);
+   procedure Set_Value (Self : Ref; Data : Element_Type);
    function Get_Value (Self : Ref) return Element_Type;
+   function Id (Self : Ref) return Natural;
+   procedure Set_Id (Self : Ref; Id : Natural);
+   procedure Alias (Self, Other : Ref);
+   procedure Unalias (Self : Ref);
+   function Get_Alias (Self : Ref) return Ref;
 
    function Image (Self : Ref) return String is
      (LRef.Image (Self.Unchecked_Get.Content));
 
    function Create return Ref;
 
+   No_Ref : Ref := Refs.Null_Ref;
    --  Refcounted one
 
    package Refcounted_Logic_Var is new Adalog.Logic_Var
-     (Ref, Element_Type, Inc_Ref, Dec_Ref);
+     (Ref, Element_Type, Inc_Ref, Dec_Ref, No_Var => No_Ref);
 
 end Langkit_Support.Adalog.Refcounted_Logic_Ref;

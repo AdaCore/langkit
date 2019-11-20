@@ -659,16 +659,8 @@ class CompileCtx:
         List of path for file names to include in the generated library.
         """
 
-        self.logic_binders: Set[Tuple[
-            Optional[PropertyDef],
-            Optional[PropertyDef]
-        ]] = set()
-        """
-        Set of tuple of properties for which we want to generate logic binders.
-        For each binder, there are potentially two properties: the conversion
-        property and the equality property. See langkit.expressions.logic.Bind
-        for more information.
-        """
+        self.logic_converter_props = set()
+        self.logic_comparer_props = set()
 
         self.default_unit_provider = default_unit_provider
         self.case_insensitive = case_insensitive
@@ -972,11 +964,14 @@ class CompileCtx:
             (to_pkg, use_clause, is_private))
 
     @property
-    def sorted_logic_binders(self):
-        return sorted(self.logic_binders, key=lambda x: (
-            x[0].name.camel if x[0] else ""
-            + x[1].name.camel if x[1] else ""
-        ))
+    def sorted_logic_converters(self):
+        return sorted(self.logic_converter_props,
+                      key=lambda x: x.name.camel)
+
+    @property
+    def sorted_logic_comparers(self):
+        return sorted(self.logic_comparer_props,
+                      key=lambda x: x.name.camel)
 
     def sorted_types(self, type_set):
         """
@@ -1001,8 +996,8 @@ class CompileCtx:
         return sorted(self.exception_types.values(),
                       key=lambda e: e.doc_entity)
 
-    def do_generate_logic_binder(self, convert_property=None,
-                                 eq_property=None):
+    def do_generate_logic_functors(self, convert_property=None,
+                                   eq_property=None):
         """
         Generate a logic binder with the given conversion property.
 
@@ -1012,7 +1007,10 @@ class CompileCtx:
         :param PropertyDef convert_property: The conversion property.
         :param PropertyDef eq_property: The equality property.
         """
-        self.logic_binders.add((convert_property, eq_property))
+        if convert_property:
+            self.logic_converter_props.add(convert_property)
+        if eq_property:
+            self.logic_comparer_props.add(eq_property)
 
     @staticmethod
     def grammar_rule_api_name(rule):

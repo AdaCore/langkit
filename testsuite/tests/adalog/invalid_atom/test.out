@@ -1,0 +1,13 @@
+Solving with new solver
+=======================
+
+Solving relation:
+Is_Even?(%X) 
+Invalid equation Is_Even?(%X): depends on undefined var %X
+Solving with old solver
+=======================
+
+Solving relation:
+Predicate Is_Even on %X
+langkit_support-adalog-abstract_relation.adb:185
+Done.

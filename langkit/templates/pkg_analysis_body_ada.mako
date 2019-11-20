@@ -336,6 +336,15 @@ package body ${ada_lib_name}.Analysis is
       Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
    end Set_Logic_Resolution_Timeout;
 
+   ---------------------
+   -- Set_Solver_Kind --
+   ---------------------
+
+   procedure Set_Solver_Kind (Kind : Langkit_Support.Adalog.Solver_Kind) is
+   begin
+      Implementation.Solver.Set_Kind (Kind);
+   end Set_Solver_Kind;
+
    ---------------------------
    -- Set_Lookup_Cache_Mode --
    ---------------------------

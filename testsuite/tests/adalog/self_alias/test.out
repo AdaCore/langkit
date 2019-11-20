@@ -1,0 +1,20 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    %X <-> %X
+    1 -> %X
+    1 -> %Y
+
+Solution: [%X = 1, %Y = 1]
+Solving with old solver
+=======================
+
+Solving relation:
+<All>:
+| | Bind %X <=> %X
+| | Unify %X <= 1
+| | Unify %Y <= 1
+Solution: [%X = 1, %Y = 1]
+Done.

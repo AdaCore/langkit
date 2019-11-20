@@ -1,0 +1,27 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    Any: 
+        All: 
+            1 -> %Y
+            Is_Even?(%X) 
+
+        1 -> %X
+
+    2 -> %X
+
+Solution: [%X = 2, %Y = 1]
+Solving with old solver
+=======================
+
+Solving relation:
+<All>:
+| | <Any>:
+| | | | <All>:
+| | | | | | Unify %Y <= 1
+| | | | | | Predicate Is_Even on %X
+| | | | Unify %X <= 1
+| | Unify %X <= 2
+Done.

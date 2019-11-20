@@ -20,6 +20,7 @@
 -- the files COPYING3 and COPYING.RUNTIME respectively.  If not, see        --
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
+
 with Langkit_Support.Generic_Bump_Ptr;
 
 package Langkit_Support.Bump_Ptr is new Langkit_Support.Generic_Bump_Ptr;

@@ -101,7 +101,7 @@ package body Langkit_Support.Adalog.Predicates is
       function Apply (Self : in out Predicate_Logic) return Solving_State is
       pragma Warnings (On);
       begin
-         for Ref of Self.Refs loop
+         for Ref of Self.Refs (1 .. Self.Arity) loop
             if not Is_Defined (Ref) then
                Trace ("In N_Predicate apply, var " & Image (Ref)
                       & " not defined, deferring application");
@@ -111,7 +111,7 @@ package body Langkit_Support.Adalog.Predicates is
 
          Trace ("In N_Predicate apply, calling predicate");
          declare
-            Vals : Val_Array (1 .. Arity);
+            Vals : Val_Array (1 .. Self.Arity);
          begin
             for I in Self.Refs'Range loop
                Vals (I) := Get_Value (Self.Refs (I));

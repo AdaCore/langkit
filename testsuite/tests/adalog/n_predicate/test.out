@@ -1,6 +1,38 @@
-X = 2
-Y = 1
-X = 4
-Y = 2
-X = 6
-Y = 3
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    Double_Of?(%X, %Y)
+    Any: 
+        1 -> %X 
+        2 -> %X 
+        3 -> %X 
+        4 -> %X 
+        5 -> %X 
+        6 -> %X 
+
+    Any: 
+        1 -> %Y 
+        2 -> %Y 
+        3 -> %Y 
+        4 -> %Y 
+        5 -> %Y 
+        6 -> %Y 
+
+
+Solution: [%Y = 1, %X = 2]
+Solution: [%Y = 2, %X = 4]
+Solution: [%Y = 3, %X = 6]
+Solving with old solver
+=======================
+
+Solving relation:
+<All>:
+| | PREDICATE Double_Of ON %X%Y
+| | Member %X {1, 2, 3, 4, 5, 6}
+| | Member %Y {1, 2, 3, 4, 5, 6}
+Solution: [%X = 2, %Y = 1]
+Solution: [%X = 4, %Y = 2]
+Solution: [%X = 6, %Y = 3]
+Done.

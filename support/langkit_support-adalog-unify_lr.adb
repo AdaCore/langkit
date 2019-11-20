@@ -125,6 +125,10 @@ package body Langkit_Support.Adalog.Unify_LR is
    ------------------
 
    function Custom_Image (Self : Unify_LR) return String is
+
+      Convert_Image : constant String := Image (Self.R_Data);
+      Equals_Image  : constant String := Image (Self.Eq_Data);
+
       C : constant String :=
         (if Convert_Image = "" then ""
          else " (convert: " & Convert_Image & ")");

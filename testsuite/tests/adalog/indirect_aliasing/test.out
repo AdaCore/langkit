@@ -1,0 +1,22 @@
+Solving with new solver
+=======================
+
+Solving relation:
+All: 
+    %X <-> %Y
+    2 -> %Y_Ind
+    %Y <-> %Y_Ind
+    1 -> %Expr
+    %X <-> %Expr
+
+Solving with old solver
+=======================
+
+Solving relation:
+<All> :
+| | Bind %X <=> %Y
+| | Unify %Y_Ind <= 2
+| | Bind %Y <=> %Y_Ind
+| | Unify %Expr <= 1
+| | Bind %X <=> %Expr
+Done.

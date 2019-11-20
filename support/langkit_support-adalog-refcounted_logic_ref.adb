@@ -31,7 +31,7 @@ package body Langkit_Support.Adalog.Refcounted_Logic_Ref is
    -- Set_Value --
    ---------------
 
-   procedure Set_Value (Self : in out Ref; Data : Element_Type) is
+   procedure Set_Value (Self : Ref; Data : Element_Type) is
    begin
       LRef.Set_Value (Self.Unchecked_Get.Content, Data);
    end Set_Value;
@@ -63,7 +63,7 @@ package body Langkit_Support.Adalog.Refcounted_Logic_Ref is
    -- Reset --
    -----------
 
-   procedure Reset (Self : in out Ref) is
+   procedure Reset (Self : Ref) is
    begin
       LRef.Reset (Self.Unchecked_Get.Content);
    end Reset;
@@ -74,5 +74,57 @@ package body Langkit_Support.Adalog.Refcounted_Logic_Ref is
 
    function Is_Defined (Self : Ref) return Boolean is
      (LRef.Is_Defined (Self.Unchecked_Get.Content));
+
+   --------
+   -- Id --
+   --------
+
+   function Id (Self : Ref) return Natural is
+     (LRef.Id (Self.Unchecked_Get.Content'Unrestricted_Access));
+
+   ------------
+   -- Set_Id --
+   ------------
+
+   procedure Set_Id (Self : Ref; Id : Natural) is
+   begin
+      LRef.Set_Id (Self.Unchecked_Get.Content'Unrestricted_Access, Id);
+   end Set_Id;
+
+   -----------
+   -- Alias --
+   -----------
+
+   procedure Alias (Self, Other : Ref) is
+   begin
+      LRef.Alias (Self.Unchecked_Get.Content'Unrestricted_Access,
+                  Other.Unchecked_Get.Content'Unrestricted_Access);
+   end Alias;
+
+   procedure Unalias (Self : Ref) is
+   begin
+      LRef.Unalias (Self.Unchecked_Get.Content'Unrestricted_Access);
+   end Unalias;
+
+   ---------------
+   -- Get_Alias --
+   ---------------
+
+   function Get_Alias (Self : Ref) return Ref is
+      use LRef;
+      Raw : constant Raw_Var :=
+        Get_Alias (Self.Unchecked_Get.Content'Unrestricted_Access);
+      Ret : Ref;
+   begin
+      if Raw = No_Var then
+         return No_Ref;
+      else
+         Refs.Set
+           (Ret,
+            Refcounted_El'
+              (Refcounted with Content => Raw.all));
+         return Ret;
+      end if;
+   end Get_Alias;
 
 end Langkit_Support.Adalog.Refcounted_Logic_Ref;

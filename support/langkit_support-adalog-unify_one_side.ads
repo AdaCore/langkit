@@ -48,15 +48,16 @@ generic
      (C_Data : R_Convert_Data; From : R_Type) return L_Type is <>;
    --  Conversion function, to get an L_Type from an R_Type
 
+   with function Image (C_Data : R_Convert_Data) return String;
+
    type Equals_Data is private;
    --  Private type containing data associated to the Equals function. Not
    --  necessary, but useful if your equality function has state.
 
    with function Equals (Data : Equals_Data; L, R : L_Type) return Boolean
-   is <>;
+     is <>;
 
-   Convert_Image : String := "";
-   Equals_Image  : String := "";
+   with function Image (Data : Equals_Data) return String;
 
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
    --  Logic variable formal package

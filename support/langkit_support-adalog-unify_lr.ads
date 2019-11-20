@@ -40,13 +40,14 @@ generic
      (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
    with function Convert
      (C_Data : Left_C_Data; From : L_Type) return R_Type is <>;
+   with function Image
+     (C_Data : Right_C_Data) return String is <>;
 
    type Equals_Data is private;
    with function Equals (Eq_Data : Equals_Data; L, R : R_Type) return Boolean
-   is <>;
-
-   Convert_Image : String := "";
-   Equals_Image  : String := "";
+     is <>;
+   with function Image
+     (C_Data : Equals_Data) return String is <>;
 
    with package Left_Var is new Adalog.Logic_Var
      (Element_Type => L_Type, others => <>);
