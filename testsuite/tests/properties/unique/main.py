@@ -8,7 +8,7 @@ import libfoolang
 print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
-a, b, c, d = [ctx.get_from_buffer('{}.txt'.format(name), 'example')
+a, b, c, d = [ctx.get_from_buffer('{}.txt'.format(name), b'example')
               for name in ('a', 'b', 'c', 'd')]
 node = a.root
 

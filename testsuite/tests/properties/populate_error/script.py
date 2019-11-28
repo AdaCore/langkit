@@ -6,7 +6,7 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('source.txt', 'example')
+u = ctx.get_from_buffer('source.txt', b'example')
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)

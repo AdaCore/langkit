@@ -14,7 +14,7 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', 'a(c) b(a c) +c(a)')
+u = ctx.get_from_buffer('main.txt', b'a(c) b(a c) +c(a)')
 if u.diagnostics:
     for d in u.diagnostics:
         pflush(d)

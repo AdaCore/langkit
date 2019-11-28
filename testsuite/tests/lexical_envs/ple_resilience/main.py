@@ -36,7 +36,7 @@ def process(n, indent=''):
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('foo', """
+u = ctx.get_from_buffer('foo', b"""
     scope_1 {
         a = scope_1
         error b {

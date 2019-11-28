@@ -18,8 +18,8 @@ def load_unit(name, content):
 
 
 ctx = libfoolang.AnalysisContext()
-u1 = load_unit('u1', 'example example')
-u2 = load_unit('u2', 'example')
+u1 = load_unit('u1', b'example example')
+u2 = load_unit('u2', b'example')
 
 u1_n1, u1_n2 = u1.root
 u2_n = u2.root[0]

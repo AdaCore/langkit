@@ -45,7 +45,8 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Symbol, lambda _: '_symbol_type.wrap({})'),
             (T.Bool, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.Int, lambda _: '{{}}{}'.format(value_suffix)),
-            (T.Character, lambda _: 'unichr({{}}{})'.format(value_suffix)),
+            (T.Character, lambda _: '_py2to3.unicode_character({{}}{})'
+                                    .format(value_suffix)),
             (ct.ArrayType, lambda _: '{}.wrap({{}})'.format(
                 self.array_wrapper(type)
             )),

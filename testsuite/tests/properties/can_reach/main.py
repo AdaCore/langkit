@@ -20,8 +20,8 @@ def parse_unit(filename, src_buffer):
     return u
 
 
-u1 = parse_unit('src1.txt', 'example\nexample')
-u2 = parse_unit('src2.txt', 'example')
+u1 = parse_unit('src1.txt', b'example\nexample')
+u2 = parse_unit('src2.txt', b'example')
 
 root = u1.root
 u1_ex1, u1_ex2 = u1.root

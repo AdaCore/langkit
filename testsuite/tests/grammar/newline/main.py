@@ -16,17 +16,17 @@ def process(text):
         u.root.dump()
 
 
-process("""
+process(b"""
 1
 2
 """.strip())
-process("1 2")
-process("""
+process(b"1 2")
+process(b"""
 1
    2
 """.strip())
 
-process("""
+process(b"""
 1
 2
    3

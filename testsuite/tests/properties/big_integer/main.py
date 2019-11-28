@@ -8,7 +8,7 @@ import libfoolang
 print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', """
+u = ctx.get_from_buffer('main.txt', b"""
 def a0 = 2
 def a = 10000000000000000000000000000000
 def b = a + 1
