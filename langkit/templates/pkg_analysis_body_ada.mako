@@ -586,8 +586,11 @@ package body ${ada_lib_name}.Analysis is
             return (Internal   => (Node => N, Info => Node.Internal.Info),
                     Safety_Net => Node.Safety_Net);
          </%def>
-         <%def name="emit_error()">
-            raise Constraint_Error with "Invalid type conversion";
+         <%def name="emit_error(e)">
+            raise Constraint_Error with
+              "${ada_lib_name}: invalid type conversion from"
+              & " ${e.element_type.dsl_name} to "
+              & Node.Kind_Name;
          </%def>
 
          % if e.element_type.equivalent_to_root:
@@ -596,13 +599,13 @@ package body ${ada_lib_name}.Analysis is
          % elif not e.element_type.concrete_subclasses:
             ## If there are no concrete subclasses, then no kind can possibly
             ## match this conversion.
-            ${emit_error()}
+            ${emit_error(e)}
 
          % else:
             if N.Kind in ${e.element_type.ada_kind_range_name} then
                ${emit_return()}
             else
-               ${emit_error()}
+               ${emit_error(e)}
             end if;
          % endif
       end;
