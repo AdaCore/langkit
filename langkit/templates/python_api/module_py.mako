@@ -128,9 +128,20 @@ class _Exception(ctypes.Structure):
         return _exception_kind_to_type[self.kind](self.information)
 
 
+def _type_fullname(t):
+    """
+    Return the fully qualified name for the given `t` type.
+    """
+    name = t.__name__
+    module = t.__module__
+    return (name
+            if module in (None, object.__class__.__module__) else
+            '{}.{}'.format(module, name))
+
+
 def _raise_type_error(expected_type_name, actual_value):
     raise TypeError('{} instance expected, got {} instead'.format(
-        expected_type_name, type(actual_value)
+        expected_type_name, _type_fullname(type(actual_value))
     ))
 
 
