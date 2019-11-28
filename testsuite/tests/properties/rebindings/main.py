@@ -35,7 +35,7 @@ def process(index, n):
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', """
+u = ctx.get_from_buffer('main.txt', b"""
 (T) foo { a b }
 
 (T U) old_bar { c d }

@@ -8,7 +8,7 @@ import libfoolang
 print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', 'def a, def b, b, a')
+u = ctx.get_from_buffer('main.txt', b'def a, def b, b, a')
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)

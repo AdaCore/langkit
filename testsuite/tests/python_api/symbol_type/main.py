@@ -3,12 +3,13 @@ from __future__ import absolute_import, division, print_function
 import sys
 
 import libfoolang
+from libfoolang import _py2to3
 
 
 print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('foo.txt', 'my_ident')
+u = ctx.get_from_buffer('foo.txt', b'my_ident')
 if u.diagnostics:
     for d in u.diagnostics:
         print(d)
@@ -17,7 +18,7 @@ if u.diagnostics:
 for s in (None, 42, 'my_ident', 'MY_IDENT', 'no_such_symbol',
           'invalid_symbol0'):
     try:
-        result = '= {}'.format(repr(u.root.p_sym(s)))
+        result = '= {}'.format(_py2to3.text_repr(u.root.p_sym(s)))
     except TypeError as exc:
         result = 'raised <TypeError: {}>'.format(exc)
     except libfoolang.InvalidSymbolError as exc:

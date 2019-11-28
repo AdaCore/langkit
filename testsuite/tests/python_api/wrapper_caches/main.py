@@ -6,7 +6,7 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-unit = ctx.get_from_buffer('foo.txt', 'example (example)')
+unit = ctx.get_from_buffer('foo.txt', b'example (example)')
 
 # Make sure that the exact context wraper is re-used over and over
 assert unit.context is ctx
@@ -26,7 +26,7 @@ assert root.unit is unit
 
 # Make sure trying to use a stale reference raises an error
 print('Reparsing...')
-unit.reparse('example (example)')
+unit.reparse(b'example (example)')
 for name, computation in [
     ('.parent', lambda n: n.parent),
     ('[0]', lambda n: n[0]),

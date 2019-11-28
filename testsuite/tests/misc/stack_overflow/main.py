@@ -30,7 +30,7 @@ def test(label, test_func):
     print('')
 
 
-n = parse('example')
+n = parse(b'example')
 test('No overflow: property calls', lambda: n.p_recurse(max_depth))
 test('Overflow: property calls', lambda: n.p_recurse(max_depth + 1))
 

@@ -25,8 +25,8 @@ def repr_node(node):
 
 ctx = libfoolang.AnalysisContext()
 ctx.discard_errors_in_populate_lexical_env(False)
-unit_a = load_unit('a.txt', 'example')
-unit_b = load_unit('b.txt', 'example')
+unit_a = load_unit('a.txt', b'example')
+unit_b = load_unit('b.txt', b'example')
 
 for unit in [unit_a, unit_b]:
     print('{} -> {}'.format(

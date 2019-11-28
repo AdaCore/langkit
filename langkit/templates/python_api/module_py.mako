@@ -126,7 +126,14 @@ class _Exception(ctypes.Structure):
                 ('information', ctypes.c_char_p)]
 
     def _wrap(self):
-        return _exception_kind_to_type[self.kind](self.information)
+        # In Python3, turn information into native strings, i.e. decode bytes.
+        # These strings are only informative, so do not raise an error if
+        # decoding fails: do best effort decoding instead to be as helpful as
+        # possible.
+        info = self.information
+        if not _py2to3.python2:
+            info = info.decode(errors='replace')
+        return _exception_kind_to_type[self.kind](info)
 
 
 def _type_fullname(t):
@@ -242,10 +249,10 @@ class _text(ctypes.Structure):
         Try to cast ``value`` into an unicode object. Raise a TypeError, or
         raise a string decoding error when this is not possible.
         """
-        if isinstance(value, str):
+        if isinstance(value, _py2to3.bytes_type):
             return value.decode('ascii')
-        elif not isinstance(value, unicode):
-            _raise_type_error('string or unicode', value)
+        elif not isinstance(value, _py2to3.text_type):
+            _raise_type_error('text string', value)
         else:
             return value
 
@@ -289,7 +296,7 @@ class _big_integer(object):
 
     @classmethod
     def unwrap(cls, value):
-        if not isinstance(value, (int, long)):
+        if not _py2to3.is_int(value):
             _raise_type_error('int or long', value)
 
         text = _text._unwrap(str(value))
@@ -434,6 +441,7 @@ class AnalysisContext(object):
         self._c_value = None
 
         if _c_value is None:
+            charset = _py2to3.text_to_bytes(charset)
             if not isinstance(tab_stop, int) or tab_stop < 1:
                 raise ValueError(
                     'Invalid tab_stop (positive integer expected)')
@@ -473,32 +481,42 @@ class AnalysisContext(object):
     def get_from_file(self, filename, charset=None, reparse=False,
                       rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_file', 8)}
+        filename = _py2to3.text_to_bytes(filename)
+        charset = _py2to3.text_to_bytes(charset or '')
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
-                                               charset or '', reparse,
+                                               charset, reparse,
                                                GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
     def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
                         rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
+        if not isinstance(buffer, _py2to3.bytes_type):
+            raise TypeError('`buffer` must be a bytes string')
+        filename = _py2to3.text_to_bytes(filename)
+        charset = _py2to3.text_to_bytes(charset or '')
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
-                                                 charset or '',
+                                                 charset,
                                                  buffer, len(buffer),
                                                  GrammarRule._unwrap(rule))
         return AnalysisUnit._wrap(c_value)
 
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
+        name = _py2to3.text_to_bytes(name)
+        name_text = _py2to3.bytes_to_text(name)
+        charset = _py2to3.text_to_bytes(charset or '')
+
         _name = _text._unwrap(name)
         _kind = ${pyapi.unwrap_value('kind', T.AnalysisUnitKind, None)}
         c_value = _get_analysis_unit_from_provider(
-            self._c_value, ctypes.byref(_name), _kind, charset or '', reparse
+            self._c_value, ctypes.byref(_name), _kind, charset, reparse
         )
         if c_value:
             return AnalysisUnit._wrap(c_value)
         else:
             raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
-                repr(name), kind
+                repr(name_text), kind
             ))
 
     def discard_errors_in_populate_lexical_env(self, discard):
@@ -566,12 +584,13 @@ class AnalysisUnit(object):
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             if not self.first:
                 raise StopIteration()
             result = self.first
             self.first = self.first.next
             return result
+        next = __next__
 
     def __init__(self, context, c_value):
         """
@@ -622,11 +641,17 @@ class AnalysisUnit(object):
 
     def reparse(self, buffer=None, charset=None):
         ${py_doc('langkit.unit_reparse_generic', 8)}
+        charset = _py2to3.text_to_bytes(charset or '')
         if buffer is None:
-            _unit_reparse_from_file(self._c_value, charset or '')
+            _unit_reparse_from_file(self._c_value, charset)
         else:
-            _unit_reparse_from_buffer(self._c_value, charset or '',
-                                      buffer, len(buffer))
+            if not isinstance(buffer, _py2to3.bytes_type):
+                raise TypeError(
+                    '`buffer` must be a bytes string, got {} instead'
+                    .format(_type_fullname(type(buffer)))
+                )
+            _unit_reparse_from_buffer(self._c_value, charset, buffer,
+                                      len(buffer))
 
     def populate_lexical_env(self):
         ${py_doc('langkit.unit_populate_lexical_env', 8)}
@@ -753,8 +778,9 @@ class Sloc(object):
         self.line = line
         self.column = column
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.line or self.column)
+    __nonzero__ = __bool__
 
     def __lt__(self, other):
         # First compare line numbers...
@@ -799,8 +825,9 @@ class SlocRange(object):
         self.start = start
         self.end = end
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.start or self.end)
+    __nonzero__ = __bool__
 
     def __lt__(self, other):
         raise NotImplementedError('SlocRange comparison not supported')
@@ -1162,7 +1189,7 @@ class ${root_astnode_name}(object):
                         ctypes.byref(result))
         return ${root_astnode_name}._wrap(result)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return always True so that checking a node against None can be done as
         simply as::
@@ -1171,6 +1198,7 @@ class ${root_astnode_name}(object):
                 ...
         """
         return True
+    __nonzero__ = __bool__
 
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
@@ -1824,7 +1852,7 @@ def _unwrap_str(c_char_p_value):
     """
     result = ctypes.c_char_p(ctypes.addressof(c_char_p_value.contents)).value
     _free(c_char_p_value)
-    return result
+    return _py2to3.bytes_to_text(result)
 
 
 _kind_to_astnode_cls = {

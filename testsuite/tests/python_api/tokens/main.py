@@ -7,6 +7,7 @@ from __future__ import absolute_import, division, print_function
 import sys
 
 import libfoolang
+from libfoolang import _py2to3
 
 
 print('main.py: Running...')
@@ -23,8 +24,8 @@ def parse(filename, content):
 
 
 ctx = libfoolang.AnalysisContext()
-u = parse('foo.txt', ' (a (b c d)) ')
-u2 = parse('bar.txt', '()')
+u = parse('foo.txt', b' (a (b c d)) ')
+u2 = parse('bar.txt', b'()')
 
 tokens = []
 t = u.first_token
@@ -39,7 +40,7 @@ for t in tokens:
 print('')
 
 # Print the whole text buffer
-print('Input source buffer:\n   {}'.format(repr(u.text)))
+print('Input source buffer:\n   {}'.format(_py2to3.text_repr(u.text)))
 print('')
 
 # Test Token's comparison operations
@@ -80,7 +81,8 @@ for t1, t2 in [(tokens[1], tokens[0]),
                (tokens[0], tokens[1]),
                (tokens[1], tokens[4])]:
     print('Token.text_range({}, {}):\n   {}'
-          .format(t1, t2, repr(libfoolang.Token.text_range(t1, t2))))
+          .format(t1, t2,
+                  _py2to3.text_repr(libfoolang.Token.text_range(t1, t2))))
 print('')
 
 # Ordering operations and .range_until must raise an error when working on
@@ -105,15 +107,13 @@ for func in [libfoolang.Token.__lt__,
              libfoolang.Token.__ge__,
              libfoolang.Token.range_until,
              libfoolang.Token.text_range]:
-    for v1, v2 in [(42, u.first_token),
-                   (u.first_token, 42)]:
-        try:
-            func(v1, v2)
-        except TypeError as exc:
-            print('{} raised {}:\n   {}'.format(
-                func.__name__, type(exc).__name__, exc))
-        else:
-            assert False
+    try:
+        func(u.first_token, 42)
+    except TypeError as exc:
+        print('{} raised {}:\n   {}'.format(
+            func.__name__, type(exc).__name__, exc))
+    else:
+        assert False
 print('')
 
 # Equality operations must handle them correctly however

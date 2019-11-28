@@ -28,7 +28,7 @@ def process(name, buffer):
 
 
 # This deals with only local nodes and environments: there is no error here
-process('foo', """
+process('foo', b"""
     foo {
         bar {}
     }
@@ -38,18 +38,18 @@ process('foo', """
 
 # Adding a node from the current unit to a foreign unit's lexical env is
 # allowed.
-process('add_to_foreign', """
+process('add_to_foreign', b"""
     foo.bar
 """)
 
 # Adding a foreign node to the current unit's lexical env is an error
-process('add_foreign_node', """
+process('add_foreign_node', b"""
     +foo.bar
 """)
 
 # Adding a local node to the current unit's lexical environment is allowed, but
 # when the metadata contains a foreign node, this is an error.
-process('add_foreign_md', """
+process('add_foreign_md', b"""
     local {}
     +local (foo)
 """)

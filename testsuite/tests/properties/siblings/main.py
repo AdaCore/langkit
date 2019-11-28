@@ -7,7 +7,7 @@ import libfoolang
 print('main.py: Running...')
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', """
+u = ctx.get_from_buffer('main.txt', b"""
 Root(
     A( a() )
     B( a() b() )
