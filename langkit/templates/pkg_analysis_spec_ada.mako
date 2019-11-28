@@ -580,6 +580,10 @@ package ${ada_lib_name}.Analysis is
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.
 
+   --  The following As_* functions convert references to nodes from one type
+   --  to another (${root_entity.api_name} can refer to any node type). They
+   --  raise a Constraint_Error if the conversion is invalid.
+
    pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
       function As_${e.element_type.kwless_raw_name}
