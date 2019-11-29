@@ -106,6 +106,22 @@ package body Langkit_Support.Vectors is
       end loop;
    end Concat;
 
+   ------------
+   -- Concat --
+   ------------
+
+   procedure Concat (Self : in out Vector; Elements : Vector) is
+   begin
+      if Small_Vector_Capacity /= 0 then
+         Self.Concat (Elements.To_Array);
+      else
+         Self.Reserve (Self.Length + Elements.Length);
+         for I in Elements.First_Index .. Elements.Last_Index loop
+            Self.Append (Elements.E (I));
+         end loop;
+      end if;
+   end Concat;
+
    ---------------
    -- Remove_At --
    ---------------

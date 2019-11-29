@@ -77,6 +77,9 @@ package Langkit_Support.Vectors is
    procedure Concat (Self : in out Vector; Elements : Elements_Array);
    --  Append every element of the Elements array in Self
 
+   procedure Concat (Self : in out Vector; Elements : Vector);
+   --  Append every element of the Elements array in Self
+
    procedure Remove_At (Self : in out Vector; Index : Index_Type);
 
    function Get
