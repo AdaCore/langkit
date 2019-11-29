@@ -86,14 +86,14 @@ package body Langkit_Support.Lexical_Env is
    --  identical New_Env in the set of rebindings. If there are, raise a
    --  property error.
 
-   function Get_Internal
+   procedure Get_Internal
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
       Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata;
-      Categories    : Ref_Categories)
-      return Lookup_Result_Array;
+      Categories    : Ref_Categories;
+      Local_Results : in out Lookup_Result_Vector);
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
@@ -550,17 +550,19 @@ package body Langkit_Support.Lexical_Env is
    -- Get --
    ---------
 
-   function Get_Internal
+   procedure Get_Internal
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
       Lookup_Kind   : Lookup_Kind_Type := Recursive;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata;
-      Categories    : Ref_Categories)
-      return Lookup_Result_Array
+      Categories    : Ref_Categories;
+      Local_Results : in out Lookup_Result_Vector)
    is
+      Outer_Results :  Lookup_Result_Vector :=
+        Lookup_Result_Item_Vectors.Empty_Vector;
+      Need_Cache  : Boolean := False;
 
-      Local_Results      : Lookup_Result_Vector;
       Current_Rebindings : Env_Rebindings;
 
       procedure Get_Refd_Nodes (Self : in out Referenced_Env);
@@ -744,21 +746,25 @@ package body Langkit_Support.Lexical_Env is
          Env := Get_Env
            (Self.Getter, Entity_Info'(Metadata, Current_Rebindings, False));
 
+         --  TODO: Do not create a temp vector here, rather keep track of prior
+         --  size, and only modify appended elements if the getter is dynamic.
          declare
-            Refd_Results : constant Lookup_Result_Array :=
-              Get_Internal
-                (Env, Key,
-                 Lookup_Kind =>
-                   (if Lookup_Kind = Recursive and then Self.Kind = Transitive
-                    then Recursive
-                    elsif Lookup_Kind = Minimal
-                    then raise System.Assertions.Assert_Failure
-                      with "Should not happen"
-                    else Flat),
-                 Rebindings => Shed_Rebindings (Env, Current_Rebindings),
-                 Metadata    => Metadata,
-                 Categories  => Categories);
+            Refd_Results : Lookup_Result_Vector;
          begin
+            Get_Internal
+              (Env, Key,
+               Lookup_Kind =>
+                 (if Lookup_Kind = Recursive and then Self.Kind = Transitive
+                  then Recursive
+                  elsif Lookup_Kind = Minimal
+                  then raise System.Assertions.Assert_Failure
+                  with "Should not happen"
+                  else Flat),
+               Rebindings  => Shed_Rebindings (Env, Current_Rebindings),
+               Metadata    => Metadata,
+               Categories  => Categories,
+               Local_Results => Refd_Results);
+
             if Self.Getter.Dynamic then
                for Res of Refd_Results loop
                   declare
@@ -771,6 +777,8 @@ package body Langkit_Support.Lexical_Env is
             else
                Local_Results.Concat (Refd_Results);
             end if;
+
+            Refd_Results.Destroy;
          end;
 
          Self.Being_Visited := False;
@@ -798,7 +806,7 @@ package body Langkit_Support.Lexical_Env is
 
    begin
       if Self in Empty_Env then
-         return Empty_Lookup_Result_Array;
+         return;
       end if;
 
       if Has_Trace then
@@ -810,10 +818,11 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       case Self.Kind is
-         when Orphaned => null;
-            return Get_Internal
+         when Orphaned =>
+            Get_Internal
               (Self.Env.Orphaned_Env, Key, Flat, Rebindings, Metadata,
-               Categories);
+               Categories, Local_Results);
+            return;
 
          when Grouped =>
             --  Just concatenate lookups for all grouped environments
@@ -823,23 +832,20 @@ package body Langkit_Support.Lexical_Env is
                   Combine (Self.Env.Default_MD, Metadata);
             begin
                for E of Self.Env.Grouped_Envs.all loop
-                  Local_Results.Concat
-                    (Get_Internal (E, Key, Lookup_Kind, Rebindings, MD,
-                                   Categories));
+                  Get_Internal (E, Key, Lookup_Kind, Rebindings, MD,
+                                Categories, Local_Results);
                end loop;
             end;
             Traces.Decrease_Indent (Rec);
 
-            return R : constant Lookup_Result_Array := Local_Results.To_Array
-            do
-               Local_Results.Destroy;
-            end return;
+            return;
 
          when Rebound =>
-            return Get_Internal
+            Get_Internal
               (Self.Env.Rebound_Env, Key, Lookup_Kind,
                Combine (Self.Env.Rebindings, Rebindings),
-               Metadata, Categories);
+               Metadata, Categories, Local_Results);
+            return;
 
          when Primary => null; --  Handled below to avoid extra nesting levels
       end case;
@@ -860,7 +866,12 @@ package body Langkit_Support.Lexical_Env is
               (Res_Key, Val, Cached_Res_Cursor, Inserted);
          end;
 
-         if not Inserted then
+         if Inserted then
+            Need_Cache := True;
+            Outer_Results := Local_Results;
+            Local_Results := Lookup_Result_Item_Vectors.Empty_Vector;
+         else
+
             Res_Val := Element (Cached_Res_Cursor);
 
             if Has_Trace then
@@ -871,10 +882,14 @@ package body Langkit_Support.Lexical_Env is
 
             case Res_Val.State is
                when Computing =>
-                  return Empty_Lookup_Result_Array;
+                  return;
                when Computed =>
-                  return Res_Val.Elements.To_Array;
-               when None => null;
+                  Local_Results.Concat (Res_Val.Elements);
+                  return;
+               when None =>
+                  Need_Cache := True;
+                  Outer_Results := Local_Results;
+                  Local_Results := Lookup_Result_Item_Vectors.Empty_Vector;
             end case;
          end if;
       end if;
@@ -932,11 +947,10 @@ package body Langkit_Support.Lexical_Env is
                     (Rec, "Recursing on parent environments");
                   Traces.Increase_Indent (Rec);
                end if;
-               Local_Results.Concat
-                 (Get_Internal
-                    (Parent_Env, Key, Lookup_Kind,
-                     Parent_Rebindings,
-                     Metadata, Categories));
+               Get_Internal
+                 (Parent_Env, Key, Lookup_Kind,
+                  Parent_Rebindings,
+                  Metadata, Categories, Local_Results);
                if Has_Trace then
                   Traces.Decrease_Indent (Rec);
                end if;
@@ -973,18 +987,16 @@ package body Langkit_Support.Lexical_Env is
       Dec_Ref (Env);
 
       if Has_Lookup_Cache (Self) and then Lookup_Kind = Recursive then
-         declare
-            Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
-         begin
-            Self.Env.Lookup_Cache.Include (Res_Key, Val);
-         end;
-
-         return Local_Results.To_Array;
-      else
-         return R : constant Lookup_Result_Array := Local_Results.To_Array
-         do
-            Local_Results.Destroy;
-         end return;
+         if Need_Cache then
+            declare
+               Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
+            begin
+               Self.Env.Lookup_Cache.Include (Res_Key, Val);
+               Outer_Results.Concat (Local_Results);
+               Local_Results := Outer_Results;
+            end;
+         end if;
+         return;
       end if;
 
    end Get_Internal;
@@ -1014,10 +1026,11 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       declare
-         Results : constant Lookup_Result_Array :=
-           Get_Internal
-             (Self, Key, Lookup_Kind, null, Empty_Metadata, Categories);
+         Results : Lookup_Result_Vector;
       begin
+         Get_Internal
+           (Self, Key, Lookup_Kind, null, Empty_Metadata, Categories, Results);
+
          for El of Results loop
             if From = No_Node
               or else (if El.Override_Filter_Node /= No_Node
@@ -1065,10 +1078,10 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       declare
-         V : constant Lookup_Result_Array :=
-           Get_Internal
-             (Self, Key, Lookup_Kind, null, Empty_Metadata, Categories);
+         V : Lookup_Result_Vector;
       begin
+         Get_Internal
+           (Self, Key, Lookup_Kind, null, Empty_Metadata, Categories, V);
 
          for El of V loop
             if From = No_Node
