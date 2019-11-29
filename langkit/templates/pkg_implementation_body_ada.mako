@@ -130,6 +130,9 @@ package body ${ada_lib_name}.Implementation is
       Destroy : Destroy_Procedure);
    --  Common underlying implementation for Register_Destroyable_Gen
 
+   function Construct_Entity_Array
+     (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
+
    function Solve_Wrapper
      (R            : Relation;
       Context_Node : ${T.root_node.name}) return Boolean;
@@ -165,6 +168,25 @@ package body ${ada_lib_name}.Implementation is
      (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
+
+   function Construct_Entity_Array
+     (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name}
+   is
+      Ret : ${T.entity.array.name} :=
+        ${T.entity.array.constructor_name} (V.Length);
+   begin
+      for J in V.First_Index .. V.Last_Index loop
+         Ret.Items (J) := V.Get (J);
+      end loop;
+
+      declare
+         Tmp : AST_Envs.Entity_Vectors.Vector := V;
+      begin
+         Tmp.Destroy;
+      end;
+
+      return Ret;
+   end Construct_Entity_Array;
 
    ----------------
    -- Enter_Call --

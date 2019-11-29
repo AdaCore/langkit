@@ -1001,6 +1001,21 @@ package body Langkit_Support.Lexical_Env is
 
    end Get_Internal;
 
+   function Get
+     (Self        : Lexical_Env;
+      Key         : Symbol_Type;
+      From        : Node_Type := No_Node;
+      Lookup_Kind : Lookup_Kind_Type := Recursive;
+      Categories  : Ref_Categories := All_Cats) return Entity_Array
+   is
+      Vec : Entity_Vectors.Vector :=
+        Get (Self, Key, From, Lookup_Kind, Categories);
+   begin
+      return Ret : constant Entity_Array := Vec.To_Array do
+         Vec.Destroy;
+      end return;
+   end Get;
+
    ---------
    -- Get --
    ---------
@@ -1011,7 +1026,7 @@ package body Langkit_Support.Lexical_Env is
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
       Categories  : Ref_Categories := All_Cats)
-      return Entity_Array
+      return Entity_Vectors.Vector
    is
       FV : Entity_Vectors.Vector;
    begin
@@ -1047,13 +1062,12 @@ package body Langkit_Support.Lexical_Env is
               (Me, "Returning vector with length " & FV.Length'Image);
          end if;
 
-         return Ret : constant Entity_Array := Entity_Vectors.To_Array (FV) do
-            FV.Destroy;
-            if Has_Trace then
-               Traces.Decrease_Indent (Me);
-               Traces.Trace (Me, "===== Out Env get =====");
-            end if;
-         end return;
+         if Has_Trace then
+            Traces.Decrease_Indent (Me);
+            Traces.Trace (Me, "===== Out Env get =====");
+         end if;
+
+         return FV;
       end;
    end Get;
 

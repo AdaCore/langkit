@@ -486,7 +486,7 @@ package Langkit_Support.Lexical_Env is
       Key         : Symbol_Type;
       From        : Node_Type := No_Node;
       Lookup_Kind : Lookup_Kind_Type := Recursive;
-      Categories  : Ref_Categories := All_Cats) return Entity_Array;
+      Categories  : Ref_Categories := All_Cats) return Entity_Vectors.Vector;
    --  Get the array of entities for this Key. If From is given, then nodes
    --  will be filtered according to the Can_Reach primitive given as parameter
    --  for the generic package.
@@ -498,6 +498,13 @@ package Langkit_Support.Lexical_Env is
    --  which Filter.all (From, Env) returns False.
    --
    --  If ``Key`` is null, return every entity in the scope regardless of name.
+
+   function Get
+     (Self        : Lexical_Env;
+      Key         : Symbol_Type;
+      From        : Node_Type := No_Node;
+      Lookup_Kind : Lookup_Kind_Type := Recursive;
+      Categories  : Ref_Categories := All_Cats) return Entity_Array;
 
    function Get_First
      (Self        : Lexical_Env;

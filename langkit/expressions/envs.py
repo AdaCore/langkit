@@ -110,9 +110,10 @@ class EnvGet(AbstractExpression):
                     ', '.join('{} => {}'.format(n, v) for n, v in args)
                 )
             else:
-                result_expr = '{} (AST_Envs.Get ({}))'.format(
-                    self.type.constructor_name,
-                    ', '.join('{} => {}'.format(n, v) for n, v in args)
+                result_expr = (
+                    'Construct_Entity_Array (AST_Envs.Get ({}))'.format(
+                        ', '.join('{} => {}'.format(n, v) for n, v in args)
+                    )
                 )
 
             # In both cases above, the expression is going to be a function
