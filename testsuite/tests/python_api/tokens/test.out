@@ -1,38 +1,38 @@
 main.py: Running...
 Tokens:
-   <Token Whitespace u' ' at 1:1-1:2>
-   <Token L_Par u'(' at 1:2-1:3>
-   <Token Identifier u'a' at 1:3-1:4>
-   <Token Whitespace u' ' at 1:4-1:5>
-   <Token L_Par u'(' at 1:5-1:6>
-   <Token Identifier u'b' at 1:6-1:7>
-   <Token Whitespace u' ' at 1:7-1:8>
-   <Token Identifier u'c' at 1:8-1:9>
-   <Token Whitespace u' ' at 1:9-1:10>
-   <Token Identifier u'd' at 1:10-1:11>
-   <Token R_Par u')' at 1:11-1:12>
-   <Token R_Par u')' at 1:12-1:13>
-   <Token Whitespace u' ' at 1:13-1:14>
+   <Token Whitespace ' ' at 1:1-1:2>
+   <Token L_Par '(' at 1:2-1:3>
+   <Token Identifier 'a' at 1:3-1:4>
+   <Token Whitespace ' ' at 1:4-1:5>
+   <Token L_Par '(' at 1:5-1:6>
+   <Token Identifier 'b' at 1:6-1:7>
+   <Token Whitespace ' ' at 1:7-1:8>
+   <Token Identifier 'c' at 1:8-1:9>
+   <Token Whitespace ' ' at 1:9-1:10>
+   <Token Identifier 'd' at 1:10-1:11>
+   <Token R_Par ')' at 1:11-1:12>
+   <Token R_Par ')' at 1:12-1:13>
+   <Token Whitespace ' ' at 1:13-1:14>
    <Token Termination at 1:14-1:14>
 
 Input source buffer:
    u' (a (b c d)) '
 
 == Test Token.text_range ==
-Token.text_range(<Token L_Par u'(' at 1:2-1:3>, <Token Whitespace u' ' at 1:1-1:2>):
+Token.text_range(<Token L_Par '(' at 1:2-1:3>, <Token Whitespace ' ' at 1:1-1:2>):
    u''
-Token.text_range(<Token Whitespace u' ' at 1:1-1:2>, <Token Whitespace u' ' at 1:1-1:2>):
+Token.text_range(<Token Whitespace ' ' at 1:1-1:2>, <Token Whitespace ' ' at 1:1-1:2>):
    u' '
-Token.text_range(<Token Whitespace u' ' at 1:1-1:2>, <Token L_Par u'(' at 1:2-1:3>):
+Token.text_range(<Token Whitespace ' ' at 1:1-1:2>, <Token L_Par '(' at 1:2-1:3>):
    u' ('
-Token.text_range(<Token L_Par u'(' at 1:2-1:3>, <Token L_Par u'(' at 1:5-1:6>):
+Token.text_range(<Token L_Par '(' at 1:2-1:3>, <Token L_Par '(' at 1:5-1:6>):
    u'(a ('
 
 == Test unit consistency checks ==
 __lt__ raised ValueError:
-   <Token Whitespace u' ' at 1:1-1:2> and <Token L_Par u'(' at 1:1-1:2> come from different analysis units
+   <Token Whitespace ' ' at 1:1-1:2> and <Token L_Par '(' at 1:1-1:2> come from different analysis units
 range_until raised ValueError:
-   <Token Whitespace u' ' at 1:1-1:2> and <Token L_Par u'(' at 1:1-1:2> come from different analysis units
+   <Token Whitespace ' ' at 1:1-1:2> and <Token L_Par '(' at 1:1-1:2> come from different analysis units
 
 == Test type consistency checks ==
 __lt__ raised TypeError:
