@@ -525,13 +525,9 @@ class Emitter(object):
                 )
                 return code
 
-        with names.camel:
-            code = ctx.render_template(
-                'python_api/module_py',
-                c_api=ctx.c_api_settings,
-                pyapi=ctx.python_api_settings,
-                module_name=ctx.python_api_settings.module_name
-            )
+        def render_python_template(file_path, *args, **kwargs):
+            with names.camel:
+                code = ctx.render_template(*args, **kwargs)
 
             # If pretty-printing failed, write the original code anyway in
             # order to ease debugging.
@@ -541,11 +537,22 @@ class Emitter(object):
             except SyntaxError as exc:
                 pp_code = code
 
-            write_source_file(os.path.join(package_dir, '__init__.py'),
-                              pp_code,
-                              self.post_process_python)
+            write_source_file(file_path, pp_code, self.post_process_python)
             if exc:
                 raise exc
+
+        render_python_template(
+            os.path.join(package_dir, '__init__.py'),
+            'python_api/module_py',
+            c_api=ctx.c_api_settings,
+            pyapi=ctx.python_api_settings,
+            module_name=ctx.python_api_settings.module_name
+        )
+
+        render_python_template(
+            os.path.join(package_dir, '_py2to3.py'),
+            'python_api/py2to3_py'
+        )
 
         # Emit the setup.py script to easily install the Python binding
         setup_py_file = os.path.join(self.lib_root, 'python', 'setup.py')
