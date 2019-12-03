@@ -29,12 +29,12 @@ print('unit_a references: {}'.format(
 ))
 
 print('Reparse unit_b')
-unit_b.reparse('b.txt', '')
+unit_b.reparse('')
 
 # And then unit_a: we expect the destroy mechanism not to try to dec-ref the
 # memoization slot, which point to a lexical environment that has been
 # deallocated.
 print('Reparse unit_a')
-unit_a.reparse('a.txt', '')
+unit_a.reparse('')
 
 print('main.py: Done.')
