@@ -410,7 +410,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Buffer_Str : String (1 .. Positive (Buffer_Size))
+         Buffer_Str : String (1 .. Natural (Buffer_Size))
             with Import, Address => Convert (Buffer);
       begin
          Reparse (Unit, Value_Or_Empty (Charset), Buffer_Str);
