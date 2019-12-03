@@ -13,8 +13,7 @@ directly.
 <%namespace name="struct_types"  file="struct_types_py.mako" />
 <%namespace name="exts"          file="/extensions.mako" />
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 
 <%
@@ -33,6 +32,8 @@ import json
 import os
 import sys
 import weakref
+
+import ${pyapi.module_name}._py2to3 as _py2to3
 
 
 #
@@ -345,11 +346,10 @@ class _Enum(object):
 
     @classmethod
     def _unwrap(cls, py_value):
-        if not isinstance(py_value, basestring):
-            raise TypeError('str expected but got {} instead'.format(
-                type(py_value)))
+        if not isinstance(py_value, str):
+            _raise_type_error('str', py_value)
         try:
-            return cls.py_to_c[py_value]
+            return _py2to3.text_to_bytes(cls.py_to_c[py_value])
         except KeyError:
             raise ValueError('Invalid {}: {}'.format(cls.name, py_value))
 
