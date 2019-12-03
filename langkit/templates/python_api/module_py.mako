@@ -975,7 +975,7 @@ class Token(ctypes.Structure):
     def __repr__(self):
         return '<Token {}{} at {}>'.format(
             self.kind,
-            ' {}'.format(repr(self.text)) if self.text else '',
+            ' {}'.format(_py2to3.text_repr(self.text)) if self.text else '',
             self.sloc_range
         )
 
