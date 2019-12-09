@@ -997,7 +997,7 @@ class ManageScript(object):
         for fpath in [
             os.path.join('include', lib_name + '.h'),
             os.path.join('share', lib_name, 'ast-types.html'),
-            os.path.join('python', lib_name, '__init__.py'),
+            os.path.join('python', lib_name, '*.py'),
             os.path.join('python', 'setup.py'),
             os.path.join('ocaml', lib_name + '.ml'),
             os.path.join('ocaml', lib_name + '.mli'),
@@ -1005,14 +1005,14 @@ class ManageScript(object):
             os.path.join('ocaml', 'dune-project'),
             os.path.join('ocaml', lib_name + '.opam'),
         ]:
-            build_path = self.dirs.build_dir(fpath)
-            install_path = self.dirs.install_dir(fpath)
+            install_path = os.path.dirname(self.dirs.install_dir(fpath))
+            if not path.isdir(install_path):
+                os.makedirs(install_path)
 
-            subdir = os.path.dirname(install_path)
-            if not path.isdir(subdir):
-                os.makedirs(subdir)
-
-            shutil.copyfile(build_path, install_path)
+            for f in glob.glob(self.dirs.build_dir(fpath)):
+                shutil.copyfile(
+                    f, os.path.join(install_path, os.path.basename(f))
+                )
 
     def do_setenv(self, args):
         """
