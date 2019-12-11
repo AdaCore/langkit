@@ -1,0 +1,5 @@
+main.py: Running...
+root.p_mmz_prop(42) = 42
+root.p_mmz_prop(0)  = PropertyError
+main.py: Done.
+Done
