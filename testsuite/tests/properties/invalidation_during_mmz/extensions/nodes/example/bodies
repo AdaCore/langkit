@@ -1,0 +1,10 @@
+--  vim: ft=ada
+
+function Example_P_Fetch_Example_Unit (Node : Bare_Example) return Internal_Unit is
+    Filename : constant String := "example.txt";
+    Context  : constant Internal_Context := Node.Unit.Context;
+begin
+    return Get_From_File (Context, Filename, Default_Charset,
+                          Reparse => False,
+                          Rule    => Default_Grammar_Rule);
+end Example_P_Fetch_Example_Unit;

@@ -83,10 +83,48 @@ is
                key_length += 1
          %>
          use Memoization_Maps;
-         Mmz_Map : Map renames Self.Unit.Memoization_Map;
-         Mmz_Cur : Cursor;
-         Mmz_K   : Mmz_Key;
-         Mmz_Val : Mmz_Value;
+
+         Mmz_Map                   : Map renames Self.Unit.Memoization_Map;
+         Mmz_Cur                   : Cursor;
+         Mmz_K                     : Mmz_Key;
+         Mmz_Val                   : Mmz_Value;
+         Mmz_Initial_Cache_Version : Natural;
+
+         function Build_Mmz_Key return Mmz_Key is
+         begin
+            return Mmz_K : Mmz_Key :=
+              (Property => ${property.memoization_enum},
+               Items    => new Mmz_Key_Array (1 ..  ${key_length}))
+            do
+               Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
+                                   As_${property.struct.name} => Self);
+               % for i, arg in enumerate(property.arguments, 2):
+                  Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
+                                         As_${arg.type.name} => ${arg.name});
+                  % if arg.type.is_refcounted:
+                     Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
+                  % endif
+               % endfor
+               % if property.uses_entity_info:
+                  Mmz_K.Items (${key_length}) :=
+                    (Kind => ${T.entity_info.memoization_kind},
+                     As_${T.entity_info.name} => ${property.entity_info_name});
+               % endif
+            end return;
+         end Build_Mmz_Key;
+
+         procedure Update_Mmz_Map (Val : Mmz_Value) is
+         begin
+            ## If caches have been reset since the beginning of the execution
+            ## of this property, ``Mmz_Cur`` is not valid anymore since the
+            ## memoization map was cleared. So, rebuild the key (it was also
+            ## destroyed) and insert directly the expected entry.
+            if Self.Unit.Cache_Version /= Mmz_Initial_Cache_Version then
+               Mmz_Map.Insert (Build_Mmz_Key, Val);
+            else
+               Mmz_Map.Replace_Element (Mmz_Cur, Val);
+            end if;
+         end Update_Mmz_Map;
    % endif
 
 begin
@@ -137,23 +175,7 @@ begin
       if not Self.Unit.Context.In_Populate_Lexical_Env then
       % endif
 
-         Mmz_K :=
-           (Property => ${property.memoization_enum},
-            Items    => new Mmz_Key_Array (1 ..  ${key_length}));
-         Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
-                             As_${property.struct.name} => Self);
-         % for i, arg in enumerate(property.arguments, 2):
-            Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
-                                   As_${arg.type.name} => ${arg.name});
-            % if arg.type.is_refcounted:
-               Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
-            % endif
-         % endfor
-         % if property.uses_entity_info:
-            Mmz_K.Items (${key_length}) :=
-              (Kind => ${T.entity_info.memoization_kind},
-               As_${T.entity_info.name} => ${property.entity_info_name});
-         % endif
+         Mmz_K := Build_Mmz_Key;
 
          if not Lookup_Memoization_Map (Self.Unit, Mmz_K, Mmz_Cur) then
             ${gdb_memoization_lookup()}
@@ -165,6 +187,8 @@ begin
                     ("Result: infinite recursion");
                % endif
                ${gdb_memoization_return()}
+
+               Mmz_Initial_Cache_Version := Self.Unit.Cache_Version;
                raise Property_Error with "Infinite recursion detected";
 
             elsif Mmz_Val.Kind = Mmz_Property_Error then
@@ -174,6 +198,8 @@ begin
                   Properties_Traces.Decrease_Indent;
                % endif
                ${gdb_memoization_return()}
+
+               Mmz_Initial_Cache_Version := Self.Unit.Cache_Version;
                raise Property_Error with "Memoized error";
 
             else
@@ -193,6 +219,8 @@ begin
             end if;
             ${gdb_end()}
          end if;
+
+         Mmz_Initial_Cache_Version := Self.Unit.Cache_Version;
 
       % if not property.memoize_in_populate:
       end if;
@@ -245,7 +273,8 @@ begin
 
          Mmz_Val := (Kind => ${property.type.memoization_kind},
                        As_${property.type.name} => Property_Result);
-         Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+         Update_Mmz_Map (Mmz_Val);
+
          % if property.type.is_refcounted:
             Inc_Ref (Property_Result);
          % endif
@@ -287,7 +316,7 @@ exception
          if not Self.Unit.Context.In_Populate_Lexical_Env then
          % endif
 
-            Mmz_Map.Replace_Element (Mmz_Cur, (Kind => Mmz_Property_Error));
+         Update_Mmz_Map ((Kind => Mmz_Property_Error));
 
          % if not property.memoize_in_populate:
          end if;
