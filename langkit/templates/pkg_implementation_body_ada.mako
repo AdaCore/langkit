@@ -3581,34 +3581,6 @@ package body ${ada_lib_name}.Implementation is
       end if;
    end Reset_Caches;
 
-   % if ctx.has_memoization:
-
-      ----------------------------
-      -- Lookup_Memoization_Map --
-      ----------------------------
-
-      function Lookup_Memoization_Map
-        (Unit   : Internal_Unit;
-         Key    : in out Mmz_Key;
-         Cursor : out Memoization_Maps.Cursor) return Boolean
-      is
-         Inserted : Boolean;
-         Value    : constant Mmz_Value := (Kind => Mmz_Evaluating);
-      begin
-         --  Make sure that we don't lookup stale caches
-         Reset_Caches (Unit);
-
-         Unit.Memoization_Map.Insert (Key, Value, Cursor, Inserted);
-
-         if not Inserted then
-            Destroy (Key.Items);
-            Key := Memoization_Maps.Key (Cursor);
-         end if;
-
-         return Inserted;
-      end Lookup_Memoization_Map;
-   % endif
-
    --------------------
    -- Reference_Unit --
    --------------------

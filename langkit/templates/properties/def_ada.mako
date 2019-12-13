@@ -77,16 +77,43 @@ is
    % endif
 
    % if memoized:
-         <%
-            key_length = 1 + len(property.arguments)
-            if property.uses_entity_info:
-               key_length += 1
-         %>
-         use Memoization_Maps;
-         Mmz_Map : Map renames Self.Unit.Memoization_Map;
-         Mmz_Cur : Cursor;
-         Mmz_K   : Mmz_Key;
-         Mmz_Val : Mmz_Value;
+      <%
+         key_length = 1 + len(property.arguments)
+         if property.uses_entity_info:
+            key_length += 1
+      %>
+      Mmz_Handle : Memoization_Handle;
+      Mmz_Val    : Mmz_Value;
+
+      function Create_Mmz_Key return Mmz_Key;
+      --  Create a memoization key for this property call and return it
+
+      --------------------
+      -- Create_Mmz_Key --
+      --------------------
+
+      function Create_Mmz_Key return Mmz_Key is
+      begin
+         return Mmz_K : Mmz_Key :=
+           (Property => ${property.memoization_enum},
+            Items    => new Mmz_Key_Array (1 ..  ${key_length}))
+         do
+            Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
+                                As_${property.struct.name} => Self);
+            % for i, arg in enumerate(property.arguments, 2):
+               Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
+                                      As_${arg.type.name} => ${arg.name});
+               % if arg.type.is_refcounted:
+                  Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
+               % endif
+            % endfor
+            % if property.uses_entity_info:
+               Mmz_K.Items (${key_length}) :=
+                 (Kind => ${T.entity_info.memoization_kind},
+                  As_${T.entity_info.name} => ${property.entity_info_name});
+            % endif
+         end return;
+      end Create_Mmz_Key;
    % endif
 
 begin
@@ -137,27 +164,10 @@ begin
       if not Self.Unit.Context.In_Populate_Lexical_Env then
       % endif
 
-         Mmz_K :=
-           (Property => ${property.memoization_enum},
-            Items    => new Mmz_Key_Array (1 ..  ${key_length}));
-         Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
-                             As_${property.struct.name} => Self);
-         % for i, arg in enumerate(property.arguments, 2):
-            Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
-                                   As_${arg.type.name} => ${arg.name});
-            % if arg.type.is_refcounted:
-               Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
-            % endif
-         % endfor
-         % if property.uses_entity_info:
-            Mmz_K.Items (${key_length}) :=
-              (Kind => ${T.entity_info.memoization_kind},
-               As_${T.entity_info.name} => ${property.entity_info_name});
-         % endif
-
-         if not Lookup_Memoization_Map (Self.Unit, Mmz_K, Mmz_Cur) then
+         if Find_Memoized_Value
+           (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access)
+         then
             ${gdb_memoization_lookup()}
-            Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
             if Mmz_Val.Kind = Mmz_Evaluating then
                % if has_logging:
@@ -238,17 +248,20 @@ begin
 
    % if memoized:
       ## If memoization is enabled for this property, save the result for later
-      ## re-use.
+      ## re-use. Note that memoization in during PLE is disabled unless
+      ## specifically allowed for this property.
       % if not property.memoize_in_populate:
       if not Self.Unit.Context.In_Populate_Lexical_Env then
       % endif
 
          Mmz_Val := (Kind => ${property.type.memoization_kind},
-                       As_${property.type.name} => Property_Result);
-         Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+                     As_${property.type.name} => Property_Result);
+         Add_Memoized_Value
+           (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access);
          % if property.type.is_refcounted:
             Inc_Ref (Property_Result);
          % endif
+
       % if not property.memoize_in_populate:
       end if;
       % endif
@@ -287,7 +300,11 @@ exception
          if not Self.Unit.Context.In_Populate_Lexical_Env then
          % endif
 
-            Mmz_Map.Replace_Element (Mmz_Cur, (Kind => Mmz_Property_Error));
+            Add_Memoized_Value
+              (Self.Unit,
+               Mmz_Handle,
+               (Kind => Mmz_Property_Error),
+               Create_Mmz_Key'Access);
 
          % if not property.memoize_in_populate:
          end if;
