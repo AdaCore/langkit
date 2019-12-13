@@ -1283,16 +1283,6 @@ private package ${ada_lib_name}.Implementation is
    --  Destroy Unit's memoization cache. This resets Unit's version number to
    --  Unit.Context.Cache_Version.
 
-   % if ctx.has_memoization:
-      function Lookup_Memoization_Map
-        (Unit   : Internal_Unit;
-         Key    : in out Mmz_Key;
-         Cursor : out Memoization_Maps.Cursor) return Boolean;
-      --  Look for a memoization entry in Unit.Memoization_Map that correspond
-      --  to Key, creating one if none is found, and store it in Cursor. If one
-      --  was created, return True. Otherwise, destroy Key and return False.
-   % endif
-
    procedure Reference_Unit (From, Referenced : Internal_Unit);
    --  Set the Referenced unit as being referenced from the From unit. This is
    --  useful for visibility purposes, and is mainly meant to be used in the

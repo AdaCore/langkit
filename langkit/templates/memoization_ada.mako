@@ -58,6 +58,41 @@ procedure Destroy (Map : in out Memoization_Maps.Map);
 --  Free all resources stored in a memoization map. This includes destroying
 --  ref-count shares the map owns.
 
+type Memoization_Handle is record
+   Key : Mmz_Key;
+   --  Key for the memoization
+
+   Cur : Memoization_Maps.Cursor;
+   --  If the unit memoization table has an entry for Key, this holds a cursor
+   --  to it.
+
+   Cache_Version : Natural := 0;
+   --  Version of the unit memoization table at the time Key/Cur were created.
+   --  When using this record, if the version has changed, both Key and Cur are
+   --  invalid and must be recomputed.
+end record;
+--  Wrapper for memoization state, to be used in memoized properties.
+--  Please use high-level functions below instead of accessing fields
+--  directly.
+
+function Find_Memoized_Value
+  (Unit       : Internal_Unit;
+   Handle     : out Memoization_Handle;
+   Value      : out Mmz_Value;
+   Create_Key : access function return Mmz_Key) return Boolean;
+--  Initialize Handle and look for a memoization entry in Unit.Memoization_Map
+--  that corresponds to the key in Handle/Create_Key. If one is found, put it
+--  in Value and return True. Create such an entry and return False otherwise.
+
+procedure Add_Memoized_Value
+  (Unit       : Internal_Unit;
+   Handle     : in out Memoization_Handle;
+   Value      : Mmz_Value;
+   Create_Key : access function return Mmz_Key);
+--  Insert the Handle.Key/Value entry in UNit.Memoization_Map (replacing the
+--  previous entry, if present). If the key in Handle is stale (i.e. caches
+--  were reset since it was created), recompute it using Create_Key.
+
 </%def>
 
 <%def name="body()">
@@ -229,5 +264,63 @@ begin
    % endif
    Free (Key);
 end Destroy;
+
+-------------------------
+-- Find_Memoized_Value --
+-------------------------
+
+function Find_Memoized_Value
+  (Unit       : Internal_Unit;
+   Handle     : out Memoization_Handle;
+   Value      : out Mmz_Value;
+   Create_Key : access function return Mmz_Key) return Boolean
+is
+   Inserted : Boolean;
+begin
+   --  Make sure that we don't lookup stale caches
+   Reset_Caches (Unit);
+
+   --  Initialize handle: create the key and create a cursor pointing to an
+   --  existing entry.
+   Handle.Key := Create_Key.all;
+   Handle.Cache_Version := Unit.Cache_Version;
+   Value := (Kind => Mmz_Evaluating);
+   Unit.Memoization_Map.Insert (Handle.Key, Value, Handle.Cur, Inserted);
+
+   --  No existing entry yet? The above just created one. Otherwise, destroy
+   --  our key and reuse the existing entry's.
+   if not Inserted then
+      Destroy (Handle.Key.Items);
+      Handle.Key := Memoization_Maps.Key (Handle.Cur);
+      Value := Memoization_Maps.Element (Handle.Cur);
+   end if;
+
+   return not Inserted;
+end Find_Memoized_Value;
+
+------------------------
+-- Add_Memoized_Value --
+------------------------
+
+procedure Add_Memoized_Value
+  (Unit       : Internal_Unit;
+   Handle     : in out Memoization_Handle;
+   Value      : Mmz_Value;
+   Create_Key : access function return Mmz_Key) is
+begin
+   --  If Handle was created using a memoization map that has been since then
+   --  reset, re-create the key.
+   if Handle.Cache_Version < Unit.Cache_Version then
+      declare
+         Dummy_Value : Mmz_Value;
+         Dummy_Inserted : constant Boolean := Find_Memoized_Value
+           (Unit, Handle, Dummy_Value, Create_Key);
+      begin
+         null;
+      end;
+   end if;
+
+   Unit.Memoization_Map.Replace_Element (Handle.Cur, Value);
+end Add_Memoized_Value;
 
 </%def>
