@@ -388,6 +388,19 @@ default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.lower}
 _unit_provider = _hashable_c_pointer()
 
 
+def _canonicalize_buffer(buffer, charset):
+    """Canonicalize source buffers to be bytes buffers."""
+    if isinstance(buffer, _py2to3.text_type):
+        if charset:
+            raise TypeError('`charset` must be null when the buffer is'
+                            ' Unicode')
+        buffer = buffer.encode('utf-8')
+        charset = b'utf-8'
+    elif not isinstance(buffer, _py2to3.bytes_type):
+        raise TypeError('`buffer` must be a string')
+    return (buffer, charset)
+
+
 #
 # High-level binding
 #
@@ -491,10 +504,9 @@ class AnalysisContext(object):
     def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
                         rule=default_grammar_rule):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
-        if not isinstance(buffer, _py2to3.bytes_type):
-            raise TypeError('`buffer` must be a bytes string')
         filename = _py2to3.text_to_bytes(filename)
         charset = _py2to3.text_to_bytes(charset or '')
+        buffer, charset = _canonicalize_buffer(buffer, charset)
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset,
                                                  buffer, len(buffer),
@@ -645,11 +657,7 @@ class AnalysisUnit(object):
         if buffer is None:
             _unit_reparse_from_file(self._c_value, charset)
         else:
-            if not isinstance(buffer, _py2to3.bytes_type):
-                raise TypeError(
-                    '`buffer` must be a bytes string, got {} instead'
-                    .format(_type_fullname(type(buffer)))
-                )
+            buffer, charset = _canonicalize_buffer(buffer, charset)
             _unit_reparse_from_buffer(self._c_value, charset, buffer,
                                       len(buffer))
 
