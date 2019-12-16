@@ -197,7 +197,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Buffer_Str : String (1 .. Positive (Buffer_Size))
+         Buffer_Str : String (1 .. Natural (Buffer_Size))
             with Import, Address => Convert (Buffer);
       begin
          return Get_From_Buffer
@@ -224,7 +224,7 @@ package body ${ada_lib_name}.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         Text_Name : Text_Type (1 .. Integer (Name.Length))
+         Text_Name : Text_Type (1 .. Natural (Name.Length))
             with Import, Address => Name.Chars;
       begin
          return Get_From_Provider
