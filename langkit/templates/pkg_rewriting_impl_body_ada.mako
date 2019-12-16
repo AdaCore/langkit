@@ -278,6 +278,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
                PU.Unit,
                Preserve_Formatting => True,
                As_Unit             => True);
+            Input.Charset := Unit_Handle.Unit.Charset;
             Input.Bytes := Bytes.all'Address;
             Input.Bytes_Count := Bytes.all'Length;
             Do_Parsing (PU.Unit, Input, PU.New_Data);

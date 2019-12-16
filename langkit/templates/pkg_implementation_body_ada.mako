@@ -418,16 +418,12 @@ package body ${ada_lib_name}.Implementation is
       Refined_Input  : Internal_Lexer_Input := Input;
 
    begin
-      --  Determine which encoding to use. The parameter comes first, then the
-      --  unit-specific default, then the context-specific one.
+      --  Determine which encoding to use. Use the Charset parameter (if
+      --  provided), otherwise use the context-wide default.
 
-      if Charset'Length /= 0 then
-         Actual_Charset := To_Unbounded_String (Charset);
-      elsif not Created then
-         Actual_Charset := Element (Cur).Charset;
-      else
-         Actual_Charset := Context.Charset;
-      end if;
+      Actual_Charset := (if Charset'Length /= 0
+                         then To_Unbounded_String (Charset)
+                         else Context.Charset);
 
       if Refined_Input.Kind = File then
          Refined_Input.Filename := Normalized_Filename;
@@ -446,12 +442,11 @@ package body ${ada_lib_name}.Implementation is
 
       --  Create the Internal_Unit if needed
 
-      if Created then
-         Unit := Create_Unit
-           (Context, Normalized_Filename, To_String (Actual_Charset), Rule);
-      else
-         Unit := Element (Cur);
-      end if;
+      Unit :=
+        (if Created
+         then Create_Unit (Context, Normalized_Filename,
+                           To_String (Actual_Charset), Rule)
+         else Element (Cur));
       Unit.Charset := Actual_Charset;
 
       --  (Re)parse it if needed
@@ -3674,7 +3669,7 @@ package body ${ada_lib_name}.Implementation is
       --  don't bother opening it and directly emit a diagnostic. This avoid
       --  pointless exceptions which harm debugging.
 
-      if Input.Kind = File 
+      if Input.Kind = File
          and then 
          (Input.Filename.Is_Directory or else (not Input.Filename.Is_Readable))
       then
@@ -3693,7 +3688,6 @@ package body ${ada_lib_name}.Implementation is
          use Ada.Exceptions;
          Actual_Input : Internal_Lexer_Input := Input;
       begin
-         Set_Default_Charset (Actual_Input, Unit.Charset);
          Init_Parser
            (Actual_Input, Context.Tab_Stop, Context.With_Trivia, Unit,
             Unit_TDH, Unit.Context.Parser);
