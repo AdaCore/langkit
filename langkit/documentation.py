@@ -322,9 +322,8 @@ base_langkit_docs = {
 
         ``Rule`` controls which grammar rule is used to parse the unit.
 
-        Use ``Charset`` in order to decode the source file. If ``Charset`` is
-        empty then use the last charset used for this unit, or use the
-        context's default if creating this unit.
+        Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+        then use the context's default charset.
 
         If any failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
@@ -338,8 +337,7 @@ base_langkit_docs = {
         ``Rule`` controls which grammar rule is used to parse the unit.
 
         Use ``Charset`` in order to decode the source. If ``Charset`` is empty
-        then use the last charset used for this unit, or use the context's
-        default if creating this unit.
+        then use the context's default charset.
 
         If any failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
@@ -351,8 +349,7 @@ base_langkit_docs = {
         exists, reparse it from ``Filename``.
 
         Use ``Charset`` in order to decode the source. If ``Charset`` is empty
-        then use the last charset used for this unit, or use the context's
-        default if creating this unit.
+        then use the context's default charset.
 
         If the unit name cannot be tuned into a file name,
         % if lang == 'ada':
@@ -374,17 +371,19 @@ base_langkit_docs = {
         Return a hash for this unit, to be used in hash tables.
     """,
     'langkit.unit_reparse_file': """
-        Reparse an analysis unit from the associated file. If ``Charset`` is
-        empty or ``${null}``, use the last charset successfuly used for this
-        unit, otherwise use it to decode the source file.
+        Reparse an analysis unit from the associated file.
+
+        Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+        then use the context's default charset.
 
         If any failure occurs, such as decoding, lexing or parsing failure,
         diagnostic are emitted to explain what happened.
     """,
     'langkit.unit_reparse_buffer': """
-        Reparse an analysis unit from a buffer. If ``Charset`` is empty or
-        ``${null}, use the last charset successfuly used for this unit,
-        otherwise use it to decode the source.
+        Reparse an analysis unit from a buffer.
+
+        Use ``Charset`` in order to decode the source. If ``Charset`` is empty
+        then use the context's default charset.
 
         If any failure occurs, such as decoding, lexing or parsing failure,
         diagnostic are emitted to explain what happened.
