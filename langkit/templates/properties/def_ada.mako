@@ -256,8 +256,7 @@ begin
 
          Mmz_Val := (Kind => ${property.type.memoization_kind},
                      As_${property.type.name} => Property_Result);
-         Add_Memoized_Value
-           (Self.Unit, Mmz_Handle, Mmz_Val, Create_Mmz_Key'Access);
+         Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val);
          % if property.type.is_refcounted:
             Inc_Ref (Property_Result);
          % endif
@@ -301,10 +300,7 @@ exception
          % endif
 
             Add_Memoized_Value
-              (Self.Unit,
-               Mmz_Handle,
-               (Kind => Mmz_Property_Error),
-               Create_Mmz_Key'Access);
+              (Self.Unit, Mmz_Handle, (Kind => Mmz_Property_Error));
 
          % if not property.memoize_in_populate:
          end if;
