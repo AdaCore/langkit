@@ -1114,7 +1114,7 @@ def format_ocaml(text, column):
     return '\n{}'.format('  ' * column).join(lines)
 
 
-def create_doc_printer(lang, formatter):
+def create_doc_printer(lang, formatter, get_node_name):
     """
     Return a function that prints documentation.
 
@@ -1123,6 +1123,11 @@ def create_doc_printer(lang, formatter):
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
     :type formatter: (str, int) -> str
+
+    :param get_node_name: Function to turn a node into the corresponding
+        lang-specific name.
+    :type get_node_name: (langkit.compile_context.CompileCtx,
+                          langkit.compiled_types.ASTNodeType) -> str
 
     :rtype: function
     """
@@ -1137,15 +1142,10 @@ def create_doc_printer(lang, formatter):
 
         :rtype: str
         """
-
         from langkit.compile_context import get_context
-        ctx = get_context()
+        from langkit.compiled_types import T, resolve_type
 
-        template_ctx = dict()
-        template_ctx['ctx'] = get_context()
-        template_ctx['capi'] = ctx.c_api_settings
-        template_ctx['null'] = null_names[lang]
-        template_ctx['TODO'] = todo_markers[lang]
+        ctx = get_context()
 
         if isinstance(entity, str):
             doc_template = ctx.documentations[entity]
@@ -1154,17 +1154,23 @@ def create_doc_printer(lang, formatter):
         else:
             return ''
 
+        def node_name(node):
+            return get_node_name(ctx, resolve_type(node))
+
         doc = doc_template.render(
             ctx=get_context(),
             capi=ctx.c_api_settings,
             lang=lang,
             null=null_names[lang],
-            TODO=todo_markers[lang]
+            TODO=todo_markers[lang],
+            T=T,
+            node_name=node_name
         )
         return formatter(doc, column, **kwargs)
 
     func.__name__ = '{}_doc'.format(lang)
     return func
+
 
 # The following are functions which return formatted source code documentation
 # for an entity. Their arguments are:
@@ -1177,11 +1183,29 @@ def create_doc_printer(lang, formatter):
 #
 #   * Arbitrary keyword arguments to pass to the documentation Mako templates.
 
+ada_doc = create_doc_printer(
+    'ada', format_ada,
+    get_node_name=lambda ctx, node: node.entity.api_name
+)
+c_doc = create_doc_printer(
+    'c', format_c,
 
-ada_doc = create_doc_printer('ada', format_ada)
-c_doc = create_doc_printer('c', format_c)
-py_doc = create_doc_printer('python', format_python)
-ocaml_doc = create_doc_printer('ocaml', format_ocaml)
+    # In the C header, there is only one node type, so use kind enumerators
+    # instead.
+    get_node_name=(lambda ctx, node:
+                   ctx.c_api_settings.get_name(node.kwless_raw_name)),
+)
+py_doc = create_doc_printer(
+    'python', format_python,
+    get_node_name=(lambda ctx, node:
+                   ctx.python_api_settings.type_public_name(node))
+)
+ocaml_doc = create_doc_printer(
+    'ocaml', format_ocaml,
+    get_node_name=(lambda ctx, node:
+                   ctx.ocaml_api_settings
+                   .type_public_name(node.entity))
+)
 
 
 def ada_c_doc(entity, column=0):

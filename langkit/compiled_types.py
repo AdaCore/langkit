@@ -37,8 +37,10 @@ def precise_types_doc(label, types):
     :param list[CompiledType] types: List of precise types to describe.
     :rtype: str
     """
-    return '\n'.join([label, ''] + sorted('* {}'.format(t.dsl_name)
-                                          for t in types))
+    return '\n'.join([label, ''] + sorted(
+        '* ${{node_name(T.{})}}'.format(t.dsl_name)
+        for t in types)
+    )
 
 
 @CompileCtx.register_template_extensions
