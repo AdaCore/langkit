@@ -1,11 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-from collections import namedtuple
 import ctypes
-import sys
 
 import libfoolang
-from libfoolang import _py2to3
 
 
 print('main.py: Running...')
