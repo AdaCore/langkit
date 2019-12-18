@@ -1148,16 +1148,19 @@ def create_doc_printer(lang, formatter):
         template_ctx['TODO'] = todo_markers[lang]
 
         if isinstance(entity, str):
-            doc = ctx.documentations[entity].render(
-                ctx=get_context(),
-                capi=ctx.c_api_settings,
-                lang=lang,
-                null=null_names[lang],
-                TODO=todo_markers[lang]
-            )
+            doc_template = ctx.documentations[entity]
+        elif entity.doc:
+            doc_template = Template(entity.doc)
         else:
-            doc = entity.doc or ''
+            return ''
 
+        doc = doc_template.render(
+            ctx=get_context(),
+            capi=ctx.c_api_settings,
+            lang=lang,
+            null=null_names[lang],
+            TODO=todo_markers[lang]
+        )
         return formatter(doc, column, **kwargs)
 
     func.__name__ = '{}_doc'.format(lang)
