@@ -186,6 +186,12 @@ package ${ada_lib_name}.Iterators is
    --
    --% belongs-to: ${pred_ref}
 
+   function Kind_In (First, Last : ${T.node_kind}) return ${pred_ref};
+   --  Return a predicate that accepts only nodes whose kind is in First ..
+   --  Last.
+   --
+   --% belongs-to: ${pred_ref}
+
    function Text_Is (Text : Text_Type) return ${pred_ref};
    --  Return a predicate that accepts only nodes that match the given ``Text``
    --
@@ -291,9 +297,9 @@ private
      (P : in out Child_With_Predicate; N : ${node}) return Boolean;
 
    type Kind_Predicate is new ${pred_iface} with record
-      Kind : ${T.node_kind};
+      First, Last : ${T.node_kind};
    end record;
-   --  Predicate that returns true for all nodes of some kind
+   --  Predicate that returns true for all nodes whose kind is in a given range
 
    overriding function Evaluate
      (P : in out Kind_Predicate; N : ${node}) return Boolean;

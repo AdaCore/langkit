@@ -195,10 +195,21 @@ package body ${ada_lib_name}.Iterators is
 
    function Kind_Is (Kind : ${T.node_kind}) return ${pred_ref} is
    begin
-      return Result : ${pred_ref} do
-         Result.Set (Kind_Predicate'(${pred_iface} with Kind => Kind));
-      end return;
+      return Kind_In (Kind, Kind);
    end Kind_Is;
+
+   -------------
+   -- Kind_In --
+   -------------
+
+   function Kind_In (First, Last : ${T.node_kind}) return ${pred_ref} is
+   begin
+      return Result : ${pred_ref} do
+         Result.Set (Kind_Predicate'(${pred_iface} with
+                                     First => First,
+                                     Last  => Last));
+      end return;
+   end Kind_In;
 
    -------------
    -- Text_Is --
@@ -483,7 +494,7 @@ package body ${ada_lib_name}.Iterators is
    overriding function Evaluate
      (P : in out Kind_Predicate; N : ${node}) return Boolean is
    begin
-      return Kind (N) = P.Kind;
+      return N.Kind in P.First .. P.Last;
    end Evaluate;
 
    --------------

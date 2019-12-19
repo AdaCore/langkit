@@ -1,0 +1,5 @@
+<VarDecl foo.txt:1:1-1:11>
+<VarDecl foo.txt:1:12-1:22>
+<FunDecl foo.txt:1:23-1:29>
+Done.
+Done
