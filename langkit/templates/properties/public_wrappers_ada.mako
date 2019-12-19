@@ -2,31 +2,42 @@
 
 <%namespace name="helpers" file="helpers.mako" />
 
-<%def name="public_prototype(property)">
-  (${property.self_arg_name} : ${property.struct.entity.api_name}'Class
-   % for arg in property.arguments:
-      ; ${arg.name} : ${arg.public_type.api_name}
+## In the following helper, use string formatting instead of regular templating
+## to make generated sources easier to read.
+<%def name="public_prototype(property)"><%
+      args = [(property.self_arg_name,
+               "{}'Class".format(property.struct.entity.api_name),
+               None)]
+      for arg in property.arguments:
+         # Make entity arguments class-wide so that 1) these property wrappers
+         # are not primitives and 2) we can give them default values. Likewise
+         # for analysis units.
+         arg_type = arg.public_type.api_name
+         if (
+            arg.public_type.is_entity_type or
+            arg.public_type.is_analysis_unit_type
+         ):
+               arg_type = "{}'Class".format(arg_type)
 
-      ## Make entity arguments class-wide so that 1) these property wrappers
-      ## are not primitives and 2) we can give them default values. Likewise
-      ## for analysis units.
-      ${"'Class" if (arg.public_type.is_entity_type or
-                     arg.public_type.is_analysis_unit_type) else ''}
+         default_val = (None if arg.default_value is None else
+                        arg.public_default_value.render_public_ada_constant())
 
-      % if arg.default_value is not None:
-         := ${arg.public_default_value.render_public_ada_constant()}
-      % endif
-   % endfor
-  ) return ${(property.public_type.api_name)}
-</%def>
+         args.append((arg.name, arg_type, default_val))
+   %>${'     ({})'.format(';\n      '.join(
+      '{} : {}{}'.format(arg_name, arg_type,
+                         ' := {}'.format(default_val) if default_val else '')
+      for arg_name, arg_type, default_val in args
+   ))} return ${property.public_type.api_name}</%def>
 
 <%def name="decl(property)">
-   function ${property.api_name} ${public_prototype(property)};
+   function ${property.api_name}
+${public_prototype(property)};
    ${ada_doc(property, 3)}
 </%def>
 
 <%def name="body(property)">
-   function ${property.api_name} ${public_prototype(property)} is
+   function ${property.api_name}
+${public_prototype(property)} is
       <%
          self_arg = property.self_arg_name
          context_expr = '{}.Internal.Node.Unit.Context'.format(self_arg)
