@@ -7,6 +7,8 @@ find in the standard library.
 from __future__ import absolute_import, division, print_function
 
 from copy import copy
+import os
+import shutil
 
 
 def copy_with(obj, **kwargs):
@@ -148,6 +150,18 @@ def inherited_property(parent_getter, default_val=False):
         return property(internal)
 
     return impl
+
+
+def ensure_clean_dir(dirname):
+    """
+    Remove any existing file/directory at ``dirname`` and create an empty
+    directory instead.
+
+    :param str dirname: Name of the directory to create.
+    """
+    if os.path.exists(dirname):
+        shutil.rmtree(dirname)
+    os.makedirs(dirname)
 
 
 try:
