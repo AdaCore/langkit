@@ -828,6 +828,8 @@ P_Id_Unit:
   foo.txt
 P_Id_Root_Node:
   <VarDeclList foo.txt:1:1-1:11>
+P_Id_Root_Node:
+  None
 P_Id_Name:
   <Name foo.txt:1:5-1:6>
 
