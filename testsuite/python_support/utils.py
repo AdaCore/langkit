@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
-import os.path
+import os.path as P
 import shutil
 import subprocess
 import sys
@@ -9,10 +9,13 @@ import sys
 import langkit
 import langkit.compile_context
 from langkit.compile_context import CompileCtx
-from langkit.diagnostics import DiagnosticError, WarningSet
+from langkit.diagnostics import DiagnosticError, Diagnostics, WarningSet
 from langkit.libmanage import ManageScript
 
 from testsuite_support.valgrind import valgrind_cmd
+
+
+Diagnostics.blacklisted_paths.append(P.dirname(P.abspath(__file__)))
 
 
 default_warning_set = WarningSet()
@@ -47,9 +50,9 @@ valgrind_enabled = bool(os.environ.get('VALGRIND_ENABLED'))
 # Determine where to find the root directory for Langkit sources
 langkit_root = os.environ.get('LANGKIT_ROOT_DIR')
 if not langkit_root:
-    test_dir = os.path.dirname(os.path.abspath(__file__))
-    testsuite_dir = os.path.dirname(test_dir)
-    langkit_root = os.path.dirname(testsuite_dir)
+    test_dir = P.dirname(P.abspath(__file__))
+    testsuite_dir = P.dirname(test_dir)
+    langkit_root = P.dirname(testsuite_dir)
 
 
 def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
@@ -75,7 +78,7 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
         lexer = foo_lexer
 
     # Have a clean build directory
-    if os.path.exists('build'):
+    if P.exists('build'):
         shutil.rmtree('build')
     os.mkdir('build')
 
@@ -161,7 +164,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     :param WarningSet warning_set: Set of warnings to emit.
     :param bool generate_unparser: Whether to generate unparser.
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
-        Symbol canoncalizes to use for this context, if any.
+        Symbol canonicalizer to use for this context, if any.
     :param bool mains: Whether to build mains.
     """
 
@@ -176,10 +179,10 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         def create_context(self, args):
             return ctx
 
-    m = Manage(override_lang_source_dir=False)
+    m = Manage()
 
-    extensions_dir = os.path.abspath('extensions')
-    if os.path.isdir(extensions_dir):
+    extensions_dir = P.abspath('extensions')
+    if P.isdir(extensions_dir):
         ctx.extensions_dir = extensions_dir
 
     # First build the library. Forward all test.py's arguments to the libmanage
@@ -259,7 +262,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
             if len(ada_main) > 1:
                 print('== {} =='.format(m))
             sys.stdout.flush()
-            run(os.path.join('obj', m[:-4]), valgrind=True)
+            run(P.join('obj', m[:-4]), valgrind=True)
 
     if ocaml_main is not None:
         # Set up a Dune project
@@ -290,5 +293,5 @@ def add_gpr_path(dirname):
     """
     old_path = os.environ.get('GPR_PROJECT_PATH')
     os.environ['GPR_PROJECT_PATH'] = (
-        '{}{}{}'.format(dirname, os.path.pathsep, old_path)
+        '{}{}{}'.format(dirname, P.pathsep, old_path)
         if old_path else dirname)

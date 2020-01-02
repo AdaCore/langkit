@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 import enum
-import os.path
+import os
+import os.path as P
 import sys
 import traceback
 
@@ -28,12 +29,7 @@ class Diagnostics(object):
     be called by manage before functions depending on knowing the language
     source dir can be called.
     """
-    lang_source_dir = (
-        os.path.abspath(os.environ['LANGKIT_LANG_SOURCE_DIR'])
-        if 'LANGKIT_LANG_SOURCE_DIR' in os.environ else
-        '<invalid dir>')
     has_pending_error = False
-    _is_under_langkit_cache = {}
 
     style = DiagnosticStyle.default
     """
@@ -42,29 +38,23 @@ class Diagnostics(object):
     :type: DiagnosticStyle
     """
 
-    @classmethod
-    def set_lang_source_dir(cls, lang_source_dir):
-        """
-        Set the language definition source directory.
-        :type lang_source_dir: str
-        """
-        cls.lang_source_dir = lang_source_dir
-        cls._is_under_langkit_cache = {}
+    blacklisted_paths = [P.dirname(P.abspath(__file__))]
+    """
+    List of blacklisted paths. Add to that list to keep paths out of
+    diagnostics.
+    """
 
     @classmethod
-    def is_under_langkit(cls, path):
+    def is_langkit_dsl(cls, python_file):
         """
-        Return wether the "path" file belongs to Langkit.
+        Return wether `python_file` is langkit DSL.
 
-        :type path: str
+        :type python_file: str
         :rtype: bool
         """
-        try:
-            return cls._is_under_langkit_cache[path]
-        except KeyError:
-            result = Diagnostics.lang_source_dir in os.path.abspath(path)
-            cls._is_under_langkit_cache[path] = result
-            return result
+        # We check that the path of the file is not in the list of blacklisted
+        # paths.
+        return all(path not in python_file for path in cls.blacklisted_paths)
 
     @classmethod
     def set_style(cls, style):
@@ -140,7 +130,7 @@ class Location(object):
             loc = loc.previous_in_callstack
 
         return '[{}]'.format(', '.join(
-            '{}:{}'.format(os.path.basename(loc.file), loc.line)
+            '{}:{}'.format(P.basename(loc.file), loc.line)
             for loc in stack))
 
 
@@ -150,8 +140,6 @@ def extract_library_location(stack=None):
     specification from a stack trace. Use `traceback.extract_stack()` if no
     stack is provided.
 
-    This relies on `Diagnostics.set_lang_source_dir` being called.
-
     :rtype: Location|None
     """
     stack = stack or traceback.extract_stack()
@@ -159,7 +147,7 @@ def extract_library_location(stack=None):
     # Create Location instances for each stack frame
     locs = [Location(t[0], t[1], t[3])
             for t in stack
-            if Diagnostics.is_under_langkit(t[0]) and "manage.py" not in t[0]]
+            if Diagnostics.is_langkit_dsl(t[0]) and "manage.py" not in t[0]]
 
     # Chain Location instances together
     for prev_loc, loc in zip(locs[:-1], locs[1:]):
@@ -319,9 +307,9 @@ def get_parsable_location():
     ctx = get_structured_context()
     if ctx:
         loc = ctx[0][1]
-        path = (os.path.abspath(loc.file)
+        path = (P.abspath(loc.file)
                 if Diagnostics.style == DiagnosticStyle.gnu_full else
-                os.path.basename(loc.file))
+                P.basename(loc.file))
         return "{}:{}:1".format(path, loc.line)
     else:
         return ""
