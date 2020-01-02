@@ -16,9 +16,6 @@
 extern "C" {
 #endif
 
-${c_doc('langkit.initialize')}
-void ${capi.lib_name}_initialize(void);
-
 ${c_doc('langkit.analysis_context_type')}
 typedef struct
 {

@@ -1608,12 +1608,6 @@ ${array_types.decl(array_type)}
 % endfor
 
 
-_initialize = _import_func(
-    '${capi.lib_name}_initialize',
-    [], None, exc_wrap=False
-)
-_initialize()
-
 _free = _import_func(
     '${capi.get_name("free")}',
     [ctypes.c_void_p], None
