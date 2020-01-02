@@ -84,11 +84,6 @@ let raisable typ =
   let new_typ = view typ ~read ~write in
   returning new_typ
 
-let initialize = foreign ~from:c_lib "${capi.lib_name}_initialize"
-  (void @-> raisable void)
-
-let () = initialize ()
-
 (* Module used to encode/decode UTF32 strings *)
 
 (* Camomile needs to know the location of its standard library to work,
