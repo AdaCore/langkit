@@ -137,17 +137,15 @@ class ManageScript(object):
     Whether warnings to build the generated library are enabled by default.
     """
 
-    def __init__(self, override_lang_source_dir=True):
-
+    def __init__(self):
         self.dirs = Directories(
             # It is assumed that manage.py is at the root of the language
-            # definition source directory.
+            # definition source directory, if no source directory is explicitly
+            # passed.
             lang_source_dir=path.dirname(
                 path.abspath(inspect.getfile(self.__class__))
             )
         )
-        if override_lang_source_dir:
-            Diagnostics.set_lang_source_dir(self.dirs.lang_source_dir())
 
         ########################
         # Main argument parser #

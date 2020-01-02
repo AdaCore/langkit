@@ -45,10 +45,6 @@ class PythonDriver(BaseDriver):
         derived_env['LANGKIT_PRETTY_PRINT'] = str(
             int(self.global_env['pretty_print']))
 
-        # Assign a sane default language source directory for Langkit's
-        # diagnostics.
-        derived_env['LANGKIT_LANG_SOURCE_DIR'] = self.working_dir()
-
         # If code coverage is requested, run the test script under the
         # "coverage" program.
         if self.coverage_enabled:
