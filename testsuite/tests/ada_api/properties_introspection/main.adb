@@ -248,6 +248,7 @@ begin
         (To_Unbounded_Wide_Wide_String ("a"));
       Unit   : constant Value_Type := Create_Analysis_Unit (U);
       RN     : constant Value_Type := Create_Node (Root);
+      NN     : constant Value_Type := Create_Node (No_Foo_Node);
       Name   : constant Value_Type := Create_Node
         (Root.Child (1).As_Var_Decl.F_Name);
 
@@ -266,6 +267,7 @@ begin
       Test ("P_Id_Sym", Root, Foo_Node_P_Id_Sym, Sym);
       Test ("P_Id_Unit", Root, Foo_Node_P_Id_Unit, Unit);
       Test ("P_Id_Root_Node", Root, Foo_Node_P_Id_Root_Node, RN);
+      Test ("P_Id_Root_Node", Root, Foo_Node_P_Id_Root_Node, NN);
       Test ("P_Id_Name", Root, Foo_Node_P_Id_Name, Name);
       New_Line;
 
