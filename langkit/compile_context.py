@@ -22,6 +22,7 @@ from os import path
 from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
+from langkit.coverage import GNATcov
 from langkit.diagnostics import (Context, Severity, WarningSet,
                                  check_source_language)
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
@@ -659,6 +660,14 @@ class CompileCtx(object):
         of the time.
 
         :type: None|langkit.emitter.Emitter
+        """
+
+        self.gnatcov = None
+        """
+        During code emission, GNATcov instance if coverage is enabled. None
+        otherwise.
+
+        :type: None|langkit.coverage.GNATcov
         """
 
         self.show_property_logging = show_property_logging
@@ -1547,6 +1556,9 @@ class CompileCtx(object):
             report_unused_documentation_entries
         )
 
+        if kwargs.get('coverage', False):
+            self.gnatcov = GNATcov(self)
+
         # Load plugin passes
         plugin_passes = [self.load_plugin_pass(p)
                          for p in kwargs.pop('plugin_passes', [])]
@@ -1806,6 +1818,8 @@ class CompileCtx(object):
             EmitterPass('emit OCaml API', Emitter.emit_ocaml_api),
             EmitterPass('emit library project file',
                         Emitter.emit_lib_project_file),
+            EmitterPass('instrument for code coverage',
+                        Emitter.instrument_for_coverage),
 
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused(),

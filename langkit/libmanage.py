@@ -411,6 +411,11 @@ class ManageScript(object):
                  ' Conventient for debugging, but bad for releases as this'
                  ' hardcodes source paths in the sources.'
         )
+        subparser.add_argument(
+            '--coverage', action='store_true',
+            help='Instrument the generated library to compute its code'
+                 ' coverage. This requires GNATcoverage.'
+        )
 
     def add_build_mode_arg(self, subparser):
         subparser.add_argument(
@@ -702,7 +707,8 @@ class ManageScript(object):
             generate_astdoc=not args.no_astdoc,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
-            pretty_print=not args.no_pretty_print
+            pretty_print=not args.no_pretty_print,
+            coverage=args.coverage
         )
 
         if args.check_only:
@@ -920,6 +926,16 @@ class ManageScript(object):
         if build_shared:
             run('relocatable')
 
+    @property
+    def lib_project(self):
+        """
+        Path to the project file for the generated library.
+
+        :rtype: str
+        """
+        return self.dirs.build_dir('lib', 'gnat',
+                                   '{}.gpr'.format(self.lib_name.lower()))
+
     def do_build(self, args):
         """
         Build generated source code.
@@ -931,14 +947,12 @@ class ManageScript(object):
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
 
-        lib_project = self.dirs.build_dir(
-            'lib', 'gnat', '{}.gpr'.format(self.lib_name.lower())
-        )
         obj_dirs = [
             self.dirs.build_dir('obj', self.lib_name.lower(), args.build_mode),
             self.dirs.build_dir('obj', 'langkit_support', args.build_mode)
         ]
-        self.gprbuild(args, lib_project, is_library=True, obj_dirs=obj_dirs)
+        self.gprbuild(args, self.lib_project, is_library=True,
+                      obj_dirs=obj_dirs)
 
         # Then build the main programs, if any
         if not self.no_ada_api:

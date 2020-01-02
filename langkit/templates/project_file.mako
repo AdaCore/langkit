@@ -12,6 +12,18 @@ with "gnatcoll_gmp";
 with "gnatcoll_iconv";
 with "langkit_support";
 
+% if emitter.coverage:
+   with "gnatcov_rts_full";
+% endif
+
+<%
+   extra_source_files = sorted(os_path.basename(p)
+                               for p in ctx.additional_source_files)
+
+   source_dirs = ['../../include/{}'.format(lib_name.lower()),
+                  emitter.extensions_src_dir]
+%>
+
 library project ${lib_name} is
 
    type Build_Mode_Type is ("dev", "prod");
@@ -22,21 +34,75 @@ library project ${lib_name} is
      ("LIBRARY_TYPE", external ("LIBADALANG_LIBRARY_TYPE", "static"));
 
    type Boolean is ("false", "true");
-   Enable_Warnings : Boolean :=
-     external ("${lib_name.upper()}_WARNINGS", "false");
 
-   <% extra_source_files = sorted(
-         os_path.basename(p) for p in ctx.additional_source_files) %>
+   ## Disable style checks on instrumented code
+   % if emitter.coverage:
+      Enable_Warnings : Boolean := "false";
+   % else:
+      Enable_Warnings : Boolean :=
+        external ("${lib_name.upper()}_WARNINGS", "false");
+   % endif
+
+   ## We rely a lot on project installation (gprinstall), and gnatcov does not
+   ## handle well that, so we need kludges to compute code coverage using
+   ## gnatcov without completely reworking how Langkit-generated libraries are
+   ## built and tested.
+   ##
+   ## Generating a library for which we want to compute code coverage happens
+   ## in four steps:
+   ##
+   ## 1. Langkit generates library sources in the regular location
+   ##    (../../include/$/).
+   ##
+   ## 2. We run "gnatcov instrument" with the $_COVINSTR scenario
+   ##    variable set to true. "gnatcov instrument" generates instrumented
+   ##    sources in the "gnatcov-instr" subdirectory in the object directory.
+   ##
+   ## 3. Langkit moves these instrumented sources to the
+   ##    ../../obj/$/gnatcov-instr directory so that the path of instrumented
+   ##    sources does not depend on scenario variables.
+   ##
+   ## 4. gprinstall and all other uses of the not-yet-installed project leave
+   ##    the $_COVINSTR scenario variable to "false" (its default value) so
+   ##    that the source directory is ../../obj/$/gnatcov-instr (i.e. points to
+   ##    instrumented sources).
+   ##
+   ## This organization is indeed involved, but given gnatcov's requirements,
+   ## no simple setup is possible, and this reduces the number of places that
+   ## have to worry about these things to this Mako template and to the
+   ## langkit.coverage module.
+   Primary_Source_Dirs :=
+     (${', '.join(string_repr(d) for d in source_dirs if d)});
+
+   % if emitter.coverage:
+      Secondary_Source_Dirs := ("../../obj/${lib_name.lower()}/gnatcov-instr");
+      For_Coverage_Instrumentation : Boolean := external
+        ("${lib_name.upper()}_COVINSTR", "false");
+      case For_Coverage_Instrumentation is
+         when "false" => for Source_Dirs use Secondary_Source_Dirs;
+         when "true" =>  for Source_Dirs use Primary_Source_Dirs;
+      end case;
+   % else:
+      for Source_Dirs use Primary_Source_Dirs;
+   % endif
 
    for Languages use ${format_str_set(emitter.project_languages)};
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
-   for Interfaces use ${format_str_set(emitter.library_interfaces)};
 
-   <% source_dirs = ['../../include/{}'.format(lib_name.lower()),
-                     emitter.extensions_src_dir] %>
-   for Source_Dirs use
-     (${', '.join(string_repr(d) for d in source_dirs if d)});
+   % if emitter.coverage:
+      --  Before "gnatcov instrument" produced instrumented sources, not all
+      --  interfaces units are present, so do not define interfaces at this
+      --  stage. "gnatcov instrument" does not need to know interfaces in order
+      --  to work, anyway.
+      case For_Coverage_Instrumentation is
+         when "false" =>
+            for Interfaces use ${format_str_set(emitter.library_interfaces)};
+         when "true" =>
+      end case;
+   % else:
+      for Interfaces use ${format_str_set(emitter.library_interfaces)};
+   % endif
 
    for Library_Dir use
       "../${lib_name.lower()}/" & Library_Kind_Param & "/" & Build_Mode;

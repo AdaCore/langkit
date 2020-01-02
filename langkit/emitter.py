@@ -123,7 +123,8 @@ class Emitter(object):
                  no_property_checks=False, generate_ada_api=True,
                  generate_astdoc=True, generate_gdb_hook=True,
                  pretty_print=False, post_process_ada=None,
-                 post_process_cpp=None, post_process_python=None):
+                 post_process_cpp=None, post_process_python=None,
+                 coverage=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -170,6 +171,9 @@ class Emitter(object):
         :param post_process_python: Optional post-processing for generated
             Python source code.
         :type post_process_python: None|(str) -> str
+
+        :param bool coverage: Instrument the generated library to compute its
+            code coverage. This requires GNATcoverage.
         """
         self.context = context
         self.verbosity = context.verbosity
@@ -199,6 +203,8 @@ class Emitter(object):
         self.post_process_ada = post_process_ada
         self.post_process_cpp = post_process_cpp
         self.post_process_python = post_process_python
+        self.coverage = coverage
+        self.gnatcov = context.gnatcov
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
@@ -220,6 +226,11 @@ class Emitter(object):
         Lower-case name for the generated library.
         """
 
+        self.lib_name_up = context.ada_api_settings.lib_name.upper()
+        """
+        Upper-case name for the generated library.
+        """
+
         # Paths for the various directories in which code is generated
         self.include_path = path.join(self.lib_root, 'include')
         self.src_path = path.join(self.lib_root, 'include', self.lib_name_low)
@@ -238,15 +249,6 @@ class Emitter(object):
         :type: langkit.lexer.regexp.DFACodeGenHolder
         """
 
-        self.library_interfaces = {os.path.basename(f)
-                                   for f in context.additional_source_files}
-        """
-        Set of source file base names for all sources that must appear in the
-        "Interfaces" attribute of the generated library project file.
-
-        :type: set[str]
-        """
-
         self._project_file_emitted = False
         """
         Whether we emitted a project file for the generated library.
@@ -261,9 +263,41 @@ class Emitter(object):
         :type: set[str]
         """
 
+        self.library_interfaces = set()
+        """
+        Set of source file base names for all sources that must appear in the
+        "Interfaces" attribute of the generated library project file.
+
+        :type: set[str]
+        """
+
+        # Add all additional source files to the list of library interfaces
+        for f in context.additional_source_files:
+            self.add_library_interface(f)
+
+        if self.coverage:
+            # Add the buffer-list unit from GNATcoverage's instrumentation to
+            # the list of library interfaces. TODO: hopefully, we should not
+            # have to do this anymore after S916-064 is addressed.
+            self.library_interfaces.add(self.gnatcov.buffer_list_file(self))
+
+        self.main_project_file = os.path.join(
+            self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
+        )
+
     def add_library_interface(self, filename):
         assert not self._project_file_emitted
-        self.library_interfaces.add(os.path.basename(filename))
+
+        filename = os.path.basename(filename)
+
+        # Add GNATcoverage's additional buffer units to the library interface.
+        # TODO: hopefully, we should not have to do this anymore after S916-064
+        # is addressed.
+        if self.coverage:
+            for f in self.gnatcov.buffer_files(filename):
+                self.library_interfaces.add(f)
+
+        self.library_interfaces.add(filename)
 
     def setup_directories(self, ctx):
         """
@@ -290,17 +324,24 @@ class Emitter(object):
         Emit a project file for the generated library.
         """
         self._project_file_emitted = True
-        main_project_file = os.path.join(
-            self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
-        )
         write_source_file(
-            main_project_file,
+            self.main_project_file,
             ctx.render_template(
                 'project_file',
                 lib_name=ctx.ada_api_settings.lib_name,
                 os_path=os.path,
             )
         )
+
+    def instrument_for_coverage(self, ctx):
+        """
+        If code coverage is enabled, instrument the generated library with
+        GNATcoverage.
+        """
+        if not self.coverage:
+            return
+        self.gnatcov.instrument(self, os.path.join(self.lib_root, 'obj',
+                                                   self.lib_name_low, 'instr'))
 
     def emit_astdoc(self, ctx):
         """
