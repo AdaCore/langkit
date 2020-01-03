@@ -1,4 +1,4 @@
 main.py: Running...
-> 'Hello'
+> b'Hello'
 main.py: Done.
 Done
