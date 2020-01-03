@@ -345,7 +345,8 @@ class Emitter(object):
 
         class Unit(object):
             def __init__(self, template_base_name, rel_qual_name,
-                         has_body=True, ada_api=False, unparser=False):
+                         has_body=True, ada_api=False, unparser=False,
+                         cached_body=False):
                 """
                 :param str template_base_name: Common prefix for the name of
                     the templates to use in order to generate spec/body sources
@@ -362,6 +363,10 @@ class Emitter(object):
 
                 :param bool has_body: Whether this unit has a body (otherwise,
                     it's just a spec).
+
+                :param bool cached_body: If true, only register the body as a
+                    library interface, i.e. do not generate it, considering
+                    that it is cached.
                 """
                 self.template_base_name = template_base_name
                 self.qual_name = (
@@ -371,6 +376,7 @@ class Emitter(object):
                 self.ada_api = ada_api
                 self.unparser = unparser
                 self.has_body = has_body
+                self.cached_body = cached_body
 
         for u in [
             # Top (pure) package
@@ -412,7 +418,7 @@ class Emitter(object):
             Unit('pkg_lexer', 'Lexer', ada_api=True),
             Unit('pkg_lexer_impl', 'Lexer_Implementation'),
             Unit('pkg_lexer_state_machine', 'Lexer_State_Machine',
-                 has_body=bool(self.dfa_code)),
+                 has_body=True, cached_body=self.dfa_code is None),
             # Unit for debug helpers
             Unit('pkg_debug', 'Debug'),
         ]:
@@ -422,7 +428,8 @@ class Emitter(object):
             ):
                 continue
             self.write_ada_module(self.src_path, u.template_base_name,
-                                  u.qual_name, u.has_body, in_library=True)
+                                  u.qual_name, u.has_body, u.cached_body,
+                                  in_library=True)
 
     def emit_mains(self, ctx):
         """
@@ -666,7 +673,7 @@ class Emitter(object):
             )
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
-                         has_body=True, in_library=False):
+                         has_body=True, cached_body=False, in_library=False):
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
@@ -683,12 +690,25 @@ class Emitter(object):
             will be a child module of the base library module.
 
         :param bool has_body: If true, generate a body for this unit.
+
+        :param bool cached_body: If true, only register the body as a library
+            interface, i.e. do not generate it, considering that it is cached.
         """
         for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
             qual_name_str = '.'.join(n.camel_with_underscores
                                      for n in qual_name)
             with_clauses = self.context.with_clauses[(qual_name_str, kind)]
             full_qual_name = [self.context.lib_name] + qual_name
+
+            # Register library modules as library interfaces
+            if in_library:
+                self.add_library_interface(ada_file_path(out_dir, kind,
+                                                         full_qual_name))
+
+            # If asked not to generate the body, skip the rest
+            if kind == ADA_BODY and cached_body:
+                continue
+
             with names.camel_with_underscores:
                 write_ada_file(
                     out_dir=out_dir,
@@ -706,7 +726,3 @@ class Emitter(object):
                     ),
                     post_process=self.post_process_ada
                 )
-
-            if in_library:
-                self.add_library_interface(ada_file_path(out_dir, kind,
-                                                         full_qual_name))
