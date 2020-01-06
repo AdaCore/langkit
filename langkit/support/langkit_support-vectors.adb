@@ -50,22 +50,34 @@ package body Langkit_Support.Vectors is
    procedure Reserve (Self : in out Vector; Capacity : Natural) is
       Siz : constant size_t := size_t (Capacity) * El_Size;
    begin
-      if Small_Vector_Capacity > 0 then
-         if Self.Capacity = Small_Vector_Capacity then
-            Self.E := To_Pointer (Alloc (Siz));
-            for I in Self.SV'Range loop
-               Self.E.all (I) := Self.SV (I);
-            end loop;
-         else
-            Self.E := To_Pointer (Realloc (Self.E.all'Address, Siz));
+      if Small_Vector_Capacity > 0
+        and then Self.Capacity = Small_Vector_Capacity
+      then
+         --  We have an inline small vector, and we're still using it
+
+         --  If the small vector has capacity, then Reserve is a no-op
+         if Capacity <= Self.Capacity then
+            return;
          end if;
+
+         --  The small vector is smaller than the required capacity. So we'll
+         --  allocate and transfer the items from the small vector to the
+         --  dynamically allocated one.
+         Self.E := To_Pointer (Alloc (Siz));
+         for I in Self.SV'Range loop
+            Self.E.all (I) := Self.SV (I);
+         end loop;
       else
-         if Self.E /= null then
-            Self.E := To_Pointer (Realloc (Self.E.all'Address, Siz));
-         else
+         if Self.E = null then
+            --  E is null: First alloc
             Self.E := To_Pointer (Alloc (Siz));
+         else
+            --  E is not null: realloc
+            Self.E := To_Pointer (Realloc (Self.E.all'Address, Siz));
          end if;
+
       end if;
+
       Self.Capacity := Capacity;
    end Reserve;
 
