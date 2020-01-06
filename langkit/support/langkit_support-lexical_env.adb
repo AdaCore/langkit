@@ -986,17 +986,13 @@ package body Langkit_Support.Lexical_Env is
 
       Dec_Ref (Env);
 
-      if Has_Lookup_Cache (Self) and then Lookup_Kind = Recursive then
-         if Need_Cache then
-            declare
-               Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
-            begin
-               Self.Env.Lookup_Cache.Include (Res_Key, Val);
-               Outer_Results.Concat (Local_Results);
-               Local_Results := Outer_Results;
-            end;
-         end if;
-         return;
+      if Has_Lookup_Cache (Self)
+        and then Lookup_Kind = Recursive
+        and then Need_Cache
+      then
+         Self.Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
+         Outer_Results.Concat (Local_Results);
+         Local_Results := Outer_Results;
       end if;
 
    end Get_Internal;
