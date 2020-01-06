@@ -1063,6 +1063,7 @@ package body Langkit_Support.Lexical_Env is
             Traces.Trace (Me, "===== Out Env get =====");
          end if;
 
+         Results.Destroy;
          return FV;
       end;
    end Get;
