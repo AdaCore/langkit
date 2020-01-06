@@ -16,6 +16,7 @@ from funcy import keep
 
 from langkit.caching import Cache
 from langkit.compile_context import ADA_BODY, ADA_SPEC, get_context
+from langkit.coverage import InstrumentationMetadata
 from langkit.diagnostics import Severity, check_source_language
 import langkit.names as names
 from langkit.template_utils import add_template_dir
@@ -271,9 +272,12 @@ class Emitter(object):
         :type: set[str]
         """
 
-        # Add all additional source files to the list of library interfaces
+        self.instr_md = InstrumentationMetadata()
+
+        # Add all additional source files to the list of library interfaces and
+        # declare them as such in instrumentation metadata.
         for f in context.additional_source_files:
-            self.add_library_interface(f)
+            self.add_library_interface(f, generated=False)
 
         if self.coverage:
             # Add the buffer-list unit from GNATcoverage's instrumentation to
@@ -285,10 +289,17 @@ class Emitter(object):
             self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
         )
 
-    def add_library_interface(self, filename):
+    def add_library_interface(self, filename, generated):
         assert not self._project_file_emitted
 
         filename = os.path.basename(filename)
+
+        # Register Ada source files in the appropriate instrumenattion metadata
+        # set.
+        source_set = (self.instr_md.generated_sources
+                      if generated else
+                      self.instr_md.additional_sources)
+        source_set.add(filename)
 
         # Add GNATcoverage's additional buffer units to the library interface.
         # TODO: hopefully, we should not have to do this anymore after S916-064
@@ -744,7 +755,8 @@ class Emitter(object):
             # Register library modules as library interfaces
             if in_library:
                 self.add_library_interface(ada_file_path(out_dir, kind,
-                                                         full_qual_name))
+                                                         full_qual_name),
+                                           generated=True)
 
             # If asked not to generate the body, skip the rest
             if kind == ADA_BODY and cached_body:
