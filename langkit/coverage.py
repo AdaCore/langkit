@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import xml.etree.ElementTree as etree
 
+from langkit.gdb.debug_info import DebugInfo, ExprStart
 from langkit.template_utils import Renderer
 from langkit.utils import ensure_clean_dir
 
@@ -259,6 +260,193 @@ class CoverageReport(object):
                     f.write(r.render('coverage/file_html', src_file=src_file))
 
 
+class PropertyDSLCoverage(object):
+    """
+    Helper to compute the coverage of the property DSL.
+    """
+
+    class Data(object):
+        """
+        Coverage data for a DSL expression.
+        """
+
+        def __init__(self, expr):
+            self.expr = expr
+            self.has_code = False
+            self.covered = False
+
+        @property
+        def state(self):
+            if self.has_code:
+                return '+' if self.covered else '-'
+            else:
+                return '.'
+
+    def __init__(self, input_file, report_group):
+        """
+        Parse GDB helpers directives in the ``input_file`` coverage
+        report, decode property DSL-level coverage from it and add this
+        coverage information to ``report_group``.
+
+        :param CoverageReport.File file_report: File coverage report to read.
+        :param CoverageReport.Group report_group: Group of coverage reports
+            under which DSL files should go.
+        """
+        self.input_file = input_file
+        self.report_group = report_group
+        self.debug_info = DebugInfo.parse_from_iterable(
+            filename=input_file.name,
+            lines=(line.content for line in input_file.lines)
+        )
+
+        self.gen_to_cov = [[] for _ in self.input_file.lines]
+        """
+        :type: list[list[PropertyDSLCoverage.Data]]
+
+        For each line in self.input_file (the generated source), list of
+        coverage data for expressions that apply to this line.
+        """
+
+        self.orig_to_cov = {}
+        """
+        :type: dict[str, list[list[PropertyDSLCoverage.Data]]]
+
+        For each line in each original source files (source file names are dict
+        keys), list of coverage data for scopes that apply to this line.
+        """
+
+        self.map_lines()
+        self.annotate()
+        self.propagate()
+
+    def open_orig_file(self, filename):
+        """
+        Consider that ``filename`` is an original source file: if this file is
+        unknown so far, create a coverage report for it and start mapping its
+        lines to expressions. Return this mapping (it's an item in
+        self.orig_to_cov).
+
+        :rtype: list[list[PropertyDSLCoverage.Data]]
+        """
+        name = os.path.basename(filename)
+
+        # Create a coverage report for filename if there is none
+        try:
+            file_report = self.report_group.files[name]
+        except KeyError:
+            file_report = CoverageReport.File(name)
+            self.report_group.files[name] = file_report
+
+            # Load the content of the file and consider for starters that no
+            # line has associated code.
+            with open(filename, 'r') as f:
+                for lineno, line in enumerate(f, 1):
+                    file_report.lines.append(CoverageReport.Line(
+                        lineno, line, '.'
+                    ))
+
+        # If this is the first time we see this filename, map its line to DSL
+        # expressions. This can be the first time even though we already had a
+        # coverage report for this file, as in theory several generated file
+        # can refer to the same original file.
+        try:
+            return self.orig_to_cov[name]
+        except KeyError:
+            result = [[] for _ in file_report.lines]
+            self.orig_to_cov[name] = result
+            return result
+
+    def map_lines(self):
+        """
+        Map lines in original and generated sources to abstract DSL constructs
+        (scopes).
+        """
+        for prop in self.debug_info.properties:
+            for expr in prop.iter_events(filter=ExprStart):
+                # Silently ignore sloc-less expressions, as we can do nothing
+                # with them. These are probably artificial expressions (i.e.
+                # created during compilation but not coming from sources)
+                # anyway, so not relevant to coverage analysis.
+                if not expr.dsl_sloc:
+                    continue
+
+                data = PropertyDSLCoverage.Data(expr)
+
+                # Map DSL linenos to DSL coverage data
+                orig_to_cov = self.open_orig_file(expr.dsl_sloc.filename)
+                orig_to_cov[expr.dsl_sloc.line_no - 1].append(data)
+
+                # Map generated code linenos to DSL coverage data
+                line_range = expr.line_range
+                for lineno in range(line_range.first_line,
+                                    line_range.last_line + 1):
+                    self.gen_to_cov[lineno - 1].append(data)
+
+    def annotate(self):
+        """
+        Use mappings to to convert coverage of generated sources to coverage of
+        DSL expressions.
+        """
+        for lineno, line in enumerate(self.input_file.lines, 1):
+            has_code, covered = {
+                '.': (False, False),
+                '+': (True, True),
+                '!': (True, True),
+                '-': (True, False),
+
+                # Be conservative: if we find some unknown coverage state,
+                # consider we have code and that coverage is not reached so
+                # that users feel the need to investigate.
+                '?': (True, False),
+            }[line.state]
+
+            if has_code or covered:
+                for data in self.gen_to_cov[lineno - 1]:
+                    data.has_code = data.has_code or has_code
+                    data.covered = data.covered or covered
+
+    def propagate(self):
+        """
+        Propagate coverage of DSL expressions to original source report.
+        """
+        # Set of expression for which we emitted a violation. Expressions can
+        # span over multiple lines, so we don't want to emit one violation per
+        # line.
+        violation_emitted = set()
+
+        for name, orig_to_cov in self.orig_to_cov.items():
+            file_report = self.report_group.files[name]
+            for lineno, line in enumerate(file_report.lines, 1):
+                for data in orig_to_cov[lineno - 1]:
+                    # Transition the coverage state for this line to account
+                    # for covered/has_code annotations.
+                    if data.covered:
+                        line.state = {
+                            '.': '+',
+                            '+': '+',
+                            '!': '!',
+                            '-': '!',
+                            '?': '!',
+                        }[line.state]
+                    elif data.has_code:
+                        line.state = {
+                            '.': '-',
+                            '+': '!',
+                            '!': '!',
+                            '-': '-',
+                            '?': '?',
+                        }[line.state]
+
+                        # This expression has code and is not covered: if not
+                        # done already, emit a violation for it.
+                        if data.expr not in violation_emitted:
+                            violation_emitted.add(data.expr)
+                            line.annotations.append(CoverageReport.Annotation(
+                                'violation',
+                                '{} not executed'.format(data.expr.expr_repr)
+                            ))
+
+
 class GNATcov(object):
     """
     Simple wrapper around the "gnatcov" tool.
@@ -416,8 +604,10 @@ class GNATcov(object):
                 group = report.get_or_create('unknown', 'Unknown sources')
             group.files[f.name] = f
 
-        # TODO: use GDB helpers info to create a coverage report for
-        # properties.
+        # Create property DSL-level coverage info from the coverage reports of
+        # generated sources.
+        for f in gen_sources.files.values():
+            PropertyDSLCoverage(f, orig_sources)
 
         # Output the final report
         report.render(output_dir)
