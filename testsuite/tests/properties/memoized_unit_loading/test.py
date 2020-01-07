@@ -63,5 +63,5 @@ grammar.add_rules(
     main_rule=Example('example'),
 )
 
-build_and_run(grammar, "main.py")
+build_and_run(grammar, "main.py", show_property_logging=True)
 print('Done')

@@ -185,7 +185,8 @@ class CompileCtx(object):
                  env_hook_subprogram=None,
                  default_unit_provider=None,
                  symbol_canonicalizer=None,
-                 documentations=None):
+                 documentations=None,
+                 show_property_logging=False):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -279,6 +280,10 @@ class CompileCtx(object):
         :param dict[str, str] documentations: If provided, supply templates to
             document entities. These will be added to the documentations
             available in code generation: see langkit.documentation.
+
+        :param bool show_property_logging: If true, any property that has been
+            marked with tracing activated will be traced on stdout by default,
+            without need for any config file.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -655,6 +660,8 @@ class CompileCtx(object):
 
         :type: None|langkit.emitter.Emitter
         """
+
+        self.show_property_logging = show_property_logging
 
         # Register builtin exception types
         self._register_builtin_exception_types()
