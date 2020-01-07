@@ -70,7 +70,7 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
     :param WarningSet warning_set: Set of warnings to emit.
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
-        Symbol canoncalizes to use for this context, if any.
+        Symbol canonicalizer to use for this context, if any.
 
     :param bool show_property_logging: See CompileCtx.show_property_logging.
     """
