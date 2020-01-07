@@ -82,7 +82,7 @@ class Context(object):
         """
         Reload debug information from the analysis source file.
         """
-        self.debug_info = DebugInfo.parse(self)
+        self.debug_info = DebugInfo.parse_from_gdb(self)
 
     def implname(self, suffix):
         """
