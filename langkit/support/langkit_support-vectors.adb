@@ -47,7 +47,7 @@ package body Langkit_Support.Vectors is
    -- Reserve --
    -------------
 
-   procedure Reserve (Self : in out Vector; Capacity : Positive) is
+   procedure Reserve (Self : in out Vector; Capacity : Natural) is
       Siz : constant size_t := size_t (Capacity) * El_Size;
    begin
       if Small_Vector_Capacity > 0 then
