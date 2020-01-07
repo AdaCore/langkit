@@ -56,7 +56,7 @@ if not langkit_root:
 
 
 def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
-                    symbol_canonicalizer=None):
+                    symbol_canonicalizer=None, show_property_logging=False):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -71,6 +71,8 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
 
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canoncalizes to use for this context, if any.
+
+    :param bool show_property_logging: See CompileCtx.show_property_logging.
     """
 
     if lexer is None:
@@ -84,7 +86,8 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
 
     # Try to emit code
     ctx = CompileCtx(lang_name='Foo', lexer=lexer, grammar=grammar,
-                     symbol_canonicalizer=symbol_canonicalizer)
+                     symbol_canonicalizer=symbol_canonicalizer,
+                     show_property_logging=show_property_logging)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -144,7 +147,7 @@ def build(grammar, lexer=None, warning_set=default_warning_set, mains=False):
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
                   ocaml_main=None, warning_set=default_warning_set,
                   generate_unparser=False, symbol_canonicalizer=None,
-                  mains=False):
+                  mains=False, show_property_logging=False):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -166,6 +169,9 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     :param langkit.compile_context.LibraryEntity|None symbol_canonicalizer:
         Symbol canonicalizer to use for this context, if any.
     :param bool mains: Whether to build mains.
+    :param bool show_property_logging: If true, any property that has been
+        marked with tracing activated will be traced on stdout by default,
+        without need for any config file.
     """
 
     if lexer is None:
@@ -173,7 +179,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         lexer = foo_lexer
 
     ctx = prepare_context(grammar, lexer, warning_set,
-                          symbol_canonicalizer=symbol_canonicalizer)
+                          symbol_canonicalizer=symbol_canonicalizer,
+                          show_property_logging=show_property_logging)
 
     class Manage(ManageScript):
         def create_context(self, args):

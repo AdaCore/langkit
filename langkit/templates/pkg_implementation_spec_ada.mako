@@ -104,7 +104,11 @@ private package ${ada_lib_name}.Implementation is
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
-           ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On);
+           ("LANGKIT.PROPERTIES", GNATCOLL.Traces.On
+           % if ctx.show_property_logging:
+           , Stream => "&1"
+           % endif
+           );
    % endif
 
    function Short_Text_Image (Self : ${T.root_node.name}) return Text_Type;
