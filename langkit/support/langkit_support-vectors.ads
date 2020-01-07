@@ -213,7 +213,7 @@ private
       SV       : Small_Array_Type;
    end record;
 
-   procedure Reserve (Self : in out Vector; Capacity : Positive)
+   procedure Reserve (Self : in out Vector; Capacity : Natural)
      with Inline;
    --  Reserve Capacity elements
 
