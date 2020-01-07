@@ -8,7 +8,12 @@ from __future__ import absolute_import, division, print_function
 import inspect
 import shlex
 
-import gdb
+
+try:
+    import gdb
+except ImportError:
+    gdb = None
+
 
 from langkit.gdb.state import Binding, ExpressionEvaluation
 
@@ -27,6 +32,12 @@ class DebugInfo(object):
 
     def __init__(self, context):
         self.context = context
+        """
+        :type: langkit.gdb.context.Context|None
+
+        Reference to the library-specific context, if in GDB. None otherwise
+        (e.g. when parsing debug info outside a debug session).
+        """
 
         self.filename = None
         """
@@ -49,12 +60,13 @@ class DebugInfo(object):
         """
 
     @classmethod
-    def parse(cls, context):
+    def parse_from_gdb(cls, context):
         """
-        Try to parse the $-implementation.adb source file to extract mapping
-        information from its GDB helpers directives. Print error messages on
-        standard output if anything goes wrong, but always return a DebugInfo
-        instance anyway.
+        Try to parse the $-implementation.adb source file that GDB found.
+
+        This extracts mapping information from its GDB helpers directives.
+        Print error messages on standard output if anything goes wrong, but
+        always return a DebugInfo instance anyway.
 
         :rtype: DebugInfo
         """
@@ -69,25 +81,48 @@ class DebugInfo(object):
         if not has_unit_sym:
             return result
 
-        result.filename = has_unit_sym.symtab.fullname()
-        with open(result.filename, 'r') as f:
-            try:
-                cls._parse_file(result, f)
-            except ParseError as exc:
-                print('Error while parsing directives in {}:'.format(
-                    result.filename
-                ))
-                print(str(exc))
+        filename = has_unit_sym.symtab.fullname()
+        with open(filename, 'r') as f:
+            result._try_parse(filename, f)
 
         return result
 
-    def _parse_file(self, f):
+    @classmethod
+    def parse_from_iterable(cls, filename, lines):
         """
-        Internal method. Read GDB helpers directives from the "f" source file
-        and fill self according to it. Raise a ParseError if anything goes
+        Like parse_from_gdb, but parsing from ``lines``.
+
+        :param str filename: Name of the file from which we read the sources.
+            Used for diagnostics purposes.
+        :param iter[str] lines: Iterable that yields all the lines to parse.
+            This can be any iterator: a read file, a list of strings in memory,
+            a custom iterator, ...
+        """
+        result = cls(context=None)
+        result._try_parse(filename, lines)
+        return result
+
+    def _try_parse(self, filename, lines):
+        """
+        Internal method. Same semantics as parse_from_iterable, but work on an
+        existing instance.
+        """
+        self.filename = filename
+        try:
+            self._parse_file(lines)
+        except ParseError as exc:
+            print('Error while parsing directives in {}:'.format(filename))
+            print(str(exc))
+
+    def _parse_file(self, lines):
+        """
+        Internal method. Read GDB helpers directives from the "lines" source
+        file and fill self according to it. Raise a ParseError if anything goes
         wrong.
 
-        :param file f: Readable file for the $-implementation.adb source file.
+        :param iter[str] lines: Iterable that yields all the lines to parse.
+            This can be any iterator: a read file, a list of strings in memory,
+            a custom iterator, ...
         :rtype: None
         """
         self.properties = []
@@ -95,7 +130,7 @@ class DebugInfo(object):
         scope_stack = []
         expr_stack = []
 
-        for line_no, line in enumerate(f, 1):
+        for line_no, line in enumerate(lines, 1):
             line = line.strip()
             if not line.startswith('--#'):
                 continue
