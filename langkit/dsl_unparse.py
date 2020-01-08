@@ -409,6 +409,12 @@ def emit_expr(expr, **ctx):
         return repr(expr)
 
 
+def emit_doc(doc):
+    from inspect import cleandoc
+    doc = cleandoc(doc).replace("\n", "$hl")
+    return sf("\"\"\"$hl${doc}$hl\"\"\"")
+
+
 def emit_prop(prop):
     quals = ""
     if prop.is_public:
@@ -425,7 +431,13 @@ def emit_prop(prop):
         "= {}".format(arg.default_value) if arg.default_value else ""
     ) for arg in prop.natural_arguments)
 
-    res = "$hl{}fun {} ({}): {}".format(
+    doc = prop.doc
+
+    res = ""
+    if doc:
+        res += "$hl{}".format(emit_doc(doc))
+
+    res += "$hl{}fun {} ({}): {}".format(
         quals, prop.original_name.lower, args, type_name(prop.type)
     )
 
@@ -475,11 +487,15 @@ def emit_node_type(node_type):
         "qualifier " if node_type.is_bool_node
         else "enum " if node_type.is_enum_node else ""
     )
+    doc = node_type.doc
 
     if base and base.is_enum_node:
         return ""
 
     return sf("""
+    % if doc:
+    ${emit_doc(doc)}$hl
+    % endif
     % if base:
     ${enum_qual}class ${type_name(node_type)} : ${type_name(base)} is$i$hl
     % else:
