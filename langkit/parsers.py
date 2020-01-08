@@ -1039,8 +1039,8 @@ class DontSkip(Parser):
 
     def __init__(self, subparser, *dontskip_parsers):
         Parser.__init__(self)
-        self.subparser = subparser
-        self.dontskip_parsers = dontskip_parsers
+        self.subparser = resolve(subparser)
+        self.dontskip_parsers = [resolve(sb) for sb in dontskip_parsers]
 
     def __repr__(self):
         return 'DontSkip({}, {})'.format(self.subparser, self.dontskip_parsers)
@@ -1622,7 +1622,7 @@ class _Extract(Parser):
         :param int index: The index you want to extract from the row.
         """
         Parser.__init__(self)
-        self.parser = parser
+        self.parser = resolve(parser)
         self.index = index
         assert isinstance(self.parser, _Row)
 
@@ -1778,7 +1778,7 @@ class _Transform(Parser):
                 or isinstance(typ, T.Defer)
                 or typ.is_ast_node)
 
-        self.parser = parser
+        self.parser = resolve(parser)
         self.parser.containing_transform = self
         self.typ = typ
 
