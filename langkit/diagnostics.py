@@ -54,6 +54,7 @@ class Diagnostics(object):
         """
         # We check that the path of the file is not in the list of blacklisted
         # paths.
+        python_file = P.normpath(python_file)
         return all(path not in python_file for path in cls.blacklisted_paths)
 
     @classmethod
