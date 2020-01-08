@@ -14,7 +14,7 @@ import xml.etree.ElementTree as etree
 
 from langkit.gdb.debug_info import DebugInfo, ExprStart
 from langkit.template_utils import Renderer
-from langkit.utils import ensure_clean_dir
+from langkit.utils import copy_to_dir, ensure_clean_dir
 
 
 css_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -242,7 +242,7 @@ class CoverageReport(object):
         def out_path(filename):
             return os.path.join(output_dir, os.path.basename(filename))
 
-        shutil.copyfile(css_file, out_path(css_file))
+        copy_to_dir(css_file, output_dir)
 
         r = Renderer(report=self,
                      escape=html_escape,
@@ -537,14 +537,13 @@ class GNATcov(object):
                                    emitter.lib_name_low)
         for pattern in ('*.c', '*.h'):
             for f in glob.glob(os.path.join(lib_src_dir, pattern)):
-                shutil.copyfile(f, os.path.join(instr_src_dir,
-                                                os.path.basename(f)))
+                copy_to_dir(f, instr_src_dir)
 
         # Create a directory to gather all SID files
         sid_dir = os.path.join(instr_dir, 'sids')
         ensure_clean_dir(sid_dir)
         for f in glob.glob(os.path.join(lib_obj_dir, '*', '*.sid')):
-            shutil.copyfile(f, os.path.join(sid_dir, os.path.basename(f)))
+            copy_to_dir(f, sid_dir)
 
         # Create instrumentation metadata
         emitter.instr_md.save(instr_dir)

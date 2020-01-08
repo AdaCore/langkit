@@ -164,6 +164,16 @@ def ensure_clean_dir(dirname):
     os.makedirs(dirname)
 
 
+def copy_to_dir(filename, dirname):
+    """
+    Copy the ``filename`` regular file to the ``dirname`` directory.
+
+    :param str filename: File to copy.
+    :param str dirname: Destination directory.
+    """
+    shutil.copy(filename, os.path.join(dirname, os.path.basename(filename)))
+
+
 try:
     from contextlib import nested  # Python 2
 except ImportError:
