@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.lexer import (Lexer, LexerToken, Literal, Pattern, WithSymbol,
-                           WithText, WithTrivia)
+from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
+                           WithSymbol, WithText, WithTrivia)
 
 
 class Token(LexerToken):
@@ -83,16 +83,13 @@ class Token(LexerToken):
     Lt = WithText()
     Number = WithText()
     String = WithText()
-
-    # Trivia
     Comment = WithTrivia()
-    Whitespace = WithTrivia()
 
     Identifier = WithSymbol()
 
 
 python_lexer = Lexer(Token, track_indent=True, pre_rules=[
-    (Pattern(r'\\\n[ \r\t]*'), Token.Whitespace)
+    (Pattern(r'\\\n[ \r\t]*'), Ignore())
 ])
 
 python_lexer.add_patterns(
@@ -106,7 +103,7 @@ python_lexer.add_rules(
     (Pattern('(u|U)?(r|R)?'
              '({MLSTRING_SQ}|{MLSTRING_DBQ}'
              '|{STRING_SQ}|{STRING_DBQ})'), Token.String),
-    (Pattern(r'[ \r\t]+'),   Token.Whitespace),
+    (Pattern(r'[ \r\t]+'),   Ignore()),
     (Pattern(r"#(.?)+"),     Token.Comment),
 
     (Literal('>>='),         Token.RshAssign),
