@@ -63,8 +63,8 @@ def emit_rule(rule):
         )
     elif isinstance(rule, Null):
         return "null({})".format(
-            emit_rule(rule.typ) if isinstance(rule.typ, Parser)
-            else node_name(rule.typ)
+            emit_rule(rule.type) if isinstance(rule.type, Parser)
+            else node_name(rule.type)
         )
     elif isinstance(rule, Or):
         body = ' | '.join(emit_rule(r) for r in rule.parsers)
@@ -405,7 +405,7 @@ def emit_expr(expr, **ctx):
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
 
     else:
-        raise NotImplementedError(type(expr))
+        # raise NotImplementedError(type(expr))
         return repr(expr)
 
 
@@ -440,7 +440,7 @@ def emit_field(field):
     if isinstance(field, BaseField):
         return "{}field {} : {}".format(
             "parse " if isinstance(field, Field) else "",
-            field._name.lower, type_name(field.type)
+            field._indexing_name, type_name(field.type)
         )
     else:
         raise NotImplementedError()
