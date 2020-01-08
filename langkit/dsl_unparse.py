@@ -38,7 +38,8 @@ def sf(strn):
 def emit_rule(rule):
     from langkit.parsers import (
         _Transform, node_name, _Row, Opt, List, Or, _Token, NoBacktrack,
-        _Extract, DontSkip, Skip, Null, Parser, resolve, Defer, Predicate
+        _Extract, DontSkip, Skip, Null, Parser, resolve, Defer, Predicate,
+        Discard
     )
     if isinstance(rule, _Transform):
         inner = emit_rule(rule.parser)
@@ -98,6 +99,8 @@ def emit_rule(rule):
         return "{} |> when({})".format(
             emit_rule(rule.parser), rule.property_name
         )
+    elif isinstance(rule, Discard):
+        return "discard({})".format(emit_rule(rule.parser))
     else:
         raise NotImplementedError()
 
