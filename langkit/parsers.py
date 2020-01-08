@@ -929,7 +929,8 @@ class _Token(Parser):
         check_source_language(
             not self.match_text or isinstance(self._val, WithSymbol),
             "Tok matcher has match text, but val is not a WithSymbol instance,"
-            " got {} instead".format(val)
+            " got {} instead".format(val),
+            ok_for_codegen=True
         )
 
     @property

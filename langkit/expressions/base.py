@@ -63,7 +63,8 @@ def unsugar(expr, ignore_errors=False):
 
     check_source_language(
         ignore_errors or isinstance(expr, AbstractExpression),
-        'Invalid abstract expression: {}'.format(expr)
+        'Invalid abstract expression: {}'.format(expr),
+        ok_for_codegen=True
     )
 
     return expr
