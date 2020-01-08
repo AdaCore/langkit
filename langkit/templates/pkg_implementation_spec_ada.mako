@@ -1154,7 +1154,7 @@ private package ${ada_lib_name}.Implementation is
    function Get_With_Error
      (Context  : Internal_Context;
       Filename : String;
-      Error    : String;
+      Error    : Text_Type;
       Charset  : String;
       Rule     : Grammar_Rule) return Internal_Unit;
    --  Implementation for Analysis.Get_With_Error

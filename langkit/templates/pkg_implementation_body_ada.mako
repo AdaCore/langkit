@@ -545,7 +545,7 @@ package body ${ada_lib_name}.Implementation is
    function Get_With_Error
      (Context  : Internal_Context;
       Filename : String;
-      Error    : String;
+      Error    : Text_Type;
       Charset  : String;
       Rule     : Grammar_Rule) return Internal_Unit
    is
@@ -560,9 +560,8 @@ package body ${ada_lib_name}.Implementation is
          declare
             Unit : constant Internal_Unit := Create_Unit
               (Context, Normalized_Filename, Charset, Rule);
-            Msg  : constant Text_Type := To_Text (Error);
          begin
-            Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
+            Append (Unit.Diagnostics, No_Source_Location_Range, Error);
             return Unit;
          end;
       else

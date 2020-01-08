@@ -199,7 +199,7 @@ package ${ada_lib_name}.Analysis is
    function Get_With_Error
      (Context  : Analysis_Context'Class;
       Filename : String;
-      Error    : String;
+      Error    : Text_Type;
       Charset  : String := "";
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit;
    --  If a Unit for ``Filename`` already exists, return it unchanged.
