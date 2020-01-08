@@ -545,11 +545,28 @@ class GNATcov(object):
         for f in glob.glob(os.path.join(lib_obj_dir, '*', '*.sid')):
             copy_to_dir(f, sid_dir)
 
+        # Create a directory to gather all non-instrumented sources (generated
+        # and additional ones). "gnatcov
+        # coverage" will use this project to generate its coverage report.
+        src_dir = os.path.join(instr_dir, 'src')
+        ensure_clean_dir(src_dir)
+        for f in emitter.context.additional_source_files:
+            copy_to_dir(f, src_dir)
+        for pattern in ('*.adb', '*.ads'):
+            for f in glob.glob(os.path.join(emitter.src_path, pattern)):
+                copy_to_dir(f, src_dir)
+
+        # Also generate a dummy project file to give easy access to these
+        # sources.
+        with open(os.path.join(instr_dir, 'to_cover.gpr'), 'w') as f:
+            f.write('project To_Cover is'
+                    '\n  for Source_Dirs use ("src");'
+                    '\nend To_Cover;')
+
         # Create instrumentation metadata
         emitter.instr_md.save(instr_dir)
 
-    def _generate_xml_report(self, gnatcov_args, instr_dir, traces,
-                             working_dir):
+    def _generate_xml_report(self, instr_dir, traces, working_dir):
         """
         Helper for generate_report. Run "gnatcov run" to produce a XML report.
 
@@ -574,11 +591,12 @@ class GNATcov(object):
         ensure_clean_dir(xml_dir)
         subprocess.check_call(
             ['gnatcov', 'coverage',
+             '-P', os.path.join(instr_dir, 'to_cover.gpr'),
              '--level', self.covlevel,
              '--annotate', 'xml',
              '--output-dir', xml_dir,
              '--sid', '@' + sid_list,
-             '@' + trace_list] + gnatcov_args
+             '@' + trace_list]
         )
         return xml_dir
 
@@ -611,15 +629,12 @@ class GNATcov(object):
         # Output the final report
         report.render(output_dir)
 
-    def generate_report(self, title, gnatcov_args, instr_dir, traces,
-                        output_dir, working_dir):
+    def generate_report(self, title, instr_dir, traces, output_dir,
+                        working_dir):
         """
         Generate a HTML coverage report.
 
         :param str title: Title for the coverage report.
-        :param list[str] gnatcov_args: Command-line arguments to forward to
-            gnatcov. These should convey the list of units of interest, so
-            either pass a project file, either give the list of SID files.
         :param str instr_dir: Directory that contains instrumentation data (see
             the corresponding argument in the "instrument" method).
         :param listr[str] traces: List of source trace files to discharge
@@ -632,6 +647,5 @@ class GNATcov(object):
         # Make sure we start with a clean output directory
         ensure_clean_dir(output_dir)
 
-        xml_dir = self._generate_xml_report(gnatcov_args, instr_dir, traces,
-                                            working_dir)
+        xml_dir = self._generate_xml_report(instr_dir, traces, working_dir)
         self._generate_final_report(title, instr_dir, xml_dir, output_dir)
