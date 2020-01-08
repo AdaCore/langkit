@@ -481,6 +481,7 @@ def type_name(type):
 
 
 def emit_node_type(node_type):
+
     base = node_type.base
     parse_fields = node_type.get_fields(
         include_inherited=False
@@ -491,6 +492,13 @@ def emit_node_type(node_type):
         else "enum " if node_type.is_enum_node else ""
     )
     doc = node_type.doc
+    builtin_properties = node_type.builtin_properties()
+
+    def is_builtin_prop(prop):
+        return any(
+            builtin_name == prop.name.lower
+            for builtin_name, _ in builtin_properties
+        )
 
     if base and base.is_enum_node:
         return ""
@@ -512,7 +520,7 @@ def emit_node_type(node_type):
                                for alt in node_type.alternatives))}$d$hl
     % endif
     % for prop in properties:
-    % if not prop.is_internal:
+    % if not prop.is_internal and not is_builtin_prop(prop):
     ${emit_prop(prop)}$hl
     % endif
     % endfor
