@@ -505,6 +505,9 @@ def emit_node_type(node_type):
 
 
 def unparse_lang(ctx):
+    emitter = ctx.emitter
+    ctx.emitter = None
+
     template = """
     grammar ${ctx.short_name}_grammar is$i$hl
     % for name, rule in ctx.grammar.rules.items():
@@ -529,6 +532,8 @@ def unparse_lang(ctx):
     print(t2 - t)
     with open("{}_lang_def.lkt".format(ctx.short_name), 'w') as f:
         f.write(lang_def)
+
+    ctx.emitter = emitter
 
 
 def create():
