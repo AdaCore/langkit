@@ -599,7 +599,7 @@ class Cond(AbstractExpression):
     def construct(self):
         from langkit.expressions import Cast
 
-        check_source_language(len(self.args) > 0, 'Missing Cond arguments')
+        check_source_language(len(self.args) > 1, 'Missing Cond arguments')
         check_source_language(len(self.args) % 2 == 1,
                               'Missing last Cond argument')
 

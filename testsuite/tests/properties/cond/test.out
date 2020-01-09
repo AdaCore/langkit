@@ -1,6 +1,4 @@
 main.py: Running...
-== cond0 ==
-  .cond0(()) = 1
 == cond1 ==
   .cond1((True,)) = 1
   .cond1((False,)) = 2

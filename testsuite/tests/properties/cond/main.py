@@ -17,7 +17,7 @@ if u.diagnostics:
 
 n = u.root
 
-for i in range(4):
+for i in range(1, 4):
     prop_name = 'cond{}'.format(i)
 
     print('== {} =='.format(prop_name))

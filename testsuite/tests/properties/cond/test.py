@@ -22,10 +22,6 @@ class Example(FooNode):
         return b
 
     @langkit_property(public=True)
-    def cond0():
-        return Cond(1)
-
-    @langkit_property(public=True)
     def cond1(b=Bool):
         return Cond(Self.identity(b), 1,
                     2)

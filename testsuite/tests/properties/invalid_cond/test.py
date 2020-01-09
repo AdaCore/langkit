@@ -31,6 +31,7 @@ def run(name, expr):
 
 
 run('Missing args', Cond())
+run('Missing args', Cond(True))
 run('Missing last', Cond(Self.cond, Self))
 run('Bad condition type', Cond(Self, True, False))
 run('Bad return type', Cond(Self.cond, Self, False))
