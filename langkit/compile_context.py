@@ -1788,6 +1788,8 @@ class CompileCtx(object):
             PropertyPass, errors_checkpoint_pass
         )
 
+        from langkit.dsl_unparse import unparse_lang
+
         return [
             MajorStepPass('Prepare code emission'),
 
@@ -1824,6 +1826,9 @@ class CompileCtx(object):
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused(),
                        disabled=not self.report_unused_documentation_entries),
+
+            GlobalPass('RA22-015: Unparse language to concrete syntax',
+                       unparse_lang),
         ]
 
     def run_passes(self, passes):

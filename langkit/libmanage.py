@@ -417,6 +417,14 @@ class ManageScript(object):
                  ' coverage. This requires GNATcoverage.'
         )
 
+        # RA22-015: option to dump the results of the unparsing concrete syntax
+        # to a file.
+        subparser.add_argument(
+            '--unparse-destination', type=str, default=None,
+            help='If specified, generate concrete syntax definition of source '
+                 'language, and store it in this file'
+        )
+
     def add_build_mode_arg(self, subparser):
         subparser.add_argument(
             '--build-mode', '-b', choices=list(self.BUILD_MODES),
@@ -708,7 +716,8 @@ class ManageScript(object):
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             pretty_print=not args.no_pretty_print,
-            coverage=args.coverage
+            coverage=args.coverage,
+            unparse_destination_file=args.unparse_destination
         )
 
         if args.check_only:

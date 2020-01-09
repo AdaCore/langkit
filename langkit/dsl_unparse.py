@@ -531,6 +531,19 @@ def emit_node_type(node_type):
 
 
 def unparse_lang(ctx):
+    """
+    Unparse the language currently being compiled.
+    """
+
+    dest_file = ctx.emitter.unparse_destination_file
+
+    # If there is no destination file, then the pass does nothing.
+    if not ctx.emitter.unparse_destination_file:
+        return
+
+    # By setting the context's emitter to `None`, we disable the sanity checks
+    # done to ensure that we don't intermix codegen and semantic checks in the
+    # langkit code generator, because we break that invariant in the unparser.
     emitter = ctx.emitter
     ctx.emitter = None
 
@@ -552,7 +565,7 @@ def unparse_lang(ctx):
 
     from time import time
     lang_def = pp(sf(template))
-    with open("{}_lang_def.lkt".format(ctx.short_name), 'w') as f:
+    with open(dest_file, 'w') as f:
         f.write(lang_def)
 
     ctx.emitter = emitter

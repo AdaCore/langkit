@@ -125,7 +125,8 @@ class Emitter(object):
                  generate_astdoc=True, generate_gdb_hook=True,
                  pretty_print=False, post_process_ada=None,
                  post_process_cpp=None, post_process_python=None,
-                 coverage=False):
+                 coverage=False,
+                 unparse_destination_file=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -288,6 +289,14 @@ class Emitter(object):
         self.main_project_file = os.path.join(
             self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
         )
+
+        self.unparse_destination_file = unparse_destination_file
+        """
+        RA22-015: If set to something else than None, then the "dsl unparse"
+        pass will be ran, and the output will be stored in this file.
+
+        :type: str|None
+        """
 
     def add_library_interface(self, filename, generated):
         assert not self._project_file_emitted
