@@ -217,7 +217,6 @@ def emit_expr(expr, **ctx):
         )
     elif isinstance(expr, Map):
         op_name = expr.kind
-        print(op_name)
         args = []
         vars = [expr.element_var]
         if expr.requires_index:
@@ -552,11 +551,7 @@ def unparse_lang(ctx):
     """
 
     from time import time
-    t = time()
     lang_def = pp(sf(template))
-    print(lang_def)
-    t2 = time()
-    print(t2 - t)
     with open("{}_lang_def.lkt".format(ctx.short_name), 'w') as f:
         f.write(lang_def)
 
