@@ -11,6 +11,7 @@ class Token(LexerToken):
 
     # Operators
     ExclMark = WithText()
+    Colon = WithText()
     IntMark = WithText()
     Div = WithText()
     Comma = WithText()
@@ -31,6 +32,7 @@ class Token(LexerToken):
     IsKw = WithText()
     EndKw = WithText()
     OrKw = WithText()
+    ClassKw = WithText()
 
 
 lkt_lexer = Lexer(Token)
@@ -47,6 +49,7 @@ lkt_lexer.add_rules(
 
     # Operators
     (Literal('!'),         Token.ExclMark),
+    (Literal(':'),         Token.Colon),
     (Literal('?'),         Token.IntMark),
     (Literal('/'),         Token.Div),
     (Literal('*'),         Token.Times),
@@ -69,6 +72,7 @@ lkt_lexer.add_rules(
     (Literal('is'),        Token.IsKw),
     (Literal('end'),       Token.EndKw),
     (Literal('or'),        Token.OrKw),
+    (Literal('class'),     Token.ClassKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),

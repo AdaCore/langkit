@@ -120,13 +120,23 @@ class ListKind(LKNode):
     alternatives = ["one", "zero"]
 
 
+class ClassDecl(LKNode):
+    """
+    Declaration for a LK class. This only cover node classes for the moment,
+    but might be extended to support regular classes in the future.
+    """
+    name = Field()
+    base_class = Field()
+    decls = Field()
+
+
 lkt_grammar = Grammar('main_rule')
 G = lkt_grammar
 lkt_grammar.add_rules(
     main_rule=LangkitRoot(
         List(G.root_decl, empty_valid=True), Lex.Termination
     ),
-    root_decl=Or(G.grammar_decl),
+    root_decl=Or(G.grammar_decl, G.regular_decl),
     id=Id(Lex.Identifier),
 
     dotted_name=Or(
@@ -194,5 +204,17 @@ lkt_grammar.add_rules(
 
     grammar_token=GrammarToken(
         "@", G.id, Opt("(", G.token_literal, ")")
-    )
+    ),
+
+    class_decl=ClassDecl(
+        "class", G.id, Opt(":", G.dotted_name), "is",
+        G.decls,
+        "end"
+    ),
+
+    regular_decl=Or(
+        G.class_decl,
+    ),
+
+    decls=List(G.regular_decl, empty_valid=True),
 )
