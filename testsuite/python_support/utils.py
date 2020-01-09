@@ -147,7 +147,7 @@ def build(grammar, lexer=None, warning_set=default_warning_set, mains=False):
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
                   ocaml_main=None, warning_set=default_warning_set,
                   generate_unparser=False, symbol_canonicalizer=None,
-                  mains=False, show_property_logging=False):
+                  mains=False, show_property_logging=False, unparse_cs=True):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -180,6 +180,9 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     :param bool show_property_logging: If true, any property that has been
         marked with tracing activated will be traced on stdout by default,
         without need for any config file.
+
+    :param bool unparse_cs: If true, unparse the language to a concrete syntax
+        lkt file.
     """
 
     if lexer is None:
@@ -225,6 +228,11 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     # For testsuite performance, do not generate mains unless told otherwise
     if not mains:
         argv.append('--disable-all-mains')
+
+    # RA22-015: Unparse the language to concrete syntax
+    if unparse_cs:
+        argv.append('--unparse-destination')
+        argv.append('concrete_syntax.lkt')
 
     m.run(argv)
 
