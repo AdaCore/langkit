@@ -353,10 +353,10 @@ package body ${ada_lib_name}.Lexer_Implementation is
             )
          %>
 
-         --  If we're reading a token that triggers the end of layout ignore ..
+         --  If we're reading a token that triggers the end of layout ignore...
          % if end_ilayout_toks:
          if Token_Id in ${end_ilayout_toks} then
-            --  Decrement the ignore stack ..
+            --  Decrement the ignore stack...
             Ign_Layout_Level := Ign_Layout_Level - 1;
          end if;
          % endif
