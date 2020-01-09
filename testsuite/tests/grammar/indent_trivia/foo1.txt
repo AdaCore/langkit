@@ -1,0 +1,11 @@
+def foo1
+    foo1_result
+
+def foo2
+    foo1()
+    bar(
+        # bbb
+        x,
+        # ccc
+        y
+    )

@@ -99,13 +99,12 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
 
-      Token                 : Lexed_Token;
-      Token_Id              : Token_Kind := ${termination};
+      Token    : Lexed_Token;
+      Token_Id : Token_Kind := ${termination};
       % if lexer.track_indent:
-      Prev_Id               : Token_Kind := ${termination};
+      Prev_Id  : Token_Kind := ${termination};
       % endif
-      Symbol                : Symbol_Type;
-      Last_Token_Was_Trivia : Boolean := False;
+      Symbol   : Symbol_Type;
 
       Current_Sloc : Source_Location := (1, 1);
       --  Source location before scanning the current token
@@ -138,6 +137,17 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       % endif
 
+      Last_Token_Was_Trivia : Boolean := False;
+      --  Whether the last item we added to TDH was a trivia
+
+      procedure Append_Token (Data : Stored_Token_Data) with Inline;
+      --  Append a token to TDH and update Last_Token_Was_Trivia accordingly
+
+      procedure Append_Trivia (Data : Stored_Token_Data) with Inline;
+      --  If trivia are disabled, do nothing. Otherwise, append a trivia to TDH
+      --  and update Last_Token_Was_Trivia and the token/trivia mapping in TDH
+      --  accordingly.
+
       function Source_First return Positive is (Token.Text_First);
       --  Index in TDH.Source_Buffer for the first character corresponding to
       --  the current token.
@@ -149,30 +159,48 @@ package body ${ada_lib_name}.Lexer_Implementation is
         (Make_Range (Current_Sloc, Next_Sloc));
       --  Create a sloc range value corresponding to Token
 
-      procedure Prepare_For_Trivia
-        with Inline;
-      --  Append an entry for the current token in the Tokens_To_Trivias
-      --  correspondence vector.
-
       function Sloc_After
         (Base_Sloc : Source_Location; Text : Text_Type) return Source_Location;
       --  Return Base_Sloc updated as if Text was appended
 
-      ------------------------
-      -- Prepare_For_Trivia --
-      ------------------------
+      ------------------
+      -- Append_Token --
+      ------------------
 
-      procedure Prepare_For_Trivia is
+      procedure Append_Token (Data : Stored_Token_Data) is
       begin
-         if With_Trivia then
-            --  By default, the current token will have no trivia
-            Append (TDH.Tokens_To_Trivias, Integer (No_Token_Index));
+         --  By default, the current token will have no trivia
+         Append (TDH.Tokens_To_Trivias, Integer (No_Token_Index));
 
-            --  Reset Last_Token_Was_Trivia so that new trivia is added to the
-            --  current token.
-            Last_Token_Was_Trivia := False;
+         TDH.Tokens.Append (Data);
+         Last_Token_Was_Trivia := False;
+      end Append_Token;
+
+      -------------------
+      -- Append_Trivia --
+      -------------------
+
+      procedure Append_Trivia (Data : Stored_Token_Data) is
+      begin
+         if not With_Trivia then
+            return;
          end if;
-      end Prepare_For_Trivia;
+
+         --  If the last item added to TDH was a trivia, extend the current
+         --  trivia chain. Otherwise, update the Tokens_To_Trivias map to state
+         --  that the trivia we are about to add is the first trivia that comes
+         --  after the last token.
+
+         if Last_Token_Was_Trivia then
+            TDH.Trivias.Last_Element.all.Has_Next := True;
+         else
+            TDH.Tokens_To_Trivias.Last_Element.all :=
+               TDH.Trivias.Last_Index + 1;
+         end if;
+         TDH.Trivias.Append ((Has_Next => False,
+                              T        => Data));
+         Last_Token_Was_Trivia := True;
+      end Append_Trivia;
 
       ----------------
       -- Sloc_After --
@@ -216,7 +244,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Token := Last_Token (State);
 
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
-      Prepare_For_Trivia;
+      TDH.Tokens_To_Trivias.Append (Integer (No_Token_Index));
 
       while Has_Next (State) loop
          Next_Token (State, Token);
@@ -251,8 +279,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
          case Token_Id is
 
          % if with_symbol_actions:
-            ## Token id is part of the class of token types for which we want to
-            ## internalize the text.
+            ## Token id is part of the class of token types for which we want
+            ## to internalize the text.
             when ${' | '.join(with_symbol_actions)} =>
                if TDH.Symbols /= No_Symbol_Table then
                   declare
@@ -278,32 +306,14 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
          % if with_trivia_actions:
             when ${' | '.join(with_trivia_actions)} =>
-               if With_Trivia then
-                  if Last_Token_Was_Trivia then
-                     Last_Element (TDH.Trivias).all.Has_Next := True;
-                  else
-                     Last_Element (TDH.Tokens_To_Trivias).all :=
-                        Last_Index (TDH.Trivias) + 1;
-                  end if;
-
-                  Append
-                    (TDH.Trivias,
-                     (Has_Next => False,
-                      T        => (Kind         => From_Token_Kind (Token_Id),
-                                   Source_First => Source_First,
-                                   Source_Last  => Source_Last,
-                                   Symbol       => null,
-                                   Sloc_Range   => Sloc_Range)));
-
-                  Last_Token_Was_Trivia := True;
-               end if;
-
-               --  Whether or not trivia is disabled, emit a diagnostic for
-               --  lexing failures.
+               Append_Trivia ((Kind         => From_Token_Kind (Token_Id),
+                               Source_First => Source_First,
+                               Source_Last  => Source_Last,
+                               Symbol       => null,
+                               Sloc_Range   => Sloc_Range));
 
                if Token_Id = ${lexer.LexingFailure.ada_name} then
-                  Append (Diagnostics, Sloc_Range,
-                          "Invalid token, ignored");
+                  Append (Diagnostics, Sloc_Range, "Invalid token, ignored");
                end if;
 
                goto Dont_Append;
@@ -316,7 +326,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
          end case;
 
          % if not lexer.track_indent:
-         TDH.Tokens.Append
+         Append_Token
            ((Kind         => From_Token_Kind (Token_Id),
              Source_First => Source_First,
              Source_Last  => Source_Last,
@@ -332,7 +342,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
          --  If the token is termination, emit the missing dedent tokens
          if Token_Id = ${termination} then
             while Get_Col > 1 loop
-               TDH.Tokens.Append
+               Append_Token
                  ((Kind         => From_Token_Kind (${lexer.Dedent.ada_name}),
                    Source_First => TDH.Source_Last + 1,
                    Source_Last  => TDH.Source_Last,
@@ -380,16 +390,17 @@ package body ${ada_lib_name}.Lexer_Implementation is
                if Sloc_Range.Start_Column < Get_Col then
                   --  Emit every necessary dedent token if the line is
                   --  dedented, and pop values from the stack.
+                  T.Kind := From_Token_Kind (${lexer.Dedent.ada_name});
                   while Sloc_Range.Start_Column < Get_Col loop
-                     T.Kind := From_Token_Kind (${lexer.Dedent.ada_name});
-                     TDH.Tokens.Append (T);
+                     Append_Token (T);
                      Columns_Stack_Len := Columns_Stack_Len - 1;
                   end loop;
+
                elsif Sloc_Range.Start_Column > Get_Col then
                   --  Emit a single indent token, and put the new value on the
                   --  indent stack.
                   T.Kind := From_Token_Kind (${lexer.Indent.ada_name});
-                  TDH.Tokens.Append (T);
+                  Append_Token (T);
                   Columns_Stack_Len := Columns_Stack_Len + 1;
                   Columns_Stack (Columns_Stack_Len) := Sloc_Range.Start_Column;
                end if;
@@ -410,7 +421,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
          if Token_Id /= ${lexer.Newline.ada_name}
             or else Ign_Layout_Level <= 0
          then
-            TDH.Tokens.Append
+            Append_Token
               ((Kind         => From_Token_Kind (Token_Id),
                 Source_First => Source_First,
                 Source_Last  => Source_Last,
@@ -418,8 +429,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
                 Sloc_Range   => Sloc_Range));
          end if;
          % endif
-
-         Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:
          <<Dont_Append>>

@@ -1,0 +1,78 @@
+grammar None_grammar is
+    def_node <- Def(@Def identifier @Newline list*(indented))
+    indented <- Indented(
+        discard(list+(newline)) @Indent list*(discard(list+(newline)) expr discard(list+(newline)), @Newline)
+        @Dedent
+    )
+    expr <- or(call | identifier | indented)
+    newline <- Newline(@Newline)
+    call <- Call(
+        identifier @LPar discard(list+(newline)) list+(call, @Comma) discard(list+(newline))
+        @RPar
+    )
+    main_rule <- list*(discard(list+(newline)) def_node discard(list+(newline)))
+    identifier <- Identifier(@Identifier)
+
+end
+class FooNode is
+end
+
+class Call : FooNode is
+    parse field name : Identifier
+    parse field args : ASTList[Call]
+end
+
+class Def : FooNode is
+    parse field name : Identifier
+    parse field stmts : ASTList[Indented]
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Call.
+"""
+class ASTList[Call] : FooNodeBaseList is
+end
+
+"""
+List of Def.
+"""
+class ASTList[Def] : FooNodeBaseList is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Call)}
+* ${node_name(T.Identifier)}
+* ${node_name(T.Indented)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+"""
+List of Indented.
+"""
+class ASTList[Indented] : FooNodeBaseList is
+end
+
+"""
+List of Newline.
+"""
+class ASTList[Newline] : FooNodeBaseList is
+end
+
+class Identifier : FooNode is
+end
+
+class Indented : FooNode is
+    parse field inner : ASTList[FooNode]
+end
+
+class Newline : FooNode is
+end
+
