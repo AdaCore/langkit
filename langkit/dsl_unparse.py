@@ -156,7 +156,7 @@ def emit_expr(expr, **ctx):
         GetSymbol, Match, Eq, BinaryBooleanOperator, Then, OrderingTest,
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
-        ArrayLiteral, Arithmetic
+        ArrayLiteral, Arithmetic, PropertyError
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -192,6 +192,10 @@ def emit_expr(expr, **ctx):
         return str(expr.literal).lower()
     elif isinstance(expr, SymbolLiteral):
         return '"{}"'.format(expr.name)
+    elif isinstance(expr, PropertyError):
+        return "raise PropertyError({})".format(
+            repr(expr.message) if expr.message else ""
+        )
     elif isinstance(expr, IsA):
         return "{} is_a {}".format(
             ee_pexpr(expr.expr),
