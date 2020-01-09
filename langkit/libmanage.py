@@ -421,8 +421,8 @@ class ManageScript(object):
         # to a file.
         subparser.add_argument(
             '--unparse-destination', type=str, default=None,
-            help='If specified, generate concrete syntax definition of source '
-                 'language, and store it in this file'
+            help='If specified, generate concrete syntax definition of the'
+                 ' source language, and store it in this file.'
         )
 
     def add_build_mode_arg(self, subparser):

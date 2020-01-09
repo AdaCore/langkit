@@ -293,7 +293,7 @@ class Emitter(object):
         self.unparse_destination_file = unparse_destination_file
         """
         RA22-015: If set to something else than None, then the "dsl unparse"
-        pass will be ran, and the output will be stored in this file.
+        pass will be run, and the output will be stored in this file.
 
         :type: str|None
         """
