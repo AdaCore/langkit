@@ -871,18 +871,25 @@ class Diagnostic(object):
         self.sloc_range = sloc_range
         self.message = message
 
-    def __str__(self):
-        return ('{}: {}'.format(self.sloc_range, self.message)
+    @property
+    def as_text(self):
+        return (u'{}: {}'.format(self.sloc_range, self.message)
                 if self.sloc_range else
                 self.message)
 
+    def __str__(self):
+        result = self.as_text
+        if _py2to3.python2:
+            result = result.encode('ascii', errors='replace')
+        return result
+
     def __repr__(self):
-        return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
+        return '<Diagnostic {}>'.format(self)
 
 
     class _c_type(ctypes.Structure):
-        _fields_ = [("sloc_range", SlocRange._c_type),
-                    ("message", _text)]
+        _fields_ = [('sloc_range', SlocRange._c_type),
+                    ('message', _text)]
 
         def _wrap(self):
             return Diagnostic(self.sloc_range._wrap(), self.message._wrap())
