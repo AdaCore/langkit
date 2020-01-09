@@ -11,10 +11,9 @@ if not os.environ.get('WITHOUT_GNATPYTHON'):
         from gnatpython import fileutils
         from gnatpython.ex import Run, STDOUT
         from gnatpython.testsuite.driver import TestDriver
+        with_gnatpython = True
     except ImportError:
         pass
-    else:
-        with_gnatpython = True
 if not with_gnatpython:
     from testsuite_support.polyfill import Run, STDOUT, TestDriver, fileutils
 # pyflakes on
