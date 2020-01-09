@@ -102,7 +102,7 @@ def emit_rule(rule):
     elif isinstance(rule, Discard):
         return "discard({})".format(emit_rule(rule.parser))
     else:
-        raise NotImplementedError()
+        raise NotImplementedError(rule.__class__)
 
 
 def var_name(var_expr, default="_"):
