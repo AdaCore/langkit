@@ -1,0 +1,67 @@
+grammar None_grammar is
+    decl <- or(
+        | VarDecl(@Def name @Equal expr)
+        | FuncDecl(
+            @Def name @LPar list*(name, @Comma) @RPar @Equal expr
+        )
+    )
+    main_rule <- list*(decl @Semicolon)
+    expr <- or(Plus(atom @Plus expr) | atom)
+    name <- Name(@Identifier)
+    atom <- or(Literal(@Number) | name)
+
+end
+class FooNode is
+
+    public fun identity (k : DeclKind): DeclKind = k
+end
+
+class Decl : FooNode is
+
+    public fun decl_kind (): DeclKind
+end
+
+class FuncDecl : Decl is
+    parse field name : Name
+    parse field args : ASTList[Name]
+    parse field expr : Expression
+
+    fun decl_kind (): DeclKind = DeclKind.Func
+end
+
+class VarDecl : Decl is
+    parse field name : Name
+    parse field expr : Expression
+
+    fun decl_kind (): DeclKind = DeclKind.Var
+end
+
+class Expression : FooNode is
+end
+
+class Literal : Expression is
+end
+
+class Name : Expression is
+end
+
+class Plus : Expression is
+    parse field left : Expression
+    parse field right : Expression
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+"""
+List of Name.
+"""
+class ASTList[Name] : FooNodeBaseList is
+end
+

@@ -1,0 +1,80 @@
+grammar None_grammar is
+    decl <- Decl(name)
+    ref_list <- list+(ref)
+    name <- Name(@Identifier)
+    main_rule <- list*(block)
+    decl_list <- @LPar list+(decl) @RPar
+    using_list <- @LPar list+(using) @RPar
+    using <- Using(name)
+    ref <- Ref(name)
+    block <- Block(
+        name decl_list @LBrace using_list ref_list @RBrace
+    )
+
+end
+class FooNode is
+end
+
+class Block : FooNode is
+    parse field name : Name
+    parse field decls : ASTList[Decl]
+    parse field usings : ASTList[Using]
+    parse field refs : ASTList[Ref]
+end
+
+class Decl : FooNode is
+    parse field name : Name
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Block.
+"""
+class ASTList[Block] : FooNodeBaseList is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+"""
+List of Ref.
+"""
+class ASTList[Ref] : FooNodeBaseList is
+end
+
+"""
+List of Using.
+"""
+class ASTList[Using] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+
+    fun ambiant_entity (): Entity[FooNode] = env.get(self)?[0]
+
+    fun designated_env (): LexicalEnv =
+        self.unit.root.node_env.get(self)?[0].children_env
+
+
+    public fun entity (): Entity[FooNode] =
+        bind env=self.node_env in
+            self.ambiant_entity
+        end
+
+end
+
+class Ref : FooNode is
+    parse field name : Name
+
+    public fun entity (): Entity[FooNode] = self.as_entity.name.entity
+end
+
+class Using : FooNode is
+    parse field name : Name
+end
+

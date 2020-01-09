@@ -1,0 +1,49 @@
+grammar None_grammar is
+    decl <- Decl(?@Plus name @LPar ref_list @RPar)
+    main_rule <- list*(decl)
+    ref <- Ref(name)
+    name <- Name(@Identifier)
+    ref_list <- list+(ref)
+
+end
+class FooNode is
+end
+
+class Decl : FooNode is
+    parse field has_plus : HasPlus
+    parse field name : Name
+    parse field items : ASTList[Ref]
+
+    public fun entity_items (): Array[Entity[Ref]] = self.as_entity.items.map((i) => i)
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+"""
+List of Ref.
+"""
+class ASTList[Ref] : FooNodeBaseList is
+end
+
+qualifier class HasPlus : FooNode is
+
+    """
+    Return whether this is an instance of HasPlusPresent
+    """
+    public fun as_bool (): Boolean
+end
+
+class Name : FooNode is
+end
+
+class Ref : FooNode is
+    parse field name : Name
+end
+

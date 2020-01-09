@@ -1,0 +1,57 @@
+grammar None_grammar is
+    decl <- or(var_decl | fun_decl)
+    name <- Name(@Identifier)
+    main_rule <- list*(decl)
+    number <- Number(@Number)
+    var_decl <- VarDecl(
+        VarKeyword(@Var) name @Equal expr @Semicolon
+    )
+    fun_decl <- FunDecl(@Def name @Semicolon)
+    expr <- or(number | ref)
+    ref <- Ref(name)
+
+end
+class FooNode is
+end
+
+class Decl : FooNode is
+    parse field name : Name
+    parse field value : Expr
+end
+
+class FunDecl : Decl is
+    parse field name : Name
+    parse field value : Expr
+end
+
+class VarDecl : Decl is
+    parse field var_kw : VarKeyword
+    parse field name : Name
+    parse field value : Expr
+end
+
+class Expr : FooNode is
+end
+
+class Number : Expr is
+end
+
+class Ref : Expr is
+    parse field name : Name
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+
+class VarKeyword : FooNode is
+end
+

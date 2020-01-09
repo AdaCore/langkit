@@ -1,0 +1,45 @@
+grammar None_grammar is
+    decl <- Decl(@Def name)
+    main_rule <- RootNode(list*(or(decl | subdecl | other_decl), @Semicolon))
+    other_decl <- OtherDecl(@Def @Var name)
+    name <- Name(@Identifier)
+    subdecl <- SubDecl(@Var name)
+
+end
+class FooNode is
+end
+
+class BaseDecl : FooNode is
+
+    public fun lookup (n : SymbolType): Entity[FooNode] = self.env_lookup(self.node_env, n)
+
+    fun env_lookup (env : LexicalEnv, n : SymbolType): Entity[FooNode] = env.get(n, only_first=true)
+end
+
+class Decl : BaseDecl is
+    parse field name : Name
+end
+
+class SubDecl : Decl is
+end
+
+class OtherDecl : BaseDecl is
+    parse field name : Name
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of BaseDecl.
+"""
+class ASTList[BaseDecl] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+
+class RootNode : FooNode is
+    parse field decls : ASTList[BaseDecl]
+end
+

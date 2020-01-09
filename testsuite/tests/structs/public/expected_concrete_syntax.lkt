@@ -1,0 +1,27 @@
+grammar None_grammar is
+    main_rule <- list*(Example(@Example))
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+
+    public fun get_struct (): MyStruct =
+        new MyStruct(
+            bigint_field=<BigInteger 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000>, entity_field=self, array_field=[self.to[FooNode].as_bare_entity, self.parent.as_bare_entity]
+        )
+
+
+    public fun struct_identity (s : MyStruct): MyStruct = s
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList is
+end
+

@@ -1,0 +1,36 @@
+grammar None_grammar is
+    main_rule <- list*(or(Definition(@Def name) | name), @Comma)
+    name <- Name(@Identifier)
+
+end
+class FooNode is
+end
+
+class Definition : FooNode is
+    parse field name : Name
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Definition)}
+* ${node_name(T.Name)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+    field ref_var : LogicVar
+
+    public fun resolve (): Boolean =
+        <domain(<FieldAccess .ref_var>, <map>)>.solve
+
+
+    public fun definition (): Entity[Definition] = self.ref_var.get_value.to[Definition]
+end
+

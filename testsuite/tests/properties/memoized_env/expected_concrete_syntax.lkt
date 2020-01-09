@@ -1,0 +1,38 @@
+grammar None_grammar is
+    main_rule <- Block(
+        Name(@Identifier) @LPar list*(Ref(Name(@Identifier))) @RPar
+    )
+
+end
+class FooNode is
+end
+
+class Block : FooNode is
+    parse field name : Name
+    parse field content : ASTList[Ref]
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Ref.
+"""
+class ASTList[Ref] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+
+class Ref : FooNode is
+    parse field name : Name
+
+    public fun referenced (): Entity[FooNode] =
+        self.referenced_env.env_node.as_bare_entity
+
+
+    memoized fun referenced_env (): LexicalEnv =
+        self.node_env.get(self.name.symbol)?[0].children_env
+
+end
+

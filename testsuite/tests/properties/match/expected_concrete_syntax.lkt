@@ -1,0 +1,101 @@
+grammar None_grammar is
+    main_rule <- list*(or(Def(@Def Name(@Identifier) expr) | expr))
+    expr <- or(atom | plus)
+    lit <- Lit(@Number)
+    plus <- @LPar Plus(expr @Plus expr) @RPar
+    atom <- or(lit | ref)
+    ref <- Ref(@Identifier)
+
+end
+class FooNode is
+
+    public fun find_atoms (): Array[Entity[Atom]] =
+        (
+            match entity do
+                case a : Atom => [a]
+                case _ => null
+
+            end
+        ) & (
+            entity.children.mapcat((c) => c.find_atoms)
+        )
+
+
+    public fun find_atoms_or_exprs (): Array[Entity[Expr]] =
+        (
+            match entity do
+                case a : Atom => [a.to[Expr]]
+                case e : Expr => [e]
+                case _ => null
+
+            end
+        ) & (
+            entity.children.mapcat((c) => c.find_atoms_or_exprs)
+        )
+
+
+    public fun find_exprs (): Array[Entity[Expr]] =
+        (
+            match entity do
+                case e : Expr => [e]
+                case a : Atom => [a.to[Expr]]
+                case _ => null
+
+            end
+        ) & (
+            entity.children.mapcat((c) => c.find_exprs)
+        )
+
+end
+
+class Def : FooNode is
+    parse field name : Name
+    parse field expr : Expr
+end
+
+class Expr : FooNode is
+
+    public fun find_refs (): Array[Entity[Ref]] =
+        (
+            match entity do
+                case r : Ref => [r]
+                case _ => null
+
+            end
+        ) & (
+            entity.children.mapcat((c) => c.to![Expr].find_refs)
+        )
+
+end
+
+class Atom : Expr is
+end
+
+class Lit : Atom is
+end
+
+class Ref : Atom is
+end
+
+class Plus : Expr is
+    parse field lhs : Expr
+    parse field rhs : Expr
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Def)}
+* ${node_name(T.Expr)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+

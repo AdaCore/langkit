@@ -1,0 +1,36 @@
+grammar None_grammar is
+    main_rule <- elem
+    scope <- Scope(id @LBrace list*(elem) @RBrace)
+    id <- Id(@Identifier)
+    elem <- or(scope | id)
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Id)}
+* ${node_name(T.Scope)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+class Id : FooNode is
+
+    public fun get_scope (): Entity[FooNode] =
+        self.children_env.get("Scope", only_first=true)
+
+end
+
+class Scope : FooNode is
+    parse field name : Id
+    parse field content : ASTList[FooNode]
+end
+

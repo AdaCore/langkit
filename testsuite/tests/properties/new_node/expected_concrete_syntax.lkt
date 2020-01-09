@@ -1,0 +1,42 @@
+grammar None_grammar is
+    list_rule <- LiteralSequence(
+        @LPar Name(@Identifier) list*(list_item, @Comma) @RPar
+    )
+    main_rule <- list_rule
+    list_item <- Literal(@Number)
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Literal.
+"""
+class ASTList[Literal] : FooNodeBaseList is
+end
+
+class Literal : FooNode is
+end
+
+class LiteralSequence : FooNode is
+    parse field name : Name
+    parse field items : ASTList[Literal]
+
+    memoized fun new_node (): SynthNode =
+        new SynthNode(items=self.items, name=self.name)
+
+
+    public fun prop (): Entity[SynthNode] = self.new_node.as_bare_entity
+end
+
+class Name : FooNode is
+end
+
+class SynthNode : FooNode is
+    parse field name : Name
+    parse field items : ASTList[Literal]
+end
+

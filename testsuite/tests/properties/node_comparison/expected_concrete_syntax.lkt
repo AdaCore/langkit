@@ -1,0 +1,23 @@
+grammar None_grammar is
+    main_rule <- list*(Example(@Example))
+
+end
+class FooNode is
+
+    public fun before (n : FooNode): Boolean = self < n
+
+    public fun before_or_equal (n : Example): Boolean = self <= n
+end
+
+class Example : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList is
+end
+

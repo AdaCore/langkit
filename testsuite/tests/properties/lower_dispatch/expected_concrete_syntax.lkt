@@ -1,0 +1,97 @@
+grammar None_grammar is
+    name <- Name(@Identifier)
+    main_rule <- list*(or(Def(@Def name expr) | expr))
+    expr <- or(atom | plus)
+    lit <- Lit(@Number)
+    plus <- @LPar Plus(expr @Plus expr) @RPar
+    atom <- or(lit | ref)
+    ref <- Ref(name)
+
+end
+class FooNode is
+end
+
+class Def : FooNode is
+    parse field name : Name
+    parse field expr : Expr
+end
+
+class Expr : FooNode is
+
+    public fun evaluate_abstract (): Integer
+
+    public fun evaluate_rtcheck (): Integer
+
+    public fun evaluate_concrete (): Integer = 1
+
+    public fun evaluate_entity (): Integer
+
+    fun evaluate_rtcheck (): Integer
+
+    fun evaluate_concrete (): Integer
+end
+
+class Atom : Expr is
+end
+
+class Lit : Atom is
+
+    fun evaluate_abstract (): Integer = 1
+
+    fun evaluate_rtcheck (): Integer = 1
+
+    fun evaluate_entity (): Integer = 1
+end
+
+class Ref : Atom is
+    parse field name : Name
+
+    public fun resolve (): Entity[Def] =
+        self.node_env.get(self.name.symbol, only_first=true).to![Def]
+
+
+    fun evaluate_abstract (): Integer = self.resolve.expr.evaluate_abstract
+
+    fun evaluate_concrete (): Integer = self.resolve.expr.evaluate_concrete
+
+    fun evaluate_entity (): Integer = entity.resolve.expr.evaluate_entity
+end
+
+class Plus : Expr is
+    parse field lhs : Expr
+    parse field rhs : Expr
+
+    fun evaluate_abstract (): Integer =
+        self.lhs.evaluate_abstract + self.rhs.evaluate_abstract
+
+
+    fun evaluate_rtcheck (): Integer =
+        self.lhs.evaluate_rtcheck + self.rhs.evaluate_rtcheck
+
+
+    fun evaluate_concrete (): Integer =
+        self.lhs.evaluate_concrete + self.rhs.evaluate_concrete
+
+
+    fun evaluate_entity (): Integer =
+        entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Def)}
+* ${node_name(T.Expr)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+

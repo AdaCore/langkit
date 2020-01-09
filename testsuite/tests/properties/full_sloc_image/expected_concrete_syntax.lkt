@@ -1,0 +1,792 @@
+grammar None_grammar is
+    print_stmt <- or(
+        | PrintStmt(@Print test_list)
+        | StreamPrintStmt(@Print @Rsh test @Comma test_list)
+    )
+    dotted_as_names <- list*(or(dotted_as_name | dotted_name), @Comma) ?@Comma
+    empty_test_list <- list+(test, @Comma) ?@Comma
+    try_stmt <- TryStmt(
+        @Try @Colon suite list+(ExceptPart(
+            @Except ?AsNameNode(test ?@As test) @Colon suite
+        )) ?else_part ?@Finally @Colon suite
+    )
+    test_list <- list*(test, @Comma) ?@Comma
+    small_stmt <- or(
+        | expr_stmt
+        | print_stmt
+        | del_stmt
+        | pass_stmt
+        | flow_stmt
+        | import_stmt
+        | global_stmt
+        | exec_stmt
+        | assert_stmt
+    )
+    expr_list <- list*(expr, @Comma) ?@Comma
+    number <- NumberLit(@Number)
+    dict_assoc <- DictAssoc(test @Colon test)
+    return_stmt <- ReturnStmt(@Return ?test_list)
+    cat_string <- ConcatStringLit(string list*(string))
+    not_test <- or(NotOp(@Not not_test) | comparison)
+    suite <- or(
+        | discard(list+(nl)) @Indent list*(discard(list+(nl)) stmt discard(list+(nl)))
+        @Dedent
+        | simple_stmt
+    )
+    string <- StringLit(@String)
+    flow_stmt <- or(
+        | break_stmt
+        | continue_stmt
+        | return_stmt
+        | raise_stmt
+        | yield_stmt
+    )
+    del_stmt <- DelStmt(@Del expr_list)
+    comp_if <- CompIf(@If test ?comp_iter)
+    expr_stmt <- or(
+        | AugAssignStmt(
+            test_list Op(
+                or(
+                    | @AddAsign
+                    | @MinusAssign
+                    | @MultAssign
+                    | @DivAssign
+                    | @ModAssign
+                    | @AndAssign
+                    | @OrAssign
+                    | @XorAssign
+                    | @LshAssign
+                    | @RshAssign
+                    | @PowerAssign
+                    | @FloordivAssign
+                )
+            ) or(yield_expr | test_list)
+        )
+        | AssignStmt(
+            test_list list*(@Assign or(yield_expr | test_list))
+        )
+        | test_list
+    )
+    nl <- NL(@Newline)
+    func_def <- FuncDef(@Def name parameters @Colon suite)
+    parameters <- @LPar ?varargslist @RPar
+    continue_stmt <- ContinueStmt(@Continue)
+    fpdef <- or(name | @LPar name_list @RPar)
+    shift_expr <- or(
+        | ShiftExpr(shift_expr Op(or(@Lsh | @Rsh)) arith_expr)
+        | arith_expr
+    )
+    atom_expr <- or(
+        | DottedName(atom_expr @Dot name)
+        | CallExpr(atom_expr @LPar arg_list @RPar)
+        | SubscriptExpr(atom_expr @Lbrack subscript_list @Rbrack)
+        | atom
+    )
+    name <- Id(@Identifier)
+    dotted_as_name <- AsNameNode(dotted_name @As name)
+    list_iter <- or(list_for | list_if)
+    list_if <- CompIf(@If test ?list_iter)
+    factor <- or(
+        | Factor(Op(or(@Plus | @Minus | @Invert)) factor)
+        | power
+    )
+    test <- or(
+        | lambdef
+        | IfExpr(or_test @If or_test @Else test)
+        | or_test
+    )
+    global_stmt <- GlobalStmt(@Global name_list)
+    subscript <- or(
+        | EllipsisExpr(@Dot @Dot @Dot)
+        | ExtSliceExpr(?test @Colon ?test @Colon ?test)
+        | SliceExpr(?test @Colon ?test)
+        | test
+    )
+    with_item <- AsNameNode(test ?@As expr)
+    decorators <- list*(decorator)
+    compound_stmt <- or(
+        | if_stmt
+        | while_stmt
+        | for_stmt
+        | try_stmt
+        | with_stmt
+        | func_def
+        | class_def
+        | decorated
+    )
+    exec_stmt <- ExecStmt(@Exec expr ?@In test_list)
+    yield_stmt <- yield_expr
+    dotted_name <- or(DottedName(dotted_name @Dot name) | name)
+    yield_expr <- YieldExpr(@Yield ?test_list)
+    power <- or(Power(atom_expr @Power factor) | atom_expr)
+    simple_stmt <- or(
+        | small_stmt
+        | list*(small_stmt, @Semicolon) ?@Semicolon
+    ) @Newline
+    main_rule <- FileNode(
+        list*(discard(list+(nl)) stmt discard(list+(nl))) @Termination
+    )
+    name_list <- list*(name, @Comma) ?@Comma
+    stmt <- or(simple_stmt | compound_stmt)
+    import_from <- ImportFrom(
+        @From or(dotted_name | RelName(list*(dot) ?dotted_name)) @Import or(
+            | ImportStar(@Multiply)
+            | @LPar import_as_names @RPar
+            | import_as_names
+        )
+    )
+    assert_stmt <- AssertStmt(@Assert test ?@Comma test)
+    list_for <- CompForL(
+        @For expr_list @In test_list ?list_iter
+    )
+    for_stmt <- ForStmt(
+        @For expr_list @In test_list @Colon suite ?else_part
+    )
+    break_stmt <- BreakStmt(@Break)
+    else_part <- ElsePart(@Else @Colon suite)
+    and_test <- or(AndOp(and_test @And not_test) | not_test)
+    lambdef <- LambdaDef(@Lambda varargslist @Colon test)
+    atom <- or(
+        | @LPar yield_expr @RPar
+        | ListGen(@LPar test list_for @RPar)
+        | TupleLit(@LPar ?test_list @RPar)
+        | ListComp(@Lbrack test list_for @Rbrack)
+        | ListLit(@Lbrack empty_test_list @Rbrack)
+        | SetComp(@LCurl test comp_for @Rcurl)
+        | set_lit
+        | DictComp(@LCurl dict_assoc comp_for @Rcurl)
+        | DictLit(
+            @LCurl list*(dict_assoc, @Comma) ?@Comma @Rcurl
+        )
+        | InlineEval(@Backtick test_list @Backtick)
+        | name
+        | number
+        | cat_string
+        | string
+    )
+    import_as_names <- list*(or(as_name | name), @Comma) ?@Comma
+    decorated <- Decorated(decorators or(class_def | func_def))
+    raise_stmt <- RaiseStmt(@Raise ?test_list)
+    arg_list <- list+(or(
+        | ArgGen(test comp_for)
+        | ArgAssoc(?test @Assign test)
+        | VarArgs(@Multiply test)
+        | KwArgs(@Power test)
+    ), @Comma) ?@Comma
+    set_lit <- SetLit(@LCurl empty_test_list @Rcurl)
+    decorator <- Decorator(
+        @At dotted_name ?@LPar arg_list @RPar @Newline
+    )
+    pass_stmt <- PassStmt(@Pass)
+    comparison <- or(
+        | CompOp(
+            comparison or(
+                | CompOpKindLt(@Lt)
+                | CompOpKindGt(@Gt)
+                | CompOpKindEq(@Equals)
+                | CompOpKindGte(@Gte)
+                | CompOpKindLte(@Lte)
+                | CompOpKindDiamond(@Diamond)
+                | CompOpKindNoteq(@Notequal)
+                | CompOpKindIn(@In)
+                | CompOpKindNotin(@Not @In)
+                | CompOpKindIsnot(@Is @Not)
+                | CompOpKindIs(@Is)
+            ) expr
+        )
+        | expr
+    )
+    term <- or(
+        | Term(
+            term Op(or(@Multiply | @Divide | @Mod | @Floordiv)) factor
+        )
+        | factor
+    )
+    comp_iter <- or(comp_for | comp_if)
+    subscript_list <- list*(subscript, @Comma) ?@Comma
+    if_stmt <- IfStmt(
+        @If test @Colon suite list+(@Elif ElifBranch(test @Colon suite)) ?else_part
+    )
+    arith_expr <- or(
+        | ArithExpr(arith_expr Op(or(@Plus | @Minus)) term)
+        | term
+    )
+    import_name <- ImportName(@Import dotted_as_names)
+    or_test <- or(OrOp(or_test @Or and_test) | and_test)
+    class_def <- ClassDef(
+        @Class name ?@LPar ?test_list @RPar @Colon suite
+    )
+    with_stmt <- WithStmt(
+        @With list*(with_item, @Comma) @Colon suite
+    )
+    while_stmt <- WhileStmt(@While test @Colon suite ?else_part)
+    varargslist <- Params(
+        list+(SingleParam(?@Multiply ?@Power fpdef ?@Assign test), @Comma)
+    )
+    comp_for <- CompFor(@For expr_list @In or_test ?comp_iter)
+    import_stmt <- or(import_name | import_from)
+    expr <- or(OrExpr(expr @BinOr xor_expr) | xor_expr)
+    xor_expr <- or(XorExpr(xor_expr @Xor and_expr) | and_expr)
+    and_expr <- or(
+        | AndExpr(and_expr @Amp shift_expr)
+        | shift_expr
+    )
+    as_name <- AsNameNode(name @As name)
+    dot <- Dot(@Dot)
+
+end
+class PythonNode is
+end
+
+class Arg : PythonNode is
+end
+
+class ArgAssoc : Arg is
+    parse field name : Expr
+    parse field expr : Expr
+end
+
+class ArgGen : Arg is
+    parse field expr : Expr
+    parse field comprehension : CompFor
+end
+
+class KwArgs : Arg is
+    parse field expr : Expr
+end
+
+class VarArgs : Arg is
+    parse field expr : Expr
+end
+
+class AsNameNode : PythonNode is
+    parse field imported : Expr
+    parse field as_name : Expr
+end
+
+class CompIf : PythonNode is
+    parse field test : Expr
+    parse field comp : PythonNode
+end
+
+enum class CompOpKind : PythonNode is
+    case Lt, Gt, Eq, Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
+end
+
+class Comprehension : PythonNode is
+end
+
+class CompFor : Comprehension is
+    parse field exprs : ASTList[Expr]
+    parse field target : Expr
+    parse field comp : PythonNode
+end
+
+class CompForL : Comprehension is
+    parse field exprs : ASTList[Expr]
+    parse field target : ASTList[Expr]
+    parse field comp : PythonNode
+end
+
+class Decorator : PythonNode is
+    parse field dec_name : Name
+    parse field arg_list : ASTList[Arg]
+end
+
+class DictAssoc : PythonNode is
+    parse field key : Expr
+    parse field value : Expr
+end
+
+class ElsePart : PythonNode is
+    parse field statements : PythonNode
+end
+
+class ExceptPart : PythonNode is
+    parse field as_name : AsNameNode
+    parse field statements : PythonNode
+end
+
+class Expr : PythonNode is
+end
+
+class AndExpr : Expr is
+    parse field left : Expr
+    parse field right : Expr
+end
+
+class AndOp : Expr is
+    parse field left : Expr
+    parse field right : Expr
+end
+
+class BinOp : Expr is
+    parse field left : Expr
+    parse field op : Op
+    parse field right : Expr
+end
+
+class ArithExpr : BinOp is
+end
+
+class ShiftExpr : BinOp is
+end
+
+class Term : BinOp is
+end
+
+class CallExpr : Expr is
+    parse field prefix : Expr
+    parse field suffix : ASTList[Arg]
+end
+
+class CompOp : Expr is
+    parse field left : Expr
+    parse field op : CompOpKind
+    parse field right : Expr
+end
+
+class ConcatStringLit : Expr is
+    parse field first_str : StringLit
+    parse field subsequent_str : ASTList[StringLit]
+end
+
+class DictComp : Expr is
+    parse field assoc : DictAssoc
+    parse field comprehension : CompFor
+end
+
+class DictLit : Expr is
+    parse field assocs : ASTList[DictAssoc]
+end
+
+class Dot : Expr is
+end
+
+class EllipsisExpr : Expr is
+end
+
+class Factor : Expr is
+    parse field op : Op
+    parse field expr : Expr
+end
+
+class IfExpr : Expr is
+    parse field expr : Expr
+    parse field cond : Expr
+    parse field else_expr : Expr
+end
+
+class InlineEval : Expr is
+    parse field exprs : ASTList[Expr]
+end
+
+class LambdaDef : Expr is
+    parse field args : Params
+    parse field expr : Expr
+end
+
+class ListComp : Expr is
+    parse field expr : Expr
+    parse field comprehension : CompForL
+end
+
+class ListGen : Expr is
+    parse field expr : Expr
+    parse field comprehension : CompForL
+end
+
+class ListLit : Expr is
+    parse field exprs : ASTList[Expr]
+end
+
+class Name : Expr is
+end
+
+class DottedName : Name is
+    parse field prefix : Expr
+    parse field suffix : Id
+end
+
+class Id : Name is
+
+    """
+    Shortcut to get the symbol of this node
+    """
+    fun sym (): SymbolType = self.symbol
+end
+
+class NotOp : Expr is
+    parse field expr : Expr
+end
+
+class NumberLit : Expr is
+end
+
+class OrExpr : Expr is
+    parse field left : Expr
+    parse field right : Expr
+end
+
+class OrOp : Expr is
+    parse field left : Expr
+    parse field right : Expr
+end
+
+class Power : Expr is
+    parse field left : Expr
+    parse field right : Expr
+end
+
+class SetComp : Expr is
+    parse field expr : Expr
+    parse field comprehension : CompFor
+end
+
+class SetLit : Expr is
+    parse field exprs : ASTList[Expr]
+end
+
+class SliceExpr : Expr is
+    parse field first : Expr
+    parse field last : Expr
+end
+
+class ExtSliceExpr : SliceExpr is
+    parse field stride : Expr
+end
+
+class StringLit : Expr is
+end
+
+class SubscriptExpr : Expr is
+    parse field prefix : Expr
+    parse field suffix : ASTList[Expr]
+end
+
+class TupleLit : Expr is
+    parse field exprs : ASTList[Expr]
+end
+
+class XorExpr : Expr is
+    parse field left : Expr
+    parse field right : Expr
+end
+
+class YieldExpr : Expr is
+    parse field exprs : ASTList[Expr]
+end
+
+class FileNode : PythonNode is
+    parse field statements : ASTList[PythonNode]
+end
+
+class ImportStar : PythonNode is
+end
+
+qualifier class KwArgsFlag : PythonNode is
+
+    """
+    Return whether this is an instance of KwArgsFlagPresent
+    """
+    public fun as_bool (): Boolean
+end
+
+class NL : PythonNode is
+end
+
+class Op : PythonNode is
+end
+
+class Params : PythonNode is
+    parse field single_params : ASTList[SingleParam]
+end
+
+class PythonNodeBaseList : PythonNode is
+end
+
+"""
+List of Arg.
+"""
+class ASTList[Arg] : PythonNodeBaseList is
+end
+
+"""
+List of AsNameNode.
+"""
+class ASTList[AsNameNode] : PythonNodeBaseList is
+end
+
+"""
+List of Decorator.
+"""
+class ASTList[Decorator] : PythonNodeBaseList is
+end
+
+"""
+List of DictAssoc.
+"""
+class ASTList[DictAssoc] : PythonNodeBaseList is
+end
+
+"""
+List of Dot.
+"""
+class ASTList[Dot] : PythonNodeBaseList is
+end
+
+"""
+List of ElifBranch.
+"""
+class ASTList[ElifBranch] : PythonNodeBaseList is
+end
+
+"""
+List of ExceptPart.
+"""
+class ASTList[ExceptPart] : PythonNodeBaseList is
+end
+
+"""
+List of Expr.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.AndExpr)}
+* ${node_name(T.AndOp)}
+* ${node_name(T.BinOp)}
+* ${node_name(T.CallExpr)}
+* ${node_name(T.CompOp)}
+* ${node_name(T.ConcatStringLit)}
+* ${node_name(T.DictComp)}
+* ${node_name(T.DictLit)}
+* ${node_name(T.EllipsisExpr)}
+* ${node_name(T.Factor)}
+* ${node_name(T.IfExpr)}
+* ${node_name(T.InlineEval)}
+* ${node_name(T.LambdaDef)}
+* ${node_name(T.ListComp)}
+* ${node_name(T.ListGen)}
+* ${node_name(T.ListLit)}
+* ${node_name(T.Name)}
+* ${node_name(T.NotOp)}
+* ${node_name(T.NumberLit)}
+* ${node_name(T.OrExpr)}
+* ${node_name(T.OrOp)}
+* ${node_name(T.Power)}
+* ${node_name(T.SetComp)}
+* ${node_name(T.SetLit)}
+* ${node_name(T.SliceExpr)}
+* ${node_name(T.StringLit)}
+* ${node_name(T.SubscriptExpr)}
+* ${node_name(T.TupleLit)}
+* ${node_name(T.XorExpr)}
+* ${node_name(T.YieldExpr)}
+"""
+class ASTList[Expr] : PythonNodeBaseList is
+end
+
+"""
+List of Id.
+"""
+class ASTList[Id] : PythonNodeBaseList is
+end
+
+"""
+List of NL.
+"""
+class ASTList[NL] : PythonNodeBaseList is
+end
+
+"""
+List of PythonNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.AsNameNode)}
+* ${node_name(T.AssertStmt)}
+* ${node_name(T.AssignStmt)}
+* ${node_name(T.AugAssignStmt)}
+* ${node_name(T.BreakStmt)}
+* ${node_name(T.ContinueStmt)}
+* ${node_name(T.Decorated)}
+* ${node_name(T.DefStmt)}
+* ${node_name(T.DelStmt)}
+* ${node_name(T.ExecStmt)}
+* ${node_name(T.Expr.list)}
+* ${node_name(T.ForStmt)}
+* ${node_name(T.GlobalStmt)}
+* ${node_name(T.IfStmt)}
+* ${node_name(T.ImportFrom)}
+* ${node_name(T.ImportName)}
+* ${node_name(T.Name)}
+* ${node_name(T.PassStmt)}
+* ${node_name(T.PrintStmt)}
+* ${node_name(T.PythonNode.list)}
+* ${node_name(T.RaiseStmt)}
+* ${node_name(T.ReturnStmt)}
+* ${node_name(T.StreamPrintStmt)}
+* ${node_name(T.TryStmt)}
+* ${node_name(T.WhileStmt)}
+* ${node_name(T.WithStmt)}
+* ${node_name(T.YieldExpr)}
+"""
+class ASTList[PythonNode] : PythonNodeBaseList is
+end
+
+"""
+List of SingleParam.
+"""
+class ASTList[SingleParam] : PythonNodeBaseList is
+end
+
+"""
+List of StringLit.
+"""
+class ASTList[StringLit] : PythonNodeBaseList is
+end
+
+class RelName : PythonNode is
+    parse field dots : ASTList[Dot]
+    parse field name : Name
+end
+
+class SingleParam : PythonNode is
+    parse field is_varargs : VarArgsFlag
+    parse field is_kwargs : KwArgsFlag
+    parse field name : PythonNode
+    parse field default_value : Expr
+end
+
+class Stmt : PythonNode is
+end
+
+class AssertStmt : Stmt is
+    parse field test_expr : Expr
+    parse field msg : Expr
+end
+
+class AssignStmt : Stmt is
+    parse field l_value : ASTList[Expr]
+    parse field r_values : ASTList[PythonNode]
+end
+
+class AugAssignStmt : Stmt is
+    parse field l_value : ASTList[Expr]
+    parse field op : Op
+    parse field r_value : PythonNode
+end
+
+class BreakStmt : Stmt is
+end
+
+class ContinueStmt : Stmt is
+end
+
+class Decorated : Stmt is
+    parse field decorators : ASTList[Decorator]
+    parse field defn : DefStmt
+end
+
+class DefStmt : Stmt is
+end
+
+class ClassDef : DefStmt is
+    parse field name : Id
+    parse field bases : ASTList[Expr]
+    parse field statements : PythonNode
+end
+
+class FuncDef : DefStmt is
+    parse field name : Id
+    parse field parameters : Params
+    parse field body : PythonNode
+end
+
+class DelStmt : Stmt is
+    parse field exprs : ASTList[Expr]
+end
+
+class ElifBranch : Stmt is
+    parse field cond_test : Expr
+    parse field statements : PythonNode
+end
+
+class ExecStmt : Stmt is
+    parse field expr : Expr
+    parse field in_list : ASTList[Expr]
+end
+
+class ForStmt : Stmt is
+    parse field bindings : ASTList[Expr]
+    parse field expr : ASTList[Expr]
+    parse field statements : PythonNode
+    parse field else_part : ElsePart
+end
+
+class GlobalStmt : Stmt is
+    parse field names : ASTList[Id]
+end
+
+class IfStmt : Stmt is
+    parse field cond_test : Expr
+    parse field statements : PythonNode
+    parse field elif_branchs : ASTList[ElifBranch]
+    parse field else_part : ElsePart
+end
+
+class ImportFrom : Stmt is
+    parse field rel_name : PythonNode
+    parse field imported : PythonNode
+end
+
+class ImportName : Stmt is
+    parse field imported_names : ASTList[PythonNode]
+end
+
+class PassStmt : Stmt is
+end
+
+class PrintStmt : Stmt is
+    parse field exprs : ASTList[Expr]
+end
+
+class RaiseStmt : Stmt is
+    parse field exprs : ASTList[Expr]
+end
+
+class ReturnStmt : Stmt is
+    parse field exprs : ASTList[Expr]
+end
+
+class StreamPrintStmt : Stmt is
+    parse field stream_expr : Expr
+    parse field exprs : ASTList[Expr]
+end
+
+class TryStmt : Stmt is
+    parse field statements : PythonNode
+    parse field except_parts : ASTList[ExceptPart]
+    parse field else_part : ElsePart
+    parse field finally_part : PythonNode
+end
+
+class WhileStmt : Stmt is
+    parse field cond_test : Expr
+    parse field statements : PythonNode
+    parse field else_part : ElsePart
+end
+
+class WithStmt : Stmt is
+    parse field bindings : ASTList[AsNameNode]
+    parse field statements : PythonNode
+end
+
+qualifier class VarArgsFlag : PythonNode is
+
+    """
+    Return whether this is an instance of VarArgsFlagPresent
+    """
+    public fun as_bool (): Boolean
+end
+

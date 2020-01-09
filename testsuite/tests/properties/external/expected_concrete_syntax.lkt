@@ -1,0 +1,28 @@
+grammar None_grammar is
+    main_rule <- or(Plus(atom @Plus main_rule) | atom)
+    atom <- Literal(@Number)
+
+end
+class FooNode is
+end
+
+class Expression : FooNode is
+
+    public fun result (): Integer
+end
+
+class Literal : Expression is
+
+    fun result (): Integer
+end
+
+class Plus : Expression is
+    parse field left : Literal
+    parse field right : Expression
+
+    fun result (): Integer = self.left.result + self.right.result
+end
+
+class FooNodeBaseList : FooNode is
+end
+

@@ -1,0 +1,86 @@
+grammar None_grammar is
+    decl <- Decl(@Def name @Equal expr)
+    name <- Identifier(@Identifier)
+    main_rule <- list*(decl)
+    expr <- or(op | atom)
+    literal <- Literal(@Number)
+    atom <- or(ref | literal)
+    ref <- Ref(name)
+    op <- or(
+        | Plus(atom @Plus expr)
+        | Minus(atom @Minus expr)
+        | Equal(atom @Equal expr)
+        | LessThan(atom @LessThan expr)
+    )
+
+end
+class FooNode is
+
+    public fun identity (value : BigIntegerType): BigIntegerType = value
+end
+
+class Decl : FooNode is
+    parse field name : Identifier
+    parse field expr_tree : Expr
+end
+
+class Expr : FooNode is
+
+    public fun evaluate (): BigIntegerType
+
+    public fun evaluate_as_int (): Integer = <as_int(<FieldAccess .evaluate>)>
+end
+
+class Equal : Expr is
+    parse field left : Expr
+    parse field right : Expr
+
+    fun evaluate (): BigIntegerType = <BigInteger <If>>
+end
+
+class LessThan : Expr is
+    parse field left : Expr
+    parse field right : Expr
+
+    fun evaluate (): BigIntegerType = <BigInteger <If>>
+end
+
+class Literal : Expr is
+
+    fun evaluate (): BigIntegerType
+end
+
+class Minus : Expr is
+    parse field left : Expr
+    parse field right : Expr
+
+    fun evaluate (): BigIntegerType = self.left.evaluate - self.right.evaluate
+end
+
+class Plus : Expr is
+    parse field left : Expr
+    parse field right : Expr
+
+    fun evaluate (): BigIntegerType = self.left.evaluate + self.right.evaluate
+end
+
+class Ref : Expr is
+    parse field name : Identifier
+
+    fun evaluate (): BigIntegerType =
+        self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+class Identifier : FooNode is
+end
+

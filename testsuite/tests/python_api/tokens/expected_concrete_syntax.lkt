@@ -1,0 +1,25 @@
+grammar None_grammar is
+    main_rule <- element
+    element <- or(sequence | atom)
+    sequence <- @LPar list+(element) @RPar
+    atom <- Atom(@Identifier)
+
+end
+class FooNode is
+end
+
+class Atom : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+class ASTList[FooNode] : ASTList[FooNode] is
+end
+

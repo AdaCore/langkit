@@ -1,0 +1,34 @@
+grammar None_grammar is
+    main_rule <- Literal(@Number)
+
+end
+class FooNode is
+
+    public fun prop (): Integer
+
+    fun prop (): Integer
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class Literal : FooNode is
+    field var : LogicVar
+
+    fun a (): Entity[FooNode]
+
+    fun node (): Entity[Literal] = self.as_entity
+
+    fun b (): LogicEquation = <Bind>
+
+    public fun public_pro (): Entity[Literal] =
+        let
+            _ = self.b
+        in
+            self.as_bare_entity
+        end
+
+
+    fun a (): Entity[FooNode]
+end
+

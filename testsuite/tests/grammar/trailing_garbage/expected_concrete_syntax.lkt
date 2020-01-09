@@ -1,0 +1,13 @@
+grammar None_grammar is
+    main_rule <- Literal(@Number)
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class Literal : FooNode is
+end
+

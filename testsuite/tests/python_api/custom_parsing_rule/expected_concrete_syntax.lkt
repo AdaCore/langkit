@@ -1,0 +1,60 @@
+grammar None_grammar is
+    main_rule <- list*(def_rule)
+    def_rule <- Def(
+        @Def name ?@LPar list*(name, @Comma) @RPar @Equal expr
+    )
+    name <- Name(@Identifier)
+    expr <- or(
+        | Plus(expr @Plus expr)
+        | ParentExpr(@LPar expr @RPar)
+        | Ref(name)
+        | Literal(@Number)
+    )
+
+end
+class FooNode is
+end
+
+class Def : FooNode is
+    parse field name : Name
+    parse field args : ASTList[Name]
+    parse field expr : Expr
+end
+
+class Expr : FooNode is
+end
+
+class Literal : Expr is
+end
+
+class ParentExpr : Expr is
+    parse field expr : Expr
+end
+
+class Plus : Expr is
+    parse field lhs : Expr
+    parse field rhs : Expr
+end
+
+class Ref : Expr is
+    parse field name : Name
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Def.
+"""
+class ASTList[Def] : FooNodeBaseList is
+end
+
+"""
+List of Name.
+"""
+class ASTList[Name] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+

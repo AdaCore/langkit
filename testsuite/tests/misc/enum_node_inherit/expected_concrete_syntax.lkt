@@ -1,0 +1,23 @@
+grammar None_grammar is
+    main_rule <- ?@Example
+
+end
+class FooNode is
+end
+
+class EnumNode : FooNode is
+
+    public fun prop (): Boolean = true
+end
+
+qualifier class HasExample : EnumNode is
+
+    """
+    Return whether this is an instance of HasExamplePresent
+    """
+    public fun as_bool (): Boolean
+end
+
+class FooNodeBaseList : FooNode is
+end
+

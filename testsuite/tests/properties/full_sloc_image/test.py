@@ -23,4 +23,6 @@ sys.path.append(LK_PYTHON_LIB_DIR)
 from language import lexer, parser
 
 
-build_and_run(parser.python_grammar, "main.py", lexer=lexer.python_lexer)
+# RA22-015: This will also dump the python grammar, which is not dumped as part
+# of another test, so keep it.
+build_and_run(parser.python_grammar, "main.py", lexer=lexer.python_lexer,)

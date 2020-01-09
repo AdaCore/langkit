@@ -1,0 +1,25 @@
+grammar None_grammar is
+    main_rule <- list*(name)
+    name <- Name(@Identifier)
+
+end
+class FooNode is
+
+    public fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Name.
+"""
+class ASTList[Name] : FooNodeBaseList is
+end
+
+class ASTList[Name] : ASTList[Name] is
+end
+
+class Name : FooNode is
+end
+
