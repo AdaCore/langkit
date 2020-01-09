@@ -44,7 +44,7 @@ library project ${lib_name} is
    % endif
 
    ## We rely a lot on project installation (gprinstall), and gnatcov does not
-   ## handle well that, so we need kludges to compute code coverage using
+   ## handle that well, so we need kludges to compute code coverage using
    ## gnatcov without completely reworking how Langkit-generated libraries are
    ## built and tested.
    ##
