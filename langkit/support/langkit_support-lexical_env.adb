@@ -1104,6 +1104,7 @@ package body Langkit_Support.Lexical_Env is
                FV.Append (El.E);
             end if;
          end loop;
+         V.Destroy;
 
          if Has_Trace then
             Traces.Trace
