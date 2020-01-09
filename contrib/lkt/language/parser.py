@@ -1,30 +1,30 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, abstract, Field, EnumNode
-from langkit.parsers import Grammar, Or, List, Opt
+from langkit.dsl import ASTNode, Field, abstract
+from langkit.parsers import Grammar, List, Opt, Or
 
 from language.lexer import lkt_lexer as Lex
 
 
 @abstract
-class LangkitNode(ASTNode):
+class LKNode(ASTNode):
     """
     Root node class for lkt AST nodes.
     """
     pass
 
 
-class LangkitRoot(LangkitNode):
+class LangkitRoot(LKNode):
     decls = Field()
 
 
 @abstract
-class Decl(LangkitNode):
+class Decl(LKNode):
     pass
 
 
 @abstract
-class Expr(LangkitNode):
+class Expr(LKNode):
     pass
 
 
@@ -115,7 +115,8 @@ class GrammarList(GrammarExpr):
     sep = Field()
 
 
-class ListKind(EnumNode):
+class ListKind(LKNode):
+    enum_node = True
     alternatives = ["one", "zero"]
 
 

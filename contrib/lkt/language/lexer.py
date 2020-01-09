@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.lexer import (
-    Lexer, LexerToken, Literal, WithText, WithSymbol, Pattern, Ignore, Eof
+    Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
 )
 
 
@@ -44,7 +44,6 @@ lkt_lexer.add_patterns(
 lkt_lexer.add_rules(
     # Whitespace & EOF
     (Pattern(r"[ \t\r\n\f]+"), Ignore()),
-    (Eof(),                Token.Termination),
 
     # Operators
     (Literal('!'),         Token.ExclMark),
