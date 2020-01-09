@@ -38,10 +38,10 @@ procedure Parse is
          Help => "Do not print the representation of the resulting tree");
 
       package Print_Envs is new Parse_Flag
-        (Parser, "-E", "--print-envs",  "Print lexical environments computed");
+        (Parser, "-E", "--print-envs", "Print lexical environments computed");
 
       package Measure_Time is new Parse_Flag
-        (Parser, "-t", "--time", Help   => "Time the execution of parsing");
+        (Parser, "-t", "--time", "Time the execution of parsing");
 
       package Check is new Parse_Flag
         (Parser, "-C", "--check",
@@ -49,41 +49,42 @@ procedure Parse is
 
       package Rule is new Parse_Option
         (Parser, "-r", "--rule-name",
-         Arg_Type => Grammar_Rule,
+         Arg_Type    => Grammar_Rule,
          Default_Val => Default_Grammar_Rule,
-         Help   => "Rule name to parse");
+         Help        => "Rule name to parse");
 
       package Charset is new Parse_Option
         (Parser, "-c", "--charset",
-         Arg_Type => Unbounded_String,
+         Arg_Type    => Unbounded_String,
          Default_Val => Null_Unbounded_String,
-         Help   => "Charset to use to decode the source code");
+         Help        => "Charset to use to decode the source code");
 
       package Do_Print_Trivia is new Parse_Flag
         (Parser, "-P", "--print-with-trivia",
-         Help   => "Print a simplified tree with trivia included");
+         Help => "Print a simplified tree with trivia included");
 
       package Hide_Slocs is new Parse_Flag
-        (Parser, Long => "--hide-slocs",
+        (Parser,
+         Long => "--hide-slocs",
          Help => "When printing the tree, hide source locations");
 
       package Lookups is new Parse_Option_List
         (Parser, "-L", "--lookups",
-         Arg_Type => Unbounded_String,
+         Arg_Type   => Unbounded_String,
          Accumulate => True,
-         Help => "Lookups to do in the parse tree");
+         Help       => "Lookups to do in the parse tree");
 
       package File_Names is new Parse_Option_List
         (Parser, "-f", "--file-name",
-         Arg_Type => Unbounded_String,
+         Arg_Type   => Unbounded_String,
          Accumulate => True,
-         Help => "Files to parse");
+         Help       => "Files to parse");
 
       package File_List is new Parse_Option
         (Parser, "-F", "--file-list",
-         Arg_Type => Unbounded_String,
+         Arg_Type    => Unbounded_String,
          Default_Val => Null_Unbounded_String,
-         Help   =>
+         Help        =>
            "Parse files listed in the provided filename with the regular"
             & " analysis circuitry (useful for timing measurements)");
 
