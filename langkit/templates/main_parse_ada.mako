@@ -11,6 +11,7 @@ with Ada.Text_IO;               use Ada.Text_IO;
 with GNATCOLL.Opt_Parse;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
 with ${ada_lib_name}.Analysis;  use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;    use ${ada_lib_name}.Common;
@@ -63,6 +64,10 @@ procedure Parse is
         (Parser, "-P", "--print-with-trivia",
          Help => "Print a simplified tree with trivia included");
 
+      package Do_Print_Tokens is new Parse_Flag
+        (Parser, "-T", "--print-tokens",
+         Help => "Only print the stream of tokens/trivia");
+
       package Hide_Slocs is new Parse_Flag
         (Parser,
          Long => "--hide-slocs",
@@ -104,7 +109,13 @@ procedure Parse is
    procedure Process_Lookups (Node : ${root_entity.api_name}'Class);
    procedure Process_Node (Res : ${root_entity.api_name}'Class);
    procedure Process_File (Filename : String; Ctx : Analysis_Context);
+   procedure Print_Token_Stream (Unit : Analysis_Unit);
    procedure Parse_Input (Content : String);
+
+   function Create_Parse_Context return Analysis_Context is
+     (Create_Context (Charset     => To_String (Args.Charset.Get),
+                      With_Trivia => Args.Do_Print_Trivia.Get
+                                     or else Args.Do_Print_Tokens.Get));
 
    -------------
    -- Convert --
@@ -174,13 +185,34 @@ procedure Parse is
       % endif
    end Process_Node;
 
+   ------------------------
+   -- Print_Token_Stream --
+   ------------------------
+
+   procedure Print_Token_Stream (Unit : Analysis_Unit) is
+      use ${ada_lib_name}.Common.Token_Data_Handlers;
+
+      Token : Token_Reference := First_Token (Unit);
+      TD    : Token_Data_Type;
+   begin
+      while Token /= No_Token loop
+         TD := Data (Token);
+         Put_Line
+           ("  [" & (if Is_Trivia (TD) then "trivia" else "token ")
+            & Token_Index'Image (Index (TD)) & "] "
+            & Token_Kind_Name (Kind (TD))
+            & " " & Image (Text (Token), With_Quotes => True));
+         Token := Next (Token);
+      end loop;
+      New_Line;
+   end Print_Token_Stream;
+
    -----------------
    -- Parse_Input --
    -----------------
 
    procedure Parse_Input (Content : String) is
-      Ctx  : constant Analysis_Context :=
-         Create_Context (With_Trivia => Args.Do_Print_Trivia.Get);
+      Ctx  : constant Analysis_Context := Create_Parse_Context;
       Unit : Analysis_Unit;
    begin
       Unit := Get_From_Buffer
@@ -196,9 +228,14 @@ procedure Parse is
          end loop;
       end if;
 
-      --  Error recovery may make the parser return something even on error:
-      --  process it anyway.
-      Process_Node (Root (Unit));
+      if Args.Do_Print_Tokens.Get then
+         Print_Token_Stream (Unit);
+
+      else
+         --  Error recovery may make the parser return something even on error:
+         --  process it anyway.
+         Process_Node (Root (Unit));
+      end if;
    end Parse_Input;
 
    ------------------
@@ -250,7 +287,10 @@ procedure Parse is
          end loop;
       end if;
 
-      if not Is_Null (AST) then
+      if Args.Do_Print_Tokens.Get then
+         Print_Token_Stream (Unit);
+
+      elsif not Is_Null (AST) then
          if not Args.Silent.Get then
             if Args.Do_Print_Trivia.Get then
                PP_Trivia (Unit);
@@ -299,9 +339,7 @@ begin
    if Args.File_List.Get /= Null_Unbounded_String then
       declare
          F   : File_Type;
-         Ctx : constant Analysis_Context :=
-           Create_Context (To_String (Args.Charset.Get),
-                           With_Trivia => Args.Do_Print_Trivia.Get);
+         Ctx : constant Analysis_Context := Create_Parse_Context;
       begin
          Open (F, In_File, To_String (Args.File_List.Get));
          while not End_Of_File (F) loop
@@ -316,9 +354,7 @@ begin
 
    elsif Args.File_Names.Get'Length /= 0 then
       declare
-         Ctx : constant Analysis_Context :=
-           Create_Context (To_String (Args.Charset.Get),
-                           With_Trivia => Args.Do_Print_Trivia.Get);
+         Ctx : constant Analysis_Context := Create_Parse_Context;
       begin
          for File_Name of Args.File_Names.Get loop
             Process_File (To_String (File_Name), Ctx);
