@@ -1,0 +1,20 @@
+grammar None_grammar is
+    main_rule <- list*(name)
+    name <- Name(@Identifier)
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Name.
+"""
+class ASTList[Name] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+

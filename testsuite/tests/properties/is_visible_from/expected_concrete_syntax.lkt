@@ -1,0 +1,32 @@
+grammar None_grammar is
+    main_rule <- list*(name)
+    name <- Name(@Identifier)
+
+end
+class FooNode is
+
+    public fun prop (empty1 : Boolean, empty2 : Boolean): Boolean =
+        let
+            arg1 = if empty1 then _ else self.children_env
+            arg2 = if empty2 then _ else self.children_env
+        in
+            <is_visible_from(<Var arg1>, <Var arg2>)>
+        end
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Name.
+"""
+class ASTList[Name] : FooNodeBaseList is
+end
+
+class ASTList[Name] : ASTList[Name] is
+end
+
+class Name : FooNode is
+end
+

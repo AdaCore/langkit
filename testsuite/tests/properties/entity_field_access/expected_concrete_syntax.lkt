@@ -1,0 +1,47 @@
+grammar None_grammar is
+    main_rule <- item
+    couple <- Couple(@LPar item @Comma item @RPar)
+    literal <- Literal(@Number)
+    item <- or(couple | literal)
+
+end
+class FooNode is
+
+    public fun first_set (): Boolean = entity.info.md.is_first
+
+    public fun second_set (): Boolean = entity.info.md.is_second
+
+    public fun test_main (): Entity[FooNode] =
+        self.as_entity.to[Couple].first_entity.first
+
+end
+
+class Couple : FooNode is
+    parse field first : FooNode
+    parse field second : FooNode
+
+    fun first_entity (): Entity[Couple] =
+        self.as_entity.get_entity(
+            new Metadata(is_first=true, is_second=false)
+        )
+
+
+    fun get_entity (md : Metadata): Entity[Couple] =
+        new Entity[Couple](
+            info=new EntityInfo(
+                md=md, from_rebound=false, rebindings=null
+            ), node=self
+        )
+
+
+    public fun property_on_entity (): Entity[Couple] =
+        self.as_entity.get_entity(self.as_entity.info.md)
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class Literal : FooNode is
+end
+

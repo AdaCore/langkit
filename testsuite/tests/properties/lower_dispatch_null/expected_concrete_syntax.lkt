@@ -1,0 +1,27 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+    field v : LogicVar
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class SomeNode : FooNode is
+
+    fun test_prop (): Boolean
+end
+
+class Example : SomeNode is
+
+    fun test_prop (): Boolean = true
+
+    public fun solve (): Boolean =
+        (
+            <domain(<FieldAccess .v>, [<No InternalEntity>])>
+        ) and (<Predicate on SomeNode.test_prop>).solve
+
+end
+

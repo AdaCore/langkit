@@ -1,0 +1,42 @@
+grammar None_grammar is
+    decl <- Decl(Name(@Identifier) @LPar list+(ref) @RPar)
+    main_rule <- list*(decl)
+    ref <- Ref(Name(@Identifier))
+
+end
+class FooNode is
+end
+
+class Decl : FooNode is
+    parse field name : Name
+    parse field refs : ASTList[Ref]
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+"""
+List of Ref.
+"""
+class ASTList[Ref] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+
+class Ref : FooNode is
+    parse field name : Name
+
+    public fun resolve (): Entity[FooNode] =
+        bind env=self.parent.parent.node_env in
+            env.get(self.name.symbol)?[0]
+        end
+
+end
+

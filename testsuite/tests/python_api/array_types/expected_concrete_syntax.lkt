@@ -1,0 +1,49 @@
+grammar None_grammar is
+    node <- or(example | null)
+    main_rule <- list*(node)
+    null <- Null(@Null)
+    example <- Example(@Example)
+
+end
+class FooNode is
+
+    public fun count (seq : Array[Entity[Example]]): Integer = seq.length
+end
+
+class Example : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Example)}
+* ${node_name(T.Null)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+"""
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Example)}
+* ${node_name(T.Null)}
+"""
+class ASTList[FooNode] : ASTList[FooNode] is
+
+    public fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
+
+    public fun example_items (): Array[Entity[Example]] =
+        entity.filter_map(
+            (i) => i.to![Example], (i) => i is_a Example
+        )
+
+end
+
+class Null : FooNode is
+end
+

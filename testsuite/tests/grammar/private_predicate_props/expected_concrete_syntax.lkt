@@ -1,0 +1,15 @@
+grammar None_grammar is
+    main_rule <- Name(@Identifier) |> when(Name.is_not_class_id)
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class Name : FooNode is
+
+    fun is_not_class_id (): Boolean = not (self.symbol == "class")
+end
+

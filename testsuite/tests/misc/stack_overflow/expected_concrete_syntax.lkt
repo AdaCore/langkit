@@ -1,0 +1,17 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+
+    public fun recurse (n : Integer): Integer =
+        if (n <= (1)) then n else self.recurse(n - (1))
+
+end
+
+class Example : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+

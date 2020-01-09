@@ -5,7 +5,15 @@ import os.path
 import sys
 
 import testsuite_support
-from testsuite_support.base_driver import BaseDriver, catch_test_errors
+from testsuite_support.base_driver import (
+    BaseDriver, catch_test_errors, with_gnatpython
+)
+
+
+if with_gnatpython:
+    from gnatpython import fileutils
+else:
+    from testsuite_support.polyfill import fileutils
 
 
 class PythonDriver(BaseDriver):
@@ -71,3 +79,43 @@ class PythonDriver(BaseDriver):
         Return the absolute path to the directory for support Python modules.
         """
         return os.path.join(self.testsuite_dir, b'python_support')
+
+    def analyze(self):
+        # RA22-015: For the transition to the concrete syntax, we want to
+        # check-in and test unparsing results.
+        super(PythonDriver, self).analyze()
+
+        rewrite = (self.global_env['options'].rewrite
+                   and not self.expect_failure)
+        failures = []
+
+        expected_lkt = self.working_dir('expected_concrete_syntax.lkt')
+        actual_lkt = self.working_dir('concrete_syntax.lkt')
+
+        if not os.path.exists(actual_lkt):
+            return
+
+        # We just open the file in append mode, to create it if it doesn't
+        # exist.
+        with open(expected_lkt, 'a+'):
+            pass
+
+        # Check for the test output itself
+        diff = fileutils.diff(expected_lkt, actual_lkt,
+                              ignore_white_chars=False)
+        if diff:
+            if rewrite:
+                new_baseline = self.read_file(actual_lkt)
+                with open(os.path.join(
+                    self.test_dir, 'expected_concrete_syntax.lkt'
+                ), 'w') as f:
+                    f.write(new_baseline)
+            self.result.actual_output += diff
+            failures.append('output is not as expected{}'.format(
+                ' (baseline updated)' if rewrite else ''
+            ))
+
+        if failures:
+            self.set_failure(' | '.join(failures))
+        else:
+            self.set_passed()

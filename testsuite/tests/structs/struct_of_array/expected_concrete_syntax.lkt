@@ -1,0 +1,25 @@
+grammar None_grammar is
+    main_rule <- list*(Example(@Example))
+
+end
+class FooNode is
+
+    public fun get (): KV =
+        new KV(
+            val=[<CharacterLiteral u'W'>, <CharacterLiteral u'h'>, <CharacterLiteral u'a'>, <CharacterLiteral u't'>], key=[<CharacterLiteral u'S'>, <CharacterLiteral u'o'>]
+        )
+
+end
+
+class Example : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList is
+end
+

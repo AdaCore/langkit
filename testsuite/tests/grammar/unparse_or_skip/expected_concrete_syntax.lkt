@@ -1,0 +1,42 @@
+grammar None_grammar is
+    main_rule <- list*(or(
+        | DefNode(
+            @Def identifier @Equal number @Semicolon
+        )
+        | skip(ErrorDef)
+    ))
+    identifier <- Identifier(@Identifier)
+    number <- Number(@Number)
+
+end
+class FooNode is
+end
+
+class DefNode : FooNode is
+    parse field name : Identifier
+    parse field value : Number
+end
+
+class ErrorDef : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.DefNode)}
+* ${node_name(T.ErrorDef)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+class Identifier : FooNode is
+end
+
+class Number : FooNode is
+end
+

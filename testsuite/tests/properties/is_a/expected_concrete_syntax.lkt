@@ -1,0 +1,27 @@
+grammar None_grammar is
+    main_rule <- list*(Def(@Def Example(@Example)))
+
+end
+class FooNode is
+
+    fun null_node (): FooNode = null
+
+    public fun is_null_a_def (): Boolean = self.null_node is_a Def
+end
+
+class Def : FooNode is
+    parse field example : Example
+end
+
+class Example : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Def.
+"""
+class ASTList[Def] : FooNodeBaseList is
+end
+

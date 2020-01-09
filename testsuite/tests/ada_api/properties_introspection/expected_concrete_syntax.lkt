@@ -1,0 +1,93 @@
+grammar None_grammar is
+    name <- Name(@Identifier)
+    main_rule <- list*(var_decl)
+    number <- Number(@Number)
+    var_decl <- VarDecl(@Var name @Equal expr @Semicolon)
+    expr <- or(Addition(expr @Plus expr) | atom)
+    atom <- or(number | ref)
+    ref <- Ref(name)
+
+end
+class FooNode is
+
+    public fun id_bool (id : Boolean): Boolean = id
+
+    public fun id_int (id : Integer): Integer = id
+
+    public fun id_bigint (id : BigIntegerType): BigIntegerType = id
+
+    public fun id_char (id : CharacterType): CharacterType = id
+
+    public fun id_token (id : TokenReference): TokenReference = id
+
+    public fun id_sym (id : SymbolType): SymbolType = id
+
+    public fun id_unit (id : InternalUnit): InternalUnit = id
+
+    public fun id_root_node (id : FooNode): FooNode = id
+
+    public fun id_name (id : Name): Name = id
+
+    public fun id_unit_kind (id : AnalysisUnitKind): AnalysisUnitKind = id
+
+    public fun id_node_array (id : Array[Entity[FooNode]]): Array[Entity[FooNode]] = id
+
+    public fun id_bigint_array (id : Array[BigIntegerType]): Array[BigIntegerType] = id
+end
+
+class Expr : FooNode is
+
+    public fun eval (): Integer
+
+    public fun eval_plus (addend : Expr): Integer = self.eval + addend.eval
+end
+
+class Addition : Expr is
+    parse field lhs : Expr
+    parse field rhs : Expr
+
+    fun eval (): Integer = self.lhs.eval + self.rhs.eval
+end
+
+class Number : Expr is
+
+    fun eval (): Integer
+
+    public fun id_dflt_bool (id : Boolean= <LiteralExpr True (Boolean)>): Boolean = id
+
+    public fun id_dflt_int (id : Integer= <LiteralExpr 42 (Integer)>): Integer = id
+
+    public fun id_dflt_char (id : CharacterType= <LiteralExpr Character_Type'Val (0) (CharacterType)>): CharacterType = id
+
+    public fun id_dflt_root_node (id : FooNode= <LiteralExpr No_Bare_Foo_Node (BareFooNode)>): FooNode = id
+end
+
+class Ref : Expr is
+    parse field name : Name
+
+    public fun referenced_var_decl (): Entity[VarDecl] =
+        self.node_env.get(self.name, only_first=true).to![VarDecl]
+
+
+    fun eval (): Integer = self.referenced_var_decl.eval
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of VarDecl.
+"""
+class ASTList[VarDecl] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+
+class VarDecl : FooNode is
+    parse field name : Name
+    parse field value : Expr
+
+    public fun eval (): Integer = self.value.eval
+end
+

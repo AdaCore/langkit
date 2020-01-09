@@ -1,0 +1,15 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+
+    public memoized fun recurse (): Boolean = self.recurse
+end
+
+class FooNodeBaseList : FooNode is
+end
+

@@ -1,0 +1,24 @@
+grammar None_grammar is
+    main_rule <- or(Plus(atom @Plus main_rule) | atom)
+    atom <- Literal(@Number)
+
+end
+class FooNode is
+
+    public fun root_node (): Entity[FooNode] = self.unit.root.as_bare_entity
+end
+
+class Expression : FooNode is
+end
+
+class Literal : Expression is
+end
+
+class Plus : Expression is
+    parse field left : Literal
+    parse field right : Expression
+end
+
+class FooNodeBaseList : FooNode is
+end
+

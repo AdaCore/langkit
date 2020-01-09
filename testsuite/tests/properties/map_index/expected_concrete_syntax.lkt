@@ -1,0 +1,25 @@
+grammar None_grammar is
+    main_rule <- ListNode(list*(NumberNode(@Number)))
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of NumberNode.
+"""
+class ASTList[NumberNode] : FooNodeBaseList is
+end
+
+class ListNode : FooNode is
+    parse field nb_list : ASTList[NumberNode]
+
+    public fun prop (): Array[Integer] = self.nb_list.map((_, i) => i)
+end
+
+class NumberNode : FooNode is
+end
+

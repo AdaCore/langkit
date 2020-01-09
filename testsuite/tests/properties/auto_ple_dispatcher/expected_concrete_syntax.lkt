@@ -1,0 +1,56 @@
+grammar None_grammar is
+    defs <- list+(def_rule)
+    name <- or(
+        | Prefix(name @Dot Id(@Identifier))
+        | Id(@Identifier)
+    )
+    main_rule <- defs
+    def_rule <- or(scope | var)
+    var <- Var(Id(@Identifier) @Equal name)
+    scope <- Scope(Id(@Identifier) @LBrace defs @RBrace)
+
+end
+class FooNode is
+end
+
+class DefNode : FooNode is
+end
+
+class Scope : DefNode is
+    parse field name : Id
+    parse field defs : ASTList[DefNode]
+end
+
+class Var : DefNode is
+    parse field name : Id
+    parse field value : Name
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of DefNode.
+"""
+class ASTList[DefNode] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+
+    public fun resolve (): Entity[FooNode]
+end
+
+class Id : Name is
+
+    fun resolve (): Entity[FooNode] = self.node_env.get(self, only_first=true)
+end
+
+class Prefix : Name is
+    parse field prefix : Name
+    parse field suffix : Id
+
+    fun resolve (): Entity[FooNode] =
+        self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
+
+end
+

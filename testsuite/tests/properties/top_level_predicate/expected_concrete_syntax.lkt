@@ -1,0 +1,24 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+
+    fun sophisticated_predicate (): Boolean = true
+end
+
+class Example : FooNode is
+    field var1 : LogicVar
+
+    public fun prop (): Entity[Example] =
+        let
+            _ = <Predicate on FooNode.sophisticated_predicate>
+        in
+            self.as_bare_entity
+        end
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+

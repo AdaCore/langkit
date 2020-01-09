@@ -1,0 +1,78 @@
+grammar None_grammar is
+    name <- Name(@Identifier)
+    vars <- @LBrace list*(var) @RBrace
+    main_rule <- list*(block)
+    param <- Param(name)
+    params <- @LPar list*(param) @RPar
+    var <- BlockVar(name)
+    block <- Block(params name vars)
+
+end
+class FooNode is
+end
+
+class DefNode : FooNode is
+
+    public fun name (): SymbolType
+end
+
+class Block : DefNode is
+    parse field params : ASTList[Param]
+    parse field name_field : Name
+    parse field vars : ASTList[BlockVar]
+
+    fun name (): SymbolType = self.name_field.symbol
+
+    public fun rebind (from_block : Entity[Block], to_block : Entity[Block]): Entity[Block] =
+        let
+            rbdng = entity.info.rebindings.append_rebinding(
+                from_block.params.children_env, to_block.children_env
+            )
+            e_info = new EntityInfo(
+                md=entity.info.md, from_rebound=false, rebindings=rbdng
+            )
+        in
+            new Entity[Block](info=e_info, node=self)
+        end
+
+end
+
+class BlockVar : DefNode is
+    parse field name_field : Name
+
+    fun name (): SymbolType = self.name_field.symbol
+end
+
+class Param : DefNode is
+    parse field name_field : Name
+
+    fun name (): SymbolType = self.name_field.symbol
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Block.
+"""
+class ASTList[Block] : FooNodeBaseList is
+end
+
+"""
+List of BlockVar.
+"""
+class ASTList[BlockVar] : FooNodeBaseList is
+end
+
+"""
+List of Param.
+"""
+class ASTList[Param] : FooNodeBaseList is
+end
+
+class ASTList[Param] : ASTList[Param] is
+end
+
+class Name : FooNode is
+end
+

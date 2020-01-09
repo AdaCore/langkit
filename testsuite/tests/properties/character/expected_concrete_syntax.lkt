@@ -1,0 +1,23 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+
+    public fun get_a (c : CharacterType= <LiteralExpr Character_Type'Val (97) (CharacterType)>): CharacterType = c
+
+    public fun get_eacute (c : CharacterType= <LiteralExpr Character_Type'Val (233) (CharacterType)>): CharacterType = c
+
+    public fun identity (c : CharacterType): CharacterType = c
+
+    public fun double (c : CharacterType): Array[CharacterType] = [c, c]
+
+    public fun text_identity (s : Array[CharacterType]): Array[CharacterType] = s
+end
+
+class FooNodeBaseList : FooNode is
+end
+

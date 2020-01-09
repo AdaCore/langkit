@@ -1,0 +1,23 @@
+grammar None_grammar is
+    main_rule <- list*(Example(@Example))
+
+end
+class FooNode is
+
+    public fun integers_neq (a : Integer, b : Integer): Boolean = not (a == b)
+end
+
+class Example : FooNode is
+
+    public fun not_eq (other : Example): Boolean = not (self == other)
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList is
+end
+

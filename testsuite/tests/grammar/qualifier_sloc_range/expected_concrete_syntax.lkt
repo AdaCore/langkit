@@ -1,0 +1,18 @@
+grammar None_grammar is
+    main_rule <- ?@Error
+
+end
+class FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+qualifier class HasError : FooNode is
+
+    """
+    Return whether this is an instance of HasErrorPresent
+    """
+    public fun as_bool (): Boolean
+end
+

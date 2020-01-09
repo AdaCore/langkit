@@ -1,0 +1,44 @@
+grammar None_grammar is
+    main_rule <- or(literal | example)
+    literal <- Literal(@Number)
+    example <- Example(@Example)
+
+end
+class FooNode is
+
+    fun get_num (): Integer
+end
+
+class Example : FooNode is
+
+    fun get_num (): Integer = 2
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class Literal : FooNode is
+
+    fun get_num (): Integer = 3
+
+    fun a (): Entity[FooNode]
+
+    public fun b (): Integer =
+        match self.a do
+            case e : Entity[Example] => e.get_num
+            case c : Entity[FooNode] => c.get_num
+
+        end
+
+
+    public fun c (): Integer =
+        match self.a do
+            case e : Example => e.get_num
+            case c : FooNode => c.get_num
+
+        end
+
+
+    fun a (): Entity[FooNode]
+end
+

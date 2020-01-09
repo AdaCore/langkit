@@ -1,0 +1,103 @@
+grammar None_grammar is
+    name <- Name(@Identifier)
+    vars <- @LBrace list+(var) @RBrace
+    main_rule <- list*(or(
+        | Def(@Def name imports vars expr)
+        | expr
+    ))
+    atom <- or(lit | ref)
+    expr <- or(atom | plus)
+    lit <- Lit(@Number)
+    plus <- @LPar Plus(expr @Plus expr) @RPar
+    imports <- @LPar list+(derived_ref) @RPar
+    var <- Var(name @Equal expr)
+    derived_ref <- DerivedRef(name)
+    ref <- Ref(name)
+
+end
+class FooNode is
+end
+
+class Def : FooNode is
+    parse field name : Name
+    parse field imports : ASTList[DerivedRef]
+    parse field vars : ASTList[Var]
+    parse field expr : Expr
+end
+
+class Expr : FooNode is
+end
+
+class Atom : Expr is
+end
+
+class Lit : Atom is
+end
+
+class Ref : Atom is
+    parse field name : Name
+
+    public fun resolve (): Entity[FooNode] =
+        self.node_env.get(self.name.symbol, only_first=true)
+
+
+    public fun dummy (): Array[Entity[FooNode]] =
+        self.referenced_env.get(self.name.symbol)
+
+
+    fun referenced_env (): LexicalEnv = null
+
+    fun referenced_env (): LexicalEnv
+end
+
+class MiddleRef : Ref is
+
+    fun referenced_env (): LexicalEnv = null
+end
+
+class DerivedRef : MiddleRef is
+
+    fun referenced_env (): LexicalEnv =
+        self.unit.root.node_env.get(self.name.symbol, only_first=true).children_env
+
+end
+
+class Plus : Expr is
+    parse field lhs : Expr
+    parse field rhs : Expr
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of DerivedRef.
+"""
+class ASTList[DerivedRef] : FooNodeBaseList is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Def)}
+* ${node_name(T.Expr)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+"""
+List of Var.
+"""
+class ASTList[Var] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+
+class Var : FooNode is
+    parse field name : Name
+    parse field expr : Expr
+end
+

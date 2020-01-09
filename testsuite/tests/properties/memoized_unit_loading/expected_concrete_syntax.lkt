@@ -1,0 +1,31 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+
+    fun ext_fetch_example_unit (): InternalUnit
+
+    fun ext_unit_count (): Integer
+
+    memoized fun fetch_example_unit (): InternalUnit = self.ext_fetch_example_unit
+
+    memoized fun unit_count (): Integer = self.ext_unit_count
+
+    public memoized fun mmz_prop (): Array[Integer] =
+        let
+            before = [self.unit_count]
+            _ = self.fetch_example_unit
+            after = [self.unit_count]
+        in
+            before & after
+        end
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+

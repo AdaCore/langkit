@@ -1,0 +1,35 @@
+grammar None_grammar is
+    decl <- Decl(@Def list*(name))
+    main_rule <- list*(decl)
+    name <- Name(@Identifier)
+
+end
+class FooNode is
+end
+
+class Decl : FooNode is
+    parse field names : ASTList[Name]
+
+    public fun lookup (n : Entity[Name]): Entity[FooNode] =
+        entity.node_env.get(n.symbol, only_first=true)
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList is
+end
+
+"""
+List of Name.
+"""
+class ASTList[Name] : FooNodeBaseList is
+end
+
+class Name : FooNode is
+end
+

@@ -1,0 +1,18 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+
+    public memoized fun get (): SynthNode = new SynthNode()
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class SynthNode : FooNode is
+end
+

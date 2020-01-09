@@ -1,0 +1,22 @@
+grammar None_grammar is
+    main_rule <- example_list
+    example_list <- list*(example)
+    example <- Example(@Example ?@LPar example_list @RPar)
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+    parse field examples : ASTList[Example]
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList is
+end
+

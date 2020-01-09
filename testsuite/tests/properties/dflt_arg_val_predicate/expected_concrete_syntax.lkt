@@ -1,0 +1,25 @@
+grammar None_grammar is
+    main_rule <- Example(@Example)
+
+end
+class FooNode is
+end
+
+class Example : FooNode is
+    field var1 : LogicVar
+    field var2 : LogicVar
+
+    fun predicate (n : Entity[FooNode], flag1 : Boolean= <LiteralExpr False (Boolean)>, flag2 : Boolean= <LiteralExpr True (Boolean)>): Boolean = (flag1 and (n.is_null)) and flag2
+
+    public fun prop (): Entity[Example] =
+        let
+            _ = <Predicate on Example.predicate>
+        in
+            self.as_bare_entity
+        end
+
+end
+
+class FooNodeBaseList : FooNode is
+end
+

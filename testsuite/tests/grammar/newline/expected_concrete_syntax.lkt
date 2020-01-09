@@ -1,0 +1,36 @@
+grammar None_grammar is
+    lit <- Literal(@Number)
+    ind <- IndentNode(lit @Newline @Indent lit @Dedent)
+    comp <- CompositeNode(
+        lit @Newline lit @Newline @Indent lit @Newline @Dedent lit
+    )
+    nl <- NewLineNode(lit @Newline lit)
+    main_rule <- or(comp | ind | nl)
+
+end
+class FooNode is
+end
+
+class CompositeNode : FooNode is
+    parse field lit_1 : Literal
+    parse field lit_2 : Literal
+    parse field lit_3 : Literal
+    parse field lit_4 : Literal
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+class IndentNode : FooNode is
+    parse field lit_1 : Literal
+    parse field lit_2 : Literal
+end
+
+class Literal : FooNode is
+end
+
+class NewLineNode : FooNode is
+    parse field lit_1 : Literal
+    parse field lit_2 : Literal
+end
+
