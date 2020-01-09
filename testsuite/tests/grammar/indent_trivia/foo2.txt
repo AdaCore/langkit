@@ -1,0 +1,27 @@
+def foo
+    return42
+
+def foo
+    return42
+
+def foo
+    return42
+
+def foo
+    return42
+
+def foo
+    return42
+
+def foo
+    return42
+
+def foo
+    bar
+    # aaa
+    bar(
+        # bbb
+        x,
+        # ccc
+        y
+    )
