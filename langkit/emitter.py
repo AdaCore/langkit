@@ -442,8 +442,6 @@ class Emitter(object):
         for u in [
             # Top (pure) package
             Unit('pkg_main', '', has_body=False),
-            # Unit for initialization primitives
-            Unit('pkg_init', 'Init'),
             # Unit for declarations used by Analysis and Implementation
             Unit('pkg_common', 'Common'),
             # Unit for public analysis primitives
