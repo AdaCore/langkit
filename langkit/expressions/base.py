@@ -3705,10 +3705,10 @@ class PropertyDef(AbstractNodeData):
             base_dynvars_defaults = (self.base_property
                                      ._dynamic_vars_default_values)
             if self_dynvars is not None:
-                # Don't use the equality operator on DynamicVariable, as it
-                # returns a new AbstractExpression.
                 check_source_language(
                     len(self_dynvars) == len(base_dynvars)
+                    # Don't use the equality operator on DynamicVariable, as it
+                    # returns a new AbstractExpression.
                     and all(sd is bd
                             for sd, bd in zip(self_dynvars, base_dynvars))
                     and all(match_default_values(sd, bd)
