@@ -156,7 +156,7 @@ def emit_expr(expr, **ctx):
         GetSymbol, Match, Eq, BinaryBooleanOperator, Then, OrderingTest,
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
-        ArrayLiteral, Arithmetic, PropertyError
+        ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -408,8 +408,13 @@ def emit_expr(expr, **ctx):
             ))
         )
     elif isinstance(expr, ArrayLiteral):
+        if isinstance(expr.elements[0], CharacterLiteral):
+            return repr(u"".join(e.literal for e in expr.elements))[1:]
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
 
+    elif isinstance(expr, CharacterLiteral):
+        # Get rid of the 'u' unicode prefix
+        return repr(expr.literal)[1:]
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)
