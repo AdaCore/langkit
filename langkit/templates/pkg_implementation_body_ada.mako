@@ -1108,9 +1108,6 @@ package body ${ada_lib_name}.Implementation is
          Convert (Destroy_Procedure'Address));
    end Register_Destroyable_Gen;
 
-   procedure Register_Destroyable is new Register_Destroyable_Gen
-     (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env_Access, Destroy);
-
    ${array_types.body(root_node_array)}
 
    % for array_type in ctx.array_types:
@@ -3492,6 +3489,19 @@ package body ${ada_lib_name}.Implementation is
          Destroy_Synthetic_Node);
    begin
       Helper (Unit, Node);
+   end Register_Destroyable;
+
+   --------------------------
+   -- Register_Destroyable --
+   --------------------------
+
+   procedure Register_Destroyable
+     (Unit : Internal_Unit; Env : AST_Envs.Lexical_Env_Access)
+   is
+      procedure Helper is new Register_Destroyable_Gen
+        (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env_Access, Destroy);
+   begin
+      Helper (Unit, Env);
    end Register_Destroyable;
 
    -----------------------

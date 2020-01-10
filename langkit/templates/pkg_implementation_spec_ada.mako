@@ -803,10 +803,11 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Register_Destroyable
      (Unit : Internal_Unit; Node : ${T.root_node.name});
-   --  Helper for synthetized nodes. We cannot use the generic
-   --  Register_Destroyable because the root AST node is an abstract types, so
-   --  this is implemented using the untyped (using System.Address)
-   --  implementation helper.
+   --  Register Node to be destroyed when Unit is deallocated/reparsed
+
+   procedure Register_Destroyable
+     (Unit : Internal_Unit; Env : AST_Envs.Lexical_Env_Access);
+   --  Register Env to be destroyed when Unit is deallocated/reparsed
 
    % if ctx.has_memoization:
    ------------------------
