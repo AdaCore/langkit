@@ -411,7 +411,6 @@ def emit_expr(expr, **ctx):
         if isinstance(expr.elements[0], CharacterLiteral):
             return repr(u"".join(e.literal for e in expr.elements))[1:]
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
-
     elif isinstance(expr, CharacterLiteral):
         # Get rid of the 'u' unicode prefix
         return repr(expr.literal)[1:]
@@ -439,7 +438,8 @@ def emit_prop(prop):
 
     args = ", ".join("{} : {}{}".format(
         arg.name.lower, type_name(arg.type),
-        "= {}".format(arg.default_value) if arg.default_value else ""
+        " = {}".format(emit_expr(arg.abstract_default_value))
+        if arg.abstract_default_value else ""
     ) for arg in prop.natural_arguments)
 
     doc = prop.doc

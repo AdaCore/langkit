@@ -9,7 +9,7 @@ class Example : FooNode is
     field var1 : LogicVar
     field var2 : LogicVar
 
-    fun predicate (n : Entity[FooNode], flag1 : Boolean= <LiteralExpr False (Boolean)>, flag2 : Boolean= <LiteralExpr True (Boolean)>): Boolean = (flag1 and (n.is_null)) and flag2
+    fun predicate (n : Entity[FooNode], flag1 : Boolean = false, flag2 : Boolean = true): Boolean = (flag1 and (n.is_null)) and flag2
 
     public fun prop (): Entity[Example] =
         let
