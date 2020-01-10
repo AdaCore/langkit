@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- expression
     expression <- or(
         | @LPar expression @RPar
@@ -7,9 +7,9 @@ grammar None_grammar is
     )
     atom <- or(Literal(@Number) | Name(@Identifier))
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun null_unit (): InternalUnit = null
 
@@ -23,39 +23,35 @@ class FooNode is
 
     public fun cast_null_node (): Entity[Name] = self.null_node.to[Name]
 
-    public fun match_null_node (): Entity[Expression] =
-        match self.null_node.node do
-            case l : Literal => l
-            case n : Name => n
-            case others => others
+    public fun match_null_node (): Entity[Expression] = match self.null_node.node {
+        case l : Literal => l
+        case n : Name => n
+        case others => others
 
-        end.as_bare_entity
+    }.as_bare_entity
+}
 
-end
+class Expression : FooNode {
+}
 
-class Expression : FooNode is
-end
+class Literal : Expression {
+}
 
-class Literal : Expression is
-end
-
-class Name : Expression is
+class Name : Expression {
 
     fun env_element (): Entity[FooNode] = self.children_env.get(self.symbol)?[0]
 
     public fun deref_env_element (): Entity[Expression] = self.env_element.null_node
 
-    public fun match_env_element (): Entity[FooNode] =
-        match self.env_element do
-            case l : Entity[Literal] => l
-            case n : Entity[Name] => n
-            case others => others
+    public fun match_env_element (): Entity[FooNode] = match self.env_element {
+        case l : Entity[Literal] => l
+        case n : Entity[Name] => n
+        case others => others
 
-        end
+    }
+}
 
-end
-
-class Plus : Expression is
+class Plus : Expression {
     parse field left : Expression
     parse field right : Expression
-end
+}

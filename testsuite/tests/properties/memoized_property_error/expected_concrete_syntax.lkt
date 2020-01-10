@@ -1,20 +1,18 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Example(@Example)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Example : FooNode is
+class Example : FooNode {
 
-    public memoized fun prop1 (): Boolean =
-        let
-            _ = [self]
-        in
-            raise PropertyError('Explicit error 1')
-        end
+    public memoized fun prop1 (): Boolean = {
+        val _ = [self]
 
+        raise PropertyError('Explicit error 1')
+    }
 
     public memoized fun prop2 (): Boolean = raise PropertyError('Explicit error 2')
-end
+}

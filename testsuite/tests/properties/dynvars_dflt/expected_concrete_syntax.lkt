@@ -1,12 +1,12 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- ExampleNode(@Example)
 
-end
+}
 
-class RootNode is
-end
+class RootNode {
+}
 
-class ExampleNode : RootNode is
+class ExampleNode : RootNode {
 
     public fun prop (): Boolean = bool_var
-end
+}

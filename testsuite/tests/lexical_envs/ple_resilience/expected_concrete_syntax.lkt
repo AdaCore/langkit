@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     defs <- list+(def_rule)
     name <- or(
         | Prefix(name @Dot Id(@Identifier))
@@ -11,54 +11,52 @@ grammar None_grammar is
         ?@Error Id(@Identifier) @LBrace defs @RBrace
     )
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class DefNode : FooNode is
-end
+class DefNode : FooNode {
+}
 
-class Scope : DefNode is
+class Scope : DefNode {
     parse field error : HasError
     parse field name : Id
     parse field defs : ASTList[DefNode]
-end
+}
 
-class Var : DefNode is
+class Var : DefNode {
     parse field name : Id
     parse field value : Name
-end
+}
 
 """
 List of DefNode.
 """
-class ASTList[DefNode] : FooNodeBaseList is
-end
+class ASTList[DefNode] : FooNodeBaseList {
+}
 
-qualifier class HasError : FooNode is
+qualifier class HasError : FooNode {
 
     """
     Return whether this is an instance of HasErrorPresent
     """
     public fun as_bool (): Boolean
-end
+}
 
-class Name : FooNode is
+class Name : FooNode {
 
     public fun resolve (): Entity[FooNode]
-end
+}
 
-class Id : Name is
+class Id : Name {
 
     fun resolve (): Entity[FooNode] = self.node_env.get(self, only_first=true)
-end
+}
 
-class Prefix : Name is
+class Prefix : Name {
     parse field prefix : Name
     parse field suffix : Id
 
-    fun resolve (): Entity[FooNode] =
-        self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
-
-end
+    fun resolve (): Entity[FooNode] = self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
+}

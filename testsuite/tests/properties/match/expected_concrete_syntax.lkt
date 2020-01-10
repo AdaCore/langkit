@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(or(Def(@Def Name(@Identifier) expr) | expr))
     expr <- or(atom | plus)
     lit <- Lit(@Number)
@@ -6,82 +6,74 @@ grammar None_grammar is
     atom <- or(lit | ref)
     ref <- Ref(@Identifier)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
-    public fun find_atoms (): Array[Entity[Atom]] =
-        (
-            match entity do
-                case a : Atom => [a]
-                case _ => null
+    public fun find_atoms (): Array[Entity[Atom]] = (
+        match entity {
+            case a : Atom => [a]
+            case _ => null
 
-            end
-        ) & (
-            entity.children.mapcat((c) => c.find_atoms)
-        )
+        }
+    ) & (
+        entity.children.mapcat((c) => c.find_atoms)
+    )
 
+    public fun find_atoms_or_exprs (): Array[Entity[Expr]] = (
+        match entity {
+            case a : Atom => [a.to[Expr]]
+            case e : Expr => [e]
+            case _ => null
 
-    public fun find_atoms_or_exprs (): Array[Entity[Expr]] =
-        (
-            match entity do
-                case a : Atom => [a.to[Expr]]
-                case e : Expr => [e]
-                case _ => null
+        }
+    ) & (
+        entity.children.mapcat((c) => c.find_atoms_or_exprs)
+    )
 
-            end
-        ) & (
-            entity.children.mapcat((c) => c.find_atoms_or_exprs)
-        )
+    public fun find_exprs (): Array[Entity[Expr]] = (
+        match entity {
+            case e : Expr => [e]
+            case a : Atom => [a.to[Expr]]
+            case _ => null
 
+        }
+    ) & (
+        entity.children.mapcat((c) => c.find_exprs)
+    )
+}
 
-    public fun find_exprs (): Array[Entity[Expr]] =
-        (
-            match entity do
-                case e : Expr => [e]
-                case a : Atom => [a.to[Expr]]
-                case _ => null
-
-            end
-        ) & (
-            entity.children.mapcat((c) => c.find_exprs)
-        )
-
-end
-
-class Def : FooNode is
+class Def : FooNode {
     parse field name : Name
     parse field expr : Expr
-end
+}
 
-class Expr : FooNode is
+class Expr : FooNode {
 
-    public fun find_refs (): Array[Entity[Ref]] =
-        (
-            match entity do
-                case r : Ref => [r]
-                case _ => null
+    public fun find_refs (): Array[Entity[Ref]] = (
+        match entity {
+            case r : Ref => [r]
+            case _ => null
 
-            end
-        ) & (
-            entity.children.mapcat((c) => c.to![Expr].find_refs)
-        )
+        }
+    ) & (
+        entity.children.mapcat((c) => c.to![Expr].find_refs)
+    )
+}
 
-end
+class Atom : Expr {
+}
 
-class Atom : Expr is
-end
+class Lit : Atom {
+}
 
-class Lit : Atom is
-end
+class Ref : Atom {
+}
 
-class Ref : Atom is
-end
-
-class Plus : Expr is
+class Plus : Expr {
     parse field lhs : Expr
     parse field rhs : Expr
-end
+}
 
 """
 List of FooNode.
@@ -91,8 +83,8 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Def)}
 * ${node_name(T.Expr)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}

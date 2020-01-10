@@ -1,39 +1,38 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(or(Literal(@Number) | Identifier(@Identifier)))
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
 """
 List of RootNode.
 """
-class ASTList[RootNode] : FooNodeBaseList is
-end
+class ASTList[RootNode] : FooNodeBaseList {
+}
 
-class RootNode : FooNode is
+class RootNode : FooNode {
     field var : LogicVar
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation
 
-    public fun solve_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): Boolean = self.xref_eq(arg1, arg2).solve
-end
+    public fun solve_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): Boolean =
+    self.xref_eq(arg1, arg2).solve
+}
 
-class Identifier : RootNode is
+class Identifier : RootNode {
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
-        <domain(<FieldAccess .var>, [<Var Self>])>
+    <domain(<FieldAccess .var>, [<Var Self>])>
+}
 
-end
-
-class Literal : RootNode is
+class Literal : RootNode {
 
     fun is_eq (other : Entity[Literal]): Boolean = self.as_entity == other
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
-        (
-            <domain(<FieldAccess .var>, [<Var arg1>])>
-        ) and (<Bind>)
-
-end
+    (
+        <domain(<FieldAccess .var>, [<Var arg1>])>
+    ) and (<Bind>)
+}

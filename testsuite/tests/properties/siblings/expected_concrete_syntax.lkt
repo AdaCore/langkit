@@ -1,24 +1,24 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- tuple
     tuple <- Tuple(
         Name(@Identifier) @LPar list+(tuple) @RPar
     )
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
 """
 List of Tuple.
 """
-class ASTList[Tuple] : FooNodeBaseList is
-end
+class ASTList[Tuple] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-class Tuple : FooNode is
+class Tuple : FooNode {
     parse field id : Name
     parse field nodes : ASTList[Tuple]
-end
+}

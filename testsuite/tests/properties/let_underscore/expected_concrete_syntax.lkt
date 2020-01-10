@@ -1,18 +1,16 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- BarNode(@Example)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class BarNode : FooNode is
+class BarNode : FooNode {
 
-    public fun prop (): Entity[FooNode] =
-        let
-            _ = self.parent
-        in
-            null
-        end
+    public fun prop (): Entity[FooNode] = {
+        val _ = self.parent
 
-end
+        null
+    }
+}

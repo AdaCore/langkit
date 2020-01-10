@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     print_stmt <- or(
         | PrintStmt(@Print test_list)
         | StreamPrintStmt(@Print @Rsh test @Comma test_list)
@@ -234,316 +234,316 @@ grammar None_grammar is
     as_name <- AsNameNode(name @As name)
     dot <- Dot(@Dot)
 
-end
+}
 
-class PythonNode is
-end
+class PythonNode {
+}
 
-class Arg : PythonNode is
-end
+class Arg : PythonNode {
+}
 
-class ArgAssoc : Arg is
+class ArgAssoc : Arg {
     parse field name : Expr
     parse field expr : Expr
-end
+}
 
-class ArgGen : Arg is
+class ArgGen : Arg {
     parse field expr : Expr
     parse field comprehension : CompFor
-end
+}
 
-class KwArgs : Arg is
+class KwArgs : Arg {
     parse field expr : Expr
-end
+}
 
-class VarArgs : Arg is
+class VarArgs : Arg {
     parse field expr : Expr
-end
+}
 
-class AsNameNode : PythonNode is
+class AsNameNode : PythonNode {
     parse field imported : Expr
     parse field as_name : Expr
-end
+}
 
-class CompIf : PythonNode is
+class CompIf : PythonNode {
     parse field test : Expr
     parse field comp : PythonNode
-end
+}
 
-enum class CompOpKind : PythonNode is
+enum class CompOpKind : PythonNode {
     case Lt, Gt, Eq, Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
-end
+}
 
-class Comprehension : PythonNode is
-end
+class Comprehension : PythonNode {
+}
 
-class CompFor : Comprehension is
+class CompFor : Comprehension {
     parse field exprs : ASTList[Expr]
     parse field target : Expr
     parse field comp : PythonNode
-end
+}
 
-class CompForL : Comprehension is
+class CompForL : Comprehension {
     parse field exprs : ASTList[Expr]
     parse field target : ASTList[Expr]
     parse field comp : PythonNode
-end
+}
 
-class Decorator : PythonNode is
+class Decorator : PythonNode {
     parse field dec_name : Name
     parse field arg_list : ASTList[Arg]
-end
+}
 
-class DictAssoc : PythonNode is
+class DictAssoc : PythonNode {
     parse field key : Expr
     parse field value : Expr
-end
+}
 
-class ElsePart : PythonNode is
+class ElsePart : PythonNode {
     parse field statements : PythonNode
-end
+}
 
-class ExceptPart : PythonNode is
+class ExceptPart : PythonNode {
     parse field as_name : AsNameNode
     parse field statements : PythonNode
-end
+}
 
-class Expr : PythonNode is
-end
+class Expr : PythonNode {
+}
 
-class AndExpr : Expr is
+class AndExpr : Expr {
     parse field left : Expr
     parse field right : Expr
-end
+}
 
-class AndOp : Expr is
+class AndOp : Expr {
     parse field left : Expr
     parse field right : Expr
-end
+}
 
-class BinOp : Expr is
+class BinOp : Expr {
     parse field left : Expr
     parse field op : Op
     parse field right : Expr
-end
+}
 
-class ArithExpr : BinOp is
-end
+class ArithExpr : BinOp {
+}
 
-class ShiftExpr : BinOp is
-end
+class ShiftExpr : BinOp {
+}
 
-class Term : BinOp is
-end
+class Term : BinOp {
+}
 
-class CallExpr : Expr is
+class CallExpr : Expr {
     parse field prefix : Expr
     parse field suffix : ASTList[Arg]
-end
+}
 
-class CompOp : Expr is
+class CompOp : Expr {
     parse field left : Expr
     parse field op : CompOpKind
     parse field right : Expr
-end
+}
 
-class ConcatStringLit : Expr is
+class ConcatStringLit : Expr {
     parse field first_str : StringLit
     parse field subsequent_str : ASTList[StringLit]
-end
+}
 
-class DictComp : Expr is
+class DictComp : Expr {
     parse field assoc : DictAssoc
     parse field comprehension : CompFor
-end
+}
 
-class DictLit : Expr is
+class DictLit : Expr {
     parse field assocs : ASTList[DictAssoc]
-end
+}
 
-class Dot : Expr is
-end
+class Dot : Expr {
+}
 
-class EllipsisExpr : Expr is
-end
+class EllipsisExpr : Expr {
+}
 
-class Factor : Expr is
+class Factor : Expr {
     parse field op : Op
     parse field expr : Expr
-end
+}
 
-class IfExpr : Expr is
+class IfExpr : Expr {
     parse field expr : Expr
     parse field cond : Expr
     parse field else_expr : Expr
-end
+}
 
-class InlineEval : Expr is
+class InlineEval : Expr {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class LambdaDef : Expr is
+class LambdaDef : Expr {
     parse field args : Params
     parse field expr : Expr
-end
+}
 
-class ListComp : Expr is
+class ListComp : Expr {
     parse field expr : Expr
     parse field comprehension : CompForL
-end
+}
 
-class ListGen : Expr is
+class ListGen : Expr {
     parse field expr : Expr
     parse field comprehension : CompForL
-end
+}
 
-class ListLit : Expr is
+class ListLit : Expr {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class Name : Expr is
-end
+class Name : Expr {
+}
 
-class DottedName : Name is
+class DottedName : Name {
     parse field prefix : Expr
     parse field suffix : Id
-end
+}
 
-class Id : Name is
+class Id : Name {
 
     """
     Shortcut to get the symbol of this node
     """
     fun sym (): SymbolType = self.symbol
-end
+}
 
-class NotOp : Expr is
+class NotOp : Expr {
     parse field expr : Expr
-end
+}
 
-class NumberLit : Expr is
-end
+class NumberLit : Expr {
+}
 
-class OrExpr : Expr is
+class OrExpr : Expr {
     parse field left : Expr
     parse field right : Expr
-end
+}
 
-class OrOp : Expr is
+class OrOp : Expr {
     parse field left : Expr
     parse field right : Expr
-end
+}
 
-class Power : Expr is
+class Power : Expr {
     parse field left : Expr
     parse field right : Expr
-end
+}
 
-class SetComp : Expr is
+class SetComp : Expr {
     parse field expr : Expr
     parse field comprehension : CompFor
-end
+}
 
-class SetLit : Expr is
+class SetLit : Expr {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class SliceExpr : Expr is
+class SliceExpr : Expr {
     parse field first : Expr
     parse field last : Expr
-end
+}
 
-class ExtSliceExpr : SliceExpr is
+class ExtSliceExpr : SliceExpr {
     parse field stride : Expr
-end
+}
 
-class StringLit : Expr is
-end
+class StringLit : Expr {
+}
 
-class SubscriptExpr : Expr is
+class SubscriptExpr : Expr {
     parse field prefix : Expr
     parse field suffix : ASTList[Expr]
-end
+}
 
-class TupleLit : Expr is
+class TupleLit : Expr {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class XorExpr : Expr is
+class XorExpr : Expr {
     parse field left : Expr
     parse field right : Expr
-end
+}
 
-class YieldExpr : Expr is
+class YieldExpr : Expr {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class FileNode : PythonNode is
+class FileNode : PythonNode {
     parse field statements : ASTList[PythonNode]
-end
+}
 
-class ImportStar : PythonNode is
-end
+class ImportStar : PythonNode {
+}
 
-qualifier class KwArgsFlag : PythonNode is
+qualifier class KwArgsFlag : PythonNode {
 
     """
     Return whether this is an instance of KwArgsFlagPresent
     """
     public fun as_bool (): Boolean
-end
+}
 
-class NL : PythonNode is
-end
+class NL : PythonNode {
+}
 
-class Op : PythonNode is
-end
+class Op : PythonNode {
+}
 
-class Params : PythonNode is
+class Params : PythonNode {
     parse field single_params : ASTList[SingleParam]
-end
+}
 
 """
 List of Arg.
 """
-class ASTList[Arg] : PythonNodeBaseList is
-end
+class ASTList[Arg] : PythonNodeBaseList {
+}
 
 """
 List of AsNameNode.
 """
-class ASTList[AsNameNode] : PythonNodeBaseList is
-end
+class ASTList[AsNameNode] : PythonNodeBaseList {
+}
 
 """
 List of Decorator.
 """
-class ASTList[Decorator] : PythonNodeBaseList is
-end
+class ASTList[Decorator] : PythonNodeBaseList {
+}
 
 """
 List of DictAssoc.
 """
-class ASTList[DictAssoc] : PythonNodeBaseList is
-end
+class ASTList[DictAssoc] : PythonNodeBaseList {
+}
 
 """
 List of Dot.
 """
-class ASTList[Dot] : PythonNodeBaseList is
-end
+class ASTList[Dot] : PythonNodeBaseList {
+}
 
 """
 List of ElifBranch.
 """
-class ASTList[ElifBranch] : PythonNodeBaseList is
-end
+class ASTList[ElifBranch] : PythonNodeBaseList {
+}
 
 """
 List of ExceptPart.
 """
-class ASTList[ExceptPart] : PythonNodeBaseList is
-end
+class ASTList[ExceptPart] : PythonNodeBaseList {
+}
 
 """
 List of Expr.
@@ -581,20 +581,20 @@ This list node can contain one of the following nodes:
 * ${node_name(T.XorExpr)}
 * ${node_name(T.YieldExpr)}
 """
-class ASTList[Expr] : PythonNodeBaseList is
-end
+class ASTList[Expr] : PythonNodeBaseList {
+}
 
 """
 List of Id.
 """
-class ASTList[Id] : PythonNodeBaseList is
-end
+class ASTList[Id] : PythonNodeBaseList {
+}
 
 """
 List of NL.
 """
-class ASTList[NL] : PythonNodeBaseList is
-end
+class ASTList[NL] : PythonNodeBaseList {
+}
 
 """
 List of PythonNode.
@@ -629,161 +629,161 @@ This list node can contain one of the following nodes:
 * ${node_name(T.WithStmt)}
 * ${node_name(T.YieldExpr)}
 """
-class ASTList[PythonNode] : PythonNodeBaseList is
-end
+class ASTList[PythonNode] : PythonNodeBaseList {
+}
 
 """
 List of SingleParam.
 """
-class ASTList[SingleParam] : PythonNodeBaseList is
-end
+class ASTList[SingleParam] : PythonNodeBaseList {
+}
 
 """
 List of StringLit.
 """
-class ASTList[StringLit] : PythonNodeBaseList is
-end
+class ASTList[StringLit] : PythonNodeBaseList {
+}
 
-class RelName : PythonNode is
+class RelName : PythonNode {
     parse field dots : ASTList[Dot]
     parse field name : Name
-end
+}
 
-class SingleParam : PythonNode is
+class SingleParam : PythonNode {
     parse field is_varargs : VarArgsFlag
     parse field is_kwargs : KwArgsFlag
     parse field name : PythonNode
     parse field default_value : Expr
-end
+}
 
-class Stmt : PythonNode is
-end
+class Stmt : PythonNode {
+}
 
-class AssertStmt : Stmt is
+class AssertStmt : Stmt {
     parse field test_expr : Expr
     parse field msg : Expr
-end
+}
 
-class AssignStmt : Stmt is
+class AssignStmt : Stmt {
     parse field l_value : ASTList[Expr]
     parse field r_values : ASTList[PythonNode]
-end
+}
 
-class AugAssignStmt : Stmt is
+class AugAssignStmt : Stmt {
     parse field l_value : ASTList[Expr]
     parse field op : Op
     parse field r_value : PythonNode
-end
+}
 
-class BreakStmt : Stmt is
-end
+class BreakStmt : Stmt {
+}
 
-class ContinueStmt : Stmt is
-end
+class ContinueStmt : Stmt {
+}
 
-class Decorated : Stmt is
+class Decorated : Stmt {
     parse field decorators : ASTList[Decorator]
     parse field defn : DefStmt
-end
+}
 
-class DefStmt : Stmt is
-end
+class DefStmt : Stmt {
+}
 
-class ClassDef : DefStmt is
+class ClassDef : DefStmt {
     parse field name : Id
     parse field bases : ASTList[Expr]
     parse field statements : PythonNode
-end
+}
 
-class FuncDef : DefStmt is
+class FuncDef : DefStmt {
     parse field name : Id
     parse field parameters : Params
     parse field body : PythonNode
-end
+}
 
-class DelStmt : Stmt is
+class DelStmt : Stmt {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class ElifBranch : Stmt is
+class ElifBranch : Stmt {
     parse field cond_test : Expr
     parse field statements : PythonNode
-end
+}
 
-class ExecStmt : Stmt is
+class ExecStmt : Stmt {
     parse field expr : Expr
     parse field in_list : ASTList[Expr]
-end
+}
 
-class ForStmt : Stmt is
+class ForStmt : Stmt {
     parse field bindings : ASTList[Expr]
     parse field expr : ASTList[Expr]
     parse field statements : PythonNode
     parse field else_part : ElsePart
-end
+}
 
-class GlobalStmt : Stmt is
+class GlobalStmt : Stmt {
     parse field names : ASTList[Id]
-end
+}
 
-class IfStmt : Stmt is
+class IfStmt : Stmt {
     parse field cond_test : Expr
     parse field statements : PythonNode
     parse field elif_branchs : ASTList[ElifBranch]
     parse field else_part : ElsePart
-end
+}
 
-class ImportFrom : Stmt is
+class ImportFrom : Stmt {
     parse field rel_name : PythonNode
     parse field imported : PythonNode
-end
+}
 
-class ImportName : Stmt is
+class ImportName : Stmt {
     parse field imported_names : ASTList[PythonNode]
-end
+}
 
-class PassStmt : Stmt is
-end
+class PassStmt : Stmt {
+}
 
-class PrintStmt : Stmt is
+class PrintStmt : Stmt {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class RaiseStmt : Stmt is
+class RaiseStmt : Stmt {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class ReturnStmt : Stmt is
+class ReturnStmt : Stmt {
     parse field exprs : ASTList[Expr]
-end
+}
 
-class StreamPrintStmt : Stmt is
+class StreamPrintStmt : Stmt {
     parse field stream_expr : Expr
     parse field exprs : ASTList[Expr]
-end
+}
 
-class TryStmt : Stmt is
+class TryStmt : Stmt {
     parse field statements : PythonNode
     parse field except_parts : ASTList[ExceptPart]
     parse field else_part : ElsePart
     parse field finally_part : PythonNode
-end
+}
 
-class WhileStmt : Stmt is
+class WhileStmt : Stmt {
     parse field cond_test : Expr
     parse field statements : PythonNode
     parse field else_part : ElsePart
-end
+}
 
-class WithStmt : Stmt is
+class WithStmt : Stmt {
     parse field bindings : ASTList[AsNameNode]
     parse field statements : PythonNode
-end
+}
 
-qualifier class VarArgsFlag : PythonNode is
+qualifier class VarArgsFlag : PythonNode {
 
     """
     Return whether this is an instance of VarArgsFlagPresent
     """
     public fun as_bool (): Boolean
-end
+}

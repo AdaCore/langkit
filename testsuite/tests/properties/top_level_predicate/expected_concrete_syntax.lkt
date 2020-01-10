@@ -1,21 +1,19 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Example(@Example)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     fun sophisticated_predicate (): Boolean = true
-end
+}
 
-class Example : FooNode is
+class Example : FooNode {
     field var1 : LogicVar
 
-    public fun prop (): Entity[Example] =
-        let
-            _ = <Predicate on FooNode.sophisticated_predicate>
-        in
-            self.as_bare_entity
-        end
+    public fun prop (): Entity[Example] = {
+        val _ = <Predicate on FooNode.sophisticated_predicate>
 
-end
+        self.as_bare_entity
+    }
+}

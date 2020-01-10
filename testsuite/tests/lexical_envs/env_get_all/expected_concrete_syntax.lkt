@@ -1,38 +1,38 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(insert)
     ident <- Id(@Identifier)
     insert <- Insert(@Def ident ident)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun env_get_all (): Array[Entity[FooNode]] = self.children_env.get(null)
 
     memoized fun make_id (s : SymbolType): FooNode = new SynthId(sym=s)
 
     fun unique_id (s : SymbolType): FooNode = self.unit.root.make_id(s)
-end
+}
 
 """
 List of Insert.
 """
-class ASTList[Insert] : FooNodeBaseList is
-end
+class ASTList[Insert] : FooNodeBaseList {
+}
 
-class ASTList[Insert] : ASTList[Insert] is
-end
+class ASTList[Insert] : ASTList[Insert] {
+}
 
-class Id : FooNode is
-end
+class Id : FooNode {
+}
 
-class Insert : FooNode is
+class Insert : FooNode {
     parse field sym : Id
     parse field node : Id
-end
+}
 
-class SynthId : FooNode is
+class SynthId : FooNode {
     field sym : SymbolType
 
     public fun get_sym (): Array[CharacterType] = self.sym.image
-end
+}

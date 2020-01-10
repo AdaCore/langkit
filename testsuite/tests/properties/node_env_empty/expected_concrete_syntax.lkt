@@ -1,32 +1,30 @@
-grammar None_grammar is
+grammar None_grammar {
     decl <- Decl(@Def list*(name))
     main_rule <- list*(decl)
     name <- Name(@Identifier)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Decl : FooNode is
+class Decl : FooNode {
     parse field names : ASTList[Name]
 
-    public fun lookup (n : Entity[Name]): Entity[FooNode] =
-        entity.node_env.get(n.symbol, only_first=true)
-
-end
+    public fun lookup (n : Entity[Name]): Entity[FooNode] = entity.node_env.get(n.symbol, only_first=true)
+}
 
 """
 List of Decl.
 """
-class ASTList[Decl] : FooNodeBaseList is
-end
+class ASTList[Decl] : FooNodeBaseList {
+}
 
 """
 List of Name.
 """
-class ASTList[Name] : FooNodeBaseList is
-end
+class ASTList[Name] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}

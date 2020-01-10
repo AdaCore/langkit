@@ -1,41 +1,37 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- or(literal | example)
     literal <- Literal(@Number)
     example <- Example(@Example)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     fun get_num (): Integer
-end
+}
 
-class Example : FooNode is
+class Example : FooNode {
 
     fun get_num (): Integer = 2
-end
+}
 
-class Literal : FooNode is
+class Literal : FooNode {
 
     fun get_num (): Integer = 3
 
     fun a (): Entity[FooNode]
 
-    public fun b (): Integer =
-        match self.a do
-            case e : Entity[Example] => e.get_num
-            case c : Entity[FooNode] => c.get_num
+    public fun b (): Integer = match self.a {
+        case e : Entity[Example] => e.get_num
+        case c : Entity[FooNode] => c.get_num
 
-        end
+    }
 
+    public fun c (): Integer = match self.a {
+        case e : Example => e.get_num
+        case c : FooNode => c.get_num
 
-    public fun c (): Integer =
-        match self.a do
-            case e : Example => e.get_num
-            case c : FooNode => c.get_num
-
-        end
-
+    }
 
     fun a (): Entity[FooNode]
-end
+}

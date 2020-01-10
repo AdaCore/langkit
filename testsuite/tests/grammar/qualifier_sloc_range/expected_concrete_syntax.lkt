@@ -1,15 +1,15 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- ?@Error
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-qualifier class HasError : FooNode is
+qualifier class HasError : FooNode {
 
     """
     Return whether this is an instance of HasErrorPresent
     """
     public fun as_bool (): Boolean
-end
+}

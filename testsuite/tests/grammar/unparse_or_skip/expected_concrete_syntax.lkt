@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(or(
         | DefNode(
             @Def identifier @Equal number @Semicolon
@@ -8,18 +8,18 @@ grammar None_grammar is
     identifier <- Identifier(@Identifier)
     number <- Number(@Number)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class DefNode : FooNode is
+class DefNode : FooNode {
     parse field name : Identifier
     parse field value : Number
-end
+}
 
-class ErrorDef : FooNode is
-end
+class ErrorDef : FooNode {
+}
 
 """
 List of FooNode.
@@ -29,11 +29,11 @@ This list node can contain one of the following nodes:
 * ${node_name(T.DefNode)}
 * ${node_name(T.ErrorDef)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
-class Identifier : FooNode is
-end
+class Identifier : FooNode {
+}
 
-class Number : FooNode is
-end
+class Number : FooNode {
+}

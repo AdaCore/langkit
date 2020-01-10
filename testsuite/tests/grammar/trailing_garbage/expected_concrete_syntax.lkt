@@ -1,10 +1,10 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Literal(@Number)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Literal : FooNode is
-end
+class Literal : FooNode {
+}

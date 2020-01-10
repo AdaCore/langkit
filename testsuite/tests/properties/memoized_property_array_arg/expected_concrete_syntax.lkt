@@ -1,18 +1,18 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Example(@Example)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Example : FooNode is
+class Example : FooNode {
 
     public memoized fun get_array (): Array[Integer] = [1, 2]
 
     public memoized fun test_prop (numbers : Array[Integer], c : Array[CharacterType]): Integer =
-        if (c == 'one') then (numbers?[0]) else (numbers?[1])
+    if (c == 'one') then (numbers?[0]) else (numbers?[1])
 
-
-    public memoized fun test_prop2 (numbers : Array[Entity[FooNode]]): Boolean = numbers.length == 0
-end
+    public memoized fun test_prop2 (numbers : Array[Entity[FooNode]]): Boolean =
+    numbers.length == 0
+}

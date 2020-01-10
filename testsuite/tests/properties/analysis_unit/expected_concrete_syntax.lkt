@@ -1,36 +1,34 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- or(Plus(atom @Plus main_rule) | atom)
     atom <- or(Literal(@Number) | Name(@Identifier))
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun eval_unit (u : InternalUnit): Integer = u.root.to[Expression].result
-end
+}
 
-class Expression : FooNode is
+class Expression : FooNode {
 
     public fun result (): Integer
-end
+}
 
-class Literal : Expression is
+class Literal : Expression {
 
     fun result (): Integer
-end
+}
 
-class Name : Expression is
+class Name : Expression {
 
     fun designated_unit (): InternalUnit
 
-    fun result (): Integer =
-        self.designated_unit.root.to[Expression].result
+    fun result (): Integer = self.designated_unit.root.to[Expression].result
+}
 
-end
-
-class Plus : Expression is
+class Plus : Expression {
     parse field left : Expression
     parse field right : Expression
 
     fun result (): Integer = self.left.result + self.right.result
-end
+}

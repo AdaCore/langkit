@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     name <- Name(@Identifier)
     vars <- @LBrace list+(var) @RBrace
     main_rule <- list*(or(
@@ -14,65 +14,59 @@ grammar None_grammar is
     derived_ref <- DerivedRef(name)
     ref <- Ref(name)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Def : FooNode is
+class Def : FooNode {
     parse field name : Name
     parse field imports : ASTList[DerivedRef]
     parse field vars : ASTList[Var]
     parse field expr : Expr
-end
+}
 
-class Expr : FooNode is
-end
+class Expr : FooNode {
+}
 
-class Atom : Expr is
-end
+class Atom : Expr {
+}
 
-class Lit : Atom is
-end
+class Lit : Atom {
+}
 
-class Ref : Atom is
+class Ref : Atom {
     parse field name : Name
 
-    public fun resolve (): Entity[FooNode] =
-        self.node_env.get(self.name.symbol, only_first=true)
+    public fun resolve (): Entity[FooNode] = self.node_env.get(self.name.symbol, only_first=true)
 
-
-    public fun dummy (): Array[Entity[FooNode]] =
-        self.referenced_env.get(self.name.symbol)
-
+    public fun dummy (): Array[Entity[FooNode]] = self.referenced_env.get(self.name.symbol)
 
     fun referenced_env (): LexicalEnv = null
 
     fun referenced_env (): LexicalEnv
-end
+}
 
-class MiddleRef : Ref is
+class MiddleRef : Ref {
 
     fun referenced_env (): LexicalEnv = null
-end
+}
 
-class DerivedRef : MiddleRef is
+class DerivedRef : MiddleRef {
 
-    fun referenced_env (): LexicalEnv =
-        self.unit.root.node_env.get(self.name.symbol, only_first=true).children_env
+    fun referenced_env (): LexicalEnv = self.unit.root.node_env.get(self.name.symbol, only_first=true).children_env
+}
 
-end
-
-class Plus : Expr is
+class Plus : Expr {
     parse field lhs : Expr
     parse field rhs : Expr
-end
+}
 
 """
 List of DerivedRef.
 """
-class ASTList[DerivedRef] : FooNodeBaseList is
-end
+class ASTList[DerivedRef] : FooNodeBaseList {
+}
 
 """
 List of FooNode.
@@ -82,19 +76,19 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Def)}
 * ${node_name(T.Expr)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
 """
 List of Var.
 """
-class ASTList[Var] : FooNodeBaseList is
-end
+class ASTList[Var] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-class Var : FooNode is
+class Var : FooNode {
     parse field name : Name
     parse field expr : Expr
-end
+}

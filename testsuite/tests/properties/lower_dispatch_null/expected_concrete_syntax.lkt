@@ -1,24 +1,22 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Example(@Example)
 
-end
+}
 
-class FooNode is
+class FooNode {
     field v : LogicVar
-end
+}
 
-class SomeNode : FooNode is
+class SomeNode : FooNode {
 
     fun test_prop (): Boolean
-end
+}
 
-class Example : SomeNode is
+class Example : SomeNode {
 
     fun test_prop (): Boolean = true
 
-    public fun solve (): Boolean =
-        (
-            <domain(<FieldAccess .v>, [<No InternalEntity>])>
-        ) and (<Predicate on SomeNode.test_prop>).solve
-
-end
+    public fun solve (): Boolean = (
+        <domain(<FieldAccess .v>, [<No InternalEntity>])>
+    ) and (<Predicate on SomeNode.test_prop>).solve
+}

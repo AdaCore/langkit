@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     foreign_decl <- ForeignDecl(identifier)
     main_rule <- list*(or(scope | self_decl | foreign_decl))
     self_decl <- SelfDecl(
@@ -13,10 +13,10 @@ grammar None_grammar is
     )
     simple_identifier <- SimpleId(@Identifier)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
 """
 List of FooNode.
@@ -27,52 +27,48 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Scope)}
 * ${node_name(T.SelfDecl)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
 """
 List of Scope.
 """
-class ASTList[Scope] : FooNodeBaseList is
-end
+class ASTList[Scope] : FooNodeBaseList {
+}
 
-class ForeignDecl : FooNode is
+class ForeignDecl : FooNode {
     parse field id : Id
-end
+}
 
-class Id : FooNode is
+class Id : FooNode {
 
     fun simple_name (): SimpleId
 
     fun resolve (base_env : LexicalEnv): Scope
-end
+}
 
-class ScopedId : Id is
+class ScopedId : Id {
     parse field scope : Id
     parse field name : SimpleId
 
     fun simple_name (): SimpleId = self.name
 
-    fun resolve (base_env : LexicalEnv): Scope =
-        self.scope.resolve(base_env).children_env.get(self.name.symbol, only_first=true).node.to[Scope]
+    fun resolve (base_env : LexicalEnv): Scope = self.scope.resolve(base_env).children_env.get(self.name.symbol, only_first=true).node.to[Scope]
+}
 
-end
-
-class SimpleId : Id is
+class SimpleId : Id {
 
     fun simple_name (): SimpleId = self
 
-    fun resolve (base_env : LexicalEnv): Scope =
-        base_env.get(self.symbol, only_first=true).node.to[Scope]
+    fun resolve (base_env : LexicalEnv): Scope = base_env.get(self.symbol, only_first=true).node.to[Scope]
+}
 
-end
-
-class Scope : FooNode is
+class Scope : FooNode {
     parse field name : SimpleId
     parse field content : ASTList[Scope]
-end
+}
 
-class SelfDecl : FooNode is
+class SelfDecl : FooNode {
     parse field id : Id
     parse field md_node : Id
-end
+}

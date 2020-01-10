@@ -1,29 +1,27 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(name)
     name <- Name(@Identifier)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
-    public fun prop (empty1 : Boolean, empty2 : Boolean): Boolean =
-        let
-            arg1 = if empty1 then _ else self.children_env
-            arg2 = if empty2 then _ else self.children_env
-        in
-            <is_visible_from(<Var arg1>, <Var arg2>)>
-        end
+    public fun prop (empty1 : Boolean, empty2 : Boolean): Boolean = {
+        val arg1 = if empty1 then _ else self.children_env
+        val arg2 = if empty2 then _ else self.children_env
 
-end
+        <is_visible_from(<Var arg1>, <Var arg2>)>
+    }
+}
 
 """
 List of Name.
 """
-class ASTList[Name] : FooNodeBaseList is
-end
+class ASTList[Name] : FooNodeBaseList {
+}
 
-class ASTList[Name] : ASTList[Name] is
-end
+class ASTList[Name] : ASTList[Name] {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}

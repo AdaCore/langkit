@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     decl <- Decl(@Def name @Equal expr)
     name <- Identifier(@Identifier)
     main_rule <- list*(decl)
@@ -13,71 +13,69 @@ grammar None_grammar is
         | LessThan(atom @LessThan expr)
     )
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun identity (value : BigIntegerType): BigIntegerType = value
-end
+}
 
-class Decl : FooNode is
+class Decl : FooNode {
     parse field name : Identifier
     parse field expr_tree : Expr
-end
+}
 
-class Expr : FooNode is
+class Expr : FooNode {
 
     public fun evaluate (): BigIntegerType
 
     public fun evaluate_as_int (): Integer = <as_int(<FieldAccess .evaluate>)>
-end
+}
 
-class Equal : Expr is
+class Equal : Expr {
     parse field left : Expr
     parse field right : Expr
 
     fun evaluate (): BigIntegerType = <BigInteger <If>>
-end
+}
 
-class LessThan : Expr is
+class LessThan : Expr {
     parse field left : Expr
     parse field right : Expr
 
     fun evaluate (): BigIntegerType = <BigInteger <If>>
-end
+}
 
-class Literal : Expr is
+class Literal : Expr {
 
     fun evaluate (): BigIntegerType
-end
+}
 
-class Minus : Expr is
+class Minus : Expr {
     parse field left : Expr
     parse field right : Expr
 
     fun evaluate (): BigIntegerType = self.left.evaluate - self.right.evaluate
-end
+}
 
-class Plus : Expr is
+class Plus : Expr {
     parse field left : Expr
     parse field right : Expr
 
     fun evaluate (): BigIntegerType = self.left.evaluate + self.right.evaluate
-end
+}
 
-class Ref : Expr is
+class Ref : Expr {
     parse field name : Identifier
 
-    fun evaluate (): BigIntegerType =
-        self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
-
-end
+    fun evaluate (): BigIntegerType = self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
+}
 
 """
 List of Decl.
 """
-class ASTList[Decl] : FooNodeBaseList is
-end
+class ASTList[Decl] : FooNodeBaseList {
+}
 
-class Identifier : FooNode is
-end
+class Identifier : FooNode {
+}

@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(Param(name mode plus))
     plus <- ?@Plus
     name <- Name(@Identifier)
@@ -8,34 +8,34 @@ grammar None_grammar is
         | EnumDefault()
     )
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-enum class Enum : FooNode is
+enum class Enum : FooNode {
     case Null, Example, Default
-end
+}
 
 """
 List of Param.
 """
-class ASTList[Param] : FooNodeBaseList is
-end
+class ASTList[Param] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-class Param : FooNode is
+class Param : FooNode {
     parse field name : Name
     parse field mode : Enum
     parse field has_plus : PlusQualifier
-end
+}
 
-qualifier class PlusQualifier : FooNode is
+qualifier class PlusQualifier : FooNode {
 
     """
     Return whether this is an instance of PlusQualifierPresent
     """
     public fun as_bool (): Boolean
-end
+}

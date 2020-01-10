@@ -1,20 +1,20 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(Example(@Example))
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun before (n : FooNode): Boolean = self < n
 
     public fun before_or_equal (n : Example): Boolean = self <= n
-end
+}
 
-class Example : FooNode is
-end
+class Example : FooNode {
+}
 
 """
 List of Example.
 """
-class ASTList[Example] : FooNodeBaseList is
-end
+class ASTList[Example] : FooNodeBaseList {
+}

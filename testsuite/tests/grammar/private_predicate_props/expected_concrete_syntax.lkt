@@ -1,12 +1,12 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Name(@Identifier) |> when(Name.is_not_class_id)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Name : FooNode is
+class Name : FooNode {
 
     fun is_not_class_id (): Boolean = not (self.symbol == "class")
-end
+}
