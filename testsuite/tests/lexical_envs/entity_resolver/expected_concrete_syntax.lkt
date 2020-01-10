@@ -4,6 +4,7 @@ grammar None_grammar is
     ref <- Ref(Name(@Identifier))
 
 end
+
 class FooNode is
 
     fun resolve_ref (): Entity[FooNode] =
@@ -40,4 +41,3 @@ class Ref : FooNode is
 
     public fun resolve (): Entity[FooNode] = self.node_env.get(self.name)?[0]
 end
-

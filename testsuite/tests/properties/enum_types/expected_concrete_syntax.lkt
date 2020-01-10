@@ -11,6 +11,7 @@ grammar None_grammar is
     atom <- or(Literal(@Number) | name)
 
 end
+
 class FooNode is
 
     public fun identity (k : DeclKind): DeclKind = k
@@ -61,4 +62,3 @@ List of Name.
 """
 class ASTList[Name] : FooNodeBaseList is
 end
-

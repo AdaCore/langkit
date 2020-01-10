@@ -235,6 +235,7 @@ grammar None_grammar is
     dot <- Dot(@Dot)
 
 end
+
 class PythonNode is
 end
 
@@ -786,4 +787,3 @@ qualifier class VarArgsFlag : PythonNode is
     """
     public fun as_bool (): Boolean
 end
-

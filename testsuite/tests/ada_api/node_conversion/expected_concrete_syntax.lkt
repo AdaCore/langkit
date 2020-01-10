@@ -8,6 +8,7 @@ grammar None_grammar is
     ref <- Ref(?@Null name)
 
 end
+
 class FooNode is
 end
 
@@ -48,4 +49,3 @@ class VarDecl : FooNode is
     parse field name : Name
     parse field value : Expr
 end
-

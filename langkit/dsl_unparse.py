@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+from funcy import keep
+
 from langkit.passes import GlobalPass
 
 templates = {}
@@ -536,7 +538,7 @@ def emit_node_type(node_type):
     % endif
     % endfor
     $d
-    end$hl$hl
+    end$hl
     """.strip())
 
     del base, parse_fields, enum_qual, properties
@@ -562,16 +564,18 @@ def unparse_lang(ctx):
     template = """
     grammar ${ctx.short_name}_grammar is$i$hl
     % for name, rule in ctx.grammar.rules.items():
-    % if not rule.is_dont_skip_parser:
-    ${name} <- ${emit_rule(rule)}$hl
-    % endif
+        % if not rule.is_dont_skip_parser:
+            ${name} <- ${emit_rule(rule)}$hl
+        % endif
     % endfor
     $d$hl
     end$hl
 
-    % for node_type in ctx.astnode_types:
-    ${emit_node_type(node_type)}
+    <% types = keep(emit_node_type(t) for t in ctx.astnode_types) %>
 
+    % for t in types:
+        $hl
+        ${t}
     % endfor
     """
 

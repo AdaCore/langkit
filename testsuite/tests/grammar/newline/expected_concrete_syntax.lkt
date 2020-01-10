@@ -8,6 +8,7 @@ grammar None_grammar is
     main_rule <- or(comp | ind | nl)
 
 end
+
 class FooNode is
 end
 
@@ -30,4 +31,3 @@ class NewLineNode : FooNode is
     parse field lit_1 : Literal
     parse field lit_2 : Literal
 end
-

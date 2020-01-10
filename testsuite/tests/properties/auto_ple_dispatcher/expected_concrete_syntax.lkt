@@ -10,6 +10,7 @@ grammar None_grammar is
     scope <- Scope(Id(@Identifier) @LBrace defs @RBrace)
 
 end
+
 class FooNode is
 end
 
@@ -50,4 +51,3 @@ class Prefix : Name is
         self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
 
 end
-

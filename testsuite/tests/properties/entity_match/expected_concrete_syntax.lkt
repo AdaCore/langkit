@@ -4,6 +4,7 @@ grammar None_grammar is
     example <- Example(@Example)
 
 end
+
 class FooNode is
 
     fun get_num (): Integer
@@ -38,4 +39,3 @@ class Literal : FooNode is
 
     fun a (): Entity[FooNode]
 end
-

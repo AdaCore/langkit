@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- ?@Example
 
 end
+
 class FooNode is
 end
 
@@ -17,4 +18,3 @@ qualifier class HasExample : EnumNode is
     """
     public fun as_bool (): Boolean
 end
-

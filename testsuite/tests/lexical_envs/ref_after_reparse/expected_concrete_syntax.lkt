@@ -12,6 +12,7 @@ grammar None_grammar is
     )
 
 end
+
 class FooNode is
 end
 
@@ -74,4 +75,3 @@ end
 class Using : FooNode is
     parse field name : Name
 end
-

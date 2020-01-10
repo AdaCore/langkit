@@ -9,6 +9,7 @@ grammar None_grammar is
     number <- Number(@Number)
 
 end
+
 class FooNode is
 end
 
@@ -36,4 +37,3 @@ end
 
 class Number : FooNode is
 end
-

@@ -7,6 +7,7 @@ grammar None_grammar is
     ref <- Ref(@Identifier)
 
 end
+
 class FooNode is
 
     public fun find_atoms (): Array[Entity[Atom]] =
@@ -95,4 +96,3 @@ end
 
 class Name : FooNode is
 end
-

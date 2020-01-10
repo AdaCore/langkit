@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- Literal(@Number)
 
 end
+
 class FooNode is
 
     public fun prop (): Integer
@@ -28,4 +29,3 @@ class Literal : FooNode is
 
     fun a (): Entity[FooNode]
 end
-

@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- Example(@Example)
 
 end
+
 class FooNode is
 
     fun sophisticated_predicate (): Boolean = true
@@ -18,4 +19,3 @@ class Example : FooNode is
         end
 
 end
-

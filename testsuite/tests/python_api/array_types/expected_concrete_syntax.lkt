@@ -5,6 +5,7 @@ grammar None_grammar is
     example <- Example(@Example)
 
 end
+
 class FooNode is
 
     public fun count (seq : Array[Entity[Example]]): Integer = seq.length
@@ -43,4 +44,3 @@ end
 
 class Null : FooNode is
 end
-

@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- Example(@Example)
 
 end
+
 class FooNode is
 end
 
@@ -11,4 +12,3 @@ class Example : FooNode is
         (if (true) then self else self) then (s => s).as_bare_entity
 
 end
-

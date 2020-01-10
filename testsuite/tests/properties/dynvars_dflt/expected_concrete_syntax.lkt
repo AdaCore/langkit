@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- ExampleNode(@Example)
 
 end
+
 class RootNode is
 end
 
@@ -9,4 +10,3 @@ class ExampleNode : RootNode is
 
     public fun prop (): Boolean = bool_var
 end
-

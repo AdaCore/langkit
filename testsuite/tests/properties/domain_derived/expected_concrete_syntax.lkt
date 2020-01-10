@@ -3,6 +3,7 @@ grammar None_grammar is
     name <- Name(@Identifier)
 
 end
+
 class FooNode is
 end
 
@@ -30,4 +31,3 @@ class Name : FooNode is
 
     public fun definition (): Entity[Definition] = self.ref_var.get_value.to[Definition]
 end
-

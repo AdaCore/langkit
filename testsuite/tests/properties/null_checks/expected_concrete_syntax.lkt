@@ -8,6 +8,7 @@ grammar None_grammar is
     atom <- or(Literal(@Number) | Name(@Identifier))
 
 end
+
 class FooNode is
 
     public fun null_unit (): InternalUnit = null
@@ -58,4 +59,3 @@ class Plus : Expression is
     parse field left : Expression
     parse field right : Expression
 end
-

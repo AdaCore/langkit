@@ -8,6 +8,7 @@ grammar None_grammar is
     block <- Block(params name vars)
 
 end
+
 class FooNode is
 end
 
@@ -72,4 +73,3 @@ end
 
 class Name : FooNode is
 end
-

@@ -5,6 +5,7 @@ grammar None_grammar is
     ref_list <- list+(ref)
 
 end
+
 class FooNode is
 end
 
@@ -37,4 +38,3 @@ class Ref : FooNode is
         self.children_env.get(self.name, only_first=true).to![Decl]
 
 end
-

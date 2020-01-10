@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- list*(or(Literal(@Number) | Identifier(@Identifier)))
 
 end
+
 class FooNode is
 end
 
@@ -36,4 +37,3 @@ class Literal : RootNode is
         ) and (<Bind>)
 
 end
-

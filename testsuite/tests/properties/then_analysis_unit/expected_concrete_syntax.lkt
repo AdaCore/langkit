@@ -3,6 +3,7 @@ grammar None_grammar is
     name <- Name(@Identifier)
 
 end
+
 class FooNode is
 
     public fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
@@ -19,4 +20,3 @@ end
 
 class Name : FooNode is
 end
-

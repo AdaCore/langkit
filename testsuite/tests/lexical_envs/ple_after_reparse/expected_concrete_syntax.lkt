@@ -7,6 +7,7 @@ grammar None_grammar is
     id <- Id(@Identifier)
 
 end
+
 class FooNode is
 end
 
@@ -78,4 +79,3 @@ class Var : FooNode is
     parse field name : Id
     parse field value : Name
 end
-

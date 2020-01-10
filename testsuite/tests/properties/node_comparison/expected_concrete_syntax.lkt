@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- list*(Example(@Example))
 
 end
+
 class FooNode is
 
     public fun before (n : FooNode): Boolean = self < n
@@ -17,4 +18,3 @@ List of Example.
 """
 class ASTList[Example] : FooNodeBaseList is
 end
-

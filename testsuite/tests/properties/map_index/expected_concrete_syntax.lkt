@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- ListNode(list*(NumberNode(@Number)))
 
 end
+
 class FooNode is
 end
 
@@ -19,4 +20,3 @@ end
 
 class NumberNode : FooNode is
 end
-

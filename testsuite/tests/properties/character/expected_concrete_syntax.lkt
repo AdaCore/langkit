@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- Example(@Example)
 
 end
+
 class FooNode is
 end
 
@@ -17,4 +18,3 @@ class Example : FooNode is
 
     public fun text_identity (s : Array[CharacterType]): Array[CharacterType] = s
 end
-

@@ -5,6 +5,7 @@ grammar None_grammar is
     )
 
 end
+
 class FooNode is
 end
 
@@ -21,4 +22,3 @@ class Tuple : FooNode is
     parse field id : Name
     parse field nodes : ASTList[Tuple]
 end
-

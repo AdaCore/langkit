@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- or(Literal(@Number) | BarNode(@Example))
 
 end
+
 class FooNode is
 end
 
@@ -20,4 +21,3 @@ class Literal : FooNode is
 
     fun a (): Entity[FooNode]
 end
-

@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- BarNode(@Example)
 
 end
+
 class FooNode is
 end
 
@@ -15,4 +16,3 @@ class BarNode : FooNode is
         end
 
 end
-
