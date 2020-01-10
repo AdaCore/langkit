@@ -112,7 +112,8 @@
                   actuals.append('{} => Node.Info'.format(
                       field.entity_info_name
                   ))
-              field_access = '{} ({})'.format(field.name, ', '.join(actuals))
+              field_access = '{} ({})'.format(field.qual_impl_name,
+                                              ', '.join(actuals))
             %>
 
             Result : ${field.type.name};

@@ -3278,6 +3278,15 @@ class PropertyDef(AbstractNodeData):
 
         self.external = external
 
+        self.user_external = external and self.prefix is not None
+        """
+        Whether this property is external and comes from the DSL. In that case,
+        code generation expects its implementation to be in the
+        $.Implementation.Extensions unit.
+
+        :type: bool
+        """
+
         self._uses_entity_info = uses_entity_info
         self._uses_envs = uses_envs
 

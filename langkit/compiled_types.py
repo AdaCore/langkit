@@ -470,8 +470,9 @@ class AbstractNodeData(object):
         This is useful during code generation to avoid name clashes.
         """
         if self.is_property:
-            return '{}.Implementation.{}'.format(
+            return '{}.Implementation{}.{}'.format(
                 get_context().ada_api_settings.lib_name,
+                '.Extensions' if self.user_external else '',
                 self.internal_name
             )
         else:
