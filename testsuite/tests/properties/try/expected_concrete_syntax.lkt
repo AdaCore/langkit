@@ -14,6 +14,3 @@ class Example : FooNode is
     public fun failsafe_property_2 (): Boolean = <Try>
 end
 
-class FooNodeBaseList : FooNode is
-end
-

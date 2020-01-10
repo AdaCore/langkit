@@ -12,9 +12,6 @@ class Block : FooNode is
     parse field content : ASTList[Ref]
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Ref.
 """

@@ -14,9 +14,6 @@ class DefNode : FooNode is
     parse field values : ASTList[DefNode]
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of DefNode.
 """

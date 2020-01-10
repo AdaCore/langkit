@@ -11,9 +11,6 @@ end
 class Atom : FooNode is
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of FooNode.
 """

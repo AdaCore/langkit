@@ -12,9 +12,6 @@ class Example : FooNode is
     public fun not_eq (other : Example): Boolean = not (self == other)
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Example.
 """

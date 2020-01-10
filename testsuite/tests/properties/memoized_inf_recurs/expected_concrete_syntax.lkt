@@ -10,6 +10,3 @@ class Example : FooNode is
     public memoized fun recurse (): Boolean = self.recurse
 end
 
-class FooNodeBaseList : FooNode is
-end
-

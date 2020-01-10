@@ -15,9 +15,6 @@ class Decl : FooNode is
 
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Decl.
 """

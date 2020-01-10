@@ -10,6 +10,3 @@ class Example : FooNode is
     public fun sym (sym : SymbolType): SymbolType = sym
 end
 
-class FooNodeBaseList : FooNode is
-end
-

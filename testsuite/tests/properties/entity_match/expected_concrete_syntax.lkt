@@ -14,9 +14,6 @@ class Example : FooNode is
     fun get_num (): Integer = 2
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 class Literal : FooNode is
 
     fun get_num (): Integer = 3

@@ -10,6 +10,3 @@ class Example : FooNode is
     public fun compute (n : FooNode): FooNode = n
 end
 
-class FooNodeBaseList : FooNode is
-end
-

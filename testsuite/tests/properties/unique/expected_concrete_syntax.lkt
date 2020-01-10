@@ -10,6 +10,3 @@ class Example : FooNode is
     public fun test (a : Array[InternalUnit]): Array[InternalUnit] = <unique(<Var a>)>
 end
 
-class FooNodeBaseList : FooNode is
-end
-

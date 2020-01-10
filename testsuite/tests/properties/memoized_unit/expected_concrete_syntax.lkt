@@ -10,6 +10,3 @@ class Example : FooNode is
     public memoized fun unit_root_node (unit : InternalUnit): Entity[FooNode] = unit.root.as_bare_entity
 end
 
-class FooNodeBaseList : FooNode is
-end
-

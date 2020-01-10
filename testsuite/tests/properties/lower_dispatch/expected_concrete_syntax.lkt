@@ -78,9 +78,6 @@ class Plus : Expr is
 
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of FooNode.
 

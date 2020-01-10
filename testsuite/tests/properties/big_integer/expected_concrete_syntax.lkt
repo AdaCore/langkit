@@ -72,9 +72,6 @@ class Ref : Expr is
 
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Decl.
 """

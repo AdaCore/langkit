@@ -502,9 +502,6 @@ class Params : PythonNode is
     parse field single_params : ASTList[SingleParam]
 end
 
-class PythonNodeBaseList : PythonNode is
-end
-
 """
 List of Arg.
 """

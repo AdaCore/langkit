@@ -39,9 +39,6 @@ class Couple : FooNode is
 
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 class Literal : FooNode is
 end
 

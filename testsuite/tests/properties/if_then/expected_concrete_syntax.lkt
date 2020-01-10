@@ -12,6 +12,3 @@ class Example : FooNode is
 
 end
 
-class FooNodeBaseList : FooNode is
-end
-

@@ -18,6 +18,3 @@ class Example : FooNode is
     public memoized fun prop2 (): Boolean = raise PropertyError('Explicit error 2')
 end
 
-class FooNodeBaseList : FooNode is
-end
-

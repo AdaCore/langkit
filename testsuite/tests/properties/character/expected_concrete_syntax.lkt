@@ -18,6 +18,3 @@ class Example : FooNode is
     public fun text_identity (s : Array[CharacterType]): Array[CharacterType] = s
 end
 
-class FooNodeBaseList : FooNode is
-end
-

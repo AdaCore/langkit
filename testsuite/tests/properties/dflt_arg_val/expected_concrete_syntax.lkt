@@ -12,6 +12,3 @@ class Example : FooNode is
     public fun prop2 (arg : Entity[FooNode] = null): Entity[FooNode] = arg
 end
 
-class FooNodeBaseList : FooNode is
-end
-

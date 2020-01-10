@@ -13,6 +13,3 @@ class Example : FooNode is
     public fun do_solving (): Boolean = <Predicate on Example.pred>.solve
 end
 
-class FooNodeBaseList : FooNode is
-end
-

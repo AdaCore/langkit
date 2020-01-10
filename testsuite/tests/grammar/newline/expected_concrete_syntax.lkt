@@ -18,9 +18,6 @@ class CompositeNode : FooNode is
     parse field lit_4 : Literal
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 class IndentNode : FooNode is
     parse field lit_1 : Literal
     parse field lit_2 : Literal

@@ -16,9 +16,6 @@ class Example : FooNode is
     public fun struct_identity (s : MyStruct): MyStruct = s
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Example.
 """

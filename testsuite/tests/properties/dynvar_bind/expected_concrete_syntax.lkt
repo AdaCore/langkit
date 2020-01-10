@@ -12,9 +12,6 @@ class Decl : FooNode is
     parse field refs : ASTList[Ref]
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Decl.
 """
