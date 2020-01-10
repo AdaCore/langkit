@@ -7,9 +7,9 @@ end
 
 class Example : FooNode is
 
-    public fun prop1 (arg : Boolean= <LiteralExpr True (Boolean)>): Boolean = arg
+    public fun prop1 (arg : Boolean = true): Boolean = arg
 
-    public fun prop2 (arg : Entity[FooNode]= <LiteralExpr No_Entity (InternalEntity)>): Entity[FooNode] = arg
+    public fun prop2 (arg : Entity[FooNode] = null): Entity[FooNode] = arg
 end
 
 class FooNodeBaseList : FooNode is

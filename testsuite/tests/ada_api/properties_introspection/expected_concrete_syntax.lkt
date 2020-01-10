@@ -53,13 +53,13 @@ class Number : Expr is
 
     fun eval (): Integer
 
-    public fun id_dflt_bool (id : Boolean= <LiteralExpr True (Boolean)>): Boolean = id
+    public fun id_dflt_bool (id : Boolean = true): Boolean = id
 
-    public fun id_dflt_int (id : Integer= <LiteralExpr 42 (Integer)>): Integer = id
+    public fun id_dflt_int (id : Integer = 42): Integer = id
 
-    public fun id_dflt_char (id : CharacterType= <LiteralExpr Character_Type'Val (0) (CharacterType)>): CharacterType = id
+    public fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
 
-    public fun id_dflt_root_node (id : FooNode= <LiteralExpr No_Bare_Foo_Node (BareFooNode)>): FooNode = id
+    public fun id_dflt_root_node (id : FooNode = null): FooNode = id
 end
 
 class Ref : Expr is

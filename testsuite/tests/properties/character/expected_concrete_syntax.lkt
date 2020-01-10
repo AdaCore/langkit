@@ -7,9 +7,9 @@ end
 
 class Example : FooNode is
 
-    public fun get_a (c : CharacterType= <LiteralExpr Character_Type'Val (97) (CharacterType)>): CharacterType = c
+    public fun get_a (c : CharacterType = 'a'): CharacterType = c
 
-    public fun get_eacute (c : CharacterType= <LiteralExpr Character_Type'Val (233) (CharacterType)>): CharacterType = c
+    public fun get_eacute (c : CharacterType = '\xe9'): CharacterType = c
 
     public fun identity (c : CharacterType): CharacterType = c
 
