@@ -1,15 +1,15 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(or(Definition(@Def name) | name), @Comma)
     name <- Name(@Identifier)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Definition : FooNode is
+class Definition : FooNode {
     parse field name : Name
-end
+}
 
 """
 List of FooNode.
@@ -19,15 +19,13 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Definition)}
 * ${node_name(T.Name)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
-class Name : FooNode is
+class Name : FooNode {
     field ref_var : LogicVar
 
-    public fun resolve (): Boolean =
-        <domain(<FieldAccess .ref_var>, <map>)>.solve
-
+    public fun resolve (): Boolean = <domain(<FieldAccess .ref_var>, <map>)>.solve
 
     public fun definition (): Entity[Definition] = self.ref_var.get_value.to[Definition]
-end
+}

@@ -1,27 +1,27 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(def_rule)
     def_rule <- Def(name ?@Plus name)
     name <- Name(@Identifier)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Def : FooNode is
+class Def : FooNode {
     parse field name : Name
     parse field ref : Name
-end
+}
 
 """
 List of Def.
 """
-class ASTList[Def] : FooNodeBaseList is
-end
+class ASTList[Def] : FooNodeBaseList {
+}
 
-class Name : FooNode is
+class Name : FooNode {
 
     fun sym (): SymbolType = self.symbol
 
     fun resolve (): Entity[FooNode] = self.parent.node_env.get(self.sym)?[0]
-end
+}

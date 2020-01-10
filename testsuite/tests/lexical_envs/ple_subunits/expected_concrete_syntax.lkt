@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     defs <- list+(or(scope | var) @Semicolon)
     name <- or(Prefix(name @Dot id) | id)
     main_rule <- list*(scope)
@@ -7,20 +7,20 @@ grammar None_grammar is
     scope <- Scope(name @LBrace deps defs @RBrace)
     id <- Id(@Identifier)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Dep : FooNode is
+class Dep : FooNode {
     parse field name : Name
-end
+}
 
 """
 List of Dep.
 """
-class ASTList[Dep] : FooNodeBaseList is
-end
+class ASTList[Dep] : FooNodeBaseList {
+}
 
 """
 List of FooNode.
@@ -30,16 +30,16 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Scope)}
 * ${node_name(T.Var)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
 """
 List of Scope.
 """
-class ASTList[Scope] : FooNodeBaseList is
-end
+class ASTList[Scope] : FooNodeBaseList {
+}
 
-class Name : FooNode is
+class Name : FooNode {
 
     public fun resolve (): Entity[FooNode]
 
@@ -50,50 +50,44 @@ class Name : FooNode is
     fun referenced_unit_or_error (or_error : Boolean): InternalUnit
 
     public fun referenced_unit (): InternalUnit = self.referenced_unit_or_error(false)
-end
+}
 
-class Id : Name is
+class Id : Name {
 
     fun resolve (): Entity[FooNode] = self.node_env.get(self, only_first=true)
 
     fun suffix_symbol (): SymbolType = self.symbol
 
     fun symbols (): Array[SymbolType] = self.symbol?[]
-end
+}
 
-class Prefix : Name is
+class Prefix : Name {
     parse field prefix : Name
     parse field suffix : Id
 
-    fun resolve (): Entity[FooNode] =
-        self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
-
+    fun resolve (): Entity[FooNode] = self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
 
     fun suffix_symbol (): SymbolType = self.suffix.symbol
 
-    fun symbols (): Array[SymbolType] =
-        self.prefix.symbols & self.suffix.symbols
+    fun symbols (): Array[SymbolType] = self.prefix.symbols & self.suffix.symbols
+}
 
-end
-
-class Scope : FooNode is
+class Scope : FooNode {
     parse field name : Name
     parse field deps : ASTList[Dep]
     parse field defs : ASTList[FooNode]
     field [internal]is_env_populated : Boolean
 
-    fun initial_env (): LexicalEnv =
-        match self.name do
-            case p : Prefix => p.prefix.referenced_unit.root.to![ASTList[Scope]].filter(
-                (scope) => scope.name.symbols == p.prefix.symbols
-            ).at_or_raise(0).children_env
-            case _ => self.children_env
+    fun initial_env (): LexicalEnv = match self.name {
+        case p : Prefix => p.prefix.referenced_unit.root.to![ASTList[Scope]].filter(
+            (scope) => scope.name.symbols == p.prefix.symbols
+        ).at_or_raise(0).children_env
+        case _ => self.children_env
 
-        end
+    }
+}
 
-end
-
-class Var : FooNode is
+class Var : FooNode {
     parse field name : Id
     parse field value : Name
-end
+}

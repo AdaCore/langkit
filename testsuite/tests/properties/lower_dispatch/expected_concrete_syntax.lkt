@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     name <- Name(@Identifier)
     main_rule <- list*(or(Def(@Def name expr) | expr))
     expr <- or(atom | plus)
@@ -7,17 +7,17 @@ grammar None_grammar is
     atom <- or(lit | ref)
     ref <- Ref(name)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Def : FooNode is
+class Def : FooNode {
     parse field name : Name
     parse field expr : Expr
-end
+}
 
-class Expr : FooNode is
+class Expr : FooNode {
 
     public fun evaluate_abstract (): Integer
 
@@ -30,54 +30,44 @@ class Expr : FooNode is
     fun evaluate_rtcheck (): Integer
 
     fun evaluate_concrete (): Integer
-end
+}
 
-class Atom : Expr is
-end
+class Atom : Expr {
+}
 
-class Lit : Atom is
+class Lit : Atom {
 
     fun evaluate_abstract (): Integer = 1
 
     fun evaluate_rtcheck (): Integer = 1
 
     fun evaluate_entity (): Integer = 1
-end
+}
 
-class Ref : Atom is
+class Ref : Atom {
     parse field name : Name
 
-    public fun resolve (): Entity[Def] =
-        self.node_env.get(self.name.symbol, only_first=true).to![Def]
-
+    public fun resolve (): Entity[Def] = self.node_env.get(self.name.symbol, only_first=true).to![Def]
 
     fun evaluate_abstract (): Integer = self.resolve.expr.evaluate_abstract
 
     fun evaluate_concrete (): Integer = self.resolve.expr.evaluate_concrete
 
     fun evaluate_entity (): Integer = entity.resolve.expr.evaluate_entity
-end
+}
 
-class Plus : Expr is
+class Plus : Expr {
     parse field lhs : Expr
     parse field rhs : Expr
 
-    fun evaluate_abstract (): Integer =
-        self.lhs.evaluate_abstract + self.rhs.evaluate_abstract
+    fun evaluate_abstract (): Integer = self.lhs.evaluate_abstract + self.rhs.evaluate_abstract
 
+    fun evaluate_rtcheck (): Integer = self.lhs.evaluate_rtcheck + self.rhs.evaluate_rtcheck
 
-    fun evaluate_rtcheck (): Integer =
-        self.lhs.evaluate_rtcheck + self.rhs.evaluate_rtcheck
+    fun evaluate_concrete (): Integer = self.lhs.evaluate_concrete + self.rhs.evaluate_concrete
 
-
-    fun evaluate_concrete (): Integer =
-        self.lhs.evaluate_concrete + self.rhs.evaluate_concrete
-
-
-    fun evaluate_entity (): Integer =
-        entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
-
-end
+    fun evaluate_entity (): Integer = entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
+}
 
 """
 List of FooNode.
@@ -87,8 +77,8 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Def)}
 * ${node_name(T.Expr)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}

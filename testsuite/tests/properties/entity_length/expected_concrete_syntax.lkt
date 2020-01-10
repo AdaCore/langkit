@@ -1,22 +1,22 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Names(list*(Name(@Identifier)))
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
 """
 List of Name.
 """
-class ASTList[Name] : FooNodeBaseList is
-end
+class ASTList[Name] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-class Names : FooNode is
+class Names : FooNode {
     parse field names : ASTList[Name]
 
     public fun count (): Integer = entity.names.length
-end
+}

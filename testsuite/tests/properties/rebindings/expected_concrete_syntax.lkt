@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     name <- Name(@Identifier)
     vars <- @LBrace list*(var) @RBrace
     main_rule <- list*(block)
@@ -7,17 +7,17 @@ grammar None_grammar is
     var <- BlockVar(name)
     block <- Block(params name vars)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class DefNode : FooNode is
+class DefNode : FooNode {
 
     public fun name (): SymbolType
-end
+}
 
-class Block : DefNode is
+class Block : DefNode {
     parse field params : ASTList[Param]
     parse field name_field : Name
     parse field vars : ASTList[BlockVar]
@@ -25,69 +25,62 @@ class Block : DefNode is
     fun name (): SymbolType = self.name_field.symbol
 
     public fun rebind (from_block : Entity[Block], to_block : Entity[Block]): Entity[Block] =
-        let
-            rbdng = entity.info.rebindings.append_rebinding(
-                from_block.params.children_env, to_block.children_env
-            )
-            e_info = new EntityInfo(
-                md=entity.info.md, from_rebound=false, rebindings=rbdng
-            )
-        in
-            new Entity[Block](info=e_info, node=self)
-        end
+    {
+        val rbdng = entity.info.rebindings.append_rebinding(
+            from_block.params.children_env, to_block.children_env
+        )
+        val e_info = new EntityInfo(
+            md=entity.info.md, from_rebound=false, rebindings=rbdng
+        )
 
+        new Entity[Block](info=e_info, node=self)
+    }
 
-    public fun parent_rebindings (): Entity[Block] =
-        let
-            e_info = new EntityInfo(
-                md=entity.info.md, from_rebound=false, rebindings=entity.info.rebindings.get_parent
-            )
-        in
-            new Entity[Block](info=e_info, node=self)
-        end
+    public fun parent_rebindings (): Entity[Block] = {
+        val e_info = new EntityInfo(
+            md=entity.info.md, from_rebound=false, rebindings=entity.info.rebindings.get_parent
+        )
 
+        new Entity[Block](info=e_info, node=self)
+    }
 
-    public fun new (): Entity[FooNode] =
-        entity.info.rebindings.new_env.env_node.as_bare_entity
+    public fun new (): Entity[FooNode] = entity.info.rebindings.new_env.env_node.as_bare_entity
 
+    public fun old (): Entity[FooNode] = entity.info.rebindings.new_env.env_node.as_bare_entity
+}
 
-    public fun old (): Entity[FooNode] =
-        entity.info.rebindings.new_env.env_node.as_bare_entity
-
-end
-
-class BlockVar : DefNode is
+class BlockVar : DefNode {
     parse field name_field : Name
 
     fun name (): SymbolType = self.name_field.symbol
-end
+}
 
-class Param : DefNode is
+class Param : DefNode {
     parse field name_field : Name
 
     fun name (): SymbolType = self.name_field.symbol
-end
+}
 
 """
 List of Block.
 """
-class ASTList[Block] : FooNodeBaseList is
-end
+class ASTList[Block] : FooNodeBaseList {
+}
 
 """
 List of BlockVar.
 """
-class ASTList[BlockVar] : FooNodeBaseList is
-end
+class ASTList[BlockVar] : FooNodeBaseList {
+}
 
 """
 List of Param.
 """
-class ASTList[Param] : FooNodeBaseList is
-end
+class ASTList[Param] : FooNodeBaseList {
+}
 
-class ASTList[Param] : ASTList[Param] is
-end
+class ASTList[Param] : ASTList[Param] {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}

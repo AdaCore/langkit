@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(or(
         | RootNode(
             @Def null(Identifier) ?@LBrace Number(@Number) @RBrace @Semicolon
@@ -8,24 +8,24 @@ grammar None_grammar is
         )
     ))
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
 """
 List of RootNode.
 """
-class ASTList[RootNode] : FooNodeBaseList is
-end
+class ASTList[RootNode] : FooNodeBaseList {
+}
 
-class Identifier : FooNode is
-end
+class Identifier : FooNode {
+}
 
-class Number : FooNode is
-end
+class Number : FooNode {
+}
 
-class RootNode : FooNode is
+class RootNode : FooNode {
     parse field ident : Identifier
     parse field number : Number
-end
+}

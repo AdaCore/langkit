@@ -1,14 +1,14 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Def(Example(@Example))
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Def : FooNode is
+class Def : FooNode {
     parse field example : Example
-end
+}
 
-class Example : FooNode is
-end
+class Example : FooNode {
+}

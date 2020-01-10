@@ -1,22 +1,22 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(name)
     name <- Name(@Identifier)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
-end
+}
 
 """
 List of Name.
 """
-class ASTList[Name] : FooNodeBaseList is
-end
+class ASTList[Name] : FooNodeBaseList {
+}
 
-class ASTList[Name] : ASTList[Name] is
-end
+class ASTList[Name] : ASTList[Name] {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}

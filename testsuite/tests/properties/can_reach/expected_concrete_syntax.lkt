@@ -1,20 +1,19 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(Example(@Example))
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun can_reach (n : Entity[FooNode], from_node : Entity[FooNode]): Boolean =
-        <can_reach(<FieldAccess .node>, <FieldAccess .node>)>
+    <can_reach(<FieldAccess .node>, <FieldAccess .node>)>
+}
 
-end
-
-class Example : FooNode is
-end
+class Example : FooNode {
+}
 
 """
 List of Example.
 """
-class ASTList[Example] : FooNodeBaseList is
-end
+class ASTList[Example] : FooNodeBaseList {
+}

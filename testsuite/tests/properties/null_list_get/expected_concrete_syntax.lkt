@@ -1,24 +1,25 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(Example(@Example))
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     fun at_bare (n : ASTList[Example], i : Integer): Example = n?[i]
 
-    fun at_entity (n : Entity[ASTList[Example]], i : Integer): Entity[Example] = n?[i]
+    fun at_entity (n : Entity[ASTList[Example]], i : Integer): Entity[Example] =
+    n?[i]
 
     public fun run_bare (): Entity[Example] = self.at_bare(null, 1).as_bare_entity
 
     public fun run_entity (): Entity[Example] = self.at_entity(null, 1)
-end
+}
 
-class Example : FooNode is
-end
+class Example : FooNode {
+}
 
 """
 List of Example.
 """
-class ASTList[Example] : FooNodeBaseList is
-end
+class ASTList[Example] : FooNodeBaseList {
+}

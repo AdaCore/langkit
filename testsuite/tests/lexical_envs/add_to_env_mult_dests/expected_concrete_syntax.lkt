@@ -1,13 +1,13 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- elem
     scope <- Scope(id @LBrace list*(elem) @RBrace)
     id <- Id(@Identifier)
     elem <- or(scope | id)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
 """
 List of FooNode.
@@ -17,17 +17,15 @@ This list node can contain one of the following nodes:
 * ${node_name(T.Id)}
 * ${node_name(T.Scope)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
-class Id : FooNode is
+class Id : FooNode {
 
-    public fun get_scope (): Entity[FooNode] =
-        self.children_env.get("Scope", only_first=true)
+    public fun get_scope (): Entity[FooNode] = self.children_env.get("Scope", only_first=true)
+}
 
-end
-
-class Scope : FooNode is
+class Scope : FooNode {
     parse field name : Id
     parse field content : ASTList[FooNode]
-end
+}

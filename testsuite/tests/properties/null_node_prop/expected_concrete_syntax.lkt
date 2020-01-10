@@ -1,14 +1,14 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Example(@Example)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun eval_unit (): Boolean = null.prop
 
     fun prop (): Boolean = true
-end
+}
 
-class Example : FooNode is
-end
+class Example : FooNode {
+}

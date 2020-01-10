@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     name <- Name(@Identifier)
     main_rule <- list*(var_decl)
     number <- Number(@Number)
@@ -7,9 +7,9 @@ grammar None_grammar is
     atom <- or(number | ref)
     ref <- Ref(name)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun id_bool (id : Boolean): Boolean = id
 
@@ -31,26 +31,28 @@ class FooNode is
 
     public fun id_unit_kind (id : AnalysisUnitKind): AnalysisUnitKind = id
 
-    public fun id_node_array (id : Array[Entity[FooNode]]): Array[Entity[FooNode]] = id
+    public fun id_node_array (id : Array[Entity[FooNode]]): Array[Entity[FooNode]] =
+    id
 
-    public fun id_bigint_array (id : Array[BigIntegerType]): Array[BigIntegerType] = id
-end
+    public fun id_bigint_array (id : Array[BigIntegerType]): Array[BigIntegerType] =
+    id
+}
 
-class Expr : FooNode is
+class Expr : FooNode {
 
     public fun eval (): Integer
 
     public fun eval_plus (addend : Expr): Integer = self.eval + addend.eval
-end
+}
 
-class Addition : Expr is
+class Addition : Expr {
     parse field lhs : Expr
     parse field rhs : Expr
 
     fun eval (): Integer = self.lhs.eval + self.rhs.eval
-end
+}
 
-class Number : Expr is
+class Number : Expr {
 
     fun eval (): Integer
 
@@ -61,30 +63,28 @@ class Number : Expr is
     public fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
 
     public fun id_dflt_root_node (id : FooNode = null): FooNode = id
-end
+}
 
-class Ref : Expr is
+class Ref : Expr {
     parse field name : Name
 
-    public fun referenced_var_decl (): Entity[VarDecl] =
-        self.node_env.get(self.name, only_first=true).to![VarDecl]
-
+    public fun referenced_var_decl (): Entity[VarDecl] = self.node_env.get(self.name, only_first=true).to![VarDecl]
 
     fun eval (): Integer = self.referenced_var_decl.eval
-end
+}
 
 """
 List of VarDecl.
 """
-class ASTList[VarDecl] : FooNodeBaseList is
-end
+class ASTList[VarDecl] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-class VarDecl : FooNode is
+class VarDecl : FooNode {
     parse field name : Name
     parse field value : Expr
 
     public fun eval (): Integer = self.value.eval
-end
+}

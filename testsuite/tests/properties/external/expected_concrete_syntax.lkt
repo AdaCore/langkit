@@ -1,25 +1,25 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- or(Plus(atom @Plus main_rule) | atom)
     atom <- Literal(@Number)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Expression : FooNode is
+class Expression : FooNode {
 
     public fun result (): Integer
-end
+}
 
-class Literal : Expression is
+class Literal : Expression {
 
     fun result (): Integer
-end
+}
 
-class Plus : Expression is
+class Plus : Expression {
     parse field left : Literal
     parse field right : Expression
 
     fun result (): Integer = self.left.result + self.right.result
-end
+}

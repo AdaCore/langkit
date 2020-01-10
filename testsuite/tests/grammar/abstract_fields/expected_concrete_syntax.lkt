@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     decl <- or(var_decl | fun_decl)
     name <- Name(@Identifier)
     main_rule <- list*(decl)
@@ -10,45 +10,45 @@ grammar None_grammar is
     expr <- or(number | ref)
     ref <- Ref(name)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Decl : FooNode is
+class Decl : FooNode {
     parse field name : Name
     parse field value : Expr
-end
+}
 
-class FunDecl : Decl is
+class FunDecl : Decl {
     parse field name : Name
     parse field value : Expr
-end
+}
 
-class VarDecl : Decl is
+class VarDecl : Decl {
     parse field var_kw : VarKeyword
     parse field name : Name
     parse field value : Expr
-end
+}
 
-class Expr : FooNode is
-end
+class Expr : FooNode {
+}
 
-class Number : Expr is
-end
+class Number : Expr {
+}
 
-class Ref : Expr is
+class Ref : Expr {
     parse field name : Name
-end
+}
 
 """
 List of Decl.
 """
-class ASTList[Decl] : FooNodeBaseList is
-end
+class ASTList[Decl] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-class VarKeyword : FooNode is
-end
+class VarKeyword : FooNode {
+}

@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     lit <- Literal(@Number)
     ind <- IndentNode(lit @Newline @Indent lit @Dedent)
     comp <- CompositeNode(
@@ -7,27 +7,27 @@ grammar None_grammar is
     nl <- NewLineNode(lit @Newline lit)
     main_rule <- or(comp | ind | nl)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class CompositeNode : FooNode is
+class CompositeNode : FooNode {
     parse field lit_1 : Literal
     parse field lit_2 : Literal
     parse field lit_3 : Literal
     parse field lit_4 : Literal
-end
+}
 
-class IndentNode : FooNode is
+class IndentNode : FooNode {
     parse field lit_1 : Literal
     parse field lit_2 : Literal
-end
+}
 
-class Literal : FooNode is
-end
+class Literal : FooNode {
+}
 
-class NewLineNode : FooNode is
+class NewLineNode : FooNode {
     parse field lit_1 : Literal
     parse field lit_2 : Literal
-end
+}

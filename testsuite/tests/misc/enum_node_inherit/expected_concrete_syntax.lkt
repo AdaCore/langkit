@@ -1,20 +1,20 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- ?@Example
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class EnumNode : FooNode is
+class EnumNode : FooNode {
 
     public fun prop (): Boolean = true
-end
+}
 
-qualifier class HasExample : EnumNode is
+qualifier class HasExample : EnumNode {
 
     """
     Return whether this is an instance of HasExamplePresent
     """
     public fun as_bool (): Boolean
-end
+}

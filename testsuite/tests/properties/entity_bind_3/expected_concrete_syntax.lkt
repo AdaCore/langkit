@@ -1,16 +1,16 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Literal(@Number)
 
-end
+}
 
-class FooNode is
+class FooNode {
 
     public fun prop (): Integer
 
     fun prop (): Integer
-end
+}
 
-class Literal : FooNode is
+class Literal : FooNode {
     field var : LogicVar
 
     fun a (): Entity[FooNode]
@@ -19,13 +19,11 @@ class Literal : FooNode is
 
     fun b (): LogicEquation = <Bind>
 
-    public fun public_pro (): Entity[Literal] =
-        let
-            _ = self.b
-        in
-            self.as_bare_entity
-        end
+    public fun public_pro (): Entity[Literal] = {
+        val _ = self.b
 
+        self.as_bare_entity
+    }
 
     fun a (): Entity[FooNode]
-end
+}

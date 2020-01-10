@@ -213,12 +213,12 @@ def emit_expr(expr, **ctx):
             return ee(expr.expr)
 
         vars_defs = "".join([
-            "{} = {}$hl".format(
+            "val {} = {}$hl".format(
                 var_name(var), ee(abs_expr)
             ) for var, abs_expr in zip(expr.vars, expr.var_exprs)
         ])
 
-        return "let$i$hl{}$din$i$hl{}$hl$dend".format(
+        return "{{$i$hl{}$hl{}$hl$d}}".format(
             vars_defs, ee(expr.expr)
         )
     elif isinstance(expr, Map):
@@ -287,7 +287,7 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, Match):
         return sf("""
-        match ${ee(expr.matched_expr)} do$i$hl
+        match ${ee(expr.matched_expr)} {$i$hl
         % for typ, var, e in expr.matchers:
         % if typ:
         case ${var_name(var)} : ${type_name(typ)} => ${ee(e)}$hl
@@ -295,7 +295,8 @@ def emit_expr(expr, **ctx):
         case ${var_name(var)} => ${ee(e)}$hl
         % endif
         % endfor
-        $d$hlend
+        $d$hl
+        }
         """)
 
     elif isinstance(expr, Eq):
@@ -428,6 +429,7 @@ def emit_doc(doc):
 
 
 def emit_prop(prop):
+    from langkit.expressions import Let
     quals = ""
     if prop.is_public:
         quals += "public "
@@ -455,7 +457,10 @@ def emit_prop(prop):
     )
 
     if prop.expr:
-        res += " = {}".format(emit_indent_expr(prop.expr))
+        if isinstance(prop.expr, Let):
+            res += " = $sl{}".format(emit_expr(prop.expr))
+        else:
+            res += " = $sl{}".format(emit_expr(prop.expr))
 
     return res
 
@@ -521,9 +526,9 @@ def emit_node_type(node_type):
     ${emit_doc(doc)}$hl
     % endif
     % if base:
-    ${enum_qual}class ${type_name(node_type)} : ${type_name(base)} is$i$hl
+    ${enum_qual}class ${type_name(node_type)} : ${type_name(base)} {$i$hl
     % else:
-    ${enum_qual}class ${type_name(node_type)} is$i$hl
+    ${enum_qual}class ${type_name(node_type)} {$i$hl
     % endif
     % for field in parse_fields:
     ${emit_field(field)}$hl
@@ -538,7 +543,7 @@ def emit_node_type(node_type):
     % endif
     % endfor
     $d
-    end$hl
+    }$hl
     """.strip())
 
     del base, parse_fields, enum_qual, properties
@@ -562,14 +567,14 @@ def unparse_lang(ctx):
     ctx.emitter = None
 
     template = """
-    grammar ${ctx.short_name}_grammar is$i$hl
+    grammar ${ctx.short_name}_grammar {$i$hl
     % for name, rule in ctx.grammar.rules.items():
         % if not rule.is_dont_skip_parser:
             ${name} <- ${emit_rule(rule)}$hl
         % endif
     % endfor
     $d$hl
-    end$hl
+    }$hl
 
     <% types = keep(emit_node_type(t) for t in ctx.astnode_types) %>
 

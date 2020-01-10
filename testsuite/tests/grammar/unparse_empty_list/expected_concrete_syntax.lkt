@@ -1,25 +1,25 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- list*(def_node)
     identifier <- Identifier(@Identifier)
     def_node <- DefNode(
         @LPar identifier @Comma null(DefNode.list) @RPar
     )
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class DefNode : FooNode is
+class DefNode : FooNode {
     parse field name : Identifier
     parse field values : ASTList[DefNode]
-end
+}
 
 """
 List of DefNode.
 """
-class ASTList[DefNode] : FooNodeBaseList is
-end
+class ASTList[DefNode] : FooNodeBaseList {
+}
 
-class Identifier : FooNode is
-end
+class Identifier : FooNode {
+}

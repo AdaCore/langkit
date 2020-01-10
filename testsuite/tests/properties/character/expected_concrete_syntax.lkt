@@ -1,12 +1,12 @@
-grammar None_grammar is
+grammar None_grammar {
     main_rule <- Example(@Example)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Example : FooNode is
+class Example : FooNode {
 
     public fun get_a (c : CharacterType = 'a'): CharacterType = c
 
@@ -16,5 +16,6 @@ class Example : FooNode is
 
     public fun double (c : CharacterType): Array[CharacterType] = [c, c]
 
-    public fun text_identity (s : Array[CharacterType]): Array[CharacterType] = s
-end
+    public fun text_identity (s : Array[CharacterType]): Array[CharacterType] =
+    s
+}

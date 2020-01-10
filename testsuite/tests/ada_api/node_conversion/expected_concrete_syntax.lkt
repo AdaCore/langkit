@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     name <- Name(@Identifier)
     main_rule <- list*(var_decl)
     number <- Number(@Number)
@@ -7,45 +7,45 @@ grammar None_grammar is
     atom <- or(number | ref)
     ref <- Ref(?@Null name)
 
-end
+}
 
-class FooNode is
-end
+class FooNode {
+}
 
-class Expr : FooNode is
-end
+class Expr : FooNode {
+}
 
-class Addition : Expr is
+class Addition : Expr {
     parse field lhs : Expr
     parse field rhs : Expr
-end
+}
 
-class Number : Expr is
-end
+class Number : Expr {
+}
 
-class Ref : Expr is
+class Ref : Expr {
     parse field null_qual : Null
     parse field name : Name
-end
+}
 
 """
 List of VarDecl.
 """
-class ASTList[VarDecl] : FooNodeBaseList is
-end
+class ASTList[VarDecl] : FooNodeBaseList {
+}
 
-class Name : FooNode is
-end
+class Name : FooNode {
+}
 
-qualifier class Null : FooNode is
+qualifier class Null : FooNode {
 
     """
     Return whether this is an instance of NullPresent
     """
     public fun as_bool (): Boolean
-end
+}
 
-class VarDecl : FooNode is
+class VarDecl : FooNode {
     parse field name : Name
     parse field value : Expr
-end
+}
