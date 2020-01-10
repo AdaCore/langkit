@@ -515,8 +515,7 @@ class AnalysisContext(object):
 
     def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
-        name = _py2to3.text_to_bytes(name)
-        name_text = _py2to3.bytes_to_text(name)
+        name = _py2to3.bytes_to_text(name)
         charset = _py2to3.text_to_bytes(charset or '')
 
         _name = _text._unwrap(name)
@@ -528,7 +527,7 @@ class AnalysisContext(object):
             return AnalysisUnit._wrap(c_value)
         else:
             raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
-                repr(name_text), kind
+                repr(name), kind
             ))
 
     def discard_errors_in_populate_lexical_env(self, discard):
