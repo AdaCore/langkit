@@ -3485,18 +3485,6 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, is_artificial=False,
-                      default_value=None, abstract_var=None):
-        """
-        Helper to add an argument to this property.
-
-        This basically just fills the .arguments list. See Argument's
-        constructor for parameters documentation.
-        """
-        self.arguments.append(Argument(name, type, is_artificial=is_artificial,
-                                       default_value=default_value,
-                                       abstract_var=abstract_var))
-
     def compute_base_property(self, context):
         """
         Get the base property for this property, if it exists.
@@ -3879,9 +3867,12 @@ class PropertyDef(AbstractNodeData):
         """
         for dynvar, default in zip(self._dynamic_vars,
                                    self._dynamic_vars_default_values):
-            self._add_argument(dynvar.argument_name, dynvar.type,
-                               is_artificial=True, default_value=default,
-                               abstract_var=dynvar)
+            self.arguments.append(Argument(
+                dynvar.argument_name, dynvar.type,
+                is_artificial=True,
+                default_value=default,
+                abstract_var=dynvar
+            ))
 
     @property
     @memoized
