@@ -65,7 +65,7 @@ ${public_prototype(property)} is
          Property_Result
             : ${'' if property.type.is_refcounted else 'constant'}
               ${property.type.name}
-            := ${property.name}
+            := ${property.qual_impl_name}
                ${'({})'.format(', '.join(actuals)) if actuals else ''};
       begin
          ## Compute the list of variables that need to be dec-ref'd before
