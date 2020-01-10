@@ -134,7 +134,7 @@ def match_default_values(left, right):
 
 def expand_abstract_fn(fn):
     """
-    Expand a function used to describe a Langkit properties into an
+    Expand a function used to describe a Langkit property into an
     AbstractExpression tree with arguments substitued with AbstractVariable
     instances.
 
