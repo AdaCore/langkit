@@ -1,0 +1,88 @@
+grammar None_grammar is
+    node <- or(example | null | var | ident | string)
+    ident <- Ident(@Identifier)
+    string <- StringLiteral(@String)
+    main_rule <- list*(node)
+    var <- Var(@Var @LPar main_rule @RPar)
+    null <- Null(@Null)
+    example <- Example(@Example)
+
+end
+class FooNode is
+
+    public fun count (seq : Array[Entity[Example]]): Integer = seq.length
+
+    public fun get_a (c : CharacterType= <LiteralExpr Character_Type'Val (97) (CharacterType)>): CharacterType = c
+
+    public fun get_eacute (c : CharacterType= <LiteralExpr Character_Type'Val (233) (CharacterType)>): CharacterType = c
+
+    public fun identity (c : CharacterType): CharacterType = c
+
+    public fun double (c : CharacterType): Array[CharacterType] = [c, c]
+
+    public fun same_color (c : Color): Color = c
+
+    public fun int_double (c : BigIntegerType): BigIntegerType = c + c
+
+    public fun me (b : Boolean): FooNodeStruct =
+        new FooNodeStruct(node=if b then entity else (null))
+
+
+    public fun get_node (node_struct : FooNodeStruct): Entity[FooNode] = node_struct.node
+end
+
+class Example : FooNode is
+end
+
+class FooNodeBaseList : FooNode is
+end
+
+"""
+List of FooNode.
+
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Example)}
+* ${node_name(T.Ident)}
+* ${node_name(T.Null)}
+* ${node_name(T.StringLiteral)}
+* ${node_name(T.Var)}
+"""
+class ASTList[FooNode] : FooNodeBaseList is
+end
+
+"""
+This list node can contain one of the following nodes:
+
+* ${node_name(T.Example)}
+* ${node_name(T.Ident)}
+* ${node_name(T.Null)}
+* ${node_name(T.StringLiteral)}
+* ${node_name(T.Var)}
+"""
+class ASTList[FooNode] : ASTList[FooNode] is
+
+    public fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
+
+    public fun example_items (): Array[Entity[Example]] =
+        entity.filter_map(
+            (i) => i.to![Example], (i) => i is_a Example
+        )
+
+end
+
+class Ident : FooNode is
+
+    public fun sym (sym : SymbolType): SymbolType = sym
+end
+
+class Null : FooNode is
+end
+
+class StringLiteral : FooNode is
+end
+
+class Var : FooNode is
+    parse field arg : ASTList[FooNode]
+end
+
