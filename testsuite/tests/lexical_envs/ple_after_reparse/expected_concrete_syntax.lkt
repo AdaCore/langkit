@@ -52,7 +52,6 @@ class Scope : FooNode {
     fun initial_env (): LexicalEnv = match self.name {
         case p : Prefix => p.prefix.referenced_unit.root.children_env
         case _ => self.children_env
-
     }
 }
 

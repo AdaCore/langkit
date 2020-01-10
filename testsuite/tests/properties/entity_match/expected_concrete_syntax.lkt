@@ -24,13 +24,11 @@ class Literal : FooNode {
     @export fun b (): Integer = match self.a {
         case e : Entity[Example] => e.get_num
         case c : Entity[FooNode] => c.get_num
-
     }
 
     @export fun c (): Integer = match self.a {
         case e : Example => e.get_num
         case c : FooNode => c.get_num
-
     }
 
     fun a (): Entity[FooNode]

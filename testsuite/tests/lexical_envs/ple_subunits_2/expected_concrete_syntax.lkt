@@ -62,7 +62,6 @@ class Scope : FooNode {
             (scope) => scope.name.symbols = p.prefix.symbols
         )(0).children_env
         case _ => self.children_env
-
     }
 }
 

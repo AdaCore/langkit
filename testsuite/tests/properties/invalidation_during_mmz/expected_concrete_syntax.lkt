@@ -13,9 +13,17 @@ class Example : FooNode {
     @memoized fun internal_mmz_prop (i : Integer): Integer =
     if (i = 0) then (raise PropertyError()) else i
 
+<<<<<<< HEAD
     @export @memoized fun mmz_prop (i : Integer): Integer = {
         val _ = self.fetch_example_unit;
+=======
+    @export memoized fun mmz_prop (i : Integer): Integer = {
+        # Update context version by parsing a new unit
+        val _ = self.fetch_example_unit
+>>>>>>> RA22-015: Add initial support for unparsing comments.
 
+        # Trigger a cache clear by calling another property
+        # (which will call Reset_Caches).
         self.internal_mmz_prop(i)
     }
 }
