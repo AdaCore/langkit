@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- list*(Def(@Def Example(@Example)))
 
 end
+
 class FooNode is
 
     fun null_node (): FooNode = null
@@ -21,4 +22,3 @@ List of Def.
 """
 class ASTList[Def] : FooNodeBaseList is
 end
-

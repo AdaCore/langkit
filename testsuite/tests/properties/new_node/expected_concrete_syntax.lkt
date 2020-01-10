@@ -6,6 +6,7 @@ grammar None_grammar is
     list_item <- Literal(@Number)
 
 end
+
 class FooNode is
 end
 
@@ -36,4 +37,3 @@ class SynthNode : FooNode is
     parse field name : Name
     parse field items : ASTList[Literal]
 end
-

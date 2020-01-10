@@ -3,6 +3,7 @@ grammar None_grammar is
     atom <- or(Literal(@Number) | Name(@Identifier))
 
 end
+
 class FooNode is
 
     public fun eval_unit (u : InternalUnit): Integer = u.root.to[Expression].result
@@ -33,4 +34,3 @@ class Plus : Expression is
 
     fun result (): Integer = self.left.result + self.right.result
 end
-

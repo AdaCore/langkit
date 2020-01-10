@@ -4,6 +4,7 @@ grammar None_grammar is
     ref <- Ref(Name(@Identifier))
 
 end
+
 class FooNode is
 end
 
@@ -36,4 +37,3 @@ class Ref : FooNode is
         end
 
 end
-

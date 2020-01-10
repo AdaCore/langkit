@@ -8,6 +8,7 @@ grammar None_grammar is
     ref <- Ref(name)
 
 end
+
 class FooNode is
 
     public fun id_bool (id : Boolean): Boolean = id
@@ -87,4 +88,3 @@ class VarDecl : FooNode is
 
     public fun eval (): Integer = self.value.eval
 end
-

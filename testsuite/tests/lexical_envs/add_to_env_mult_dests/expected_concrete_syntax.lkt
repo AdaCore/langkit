@@ -5,6 +5,7 @@ grammar None_grammar is
     elem <- or(scope | id)
 
 end
+
 class FooNode is
 end
 
@@ -30,4 +31,3 @@ class Scope : FooNode is
     parse field name : Id
     parse field content : ASTList[FooNode]
 end
-

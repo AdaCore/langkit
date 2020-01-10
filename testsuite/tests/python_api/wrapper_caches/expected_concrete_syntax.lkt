@@ -4,6 +4,7 @@ grammar None_grammar is
     example <- Example(@Example ?@LPar example_list @RPar)
 
 end
+
 class FooNode is
 end
 
@@ -16,4 +17,3 @@ List of Example.
 """
 class ASTList[Example] : FooNodeBaseList is
 end
-

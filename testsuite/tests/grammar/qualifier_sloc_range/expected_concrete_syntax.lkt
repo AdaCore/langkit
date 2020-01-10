@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- ?@Error
 
 end
+
 class FooNode is
 end
 
@@ -12,4 +13,3 @@ qualifier class HasError : FooNode is
     """
     public fun as_bool (): Boolean
 end
-

@@ -4,6 +4,7 @@ grammar None_grammar is
     insert <- Insert(@Def ident ident)
 
 end
+
 class FooNode is
 
     public fun env_get_all (): Array[Entity[FooNode]] = self.children_env.get(null)
@@ -35,4 +36,3 @@ class SynthId : FooNode is
 
     public fun get_sym (): Array[CharacterType] = self.sym.image
 end
-

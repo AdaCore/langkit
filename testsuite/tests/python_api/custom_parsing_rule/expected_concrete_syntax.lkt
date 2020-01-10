@@ -12,6 +12,7 @@ grammar None_grammar is
     )
 
 end
+
 class FooNode is
 end
 
@@ -54,4 +55,3 @@ end
 
 class Name : FooNode is
 end
-

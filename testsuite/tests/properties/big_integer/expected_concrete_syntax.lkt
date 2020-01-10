@@ -14,6 +14,7 @@ grammar None_grammar is
     )
 
 end
+
 class FooNode is
 
     public fun identity (value : BigIntegerType): BigIntegerType = value
@@ -80,4 +81,3 @@ end
 
 class Identifier : FooNode is
 end
-

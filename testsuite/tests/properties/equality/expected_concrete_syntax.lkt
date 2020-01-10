@@ -7,6 +7,7 @@ grammar None_grammar is
     ref_list <- list+(ref)
 
 end
+
 class FooNode is
 
     fun env_struct (): EnvStruct =
@@ -60,4 +61,3 @@ end
 class Ref : FooNode is
     parse field name : Name
 end
-

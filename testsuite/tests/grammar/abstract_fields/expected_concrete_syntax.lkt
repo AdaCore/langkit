@@ -11,6 +11,7 @@ grammar None_grammar is
     ref <- Ref(name)
 
 end
+
 class FooNode is
 end
 
@@ -51,4 +52,3 @@ end
 
 class VarKeyword : FooNode is
 end
-

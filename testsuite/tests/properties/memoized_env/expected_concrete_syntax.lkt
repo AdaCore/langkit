@@ -4,6 +4,7 @@ grammar None_grammar is
     )
 
 end
+
 class FooNode is
 end
 
@@ -32,4 +33,3 @@ class Ref : FooNode is
         self.node_env.get(self.name.symbol)?[0].children_env
 
 end
-

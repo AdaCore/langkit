@@ -6,6 +6,7 @@ grammar None_grammar is
     ref_list <- list+(ref)
 
 end
+
 class FooNode is
 end
 
@@ -43,4 +44,3 @@ end
 class Ref : FooNode is
     parse field name : Name
 end
-

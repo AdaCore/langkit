@@ -9,6 +9,7 @@ grammar None_grammar is
     ))
 
 end
+
 class FooNode is
 end
 
@@ -28,4 +29,3 @@ class RootNode : FooNode is
     parse field ident : Identifier
     parse field number : Number
 end
-

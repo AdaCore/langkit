@@ -2,6 +2,7 @@ grammar None_grammar is
     main_rule <- Names(list*(Name(@Identifier)))
 
 end
+
 class FooNode is
 end
 
@@ -19,4 +20,3 @@ class Names : FooNode is
 
     public fun count (): Integer = entity.names.length
 end
-

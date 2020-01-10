@@ -2,9 +2,9 @@ grammar None_grammar is
     main_rule <- Example(@Example)
 
 end
+
 class FooNode is
 end
 
 class Example : FooNode is
 end
-

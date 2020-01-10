@@ -3,6 +3,7 @@ grammar None_grammar is
     atom <- Literal(@Number)
 
 end
+
 class FooNode is
 
     public fun root_node (): Entity[FooNode] = self.unit.root.as_bare_entity
@@ -18,4 +19,3 @@ class Plus : Expression is
     parse field left : Literal
     parse field right : Expression
 end
-

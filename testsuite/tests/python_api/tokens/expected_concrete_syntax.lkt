@@ -5,6 +5,7 @@ grammar None_grammar is
     atom <- Atom(@Identifier)
 
 end
+
 class FooNode is
 end
 
@@ -19,4 +20,3 @@ end
 
 class ASTList[FooNode] : ASTList[FooNode] is
 end
-
