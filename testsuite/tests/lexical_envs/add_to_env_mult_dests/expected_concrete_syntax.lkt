@@ -8,9 +8,6 @@ end
 class FooNode is
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of FooNode.
 

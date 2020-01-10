@@ -6,9 +6,6 @@ class FooNode is
     field v : LogicVar
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 class SomeNode : FooNode is
 
     fun test_prop (): Boolean

@@ -17,9 +17,6 @@ class Decl : FooNode is
     public fun entity_items (): Array[Entity[Ref]] = self.as_entity.items.map((i) => i)
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Decl.
 """

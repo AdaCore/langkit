@@ -27,9 +27,6 @@ class Def : FooNode is
     parse field stmts : ASTList[Indented]
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Call.
 """

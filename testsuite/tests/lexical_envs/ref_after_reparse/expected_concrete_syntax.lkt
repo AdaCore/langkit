@@ -26,9 +26,6 @@ class Decl : FooNode is
     parse field name : Name
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Block.
 """

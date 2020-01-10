@@ -29,9 +29,6 @@ class Var : DefNode is
     parse field value : Name
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of DefNode.
 """

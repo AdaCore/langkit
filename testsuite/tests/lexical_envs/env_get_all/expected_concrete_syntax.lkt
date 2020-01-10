@@ -13,9 +13,6 @@ class FooNode is
     fun unique_id (s : SymbolType): FooNode = self.unit.root.make_id(s)
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Insert.
 """

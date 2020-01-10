@@ -82,9 +82,6 @@ class Plus : Expr is
     parse field rhs : Expr
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of FooNode.
 

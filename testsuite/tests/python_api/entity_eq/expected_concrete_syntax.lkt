@@ -49,9 +49,6 @@ class Param : DefNode is
     fun name (): SymbolType = self.name_field.symbol
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Block.
 """

@@ -16,6 +16,3 @@ class Example : FooNode is
     public memoized fun test_prop2 (numbers : Array[Entity[FooNode]]): Boolean = numbers.length == 0
 end
 
-class FooNodeBaseList : FooNode is
-end
-

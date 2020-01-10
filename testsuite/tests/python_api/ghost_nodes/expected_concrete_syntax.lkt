@@ -16,9 +16,6 @@ enum class Enum : FooNode is
     case Null, Example, Default
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Param.
 """

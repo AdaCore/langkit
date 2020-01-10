@@ -34,9 +34,6 @@ class Decl : FooNode is
     public fun test_array (other : Entity[FooNode]): Boolean = self.env_array == other.env_array
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Decl.
 """

@@ -12,9 +12,6 @@ class Def : FooNode is
     parse field ref : Name
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Def.
 """

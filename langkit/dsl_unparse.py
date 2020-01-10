@@ -490,6 +490,9 @@ def type_name(type):
 
 def emit_node_type(node_type):
 
+    if node_type.is_generic_list_type:
+        return ""
+
     base = node_type.base
     parse_fields = node_type.get_fields(
         include_inherited=False

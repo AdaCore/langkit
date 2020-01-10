@@ -18,6 +18,3 @@ qualifier class HasExample : EnumNode is
     public fun as_bool (): Boolean
 end
 
-class FooNodeBaseList : FooNode is
-end
-

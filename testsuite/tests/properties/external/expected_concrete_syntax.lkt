@@ -23,6 +23,3 @@ class Plus : Expression is
     fun result (): Integer = self.left.result + self.right.result
 end
 
-class FooNodeBaseList : FooNode is
-end
-

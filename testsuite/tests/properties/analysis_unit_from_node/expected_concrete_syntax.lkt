@@ -19,6 +19,3 @@ class Plus : Expression is
     parse field right : Expression
 end
 
-class FooNodeBaseList : FooNode is
-end
-

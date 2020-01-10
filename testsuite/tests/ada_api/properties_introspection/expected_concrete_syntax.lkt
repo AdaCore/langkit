@@ -72,9 +72,6 @@ class Ref : Expr is
     fun eval (): Integer = self.referenced_var_decl.eval
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of VarDecl.
 """

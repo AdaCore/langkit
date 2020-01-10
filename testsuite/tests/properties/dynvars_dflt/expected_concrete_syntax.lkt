@@ -10,6 +10,3 @@ class ExampleNode : RootNode is
     public fun prop (): Boolean = bool_var
 end
 
-class RootNodeBaseList : RootNode is
-end
-

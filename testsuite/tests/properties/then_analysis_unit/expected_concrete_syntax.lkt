@@ -8,9 +8,6 @@ class FooNode is
     public fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Name.
 """

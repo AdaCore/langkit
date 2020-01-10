@@ -10,9 +10,6 @@ class Example : FooNode is
     public memoized fun get (): SynthNode = new SynthNode()
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 class SynthNode : FooNode is
 end
 

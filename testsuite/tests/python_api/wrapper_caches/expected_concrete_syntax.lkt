@@ -11,9 +11,6 @@ class Example : FooNode is
     parse field examples : ASTList[Example]
 end
 
-class FooNodeBaseList : FooNode is
-end
-
 """
 List of Example.
 """
