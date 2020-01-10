@@ -4,11 +4,7 @@ grammar None_grammar is
 end
 class FooNode is
 
-    public fun get (): KV =
-        new KV(
-            val=[<CharacterLiteral u'W'>, <CharacterLiteral u'h'>, <CharacterLiteral u'a'>, <CharacterLiteral u't'>], key=[<CharacterLiteral u'S'>, <CharacterLiteral u'o'>]
-        )
-
+    public fun get (): KV = new KV(val='What', key='So')
 end
 
 class Example : FooNode is
