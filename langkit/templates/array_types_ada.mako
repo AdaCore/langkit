@@ -114,6 +114,10 @@
    --  Create a new array for N uninitialized elements and give its only
    --  ownership share to the caller.
 
+   function ${cls.constructor_name}
+     (Items : ${cls.array_type_name}) return ${cls.name};
+   --  Create a new array from an existing collection of elements
+
    ## Helper getter generated for properties code. Used in CollectionGet's code
    function Get
      (T       : ${cls.name};
@@ -268,7 +272,6 @@
           Ref_Count => 1));
    % endif
 
-   pragma Warnings (Off, "referenced");
    function ${cls.constructor_name}
      (Items : ${cls.array_type_name}) return ${cls.name} is
    begin
@@ -284,7 +287,6 @@
       return new ${cls.pointed}'
         (N => Items'Length, Ref_Count => 1, Items => Items);
    end;
-   pragma Warnings (On, "referenced");
 
    ----------------
    -- Equivalent --
