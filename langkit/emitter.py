@@ -298,6 +298,21 @@ class Emitter(object):
         :type: str|None
         """
 
+        # Determine whether we have user external properties. If so,
+        # automatically WITH $.Implementation.Extensions from the body of
+        # $.Analysis and $.Implementation.
+        if any(
+            prop.user_external
+            for prop in context.all_properties(include_inherited=True)
+        ):
+            for unit in ('Analysis', 'Implementation', 'Implementation.C'):
+                context.add_with_clause(
+                    unit, ADA_BODY,
+                    '{}.Implementation.Extensions'
+                    .format(context.ada_api_settings.lib_name),
+                    use_clause=True
+                )
+
     def add_library_interface(self, filename, generated):
         assert not self._project_file_emitted
 

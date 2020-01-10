@@ -221,7 +221,9 @@
 
    ## Properties
    % for prop in cls.get_properties(include_inherited=False):
-      ${prop.prop_decl}
+      % if not prop.user_external:
+         ${prop.prop_decl}
+      % endif
    % endfor
 
    ${exts.include_extension(ext)}

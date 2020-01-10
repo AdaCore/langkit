@@ -526,7 +526,9 @@ private package ${ada_lib_name}.Implementation is
    ------------------------------
 
    % for prop in T.root_node.get_properties(include_inherited=False):
-      ${prop.prop_decl}
+      % if not prop.user_external:
+         ${prop.prop_decl}
+      % endif
    % endfor
 
    -----------------------------------------

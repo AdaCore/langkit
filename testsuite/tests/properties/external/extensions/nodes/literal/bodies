@@ -1,6 +1,0 @@
---  vim: ft=ada
-
-function Literal_P_Result (Node : Bare_Literal) return Integer is
-begin
-    return Integer'Value (Image (Text (Node)));
-end Literal_P_Result;
