@@ -1610,21 +1610,34 @@ class Argument(object):
         :param bool is_artificial: Whether the argument was automatically
             created by Langkit, i.e. the language specification did not mention
             it.
-        :param ResolvedExpression|None default_value: If None, there is no
+        :param AbstractExpression|None default_value: If None, there is no
             default value associated to this argument. Otherwise, it must be a
-            compile-time known resolved expression to be used when generating
+            compile-time known abstract expression to be used when generating
             code for the corresponding property argument.
         :param AbstractVariable|None abstract_var: For properties only. If
             provided, use it as the abstract variable to reference this
             argument. If not provided, an AbstractVariable instance is
             automatically created.
         """
-        from langkit.expressions.base import AbstractVariable
+        from langkit.expressions.base import (
+            AbstractVariable, construct_compile_time_known, unsugar
+        )
         self.name = name
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=name))
         self.is_artificial = is_artificial
-        self.default_value = default_value
+
+        # Make sure that, if present, the default value is a compile-time known
+        # constant.
+
+        self.abstract_default_value = default_value
+        self.default_value = None
+        if default_value is not None:
+            default_value = unsugar(default_value)
+            default_value.prepare()
+            self.default_value = construct_compile_time_known(
+                default_value, type
+            )
 
     @property
     def type(self):

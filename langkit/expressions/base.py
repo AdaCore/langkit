@@ -185,12 +185,6 @@ def expand_abstract_fn(fn):
             ' (got {})'.format(kw, type_ref)
         )
 
-        # Make sure that, if present, the default value is a compile-time known
-        # constant.
-        if default_value is not None:
-            default_value = construct_compile_time_known(default_value,
-                                                         type_ref)
-
         fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
                                      default_value=default_value))
 
@@ -3235,11 +3229,6 @@ class PropertyDef(AbstractNodeData):
                         ' default value'
                     )
                     dyn_var, default = dv
-                    default = unsugar(default)
-                    default.prepare()
-                    default = construct_compile_time_known(default,
-                                                           dyn_var.type)
-
                 else:
                     check_source_language(
                         isinstance(dv, DynamicVariable),
