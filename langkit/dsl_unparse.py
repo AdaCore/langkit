@@ -3,11 +3,173 @@ from __future__ import absolute_import, division, print_function
 from funcy import keep
 
 from langkit.passes import GlobalPass
+import libpythonlang as lpl
+from contextlib import contextmanager
 
 templates = {}
 
 def fqn(prop):
     return "{}.{}".format(prop.struct.name.camel, prop._original_name.lower)
+
+
+class DSLWalker(object):
+    ctx = lpl.AnalysisContext()
+
+    class NoOpWalker(object):
+        def __init__(self):
+            pass
+
+        def __getattr__(self, item):
+            return self
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            return self
+
+        def emit_comments(self):
+            return ""
+
+    @staticmethod
+    def class_from_location(loc):
+        if not loc:
+            return DSLWalker.NoOpWalker()
+
+        unit = DSLWalker.ctx.get_from_file(loc.file)
+        class_def = unit.root.find(
+            lambda n:
+            n.is_a(lpl.ClassDef) and
+            n.sloc_range.start.line == loc.line
+        )
+
+        if not class_def:
+            return DSLWalker.NoOpWalker()
+
+        return DSLWalker(class_def)
+
+    def __init__(self, from_node):
+        self.current_node = from_node
+        self.last_token = from_node.token_start
+        self.current_token = self.last_token
+
+    @contextmanager
+    def _with_current_node(self, new_node):
+        old_node = self.current_node
+        self.current_node = new_node
+        self.current_token = new_node.token_start
+        yield
+        self.current_node = old_node
+        self.current_token = new_node.token_end
+
+    def property(self, prop):
+        pname = prop._indexing_name
+
+        fun_decl = self.current_node.find(
+            lambda n: n.is_a(lpl.FuncDef) and n.f_name.text == pname
+        )
+
+        if fun_decl is not None:
+            # property is defined with the following syntax:
+            # @langkit_property(...)
+            # def prop(x):
+            #     v0 = Var(...)
+            #     ...
+            #     return ...
+            self.last_token = fun_decl.token_start
+            return self._with_current_node(fun_decl.f_body)
+
+        assignment = self.current_node.find(
+            lambda n:
+            n.is_a(lpl.AssignStmt) and
+            n.f_l_value.text == pname and
+            n.f_r_values[0][0].is_a(lpl.CallExpr) and
+            'property' in n.f_r_values[0][0].f_prefix.text.lower()
+        )
+
+        if assignment is not None:
+            self.last_token = assignment.f_r_values.token_start
+            content = assignment.f_r_values[0][0].f_suffix
+
+            if content[0].f_expr.is_a(lpl.LambdaDef):
+                # property is defined with the following syntax:
+                # prop = *Property(lambda x: ...)
+                return self._with_current_node(content[0].f_expr.f_expr)
+            else:
+                # property is defined with the following syntax:
+                # prop = *Property(...)
+                return self._with_current_node(content)
+
+        raise LookupError("Could not find proprety {}".format(pname))
+
+    def var_assignment(self, index):
+        var_calls = self.current_node.findall(
+            lambda n: n.is_a(lpl.CallExpr) and n.f_prefix.text == "Var"
+        )
+        return self._with_current_node(var_calls[index].f_suffix)
+
+    def returned_expr(self):
+        if self.current_node.parent.is_a(lpl.LambdaDef):
+            return self._with_current_node(self.current_node)
+
+        return_stmt = self.current_node.find(
+            lambda n: n.is_a(lpl.ReturnStmt)
+        )
+        assert len(return_stmt.f_exprs) == 1
+        return self._with_current_node(return_stmt.f_exprs[0])
+
+    def call(self, fun_name):
+        def matches(n):
+            return n.is_a(lpl.CallExpr) and n.f_prefix.text == fun_name
+
+        call_node = (
+            self.current_node
+            if matches(self.current_node)
+            else self.current_node.find(matches)
+        )
+
+        return self._with_current_node(call_node)
+
+    def method_call(self, method_name):
+        def matches(n):
+            if n.is_a(lpl.CallExpr):
+                if n.f_prefix.is_a(lpl.DottedName):
+                    return n.f_prefix.f_suffix.text == method_name
+            return False
+
+        call_node = (
+            self.current_node
+            if matches(self.current_node)
+            else self.current_node.find(matches)
+        )
+
+        return self._with_current_node(call_node)
+
+    def self_arg(self):
+        assert self.current_node.is_a(lpl.CallExpr)
+        assert self.current_node.f_prefix.is_a(lpl.DottedName)
+        return self._with_current_node(self.current_node.f_prefix.f_prefix)
+
+    def arg(self, index):
+        assert self.current_node.is_a(lpl.CallExpr)
+        return self._with_current_node(self.current_node.f_suffix[index])
+
+    def missed_comments(self):
+        cur_tok = self.current_token
+        while self.last_token < cur_tok:
+            token = self.last_token
+            if token.kind == 'Comment':
+                yield token.text
+            self.last_token = self.last_token.next
+
+    def emit_comments(self):
+        return "".join("{}$hl".format(c) for c in self.missed_comments())
+
+    def where(self):
+        print(self.current_node)
 
 
 def sf(strn):
@@ -155,19 +317,38 @@ def emit_indent_expr(expr, **ctx):
         return strn
 
 
+def prepend_comments(expr, **ctx):
+    arg_expr = ctx.pop('arg_expr', None)
+    if arg_expr is None:
+        return emit_expr(expr, **ctx), False
+
+    walker = ctx.get('walker')
+    with walker.arg(arg_expr):
+        coms = walker.emit_comments()
+        strn = emit_expr(expr, **ctx)
+
+    if coms == "":
+        return strn, False
+
+    return coms + strn, True
+
+
 def emit_paren_expr(expr, **ctx):
     from langkit.expressions import Let
-    if not needs_parens(expr):
+
+    strn, has_coms = prepend_comments(expr, **ctx)
+
+    if not needs_parens(expr) and not has_coms:
         strn = emit_expr(expr, **ctx)
         return emit_paren(strn) if len(strn) > 40 else strn
     elif isinstance(expr, Let):
         return emit_expr(expr, **ctx)
     else:
-        return emit_paren(emit_expr(expr, **ctx))
+        return emit_paren(strn, force=has_coms)
 
 
-def emit_paren(strn):
-    if len(strn) > 40:
+def emit_paren(strn, force=False):
+    if force or len(strn) > 40:
         return "($i$hl{}$d$hl)".format(strn)
     else:
         return "({})".format(strn)
@@ -188,9 +369,8 @@ def emit_expr(expr, **ctx):
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
-        StructUpdate, BigIntLiteral, RefCategories, Bind, Try
+        StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block
     )
-
 
     def is_a(*names):
         return any(expr.__class__.__name__ == n for n in names)
@@ -198,6 +378,7 @@ def emit_expr(expr, **ctx):
 
     then_underscore_var = ctx.get('then_underscore_var')
     overload_coll_name = ctx.get('overload_coll_name')
+    walker = ctx.get('walker')
 
     def emit_lambda(expr, vars):
         vars_str = ", ".join(var_name(var) for var in vars)
@@ -241,8 +422,26 @@ def emit_expr(expr, **ctx):
         return "%true"
     elif isinstance(expr, LogicFalse):
         return "%false"
-    elif isinstance(expr, Let):
+    elif isinstance(expr, Block):
+        if len(expr.vars) == 0:
+            with walker.returned_expr():
+                coms = walker.emit_comments()
+                return ee(expr.expr)
 
+        vars_defs = ""
+        for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):
+            with walker.var_assignment(i):
+                vars_defs += "{}val {} = {};$hl".format(
+                    walker.emit_comments(), var_name(var), ee(abs_expr)
+                )
+            vars_defs += walker.emit_comments()
+
+        with walker.returned_expr():
+            return "{{$i$hl{}$hl{}{}$hl$d}}".format(
+                vars_defs, walker.emit_comments(), ee(expr.expr)
+            )
+
+    elif isinstance(expr, Let):
         if len(expr.vars) == 0:
             return ee(expr.expr)
 
@@ -296,22 +495,45 @@ def emit_expr(expr, **ctx):
         )
 
     elif isinstance(expr, If):
-        res = "if {} then {} else {}".format(
-            ee_pexpr(expr.cond), ee_pexpr(expr._then), ee_pexpr(expr.else_then)
-        )
+        with walker.call('If'):
+            with walker.arg(0):
+                coms = walker.emit_comments()
+                cond_strn = ee_pexpr(expr.cond)
 
-        return res
+            res = "{}if {} then {} else {}".format(
+                coms,
+                cond_strn,
+                ee_pexpr(expr._then, arg_expr=1),
+                ee_pexpr(expr.else_then, arg_expr=2)
+            )
+            return res
 
     elif isinstance(expr, Cond):
-        branches = expr.branches
-        parts = ["if {} then {}".format(
-            ee_pexpr(branches[0][0]), ee_pexpr(branches[0][1])
-        )]
-        parts += ["elif {} then {}".format(ee_pexpr(cond), ee_pexpr(then))
-                  for cond, then in expr.branches[1:]]
-        parts.append("else {}".format(ee_pexpr(expr.else_expr)))
+        with walker.call('Cond'):
+            branches = expr.branches
+            res = ""
 
-        return "$hl".join(parts)
+            for i, b in enumerate(branches):
+                # condition
+                with walker.arg(i * 2):
+                    coms = walker.emit_comments()
+                    cond_strn = ee_pexpr(b[0])
+                expr_strn = ee_pexpr(b[1], arg_expr=i * 2 + 1)
+
+                res += "{}{} {} then {}$hl".format(
+                    coms,
+                    "if" if i == 0 else "elif",
+                    cond_strn,
+                    expr_strn
+                )
+
+            with walker.arg(len(branches) * 2):
+                coms = walker.emit_comments()
+                else_strn = ee_pexpr(expr.else_expr)
+
+            res += "{}else {}".format(coms, else_strn)
+
+            return res
 
     elif isinstance(expr, IsNull):
         return "{}.is_null".format(ee(expr.expr))
@@ -329,18 +551,30 @@ def emit_expr(expr, **ctx):
         return ee(expr.equation_array, overload_coll_name="logic_any")
 
     elif isinstance(expr, Match):
-        return sf("""
-        match ${ee(expr.matched_expr)} {$i$hl
-        % for typ, var, e in expr.matchers:
-        % if typ:
-        case ${var_name(var)} : ${type_name(typ)} => ${ee(e)}$hl
-        % else:
-        case ${var_name(var)} => ${ee(e)}$hl
-        % endif
-        % endfor
-        $d$hl
-        }
-        """)
+        with walker.method_call("match"):
+            res = ""
+            with walker.self_arg():
+                coms = walker.emit_comments()
+                matched_expr_strn = ee(expr.matched_expr)
+
+            res += "{}match {} {{$i".format(coms, matched_expr_strn)
+
+            for i, (typ, var, e) in enumerate(expr.matchers):
+                with walker.arg(i):
+                    coms = walker.emit_comments()
+                    if coms and i > 0:
+                        coms = "$hl" + coms
+
+                    res += "$hl{}case {}{} => {}".format(
+                        coms,
+                        var_name(var),
+                        (" " + sf(": ${type_name(typ)}")) if typ else "",
+                        ee(e)
+                    )
+
+            res += "$d$hl}"
+
+        return res
 
     elif isinstance(expr, Eq):
         return "{} = {}".format(ee(expr.lhs), ee(expr.rhs))
@@ -511,9 +745,9 @@ def emit_doc(doc):
     return sf("${doc}")
 
 
-def emit_prop(prop):
-    from langkit.expressions import Let
+def emit_prop(prop, walker):
     quals = ""
+
     if prop.is_public:
         quals += "@export "
 
@@ -540,10 +774,8 @@ def emit_prop(prop):
     )
 
     if prop.expr:
-        if isinstance(prop.expr, Let):
-            res += " = $sl{}".format(emit_expr(prop.expr))
-        else:
-            res += " = $sl{}".format(emit_expr(prop.expr))
+        with walker.property(prop):
+            res += " = $sl{}".format(emit_expr(prop.expr, walker=walker))
 
     return res
 
@@ -588,9 +820,10 @@ def type_name(type):
 
 
 def emit_node_type(node_type):
-
     if node_type.is_generic_list_type:
         return ""
+
+    walker = DSLWalker.class_from_location(node_type.location)
 
     base = node_type.base
 
@@ -636,7 +869,7 @@ def emit_node_type(node_type):
     % endfor
     % for prop in properties:
     % if not prop.is_internal and not is_builtin_prop(prop):
-    ${emit_prop(prop)}$hl
+    ${emit_prop(prop, walker)}$hl
     % endif
     % endfor
     $d
@@ -711,7 +944,7 @@ def pp(strn, indent_step=4, line_size=80):
 
             len_next_line = 0
             if el == '$sl':
-                for j in range(i + 1, len(buf)) :
+                for j in range(i + 1, len(buf)):
                     if buf[j] == '$hl':
                         break
                     len_next_line += len(buf[j])

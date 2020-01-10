@@ -30,7 +30,6 @@ class FooNode {
         case l : Literal => l
         case n : Name => n
         case others => others
-
     }.as_bare_entity
 }
 
@@ -52,7 +51,6 @@ class Name : Expression {
         case l : Entity[Literal] => l
         case n : Entity[Name] => n
         case others => others
-
     }
 }
 
