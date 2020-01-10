@@ -463,6 +463,21 @@ class AbstractNodeData(object):
         return self._indexing_name
 
     @property
+    def qual_impl_name(self):
+        """
+        Fully qualified name for the implementation of this property.
+
+        This is useful during code generation to avoid name clashes.
+        """
+        if self.is_property:
+            return '{}.Implementation.{}'.format(
+                get_context().ada_api_settings.lib_name,
+                self.internal_name
+            )
+        else:
+            return self.name
+
+    @property
     @memoized
     def api_name(self):
         """

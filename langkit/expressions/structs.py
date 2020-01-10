@@ -4,7 +4,7 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (AbstractNodeData, BuiltinField, Field,
-                                    UserField, get_context, resolve_type)
+                                    UserField, resolve_type)
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -705,18 +705,12 @@ class FieldAccess(AbstractExpression):
                         args.append((str(PropertyDef.entity_info_name),
                                      einfo_expr))
 
-                # Use a fully qualified name for properties so that they don't
-                # clash with local variables.
-                call_name = "{}.Implementation.{}".format(
-                    get_context().ada_api_settings.lib_name,
-                    str(self.node_data.internal_name)
-                )
-
                 # Build the call
-                ret = '{} ({})'.format(call_name, ', '.join(
-                    '{} => {}'.format(name, value)
-                    for name, value in args
-                ))
+                ret = '{} ({})'.format(
+                    self.node_data.qual_impl_name,
+                    ', '.join('{} => {}'.format(name, value)
+                              for name, value in args)
+                )
 
             elif self.node_data.abstract:
                 # Call the accessor for abstract fields
