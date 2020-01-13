@@ -219,6 +219,61 @@ class DocLit(Expr):
     token_node = True
 
 
+class FunDecl(Decl):
+    """
+    Function declaration.
+    """
+    visibility = Field()
+    name = Field()
+    args = Field()
+    return_type = Field()
+    body = Field()
+
+
+class FunArgDecl(Decl):
+    """
+    Function argument declaration.
+    """
+    name = Field()
+    type = Field()
+    default_val = Field()
+
+
+class EntityVisibility(LKNode):
+    """
+    Visibility for methods.
+    """
+    enum_node = True
+    alternatives = ["public", "private"]
+
+
+@abstract
+class TypeRef(LKNode):
+    """
+    Base class for a reference to a type.
+    """
+    pass
+
+
+class SimpleTypeRef(TypeRef):
+    """
+    Simple reference to a type.
+    """
+    type_name = Field()
+
+
+class GenericTypeRef(TypeRef):
+    """
+    Reference to a generic type.
+    """
+    type_name = Field()
+    params = Field()
+
+
+class NullLit(Expr):
+    token_node = True
+
+
 lkt_grammar = Grammar('main_rule')
 G = lkt_grammar
 lkt_grammar.add_rules(
@@ -228,8 +283,8 @@ lkt_grammar.add_rules(
     root_decl=Or(G.grammar_decl, G.regular_decl),
     id=Id(Lex.Identifier),
 
-    dotted_name=Or(
-        DottedName(G.dotted_name, ".", G.id),
+    name=Or(
+        DottedName(G.name, ".", G.id),
         G.id
     ),
 
@@ -262,7 +317,7 @@ lkt_grammar.add_rules(
         GrammarPredicate(
             G.grammar_expr,
             "|>", Lex.Identifier("when"),
-            "(", G.dotted_name, ")"
+            "(", G.name, ")"
         ),
         G.grammar_primary
     ),
@@ -301,14 +356,51 @@ lkt_grammar.add_rules(
 
     class_decl=ClassDecl(
         G.doc,
-        "class", G.id, Opt(":", G.dotted_name), "{",
+        "class", G.id, Opt(":", G.name), "{",
         G.decls,
         "}"
     ),
 
+    fun_decl=FunDecl(
+        G.doc,
+        G.visibility, "fun", G.id,
+        "(", List(G.arg_decl, empty_valid=True, sep=","), ")",
+        ":", G.type_ref,
+        Opt("=", G.expr)
+    ),
+
+    arg_decl=FunArgDecl(
+        G.doc,
+        G.id,
+        ":",
+        G.type_ref,
+        Opt("=", G.expr)
+    ),
+
+    visibility=Or(
+        EntityVisibility.alt_public("public"),
+        EntityVisibility.alt_private("private"),
+        EntityVisibility.alt_private(),
+    ),
+
     regular_decl=Or(
         G.class_decl,
+        G.fun_decl
+    ),
+
+    type_ref=Or(
+        GenericTypeRef(
+            G.name, "[", List(G.type_ref, empty_valid=False, sep=","), "]"
+        ),
+        SimpleTypeRef(G.name),
     ),
 
     decls=List(G.regular_decl, empty_valid=True),
+
+    expr=Or(
+        G.name,
+        G.null,
+    ),
+
+    null=NullLit("null"),
 )
