@@ -8,14 +8,8 @@ grammar None_grammar {
 class FooNode {
 
     fun resolve_ref (): Entity[FooNode] = match self {
-<<<<<<< HEAD
         case r : Ref => r.parent.parent.node_env.get(r.name)?(0)
         case _ => null.to[Entity[FooNode]]
-
-=======
-        case r : Ref => r.parent.parent.node_env.get(r.name)?[0]
-        case _ => null
->>>>>>> RA22-015: Add initial support for unparsing comments.
     }
 }
 

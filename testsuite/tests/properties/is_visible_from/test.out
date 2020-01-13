@@ -1,9 +1,9 @@
 main.py: Running...
-u.root.p_test(True, True) = <PropertyError: raised LIBFOOLANG.COMMON.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
+u.root.p_test(True, True) = <PropertyError: raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
 >
-u.root.p_test(True, False) = <PropertyError: raised LIBFOOLANG.COMMON.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
+u.root.p_test(True, False) = <PropertyError: raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
 >
-u.root.p_test(False, True) = <PropertyError: raised LIBFOOLANG.COMMON.PROPERTY_ERROR : base environment does not belong to any analysis unit
+u.root.p_test(False, True) = <PropertyError: raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : base environment does not belong to any analysis unit
 >
 u.root.p_test(False, False) = True
 main.py: Done.
