@@ -2,7 +2,8 @@ grammar None_grammar {
     decl <- or(
         | VarDecl(@Def name @Equal expr)
         | FuncDecl(
-            @Def name @LPar list*(name, @Comma) @RPar @Equal expr
+            @Def
+            name @LPar list*(name, @Comma) @RPar @Equal expr
         )
     )
     main_rule <- list*(decl @Semicolon)

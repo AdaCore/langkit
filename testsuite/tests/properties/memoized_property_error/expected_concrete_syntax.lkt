@@ -14,5 +14,6 @@ class Example : FooNode {
         raise PropertyError('Explicit error 1')
     }
 
-    public memoized fun prop2 (): Boolean = raise PropertyError('Explicit error 2')
+    public memoized fun prop2 (): Boolean =
+    raise PropertyError('Explicit error 2')
 }

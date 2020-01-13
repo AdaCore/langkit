@@ -12,7 +12,8 @@ class Example : FooNode {
 
     fun ext_unit_count (): Integer
 
-    memoized fun fetch_example_unit (): InternalUnit = self.ext_fetch_example_unit
+    memoized fun fetch_example_unit (): InternalUnit =
+    self.ext_fetch_example_unit
 
     memoized fun unit_count (): Integer = self.ext_unit_count
 

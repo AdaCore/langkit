@@ -1,16 +1,21 @@
 grammar None_grammar {
     def_node <- Def(@Def identifier @Newline list*(indented))
     indented <- Indented(
-        discard(list+(newline)) @Indent list*(discard(list+(newline)) expr discard(list+(newline)), @Newline)
-        @Dedent
+        discard(list+(newline))
+        @Indent
+        list*(discard(list+(newline))
+        expr discard(list+(newline)), @Newline) @Dedent
     )
     expr <- or(call | identifier | indented)
     newline <- Newline(@Newline)
     call <- Call(
-        identifier @LPar discard(list+(newline)) list+(call, @Comma) discard(list+(newline))
-        @RPar
+        identifier
+        @LPar
+        discard(list+(newline))
+        list+(call, @Comma) discard(list+(newline)) @RPar
     )
-    main_rule <- list*(discard(list+(newline)) def_node discard(list+(newline)))
+    main_rule <- list*(discard(list+(newline))
+    def_node discard(list+(newline)))
     identifier <- Identifier(@Identifier)
 
 }

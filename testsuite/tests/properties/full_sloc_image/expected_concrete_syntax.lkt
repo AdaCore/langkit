@@ -29,8 +29,9 @@ grammar None_grammar {
     cat_string <- ConcatStringLit(string list*(string))
     not_test <- or(NotOp(@Not not_test) | comparison)
     suite <- or(
-        | discard(list+(nl)) @Indent list*(discard(list+(nl)) stmt discard(list+(nl)))
-        @Dedent
+        | discard(list+(nl))
+        @Indent
+        list*(discard(list+(nl)) stmt discard(list+(nl))) @Dedent
         | simple_stmt
     )
     string <- StringLit(@String)
@@ -129,7 +130,8 @@ grammar None_grammar {
     name_list <- list*(name, @Comma) ?@Comma
     stmt <- or(simple_stmt | compound_stmt)
     import_from <- ImportFrom(
-        @From or(dotted_name | RelName(list*(dot) ?dotted_name)) @Import or(
+        @From
+        or(dotted_name | RelName(list*(dot) ?dotted_name)) @Import or(
             | ImportStar(@Multiply)
             | @LPar import_as_names @RPar
             | import_as_names
@@ -205,7 +207,11 @@ grammar None_grammar {
     comp_iter <- or(comp_for | comp_if)
     subscript_list <- list*(subscript, @Comma) ?@Comma
     if_stmt <- IfStmt(
-        @If test @Colon suite list+(@Elif ElifBranch(test @Colon suite)) ?else_part
+        @If
+        test
+        @Colon
+        suite
+        list+(@Elif ElifBranch(test @Colon suite)) ?else_part
     )
     arith_expr <- or(
         | ArithExpr(arith_expr Op(or(@Plus | @Minus)) term)
@@ -221,7 +227,8 @@ grammar None_grammar {
     )
     while_stmt <- WhileStmt(@While test @Colon suite ?else_part)
     varargslist <- Params(
-        list+(SingleParam(?@Multiply ?@Power fpdef ?@Assign test), @Comma)
+        list+(SingleParam(?@Multiply
+        ?@Power fpdef ?@Assign test), @Comma)
     )
     comp_for <- CompFor(@For expr_list @In or_test ?comp_iter)
     import_stmt <- or(import_name | import_from)
@@ -271,7 +278,10 @@ class CompIf : PythonNode {
 }
 
 enum class CompOpKind : PythonNode {
-    case Lt, Gt, Eq, Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
+    case Lt,
+        Gt,
+        Eq,
+        Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
 }
 
 class Comprehension : PythonNode {

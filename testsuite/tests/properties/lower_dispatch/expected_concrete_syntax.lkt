@@ -47,7 +47,8 @@ class Lit : Atom {
 class Ref : Atom {
     parse field name : Name
 
-    public fun resolve (): Entity[Def] = self.node_env.get(self.name.symbol, only_first=true).to![Def]
+    public fun resolve (): Entity[Def] =
+    self.node_env.get(self.name.symbol, only_first=true).to![Def]
 
     fun evaluate_abstract (): Integer = self.resolve.expr.evaluate_abstract
 
@@ -60,13 +61,17 @@ class Plus : Expr {
     parse field lhs : Expr
     parse field rhs : Expr
 
-    fun evaluate_abstract (): Integer = self.lhs.evaluate_abstract + self.rhs.evaluate_abstract
+    fun evaluate_abstract (): Integer =
+    self.lhs.evaluate_abstract + self.rhs.evaluate_abstract
 
-    fun evaluate_rtcheck (): Integer = self.lhs.evaluate_rtcheck + self.rhs.evaluate_rtcheck
+    fun evaluate_rtcheck (): Integer =
+    self.lhs.evaluate_rtcheck + self.rhs.evaluate_rtcheck
 
-    fun evaluate_concrete (): Integer = self.lhs.evaluate_concrete + self.rhs.evaluate_concrete
+    fun evaluate_concrete (): Integer =
+    self.lhs.evaluate_concrete + self.rhs.evaluate_concrete
 
-    fun evaluate_entity (): Integer = entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
+    fun evaluate_entity (): Integer =
+    entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
 }
 
 """

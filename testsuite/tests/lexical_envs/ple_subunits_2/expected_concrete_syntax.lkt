@@ -49,7 +49,8 @@ class Name : FooNode {
 
     fun referenced_unit_or_error (or_error : Boolean): InternalUnit
 
-    public fun referenced_unit (): InternalUnit = self.referenced_unit_or_error(false)
+    public fun referenced_unit (): InternalUnit =
+    self.referenced_unit_or_error(false)
 }
 
 class Id : Name {
@@ -65,11 +66,13 @@ class Prefix : Name {
     parse field prefix : Name
     parse field suffix : Id
 
-    fun resolve (): Entity[FooNode] = self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
+    fun resolve (): Entity[FooNode] =
+    self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
 
     fun suffix_symbol (): SymbolType = self.suffix.symbol
 
-    fun symbols (): Array[SymbolType] = self.prefix.symbols & self.suffix.symbols
+    fun symbols (): Array[SymbolType] =
+    self.prefix.symbols & self.suffix.symbols
 }
 
 class Scope : FooNode {

@@ -68,7 +68,8 @@ class Number : Expr {
 class Ref : Expr {
     parse field name : Name
 
-    public fun referenced_var_decl (): Entity[VarDecl] = self.node_env.get(self.name, only_first=true).to![VarDecl]
+    public fun referenced_var_decl (): Entity[VarDecl] =
+    self.node_env.get(self.name, only_first=true).to![VarDecl]
 
     fun eval (): Integer = self.referenced_var_decl.eval
 }

@@ -23,7 +23,8 @@ class LiteralSequence : FooNode {
     parse field name : Name
     parse field items : ASTList[Literal]
 
-    memoized fun new_node (): SynthNode = new SynthNode(items=self.items, name=self.name)
+    memoized fun new_node (): SynthNode =
+    new SynthNode(items=self.items, name=self.name)
 
     public fun prop (): Entity[SynthNode] = self.new_node.as_bare_entity
 }

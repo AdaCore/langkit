@@ -15,7 +15,8 @@ class FooNode {
 
     public fun null_node (): Entity[Expression] = null
 
-    public fun deref_null_unit (): Entity[FooNode] = self.null_unit.root.as_bare_entity
+    public fun deref_null_unit (): Entity[FooNode] =
+    self.null_unit.root.as_bare_entity
 
     public fun deref_null_node (): Entity[Expression] = self.null_node.null_node
 
@@ -23,7 +24,8 @@ class FooNode {
 
     public fun cast_null_node (): Entity[Name] = self.null_node.to[Name]
 
-    public fun match_null_node (): Entity[Expression] = match self.null_node.node {
+    public fun match_null_node (): Entity[Expression] =
+    match self.null_node.node {
         case l : Literal => l
         case n : Name => n
         case others => others
@@ -41,9 +43,11 @@ class Name : Expression {
 
     fun env_element (): Entity[FooNode] = self.children_env.get(self.symbol)?[0]
 
-    public fun deref_env_element (): Entity[Expression] = self.env_element.null_node
+    public fun deref_env_element (): Entity[Expression] =
+    self.env_element.null_node
 
-    public fun match_env_element (): Entity[FooNode] = match self.env_element {
+    public fun match_env_element (): Entity[FooNode] =
+    match self.env_element {
         case l : Entity[Literal] => l
         case n : Entity[Name] => n
         case others => others

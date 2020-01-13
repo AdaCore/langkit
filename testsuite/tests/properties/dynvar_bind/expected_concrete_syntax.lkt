@@ -31,7 +31,8 @@ class Name : FooNode {
 class Ref : FooNode {
     parse field name : Name
 
-    public fun resolve (): Entity[FooNode] = bind env=self.parent.parent.node_env in
+    public fun resolve (): Entity[FooNode] =
+    bind env=self.parent.parent.node_env in
         env.get(self.name.symbol)?[0]
     end
 }

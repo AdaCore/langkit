@@ -44,9 +44,11 @@ class Block : DefNode {
         new Entity[Block](info=e_info, node=self)
     }
 
-    public fun new (): Entity[FooNode] = entity.info.rebindings.new_env.env_node.as_bare_entity
+    public fun new (): Entity[FooNode] =
+    entity.info.rebindings.new_env.env_node.as_bare_entity
 
-    public fun old (): Entity[FooNode] = entity.info.rebindings.new_env.env_node.as_bare_entity
+    public fun old (): Entity[FooNode] =
+    entity.info.rebindings.new_env.env_node.as_bare_entity
 }
 
 class BlockVar : DefNode {

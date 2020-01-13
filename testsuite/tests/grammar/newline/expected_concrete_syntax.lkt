@@ -2,7 +2,9 @@ grammar None_grammar {
     lit <- Literal(@Number)
     ind <- IndentNode(lit @Newline @Indent lit @Dedent)
     comp <- CompositeNode(
-        lit @Newline lit @Newline @Indent lit @Newline @Dedent lit
+        lit
+        @Newline
+        lit @Newline @Indent lit @Newline @Dedent lit
     )
     nl <- NewLineNode(lit @Newline lit)
     main_rule <- or(comp | ind | nl)

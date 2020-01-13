@@ -12,7 +12,8 @@ class FooNode {
 
     public fun second_set (): Boolean = entity.info.md.is_second
 
-    public fun test_main (): Entity[FooNode] = self.as_entity.to[Couple].first_entity.first
+    public fun test_main (): Entity[FooNode] =
+    self.as_entity.to[Couple].first_entity.first
 }
 
 class Couple : FooNode {
@@ -29,7 +30,8 @@ class Couple : FooNode {
         ), node=self
     )
 
-    public fun property_on_entity (): Entity[Couple] = self.as_entity.get_entity(self.as_entity.info.md)
+    public fun property_on_entity (): Entity[Couple] =
+    self.as_entity.get_entity(self.as_entity.info.md)
 }
 
 class Literal : FooNode {

@@ -13,15 +13,18 @@ class Example : FooNode {
     public fun cond1 (b : Boolean): Integer = if self.identity(b) then (1)
     else (2)
 
-    public fun cond2 (b1 : Boolean, b2 : Boolean): Integer = if self.identity(b1) then (1)
+    public fun cond2 (b1 : Boolean, b2 : Boolean): Integer =
+    if self.identity(b1) then (1)
     elif self.identity(b2) then (2)
     else (3)
 
-    public fun cond3 (b1 : Boolean, b2 : Boolean, b3 : Boolean): Integer = if self.identity(b1) then (1)
+    public fun cond3 (b1 : Boolean, b2 : Boolean, b3 : Boolean): Integer =
+    if self.identity(b1) then (1)
     elif self.identity(b2) then (2)
     elif self.identity(b3) then (3)
     else (3)
 
-    public fun cond_node (b : Boolean): Entity[FooNode] = if self.identity(b) then self
+    public fun cond_node (b : Boolean): Entity[FooNode] =
+    if self.identity(b) then self
     else (null).as_bare_entity
 }
