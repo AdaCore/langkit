@@ -6,6 +6,9 @@ set -e
 export PATH=$INSTALL_DIR/bin:$PATH
 export GPR_PROJECT_PATH=$LIB_INSTALL_DIR/share/gpr
 
+# RA22-015: Make libpythonlang available
+eval `./scripts/manage.sh setenv`
+
 # Log the toolchain to use
 which gcc
 which gprbuild
