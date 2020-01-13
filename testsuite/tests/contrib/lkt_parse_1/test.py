@@ -16,6 +16,7 @@ import sys
 
 
 LK_LIB_DIR = P.join(os.environ['LANGKIT_ROOT_DIR'], 'contrib', 'lkt')
+TESTS_DIR = P.join(os.environ['LANGKIT_ROOT_DIR'], 'testsuite', 'tests')
 
 o = subprocess.check_output(
     [sys.executable, P.join(LK_LIB_DIR, 'manage.py'), 'make', '-P'],
@@ -24,22 +25,16 @@ o = subprocess.check_output(
     cwd=LK_LIB_DIR
 )
 
-# TODO: stub test, eventually should try and parse all the
-# expected_concrete_syntax.lkt files from the testsuite.
-test_py = """
-"Grammar for our language"
-grammar None_grammar {
-    "Root decl"
-    decl <- Decl(
-        ?@Plus Name(@Identifier) @LPar ref_list @RPar
-    )
-    main_rule <- list*(decl)
-    ref <- Ref(Name(@Identifier))
-    ref_list <- list+(ref)
+# TODO: for the moment we'll use a whitelist for tests, eventually we want to
+# parse them all.
+test_whitelist = ['dflt_arg_val']
 
-}
-"""
-
-subprocess.check_call(
-    [P.join(LK_LIB_DIR, 'build', 'bin', 'parse'), test_py]
-)
+for root, _, files in os.walk(TESTS_DIR):
+    test_name = P.basename(root)
+    for f in files:
+        if (f == 'expected_concrete_syntax.lkt'
+                and test_name in test_whitelist):
+            subprocess.check_call(
+                [P.join(LK_LIB_DIR, 'build', 'bin', 'parse'), "-f",
+                 P.join(root, f)]
+            )
