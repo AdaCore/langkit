@@ -96,29 +96,27 @@ class DSLWalker(object):
         )
 
         if assignment is not None:
+            # property is defined with the following syntax:
+            # prop = *Property(...)
             self.last_token = assignment.f_r_values.token_start
             content = assignment.f_r_values[0][0].f_suffix
-
-            if content[0].f_expr.is_a(lpl.LambdaDef):
-                # property is defined with the following syntax:
-                # prop = *Property(lambda x: ...)
-                return self._with_current_node(content[0].f_expr.f_expr)
-            else:
-                # property is defined with the following syntax:
-                # prop = *Property(...)
-                return self._with_current_node(content)
+            return self._with_current_node(content[0].f_expr)
 
         raise LookupError("Could not find proprety {}".format(pname))
 
     def var_assignment(self, index):
+        if self.current_node.is_a(lpl.LambdaDef):
+            params = self.current_node.f_args.f_single_params
+            return self._with_current_node(params[index].f_default_value)
+
         var_calls = self.current_node.findall(
             lambda n: n.is_a(lpl.CallExpr) and n.f_prefix.text == "Var"
         )
         return self._with_current_node(var_calls[index].f_suffix)
 
     def returned_expr(self):
-        if self.current_node.parent.is_a(lpl.LambdaDef):
-            return self._with_current_node(self.current_node)
+        if self.current_node.is_a(lpl.LambdaDef):
+            return self._with_current_node(self.current_node.f_expr)
 
         return_stmt = self.current_node.find(
             lambda n: n.is_a(lpl.ReturnStmt)
@@ -160,7 +158,9 @@ class DSLWalker(object):
 
     def arg(self, index):
         assert self.current_node.is_a(lpl.CallExpr)
-        return self._with_current_node(self.current_node.f_suffix[index])
+        return self._with_current_node(
+            self.current_node.f_suffix[index].f_expr
+        )
 
     def missed_comments(self):
         cur_tok = self.current_token
@@ -399,6 +399,24 @@ def emit_expr(expr, **ctx):
                 receiver, name, emit_paren(", ".join(args))
             )
 
+    def emit_let(expr):
+        if len(expr.vars) == 0:
+            with walker.returned_expr():
+                return walker.emit_comments() + ee(expr.expr)
+
+        vars_defs = ""
+        for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):
+            with walker.var_assignment(i):
+                vars_defs += "{}val {} = {};$hl".format(
+                    walker.emit_comments(), var_name(var), ee(abs_expr)
+                )
+            vars_defs += walker.emit_comments()
+
+        with walker.returned_expr():
+            return "{{$i$hl{}$hl{}{}$hl$d}}".format(
+                vars_defs, walker.emit_comments(), ee(expr.expr)
+            )
+
     def ee(expr, **extra_ctx):
         full_ctx = dict(ctx, **extra_ctx)
         return emit_expr(expr, **full_ctx)
@@ -428,37 +446,6 @@ def emit_expr(expr, **ctx):
         return "%true"
     elif isinstance(expr, LogicFalse):
         return "%false"
-    elif isinstance(expr, Block):
-        if len(expr.vars) == 0:
-            with walker.returned_expr():
-                return walker.emit_comments() + ee(expr.expr)
-
-        vars_defs = ""
-        for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):
-            with walker.var_assignment(i):
-                vars_defs += "{}val {} = {};$hl".format(
-                    walker.emit_comments(), var_name(var), ee(abs_expr)
-                )
-            vars_defs += walker.emit_comments()
-
-        with walker.returned_expr():
-            return "{{$i$hl{}$hl{}{}$hl$d}}".format(
-                vars_defs, walker.emit_comments(), ee(expr.expr)
-            )
-
-    elif isinstance(expr, Let):
-        if len(expr.vars) == 0:
-            return ee(expr.expr)
-
-        vars_defs = "".join([
-            "val {} = {};$hl".format(
-                var_name(var), ee(abs_expr)
-            ) for var, abs_expr in zip(expr.vars, expr.var_exprs)
-        ])
-
-        return "{{$i$hl{}$hl{}$hl$d}}".format(
-            vars_defs, ee(expr.expr)
-        )
     elif is_a("bind"):
 
         bind = "bind {} = {};$hl".format(
@@ -468,6 +455,13 @@ def emit_expr(expr, **ctx):
         return "{{$i$hl{}$hl{}$hl$d}}".format(
             bind, ee(expr.expr_2)
         )
+    elif isinstance(expr, Let):
+        if isinstance(expr, Block):
+            return emit_let(expr)
+        else:
+            with walker.call('Let'):
+                with walker.arg(0):
+                    return walker.emit_comments() + emit_let(expr)
     elif isinstance(expr, Map):
         op_name = expr.kind
         args = []

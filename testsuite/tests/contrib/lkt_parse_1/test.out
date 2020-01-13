@@ -11177,7 +11177,382 @@ LangkitRoot[1:1-35:2]
 Parsing concrete syntax for test entity_resolver
 ================================================
 
-expected_concrete_syntax.lkt:11:1: Expected 'case', got '<'
+LangkitRoot[1:1-28:2]
+|decls:
+|  FullDeclList[1:1-28:2]
+|  |  FullDecl[1:1-6:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-6:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-4:34]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:59]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:9]: decl
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[2:13-2:59]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[2:13-2:17]: Decl
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[2:18-2:58]
+|  |  |  |  |  |  |  |  ParseNodeExpr[2:18-2:35]
+|  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  Id[2:18-2:22]: Name
+|  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  GrammarExprList[2:23-2:34]
+|  |  |  |  |  |  |  |  |  |  GrammarToken[2:23-2:34]
+|  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  Id[2:24-2:34]: Identifier
+|  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  GrammarToken[2:36-2:41]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:37-2:41]: LPar
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  GrammarList[2:42-2:52]
+|  |  |  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  |  |  ListKindOne[2:42-2:47]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[2:48-2:51]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:48-2:51]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:48-2:51]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:48-2:51]: ref
+|  |  |  |  |  |  |  |  |sep: <null>
+|  |  |  |  |  |  |  |  GrammarToken[2:53-2:58]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:54-2:58]: RPar
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  GrammarRuleDecl[3:5-3:29]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[3:5-3:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarList[3:18-3:29]
+|  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  ListKindZero[3:18-3:23]
+|  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
+|  |  |  |  |  |  |sep: <null>
+|  |  |  |  |  GrammarRuleDecl[4:5-4:34]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[4:5-4:8]: ref
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[4:12-4:34]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[4:12-4:15]: Ref
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[4:16-4:33]
+|  |  |  |  |  |  |  |  ParseNodeExpr[4:16-4:33]
+|  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  Id[4:16-4:20]: Name
+|  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  GrammarExprList[4:21-4:32]
+|  |  |  |  |  |  |  |  |  |  GrammarToken[4:21-4:32]
+|  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  Id[4:22-4:32]: Identifier
+|  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[8:1-14:2]
+|  |  |doc:
+|  |  |  Doc[6:2-6:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[6:2-6:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[6:2-6:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[8:1-14:2]
+|  |  |  |name:
+|  |  |  |  Id[8:7-8:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[10:5-13:6]
+|  |  |  |  |  FullDecl[10:5-13:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[8:16-8:16]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[8:16-8:16]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[8:16-8:16]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[10:5-13:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[10:9-10:20]: resolve_ref
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[10:22-10:22]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[10:25-10:40]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[10:25-10:31]: Entity
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[10:32-10:39]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[10:32-10:39]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[10:32-10:39]: FooNode
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  MatchExpr[10:43-13:6]
+|  |  |  |  |  |  |  |match_expr:
+|  |  |  |  |  |  |  |  Id[10:49-10:53]: self
+|  |  |  |  |  |  |  |branches:
+|  |  |  |  |  |  |  |  MatchBranchList[11:9-12:43]
+|  |  |  |  |  |  |  |  |  MatchBranch[11:9-11:65]
+|  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  MatchValDecl[11:14-11:21]
+|  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  Id[11:14-11:15]: r
+|  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[11:18-11:21]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[11:18-11:21]: Ref
+|  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  NullCondCallExpr[11:25-11:65]
+|  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  CallExpr[11:25-11:61]
+|  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  DotExpr[11:25-11:53]
+|  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[11:25-11:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[11:25-11:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[11:25-11:33]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:25-11:26]: r
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:27-11:33]: parent
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:34-11:40]: parent
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:41-11:49]: node_env
+|  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:50-11:53]: get
+|  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  ParamList[11:54-11:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  Param[11:54-11:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[11:54-11:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:54-11:55]: r
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:56-11:60]: name
+|  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  ParamList[11:63-11:64]
+|  |  |  |  |  |  |  |  |  |  |  |  Param[11:63-11:64]
+|  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  NumLit[11:63-11:64]: 0
+|  |  |  |  |  |  |  |  |  MatchBranch[12:9-12:43]
+|  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  MatchValDecl[12:14-12:15]
+|  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  Id[12:14-12:15]: _
+|  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  GenericInstantiation[12:19-12:43]
+|  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  DotExpr[12:19-12:26]
+|  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  NullLit[12:19-12:23]: null
+|  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[12:24-12:26]: to
+|  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  ParamList[12:27-12:42]
+|  |  |  |  |  |  |  |  |  |  |  |  Param[12:27-12:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[12:27-12:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[12:27-12:33]: Entity
+|  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[12:34-12:41]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[12:34-12:41]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[12:34-12:41]: FooNode
+|  |  FullDecl[16:1-19:2]
+|  |  |doc:
+|  |  |  Doc[14:2-14:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[14:2-14:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[14:2-14:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[16:1-19:2]
+|  |  |  |name:
+|  |  |  |  Id[16:7-16:11]: Decl
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[16:14-16:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[16:14-16:21]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[17:5-18:37]
+|  |  |  |  |  FullDecl[17:5-17:29]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[16:23-16:23]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[16:23-16:23]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[17:5-17:17]
+|  |  |  |  |  |  |  DeclAnnotation[17:5-17:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[17:6-17:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[17:6-17:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[17:18-17:29]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[17:18-17:22]: name
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[17:25-17:29]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[17:25-17:29]: Name
+|  |  |  |  |  FullDecl[18:5-18:37]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[17:29-17:29]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[17:29-17:29]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[18:5-18:17]
+|  |  |  |  |  |  |  DeclAnnotation[18:5-18:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[18:6-18:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[18:6-18:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[18:18-18:37]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[18:18-18:22]: refs
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  GenericTypeRef[18:25-18:37]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[18:25-18:32]: ASTList
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[18:33-18:36]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[18:33-18:36]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[18:33-18:36]: Ref
+|  |  FullDecl[21:1-22:2]
+|  |  |doc:
+|  |  |  Doc[19:2-19:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[19:2-19:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[19:2-19:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[21:1-22:2]
+|  |  |  |name:
+|  |  |  |  Id[21:7-21:11]: Name
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[21:14-21:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[21:14-21:21]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[21:23-21:23]: <empty list>
+|  |  FullDecl[24:1-28:2]
+|  |  |doc:
+|  |  |  Doc[22:2-22:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[22:2-22:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[22:2-22:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[24:1-28:2]
+|  |  |  |name:
+|  |  |  |  Id[24:7-24:10]: Ref
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[24:13-24:20]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[24:13-24:20]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[25:5-27:79]
+|  |  |  |  |  FullDecl[25:5-25:29]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[24:22-24:22]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[24:22-24:22]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[25:5-25:17]
+|  |  |  |  |  |  |  DeclAnnotation[25:5-25:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[25:6-25:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[25:6-25:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[25:18-25:29]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[25:18-25:22]: name
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[25:25-25:29]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[25:25-25:29]: Name
+|  |  |  |  |  FullDecl[27:5-27:79]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[25:29-25:29]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[25:29-25:29]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[27:5-27:12]
+|  |  |  |  |  |  |  DeclAnnotation[27:5-27:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[27:6-27:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[27:6-27:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[27:13-27:79]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[27:17-27:24]: resolve
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[27:26-27:26]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[27:29-27:44]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[27:29-27:35]: Entity
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[27:36-27:43]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[27:36-27:43]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[27:36-27:43]: FooNode
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  NullCondCallExpr[27:47-27:79]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  CallExpr[27:47-27:75]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  DotExpr[27:47-27:64]
+|  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  DotExpr[27:47-27:60]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  Id[27:47-27:51]: self
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[27:52-27:60]: node_env
+|  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  Id[27:61-27:64]: get
+|  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  ParamList[27:65-27:74]
+|  |  |  |  |  |  |  |  |  |  Param[27:65-27:74]
+|  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  DotExpr[27:65-27:74]
+|  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[27:65-27:69]: self
+|  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[27:70-27:74]: name
+|  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  ParamList[27:77-27:78]
+|  |  |  |  |  |  |  |  |  Param[27:77-27:78]
+|  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  NumLit[27:77-27:78]: 0
 
 Parsing concrete syntax for test enum_node_inherit
 ==================================================
@@ -15804,7 +16179,203 @@ LangkitRoot[1:1-44:2]
 Parsing concrete syntax for test invalidation_during_mmz
 ========================================================
 
-expected_concrete_syntax.lkt:16:2: Expected 'if', got '<'
+LangkitRoot[1:1-24:2]
+|decls:
+|  FullDeclList[1:1-24:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:35]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:35]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[2:18-2:35]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[2:18-2:25]: Example
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[2:26-2:34]
+|  |  |  |  |  |  |  |  GrammarToken[2:26-2:34]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:27-2:34]: Example
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[6:1-7:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-7:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[6:16-6:16]: <empty list>
+|  |  FullDecl[9:1-24:2]
+|  |  |doc:
+|  |  |  Doc[7:2-7:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[7:2-7:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[9:1-24:2]
+|  |  |  |name:
+|  |  |  |  Id[9:7-9:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[11:5-23:6]
+|  |  |  |  |  FullDecl[11:5-11:44]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[9:26-9:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[11:5-11:44]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[11:9-11:27]: fetch_example_unit
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[11:29-11:29]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[11:32-11:44]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[11:32-11:44]: InternalUnit
+|  |  |  |  |  |  |body: <null>
+|  |  |  |  |  FullDecl[13:5-14:51]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[11:44-11:44]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[11:44-11:44]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[13:5-13:14]
+|  |  |  |  |  |  |  DeclAnnotation[13:5-13:14]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[13:6-13:14]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[13:6-13:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[13:15-14:51]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[13:19-13:36]: internal_mmz_prop
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[13:38-13:49]
+|  |  |  |  |  |  |  |  FunArgDecl[13:38-13:49]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[13:38-13:39]: i
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:42-13:49]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[13:42-13:49]: Integer
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[13:52-13:59]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[13:52-13:59]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  IfExpr[14:5-14:51]
+|  |  |  |  |  |  |  |cond_expr:
+|  |  |  |  |  |  |  |  ParenExpr[14:8-14:15]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  BinOp[14:9-14:14]
+|  |  |  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  |  |  Id[14:9-14:10]: i
+|  |  |  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  |  |  OpEq[14:11-14:12]
+|  |  |  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  |  |  NumLit[14:13-14:14]: 0
+|  |  |  |  |  |  |  |then_expr:
+|  |  |  |  |  |  |  |  ParenExpr[14:21-14:44]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  RaiseExpr[14:22-14:43]
+|  |  |  |  |  |  |  |  |  |except_expr:
+|  |  |  |  |  |  |  |  |  |  CallExpr[14:28-14:43]
+|  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  Id[14:28-14:41]: PropertyError
+|  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  ParamList[14:42-14:42]: <empty list>
+|  |  |  |  |  |  |  |alternatives:
+|  |  |  |  |  |  |  |  ElsifBranchList[14:44-14:44]: <empty list>
+|  |  |  |  |  |  |  |else_expr:
+|  |  |  |  |  |  |  |  Id[14:50-14:51]: i
+|  |  |  |  |  FullDecl[16:5-23:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[14:51-14:51]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[14:51-14:51]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[16:5-16:22]
+|  |  |  |  |  |  |  DeclAnnotation[16:5-16:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[16:6-16:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[16:6-16:6]: <empty list>
+|  |  |  |  |  |  |  DeclAnnotation[16:13-16:22]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[16:14-16:22]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[16:14-16:14]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[16:23-23:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[16:27-16:35]: mmz_prop
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[16:37-16:48]
+|  |  |  |  |  |  |  |  FunArgDecl[16:37-16:48]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[16:37-16:38]: i
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[16:41-16:48]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[16:41-16:48]: Integer
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[16:51-16:58]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[16:51-16:58]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BlockExpr[16:61-23:6]
+|  |  |  |  |  |  |  |val_defs:
+|  |  |  |  |  |  |  |  BaseValDeclList[18:9-18:41]
+|  |  |  |  |  |  |  |  |  ValDecl[18:9-18:40]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[18:13-18:14]: _
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  DotExpr[18:17-18:40]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  Id[18:17-18:21]: self
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[18:22-18:40]: fetch_example_unit
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  CallExpr[22:9-22:34]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  DotExpr[22:9-22:31]
+|  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  Id[22:9-22:13]: self
+|  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  Id[22:14-22:31]: internal_mmz_prop
+|  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  ParamList[22:32-22:33]
+|  |  |  |  |  |  |  |  |  |  Param[22:32-22:33]
+|  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  Id[22:32-22:33]: i
 
 Parsing concrete syntax for test is_a
 =====================================
@@ -19109,7 +19680,936 @@ LangkitRoot[1:1-16:2]
 Parsing concrete syntax for test match
 ======================================
 
-expected_concrete_syntax.lkt:17:2: Expected Identifier, got '<'
+LangkitRoot[1:1-92:2]
+|decls:
+|  FullDeclList[1:1-92:2]
+|  |  FullDecl[1:1-9:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-9:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-7:28]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:68]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarList[2:18-2:68]
+|  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  ListKindZero[2:18-2:23]
+|  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:67]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:67]
+|  |  |  |  |  |  |  |  |  GrammarOrExpr[2:24-2:67]
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprListList[2:27-2:66]
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:27-2:59]
+|  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:27-2:59]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:27-2:30]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:31-2:58]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:31-2:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:32-2:35]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:36-2:53]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:36-2:40]: Name
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:41-2:52]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:41-2:52]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:42-2:52]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:54-2:58]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:54-2:58]: expr
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:62-2:66]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:62-2:66]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:62-2:66]: expr
+|  |  |  |  |  |  |sep: <null>
+|  |  |  |  |  GrammarRuleDecl[3:5-3:28]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[3:5-3:9]: expr
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarOrExpr[3:13-3:28]
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprListList[3:16-3:27]
+|  |  |  |  |  |  |  |  GrammarExprList[3:16-3:20]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:16-3:20]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:16-3:20]: atom
+|  |  |  |  |  |  |  |  GrammarExprList[3:23-3:27]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:23-3:27]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:23-3:27]: plus
+|  |  |  |  |  GrammarRuleDecl[4:5-4:24]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[4:5-4:8]: lit
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[4:12-4:24]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[4:12-4:15]: Lit
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[4:16-4:23]
+|  |  |  |  |  |  |  |  GrammarToken[4:16-4:23]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[4:17-4:23]: Number
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  GrammarRuleDecl[5:5-5:48]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[5:5-5:9]: plus
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarPick[5:13-5:48]
+|  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  GrammarExprList[5:14-5:47]
+|  |  |  |  |  |  |  |  GrammarToken[5:14-5:19]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[5:15-5:19]: LPar
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  ParseNodeExpr[5:20-5:41]
+|  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  Id[5:20-5:24]: Plus
+|  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  GrammarExprList[5:25-5:40]
+|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:25-5:29]
+|  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  Id[5:25-5:29]: expr
+|  |  |  |  |  |  |  |  |  |  GrammarToken[5:30-5:35]
+|  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  Id[5:31-5:35]: Plus
+|  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:36-5:40]
+|  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  Id[5:36-5:40]: expr
+|  |  |  |  |  |  |  |  GrammarToken[5:42-5:47]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[5:43-5:47]: RPar
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  GrammarRuleDecl[6:5-6:26]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[6:5-6:9]: atom
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarOrExpr[6:13-6:26]
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprListList[6:16-6:25]
+|  |  |  |  |  |  |  |  GrammarExprList[6:16-6:19]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[6:16-6:19]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[6:16-6:19]: lit
+|  |  |  |  |  |  |  |  GrammarExprList[6:22-6:25]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[6:22-6:25]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[6:22-6:25]: ref
+|  |  |  |  |  GrammarRuleDecl[7:5-7:28]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[7:5-7:8]: ref
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[7:12-7:28]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[7:12-7:15]: Ref
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[7:16-7:27]
+|  |  |  |  |  |  |  |  GrammarToken[7:16-7:27]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[7:17-7:27]: Identifier
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[11:1-55:2]
+|  |  |doc:
+|  |  |  Doc[9:2-9:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[9:2-9:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[9:2-9:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[11:1-55:2]
+|  |  |  |name:
+|  |  |  |  Id[11:7-11:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[13:5-54:6]
+|  |  |  |  |  FullDecl[13:5-23:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[11:16-11:16]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[11:16-11:16]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[13:5-13:12]
+|  |  |  |  |  |  |  DeclAnnotation[13:5-13:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[13:6-13:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[13:6-13:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[13:13-23:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[13:17-13:27]: find_atoms
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[13:29-13:29]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[13:32-13:51]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[13:32-13:37]: Array
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[13:38-13:50]
+|  |  |  |  |  |  |  |  |  GenericTypeRef[13:38-13:50]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[13:38-13:44]: Entity
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[13:45-13:49]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[13:45-13:49]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[13:45-13:49]: Atom
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BinOp[13:54-23:6]
+|  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  ParenExpr[13:54-21:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  MatchExpr[14:9-20:10]
+|  |  |  |  |  |  |  |  |  |match_expr:
+|  |  |  |  |  |  |  |  |  |  Id[14:15-14:21]: entity
+|  |  |  |  |  |  |  |  |  |branches:
+|  |  |  |  |  |  |  |  |  |  MatchBranchList[16:13-19:51]
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[16:13-16:33]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[16:18-16:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[16:18-16:19]: a
+|  |  |  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[16:22-16:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[16:22-16:26]: Atom
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  ArrayLiteral[16:30-16:33]
+|  |  |  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ExprList[16:31-16:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[16:31-16:32]: a
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[19:13-19:51]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[19:18-19:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[19:18-19:19]: _
+|  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[19:23-19:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[19:23-19:30]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  NullLit[19:23-19:27]: null
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[19:28-19:30]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[19:31-19:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[19:31-19:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[19:31-19:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[19:31-19:36]: Array
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[19:37-19:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[19:37-19:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[19:37-19:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[19:37-19:43]: Entity
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[19:44-19:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[19:44-19:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[19:44-19:48]: Atom
+|  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  OpAmp[21:7-21:8]
+|  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  ParenExpr[21:9-23:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  CallExpr[22:9-22:52]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  DotExpr[22:9-22:31]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  DotExpr[22:9-22:24]
+|  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[22:9-22:15]: entity
+|  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[22:16-22:24]: children
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[22:25-22:31]: mapcat
+|  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  ParamList[22:32-22:51]
+|  |  |  |  |  |  |  |  |  |  |  Param[22:32-22:51]
+|  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  LambdaExpr[22:32-22:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDeclList[22:33-22:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDecl[22:33-22:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[22:33-22:34]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[22:39-22:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[22:39-22:40]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[22:41-22:51]: find_atoms
+|  |  |  |  |  FullDecl[25:5-38:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[23:6-23:6]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[23:6-23:6]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[25:5-25:12]
+|  |  |  |  |  |  |  DeclAnnotation[25:5-25:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[25:6-25:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[25:6-25:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[25:13-38:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[25:17-25:36]: find_atoms_or_exprs
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[25:38-25:38]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[25:41-25:60]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[25:41-25:46]: Array
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[25:47-25:59]
+|  |  |  |  |  |  |  |  |  GenericTypeRef[25:47-25:59]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[25:47-25:53]: Entity
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[25:54-25:58]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[25:54-25:58]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[25:54-25:58]: Expr
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BinOp[25:63-38:6]
+|  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  ParenExpr[25:63-36:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  MatchExpr[26:9-35:10]
+|  |  |  |  |  |  |  |  |  |match_expr:
+|  |  |  |  |  |  |  |  |  |  Id[26:15-26:21]: entity
+|  |  |  |  |  |  |  |  |  |branches:
+|  |  |  |  |  |  |  |  |  |  MatchBranchList[28:13-34:51]
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[28:13-28:42]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[28:18-28:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[28:18-28:19]: a
+|  |  |  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[28:22-28:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[28:22-28:26]: Atom
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  ArrayLiteral[28:30-28:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ExprList[28:31-28:41]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[28:31-28:41]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[28:31-28:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[28:31-28:32]: a
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[28:33-28:35]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[28:36-28:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[28:36-28:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[28:36-28:40]: Expr
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[31:13-31:33]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[31:18-31:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[31:18-31:19]: e
+|  |  |  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[31:22-31:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[31:22-31:26]: Expr
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  ArrayLiteral[31:30-31:33]
+|  |  |  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ExprList[31:31-31:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[31:31-31:32]: e
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[34:13-34:51]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[34:18-34:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[34:18-34:19]: _
+|  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[34:23-34:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[34:23-34:30]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  NullLit[34:23-34:27]: null
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[34:28-34:30]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[34:31-34:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[34:31-34:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[34:31-34:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[34:31-34:36]: Array
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[34:37-34:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[34:37-34:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[34:37-34:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[34:37-34:43]: Entity
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[34:44-34:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[34:44-34:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[34:44-34:48]: Expr
+|  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  OpAmp[36:7-36:8]
+|  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  ParenExpr[36:9-38:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  CallExpr[37:9-37:61]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  DotExpr[37:9-37:31]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  DotExpr[37:9-37:24]
+|  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[37:9-37:15]: entity
+|  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[37:16-37:24]: children
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[37:25-37:31]: mapcat
+|  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  ParamList[37:32-37:60]
+|  |  |  |  |  |  |  |  |  |  |  Param[37:32-37:60]
+|  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  LambdaExpr[37:32-37:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDeclList[37:33-37:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDecl[37:33-37:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[37:33-37:34]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[37:39-37:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[37:39-37:40]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[37:41-37:60]: find_atoms_or_exprs
+|  |  |  |  |  FullDecl[40:5-54:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[38:6-38:6]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[38:6-38:6]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[40:5-40:12]
+|  |  |  |  |  |  |  DeclAnnotation[40:5-40:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[40:6-40:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[40:6-40:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[40:13-54:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[40:17-40:27]: find_exprs
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[40:29-40:29]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[40:32-40:51]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[40:32-40:37]: Array
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[40:38-40:50]
+|  |  |  |  |  |  |  |  |  GenericTypeRef[40:38-40:50]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[40:38-40:44]: Entity
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[40:45-40:49]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[40:45-40:49]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[40:45-40:49]: Expr
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BinOp[40:54-54:6]
+|  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  ParenExpr[40:54-52:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  MatchExpr[41:9-51:10]
+|  |  |  |  |  |  |  |  |  |match_expr:
+|  |  |  |  |  |  |  |  |  |  Id[41:15-41:21]: entity
+|  |  |  |  |  |  |  |  |  |branches:
+|  |  |  |  |  |  |  |  |  |  MatchBranchList[43:13-50:51]
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[43:13-43:33]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[43:18-43:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[43:18-43:19]: e
+|  |  |  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[43:22-43:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[43:22-43:26]: Expr
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  ArrayLiteral[43:30-43:33]
+|  |  |  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ExprList[43:31-43:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[43:31-43:32]: e
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[47:13-47:42]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[47:18-47:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[47:18-47:19]: a
+|  |  |  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[47:22-47:26]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[47:22-47:26]: Atom
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  ArrayLiteral[47:30-47:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ExprList[47:31-47:41]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[47:31-47:41]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[47:31-47:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[47:31-47:32]: a
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[47:33-47:35]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[47:36-47:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[47:36-47:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[47:36-47:40]: Expr
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[50:13-50:51]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[50:18-50:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[50:18-50:19]: _
+|  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[50:23-50:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[50:23-50:30]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  NullLit[50:23-50:27]: null
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[50:28-50:30]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[50:31-50:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[50:31-50:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[50:31-50:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[50:31-50:36]: Array
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[50:37-50:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[50:37-50:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[50:37-50:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[50:37-50:43]: Entity
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[50:44-50:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[50:44-50:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[50:44-50:48]: Expr
+|  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  OpAmp[52:7-52:8]
+|  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  ParenExpr[52:9-54:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  CallExpr[53:9-53:52]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  DotExpr[53:9-53:31]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  DotExpr[53:9-53:24]
+|  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[53:9-53:15]: entity
+|  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[53:16-53:24]: children
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[53:25-53:31]: mapcat
+|  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  ParamList[53:32-53:51]
+|  |  |  |  |  |  |  |  |  |  |  Param[53:32-53:51]
+|  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  LambdaExpr[53:32-53:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDeclList[53:33-53:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDecl[53:33-53:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[53:33-53:34]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[53:39-53:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[53:39-53:40]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[53:41-53:51]: find_exprs
+|  |  FullDecl[57:1-60:2]
+|  |  |doc:
+|  |  |  Doc[55:2-55:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[55:2-55:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[55:2-55:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[57:1-60:2]
+|  |  |  |name:
+|  |  |  |  Id[57:7-57:10]: Def
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[57:13-57:20]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[57:13-57:20]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[58:5-59:29]
+|  |  |  |  |  FullDecl[58:5-58:29]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[57:22-57:22]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[57:22-57:22]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[58:5-58:17]
+|  |  |  |  |  |  |  DeclAnnotation[58:5-58:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[58:6-58:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[58:6-58:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[58:18-58:29]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[58:18-58:22]: name
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[58:25-58:29]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[58:25-58:29]: Name
+|  |  |  |  |  FullDecl[59:5-59:29]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[58:29-58:29]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[58:29-58:29]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[59:5-59:17]
+|  |  |  |  |  |  |  DeclAnnotation[59:5-59:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[59:6-59:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[59:6-59:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[59:18-59:29]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[59:18-59:22]: expr
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[59:25-59:29]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[59:25-59:29]: Expr
+|  |  FullDecl[62:1-75:2]
+|  |  |doc:
+|  |  |  Doc[60:2-60:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[60:2-60:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[60:2-60:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[62:1-75:2]
+|  |  |  |name:
+|  |  |  |  Id[62:7-62:11]: Expr
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[62:14-62:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[62:14-62:21]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[64:5-74:6]
+|  |  |  |  |  FullDecl[64:5-74:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[62:23-62:23]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[62:23-62:23]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[64:5-64:12]
+|  |  |  |  |  |  |  DeclAnnotation[64:5-64:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[64:6-64:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[64:6-64:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[64:13-74:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[64:17-64:26]: find_refs
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[64:28-64:28]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[64:31-64:49]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[64:31-64:36]: Array
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[64:37-64:48]
+|  |  |  |  |  |  |  |  |  GenericTypeRef[64:37-64:48]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[64:37-64:43]: Entity
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[64:44-64:47]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[64:44-64:47]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[64:44-64:47]: Ref
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BinOp[64:52-74:6]
+|  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  ParenExpr[64:52-72:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  MatchExpr[65:9-71:10]
+|  |  |  |  |  |  |  |  |  |match_expr:
+|  |  |  |  |  |  |  |  |  |  Id[65:15-65:21]: entity
+|  |  |  |  |  |  |  |  |  |branches:
+|  |  |  |  |  |  |  |  |  |  MatchBranchList[67:13-70:50]
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[67:13-67:32]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[67:18-67:25]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[67:18-67:19]: r
+|  |  |  |  |  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[67:22-67:25]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[67:22-67:25]: Ref
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  ArrayLiteral[67:29-67:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ExprList[67:30-67:31]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[67:30-67:31]: r
+|  |  |  |  |  |  |  |  |  |  |  MatchBranch[70:13-70:50]
+|  |  |  |  |  |  |  |  |  |  |  |decl:
+|  |  |  |  |  |  |  |  |  |  |  |  MatchValDecl[70:18-70:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[70:18-70:19]: _
+|  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[70:23-70:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[70:23-70:30]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  NullLit[70:23-70:27]: null
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[70:28-70:30]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[70:31-70:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[70:31-70:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[70:31-70:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[70:31-70:36]: Array
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[70:37-70:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[70:37-70:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[70:37-70:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[70:37-70:43]: Entity
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[70:44-70:47]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[70:44-70:47]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[70:44-70:47]: Ref
+|  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  OpAmp[72:7-72:8]
+|  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  ParenExpr[72:9-74:6]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  CallExpr[73:9-73:61]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  DotExpr[73:9-73:31]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  DotExpr[73:9-73:24]
+|  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[73:9-73:15]: entity
+|  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[73:16-73:24]: children
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[73:25-73:31]: mapcat
+|  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  ParamList[73:32-73:60]
+|  |  |  |  |  |  |  |  |  |  |  Param[73:32-73:60]
+|  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  LambdaExpr[73:32-73:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDeclList[73:33-73:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  LambdaArgDecl[73:33-73:34]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[73:33-73:34]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[73:39-73:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  ErrorOnNull[73:39-73:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GenericInstantiation[73:39-73:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  DotExpr[73:39-73:43]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[73:39-73:40]: c
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[73:41-73:43]: to
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ParamList[73:44-73:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Param[73:44-73:48]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[73:44-73:48]: Expr
+|  |  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[73:51-73:60]: find_refs
+|  |  FullDecl[77:1-78:2]
+|  |  |doc:
+|  |  |  Doc[75:2-75:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[75:2-75:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[75:2-75:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[77:1-78:2]
+|  |  |  |name:
+|  |  |  |  Id[77:7-77:11]: Atom
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[77:14-77:18]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[77:14-77:18]: Expr
+|  |  |  |decls:
+|  |  |  |  FullDeclList[77:20-77:20]: <empty list>
+|  |  FullDecl[80:1-81:2]
+|  |  |doc:
+|  |  |  Doc[78:2-78:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[78:2-78:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[78:2-78:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[80:1-81:2]
+|  |  |  |name:
+|  |  |  |  Id[80:7-80:10]: Lit
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[80:13-80:17]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[80:13-80:17]: Atom
+|  |  |  |decls:
+|  |  |  |  FullDeclList[80:19-80:19]: <empty list>
+|  |  FullDecl[83:1-84:2]
+|  |  |doc:
+|  |  |  Doc[81:2-81:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[81:2-81:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[81:2-81:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[83:1-84:2]
+|  |  |  |name:
+|  |  |  |  Id[83:7-83:10]: Ref
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[83:13-83:17]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[83:13-83:17]: Atom
+|  |  |  |decls:
+|  |  |  |  FullDeclList[83:19-83:19]: <empty list>
+|  |  FullDecl[86:1-89:2]
+|  |  |doc:
+|  |  |  Doc[84:2-84:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[84:2-84:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[84:2-84:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[86:1-89:2]
+|  |  |  |name:
+|  |  |  |  Id[86:7-86:11]: Plus
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[86:14-86:18]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[86:14-86:18]: Expr
+|  |  |  |decls:
+|  |  |  |  FullDeclList[87:5-88:28]
+|  |  |  |  |  FullDecl[87:5-87:28]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[86:20-86:20]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[86:20-86:20]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[87:5-87:17]
+|  |  |  |  |  |  |  DeclAnnotation[87:5-87:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[87:6-87:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[87:6-87:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[87:18-87:28]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[87:18-87:21]: lhs
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[87:24-87:28]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[87:24-87:28]: Expr
+|  |  |  |  |  FullDecl[88:5-88:28]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[87:28-87:28]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[87:28-87:28]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[88:5-88:17]
+|  |  |  |  |  |  |  DeclAnnotation[88:5-88:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[88:6-88:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[88:6-88:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[88:18-88:28]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[88:18-88:21]: rhs
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[88:24-88:28]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[88:24-88:28]: Expr
+|  |  FullDecl[91:1-92:2]
+|  |  |doc:
+|  |  |  Doc[89:2-89:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[89:2-89:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[89:2-89:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[91:1-92:2]
+|  |  |  |name:
+|  |  |  |  Id[91:7-91:11]: Name
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[91:14-91:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[91:14-91:21]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[91:23-91:23]: <empty list>
 
 Parsing concrete syntax for test memoized_big_table
 ===================================================
@@ -20138,7 +21638,238 @@ LangkitRoot[1:1-13:2]
 Parsing concrete syntax for test memoized_unit_loading
 ======================================================
 
-expected_concrete_syntax.lkt:20:2: Expected Identifier, got '<'
+LangkitRoot[1:1-30:2]
+|decls:
+|  FullDeclList[1:1-30:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:35]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:35]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[2:18-2:35]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[2:18-2:25]: Example
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[2:26-2:34]
+|  |  |  |  |  |  |  |  GrammarToken[2:26-2:34]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:27-2:34]: Example
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[6:1-7:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-7:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[6:16-6:16]: <empty list>
+|  |  FullDecl[9:1-30:2]
+|  |  |doc:
+|  |  |  Doc[7:2-7:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[7:2-7:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[9:1-30:2]
+|  |  |  |name:
+|  |  |  |  Id[9:7-9:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[11:5-29:6]
+|  |  |  |  |  FullDecl[11:5-11:48]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[9:26-9:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[11:5-11:48]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[11:9-11:31]: ext_fetch_example_unit
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[11:33-11:33]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[11:36-11:48]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[11:36-11:48]: InternalUnit
+|  |  |  |  |  |  |body: <null>
+|  |  |  |  |  FullDecl[13:5-13:35]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[11:48-11:48]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[11:48-11:48]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[11:48-11:48]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[13:5-13:35]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[13:9-13:23]: ext_unit_count
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[13:25-13:25]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[13:28-13:35]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[13:28-13:35]: Integer
+|  |  |  |  |  |  |body: <null>
+|  |  |  |  |  FullDecl[15:5-16:32]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[13:35-13:35]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[13:35-13:35]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[15:5-15:14]
+|  |  |  |  |  |  |  DeclAnnotation[15:5-15:14]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[15:6-15:14]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[15:6-15:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[15:15-16:32]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[15:19-15:37]: fetch_example_unit
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[15:39-15:39]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[15:42-15:54]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[15:42-15:54]: InternalUnit
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  DotExpr[16:5-16:32]
+|  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  Id[16:5-16:9]: self
+|  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  Id[16:10-16:32]: ext_fetch_example_unit
+|  |  |  |  |  FullDecl[18:5-18:63]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[16:32-16:32]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[16:32-16:32]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[18:5-18:14]
+|  |  |  |  |  |  |  DeclAnnotation[18:5-18:14]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[18:6-18:14]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[18:6-18:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[18:15-18:63]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[18:19-18:29]: unit_count
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[18:31-18:31]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[18:34-18:41]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[18:34-18:41]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  DotExpr[18:44-18:63]
+|  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  Id[18:44-18:48]: self
+|  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  Id[18:49-18:63]: ext_unit_count
+|  |  |  |  |  FullDecl[20:5-29:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[18:63-18:63]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[18:63-18:63]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[20:5-20:22]
+|  |  |  |  |  |  |  DeclAnnotation[20:5-20:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[20:6-20:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[20:6-20:6]: <empty list>
+|  |  |  |  |  |  |  DeclAnnotation[20:13-20:22]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[20:14-20:22]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[20:14-20:14]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[20:23-29:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[20:27-20:35]: mmz_prop
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[20:37-20:37]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[20:40-20:54]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[20:40-20:45]: Array
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[20:46-20:53]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[20:46-20:53]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[20:46-20:53]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BlockExpr[20:57-29:6]
+|  |  |  |  |  |  |  |val_defs:
+|  |  |  |  |  |  |  |  BaseValDeclList[23:9-26:39]
+|  |  |  |  |  |  |  |  |  ValDecl[23:9-23:39]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[23:13-23:19]: before
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  ArrayLiteral[23:22-23:39]
+|  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  ExprList[23:23-23:38]
+|  |  |  |  |  |  |  |  |  |  |  |  DotExpr[23:23-23:38]
+|  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[23:23-23:27]: self
+|  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[23:28-23:38]: unit_count
+|  |  |  |  |  |  |  |  |  ValDecl[25:9-25:40]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[25:13-25:14]: _
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  DotExpr[25:17-25:40]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  Id[25:17-25:21]: self
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[25:22-25:40]: fetch_example_unit
+|  |  |  |  |  |  |  |  |  ValDecl[26:9-26:38]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[26:13-26:18]: after
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  ArrayLiteral[26:21-26:38]
+|  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  ExprList[26:22-26:37]
+|  |  |  |  |  |  |  |  |  |  |  |  DotExpr[26:22-26:37]
+|  |  |  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[26:22-26:26]: self
+|  |  |  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[26:27-26:37]: unit_count
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  BinOp[28:9-28:23]
+|  |  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  |  Id[28:9-28:15]: before
+|  |  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  |  OpAmp[28:16-28:17]
+|  |  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  |  Id[28:18-28:23]: after
 
 Parsing concrete syntax for test mmz_on_null
 ============================================
