@@ -1,0 +1,92 @@
+LangkitRoot[2:1-12:2]
+|decls:
+|  DeclList[2:1-12:2]
+|  |  GrammarDecl[2:1-12:2]
+|  |  |doc:
+|  |  |  DocLit[2:1-2:27]: "Grammar for our language"
+|  |  |name:
+|  |  |  Id[3:9-3:21]: None_grammar
+|  |  |rules:
+|  |  |  GrammarRuleDeclList[4:5-10:27]
+|  |  |  |  GrammarRuleDecl[4:5-7:6]
+|  |  |  |  |doc:
+|  |  |  |  |  DocLit[4:5-4:16]: "Root decl"
+|  |  |  |  |name:
+|  |  |  |  |  Id[5:5-5:9]: decl
+|  |  |  |  |expr:
+|  |  |  |  |  ParseNodeExpr[5:13-7:6]
+|  |  |  |  |  |node_name:
+|  |  |  |  |  |  Id[5:13-5:17]: Decl
+|  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  GrammarExprList[6:9-6:54]
+|  |  |  |  |  |  |  GrammarOpt[6:9-6:15]
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  GrammarToken[6:10-6:15]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[6:11-6:15]: Plus
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  ParseNodeExpr[6:16-6:33]
+|  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  Id[6:16-6:20]: Name
+|  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[6:21-6:32]
+|  |  |  |  |  |  |  |  |  GrammarToken[6:21-6:32]
+|  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  Id[6:22-6:32]: Identifier
+|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarToken[6:34-6:39]
+|  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  Id[6:35-6:39]: LPar
+|  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarRuleRef[6:40-6:48]
+|  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  Id[6:40-6:48]: ref_list
+|  |  |  |  |  |  |  GrammarToken[6:49-6:54]
+|  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  Id[6:50-6:54]: RPar
+|  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  GrammarRuleDecl[8:5-8:29]
+|  |  |  |  |doc: <null>
+|  |  |  |  |name:
+|  |  |  |  |  Id[8:5-8:14]: main_rule
+|  |  |  |  |expr:
+|  |  |  |  |  GrammarList[8:18-8:29]
+|  |  |  |  |  |kind:
+|  |  |  |  |  |  ListKindZero[8:18-8:23]
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarRuleRef[8:24-8:28]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[8:24-8:28]: decl
+|  |  |  |  |  |sep: <null>
+|  |  |  |  GrammarRuleDecl[9:5-9:34]
+|  |  |  |  |doc: <null>
+|  |  |  |  |name:
+|  |  |  |  |  Id[9:5-9:8]: ref
+|  |  |  |  |expr:
+|  |  |  |  |  ParseNodeExpr[9:12-9:34]
+|  |  |  |  |  |node_name:
+|  |  |  |  |  |  Id[9:12-9:15]: Ref
+|  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  GrammarExprList[9:16-9:33]
+|  |  |  |  |  |  |  ParseNodeExpr[9:16-9:33]
+|  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  Id[9:16-9:20]: Name
+|  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[9:21-9:32]
+|  |  |  |  |  |  |  |  |  GrammarToken[9:21-9:32]
+|  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  Id[9:22-9:32]: Identifier
+|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  GrammarRuleDecl[10:5-10:27]
+|  |  |  |  |doc: <null>
+|  |  |  |  |name:
+|  |  |  |  |  Id[10:5-10:13]: ref_list
+|  |  |  |  |expr:
+|  |  |  |  |  GrammarList[10:17-10:27]
+|  |  |  |  |  |kind:
+|  |  |  |  |  |  ListKindOne[10:17-10:22]
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarRuleRef[10:23-10:26]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[10:23-10:26]: ref
+|  |  |  |  |  |sep: <null>
