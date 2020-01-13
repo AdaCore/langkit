@@ -30,11 +30,16 @@ class Token(LexerToken):
     RBrack = WithText()
     ListPlus = WithText()
     ListStar = WithText()
+    Equal = WithText()
 
     # Keywords
     GrammarKw = WithText()
     OrKw = WithText()
     ClassKw = WithText()
+    FunKw = WithText()
+    PublicKw = WithText()
+    PrivateKw = WithText()
+    NullKw = WithText()
 
 
 lkt_lexer = Lexer(Token)
@@ -70,11 +75,16 @@ lkt_lexer.add_rules(
     (Literal('@'),         Token.At),
     (Literal('list+'),     Token.ListPlus),
     (Literal('list*'),     Token.ListStar),
+    (Literal('='),         Token.Equal),
 
     # Keywords
     (Literal('grammar'),   Token.GrammarKw),
     (Literal('or'),        Token.OrKw),
     (Literal('class'),     Token.ClassKw),
+    (Literal('fun'),       Token.FunKw),
+    (Literal('public'),    Token.PublicKw),
+    (Literal('private'),   Token.PrivateKw),
+    (Literal('null'),      Token.NullKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
