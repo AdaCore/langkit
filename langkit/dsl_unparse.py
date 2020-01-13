@@ -316,7 +316,8 @@ def needs_parens(expr):
 
 def emit_indent_expr(expr, **ctx):
     strn = emit_expr(expr, **ctx)
-    if len(strn) > 40:
+    starts_with_comment = len(strn) > 0 and strn[0] == '#'
+    if len(strn) > 40 or starts_with_comment:
         return "$i$hl{}$d$hl".format(strn)
     else:
         return strn
@@ -430,8 +431,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, Block):
         if len(expr.vars) == 0:
             with walker.returned_expr():
-                coms = walker.emit_comments()
-                return ee(expr.expr)
+                return walker.emit_comments() + ee(expr.expr)
 
         vars_defs = ""
         for i, (var, abs_expr) in enumerate(zip(expr.vars, expr.var_exprs)):

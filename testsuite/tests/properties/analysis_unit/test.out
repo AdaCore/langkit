@@ -1,6 +1,6 @@
 main.py: Running...
 result = 6
-unit.root.eval_unit(None) = <PropertyError: raised LIBFOOLANG.COMMON.PROPERTY_ERROR : dereferencing a null access
+unit.root.eval_unit(None) = <PropertyError: raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : dereferencing a null access
 >
 unit.root.eval_unit(42) = <TypeError: AnalysisUnit instance expected, got int instead>
 unit.root.eval_unit(unit) = 6

@@ -7,8 +7,8 @@ Processing <Block foo 2:1-2:16> (1)
   new = <Block new_bar 5:1-5:22>
   old = <Block new_bar 5:1-5:22>
 Processing <Block foo 2:1-2:16> (2)
-  parent = raised LIBFOOLANG.COMMON.PROPERTY_ERROR : dereferencing a null access
-  new = raised LIBFOOLANG.COMMON.PROPERTY_ERROR : dereferencing a null access
-  old = raised LIBFOOLANG.COMMON.PROPERTY_ERROR : dereferencing a null access
+  parent = raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : dereferencing a null access
+  new = raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : dereferencing a null access
+  old = raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : dereferencing a null access
 main.py: Done.
 Done

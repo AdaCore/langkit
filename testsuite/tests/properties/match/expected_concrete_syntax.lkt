@@ -14,13 +14,9 @@ class FooNode {
         match entity {
             # This should match Lit .. Ref
             case a : Atom => [a]
-<<<<<<< HEAD
-            case _ => null.to[Array[Entity[Atom]]]
-=======
->>>>>>> RA22-015: Add initial support for unparsing comments.
 
             # This should match Def | Plus .. FooNode.list
-            case _ => null
+            case _ => null.to[Array[Entity[Atom]]]
         }
     ) & (
         entity.children.mapcat((c) => c.find_atoms)
@@ -33,13 +29,9 @@ class FooNode {
 
             # This should match the only remaining expression: Plus
             case e : Expr => [e]
-<<<<<<< HEAD
-            case _ => null.to[Array[Entity[Expr]]]
-=======
->>>>>>> RA22-015: Add initial support for unparsing comments.
 
             # This should match Def | FooNode.list
-            case _ => null
+            case _ => null.to[Array[Entity[Expr]]]
         }
     ) & (
         entity.children.mapcat((c) => c.find_atoms_or_exprs)
@@ -53,13 +45,9 @@ class FooNode {
             # This should match nothing (Atom is an Expr subclass), so emit a
             # warning.
             case a : Atom => [a.to[Expr]]
-<<<<<<< HEAD
-            case _ => null.to[Array[Entity[Expr]]]
-=======
->>>>>>> RA22-015: Add initial support for unparsing comments.
 
             # This should match Def | FooNode.list
-            case _ => null
+            case _ => null.to[Array[Entity[Expr]]]
         }
     ) & (
         entity.children.mapcat((c) => c.find_exprs)
@@ -77,13 +65,9 @@ class Expr : FooNode {
         match entity {
             # This should match Ref
             case r : Ref => [r]
-<<<<<<< HEAD
-            case _ => null.to[Array[Entity[Ref]]]
-=======
->>>>>>> RA22-015: Add initial support for unparsing comments.
 
             # This should match Lit
-            case _ => null
+            case _ => null.to[Array[Entity[Ref]]]
         }
     ) & (
         entity.children.mapcat((c) => c.to[Expr]!.find_refs)

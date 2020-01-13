@@ -17,20 +17,13 @@ class Example : FooNode {
 
     @memoized fun unit_count (): Integer = self.ext_unit_count
 
-<<<<<<< HEAD
     @export @memoized fun mmz_prop (): Array[Integer] = {
-        val before = [self.unit_count];
-        val _ = self.fetch_example_unit;
-        val after = [self.unit_count];
-=======
-    @export memoized fun mmz_prop (): Array[Integer] = {
         # Both calls to unit_count are memoized, but when called for the first
         # time, the first one's result will be different from the second one.
-        val before = [self.unit_count]
+        val before = [self.unit_count];
         # Update context version by parsing a new unit
-        val _ = self.fetch_example_unit
-        val after = [self.unit_count]
->>>>>>> RA22-015: Add initial support for unparsing comments.
+        val _ = self.fetch_example_unit;
+        val after = [self.unit_count];
 
         before & after
     }
