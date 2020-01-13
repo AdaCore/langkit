@@ -15,107 +15,189 @@ class LKNode(ASTNode):
 
 
 class LangkitRoot(LKNode):
+    """
+    For the moment, root node of a lkt compilation unit.
+    """
     decls = Field()
 
 
 @abstract
 class Decl(LKNode):
+    """
+    Base class for declarations. Encompasses regular declarations as well as
+    special declarations such as grammars, grammar rules, etc.
+    """
     pass
 
 
 @abstract
 class Expr(LKNode):
+    """
+    Base class for expressions. Encompasses regular expressions as well as
+    special expressions (grammar expressions, etc).
+    """
     pass
 
 
-class GrammarDecl(Decl):
+@abstract
+class BaseGrammarDecl(Decl):
+    """
+    Base class for all declarations related to grammars.
+    """
+
+
+class GrammarDecl(BaseGrammarDecl):
+    """
+    Declaration of a language's grammar.
+    """
     name = Field()
     rules = Field()
 
 
 class GrammarRuleDecl(Decl):
+    """
+    Declaration of a grammar rule inside of a grammar.
+    """
     name = Field()
     expr = Field()
 
 
 @abstract
 class GrammarExpr(Expr):
+    """
+    Base class for expressions related to grammars.
+    """
     pass
 
 
 class ParseNodeExpr(GrammarExpr):
+    """
+    Expression for the parsing of a Node.
+    """
     node_name = Field()
     sub_exprs = Field()
 
 
 class GrammarRuleRef(GrammarExpr):
+    """
+    Grammar expression for a reference to another grammar rule.
+    """
     node_name = Field()
 
 
 @abstract
 class Name(Expr):
+    """
+    Name referencing an entity.
+    """
     pass
 
 
 class DottedName(Name):
+    """
+    Dotted qualified name.
+    """
     prefix = Field()
     suffix = Field()
 
 
 class Id(Name):
+    """
+    Identifier.
+    """
     token_node = True
 
 
 class TokenLit(GrammarExpr):
+    """
+    Grammar expression for a token literal.
+    """
     token_node = True
 
 
 class GrammarToken(GrammarExpr):
+    """
+    Grammar expression for a token reference.
+    """
     token_name = Field()
     expr = Field()
 
 
 class GrammarOrExpr(GrammarExpr):
+    """
+    Grammar `Or` expression (disjunctive choice between several grammar
+    options).
+    """
     sub_exprs = Field()
 
 
 class GrammarOpt(GrammarExpr):
+    """
+    Grammar expression for an optional parsing result.
+    """
     expr = Field()
 
 
 class GrammarOptGroup(GrammarExpr):
+    """
+    Grammar expression for a group of optional parsing results.
+    """
     expr = Field()
 
 
 class GrammarCut(GrammarExpr):
+    """
+    Grammar expression for a cut.
+    """
     pass
 
 
 class GrammarNull(GrammarExpr):
+    """
+    Grammar expression to parse a null node.
+    """
     name = Field()
 
 
 class GrammarSkip(GrammarExpr):
+    """
+    Grammar expression (error recovery) to skip a parsing result.
+    """
     name = Field()
 
 
 class GrammarPredicate(GrammarExpr):
+    """
+    Grammar expression for a predicate: Only parse something if the predicate
+    (that is a reference to a node property) returns True.
+    """
     expr = Field()
     prop_ref = Field()
 
 
 class GrammarDontSkip(GrammarExpr):
+    """
+    Grammar expression (error recovery) to ensure that any nested skip parser
+    calls won't skip certain parse results.
+    """
     expr = Field()
     dont_skip = Field()
 
 
 class GrammarList(GrammarExpr):
+    """
+    Grammar expression to parse lists of results. Results can be separated by a
+    separator. List can be empty ('*') or not ('+').
+    """
     kind = Field()
     expr = Field()
     sep = Field()
 
 
 class ListKind(LKNode):
+    """
+    Kind for list parser expressions.
+    """
     enum_node = True
     alternatives = ["one", "zero"]
 
