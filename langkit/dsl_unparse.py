@@ -914,7 +914,6 @@ def unparse_lang(ctx):
     % endfor
     """
 
-    from time import time
     lang_def = pp(sf(template))
     with open(dest_file, 'w') as f:
         f.write(lang_def)
