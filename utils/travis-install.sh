@@ -97,3 +97,6 @@ pip install .
 
 # Also install flake8 to have complete style checks
 pip install flake8
+
+# RA22-015: Install libpythonlang to make it available to dsl_unparse
+./scripts/manage.sh make
