@@ -227,7 +227,7 @@ lkt_grammar.add_rules(
     ),
 
     grammar_decl=GrammarDecl(
-        "grammar", G.id, "is", List(G.grammar_rule, empty_valid=True), "end"
+        "grammar", G.id, "{", List(G.grammar_rule, empty_valid=True), "}"
     ),
     grammar_rule=GrammarRuleDecl(G.id, "<-", G.grammar_expr),
     grammar_primary=Or(
@@ -289,9 +289,9 @@ lkt_grammar.add_rules(
     ),
 
     class_decl=ClassDecl(
-        "class", G.id, Opt(":", G.dotted_name), "is",
+        "class", G.id, Opt(":", G.dotted_name), "{",
         G.decls,
-        "end"
+        "}"
     ),
 
     regular_decl=Or(

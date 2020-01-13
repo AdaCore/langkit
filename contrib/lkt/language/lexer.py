@@ -24,6 +24,8 @@ class Token(LexerToken):
     At = WithText()
     LPar = WithText()
     RPar = WithText()
+    LBrace = WithText()
+    RBrace = WithText()
     LBrack = WithText()
     RBrack = WithText()
     ListPlus = WithText()
@@ -31,8 +33,6 @@ class Token(LexerToken):
 
     # Keywords
     GrammarKw = WithText()
-    IsKw = WithText()
-    EndKw = WithText()
     OrKw = WithText()
     ClassKw = WithText()
 
@@ -63,6 +63,8 @@ lkt_lexer.add_rules(
     (Literal(')'),         Token.RPar),
     (Literal('['),         Token.LBrack),
     (Literal(']'),         Token.RBrack),
+    (Literal('{'),         Token.LBrace),
+    (Literal('}'),         Token.RBrace),
     (Literal('|>'),        Token.Comb),
     (Literal(','),         Token.Comma),
     (Literal('@'),         Token.At),
@@ -71,8 +73,6 @@ lkt_lexer.add_rules(
 
     # Keywords
     (Literal('grammar'),   Token.GrammarKw),
-    (Literal('is'),        Token.IsKw),
-    (Literal('end'),       Token.EndKw),
     (Literal('or'),        Token.OrKw),
     (Literal('class'),     Token.ClassKw),
 
