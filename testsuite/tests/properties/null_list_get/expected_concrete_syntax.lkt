@@ -10,7 +10,8 @@ class FooNode {
     fun at_entity (n : Entity[ASTList[Example]], i : Integer): Entity[Example] =
     n?[i]
 
-    public fun run_bare (): Entity[Example] = self.at_bare(null, 1).as_bare_entity
+    public fun run_bare (): Entity[Example] =
+    self.at_bare(null, 1).as_bare_entity
 
     public fun run_entity (): Entity[Example] = self.at_entity(null, 1)
 }

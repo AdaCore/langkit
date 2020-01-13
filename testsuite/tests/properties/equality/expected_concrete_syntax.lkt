@@ -14,7 +14,8 @@ class FooNode {
         env=<env_orphan(<FieldAccess .children_env>)>
     )
 
-    fun env_array (): Array[LexicalEnv] = [<env_orphan(<FieldAccess .children_env>)>]
+    fun env_array (): Array[LexicalEnv] =
+    [<env_orphan(<FieldAccess .children_env>)>]
 }
 
 class Decl : FooNode {
@@ -22,11 +23,14 @@ class Decl : FooNode {
     parse field name : Name
     parse field items : ASTList[Ref]
 
-    public fun test_env (other : Entity[FooNode]): Boolean = <env_orphan(<FieldAccess .children_env>)> == <env_orphan(<FieldAccess .children_env>)>
+    public fun test_env (other : Entity[FooNode]): Boolean =
+    <env_orphan(<FieldAccess .children_env>)> == <env_orphan(<FieldAccess .children_env>)>
 
-    public fun test_struct (other : Entity[FooNode]): Boolean = self.env_struct == other.env_struct
+    public fun test_struct (other : Entity[FooNode]): Boolean =
+    self.env_struct == other.env_struct
 
-    public fun test_array (other : Entity[FooNode]): Boolean = self.env_array == other.env_array
+    public fun test_array (other : Entity[FooNode]): Boolean =
+    self.env_array == other.env_array
 }
 
 """

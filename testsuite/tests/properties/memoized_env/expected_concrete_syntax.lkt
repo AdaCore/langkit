@@ -25,7 +25,9 @@ class Name : FooNode {
 class Ref : FooNode {
     parse field name : Name
 
-    public fun referenced (): Entity[FooNode] = self.referenced_env.env_node.as_bare_entity
+    public fun referenced (): Entity[FooNode] =
+    self.referenced_env.env_node.as_bare_entity
 
-    memoized fun referenced_env (): LexicalEnv = self.node_env.get(self.name.symbol)?[0].children_env
+    memoized fun referenced_env (): LexicalEnv =
+    self.node_env.get(self.name.symbol)?[0].children_env
 }

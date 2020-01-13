@@ -15,7 +15,8 @@ class Decl : FooNode {
     parse field name : Name
     parse field items : ASTList[Ref]
 
-    public fun entity_items (): Array[Entity[Ref]] = self.as_entity.items.map((i) => i)
+    public fun entity_items (): Array[Entity[Ref]] =
+    self.as_entity.items.map((i) => i)
 }
 
 """

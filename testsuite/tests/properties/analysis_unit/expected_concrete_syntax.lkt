@@ -6,7 +6,8 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun eval_unit (u : InternalUnit): Integer = u.root.to[Expression].result
+    public fun eval_unit (u : InternalUnit): Integer =
+    u.root.to[Expression].result
 }
 
 class Expression : FooNode {

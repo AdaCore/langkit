@@ -68,7 +68,8 @@ class Plus : Expr {
 class Ref : Expr {
     parse field name : Identifier
 
-    fun evaluate (): BigIntegerType = self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
+    fun evaluate (): BigIntegerType =
+    self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
 }
 
 """

@@ -58,5 +58,6 @@ class Prefix : Name {
     parse field prefix : Name
     parse field suffix : Id
 
-    fun resolve (): Entity[FooNode] = self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
+    fun resolve (): Entity[FooNode] =
+    self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
 }

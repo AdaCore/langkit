@@ -609,9 +609,17 @@ def pp(strn, indent_step=4, line_size=80):
 
     for i in range(len(buf)):
         el = buf[i].replace("\n", "")
-        next_el = buf[i] if i < len(buf) else ""
+
         if el in ['$hl', '$sl']:
-            if el == '$hl' or len(current_line) + len(next_el) > line_size:
+
+            len_next_line = 0
+            if el == '$sl':
+                for j in range(i + 1, len(buf)) :
+                    if buf[j] == '$hl':
+                        break
+                    len_next_line += len(buf[j])
+
+            if el == '$hl' or len(current_line) + len_next_line > line_size:
                 write_line()
                 current_line = " " * indent_level
         elif el == '$i':

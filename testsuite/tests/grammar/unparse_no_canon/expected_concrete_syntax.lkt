@@ -1,10 +1,14 @@
 grammar None_grammar {
     main_rule <- list*(or(
         | RootNode(
-            @Def null(Identifier) ?@LBrace Number(@Number) @RBrace @Semicolon
+            @Def
+            null(Identifier)
+            ?@LBrace Number(@Number) @RBrace @Semicolon
         )
         | RootNode(
-            @Def ?@LPar Identifier(@Identifier) @RPar null(Number) @Semicolon
+            @Def
+            ?@LPar
+            Identifier(@Identifier) @RPar null(Number) @Semicolon
         )
     ))
 
