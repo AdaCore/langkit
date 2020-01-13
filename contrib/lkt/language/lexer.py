@@ -24,6 +24,8 @@ class Token(LexerToken):
     At = WithText()
     LPar = WithText()
     RPar = WithText()
+    LBrack = WithText()
+    RBrack = WithText()
     ListPlus = WithText()
     ListStar = WithText()
 
@@ -59,9 +61,9 @@ lkt_lexer.add_rules(
     (Literal('.'),         Token.Dot),
     (Literal('('),         Token.LPar),
     (Literal(')'),         Token.RPar),
-    (Literal('['),         Token.LPar),
+    (Literal('['),         Token.LBrack),
+    (Literal(']'),         Token.RBrack),
     (Literal('|>'),        Token.Comb),
-    (Literal(']'),         Token.RPar),
     (Literal(','),         Token.Comma),
     (Literal('@'),         Token.At),
     (Literal('list+'),     Token.ListPlus),
