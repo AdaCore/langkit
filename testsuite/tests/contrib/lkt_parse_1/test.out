@@ -1,92 +1,96 @@
-LangkitRoot[2:1-12:2]
+LangkitRoot[1:1-14:2]
 |decls:
-|  DeclList[2:1-12:2]
-|  |  GrammarDecl[2:1-12:2]
-|  |  |doc:
-|  |  |  DocLit[2:1-2:27]: "Grammar for our language"
+|  DeclList[1:1-14:2]
+|  |  GrammarDecl[1:1-4:2]
+|  |  |doc: <null>
 |  |  |name:
-|  |  |  Id[3:9-3:21]: None_grammar
+|  |  |  Id[1:9-1:21]: None_grammar
 |  |  |rules:
-|  |  |  GrammarRuleDeclList[4:5-10:27]
-|  |  |  |  GrammarRuleDecl[4:5-7:6]
-|  |  |  |  |doc:
-|  |  |  |  |  DocLit[4:5-4:16]: "Root decl"
+|  |  |  GrammarRuleDeclList[2:5-2:35]
+|  |  |  |  GrammarRuleDecl[2:5-2:35]
+|  |  |  |  |doc: <null>
 |  |  |  |  |name:
-|  |  |  |  |  Id[5:5-5:9]: decl
+|  |  |  |  |  Id[2:5-2:14]: main_rule
 |  |  |  |  |expr:
-|  |  |  |  |  ParseNodeExpr[5:13-7:6]
+|  |  |  |  |  ParseNodeExpr[2:18-2:35]
 |  |  |  |  |  |node_name:
-|  |  |  |  |  |  Id[5:13-5:17]: Decl
+|  |  |  |  |  |  Id[2:18-2:25]: Example
 |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  GrammarExprList[6:9-6:54]
-|  |  |  |  |  |  |  GrammarOpt[6:9-6:15]
-|  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  GrammarToken[6:10-6:15]
-|  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  Id[6:11-6:15]: Plus
-|  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  ParseNodeExpr[6:16-6:33]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[6:16-6:20]: Name
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[6:21-6:32]
-|  |  |  |  |  |  |  |  |  GrammarToken[6:21-6:32]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[6:22-6:32]: Identifier
-|  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  GrammarToken[6:34-6:39]
+|  |  |  |  |  |  GrammarExprList[2:26-2:34]
+|  |  |  |  |  |  |  GrammarToken[2:26-2:34]
 |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  Id[6:35-6:39]: LPar
+|  |  |  |  |  |  |  |  Id[2:27-2:34]: Example
 |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  GrammarRuleRef[6:40-6:48]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[6:40-6:48]: ref_list
-|  |  |  |  |  |  |  GrammarToken[6:49-6:54]
-|  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  Id[6:50-6:54]: RPar
-|  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  GrammarRuleDecl[8:5-8:29]
+|  |  ClassDecl[6:1-7:2]
+|  |  |doc: <null>
+|  |  |name:
+|  |  |  Id[6:7-6:14]: FooNode
+|  |  |base_class: <null>
+|  |  |decls:
+|  |  |  DeclList[6:16-6:16]: <empty list>
+|  |  ClassDecl[9:1-14:2]
+|  |  |doc: <null>
+|  |  |name:
+|  |  |  Id[9:7-9:14]: Example
+|  |  |base_class:
+|  |  |  Id[9:17-9:24]: FooNode
+|  |  |decls:
+|  |  |  DeclList[11:5-13:75]
+|  |  |  |  FunDecl[11:5-11:59]
 |  |  |  |  |doc: <null>
+|  |  |  |  |visibility:
+|  |  |  |  |  EntityVisibilityPublic[11:5-11:11]
 |  |  |  |  |name:
-|  |  |  |  |  Id[8:5-8:14]: main_rule
-|  |  |  |  |expr:
-|  |  |  |  |  GrammarList[8:18-8:29]
-|  |  |  |  |  |kind:
-|  |  |  |  |  |  ListKindZero[8:18-8:23]
-|  |  |  |  |  |expr:
-|  |  |  |  |  |  GrammarRuleRef[8:24-8:28]
-|  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  Id[8:24-8:28]: decl
-|  |  |  |  |  |sep: <null>
-|  |  |  |  GrammarRuleDecl[9:5-9:34]
+|  |  |  |  |  Id[11:16-11:21]: prop1
+|  |  |  |  |args:
+|  |  |  |  |  FunArgDeclList[11:23-11:43]
+|  |  |  |  |  |  FunArgDecl[11:23-11:43]
+|  |  |  |  |  |  |doc: <null>
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[11:23-11:26]: arg
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[11:29-11:36]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[11:29-11:36]: Boolean
+|  |  |  |  |  |  |default_val:
+|  |  |  |  |  |  |  Id[11:39-11:43]: true
+|  |  |  |  |return_type:
+|  |  |  |  |  SimpleTypeRef[11:46-11:53]
+|  |  |  |  |  |type_name:
+|  |  |  |  |  |  Id[11:46-11:53]: Boolean
+|  |  |  |  |body:
+|  |  |  |  |  Id[11:56-11:59]: arg
+|  |  |  |  FunDecl[13:5-13:75]
 |  |  |  |  |doc: <null>
+|  |  |  |  |visibility:
+|  |  |  |  |  EntityVisibilityPublic[13:5-13:11]
 |  |  |  |  |name:
-|  |  |  |  |  Id[9:5-9:8]: ref
-|  |  |  |  |expr:
-|  |  |  |  |  ParseNodeExpr[9:12-9:34]
-|  |  |  |  |  |node_name:
-|  |  |  |  |  |  Id[9:12-9:15]: Ref
-|  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  GrammarExprList[9:16-9:33]
-|  |  |  |  |  |  |  ParseNodeExpr[9:16-9:33]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[9:16-9:20]: Name
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[9:21-9:32]
-|  |  |  |  |  |  |  |  |  GrammarToken[9:21-9:32]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[9:22-9:32]: Identifier
-|  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  GrammarRuleDecl[10:5-10:27]
-|  |  |  |  |doc: <null>
-|  |  |  |  |name:
-|  |  |  |  |  Id[10:5-10:13]: ref_list
-|  |  |  |  |expr:
-|  |  |  |  |  GrammarList[10:17-10:27]
-|  |  |  |  |  |kind:
-|  |  |  |  |  |  ListKindOne[10:17-10:22]
-|  |  |  |  |  |expr:
-|  |  |  |  |  |  GrammarRuleRef[10:23-10:26]
-|  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  Id[10:23-10:26]: ref
-|  |  |  |  |  |sep: <null>
+|  |  |  |  |  Id[13:16-13:21]: prop2
+|  |  |  |  |args:
+|  |  |  |  |  FunArgDeclList[13:23-13:51]
+|  |  |  |  |  |  FunArgDecl[13:23-13:51]
+|  |  |  |  |  |  |doc: <null>
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[13:23-13:26]: arg
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  GenericTypeRef[13:29-13:44]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[13:29-13:35]: Entity
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[13:36-13:43]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:36-13:43]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[13:36-13:43]: FooNode
+|  |  |  |  |  |  |default_val:
+|  |  |  |  |  |  |  NullLit[13:47-13:51]: null
+|  |  |  |  |return_type:
+|  |  |  |  |  GenericTypeRef[13:54-13:69]
+|  |  |  |  |  |type_name:
+|  |  |  |  |  |  Id[13:54-13:60]: Entity
+|  |  |  |  |  |params:
+|  |  |  |  |  |  TypeRefList[13:61-13:68]
+|  |  |  |  |  |  |  SimpleTypeRef[13:61-13:68]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[13:61-13:68]: FooNode
+|  |  |  |  |body:
+|  |  |  |  |  Id[13:72-13:75]: arg
