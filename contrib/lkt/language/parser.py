@@ -27,7 +27,7 @@ class Decl(LKNode):
     Base class for declarations. Encompasses regular declarations as well as
     special declarations such as grammars, grammar rules, etc.
     """
-    pass
+    doc = Field()
 
 
 @abstract
@@ -202,7 +202,7 @@ class ListKind(LKNode):
     alternatives = ["one", "zero"]
 
 
-class ClassDecl(LKNode):
+class ClassDecl(Decl):
     """
     Declaration for a LK class. This only cover node classes for the moment,
     but might be extended to support regular classes in the future.
@@ -210,6 +210,13 @@ class ClassDecl(LKNode):
     name = Field()
     base_class = Field()
     decls = Field()
+
+
+class DocLit(Expr):
+    """
+    Grammar expression for a documentation literal.
+    """
+    token_node = True
 
 
 lkt_grammar = Grammar('main_rule')
@@ -226,10 +233,14 @@ lkt_grammar.add_rules(
         G.id
     ),
 
+    doc=Opt(DocLit(Lex.String)),
+
     grammar_decl=GrammarDecl(
-        "grammar", G.id, "{", List(G.grammar_rule, empty_valid=True), "}"
+        G.doc,
+        "grammar", G.id,
+        "{", List(G.grammar_rule, empty_valid=True), "}"
     ),
-    grammar_rule=GrammarRuleDecl(G.id, "<-", G.grammar_expr),
+    grammar_rule=GrammarRuleDecl(G.doc, G.id, "<-", G.grammar_expr),
     grammar_primary=Or(
         G.token_literal,
         G.grammar_cut,
@@ -289,6 +300,7 @@ lkt_grammar.add_rules(
     ),
 
     class_decl=ClassDecl(
+        G.doc,
         "class", G.id, Opt(":", G.dotted_name), "{",
         G.decls,
         "}"
