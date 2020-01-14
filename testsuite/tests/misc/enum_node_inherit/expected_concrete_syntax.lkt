@@ -11,7 +11,7 @@ class EnumNode : FooNode {
     @export fun prop (): Boolean = true
 }
 
-qualifier class HasExample : EnumNode {
+@qualifier class HasExample : EnumNode {
 
     ## Return whether this is an instance of HasExamplePresent
     @export fun as_bool (): Boolean

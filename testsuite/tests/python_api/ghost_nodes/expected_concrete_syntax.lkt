@@ -13,7 +13,7 @@ grammar None_grammar {
 class FooNode {
 }
 
-enum class Enum : FooNode {
+@enum class Enum : FooNode {
     case Null, Example, Default
 }
 
@@ -30,7 +30,7 @@ class Param : FooNode {
     @parse_field has_plus : PlusQualifier
 }
 
-qualifier class PlusQualifier : FooNode {
+@qualifier class PlusQualifier : FooNode {
 
     ## Return whether this is an instance of PlusQualifierPresent
     @export fun as_bool (): Boolean

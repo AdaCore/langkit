@@ -34,7 +34,7 @@ class Var : DefNode {
 class ASTList[DefNode] : FooNodeBaseList {
 }
 
-qualifier class HasError : FooNode {
+@qualifier class HasError : FooNode {
 
     ## Return whether this is an instance of HasErrorPresent
     @export fun as_bool (): Boolean
