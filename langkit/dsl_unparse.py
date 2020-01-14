@@ -17,10 +17,50 @@ def fqn(prop):
 
 
 class DSLWalker(object):
+    """
+    DSLWalker can be used to traverse the *Python* syntax tree in which the
+    language description is written (with the current langkit DSL).
+
+    This walker is supposed to be used during the unparsing to "follow" the
+    tree of AbstractExpressions (e.g. when emitting a Let expression, the
+    cursor of the DSLWalker should be on the Python call ``Let(...)``).
+
+    The cursor of the walker can be moved using a bunch of helper functions,
+    such as:
+      - ``property(name)``: given that the cursor is on a class defining a Node
+            type, move the cursor to the property named ``name`` defined in
+            that node type.
+      - ``[method_]call(name)``: move the cursor to the next Python call to the
+            function/method named ``name``.
+      - ``arg(index)``: Given that the cursor is on a call (using the afore-
+            mentionned ``[method_]call(...)`` construct, move the cursor to
+            the ``index``th argument.
+      - etc.
+    For user-friendliness purposes, these all return a context manager: this
+    is to make sure that once a nested construct has been unparsed, the cursor
+    moves to after this construction. So it would typically be used as such:
+    .. code::
+        with my_walker.call('If'):
+            with my_walker.arg(0):
+                # my_walker's cursor is on the condition of the If expression.
+                ...
+
+
+    The sole purpose of the walker is to be able to unparse the comments
+    written in the DSL. This functionality is made available through the
+    ``emit_comments`` method of the walker: it will simply return all the
+    comments that have been written between the last call to ``emit_comments``
+    and the current position of the cursor.
+    """
     if lpl is not None:
         ctx = lpl.AnalysisContext()
 
     class NoOpWalker(object):
+        """
+        Helper object that accepts any method call and attribute access without
+        doing anything. Useful for substituting an actual DSLWalker when it's
+        out of sync, without having to write manual checks in the user code.
+        """
         def __init__(self):
             pass
 
@@ -41,6 +81,13 @@ class DSLWalker(object):
 
     @staticmethod
     def class_from_location(loc):
+        """
+        Construct a DSLWalker and place its cursor on the Python class
+        definition that is located at the given location.
+
+        :type loc: langkit.diagnostics.Location
+        :rtype: DSLWalker
+        """
         if lpl is None or loc is None:
             return DSLWalker.NoOpWalker()
 
@@ -71,6 +118,15 @@ class DSLWalker(object):
         self.current_token = new_node.token_end
 
     def property(self, prop):
+        """
+        Given that the current cursor is on a class defining a Node type,
+        move the cursor to the property named ``name`` defined in that node
+        type.
+
+        .. note:: is a context manager.
+
+        :type prop: str
+        """
         pname = prop._indexing_name
 
         fun_decl = self.current_node.find(
@@ -105,6 +161,17 @@ class DSLWalker(object):
         raise LookupError("Could not find proprety {}".format(pname))
 
     def var_assignment(self, index):
+        """
+        Move the cursor to the ``index``th variable assignment:
+          - if the current cursor is in a FuncDef, it looks for the
+            x = Var(...) pattern and moves to what's inside ``Var``.
+          - if the current cursor is in a LambdaDef, it looks at the default
+            value of the ``index``th parameter of the lambda.
+
+        .. note:: is a context manager.
+
+        :type index: int
+        """
         if self.current_node.is_a(lpl.LambdaDef):
             params = self.current_node.f_args.f_single_params
             return self._with_current_node(params[index].f_default_value)
@@ -115,6 +182,12 @@ class DSLWalker(object):
         return self._with_current_node(var_calls[index].f_suffix)
 
     def returned_expr(self):
+        """
+        Moves the cursor to the expression that will be returned by this
+        FuncDef or LambdaDef.
+
+        .. note:: is a context manager.
+        """
         if self.current_node.is_a(lpl.LambdaDef):
             return self._with_current_node(self.current_node.f_expr)
 
@@ -125,6 +198,13 @@ class DSLWalker(object):
         return self._with_current_node(return_stmt.f_exprs[0])
 
     def call(self, fun_name):
+        """
+        Moves the cursor to the next call to a function named ``fun_name``.
+
+        .. note:: is a context manager.
+
+        :type fun_name: str
+        """
         def matches(n):
             return n.is_a(lpl.CallExpr) and n.f_prefix.text == fun_name
 
@@ -137,6 +217,13 @@ class DSLWalker(object):
         return self._with_current_node(call_node)
 
     def method_call(self, method_name):
+        """
+        Moves the cursor to the next call to a method named ``method_name``.
+
+        .. note:: is a context manager.
+
+        :type method_name: str
+        """
         def matches(n):
             if n.is_a(lpl.CallExpr):
                 if n.f_prefix.is_a(lpl.DottedName):
@@ -152,17 +239,35 @@ class DSLWalker(object):
         return self._with_current_node(call_node)
 
     def self_arg(self):
+        """
+        If the cursor is on a method call, moves the cursor to the prefix
+        expression of the call. (i.e. ``self`` from the method POV).
+
+        .. note:: is a context manager.
+        """
         assert self.current_node.is_a(lpl.CallExpr)
         assert self.current_node.f_prefix.is_a(lpl.DottedName)
         return self._with_current_node(self.current_node.f_prefix.f_prefix)
 
     def arg(self, index):
+        """
+        If the cursor is on a function/method call, moves the cursor to the
+        ``index``th argument of the call.
+
+        .. note:: is a context manager.
+
+        :type index: int
+        """
         assert self.current_node.is_a(lpl.CallExpr)
         return self._with_current_node(
             self.current_node.f_suffix[index].f_expr
         )
 
     def missed_comments(self):
+        """
+        Generates all the comments that have been missed between the last call
+        to ``missed_comments`` and the current cursor position.
+        """
         cur_tok = self.current_token
         while self.last_token < cur_tok:
             token = self.last_token
@@ -171,9 +276,17 @@ class DSLWalker(object):
             self.last_token = self.last_token.next
 
     def emit_comments(self):
+        """
+        Same as ``missed_comments`` but returns all the comments aggregated in
+        a single string.
+        :rtype: str
+        """
         return "".join("{}$hl".format(c) for c in self.missed_comments())
 
     def where(self):
+        """
+        Prints the current location of the walker.
+        """
         print(self.current_node)
 
 
