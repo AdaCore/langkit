@@ -1,0 +1,10 @@
+main.py: Running...
+VarDecl.p_prop() = True
+VarDecl.p_prop(True) = False
+VarDecl.p_prop(False) = True
+FunDecl.p_prop() = False
+FunDecl.p_prop(True) = True
+FunDecl.p_prop(False) = False
+main.py: Done.
+
+Done
