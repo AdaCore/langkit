@@ -528,8 +528,8 @@ def emit_node_type(node_type):
     )
     properties = node_type.get_properties(include_inherited=False)
     enum_qual = (
-        "qualifier " if node_type.is_bool_node
-        else "enum " if node_type.is_enum_node else ""
+        "@qualifier " if node_type.is_bool_node
+        else "@enum " if node_type.is_enum_node else ""
     )
     doc = node_type.doc
     builtin_properties = node_type.builtin_properties()
@@ -555,7 +555,7 @@ def emit_node_type(node_type):
     % for field in parse_fields:
     ${emit_field(field)}$hl
     % endfor
-    % if enum_qual == "enum ":
+    % if enum_qual == "@enum ":
         case $i${(", $sl".join(alt.name.camel
                                for alt in node_type.alternatives))}$d$hl
     % endif

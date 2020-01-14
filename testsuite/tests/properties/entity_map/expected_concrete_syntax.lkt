@@ -30,7 +30,7 @@ class ASTList[Decl] : FooNodeBaseList {
 class ASTList[Ref] : FooNodeBaseList {
 }
 
-qualifier class HasPlus : FooNode {
+@qualifier class HasPlus : FooNode {
 
     ## Return whether this is an instance of HasPlusPresent
     @export fun as_bool (): Boolean

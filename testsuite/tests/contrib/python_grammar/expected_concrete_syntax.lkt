@@ -277,7 +277,7 @@ class CompIf : PythonNode {
     @parse_field comp : PythonNode
 }
 
-enum class CompOpKind : PythonNode {
+@enum class CompOpKind : PythonNode {
     case Lt,
         Gt,
         Eq,
@@ -493,7 +493,7 @@ class FileNode : PythonNode {
 class ImportStar : PythonNode {
 }
 
-qualifier class KwArgsFlag : PythonNode {
+@qualifier class KwArgsFlag : PythonNode {
 
     ## Return whether this is an instance of KwArgsFlagPresent
     @export fun as_bool (): Boolean
@@ -760,7 +760,7 @@ class WithStmt : Stmt {
     @parse_field statements : PythonNode
 }
 
-qualifier class VarArgsFlag : PythonNode {
+@qualifier class VarArgsFlag : PythonNode {
 
     ## Return whether this is an instance of VarArgsFlagPresent
     @export fun as_bool (): Boolean
