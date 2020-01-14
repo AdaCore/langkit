@@ -21,8 +21,8 @@ class FooNode {
 }
 
 class Decl : FooNode {
-    parse field name : Identifier
-    parse field expr_tree : Expr
+    @parse_field name : Identifier
+    @parse_field expr_tree : Expr
 }
 
 class Expr : FooNode {
@@ -33,15 +33,15 @@ class Expr : FooNode {
 }
 
 class Equal : Expr {
-    parse field left : Expr
-    parse field right : Expr
+    @parse_field left : Expr
+    @parse_field right : Expr
 
     fun evaluate (): BigIntegerType = <BigInteger <If>>
 }
 
 class LessThan : Expr {
-    parse field left : Expr
-    parse field right : Expr
+    @parse_field left : Expr
+    @parse_field right : Expr
 
     fun evaluate (): BigIntegerType = <BigInteger <If>>
 }
@@ -52,21 +52,21 @@ class Literal : Expr {
 }
 
 class Minus : Expr {
-    parse field left : Expr
-    parse field right : Expr
+    @parse_field left : Expr
+    @parse_field right : Expr
 
     fun evaluate (): BigIntegerType = self.left.evaluate - self.right.evaluate
 }
 
 class Plus : Expr {
-    parse field left : Expr
-    parse field right : Expr
+    @parse_field left : Expr
+    @parse_field right : Expr
 
     fun evaluate (): BigIntegerType = self.left.evaluate + self.right.evaluate
 }
 
 class Ref : Expr {
-    parse field name : Identifier
+    @parse_field name : Identifier
 
     fun evaluate (): BigIntegerType =
     self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate

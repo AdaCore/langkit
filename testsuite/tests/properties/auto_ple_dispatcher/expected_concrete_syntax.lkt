@@ -18,13 +18,13 @@ class DefNode : FooNode {
 }
 
 class Scope : DefNode {
-    parse field name : Id
-    parse field defs : ASTList[DefNode]
+    @parse_field name : Id
+    @parse_field defs : ASTList[DefNode]
 }
 
 class Var : DefNode {
-    parse field name : Id
-    parse field value : Name
+    @parse_field name : Id
+    @parse_field value : Name
 }
 
 """
@@ -44,8 +44,8 @@ class Id : Name {
 }
 
 class Prefix : Name {
-    parse field prefix : Name
-    parse field suffix : Id
+    @parse_field prefix : Name
+    @parse_field suffix : Id
 
     fun resolve (): Entity[FooNode] =
     self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)

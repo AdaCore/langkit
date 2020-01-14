@@ -20,8 +20,8 @@ class Literal : FooNode {
 }
 
 class LiteralSequence : FooNode {
-    parse field name : Name
-    parse field items : ASTList[Literal]
+    @parse_field name : Name
+    @parse_field items : ASTList[Literal]
 
     memoized fun new_node (): SynthNode =
     new SynthNode(items=self.items, name=self.name)
@@ -33,6 +33,6 @@ class Name : FooNode {
 }
 
 class SynthNode : FooNode {
-    parse field name : Name
-    parse field items : ASTList[Literal]
+    @parse_field name : Name
+    @parse_field items : ASTList[Literal]
 }

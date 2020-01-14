@@ -37,7 +37,7 @@ class ASTList[Scope] : FooNodeBaseList {
 }
 
 class ForeignDecl : FooNode {
-    parse field id : Id
+    @parse_field id : Id
 }
 
 class Id : FooNode {
@@ -48,8 +48,8 @@ class Id : FooNode {
 }
 
 class ScopedId : Id {
-    parse field scope : Id
-    parse field name : SimpleId
+    @parse_field scope : Id
+    @parse_field name : SimpleId
 
     fun simple_name (): SimpleId = self.name
 
@@ -66,11 +66,11 @@ class SimpleId : Id {
 }
 
 class Scope : FooNode {
-    parse field name : SimpleId
-    parse field content : ASTList[Scope]
+    @parse_field name : SimpleId
+    @parse_field content : ASTList[Scope]
 }
 
 class SelfDecl : FooNode {
-    parse field id : Id
-    parse field md_node : Id
+    @parse_field id : Id
+    @parse_field md_node : Id
 }

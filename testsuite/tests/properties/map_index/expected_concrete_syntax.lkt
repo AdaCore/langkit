@@ -13,7 +13,7 @@ class ASTList[NumberNode] : FooNodeBaseList {
 }
 
 class ListNode : FooNode {
-    parse field nb_list : ASTList[NumberNode]
+    @parse_field nb_list : ASTList[NumberNode]
 
     public fun prop (): Array[Integer] = self.nb_list.map((_, i) => i)
 }

@@ -19,9 +19,9 @@ class FooNode {
 }
 
 class Decl : FooNode {
-    parse field has_plus : HasPlus
-    parse field name : Name
-    parse field items : ASTList[Ref]
+    @parse_field has_plus : HasPlus
+    @parse_field name : Name
+    @parse_field items : ASTList[Ref]
 
     public fun test_env (other : Entity[FooNode]): Boolean =
     <env_orphan(<FieldAccess .children_env>)> == <env_orphan(<FieldAccess .children_env>)>
@@ -57,5 +57,5 @@ class Name : FooNode {
 }
 
 class Ref : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 }

@@ -28,12 +28,12 @@ class Id : FooNode {
 }
 
 class Insert : FooNode {
-    parse field sym : Id
-    parse field node : Id
+    @parse_field sym : Id
+    @parse_field node : Id
 }
 
 class SynthId : FooNode {
-    field sym : SymbolType
+    @field sym : SymbolType
 
     public fun get_sym (): Array[CharacterType] = self.sym.image
 }

@@ -17,14 +17,14 @@ class FooNode {
 }
 
 class Block : FooNode {
-    parse field name : Name
-    parse field decls : ASTList[Decl]
-    parse field usings : ASTList[Using]
-    parse field refs : ASTList[Ref]
+    @parse_field name : Name
+    @parse_field decls : ASTList[Decl]
+    @parse_field usings : ASTList[Using]
+    @parse_field refs : ASTList[Ref]
 }
 
 class Decl : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 }
 
 """
@@ -64,11 +64,11 @@ class Name : FooNode {
 }
 
 class Ref : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 
     public fun entity (): Entity[FooNode] = self.as_entity.name.entity
 }
 
 class Using : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 }

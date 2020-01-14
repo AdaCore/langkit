@@ -18,9 +18,9 @@ class DefNode : FooNode {
 }
 
 class Block : DefNode {
-    parse field params : ASTList[Param]
-    parse field name_field : Name
-    parse field vars : ASTList[BlockVar]
+    @parse_field params : ASTList[Param]
+    @parse_field name_field : Name
+    @parse_field vars : ASTList[BlockVar]
 
     fun name (): SymbolType = self.name_field.symbol
 
@@ -38,13 +38,13 @@ class Block : DefNode {
 }
 
 class BlockVar : DefNode {
-    parse field name_field : Name
+    @parse_field name_field : Name
 
     fun name (): SymbolType = self.name_field.symbol
 }
 
 class Param : DefNode {
-    parse field name_field : Name
+    @parse_field name_field : Name
 
     fun name (): SymbolType = self.name_field.symbol
 }

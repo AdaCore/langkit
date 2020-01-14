@@ -19,6 +19,6 @@ class Name : FooNode {
 }
 
 class Tuple : FooNode {
-    parse field id : Name
-    parse field nodes : ASTList[Tuple]
+    @parse_field id : Name
+    @parse_field nodes : ASTList[Tuple]
 }

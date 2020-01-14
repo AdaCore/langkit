@@ -11,8 +11,8 @@ class FooNode {
 }
 
 class DefNode : FooNode {
-    parse field name : Identifier
-    parse field values : ASTList[DefNode]
+    @parse_field name : Identifier
+    @parse_field values : ASTList[DefNode]
 }
 
 """

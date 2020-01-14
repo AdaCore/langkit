@@ -16,19 +16,19 @@ class FooNode {
 }
 
 class Decl : FooNode {
-    parse field name : Name
-    parse field value : Expr
+    @parse_field name : Name
+    @parse_field value : Expr
 }
 
 class FunDecl : Decl {
-    parse field name : Name
-    parse field value : Expr
+    @parse_field name : Name
+    @parse_field value : Expr
 }
 
 class VarDecl : Decl {
-    parse field var_kw : VarKeyword
-    parse field name : Name
-    parse field value : Expr
+    @parse_field var_kw : VarKeyword
+    @parse_field name : Name
+    @parse_field value : Expr
 }
 
 class Expr : FooNode {
@@ -38,7 +38,7 @@ class Number : Expr {
 }
 
 class Ref : Expr {
-    parse field name : Name
+    @parse_field name : Name
 }
 
 """

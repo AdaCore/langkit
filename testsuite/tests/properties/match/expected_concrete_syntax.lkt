@@ -44,8 +44,8 @@ class FooNode {
 }
 
 class Def : FooNode {
-    parse field name : Name
-    parse field expr : Expr
+    @parse_field name : Name
+    @parse_field expr : Expr
 }
 
 class Expr : FooNode {
@@ -71,8 +71,8 @@ class Ref : Atom {
 }
 
 class Plus : Expr {
-    parse field lhs : Expr
-    parse field rhs : Expr
+    @parse_field lhs : Expr
+    @parse_field rhs : Expr
 }
 
 """

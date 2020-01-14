@@ -27,6 +27,6 @@ class Id : FooNode {
 }
 
 class Scope : FooNode {
-    parse field name : Id
-    parse field content : ASTList[FooNode]
+    @parse_field name : Id
+    @parse_field content : ASTList[FooNode]
 }

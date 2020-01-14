@@ -9,8 +9,8 @@ class FooNode {
 }
 
 class Decl : FooNode {
-    parse field name : Name
-    parse field refs : ASTList[Ref]
+    @parse_field name : Name
+    @parse_field refs : ASTList[Ref]
 }
 
 """
@@ -29,7 +29,7 @@ class Name : FooNode {
 }
 
 class Ref : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 
     public fun resolve (): Entity[FooNode] =
     bind env=self.parent.parent.node_env in

@@ -27,9 +27,9 @@ class Name : FooNode {
 }
 
 class Param : FooNode {
-    parse field name : Name
-    parse field mode : Enum
-    parse field has_plus : PlusQualifier
+    @parse_field name : Name
+    @parse_field mode : Enum
+    @parse_field has_plus : PlusQualifier
 }
 
 qualifier class PlusQualifier : FooNode {

@@ -20,14 +20,14 @@ class BaseDecl : FooNode {
 }
 
 class Decl : BaseDecl {
-    parse field name : Name
+    @parse_field name : Name
 }
 
 class SubDecl : Decl {
 }
 
 class OtherDecl : BaseDecl {
-    parse field name : Name
+    @parse_field name : Name
 }
 
 """
@@ -40,5 +40,5 @@ class Name : FooNode {
 }
 
 class RootNode : FooNode {
-    parse field decls : ASTList[BaseDecl]
+    @parse_field decls : ASTList[BaseDecl]
 }

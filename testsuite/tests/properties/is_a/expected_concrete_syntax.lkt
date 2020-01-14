@@ -11,7 +11,7 @@ class FooNode {
 }
 
 class Def : FooNode {
-    parse field example : Example
+    @parse_field example : Example
 }
 
 class Example : FooNode {

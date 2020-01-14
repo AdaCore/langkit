@@ -8,7 +8,7 @@ class FooNode {
 }
 
 class Definition : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 }
 
 """
@@ -23,7 +23,7 @@ class ASTList[FooNode] : FooNodeBaseList {
 }
 
 class Name : FooNode {
-    field ref_var : LogicVar
+    @field ref_var : LogicVar
 
     public fun resolve (): Boolean =
     <domain(<FieldAccess .ref_var>, <map>)>.solve

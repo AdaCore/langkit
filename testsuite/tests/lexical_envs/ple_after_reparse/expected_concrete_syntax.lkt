@@ -12,7 +12,7 @@ class FooNode {
 }
 
 class Dep : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 }
 
 """
@@ -52,8 +52,8 @@ class Id : Name {
 }
 
 class Prefix : Name {
-    parse field prefix : Name
-    parse field suffix : Id
+    @parse_field prefix : Name
+    @parse_field suffix : Id
 
     fun resolve (): Entity[FooNode] =
     self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
@@ -62,9 +62,9 @@ class Prefix : Name {
 }
 
 class Scope : FooNode {
-    parse field name : Name
-    parse field deps : ASTList[Dep]
-    parse field defs : ASTList[FooNode]
+    @parse_field name : Name
+    @parse_field deps : ASTList[Dep]
+    @parse_field defs : ASTList[FooNode]
 
     fun initial_env (): LexicalEnv = match self.name {
         case p : Prefix => p.prefix.referenced_unit.root.children_env
@@ -74,6 +74,6 @@ class Scope : FooNode {
 }
 
 class Var : FooNode {
-    parse field name : Id
-    parse field value : Name
+    @parse_field name : Id
+    @parse_field value : Name
 }
