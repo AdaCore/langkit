@@ -1,0 +1,90 @@
+grammar None_grammar {
+    main_rule <- ExampleNode(@Example)
+
+}
+
+## Root node class for Test AST nodes.
+class TestNode {
+}
+
+## Example node.
+##
+## Second line.
+class ExampleNode : TestNode {
+
+    ## docstring.
+    @export fun test_no_var (): Integer = # hello
+    42
+
+    @export fun prop_inline (): Integer = 43
+
+    @export fun prop_lambda (x : Integer): Integer = # identity
+    # yep
+    x
+
+    @export fun test_cond (x : Integer): Integer = # incredible function
+    # case 0
+    if (x = 0) then (
+        # identity
+        x
+    )
+    # case 1
+    elif (x = 1) then (
+        # increment
+        x + (1)
+    )
+    # otherwise double
+    else (x + x)
+
+    @export fun test_if (): Integer = {
+        # define x
+        # let's see... maybe 24?
+        val x = 24;
+
+        # call foo
+        # no way!
+        if (true) then (
+            # haha
+            # second
+            if (false) then (
+                # nope
+                12
+            ) else (
+                # finally!
+                self.test_cond(x)
+            )
+        ) else (
+            # hoho
+            24
+        )
+    }
+
+    @export fun test_match (): Integer = match self {
+        # first case
+        case x : NodeType1 => 0
+
+        # node type 2!
+        case y : NodeType2 => 1
+
+        # well otherwise...
+        case _ => 2
+    }
+
+    @export fun test_let (): Integer = # let it go!!!
+    # where is this comment?
+    {
+        # define x
+        val x = 42;
+        # define y
+        val y = 24;
+
+        # compute
+        x + y
+    }
+}
+
+class NodeType1 : ExampleNode {
+}
+
+class NodeType2 : ExampleNode {
+}
