@@ -1,0 +1,35 @@
+grammar None_grammar {
+    main_rule <- list*(or(var_decl | fun_decl))
+    identifier <- Identifier(@Identifier)
+    var_decl <- VarDecl(@Var identifier)
+    fun_decl <- FunDecl(@Def identifier)
+
+}
+
+class FooNode {
+}
+
+class Decl : FooNode {
+    @parse_field name : Identifier
+
+    @export fun prop (arg : Boolean = false): Boolean = arg
+
+    fun prop (arg : Boolean = false): Boolean
+}
+
+class FunDecl : Decl {
+}
+
+class VarDecl : Decl {
+
+    fun prop (arg : Boolean = false): Boolean = not arg
+}
+
+"""
+List of Decl.
+"""
+class ASTList[Decl] : FooNodeBaseList {
+}
+
+class Identifier : FooNode {
+}
