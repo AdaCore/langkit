@@ -32,8 +32,8 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    public fun decl_wrapper (): Entity[Decl] = entity.decl
+    @export fun decl_wrapper (): Entity[Decl] = entity.decl
 
-    public fun decl (): Entity[Decl] =
+    @export fun decl (): Entity[Decl] =
     self.children_env.get(self.name, only_first=true).to![Decl]
 }

@@ -12,7 +12,7 @@ class FooNode {
 
 class BaseDecl : FooNode {
 
-    public fun lookup (n : SymbolType): Entity[FooNode] =
+    @export fun lookup (n : SymbolType): Entity[FooNode] =
     self.env_lookup(self.node_env, n)
 
     fun env_lookup (env : LexicalEnv, n : SymbolType): Entity[FooNode] =

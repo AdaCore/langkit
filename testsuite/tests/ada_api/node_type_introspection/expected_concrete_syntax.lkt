@@ -42,7 +42,7 @@ qualifier class Null : FooNode {
     """
     Return whether this is an instance of NullPresent
     """
-    public fun as_bool (): Boolean
+    @export fun as_bool (): Boolean
 }
 
 class VarDecl : FooNode {

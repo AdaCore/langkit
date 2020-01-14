@@ -11,20 +11,21 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun null_unit (): InternalUnit = null
+    @export fun null_unit (): InternalUnit = null
 
-    public fun null_node (): Entity[Expression] = null
+    @export fun null_node (): Entity[Expression] = null
 
-    public fun deref_null_unit (): Entity[FooNode] =
+    @export fun deref_null_unit (): Entity[FooNode] =
     self.null_unit.root.as_bare_entity
 
-    public fun deref_null_node (): Entity[Expression] = self.null_node.null_node
+    @export fun deref_null_node (): Entity[Expression] =
+    self.null_node.null_node
 
-    public fun null_node_unit (): InternalUnit = self.null_node.unit
+    @export fun null_node_unit (): InternalUnit = self.null_node.unit
 
-    public fun cast_null_node (): Entity[Name] = self.null_node.to[Name]
+    @export fun cast_null_node (): Entity[Name] = self.null_node.to[Name]
 
-    public fun match_null_node (): Entity[Expression] =
+    @export fun match_null_node (): Entity[Expression] =
     match self.null_node.node {
         case l : Literal => l
         case n : Name => n
@@ -43,10 +44,10 @@ class Name : Expression {
 
     fun env_element (): Entity[FooNode] = self.children_env.get(self.symbol)?[0]
 
-    public fun deref_env_element (): Entity[Expression] =
+    @export fun deref_env_element (): Entity[Expression] =
     self.env_element.null_node
 
-    public fun match_env_element (): Entity[FooNode] =
+    @export fun match_env_element (): Entity[FooNode] =
     match self.env_element {
         case l : Entity[Literal] => l
         case n : Entity[Name] => n

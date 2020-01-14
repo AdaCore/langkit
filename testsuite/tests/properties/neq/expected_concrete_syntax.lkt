@@ -5,12 +5,12 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun integers_neq (a : Integer, b : Integer): Boolean = not (a == b)
+    @export fun integers_neq (a : Integer, b : Integer): Boolean = not (a == b)
 }
 
 class Example : FooNode {
 
-    public fun not_eq (other : Example): Boolean = not (self == other)
+    @export fun not_eq (other : Example): Boolean = not (self == other)
 }
 
 """

@@ -7,7 +7,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun env_get_all (): Array[Entity[FooNode]] =
+    @export fun env_get_all (): Array[Entity[FooNode]] =
     self.children_env.get(null)
 
     memoized fun make_id (s : SymbolType): FooNode = new SynthId(sym=s)
@@ -35,5 +35,5 @@ class Insert : FooNode {
 class SynthId : FooNode {
     @field sym : SymbolType
 
-    public fun get_sym (): Array[CharacterType] = self.sym.image
+    @export fun get_sym (): Array[CharacterType] = self.sym.image
 }

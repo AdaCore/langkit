@@ -8,8 +8,8 @@ class FooNode {
 
 class Example : FooNode {
 
-    public fun raise_msg (): Boolean =
+    @export fun raise_msg (): Boolean =
     raise PropertyError('Custom error message!')
 
-    public fun raise_no_msg (): Boolean = raise PropertyError()
+    @export fun raise_no_msg (): Boolean = raise PropertyError()
 }

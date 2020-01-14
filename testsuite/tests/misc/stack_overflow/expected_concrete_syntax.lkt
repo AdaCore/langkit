@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun recurse (n : Integer): Integer =
+    @export fun recurse (n : Integer): Integer =
     if (n <= (1)) then n else self.recurse(n - (1))
 }
 

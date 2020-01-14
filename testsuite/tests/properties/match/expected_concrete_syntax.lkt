@@ -10,7 +10,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun find_atoms (): Array[Entity[Atom]] = (
+    @export fun find_atoms (): Array[Entity[Atom]] = (
         match entity {
             case a : Atom => [a]
             case _ => null
@@ -20,7 +20,7 @@ class FooNode {
         entity.children.mapcat((c) => c.find_atoms)
     )
 
-    public fun find_atoms_or_exprs (): Array[Entity[Expr]] = (
+    @export fun find_atoms_or_exprs (): Array[Entity[Expr]] = (
         match entity {
             case a : Atom => [a.to[Expr]]
             case e : Expr => [e]
@@ -31,7 +31,7 @@ class FooNode {
         entity.children.mapcat((c) => c.find_atoms_or_exprs)
     )
 
-    public fun find_exprs (): Array[Entity[Expr]] = (
+    @export fun find_exprs (): Array[Entity[Expr]] = (
         match entity {
             case e : Expr => [e]
             case a : Atom => [a.to[Expr]]
@@ -50,7 +50,7 @@ class Def : FooNode {
 
 class Expr : FooNode {
 
-    public fun find_refs (): Array[Entity[Ref]] = (
+    @export fun find_refs (): Array[Entity[Ref]] = (
         match entity {
             case r : Ref => [r]
             case _ => null

@@ -13,7 +13,7 @@ class Example : FooNode {
     memoized fun internal_mmz_prop (i : Integer): Integer =
     if (i == 0) then (raise PropertyError()) else i
 
-    public memoized fun mmz_prop (i : Integer): Integer = {
+    @export memoized fun mmz_prop (i : Integer): Integer = {
         val _ = self.fetch_example_unit
 
         self.internal_mmz_prop(i)

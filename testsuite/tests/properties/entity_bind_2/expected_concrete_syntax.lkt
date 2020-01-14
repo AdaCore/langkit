@@ -17,7 +17,7 @@ class RootNode : FooNode {
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation
 
-    public fun solve_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): Boolean =
+    @export fun solve_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): Boolean =
     self.xref_eq(arg1, arg2).solve
 }
 

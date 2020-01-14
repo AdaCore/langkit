@@ -41,15 +41,15 @@ class ASTList[Scope] : FooNodeBaseList {
 
 class Name : FooNode {
 
-    public fun resolve (): Entity[FooNode]
+    @export fun resolve (): Entity[FooNode]
 
-    public fun suffix_symbol (): SymbolType
+    @export fun suffix_symbol (): SymbolType
 
-    public fun symbols (): Array[SymbolType]
+    @export fun symbols (): Array[SymbolType]
 
     fun referenced_unit_or_error (or_error : Boolean): InternalUnit
 
-    public fun referenced_unit (): InternalUnit =
+    @export fun referenced_unit (): InternalUnit =
     self.referenced_unit_or_error(false)
 }
 

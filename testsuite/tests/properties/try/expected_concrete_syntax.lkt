@@ -10,7 +10,7 @@ class Example : FooNode {
 
     fun failing_property (): Boolean = raise PropertyError()
 
-    public fun failsafe_property (): Boolean = <Try>
+    @export fun failsafe_property (): Boolean = <Try>
 
-    public fun failsafe_property_2 (): Boolean = <Try>
+    @export fun failsafe_property_2 (): Boolean = <Try>
 }

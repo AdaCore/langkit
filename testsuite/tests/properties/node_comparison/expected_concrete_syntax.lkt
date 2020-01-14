@@ -5,9 +5,9 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun before (n : FooNode): Boolean = self < n
+    @export fun before (n : FooNode): Boolean = self < n
 
-    public fun before_or_equal (n : Example): Boolean = self <= n
+    @export fun before_or_equal (n : Example): Boolean = self <= n
 }
 
 class Example : FooNode {

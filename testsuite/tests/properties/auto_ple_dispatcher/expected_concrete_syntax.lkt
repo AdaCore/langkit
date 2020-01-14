@@ -35,7 +35,7 @@ class ASTList[DefNode] : FooNodeBaseList {
 
 class Name : FooNode {
 
-    public fun resolve (): Entity[FooNode]
+    @export fun resolve (): Entity[FooNode]
 }
 
 class Id : Name {

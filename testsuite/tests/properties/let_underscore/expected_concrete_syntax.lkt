@@ -8,7 +8,7 @@ class FooNode {
 
 class BarNode : FooNode {
 
-    public fun prop (): Entity[FooNode] = {
+    @export fun prop (): Entity[FooNode] = {
         val _ = self.parent
 
         null

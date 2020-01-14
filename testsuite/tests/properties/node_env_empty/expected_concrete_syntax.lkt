@@ -11,7 +11,7 @@ class FooNode {
 class Decl : FooNode {
     @parse_field names : ASTList[Name]
 
-    public fun lookup (n : Entity[Name]): Entity[FooNode] =
+    @export fun lookup (n : Entity[Name]): Entity[FooNode] =
     entity.node_env.get(n.symbol, only_first=true)
 }
 

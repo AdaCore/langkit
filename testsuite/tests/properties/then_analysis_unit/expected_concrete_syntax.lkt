@@ -6,7 +6,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
+    @export fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
 }
 
 """

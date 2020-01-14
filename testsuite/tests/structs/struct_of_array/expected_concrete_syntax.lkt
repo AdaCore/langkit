@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun get (): KV = new KV(val='What', key='So')
+    @export fun get (): KV = new KV(val='What', key='So')
 }
 
 class Example : FooNode {

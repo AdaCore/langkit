@@ -11,7 +11,7 @@ class FooNode {
 class Example : FooNode {
     @field var1 : LogicVar
 
-    public fun prop (): Entity[Example] = {
+    @export fun prop (): Entity[Example] = {
         val _ = <Predicate on FooNode.sophisticated_predicate>
 
         self.as_bare_entity

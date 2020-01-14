@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun can_reach (n : Entity[FooNode], from_node : Entity[FooNode]): Boolean =
+    @export fun can_reach (n : Entity[FooNode], from_node : Entity[FooNode]): Boolean =
     <can_reach(<FieldAccess .node>, <FieldAccess .node>)>
 }
 

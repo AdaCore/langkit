@@ -500,7 +500,7 @@ qualifier class KwArgsFlag : PythonNode {
     """
     Return whether this is an instance of KwArgsFlagPresent
     """
-    public fun as_bool (): Boolean
+    @export fun as_bool (): Boolean
 }
 
 class NL : PythonNode {
@@ -795,5 +795,5 @@ qualifier class VarArgsFlag : PythonNode {
     """
     Return whether this is an instance of VarArgsFlagPresent
     """
-    public fun as_bool (): Boolean
+    @export fun as_bool (): Boolean
 }

@@ -9,7 +9,7 @@ class FooNode {
 
 class Expression : FooNode {
 
-    public fun result (): Integer
+    @export fun result (): Integer
 }
 
 class Literal : Expression {

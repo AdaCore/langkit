@@ -11,38 +11,38 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun id_bool (id : Boolean): Boolean = id
+    @export fun id_bool (id : Boolean): Boolean = id
 
-    public fun id_int (id : Integer): Integer = id
+    @export fun id_int (id : Integer): Integer = id
 
-    public fun id_bigint (id : BigIntegerType): BigIntegerType = id
+    @export fun id_bigint (id : BigIntegerType): BigIntegerType = id
 
-    public fun id_char (id : CharacterType): CharacterType = id
+    @export fun id_char (id : CharacterType): CharacterType = id
 
-    public fun id_token (id : TokenReference): TokenReference = id
+    @export fun id_token (id : TokenReference): TokenReference = id
 
-    public fun id_sym (id : SymbolType): SymbolType = id
+    @export fun id_sym (id : SymbolType): SymbolType = id
 
-    public fun id_unit (id : InternalUnit): InternalUnit = id
+    @export fun id_unit (id : InternalUnit): InternalUnit = id
 
-    public fun id_root_node (id : FooNode): FooNode = id
+    @export fun id_root_node (id : FooNode): FooNode = id
 
-    public fun id_name (id : Name): Name = id
+    @export fun id_name (id : Name): Name = id
 
-    public fun id_unit_kind (id : AnalysisUnitKind): AnalysisUnitKind = id
+    @export fun id_unit_kind (id : AnalysisUnitKind): AnalysisUnitKind = id
 
-    public fun id_node_array (id : Array[Entity[FooNode]]): Array[Entity[FooNode]] =
+    @export fun id_node_array (id : Array[Entity[FooNode]]): Array[Entity[FooNode]] =
     id
 
-    public fun id_bigint_array (id : Array[BigIntegerType]): Array[BigIntegerType] =
+    @export fun id_bigint_array (id : Array[BigIntegerType]): Array[BigIntegerType] =
     id
 }
 
 class Expr : FooNode {
 
-    public fun eval (): Integer
+    @export fun eval (): Integer
 
-    public fun eval_plus (addend : Expr): Integer = self.eval + addend.eval
+    @export fun eval_plus (addend : Expr): Integer = self.eval + addend.eval
 }
 
 class Addition : Expr {
@@ -56,19 +56,19 @@ class Number : Expr {
 
     fun eval (): Integer
 
-    public fun id_dflt_bool (id : Boolean = true): Boolean = id
+    @export fun id_dflt_bool (id : Boolean = true): Boolean = id
 
-    public fun id_dflt_int (id : Integer = 42): Integer = id
+    @export fun id_dflt_int (id : Integer = 42): Integer = id
 
-    public fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
+    @export fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
 
-    public fun id_dflt_root_node (id : FooNode = null): FooNode = id
+    @export fun id_dflt_root_node (id : FooNode = null): FooNode = id
 }
 
 class Ref : Expr {
     @parse_field name : Name
 
-    public fun referenced_var_decl (): Entity[VarDecl] =
+    @export fun referenced_var_decl (): Entity[VarDecl] =
     self.node_env.get(self.name, only_first=true).to![VarDecl]
 
     fun eval (): Integer = self.referenced_var_decl.eval
@@ -87,5 +87,5 @@ class VarDecl : FooNode {
     @parse_field name : Name
     @parse_field value : Expr
 
-    public fun eval (): Integer = self.value.eval
+    @export fun eval (): Integer = self.value.eval
 }

@@ -233,7 +233,6 @@ class FunDecl(Decl):
     """
     Function declaration.
     """
-    visibility = Field()
     name = Field()
     args = Field()
     return_type = Field()
@@ -247,14 +246,6 @@ class FunArgDecl(Decl):
     name = Field()
     type = Field()
     default_val = Field()
-
-
-class EntityVisibility(LKNode):
-    """
-    Visibility for methods.
-    """
-    enum_node = True
-    alternatives = ["public", "private"]
 
 
 @abstract
@@ -381,7 +372,7 @@ lkt_grammar.add_rules(
     ),
 
     fun_decl=FunDecl(
-        G.visibility, "fun", G.id,
+        "fun", G.id,
         "(", List(G.arg_decl, empty_valid=True, sep=","), ")",
         ":", G.type_ref,
         Opt("=", G.expr)
@@ -392,12 +383,6 @@ lkt_grammar.add_rules(
         ":",
         G.type_ref,
         Opt("=", G.expr)
-    ),
-
-    visibility=Or(
-        EntityVisibility.alt_public("public"),
-        EntityVisibility.alt_private("private"),
-        EntityVisibility.alt_private(),
     ),
 
     decl=FullDecl(

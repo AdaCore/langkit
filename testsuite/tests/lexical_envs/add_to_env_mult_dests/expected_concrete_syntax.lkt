@@ -22,7 +22,7 @@ class ASTList[FooNode] : FooNodeBaseList {
 
 class Id : FooNode {
 
-    public fun get_scope (): Entity[FooNode] =
+    @export fun get_scope (): Entity[FooNode] =
     self.children_env.get("Scope", only_first=true)
 }
 

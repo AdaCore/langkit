@@ -6,13 +6,13 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun eval_unit (u : InternalUnit): Integer =
+    @export fun eval_unit (u : InternalUnit): Integer =
     u.root.to[Expression].result
 }
 
 class Expression : FooNode {
 
-    public fun result (): Integer
+    @export fun result (): Integer
 }
 
 class Literal : Expression {

@@ -8,7 +8,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun count (seq : Array[Entity[Example]]): Integer = seq.length
+    @export fun count (seq : Array[Entity[Example]]): Integer = seq.length
 }
 
 class Example : FooNode {
@@ -33,9 +33,9 @@ This list node can contain one of the following nodes:
 """
 class ASTList[FooNode] : ASTList[FooNode] {
 
-    public fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
+    @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
 
-    public fun example_items (): Array[Entity[Example]] = entity.filter_map(
+    @export fun example_items (): Array[Entity[Example]] = entity.filter_map(
         (i) => i.to![Example], (i) => i is_a Example
     )
 }

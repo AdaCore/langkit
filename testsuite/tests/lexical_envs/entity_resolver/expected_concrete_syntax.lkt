@@ -37,5 +37,5 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    public fun resolve (): Entity[FooNode] = self.node_env.get(self.name)?[0]
+    @export fun resolve (): Entity[FooNode] = self.node_env.get(self.name)?[0]
 }

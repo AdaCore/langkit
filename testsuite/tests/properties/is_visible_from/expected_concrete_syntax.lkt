@@ -6,7 +6,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun prop (empty1 : Boolean, empty2 : Boolean): Boolean = {
+    @export fun prop (empty1 : Boolean, empty2 : Boolean): Boolean = {
         val arg1 = if empty1 then _ else self.children_env
         val arg2 = if empty2 then _ else self.children_env
 

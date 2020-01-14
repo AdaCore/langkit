@@ -25,7 +25,7 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    public fun referenced (): Entity[FooNode] =
+    @export fun referenced (): Entity[FooNode] =
     self.referenced_env.env_node.as_bare_entity
 
     memoized fun referenced_env (): LexicalEnv =
