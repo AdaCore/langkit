@@ -28,9 +28,7 @@ class Ref : Expr {
     @parse_field name : Name
 }
 
-"""
-List of VarDecl.
-"""
+## List of VarDecl.
 class ASTList[VarDecl] : FooNodeBaseList {
 }
 
@@ -39,9 +37,7 @@ class Name : FooNode {
 
 qualifier class Null : FooNode {
 
-    """
-    Return whether this is an instance of NullPresent
-    """
+    ## Return whether this is an instance of NullPresent
     @export fun as_bool (): Boolean
 }
 

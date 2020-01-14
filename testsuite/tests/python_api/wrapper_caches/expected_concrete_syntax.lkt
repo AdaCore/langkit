@@ -12,8 +12,6 @@ class Example : FooNode {
     @parse_field examples : ASTList[Example]
 }
 
-"""
-List of Example.
-"""
+## List of Example.
 class ASTList[Example] : FooNodeBaseList {
 }

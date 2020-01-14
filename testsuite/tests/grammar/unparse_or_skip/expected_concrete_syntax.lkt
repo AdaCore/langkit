@@ -21,14 +21,12 @@ class DefNode : FooNode {
 class ErrorDef : FooNode {
 }
 
-"""
-List of FooNode.
-
-This list node can contain one of the following nodes:
-
-* ${node_name(T.DefNode)}
-* ${node_name(T.ErrorDef)}
-"""
+## List of FooNode.
+##
+## This list node can contain one of the following nodes:
+##
+## * ${node_name(T.DefNode)}
+## * ${node_name(T.ErrorDef)}
 class ASTList[FooNode] : FooNodeBaseList {
 }
 

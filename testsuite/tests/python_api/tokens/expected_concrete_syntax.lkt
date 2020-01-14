@@ -12,9 +12,7 @@ class FooNode {
 class Atom : FooNode {
 }
 
-"""
-List of FooNode.
-"""
+## List of FooNode.
 class ASTList[FooNode] : FooNodeBaseList {
 }
 

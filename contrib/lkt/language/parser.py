@@ -222,11 +222,18 @@ class ClassDecl(Decl):
     decls = Field()
 
 
-class DocLit(Expr):
+class DocComment(LKNode):
     """
-    Grammar expression for a documentation literal.
+    Node for one line of documentation attached to a node.
     """
     token_node = True
+
+
+class Doc(LKNode):
+    """
+    Documentation attached to a decl node.
+    """
+    lines = Field()
 
 
 class FunDecl(Decl):
@@ -300,7 +307,9 @@ lkt_grammar.add_rules(
         G.id
     ),
 
-    doc=Opt(DocLit(Lex.String)),
+    doc_comment=DocComment(Lex.DocComment),
+
+    doc=Doc(List(G.doc_comment, empty_valid=True)),
 
     grammar_decl=GrammarDecl(
         "grammar", G.id,

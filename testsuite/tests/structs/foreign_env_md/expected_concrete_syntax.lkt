@@ -13,9 +13,7 @@ class Def : FooNode {
     @parse_field ref : Name
 }
 
-"""
-List of Def.
-"""
+## List of Def.
 class ASTList[Def] : FooNodeBaseList {
 }
 

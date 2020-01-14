@@ -13,8 +13,6 @@ class Example : FooNode {
     @export fun not_eq (other : Example): Boolean = not (self == other)
 }
 
-"""
-List of Example.
-"""
+## List of Example.
 class ASTList[Example] : FooNodeBaseList {
 }

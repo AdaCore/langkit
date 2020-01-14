@@ -75,14 +75,12 @@ class Plus : Expr {
     @parse_field rhs : Expr
 }
 
-"""
-List of FooNode.
-
-This list node can contain one of the following nodes:
-
-* ${node_name(T.Def)}
-* ${node_name(T.Expr)}
-"""
+## List of FooNode.
+##
+## This list node can contain one of the following nodes:
+##
+## * ${node_name(T.Def)}
+## * ${node_name(T.Expr)}
 class ASTList[FooNode] : FooNodeBaseList {
 }
 

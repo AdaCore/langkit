@@ -9,9 +9,7 @@ grammar None_grammar {
 class FooNode {
 }
 
-"""
-List of Tuple.
-"""
+## List of Tuple.
 class ASTList[Tuple] : FooNodeBaseList {
 }
 

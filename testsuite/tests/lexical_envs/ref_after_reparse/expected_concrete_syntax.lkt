@@ -27,27 +27,19 @@ class Decl : FooNode {
     @parse_field name : Name
 }
 
-"""
-List of Block.
-"""
+## List of Block.
 class ASTList[Block] : FooNodeBaseList {
 }
 
-"""
-List of Decl.
-"""
+## List of Decl.
 class ASTList[Decl] : FooNodeBaseList {
 }
 
-"""
-List of Ref.
-"""
+## List of Ref.
 class ASTList[Ref] : FooNodeBaseList {
 }
 
-"""
-List of Using.
-"""
+## List of Using.
 class ASTList[Using] : FooNodeBaseList {
 }
 

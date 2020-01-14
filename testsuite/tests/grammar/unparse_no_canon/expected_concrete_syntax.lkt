@@ -17,9 +17,7 @@ grammar None_grammar {
 class FooNode {
 }
 
-"""
-List of RootNode.
-"""
+## List of RootNode.
 class ASTList[RootNode] : FooNodeBaseList {
 }
 

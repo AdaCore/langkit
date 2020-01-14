@@ -13,15 +13,11 @@ class Decl : FooNode {
     @parse_field refs : ASTList[Ref]
 }
 
-"""
-List of Decl.
-"""
+## List of Decl.
 class ASTList[Decl] : FooNodeBaseList {
 }
 
-"""
-List of Ref.
-"""
+## List of Ref.
 class ASTList[Ref] : FooNodeBaseList {
 }
 
