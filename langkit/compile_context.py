@@ -2250,7 +2250,7 @@ class CompileCtx(object):
                     root_static.arguments = prop.arguments
                     prop.arguments = [
                         Argument(arg.name, arg.type, arg.is_artificial,
-                                 arg.default_value)
+                                 arg.abstract_default_value)
                         for arg in prop.natural_arguments
                     ]
                     prop.build_dynamic_var_arguments()
