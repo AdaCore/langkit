@@ -30,17 +30,13 @@ class Var : DefNode {
     @parse_field value : Name
 }
 
-"""
-List of DefNode.
-"""
+## List of DefNode.
 class ASTList[DefNode] : FooNodeBaseList {
 }
 
 qualifier class HasError : FooNode {
 
-    """
-    Return whether this is an instance of HasErrorPresent
-    """
+    ## Return whether this is an instance of HasErrorPresent
     @export fun as_bool (): Boolean
 }
 

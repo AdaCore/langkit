@@ -6,9 +6,7 @@ grammar None_grammar {
 class FooNode {
 }
 
-"""
-List of Name.
-"""
+## List of Name.
 class ASTList[Name] : FooNodeBaseList {
 }
 

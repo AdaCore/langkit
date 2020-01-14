@@ -18,21 +18,17 @@ grammar None_grammar {
 class FooNode {
 }
 
-"""
-List of FooNode.
-
-This list node can contain one of the following nodes:
-
-* ${node_name(T.ForeignDecl)}
-* ${node_name(T.Scope)}
-* ${node_name(T.SelfDecl)}
-"""
+## List of FooNode.
+##
+## This list node can contain one of the following nodes:
+##
+## * ${node_name(T.ForeignDecl)}
+## * ${node_name(T.Scope)}
+## * ${node_name(T.SelfDecl)}
 class ASTList[FooNode] : FooNodeBaseList {
 }
 
-"""
-List of Scope.
-"""
+## List of Scope.
 class ASTList[Scope] : FooNodeBaseList {
 }
 

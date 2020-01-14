@@ -75,9 +75,7 @@ class Ref : Expr {
     self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
 }
 
-"""
-List of Decl.
-"""
+## List of Decl.
 class ASTList[Decl] : FooNodeBaseList {
 }
 

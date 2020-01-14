@@ -74,14 +74,12 @@ class Plus : Expr {
     entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
 }
 
-"""
-List of FooNode.
-
-This list node can contain one of the following nodes:
-
-* ${node_name(T.Def)}
-* ${node_name(T.Expr)}
-"""
+## List of FooNode.
+##
+## This list node can contain one of the following nodes:
+##
+## * ${node_name(T.Def)}
+## * ${node_name(T.Expr)}
 class ASTList[FooNode] : FooNodeBaseList {
 }
 

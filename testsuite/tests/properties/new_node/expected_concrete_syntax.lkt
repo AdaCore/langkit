@@ -10,9 +10,7 @@ grammar None_grammar {
 class FooNode {
 }
 
-"""
-List of Literal.
-"""
+## List of Literal.
 class ASTList[Literal] : FooNodeBaseList {
 }
 

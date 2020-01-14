@@ -52,14 +52,10 @@ class Plus : Expression {
     @parse_field right : Expression
 }
 
-"""
-List of Decl.
-"""
+## List of Decl.
 class ASTList[Decl] : FooNodeBaseList {
 }
 
-"""
-List of Name.
-"""
+## List of Name.
 class ASTList[Name] : FooNodeBaseList {
 }

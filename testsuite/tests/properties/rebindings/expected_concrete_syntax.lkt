@@ -63,21 +63,15 @@ class Param : DefNode {
     fun name (): SymbolType = self.name_field.symbol
 }
 
-"""
-List of Block.
-"""
+## List of Block.
 class ASTList[Block] : FooNodeBaseList {
 }
 
-"""
-List of BlockVar.
-"""
+## List of BlockVar.
 class ASTList[BlockVar] : FooNodeBaseList {
 }
 
-"""
-List of Param.
-"""
+## List of Param.
 class ASTList[Param] : FooNodeBaseList {
 }
 

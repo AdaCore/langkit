@@ -446,8 +446,8 @@ def emit_expr(expr, **ctx):
 
 def emit_doc(doc):
     from inspect import cleandoc
-    doc = cleandoc(doc).replace("\n", "$hl")
-    return sf("\"\"\"$hl${doc}$hl\"\"\"")
+    doc = "$hl".join(["## "+ l for l in cleandoc(doc).split("\n")])
+    return sf("${doc}")
 
 
 def emit_prop(prop):

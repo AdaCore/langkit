@@ -30,9 +30,7 @@ class OtherDecl : BaseDecl {
     @parse_field name : Name
 }
 
-"""
-List of BaseDecl.
-"""
+## List of BaseDecl.
 class ASTList[BaseDecl] : FooNodeBaseList {
 }
 

@@ -17,9 +17,7 @@ enum class Enum : FooNode {
     case Null, Example, Default
 }
 
-"""
-List of Param.
-"""
+## List of Param.
 class ASTList[Param] : FooNodeBaseList {
 }
 
@@ -34,8 +32,6 @@ class Param : FooNode {
 
 qualifier class PlusQualifier : FooNode {
 
-    """
-    Return whether this is an instance of PlusQualifierPresent
-    """
+    ## Return whether this is an instance of PlusQualifierPresent
     @export fun as_bool (): Boolean
 }

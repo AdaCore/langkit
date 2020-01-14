@@ -74,9 +74,7 @@ class Ref : Expr {
     fun eval (): Integer = self.referenced_var_decl.eval
 }
 
-"""
-List of VarDecl.
-"""
+## List of VarDecl.
 class ASTList[VarDecl] : FooNodeBaseList {
 }
 

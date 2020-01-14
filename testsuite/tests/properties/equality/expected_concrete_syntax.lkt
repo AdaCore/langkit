@@ -33,23 +33,17 @@ class Decl : FooNode {
     self.env_array == other.env_array
 }
 
-"""
-List of Decl.
-"""
+## List of Decl.
 class ASTList[Decl] : FooNodeBaseList {
 }
 
-"""
-List of Ref.
-"""
+## List of Ref.
 class ASTList[Ref] : FooNodeBaseList {
 }
 
 qualifier class HasPlus : FooNode {
 
-    """
-    Return whether this is an instance of HasPlusPresent
-    """
+    ## Return whether this is an instance of HasPlusPresent
     @export fun as_bool (): Boolean
 }
 

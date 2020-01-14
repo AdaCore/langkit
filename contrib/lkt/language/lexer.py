@@ -1,13 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.lexer import (
-    Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
+    Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText,
+    WithTrivia
 )
 
 
 class Token(LexerToken):
     Identifier = WithSymbol()
-    String = WithText()
 
     # Operators
     ExclMark = WithText()
@@ -40,6 +40,13 @@ class Token(LexerToken):
     PublicKw = WithText()
     PrivateKw = WithText()
     NullKw = WithText()
+
+    # Trivia
+    Comment = WithTrivia()
+
+    # Literals
+    String = WithText()
+    DocComment = WithText()
 
 
 lkt_lexer = Lexer(Token)
@@ -91,4 +98,8 @@ lkt_lexer.add_rules(
 
     # Strings
     (Pattern('{STRING_SQ}|{STRING_DBQ}'), Token.String),
+
+    # Comments
+    (Pattern(r"#(.?)+"),     Token.Comment),
+    (Pattern(r"##(.?)+"),     Token.DocComment),
 )

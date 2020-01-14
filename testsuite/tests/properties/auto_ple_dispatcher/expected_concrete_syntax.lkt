@@ -27,9 +27,7 @@ class Var : DefNode {
     @parse_field value : Name
 }
 
-"""
-List of DefNode.
-"""
+## List of DefNode.
 class ASTList[DefNode] : FooNodeBaseList {
 }
 

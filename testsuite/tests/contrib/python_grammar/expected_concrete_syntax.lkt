@@ -421,9 +421,7 @@ class DottedName : Name {
 
 class Id : Name {
 
-    """
-    Shortcut to get the symbol of this node
-    """
+    ## Shortcut to get the symbol of this node
     fun sym (): SymbolType = self.symbol
 }
 
@@ -497,9 +495,7 @@ class ImportStar : PythonNode {
 
 qualifier class KwArgsFlag : PythonNode {
 
-    """
-    Return whether this is an instance of KwArgsFlagPresent
-    """
+    ## Return whether this is an instance of KwArgsFlagPresent
     @export fun as_bool (): Boolean
 }
 
@@ -513,144 +509,118 @@ class Params : PythonNode {
     @parse_field single_params : ASTList[SingleParam]
 }
 
-"""
-List of Arg.
-"""
+## List of Arg.
 class ASTList[Arg] : PythonNodeBaseList {
 }
 
-"""
-List of AsNameNode.
-"""
+## List of AsNameNode.
 class ASTList[AsNameNode] : PythonNodeBaseList {
 }
 
-"""
-List of Decorator.
-"""
+## List of Decorator.
 class ASTList[Decorator] : PythonNodeBaseList {
 }
 
-"""
-List of DictAssoc.
-"""
+## List of DictAssoc.
 class ASTList[DictAssoc] : PythonNodeBaseList {
 }
 
-"""
-List of Dot.
-"""
+## List of Dot.
 class ASTList[Dot] : PythonNodeBaseList {
 }
 
-"""
-List of ElifBranch.
-"""
+## List of ElifBranch.
 class ASTList[ElifBranch] : PythonNodeBaseList {
 }
 
-"""
-List of ExceptPart.
-"""
+## List of ExceptPart.
 class ASTList[ExceptPart] : PythonNodeBaseList {
 }
 
-"""
-List of Expr.
-
-This list node can contain one of the following nodes:
-
-* ${node_name(T.AndExpr)}
-* ${node_name(T.AndOp)}
-* ${node_name(T.BinOp)}
-* ${node_name(T.CallExpr)}
-* ${node_name(T.CompOp)}
-* ${node_name(T.ConcatStringLit)}
-* ${node_name(T.DictComp)}
-* ${node_name(T.DictLit)}
-* ${node_name(T.EllipsisExpr)}
-* ${node_name(T.Factor)}
-* ${node_name(T.IfExpr)}
-* ${node_name(T.InlineEval)}
-* ${node_name(T.LambdaDef)}
-* ${node_name(T.ListComp)}
-* ${node_name(T.ListGen)}
-* ${node_name(T.ListLit)}
-* ${node_name(T.Name)}
-* ${node_name(T.NotOp)}
-* ${node_name(T.NumberLit)}
-* ${node_name(T.OrExpr)}
-* ${node_name(T.OrOp)}
-* ${node_name(T.Power)}
-* ${node_name(T.SetComp)}
-* ${node_name(T.SetLit)}
-* ${node_name(T.SliceExpr)}
-* ${node_name(T.StringLit)}
-* ${node_name(T.SubscriptExpr)}
-* ${node_name(T.TupleLit)}
-* ${node_name(T.XorExpr)}
-* ${node_name(T.YieldExpr)}
-"""
+## List of Expr.
+##
+## This list node can contain one of the following nodes:
+##
+## * ${node_name(T.AndExpr)}
+## * ${node_name(T.AndOp)}
+## * ${node_name(T.BinOp)}
+## * ${node_name(T.CallExpr)}
+## * ${node_name(T.CompOp)}
+## * ${node_name(T.ConcatStringLit)}
+## * ${node_name(T.DictComp)}
+## * ${node_name(T.DictLit)}
+## * ${node_name(T.EllipsisExpr)}
+## * ${node_name(T.Factor)}
+## * ${node_name(T.IfExpr)}
+## * ${node_name(T.InlineEval)}
+## * ${node_name(T.LambdaDef)}
+## * ${node_name(T.ListComp)}
+## * ${node_name(T.ListGen)}
+## * ${node_name(T.ListLit)}
+## * ${node_name(T.Name)}
+## * ${node_name(T.NotOp)}
+## * ${node_name(T.NumberLit)}
+## * ${node_name(T.OrExpr)}
+## * ${node_name(T.OrOp)}
+## * ${node_name(T.Power)}
+## * ${node_name(T.SetComp)}
+## * ${node_name(T.SetLit)}
+## * ${node_name(T.SliceExpr)}
+## * ${node_name(T.StringLit)}
+## * ${node_name(T.SubscriptExpr)}
+## * ${node_name(T.TupleLit)}
+## * ${node_name(T.XorExpr)}
+## * ${node_name(T.YieldExpr)}
 class ASTList[Expr] : PythonNodeBaseList {
 }
 
-"""
-List of Id.
-"""
+## List of Id.
 class ASTList[Id] : PythonNodeBaseList {
 }
 
-"""
-List of NL.
-"""
+## List of NL.
 class ASTList[NL] : PythonNodeBaseList {
 }
 
-"""
-List of PythonNode.
-
-This list node can contain one of the following nodes:
-
-* ${node_name(T.AsNameNode)}
-* ${node_name(T.AssertStmt)}
-* ${node_name(T.AssignStmt)}
-* ${node_name(T.AugAssignStmt)}
-* ${node_name(T.BreakStmt)}
-* ${node_name(T.ContinueStmt)}
-* ${node_name(T.Decorated)}
-* ${node_name(T.DefStmt)}
-* ${node_name(T.DelStmt)}
-* ${node_name(T.ExecStmt)}
-* ${node_name(T.Expr.list)}
-* ${node_name(T.ForStmt)}
-* ${node_name(T.GlobalStmt)}
-* ${node_name(T.IfStmt)}
-* ${node_name(T.ImportFrom)}
-* ${node_name(T.ImportName)}
-* ${node_name(T.Name)}
-* ${node_name(T.PassStmt)}
-* ${node_name(T.PrintStmt)}
-* ${node_name(T.PythonNode.list)}
-* ${node_name(T.RaiseStmt)}
-* ${node_name(T.ReturnStmt)}
-* ${node_name(T.StreamPrintStmt)}
-* ${node_name(T.TryStmt)}
-* ${node_name(T.WhileStmt)}
-* ${node_name(T.WithStmt)}
-* ${node_name(T.YieldExpr)}
-"""
+## List of PythonNode.
+##
+## This list node can contain one of the following nodes:
+##
+## * ${node_name(T.AsNameNode)}
+## * ${node_name(T.AssertStmt)}
+## * ${node_name(T.AssignStmt)}
+## * ${node_name(T.AugAssignStmt)}
+## * ${node_name(T.BreakStmt)}
+## * ${node_name(T.ContinueStmt)}
+## * ${node_name(T.Decorated)}
+## * ${node_name(T.DefStmt)}
+## * ${node_name(T.DelStmt)}
+## * ${node_name(T.ExecStmt)}
+## * ${node_name(T.Expr.list)}
+## * ${node_name(T.ForStmt)}
+## * ${node_name(T.GlobalStmt)}
+## * ${node_name(T.IfStmt)}
+## * ${node_name(T.ImportFrom)}
+## * ${node_name(T.ImportName)}
+## * ${node_name(T.Name)}
+## * ${node_name(T.PassStmt)}
+## * ${node_name(T.PrintStmt)}
+## * ${node_name(T.PythonNode.list)}
+## * ${node_name(T.RaiseStmt)}
+## * ${node_name(T.ReturnStmt)}
+## * ${node_name(T.StreamPrintStmt)}
+## * ${node_name(T.TryStmt)}
+## * ${node_name(T.WhileStmt)}
+## * ${node_name(T.WithStmt)}
+## * ${node_name(T.YieldExpr)}
 class ASTList[PythonNode] : PythonNodeBaseList {
 }
 
-"""
-List of SingleParam.
-"""
+## List of SingleParam.
 class ASTList[SingleParam] : PythonNodeBaseList {
 }
 
-"""
-List of StringLit.
-"""
+## List of StringLit.
 class ASTList[StringLit] : PythonNodeBaseList {
 }
 
@@ -792,8 +762,6 @@ class WithStmt : Stmt {
 
 qualifier class VarArgsFlag : PythonNode {
 
-    """
-    Return whether this is an instance of VarArgsFlagPresent
-    """
+    ## Return whether this is an instance of VarArgsFlagPresent
     @export fun as_bool (): Boolean
 }
