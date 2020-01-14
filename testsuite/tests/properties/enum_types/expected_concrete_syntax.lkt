@@ -15,12 +15,12 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun identity (k : DeclKind): DeclKind = k
+    @export fun identity (k : DeclKind): DeclKind = k
 }
 
 class Decl : FooNode {
 
-    public fun decl_kind (): DeclKind
+    @export fun decl_kind (): DeclKind
 }
 
 class FuncDecl : Decl {

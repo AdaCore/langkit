@@ -15,7 +15,7 @@ class Decl : FooNode {
     @parse_field name : Name
     @parse_field items : ASTList[Ref]
 
-    public fun entity_items (): Array[Entity[Ref]] =
+    @export fun entity_items (): Array[Entity[Ref]] =
     self.as_entity.items.map((i) => i)
 }
 
@@ -36,7 +36,7 @@ qualifier class HasPlus : FooNode {
     """
     Return whether this is an instance of HasPlusPresent
     """
-    public fun as_bool (): Boolean
+    @export fun as_bool (): Boolean
 }
 
 class Name : FooNode {

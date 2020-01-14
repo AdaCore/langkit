@@ -38,10 +38,10 @@ class Lit : Atom {
 class Ref : Atom {
     @parse_field name : Name
 
-    public fun resolve (): Entity[FooNode] =
+    @export fun resolve (): Entity[FooNode] =
     self.node_env.get(self.name.symbol, only_first=true)
 
-    public fun dummy (): Array[Entity[FooNode]] =
+    @export fun dummy (): Array[Entity[FooNode]] =
     self.referenced_env.get(self.name.symbol)
 
     fun referenced_env (): LexicalEnv = null

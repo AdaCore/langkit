@@ -11,5 +11,5 @@ class Example : FooNode {
 
     fun pred (): Boolean = false
 
-    public fun do_solving (): Boolean = <Predicate on Example.pred>.solve
+    @export fun do_solving (): Boolean = <Predicate on Example.pred>.solve
 }

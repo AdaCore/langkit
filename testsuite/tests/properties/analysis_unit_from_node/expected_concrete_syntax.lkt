@@ -6,7 +6,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun root_node (): Entity[FooNode] = self.unit.root.as_bare_entity
+    @export fun root_node (): Entity[FooNode] = self.unit.root.as_bare_entity
 }
 
 class Expression : FooNode {

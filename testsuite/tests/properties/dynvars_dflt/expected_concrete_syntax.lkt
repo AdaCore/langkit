@@ -8,5 +8,5 @@ class RootNode {
 
 class ExampleNode : RootNode {
 
-    public fun prop (): Boolean = bool_var
+    @export fun prop (): Boolean = bool_var
 }

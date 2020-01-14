@@ -21,13 +21,13 @@ class Literal : FooNode {
 
     fun a (): Entity[FooNode]
 
-    public fun b (): Integer = match self.a {
+    @export fun b (): Integer = match self.a {
         case e : Entity[Example] => e.get_num
         case c : Entity[FooNode] => c.get_num
 
     }
 
-    public fun c (): Integer = match self.a {
+    @export fun c (): Integer = match self.a {
         case e : Example => e.get_num
         case c : FooNode => c.get_num
 

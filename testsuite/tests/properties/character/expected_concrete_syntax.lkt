@@ -8,14 +8,14 @@ class FooNode {
 
 class Example : FooNode {
 
-    public fun get_a (c : CharacterType = 'a'): CharacterType = c
+    @export fun get_a (c : CharacterType = 'a'): CharacterType = c
 
-    public fun get_eacute (c : CharacterType = '\xe9'): CharacterType = c
+    @export fun get_eacute (c : CharacterType = '\xe9'): CharacterType = c
 
-    public fun identity (c : CharacterType): CharacterType = c
+    @export fun identity (c : CharacterType): CharacterType = c
 
-    public fun double (c : CharacterType): Array[CharacterType] = [c, c]
+    @export fun double (c : CharacterType): Array[CharacterType] = [c, c]
 
-    public fun text_identity (s : Array[CharacterType]): Array[CharacterType] =
+    @export fun text_identity (s : Array[CharacterType]): Array[CharacterType] =
     s
 }

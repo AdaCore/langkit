@@ -58,7 +58,7 @@ class Name : FooNode {
     fun designated_env (): LexicalEnv =
     self.unit.root.node_env.get(self)?[0].children_env
 
-    public fun entity (): Entity[FooNode] = bind env=self.node_env in
+    @export fun entity (): Entity[FooNode] = bind env=self.node_env in
         self.ambiant_entity
     end
 }
@@ -66,7 +66,7 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    public fun entity (): Entity[FooNode] = self.as_entity.name.entity
+    @export fun entity (): Entity[FooNode] = self.as_entity.name.entity
 }
 
 class Using : FooNode {

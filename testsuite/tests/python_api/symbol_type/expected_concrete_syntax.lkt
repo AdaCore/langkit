@@ -8,5 +8,5 @@ class FooNode {
 
 class Example : FooNode {
 
-    public fun sym (sym : SymbolType): SymbolType = sym
+    @export fun sym (sym : SymbolType): SymbolType = sym
 }

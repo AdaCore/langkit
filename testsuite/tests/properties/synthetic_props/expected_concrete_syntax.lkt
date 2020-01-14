@@ -8,7 +8,7 @@ class FooNode {
 
 class Example : FooNode {
 
-    public memoized fun get (): SynthNode = new SynthNode()
+    @export memoized fun get (): SynthNode = new SynthNode()
 }
 
 class SynthNode : FooNode {

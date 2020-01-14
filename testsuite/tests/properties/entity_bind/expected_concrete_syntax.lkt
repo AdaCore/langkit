@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun prop (): Integer
+    @export fun prop (): Integer
 
     fun prop (): Integer
 }
@@ -17,7 +17,7 @@ class Literal : FooNode {
 
     fun b (): LogicEquation = <Bind>
 
-    public fun public_prop (): Entity[Literal] = {
+    @export fun public_prop (): Entity[Literal] = {
         val _ = self.b
 
         self.as_bare_entity

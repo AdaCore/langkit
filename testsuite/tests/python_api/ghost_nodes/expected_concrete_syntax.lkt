@@ -37,5 +37,5 @@ qualifier class PlusQualifier : FooNode {
     """
     Return whether this is an instance of PlusQualifierPresent
     """
-    public fun as_bool (): Boolean
+    @export fun as_bool (): Boolean
 }

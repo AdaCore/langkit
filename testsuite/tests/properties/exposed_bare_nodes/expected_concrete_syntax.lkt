@@ -8,5 +8,5 @@ class FooNode {
 
 class Example : FooNode {
 
-    public fun compute (n : FooNode): FooNode = n
+    @export fun compute (n : FooNode): FooNode = n
 }

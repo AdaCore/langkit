@@ -15,9 +15,9 @@ class Literal : FooNode {
 
     fun b (): Entity[BarNode] = self.a.to[Entity[BarNode]]
 
-    public fun c (): Entity[BarNode] = self.b
+    @export fun c (): Entity[BarNode] = self.b
 
-    public fun d (): Entity[BarNode] = self.a.to[BarNode]
+    @export fun d (): Entity[BarNode] = self.a.to[BarNode]
 
     fun a (): Entity[FooNode]
 }

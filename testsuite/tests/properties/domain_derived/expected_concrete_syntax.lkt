@@ -25,9 +25,9 @@ class ASTList[FooNode] : FooNodeBaseList {
 class Name : FooNode {
     @field ref_var : LogicVar
 
-    public fun resolve (): Boolean =
+    @export fun resolve (): Boolean =
     <domain(<FieldAccess .ref_var>, <map>)>.solve
 
-    public fun definition (): Entity[Definition] =
+    @export fun definition (): Entity[Definition] =
     self.ref_var.get_value.to[Definition]
 }

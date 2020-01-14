@@ -8,11 +8,11 @@ class FooNode {
 
 class Example : FooNode {
 
-    public fun get_struct (): MyStruct = new MyStruct(
+    @export fun get_struct (): MyStruct = new MyStruct(
         bigint_field=<BigInteger 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000>, entity_field=self, array_field=[self.to[FooNode].as_bare_entity, self.parent.as_bare_entity]
     )
 
-    public fun struct_identity (s : MyStruct): MyStruct = s
+    @export fun struct_identity (s : MyStruct): MyStruct = s
 }
 
 """

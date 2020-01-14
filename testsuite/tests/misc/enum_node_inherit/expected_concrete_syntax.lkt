@@ -8,7 +8,7 @@ class FooNode {
 
 class EnumNode : FooNode {
 
-    public fun prop (): Boolean = true
+    @export fun prop (): Boolean = true
 }
 
 qualifier class HasExample : EnumNode {
@@ -16,5 +16,5 @@ qualifier class HasExample : EnumNode {
     """
     Return whether this is an instance of HasExamplePresent
     """
-    public fun as_bool (): Boolean
+    @export fun as_bool (): Boolean
 }

@@ -17,7 +17,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    public fun identity (value : BigIntegerType): BigIntegerType = value
+    @export fun identity (value : BigIntegerType): BigIntegerType = value
 }
 
 class Decl : FooNode {
@@ -27,9 +27,9 @@ class Decl : FooNode {
 
 class Expr : FooNode {
 
-    public fun evaluate (): BigIntegerType
+    @export fun evaluate (): BigIntegerType
 
-    public fun evaluate_as_int (): Integer = <as_int(<FieldAccess .evaluate>)>
+    @export fun evaluate_as_int (): Integer = <as_int(<FieldAccess .evaluate>)>
 }
 
 class Equal : Expr {

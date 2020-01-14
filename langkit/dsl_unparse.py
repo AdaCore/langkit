@@ -432,7 +432,7 @@ def emit_prop(prop):
     from langkit.expressions import Let
     quals = ""
     if prop.is_public:
-        quals += "public "
+        quals += "@export "
 
     if prop.abstract:
         quals += "abstract "

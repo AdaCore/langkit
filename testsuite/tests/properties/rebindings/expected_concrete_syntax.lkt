@@ -14,7 +14,7 @@ class FooNode {
 
 class DefNode : FooNode {
 
-    public fun name (): SymbolType
+    @export fun name (): SymbolType
 }
 
 class Block : DefNode {
@@ -24,7 +24,7 @@ class Block : DefNode {
 
     fun name (): SymbolType = self.name_field.symbol
 
-    public fun rebind (from_block : Entity[Block], to_block : Entity[Block]): Entity[Block] =
+    @export fun rebind (from_block : Entity[Block], to_block : Entity[Block]): Entity[Block] =
     {
         val rbdng = entity.info.rebindings.append_rebinding(
             from_block.params.children_env, to_block.children_env
@@ -36,7 +36,7 @@ class Block : DefNode {
         new Entity[Block](info=e_info, node=self)
     }
 
-    public fun parent_rebindings (): Entity[Block] = {
+    @export fun parent_rebindings (): Entity[Block] = {
         val e_info = new EntityInfo(
             md=entity.info.md, from_rebound=false, rebindings=entity.info.rebindings.get_parent
         )
@@ -44,10 +44,10 @@ class Block : DefNode {
         new Entity[Block](info=e_info, node=self)
     }
 
-    public fun new (): Entity[FooNode] =
+    @export fun new (): Entity[FooNode] =
     entity.info.rebindings.new_env.env_node.as_bare_entity
 
-    public fun old (): Entity[FooNode] =
+    @export fun old (): Entity[FooNode] =
     entity.info.rebindings.new_env.env_node.as_bare_entity
 }
 

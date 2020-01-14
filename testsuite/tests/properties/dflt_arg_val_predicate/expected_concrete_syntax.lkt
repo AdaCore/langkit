@@ -13,7 +13,7 @@ class Example : FooNode {
     fun predicate (n : Entity[FooNode], flag1 : Boolean = false, flag2 : Boolean = true): Boolean =
     (flag1 and (n.is_null)) and flag2
 
-    public fun prop (): Entity[Example] = {
+    @export fun prop (): Entity[Example] = {
         val _ = <Predicate on Example.predicate>
 
         self.as_bare_entity

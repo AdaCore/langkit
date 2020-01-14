@@ -16,7 +16,7 @@ class Example : SomeNode {
 
     fun test_prop (): Boolean = true
 
-    public fun solve (): Boolean = (
+    @export fun solve (): Boolean = (
         <domain(<FieldAccess .v>, [<No InternalEntity>])>
     ) and (<Predicate on SomeNode.test_prop>).solve
 }

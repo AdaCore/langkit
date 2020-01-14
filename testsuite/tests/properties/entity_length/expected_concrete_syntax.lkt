@@ -18,5 +18,5 @@ class Name : FooNode {
 class Names : FooNode {
     @parse_field names : ASTList[Name]
 
-    public fun count (): Integer = entity.names.length
+    @export fun count (): Integer = entity.names.length
 }

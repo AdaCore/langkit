@@ -8,6 +8,6 @@ class FooNode {
 
 class Example : FooNode {
 
-    public fun test (a : Array[InternalUnit]): Array[InternalUnit] =
+    @export fun test (a : Array[InternalUnit]): Array[InternalUnit] =
     <unique(<Var a>)>
 }
