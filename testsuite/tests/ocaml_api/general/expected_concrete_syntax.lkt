@@ -1,4 +1,4 @@
-grammar None_grammar is
+grammar None_grammar {
     node <- or(example | null | var | ident | string)
     ident <- Ident(@Identifier)
     string <- StringLiteral(@String)
@@ -7,35 +7,33 @@ grammar None_grammar is
     null <- Null(@Null)
     example <- Example(@Example)
 
-end
-class FooNode is
+}
 
-    public fun count (seq : Array[Entity[Example]]): Integer = seq.length
+class FooNode {
 
-    public fun get_a (c : CharacterType= <LiteralExpr Character_Type'Val (97) (CharacterType)>): CharacterType = c
+    @export fun count (seq : Array[Entity[Example]]): Integer = seq.length
 
-    public fun get_eacute (c : CharacterType= <LiteralExpr Character_Type'Val (233) (CharacterType)>): CharacterType = c
+    @export fun get_a (c : CharacterType = 'a'): CharacterType = c
 
-    public fun identity (c : CharacterType): CharacterType = c
+    @export fun get_eacute (c : CharacterType = '\xe9'): CharacterType = c
 
-    public fun double (c : CharacterType): Array[CharacterType] = [c, c]
+    @export fun identity (c : CharacterType): CharacterType = c
 
-    public fun same_color (c : Color): Color = c
+    @export fun double (c : CharacterType): Array[CharacterType] = [c, c]
 
-    public fun int_double (c : BigIntegerType): BigIntegerType = c + c
+    @export fun same_color (c : Color): Color = c
 
-    public fun me (b : Boolean): FooNodeStruct =
-        new FooNodeStruct(node=if b then entity else (null))
+    @export fun int_double (c : BigIntegerType): BigIntegerType = c + c
 
+    @export fun me (b : Boolean): FooNodeStruct =
+    new FooNodeStruct(node=if b then entity else (null))
 
-    public fun get_node (node_struct : FooNodeStruct): Entity[FooNode] = node_struct.node
-end
+    @export fun get_node (node_struct : FooNodeStruct): Entity[FooNode] =
+    node_struct.node
+}
 
-class Example : FooNode is
-end
-
-class FooNodeBaseList : FooNode is
-end
+class Example : FooNode {
+}
 
 """
 List of FooNode.
@@ -48,8 +46,8 @@ This list node can contain one of the following nodes:
 * ${node_name(T.StringLiteral)}
 * ${node_name(T.Var)}
 """
-class ASTList[FooNode] : FooNodeBaseList is
-end
+class ASTList[FooNode] : FooNodeBaseList {
+}
 
 """
 This list node can contain one of the following nodes:
@@ -60,29 +58,26 @@ This list node can contain one of the following nodes:
 * ${node_name(T.StringLiteral)}
 * ${node_name(T.Var)}
 """
-class ASTList[FooNode] : ASTList[FooNode] is
+class ASTList[FooNode] : ASTList[FooNode] {
 
-    public fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
+    @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
 
-    public fun example_items (): Array[Entity[Example]] =
-        entity.filter_map(
-            (i) => i.to![Example], (i) => i is_a Example
-        )
+    @export fun example_items (): Array[Entity[Example]] = entity.filter_map(
+        (i) => i.to![Example], (i) => i is_a Example
+    )
+}
 
-end
+class Ident : FooNode {
 
-class Ident : FooNode is
+    @export fun sym (sym : SymbolType): SymbolType = sym
+}
 
-    public fun sym (sym : SymbolType): SymbolType = sym
-end
+class Null : FooNode {
+}
 
-class Null : FooNode is
-end
+class StringLiteral : FooNode {
+}
 
-class StringLiteral : FooNode is
-end
-
-class Var : FooNode is
-    parse field arg : ASTList[FooNode]
-end
-
+class Var : FooNode {
+    @parse_field arg : ASTList[FooNode]
+}
