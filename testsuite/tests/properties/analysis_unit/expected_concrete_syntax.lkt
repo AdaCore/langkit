@@ -28,8 +28,8 @@ class Name : Expression {
 }
 
 class Plus : Expression {
-    parse field left : Expression
-    parse field right : Expression
+    @parse_field left : Expression
+    @parse_field right : Expression
 
     fun result (): Integer = self.left.result + self.right.result
 }

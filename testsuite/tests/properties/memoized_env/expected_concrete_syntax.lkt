@@ -9,8 +9,8 @@ class FooNode {
 }
 
 class Block : FooNode {
-    parse field name : Name
-    parse field content : ASTList[Ref]
+    @parse_field name : Name
+    @parse_field content : ASTList[Ref]
 }
 
 """
@@ -23,7 +23,7 @@ class Name : FooNode {
 }
 
 class Ref : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 
     public fun referenced (): Entity[FooNode] =
     self.referenced_env.env_node.as_bare_entity

@@ -24,13 +24,13 @@ class FooNode {
 }
 
 class Call : FooNode {
-    parse field name : Identifier
-    parse field args : ASTList[Call]
+    @parse_field name : Identifier
+    @parse_field args : ASTList[Call]
 }
 
 class Def : FooNode {
-    parse field name : Identifier
-    parse field stmts : ASTList[Indented]
+    @parse_field name : Identifier
+    @parse_field stmts : ASTList[Indented]
 }
 
 """
@@ -73,7 +73,7 @@ class Identifier : FooNode {
 }
 
 class Indented : FooNode {
-    parse field inner : ASTList[FooNode]
+    @parse_field inner : ASTList[FooNode]
 }
 
 class Newline : FooNode {

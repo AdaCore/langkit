@@ -21,13 +21,23 @@ class LangkitRoot(LKNode):
     decls = Field()
 
 
+class FullDecl(LKNode):
+    """
+    Container for an lkt declaration. Contains the decl node plus the
+    documentation and annotations.
+    """
+    doc = Field()
+    decl_annotations = Field()
+    decl = Field()
+
+
 @abstract
 class Decl(LKNode):
     """
     Base class for declarations. Encompasses regular declarations as well as
     special declarations such as grammars, grammar rules, etc.
     """
-    doc = Field()
+    pass
 
 
 @abstract
@@ -271,16 +281,27 @@ class GenericTypeRef(TypeRef):
 
 
 class NullLit(Expr):
+    """
+    Null literal expression.
+    """
     token_node = True
+
+
+class DeclAnnotation(LKNode):
+    """
+    Compile time annotation attached to a declaration.
+    For the moment, just a name, but we might want to add parameters, like
+    Java's annotations, at some stage.
+    """
+    name = Field()
 
 
 lkt_grammar = Grammar('main_rule')
 G = lkt_grammar
 lkt_grammar.add_rules(
     main_rule=LangkitRoot(
-        List(G.root_decl, empty_valid=True), Lex.Termination
+        G.decls, Lex.Termination
     ),
-    root_decl=Or(G.grammar_decl, G.regular_decl),
     id=Id(Lex.Identifier),
 
     name=Or(
@@ -291,11 +312,10 @@ lkt_grammar.add_rules(
     doc=Opt(DocLit(Lex.String)),
 
     grammar_decl=GrammarDecl(
-        G.doc,
         "grammar", G.id,
         "{", List(G.grammar_rule, empty_valid=True), "}"
     ),
-    grammar_rule=GrammarRuleDecl(G.doc, G.id, "<-", G.grammar_expr),
+    grammar_rule=GrammarRuleDecl(G.id, "<-", G.grammar_expr),
     grammar_primary=Or(
         G.token_literal,
         G.grammar_cut,
@@ -355,14 +375,12 @@ lkt_grammar.add_rules(
     ),
 
     class_decl=ClassDecl(
-        G.doc,
         "class", G.id, Opt(":", G.name), "{",
         G.decls,
         "}"
     ),
 
     fun_decl=FunDecl(
-        G.doc,
         G.visibility, "fun", G.id,
         "(", List(G.arg_decl, empty_valid=True, sep=","), ")",
         ":", G.type_ref,
@@ -370,7 +388,6 @@ lkt_grammar.add_rules(
     ),
 
     arg_decl=FunArgDecl(
-        G.doc,
         G.id,
         ":",
         G.type_ref,
@@ -383,9 +400,12 @@ lkt_grammar.add_rules(
         EntityVisibility.alt_private(),
     ),
 
-    regular_decl=Or(
-        G.class_decl,
-        G.fun_decl
+    decl=FullDecl(
+        G.doc, List(G.decl_annotation, empty_valid=True),
+        Or(G.class_decl,
+           G.fun_decl,
+           G.grammar_decl,
+           G.grammar_rule),
     ),
 
     type_ref=Or(
@@ -395,7 +415,7 @@ lkt_grammar.add_rules(
         SimpleTypeRef(G.name),
     ),
 
-    decls=List(G.regular_decl, empty_valid=True),
+    decls=List(G.decl, empty_valid=True),
 
     expr=Or(
         G.name,
@@ -403,4 +423,6 @@ lkt_grammar.add_rules(
     ),
 
     null=NullLit("null"),
+
+    decl_annotation=DeclAnnotation("@", G.id),
 )

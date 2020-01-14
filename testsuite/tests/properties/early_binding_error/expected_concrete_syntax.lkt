@@ -7,7 +7,7 @@ class FooNode {
 }
 
 class Example : FooNode {
-    field a : LogicVar
+    @field a : LogicVar
 
     fun pred (): Boolean = false
 

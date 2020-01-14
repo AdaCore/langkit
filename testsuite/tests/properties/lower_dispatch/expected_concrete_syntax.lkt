@@ -13,8 +13,8 @@ class FooNode {
 }
 
 class Def : FooNode {
-    parse field name : Name
-    parse field expr : Expr
+    @parse_field name : Name
+    @parse_field expr : Expr
 }
 
 class Expr : FooNode {
@@ -45,7 +45,7 @@ class Lit : Atom {
 }
 
 class Ref : Atom {
-    parse field name : Name
+    @parse_field name : Name
 
     public fun resolve (): Entity[Def] =
     self.node_env.get(self.name.symbol, only_first=true).to![Def]
@@ -58,8 +58,8 @@ class Ref : Atom {
 }
 
 class Plus : Expr {
-    parse field lhs : Expr
-    parse field rhs : Expr
+    @parse_field lhs : Expr
+    @parse_field rhs : Expr
 
     fun evaluate_abstract (): Integer =
     self.lhs.evaluate_abstract + self.rhs.evaluate_abstract

@@ -468,8 +468,8 @@ def emit_prop(prop):
 def emit_field(field):
     from langkit.compiled_types import BaseField, Field
     if isinstance(field, BaseField):
-        return "{}field {} : {}".format(
-            "parse " if isinstance(field, Field) else "",
+        return "@{}field {} : {}".format(
+            "parse_" if isinstance(field, Field) else "",
             field._indexing_name, type_name(field.type)
         )
     else:

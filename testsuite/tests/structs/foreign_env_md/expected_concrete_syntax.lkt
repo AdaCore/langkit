@@ -9,8 +9,8 @@ class FooNode {
 }
 
 class Def : FooNode {
-    parse field name : Name
-    parse field ref : Name
+    @parse_field name : Name
+    @parse_field ref : Name
 }
 
 """

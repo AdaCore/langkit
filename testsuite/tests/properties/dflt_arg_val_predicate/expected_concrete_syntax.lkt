@@ -7,8 +7,8 @@ class FooNode {
 }
 
 class Example : FooNode {
-    field var1 : LogicVar
-    field var2 : LogicVar
+    @field var1 : LogicVar
+    @field var2 : LogicVar
 
     fun predicate (n : Entity[FooNode], flag1 : Boolean = false, flag2 : Boolean = true): Boolean =
     (flag1 and (n.is_null)) and flag2

@@ -18,8 +18,8 @@ class Literal : Expression {
 }
 
 class Plus : Expression {
-    parse field left : Literal
-    parse field right : Expression
+    @parse_field left : Literal
+    @parse_field right : Expression
 
     fun result (): Integer = self.left.result + self.right.result
 }

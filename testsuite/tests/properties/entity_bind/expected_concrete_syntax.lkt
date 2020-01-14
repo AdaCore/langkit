@@ -11,7 +11,7 @@ class FooNode {
 }
 
 class Literal : FooNode {
-    field var : LogicVar
+    @field var : LogicVar
 
     fun a (): Entity[FooNode]
 

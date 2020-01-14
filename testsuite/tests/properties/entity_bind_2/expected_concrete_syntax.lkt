@@ -13,7 +13,7 @@ class ASTList[RootNode] : FooNodeBaseList {
 }
 
 class RootNode : FooNode {
-    field var : LogicVar
+    @field var : LogicVar
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation
 

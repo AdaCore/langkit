@@ -16,16 +16,16 @@ class Expr : FooNode {
 }
 
 class Addition : Expr {
-    parse field lhs : Expr
-    parse field rhs : Expr
+    @parse_field lhs : Expr
+    @parse_field rhs : Expr
 }
 
 class Number : Expr {
 }
 
 class Ref : Expr {
-    parse field null_qual : Null
-    parse field name : Name
+    @parse_field null_qual : Null
+    @parse_field name : Name
 }
 
 """
@@ -46,6 +46,6 @@ qualifier class Null : FooNode {
 }
 
 class VarDecl : FooNode {
-    parse field name : Name
-    parse field value : Expr
+    @parse_field name : Name
+    @parse_field value : Expr
 }

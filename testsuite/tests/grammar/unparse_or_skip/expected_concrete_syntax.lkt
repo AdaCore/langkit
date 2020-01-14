@@ -14,8 +14,8 @@ class FooNode {
 }
 
 class DefNode : FooNode {
-    parse field name : Identifier
-    parse field value : Number
+    @parse_field name : Identifier
+    @parse_field value : Number
 }
 
 class ErrorDef : FooNode {

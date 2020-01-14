@@ -11,9 +11,9 @@ class FooNode {
 }
 
 class Decl : FooNode {
-    parse field has_plus : HasPlus
-    parse field name : Name
-    parse field items : ASTList[Ref]
+    @parse_field has_plus : HasPlus
+    @parse_field name : Name
+    @parse_field items : ASTList[Ref]
 
     public fun entity_items (): Array[Entity[Ref]] =
     self.as_entity.items.map((i) => i)
@@ -43,5 +43,5 @@ class Name : FooNode {
 }
 
 class Ref : FooNode {
-    parse field name : Name
+    @parse_field name : Name
 }

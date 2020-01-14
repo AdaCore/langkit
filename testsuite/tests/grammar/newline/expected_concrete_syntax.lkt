@@ -15,21 +15,21 @@ class FooNode {
 }
 
 class CompositeNode : FooNode {
-    parse field lit_1 : Literal
-    parse field lit_2 : Literal
-    parse field lit_3 : Literal
-    parse field lit_4 : Literal
+    @parse_field lit_1 : Literal
+    @parse_field lit_2 : Literal
+    @parse_field lit_3 : Literal
+    @parse_field lit_4 : Literal
 }
 
 class IndentNode : FooNode {
-    parse field lit_1 : Literal
-    parse field lit_2 : Literal
+    @parse_field lit_1 : Literal
+    @parse_field lit_2 : Literal
 }
 
 class Literal : FooNode {
 }
 
 class NewLineNode : FooNode {
-    parse field lit_1 : Literal
-    parse field lit_2 : Literal
+    @parse_field lit_1 : Literal
+    @parse_field lit_2 : Literal
 }

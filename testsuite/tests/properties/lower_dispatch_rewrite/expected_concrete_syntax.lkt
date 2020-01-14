@@ -20,10 +20,10 @@ class FooNode {
 }
 
 class Def : FooNode {
-    parse field name : Name
-    parse field imports : ASTList[DerivedRef]
-    parse field vars : ASTList[Var]
-    parse field expr : Expr
+    @parse_field name : Name
+    @parse_field imports : ASTList[DerivedRef]
+    @parse_field vars : ASTList[Var]
+    @parse_field expr : Expr
 }
 
 class Expr : FooNode {
@@ -36,7 +36,7 @@ class Lit : Atom {
 }
 
 class Ref : Atom {
-    parse field name : Name
+    @parse_field name : Name
 
     public fun resolve (): Entity[FooNode] =
     self.node_env.get(self.name.symbol, only_first=true)
@@ -61,8 +61,8 @@ class DerivedRef : MiddleRef {
 }
 
 class Plus : Expr {
-    parse field lhs : Expr
-    parse field rhs : Expr
+    @parse_field lhs : Expr
+    @parse_field rhs : Expr
 }
 
 """
@@ -92,6 +92,6 @@ class Name : FooNode {
 }
 
 class Var : FooNode {
-    parse field name : Name
-    parse field expr : Expr
+    @parse_field name : Name
+    @parse_field expr : Expr
 }

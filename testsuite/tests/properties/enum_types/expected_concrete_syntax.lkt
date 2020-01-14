@@ -24,16 +24,16 @@ class Decl : FooNode {
 }
 
 class FuncDecl : Decl {
-    parse field name : Name
-    parse field args : ASTList[Name]
-    parse field expr : Expression
+    @parse_field name : Name
+    @parse_field args : ASTList[Name]
+    @parse_field expr : Expression
 
     fun decl_kind (): DeclKind = DeclKind.Func
 }
 
 class VarDecl : Decl {
-    parse field name : Name
-    parse field expr : Expression
+    @parse_field name : Name
+    @parse_field expr : Expression
 
     fun decl_kind (): DeclKind = DeclKind.Var
 }
@@ -48,8 +48,8 @@ class Name : Expression {
 }
 
 class Plus : Expression {
-    parse field left : Expression
-    parse field right : Expression
+    @parse_field left : Expression
+    @parse_field right : Expression
 }
 
 """

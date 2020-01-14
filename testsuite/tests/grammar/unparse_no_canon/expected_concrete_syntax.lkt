@@ -30,6 +30,6 @@ class Number : FooNode {
 }
 
 class RootNode : FooNode {
-    parse field ident : Identifier
-    parse field number : Number
+    @parse_field ident : Identifier
+    @parse_field number : Number
 }
