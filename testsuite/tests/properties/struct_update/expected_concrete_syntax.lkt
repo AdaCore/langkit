@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    @export fun increment (kv : KV): KV = <StructUpdate>
+    @export fun increment (kv : KV): KV = kv.update(val=kv.val + BigInt(1))
 }
 
 class Example : FooNode {
