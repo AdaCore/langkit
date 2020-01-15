@@ -1,0 +1,5 @@
+main.py: Running...
+<KV key=foo val=42 node=None>
+<KV key=foo val=1 node=None>
+main.py: Done
+Done

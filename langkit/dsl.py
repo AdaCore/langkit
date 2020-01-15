@@ -883,7 +883,7 @@ def NullField():
     return _Field(null=True)
 
 
-def UserField(type, repr=False, doc='', public=True):
+def UserField(type, repr=False, doc='', public=True, default_value=None):
     """
     Create a field that is not meant to store parsing results. Both AST nodes
     and Struct can hold such types.
@@ -897,8 +897,11 @@ def UserField(type, repr=False, doc='', public=True):
     :param str doc: User documentation for this field.
 
     :param bool is_public: Whether this field is public in the generated APIs.
+
+    :param None|AbstractExpression default_value: Default value for this field,
+        when omitted from New expressions.
     """
-    return _UserField(type, repr, doc, public)
+    return _UserField(type, repr, doc, public, default_value)
 
 
 class _EnumMetaclass(type):
