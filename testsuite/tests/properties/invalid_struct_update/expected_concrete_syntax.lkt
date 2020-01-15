@@ -1,0 +1,18 @@
+grammar None_grammar {
+    main_rule <- list*(Example(@Example))
+
+}
+
+class FooNode {
+
+    @export fun increment (kv : KV): KV = <StructUpdate>
+}
+
+class Example : FooNode {
+}
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList {
+}

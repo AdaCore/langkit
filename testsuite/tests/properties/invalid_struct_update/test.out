@@ -1,0 +1,16 @@
+== Not a struct ==
+File "test.py", line 23, in FooNode.increment
+  line 35, in BigIntLiteral expression
+    Error: Struct expected, got BigInt
+
+== Invalid field ==
+File "test.py", line 23, in FooNode.increment
+  line 38, in StructUpdate expression
+    Error: Invalid KV field: nosuchfield
+
+== Invalid type ==
+File "test.py", line 23, in FooNode.increment
+  line 35, in BigIntLiteral expression
+    Error: Wrong type for field key: expected Character.array, got BigInt
+
+Done

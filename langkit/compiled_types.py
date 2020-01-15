@@ -2068,6 +2068,32 @@ class BaseStructType(CompiledType):
             f.type.py_nullexpr for f in self.get_fields()
         ))
 
+    @property
+    def required_fields_in_exprs(self):
+        """
+        Return all fields that must be involved in the property DSL.
+
+        This returns a mapping from DSL field names to fields for all fields
+        that must be considered when building structs in the property DSL.
+
+        :rtype: dict[str, Field]
+        """
+        def is_required(f):
+            if isinstance(f, BuiltinField):
+                # BuiltinFields are actually stored fields only for structure
+                # types (not for nodes).
+                return self.is_struct_type
+
+            elif isinstance(f, Field):
+                return not f.null
+
+            else:
+                return isinstance(f, UserField)
+
+        return {f.original_name.lower: f
+                for f in self.get_abstract_node_data()
+                if is_required(f)}
+
 
 class StructType(BaseStructType):
     """
