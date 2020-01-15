@@ -263,6 +263,13 @@ class FunArgDecl(ValDecl):
     default_val = Field()
 
 
+class FieldDecl(ValDecl):
+    """
+    Field declaration.
+    """
+    pass
+
+
 @abstract
 class TypeRef(LKNode):
     """
@@ -402,12 +409,21 @@ lkt_grammar.add_rules(
         Opt("=", G.expr)
     ),
 
+    field_decl=FieldDecl(
+        G.id,
+        ":",
+        G.type_ref
+    ),
+
     decl=FullDecl(
         G.doc, List(G.decl_annotation, empty_valid=True),
-        Or(G.class_decl,
-           G.fun_decl,
-           G.grammar_decl,
-           G.grammar_rule),
+        Or(
+            G.class_decl,
+            G.fun_decl,
+            G.grammar_decl,
+            G.grammar_rule,
+            G.field_decl
+        ),
     ),
 
     type_ref=Or(
