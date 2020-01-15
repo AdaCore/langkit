@@ -277,11 +277,13 @@ class CompIf : PythonNode {
     @parse_field comp : PythonNode
 }
 
-@enum class CompOpKind : PythonNode {
-    case Lt,
-        Gt,
-        Eq,
-        Gte, Lte, Diamond, Noteq, In, Notin, Is, Isnot
+@enum_node(Lt,
+    Gt,
+    Eq,
+    Gte,
+    Lte,
+    Diamond,
+    Noteq, In, Notin, Is, Isnot) class CompOpKind : PythonNode {
 }
 
 class Comprehension : PythonNode {
