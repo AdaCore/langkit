@@ -114,8 +114,10 @@ def var_name(var_expr, default="_"):
 
 
 def is_simple_expr(expr):
-    from langkit.expressions import FieldAccess, Literal, AbstractVariable
-    return isinstance(expr, (FieldAccess, Literal, AbstractVariable))
+    from langkit.expressions import (FieldAccess, Literal, AbstractVariable,
+                                     BigIntLiteral)
+    return isinstance(expr, (FieldAccess, Literal, AbstractVariable,
+                             BigIntLiteral))
 
 
 def emit_indent_expr(expr, **ctx):
@@ -158,7 +160,8 @@ def emit_expr(expr, **ctx):
         GetSymbol, Match, Eq, BinaryBooleanOperator, Then, OrderingTest,
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
-        ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral
+        ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral,
+        BigIntLiteral
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -417,6 +420,10 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, CharacterLiteral):
         # Get rid of the 'u' unicode prefix
         return repr(expr.literal)[1:]
+    elif isinstance(expr, BigIntLiteral):
+        return 'BigInt({})'.format(str(expr.expr)
+                                   if isinstance(expr.expr, (int, long)) else
+                                   ee(expr.expr))
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)
