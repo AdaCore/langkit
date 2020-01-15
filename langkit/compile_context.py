@@ -834,6 +834,7 @@ class CompileCtx(object):
         from langkit.compiled_types import (CompiledTypeRepo, EnumType,
                                             StructType, T)
         from langkit.dsl import _StructMetaclass
+        from langkit.expressions.base import construct_compile_time_known
 
         # Make sure the language spec tagged at most one metadata struct.
         # Register it, if there is one.
@@ -908,6 +909,14 @@ class CompileCtx(object):
                  doc="Gramar rule to use for parsing.",
                  value_names=[self.grammar_rule_api_name(n)
                               for n in self.grammar.user_defined_rules])
+
+        # Now that all types are known, construct default values for fields
+        for st in CompiledTypeRepo.struct_types:
+            for f in st.get_abstract_node_data():
+                if f.abstract_default_value is not None:
+                    f.default_value = construct_compile_time_known(
+                        f.abstract_default_value
+                    )
 
     def compute_optional_field_info(self):
         """

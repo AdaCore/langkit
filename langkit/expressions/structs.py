@@ -10,7 +10,8 @@ from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
     ResolvedExpression, SavedExpr, T, attr_call, attr_expr, construct,
-    dsl_document, gdb_end, gdb_property_call_start, render
+    construct_compile_time_known, dsl_document, gdb_end,
+    gdb_property_call_start, render
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
@@ -381,14 +382,17 @@ class New(AbstractExpression):
             else:
                 return isinstance(f, UserField)
 
-        required_fields = {
-            f.original_name.lower: f
-            for f in self.struct_type.get_abstract_node_data()
-            if is_required(f)
-        }
+        required_fields = {f.original_name.lower: f
+                           for f in self.struct_type.get_abstract_node_data()
+                           if is_required(f)}
+        default_valued_fields = {n: f
+                                 for n, f in required_fields.items()
+                                 if f.default_value}
 
         error_if_not_empty(
-            set(required_fields) - set(self.field_values.keys()),
+            set(required_fields)
+            - set(self.field_values.keys())
+            - set(default_valued_fields),
             'Values are missing for {} fields'.format(
                 self.struct_type.dsl_name
             )
@@ -403,6 +407,17 @@ class New(AbstractExpression):
         # values.
         field_values = {required_fields[name]: construct(expr)
                         for name, expr in self.field_values.items()}
+
+        # Add default values for missing fields. Note that we construct their
+        # abstract expressions on purpose: even though a resolved expression is
+        # already present in field.default_value, reusing ResolvedExpression
+        # nodes in multiple expressions is forbidden. Constructing a new each
+        # time avoids this problem.
+        for name, field in default_valued_fields.items():
+            if field not in field_values:
+                field_values[field] = construct_compile_time_known(
+                    field.abstract_default_value
+                )
 
         # Then check that the type of these expressions match field types
         for field, expr in field_values.items():

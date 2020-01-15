@@ -1,0 +1,21 @@
+grammar None_grammar {
+    main_rule <- list*(Example(@Example))
+
+}
+
+class FooNode {
+
+    @export fun build_1 (key : Array[CharacterType]): KV = new KV(key=key)
+
+    @export fun build_2 (key : Array[CharacterType], val : Integer): KV =
+    new KV(val=val, key=key)
+}
+
+class Example : FooNode {
+}
+
+"""
+List of Example.
+"""
+class ASTList[Example] : FooNodeBaseList {
+}

@@ -287,6 +287,8 @@ class AbstractNodeData(object):
         self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
+        self.abstract_default_value = None
+        self.default_value = None
 
     @property
     def abstract(self):
@@ -1997,7 +1999,8 @@ class UserField(BaseField):
     is_user_field = True
 
     def __init__(self, type, repr=False, doc='', public=True,
-                 access_needs_incref=True, internal_name=None):
+                 default_value=None, access_needs_incref=True,
+                 internal_name=None):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -2014,12 +2017,19 @@ class UserField(BaseField):
 
         :param None|names.Name internal_name: See AbstractNodeData's
             constructor.
+
+        :param None|AbstractExpression default_value: Default value for this
+            field, when omitted from New expressions.
         """
         super(UserField, self).__init__(
             repr, doc, type, access_needs_incref=access_needs_incref,
             internal_name=internal_name
         )
         self._is_public = public
+
+        # We cannot construct the default value yet, as not all types are
+        # known. Do this in CompileCtx.compute_types instead.
+        self.abstract_default_value = default_value
 
     concrete = True
 
