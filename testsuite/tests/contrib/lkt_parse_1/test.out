@@ -1,3 +1,6 @@
+Parsing concrete syntax for test dflt_arg_val
+=============================================
+
 LangkitRoot[1:1-16:2]
 |decls:
 |  FullDeclList[1:1-16:2]
@@ -163,3 +166,4 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |  |  Id[15:62-15:69]: FooNode
 |  |  |  |  |  |  |body:
 |  |  |  |  |  |  |  Id[15:73-15:76]: arg
+

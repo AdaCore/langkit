@@ -25,16 +25,22 @@ o = subprocess.check_output(
     cwd=LK_LIB_DIR
 )
 
+tests = sorted(((P.join(root, f), P.basename(root))
+                for root, _, files in os.walk(TESTS_DIR)
+                for f in files
+                if f == 'expected_concrete_syntax.lkt'), key=lambda x: x[1])
+
 # TODO: for the moment we'll use a whitelist for tests, eventually we want to
 # parse them all.
 test_whitelist = ['dflt_arg_val']
+whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
 
-for root, _, files in os.walk(TESTS_DIR):
-    test_name = P.basename(root)
-    for f in files:
-        if (f == 'expected_concrete_syntax.lkt'
-                and test_name in test_whitelist):
-            subprocess.check_call(
-                [P.join(LK_LIB_DIR, 'build', 'bin', 'parse'), "-f",
-                 P.join(root, f)]
-            )
+for full_syntax_path, test_name in whitelisted_tests:
+    header = 'Parsing concrete syntax for test {}'.format(test_name)
+    print("{}\n{}\n".format(header, "=" * len(header)))
+    sys.stdout.flush()
+    subprocess.check_call(
+        [P.join(LK_LIB_DIR, 'build', 'bin', 'parse'), "-f",
+         full_syntax_path]
+    )
+    print()
