@@ -3,8 +3,7 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (AbstractNodeData, BuiltinField, Field,
-                                    UserField, resolve_type)
+from langkit.compiled_types import AbstractNodeData, Field, resolve_type
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -370,21 +369,7 @@ class New(AbstractExpression):
 
         # Create a dict of field names to fields in the struct type
 
-        def is_required(f):
-            if isinstance(f, BuiltinField):
-                # BuiltinFields are actually stored fields only for structure
-                # types (not for nodes).
-                return self.struct_type.is_struct_type
-
-            elif isinstance(f, Field):
-                return not f.null
-
-            else:
-                return isinstance(f, UserField)
-
-        required_fields = {f.original_name.lower: f
-                           for f in self.struct_type.get_abstract_node_data()
-                           if is_required(f)}
+        required_fields = self.struct_type.required_fields_in_exprs
         default_valued_fields = {n: f
                                  for n, f in required_fields.items()
                                  if f.default_value}
@@ -1337,3 +1322,78 @@ class Match(AbstractExpression):
 
     def __repr__(self):
         return '<Match>'
+
+
+@attr_call('update',
+           doc='Create a new struct value, replacing fields with the given'
+               ' values.')
+class StructUpdate(AbstractExpression):
+
+    class Expr(ComputingExpr):
+        pretty_class_name = 'StructUpdate'
+
+        def __init__(self, expr, assocs, abstract_expr=None):
+            """
+            :type expr: ResolvedExpression
+            :type assocs: dict[UserField, ResolvedExpression
+            :type None|AbstractExpression: ResolvedExpression
+            """
+            self.static_type = expr.type
+            self.expr = expr
+            self.assocs = assocs
+            super(StructUpdate.Expr, self).__init__(
+                'Update_Result',
+                abstract_expr=abstract_expr
+            )
+
+        def _render_pre(self):
+            return render('properties/update_ada', expr=self)
+
+        @property
+        def subexprs(self):
+            return {'expr': self.expr,
+                    'assocs': {f.original_name.lower: f_expr
+                               for f, f_expr in self.assocs.items()}}
+
+        def __repr__(self):
+            return '<StructUpdate.Expr>'
+
+    def __init__(self, expr, **kwargs):
+        """
+        :param AbstractExpression expr: Original structure copy.
+        :param dict[str, AbstractExpression] kwargs: Field/value associations
+            to replace in the copy.
+        """
+        super(StructUpdate, self).__init__()
+        self.expr = expr
+        self.assocs = kwargs
+
+    def construct(self):
+        # Construct the expression for the original struct
+        expr = construct(
+            self.expr,
+            lambda expr_type: expr_type.is_struct_type,
+            'Struct expected, got {expr_type}'
+        )
+
+        # Check that all fields are valid structure fields. Also compile them,
+        # checking their types.
+        fields = expr.type.required_fields_in_exprs
+        assocs = {}
+        for name, field_expr in sorted(self.assocs.items()):
+            check_source_language(
+                name in fields,
+                'Invalid {} field: {}'.format(expr.type.dsl_name, name)
+            )
+            field = fields[name]
+            assocs[field] = construct(
+                field_expr,
+                fields[name].type,
+                'Wrong type for field {}:'
+                ' expected {{expected}}, got {{expr_type}}'.format(name)
+            )
+
+        return StructUpdate.Expr(expr, assocs, abstract_expr=self)
+
+    def __repr__(self):
+        return '<StructUpdate>'
