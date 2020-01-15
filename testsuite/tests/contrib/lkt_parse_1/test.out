@@ -69,6 +69,8 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  DeclAnnotation[11:5-11:12]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[11:6-11:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[11:6-11:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FunDecl[11:13-11:60]
 |  |  |  |  |  |  |name:
@@ -100,6 +102,8 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  DeclAnnotation[13:5-13:12]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[13:6-13:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[13:6-13:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FunDecl[13:13-13:61]
 |  |  |  |  |  |  |name:
@@ -354,6 +358,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[20:5-20:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[20:6-20:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[20:6-20:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[20:18-20:29]
 |  |  |  |  |  |  |name:
@@ -372,6 +378,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[21:5-21:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[21:6-21:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[21:6-21:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[21:18-21:38]
 |  |  |  |  |  |  |name:
@@ -395,6 +403,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[22:5-22:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[22:6-22:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[22:6-22:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[22:18-22:29]
 |  |  |  |  |  |  |name:
@@ -458,6 +468,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[32:5-32:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[32:6-32:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[32:6-32:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[32:18-32:29]
 |  |  |  |  |  |  |name:
@@ -491,6 +503,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[36:5-36:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[36:6-36:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[36:6-36:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[36:18-36:28]
 |  |  |  |  |  |  |name:
@@ -509,6 +523,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[37:5-37:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[37:6-37:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[37:6-37:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[37:18-37:28]
 |  |  |  |  |  |  |name:
@@ -542,6 +558,8 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  DeclAnnotation[41:5-41:17]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[41:6-41:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[41:6-41:6]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  FieldDecl[41:18-41:29]
 |  |  |  |  |  |  |name:

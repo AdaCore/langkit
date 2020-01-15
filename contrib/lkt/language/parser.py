@@ -303,10 +303,17 @@ class NullLit(Expr):
 class DeclAnnotation(LKNode):
     """
     Compile time annotation attached to a declaration.
-    For the moment, just a name, but we might want to add parameters, like
-    Java's annotations, at some stage.
     """
     name = Field()
+    params = Field()
+
+
+class Param(LKNode):
+    """
+    Parameter for function calls or for annotations.
+    """
+    name = Field()
+    value = Field()
 
 
 lkt_grammar = Grammar('main_rule')
@@ -442,5 +449,9 @@ lkt_grammar.add_rules(
 
     null=NullLit("null"),
 
-    decl_annotation=DeclAnnotation("@", G.id),
+    decl_annotation=DeclAnnotation(
+        "@", G.id, Opt("(", List(G.param, sep=","), ")")
+    ),
+
+    param=Param(Opt(G.id, "="), G.expr),
 )
