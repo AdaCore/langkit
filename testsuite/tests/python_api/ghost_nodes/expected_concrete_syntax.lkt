@@ -13,8 +13,7 @@ grammar None_grammar {
 class FooNode {
 }
 
-@enum class Enum : FooNode {
-    case Null, Example, Default
+@enum_node(Null, Example, Default) class Enum : FooNode {
 }
 
 class Name : FooNode {
