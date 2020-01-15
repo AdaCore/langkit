@@ -1,10 +1,8 @@
 """
-This tests that the Langkit based python parser can be compiled and can parse a
-simple python program without errors.
+Test langkit's new concrete syntax parser.
 
-TODO: This is hackish and minimalistic. Since Langkit's python parser is a
-fully fledged Langkit generated lib, it would make sense to reuse Libadalang's
-parser test driver.
+RA22-015: This is a temporary test, we'll get rid of it when tests are ported
+to the new syntax.
 """
 
 from __future__ import absolute_import, division, print_function
