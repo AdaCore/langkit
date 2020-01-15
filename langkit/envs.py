@@ -207,12 +207,12 @@ class EnvSpec(object):
         actions = list(actions)
 
         self.env_hook = None
-        if isinstance(actions and actions[0], CallEnvHook):
+        if actions and isinstance(actions[0], CallEnvHook):
             self.env_hook = actions.pop(0)
             ":type: SetInitialEnv"
 
         self.initial_env = None
-        if isinstance(actions and actions[0], SetInitialEnv):
+        if actions and isinstance(actions[0], SetInitialEnv):
             self.initial_env = actions.pop(0)
             ":type: SetInitialEnv"
 
@@ -588,6 +588,7 @@ class SetInitialEnv(ExprHolderAction):
         # that a SetInitialEnv instance has found its way into a regular action
         # list.
         check_source_language(
+            False,
             "set_initial_env can only be preceded by call_env_hook"
         )
 
@@ -598,6 +599,7 @@ class CallEnvHook(ExprHolderAction):
         # that a CallEnvHook instance has found its way into a regular action
         # list.
         check_source_language(
+            False,
             "set_initial_env must be first in the action list"
         )
 
