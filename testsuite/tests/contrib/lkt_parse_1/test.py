@@ -32,7 +32,7 @@ tests = sorted(((P.join(root, f), P.basename(root))
 
 # TODO: for the moment we'll use a whitelist for tests, eventually we want to
 # parse them all.
-test_whitelist = ['dflt_arg_val', 'rewriting']
+test_whitelist = ['dflt_arg_val', 'rewriting', 'ghost_nodes']
 whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
 
 for full_syntax_path, test_name in whitelisted_tests:
