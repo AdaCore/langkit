@@ -216,6 +216,14 @@ package body Langkit_Support.Lexical_Env is
             Result : constant Lexical_Env := Self.Resolver.all (E);
          begin
             if Cache_Enabled then
+               --  Since the call to Self.Resolver above may have invoked
+               --  Get_Env on the same Env_Getter object (Self), we need to be
+               --  re-entrant. This means that though called Dec_Ref on
+               --  Self.Env above, once we got here, Self.Env may have another
+               --  value: we need to remove its ownership share before
+               --  overriding below.
+               Dec_Ref (Self.Env);
+
                --  The ownership share returned by the resolver goes to the
                --  cache: the call to Inc_Ref below will create a new one for
                --  the returned value.
