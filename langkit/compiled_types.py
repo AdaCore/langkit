@@ -1619,9 +1619,9 @@ class Argument(object):
             argument. If not provided, an AbstractVariable instance is
             automatically created.
         """
-        from langkit.expressions.base import (
-            AbstractVariable, construct_compile_time_known, unsugar
-        )
+        from langkit.expressions.base import (AbstractVariable,
+                                              construct_compile_time_known)
+
         self.name = name
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=name))
@@ -1629,15 +1629,12 @@ class Argument(object):
 
         # Make sure that, if present, the default value is a compile-time known
         # constant.
-
         self.abstract_default_value = default_value
-        self.default_value = None
-        if default_value is not None:
-            default_value = unsugar(default_value)
-            default_value.prepare()
-            self.default_value = construct_compile_time_known(
-                default_value, type
-            )
+        self.default_value = (
+            None
+            if default_value is None else
+            construct_compile_time_known(default_value, type)
+        )
 
     @property
     def type(self):

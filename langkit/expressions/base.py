@@ -109,6 +109,8 @@ def construct_compile_time_known(expr, *args, **kwargs):
     :type expr: AbstractExpression
     :rtype: ResolvedExpression
     """
+    expr = unsugar(expr)
+    expr.prepare()
     result = construct(expr, *args, **kwargs)
     check_source_language(
         isinstance(result, BindableLiteralExpr),
