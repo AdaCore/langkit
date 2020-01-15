@@ -161,7 +161,7 @@ def emit_expr(expr, **ctx):
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral,
-        BigIntLiteral
+        StructUpdate, BigIntLiteral
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -412,6 +412,12 @@ def emit_expr(expr, **ctx):
             emit_paren(", ".join(
                 "{}={}".format(k, ee(v)) for k, v in expr.field_values.items()
             ))
+        )
+    elif isinstance(expr, StructUpdate):
+        return '{}.update({})'.format(
+            ee(expr.expr),
+            ', '.join('{}={}'.format(name, ee(field_expr))
+                      for name, field_expr in sorted(expr.assocs.items()))
         )
     elif isinstance(expr, ArrayLiteral):
         if isinstance(expr.elements[0], CharacterLiteral):
