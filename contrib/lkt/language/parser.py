@@ -246,12 +246,20 @@ class FunDecl(Decl):
     body = Field()
 
 
-class FunArgDecl(Decl):
+@abstract
+class ValDecl(Decl):
     """
-    Function argument declaration.
+    Abstract class for named values declarations, such as arguments, local
+    value bindings, fields, etc.
     """
     name = Field()
     type = Field()
+
+
+class FunArgDecl(ValDecl):
+    """
+    Function argument declaration.
+    """
     default_val = Field()
 
 
