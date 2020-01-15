@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, abstract
+from langkit.dsl import ASTNode, AbstractField, Field, T, abstract
 from langkit.parsers import Grammar, List, Opt, Or
 
 from language.lexer import lkt_lexer as Lex
@@ -37,7 +37,7 @@ class Decl(LKNode):
     Base class for declarations. Encompasses regular declarations as well as
     special declarations such as grammars, grammar rules, etc.
     """
-    pass
+    name = AbstractField(type=T.Id)
 
 
 @abstract
