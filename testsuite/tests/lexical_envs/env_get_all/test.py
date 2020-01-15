@@ -5,9 +5,10 @@ determinism.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, T, has_abstract_list, synthetic
+from langkit.dsl import (ASTNode, Field, T, UserField, has_abstract_list,
+                         synthetic)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
-from langkit.expressions import Field,  No, Self, UserField, langkit_property
+from langkit.expressions import No, Self, langkit_property
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token
