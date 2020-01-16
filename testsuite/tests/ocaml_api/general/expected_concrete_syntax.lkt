@@ -44,7 +44,7 @@ class Example : FooNode {
 ## * ${node_name(T.Null)}
 ## * ${node_name(T.StringLiteral)}
 ## * ${node_name(T.Var)}
-class ASTList[FooNode] : ASTList[FooNode] {
+class Sequence : ASTList[FooNode] {
 
     @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
 
@@ -65,5 +65,5 @@ class StringLiteral : FooNode {
 }
 
 class Var : FooNode {
-    @parse_field arg : ASTList[FooNode]
+    @parse_field arg : Sequence
 }

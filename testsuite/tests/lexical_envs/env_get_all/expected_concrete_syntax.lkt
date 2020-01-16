@@ -15,7 +15,7 @@ class FooNode {
     fun unique_id (s : SymbolType): FooNode = self.unit.root.make_id(s)
 }
 
-class ASTList[Insert] : ASTList[Insert] {
+class Program : ASTList[Insert] {
 }
 
 class Id : FooNode {

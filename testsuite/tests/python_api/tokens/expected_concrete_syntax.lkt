@@ -12,5 +12,5 @@ class FooNode {
 class Atom : FooNode {
 }
 
-class ASTList[FooNode] : ASTList[FooNode] {
+class Sequence : ASTList[FooNode] {
 }

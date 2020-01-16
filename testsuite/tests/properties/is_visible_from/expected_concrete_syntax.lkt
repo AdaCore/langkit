@@ -14,7 +14,7 @@ class FooNode {
     }
 }
 
-class ASTList[Name] : ASTList[Name] {
+class Scope : ASTList[Name] {
 }
 
 class Name : FooNode {
