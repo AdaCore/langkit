@@ -15,19 +15,6 @@ class Dep : FooNode {
     @parse_field name : Name
 }
 
-## List of Dep.
-class ASTList[Dep] : FooNodeBaseList {
-}
-
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Scope)}
-## * ${node_name(T.Var)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 
     @export fun resolve (): Entity[FooNode]

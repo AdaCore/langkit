@@ -9,15 +9,6 @@ grammar None_grammar {
 class FooNode {
 }
 
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Id)}
-## * ${node_name(T.Scope)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
 class Id : FooNode {
 
     @export fun get_scope (): Entity[FooNode] =

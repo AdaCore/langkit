@@ -14,7 +14,3 @@ class Example : FooNode {
 
     @export fun struct_identity (s : MyStruct): MyStruct = s
 }
-
-## List of Example.
-class ASTList[Example] : FooNodeBaseList {
-}

@@ -14,15 +14,6 @@ class FooNode {
 class Example : FooNode {
 }
 
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Example)}
-## * ${node_name(T.Null)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
 ## This list node can contain one of the following nodes:
 ##
 ## * ${node_name(T.Example)}

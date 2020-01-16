@@ -65,23 +65,6 @@ class Plus : Expr {
     @parse_field rhs : Expr
 }
 
-## List of DerivedRef.
-class ASTList[DerivedRef] : FooNodeBaseList {
-}
-
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Def)}
-## * ${node_name(T.Expr)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
-## List of Var.
-class ASTList[Var] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }
 

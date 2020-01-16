@@ -13,10 +13,6 @@ class Block : FooNode {
     @parse_field content : ASTList[Ref]
 }
 
-## List of Ref.
-class ASTList[Ref] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }
 

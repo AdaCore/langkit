@@ -6,10 +6,6 @@ grammar None_grammar {
 class FooNode {
 }
 
-## List of NumberNode.
-class ASTList[NumberNode] : FooNodeBaseList {
-}
-
 class ListNode : FooNode {
     @parse_field nb_list : ASTList[NumberNode]
 

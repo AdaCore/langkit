@@ -27,10 +27,6 @@ class Var : DefNode {
     @parse_field value : Name
 }
 
-## List of DefNode.
-class ASTList[DefNode] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 
     @export fun resolve (): Entity[FooNode]

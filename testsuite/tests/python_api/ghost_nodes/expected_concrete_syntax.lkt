@@ -17,10 +17,6 @@ class FooNode {
     case Null, Example, Default
 }
 
-## List of Param.
-class ASTList[Param] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }
 

@@ -19,14 +19,6 @@ class Decl : FooNode {
     @parse_field refs : ASTList[Ref]
 }
 
-## List of Decl.
-class ASTList[Decl] : FooNodeBaseList {
-}
-
-## List of Ref.
-class ASTList[Ref] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }
 

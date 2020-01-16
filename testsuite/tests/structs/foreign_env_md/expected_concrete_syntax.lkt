@@ -13,10 +13,6 @@ class Def : FooNode {
     @parse_field ref : Name
 }
 
-## List of Def.
-class ASTList[Def] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 
     fun sym (): SymbolType = self.symbol
