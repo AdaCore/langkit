@@ -20,7 +20,11 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    subtype Internal_Value_Kind is Any_Value_Kind
       with Static_Predicate => Internal_Value_Kind in
-         None | Boolean_Value | Integer_Value | Character_Value | Node_Value;
+         None | Boolean_Value | Integer_Value | Character_Value
+      % for enum_type in ctx.enum_types:
+       | ${enum_type.introspection_kind}
+      % endfor
+       | Node_Value;
 
    type Internal_Value (Kind : Internal_Value_Kind := None) is record
       case Kind is
@@ -35,6 +39,11 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
          when Character_Value =>
             Character_Value : Character_Type;
+
+         % for enum_type in ctx.enum_types:
+         when ${enum_type.introspection_kind} =>
+            ${enum_type.introspection_kind} : ${enum_type.api_name};
+         % endfor
 
          when Node_Value =>
             Node_Value : ${T.entity.name};
@@ -60,6 +69,15 @@ private package ${ada_lib_name}.Introspection_Implementation is
    function As_Node (Self : Internal_Value) return ${T.entity.name};
    function Create_Node (Value : ${T.entity.name}) return Internal_Value is
      ((Kind => Node_Value, Node_Value => Value));
+
+   % for enum_type in ctx.enum_types:
+      function As_${enum_type.api_name}
+        (Self : Internal_Value) return ${enum_type.api_name};
+      function Create_${enum_type.api_name}
+        (Value : ${enum_type.api_name}) return Internal_Value
+      is ((Kind => ${enum_type.introspection_kind},
+           ${enum_type.introspection_kind} => Value));
+   % endfor
 
    -----------------------
    -- Descriptor tables --

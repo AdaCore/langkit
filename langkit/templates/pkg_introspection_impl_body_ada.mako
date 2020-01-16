@@ -44,6 +44,15 @@ package body ${ada_lib_name}.Introspection_Implementation is
       return Self.Node_Value;
    end As_Node;
 
+   % for enum_type in ctx.enum_types:
+      function As_${enum_type.introspection_prefix}
+        (Self : Internal_Value) return ${enum_type.api_name} is
+      begin
+         return Self.${enum_type.introspection_kind};
+      end As_${enum_type.introspection_prefix};
+
+   % endfor
+
    --  Now we can emit descriptor tables
 
    --------------

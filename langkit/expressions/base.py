@@ -1716,6 +1716,37 @@ class CharacterLiteralExpr(BindableLiteralExpr):
         return 'Create_Character ({})'.format(self.ada_value)
 
 
+class EnumLiteralExpr(BindableLiteralExpr):
+
+    def __init__(self, value, abstract_expr=None):
+        self.value = value
+        super(EnumLiteralExpr, self).__init__(
+            self.render_private_ada_constant(),
+            self.value.type,
+            abstract_expr=abstract_expr
+        )
+
+    def render_private_ada_constant(self):
+        return self.value.ada_name
+
+    def render_public_ada_constant(self):
+        return self.value.ada_name
+
+    def render_python_constant(self):
+        return '{}.{}'.format(self.type.py_helper,
+                              self.value.name.lower)
+
+    def render_ocaml_constant(self):
+        ocaml_api = get_context().ocaml_api_settings
+        return '{}.{}'.format(ocaml_api.module_name(self.type),
+                              self.value.name.camel)
+
+    def render_introspection_constant(self):
+        return 'Create_{} ({})'.format(
+            self.type.api_name, self.render_private_ada_constant()
+        )
+
+
 class NullExpr(BindableLiteralExpr):
     """
     Resolved expression for the null expression corresponding to some type.
@@ -2915,8 +2946,7 @@ class EnumLiteral(AbstractExpression):
         self.value = value
 
     def construct(self):
-        return LiteralExpr(self.value.ada_name, self.value.type,
-                           abstract_expr=self)
+        return EnumLiteralExpr(self.value, abstract_expr=self)
 
 
 def gdb_property_start(prop):

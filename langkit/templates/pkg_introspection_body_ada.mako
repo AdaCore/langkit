@@ -149,6 +149,12 @@ package body ${ada_lib_name}.Introspection is
          when Character_Value =>
             return Create_Character (Impl.As_Character (Value));
 
+         % for enum_type in ctx.enum_types:
+            when ${enum_type.introspection_kind} =>
+               return Create_${enum_type.api_name}
+                 (Impl.As_${enum_type.api_name} (Value));
+         % endfor
+
          when Node_Value =>
             declare
                N : constant ${T.entity.name} := Impl.As_Node (Value);

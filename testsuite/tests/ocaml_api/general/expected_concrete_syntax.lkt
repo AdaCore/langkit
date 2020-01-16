@@ -23,6 +23,8 @@ class FooNode {
 
     @export fun same_color (c : Color): Color = c
 
+    @export fun same_color_dflt (c : Color = Color.Red): Color = c
+
     @export fun int_double (c : BigIntegerType): BigIntegerType = c + c
 
     @export fun me (b : Boolean): FooNodeStruct =
