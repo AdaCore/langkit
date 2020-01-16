@@ -1,3 +1,0 @@
-File "test.py", line 15, in BarNode
-    Error: Cannot invoke the environment hook if CompileContext.bind_env_hook has not been called
-Done

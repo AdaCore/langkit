@@ -156,22 +156,12 @@ def handle_children():
 def set_initial_env(env_expr):
     """
     Action that sets the initial env in which the rest of the environment
-    actions are evaluated. This action must be first or second in the list of
-    action, can only be preceded by call_env_hook.
+    actions are evaluated. Except for Do() hooks, this action must be first in
+    the list of action.
 
     :rtype: SetInitialEnv
     """
     return SetInitialEnv(env_expr)
-
-
-def call_env_hook(env_expr):
-    """
-    Call the env-hook, that is an externally defined procedure, with env_expr
-    as argument.
-
-    :rtype: CallEnvHook
-    """
-    return CallEnvHook(env_expr)
 
 
 def do(expr):
@@ -206,15 +196,16 @@ class EnvSpec(object):
 
         actions = list(actions)
 
-        self.env_hook = None
-        if actions and isinstance(actions[0], CallEnvHook):
-            self.env_hook = actions.pop(0)
-            ":type: SetInitialEnv"
+        # If present, allow Do actions to come before SetInitialEnv
+        self.pre_initial_env_actions = []
+        if any(isinstance(a, SetInitialEnv) for a in actions):
+            while actions and isinstance(actions[0], Do):
+                self.pre_initial_env_actions.append(actions.pop(0))
 
+        # After that, allow one call to SetInitialEnv
         self.initial_env = None
         if actions and isinstance(actions[0], SetInitialEnv):
             self.initial_env = actions.pop(0)
-            ":type: SetInitialEnv"
 
         pre, post = split_by(
             lambda a: not isinstance(a, HandleChildren), actions
@@ -230,9 +221,6 @@ class EnvSpec(object):
         # These are the property attributes
 
         self.initial_env_prop = None
-        ":type: PropertyDef"
-
-        self.env_hook_arg = None
         ":type: PropertyDef"
 
         self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
@@ -279,6 +267,9 @@ class EnvSpec(object):
         :param langkit.compile_context.CompileCtx context: Current context.
         """
 
+        for action in self.pre_initial_env_actions:
+            action.create_internal_properties(self)
+
         self.initial_env_prop = self.create_internal_property(
             'Initial_Env',
             self.initial_env and self.initial_env.env_expr,
@@ -287,12 +278,6 @@ class EnvSpec(object):
 
         for action in self.actions:
             action.create_internal_properties(self)
-
-        self.env_hook_arg_prop = self.create_internal_property(
-            'Env_Hook_Arg',
-            self.env_hook and self.env_hook.env_expr,
-            T.root_node
-        )
 
     def check_spec(self, context):
         """
@@ -340,26 +325,6 @@ class EnvSpec(object):
         :rtype: str
         """
         return self._render_field_access(self.initial_env_prop)
-
-    @property
-    def env_hook_enabled(self):
-        """
-        Return whether the environment hook must be called.
-
-        :rtype: bool
-        """
-        return bool(self.env_hook_arg_prop)
-
-    @property
-    def env_hook_arg_expr(self):
-        """
-        The expression for the environment hook argument.
-
-        This is not available when "self.env_hook_enabled" is False.
-
-        :rtype: str
-        """
-        return self._render_field_access(self.env_hook_arg_prop)
 
 
 class EnvAction(object):
@@ -589,18 +554,7 @@ class SetInitialEnv(ExprHolderAction):
         # list.
         check_source_language(
             False,
-            "set_initial_env can only be preceded by call_env_hook"
-        )
-
-
-class CallEnvHook(ExprHolderAction):
-    def check(self):
-        # Check is not normally called on this, so if it is called it means
-        # that a CallEnvHook instance has found its way into a regular action
-        # list.
-        check_source_language(
-            False,
-            "set_initial_env must be first in the action list"
+            "set_initial_env can only be preceded by do()"
         )
 
 

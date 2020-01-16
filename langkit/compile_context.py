@@ -183,7 +183,6 @@ class CompileCtx(object):
                  default_tab_stop=8,
                  verbosity=Verbosity('none'),
                  template_lookup_extra_dirs=None,
-                 env_hook_subprogram=None,
                  default_unit_provider=None,
                  symbol_canonicalizer=None,
                  documentations=None,
@@ -229,33 +228,6 @@ class CompileCtx(object):
             extra directories to add to the directories used by mako for
             template lookup. This is useful if you want to render custom
             code as part of the compilation process.
-
-        :param LibraryEntity|None env_hook_subprogram: If provided, define a
-            subprogram to call as the environment hook.
-
-            The environment hook is a subprogram provided by a language
-            specification and that can perform arbitrarily complex computations
-            and changes to a whole analysis context. It can be invoked in
-            environment specifications: see EnvSpec's call_env_hook argument.
-
-            Its intended use case is to implement lexical environment lookups
-            across analysis units: when executed on a node that designates
-            another unit, the hook can fetch this other unit from the analysis
-            context and populate its lexical environment. The logic for
-            determining a file name from an analysis unit name is completely
-            language dependent, hence the need for a hook.
-
-            The subprogram that implements the hook must have the following
-            signature::
-
-                procedure Hook_Func
-                  (Unit        : Analysis_Unit;
-                   Node        : <root AST node type>;
-                   Initial_Env : in out Lexical_Env);
-
-            If the hook is invoked on an node that uses the initial_env EnvSpec
-            attribute, the hook can alter it so that it affects the rest of the
-            EnvSpec actions.
 
         :param LibraryEntity|None default_unit_provider: If provided, define a
             Langkit_Support.Unit_Files.Unit_Provider_Access object. This object
@@ -571,7 +543,6 @@ class CompileCtx(object):
         :type: set[(PropertyDef|None, PropertyDef|None)]
         """
 
-        self.env_hook_subprogram = env_hook_subprogram
         self.default_unit_provider = default_unit_provider
         self.symbol_canonicalizer = symbol_canonicalizer
 
@@ -883,17 +854,6 @@ class CompileCtx(object):
 
         self.synthetic_nodes = [n for n in self.astnode_types
                                 if n.synthetic]
-
-        # Check that the environment hook is bound if the language spec uses
-        # it.
-        if self.env_hook_subprogram is None:
-            for t in self.astnode_types:
-                with t.diagnostic_context:
-                    check_source_language(
-                        t.env_spec is None or not t.env_spec.env_hook_enabled,
-                        'Cannot invoke the environment hook if'
-                        ' CompileContext.bind_env_hook has not been called'
-                    )
 
         # We need a hash function for the metadata structure as the
         # Langkit_Support.Lexical_Env generic package requires it.
