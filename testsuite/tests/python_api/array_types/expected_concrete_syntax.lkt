@@ -1,8 +1,8 @@
 grammar None_grammar {
-    node <- or(example | null)
+    node <- or(example | null_node)
     main_rule <- list*(node)
-    null <- Null(@Null)
     example <- Example(@Example)
+    null_node <- NullNode(@Null)
 
 }
 
@@ -17,7 +17,7 @@ class Example : FooNode {
 ## This list node can contain one of the following nodes:
 ##
 ## * ${node_name(T.Example)}
-## * ${node_name(T.Null)}
+## * ${node_name(T.NullNode)}
 class ASTList[FooNode] : ASTList[FooNode] {
 
     @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
@@ -27,5 +27,5 @@ class ASTList[FooNode] : ASTList[FooNode] {
     )
 }
 
-class Null : FooNode {
+class NullNode : FooNode {
 }

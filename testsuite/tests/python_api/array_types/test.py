@@ -31,16 +31,16 @@ class Example(FooNode):
     pass
 
 
-class Null(FooNode):
+class NullNode(FooNode):
     pass
 
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.node, list_cls=Sequence),
-    node=Or(foo_grammar.example, foo_grammar.null),
+    node=Or(foo_grammar.example, foo_grammar.null_node),
     example=Example('example'),
-    null=Null('null'),
+    null_node=NullNode('null'),
 )
 
 build_and_run(foo_grammar, 'main.py')
