@@ -161,7 +161,7 @@ def emit_expr(expr, **ctx):
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral,
-        StructUpdate, BigIntLiteral
+        StructUpdate, BigIntLiteral, RefCategories
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -364,6 +364,8 @@ def emit_expr(expr, **ctx):
             args.append("from={}".format(ee(expr.sequential_from)))
         if expr.only_first:
             args.append("only_first={}".format(ee(expr.only_first)))
+        if expr.categories:
+            args.append('categories={}'.format(ee(expr.categories)))
         return emit_method_call(ee(expr.env), "get", args)
 
     elif is_a("bind"):
@@ -432,6 +434,11 @@ def emit_expr(expr, **ctx):
         return 'BigInt({})'.format(str(expr.expr)
                                    if isinstance(expr.expr, (int, long)) else
                                    ee(expr.expr))
+    elif isinstance(expr, RefCategories):
+        return 'RefCats({}, others={})'.format(', '.join(
+            '{}={}'.format(name, ee(value))
+            for name, value in sorted(expr.cat_map.items())
+        ), ee(expr.default))
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)
