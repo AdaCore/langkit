@@ -44,8 +44,6 @@ use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Introspection_Implementation;
 
 ${exts.with_clauses(with_clauses + [
-   ((ctx.env_hook_subprogram.unit_fqn, False, False)
-    if ctx.env_hook_subprogram else None),
    ((ctx.symbol_canonicalizer.unit_fqn, False, False)
     if ctx.symbol_canonicalizer else None),
    ((ctx.default_unit_provider.unit_fqn, False, False)

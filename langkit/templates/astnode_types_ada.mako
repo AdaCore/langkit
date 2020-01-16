@@ -416,8 +416,13 @@
    </%def>
 
    <%
+   # Whether the initial env for this node is dynamic
+   has_dyn_env = (cls.env_spec.initial_env
+                  or cls.env_spec.pre_initial_env_actions)
+
+   # Name of the function to call in order to get the initial lexical env for
+   # this node. Useful only when the initial env is dynamic.
    env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
-   has_dyn_env = cls.env_spec.initial_env or cls.env_spec.env_hook_enabled
    %>
 
    % if has_dyn_env:
@@ -438,10 +443,10 @@
 
       Initial_Env : Lexical_Env := Bound_Env;
    begin
-      % if cls.env_spec.env_hook_enabled:
-         ${ctx.env_hook_subprogram.fqn}
-           (Self.Unit, ${cls.env_spec.env_hook_arg_expr});
-      % endif
+      % for action in cls.env_spec.pre_initial_env_actions:
+         ${emit_env_action(action)}
+      % endfor
+
       % if cls.env_spec.initial_env:
       Initial_Env := ${cls.env_spec.initial_env_expr};
       % endif
