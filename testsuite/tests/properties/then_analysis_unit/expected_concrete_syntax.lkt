@@ -9,10 +9,6 @@ class FooNode {
     @export fun node_unit (): InternalUnit = (self.to[Name]) then (n => n.unit)
 }
 
-## List of Name.
-class ASTList[Name] : FooNodeBaseList {
-}
-
 class ASTList[Name] : ASTList[Name] {
 }
 

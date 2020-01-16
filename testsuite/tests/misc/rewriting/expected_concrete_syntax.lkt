@@ -41,13 +41,5 @@ class Ref : Expr {
     @parse_field name : Name
 }
 
-## List of Def.
-class ASTList[Def] : FooNodeBaseList {
-}
-
-## List of Name.
-class ASTList[Name] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }

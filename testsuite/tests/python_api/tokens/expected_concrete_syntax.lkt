@@ -12,9 +12,5 @@ class FooNode {
 class Atom : FooNode {
 }
 
-## List of FooNode.
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
 class ASTList[FooNode] : ASTList[FooNode] {
 }

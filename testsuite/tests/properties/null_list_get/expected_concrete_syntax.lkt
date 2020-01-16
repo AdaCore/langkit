@@ -18,7 +18,3 @@ class FooNode {
 
 class Example : FooNode {
 }
-
-## List of Example.
-class ASTList[Example] : FooNodeBaseList {
-}

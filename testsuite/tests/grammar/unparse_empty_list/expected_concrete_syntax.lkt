@@ -15,9 +15,5 @@ class DefNode : FooNode {
     @parse_field values : ASTList[DefNode]
 }
 
-## List of DefNode.
-class ASTList[DefNode] : FooNodeBaseList {
-}
-
 class Identifier : FooNode {
 }

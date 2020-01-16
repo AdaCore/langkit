@@ -11,15 +11,6 @@ class Definition : FooNode {
     @parse_field name : Name
 }
 
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Definition)}
-## * ${node_name(T.Name)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
 class Name : FooNode {
     @field ref_var : LogicVar
 

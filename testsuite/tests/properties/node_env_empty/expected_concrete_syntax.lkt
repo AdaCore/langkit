@@ -15,13 +15,5 @@ class Decl : FooNode {
     entity.node_env.get(n.symbol, only_first=true)
 }
 
-## List of Decl.
-class ASTList[Decl] : FooNodeBaseList {
-}
-
-## List of Name.
-class ASTList[Name] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }

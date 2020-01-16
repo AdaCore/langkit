@@ -22,14 +22,6 @@ class Decl : FooNode {
     self.as_entity.items.map((i) => i)
 }
 
-## List of Decl.
-class ASTList[Decl] : FooNodeBaseList {
-}
-
-## List of Ref.
-class ASTList[Ref] : FooNodeBaseList {
-}
-
 @qualifier class HasPlus : FooNode {
 
     ## Return whether this is an instance of HasPlusPresent

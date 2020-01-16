@@ -16,7 +16,3 @@ class Def : FooNode {
 
 class Example : FooNode {
 }
-
-## List of Def.
-class ASTList[Def] : FooNodeBaseList {
-}

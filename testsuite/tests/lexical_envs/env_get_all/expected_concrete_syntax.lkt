@@ -15,10 +15,6 @@ class FooNode {
     fun unique_id (s : SymbolType): FooNode = self.unit.root.make_id(s)
 }
 
-## List of Insert.
-class ASTList[Insert] : FooNodeBaseList {
-}
-
 class ASTList[Insert] : ASTList[Insert] {
 }
 

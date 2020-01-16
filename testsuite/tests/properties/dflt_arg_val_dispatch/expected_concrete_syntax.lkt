@@ -25,11 +25,5 @@ class VarDecl : Decl {
     fun prop (arg : Boolean = false): Boolean = not arg
 }
 
-"""
-List of Decl.
-"""
-class ASTList[Decl] : FooNodeBaseList {
-}
-
 class Identifier : FooNode {
 }

@@ -523,6 +523,10 @@ def emit_node_type(node_type):
         return ""
 
     base = node_type.base
+
+    if base and base.is_generic_list_type:
+        return ""
+
     parse_fields = node_type.get_fields(
         include_inherited=False
     )

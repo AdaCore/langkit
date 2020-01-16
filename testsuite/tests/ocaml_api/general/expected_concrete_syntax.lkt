@@ -37,18 +37,6 @@ class FooNode {
 class Example : FooNode {
 }
 
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Example)}
-## * ${node_name(T.Ident)}
-## * ${node_name(T.Null)}
-## * ${node_name(T.StringLiteral)}
-## * ${node_name(T.Var)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
 ## This list node can contain one of the following nodes:
 ##
 ## * ${node_name(T.Example)}

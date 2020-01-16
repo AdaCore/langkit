@@ -33,32 +33,6 @@ class Def : FooNode {
     @parse_field stmts : ASTList[Indented]
 }
 
-## List of Call.
-class ASTList[Call] : FooNodeBaseList {
-}
-
-## List of Def.
-class ASTList[Def] : FooNodeBaseList {
-}
-
-## List of FooNode.
-##
-## This list node can contain one of the following nodes:
-##
-## * ${node_name(T.Call)}
-## * ${node_name(T.Identifier)}
-## * ${node_name(T.Indented)}
-class ASTList[FooNode] : FooNodeBaseList {
-}
-
-## List of Indented.
-class ASTList[Indented] : FooNodeBaseList {
-}
-
-## List of Newline.
-class ASTList[Newline] : FooNodeBaseList {
-}
-
 class Identifier : FooNode {
 }
 

@@ -28,10 +28,6 @@ class Ref : Expr {
     @parse_field name : Name
 }
 
-## List of VarDecl.
-class ASTList[VarDecl] : FooNodeBaseList {
-}
-
 class Name : FooNode {
 }
 
