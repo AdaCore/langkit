@@ -19,6 +19,7 @@ class Token(LexerToken):
     Plus = WithText()
     Pipe = WithText()
     LeftArrow = WithText()
+    FatRightArrow = WithText()
     Dot = WithText()
     Comb = WithText()
     At = WithText()
@@ -40,6 +41,7 @@ class Token(LexerToken):
     PublicKw = WithText()
     PrivateKw = WithText()
     NullKw = WithText()
+    IsaKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -82,6 +84,7 @@ lkt_lexer.add_rules(
     (Literal('@'),         Token.At),
     (Literal('list+'),     Token.ListPlus),
     (Literal('list*'),     Token.ListStar),
+    (Literal('=>'),        Token.FatRightArrow),
     (Literal('='),         Token.Equal),
 
     # Keywords
@@ -92,9 +95,10 @@ lkt_lexer.add_rules(
     (Literal('public'),    Token.PublicKw),
     (Literal('private'),   Token.PrivateKw),
     (Literal('null'),      Token.NullKw),
+    (Literal('isa'),       Token.IsaKw),
 
     # Identifiers
-    (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
+    (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),
 
     # Strings
     (Pattern('{STRING_SQ}|{STRING_DBQ}'), Token.String),
