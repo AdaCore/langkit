@@ -4,11 +4,68 @@ from langkit import names
 from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
-    GetSymbol, No, NullCheckExpr, NullExpr,
-    PropertyDef, Self, attr_call, auto_attr, construct
+    AbstractExpression, AbstractVariable, BindableLiteralExpr, CallExpr,
+    ComputingExpr, GetSymbol, No, NullCheckExpr, NullExpr, PropertyDef, Self,
+    attr_call, auto_attr, construct, dsl_document
 )
 from langkit.expressions.utils import assign_var
+
+
+@dsl_document
+class RefCategories(AbstractExpression):
+    """
+    Build a set of categories.
+    """
+
+    class Expr(BindableLiteralExpr):
+        def __init__(self, cats, abstract_expr=None):
+            self.cats = cats
+            super(RefCategories.Expr, self).__init__(
+                self.render_private_ada_constant(),
+                T.RefCategories,
+                abstract_expr=abstract_expr
+            )
+
+        def render_private_ada_constant(self):
+            all_cats = get_context().ref_cats
+            return '({})'.format(', '.join(sorted(
+                '{} => {}'.format(name.camel_with_underscores,
+                                  name in self.cats)
+                for name in all_cats
+            )))
+
+        # This type is not available in public APIs, so there is no need to
+        # implement the other rendering properties.
+
+        @property
+        def subexprs(self):
+            return {'cats': self.cats}
+
+    def __init__(self, default=False, **kwargs):
+        super(RefCategories, self).__init__()
+        self.default = default
+        self.cat_map = kwargs
+
+    def construct(self):
+        check_source_language(isinstance(self.default, bool),
+                              'Invalid categories default')
+
+        all_cats = get_context().ref_cats
+        cats = set(all_cats) if self.default else set()
+
+        # Compute the list of requested categories
+        for key, value in self.cat_map.items():
+            name = names.Name.from_lower(key)
+            check_source_language(name in all_cats,
+                                  'Invalid category: {}'.format(key))
+            check_source_language(isinstance(value, bool),
+                                  'Invalid status for {}'.format(key))
+            if value:
+                cats.add(name)
+            else:
+                cats.discard(name)
+
+        return self.Expr(cats, abstract_expr=self)
 
 
 @attr_call('get')
@@ -58,10 +115,9 @@ class EnvGet(AbstractExpression):
     """
 
     class Expr(ComputingExpr):
-        def __init__(self, env_expr, key_expr, lookup_kind_expr,
+        def __init__(self, env_expr, key_expr, lookup_kind_expr, categories,
                      sequential_from=None,
-                     only_first=False, abstract_expr=None,
-                     categories=None):
+                     only_first=False, abstract_expr=None):
             self.env_expr = env_expr
             self.key_expr = key_expr
             self.lookup_kind_expr = lookup_kind_expr
@@ -80,25 +136,18 @@ class EnvGet(AbstractExpression):
             PropertyDef.get().set_uses_envs()
 
         def _render_pre(self):
-            if self.categories:
-                cat_arg = "({})".format(", ".join(
-                    "{} => {}".format(cat_name, cat_val)
-                    for cat_name, cat_val in self.categories.items()
-                ))
-            else:
-                cat_arg = "All_Cats"
-
             result = [
                 self.env_expr.render_pre(),
                 self.key_expr.render_pre(),
                 self.lookup_kind_expr.render_pre(),
+                self.categories.render_pre()
             ]
             args = [('Self', self.env_expr.render_expr()),
                     ('Key', self.key_expr.render_expr()),
                     ('Lookup_Kind', 'To_Lookup_Kind_Type ({})'.format(
                         self.lookup_kind_expr.render_expr()
                     )),
-                    ('Categories', cat_arg)]
+                    ('Categories', self.categories.render_expr())]
 
             # Pass the From parameter if the user wants sequential semantics
             if self.sequential_from:
@@ -131,6 +180,7 @@ class EnvGet(AbstractExpression):
                 'env': self.env_expr,
                 'key': self.key_expr,
                 'lookup_kind': self.lookup_kind_expr,
+                'categories': self.categories,
                 'sequential_from': self.sequential_from,
             }
 
@@ -188,38 +238,19 @@ class EnvGet(AbstractExpression):
 
         lookup_kind_expr = construct(self.lookup_kind, T.LookupKind)
 
-        ctx = get_context()
-
-        if self.categories:
-            check_source_language(
-                isinstance(self.categories, dict),
-                "Categories should be a dict"
+        # If no category is provided, consider they are all requested
+        if self.categories is None:
+            categories = RefCategories.Expr(get_context().ref_cats)
+        else:
+            categories = construct(
+                self.categories,
+                T.RefCategories,
+                'Invalid categories: {expected} expected but got {expr_type}'
             )
 
-            self.categories = {cat.lower(): val
-                               for cat, val in self.categories.items()}
-
-            check_source_language(
-                self.categories.get('others', None)
-                or all(self.categories.get(cat, None) for cat in ctx.ref_cats),
-                'Categories for env.get do not contain mappings for all'
-                ' categories'
-            )
-
-            check_source_language(
-                all(isinstance(val, bool) for val in self.categories.values()),
-                "Categories values should be bool"
-            )
-
-            self.categories = {
-                names.Name.from_lower(cat).camel_with_underscores
-                if cat != 'others' else 'others': val
-                for cat, val in self.categories.items()
-            }
-
-        return EnvGet.Expr(env_expr, sym_expr, lookup_kind_expr,
+        return EnvGet.Expr(env_expr, sym_expr, lookup_kind_expr, categories,
                            from_expr, self.only_first,
-                           abstract_expr=self, categories=self.categories)
+                           abstract_expr=self)
 
     def __repr__(self):
         return '<EnvGet({}, {})>'.format(self.env, self.symbol)

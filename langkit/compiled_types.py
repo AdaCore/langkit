@@ -3853,6 +3853,8 @@ def create_builtin_types():
              value_names=[names.Name('Unit_Specification'),
                           names.Name('Unit_Body')])
 
+    CompiledType('RefCategories', null_allowed=False)
+
     EnumType(name='LookupKind',
              location=None,
              doc="""
