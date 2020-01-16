@@ -56,7 +56,9 @@ LangkitRoot[1:1-16:2]
 |  |  |  |name:
 |  |  |  |  Id[9:7-9:14]: Example
 |  |  |  |base_class:
-|  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[11:5-15:76]
 |  |  |  |  |  FullDecl[11:5-11:60]
@@ -312,7 +314,9 @@ LangkitRoot[1:1-32:2]
 |  |  |  |name:
 |  |  |  |  Id[16:42-16:46]: Enum
 |  |  |  |base_class:
-|  |  |  |  Id[16:49-16:56]: FooNode
+|  |  |  |  SimpleTypeRef[16:49-16:56]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[16:49-16:56]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[16:58-16:58]: <empty list>
 |  |  FullDecl[19:1-20:2]
@@ -327,7 +331,9 @@ LangkitRoot[1:1-32:2]
 |  |  |  |name:
 |  |  |  |  Id[19:7-19:11]: Name
 |  |  |  |base_class:
-|  |  |  |  Id[19:14-19:21]: FooNode
+|  |  |  |  SimpleTypeRef[19:14-19:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[19:14-19:21]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[19:23-19:23]: <empty list>
 |  |  FullDecl[22:1-26:2]
@@ -342,7 +348,9 @@ LangkitRoot[1:1-32:2]
 |  |  |  |name:
 |  |  |  |  Id[22:7-22:12]: Param
 |  |  |  |base_class:
-|  |  |  |  Id[22:15-22:22]: FooNode
+|  |  |  |  SimpleTypeRef[22:15-22:22]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[22:15-22:22]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[23:5-25:42]
 |  |  |  |  |  FullDecl[23:5-23:29]
@@ -422,7 +430,9 @@ LangkitRoot[1:1-32:2]
 |  |  |  |name:
 |  |  |  |  Id[28:18-28:31]: PlusQualifier
 |  |  |  |base_class:
-|  |  |  |  Id[28:34-28:41]: FooNode
+|  |  |  |  SimpleTypeRef[28:34-28:41]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[28:34-28:41]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[31:5-31:36]
 |  |  |  |  |  FullDecl[31:5-31:36]
@@ -507,7 +517,9 @@ LangkitRoot[1:1-10:2]
 |  |  |  |name:
 |  |  |  |  Id[9:7-9:14]: Example
 |  |  |  |base_class:
-|  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[9:26-9:26]: <empty list>
 
@@ -685,7 +697,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[19:7-19:10]: Def
 |  |  |  |base_class:
-|  |  |  |  Id[19:13-19:20]: FooNode
+|  |  |  |  SimpleTypeRef[19:13-19:20]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[19:13-19:20]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[20:5-22:29]
 |  |  |  |  |  FullDecl[20:5-20:29]
@@ -765,7 +779,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[25:7-25:11]: Expr
 |  |  |  |base_class:
-|  |  |  |  Id[25:14-25:21]: FooNode
+|  |  |  |  SimpleTypeRef[25:14-25:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[25:14-25:21]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[25:23-25:23]: <empty list>
 |  |  FullDecl[28:1-29:2]
@@ -780,7 +796,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[28:7-28:14]: Literal
 |  |  |  |base_class:
-|  |  |  |  Id[28:17-28:21]: Expr
+|  |  |  |  SimpleTypeRef[28:17-28:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[28:17-28:21]: Expr
 |  |  |  |decls:
 |  |  |  |  FullDeclList[28:23-28:23]: <empty list>
 |  |  FullDecl[31:1-33:2]
@@ -795,7 +813,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[31:7-31:16]: ParenExpr
 |  |  |  |base_class:
-|  |  |  |  Id[31:19-31:23]: Expr
+|  |  |  |  SimpleTypeRef[31:19-31:23]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[31:19-31:23]: Expr
 |  |  |  |decls:
 |  |  |  |  FullDeclList[32:5-32:29]
 |  |  |  |  |  FullDecl[32:5-32:29]
@@ -830,7 +850,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[35:7-35:11]: Plus
 |  |  |  |base_class:
-|  |  |  |  Id[35:14-35:18]: Expr
+|  |  |  |  SimpleTypeRef[35:14-35:18]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[35:14-35:18]: Expr
 |  |  |  |decls:
 |  |  |  |  FullDeclList[36:5-37:28]
 |  |  |  |  |  FullDecl[36:5-36:28]
@@ -885,7 +907,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[40:7-40:10]: Ref
 |  |  |  |base_class:
-|  |  |  |  Id[40:13-40:17]: Expr
+|  |  |  |  SimpleTypeRef[40:13-40:17]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[40:13-40:17]: Expr
 |  |  |  |decls:
 |  |  |  |  FullDeclList[41:5-41:29]
 |  |  |  |  |  FullDecl[41:5-41:29]
@@ -920,7 +944,9 @@ LangkitRoot[1:1-45:2]
 |  |  |  |name:
 |  |  |  |  Id[44:7-44:11]: Name
 |  |  |  |base_class:
-|  |  |  |  Id[44:14-44:21]: FooNode
+|  |  |  |  SimpleTypeRef[44:14-44:21]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[44:14-44:21]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[44:23-44:23]: <empty list>
 
@@ -982,7 +1008,9 @@ LangkitRoot[1:1-12:2]
 |  |  |  |name:
 |  |  |  |  Id[9:7-9:14]: Example
 |  |  |  |base_class:
-|  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[11:5-11:57]
 |  |  |  |  |  FullDecl[11:5-11:57]
@@ -1076,7 +1104,9 @@ LangkitRoot[1:1-10:2]
 |  |  |  |name:
 |  |  |  |  Id[9:7-9:14]: Example
 |  |  |  |base_class:
-|  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[9:26-9:26]: <empty list>
 

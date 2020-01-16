@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, AbstractField, Field, T, abstract
-from langkit.parsers import Grammar, List, Opt, Or
+from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or
 
 from language.lexer import lkt_lexer as Lex
 
@@ -263,6 +263,13 @@ class FunArgDecl(ValDecl):
     default_val = Field()
 
 
+class LambdaArgDecl(ValDecl):
+    """
+    Function argument declaration.
+    """
+    default_val = Field()
+
+
 class FieldDecl(ValDecl):
     """
     Field declaration.
@@ -300,6 +307,21 @@ class NullLit(Expr):
     token_node = True
 
 
+class ArrayLiteral(Expr):
+    """
+    Literal for an array value.
+    """
+    exprs = Field()
+
+
+class Isa(Expr):
+    """
+    Isa expression.
+    """
+    expr = Field()
+    dest_type = Field()
+
+
 class DeclAnnotation(LKNode):
     """
     Compile time annotation attached to a declaration.
@@ -316,6 +338,44 @@ class Param(LKNode):
     value = Field()
 
 
+class ParenExpr(Expr):
+    """
+    Parenthesized expression.
+    """
+    expr = Field()
+
+
+class CallExpr(Expr):
+    """
+    Call expression.
+    """
+    name = Field()
+    args = Field()
+
+
+class GenericInstantiation(Expr):
+    """
+    Generic instantiation.
+    """
+    name = Field()
+    args = Field()
+
+
+class ErrorOnNull(Expr):
+    """
+    Expression that throws an error if LHS is null.
+    """
+    expr = Field()
+
+
+class LambdaExpr(Expr):
+    """
+    Lambda expression.
+    """
+    params = Field()
+    body = Field()
+
+
 lkt_grammar = Grammar('main_rule')
 G = lkt_grammar
 lkt_grammar.add_rules(
@@ -323,11 +383,6 @@ lkt_grammar.add_rules(
         G.decls, Lex.Termination
     ),
     id=Id(Lex.Identifier),
-
-    name=Or(
-        DottedName(G.name, ".", G.id),
-        G.id
-    ),
 
     doc_comment=DocComment(Lex.DocComment),
 
@@ -359,7 +414,7 @@ lkt_grammar.add_rules(
         GrammarPredicate(
             G.grammar_expr,
             "|>", Lex.Identifier("when"),
-            "(", G.name, ")"
+            "(", G.basic_name, ")"
         ),
         G.grammar_primary
     ),
@@ -397,24 +452,26 @@ lkt_grammar.add_rules(
     ),
 
     class_decl=ClassDecl(
-        "class", G.id, Opt(":", G.name), "{",
+        "class", G.id, Opt(":", G.type_ref), "{",
         G.decls,
         "}"
     ),
 
     fun_decl=FunDecl(
         "fun", G.id,
-        "(", List(G.arg_decl, empty_valid=True, sep=","), ")",
+        "(", G.fun_arg_list, ")",
         ":", G.type_ref,
         Opt("=", G.expr)
     ),
 
-    arg_decl=FunArgDecl(
-        G.id,
-        ":",
-        G.type_ref,
-        Opt("=", G.expr)
+    lambda_arg_decl=LambdaArgDecl(
+        G.id, Opt(":", G.type_ref), Opt("=", G.expr)
     ),
+
+    fun_arg_decl=FunArgDecl(G.id, ":", G.type_ref, Opt("=", G.expr)),
+
+    fun_arg_list=List(G.fun_arg_decl, empty_valid=True, sep=","),
+    lambda_arg_list=List(G.lambda_arg_decl, empty_valid=True, sep=","),
 
     field_decl=FieldDecl(
         G.id,
@@ -435,22 +492,57 @@ lkt_grammar.add_rules(
 
     type_ref=Or(
         GenericTypeRef(
-            G.name, "[", List(G.type_ref, empty_valid=False, sep=","), "]"
+            G.basic_name,
+            "[", List(G.type_ref, empty_valid=False, sep=","), "]"
         ),
-        SimpleTypeRef(G.name),
+        SimpleTypeRef(G.basic_name),
     ),
 
     decls=List(G.decl, empty_valid=True),
 
-    expr=Or(
-        G.name,
-        G.null,
+    isa_or_primary=Or(
+        Isa(G.primary, "isa", G.type_ref),
+        G.primary
     ),
+
+    primary=Or(
+        G.basic_expr,
+        G.null,
+        G.lambda_expr,
+        ParenExpr("(", G.expr, ")"),
+        G.array_literal
+    ),
+
+    array_literal=ArrayLiteral(
+        "[", List(G.expr, sep=",", empty_valid=True), "]"
+    ),
+
+    expr=Or(
+        G.isa_or_primary
+    ),
+
+    basic_expr=Or(
+        CallExpr(G.basic_expr, "(", G.params, ")"),
+        GenericInstantiation(G.basic_expr, "[", G.params, "]"),
+        ErrorOnNull(G.basic_expr, "!"),
+        DottedName(G.basic_expr, ".", G.id),
+        G.id
+    ),
+
+    basic_name=Or(
+        DottedName(G.basic_name, ".", G.id),
+        G.id
+    ),
+
+
+    lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")", "=>", cut(), G.expr),
 
     null=NullLit("null"),
 
+    params=List(G.param, sep=","),
+
     decl_annotation=DeclAnnotation(
-        "@", G.id, Opt("(", List(G.param, sep=","), ")")
+        "@", G.id, Opt("(", G.params, ")")
     ),
 
     param=Param(Opt(G.id, "="), G.expr),
