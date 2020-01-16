@@ -502,8 +502,16 @@ def type_name(type):
     from langkit.compiled_types import ASTNodeType, resolve_type
 
     type = resolve_type(type)
+
+    def bases(typ):
+        t = typ.base
+        while t is not None:
+            yield t
+            t = t.base
+
     if isinstance(type, ASTNodeType):
-        if type.is_list_type:
+        if (type.is_list_type
+                and not any(t.is_generic_list_type for t in bases(type.base))):
             return "ASTList[{}]".format(type_name(type.element_type))
         else:
             return type.raw_name.camel

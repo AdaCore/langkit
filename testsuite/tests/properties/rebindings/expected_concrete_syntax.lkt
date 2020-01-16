@@ -18,7 +18,7 @@ class DefNode : FooNode {
 }
 
 class Block : DefNode {
-    @parse_field params : ASTList[Param]
+    @parse_field params : Params
     @parse_field name_field : Name
     @parse_field vars : ASTList[BlockVar]
 
@@ -63,7 +63,7 @@ class Param : DefNode {
     fun name (): SymbolType = self.name_field.symbol
 }
 
-class ASTList[Param] : ASTList[Param] {
+class Params : ASTList[Param] {
 }
 
 class Name : FooNode {
