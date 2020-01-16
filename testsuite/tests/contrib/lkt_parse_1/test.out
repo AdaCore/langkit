@@ -1,6 +1,6 @@
-LangkitRoot[1:1-14:2]
+LangkitRoot[1:1-16:2]
 |decls:
-|  FullDeclList[1:1-14:2]
+|  FullDeclList[1:1-16:2]
 |  |  FullDecl[1:1-4:2]
 |  |  |doc: <null>
 |  |  |decl_annotations:
@@ -35,18 +35,18 @@ LangkitRoot[1:1-14:2]
 |  |  |  |base_class: <null>
 |  |  |  |decls:
 |  |  |  |  FullDeclList[6:16-6:16]: <empty list>
-|  |  FullDecl[9:1-14:2]
+|  |  FullDecl[9:1-16:2]
 |  |  |doc: <null>
 |  |  |decl_annotations:
 |  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
 |  |  |decl:
-|  |  |  ClassDecl[9:1-14:2]
+|  |  |  ClassDecl[9:1-16:2]
 |  |  |  |name:
 |  |  |  |  Id[9:7-9:14]: Example
 |  |  |  |base_class:
 |  |  |  |  Id[9:17-9:24]: FooNode
 |  |  |  |decls:
-|  |  |  |  FullDeclList[11:5-13:76]
+|  |  |  |  FullDeclList[11:5-15:76]
 |  |  |  |  |  FullDecl[11:5-11:60]
 |  |  |  |  |  |doc: <null>
 |  |  |  |  |  |decl_annotations:
@@ -75,7 +75,7 @@ LangkitRoot[1:1-14:2]
 |  |  |  |  |  |  |  |  Id[11:47-11:54]: Boolean
 |  |  |  |  |  |  |body:
 |  |  |  |  |  |  |  Id[11:57-11:60]: arg
-|  |  |  |  |  FullDecl[13:5-13:76]
+|  |  |  |  |  FullDecl[13:5-13:61]
 |  |  |  |  |  |doc: <null>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[13:5-13:12]
@@ -83,33 +83,65 @@ LangkitRoot[1:1-14:2]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[13:6-13:12]: export
 |  |  |  |  |  |decl:
-|  |  |  |  |  |  FunDecl[13:13-13:76]
+|  |  |  |  |  |  FunDecl[13:13-13:61]
 |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  Id[13:17-13:22]: prop2
 |  |  |  |  |  |  |args:
-|  |  |  |  |  |  |  FunArgDeclList[13:24-13:52]
-|  |  |  |  |  |  |  |  FunArgDecl[13:24-13:52]
+|  |  |  |  |  |  |  FunArgDeclList[13:24-13:47]
+|  |  |  |  |  |  |  |  FunArgDecl[13:24-13:47]
 |  |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  |  Id[13:24-13:27]: arg
 |  |  |  |  |  |  |  |  |type:
-|  |  |  |  |  |  |  |  |  GenericTypeRef[13:30-13:45]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:30-13:35]
 |  |  |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  |  |  Id[13:30-13:36]: Entity
-|  |  |  |  |  |  |  |  |  |params:
-|  |  |  |  |  |  |  |  |  |  TypeRefList[13:37-13:44]
-|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[13:37-13:44]
-|  |  |  |  |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  |  |  |  |  Id[13:37-13:44]: FooNode
+|  |  |  |  |  |  |  |  |  |  Id[13:30-13:35]: Color
 |  |  |  |  |  |  |  |  |default_val:
-|  |  |  |  |  |  |  |  |  NullLit[13:48-13:52]: null
+|  |  |  |  |  |  |  |  |  DottedName[13:38-13:47]
+|  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  Id[13:38-13:43]: Color
+|  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  Id[13:44-13:47]: Red
 |  |  |  |  |  |  |return_type:
-|  |  |  |  |  |  |  GenericTypeRef[13:55-13:70]
+|  |  |  |  |  |  |  SimpleTypeRef[13:50-13:55]
 |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  Id[13:55-13:61]: Entity
-|  |  |  |  |  |  |  |params:
-|  |  |  |  |  |  |  |  TypeRefList[13:62-13:69]
-|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:62-13:69]
-|  |  |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  |  |  Id[13:62-13:69]: FooNode
+|  |  |  |  |  |  |  |  Id[13:50-13:55]: Color
 |  |  |  |  |  |  |body:
-|  |  |  |  |  |  |  Id[13:73-13:76]: arg
+|  |  |  |  |  |  |  Id[13:58-13:61]: arg
+|  |  |  |  |  FullDecl[15:5-15:76]
+|  |  |  |  |  |doc: <null>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[15:5-15:12]
+|  |  |  |  |  |  |  DeclAnnotation[15:5-15:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[15:6-15:12]: export
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[15:13-15:76]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[15:17-15:22]: prop3
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[15:24-15:52]
+|  |  |  |  |  |  |  |  FunArgDecl[15:24-15:52]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[15:24-15:27]: arg
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  GenericTypeRef[15:30-15:45]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[15:30-15:36]: Entity
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[15:37-15:44]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[15:37-15:44]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[15:37-15:44]: FooNode
+|  |  |  |  |  |  |  |  |default_val:
+|  |  |  |  |  |  |  |  |  NullLit[15:48-15:52]: null
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[15:55-15:70]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[15:55-15:61]: Entity
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[15:62-15:69]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[15:62-15:69]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[15:62-15:69]: FooNode
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  Id[15:73-15:76]: arg

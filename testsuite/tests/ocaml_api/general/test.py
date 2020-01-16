@@ -56,6 +56,10 @@ class FooNode(ASTNode):
         return c
 
     @langkit_property(public=True)
+    def same_color_dflt(c=(Color, Color.Red)):
+        return c
+
+    @langkit_property(public=True)
     def int_double(c=T.BigInt):
         return c + c
 

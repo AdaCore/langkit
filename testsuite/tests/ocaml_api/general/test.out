@@ -375,9 +375,10 @@ double a: "aa"
 =======================
 
 =======ENUM=======
-color: Red; same_color: Red
-color: Green; same_color: Green
-color: Blue; same_color: Blue
+color: Red; same_color: Red; same_color_dflt: Red
+color: Green; same_color: Green; same_color_dflt: Green
+color: Blue; same_color: Blue; same_color_dflt: Blue
+same_color_dflt: Red
 =================
 
 ========BIG INT========
