@@ -10,7 +10,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    fun env_struct (): EnvStruct = new EnvStruct(
+    fun env_struct (): EnvStruct = EnvStruct(
         env=<env_orphan(<FieldAccess .children_env>)>
     )
 

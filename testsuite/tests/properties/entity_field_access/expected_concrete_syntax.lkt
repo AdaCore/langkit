@@ -20,12 +20,11 @@ class Couple : FooNode {
     @parse_field first : FooNode
     @parse_field second : FooNode
 
-    fun first_entity (): Entity[Couple] = self.as_entity.get_entity(
-        new Metadata(is_first=true, is_second=false)
-    )
+    fun first_entity (): Entity[Couple] =
+    self.as_entity.get_entity(Metadata(is_first=true, is_second=false))
 
-    fun get_entity (md : Metadata): Entity[Couple] = new Entity[Couple](
-        info=new EntityInfo(
+    fun get_entity (md : Metadata): Entity[Couple] = Entity[Couple](
+        info=EntityInfo(
             md=md, from_rebound=false, rebindings=null
         ), node=self
     )

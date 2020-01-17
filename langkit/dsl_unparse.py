@@ -414,7 +414,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, CollectionSingleton):
         return "[{}]".format(ee(expr.expr))
     elif isinstance(expr, New):
-        return "new {}{}".format(
+        return "{}{}".format(
             type_name(expr.struct_type),
             emit_paren(", ".join(
                 "{}={}".format(k, ee(v)) for k, v in expr.field_values.items()
