@@ -255,7 +255,7 @@ class FunDecl(Decl):
 
 
 @abstract
-class ValDecl(Decl):
+class BaseValDecl(Decl):
     """
     Abstract class for named values declarations, such as arguments, local
     value bindings, fields, etc.
@@ -264,21 +264,21 @@ class ValDecl(Decl):
     type = Field()
 
 
-class FunArgDecl(ValDecl):
+class FunArgDecl(BaseValDecl):
     """
     Function argument declaration.
     """
     default_val = Field()
 
 
-class LambdaArgDecl(ValDecl):
+class LambdaArgDecl(BaseValDecl):
     """
     Function argument declaration.
     """
     default_val = Field()
 
 
-class FieldDecl(ValDecl):
+class FieldDecl(BaseValDecl):
     """
     Field declaration.
     """
@@ -382,6 +382,21 @@ class LambdaExpr(Expr):
     """
     params = Field()
     body = Field()
+
+
+class BlockExpr(Expr):
+    """
+    Block expression.
+    """
+    val_defs = Field()
+    expr = Field()
+
+
+class ValDecl(BaseValDecl):
+    """
+    Value declaration.
+    """
+    val = Field()
 
 
 lkt_grammar = Grammar('main_rule')
@@ -513,6 +528,18 @@ lkt_grammar.add_rules(
 
     decls=List(G.decl, empty_valid=True),
 
+    val_decl=ValDecl(
+        "val", G.id, Opt(":", G.type_ref), "=", G.expr
+    ),
+
+    block=BlockExpr(
+        "{",
+        # TODO: Add discard/ignore in the list
+        List(G.val_decl, empty_valid=False),
+        G.expr,
+        "}"
+    ),
+
     isa_or_primary=Or(
         Isa(G.primary, "isa", G.type_ref),
         G.primary
@@ -523,7 +550,8 @@ lkt_grammar.add_rules(
         G.null,
         G.lambda_expr,
         ParenExpr("(", G.expr, ")"),
-        G.array_literal
+        G.array_literal,
+        G.block
     ),
 
     array_literal=ArrayLiteral(
