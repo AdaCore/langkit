@@ -19,8 +19,9 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun resolve (): Entity[FooNode] =
-    bind env=self.parent.parent.node_env in
+    @export fun resolve (): Entity[FooNode] = {
+        bind env = self.parent.parent.node_env
+
         env.get(self.name.symbol)?(0)
-    end
+    }
 }
