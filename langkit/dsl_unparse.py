@@ -153,7 +153,7 @@ def emit_nl(strn):
     if len(strn) > 40:
         return "$i$hl{}$d$hl".format(strn)
     else:
-        return " {} ".format(strn)
+        return "{}".format(strn)
 
 
 def emit_expr(expr, **ctx):
@@ -228,6 +228,15 @@ def emit_expr(expr, **ctx):
 
         return "{{$i$hl{}$hl{}$hl$d}}".format(
             vars_defs, ee(expr.expr)
+        )
+    elif is_a("bind"):
+
+        bind = "bind {} = {}$hl".format(
+            ee(expr.expr_0), ee(expr.expr_1)
+        )
+
+        return "{{$i$hl{}$hl{}$hl$d}}".format(
+            bind, ee(expr.expr_2)
         )
     elif isinstance(expr, Map):
         op_name = expr.kind
@@ -373,11 +382,6 @@ def emit_expr(expr, **ctx):
             args.append('categories={}'.format(ee(expr.categories)))
         return emit_method_call(ee(expr.env), "get", args)
 
-    elif is_a("bind"):
-        return "bind{}in$i$hl{}$d$hlend".format(
-            emit_nl("{}={}".format(ee(expr.expr_0), ee(expr.expr_1))),
-            ee(expr.expr_2)
-        )
     elif is_a("at"):
         # Recognize find
         if (isinstance(expr.expr_0, Map) and expr.expr_0.kind == 'filter' and
