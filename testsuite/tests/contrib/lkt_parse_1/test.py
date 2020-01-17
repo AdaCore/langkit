@@ -30,12 +30,26 @@ tests = sorted(((P.join(root, f), P.basename(root))
 
 # TODO: for the moment we'll use a whitelist for tests, eventually we want to
 # parse them all.
-test_whitelist = [
-    'dflt_arg_val', 'rewriting', 'ghost_nodes', 'import_argcount',
-    'symbol_type', 'unicode_buffer', 'array_types', 'entity_eq',
-    'custom_parsing_rule', 'node_negative_index', 'node_none_check',
-    'tokens', 'unit_filename', 'wrapper_caches', 'unit_canon',
-]
+test_whitelist = {
+    'abstract_fields', 'add_to_env_foreign', 'add_to_env_mult_dests',
+    'analysis_unit', 'analysis_unit_from_node', 'array_types',
+    'auto_ple_dispatcher', 'auto_populate', 'bare_lexing',
+    'c_text_to_locale_string', 'character', 'custom_parsing_rule',
+    'dflt_arg_val', 'dynvars_dflt', 'entity_cast', 'entity_eq',
+    'entity_field_access', 'entity_length', 'enum_node_inherit',
+    'exposed_bare_nodes', 'external', 'field_introspection', 'ghost_nodes',
+    'hashes', 'import_argcount', 'is_a', 'let_underscore', 'lifetimes',
+    'logging', 'lookup_token', 'lower_dispatch', 'lower_dispatch_rewrite',
+    'map_index', 'newline', 'node_comparison', 'node_conversion',
+    'node_env_concrete_subclass', 'node_env_empty', 'node_negative_index',
+    'node_none_check', 'node_type_introspection', 'null_list_get',
+    'ple_resilience', 'ple_resilience_2', 'populate_error', 'pred_kind_in',
+    'properties_introspection', 'qualifier_sloc_range', 'rebindings',
+    'rewriting', 'siblings', 'stack_overflowrewriting', 'symbol_type',
+    'tokens', 'trailing_garbage', 'unbounded_string_buffer', 'unicode_buffer',
+    'unit_canon', 'unit_filename', 'unparse_or_skip', 'wrapper_caches'
+}
+
 whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
 
 for full_syntax_path, test_name in whitelisted_tests:
