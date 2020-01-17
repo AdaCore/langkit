@@ -17,6 +17,7 @@ class Token(LexerToken):
     Comma = WithText()
     Times = WithText()
     Plus = WithText()
+    Minus = WithText()
     Pipe = WithText()
     LeftArrow = WithText()
     FatRightArrow = WithText()
@@ -32,6 +33,10 @@ class Token(LexerToken):
     ListPlus = WithText()
     ListStar = WithText()
     Equal = WithText()
+    GTE = WithText()
+    LTE = WithText()
+    GT = WithText()
+    LT = WithText()
 
     # Keywords
     GrammarKw = WithText()
@@ -43,6 +48,12 @@ class Token(LexerToken):
     NullKw = WithText()
     IsaKw = WithText()
     ValKw = WithText()
+    IfKw = WithText()
+    ThenKw = WithText()
+    ElifKw = WithText()
+    ElseKw = WithText()
+    AndKw = WithText()
+    OrKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -50,6 +61,7 @@ class Token(LexerToken):
     # Literals
     String = WithText()
     DocComment = WithText()
+    Number = WithText()
 
 
 lkt_lexer = Lexer(Token)
@@ -71,6 +83,7 @@ lkt_lexer.add_rules(
     (Literal('/'),         Token.Div),
     (Literal('*'),         Token.Times),
     (Literal('+'),         Token.Plus),
+    (Literal('-'),         Token.Minus),
     (Literal('|'),         Token.Pipe),
     (Literal('<-'),        Token.LeftArrow),
     (Literal('.'),         Token.Dot),
@@ -87,6 +100,10 @@ lkt_lexer.add_rules(
     (Literal('list*'),     Token.ListStar),
     (Literal('=>'),        Token.FatRightArrow),
     (Literal('='),         Token.Equal),
+    (Literal('<='),        Token.LTE),
+    (Literal('>='),        Token.GTE),
+    (Literal('<'),         Token.LT),
+    (Literal('>'),         Token.GT),
 
     # Keywords
     (Literal('grammar'),   Token.GrammarKw),
@@ -98,9 +115,18 @@ lkt_lexer.add_rules(
     (Literal('null'),      Token.NullKw),
     (Literal('isa'),       Token.IsaKw),
     (Literal('val'),       Token.ValKw),
+    (Literal('if'),        Token.IfKw),
+    (Literal('elif'),      Token.ElifKw),
+    (Literal('else'),      Token.ElseKw),
+    (Literal('then'),      Token.ThenKw),
+    (Literal('and'),       Token.AndKw),
+    (Literal('or'),        Token.OrKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),
+
+    # Numbers
+    (Pattern('[0-9]+'),      Token.Number),
 
     # Strings
     (Pattern('{STRING_SQ}|{STRING_DBQ}'), Token.String),
