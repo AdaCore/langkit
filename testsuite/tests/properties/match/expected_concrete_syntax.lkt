@@ -57,7 +57,7 @@ class Expr : FooNode {
 
         }
     ) & (
-        entity.children.mapcat((c) => c.to![Expr].find_refs)
+        entity.children.mapcat((c) => c.to[Expr]!.find_refs)
     )
 }
 

@@ -277,10 +277,10 @@ def emit_expr(expr, **ctx):
         return "{}.is_null".format(ee(expr.expr))
 
     elif isinstance(expr, Cast):
-        return "{}.to{}[{}]".format(
+        return "{}.to[{}]{}".format(
             ee(expr.expr),
+            type_name(expr.dest_type),
             "!" if expr.do_raise else "",
-            type_name(expr.dest_type)
         )
 
     elif isinstance(expr, All):

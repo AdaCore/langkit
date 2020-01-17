@@ -69,7 +69,7 @@ class Ref : Expr {
     @parse_field name : Name
 
     @export fun referenced_var_decl (): Entity[VarDecl] =
-    self.node_env.get(self.name, only_first=true).to![VarDecl]
+    self.node_env.get(self.name, only_first=true).to[VarDecl]!
 
     fun eval (): Integer = self.referenced_var_decl.eval
 }

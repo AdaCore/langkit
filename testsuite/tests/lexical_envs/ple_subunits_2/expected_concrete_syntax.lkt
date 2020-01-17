@@ -59,7 +59,7 @@ class Scope : FooNode {
     @field [internal]is_env_populated : Boolean
 
     fun initial_env (): LexicalEnv = match self.name {
-        case p : Prefix => p.prefix.referenced_unit.root.to![ASTList[Scope]].filter(
+        case p : Prefix => p.prefix.referenced_unit.root.to[ASTList[Scope]]!.filter(
             (scope) => scope.name.symbols == p.prefix.symbols
         ).at_or_raise(0).children_env
         case _ => self.children_env
