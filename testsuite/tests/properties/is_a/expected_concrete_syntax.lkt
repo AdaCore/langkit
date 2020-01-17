@@ -7,7 +7,7 @@ class FooNode {
 
     fun null_node (): FooNode = null
 
-    @export fun is_null_a_def (): Boolean = self.null_node is_a Def
+    @export fun is_null_a_def (): Boolean = self.null_node isa Def
 }
 
 class Def : FooNode {
