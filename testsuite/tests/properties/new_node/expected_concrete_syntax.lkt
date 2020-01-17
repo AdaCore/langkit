@@ -17,7 +17,7 @@ class LiteralSequence : FooNode {
     @parse_field name : Name
     @parse_field items : ASTList[Literal]
 
-    memoized fun new_node (): SynthNode =
+    @memoized fun new_node (): SynthNode =
     SynthNode(items=self.items, name=self.name)
 
     @export fun prop (): Entity[SynthNode] = self.new_node.as_bare_entity

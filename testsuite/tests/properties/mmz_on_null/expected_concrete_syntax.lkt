@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    @export memoized fun prop (): Boolean = true
+    @export @memoized fun prop (): Boolean = true
 }
 
 class Example : FooNode {

@@ -8,6 +8,6 @@ class FooNode {
 
 class Example : FooNode {
 
-    @export memoized fun unit_root_node (unit : InternalUnit): Entity[FooNode] =
+    @export @memoized fun unit_root_node (unit : InternalUnit): Entity[FooNode] =
     unit.root.as_bare_entity
 }

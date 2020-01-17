@@ -10,7 +10,7 @@ class FooNode {
     @export fun env_get_all (): Array[Entity[FooNode]] =
     self.children_env.get(null)
 
-    memoized fun make_id (s : SymbolType): FooNode = SynthId(sym=s)
+    @memoized fun make_id (s : SymbolType): FooNode = SynthId(sym=s)
 
     fun unique_id (s : SymbolType): FooNode = self.unit.root.make_id(s)
 }
