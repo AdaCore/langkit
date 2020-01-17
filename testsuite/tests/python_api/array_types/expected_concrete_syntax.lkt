@@ -23,7 +23,7 @@ class Sequence : ASTList[FooNode] {
     @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
 
     @export fun example_items (): Array[Entity[Example]] = entity.filter_map(
-        (i) => i.to![Example], (i) => i is_a Example
+        (i) => i.to[Example]!, (i) => i is_a Example
     )
 }
 

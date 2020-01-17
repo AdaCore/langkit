@@ -48,7 +48,7 @@ class Ref : Atom {
     @parse_field name : Name
 
     @export fun resolve (): Entity[Def] =
-    self.node_env.get(self.name.symbol, only_first=true).to![Def]
+    self.node_env.get(self.name.symbol, only_first=true).to[Def]!
 
     fun evaluate_abstract (): Integer = self.resolve.expr.evaluate_abstract
 
