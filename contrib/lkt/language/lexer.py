@@ -54,6 +54,7 @@ class Token(LexerToken):
     ElseKw = WithText()
     AndKw = WithText()
     OrKw = WithText()
+    BindKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -121,6 +122,7 @@ lkt_lexer.add_rules(
     (Literal('then'),      Token.ThenKw),
     (Literal('and'),       Token.AndKw),
     (Literal('or'),        Token.OrKw),
+    (Literal('bind'),      Token.BindKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),

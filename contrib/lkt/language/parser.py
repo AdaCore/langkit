@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, AbstractField, Field, T, abstract
+from langkit.dsl import (
+    ASTNode, AbstractField, Field, NullField, T, abstract
+)
 from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or
 
 from language.lexer import lkt_lexer as Lex
@@ -109,6 +111,13 @@ class DottedName(Name):
     """
     prefix = Field()
     suffix = Field()
+
+
+class NullCondDottedName(DottedName):
+    """
+    Null conditional dotted name.
+    """
+    pass
 
 
 class Id(Name):
@@ -261,13 +270,14 @@ class BaseValDecl(Decl):
     value bindings, fields, etc.
     """
     name = Field()
-    type = Field()
+    type = AbstractField(type=T.TypeRef)
 
 
 class FunArgDecl(BaseValDecl):
     """
     Function argument declaration.
     """
+    type = Field()
     default_val = Field()
 
 
@@ -275,6 +285,7 @@ class LambdaArgDecl(BaseValDecl):
     """
     Function argument declaration.
     """
+    type = Field()
     default_val = Field()
 
 
@@ -282,7 +293,7 @@ class FieldDecl(BaseValDecl):
     """
     Field declaration.
     """
-    pass
+    type = Field()
 
 
 @abstract
@@ -361,6 +372,13 @@ class CallExpr(Expr):
     args = Field()
 
 
+class NullCondCallExpr(CallExpr):
+    """
+    Null conditional call expression.
+    """
+    pass
+
+
 class GenericInstantiation(Expr):
     """
     Generic instantiation.
@@ -423,6 +441,7 @@ class ValDecl(BaseValDecl):
     """
     Value declaration.
     """
+    type = Field()
     val = Field()
 
 
@@ -448,6 +467,14 @@ class NumLit(Expr):
     Number literal expression.
     """
     token_node = True
+
+
+class BindDecl(BaseValDecl):
+    """
+    Dynamic var bind expression.
+    """
+    expr = Field()
+    type = NullField()
 
 
 lkt_grammar = Grammar('main_rule')
@@ -583,10 +610,12 @@ lkt_grammar.add_rules(
         "val", G.id, Opt(":", G.type_ref), "=", G.expr
     ),
 
+    bind_decl=BindDecl("bind", G.id, "=", G.expr),
+
     block=BlockExpr(
         "{",
         # TODO: Add discard/ignore in the list
-        List(G.val_decl, empty_valid=False),
+        List(Or(G.val_decl, G.bind_decl), empty_valid=False),
         G.expr,
         "}"
     ),
@@ -649,9 +678,11 @@ lkt_grammar.add_rules(
 
     basic_expr=Or(
         CallExpr(G.basic_expr, "(", G.params, ")"),
+        NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.params, "]"),
         ErrorOnNull(G.basic_expr, "!"),
         DottedName(G.basic_expr, ".", G.id),
+        NullCondDottedName(G.basic_expr, "?", ".", G.id),
         G.id
     ),
 
