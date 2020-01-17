@@ -21,6 +21,6 @@ class Ref : FooNode {
 
     @export fun resolve (): Entity[FooNode] =
     bind env=self.parent.parent.node_env in
-        env.get(self.name.symbol)?[0]
+        env.get(self.name.symbol)?(0)
     end
 }

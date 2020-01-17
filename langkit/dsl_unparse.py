@@ -348,7 +348,7 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, GetSymbol):
         return "{}.symbol".format(ee(expr.node_expr))
-    elif is_a("as_entity", "as_bare_entity", "at_or_raise", "children",
+    elif is_a("as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
               "append_rebinding", "concat_rebindings", "env_node",
               "rebindings_new_env", "rebindings_old_env", "get_value",
@@ -384,7 +384,9 @@ def emit_expr(expr, **ctx):
                 ee(expr.expr_1) == "0"):
             return ee(expr.expr_0, overload_coll_name="find")
 
-        return "{}?[{}]".format(ee(expr.expr_0), ee(expr.expr_1))
+        return "{}?({})".format(ee(expr.expr_0), ee(expr.expr_1))
+    elif is_a("at_or_raise"):
+        return "{}({})".format(ee(expr.expr_0), ee(expr.expr_1))
     elif isinstance(expr, FieldAccess):
         args = []
         if expr.arguments:
