@@ -42,6 +42,7 @@ class Token(LexerToken):
     PrivateKw = WithText()
     NullKw = WithText()
     IsaKw = WithText()
+    ValKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -96,6 +97,7 @@ lkt_lexer.add_rules(
     (Literal('private'),   Token.PrivateKw),
     (Literal('null'),      Token.NullKw),
     (Literal('isa'),       Token.IsaKw),
+    (Literal('val'),       Token.ValKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),
