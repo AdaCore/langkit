@@ -1,9 +1,9 @@
 grammar None_grammar {
     name <- Name(@Identifier)
-    vars <- @LBrace list*(var) @RBrace
+    vars <- (@LBrace list*(var) @RBrace)
     main_rule <- list*(block)
     param <- Param(name)
-    params <- @LPar list*(param) @RPar
+    params <- (@LPar list*(param) @RPar)
     var <- BlockVar(name)
     block <- Block(params name vars)
 

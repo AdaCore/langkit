@@ -37,7 +37,7 @@ def sf(strn):
     return t.render(**dict(frame.f_locals, **frame.f_globals))
 
 
-def emit_rule(rule):
+def emit_rule(rule, top_level=False):
     from langkit.parsers import (
         _Transform, node_name, _Row, Opt, List, Or, _Token, NoBacktrack,
         _Extract, DontSkip, Skip, Null, Parser, resolve, Defer, Predicate,
@@ -58,7 +58,10 @@ def emit_rule(rule):
             else "?{}".format(emit_rule(rule.parser))
         )
     elif isinstance(rule, _Extract):
-        return emit_rule(rule.parser)
+        r = emit_rule(rule.parser)
+        if top_level:
+            return "({})".format(r)
+        return r
     elif isinstance(rule, List):
         sep_str = ", {}".format(emit_rule(rule.sep)) if rule.sep else ""
         return "list{}({}{})".format(
@@ -605,7 +608,7 @@ def unparse_lang(ctx):
     grammar ${ctx.short_name}_grammar {$i$hl
     % for name, rule in ctx.grammar.rules.items():
         % if not rule.is_dont_skip_parser:
-            ${name} <- ${emit_rule(rule)}$hl
+            ${name} <- ${emit_rule(rule, True)}$hl
         % endif
     % endfor
     $d$hl

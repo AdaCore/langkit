@@ -3,14 +3,14 @@ grammar None_grammar {
         | PrintStmt(@Print test_list)
         | StreamPrintStmt(@Print @Rsh test @Comma test_list)
     )
-    dotted_as_names <- list*(or(dotted_as_name | dotted_name), @Comma) ?@Comma
-    empty_test_list <- list+(test, @Comma) ?@Comma
+    dotted_as_names <- (list*(or(dotted_as_name | dotted_name), @Comma) ?@Comma)
+    empty_test_list <- (list+(test, @Comma) ?@Comma)
     try_stmt <- TryStmt(
         @Try @Colon suite list+(ExceptPart(
             @Except ?AsNameNode(test ?@As test) @Colon suite
         )) ?else_part ?@Finally @Colon suite
     )
-    test_list <- list*(test, @Comma) ?@Comma
+    test_list <- (list*(test, @Comma) ?@Comma)
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -22,7 +22,7 @@ grammar None_grammar {
         | exec_stmt
         | assert_stmt
     )
-    expr_list <- list*(expr, @Comma) ?@Comma
+    expr_list <- (list*(expr, @Comma) ?@Comma)
     number <- NumberLit(@Number)
     dict_assoc <- DictAssoc(test @Colon test)
     return_stmt <- ReturnStmt(@Return ?test_list)
@@ -70,7 +70,7 @@ grammar None_grammar {
     )
     nl <- NL(@Newline)
     func_def <- FuncDef(@Def name parameters @Colon suite)
-    parameters <- @LPar ?varargslist @RPar
+    parameters <- (@LPar ?varargslist @RPar)
     continue_stmt <- ContinueStmt(@Continue)
     fpdef <- or(name | @LPar name_list @RPar)
     shift_expr <- or(
@@ -120,14 +120,14 @@ grammar None_grammar {
     dotted_name <- or(DottedName(dotted_name @Dot name) | name)
     yield_expr <- YieldExpr(@Yield ?test_list)
     power <- or(Power(atom_expr @Power factor) | atom_expr)
-    simple_stmt <- or(
+    simple_stmt <- (or(
         | small_stmt
         | list*(small_stmt, @Semicolon) ?@Semicolon
-    ) @Newline
+    ) @Newline)
     main_rule <- FileNode(
         list*(discard(list+(nl)) stmt discard(list+(nl))) @Termination
     )
-    name_list <- list*(name, @Comma) ?@Comma
+    name_list <- (list*(name, @Comma) ?@Comma)
     stmt <- or(simple_stmt | compound_stmt)
     import_from <- ImportFrom(
         @From
@@ -166,15 +166,15 @@ grammar None_grammar {
         | cat_string
         | string
     )
-    import_as_names <- list*(or(as_name | name), @Comma) ?@Comma
+    import_as_names <- (list*(or(as_name | name), @Comma) ?@Comma)
     decorated <- Decorated(decorators or(class_def | func_def))
     raise_stmt <- RaiseStmt(@Raise ?test_list)
-    arg_list <- list+(or(
+    arg_list <- (list+(or(
         | ArgGen(test comp_for)
         | ArgAssoc(?test @Assign test)
         | VarArgs(@Multiply test)
         | KwArgs(@Power test)
-    ), @Comma) ?@Comma
+    ), @Comma) ?@Comma)
     set_lit <- SetLit(@LCurl empty_test_list @Rcurl)
     decorator <- Decorator(
         @At dotted_name ?@LPar arg_list @RPar @Newline
@@ -205,7 +205,7 @@ grammar None_grammar {
         | factor
     )
     comp_iter <- or(comp_for | comp_if)
-    subscript_list <- list*(subscript, @Comma) ?@Comma
+    subscript_list <- (list*(subscript, @Comma) ?@Comma)
     if_stmt <- IfStmt(
         @If
         test
