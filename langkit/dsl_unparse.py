@@ -465,7 +465,7 @@ def emit_prop(prop):
         quals += "abstract "
 
     if prop.memoized:
-        quals += "memoized "
+        quals += "@memoized "
 
     args = ", ".join("{} : {}{}".format(
         arg.name.lower, type_name(arg.type),

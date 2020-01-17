@@ -8,12 +8,12 @@ class FooNode {
 
 class Example : FooNode {
 
-    @export memoized fun prop1 (): Boolean = {
+    @export @memoized fun prop1 (): Boolean = {
         val _ = [self]
 
         raise PropertyError('Explicit error 1')
     }
 
-    @export memoized fun prop2 (): Boolean =
+    @export @memoized fun prop2 (): Boolean =
     raise PropertyError('Explicit error 2')
 }

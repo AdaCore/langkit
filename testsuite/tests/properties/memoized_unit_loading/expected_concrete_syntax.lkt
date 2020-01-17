@@ -12,12 +12,12 @@ class Example : FooNode {
 
     fun ext_unit_count (): Integer
 
-    memoized fun fetch_example_unit (): InternalUnit =
+    @memoized fun fetch_example_unit (): InternalUnit =
     self.ext_fetch_example_unit
 
-    memoized fun unit_count (): Integer = self.ext_unit_count
+    @memoized fun unit_count (): Integer = self.ext_unit_count
 
-    @export memoized fun mmz_prop (): Array[Integer] = {
+    @export @memoized fun mmz_prop (): Array[Integer] = {
         val before = [self.unit_count]
         val _ = self.fetch_example_unit
         val after = [self.unit_count]

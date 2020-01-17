@@ -22,6 +22,6 @@ class Ref : FooNode {
     @export fun referenced (): Entity[FooNode] =
     self.referenced_env.env_node.as_bare_entity
 
-    memoized fun referenced_env (): LexicalEnv =
+    @memoized fun referenced_env (): LexicalEnv =
     self.node_env.get(self.name.symbol)?[0].children_env
 }
