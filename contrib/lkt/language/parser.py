@@ -384,6 +384,24 @@ class LambdaExpr(Expr):
     body = Field()
 
 
+class IfExpr(Expr):
+    """
+    If expression.
+    """
+    cond_expr = Field()
+    then_expr = Field()
+    alternatives = Field()
+    else_expr = Field()
+
+
+class ElsifBranch(LKNode):
+    """
+    Elsif branch of an if expression.
+    """
+    cond_expr = Field()
+    then_expr = Field()
+
+
 class BlockExpr(Expr):
     """
     Block expression.
@@ -392,11 +410,44 @@ class BlockExpr(Expr):
     expr = Field()
 
 
+class BinOp(Expr):
+    """
+    Binary operator expression.
+    """
+    left = Field()
+    op = Field()
+    right = Field()
+
+
 class ValDecl(BaseValDecl):
     """
     Value declaration.
     """
     val = Field()
+
+
+class Op(LKNode):
+    """
+    Operator in a binary operator expression.
+    """
+    enum_node = True
+
+    alternatives = ["and", "or", "plus", "minus", "eq", "mult", "div",
+                    "lt", "gt", "lte", "gte"]
+
+
+class StringLit(Expr):
+    """
+    String literal expression.
+    """
+    token_node = True
+
+
+class NumLit(Expr):
+    """
+    Number literal expression.
+    """
+    token_node = True
 
 
 lkt_grammar = Grammar('main_rule')
@@ -540,6 +591,32 @@ lkt_grammar.add_rules(
         "}"
     ),
 
+    expr=Or(
+        BinOp(G.expr, Or(Op.alt_or("or"), Op.alt_and("and")), G.rel),
+        G.rel
+    ),
+
+
+    rel=Or(
+        BinOp(G.rel, Or(Op.alt_lte("<="),
+                        Op.alt_lt("<"),
+                        Op.alt_gte(">="),
+                        Op.alt_gt(">"),
+                        Op.alt_eq("=")), G.arith_1),
+        G.arith_1
+    ),
+
+    arith_1=Or(
+        BinOp(G.arith_1, Or(Op.alt_plus("+"), Op.alt_minus("-")), G.arith_2),
+        G.arith_2
+    ),
+
+    arith_2=Or(
+        BinOp(G.arith_2,
+              Or(Op.alt_mult("*"), Op.alt_div("/")), G.isa_or_primary),
+        G.isa_or_primary
+    ),
+
     isa_or_primary=Or(
         Isa(G.primary, "isa", G.type_ref),
         G.primary
@@ -551,15 +628,23 @@ lkt_grammar.add_rules(
         G.lambda_expr,
         ParenExpr("(", G.expr, ")"),
         G.array_literal,
-        G.block
+        G.block,
+        G.if_expr,
+        G.num_lit,
+        G.string_lit,
+    ),
+
+    num_lit=NumLit(Lex.Number),
+    string_lit=StringLit(Lex.String),
+
+    if_expr=IfExpr(
+        "if", G.expr, "then", G.expr,
+        List(ElsifBranch("elif", G.expr, "then", G.expr), empty_valid=True),
+        "else", G.expr
     ),
 
     array_literal=ArrayLiteral(
         "[", List(G.expr, sep=",", empty_valid=True), "]"
-    ),
-
-    expr=Or(
-        G.isa_or_primary
     ),
 
     basic_expr=Or(
