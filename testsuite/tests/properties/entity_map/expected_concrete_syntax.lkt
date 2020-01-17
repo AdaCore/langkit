@@ -35,5 +35,5 @@ class Ref : FooNode {
     @parse_field name : Name
 
     @export fun decl (): Entity[Decl] =
-    self.children_env.get(self.name)?[0].to[Decl]!
+    self.children_env.get(self.name)?(0).to[Decl]!
 }

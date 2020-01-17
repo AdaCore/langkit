@@ -17,5 +17,5 @@ class Name : FooNode {
 
     fun sym (): SymbolType = self.symbol
 
-    fun resolve (): Entity[FooNode] = self.parent.node_env.get(self.sym)?[0]
+    fun resolve (): Entity[FooNode] = self.parent.node_env.get(self.sym)?(0)
 }

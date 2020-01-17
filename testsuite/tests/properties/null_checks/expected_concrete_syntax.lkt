@@ -42,7 +42,7 @@ class Literal : Expression {
 
 class Name : Expression {
 
-    fun env_element (): Entity[FooNode] = self.children_env.get(self.symbol)?[0]
+    fun env_element (): Entity[FooNode] = self.children_env.get(self.symbol)?(0)
 
     @export fun deref_env_element (): Entity[Expression] =
     self.env_element.null_node

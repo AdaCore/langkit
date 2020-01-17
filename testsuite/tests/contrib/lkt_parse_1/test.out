@@ -12990,7 +12990,7 @@ LangkitRoot[1:1-20:2]
 |  |  |  |  |  |  |  |type_name:
 |  |  |  |  |  |  |  |  Id[8:54-8:61]: Example
 |  |  |  |  |  |  |body:
-|  |  |  |  |  |  |  GenericInstantiation[8:64-8:69]
+|  |  |  |  |  |  |  CallExpr[8:64-8:69]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[8:64-8:66]: n?
 |  |  |  |  |  |  |  |args:
@@ -13048,7 +13048,7 @@ LangkitRoot[1:1-20:2]
 |  |  |  |  |  |  |  |  |  |type_name:
 |  |  |  |  |  |  |  |  |  |  Id[10:71-10:78]: Example
 |  |  |  |  |  |  |body:
-|  |  |  |  |  |  |  GenericInstantiation[11:5-11:10]
+|  |  |  |  |  |  |  CallExpr[11:5-11:10]
 |  |  |  |  |  |  |  |name:
 |  |  |  |  |  |  |  |  Id[11:5-11:7]: n?
 |  |  |  |  |  |  |  |args:

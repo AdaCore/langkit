@@ -23,5 +23,5 @@ class Ref : FooNode {
     self.referenced_env.env_node.as_bare_entity
 
     @memoized fun referenced_env (): LexicalEnv =
-    self.node_env.get(self.name.symbol)?[0].children_env
+    self.node_env.get(self.name.symbol)?(0).children_env
 }
