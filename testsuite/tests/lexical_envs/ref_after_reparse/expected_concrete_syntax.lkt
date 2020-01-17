@@ -3,8 +3,8 @@ grammar None_grammar {
     ref_list <- list+(ref)
     name <- Name(@Identifier)
     main_rule <- list*(block)
-    decl_list <- @LPar list+(decl) @RPar
-    using_list <- @LPar list+(using) @RPar
+    decl_list <- (@LPar list+(decl) @RPar)
+    using_list <- (@LPar list+(using) @RPar)
     using <- Using(name)
     ref <- Ref(name)
     block <- Block(
