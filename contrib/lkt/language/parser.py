@@ -125,6 +125,14 @@ class TokenLit(GrammarExpr):
     token_node = True
 
 
+class GrammarPick(GrammarExpr):
+    """
+    Grammar expression to pick the significant parse out of a list of parses
+    (will automatically discard token results).
+    """
+    exprs = Field()
+
+
 class GrammarToken(GrammarExpr):
     """
     Grammar expression for a token reference.
@@ -404,6 +412,7 @@ lkt_grammar.add_rules(
         G.grammar_opt,
         G.grammar_or_expr,
         G.grammar_rule_ref,
+        G.grammar_pick,
     ),
     grammar_expr=Or(
         GrammarDontSkip(
@@ -417,6 +426,10 @@ lkt_grammar.add_rules(
             "(", G.basic_name, ")"
         ),
         G.grammar_primary
+    ),
+
+    grammar_pick=GrammarPick(
+        "(", List(G.grammar_expr, empty_valid=False), ")"
     ),
 
     grammar_opt=Or(
