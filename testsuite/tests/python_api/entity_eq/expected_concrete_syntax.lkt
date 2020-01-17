@@ -29,11 +29,11 @@ class Block : DefNode {
         val rbdng = entity.info.rebindings.append_rebinding(
             from_block.params.children_env, to_block.children_env
         )
-        val e_info = new EntityInfo(
+        val e_info = EntityInfo(
             md=entity.info.md, from_rebound=false, rebindings=rbdng
         )
 
-        new Entity[Block](info=e_info, node=self)
+        Entity[Block](info=e_info, node=self)
     }
 }
 
