@@ -418,7 +418,10 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, No):
         return "null"
     elif isinstance(expr, CollectionSingleton):
-        return "[{}]".format(ee(expr.expr))
+        if then_underscore_var:
+            return emit_method_call(ee(expr.expr), "singleton")
+        else:
+            return "[{}]".format(ee(expr.expr))
     elif isinstance(expr, New):
         return "{}{}".format(
             type_name(expr.struct_type),

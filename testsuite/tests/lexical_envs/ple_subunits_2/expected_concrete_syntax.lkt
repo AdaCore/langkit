@@ -36,7 +36,7 @@ class Id : Name {
 
     fun suffix_symbol (): SymbolType = self.symbol
 
-    fun symbols (): Array[SymbolType] = self.symbol?[]
+    fun symbols (): Array[SymbolType] = self.symbol?.singleton
 }
 
 class Prefix : Name {
