@@ -7,7 +7,7 @@ class FooNode {
 }
 
 class RootNode : FooNode {
-    @field var : LogicVar
+    var : LogicVar
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation
 
