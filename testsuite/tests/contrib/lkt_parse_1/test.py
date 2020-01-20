@@ -35,20 +35,22 @@ test_whitelist = {
     'analysis_unit', 'analysis_unit_from_node', 'array_types',
     'auto_ple_dispatcher', 'auto_populate', 'bare_lexing',
     'c_text_to_locale_string', 'character', 'custom_parsing_rule',
-    'dflt_arg_val', 'dynvars_dflt', 'entity_cast', 'entity_eq',
-    'entity_field_access', 'entity_length', 'enum_node_inherit', 'env_get_all',
-    'exposed_bare_nodes', 'external', 'field_introspection', 'ghost_nodes',
-    'hashes', 'import_argcount', 'is_a', 'let_underscore', 'lifetimes',
-    'logging', 'lookup_token', 'lower_dispatch', 'lower_dispatch_rewrite',
-    'map_index', 'memoized_big_table', 'memoized_inf_recurs', 'memoized_unit',
-    'new_node', 'newline', 'node_comparison', 'node_conversion',
+    'dflt_arg_val', 'dynvar_bind', 'dynvars_dflt', 'entity_cast', 'entity_eq',
+    'entity_field_access', 'entity_length', 'entity_map', 'enum_node_inherit',
+    'env_get_all', 'exposed_bare_nodes', 'external', 'field_introspection',
+    'foreign_env_md', 'ghost_nodes', 'hashes', 'import_argcount', 'is_a',
+    'let_underscore', 'lifetimes', 'logging', 'lookup_token', 'lower_dispatch',
+    'lower_dispatch_rewrite', 'map_index', 'memoized_big_table',
+    'memoized_env', 'memoized_inf_recurs', 'memoized_unit', 'new_node',
+    'newline', 'node_comparison', 'node_conversion',
     'node_env_concrete_subclass', 'node_env_empty', 'node_negative_index',
     'node_none_check', 'node_type_introspection', 'null_list_get',
     'ple_resilience', 'ple_resilience_2', 'populate_error', 'pred_kind_in',
     'properties_introspection', 'qualifier_sloc_range', 'rebindings',
-    'rewriting', 'siblings', 'stack_overflow', 'symbol_type', 'tokens',
-    'trailing_garbage', 'unbounded_string_buffer', 'unicode_buffer',
-    'unit_canon', 'unit_filename', 'unparse_or_skip', 'wrapper_caches'
+    'ref_after_reparse', 'rewriting', 'siblings', 'stack_overflow',
+    'symbol_type', 'tokens', 'trailing_garbage', 'unbounded_string_buffer',
+    'unicode_buffer', 'unit_canon', 'unit_filename', 'unparse_or_skip',
+    'wrapper_caches'
 }
 
 whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
