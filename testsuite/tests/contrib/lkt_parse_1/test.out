@@ -25907,6 +25907,397 @@ LangkitRoot[1:1-10:2]
 |  |  |  |decls:
 |  |  |  |  FullDeclList[9:26-9:26]: <empty list>
 
+Parsing concrete syntax for test unparse_empty_list
+===================================================
+
+LangkitRoot[1:1-19:2]
+|decls:
+|  FullDeclList[1:1-19:2]
+|  |  FullDecl[1:1-8:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-8:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-6:6]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:33]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarList[2:18-2:33]
+|  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  ListKindZero[2:18-2:23]
+|  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:32]: def_node
+|  |  |  |  |  |  |sep: <null>
+|  |  |  |  |  GrammarRuleDecl[3:5-3:42]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[3:5-3:15]: identifier
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[3:19-3:42]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[3:19-3:29]: Identifier
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[3:30-3:41]
+|  |  |  |  |  |  |  |  GrammarToken[3:30-3:41]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[3:31-3:41]: Identifier
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  GrammarRuleDecl[4:5-6:6]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[4:5-4:13]: def_node
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[4:17-6:6]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[4:17-4:24]: DefNode
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[5:9-5:61]
+|  |  |  |  |  |  |  |  GrammarToken[5:9-5:14]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[5:10-5:14]: LPar
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  GrammarRuleRef[5:15-5:25]
+|  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  Id[5:15-5:25]: identifier
+|  |  |  |  |  |  |  |  GrammarToken[5:26-5:32]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[5:27-5:32]: Comma
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  GrammarNull[5:33-5:55]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  GenericTypeRef[5:38-5:54]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[5:38-5:45]: ASTList
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[5:46-5:53]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[5:46-5:53]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[5:46-5:53]: DefNode
+|  |  |  |  |  |  |  |  GrammarToken[5:56-5:61]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[5:57-5:61]: RPar
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[10:1-11:2]
+|  |  |doc:
+|  |  |  Doc[8:2-8:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[8:2-8:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[8:2-8:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[10:1-11:2]
+|  |  |  |name:
+|  |  |  |  Id[10:7-10:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[10:16-10:16]: <empty list>
+|  |  FullDecl[13:1-16:2]
+|  |  |doc:
+|  |  |  Doc[11:2-11:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[11:2-11:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[11:2-11:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[13:1-16:2]
+|  |  |  |name:
+|  |  |  |  Id[13:7-13:14]: DefNode
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[13:17-13:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[13:17-13:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[14:5-15:43]
+|  |  |  |  |  FullDecl[14:5-14:35]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[13:26-13:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[13:26-13:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[14:5-14:17]
+|  |  |  |  |  |  |  DeclAnnotation[14:5-14:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[14:6-14:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[14:6-14:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[14:18-14:35]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[14:18-14:22]: name
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[14:25-14:35]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[14:25-14:35]: Identifier
+|  |  |  |  |  FullDecl[15:5-15:43]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[14:35-14:35]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[14:35-14:35]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[15:5-15:17]
+|  |  |  |  |  |  |  DeclAnnotation[15:5-15:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[15:6-15:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[15:6-15:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[15:18-15:43]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[15:18-15:24]: values
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  GenericTypeRef[15:27-15:43]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[15:27-15:34]: ASTList
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[15:35-15:42]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[15:35-15:42]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[15:35-15:42]: DefNode
+|  |  FullDecl[18:1-19:2]
+|  |  |doc:
+|  |  |  Doc[16:2-16:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[16:2-16:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[16:2-16:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[18:1-19:2]
+|  |  |  |name:
+|  |  |  |  Id[18:7-18:17]: Identifier
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[18:20-18:27]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[18:20-18:27]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[18:29-18:29]: <empty list>
+
+Parsing concrete syntax for test unparse_no_canon
+=================================================
+
+LangkitRoot[1:1-29:2]
+|decls:
+|  FullDeclList[1:1-29:2]
+|  |  FullDecl[1:1-15:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-15:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-13:7]
+|  |  |  |  |  GrammarRuleDecl[2:5-13:7]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarList[2:18-13:7]
+|  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  ListKindZero[2:18-2:23]
+|  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-13:6]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-13:6]
+|  |  |  |  |  |  |  |  |  GrammarOrExpr[2:24-13:6]
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprListList[3:11-12:10]
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:11-7:10]
+|  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:11-7:10]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:11-3:19]: RootNode
+|  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:13-6:56]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:13-4:17]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:14-4:17]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarNull[5:13-5:29]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[5:18-5:28]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:18-5:28]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarOpt[6:13-6:21]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[6:14-6:21]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:15-6:21]: LBrace
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[6:22-6:37]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:22-6:28]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[6:29-6:36]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[6:29-6:36]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:30-6:36]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[6:38-6:45]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:39-6:45]: RBrace
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[6:46-6:56]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:47-6:56]: Semicolon
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[8:11-12:10]
+|  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[8:11-12:10]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[8:11-8:19]: RootNode
+|  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[9:13-11:66]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[9:13-9:17]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[9:14-9:17]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarOpt[10:13-10:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[10:14-10:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[10:15-10:19]: LPar
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[11:13-11:36]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:13-11:23]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[11:24-11:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[11:24-11:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:25-11:35]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[11:37-11:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:38-11:42]: RPar
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarNull[11:43-11:55]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[11:48-11:54]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:48-11:54]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[11:56-11:66]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[11:57-11:66]: Semicolon
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |sep: <null>
+|  |  FullDecl[17:1-18:2]
+|  |  |doc:
+|  |  |  Doc[15:2-15:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[15:2-15:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[15:2-15:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[17:1-18:2]
+|  |  |  |name:
+|  |  |  |  Id[17:7-17:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[17:16-17:16]: <empty list>
+|  |  FullDecl[20:1-21:2]
+|  |  |doc:
+|  |  |  Doc[18:2-18:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[18:2-18:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[18:2-18:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[20:1-21:2]
+|  |  |  |name:
+|  |  |  |  Id[20:7-20:17]: Identifier
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[20:20-20:27]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[20:20-20:27]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[20:29-20:29]: <empty list>
+|  |  FullDecl[23:1-24:2]
+|  |  |doc:
+|  |  |  Doc[21:2-21:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[21:2-21:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[21:2-21:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[23:1-24:2]
+|  |  |  |name:
+|  |  |  |  Id[23:7-23:13]: Number
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[23:16-23:23]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[23:16-23:23]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[23:25-23:25]: <empty list>
+|  |  FullDecl[26:1-29:2]
+|  |  |doc:
+|  |  |  Doc[24:2-24:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[24:2-24:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[24:2-24:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[26:1-29:2]
+|  |  |  |name:
+|  |  |  |  Id[26:7-26:15]: RootNode
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[26:18-26:25]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[26:18-26:25]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[27:5-28:33]
+|  |  |  |  |  FullDecl[27:5-27:36]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[26:27-26:27]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[26:27-26:27]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[27:5-27:17]
+|  |  |  |  |  |  |  DeclAnnotation[27:5-27:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[27:6-27:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[27:6-27:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[27:18-27:36]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[27:18-27:23]: ident
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[27:26-27:36]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[27:26-27:36]: Identifier
+|  |  |  |  |  FullDecl[28:5-28:33]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[27:36-27:36]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[27:36-27:36]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[28:5-28:17]
+|  |  |  |  |  |  |  DeclAnnotation[28:5-28:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[28:6-28:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[28:6-28:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[28:18-28:33]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[28:18-28:24]: number
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[28:27-28:33]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[28:27-28:33]: Number
+
 Parsing concrete syntax for test unparse_or_skip
 ================================================
 

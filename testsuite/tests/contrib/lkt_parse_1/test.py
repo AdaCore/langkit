@@ -53,7 +53,8 @@ test_whitelist = {
     'qualifier_sloc_range', 'rebindings', 'ref_after_reparse', 'rewriting',
     'siblings', 'stack_overflow', 'symbol_type', 'tokens', 'trailing_garbage',
     'unbounded_string_buffer', 'unicode_buffer', 'unit_canon', 'unit_filename',
-    'unparse_or_skip', 'wrapper_caches'
+    'unparse_empty_list', 'unparse_no_canon', 'unparse_or_skip',
+    'wrapper_caches'
 }
 
 whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
