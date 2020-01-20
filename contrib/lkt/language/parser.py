@@ -142,6 +142,13 @@ class GrammarPick(GrammarExpr):
     exprs = Field()
 
 
+class GrammarImplicitPick(GrammarPick):
+    """
+    Implicit pick operation.
+    """
+    pass
+
+
 class GrammarToken(GrammarExpr):
     """
     Grammar expression for a token reference.
@@ -525,10 +532,15 @@ lkt_grammar.add_rules(
         "(", List(G.grammar_expr, empty_valid=False), ")"
     ),
 
+    grammar_implicit_pick=GrammarImplicitPick(
+        List(G.grammar_expr, empty_valid=False)
+    ),
+
     grammar_opt=Or(
         GrammarOpt("?", G.grammar_expr),
         GrammarOptGroup("?", "(", List(G.grammar_expr, empty_valid=True), ")"),
     ),
+
     grammar_cut=GrammarCut("/"),
     grammar_or_expr=GrammarOrExpr(
         "or", "(",
@@ -542,7 +554,13 @@ lkt_grammar.add_rules(
     grammar_rule_ref=GrammarRuleRef(G.id),
     grammar_list_expr=GrammarList(
         Or(ListKind.alt_one("list+"), ListKind.alt_zero("list*")),
-        "(", G.grammar_expr, Opt(",", G.grammar_expr), ")",
+        "(",
+
+        # Main list expr
+        G.grammar_implicit_pick | G.grammar_expr,
+
+        # Separator
+        Opt(",", G.grammar_expr), ")",
     ),
 
     grammar_skip=GrammarSkip(

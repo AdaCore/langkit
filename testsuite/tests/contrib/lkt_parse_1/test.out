@@ -53,9 +53,12 @@ LangkitRoot[1:1-48:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[4:18-4:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[4:24-4:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[4:24-4:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[4:24-4:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[4:24-4:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:24-4:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[4:24-4:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[5:5-5:30]
 |  |  |  |  |  |name:
@@ -499,21 +502,24 @@ LangkitRoot[1:1-58:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarOrExpr[3:24-3:60]
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprListList[3:27-3:59]
-|  |  |  |  |  |  |  |  |  GrammarExprList[3:27-3:32]
-|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:27-3:32]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[3:27-3:32]: scope
-|  |  |  |  |  |  |  |  |  GrammarExprList[3:35-3:44]
-|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:35-3:44]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[3:35-3:44]: self_decl
-|  |  |  |  |  |  |  |  |  GrammarExprList[3:47-3:59]
-|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:47-3:59]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[3:47-3:59]: foreign_decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:60]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:60]
+|  |  |  |  |  |  |  |  |  GrammarOrExpr[3:24-3:60]
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprListList[3:27-3:59]
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:27-3:32]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:27-3:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:27-3:32]: scope
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:35-3:44]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:35-3:44]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:35-3:44]: self_decl
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:47-3:59]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:47-3:59]
+|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:47-3:59]: foreign_decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-6:6]
 |  |  |  |  |  |name:
@@ -564,9 +570,12 @@ LangkitRoot[1:1-58:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[8:35-8:40]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[8:41-8:46]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[8:41-8:46]: scope
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[8:41-8:46]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[8:41-8:46]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[8:41-8:46]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[8:41-8:46]: scope
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[8:48-8:55]
 |  |  |  |  |  |  |  |  |token_name:
@@ -1158,9 +1167,12 @@ LangkitRoot[1:1-21:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[3:31-3:36]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:37-3:41]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[3:37-3:41]: elem
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:37-3:41]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:37-3:41]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:37-3:41]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[3:37-3:41]: elem
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[3:43-3:50]
 |  |  |  |  |  |  |  |  |token_name:
@@ -1977,9 +1989,12 @@ LangkitRoot[1:1-31:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:28]: node
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:28]: node
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:33]
 |  |  |  |  |  |name:
@@ -2294,9 +2309,12 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[2:13-2:18]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:19-2:27]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:19-2:27]: def_rule
+|  |  |  |  |  |  |  GrammarImplicitPick[2:19-2:27]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:19-2:27]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:19-2:27]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:19-2:27]: def_rule
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-6:6]
 |  |  |  |  |  |name:
@@ -2845,9 +2863,12 @@ LangkitRoot[1:1-27:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:34]
 |  |  |  |  |  |name:
@@ -2875,9 +2896,12 @@ LangkitRoot[1:1-27:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[5:17-5:22]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[5:23-5:26]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[5:23-5:26]: ref
+|  |  |  |  |  |  |  GrammarImplicitPick[5:23-5:26]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[5:23-5:26]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[5:23-5:26]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[5:23-5:26]: ref
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[9:1-10:2]
 |  |  |doc:
@@ -3138,15 +3162,18 @@ LangkitRoot[1:1-10:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
-|  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
-|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -3516,9 +3543,12 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:32]: def_rule
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:32]: def_rule
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-5:6]
 |  |  |  |  |  |name:
@@ -3546,9 +3576,12 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[4:26-4:31]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:32-4:36]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[4:32-4:36]: name
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[4:32-4:36]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[4:32-4:36]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:32-4:36]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[4:32-4:36]: name
 |  |  |  |  |  |  |  |  |sep:
 |  |  |  |  |  |  |  |  |  GrammarToken[4:38-4:44]
 |  |  |  |  |  |  |  |  |  |token_name:
@@ -4138,9 +4171,12 @@ LangkitRoot[1:1-27:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[2:42-2:47]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:48-2:51]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:48-2:51]: ref
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[2:48-2:51]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:48-2:51]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:48-2:51]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:48-2:51]: ref
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[2:53-2:58]
 |  |  |  |  |  |  |  |  |token_name:
@@ -4154,9 +4190,12 @@ LangkitRoot[1:1-27:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:34]
 |  |  |  |  |  |name:
@@ -4787,9 +4826,12 @@ LangkitRoot[1:1-56:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[3:22-3:27]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:28-3:31]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[3:28-3:31]: var
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[3:28-3:31]: var
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[3:33-3:40]
 |  |  |  |  |  |  |  |  |token_name:
@@ -4803,9 +4845,12 @@ LangkitRoot[1:1-56:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[4:18-4:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[4:24-4:29]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[4:24-4:29]: block
+|  |  |  |  |  |  |  GrammarImplicitPick[4:24-4:29]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[4:24-4:29]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:24-4:29]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[4:24-4:29]: block
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[5:5-5:25]
 |  |  |  |  |  |name:
@@ -4834,9 +4879,12 @@ LangkitRoot[1:1-56:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[6:22-6:27]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[6:28-6:33]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[6:28-6:33]: param
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[6:28-6:33]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[6:28-6:33]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:28-6:33]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[6:28-6:33]: param
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[6:35-6:40]
 |  |  |  |  |  |  |  |  |token_name:
@@ -5870,15 +5918,18 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[2:24-2:29]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:30-2:47]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:30-2:34]: Name
-|  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:35-2:46]
-|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:35-2:46]
-|  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  Id[2:36-2:46]: Identifier
-|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[2:30-2:47]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:30-2:47]
+|  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:30-2:47]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:30-2:34]: Name
+|  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:35-2:46]
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:35-2:46]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:36-2:46]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -6048,9 +6099,12 @@ LangkitRoot[1:1-39:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[5:18-5:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[5:24-5:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[5:24-5:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[5:24-5:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[5:24-5:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[5:24-5:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[5:24-5:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[6:5-6:34]
 |  |  |  |  |  |name:
@@ -6078,9 +6132,12 @@ LangkitRoot[1:1-39:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[7:17-7:22]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[7:23-7:26]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[7:23-7:26]: ref
+|  |  |  |  |  |  |  GrammarImplicitPick[7:23-7:26]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[7:23-7:26]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[7:23-7:26]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[7:23-7:26]: ref
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[11:1-14:2]
 |  |  |doc:
@@ -6605,9 +6662,12 @@ LangkitRoot[1:1-33:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:24-2:30]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:30]: insert
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:30]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:30]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:24-2:30]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:30]: insert
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-3:29]
 |  |  |  |  |  |name:
@@ -7362,9 +7422,12 @@ LangkitRoot[1:1-48:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[4:18-4:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[4:24-4:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[4:24-4:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[4:24-4:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[4:24-4:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:24-4:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[4:24-4:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[5:5-5:30]
 |  |  |  |  |  |name:
@@ -7796,9 +7859,12 @@ LangkitRoot[1:1-21:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:32]: def_rule
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:32]: def_rule
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-3:38]
 |  |  |  |  |  |name:
@@ -8029,20 +8095,23 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:45]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:29]: Param
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:30-2:44]
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:30-2:34]
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:45]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:45]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:45]
 |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:30-2:34]: name
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:35-2:39]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:35-2:39]: mode
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:40-2:44]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:40-2:44]: plus
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:29]: Param
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:30-2:44]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:30-2:34]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:30-2:34]: name
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:35-2:39]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:35-2:39]: mode
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:40-2:44]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:40-2:44]: plus
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-3:19]
 |  |  |  |  |  |name:
@@ -8443,24 +8512,27 @@ LangkitRoot[1:1-18:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:51]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:27]: Def
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:28-2:50]
-|  |  |  |  |  |  |  |  |  GrammarToken[2:28-2:32]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:29-2:32]: Def
-|  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:33-2:50]
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:51]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:51]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:51]
 |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:27]: Def
 |  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:41-2:49]
-|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:41-2:49]
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:28-2:50]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:28-2:32]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  Id[2:42-2:49]: Example
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:29-2:32]: Def
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:33-2:50]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:41-2:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:41-2:49]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:42-2:49]: Example
+|  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-11:2]
 |  |  |doc:
@@ -8811,9 +8883,12 @@ LangkitRoot[1:1-33:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:21]
 |  |  |  |  |  |name:
@@ -8848,9 +8923,12 @@ LangkitRoot[1:1-33:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[6:17-6:22]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[6:23-6:26]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[6:23-6:26]: ref
+|  |  |  |  |  |  |  GrammarImplicitPick[6:23-6:26]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[6:23-6:26]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[6:23-6:26]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[6:23-6:26]: ref
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[10:1-11:2]
 |  |  |doc:
@@ -9138,15 +9216,18 @@ LangkitRoot[1:1-10:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
-|  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
-|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -9220,29 +9301,32 @@ LangkitRoot[1:1-78:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarOrExpr[3:24-3:54]
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprListList[3:27-3:53]
-|  |  |  |  |  |  |  |  |  GrammarExprList[3:27-3:46]
-|  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:27-3:46]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[3:27-3:30]: Def
-|  |  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:31-3:45]
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:31-3:35]
-|  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:32-3:35]: Def
-|  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:36-3:40]
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:54]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:54]
+|  |  |  |  |  |  |  |  |  GrammarOrExpr[3:24-3:54]
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprListList[3:27-3:53]
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:27-3:46]
+|  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:27-3:46]
 |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:36-3:40]: name
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:41-3:45]
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:27-3:30]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:31-3:45]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:31-3:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:32-3:35]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:36-3:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:36-3:40]: name
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:41-3:45]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:41-3:45]: expr
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:49-3:53]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:49-3:53]
 |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:41-3:45]: expr
-|  |  |  |  |  |  |  |  |  GrammarExprList[3:49-3:53]
-|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:49-3:53]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[3:49-3:53]: expr
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:49-3:53]: expr
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:28]
 |  |  |  |  |  |name:
@@ -10125,9 +10209,12 @@ LangkitRoot[1:1-74:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[3:22-3:27]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:28-3:31]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[3:28-3:31]: var
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[3:28-3:31]: var
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[3:33-3:40]
 |  |  |  |  |  |  |  |  |token_name:
@@ -10141,35 +10228,38 @@ LangkitRoot[1:1-74:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[4:18-4:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarOrExpr[4:24-7:6]
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprListList[5:11-6:15]
-|  |  |  |  |  |  |  |  |  GrammarExprList[5:11-5:43]
-|  |  |  |  |  |  |  |  |  |  ParseNodeExpr[5:11-5:43]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[5:11-5:14]: Def
-|  |  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[5:15-5:42]
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[5:15-5:19]
-|  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:16-5:19]: Def
-|  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:20-5:24]
+|  |  |  |  |  |  |  GrammarImplicitPick[4:24-7:6]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[4:24-7:6]
+|  |  |  |  |  |  |  |  |  GrammarOrExpr[4:24-7:6]
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprListList[5:11-6:15]
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[5:11-5:43]
+|  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[5:11-5:43]
 |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:20-5:24]: name
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:25-5:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:11-5:14]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[5:15-5:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[5:15-5:19]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:16-5:19]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:20-5:24]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:20-5:24]: name
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:25-5:32]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:25-5:32]: imports
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:33-5:37]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:33-5:37]: vars
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:38-5:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:38-5:42]: expr
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[6:11-6:15]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:11-6:15]
 |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:25-5:32]: imports
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:33-5:37]
-|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:33-5:37]: vars
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:38-5:42]
-|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[5:38-5:42]: expr
-|  |  |  |  |  |  |  |  |  GrammarExprList[6:11-6:15]
-|  |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:11-6:15]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[6:11-6:15]: expr
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:11-6:15]: expr
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[8:5-8:26]
 |  |  |  |  |  |name:
@@ -10259,9 +10349,12 @@ LangkitRoot[1:1-74:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[12:23-12:28]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[12:29-12:40]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[12:29-12:40]: derived_ref
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[12:29-12:40]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[12:29-12:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[12:29-12:40]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[12:29-12:40]: derived_ref
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[12:42-12:47]
 |  |  |  |  |  |  |  |  |token_name:
@@ -10949,15 +11042,18 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[2:27-2:32]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:33-2:52]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:43]: NumberNode
-|  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:44-2:51]
-|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:44-2:51]
-|  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  Id[2:45-2:51]: Number
-|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[2:33-2:52]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:33-2:52]
+|  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:33-2:52]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:43]: NumberNode
+|  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:44-2:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:44-2:51]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[2:45-2:51]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -11246,20 +11342,23 @@ LangkitRoot[1:1-27:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[3:33-3:38]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  ParseNodeExpr[3:39-3:61]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[3:39-3:42]: Ref
-|  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:43-3:60]
-|  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:43-3:60]
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:39-3:61]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:39-3:61]
+|  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:39-3:61]
 |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  Id[3:43-3:47]: Name
+|  |  |  |  |  |  |  |  |  |  |  |  Id[3:39-3:42]: Ref
 |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:48-3:59]
-|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:48-3:59]
-|  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:49-3:59]: Identifier
-|  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:43-3:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:43-3:60]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:43-3:47]: Name
+|  |  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:48-3:59]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:48-3:59]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:49-3:59]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[3:63-3:68]
 |  |  |  |  |  |  |  |  |token_name:
@@ -11753,9 +11852,12 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[3:33-3:38]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:39-3:48]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[3:39-3:48]: list_item
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:39-3:48]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:39-3:48]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:39-3:48]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[3:39-3:48]: list_item
 |  |  |  |  |  |  |  |  |sep:
 |  |  |  |  |  |  |  |  |  GrammarToken[3:50-3:56]
 |  |  |  |  |  |  |  |  |  |token_name:
@@ -12449,15 +12551,18 @@ LangkitRoot[1:1-14:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
-|  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
-|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-11:2]
 |  |  |doc:
@@ -12607,9 +12712,12 @@ LangkitRoot[1:1-43:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:32]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:32]: var_decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:32]: var_decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:30]
 |  |  |  |  |  |name:
@@ -13041,21 +13149,24 @@ LangkitRoot[1:1-38:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[3:27-3:32]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarOrExpr[3:33-3:64]
-|  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  GrammarExprListList[3:36-3:63]
-|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:36-3:40]
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:36-3:40]
-|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:36-3:40]: decl
-|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:43-3:50]
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:43-3:50]
-|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:43-3:50]: subdecl
-|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:53-3:63]
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:53-3:63]
-|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:53-3:63]: other_decl
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:33-3:64]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:33-3:64]
+|  |  |  |  |  |  |  |  |  |  |  GrammarOrExpr[3:33-3:64]
+|  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarExprListList[3:36-3:63]
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:36-3:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:36-3:40]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:36-3:40]: decl
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:43-3:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:43-3:50]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:43-3:50]: subdecl
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:53-3:63]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:53-3:63]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:53-3:63]: other_decl
 |  |  |  |  |  |  |  |  |sep:
 |  |  |  |  |  |  |  |  |  GrammarToken[3:66-3:76]
 |  |  |  |  |  |  |  |  |  |token_name:
@@ -13442,9 +13553,12 @@ LangkitRoot[1:1-19:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[2:23-2:28]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:29-2:33]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:29-2:33]: name
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[2:29-2:33]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:29-2:33]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[2:29-2:33]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:29-2:33]: name
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-3:29]
 |  |  |  |  |  |name:
@@ -13454,9 +13568,12 @@ LangkitRoot[1:1-19:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:30]
 |  |  |  |  |  |name:
@@ -13639,9 +13756,12 @@ LangkitRoot[1:1-11:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:24-2:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:28]: name
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:24-2:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:28]: name
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-3:30]
 |  |  |  |  |  |name:
@@ -13715,15 +13835,18 @@ LangkitRoot[1:1-10:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
-|  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
-|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -13797,9 +13920,12 @@ LangkitRoot[1:1-43:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:32]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:32]: var_decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:32]: var_decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:30]
 |  |  |  |  |  |name:
@@ -14210,15 +14336,18 @@ LangkitRoot[1:1-20:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
-|  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
-|  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
-|  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-17:2]
 |  |  |doc:
@@ -14479,9 +14608,12 @@ LangkitRoot[1:1-55:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[2:13-2:18]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:19-2:27]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:19-2:27]: def_rule
+|  |  |  |  |  |  |  GrammarImplicitPick[2:19-2:27]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:19-2:27]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:19-2:27]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:19-2:27]: def_rule
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-6:6]
 |  |  |  |  |  |name:
@@ -15270,9 +15402,12 @@ LangkitRoot[1:1-48:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[4:18-4:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[4:24-4:28]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[4:24-4:28]: decl
+|  |  |  |  |  |  |  GrammarImplicitPick[4:24-4:28]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[4:24-4:28]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:24-4:28]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[4:24-4:28]: decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[5:5-5:30]
 |  |  |  |  |  |name:
@@ -15717,9 +15852,12 @@ LangkitRoot[1:1-85:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:18-3:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:24-3:32]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:24-3:32]: var_decl
+|  |  |  |  |  |  |  GrammarImplicitPick[3:24-3:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:24-3:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:24-3:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:24-3:32]: var_decl
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:30]
 |  |  |  |  |  |name:
@@ -16969,9 +17107,12 @@ LangkitRoot[1:1-70:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[3:22-3:27]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:28-3:31]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[3:28-3:31]: var
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:28-3:31]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[3:28-3:31]: var
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[3:33-3:40]
 |  |  |  |  |  |  |  |  |token_name:
@@ -16985,9 +17126,12 @@ LangkitRoot[1:1-70:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[4:18-4:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[4:24-4:29]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[4:24-4:29]: block
+|  |  |  |  |  |  |  GrammarImplicitPick[4:24-4:29]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[4:24-4:29]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:24-4:29]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[4:24-4:29]: block
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[5:5-5:25]
 |  |  |  |  |  |name:
@@ -17016,9 +17160,12 @@ LangkitRoot[1:1-70:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[6:22-6:27]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[6:28-6:33]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[6:28-6:33]: param
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[6:28-6:33]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[6:28-6:33]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:28-6:33]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[6:28-6:33]: param
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[6:35-6:40]
 |  |  |  |  |  |  |  |  |token_name:
@@ -17778,9 +17925,12 @@ LangkitRoot[1:1-52:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[3:17-3:22]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:23-3:26]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:23-3:26]: ref
+|  |  |  |  |  |  |  GrammarImplicitPick[3:23-3:26]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:23-3:26]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:23-3:26]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:23-3:26]: ref
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:30]
 |  |  |  |  |  |name:
@@ -17803,9 +17953,12 @@ LangkitRoot[1:1-52:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[5:18-5:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[5:24-5:29]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[5:24-5:29]: block
+|  |  |  |  |  |  |  GrammarImplicitPick[5:24-5:29]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[5:24-5:29]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[5:24-5:29]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[5:24-5:29]: block
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[6:5-6:43]
 |  |  |  |  |  |name:
@@ -17822,9 +17975,12 @@ LangkitRoot[1:1-52:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[6:25-6:30]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[6:31-6:35]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[6:31-6:35]: decl
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[6:31-6:35]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[6:31-6:35]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:31-6:35]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[6:31-6:35]: decl
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[6:37-6:42]
 |  |  |  |  |  |  |  |  |token_name:
@@ -17845,9 +18001,12 @@ LangkitRoot[1:1-52:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[7:26-7:31]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[7:32-7:37]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[7:32-7:37]: using
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[7:32-7:37]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[7:32-7:37]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[7:32-7:37]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[7:32-7:37]: using
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[7:39-7:44]
 |  |  |  |  |  |  |  |  |token_name:
@@ -18374,9 +18533,12 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindOne[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[2:24-2:32]: def_rule
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:32]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:32]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[2:24-2:32]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:32]: def_rule
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[3:5-5:6]
 |  |  |  |  |  |name:
@@ -18404,9 +18566,12 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindZero[4:26-4:31]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:32-4:36]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[4:32-4:36]: name
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[4:32-4:36]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[4:32-4:36]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:32-4:36]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[4:32-4:36]: name
 |  |  |  |  |  |  |  |  |sep:
 |  |  |  |  |  |  |  |  |  GrammarToken[4:38-4:44]
 |  |  |  |  |  |  |  |  |  |token_name:
@@ -18826,9 +18991,12 @@ LangkitRoot[1:1-18:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[4:33-4:38]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:39-4:44]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[4:39-4:44]: tuple
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[4:39-4:44]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[4:39-4:44]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:39-4:44]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[4:39-4:44]: tuple
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[4:46-4:51]
 |  |  |  |  |  |  |  |  |token_name:
@@ -19214,9 +19382,12 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  |  |  ListKindOne[4:24-4:29]
 |  |  |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  |  |  GrammarRuleRef[4:30-4:37]
-|  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  Id[4:30-4:37]: element
+|  |  |  |  |  |  |  |  |  GrammarImplicitPick[4:30-4:37]
+|  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[4:30-4:37]
+|  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:30-4:37]
+|  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[4:30-4:37]: element
 |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  GrammarToken[4:39-4:44]
 |  |  |  |  |  |  |  |  |token_name:
@@ -19636,37 +19807,40 @@ LangkitRoot[1:1-28:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[2:18-2:23]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarOrExpr[2:24-7:6]
-|  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  GrammarExprListList[3:11-6:25]
-|  |  |  |  |  |  |  |  |  GrammarExprList[3:11-5:10]
-|  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:11-5:10]
-|  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  Id[3:11-3:18]: DefNode
-|  |  |  |  |  |  |  |  |  |  |sub_exprs:
-|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:13-4:53]
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:13-4:17]
-|  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:14-4:17]: Def
-|  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:18-4:28]
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-7:6]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-7:6]
+|  |  |  |  |  |  |  |  |  GrammarOrExpr[2:24-7:6]
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprListList[3:11-6:25]
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:11-5:10]
+|  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:11-5:10]
 |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:18-4:28]: identifier
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:29-4:35]
-|  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:30-4:35]: Equal
-|  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:36-4:42]
-|  |  |  |  |  |  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:36-4:42]: number
-|  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:43-4:53]
-|  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:44-4:53]: Semicolon
-|  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
-|  |  |  |  |  |  |  |  |  GrammarExprList[6:11-6:25]
-|  |  |  |  |  |  |  |  |  |  GrammarSkip[6:11-6:25]
-|  |  |  |  |  |  |  |  |  |  |name:
-|  |  |  |  |  |  |  |  |  |  |  Id[6:16-6:24]: ErrorDef
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[3:11-3:18]: DefNode
+|  |  |  |  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:13-4:53]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:13-4:17]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:14-4:17]: Def
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:18-4:28]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:18-4:28]: identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:29-4:35]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:30-4:35]: Equal
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:36-4:42]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:36-4:42]: number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:43-4:53]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[4:44-4:53]: Semicolon
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |  |  |  |  |  GrammarExprList[6:11-6:25]
+|  |  |  |  |  |  |  |  |  |  |  |  GrammarSkip[6:11-6:25]
+|  |  |  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:16-6:24]: ErrorDef
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[8:5-8:42]
 |  |  |  |  |  |name:
@@ -19851,9 +20025,12 @@ LangkitRoot[1:1-13:2]
 |  |  |  |  |  |  |kind:
 |  |  |  |  |  |  |  ListKindZero[3:21-3:26]
 |  |  |  |  |  |  |expr:
-|  |  |  |  |  |  |  GrammarRuleRef[3:27-3:34]
-|  |  |  |  |  |  |  |node_name:
-|  |  |  |  |  |  |  |  Id[3:27-3:34]: example
+|  |  |  |  |  |  |  GrammarImplicitPick[3:27-3:34]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[3:27-3:34]
+|  |  |  |  |  |  |  |  |  GrammarRuleRef[3:27-3:34]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[3:27-3:34]: example
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[4:5-4:59]
 |  |  |  |  |  |name:
