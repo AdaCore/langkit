@@ -503,9 +503,10 @@ def emit_prop(prop):
 
 def emit_field(field):
     from langkit.compiled_types import BaseField, Field
+
     if isinstance(field, BaseField):
-        return "@{}field {} : {}".format(
-            "parse_" if isinstance(field, Field) else "",
+        return "{}{} : {}".format(
+            "@parse_field " if isinstance(field, Field) else "",
             field._indexing_name, type_name(field.type)
         )
     else:
@@ -549,9 +550,11 @@ def emit_node_type(node_type):
     if base and base.is_generic_list_type:
         return ""
 
-    parse_fields = node_type.get_fields(
-        include_inherited=False
-    )
+    parse_fields = [
+        f for f in node_type.get_fields(include_inherited=False)
+        if not "[internal]" in f._indexing_name
+    ]
+
     properties = node_type.get_properties(include_inherited=False)
     enum_qual = (
         "@qualifier " if node_type.is_bool_node

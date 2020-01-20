@@ -12,7 +12,7 @@ class Definition : FooNode {
 }
 
 class Name : FooNode {
-    @field ref_var : LogicVar
+    ref_var : LogicVar
 
     @export fun resolve (): Boolean =
     <domain(<FieldAccess .ref_var>, <map>)>.solve
