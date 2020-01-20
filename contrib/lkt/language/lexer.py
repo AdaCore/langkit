@@ -17,6 +17,7 @@ class Token(LexerToken):
     Comma = WithText()
     Times = WithText()
     Plus = WithText()
+    Amp = WithText()
     Minus = WithText()
     Pipe = WithText()
     LeftArrow = WithText()
@@ -84,6 +85,7 @@ lkt_lexer.add_rules(
     (Literal('/'),         Token.Div),
     (Literal('*'),         Token.Times),
     (Literal('+'),         Token.Plus),
+    (Literal('&'),         Token.Amp),
     (Literal('-'),         Token.Minus),
     (Literal('|'),         Token.Pipe),
     (Literal('<-'),        Token.LeftArrow),
