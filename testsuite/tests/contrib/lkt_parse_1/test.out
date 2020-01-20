@@ -25967,7 +25967,9 @@ LangkitRoot[1:1-28:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[6:11-6:25]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarSkip[6:11-6:25]
 |  |  |  |  |  |  |  |  |  |  |  |  |name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:16-6:24]: ErrorDef
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[6:16-6:24]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[6:16-6:24]: ErrorDef
 |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  GrammarRuleDecl[8:5-8:42]
 |  |  |  |  |  |name:
