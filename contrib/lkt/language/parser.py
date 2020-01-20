@@ -452,7 +452,7 @@ class Op(LKNode):
     enum_node = True
 
     alternatives = ["and", "or", "plus", "minus", "eq", "mult", "div",
-                    "lt", "gt", "lte", "gte"]
+                    "lt", "gt", "lte", "gte", "amp"]
 
 
 class StringLit(Expr):
@@ -636,7 +636,8 @@ lkt_grammar.add_rules(
     ),
 
     arith_1=Or(
-        BinOp(G.arith_1, Or(Op.alt_plus("+"), Op.alt_minus("-")), G.arith_2),
+        BinOp(G.arith_1, Or(Op.alt_plus("+"), Op.alt_minus("-"),
+                            Op.alt_amp("&")), G.arith_2),
         G.arith_2
     ),
 
