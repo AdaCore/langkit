@@ -6966,31 +6966,26 @@ LangkitRoot[1:1-33:2]
 |  |  |  |  |  Id[29:17-29:24]: FooNode
 |  |  |  |decls:
 |  |  |  |  FullDeclList[30:5-32:66]
-|  |  |  |  |  FullDecl[30:5-30:28]
+|  |  |  |  |  FullDecl[30:5-30:21]
 |  |  |  |  |  |doc:
 |  |  |  |  |  |  Doc[29:26-29:26]
 |  |  |  |  |  |  |lines:
 |  |  |  |  |  |  |  DocCommentList[29:26-29:26]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[30:5-30:11]
-|  |  |  |  |  |  |  DeclAnnotation[30:5-30:11]
-|  |  |  |  |  |  |  |name:
-|  |  |  |  |  |  |  |  Id[30:6-30:11]: field
-|  |  |  |  |  |  |  |params:
-|  |  |  |  |  |  |  |  ParamList[30:6-30:6]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[29:26-29:26]: <empty list>
 |  |  |  |  |  |decl:
-|  |  |  |  |  |  FieldDecl[30:12-30:28]
+|  |  |  |  |  |  FieldDecl[30:5-30:21]
 |  |  |  |  |  |  |name:
-|  |  |  |  |  |  |  Id[30:12-30:15]: sym
+|  |  |  |  |  |  |  Id[30:5-30:8]: sym
 |  |  |  |  |  |  |type:
-|  |  |  |  |  |  |  SimpleTypeRef[30:18-30:28]
+|  |  |  |  |  |  |  SimpleTypeRef[30:11-30:21]
 |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  Id[30:18-30:28]: SymbolType
+|  |  |  |  |  |  |  |  Id[30:11-30:21]: SymbolType
 |  |  |  |  |  FullDecl[32:5-32:66]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[30:28-30:28]
+|  |  |  |  |  |  Doc[30:21-30:21]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[30:28-30:28]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[30:21-30:21]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[32:5-32:12]
 |  |  |  |  |  |  |  DeclAnnotation[32:5-32:12]

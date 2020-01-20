@@ -8,5 +8,5 @@ class FooNode {
 
 class Name : FooNode {
 
-    fun is_not_class_id (): Boolean = not (self.symbol == "class")
+    fun is_not_class_id (): Boolean = not (self.symbol = "class")
 }
