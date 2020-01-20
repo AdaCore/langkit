@@ -435,6 +435,29 @@ class BlockExpr(Expr):
     expr = Field()
 
 
+class MatchExpr(Expr):
+    """
+    Binary operator expression.
+    """
+    match_expr = Field()
+    branches = Field()
+
+
+class MatchBranch(LKNode):
+    """
+    Branch inside a match expression.
+    """
+    decl = Field()
+    expr = Field()
+
+
+class MatchValDecl(BaseValDecl):
+    """
+    Value declaration in a match branch.
+    """
+    type = Field()
+
+
 class BinOp(Expr):
     """
     Binary operator expression.
@@ -680,6 +703,15 @@ lkt_grammar.add_rules(
         G.if_expr,
         G.num_lit,
         G.string_lit,
+        G.match_expr,
+    ),
+
+    match_expr=MatchExpr(
+        "match", G.expr, "{",
+        List(MatchBranch("case",
+                         MatchValDecl(G.id, Opt(":", G.type_ref)),
+                         "=>", G.expr)),
+        "}"
     ),
 
     num_lit=NumLit(Lex.Number),
