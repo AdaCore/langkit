@@ -24,13 +24,13 @@ class Decl : FooNode {
     @parse_field items : ASTList[Ref]
 
     @export fun test_env (other : Entity[FooNode]): Boolean =
-    <env_orphan(<FieldAccess .children_env>)> == <env_orphan(<FieldAccess .children_env>)>
+    <env_orphan(<FieldAccess .children_env>)> = <env_orphan(<FieldAccess .children_env>)>
 
     @export fun test_struct (other : Entity[FooNode]): Boolean =
-    self.env_struct == other.env_struct
+    self.env_struct = other.env_struct
 
     @export fun test_array (other : Entity[FooNode]): Boolean =
-    self.env_array == other.env_array
+    self.env_array = other.env_array
 }
 
 @qualifier class HasPlus : FooNode {

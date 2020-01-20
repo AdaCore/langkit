@@ -11,7 +11,7 @@ class Example : FooNode {
     fun fetch_example_unit (): InternalUnit
 
     @memoized fun internal_mmz_prop (i : Integer): Integer =
-    if (i == 0) then (raise PropertyError()) else i
+    if (i = 0) then (raise PropertyError()) else i
 
     @export @memoized fun mmz_prop (i : Integer): Integer = {
         val _ = self.fetch_example_unit

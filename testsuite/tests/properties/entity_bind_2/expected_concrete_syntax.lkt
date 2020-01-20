@@ -23,7 +23,7 @@ class Identifier : RootNode {
 
 class Literal : RootNode {
 
-    fun is_eq (other : Entity[Literal]): Boolean = self.as_entity == other
+    fun is_eq (other : Entity[Literal]): Boolean = self.as_entity = other
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
     (

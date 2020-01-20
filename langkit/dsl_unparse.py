@@ -317,7 +317,7 @@ def emit_expr(expr, **ctx):
         """)
 
     elif isinstance(expr, Eq):
-        return "{} == {}".format(ee(expr.lhs), ee(expr.rhs))
+        return "{} = {}".format(ee(expr.lhs), ee(expr.rhs))
 
     elif isinstance(expr, BinaryBooleanOperator):
         return "{} {} {}".format(
