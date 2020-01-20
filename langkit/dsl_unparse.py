@@ -70,7 +70,7 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, Null):
         return "null({})".format(
             emit_rule(rule.type) if isinstance(rule.type, Parser)
-            else node_name(rule.type)
+            else type_name(rule.type)
         )
     elif isinstance(rule, Or):
         body = ' | '.join(emit_rule(r) for r in rule.parsers)
