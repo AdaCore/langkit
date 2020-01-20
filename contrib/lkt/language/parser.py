@@ -587,7 +587,7 @@ lkt_grammar.add_rules(
     ),
 
     grammar_skip=GrammarSkip(
-        Lex.Identifier(match_text="skip"), "(", G.id, ")"
+        Lex.Identifier(match_text="skip"), "(", G.type_ref, ")"
     ),
 
     grammar_null=GrammarNull(
