@@ -701,16 +701,15 @@ lkt_grammar.add_rules(
     ),
 
     primary=Or(
-        G.logic,
         G.null,
         G.lambda_expr,
-        ParenExpr("(", G.expr, ")"),
         G.array_literal,
         G.block,
         G.if_expr,
         G.num_lit,
         G.string_lit,
         G.match_expr,
+        G.logic,
     ),
 
     match_expr=MatchExpr(
@@ -746,6 +745,11 @@ lkt_grammar.add_rules(
         ErrorOnNull(G.basic_expr, "!"),
         DottedName(G.basic_expr, ".", G.id),
         NullCondDottedName(G.basic_expr, "?", ".", G.id),
+        G.term
+    ),
+
+    term=Or(
+        ParenExpr("(", G.expr, ")"),
         G.id
     ),
 
