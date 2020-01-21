@@ -2369,6 +2369,8 @@ def can_reach(self, node, from_node):
     always return True, eg this does not handle general visibility issues, just
     sequentiality of declarations.
     """
+    # TODO: this could and should be a built-in property rather than an
+    # expression.
     node_expr = construct(node, T.root_node)
     from_node_expr = construct(from_node, T.root_node)
     return CallExpr('Node_Can_Reach', 'Can_Reach', T.Bool,
