@@ -12,7 +12,7 @@ class Example : FooNode {
     var1 : LogicVar
 
     @export fun prop (): Entity[Example] = {
-        val _ = <Predicate on FooNode.sophisticated_predicate>
+        val _ = %predicate(BareFooNode.sophisticated_predicate, self.var1)
 
         self.as_bare_entity
     }
