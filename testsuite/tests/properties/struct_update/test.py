@@ -13,14 +13,14 @@ from utils import build_and_run
 
 class KV(Struct):
     key = UserField(type=T.String)
-    val = UserField(type=T.BigInt)
+    value = UserField(type=T.BigInt)
 
 
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
     def increment(kv=KV):
-        return kv.update(val=kv.val + BigIntLiteral(1))
+        return kv.update(value=kv.value + BigIntLiteral(1))
 
 
 class Example(FooNode):

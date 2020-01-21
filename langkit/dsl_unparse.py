@@ -339,15 +339,15 @@ def emit_expr(expr, **ctx):
                 ee(expr.then_expr, then_underscore_var=expr.var_expr)
             )
 
-        res = "{} then {}".format(
+        return emit_method_call(
             ee_pexpr(expr.expr),
-            emit_paren("{} => {}".format(
-                var_name(expr.var_expr),
-                ee(expr.then_expr),
-            )),
+            "do",
+            keep([
+                "({}) => {}".format(var_name(expr.var_expr), ee(expr.then_expr)),
+                "default_val={}".format(ee_pexpr(expr.default_val))
+                if expr.default_val else None
+            ])
         )
-        if expr.default_val:
-            res += " else {}".format(ee_pexpr(expr.default_val))
 
         return res
 

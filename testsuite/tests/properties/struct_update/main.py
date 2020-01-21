@@ -18,7 +18,7 @@ def load_unit(name, buffer):
 print('main.py: Running...')
 ctx = libfoolang.AnalysisContext()
 u = load_unit('main1.txt', b'example')
-s = libfoolang.KV(key='foo', val=10)
+s = libfoolang.KV(key='foo', value=10)
 print(s)
 print(u.root[0].p_increment(s))
 print('main.py: Done')
