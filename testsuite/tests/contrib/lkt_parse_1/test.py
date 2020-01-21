@@ -34,7 +34,7 @@ test_whitelist = {
     'abstract_fields', 'add_to_env_foreign', 'add_to_env_mult_dests',
     'analysis_unit', 'analysis_unit_from_node', 'array_types',
     'auto_ple_dispatcher', 'auto_populate', 'bare_lexing',
-    'c_text_to_locale_string', 'categories', 'character',
+    'c_text_to_locale_string', 'can_reach', 'categories', 'character',
     'custom_parsing_rule', 'dflt_arg_val', 'dflt_arg_val_predicate',
     'domain_derived', 'dynvar_bind', 'dynvars_dflt', 'early_binding_error',
     'entity_bind', 'entity_bind_2', 'entity_bind_3', 'entity_cast',
