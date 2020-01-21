@@ -4,12 +4,5 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer(
-    "foo.py", """
-def test(a, b):
-    return a - b
-    raise Exception
-"""
-)
-r = u.root.find(libfoolang.RaiseStmt)
-print("{}{}".format(r.full_sloc_image, "raise statement"))
+u = ctx.get_from_buffer('foo.txt', 'example')
+print(libfoolang._py2to3.text_repr(u.root.full_sloc_image))
