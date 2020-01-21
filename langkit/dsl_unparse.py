@@ -364,7 +364,8 @@ def emit_expr(expr, **ctx):
               "env_parent", "rebindings_parent", "parents", "parent", "root",
               "append_rebinding", "concat_rebindings", "env_node",
               "rebindings_new_env", "rebindings_old_env", "get_value",
-              "solve", "is_referenced_from", "env_group", "length"):
+              "solve", "is_referenced_from", "env_group", "length",
+              "can_reach"):
         exprs = expr.sub_expressions
         return emit_method_call(ee(exprs[0]), type(expr).__name__,
                                 map(ee, exprs[1:]))
