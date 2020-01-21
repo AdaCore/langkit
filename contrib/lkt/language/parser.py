@@ -507,6 +507,13 @@ class BindDecl(BaseValDecl):
     type = NullField()
 
 
+class LogicExpr(Expr):
+    """
+    Class for logic expressions (any ``basic_expr`` starting with %).
+    """
+    expr = Field()
+
+
 lkt_grammar = Grammar('main_rule')
 G = lkt_grammar
 lkt_grammar.add_rules(
@@ -694,7 +701,7 @@ lkt_grammar.add_rules(
     ),
 
     primary=Or(
-        G.basic_expr,
+        G.logic,
         G.null,
         G.lambda_expr,
         ParenExpr("(", G.expr, ")"),
@@ -727,6 +734,11 @@ lkt_grammar.add_rules(
         "[", List(G.expr, sep=",", empty_valid=True), "]"
     ),
 
+    logic=Or(
+        LogicExpr("%", G.basic_expr),
+        G.basic_expr
+    ),
+
     basic_expr=Or(
         CallExpr(G.basic_expr, "(", G.params, ")"),
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
@@ -747,7 +759,7 @@ lkt_grammar.add_rules(
 
     null=NullLit("null"),
 
-    params=List(G.param, sep=","),
+    params=List(G.param, sep=",", empty_valid=True),
 
     decl_annotation=DeclAnnotation(
         "@", G.id, Opt("(", G.params, ")")

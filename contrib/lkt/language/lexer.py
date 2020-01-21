@@ -38,6 +38,7 @@ class Token(LexerToken):
     LTE = WithText()
     GT = WithText()
     LT = WithText()
+    Percent = WithText()
 
     # Keywords
     GrammarKw = WithText()
@@ -109,6 +110,7 @@ lkt_lexer.add_rules(
     (Literal('>='),        Token.GTE),
     (Literal('<'),         Token.LT),
     (Literal('>'),         Token.GT),
+    (Literal('%'),         Token.Percent),
 
     # Keywords
     (Literal('grammar'),   Token.GrammarKw),

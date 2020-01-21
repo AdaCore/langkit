@@ -15,7 +15,7 @@ class Name : FooNode {
     ref_var : LogicVar
 
     @export fun resolve (): Boolean =
-    <domain(<FieldAccess .ref_var>, <map>)>.solve
+    %domain(self.ref_var, self.node_env.get(self).map((d) => d.to[Definition])).solve
 
     @export fun definition (): Entity[Definition] =
     self.ref_var.get_value.to[Definition]
