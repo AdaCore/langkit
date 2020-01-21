@@ -55,6 +55,10 @@ if not langkit_root:
     langkit_root = P.dirname(testsuite_dir)
 
 
+# When unparsing the concrete syntax, name of the file to write
+unparse_destination = 'concrete_syntax.lkt'
+
+
 def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
                     symbol_canonicalizer=None, show_property_logging=False):
     """
@@ -96,7 +100,8 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
 
 def emit_and_print_errors(grammar, lexer=None,
                           warning_set=default_warning_set,
-                          generate_unparser=False, symbol_canonicalizer=None):
+                          generate_unparser=False, symbol_canonicalizer=None,
+                          unparse_cs=False):
     """
     Compile and emit code for CTX. Return the compile context if this was
     successful, None otherwise.
@@ -114,16 +119,22 @@ def emit_and_print_errors(grammar, lexer=None,
         Symbol canoncalizes to use for this context, if any.
 
     :rtype: None|langkit.compile_context.CompileCtx
+
+    :param bool unparse_cs: If true, unparse the language to a concrete syntax
+        lkt file.
     """
 
     if lexer is None:
         from lexer_example import foo_lexer
         lexer = foo_lexer
 
+    unparse_dest = unparse_destination if unparse_cs else None
+
     try:
         ctx = prepare_context(grammar, lexer, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer)
-        ctx.emit('build', generate_unparser=generate_unparser)
+        ctx.emit('build', generate_unparser=generate_unparser,
+                 unparse_destination_file=unparse_dest)
         # ... and tell about how it went
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
@@ -232,7 +243,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     # RA22-015: Unparse the language to concrete syntax
     if unparse_cs:
         argv.append('--unparse-destination')
-        argv.append('concrete_syntax.lkt')
+        argv.append(unparse_destination)
 
     m.run(argv)
 
