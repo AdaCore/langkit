@@ -17,7 +17,7 @@ class Literal : FooNode {
 
     fun node (): Entity[Literal] = self.as_entity
 
-    fun b (): LogicEquation = <Bind>
+    fun b (): LogicEquation = %eq(self.var, self.a, conv_prop=BareLiteral.node)
 
     @export fun public_pro (): Entity[Literal] = {
         val _ = self.b

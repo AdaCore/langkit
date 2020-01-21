@@ -6,6 +6,9 @@ from langkit.passes import GlobalPass
 
 templates = {}
 
+def fqn(prop):
+    return "{}.{}".format(prop.struct.name.camel, prop._original_name.lower)
+
 
 def sf(strn):
     """
@@ -163,8 +166,8 @@ def emit_expr(expr, **ctx):
         GetSymbol, Match, Eq, BinaryBooleanOperator, Then, OrderingTest,
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
-        ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral,
-        StructUpdate, BigIntLiteral, RefCategories
+        ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
+        StructUpdate, BigIntLiteral, RefCategories, Bind
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -212,9 +215,9 @@ def emit_expr(expr, **ctx):
             else type_name(expr.astnodes[0])
         )
     elif isinstance(expr, LogicTrue):
-        return "ltrue"
+        return "%true"
     elif isinstance(expr, LogicFalse):
-        return "lfalse"
+        return "%false"
     elif isinstance(expr, Let):
 
         if len(expr.vars) == 0:
@@ -453,6 +456,19 @@ def emit_expr(expr, **ctx):
             '{}={}'.format(name, ee(value))
             for name, value in sorted(expr.cat_map.items())
         ), ee(expr.default))
+    elif isinstance(expr, Predicate):
+        return "%predicate({})".format(", ".join(keep([
+            fqn(expr.pred_property),
+            ee(expr.exprs[0]),
+        ] + [ee(e) for e in expr.exprs[1:]])))
+    elif is_a("domain"):
+        return "%domain({}, {})".format(ee(expr.expr_0), ee(expr.expr_1))
+    elif isinstance(expr, Bind):
+        return "%eq({})".format(", ".join(keep([
+            ee(expr.from_expr), ee(expr.to_expr),
+            "eq_prop={}".format(fqn(expr.eq_prop)) if expr.eq_prop else ""
+            "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
+        ])))
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)

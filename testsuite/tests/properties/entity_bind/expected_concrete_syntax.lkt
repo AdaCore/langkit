@@ -15,7 +15,7 @@ class Literal : FooNode {
 
     fun a (): Entity[FooNode]
 
-    fun b (): LogicEquation = <Bind>
+    fun b (): LogicEquation = %eq(self.var, self.a)
 
     @export fun public_prop (): Entity[Literal] = {
         val _ = self.b

@@ -18,7 +18,7 @@ class RootNode : FooNode {
 class Identifier : RootNode {
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
-    <domain(<FieldAccess .var>, [<Var Self>])>
+    %domain(self.var, [self])
 }
 
 class Literal : RootNode {
@@ -26,7 +26,7 @@ class Literal : RootNode {
     fun is_eq (other : Entity[Literal]): Boolean = self.as_entity = other
 
     fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
-    (
-        <domain(<FieldAccess .var>, [<Var arg1>])>
-    ) and (<Bind>)
+    (%domain(self.var, [arg1])) and (
+        %eq(self.var, arg2, eq_prop=BareLiteral.is_eq)
+    )
 }

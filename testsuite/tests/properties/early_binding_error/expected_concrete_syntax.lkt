@@ -11,5 +11,6 @@ class Example : FooNode {
 
     fun pred (): Boolean = false
 
-    @export fun do_solving (): Boolean = <Predicate on Example.pred>.solve
+    @export fun do_solving (): Boolean =
+    %predicate(BareExample.pred, self.a).solve
 }
