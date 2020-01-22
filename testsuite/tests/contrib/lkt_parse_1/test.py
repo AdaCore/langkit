@@ -34,14 +34,14 @@ test_whitelist = {
     'abstract_fields', 'add_to_env_foreign', 'add_to_env_mult_dests',
     'analysis_unit', 'analysis_unit_from_node', 'array_types',
     'auto_ple_dispatcher', 'auto_populate', 'bare_lexing',
-    'c_text_to_locale_string', 'can_reach', 'categories', 'character',
+    'c_text_to_locale_string', 'can_reach', 'categories', 'character', 'cond',
     'custom_parsing_rule', 'dflt_arg_val', 'dflt_arg_val_predicate',
     'domain_derived', 'dynvar_bind', 'dynvars_dflt', 'early_binding_error',
     'entity_bind', 'entity_bind_2', 'entity_bind_3', 'entity_cast',
     'entity_eq', 'entity_field_access', 'entity_length', 'entity_map',
     'entity_match', 'entity_resolver', 'enum_node_inherit', 'enum_types',
     'env_get_all', 'exposed_bare_nodes', 'external', 'field_introspection',
-    'foreign_env_md', 'full_sloc_image', 'ghost_nodes', 'hashes',
+    'foreign_env_md', 'full_sloc_image', 'ghost_nodes', 'hashes', 'if_then',
     'import_argcount', 'indent_trivia', 'is_a', 'let_underscore', 'lifetimes',
     'logging', 'lookup_token', 'lower_dispatch', 'lower_dispatch_rewrite',
     'map_index', 'match', 'memoized_big_table', 'memoized_env',
@@ -54,10 +54,10 @@ test_whitelist = {
     'private_predicate_props', 'properties_introspection', 'public',
     'qualifier_sloc_range', 'rebindings', 'ref_after_reparse', 'rewriting',
     'siblings', 'stack_overflow', 'struct_update', 'symbol_type',
-    'synthetic_props', 'tokens', 'top_level_predicate', 'trailing_garbage',
-    'unbounded_string_buffer', 'unicode_buffer', 'unit_canon', 'unit_filename',
-    'unparse_empty_list', 'unparse_no_canon', 'unparse_or_skip',
-    'wrapper_caches'
+    'synthetic_props', 'then_analysis_unit', 'tokens', 'top_level_predicate',
+    'trailing_garbage', 'unbounded_string_buffer', 'unicode_buffer',
+    'unit_canon', 'unit_filename', 'unparse_empty_list', 'unparse_no_canon',
+    'unparse_or_skip', 'wrapper_caches'
 }
 
 whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
