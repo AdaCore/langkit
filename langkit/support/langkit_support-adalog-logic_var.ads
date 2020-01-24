@@ -54,13 +54,13 @@ generic
    with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
    --  Checks whether the logic variable has a value or not
 
-   with procedure Set_Value (Self : in out Logic_Var_Type; Data : Element_Type)
-     is <> with Inline => True;
+   with procedure Set_Value
+     (Self : in out Logic_Var_Type; Data : Element_Type) is <>;
    --  Set the value of the logic variable to Data. Low level function, not for
    --  use by clients.
 
-   with function Get_Value (Self : Logic_Var_Type) return Element_Type
-     is <> with Inline => True;
+   with function Get_Value
+     (Self : Logic_Var_Type) return Element_Type is <>;
    --  Get the value stored in Self
 
    with function Create return Logic_Var_Type is <>;
