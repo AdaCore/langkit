@@ -738,6 +738,12 @@ class ManageScript(object):
 
         main_programs = ([] if self.no_ada_api else self.main_programs)
 
+        # If requested, generate the Langkit_Support project before emitting
+        # regular code, as instrumentation for code coverage (part of code
+        # emission) requires it.
+        if not args.check_only and not args.no_langkit_support:
+            self.do_generate_langkit_support(args)
+
         self.context.emit(
             lib_root=self.dirs.build_dir(),
             main_source_dirs=main_source_dirs,
@@ -759,9 +765,6 @@ class ManageScript(object):
 
         if args.check_only:
             return
-
-        if not args.no_langkit_support:
-            self.do_generate_langkit_support(args)
 
         if not getattr(args, 'no_pretty_print', False):
             self.log_info(
