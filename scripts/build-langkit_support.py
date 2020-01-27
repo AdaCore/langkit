@@ -6,6 +6,7 @@ import argparse
 
 from langkit.compile_context import Verbosity
 from langkit.libmanage import LibraryTypes, ManageScript, get_cpu_count
+from langkit.packaging import Packager
 
 
 def main():
@@ -80,6 +81,30 @@ def main():
     )
     install_parser.set_defaults(cmd='install-langkit-support')
 
+    # Package dependencies
+    pkg_deps_parser = subparsers.add_parser(
+        'package-deps',
+        help='Bundle all dependencies to complete GNAT Pro'
+    )
+    pkg_deps_parser.add_argument(
+        'package-dir',
+        help='Destination directory.'
+    )
+    Packager.add_prefix_options(pkg_deps_parser)
+    pkg_deps_parser.set_defaults(cmd='package-deps')
+
+    # Standalone package for dynamic libraries
+    pkg_std_dyn_parser = subparsers.add_parser(
+        'package-std-dyn',
+        help='Bundle all dependencies to create standalone packages'
+    )
+    pkg_std_dyn_parser.add_argument(
+        'package-dir',
+        help='Destination directory.'
+    )
+    Packager.add_prefix_options(pkg_std_dyn_parser)
+    pkg_std_dyn_parser.set_defaults(cmd='package-std-dyn')
+
     args = args_parser.parse_args()
 
     argv = ['-E', '--build-dir={}'.format(args.build_dir),
@@ -94,9 +119,19 @@ def main():
         add_build_mode()
         if args.gargs:
             argv.append('--gargs={}'.format(args.gargs))
-    if args.cmd == 'install-langkit-support':
+    elif args.cmd == 'install-langkit-support':
         add_build_mode()
         argv.append(getattr(args, 'install-dir'))
+    elif args.cmd == 'package-deps':
+        p = Packager.from_args(args)
+        p.package_deps(getattr(args, 'package-dir'))
+        return
+    elif args.cmd == 'package-std-dyn':
+        p = Packager.from_args(args)
+        pkg_dir = getattr(args, 'package-dir')
+        p.package_standalone_dyn(pkg_dir)
+        p.package_langkit_support_dyn(pkg_dir)
+        return
 
     m.run(argv)
 
