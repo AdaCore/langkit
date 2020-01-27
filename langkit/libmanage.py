@@ -297,6 +297,10 @@ class ManageScript(object):
             '--force', '-f', action='store_true',
             help='Force installation, overwrite files.'
         )
+        install_parser.add_argument(
+            '--disable-all-mains', action='store_true',
+            help='Do not install main program.'
+        )
 
         ##########
         # Setenv #
@@ -1010,9 +1014,10 @@ class ManageScript(object):
             self.gprinstall(args, self.dirs.build_dir('lib', 'gnat', prj),
                             True)
 
-        # Install programs if they are all required.  If some are missing,
-        # installing them is useless (this is in development mode).
-        self.gprinstall(args, self.dirs.build_dir('src', 'mains.gpr'), False)
+        # Install programs if they are all required
+        if not args.disable_all_mains:
+            self.gprinstall(args, self.dirs.build_dir('src', 'mains.gpr'),
+                            is_library=False)
 
         # Install the remaining miscellaneous files
         for fpath in [
