@@ -22,6 +22,7 @@ from langkit.diagnostics import (
     WarningSet, check_source_language, extract_library_location
 )
 from langkit.langkit_support import LangkitSupport
+from langkit.packaging import Packager
 from langkit.utils import Colors, Log, col, printcol
 
 
@@ -312,6 +313,38 @@ class ManageScript(object):
         self.setenv_parser.add_argument(
             '--json', '-J', action='store_true',
             help='Output necessary env keys to JSON.'
+        )
+
+        #######################
+        # Create Python wheel #
+        #######################
+
+        self.create_wheel_parser = create_parser(self.do_create_wheel, True)
+        self.create_wheel_parser.add_argument(
+            '--with-python',
+            help='Python intererpter to use in order to build the wheel. If'
+                 ' not provided, use the current one.'
+        )
+        self.create_wheel_parser.add_argument(
+            '--tag',
+            help="Tag for the wheel (setup.py's --python-tag argument)."
+        )
+        self.create_wheel_parser.add_argument(
+            'wheel-dir',
+            help='Destination directory for the wheel.'
+        )
+        self.create_wheel_parser.add_argument(
+            'build-dir',
+            help='Temporary directory to use in order to build the wheel.'
+        )
+        self.create_wheel_parser.add_argument(
+            'dyn-deps-dir',
+            help='Directory that contains all the dynamic libraries to ship in'
+                 ' the wheel (i.e. dependencies).'
+        )
+        self.create_wheel_parser.add_argument(
+            'install-dir',
+            help='Directory in which the library is installed.'
         )
 
         ###############################################
@@ -1064,6 +1097,23 @@ class ManageScript(object):
             print(json.dumps(result))
         else:
             self.write_setenv(args.build_mode)
+
+    def do_create_wheel(self, args):
+        """
+        Create a standalone Python wheel for the Python bindings.
+        """
+        Packager(None, None).create_python_wheel(
+            args.tag,
+            getattr(args, 'wheel-dir'),
+            getattr(args, 'build-dir'),
+            getattr(args, 'dyn-deps-dir'),
+            getattr(args, 'install-dir'),
+            project_name=self.context.ada_api_settings.lib_name.lower(),
+            lib_name='lib{}'.format(
+                self.context.c_api_settings.shared_object_basename
+            ),
+            python_interpreter=args.with_python
+        )
 
     def lksp(self, args):
         return LangkitSupport(args.build_dir)
