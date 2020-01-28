@@ -278,6 +278,7 @@ class CompileCtx(object):
             (self.lang_name.lower
              if c_symbol_prefix is None else c_symbol_prefix)
         )
+        self.c_api_settings.lib_name = self.lib_name.lower
 
         self.default_charset = default_charset
         self.default_tab_stop = default_tab_stop
@@ -1572,8 +1573,6 @@ class CompileCtx(object):
 
         if self.generate_unparser:
             self.warnings.enable(self.warnings.unparser_bad_grammar)
-
-        self.c_api_settings.lib_name = self.lib_name.lower
 
     def prepare_code_emission_pass(self, lib_root, **kwargs):
         """
