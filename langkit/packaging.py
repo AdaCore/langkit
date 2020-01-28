@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import glob
 import os
 import subprocess
+import sys
 
 from e3.env import Env
 from e3.fs import cp, mkdir, sync_tree
@@ -310,3 +311,50 @@ class Packager(object):
         """
         self.package_std_dyn(self.langkit_support_prefix, 'langkit_support',
                              'liblangkit_support', package_dir)
+
+    def create_python_wheel(self, tag, wheel_dir, build_dir, dyn_deps_dir,
+                            langlib_prefix, project_name, lib_name=None,
+                            python_interpreter=None):
+        """
+        Create a Python wheel for a Langkit-generated library.
+
+        :param str tag: Tag for the wheel (setup.py's --python-tag argument).
+        :param str wheel_dir: Destination directory for the wheel.
+        :param str build_dir: Temporary directory to use in order to build the
+            wheel.
+        :param str dyn_deps_dir: Directory that contains all the dynamic
+            libraries to ship in the wheel (i.e. dependencies).
+        :param str langlib_prefix: Directory in which the Langkit-generated
+            dynamic library is installed.
+        :param str project_name: Name of the GPR project for the
+            Langkit-generated library.
+        :param None|str lib_name: If provided, name of the dynamic library. If
+            not provided, consider it is "lib$project_name".
+        :param None|str python_interpreter: If provided, path to the Python
+            interpreter to use in order to build the wheel. If left to None,
+            use the current interpreter.
+        """
+        lib_name = lib_name or 'lib{}'.format(project_name)
+        python_interpreter = python_interpreter or sys.executable
+
+        # Make the wheel directory absolute since setup.py is run from the
+        # build directory.
+        wheel_dir = os.path.abspath(wheel_dir)
+
+        # Copy Python bindings for the Langkit-generated library and its
+        # setup.py script.
+        sync_tree(os.path.join(langlib_prefix, 'python'), build_dir,
+                  delete=True)
+
+        # Import all required dynamic libraries in the Python package
+        package_dir = os.path.join(build_dir, project_name)
+        self.package_std_dyn(langlib_prefix, project_name, lib_name,
+                             package_dir)
+        sync_tree(dyn_deps_dir, package_dir, delete=False)
+
+        # Finally create the wheel
+        args = [python_interpreter, 'setup.py', 'bdist_wheel',
+                '-d', os.path.abspath(wheel_dir)]
+        if tag:
+            args.append('--python-tag={}'.format(tag))
+        subprocess.check_call(args, cwd=build_dir)
