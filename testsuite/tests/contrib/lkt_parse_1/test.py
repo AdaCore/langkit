@@ -49,16 +49,16 @@ test_whitelist = {
     'memoized_unit', 'memoized_unit_loading', 'neq', 'new_node', 'newline',
     'node_comparison', 'node_conversion', 'node_env_concrete_subclass',
     'node_env_empty', 'node_negative_index', 'node_none_check',
-    'node_type_introspection', 'null_list_get', 'ple_after_reparse',
-    'ple_resilience', 'ple_resilience_2', 'ple_subunits', 'ple_subunits_2',
-    'populate_error', 'pred_kind_in', 'private_predicate_props',
-    'properties_introspection', 'public', 'qualifier_sloc_range', 'rebindings',
-    'ref_after_reparse', 'rewriting', 'siblings', 'stack_overflow',
-    'struct_update', 'symbol_type', 'synthetic_props', 'then_analysis_unit',
-    'tokens', 'top_level_predicate', 'trailing_garbage',
-    'unbounded_string_buffer', 'unicode_buffer', 'unit_canon', 'unit_filename',
-    'unparse_empty_list', 'unparse_no_canon', 'unparse_or_skip',
-    'wrapper_caches'
+    'node_type_introspection', 'null_checks', 'null_list_get',
+    'ple_after_reparse', 'ple_resilience', 'ple_resilience_2', 'ple_subunits',
+    'ple_subunits_2', 'populate_error', 'pred_kind_in',
+    'private_predicate_props', 'properties_introspection', 'public',
+    'qualifier_sloc_range', 'rebindings', 'ref_after_reparse', 'rewriting',
+    'siblings', 'stack_overflow', 'struct_update', 'symbol_type',
+    'synthetic_props', 'then_analysis_unit', 'tokens', 'top_level_predicate',
+    'trailing_garbage', 'unbounded_string_buffer', 'unicode_buffer',
+    'unit_canon', 'unit_filename', 'unparse_empty_list', 'unparse_no_canon',
+    'unparse_or_skip', 'wrapper_caches'
 }
 
 whitelisted_tests = [t for t in tests if t[1] in test_whitelist]
