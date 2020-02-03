@@ -14,7 +14,7 @@ from utils import build_and_run
 
 class KV(Struct):
     key = UserField(type=T.String)
-    val = UserField(type=T.Int, default_value=42)
+    value = UserField(type=T.Int, default_value=42)
     node = UserField(type=T.FooNode, default_value=No(T.FooNode))
 
 
@@ -25,8 +25,8 @@ class FooNode(ASTNode):
         return New(T.KV, key=key)
 
     @langkit_property(public=True)
-    def build_2(key=T.String, val=T.Int):
-        return New(T.KV, key=key, val=val)
+    def build_2(key=T.String, value=T.Int):
+        return New(T.KV, key=key, value=value)
 
 
 class Example(FooNode):

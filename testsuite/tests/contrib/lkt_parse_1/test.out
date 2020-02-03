@@ -6500,6 +6500,183 @@ LangkitRoot[1:1-21:2]
 |  |  |  |  |  |  |  |  |suffix:
 |  |  |  |  |  |  |  |  |  Id[19:14-19:28]: as_bare_entity
 
+Parsing concrete syntax for test dflt_field_val
+===============================================
+
+LangkitRoot[1:1-15:2]
+|decls:
+|  FullDeclList[1:1-15:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:42]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:42]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarList[2:18-2:42]
+|  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  ListKindZero[2:18-2:23]
+|  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |sep: <null>
+|  |  FullDecl[6:1-12:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-12:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[8:5-11:29]
+|  |  |  |  |  FullDecl[8:5-8:71]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[6:16-6:16]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[6:16-6:16]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[8:5-8:12]
+|  |  |  |  |  |  |  DeclAnnotation[8:5-8:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[8:6-8:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[8:6-8:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[8:13-8:71]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[8:17-8:24]: build_1
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[8:26-8:52]
+|  |  |  |  |  |  |  |  FunArgDecl[8:26-8:52]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[8:26-8:29]: key
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  GenericTypeRef[8:32-8:52]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[8:32-8:37]: Array
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[8:38-8:51]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[8:38-8:51]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[8:38-8:51]: CharacterType
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[8:55-8:57]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[8:55-8:57]: KV
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  CallExpr[8:60-8:71]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[8:60-8:62]: KV
+|  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  ParamList[8:63-8:70]
+|  |  |  |  |  |  |  |  |  Param[8:63-8:70]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[8:63-8:66]: key
+|  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  Id[8:67-8:70]: key
+|  |  |  |  |  FullDecl[10:5-11:29]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[8:71-8:71]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[8:71-8:71]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[10:5-10:12]
+|  |  |  |  |  |  |  DeclAnnotation[10:5-10:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[10:6-10:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[10:6-10:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[10:13-11:29]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[10:17-10:24]: build_2
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[10:26-10:69]
+|  |  |  |  |  |  |  |  FunArgDecl[10:26-10:52]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[10:26-10:29]: key
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  GenericTypeRef[10:32-10:52]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[10:32-10:37]: Array
+|  |  |  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  |  |  TypeRefList[10:38-10:51]
+|  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[10:38-10:51]
+|  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[10:38-10:51]: CharacterType
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |  |  FunArgDecl[10:54-10:69]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[10:54-10:59]: value
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[10:62-10:69]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[10:62-10:69]: Integer
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[10:72-10:74]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[10:72-10:74]: KV
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  CallExpr[11:5-11:29]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[11:5-11:7]: KV
+|  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  ParamList[11:8-11:28]
+|  |  |  |  |  |  |  |  |  Param[11:8-11:19]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[11:8-11:13]: value
+|  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  Id[11:14-11:19]: value
+|  |  |  |  |  |  |  |  |  Param[11:21-11:28]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[11:21-11:24]: key
+|  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  Id[11:25-11:28]: key
+|  |  FullDecl[14:1-15:2]
+|  |  |doc:
+|  |  |  Doc[12:2-12:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[12:2-12:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[12:2-12:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[14:1-15:2]
+|  |  |  |name:
+|  |  |  |  Id[14:7-14:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[14:17-14:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[14:17-14:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[14:26-14:26]: <empty list>
+
 Parsing concrete syntax for test domain_derived
 ===============================================
 
