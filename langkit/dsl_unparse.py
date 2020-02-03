@@ -118,12 +118,23 @@ def var_name(var_expr, default="_"):
         var_expr.source_name.lower if var_expr.source_name else default
     )
 
+def is_a(expr, *names):
+    return any(expr.__class__.__name__ == n for n in names)
 
-def is_simple_expr(expr):
+
+def needs_parens(expr):
     from langkit.expressions import (FieldAccess, Literal, AbstractVariable,
-                                     BigIntLiteral)
-    return isinstance(expr, (FieldAccess, Literal, AbstractVariable,
-                             BigIntLiteral))
+                                     BigIntLiteral, Map, Quantifier, EnvGet)
+    return not (
+        isinstance(expr, (FieldAccess, Literal, AbstractVariable, BigIntLiteral, EnvGet,
+                          Map, Quantifier))
+        or is_a(expr, "as_entity", "as_bare_entity", "children",
+              "env_parent", "rebindings_parent", "parents", "parent", "root",
+              "append_rebinding", "concat_rebindings", "env_node",
+              "rebindings_new_env", "rebindings_old_env", "get_value",
+              "solve", "is_referenced_from", "env_group", "length",
+              "can_reach", "as_int", "unique", "env_orphan")
+    )
 
 
 def emit_indent_expr(expr, **ctx):
@@ -136,7 +147,7 @@ def emit_indent_expr(expr, **ctx):
 
 def emit_paren_expr(expr, **ctx):
     from langkit.expressions import Let
-    if is_simple_expr(expr):
+    if not needs_parens(expr):
         strn = emit_expr(expr, **ctx)
         return emit_paren(strn) if len(strn) > 40 else strn
     elif isinstance(expr, Let):
@@ -170,11 +181,13 @@ def emit_expr(expr, **ctx):
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try
     )
 
-    then_underscore_var = ctx.get('then_underscore_var')
-    overload_coll_name = ctx.get('overload_coll_name')
 
     def is_a(*names):
         return any(expr.__class__.__name__ == n for n in names)
+
+
+    then_underscore_var = ctx.get('then_underscore_var')
+    overload_coll_name = ctx.get('overload_coll_name')
 
     def emit_lambda(expr, vars):
         vars_str = ", ".join(var_name(var) for var in vars)
