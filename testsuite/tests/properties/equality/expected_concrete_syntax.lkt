@@ -10,12 +10,9 @@ grammar None_grammar {
 
 class FooNode {
 
-    fun env_struct (): EnvStruct = EnvStruct(
-        env=<env_orphan(<FieldAccess .children_env>)>
-    )
+    fun env_struct (): EnvStruct = EnvStruct(env=self.children_env.env_orphan)
 
-    fun env_array (): Array[LexicalEnv] =
-    [<env_orphan(<FieldAccess .children_env>)>]
+    fun env_array (): Array[LexicalEnv] = [self.children_env.env_orphan]
 }
 
 class Decl : FooNode {
@@ -24,7 +21,7 @@ class Decl : FooNode {
     @parse_field items : ASTList[Ref]
 
     @export fun test_env (other : Entity[FooNode]): Boolean =
-    <env_orphan(<FieldAccess .children_env>)> = <env_orphan(<FieldAccess .children_env>)>
+    self.children_env.env_orphan = other.children_env.env_orphan
 
     @export fun test_struct (other : Entity[FooNode]): Boolean =
     self.env_struct = other.env_struct

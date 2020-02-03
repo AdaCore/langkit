@@ -40,7 +40,7 @@ test_whitelist = {
     'early_binding_error', 'entity_bind', 'entity_bind_2', 'entity_bind_3',
     'entity_cast', 'entity_eq', 'entity_field_access', 'entity_length',
     'entity_map', 'entity_match', 'entity_resolver', 'enum_node_inherit',
-    'enum_types', 'env_get_all', 'exposed_bare_nodes', 'external',
+    'enum_types', 'env_get_all', 'equality', 'exposed_bare_nodes', 'external',
     'field_introspection', 'foreign_env_md', 'full_sloc_image', 'ghost_nodes',
     'hashes', 'if_then', 'import_argcount', 'indent_trivia',
     'invalidation_during_mmz', 'is_a', 'let_underscore', 'lifetimes',
