@@ -29,7 +29,7 @@ class Expr : FooNode {
 
     @export fun evaluate (): BigIntegerType
 
-    @export fun evaluate_as_int (): Integer = <as_int(<FieldAccess .evaluate>)>
+    @export fun evaluate_as_int (): Integer = self.evaluate.as_int
 }
 
 class Equal : Expr {
