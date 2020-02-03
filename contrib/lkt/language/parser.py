@@ -708,7 +708,6 @@ lkt_grammar.add_rules(
         G.if_expr,
         G.num_lit,
         G.string_lit,
-        G.match_expr,
         G.logic,
     ),
 
@@ -750,6 +749,7 @@ lkt_grammar.add_rules(
 
     term=Or(
         ParenExpr("(", G.expr, ")"),
+        G.match_expr,
         G.id
     ),
 
