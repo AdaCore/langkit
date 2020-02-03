@@ -409,6 +409,13 @@ class LambdaExpr(Expr):
     body = Field()
 
 
+class RaiseExpr(Expr):
+    """
+    Raise expression.
+    """
+    except_expr = Field()
+
+
 class IfExpr(Expr):
     """
     If expression.
@@ -706,6 +713,7 @@ lkt_grammar.add_rules(
         G.array_literal,
         G.block,
         G.if_expr,
+        G.raise_expr,
         G.num_lit,
         G.string_lit,
         G.logic,
@@ -727,6 +735,8 @@ lkt_grammar.add_rules(
         List(ElsifBranch("elif", G.expr, "then", G.expr), empty_valid=True),
         "else", G.expr
     ),
+
+    raise_expr=RaiseExpr("raise", G.expr),
 
     array_literal=ArrayLiteral(
         "[", List(G.expr, sep=",", empty_valid=True), "]"

@@ -14255,6 +14255,207 @@ LangkitRoot[1:1-44:2]
 |  |  |  |decls:
 |  |  |  |  FullDeclList[43:26-43:26]: <empty list>
 
+Parsing concrete syntax for test invalidation_during_mmz
+========================================================
+
+LangkitRoot[1:1-21:2]
+|decls:
+|  FullDeclList[1:1-21:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:35]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:35]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[2:18-2:35]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[2:18-2:25]: Example
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[2:26-2:34]
+|  |  |  |  |  |  |  |  GrammarToken[2:26-2:34]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:27-2:34]: Example
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[6:1-7:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-7:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[6:16-6:16]: <empty list>
+|  |  FullDecl[9:1-21:2]
+|  |  |doc:
+|  |  |  Doc[7:2-7:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[7:2-7:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[9:1-21:2]
+|  |  |  |name:
+|  |  |  |  Id[9:7-9:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[11:5-20:6]
+|  |  |  |  |  FullDecl[11:5-11:44]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[9:26-9:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[11:5-11:44]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[11:9-11:27]: fetch_example_unit
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[11:29-11:29]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[11:32-11:44]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[11:32-11:44]: InternalUnit
+|  |  |  |  |  |  |body: <null>
+|  |  |  |  |  FullDecl[13:5-14:51]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[11:44-11:44]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[11:44-11:44]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[13:5-13:14]
+|  |  |  |  |  |  |  DeclAnnotation[13:5-13:14]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[13:6-13:14]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[13:6-13:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[13:15-14:51]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[13:19-13:36]: internal_mmz_prop
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[13:38-13:49]
+|  |  |  |  |  |  |  |  FunArgDecl[13:38-13:49]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[13:38-13:39]: i
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:42-13:49]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[13:42-13:49]: Integer
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[13:52-13:59]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[13:52-13:59]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  IfExpr[14:5-14:51]
+|  |  |  |  |  |  |  |cond_expr:
+|  |  |  |  |  |  |  |  ParenExpr[14:8-14:15]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  BinOp[14:9-14:14]
+|  |  |  |  |  |  |  |  |  |left:
+|  |  |  |  |  |  |  |  |  |  Id[14:9-14:10]: i
+|  |  |  |  |  |  |  |  |  |op:
+|  |  |  |  |  |  |  |  |  |  OpEq[14:11-14:12]
+|  |  |  |  |  |  |  |  |  |right:
+|  |  |  |  |  |  |  |  |  |  NumLit[14:13-14:14]: 0
+|  |  |  |  |  |  |  |then_expr:
+|  |  |  |  |  |  |  |  ParenExpr[14:21-14:44]
+|  |  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  |  RaiseExpr[14:22-14:43]
+|  |  |  |  |  |  |  |  |  |except_expr:
+|  |  |  |  |  |  |  |  |  |  CallExpr[14:28-14:43]
+|  |  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  |  Id[14:28-14:41]: PropertyError
+|  |  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  |  ParamList[14:42-14:42]: <empty list>
+|  |  |  |  |  |  |  |alternatives:
+|  |  |  |  |  |  |  |  ElsifBranchList[14:44-14:44]: <empty list>
+|  |  |  |  |  |  |  |else_expr:
+|  |  |  |  |  |  |  |  Id[14:50-14:51]: i
+|  |  |  |  |  FullDecl[16:5-20:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[14:51-14:51]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[14:51-14:51]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[16:5-16:22]
+|  |  |  |  |  |  |  DeclAnnotation[16:5-16:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[16:6-16:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[16:6-16:6]: <empty list>
+|  |  |  |  |  |  |  DeclAnnotation[16:13-16:22]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[16:14-16:22]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[16:14-16:14]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[16:23-20:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[16:27-16:35]: mmz_prop
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[16:37-16:48]
+|  |  |  |  |  |  |  |  FunArgDecl[16:37-16:48]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[16:37-16:38]: i
+|  |  |  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[16:41-16:48]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[16:41-16:48]: Integer
+|  |  |  |  |  |  |  |  |default_val: <null>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[16:51-16:58]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[16:51-16:58]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BlockExpr[16:61-20:6]
+|  |  |  |  |  |  |  |val_defs:
+|  |  |  |  |  |  |  |  BaseValDeclList[17:9-17:40]
+|  |  |  |  |  |  |  |  |  ValDecl[17:9-17:40]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[17:13-17:14]: _
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  DottedName[17:17-17:40]
+|  |  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  |  Id[17:17-17:21]: self
+|  |  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  |  Id[17:22-17:40]: fetch_example_unit
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  CallExpr[19:9-19:34]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  DottedName[19:9-19:31]
+|  |  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  |  Id[19:9-19:13]: self
+|  |  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  |  Id[19:14-19:31]: internal_mmz_prop
+|  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  ParamList[19:32-19:33]
+|  |  |  |  |  |  |  |  |  |  Param[19:32-19:33]
+|  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  Id[19:32-19:33]: i
+
 Parsing concrete syntax for test is_a
 =====================================
 
@@ -18748,6 +18949,161 @@ LangkitRoot[1:1-18:2]
 |  |  |  |  |  |  |  |  OpEq[17:20-17:21]
 |  |  |  |  |  |  |  |right:
 |  |  |  |  |  |  |  |  NumLit[17:22-17:23]: 0
+
+Parsing concrete syntax for test memoized_property_error
+========================================================
+
+LangkitRoot[1:1-19:2]
+|decls:
+|  FullDeclList[1:1-19:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:35]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:35]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[2:18-2:35]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[2:18-2:25]: Example
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[2:26-2:34]
+|  |  |  |  |  |  |  |  GrammarToken[2:26-2:34]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:27-2:34]: Example
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[6:1-7:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-7:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[6:16-6:16]: <empty list>
+|  |  FullDecl[9:1-19:2]
+|  |  |doc:
+|  |  |  Doc[7:2-7:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[7:2-7:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[9:1-19:2]
+|  |  |  |name:
+|  |  |  |  Id[9:7-9:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[11:5-18:44]
+|  |  |  |  |  FullDecl[11:5-15:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[9:26-9:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[11:5-11:22]
+|  |  |  |  |  |  |  DeclAnnotation[11:5-11:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[11:6-11:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[11:6-11:6]: <empty list>
+|  |  |  |  |  |  |  DeclAnnotation[11:13-11:22]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[11:14-11:22]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[11:14-11:14]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[11:23-15:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[11:27-11:32]: prop1
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[11:34-11:34]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[11:37-11:44]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[11:37-11:44]: Boolean
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BlockExpr[11:47-15:6]
+|  |  |  |  |  |  |  |val_defs:
+|  |  |  |  |  |  |  |  BaseValDeclList[12:9-12:23]
+|  |  |  |  |  |  |  |  |  ValDecl[12:9-12:23]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[12:13-12:14]: _
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  ArrayLiteral[12:17-12:23]
+|  |  |  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  |  |  ExprList[12:18-12:22]
+|  |  |  |  |  |  |  |  |  |  |  |  Id[12:18-12:22]: self
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  RaiseExpr[14:9-14:48]
+|  |  |  |  |  |  |  |  |except_expr:
+|  |  |  |  |  |  |  |  |  CallExpr[14:15-14:48]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[14:15-14:28]: PropertyError
+|  |  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  |  ParamList[14:29-14:47]
+|  |  |  |  |  |  |  |  |  |  |  Param[14:29-14:47]
+|  |  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  |  StringLit[14:29-14:47]: 'Explicit error 1'
+|  |  |  |  |  FullDecl[17:5-18:44]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[15:6-15:6]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[15:6-15:6]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[17:5-17:22]
+|  |  |  |  |  |  |  DeclAnnotation[17:5-17:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[17:6-17:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[17:6-17:6]: <empty list>
+|  |  |  |  |  |  |  DeclAnnotation[17:13-17:22]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[17:14-17:22]: memoized
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[17:14-17:14]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[17:23-18:44]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[17:27-17:32]: prop2
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[17:34-17:34]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[17:37-17:44]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[17:37-17:44]: Boolean
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  RaiseExpr[18:5-18:44]
+|  |  |  |  |  |  |  |except_expr:
+|  |  |  |  |  |  |  |  CallExpr[18:11-18:44]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[18:11-18:24]: PropertyError
+|  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  ParamList[18:25-18:43]
+|  |  |  |  |  |  |  |  |  |  Param[18:25-18:43]
+|  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  StringLit[18:25-18:43]: 'Explicit error 2'
 
 Parsing concrete syntax for test memoized_unit
 ==============================================
@@ -27928,6 +28284,134 @@ LangkitRoot[1:1-85:2]
 |  |  |  |  |  |  |  |  |  Id[84:41-84:46]: value
 |  |  |  |  |  |  |  |suffix:
 |  |  |  |  |  |  |  |  Id[84:47-84:51]: eval
+
+Parsing concrete syntax for test property_error
+===============================================
+
+LangkitRoot[1:1-15:2]
+|decls:
+|  FullDeclList[1:1-15:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:35]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:35]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  ParseNodeExpr[2:18-2:35]
+|  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  Id[2:18-2:25]: Example
+|  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  GrammarExprList[2:26-2:34]
+|  |  |  |  |  |  |  |  GrammarToken[2:26-2:34]
+|  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  Id[2:27-2:34]: Example
+|  |  |  |  |  |  |  |  |expr: <null>
+|  |  FullDecl[6:1-7:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-7:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[6:16-6:16]: <empty list>
+|  |  FullDecl[9:1-15:2]
+|  |  |doc:
+|  |  |  Doc[7:2-7:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[7:2-7:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[9:1-15:2]
+|  |  |  |name:
+|  |  |  |  Id[9:7-9:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[11:5-14:65]
+|  |  |  |  |  FullDecl[11:5-12:49]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[9:26-9:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[11:5-11:12]
+|  |  |  |  |  |  |  DeclAnnotation[11:5-11:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[11:6-11:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[11:6-11:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[11:13-12:49]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[11:17-11:26]: raise_msg
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[11:28-11:28]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[11:31-11:38]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[11:31-11:38]: Boolean
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  RaiseExpr[12:5-12:49]
+|  |  |  |  |  |  |  |except_expr:
+|  |  |  |  |  |  |  |  CallExpr[12:11-12:49]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[12:11-12:24]: PropertyError
+|  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  ParamList[12:25-12:48]
+|  |  |  |  |  |  |  |  |  |  Param[12:25-12:48]
+|  |  |  |  |  |  |  |  |  |  |name: <null>
+|  |  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  |  StringLit[12:25-12:48]: 'Custom error message!'
+|  |  |  |  |  FullDecl[14:5-14:65]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[12:49-12:49]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[12:49-12:49]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[14:5-14:12]
+|  |  |  |  |  |  |  DeclAnnotation[14:5-14:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[14:6-14:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[14:6-14:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[14:13-14:65]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[14:17-14:29]: raise_no_msg
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[14:31-14:31]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[14:34-14:41]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[14:34-14:41]: Boolean
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  RaiseExpr[14:44-14:65]
+|  |  |  |  |  |  |  |except_expr:
+|  |  |  |  |  |  |  |  CallExpr[14:50-14:65]
+|  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  Id[14:50-14:63]: PropertyError
+|  |  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  |  ParamList[14:64-14:64]: <empty list>
 
 Parsing concrete syntax for test public
 =======================================
