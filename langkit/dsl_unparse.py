@@ -167,7 +167,7 @@ def emit_expr(expr, **ctx):
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
-        StructUpdate, BigIntLiteral, RefCategories, Bind
+        StructUpdate, BigIntLiteral, RefCategories, Bind, Try
     )
 
     then_underscore_var = ctx.get('then_underscore_var')
@@ -372,6 +372,12 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, EnumLiteral):
         return expr.value.dsl_name
+
+    elif isinstance(expr, Try):
+        return "try $sl$i{}$sl$d {}".format(
+            ee_pexpr(expr.try_expr),
+            "or {}".format(ee_pexpr(expr.else_expr)) if expr.else_expr is not None else ""
+        )
 
     elif isinstance(expr, Arithmetic):
         return "{} {} {}".format(ee_pexpr(expr.l), expr.op, ee_pexpr(expr.r))

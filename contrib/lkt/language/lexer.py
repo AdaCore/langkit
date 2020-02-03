@@ -60,6 +60,7 @@ class Token(LexerToken):
     MatchKw = WithText()
     CaseKw = WithText()
     RaiseKw = WithText()
+    TryKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -133,6 +134,7 @@ lkt_lexer.add_rules(
     (Literal('match'),     Token.MatchKw),
     (Literal('case'),      Token.CaseKw),
     (Literal('raise'),     Token.RaiseKw),
+    (Literal('try'),       Token.TryKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),

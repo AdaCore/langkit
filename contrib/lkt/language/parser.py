@@ -409,6 +409,14 @@ class LambdaExpr(Expr):
     body = Field()
 
 
+class TryExpr(Expr):
+    """
+    Try expression.
+    """
+    try_expr = Field()
+    or_expr = Field()
+
+
 class RaiseExpr(Expr):
     """
     Raise expression.
@@ -714,6 +722,7 @@ lkt_grammar.add_rules(
         G.block,
         G.if_expr,
         G.raise_expr,
+        G.try_expr,
         G.num_lit,
         G.string_lit,
         G.logic,
@@ -737,6 +746,7 @@ lkt_grammar.add_rules(
     ),
 
     raise_expr=RaiseExpr("raise", G.expr),
+    try_expr=TryExpr("try", G.expr, Opt("or", G.expr)),
 
     array_literal=ArrayLiteral(
         "[", List(G.expr, sep=",", empty_valid=True), "]"

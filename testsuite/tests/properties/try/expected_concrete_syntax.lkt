@@ -10,7 +10,9 @@ class Example : FooNode {
 
     fun failing_property (): Boolean = raise PropertyError()
 
-    @export fun failsafe_property (): Boolean = <Try>
+    @export fun failsafe_property (): Boolean =
+    try self.failing_property or (false)
 
-    @export fun failsafe_property_2 (): Boolean = <Try>
+    @export fun failsafe_property_2 (): Boolean =
+    try self.failing_property
 }
