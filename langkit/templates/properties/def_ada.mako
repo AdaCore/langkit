@@ -143,7 +143,7 @@ begin
    ## If this property uses env, we want to make sure lexical env caches are up
    ## to date.
    % if property.uses_envs:
-      if Node /= null then
+      if Self /= null then
          Reset_Caches (Self.Unit);
 
          ## And if it is also public, we need to ensure that lexical
@@ -155,6 +155,10 @@ begin
    % endif
 
    % if memoized:
+      if Self = null then
+         raise Property_Error with "property called on null node";
+      end if;
+
       ## If memoization is enabled for this property, look for an already
       ## computed result for this property. See the declaration of
       ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale about
@@ -295,16 +299,18 @@ exception
       % endif
 
       % if memoized:
-         % if not property.memoize_in_populate:
-         if not Self.Unit.Context.In_Populate_Lexical_Env then
-         % endif
+         if Self /= null then
+            % if not property.memoize_in_populate:
+            if not Self.Unit.Context.In_Populate_Lexical_Env then
+            % endif
 
-            Add_Memoized_Value
-              (Self.Unit, Mmz_Handle, (Kind => Mmz_Property_Error));
+               Add_Memoized_Value
+                 (Self.Unit, Mmz_Handle, (Kind => Mmz_Property_Error));
 
-         % if not property.memoize_in_populate:
+            % if not property.memoize_in_populate:
+            end if;
+            % endif
          end if;
-         % endif
       % endif
 
       % if has_logging:
