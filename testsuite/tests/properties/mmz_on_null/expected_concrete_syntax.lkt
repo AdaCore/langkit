@@ -1,0 +1,12 @@
+grammar None_grammar {
+    main_rule <- Example(@Example)
+
+}
+
+class FooNode {
+
+    @export memoized fun prop (): Boolean = true
+}
+
+class Example : FooNode {
+}
