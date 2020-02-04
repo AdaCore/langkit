@@ -706,15 +706,13 @@ package body ${ada_lib_name}.Implementation.C is
       declare
          Id : constant Exception_Id := Exception_Identity (Exc);
       begin
-         % for i, (_, exc) in enumerate(ctx.sorted_exception_types):
-         ${'elsif' if i > 0 else 'if'} Id = ${exc}'Identity then
-            Last_Exception.Kind := ${ctx.exception_kind_name(exc)};
+         % for i, e in enumerate(ctx.sorted_exception_types):
+         ${'elsif' if i > 0 else 'if'} Id = ${e.name}'Identity then
+            Last_Exception.Kind := ${e.kind_name};
          % endfor
          else
             Last_Exception.Kind := ${
-               ctx.exception_kind_name(
-                  ctx.exception_types['langkit.native_exception']
-               )
+               ctx.exception_types['native_exception'].kind_name
             };
          end if;
       end;

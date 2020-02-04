@@ -37,6 +37,7 @@ library project Langkit_Support is
       "Langkit_Support.Bump_Ptr.Vectors",
       "Langkit_Support.Cheap_Sets",
       "Langkit_Support.Diagnostics",
+      "Langkit_Support.Errors",
       "Langkit_Support.Hashes",
       "Langkit_Support.Images",
       "Langkit_Support.Iterators",

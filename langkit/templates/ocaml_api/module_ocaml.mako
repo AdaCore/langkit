@@ -15,8 +15,8 @@ let so_ext = if Sys.win32 || Sys.cygwin then "dll" else "so"
 let c_lib_name = Format.sprintf "lib${c_api.shared_object_basename}.%s" so_ext
 let c_lib = Dl.dlopen ~filename:c_lib_name ~flags:[Dl.RTLD_NOW]
 
-% for _, exc in ctx.sorted_exception_types:
-exception ${exc} of string
+% for e in ctx.sorted_exception_types:
+exception ${e.name} of string
 
 % endfor
 
@@ -74,9 +74,9 @@ let raisable typ =
     | None -> value
     | Some exc ->
         (match exc.kind with
-   % for i, (_, exc_type) in enumerate(ctx.sorted_exception_types):
+   % for i, e in enumerate(ctx.sorted_exception_types):
          | ${i} ->
-             raise (${exc_type} exc.information)
+             raise (${e.name} exc.information)
    % endfor
          | _ -> assert false)
   in

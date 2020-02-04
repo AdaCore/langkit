@@ -406,15 +406,15 @@ def _canonicalize_buffer(buffer, charset):
 #
 
 
-% for exc_ref, exc in ctx.sorted_exception_types:
-class ${exc}(Exception):
-    ${py_doc(exc_ref, 4)}
+% for e in ctx.sorted_exception_types:
+class ${e.name.camel}(Exception):
+    ${py_doc(e.doc_entity, 4)}
     pass
 % endfor
 
 _exception_kind_to_type = [
-% for _, exc in ctx.sorted_exception_types:
-    ${exc},
+% for e in ctx.sorted_exception_types:
+    ${e.name.camel},
 % endfor
 ]
 
