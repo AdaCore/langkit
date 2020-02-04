@@ -10,9 +10,9 @@
  * OCaml binding of the ${ctx.lib_name.camel} API.
  *)
 
-% for name, exc in ctx.sorted_exception_types:
-${ocaml_doc(name, 0)}
-exception ${exc} of string
+% for e in ctx.sorted_exception_types:
+${ocaml_doc(e.doc_entity, 0)}
+exception ${e.name} of string
 
 % endfor
 

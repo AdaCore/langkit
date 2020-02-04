@@ -129,8 +129,8 @@ const ${grammar_rule_type} ${default_grammar_rule} = ${
 
 ${c_doc('langkit.exception_kind_type')}
 typedef enum {
-   % for _, exc in ctx.sorted_exception_types:
-      ${ctx.exception_kind_name(exc).upper},
+   % for e in ctx.sorted_exception_types:
+      ${e.kind_name.upper},
    % endfor
 } ${exception_kind_type};
 

@@ -173,6 +173,52 @@ class LibraryEntity(object):
         return '{}.{}'.format(self.unit_fqn, self.entity_name)
 
 
+class GeneratedException(object):
+    """
+    Describe an exception in generated libraries.
+    """
+
+    def __init__(self, doc_section, package, name):
+        """
+        :param str doc_section: Section in the documentation where this
+            exception occurs.
+        :param list[names.Name] package: Ada package in which this exception is
+            originally defined.
+        :param names.Name name: Name for this exception.
+        """
+        self.doc_section = doc_section
+        self.package = package
+        self.name = name
+
+    @property
+    def doc_entity(self):
+        """
+        Name of the documentation entry for this exception.
+
+        :rtype: str
+        """
+        return '{}.{}'.format(self.doc_section, self.name.lower)
+
+    @property
+    def qualname(self):
+        """
+        Fully qualified name to the exception declaration (in Ada).
+
+        :rtype: str
+        """
+        return '{}.{}'.format('.'.join(str(p) for p in self.package),
+                              self.name)
+
+    @property
+    def kind_name(self):
+        """
+        Return the enumeration name corresponding to an exception.
+
+        :rtype: names.Name
+        """
+        return names.Name('Exception') + self.name
+
+
 class CompileCtx(object):
     """State holder for native code emission."""
 
@@ -405,13 +451,9 @@ class CompileCtx(object):
 
         self.exception_types = {}
         """
-        Dictionary of all exception types.
+        Mapping of all exception types. Keys are lower-case exception names.
 
-        This maps from keys in the documentation database for the exception
-        documentation (for instance 'langkit.*', see langkit.documentation) to
-        the name of exceptions.
-
-        :type: dict[str, names.Name]
+        :type: dict[str, GeneratedException]
         """
 
         self._array_types = None
@@ -647,37 +689,36 @@ class CompileCtx(object):
         # Register builtin exception types
         self._register_builtin_exception_types()
 
-    def _register_exception_type(self, namespace, exception_name):
-        """
-        Register an exception type.
-
-        :param str namespace: Prefix for the name of the documentation entry.
-            For instance: 'langkit', or 'langkit.rewriting'.
-        :param str exception_name: Lower-case name for the exception type.
-        """
-        ref = '{}.{}'.format(namespace, exception_name)
-        self.exception_types[ref] = names.Name.from_lower(exception_name)
-
     def _register_builtin_exception_types(self):
         """
         Register exception types for all builtin exceptions.
         """
         for namespace, exception_name in [
-            ('langkit', 'native_exception'),
-            ('langkit', 'precondition_failure'),
-            ('langkit', 'property_error'),
-            ('langkit', 'invalid_unit_name_error'),
-            ('langkit', 'invalid_symbol_error'),
-            ('langkit', 'stale_reference_error'),
-            ('langkit', 'unknown_charset'),
-            ('langkit', 'invalid_input'),
-            ('langkit.introspection', 'invalid_field'),
-            ('langkit.introspection', 'node_data_evaluation_error'),
-            ('langkit.rewriting', 'template_format_error'),
-            ('langkit.rewriting', 'template_args_error'),
-            ('langkit.rewriting', 'template_instantiation_error')
+            (None, 'native_exception'),
+            (None, 'precondition_failure'),
+            (None, 'property_error'),
+            (None, 'invalid_unit_name_error'),
+            (None, 'invalid_symbol_error'),
+            (None, 'stale_reference_error'),
+            (None, 'unknown_charset'),
+            (None, 'invalid_input'),
+            ('introspection', 'invalid_field'),
+            ('introspection', 'node_data_evaluation_error'),
+            ('rewriting', 'template_format_error'),
+            ('rewriting', 'template_args_error'),
+            ('rewriting', 'template_instantiation_error')
         ]:
-            self._register_exception_type(namespace, exception_name)
+            doc_section = 'langkit'
+            package = [names.Name('Langkit_Support'),
+                       names.Name('Errors')]
+            if namespace:
+                doc_section = '{}.{}'.format(doc_section, namespace)
+                package.append(names.Name.from_lower(namespace))
+
+            assert exception_name not in self.exception_types
+            self.exception_types[exception_name] = GeneratedException(
+                doc_section, package, names.Name.from_lower(exception_name)
+            )
 
     @property
     def exceptions_by_section(self):
@@ -692,15 +733,15 @@ class CompileCtx(object):
         """
         sections = defaultdict(list)
 
-        for doc_name, exc_name in self.sorted_exception_types:
+        for e in self.sorted_exception_types:
             # Remove the 'langkit.' prefix
-            no_prefix = doc_name.split('.', 1)[1]
+            no_prefix = e.doc_entity.split('.', 1)[1]
 
             section_name = (
                 None if '.' not in no_prefix else
                 no_prefix.split('.')[0].replace('_', ' ').capitalize())
 
-            sections[section_name].append((doc_name, exc_name))
+            sections[section_name].append(e)
 
         return sorted(sections.iteritems())
 
@@ -754,7 +795,8 @@ class CompileCtx(object):
 
         :rtype: list[(str, names.Name)]
         """
-        return sorted(self.exception_types.items())
+        return sorted(self.exception_types.values(),
+                      key=lambda e: e.doc_entity)
 
     def do_generate_logic_binder(self, convert_property=None,
                                  eq_property=None):
@@ -768,16 +810,6 @@ class CompileCtx(object):
         :param PropertyDef eq_property: The equality property.
         """
         self.logic_binders.add((convert_property, eq_property))
-
-    @staticmethod
-    def exception_kind_name(exc_name):
-        """
-        Return the enumeration name corresponding to an exception.
-
-        :param names.Name exc_name: Name of the requested exception.
-        :rtype: names.Name
-        """
-        return names.Name('Exception') + exc_name
 
     @staticmethod
     def grammar_rule_api_name(rule):

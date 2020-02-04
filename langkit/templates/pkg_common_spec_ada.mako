@@ -5,6 +5,7 @@
 with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
 
+with Langkit_Support.Errors;
 with Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 
@@ -293,9 +294,9 @@ package ${ada_lib_name}.Common is
    ${comment_box(section_name, 3)}
 
    % endif
-   % for doc_name, exc_name in exceptions:
-   ${exc_name} : exception;
-   ${ada_doc(doc_name, 3)}
+   % for e in exceptions:
+   ${e.name} : exception renames ${e.qualname};
+   ${ada_doc(e.doc_entity, 3)}
 
    % endfor
    % endfor
