@@ -285,9 +285,6 @@ package ${ada_lib_name}.Common is
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for ``T``
 
-   procedure Raise_Property_Error (Message : String := "");
-   --  Raise a ``Property_Error`` with the given message
-
    ## Emit declarations for all exceptions
    % for section_name, exceptions in ctx.exceptions_by_section:
    % if section_name:

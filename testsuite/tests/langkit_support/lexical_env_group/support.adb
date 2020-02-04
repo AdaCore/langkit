@@ -2,15 +2,6 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 package body Support is
 
-   --------------------------
-   -- Raise_Property_Error --
-   --------------------------
-
-   procedure Raise_Property_Error (Message : String := "") is
-   begin
-      raise Program_Error;
-   end Raise_Property_Error;
-
    --------------
    -- Put_Line --
    --------------

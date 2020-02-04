@@ -377,19 +377,6 @@ package body ${ada_lib_name}.Common is
    end Convert;
 
    --------------------------
-   -- Raise_Property_Error --
-   --------------------------
-
-   procedure Raise_Property_Error (Message : String := "") is
-   begin
-      if Message'Length = 0 then
-         raise Property_Error;
-      else
-         raise Property_Error with Message;
-      end if;
-   end Raise_Property_Error;
-
-   --------------------------
    -- Wrap_Token_Reference --
    --------------------------
 
