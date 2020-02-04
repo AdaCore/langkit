@@ -1,0 +1,12 @@
+grammar None_grammar {
+    main_rule <- Example(@Example)
+
+}
+
+class FooNode {
+}
+
+class Example : FooNode {
+
+    fun resolve (): LexicalEnv = raise PropertyError()
+}

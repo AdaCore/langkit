@@ -183,6 +183,14 @@ package body Langkit_Support.Lexical_Env is
          when False =>
             null;
       end case;
+   exception
+      when Property_Error =>
+         --  Resolution failed. Get_Env took care of invalidating the cache, so
+         --  there is nothing else to do. Note that there is no need to
+         --  propagate the error, as the job of this procedure is just to do
+         --  precomputation for Get_Env. The next call to Get_Env will
+         --  propagate this error, so all is fine.
+         null;
    end Resolve;
 
    -------------
