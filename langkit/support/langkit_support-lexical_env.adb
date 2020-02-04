@@ -28,9 +28,10 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 
 with System.Address_Image;
-
-with Langkit_Support.Images; use Langkit_Support.Images;
 with System.Assertions;
+
+with Langkit_Support.Errors; use Langkit_Support.Errors;
+with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Env is
 
@@ -360,7 +361,7 @@ package body Langkit_Support.Lexical_Env is
       New_Env : Lexical_Env) return Env_Rebindings is
    begin
       if not Is_Rebindable (Env_Node (Old_Env)) then
-         Raise_Property_Error ("Illegal lexical environment rebinding");
+         raise Property_Error with "Illegal lexical environment rebinding";
       end if;
 
       return Append (Self, Old_Env, New_Env);
@@ -518,8 +519,8 @@ package body Langkit_Support.Lexical_Env is
 
       if Rebindings_Assoc then
          if Self.Env.Rebindings_Assoc_Ref_Env /= -1 then
-            Raise_Property_Error
-              ("Env already has a rebindings associated reference env");
+            raise Property_Error with
+               "Env already has a rebindings associated reference env";
          end if;
 
          Self.Env.Rebindings_Assoc_Ref_Env :=
@@ -1151,16 +1152,16 @@ package body Langkit_Support.Lexical_Env is
          case Env.Kind is
             when Primary =>
                if Env.Env.Transitive_Parent then
-                  Raise_Property_Error
-                     ("Cannot create an orphan for an environment with a"
-                      & " transitive parent");
+                  raise Property_Error with
+                     "Cannot create an orphan for an environment with a"
+                     & " transitive parent";
                end if;
 
             when Orphaned => null;
 
             when Grouped =>
-               Raise_Property_Error
-                 ("Cannot create an orphan for a grouped environment");
+               raise Property_Error with
+                  "Cannot create an orphan for a grouped environment";
 
             when Rebound =>
                Check_Valid (Env.Env.Rebound_Env);
@@ -1415,7 +1416,7 @@ package body Langkit_Support.Lexical_Env is
 
                      --  Extracted rebinding *must* be the last one
                      if R /= Rebindings then
-                        Raise_Property_Error ("Incorrect rebindings");
+                        raise Property_Error with "Incorrect rebindings";
                      end if;
                      exit;
                   end if;
@@ -1533,9 +1534,11 @@ package body Langkit_Support.Lexical_Env is
          R := L.Parent;
          while R /= null loop
             if L.Old_Env = R.Old_Env then
-               Raise_Property_Error ("Old_Env present twice in rebindings");
+               raise Property_Error with
+                  "Old_Env present twice in rebindings";
             elsif L.New_Env = R.New_Env then
-               Raise_Property_Error ("New_Env present twice in rebindings");
+               raise Property_Error with
+                  "New_Env present twice in rebindings";
             end if;
             R := R.Parent;
          end loop;

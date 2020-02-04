@@ -17,7 +17,6 @@ package Support is
 
    function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
    function Metadata_Hash (Dummy_MD : Metadata) return Hash_Type is (0);
-   procedure Raise_Property_Error (Message : String := "");
    function Combine (Dummy_L, Dummy_R : Metadata) return Metadata
    is ((null record));
    function Parent (Dummy_Node : Character) return Character is (' ');
@@ -60,7 +59,6 @@ package Support is
       Empty_Metadata           => Default_MD,
       Node_Hash                => Node_Hash,
       Metadata_Hash            => Metadata_Hash,
-      Raise_Property_Error     => Raise_Property_Error,
       Combine                  => Combine,
       Can_Reach                => Can_Reach,
       Is_Rebindable            => Is_Rebindable,

@@ -81,8 +81,6 @@ generic
    with function Node_Hash (Node : Node_Type) return Hash_Type;
    with function Metadata_Hash (Metadata : Node_Metadata) return Hash_Type;
 
-   with procedure Raise_Property_Error (Message : String := "");
-
    with function Combine (L, R : Node_Metadata) return Node_Metadata;
 
    with function Can_Reach (Node, From : Node_Type) return Boolean is <>;

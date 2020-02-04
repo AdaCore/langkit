@@ -193,7 +193,6 @@ private package ${ada_lib_name}.Implementation is
       Empty_Metadata           => No_Metadata,
       Node_Hash                => Named_Hash,
       Metadata_Hash            => Hash,
-      Raise_Property_Error     => Raise_Property_Error,
       Combine                  => Combine,
       Node_Text_Image          => AST_Envs_Node_Text_Image,
       Register_Rebinding       => Register_Rebinding,
