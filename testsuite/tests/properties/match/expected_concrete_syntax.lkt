@@ -13,7 +13,7 @@ class FooNode {
     @export fun find_atoms (): Array[Entity[Atom]] = (
         match entity {
             case a : Atom => [a]
-            case _ => null
+            case _ => null.to[Array[Entity[Atom]]]
 
         }
     ) & (
@@ -24,7 +24,7 @@ class FooNode {
         match entity {
             case a : Atom => [a.to[Expr]]
             case e : Expr => [e]
-            case _ => null
+            case _ => null.to[Array[Entity[Expr]]]
 
         }
     ) & (
@@ -35,7 +35,7 @@ class FooNode {
         match entity {
             case e : Expr => [e]
             case a : Atom => [a.to[Expr]]
-            case _ => null
+            case _ => null.to[Array[Entity[Expr]]]
 
         }
     ) & (
@@ -53,7 +53,7 @@ class Expr : FooNode {
     @export fun find_refs (): Array[Entity[Ref]] = (
         match entity {
             case r : Ref => [r]
-            case _ => null
+            case _ => null.to[Array[Entity[Ref]]]
 
         }
     ) & (

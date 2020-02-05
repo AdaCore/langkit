@@ -9,7 +9,7 @@ class FooNode {
 
     fun resolve_ref (): Entity[FooNode] = match self {
         case r : Ref => r.parent.parent.node_env.get(r.name)?(0)
-        case _ => null
+        case _ => null.to[Entity[FooNode]]
 
     }
 }

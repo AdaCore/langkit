@@ -27,8 +27,9 @@ class FooNode {
 
     @export fun int_double (c : BigIntegerType): BigIntegerType = c + c
 
-    @export fun me (b : Boolean): FooNodeStruct =
-    FooNodeStruct(node=if b then entity else (null))
+    @export fun me (b : Boolean): FooNodeStruct = FooNodeStruct(
+        node=if b then entity else (null.to[Entity[FooNode]])
+    )
 
     @export fun get_node (node_struct : FooNodeStruct): Entity[FooNode] =
     node_struct.node

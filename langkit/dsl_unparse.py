@@ -439,7 +439,7 @@ def emit_expr(expr, **ctx):
                 return ""
         return var_name(expr)
     elif isinstance(expr, No):
-        return "null"
+        return "null.to[{}]".format(type_name(expr.expr_type))
     elif isinstance(expr, CollectionSingleton):
         if then_underscore_var:
             return emit_method_call(ee(expr.expr), "singleton")

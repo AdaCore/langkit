@@ -16,7 +16,9 @@ class Example : SomeNode {
 
     fun test_prop (): Boolean = true
 
-    @export fun solve (): Boolean = (%domain(self.v, [null])) and (
+    @export fun solve (): Boolean = (
+        %domain(self.v, [null.to[Entity[FooNode]]])
+    ) and (
         %predicate(BareSomeNode.test_prop, self.v)
     ).solve
 }
