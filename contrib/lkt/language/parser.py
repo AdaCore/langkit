@@ -97,30 +97,22 @@ class GrammarRuleRef(GrammarExpr):
     node_name = Field()
 
 
-@abstract
-class Name(Expr):
+class DotExpr(Expr):
     """
-    Name referencing an entity.
-    """
-    pass
-
-
-class DottedName(Name):
-    """
-    Dotted qualified name.
+    Dotted expression.
     """
     prefix = Field()
     suffix = Field()
 
 
-class NullCondDottedName(DottedName):
+class NullCondDottedName(DotExpr):
     """
-    Null conditional dotted name.
+    Null conditional dotted expression.
     """
     pass
 
 
-class Id(Name):
+class Id(Expr):
     """
     Identifier.
     """
@@ -762,7 +754,7 @@ lkt_grammar.add_rules(
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.params, "]"),
         ErrorOnNull(G.basic_expr, "!"),
-        DottedName(G.basic_expr, ".", G.id),
+        DotExpr(G.basic_expr, ".", G.id),
         NullCondDottedName(G.basic_expr, "?", ".", G.id),
         G.term
     ),
@@ -774,7 +766,7 @@ lkt_grammar.add_rules(
     ),
 
     basic_name=Or(
-        DottedName(G.basic_name, ".", G.id),
+        DotExpr(G.basic_name, ".", G.id),
         G.id
     ),
 
