@@ -453,6 +453,12 @@ class ManageScript(object):
             help='Instrument the generated library to compute its code'
                  ' coverage. This requires GNATcoverage.'
         )
+        subparser.add_argument(
+            '--relative-project', action='store_true',
+            help='Use relative paths in generated project files. This is'
+                 ' useful in order to get portable generated sources, for'
+                 ' releases for instance.'
+        )
 
         # RA22-015: option to dump the results of the unparsing concrete syntax
         # to a file.
@@ -760,6 +766,7 @@ class ManageScript(object):
             plugin_passes=args.plugin_pass,
             pretty_print=not args.no_pretty_print,
             coverage=args.coverage,
+            relative_project=args.relative_project,
             unparse_destination_file=args.unparse_destination
         )
 

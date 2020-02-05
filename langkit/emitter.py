@@ -125,7 +125,7 @@ class Emitter(object):
                  generate_astdoc=True, generate_gdb_hook=True,
                  pretty_print=False, post_process_ada=None,
                  post_process_cpp=None, post_process_python=None,
-                 coverage=False,
+                 coverage=False, relative_project=False,
                  unparse_destination_file=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
@@ -176,6 +176,9 @@ class Emitter(object):
 
         :param bool coverage: Instrument the generated library to compute its
             code coverage. This requires GNATcoverage.
+
+        :param bool relative_project: See libmanage's --relative-project
+            option.
         """
         self.context = context
         self.verbosity = context.verbosity
@@ -207,6 +210,7 @@ class Emitter(object):
         self.post_process_python = post_process_python
         self.coverage = coverage
         self.gnatcov = context.gnatcov
+        self.relative_project = relative_project
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
@@ -313,6 +317,20 @@ class Emitter(object):
                     use_clause=True
                 )
 
+    def path_to(self, destination, path_from):
+        """
+        Helper to generate absolute or relative paths inside the generated
+        project, depending on libmanage's --relative-path.
+
+        :param bool relative_project: Whether to generate relative paths.
+        :param str destination: Path to generate. This argument can be either
+            relative to ``path_from`` or absolute.
+        """
+        destination = os.path.abspath(os.path.join(path_from, destination))
+        return (os.path.relpath(destination, path_from)
+                if self.relative_project else
+                destination)
+
     def add_library_interface(self, filename, generated):
         assert not self._project_file_emitted
 
@@ -365,6 +383,7 @@ class Emitter(object):
                 'project_file',
                 lib_name=ctx.ada_api_settings.lib_name,
                 os_path=os.path,
+                project_path=os.path.dirname(self.main_project_file),
             )
         )
 
