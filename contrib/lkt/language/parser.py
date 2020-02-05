@@ -708,7 +708,6 @@ lkt_grammar.add_rules(
     ),
 
     primary=Or(
-        G.null,
         G.lambda_expr,
         G.array_literal,
         G.block,
@@ -762,7 +761,8 @@ lkt_grammar.add_rules(
     term=Or(
         ParenExpr("(", G.expr, ")"),
         G.match_expr,
-        G.id
+        G.null,
+        G.id,
     ),
 
     basic_name=Or(
