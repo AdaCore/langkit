@@ -332,6 +332,13 @@ class ArrayLiteral(Expr):
     exprs = Field()
 
 
+class NotExpr(Expr):
+    """
+    Boolean negation expression.
+    """
+    expr = Field()
+
+
 class Isa(Expr):
     """
     Isa expression.
@@ -680,9 +687,13 @@ lkt_grammar.add_rules(
         G.rel
     ),
 
-
     rel=Or(
-        BinOp(G.rel, Or(Op.alt_lte("<="),
+        NotExpr("not", G.eq),
+        G.eq
+    ),
+
+    eq=Or(
+        BinOp(G.eq, Or(Op.alt_lte("<="),
                         Op.alt_lt("<"),
                         Op.alt_gte(">="),
                         Op.alt_gt(">"),
