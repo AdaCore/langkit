@@ -10,7 +10,7 @@ class FooNode {
         val arg1 = if empty1 then _ else self.children_env
         val arg2 = if empty2 then _ else self.children_env
 
-        <is_visible_from(<Var arg1>, <Var arg2>)>
+        arg1.is_visible_from(arg2)
     }
 }
 
