@@ -43,6 +43,7 @@ class Token(LexerToken):
     # Keywords
     GrammarKw = WithText()
     OrKw = WithText()
+    NotKw = WithText()
     ClassKw = WithText()
     FunKw = WithText()
     PublicKw = WithText()
@@ -116,7 +117,6 @@ lkt_lexer.add_rules(
 
     # Keywords
     (Literal('grammar'),   Token.GrammarKw),
-    (Literal('or'),        Token.OrKw),
     (Literal('class'),     Token.ClassKw),
     (Literal('fun'),       Token.FunKw),
     (Literal('public'),    Token.PublicKw),
@@ -130,6 +130,7 @@ lkt_lexer.add_rules(
     (Literal('then'),      Token.ThenKw),
     (Literal('and'),       Token.AndKw),
     (Literal('or'),        Token.OrKw),
+    (Literal('not'),       Token.NotKw),
     (Literal('bind'),      Token.BindKw),
     (Literal('match'),     Token.MatchKw),
     (Literal('case'),      Token.CaseKw),
