@@ -13,14 +13,14 @@ from utils import build_and_run
 
 class KV(Struct):
     key = UserField(type=T.String)
-    val = UserField(type=T.String)
+    value = UserField(type=T.String)
 
 
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
     def get():
-        return New(T.KV, key=String("So"), val=String("What"))
+        return New(T.KV, key=String("So"), value=String("What"))
 
 
 class Example(FooNode):

@@ -57,9 +57,9 @@ test_whitelist = {
     'pred_kind_in', 'private_predicate_props', 'properties_introspection',
     'property_error', 'public', 'qualifier_sloc_range', 'rebindings',
     'ref_after_reparse', 'rewriting', 'siblings', 'stack_overflow',
-    'struct_update', 'symbol_type', 'synthetic_props', 'then_analysis_unit',
-    'tokens', 'top_level_predicate', 'trailing_garbage', 'try',
-    'unbounded_string_buffer', 'unicode_buffer', 'unique', 'unit_canon',
+    'struct_of_array', 'struct_update', 'symbol_type', 'synthetic_props',
+    'then_analysis_unit', 'tokens', 'top_level_predicate', 'trailing_garbage',
+    'try', 'unbounded_string_buffer', 'unicode_buffer', 'unique', 'unit_canon',
     'unit_filename', 'unparse_empty_list', 'unparse_no_canon',
     'unparse_or_skip', 'wrapper_caches'
 }
