@@ -106,10 +106,10 @@ class StringLiteral(FooNode):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.node, list_cls=Sequence),
-    node=Or(foo_grammar.example, foo_grammar.null, foo_grammar.var,
+    node=Or(foo_grammar.example, foo_grammar.null_node, foo_grammar.var,
             foo_grammar.ident, foo_grammar.string),
     example=Example('example'),
-    null=Null('null'),
+    null_node=Null('null'),
     var=Var('var', '(', foo_grammar.main_rule, ')'),
     ident=Ident(Token.Identifier),
     string=StringLiteral(Token.String)

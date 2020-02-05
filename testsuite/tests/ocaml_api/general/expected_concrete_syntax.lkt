@@ -1,10 +1,10 @@
 grammar None_grammar {
-    node <- or(example | null | var | ident | string)
+    node <- or(example | null_node | var | ident | string)
     ident <- Ident(@Identifier)
     string <- StringLiteral(@String)
     main_rule <- list*(node)
+    null_node <- Null(@Null)
     var <- Var(@Var @LPar main_rule @RPar)
-    null <- Null(@Null)
     example <- Example(@Example)
 
 }
