@@ -11,9 +11,9 @@ grammar None_grammar {
 
 class FooNode {
 
-    @export fun null_unit (): InternalUnit = null
+    @export fun null_unit (): InternalUnit = null.to[InternalUnit]
 
-    @export fun null_node (): Entity[Expression] = null
+    @export fun null_node (): Entity[Expression] = null.to[Entity[Expression]]
 
     @export fun deref_null_unit (): Entity[FooNode] =
     self.null_unit.root.as_bare_entity

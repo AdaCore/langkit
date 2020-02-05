@@ -12,5 +12,6 @@ class Example : FooNode {
 
     @export fun prop2 (arg : Color = Color.Red): Color = arg
 
-    @export fun prop3 (arg : Entity[FooNode] = null): Entity[FooNode] = arg
+    @export fun prop3 (arg : Entity[FooNode] = null.to[Entity[FooNode]]): Entity[FooNode] =
+    arg
 }

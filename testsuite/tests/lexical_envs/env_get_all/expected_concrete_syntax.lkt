@@ -8,7 +8,7 @@ grammar None_grammar {
 class FooNode {
 
     @export fun env_get_all (): Array[Entity[FooNode]] =
-    self.children_env.get(null)
+    self.children_env.get(null.to[SymbolType])
 
     @memoized fun make_id (s : SymbolType): FooNode = SynthId(sym=s)
 

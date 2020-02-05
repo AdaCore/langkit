@@ -5,7 +5,7 @@ grammar None_grammar {
 
 class FooNode {
 
-    @export fun eval_unit (): Boolean = null.prop
+    @export fun eval_unit (): Boolean = null.to[FooNode].prop
 
     fun prop (): Boolean = true
 }

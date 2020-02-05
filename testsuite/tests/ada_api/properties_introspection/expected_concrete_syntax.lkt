@@ -62,7 +62,8 @@ class Number : Expr {
 
     @export fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
 
-    @export fun id_dflt_root_node (id : FooNode = null): FooNode = id
+    @export fun id_dflt_root_node (id : FooNode = null.to[FooNode]): FooNode =
+    id
 }
 
 class Ref : Expr {

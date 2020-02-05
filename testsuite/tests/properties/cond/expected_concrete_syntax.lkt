@@ -26,5 +26,5 @@ class Example : FooNode {
 
     @export fun cond_node (b : Boolean): Entity[FooNode] =
     if self.identity(b) then self
-    else (null).as_bare_entity
+    else (null.to[FooNode]).as_bare_entity
 }

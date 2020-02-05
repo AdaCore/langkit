@@ -11,6 +11,6 @@ class BarNode : FooNode {
     @export fun prop (): Entity[FooNode] = {
         val _ = self.parent
 
-        null
+        null.to[Entity[FooNode]]
     }
 }
