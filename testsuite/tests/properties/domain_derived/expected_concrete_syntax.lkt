@@ -1,5 +1,5 @@
 grammar None_grammar {
-    main_rule <- list*(or(Definition(@Def name) | name), @Comma)
+    main_rule <- list*(or(Definition("def" name) | name), ",")
     name <- Name(@Identifier)
 
 }

@@ -2,8 +2,8 @@ grammar None_grammar {
     name <- Name(@Identifier)
     main_rule <- list*(var_decl)
     number <- Number(@Number)
-    var_decl <- VarDecl(@Var name @Equal expr @Semicolon)
-    expr <- or(Addition(expr @Plus expr) | atom)
+    var_decl <- VarDecl("var" name "=" expr ";")
+    expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
     ref <- Ref(name)
 

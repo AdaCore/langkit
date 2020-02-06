@@ -1,5 +1,5 @@
 grammar None_grammar {
-    main_rule <- list*(Def(@Def Example(@Example)))
+    main_rule <- list*(Def("def" Example("example")))
 
 }
 

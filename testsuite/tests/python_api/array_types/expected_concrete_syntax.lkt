@@ -1,8 +1,8 @@
 grammar None_grammar {
     node <- or(example | null_node)
     main_rule <- list*(node)
-    example <- Example(@Example)
-    null_node <- NullNode(@Null)
+    example <- Example("example")
+    null_node <- NullNode("null")
 
 }
 

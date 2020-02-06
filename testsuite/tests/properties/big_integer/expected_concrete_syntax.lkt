@@ -1,5 +1,5 @@
 grammar None_grammar {
-    decl <- Decl(@Def name @Equal expr)
+    decl <- Decl("def" name "=" expr)
     name <- Identifier(@Identifier)
     main_rule <- list*(decl)
     expr <- or(op | atom)
@@ -7,10 +7,10 @@ grammar None_grammar {
     atom <- or(ref | literal)
     ref <- Ref(name)
     op <- or(
-        | Plus(atom @Plus expr)
-        | Minus(atom @Minus expr)
-        | Equal(atom @Equal expr)
-        | LessThan(atom @LessThan expr)
+        | Plus(atom "+" expr)
+        | Minus(atom "-" expr)
+        | Equal(atom "=" expr)
+        | LessThan(atom "<" expr)
     )
 
 }

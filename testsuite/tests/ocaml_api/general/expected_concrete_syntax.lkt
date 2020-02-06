@@ -3,9 +3,9 @@ grammar None_grammar {
     ident <- Ident(@Identifier)
     string <- StringLiteral(@String)
     main_rule <- list*(node)
-    null_node <- Null(@Null)
-    var <- Var(@Var @LPar main_rule @RPar)
-    example <- Example(@Example)
+    null_node <- Null("null")
+    var <- Var("var" "(" main_rule ")")
+    example <- Example("example")
 
 }
 

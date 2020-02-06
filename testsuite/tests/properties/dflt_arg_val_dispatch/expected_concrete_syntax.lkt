@@ -1,8 +1,8 @@
 grammar None_grammar {
     main_rule <- list*(or(var_decl | fun_decl))
     identifier <- Identifier(@Identifier)
-    var_decl <- VarDecl(@Var identifier)
-    fun_decl <- FunDecl(@Def identifier)
+    var_decl <- VarDecl("var" identifier)
+    fun_decl <- FunDecl("def" identifier)
 
 }
 

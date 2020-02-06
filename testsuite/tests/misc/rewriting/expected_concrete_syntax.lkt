@@ -1,12 +1,12 @@
 grammar None_grammar {
     main_rule <- list+(def_rule)
     def_rule <- Def(
-        @Def name ?@LPar list*(name, @Comma) @RPar @Equal expr
+        "def" name ?"(" list*(name, ",") ")" "=" expr
     )
     name <- Name(@Identifier)
     expr <- or(
-        | Plus(expr @Plus expr)
-        | ParenExpr(@LPar expr @RPar)
+        | Plus(expr "+" expr)
+        | ParenExpr("(" expr ")")
         | Ref(name)
         | Literal(@Number)
     )

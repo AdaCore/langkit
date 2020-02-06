@@ -1,8 +1,6 @@
 grammar None_grammar {
     main_rule <- list*(or(
-        | DefNode(
-            @Def identifier @Equal number @Semicolon
-        )
+        | DefNode("def" identifier "=" number ";")
         | skip(ErrorDef)
     ))
     identifier <- Identifier(@Identifier)

@@ -923,6 +923,14 @@ class _Token(Parser):
         self._val = val
         ":type: TokenAction|str"
 
+        self._original_string = None
+        """
+        Keep the original token string that was used to determine the token we
+        want to parse.
+
+        :type: basestring|None
+        """
+
         self.match_text = match_text
         ":type: str"
 
@@ -945,6 +953,7 @@ class _Token(Parser):
     def _compile(self):
         # Resolve the token action associated with this parser
         if isinstance(self._val, basestring):
+            self._original_string = self._val
             self._val = get_context().lexer.get_token(self._val)
         else:
             check_source_language(isinstance(self._val, TokenAction),

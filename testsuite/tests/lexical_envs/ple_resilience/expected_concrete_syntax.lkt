@@ -1,15 +1,13 @@
 grammar None_grammar {
     defs <- list+(def_rule)
     name <- or(
-        | Prefix(name @Dot Id(@Identifier))
+        | Prefix(name "." Id(@Identifier))
         | Id(@Identifier)
     )
     main_rule <- defs
     def_rule <- or(scope | var)
-    var <- Var(Id(@Identifier) @Equal name)
-    scope <- Scope(
-        ?@Error Id(@Identifier) @LBrace defs @RBrace
-    )
+    var <- Var(Id(@Identifier) "=" name)
+    scope <- Scope(?"error" Id(@Identifier) "{" defs "}")
 
 }
 
