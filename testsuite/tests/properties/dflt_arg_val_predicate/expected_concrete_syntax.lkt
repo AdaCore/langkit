@@ -14,7 +14,7 @@ class Example : FooNode {
     (flag1 and (n.is_null)) and flag2
 
     @export fun prop (): Entity[Example] = {
-        val _ = %predicate(BareExample.predicate, self.var1, self.var2)
+        val _ = %predicate(BareExample.predicate, self.var1, self.var2);
 
         self.as_bare_entity
     }
