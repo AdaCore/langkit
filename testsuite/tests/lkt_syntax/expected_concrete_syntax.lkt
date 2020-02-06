@@ -1,0 +1,17 @@
+grammar None_grammar {
+    main_rule <- list*(Example(@Example))
+
+}
+
+class FooNode {
+}
+
+class Example : FooNode {
+
+    ## Tests that block delimiter prevents a syntactic ambiguity.
+    @export fun test_1 (): Array[Integer] = {
+        val a = 12;
+
+        [a]
+    }
+}
