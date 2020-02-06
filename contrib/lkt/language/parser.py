@@ -561,7 +561,7 @@ lkt_grammar.add_rules(
     grammar_expr=Or(
         GrammarDontSkip(
             G.grammar_expr,
-            "|>", Lex.Identifier("dont_skip"),
+            ".", Lex.Identifier("dont_skip"),
             "(", G.grammar_expr, ")"
         ),
         GrammarPredicate(
