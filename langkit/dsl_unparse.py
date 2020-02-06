@@ -114,9 +114,19 @@ def emit_rule(rule, top_level=False):
 
 
 def var_name(var_expr, default="_"):
-    return (
-        var_expr.source_name.lower if var_expr.source_name else default
-    )
+    from langkit.compiled_types import Argument
+    if isinstance(var_expr, Argument):
+        ret = var_expr.name.lower
+    else:
+        ret = (
+            var_expr.source_name.lower if var_expr.source_name else default
+        )
+
+    # Special cases: some variable names are keywords. Rename them.
+    if ret == "val":
+        return "value"
+    else:
+        return ret
 
 def is_a(expr, *names):
     return any(expr.__class__.__name__ == n for n in names)
@@ -514,7 +524,7 @@ def emit_prop(prop):
         quals += "@memoized "
 
     args = ", ".join("{} : {}{}".format(
-        arg.name.lower, type_name(arg.type),
+        var_name(arg), type_name(arg.type),
         " = {}".format(emit_expr(arg.abstract_default_value))
         if arg.abstract_default_value else ""
     ) for arg in prop.natural_arguments)
