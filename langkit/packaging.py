@@ -348,6 +348,12 @@ class Packager(object):
                              package_dir)
         sync_tree(dyn_deps_dir, package_dir, delete=False)
 
+        # On darwin, make all shared objects look for their dependencies in the
+        # same directory.
+        if self.env.build.os.name == 'darwin':
+            from e3.binarydata.macho import localize_distrib
+            localize_distrib(package_dir, [])
+
         # Finally create the wheel. Make the wheel directory absolute since
         # setup.py is run from the build directory.
         args = [python_interpreter, 'setup.py', 'bdist_wheel',
