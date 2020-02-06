@@ -677,7 +677,8 @@ lkt_grammar.add_rules(
     block=BlockExpr(
         "{",
         # TODO: Add discard/ignore in the list
-        List(Or(G.val_decl, G.bind_decl), empty_valid=False),
+        List(Or(G.val_decl, G.bind_decl), empty_valid=False, sep=";"),
+        ";",
         G.expr,
         "}"
     ),

@@ -247,7 +247,7 @@ def emit_expr(expr, **ctx):
             return ee(expr.expr)
 
         vars_defs = "".join([
-            "val {} = {}$hl".format(
+            "val {} = {};$hl".format(
                 var_name(var), ee(abs_expr)
             ) for var, abs_expr in zip(expr.vars, expr.var_exprs)
         ])
@@ -257,7 +257,7 @@ def emit_expr(expr, **ctx):
         )
     elif is_a("bind"):
 
-        bind = "bind {} = {}$hl".format(
+        bind = "bind {} = {};$hl".format(
             ee(expr.expr_0), ee(expr.expr_1)
         )
 

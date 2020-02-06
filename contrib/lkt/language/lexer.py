@@ -12,6 +12,7 @@ class Token(LexerToken):
     # Operators
     ExclMark = WithText()
     Colon = WithText()
+    Semicolon = WithText()
     IntMark = WithText()
     Div = WithText()
     Comma = WithText()
@@ -86,6 +87,7 @@ lkt_lexer.add_rules(
 
     # Operators
     (Literal('!'),         Token.ExclMark),
+    (Literal(';'),         Token.Semicolon),
     (Literal(':'),         Token.Colon),
     (Literal('?'),         Token.IntMark),
     (Literal('/'),         Token.Div),

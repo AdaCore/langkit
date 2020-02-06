@@ -35,7 +35,7 @@ class Name : FooNode {
     self.unit.root.node_env.get(self)?(0).children_env
 
     @export fun entity (): Entity[FooNode] = {
-        bind env = self.node_env
+        bind env = self.node_env;
 
         self.ambiant_entity
     }
