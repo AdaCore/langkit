@@ -1,9 +1,9 @@
 grammar None_grammar {
     name <- Name(@Identifier)
-    main_rule <- list*(or(Def(@Def name expr) | expr))
+    main_rule <- list*(or(Def("def" name expr) | expr))
     expr <- or(atom | plus)
     lit <- Lit(@Number)
-    plus <- (@LPar Plus(expr @Plus expr) @RPar)
+    plus <- ("(" Plus(expr "+" expr) ")")
     atom <- or(lit | ref)
     ref <- Ref(name)
 

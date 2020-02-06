@@ -1,6 +1,6 @@
 grammar None_grammar {
     list_rule <- LiteralSequence(
-        @LPar Name(@Identifier) list*(list_item, @Comma) @RPar
+        "(" Name(@Identifier) list*(list_item, ",") ")"
     )
     main_rule <- list_rule
     list_item <- Literal(@Number)

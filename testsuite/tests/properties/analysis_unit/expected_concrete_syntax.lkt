@@ -1,5 +1,5 @@
 grammar None_grammar {
-    main_rule <- or(Plus(atom @Plus main_rule) | atom)
+    main_rule <- or(Plus(atom "+" main_rule) | atom)
     atom <- or(Literal(@Number) | Name(@Identifier))
 
 }

@@ -1,10 +1,10 @@
 grammar None_grammar {
     main_rule <- list*(Param(name mode plus))
-    plus <- ?@Plus
+    plus <- ?"+"
     name <- Name(@Identifier)
     mode <- or(
-        | EnumNull(@Null)
-        | EnumExample(@Example)
+        | EnumNull("null")
+        | EnumExample("example")
         | EnumDefault()
     )
 

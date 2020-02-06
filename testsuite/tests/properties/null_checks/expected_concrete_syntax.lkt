@@ -1,8 +1,8 @@
 grammar None_grammar {
     main_rule <- expression
     expression <- or(
-        | @LPar expression @RPar
-        | Plus(atom @Plus main_rule)
+        | "(" expression ")"
+        | Plus(atom "+" main_rule)
         | atom
     )
     atom <- or(Literal(@Number) | Name(@Identifier))

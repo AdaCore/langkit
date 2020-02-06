@@ -2,7 +2,7 @@ grammar None_grammar {
     main_rule <- list*(def_node)
     identifier <- Identifier(@Identifier)
     def_node <- DefNode(
-        @LPar identifier @Comma null(ASTList[DefNode]) @RPar
+        "(" identifier "," null(ASTList[DefNode]) ")"
     )
 
 }

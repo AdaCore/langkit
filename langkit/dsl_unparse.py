@@ -371,8 +371,8 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, Skip):
         return "skip({})".format(node_name(rule.dest_node))
     elif isinstance(rule, _Token):
-        if isinstance(rule._val, basestring):
-            return '"{}"'.format(rule._val)
+        if rule._original_string:
+            return '"{}"'.format(rule._original_string)
         else:
             return "@{}{}".format(
                 rule._val.name.camel,

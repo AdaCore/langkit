@@ -1,5 +1,5 @@
 grammar None_grammar {
-    main_rule <- Example(@Example)
+    main_rule <- Example("example")
 
 }
 

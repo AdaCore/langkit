@@ -1,6 +1,6 @@
 grammar None_grammar {
     main_rule <- list*(def_rule)
-    def_rule <- Def(name ?@Plus name)
+    def_rule <- Def(name ?"+" name)
     name <- Name(@Identifier)
 
 }

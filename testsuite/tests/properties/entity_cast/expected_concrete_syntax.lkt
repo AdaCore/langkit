@@ -1,5 +1,5 @@
 grammar None_grammar {
-    main_rule <- or(Literal(@Number) | BarNode(@Example))
+    main_rule <- or(Literal(@Number) | BarNode("example"))
 
 }
 

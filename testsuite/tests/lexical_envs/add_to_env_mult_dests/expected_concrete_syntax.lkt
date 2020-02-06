@@ -1,6 +1,6 @@
 grammar None_grammar {
     main_rule <- elem
-    scope <- Scope(id @LBrace list*(elem) @RBrace)
+    scope <- Scope(id "{" list*(elem) "}")
     id <- Id(@Identifier)
     elem <- or(scope | id)
 

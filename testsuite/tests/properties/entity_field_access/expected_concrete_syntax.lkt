@@ -1,6 +1,6 @@
 grammar None_grammar {
     main_rule <- item
-    couple <- Couple(@LPar item @Comma item @RPar)
+    couple <- Couple("(" item "," item ")")
     literal <- Literal(@Number)
     item <- or(couple | literal)
 

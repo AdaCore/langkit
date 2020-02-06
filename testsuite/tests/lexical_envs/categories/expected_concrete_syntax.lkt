@@ -1,10 +1,10 @@
 grammar None_grammar {
     name <- Name(@Identifier)
     main_rule <- Def(
-        @Def name @LBrace cat1 cat2 Example(@Example) @RBrace
+        "def" name "{" cat1 cat2 Example("example") "}"
     )
-    cat1 <- Cat1(@Identifier("cat1") @LBrace decls @RBrace)
-    cat2 <- Cat2(@Identifier("cat2") @LBrace decls @RBrace)
+    cat1 <- Cat1(@Identifier("cat1") "{" decls "}")
+    cat2 <- Cat2(@Identifier("cat2") "{" decls "}")
     var <- Var(name)
     decls <- list+(var)
 

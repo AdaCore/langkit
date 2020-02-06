@@ -1,10 +1,10 @@
 grammar None_grammar {
-    defs <- list+(or(scope | var) @Semicolon)
-    name <- or(Prefix(name @Dot id) | id)
+    defs <- list+(or(scope | var) ";")
+    name <- or(Prefix(name "." id) | id)
     main_rule <- list*(scope)
-    deps <- list+(Dep(@Plus name) @Semicolon)
-    var <- Var(id @Equal name)
-    scope <- Scope(name @LBrace deps defs @RBrace)
+    deps <- list+(Dep("+" name) ";")
+    var <- Var(id "=" name)
+    scope <- Scope(name "{" deps defs "}")
     id <- Id(@Identifier)
 
 }

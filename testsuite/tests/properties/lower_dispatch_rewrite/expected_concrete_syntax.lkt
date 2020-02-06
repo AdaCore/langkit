@@ -1,16 +1,16 @@
 grammar None_grammar {
     name <- Name(@Identifier)
-    vars <- (@LBrace list+(var) @RBrace)
+    vars <- ("{" list+(var) "}")
     main_rule <- list*(or(
-        | Def(@Def name imports vars expr)
+        | Def("def" name imports vars expr)
         | expr
     ))
     atom <- or(lit | ref)
     expr <- or(atom | plus)
     lit <- Lit(@Number)
-    plus <- (@LPar Plus(expr @Plus expr) @RPar)
-    imports <- (@LPar list+(derived_ref) @RPar)
-    var <- Var(name @Equal expr)
+    plus <- ("(" Plus(expr "+" expr) ")")
+    imports <- ("(" list+(derived_ref) ")")
+    var <- Var(name "=" expr)
     derived_ref <- DerivedRef(name)
     ref <- Ref(name)
 

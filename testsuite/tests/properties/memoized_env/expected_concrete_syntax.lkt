@@ -1,6 +1,6 @@
 grammar None_grammar {
     main_rule <- Block(
-        Name(@Identifier) @LPar list*(Ref(Name(@Identifier))) @RPar
+        Name(@Identifier) "(" list*(Ref(Name(@Identifier))) ")"
     )
 
 }

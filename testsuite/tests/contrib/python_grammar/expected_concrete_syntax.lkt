@@ -1,16 +1,16 @@
 grammar None_grammar {
     print_stmt <- or(
-        | PrintStmt(@Print test_list)
-        | StreamPrintStmt(@Print @Rsh test @Comma test_list)
+        | PrintStmt("print" test_list)
+        | StreamPrintStmt("print" ">>" test "," test_list)
     )
-    dotted_as_names <- (list*(or(dotted_as_name | dotted_name), @Comma) ?@Comma)
-    empty_test_list <- (list+(test, @Comma) ?@Comma)
+    dotted_as_names <- (list*(or(dotted_as_name | dotted_name), ",") ?",")
+    empty_test_list <- (list+(test, ",") ?",")
     try_stmt <- TryStmt(
-        @Try @Colon suite list+(ExceptPart(
-            @Except ?AsNameNode(test ?@As test) @Colon suite
-        )) ?else_part ?@Finally @Colon suite
+        "try" ":" suite list+(ExceptPart(
+            "except" ?AsNameNode(test ?"as" test) ":" suite
+        )) ?else_part ?"finally" ":" suite
     )
-    test_list <- (list*(test, @Comma) ?@Comma)
+    test_list <- (list*(test, ",") ?",")
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -22,12 +22,12 @@ grammar None_grammar {
         | exec_stmt
         | assert_stmt
     )
-    expr_list <- (list*(expr, @Comma) ?@Comma)
+    expr_list <- (list*(expr, ",") ?",")
     number <- NumberLit(@Number)
-    dict_assoc <- DictAssoc(test @Colon test)
-    return_stmt <- ReturnStmt(@Return ?test_list)
+    dict_assoc <- DictAssoc(test ":" test)
+    return_stmt <- ReturnStmt("return" ?test_list)
     cat_string <- ConcatStringLit(string list*(string))
-    not_test <- or(NotOp(@Not not_test) | comparison)
+    not_test <- or(NotOp("not" not_test) | comparison)
     suite <- or(
         | discard(list+(nl))
         @Indent
@@ -42,68 +42,65 @@ grammar None_grammar {
         | raise_stmt
         | yield_stmt
     )
-    del_stmt <- DelStmt(@Del expr_list)
-    comp_if <- CompIf(@If test ?comp_iter)
+    del_stmt <- DelStmt("del" expr_list)
+    comp_if <- CompIf("if" test ?comp_iter)
     expr_stmt <- or(
         | AugAssignStmt(
             test_list Op(
                 or(
-                    | @AddAsign
-                    | @MinusAssign
-                    | @MultAssign
-                    | @DivAssign
-                    | @ModAssign
-                    | @AndAssign
-                    | @OrAssign
-                    | @XorAssign
-                    | @LshAssign
-                    | @RshAssign
-                    | @PowerAssign
-                    | @FloordivAssign
+                    | "+="
+                    | "-="
+                    | "*="
+                    | "/="
+                    | "%="
+                    | "&="
+                    | "|="
+                    | "^="
+                    | "<<="
+                    | ">>="
+                    | "**="
+                    | "//="
                 )
             ) or(yield_expr | test_list)
         )
         | AssignStmt(
-            test_list list*(@Assign or(yield_expr | test_list))
+            test_list list*("=" or(yield_expr | test_list))
         )
         | test_list
     )
     nl <- NL(@Newline)
-    func_def <- FuncDef(@Def name parameters @Colon suite)
-    parameters <- (@LPar ?varargslist @RPar)
-    continue_stmt <- ContinueStmt(@Continue)
-    fpdef <- or(name | @LPar name_list @RPar)
+    func_def <- FuncDef("def" name parameters ":" suite)
+    parameters <- ("(" ?varargslist ")")
+    continue_stmt <- ContinueStmt("continue")
+    fpdef <- or(name | "(" name_list ")")
     shift_expr <- or(
-        | ShiftExpr(shift_expr Op(or(@Lsh | @Rsh)) arith_expr)
+        | ShiftExpr(shift_expr Op(or("<<" | ">>")) arith_expr)
         | arith_expr
     )
     atom_expr <- or(
-        | DottedName(atom_expr @Dot name)
-        | CallExpr(atom_expr @LPar arg_list @RPar)
-        | SubscriptExpr(atom_expr @Lbrack subscript_list @Rbrack)
+        | DottedName(atom_expr "." name)
+        | CallExpr(atom_expr "(" arg_list ")")
+        | SubscriptExpr(atom_expr "[" subscript_list "]")
         | atom
     )
     name <- Id(@Identifier)
-    dotted_as_name <- AsNameNode(dotted_name @As name)
+    dotted_as_name <- AsNameNode(dotted_name "as" name)
     list_iter <- or(list_for | list_if)
-    list_if <- CompIf(@If test ?list_iter)
-    factor <- or(
-        | Factor(Op(or(@Plus | @Minus | @Invert)) factor)
-        | power
-    )
+    list_if <- CompIf("if" test ?list_iter)
+    factor <- or(Factor(Op(or("+" | "-" | "~")) factor) | power)
     test <- or(
         | lambdef
-        | IfExpr(or_test @If or_test @Else test)
+        | IfExpr(or_test "if" or_test "else" test)
         | or_test
     )
-    global_stmt <- GlobalStmt(@Global name_list)
+    global_stmt <- GlobalStmt("global" name_list)
     subscript <- or(
-        | EllipsisExpr(@Dot @Dot @Dot)
-        | ExtSliceExpr(?test @Colon ?test @Colon ?test)
-        | SliceExpr(?test @Colon ?test)
+        | EllipsisExpr("." "." ".")
+        | ExtSliceExpr(?test ":" ?test ":" ?test)
+        | SliceExpr(?test ":" ?test)
         | test
     )
-    with_item <- AsNameNode(test ?@As expr)
+    with_item <- AsNameNode(test ?"as" expr)
     decorators <- list*(decorator)
     compound_stmt <- or(
         | if_stmt
@@ -115,131 +112,122 @@ grammar None_grammar {
         | class_def
         | decorated
     )
-    exec_stmt <- ExecStmt(@Exec expr ?@In test_list)
+    exec_stmt <- ExecStmt("exec" expr ?"in" test_list)
     yield_stmt <- yield_expr
-    dotted_name <- or(DottedName(dotted_name @Dot name) | name)
-    yield_expr <- YieldExpr(@Yield ?test_list)
-    power <- or(Power(atom_expr @Power factor) | atom_expr)
-    simple_stmt <- (or(
-        | small_stmt
-        | list*(small_stmt, @Semicolon) ?@Semicolon
-    ) @Newline)
+    dotted_name <- or(DottedName(dotted_name "." name) | name)
+    yield_expr <- YieldExpr("yield" ?test_list)
+    power <- or(Power(atom_expr "**" factor) | atom_expr)
+    simple_stmt <- (or(small_stmt | list*(small_stmt, ";") ?";") @Newline)
     main_rule <- FileNode(
         list*(discard(list+(nl)) stmt discard(list+(nl))) @Termination
     )
-    name_list <- (list*(name, @Comma) ?@Comma)
+    name_list <- (list*(name, ",") ?",")
     stmt <- or(simple_stmt | compound_stmt)
     import_from <- ImportFrom(
-        @From
-        or(dotted_name | RelName(list*(dot) ?dotted_name)) @Import or(
-            | ImportStar(@Multiply)
-            | @LPar import_as_names @RPar
+        "from"
+        or(dotted_name | RelName(list*(dot) ?dotted_name)) "import" or(
+            | ImportStar("*")
+            | "(" import_as_names ")"
             | import_as_names
         )
     )
-    assert_stmt <- AssertStmt(@Assert test ?@Comma test)
+    assert_stmt <- AssertStmt("assert" test ?"," test)
     list_for <- CompForL(
-        @For expr_list @In test_list ?list_iter
+        "for" expr_list "in" test_list ?list_iter
     )
     for_stmt <- ForStmt(
-        @For expr_list @In test_list @Colon suite ?else_part
+        "for" expr_list "in" test_list ":" suite ?else_part
     )
-    break_stmt <- BreakStmt(@Break)
-    else_part <- ElsePart(@Else @Colon suite)
-    and_test <- or(AndOp(and_test @And not_test) | not_test)
-    lambdef <- LambdaDef(@Lambda varargslist @Colon test)
+    break_stmt <- BreakStmt("break")
+    else_part <- ElsePart("else" ":" suite)
+    and_test <- or(AndOp(and_test "and" not_test) | not_test)
+    lambdef <- LambdaDef("lambda" varargslist ":" test)
     atom <- or(
-        | @LPar yield_expr @RPar
-        | ListGen(@LPar test list_for @RPar)
-        | TupleLit(@LPar ?test_list @RPar)
-        | ListComp(@Lbrack test list_for @Rbrack)
-        | ListLit(@Lbrack empty_test_list @Rbrack)
-        | SetComp(@LCurl test comp_for @Rcurl)
+        | "(" yield_expr ")"
+        | ListGen("(" test list_for ")")
+        | TupleLit("(" ?test_list ")")
+        | ListComp("[" test list_for "]")
+        | ListLit("[" empty_test_list "]")
+        | SetComp("{" test comp_for "}")
         | set_lit
-        | DictComp(@LCurl dict_assoc comp_for @Rcurl)
-        | DictLit(
-            @LCurl list*(dict_assoc, @Comma) ?@Comma @Rcurl
-        )
-        | InlineEval(@Backtick test_list @Backtick)
+        | DictComp("{" dict_assoc comp_for "}")
+        | DictLit("{" list*(dict_assoc, ",") ?"," "}")
+        | InlineEval("`" test_list "`")
         | name
         | number
         | cat_string
         | string
     )
-    import_as_names <- (list*(or(as_name | name), @Comma) ?@Comma)
+    import_as_names <- (list*(or(as_name | name), ",") ?",")
     decorated <- Decorated(decorators or(class_def | func_def))
-    raise_stmt <- RaiseStmt(@Raise ?test_list)
+    raise_stmt <- RaiseStmt("raise" ?test_list)
     arg_list <- (list+(or(
         | ArgGen(test comp_for)
-        | ArgAssoc(?test @Assign test)
-        | VarArgs(@Multiply test)
-        | KwArgs(@Power test)
-    ), @Comma) ?@Comma)
-    set_lit <- SetLit(@LCurl empty_test_list @Rcurl)
+        | ArgAssoc(?test "=" test)
+        | VarArgs("*" test)
+        | KwArgs("**" test)
+    ), ",") ?",")
+    set_lit <- SetLit("{" empty_test_list "}")
     decorator <- Decorator(
-        @At dotted_name ?@LPar arg_list @RPar @Newline
+        "@" dotted_name ?"(" arg_list ")" @Newline
     )
-    pass_stmt <- PassStmt(@Pass)
+    pass_stmt <- PassStmt("pass")
     comparison <- or(
         | CompOp(
             comparison or(
-                | CompOpKindLt(@Lt)
-                | CompOpKindGt(@Gt)
-                | CompOpKindEq(@Equals)
-                | CompOpKindGte(@Gte)
-                | CompOpKindLte(@Lte)
-                | CompOpKindDiamond(@Diamond)
-                | CompOpKindNoteq(@Notequal)
-                | CompOpKindIn(@In)
-                | CompOpKindNotin(@Not @In)
-                | CompOpKindIsnot(@Is @Not)
-                | CompOpKindIs(@Is)
+                | CompOpKindLt("<")
+                | CompOpKindGt(">")
+                | CompOpKindEq("==")
+                | CompOpKindGte(">=")
+                | CompOpKindLte("<=")
+                | CompOpKindDiamond("<>")
+                | CompOpKindNoteq("!=")
+                | CompOpKindIn("in")
+                | CompOpKindNotin("not" "in")
+                | CompOpKindIsnot("is" "not")
+                | CompOpKindIs("is")
             ) expr
         )
         | expr
     )
     term <- or(
-        | Term(
-            term Op(or(@Multiply | @Divide | @Mod | @Floordiv)) factor
-        )
+        | Term(term Op(or("*" | "/" | "%" | "//")) factor)
         | factor
     )
     comp_iter <- or(comp_for | comp_if)
-    subscript_list <- (list*(subscript, @Comma) ?@Comma)
+    subscript_list <- (list*(subscript, ",") ?",")
     if_stmt <- IfStmt(
-        @If
+        "if"
         test
-        @Colon
-        suite
-        list+(@Elif ElifBranch(test @Colon suite)) ?else_part
+        ":"
+        suite list+("elif" ElifBranch(test ":" suite)) ?else_part
     )
     arith_expr <- or(
-        | ArithExpr(arith_expr Op(or(@Plus | @Minus)) term)
+        | ArithExpr(arith_expr Op(or("+" | "-")) term)
         | term
     )
-    import_name <- ImportName(@Import dotted_as_names)
-    or_test <- or(OrOp(or_test @Or and_test) | and_test)
+    import_name <- ImportName("import" dotted_as_names)
+    or_test <- or(OrOp(or_test "or" and_test) | and_test)
     class_def <- ClassDef(
-        @Class name ?@LPar ?test_list @RPar @Colon suite
+        "class" name ?"(" ?test_list ")" ":" suite
     )
-    with_stmt <- WithStmt(
-        @With list*(with_item, @Comma) @Colon suite
-    )
-    while_stmt <- WhileStmt(@While test @Colon suite ?else_part)
+    with_stmt <- WithStmt("with" list*(with_item, ",") ":" suite)
+    while_stmt <- WhileStmt("while" test ":" suite ?else_part)
     varargslist <- Params(
-        list+(SingleParam(?@Multiply
-        ?@Power fpdef ?@Assign test), @Comma)
+        list+(SingleParam(?"*" ?"**" fpdef ?"=" test), ",")
     )
-    comp_for <- CompFor(@For expr_list @In or_test ?comp_iter)
+    comp_for <- CompFor(
+        "for" expr_list "in" or_test ?comp_iter
+    )
     import_stmt <- or(import_name | import_from)
-    expr <- or(OrExpr(expr @BinOr xor_expr) | xor_expr)
-    xor_expr <- or(XorExpr(xor_expr @Xor and_expr) | and_expr)
+    expr <- or(OrExpr(expr "|" xor_expr) | xor_expr)
+    xor_expr <- or(XorExpr(xor_expr "^" and_expr) | and_expr)
     and_expr <- or(
-        | AndExpr(and_expr @Amp shift_expr)
+        | AndExpr(and_expr "&" shift_expr)
         | shift_expr
     )
-    as_name <- AsNameNode(name @As name)
-    dot <- Dot(@Dot)
+    as_name <- AsNameNode(name "as" name)
+    dot <- Dot(".")
 
 }
 

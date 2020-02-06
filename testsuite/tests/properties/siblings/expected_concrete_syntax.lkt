@@ -1,8 +1,6 @@
 grammar None_grammar {
     main_rule <- tuple
-    tuple <- Tuple(
-        Name(@Identifier) @LPar list+(tuple) @RPar
-    )
+    tuple <- Tuple(Name(@Identifier) "(" list+(tuple) ")")
 
 }
 

@@ -1,5 +1,5 @@
 grammar None_grammar {
-    def_node <- Def(@Def identifier @Newline list*(indented))
+    def_node <- Def("def" identifier @Newline list*(indented))
     indented <- Indented(
         discard(list+(newline))
         @Indent
@@ -10,9 +10,9 @@ grammar None_grammar {
     newline <- Newline(@Newline)
     call <- Call(
         identifier
-        @LPar
+        "("
         discard(list+(newline))
-        list+(call, @Comma) discard(list+(newline)) @RPar
+        list+(call, ",") discard(list+(newline)) ")"
     )
     main_rule <- list*(discard(list+(newline))
     def_node discard(list+(newline)))

@@ -1,14 +1,10 @@
 grammar None_grammar {
     foreign_decl <- ForeignDecl(identifier)
     main_rule <- list*(or(scope | self_decl | foreign_decl))
-    self_decl <- SelfDecl(
-        @Plus identifier ?@LPar identifier @RPar
-    )
-    scope <- Scope(
-        simple_identifier @LBrace list+(scope) @RBrace
-    )
+    self_decl <- SelfDecl("+" identifier ?"(" identifier ")")
+    scope <- Scope(simple_identifier "{" list+(scope) "}")
     identifier <- or(
-        | ScopedId(identifier @Dot simple_identifier)
+        | ScopedId(identifier "." simple_identifier)
         | simple_identifier
     )
     simple_identifier <- SimpleId(@Identifier)

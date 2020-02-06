@@ -1,5 +1,5 @@
 grammar None_grammar {
-    decl <- Decl(Name(@Identifier) @LPar ref_list @RPar)
+    decl <- Decl(Name(@Identifier) "(" ref_list ")")
     main_rule <- list*(decl)
     ref <- Ref(Name(@Identifier))
     ref_list <- list+(ref)

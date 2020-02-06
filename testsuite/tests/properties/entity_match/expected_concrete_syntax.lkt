@@ -1,7 +1,7 @@
 grammar None_grammar {
     main_rule <- or(literal | example)
     literal <- Literal(@Number)
-    example <- Example(@Example)
+    example <- Example("example")
 
 }
 
