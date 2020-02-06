@@ -695,15 +695,16 @@ lkt_grammar.add_rules(
 
     eq=Or(
         BinOp(G.eq, Or(Op.alt_lte("<="),
-                        Op.alt_lt("<"),
-                        Op.alt_gte(">="),
-                        Op.alt_gt(">"),
-                        Op.alt_eq("=")), G.arith_1),
+                       Op.alt_lt("<"),
+                       Op.alt_gte(">="),
+                       Op.alt_gt(">"),
+                       Op.alt_eq("=")), G.arith_1),
         G.arith_1
     ),
 
     arith_1=Or(
-        BinOp(G.arith_1, Or(Op.alt_plus("+"), Op.alt_minus("-"),
+        BinOp(G.arith_1, Or(Op.alt_plus("+"),
+                            Op.alt_minus("-"),
                             Op.alt_amp("&")), G.arith_2),
         G.arith_2
     ),
