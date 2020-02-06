@@ -16944,6 +16944,120 @@ LangkitRoot[1:1-10:2]
 |  |  |  |decls:
 |  |  |  |  FullDeclList[9:26-9:26]: <empty list>
 
+Parsing concrete syntax for test lkt_syntax
+===========================================
+
+LangkitRoot[1:1-17:2]
+|decls:
+|  FullDeclList[1:1-17:2]
+|  |  FullDecl[1:1-4:2]
+|  |  |doc:
+|  |  |  Doc[1:1-1:1]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[1:1-1:1]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[1:1-1:1]: <empty list>
+|  |  |decl:
+|  |  |  GrammarDecl[1:1-4:2]
+|  |  |  |name:
+|  |  |  |  Id[1:9-1:21]: None_grammar
+|  |  |  |rules:
+|  |  |  |  GrammarRuleDeclList[2:5-2:42]
+|  |  |  |  |  GrammarRuleDecl[2:5-2:42]
+|  |  |  |  |  |name:
+|  |  |  |  |  |  Id[2:5-2:14]: main_rule
+|  |  |  |  |  |expr:
+|  |  |  |  |  |  GrammarList[2:18-2:42]
+|  |  |  |  |  |  |kind:
+|  |  |  |  |  |  |  ListKindZero[2:18-2:23]
+|  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  GrammarImplicitPick[2:24-2:41]
+|  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  GrammarExprList[2:24-2:41]
+|  |  |  |  |  |  |  |  |  ParseNodeExpr[2:24-2:41]
+|  |  |  |  |  |  |  |  |  |node_name:
+|  |  |  |  |  |  |  |  |  |  Id[2:24-2:31]: Example
+|  |  |  |  |  |  |  |  |  |sub_exprs:
+|  |  |  |  |  |  |  |  |  |  GrammarExprList[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:32-2:40]
+|  |  |  |  |  |  |  |  |  |  |  |token_name:
+|  |  |  |  |  |  |  |  |  |  |  |  Id[2:33-2:40]: Example
+|  |  |  |  |  |  |  |  |  |  |  |expr: <null>
+|  |  |  |  |  |  |sep: <null>
+|  |  FullDecl[6:1-7:2]
+|  |  |doc:
+|  |  |  Doc[4:2-4:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[4:2-4:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[6:1-7:2]
+|  |  |  |name:
+|  |  |  |  Id[6:7-6:14]: FooNode
+|  |  |  |base_class: <null>
+|  |  |  |decls:
+|  |  |  |  FullDeclList[6:16-6:16]: <empty list>
+|  |  FullDecl[9:1-17:2]
+|  |  |doc:
+|  |  |  Doc[7:2-7:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[7:2-7:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[9:1-17:2]
+|  |  |  |name:
+|  |  |  |  Id[9:7-9:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[9:17-9:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[9:17-9:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[12:5-16:6]
+|  |  |  |  |  FullDecl[12:5-16:6]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[9:26-9:26]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[9:26-9:26]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[12:5-12:12]
+|  |  |  |  |  |  |  DeclAnnotation[12:5-12:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[12:6-12:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[12:6-12:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[12:13-16:6]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[12:17-12:23]: test_1
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[12:25-12:25]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  GenericTypeRef[12:28-12:42]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[12:28-12:33]: Array
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  TypeRefList[12:34-12:41]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[12:34-12:41]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[12:34-12:41]: Integer
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  BlockExpr[12:45-16:6]
+|  |  |  |  |  |  |  |val_defs:
+|  |  |  |  |  |  |  |  BaseValDeclList[13:9-13:20]
+|  |  |  |  |  |  |  |  |  ValDecl[13:9-13:19]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[13:13-13:14]: a
+|  |  |  |  |  |  |  |  |  |type: <null>
+|  |  |  |  |  |  |  |  |  |val:
+|  |  |  |  |  |  |  |  |  |  NumLit[13:17-13:19]: 12
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  ArrayLiteral[15:9-15:12]
+|  |  |  |  |  |  |  |  |exprs:
+|  |  |  |  |  |  |  |  |  ExprList[15:10-15:11]
+|  |  |  |  |  |  |  |  |  |  Id[15:10-15:11]: a
+
 Parsing concrete syntax for test logging
 ========================================
 
