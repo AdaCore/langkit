@@ -337,10 +337,6 @@ class Packager(object):
         lib_name = lib_name or 'lib{}'.format(project_name)
         python_interpreter = python_interpreter or sys.executable
 
-        # Make the wheel directory absolute since setup.py is run from the
-        # build directory.
-        wheel_dir = os.path.abspath(wheel_dir)
-
         # Copy Python bindings for the Langkit-generated library and its
         # setup.py script.
         sync_tree(os.path.join(langlib_prefix, 'python'), build_dir,
@@ -352,7 +348,8 @@ class Packager(object):
                              package_dir)
         sync_tree(dyn_deps_dir, package_dir, delete=False)
 
-        # Finally create the wheel
+        # Finally create the wheel. Make the wheel directory absolute since
+        # setup.py is run from the build directory.
         args = [python_interpreter, 'setup.py', 'bdist_wheel',
                 '-d', os.path.abspath(wheel_dir)]
         if tag:
