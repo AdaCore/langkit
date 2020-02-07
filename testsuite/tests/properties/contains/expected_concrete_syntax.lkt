@@ -1,0 +1,16 @@
+grammar None_grammar {
+    main_rule <- ListNode(list*(NumberNode(@Number)))
+
+}
+
+@abstract class FooNode {
+}
+
+class ListNode : FooNode {
+    @parse_field nb_list : ASTList[NumberNode]
+
+    @export fun prop (): Boolean = self.nb_list.map((_, i) => i).contains(1)
+}
+
+class NumberNode : FooNode {
+}
