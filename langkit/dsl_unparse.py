@@ -489,7 +489,7 @@ def emit_expr(expr, **ctx):
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
-        StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block
+        StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains
     )
 
     def is_a(*names):
@@ -604,6 +604,9 @@ def emit_expr(expr, **ctx):
             expr.kind,
             [emit_lambda(expr.expr, [expr.element_var])]
         )
+
+    elif isinstance(expr, Contains):
+        return emit_method_call(ee(expr.collection), "contains", [ee(expr.item)])
 
     elif isinstance(expr, If):
         with walker.call('If'):
