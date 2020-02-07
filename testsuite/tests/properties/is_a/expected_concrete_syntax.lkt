@@ -8,6 +8,9 @@ class FooNode {
     fun null_node (): FooNode = null.to[FooNode]
 
     @export fun is_null_a_def (): Boolean = self.null_node isa Def
+
+    @export fun is_null_a_def_or_example (): Boolean =
+    self.null_node isa Def | Example
 }
 
 class Def : FooNode {

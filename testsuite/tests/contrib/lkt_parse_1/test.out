@@ -2210,9 +2210,10 @@ LangkitRoot[1:1-31:2]
 |  |  |  |  |  |  |  |  |  |  |  |expr:
 |  |  |  |  |  |  |  |  |  |  |  |  Id[26:39-26:40]: i
 |  |  |  |  |  |  |  |  |  |  |  |dest_type:
-|  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[26:45-26:52]
-|  |  |  |  |  |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[26:45-26:52]: Example
+|  |  |  |  |  |  |  |  |  |  |  |  TypeRefList[26:45-26:52]
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[26:45-26:52]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[26:45-26:52]: Example
 |  |  FullDecl[30:1-31:2]
 |  |  |doc:
 |  |  |  Doc[28:2-28:2]
@@ -14692,9 +14693,10 @@ LangkitRoot[1:1-70:2]
 |  |  |  |  |  |  |  |  |  |  |  |expr:
 |  |  |  |  |  |  |  |  |  |  |  |  Id[53:39-53:40]: i
 |  |  |  |  |  |  |  |  |  |  |  |dest_type:
-|  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[53:45-53:52]
-|  |  |  |  |  |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  Id[53:45-53:52]: Example
+|  |  |  |  |  |  |  |  |  |  |  |  TypeRefList[53:45-53:52]
+|  |  |  |  |  |  |  |  |  |  |  |  |  SimpleTypeRef[53:45-53:52]
+|  |  |  |  |  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  Id[53:45-53:52]: Example
 |  |  FullDecl[57:1-60:2]
 |  |  |doc:
 |  |  |  Doc[55:2-55:2]
@@ -16038,9 +16040,9 @@ LangkitRoot[1:1-24:2]
 Parsing concrete syntax for test is_a
 =====================================
 
-LangkitRoot[1:1-18:2]
+LangkitRoot[1:1-21:2]
 |decls:
-|  FullDeclList[1:1-18:2]
+|  FullDeclList[1:1-21:2]
 |  |  FullDecl[1:1-4:2]
 |  |  |doc:
 |  |  |  Doc[1:1-1:1]
@@ -16078,7 +16080,7 @@ LangkitRoot[1:1-18:2]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:42-2:51]
 |  |  |  |  |  |  |  |  |  |  |  |  |  TokenLit[2:42-2:51]: "example"
 |  |  |  |  |  |  |sep: <null>
-|  |  FullDecl[6:1-11:2]
+|  |  FullDecl[6:1-14:2]
 |  |  |doc:
 |  |  |  Doc[4:2-4:2]
 |  |  |  |lines:
@@ -16086,12 +16088,12 @@ LangkitRoot[1:1-18:2]
 |  |  |decl_annotations:
 |  |  |  DeclAnnotationList[4:2-4:2]: <empty list>
 |  |  |decl:
-|  |  |  ClassDecl[6:1-11:2]
+|  |  |  ClassDecl[6:1-14:2]
 |  |  |  |name:
 |  |  |  |  Id[6:7-6:14]: FooNode
 |  |  |  |base_class: <null>
 |  |  |  |decls:
-|  |  |  |  FullDeclList[8:5-10:67]
+|  |  |  |  FullDeclList[8:5-13:37]
 |  |  |  |  |  FullDecl[8:5-8:49]
 |  |  |  |  |  |doc:
 |  |  |  |  |  |  Doc[6:16-6:16]
@@ -16154,63 +16156,102 @@ LangkitRoot[1:1-18:2]
 |  |  |  |  |  |  |  |  |suffix:
 |  |  |  |  |  |  |  |  |  Id[10:50-10:59]: null_node
 |  |  |  |  |  |  |  |dest_type:
-|  |  |  |  |  |  |  |  SimpleTypeRef[10:64-10:67]
-|  |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  |  Id[10:64-10:67]: Def
-|  |  FullDecl[13:1-15:2]
-|  |  |doc:
-|  |  |  Doc[11:2-11:2]
-|  |  |  |lines:
-|  |  |  |  DocCommentList[11:2-11:2]: <empty list>
-|  |  |decl_annotations:
-|  |  |  DeclAnnotationList[11:2-11:2]: <empty list>
-|  |  |decl:
-|  |  |  ClassDecl[13:1-15:2]
-|  |  |  |name:
-|  |  |  |  Id[13:7-13:10]: Def
-|  |  |  |base_class:
-|  |  |  |  SimpleTypeRef[13:13-13:20]
-|  |  |  |  |type_name:
-|  |  |  |  |  Id[13:13-13:20]: FooNode
-|  |  |  |decls:
-|  |  |  |  FullDeclList[14:5-14:35]
-|  |  |  |  |  FullDecl[14:5-14:35]
+|  |  |  |  |  |  |  |  TypeRefList[10:64-10:67]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[10:64-10:67]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[10:64-10:67]: Def
+|  |  |  |  |  FullDecl[12:5-13:37]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[13:22-13:22]
+|  |  |  |  |  |  Doc[10:67-10:67]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[13:22-13:22]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[10:67-10:67]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[14:5-14:17]
-|  |  |  |  |  |  |  DeclAnnotation[14:5-14:17]
+|  |  |  |  |  |  DeclAnnotationList[12:5-12:12]
+|  |  |  |  |  |  |  DeclAnnotation[12:5-12:12]
 |  |  |  |  |  |  |  |name:
-|  |  |  |  |  |  |  |  Id[14:6-14:17]: parse_field
+|  |  |  |  |  |  |  |  Id[12:6-12:12]: export
 |  |  |  |  |  |  |  |params:
-|  |  |  |  |  |  |  |  ParamList[14:6-14:6]: <empty list>
+|  |  |  |  |  |  |  |  ParamList[12:6-12:6]: <empty list>
 |  |  |  |  |  |decl:
-|  |  |  |  |  |  FieldDecl[14:18-14:35]
+|  |  |  |  |  |  FunDecl[12:13-13:37]
 |  |  |  |  |  |  |name:
-|  |  |  |  |  |  |  Id[14:18-14:25]: example
-|  |  |  |  |  |  |type:
-|  |  |  |  |  |  |  SimpleTypeRef[14:28-14:35]
+|  |  |  |  |  |  |  Id[12:17-12:41]: is_null_a_def_or_example
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[12:43-12:43]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[12:46-12:53]
 |  |  |  |  |  |  |  |type_name:
-|  |  |  |  |  |  |  |  Id[14:28-14:35]: Example
-|  |  FullDecl[17:1-18:2]
+|  |  |  |  |  |  |  |  Id[12:46-12:53]: Boolean
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  Isa[13:5-13:37]
+|  |  |  |  |  |  |  |expr:
+|  |  |  |  |  |  |  |  DotExpr[13:5-13:19]
+|  |  |  |  |  |  |  |  |prefix:
+|  |  |  |  |  |  |  |  |  Id[13:5-13:9]: self
+|  |  |  |  |  |  |  |  |suffix:
+|  |  |  |  |  |  |  |  |  Id[13:10-13:19]: null_node
+|  |  |  |  |  |  |  |dest_type:
+|  |  |  |  |  |  |  |  TypeRefList[13:24-13:37]
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:24-13:27]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[13:24-13:27]: Def
+|  |  |  |  |  |  |  |  |  SimpleTypeRef[13:30-13:37]
+|  |  |  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  |  |  Id[13:30-13:37]: Example
+|  |  FullDecl[16:1-18:2]
 |  |  |doc:
-|  |  |  Doc[15:2-15:2]
+|  |  |  Doc[14:2-14:2]
 |  |  |  |lines:
-|  |  |  |  DocCommentList[15:2-15:2]: <empty list>
+|  |  |  |  DocCommentList[14:2-14:2]: <empty list>
 |  |  |decl_annotations:
-|  |  |  DeclAnnotationList[15:2-15:2]: <empty list>
+|  |  |  DeclAnnotationList[14:2-14:2]: <empty list>
 |  |  |decl:
-|  |  |  ClassDecl[17:1-18:2]
+|  |  |  ClassDecl[16:1-18:2]
 |  |  |  |name:
-|  |  |  |  Id[17:7-17:14]: Example
+|  |  |  |  Id[16:7-16:10]: Def
 |  |  |  |base_class:
-|  |  |  |  SimpleTypeRef[17:17-17:24]
+|  |  |  |  SimpleTypeRef[16:13-16:20]
 |  |  |  |  |type_name:
-|  |  |  |  |  Id[17:17-17:24]: FooNode
+|  |  |  |  |  Id[16:13-16:20]: FooNode
 |  |  |  |decls:
-|  |  |  |  FullDeclList[17:26-17:26]: <empty list>
+|  |  |  |  FullDeclList[17:5-17:35]
+|  |  |  |  |  FullDecl[17:5-17:35]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[16:22-16:22]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[16:22-16:22]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[17:5-17:17]
+|  |  |  |  |  |  |  DeclAnnotation[17:5-17:17]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[17:6-17:17]: parse_field
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[17:6-17:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FieldDecl[17:18-17:35]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[17:18-17:25]: example
+|  |  |  |  |  |  |type:
+|  |  |  |  |  |  |  SimpleTypeRef[17:28-17:35]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[17:28-17:35]: Example
+|  |  FullDecl[20:1-21:2]
+|  |  |doc:
+|  |  |  Doc[18:2-18:2]
+|  |  |  |lines:
+|  |  |  |  DocCommentList[18:2-18:2]: <empty list>
+|  |  |decl_annotations:
+|  |  |  DeclAnnotationList[18:2-18:2]: <empty list>
+|  |  |decl:
+|  |  |  ClassDecl[20:1-21:2]
+|  |  |  |name:
+|  |  |  |  Id[20:7-20:14]: Example
+|  |  |  |base_class:
+|  |  |  |  SimpleTypeRef[20:17-20:24]
+|  |  |  |  |type_name:
+|  |  |  |  |  Id[20:17-20:24]: FooNode
+|  |  |  |decls:
+|  |  |  |  FullDeclList[20:26-20:26]: <empty list>
 
 Parsing concrete syntax for test is_visible_from
 ================================================

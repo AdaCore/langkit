@@ -551,9 +551,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, IsA):
         return "{} isa {}".format(
             ee_pexpr(expr.expr),
-            "({})".format(", ".join(type_name(t) for t in expr.astnodes))
-            if len(expr.astnodes) > 1
-            else type_name(expr.astnodes[0])
+            "{}".format(" | ".join(type_name(t) for t in expr.astnodes))
         )
     elif isinstance(expr, LogicTrue):
         return "%true"
