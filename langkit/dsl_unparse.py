@@ -705,10 +705,14 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, Then):
         if expr.var_expr.source_name is None:
             assert expr.underscore_then
-            return "{}?{}".format(
-                ee(expr.expr),
-                ee(expr.then_expr, then_underscore_var=expr.var_expr)
-            )
+            # Match is like a function call in the Python DSL, but is a regular
+            # expression in the new syntax, so we don't want to use the ?
+            # syntax on it.
+            if not isinstance(expr.then_expr, Match):
+                return "{}?{}".format(
+                    ee(expr.expr),
+                    ee(expr.then_expr, then_underscore_var=expr.var_expr)
+                )
 
         return emit_method_call(
             ee_pexpr(expr.expr),
