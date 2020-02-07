@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode
 from langkit.expressions import (
-    ArrayLiteral, CharacterLiteral as Char, Let, String, Var, ignore,
+    ArrayLiteral, CharacterLiteral as Char, Let, Self, String, Var, ignore,
     langkit_property
 )
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
@@ -35,6 +35,15 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
+
+    @langkit_property(public=True)
+    def null_match():
+        """
+        Test that null conditional + match expr expands correctly.
+        """
+        return Self._.match(
+            lambda e=Example: e
+        )
 
     @langkit_property(public=True)
     def test_symlit_escape():
