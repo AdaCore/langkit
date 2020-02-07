@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     fun at_bare (n : ASTList[Example], i : Integer): Example = n?(i)
 

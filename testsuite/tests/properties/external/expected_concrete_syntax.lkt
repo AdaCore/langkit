@@ -4,10 +4,10 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
-class Expression : FooNode {
+@abstract class Expression : FooNode {
 
     @export fun result (): Integer
 }

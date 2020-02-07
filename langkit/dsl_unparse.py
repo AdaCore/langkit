@@ -903,7 +903,8 @@ def emit_field(field):
     from langkit.compiled_types import BaseField, Field
 
     if isinstance(field, BaseField):
-        return "{}{} : {}".format(
+        return "{}{}{} : {}".format(
+            "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
             field._indexing_name, type_name(field.type)
         )
@@ -964,6 +965,7 @@ def emit_node_type(node_type):
     )
     doc = node_type.doc
     builtin_properties = node_type.builtin_properties()
+    abstract_qual = "@abstract " if node_type.abstract else ""
 
     def is_builtin_prop(prop):
         return any(
@@ -979,9 +981,9 @@ def emit_node_type(node_type):
     ${emit_doc(doc)}$hl
     % endif
     % if base:
-    ${enum_qual}class ${type_name(node_type)} : ${type_name(base)} {$i$hl
+    ${abstract_qual}${enum_qual}class ${type_name(node_type)} : ${type_name(base)} {$i$hl
     % else:
-    ${enum_qual}class ${type_name(node_type)} {$i$hl
+    ${abstract_qual}${enum_qual}class ${type_name(node_type)} {$i$hl
     % endif
     % for field in parse_fields:
     ${emit_field(field)}$hl

@@ -9,14 +9,14 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
 class Dep : FooNode {
     @parse_field name : Name
 }
 
-class Name : FooNode {
+@abstract class Name : FooNode {
 
     @export fun resolve (): Entity[FooNode]
 

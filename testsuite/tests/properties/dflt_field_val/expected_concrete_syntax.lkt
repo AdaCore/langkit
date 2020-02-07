@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun build_1 (key : Array[CharacterType]): KV = KV(key=key)
 

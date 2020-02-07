@@ -3,11 +3,11 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
     v : LogicVar
 }
 
-class SomeNode : FooNode {
+@abstract class SomeNode : FooNode {
 
     fun test_prop (): Boolean
 }

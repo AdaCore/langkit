@@ -231,10 +231,10 @@ grammar None_grammar {
 
 }
 
-class PythonNode {
+@abstract class PythonNode {
 }
 
-class Arg : PythonNode {
+@abstract class Arg : PythonNode {
 }
 
 class ArgAssoc : Arg {
@@ -265,7 +265,7 @@ class CompIf : PythonNode {
     @parse_field comp : PythonNode
 }
 
-@enum_node(Lt,
+@abstract @enum_node(Lt,
     Gt,
     Eq,
     Gte,
@@ -274,7 +274,7 @@ class CompIf : PythonNode {
     Noteq, In, Notin, Is, Isnot) class CompOpKind : PythonNode {
 }
 
-class Comprehension : PythonNode {
+@abstract class Comprehension : PythonNode {
 }
 
 class CompFor : Comprehension {
@@ -308,7 +308,7 @@ class ExceptPart : PythonNode {
     @parse_field statements : PythonNode
 }
 
-class Expr : PythonNode {
+@abstract class Expr : PythonNode {
 }
 
 class AndExpr : Expr {
@@ -321,7 +321,7 @@ class AndOp : Expr {
     @parse_field right : Expr
 }
 
-class BinOp : Expr {
+@abstract class BinOp : Expr {
     @parse_field left : Expr
     @parse_field op : Op
     @parse_field right : Expr
@@ -401,7 +401,7 @@ class ListLit : Expr {
     @parse_field exprs : ASTList[Expr]
 }
 
-class Name : Expr {
+@abstract class Name : Expr {
 }
 
 class DottedName : Name {
@@ -483,7 +483,7 @@ class FileNode : PythonNode {
 class ImportStar : PythonNode {
 }
 
-@qualifier class KwArgsFlag : PythonNode {
+@abstract @qualifier class KwArgsFlag : PythonNode {
 
     ## Return whether this is an instance of KwArgsFlagPresent
     @export fun as_bool (): Boolean
@@ -511,7 +511,7 @@ class SingleParam : PythonNode {
     @parse_field default_value : Expr
 }
 
-class Stmt : PythonNode {
+@abstract class Stmt : PythonNode {
 }
 
 class AssertStmt : Stmt {
@@ -541,7 +541,7 @@ class Decorated : Stmt {
     @parse_field defn : DefStmt
 }
 
-class DefStmt : Stmt {
+@abstract class DefStmt : Stmt {
 }
 
 class ClassDef : DefStmt {
@@ -635,7 +635,7 @@ class WithStmt : Stmt {
     @parse_field statements : PythonNode
 }
 
-@qualifier class VarArgsFlag : PythonNode {
+@abstract @qualifier class VarArgsFlag : PythonNode {
 
     ## Return whether this is an instance of VarArgsFlagPresent
     @export fun as_bool (): Boolean

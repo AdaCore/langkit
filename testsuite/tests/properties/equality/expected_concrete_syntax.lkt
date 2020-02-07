@@ -8,7 +8,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     fun env_struct (): EnvStruct = EnvStruct(env=self.children_env.env_orphan)
 
@@ -30,7 +30,7 @@ class Decl : FooNode {
     self.env_array = other.env_array
 }
 
-@qualifier class HasPlus : FooNode {
+@abstract @qualifier class HasPlus : FooNode {
 
     ## Return whether this is an instance of HasPlusPresent
     @export fun as_bool (): Boolean

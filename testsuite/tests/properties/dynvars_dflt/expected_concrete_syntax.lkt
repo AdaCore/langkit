@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class RootNode {
+@abstract class RootNode {
 }
 
 class ExampleNode : RootNode {

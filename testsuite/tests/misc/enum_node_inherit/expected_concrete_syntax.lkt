@@ -3,15 +3,15 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
-class EnumNode : FooNode {
+@abstract class EnumNode : FooNode {
 
     @export fun prop (): Boolean = true
 }
 
-@qualifier class HasExample : EnumNode {
+@abstract @qualifier class HasExample : EnumNode {
 
     ## Return whether this is an instance of HasExamplePresent
     @export fun as_bool (): Boolean

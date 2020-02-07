@@ -6,7 +6,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun first_set (): Boolean = entity.info.md.is_first
 

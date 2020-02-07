@@ -7,7 +7,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
 class Decl : FooNode {
@@ -19,7 +19,7 @@ class Decl : FooNode {
     self.as_entity.items.map((i) => i)
 }
 
-@qualifier class HasPlus : FooNode {
+@abstract @qualifier class HasPlus : FooNode {
 
     ## Return whether this is an instance of HasPlusPresent
     @export fun as_bool (): Boolean
