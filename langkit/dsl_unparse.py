@@ -835,10 +835,11 @@ def emit_expr(expr, **ctx):
                                    if isinstance(expr.expr, (int, long)) else
                                    ee(expr.expr))
     elif isinstance(expr, RefCategories):
-        return 'RefCats({}, others={})'.format(', '.join(
+        return 'RefCats({})'.format(', '.join(
             '{}={}'.format(name, ee(value))
-            for name, value in sorted(expr.cat_map.items())
-        ), ee(expr.default))
+            for name, value in
+            list(sorted(expr.cat_map.items())) + [("others", expr.default)]
+        ))
     elif isinstance(expr, Predicate):
         return "%predicate({})".format(", ".join(keep([
             fqn(expr.pred_property),
