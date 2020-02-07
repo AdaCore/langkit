@@ -8,6 +8,9 @@ class FooNode {
 
 class Example : FooNode {
 
+    ## Test that sym literals with quotes in them are properly unparsed.
+    @export fun test_symlit_escape (): SymbolType = "\"=\""
+
     ## Test various valid dotexpr's LHS.
     @export fun test_dotexpr_lhs (): Integer = {
         val a = [1].find((v) => v = 1);
