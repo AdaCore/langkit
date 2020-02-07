@@ -37,4 +37,7 @@ class Example : FooNode {
 
         [a]
     }
+
+    ## Tests that reserved names are properly avoided in constructor syntax.
+    @export fun test_2 (): KV = KV(key="hey", value="you")
 }
