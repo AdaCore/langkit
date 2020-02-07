@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import (
-    ASTNode, AbstractField, Field, NullField, T, abstract
+    ASTNode, AbstractField, Field, T, abstract
 )
 from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or
 
@@ -39,7 +39,7 @@ class Decl(LKNode):
     Base class for declarations. Encompasses regular declarations as well as
     special declarations such as grammars, grammar rules, etc.
     """
-    name = AbstractField(type=T.Id)
+    name = AbstractField(type=T.DefId)
 
 
 @abstract
@@ -117,6 +117,20 @@ class Id(Expr):
     Identifier.
     """
     token_node = True
+
+
+class DefId(Id):
+    """
+    Defining identifier.
+    """
+    pass
+
+
+class RefId(Id):
+    """
+    Reference identifier.
+    """
+    pass
 
 
 class TokenLit(GrammarExpr):
@@ -513,12 +527,12 @@ class NumLit(Expr):
     token_node = True
 
 
-class BindDecl(BaseValDecl):
+class Bind(LKNode):
     """
     Dynamic var bind expression.
     """
+    name = Field()
     expr = Field()
-    type = NullField()
 
 
 class LogicExpr(Expr):
@@ -535,16 +549,18 @@ lkt_grammar.add_rules(
         G.decls, Lex.Termination
     ),
     id=Id(Lex.Identifier),
+    ref_id=RefId(Lex.Identifier),
+    def_id=DefId(Lex.Identifier),
 
     doc_comment=DocComment(Lex.DocComment),
 
     doc=Doc(List(G.doc_comment, empty_valid=True)),
 
     grammar_decl=GrammarDecl(
-        "grammar", G.id,
+        "grammar", G.def_id,
         "{", List(G.grammar_rule, empty_valid=True), "}"
     ),
-    grammar_rule=GrammarRuleDecl(G.id, "<-", G.grammar_expr),
+    grammar_rule=GrammarRuleDecl(G.def_id, "<-", G.grammar_expr),
     grammar_primary=Or(
         G.token_literal,
         G.grammar_cut,
@@ -593,9 +609,9 @@ lkt_grammar.add_rules(
     ),
     token_literal=TokenLit(Lex.String),
     parse_node_expr=ParseNodeExpr(
-        G.id, "(", List(G.grammar_expr, empty_valid=True), ")"
+        G.ref_id, "(", List(G.grammar_expr, empty_valid=True), ")"
     ),
-    grammar_rule_ref=GrammarRuleRef(G.id),
+    grammar_rule_ref=GrammarRuleRef(G.ref_id),
     grammar_list_expr=GrammarList(
         Or(ListKind.alt_one("list+"), ListKind.alt_zero("list*")),
         "(",
@@ -616,33 +632,33 @@ lkt_grammar.add_rules(
     ),
 
     grammar_token=GrammarToken(
-        "@", G.id, Opt("(", G.token_literal, ")")
+        "@", G.ref_id, Opt("(", G.token_literal, ")")
     ),
 
     class_decl=ClassDecl(
-        "class", G.id, Opt(":", G.type_ref), "{",
+        "class", G.def_id, Opt(":", G.type_ref), "{",
         G.decls,
         "}"
     ),
 
     fun_decl=FunDecl(
-        "fun", G.id,
+        "fun", G.def_id,
         "(", G.fun_arg_list, ")",
         ":", G.type_ref,
         Opt("=", G.expr)
     ),
 
     lambda_arg_decl=LambdaArgDecl(
-        G.id, Opt(":", G.type_ref), Opt("=", G.expr)
+        G.def_id, Opt(":", G.type_ref), Opt("=", G.expr)
     ),
 
-    fun_arg_decl=FunArgDecl(G.id, ":", G.type_ref, Opt("=", G.expr)),
+    fun_arg_decl=FunArgDecl(G.def_id, ":", G.type_ref, Opt("=", G.expr)),
 
     fun_arg_list=List(G.fun_arg_decl, empty_valid=True, sep=","),
     lambda_arg_list=List(G.lambda_arg_decl, empty_valid=True, sep=","),
 
     field_decl=FieldDecl(
-        G.id,
+        G.def_id,
         ":",
         G.type_ref
     ),
@@ -669,15 +685,15 @@ lkt_grammar.add_rules(
     decls=List(G.decl, empty_valid=True),
 
     val_decl=ValDecl(
-        "val", G.id, Opt(":", G.type_ref), "=", G.expr
+        "val", G.def_id, Opt(":", G.type_ref), "=", G.expr
     ),
 
-    bind_decl=BindDecl("bind", G.id, "=", G.expr),
+    bind=Bind("bind", G.ref_id, "=", G.expr),
 
     block=BlockExpr(
         "{",
         # TODO: Add discard/ignore in the list
-        List(Or(G.val_decl, G.bind_decl), empty_valid=False, sep=";"),
+        List(Or(G.val_decl, G.bind), empty_valid=False, sep=";"),
         ";",
         G.expr,
         "}"
@@ -731,7 +747,7 @@ lkt_grammar.add_rules(
     match_expr=MatchExpr(
         "match", G.expr, "{",
         List(MatchBranch("case",
-                         MatchValDecl(G.id, Opt(":", G.type_ref)),
+                         MatchValDecl(G.def_id, Opt(":", G.type_ref)),
                          "=>", G.expr)),
         "}"
     ),
@@ -762,8 +778,8 @@ lkt_grammar.add_rules(
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.params, "]"),
         ErrorOnNull(G.basic_expr, "!"),
-        DotExpr(G.basic_expr, ".", G.id),
-        NullCondDottedName(G.basic_expr, "?", ".", G.id),
+        DotExpr(G.basic_expr, ".", G.ref_id),
+        NullCondDottedName(G.basic_expr, "?", ".", G.ref_id),
         G.term
     ),
 
@@ -771,7 +787,7 @@ lkt_grammar.add_rules(
         ParenExpr("(", G.expr, ")"),
         G.match_expr,
         G.null,
-        G.id,
+        G.ref_id,
         G.block,
         G.num_lit,
         G.string_lit,
@@ -779,8 +795,8 @@ lkt_grammar.add_rules(
     ),
 
     basic_name=Or(
-        DotExpr(G.basic_name, ".", G.id),
-        G.id
+        DotExpr(G.basic_name, ".", G.ref_id),
+        G.ref_id
     ),
 
 
@@ -794,5 +810,5 @@ lkt_grammar.add_rules(
         "@", G.id, Opt("(", G.params, ")")
     ),
 
-    param=Param(Opt(G.id, "="), G.expr),
+    param=Param(Opt(G.ref_id, "="), G.expr),
 )
