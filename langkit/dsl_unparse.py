@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from funcy import keep
+import json
 
 from langkit.passes import GlobalPass
 from contextlib import contextmanager
@@ -543,7 +544,7 @@ def emit_expr(expr, **ctx):
     if isinstance(expr, Literal):
         return str(expr.literal).lower()
     elif isinstance(expr, SymbolLiteral):
-        return '"{}"'.format(expr.name)
+        return json.dumps(expr.name)
     elif isinstance(expr, PropertyError):
         return "raise PropertyError({})".format(
             repr(expr.message) if expr.message else ""

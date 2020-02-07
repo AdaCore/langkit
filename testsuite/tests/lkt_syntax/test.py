@@ -37,6 +37,13 @@ class FooNode(ASTNode):
 class Example(FooNode):
 
     @langkit_property(public=True)
+    def test_symlit_escape():
+        """
+        Test that sym literals with quotes in them are properly unparsed.
+        """
+        return "\"=\""
+
+    @langkit_property(public=True)
     def test_dotexpr_lhs():
         """
         Test various valid dotexpr's LHS.
