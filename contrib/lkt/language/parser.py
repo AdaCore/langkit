@@ -722,13 +722,9 @@ lkt_grammar.add_rules(
 
     primary=Or(
         G.lambda_expr,
-        G.array_literal,
-        G.block,
         G.if_expr,
         G.raise_expr,
         G.try_expr,
-        G.num_lit,
-        G.string_lit,
         G.logic,
     ),
 
@@ -776,6 +772,10 @@ lkt_grammar.add_rules(
         G.match_expr,
         G.null,
         G.id,
+        G.block,
+        G.num_lit,
+        G.string_lit,
+        G.array_literal,
     ),
 
     basic_name=Or(
