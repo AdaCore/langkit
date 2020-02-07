@@ -16,7 +16,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Def : FooNode {
@@ -38,26 +38,26 @@ class Lit : Atom {
 class Ref : Atom {
     @parse_field name : Name
 
-    @export fun resolve (): Entity[FooNode] =
-    self.node_env.get(self.name.symbol, only_first=true)
+    @export fun resolve (): FooNode =
+    node.node_env.get(node.name.symbol, only_first=true)
 
-    @export fun dummy (): Array[Entity[FooNode]] =
-    self.referenced_env.get(self.name.symbol)
+    @export fun dummy (): Array[FooNode] =
+    node.referenced_env.get(node.name.symbol)
 
-    fun referenced_env (): LexicalEnv = null.to[LexicalEnv]
+    fun referenced_env (): LexicalEnv = null
 
     fun referenced_env (): LexicalEnv
 }
 
 class MiddleRef : Ref {
 
-    fun referenced_env (): LexicalEnv = null.to[LexicalEnv]
+    fun referenced_env (): LexicalEnv = null
 }
 
 class DerivedRef : MiddleRef {
 
     fun referenced_env (): LexicalEnv =
-    self.unit.root.node_env.get(self.name.symbol, only_first=true).children_env
+    node.unit.root.node_env.get(node.name.symbol, only_first=true).children_env
 }
 
 class Plus : Expr {
@@ -71,4 +71,11 @@ class Name : FooNode {
 class Var : FooNode {
     @parse_field name : Name
     @parse_field expr : Expr
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

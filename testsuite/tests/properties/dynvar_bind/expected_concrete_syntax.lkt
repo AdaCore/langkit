@@ -5,7 +5,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Decl : FooNode {
@@ -19,9 +19,16 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun resolve (): Entity[FooNode] = {
-        bind env = self.parent.parent.node_env;
+    @export fun resolve (): FooNode = {
+        bind env = node.parent.parent.node_env;
 
-        env.get(self.name.symbol)?(0)
+        env.get(node.name.symbol)?(0)
     }
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

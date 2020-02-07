@@ -3,14 +3,14 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    fun null_node (): FooNode = null.to[FooNode]
+    fun null_node (): FooNode = null
 
-    @export fun is_null_a_def (): Boolean = self.null_node isa Def
+    @export fun is_null_a_def (): Boolean = node.null_node isa Def
 
     @export fun is_null_a_def_or_example (): Boolean =
-    self.null_node isa Def | Example
+    node.null_node isa Def | Example
 }
 
 class Def : FooNode {

@@ -46,6 +46,7 @@ class Token(LexerToken):
     OrKw = WithText()
     NotKw = WithText()
     ClassKw = WithText()
+    StructKw = WithText()
     FunKw = WithText()
     PublicKw = WithText()
     PrivateKw = WithText()
@@ -63,6 +64,8 @@ class Token(LexerToken):
     CaseKw = WithText()
     RaiseKw = WithText()
     TryKw = WithText()
+    EnumKw = WithText()
+    GenericKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -120,6 +123,7 @@ lkt_lexer.add_rules(
     # Keywords
     (Literal('grammar'),   Token.GrammarKw),
     (Literal('class'),     Token.ClassKw),
+    (Literal('struct'),    Token.StructKw),
     (Literal('fun'),       Token.FunKw),
     (Literal('public'),    Token.PublicKw),
     (Literal('private'),   Token.PrivateKw),
@@ -138,6 +142,8 @@ lkt_lexer.add_rules(
     (Literal('case'),      Token.CaseKw),
     (Literal('raise'),     Token.RaiseKw),
     (Literal('try'),       Token.TryKw),
+    (Literal('enum'),      Token.EnumKw),
+    (Literal('generic'),   Token.GenericKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),

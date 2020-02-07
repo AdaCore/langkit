@@ -4,9 +4,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun node_unit (): InternalUnit = (self.to[Name]).do((n) => n.unit)
+    @export fun node_unit (): InternalUnit = (node.to[Name]).do((n) => n.unit)
 }
 
 class Scope : ASTList[Name] {

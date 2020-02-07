@@ -9,13 +9,13 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
     @export fun id_bool (id : Boolean): Boolean = id
 
-    @export fun id_int (id : Integer): Integer = id
+    @export fun id_int (id : Int): Int = id
 
-    @export fun id_bigint (id : BigIntegerType): BigIntegerType = id
+    @export fun id_bigint (id : BigInt): BigInt = id
 
     @export fun id_char (id : CharacterType): CharacterType = id
 
@@ -31,48 +31,45 @@ grammar None_grammar {
 
     @export fun id_unit_kind (id : AnalysisUnitKind): AnalysisUnitKind = id
 
-    @export fun id_node_array (id : Array[Entity[FooNode]]): Array[Entity[FooNode]] =
-    id
+    @export fun id_node_array (id : Array[FooNode]): Array[FooNode] = id
 
-    @export fun id_bigint_array (id : Array[BigIntegerType]): Array[BigIntegerType] =
-    id
+    @export fun id_bigint_array (id : Array[BigInt]): Array[BigInt] = id
 }
 
 @abstract class Expr : FooNode {
 
-    @export fun eval (): Integer
+    @export fun eval (): Int
 
-    @export fun eval_plus (addend : Expr): Integer = self.eval + addend.eval
+    @export fun eval_plus (addend : Expr): Int = node.eval + addend.eval
 }
 
 class Addition : Expr {
     @parse_field lhs : Expr
     @parse_field rhs : Expr
 
-    fun eval (): Integer = self.lhs.eval + self.rhs.eval
+    fun eval (): Int = node.lhs.eval + node.rhs.eval
 }
 
 class Number : Expr {
 
-    fun eval (): Integer
+    fun eval (): Int
 
     @export fun id_dflt_bool (id : Boolean = true): Boolean = id
 
-    @export fun id_dflt_int (id : Integer = 42): Integer = id
+    @export fun id_dflt_int (id : Int = 42): Int = id
 
     @export fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
 
-    @export fun id_dflt_root_node (id : FooNode = null.to[FooNode]): FooNode =
-    id
+    @export fun id_dflt_root_node (id : FooNode = null): FooNode = id
 }
 
 class Ref : Expr {
     @parse_field name : Name
 
-    @export fun referenced_var_decl (): Entity[VarDecl] =
-    self.node_env.get(self.name, only_first=true).to[VarDecl]!
+    @export fun referenced_var_decl (): VarDecl =
+    node.node_env.get(node.name, only_first=true).to[VarDecl]!
 
-    fun eval (): Integer = self.referenced_var_decl.eval
+    fun eval (): Int = node.referenced_var_decl.eval
 }
 
 class Name : FooNode {
@@ -82,5 +79,12 @@ class VarDecl : FooNode {
     @parse_field name : Name
     @parse_field value : Expr
 
-    @export fun eval (): Integer = self.value.eval
+    @export fun eval (): Int = node.value.eval
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

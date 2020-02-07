@@ -37,7 +37,7 @@ package body Langkit_Support.Symbols is
 
    function Image (S : Symbol_Type) return Text_Type is
    begin
-      return S.all;
+      return (if S = null then "<no symbol>" else S.all);
    end Image;
 
    -----------

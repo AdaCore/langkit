@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
     v : LogicVar
 }
 
@@ -16,9 +16,7 @@ class Example : SomeNode {
 
     fun test_prop (): Boolean = true
 
-    @export fun solve (): Boolean = (
-        %domain(self.v, [null.to[Entity[FooNode]]])
-    ) and (
-        %predicate(BareSomeNode.test_prop, self.v)
+    @export fun solve (): Boolean = (%domain(node.v, [null])) and (
+        %predicate(BareSomeNode.test_prop, node.v)
     ).solve
 }

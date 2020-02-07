@@ -3,9 +3,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun can_reach (n : Entity[FooNode], from_node : Entity[FooNode]): Boolean =
+    @export fun can_reach (n : FooNode, from_node : FooNode): Boolean =
     n.node.can_reach(from_node.node)
 }
 

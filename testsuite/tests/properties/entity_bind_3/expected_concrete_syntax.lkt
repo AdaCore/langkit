@@ -3,27 +3,27 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun prop (): Integer
+    @export fun prop (): Int
 
-    fun prop (): Integer
+    fun prop (): Int
 }
 
 class Literal : FooNode {
     var : LogicVar
 
-    fun a (): Entity[FooNode]
+    fun a (): FooNode
 
-    fun node (): Entity[Literal] = self.as_entity
+    fun node (): Literal = node.as_entity
 
-    fun b (): LogicEquation = %eq(self.var, self.a, conv_prop=BareLiteral.node)
+    fun b (): LogicEquation = %eq(node.var, node.a, conv_prop=BareLiteral.node)
 
-    @export fun public_pro (): Entity[Literal] = {
-        val _ = self.b;
+    @export fun public_pro (): Literal = {
+        val _ = node.b;
 
-        self.as_bare_entity
+        node.as_bare_entity
     }
 
-    fun a (): Entity[FooNode]
+    fun a (): FooNode
 }

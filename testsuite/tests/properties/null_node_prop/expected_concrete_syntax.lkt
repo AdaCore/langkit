@@ -3,9 +3,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun eval_unit (): Boolean = null.to[FooNode].prop
+    @export fun eval_unit (): Boolean = null.prop
 
     fun prop (): Boolean = true
 }

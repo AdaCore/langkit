@@ -6,32 +6,32 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun first_set (): Boolean = entity.info.md.is_first
+    @export fun first_set (): Boolean = self.info.md.is_first
 
-    @export fun second_set (): Boolean = entity.info.md.is_second
+    @export fun second_set (): Boolean = self.info.md.is_second
 
-    @export fun test_main (): Entity[FooNode] =
-    self.as_entity.to[Couple].first_entity.first
+    @export fun test_main (): FooNode =
+    node.as_entity.to[Couple].first_entity.first
 }
 
 class Couple : FooNode {
     @parse_field first : FooNode
     @parse_field second : FooNode
 
-    fun first_entity (): Entity[Couple] =
-    self.as_entity.get_entity(Metadata(is_first=true, is_second=false))
+    fun first_entity (): Couple =
+    node.as_entity.get_entity(Metadata(is_first=true, is_second=false))
 
-    fun get_entity (md : Metadata): Entity[Couple] = Entity[Couple](
+    fun get_entity (md : Metadata): Couple = Couple(
         info=EntityInfo(
-            md=md, from_rebound=false, rebindings=null.to[EnvRebindings]
-        ), node=self
+            md=md, from_rebound=false, rebindings=null
+        ), node=node
     )
 
-    @export fun property_on_entity (): Entity[Couple] =
+    @export fun property_on_entity (): Couple =
     # Check that we can do ".get_entity" even when the prefix is an entity
-    self.as_entity.get_entity(self.as_entity.info.md)
+    node.as_entity.get_entity(node.as_entity.info.md)
 }
 
 class Literal : FooNode {

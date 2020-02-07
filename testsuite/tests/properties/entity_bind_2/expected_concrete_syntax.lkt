@@ -3,30 +3,30 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 @abstract class RootNode : FooNode {
     var : LogicVar
 
-    fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation
+    fun xref_eq (arg1 : FooNode, arg2 : FooNode): LogicEquation
 
-    @export fun solve_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): Boolean =
-    self.xref_eq(arg1, arg2).solve
+    @export fun solve_eq (arg1 : FooNode, arg2 : FooNode): Boolean =
+    node.xref_eq(arg1, arg2).solve
 }
 
 class Identifier : RootNode {
 
-    fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
-    %domain(self.var, [self])
+    fun xref_eq (arg1 : FooNode, arg2 : FooNode): LogicEquation =
+    %domain(node.var, [node])
 }
 
 class Literal : RootNode {
 
-    fun is_eq (other : Entity[Literal]): Boolean = self.as_entity = other
+    fun is_eq (other : Literal): Boolean = node.as_entity = other
 
-    fun xref_eq (arg1 : Entity[FooNode], arg2 : Entity[FooNode]): LogicEquation =
-    (%domain(self.var, [arg1])) and (
-        %eq(self.var, arg2, eq_prop=BareLiteral.is_eq)
+    fun xref_eq (arg1 : FooNode, arg2 : FooNode): LogicEquation =
+    (%domain(node.var, [arg1])) and (
+        %eq(node.var, arg2, eq_prop=BareLiteral.is_eq)
     )
 }

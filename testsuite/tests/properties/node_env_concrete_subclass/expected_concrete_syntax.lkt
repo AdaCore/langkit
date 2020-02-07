@@ -7,15 +7,15 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 @abstract class BaseDecl : FooNode {
 
-    @export fun lookup (n : SymbolType): Entity[FooNode] =
-    self.env_lookup(self.node_env, n)
+    @export fun lookup (n : SymbolType): FooNode =
+    node.env_lookup(node.node_env, n)
 
-    fun env_lookup (env : LexicalEnv, n : SymbolType): Entity[FooNode] =
+    fun env_lookup (env : LexicalEnv, n : SymbolType): FooNode =
     env.get(n, only_first=true)
 }
 
@@ -35,4 +35,11 @@ class Name : FooNode {
 
 class RootNode : FooNode {
     @parse_field decls : ASTList[BaseDecl]
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

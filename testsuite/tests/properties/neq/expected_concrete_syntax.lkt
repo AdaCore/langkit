@@ -3,12 +3,12 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun integers_neq (a : Integer, b : Integer): Boolean = not (a = b)
+    @export fun integers_neq (a : Int, b : Int): Boolean = not (a = b)
 }
 
 class Example : FooNode {
 
-    @export fun not_eq (other : Example): Boolean = not (self = other)
+    @export fun not_eq (other : Example): Boolean = not (node = other)
 }

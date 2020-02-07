@@ -3,13 +3,13 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class ListNode : FooNode {
     @parse_field nb_list : ASTList[NumberNode]
 
-    @export fun prop (): Boolean = self.nb_list.map((_, i) => i).contains(1)
+    @export fun prop (): Boolean = node.nb_list.map((_, i) => i).contains(1)
 }
 
 class NumberNode : FooNode {

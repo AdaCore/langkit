@@ -6,9 +6,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun count (seq : Array[Entity[Example]]): Integer = seq.length
+    @export fun count (seq : Array[Example]): Int = seq.length
 }
 
 class Example : FooNode {
@@ -20,9 +20,9 @@ class Example : FooNode {
 ## * ${node_name(T.NullNode)}
 class Sequence : ASTList[FooNode] {
 
-    @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
+    @export fun all_items (): Array[FooNode] = self.map((i) => i)
 
-    @export fun example_items (): Array[Entity[Example]] = entity.filter_map(
+    @export fun example_items (): Array[Example] = self.filter_map(
         (i) => i.to[Example]!, (i) => i isa Example
     )
 }

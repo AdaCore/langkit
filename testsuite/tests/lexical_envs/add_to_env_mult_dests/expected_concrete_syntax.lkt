@@ -6,16 +6,23 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Id : FooNode {
 
-    @export fun get_scope (): Entity[FooNode] =
-    self.children_env.get("Scope", only_first=true)
+    @export fun get_scope (): FooNode =
+    node.children_env.get("Scope", only_first=true)
 }
 
 class Scope : FooNode {
     @parse_field name : Id
     @parse_field content : ASTList[FooNode]
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

@@ -3,10 +3,10 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun recurse (n : Integer): Integer =
-    if (n <= (1)) then n else self.recurse(n - (1))
+    @export fun recurse (n : Int): Int =
+    if (n <= (1)) then n else node.recurse(n - (1))
 }
 
 class Example : FooNode {

@@ -9,7 +9,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Def : FooNode {
@@ -19,17 +19,17 @@ class Def : FooNode {
 
 @abstract class Expr : FooNode {
 
-    @export fun evaluate_abstract (): Integer
+    @export fun evaluate_abstract (): Int
 
-    @export fun evaluate_rtcheck (): Integer
+    @export fun evaluate_rtcheck (): Int
 
-    @export fun evaluate_concrete (): Integer = 1
+    @export fun evaluate_concrete (): Int = 1
 
-    @export fun evaluate_entity (): Integer
+    @export fun evaluate_entity (): Int
 
-    fun evaluate_rtcheck (): Integer
+    fun evaluate_rtcheck (): Int
 
-    fun evaluate_concrete (): Integer
+    fun evaluate_concrete (): Int
 }
 
 @abstract class Atom : Expr {
@@ -37,42 +37,49 @@ class Def : FooNode {
 
 class Lit : Atom {
 
-    fun evaluate_abstract (): Integer = 1
+    fun evaluate_abstract (): Int = 1
 
-    fun evaluate_rtcheck (): Integer = 1
+    fun evaluate_rtcheck (): Int = 1
 
-    fun evaluate_entity (): Integer = 1
+    fun evaluate_entity (): Int = 1
 }
 
 class Ref : Atom {
     @parse_field name : Name
 
-    @export fun resolve (): Entity[Def] =
-    self.node_env.get(self.name.symbol, only_first=true).to[Def]!
+    @export fun resolve (): Def =
+    node.node_env.get(node.name.symbol, only_first=true).to[Def]!
 
-    fun evaluate_abstract (): Integer = self.resolve.expr.evaluate_abstract
+    fun evaluate_abstract (): Int = node.resolve.expr.evaluate_abstract
 
-    fun evaluate_concrete (): Integer = self.resolve.expr.evaluate_concrete
+    fun evaluate_concrete (): Int = node.resolve.expr.evaluate_concrete
 
-    fun evaluate_entity (): Integer = entity.resolve.expr.evaluate_entity
+    fun evaluate_entity (): Int = self.resolve.expr.evaluate_entity
 }
 
 class Plus : Expr {
     @parse_field lhs : Expr
     @parse_field rhs : Expr
 
-    fun evaluate_abstract (): Integer =
-    self.lhs.evaluate_abstract + self.rhs.evaluate_abstract
+    fun evaluate_abstract (): Int =
+    node.lhs.evaluate_abstract + node.rhs.evaluate_abstract
 
-    fun evaluate_rtcheck (): Integer =
-    self.lhs.evaluate_rtcheck + self.rhs.evaluate_rtcheck
+    fun evaluate_rtcheck (): Int =
+    node.lhs.evaluate_rtcheck + node.rhs.evaluate_rtcheck
 
-    fun evaluate_concrete (): Integer =
-    self.lhs.evaluate_concrete + self.rhs.evaluate_concrete
+    fun evaluate_concrete (): Int =
+    node.lhs.evaluate_concrete + node.rhs.evaluate_concrete
 
-    fun evaluate_entity (): Integer =
-    entity.lhs.evaluate_entity + entity.rhs.evaluate_entity
+    fun evaluate_entity (): Int =
+    self.lhs.evaluate_entity + self.rhs.evaluate_entity
 }
 
 class Name : FooNode {
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

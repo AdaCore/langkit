@@ -5,31 +5,31 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    fun get_num (): Integer
+    fun get_num (): Int
 }
 
 class Example : FooNode {
 
-    fun get_num (): Integer = 2
+    fun get_num (): Int = 2
 }
 
 class Literal : FooNode {
 
-    fun get_num (): Integer = 3
+    fun get_num (): Int = 3
 
-    fun a (): Entity[FooNode]
+    fun a (): FooNode
 
-    @export fun b (): Integer = match self.a {
-        case e : Entity[Example] => e.get_num
-        case c : Entity[FooNode] => c.get_num
-    }
-
-    @export fun c (): Integer = match self.a {
+    @export fun b (): Int = match node.a {
         case e : Example => e.get_num
         case c : FooNode => c.get_num
     }
 
-    fun a (): Entity[FooNode]
+    @export fun c (): Int = match node.a {
+        case e : Example => e.get_num
+        case c : FooNode => c.get_num
+    }
+
+    fun a (): FooNode
 }

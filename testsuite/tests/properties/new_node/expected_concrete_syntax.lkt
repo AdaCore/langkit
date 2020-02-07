@@ -7,7 +7,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Literal : FooNode {
@@ -18,9 +18,9 @@ class LiteralSequence : FooNode {
     @parse_field items : ASTList[Literal]
 
     @memoized fun new_node (): SynthNode =
-    SynthNode(items=self.items, name=self.name)
+    SynthNode(items=node.items, name=node.name)
 
-    @export fun prop (): Entity[SynthNode] = self.new_node.as_bare_entity
+    @export fun prop (): SynthNode = node.new_node.as_bare_entity
 }
 
 class Name : FooNode {

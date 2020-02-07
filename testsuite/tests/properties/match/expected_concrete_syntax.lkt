@@ -8,22 +8,22 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun find_atoms (): Array[Entity[Atom]] = (
-        match entity {
+    @export fun find_atoms (): Array[Atom] = (
+        match self {
             # This should match Lit .. Ref
             case a : Atom => [a]
 
             # This should match Def | Plus .. FooNode.list
-            case _ => null.to[Array[Entity[Atom]]]
+            case _ => null
         }
     ) & (
-        entity.children.mapcat((c) => c.find_atoms)
+        self.children.mapcat((c) => c.find_atoms)
     )
 
-    @export fun find_atoms_or_exprs (): Array[Entity[Expr]] = (
-        match entity {
+    @export fun find_atoms_or_exprs (): Array[Expr] = (
+        match self {
             # This should match Lit .. Ref
             case a : Atom => [a.to[Expr]]
 
@@ -31,14 +31,14 @@ grammar None_grammar {
             case e : Expr => [e]
 
             # This should match Def | FooNode.list
-            case _ => null.to[Array[Entity[Expr]]]
+            case _ => null
         }
     ) & (
-        entity.children.mapcat((c) => c.find_atoms_or_exprs)
+        self.children.mapcat((c) => c.find_atoms_or_exprs)
     )
 
-    @export fun find_exprs (): Array[Entity[Expr]] = (
-        match entity {
+    @export fun find_exprs (): Array[Expr] = (
+        match self {
             # This should match Lit .. Plus
             case e : Expr => [e]
 
@@ -47,10 +47,10 @@ grammar None_grammar {
             case a : Atom => [a.to[Expr]]
 
             # This should match Def | FooNode.list
-            case _ => null.to[Array[Entity[Expr]]]
+            case _ => null
         }
     ) & (
-        entity.children.mapcat((c) => c.find_exprs)
+        self.children.mapcat((c) => c.find_exprs)
     )
 }
 
@@ -61,16 +61,16 @@ class Def : FooNode {
 
 @abstract class Expr : FooNode {
 
-    @export fun find_refs (): Array[Entity[Ref]] = (
-        match entity {
+    @export fun find_refs (): Array[Ref] = (
+        match self {
             # This should match Ref
             case r : Ref => [r]
 
             # This should match Lit
-            case _ => null.to[Array[Entity[Ref]]]
+            case _ => null
         }
     ) & (
-        entity.children.mapcat((c) => c.to[Expr]!.find_refs)
+        self.children.mapcat((c) => c.to[Expr]!.find_refs)
     )
 }
 
