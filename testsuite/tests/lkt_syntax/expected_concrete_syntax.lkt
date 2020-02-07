@@ -8,6 +8,19 @@ class FooNode {
 
 class Example : FooNode {
 
+    ## Test various valid dotexpr's LHS.
+    @export fun test_dotexpr_lhs (): Integer = {
+        val a = [1].find((v) => v = 1);
+        val b = {
+            val b = [1, 2];
+
+            b
+        }.find((v) => v = 1);
+        val c = 'hello'.find((c) => c = 'h');
+
+        a
+    }
+
     ## Tests that block delimiter prevents a syntactic ambiguity.
     @export fun test_1 (): Array[Integer] = {
         val a = 12;

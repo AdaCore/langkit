@@ -6,7 +6,10 @@ syntax, that were not covered by the existing testsuite.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode
-from langkit.expressions import Var, langkit_property
+from langkit.expressions import (
+    ArrayLiteral, CharacterLiteral as Char, Let, String, Var, ignore,
+    langkit_property
+)
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithText, WithTrivia)
 from langkit.parsers import Grammar, List
@@ -32,6 +35,18 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
+
+    @langkit_property(public=True)
+    def test_dotexpr_lhs():
+        """
+        Test various valid dotexpr's LHS.
+        """
+        a = Var(ArrayLiteral([1]).find(lambda v: v == 1))
+        b = Var(Let(lambda b=[1, 2]: b).find(lambda v: v == 1))
+        c = Var(String("hello").find(lambda c: c == Char('h')))
+        ignore(b)
+        ignore(c)
+        return a
 
     @langkit_property(public=True)
     def test_1():
