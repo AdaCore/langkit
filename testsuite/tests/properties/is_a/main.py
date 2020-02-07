@@ -16,5 +16,6 @@ if u.diagnostics:
 
 n = u.root[0]
 print('.is_null_a_def = {}'.format(n.p_is_null_a_def))
+print('.is_null_a_def_or_example = {}'.format(n.p_is_null_a_def_or_example))
 
 print('main.py: Done.')

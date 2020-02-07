@@ -21,6 +21,10 @@ class FooNode(ASTNode):
     def is_null_a_def():
         return Self.null_node.is_a(T.Def)
 
+    @langkit_property(public=True)
+    def is_null_a_def_or_example():
+        return Self.null_node.is_a(T.Def, T.Example)
+
 
 class Def(FooNode):
     example = Field()

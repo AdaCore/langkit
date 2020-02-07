@@ -1,4 +1,5 @@
 main.py: Running...
 .is_null_a_def = False
+.is_null_a_def_or_example = False
 main.py: Done.
 Done

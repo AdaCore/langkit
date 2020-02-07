@@ -716,7 +716,7 @@ lkt_grammar.add_rules(
     ),
 
     isa_or_primary=Or(
-        Isa(G.primary, "isa", G.type_ref),
+        Isa(G.primary, "isa", List(G.type_ref, sep="|", empty_valid=False)),
         G.primary
     ),
 
