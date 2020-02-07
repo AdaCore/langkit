@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
     fun sophisticated_predicate (): Boolean = true
 }
@@ -11,9 +11,9 @@ grammar None_grammar {
 class Example : FooNode {
     var1 : LogicVar
 
-    @export fun prop (): Entity[Example] = {
-        val _ = %predicate(BareFooNode.sophisticated_predicate, self.var1);
+    @export fun prop (): Example = {
+        val _ = %predicate(BareFooNode.sophisticated_predicate, node.var1);
 
-        self.as_bare_entity
+        node.as_bare_entity
     }
 }

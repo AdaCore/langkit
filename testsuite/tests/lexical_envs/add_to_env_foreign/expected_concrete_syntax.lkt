@@ -11,7 +11,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class ForeignDecl : FooNode {
@@ -29,18 +29,18 @@ class ScopedId : Id {
     @parse_field scope : Id
     @parse_field name : SimpleId
 
-    fun simple_name (): SimpleId = self.name
+    fun simple_name (): SimpleId = node.name
 
     fun resolve (base_env : LexicalEnv): Scope =
-    self.scope.resolve(base_env).children_env.get(self.name.symbol, only_first=true).node.to[Scope]
+    node.scope.resolve(base_env).children_env.get(node.name.symbol, only_first=true).node.to[Scope]
 }
 
 class SimpleId : Id {
 
-    fun simple_name (): SimpleId = self
+    fun simple_name (): SimpleId = node
 
     fun resolve (base_env : LexicalEnv): Scope =
-    base_env.get(self.symbol, only_first=true).node.to[Scope]
+    base_env.get(node.symbol, only_first=true).node.to[Scope]
 }
 
 class Scope : FooNode {
@@ -51,4 +51,11 @@ class Scope : FooNode {
 class SelfDecl : FooNode {
     @parse_field id : Id
     @parse_field md_node : Id
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

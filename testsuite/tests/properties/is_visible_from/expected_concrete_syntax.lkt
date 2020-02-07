@@ -4,11 +4,11 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
     @export fun prop (empty1 : Boolean, empty2 : Boolean): Boolean = {
-        val arg1 = if empty1 then _ else self.children_env;
-        val arg2 = if empty2 then _ else self.children_env;
+        val arg1 = if empty1 then _ else node.children_env;
+        val arg2 = if empty2 then _ else node.children_env;
 
         arg1.is_visible_from(arg2)
     }
@@ -18,4 +18,11 @@ class Scope : ASTList[Name] {
 }
 
 class Name : FooNode {
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

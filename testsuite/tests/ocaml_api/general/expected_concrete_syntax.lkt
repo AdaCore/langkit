@@ -9,9 +9,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun count (seq : Array[Entity[Example]]): Integer = seq.length
+    @export fun count (seq : Array[Example]): Int = seq.length
 
     @export fun get_a (c : CharacterType = 'a'): CharacterType = c
 
@@ -25,13 +25,12 @@ grammar None_grammar {
 
     @export fun same_color_dflt (c : Color = Color.Red): Color = c
 
-    @export fun int_double (c : BigIntegerType): BigIntegerType = c + c
+    @export fun int_double (c : BigInt): BigInt = c + c
 
-    @export fun me (b : Boolean): FooNodeStruct = FooNodeStruct(
-        node=if b then entity else (null.to[Entity[FooNode]])
-    )
+    @export fun me (b : Boolean): FooNodeStruct =
+    FooNodeStruct(node=if b then self else (null))
 
-    @export fun get_node (node_struct : FooNodeStruct): Entity[FooNode] =
+    @export fun get_node (node_struct : FooNodeStruct): FooNode =
     node_struct.node
 }
 
@@ -47,9 +46,9 @@ class Example : FooNode {
 ## * ${node_name(T.Var)}
 class Sequence : ASTList[FooNode] {
 
-    @export fun all_items (): Array[Entity[FooNode]] = entity.map((i) => i)
+    @export fun all_items (): Array[FooNode] = self.map((i) => i)
 
-    @export fun example_items (): Array[Entity[Example]] = entity.filter_map(
+    @export fun example_items (): Array[Example] = self.filter_map(
         (i) => i.to[Example]!, (i) => i isa Example
     )
 }
@@ -67,4 +66,8 @@ class StringLiteral : FooNode {
 
 class Var : FooNode {
     @parse_field arg : Sequence
+}
+
+struct FooNodeStruct {
+    node : FooNode
 }

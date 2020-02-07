@@ -13,6 +13,7 @@ class Manage(ManageScript):
         from language.parser import lkt_grammar
 
         return CompileCtx(lang_name='lkt',
+                          short_name='lkt',
                           lexer=lkt_lexer,
                           grammar=lkt_grammar)
 

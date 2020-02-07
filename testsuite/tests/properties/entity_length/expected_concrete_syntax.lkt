@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Name : FooNode {
@@ -12,5 +12,5 @@ class Name : FooNode {
 class Names : FooNode {
     @parse_field names : ASTList[Name]
 
-    @export fun count (): Integer = entity.names.length
+    @export fun count (): Int = self.names.length
 }

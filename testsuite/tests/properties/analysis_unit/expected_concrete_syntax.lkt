@@ -4,32 +4,31 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun eval_unit (u : InternalUnit): Integer =
-    u.root.to[Expression].result
+    @export fun eval_unit (u : InternalUnit): Int = u.root.to[Expression].result
 }
 
 @abstract class Expression : FooNode {
 
-    @export fun result (): Integer
+    @export fun result (): Int
 }
 
 class Literal : Expression {
 
-    fun result (): Integer
+    fun result (): Int
 }
 
 class Name : Expression {
 
     fun designated_unit (): InternalUnit
 
-    fun result (): Integer = self.designated_unit.root.to[Expression].result
+    fun result (): Int = node.designated_unit.root.to[Expression].result
 }
 
 class Plus : Expression {
     @parse_field left : Expression
     @parse_field right : Expression
 
-    fun result (): Integer = self.left.result + self.right.result
+    fun result (): Int = node.left.result + node.right.result
 }

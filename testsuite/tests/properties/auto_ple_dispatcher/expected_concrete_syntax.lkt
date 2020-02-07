@@ -11,7 +11,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 @abstract class DefNode : FooNode {
@@ -29,18 +29,25 @@ class Var : DefNode {
 
 @abstract class Name : FooNode {
 
-    @export fun resolve (): Entity[FooNode]
+    @export fun resolve (): FooNode
 }
 
 class Id : Name {
 
-    fun resolve (): Entity[FooNode] = self.node_env.get(self, only_first=true)
+    fun resolve (): FooNode = node.node_env.get(node, only_first=true)
 }
 
 class Prefix : Name {
     @parse_field prefix : Name
     @parse_field suffix : Id
 
-    fun resolve (): Entity[FooNode] =
-    self.prefix.resolve.children_env.get(self.suffix.symbol, only_first=true)
+    fun resolve (): FooNode =
+    node.prefix.resolve.children_env.get(node.suffix.symbol, only_first=true)
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

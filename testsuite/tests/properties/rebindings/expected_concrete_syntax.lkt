@@ -9,7 +9,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 @abstract class DefNode : FooNode {
@@ -22,49 +22,55 @@ class Block : DefNode {
     @parse_field name_field : Name
     @parse_field vars : ASTList[BlockVar]
 
-    fun name (): SymbolType = self.name_field.symbol
+    fun name (): SymbolType = node.name_field.symbol
 
-    @export fun rebind (from_block : Entity[Block], to_block : Entity[Block]): Entity[Block] =
-    {
-        val rbdng = entity.info.rebindings.append_rebinding(
+    @export fun rebind (from_block : Block, to_block : Block): Block = {
+        val rbdng = self.info.rebindings.append_rebinding(
             from_block.params.children_env, to_block.children_env
         );
         val e_info = EntityInfo(
-            md=entity.info.md, from_rebound=false, rebindings=rbdng
+            md=self.info.md, from_rebound=false, rebindings=rbdng
         );
 
-        Entity[Block](info=e_info, node=self)
+        Block(info=e_info, node=node)
     }
 
-    @export fun parent_rebindings (): Entity[Block] = {
+    @export fun parent_rebindings (): Block = {
         val e_info = EntityInfo(
-            md=entity.info.md, from_rebound=false, rebindings=entity.info.rebindings.get_parent
+            md=self.info.md, from_rebound=false, rebindings=self.info.rebindings.get_parent
         );
 
-        Entity[Block](info=e_info, node=self)
+        Block(info=e_info, node=node)
     }
 
-    @export fun new (): Entity[FooNode] =
-    entity.info.rebindings.new_env.env_node.as_bare_entity
+    @export fun new (): FooNode =
+    self.info.rebindings.new_env.env_node.as_bare_entity
 
-    @export fun old (): Entity[FooNode] =
-    entity.info.rebindings.new_env.env_node.as_bare_entity
+    @export fun old (): FooNode =
+    self.info.rebindings.new_env.env_node.as_bare_entity
 }
 
 class BlockVar : DefNode {
     @parse_field name_field : Name
 
-    fun name (): SymbolType = self.name_field.symbol
+    fun name (): SymbolType = node.name_field.symbol
 }
 
 class Param : DefNode {
     @parse_field name_field : Name
 
-    fun name (): SymbolType = self.name_field.symbol
+    fun name (): SymbolType = node.name_field.symbol
 }
 
 class Params : ASTList[Param] {
 }
 
 class Name : FooNode {
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

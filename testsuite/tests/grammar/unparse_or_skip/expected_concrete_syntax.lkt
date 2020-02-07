@@ -8,7 +8,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class DefNode : FooNode {

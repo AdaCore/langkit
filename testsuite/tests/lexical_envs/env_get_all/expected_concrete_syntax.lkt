@@ -5,14 +5,13 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun env_get_all (): Array[Entity[FooNode]] =
-    self.children_env.get(null.to[SymbolType])
+    @export fun env_get_all (): Array[FooNode] = node.children_env.get(null)
 
     @memoized fun make_id (s : SymbolType): FooNode = SynthId(sym=s)
 
-    fun unique_id (s : SymbolType): FooNode = self.unit.root.make_id(s)
+    fun unique_id (s : SymbolType): FooNode = node.unit.root.make_id(s)
 }
 
 class Program : ASTList[Insert] {
@@ -29,5 +28,12 @@ class Insert : FooNode {
 class SynthId : FooNode {
     sym : SymbolType
 
-    @export fun get_sym (): Array[CharacterType] = self.sym.image
+    @export fun get_sym (): Array[CharacterType] = node.sym.image
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

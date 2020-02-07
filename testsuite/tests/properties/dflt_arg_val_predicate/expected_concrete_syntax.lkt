@@ -3,19 +3,19 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Example : FooNode {
     var1 : LogicVar
     var2 : LogicVar
 
-    fun predicate (n : Entity[FooNode], flag1 : Boolean = false, flag2 : Boolean = true): Boolean =
+    fun predicate (n : FooNode, flag1 : Boolean = false, flag2 : Boolean = true): Boolean =
     (flag1 and (n.is_null)) and flag2
 
-    @export fun prop (): Entity[Example] = {
-        val _ = %predicate(BareExample.predicate, self.var1, self.var2);
+    @export fun prop (): Example = {
+        val _ = %predicate(BareExample.predicate, node.var1, node.var2);
 
-        self.as_bare_entity
+        node.as_bare_entity
     }
 }

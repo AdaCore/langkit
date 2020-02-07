@@ -13,7 +13,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Block : FooNode {
@@ -29,24 +29,31 @@ class Decl : FooNode {
 
 class Name : FooNode {
 
-    fun ambiant_entity (): Entity[FooNode] = env.get(self)?(0)
+    fun ambiant_entity (): FooNode = env.get(node)?(0)
 
     fun designated_env (): LexicalEnv =
-    self.unit.root.node_env.get(self)?(0).children_env
+    node.unit.root.node_env.get(node)?(0).children_env
 
-    @export fun entity (): Entity[FooNode] = {
-        bind env = self.node_env;
+    @export fun entity (): FooNode = {
+        bind env = node.node_env;
 
-        self.ambiant_entity
+        node.ambiant_entity
     }
 }
 
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun entity (): Entity[FooNode] = self.as_entity.name.entity
+    @export fun entity (): FooNode = node.as_entity.name.entity
 }
 
 class Using : FooNode {
     @parse_field name : Name
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

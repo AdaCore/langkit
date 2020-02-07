@@ -5,14 +5,14 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Decl : FooNode {
     @parse_field names : ASTList[Name]
 
-    @export fun lookup (n : Entity[Name]): Entity[FooNode] =
-    entity.node_env.get(n.symbol, only_first=true)
+    @export fun lookup (n : Name): FooNode =
+    self.node_env.get(n.symbol, only_first=true)
 }
 
 class Name : FooNode {

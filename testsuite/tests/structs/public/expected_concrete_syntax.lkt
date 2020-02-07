@@ -3,14 +3,20 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Example : FooNode {
 
     @export fun get_struct (): MyStruct = MyStruct(
-        bigint_field=BigInt(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000), entity_field=self, array_field=[self.to[FooNode].as_bare_entity, self.parent.as_bare_entity]
+        bigint_field=BigInt(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000), entity_field=node, array_field=[node.to[FooNode].as_bare_entity, node.parent.as_bare_entity]
     )
 
     @export fun struct_identity (s : MyStruct): MyStruct = s
+}
+
+struct MyStruct {
+    entity_field : FooNode
+    array_field : Array[FooNode]
+    bigint_field : BigInt
 }

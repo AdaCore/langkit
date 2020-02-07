@@ -15,9 +15,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun identity (value : BigIntegerType): BigIntegerType = value
+    @export fun identity (value : BigInt): BigInt = value
 }
 
 class Decl : FooNode {
@@ -27,52 +27,59 @@ class Decl : FooNode {
 
 @abstract class Expr : FooNode {
 
-    @export fun evaluate (): BigIntegerType
+    @export fun evaluate (): BigInt
 
-    @export fun evaluate_as_int (): Integer = self.evaluate.as_int
+    @export fun evaluate_as_int (): Int = node.evaluate.as_int
 }
 
 class Equal : Expr {
     @parse_field left : Expr
     @parse_field right : Expr
 
-    fun evaluate (): BigIntegerType =
-    BigInt(if (self.left.evaluate = self.right.evaluate) then (1) else (0))
+    fun evaluate (): BigInt =
+    BigInt(if (node.left.evaluate = node.right.evaluate) then (1) else (0))
 }
 
 class LessThan : Expr {
     @parse_field left : Expr
     @parse_field right : Expr
 
-    fun evaluate (): BigIntegerType =
-    BigInt(if (self.left.evaluate < self.right.evaluate) then (1) else (0))
+    fun evaluate (): BigInt =
+    BigInt(if (node.left.evaluate < node.right.evaluate) then (1) else (0))
 }
 
 class Literal : Expr {
 
-    fun evaluate (): BigIntegerType
+    fun evaluate (): BigInt
 }
 
 class Minus : Expr {
     @parse_field left : Expr
     @parse_field right : Expr
 
-    fun evaluate (): BigIntegerType = self.left.evaluate - self.right.evaluate
+    fun evaluate (): BigInt = node.left.evaluate - node.right.evaluate
 }
 
 class Plus : Expr {
     @parse_field left : Expr
     @parse_field right : Expr
 
-    fun evaluate (): BigIntegerType = self.left.evaluate + self.right.evaluate
+    fun evaluate (): BigInt = node.left.evaluate + node.right.evaluate
 }
 
 class Ref : Expr {
     @parse_field name : Identifier
 
-    fun evaluate (): BigIntegerType =
-    self.node_env.get(self.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
+    fun evaluate (): BigInt =
+    node.node_env.get(node.name.symbol, only_first=true).to[Decl].expr_tree.evaluate
 }
 
 class Identifier : FooNode {
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

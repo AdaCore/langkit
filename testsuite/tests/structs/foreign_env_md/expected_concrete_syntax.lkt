@@ -5,7 +5,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Def : FooNode {
@@ -15,7 +15,14 @@ class Def : FooNode {
 
 class Name : FooNode {
 
-    fun sym (): SymbolType = self.symbol
+    fun sym (): SymbolType = node.symbol
 
-    fun resolve (): Entity[FooNode] = self.parent.node_env.get(self.sym)?(0)
+    fun resolve (): FooNode = node.parent.node_env.get(node.sym)?(0)
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

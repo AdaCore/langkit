@@ -4,7 +4,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Definition : FooNode {
@@ -15,8 +15,15 @@ class Name : FooNode {
     ref_var : LogicVar
 
     @export fun resolve (): Boolean =
-    %domain(self.ref_var, self.node_env.get(self).map((d) => d.to[Definition])).solve
+    %domain(node.ref_var, node.node_env.get(node).map((d) => d.to[Definition])).solve
 
-    @export fun definition (): Entity[Definition] =
-    self.ref_var.get_value.to[Definition]
+    @export fun definition (): Definition =
+    node.ref_var.get_value.to[Definition]
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

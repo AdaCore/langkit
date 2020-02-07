@@ -12,7 +12,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
     @export fun identity (k : DeclKind): DeclKind = k
 }

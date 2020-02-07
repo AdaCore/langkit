@@ -3,16 +3,16 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class Example : FooNode {
 
-    @export @memoized fun get_array (): Array[Integer] = [1, 2]
+    @export @memoized fun get_array (): Array[Int] = [1, 2]
 
-    @export @memoized fun test_prop (numbers : Array[Integer], c : Array[CharacterType]): Integer =
+    @export @memoized fun test_prop (numbers : Array[Int], c : Array[CharacterType]): Int =
     if (c = 'one') then (numbers?(0)) else (numbers?(1))
 
-    @export @memoized fun test_prop2 (numbers : Array[Entity[FooNode]]): Boolean =
+    @export @memoized fun test_prop2 (numbers : Array[FooNode]): Boolean =
     numbers.length = 0
 }

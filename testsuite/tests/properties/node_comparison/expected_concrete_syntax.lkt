@@ -3,11 +3,11 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun before (n : FooNode): Boolean = self < n
+    @export fun before (n : FooNode): Boolean = node < n
 
-    @export fun before_or_equal (n : Example): Boolean = self <= n
+    @export fun before_or_equal (n : Example): Boolean = node <= n
 }
 
 class Example : FooNode {

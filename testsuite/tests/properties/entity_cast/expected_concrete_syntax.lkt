@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class BarNode : FooNode {
@@ -11,13 +11,13 @@ class BarNode : FooNode {
 
 class Literal : FooNode {
 
-    fun a (): Entity[FooNode]
+    fun a (): FooNode
 
-    fun b (): Entity[BarNode] = self.a.to[Entity[BarNode]]
+    fun b (): BarNode = node.a.to[BarNode]
 
-    @export fun c (): Entity[BarNode] = self.b
+    @export fun c (): BarNode = node.b
 
-    @export fun d (): Entity[BarNode] = self.a.to[BarNode]
+    @export fun d (): BarNode = node.a.to[BarNode]
 
-    fun a (): Entity[FooNode]
+    fun a (): FooNode
 }

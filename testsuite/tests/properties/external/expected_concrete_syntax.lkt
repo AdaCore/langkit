@@ -4,22 +4,22 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 @abstract class Expression : FooNode {
 
-    @export fun result (): Integer
+    @export fun result (): Int
 }
 
 class Literal : Expression {
 
-    fun result (): Integer
+    fun result (): Int
 }
 
 class Plus : Expression {
     @parse_field left : Literal
     @parse_field right : Expression
 
-    fun result (): Integer = self.left.result + self.right.result
+    fun result (): Int = node.left.result + node.right.result
 }

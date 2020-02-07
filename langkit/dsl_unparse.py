@@ -798,9 +798,9 @@ def emit_expr(expr, **ctx):
         return "{} & {}".format(ee_pexpr(expr.array_1), ee_pexpr(expr.array_2))
 
     elif isinstance(expr, EntityVariable):
-        return "entity"
-    elif isinstance(expr, SelfVariable):
         return "self"
+    elif isinstance(expr, SelfVariable):
+        return "node"
     elif isinstance(expr, DynamicVariable):
         return expr.argument_name.lower
     elif isinstance(expr, AbstractVariable):
@@ -809,7 +809,8 @@ def emit_expr(expr, **ctx):
                 return ""
         return var_name(expr)
     elif isinstance(expr, No):
-        return "null.to[{}]".format(type_name(expr.expr_type))
+        return "null".format(type_name(expr.expr_type))
+        # TODO: Emit valid null values for other types, eg. [] for arrays.
     elif isinstance(expr, CollectionSingleton):
         if then_underscore_var:
             return emit_method_call(ee(expr.expr), "singleton")
@@ -914,7 +915,7 @@ def emit_field(field):
         return "{}{}{} : {}".format(
             "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
-            field._indexing_name, type_name(field.type)
+            unparsed_name(field._indexing_name), type_name(field.type)
         )
     else:
         raise NotImplementedError()
@@ -940,23 +941,64 @@ def type_name(type):
     elif type.is_array_type:
         return "Array[{}]".format(type_name(type.element_type))
     elif type.is_entity_type:
-        return "Entity[{}]".format(type_name(type.element_type))
+        return type_name(type.element_type)
     elif type.is_struct_type:
         return type.api_name.camel
+    elif type.is_ast_node:
+        return "{}.node".format(type.name.camel)
+    elif type.name.camel == 'Integer':
+        return 'Int'
+    elif type.name.camel == 'BigIntegerType':
+        return 'BigInt'
     else:
         return type.name.camel
 
 
 def emit_node_type(node_type):
-    if node_type.is_generic_list_type:
-        return ""
+
+    from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
 
     walker = DSLWalker.class_from_location(node_type.location)
+    base = None
+    enum_qual = ""
+    builtin_properties = []
+    abstract_qual = ""
+    type_kind = "struct"
 
-    base = node_type.base
+    if isinstance(node_type, ASTNodeType):
+        if node_type.is_generic_list_type:
+            return ""
 
-    if base and base.is_generic_list_type:
-        return ""
+        base = node_type.base
+
+        if base and base.is_generic_list_type:
+            return ""
+
+        enum_qual = (
+            "@qualifier " if node_type.is_bool_node
+            else "@enum_node$i({}) $d".format(
+                ", $sl".join(alt.name.camel for alt in node_type.alternatives)
+            )
+            if node_type.is_enum_node else ""
+        )
+
+        builtin_properties = node_type.builtin_properties()
+
+        abstract_qual = (
+            "@root_node " if node_type.is_root_node
+            else "@abstract " if node_type.abstract else ""
+        )
+
+        type_kind = "class"
+    else:
+        if node_type.is_entity_type:
+            return ""
+        elif node_type == CompiledTypeRepo.entity_info:
+            return ""
+        elif node_type == CompiledTypeRepo.entity_info:
+            return ""
+        elif node_type == CompiledTypeRepo.env_metadata:
+            return ""
 
     parse_fields = [
         f for f in node_type.get_fields(include_inherited=False)
@@ -964,16 +1006,7 @@ def emit_node_type(node_type):
     ]
 
     properties = node_type.get_properties(include_inherited=False)
-    enum_qual = (
-        "@qualifier " if node_type.is_bool_node
-        else "@enum_node$i({}) $d".format(
-            ", $sl".join(alt.name.camel for alt in node_type.alternatives)
-        )
-        if node_type.is_enum_node else ""
-    )
     doc = node_type.doc
-    builtin_properties = node_type.builtin_properties()
-    abstract_qual = "@abstract " if node_type.abstract else ""
 
     def is_builtin_prop(prop):
         return any(
@@ -989,9 +1022,9 @@ def emit_node_type(node_type):
     ${emit_doc(doc)}$hl
     % endif
     % if base:
-    ${abstract_qual}${enum_qual}class ${type_name(node_type)} : ${type_name(base)} {$i$hl
+    ${abstract_qual}${enum_qual}${type_kind} ${type_name(node_type)} : ${type_name(base)} {$i$hl
     % else:
-    ${abstract_qual}${enum_qual}class ${type_name(node_type)} {$i$hl
+    ${abstract_qual}${enum_qual}${type_kind} ${type_name(node_type)} {$i$hl
     % endif
     % for field in parse_fields:
     ${emit_field(field)}$hl
@@ -1035,7 +1068,7 @@ def unparse_lang(ctx):
     $d$hl
     }$hl
 
-    <% types = keep(emit_node_type(t) for t in ctx.astnode_types) %>
+    <% types = keep(emit_node_type(t) for t in ctx.astnode_types + ctx._struct_types) %>
 
     % for t in types:
         $hl

@@ -3,14 +3,14 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 }
 
 class BarNode : FooNode {
 
-    @export fun prop (): Entity[FooNode] = {
-        val _ = self.parent;
+    @export fun prop (): FooNode = {
+        val _ = node.parent;
 
-        null.to[Entity[FooNode]]
+        null
     }
 }

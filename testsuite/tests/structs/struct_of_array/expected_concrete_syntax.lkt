@@ -3,10 +3,15 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
     @export fun get (): KV = KV(value='What', key='So')
 }
 
 class Example : FooNode {
+}
+
+struct KV {
+    key : Array[CharacterType]
+    value : Array[CharacterType]
 }

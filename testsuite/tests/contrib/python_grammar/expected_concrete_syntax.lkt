@@ -231,7 +231,7 @@ grammar None_grammar {
 
 }
 
-@abstract class PythonNode {
+@root_node class PythonNode {
 }
 
 @abstract class Arg : PythonNode {
@@ -412,7 +412,7 @@ class DottedName : Name {
 class Id : Name {
 
     ## Shortcut to get the symbol of this node
-    fun sym (): SymbolType = self.symbol
+    fun sym (): SymbolType = node.symbol
 }
 
 class NotOp : Expr {
@@ -639,4 +639,11 @@ class WithStmt : Stmt {
 
     ## Return whether this is an instance of VarArgsFlagPresent
     @export fun as_bool (): Boolean
+}
+
+struct EnvAssoc {
+    key : SymbolType
+    value : PythonNode
+    dest_env : LexicalEnv
+    metadata : Metadata
 }

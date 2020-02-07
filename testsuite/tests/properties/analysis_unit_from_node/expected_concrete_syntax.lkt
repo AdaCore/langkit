@@ -4,9 +4,9 @@ grammar None_grammar {
 
 }
 
-@abstract class FooNode {
+@root_node class FooNode {
 
-    @export fun root_node (): Entity[FooNode] = self.unit.root.as_bare_entity
+    @export fun root_node (): FooNode = node.unit.root.as_bare_entity
 }
 
 @abstract class Expression : FooNode {
