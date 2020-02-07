@@ -17229,9 +17229,9 @@ LangkitRoot[1:1-10:2]
 Parsing concrete syntax for test lkt_syntax
 ===========================================
 
-LangkitRoot[1:1-40:2]
+LangkitRoot[1:1-43:2]
 |decls:
-|  FullDeclList[1:1-40:2]
+|  FullDeclList[1:1-43:2]
 |  |  FullDecl[1:1-4:2]
 |  |  |doc:
 |  |  |  Doc[1:1-1:1]
@@ -17282,7 +17282,7 @@ LangkitRoot[1:1-40:2]
 |  |  |  |base_class: <null>
 |  |  |  |decls:
 |  |  |  |  FullDeclList[6:26-6:26]: <empty list>
-|  |  FullDecl[9:1-40:2]
+|  |  FullDecl[9:1-43:2]
 |  |  |doc:
 |  |  |  Doc[7:2-7:2]
 |  |  |  |lines:
@@ -17290,7 +17290,7 @@ LangkitRoot[1:1-40:2]
 |  |  |decl_annotations:
 |  |  |  DeclAnnotationList[7:2-7:2]: <empty list>
 |  |  |decl:
-|  |  |  ClassDecl[9:1-40:2]
+|  |  |  ClassDecl[9:1-43:2]
 |  |  |  |name:
 |  |  |  |  Id[9:7-9:14]: Example
 |  |  |  |base_class:
@@ -17298,7 +17298,7 @@ LangkitRoot[1:1-40:2]
 |  |  |  |  |type_name:
 |  |  |  |  |  Id[9:17-9:24]: FooNode
 |  |  |  |decls:
-|  |  |  |  FullDeclList[12:5-39:6]
+|  |  |  |  FullDeclList[12:5-42:59]
 |  |  |  |  |  FullDecl[12:5-16:6]
 |  |  |  |  |  |doc:
 |  |  |  |  |  |  Doc[9:26-9:26]
@@ -17569,6 +17569,44 @@ LangkitRoot[1:1-40:2]
 |  |  |  |  |  |  |  |  |exprs:
 |  |  |  |  |  |  |  |  |  ExprList[38:10-38:11]
 |  |  |  |  |  |  |  |  |  |  Id[38:10-38:11]: a
+|  |  |  |  |  FullDecl[42:5-42:59]
+|  |  |  |  |  |doc:
+|  |  |  |  |  |  Doc[39:6-39:6]
+|  |  |  |  |  |  |lines:
+|  |  |  |  |  |  |  DocCommentList[39:6-39:6]: <empty list>
+|  |  |  |  |  |decl_annotations:
+|  |  |  |  |  |  DeclAnnotationList[42:5-42:12]
+|  |  |  |  |  |  |  DeclAnnotation[42:5-42:12]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[42:6-42:12]: export
+|  |  |  |  |  |  |  |params:
+|  |  |  |  |  |  |  |  ParamList[42:6-42:6]: <empty list>
+|  |  |  |  |  |decl:
+|  |  |  |  |  |  FunDecl[42:13-42:59]
+|  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  Id[42:17-42:23]: test_2
+|  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  FunArgDeclList[42:25-42:25]: <empty list>
+|  |  |  |  |  |  |return_type:
+|  |  |  |  |  |  |  SimpleTypeRef[42:28-42:30]
+|  |  |  |  |  |  |  |type_name:
+|  |  |  |  |  |  |  |  Id[42:28-42:30]: KV
+|  |  |  |  |  |  |body:
+|  |  |  |  |  |  |  CallExpr[42:33-42:59]
+|  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  Id[42:33-42:35]: KV
+|  |  |  |  |  |  |  |args:
+|  |  |  |  |  |  |  |  ParamList[42:36-42:58]
+|  |  |  |  |  |  |  |  |  Param[42:36-42:45]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[42:36-42:39]: key
+|  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  StringLit[42:40-42:45]: "hey"
+|  |  |  |  |  |  |  |  |  Param[42:47-42:58]
+|  |  |  |  |  |  |  |  |  |name:
+|  |  |  |  |  |  |  |  |  |  Id[42:47-42:52]: value
+|  |  |  |  |  |  |  |  |  |value:
+|  |  |  |  |  |  |  |  |  |  StringLit[42:53-42:58]: "you"
 
 Parsing concrete syntax for test logging
 ========================================

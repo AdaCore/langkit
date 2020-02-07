@@ -5,7 +5,7 @@ syntax, that were not covered by the existing testsuite.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode
+from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import (
     ArrayLiteral, CharacterLiteral as Char, Let, Self, String, Var, ignore,
     langkit_property
@@ -32,6 +32,11 @@ foo_lexer.add_rules(
 
 class FooNode(ASTNode):
     pass
+
+
+class KV(Struct):
+    key = UserField(T.Symbol)
+    val = UserField(T.Symbol)
 
 
 class Example(FooNode):
@@ -71,6 +76,13 @@ class Example(FooNode):
         """
         a = Var(12)
         return [a]
+
+    @langkit_property(public=True)
+    def test_2():
+        """
+        Tests that reserved names are properly avoided in constructor syntax.
+        """
+        return KV.new(key="hey", val="you")
 
 
 g = Grammar('main_rule')

@@ -394,6 +394,16 @@ def emit_rule(rule, top_level=False):
         raise NotImplementedError(rule.__class__)
 
 
+def unparsed_name(strn):
+    # Special cases: some variable names are keywords. Rename them.
+    if strn == "val":
+        return "value"
+    elif strn == "match":
+        return "matched"
+    else:
+        return strn
+
+
 def var_name(var_expr, default="_"):
     from langkit.compiled_types import Argument
     if isinstance(var_expr, Argument):
@@ -403,11 +413,8 @@ def var_name(var_expr, default="_"):
             var_expr.source_name.lower if var_expr.source_name else default
         )
 
-    # Special cases: some variable names are keywords. Rename them.
-    if ret == "val":
-        return "value"
-    else:
-        return ret
+    return unparsed_name(ret)
+
 
 def is_a(expr, *names):
     return any(expr.__class__.__name__ == n for n in names)
@@ -812,7 +819,8 @@ def emit_expr(expr, **ctx):
         return "{}{}".format(
             type_name(expr.struct_type),
             emit_paren(", ".join(
-                "{}={}".format(k, ee(v)) for k, v in expr.field_values.items()
+                "{}={}".format(unparsed_name(k), ee(v))
+                for k, v in expr.field_values.items()
             ))
         )
     elif isinstance(expr, StructUpdate):
