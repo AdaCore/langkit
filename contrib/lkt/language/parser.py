@@ -3,6 +3,8 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import (
     ASTNode, AbstractField, Field, T, abstract
 )
+from langkit.envs import EnvSpec, add_env, add_to_env_kv
+from langkit.expressions import Entity, Self
 from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or
 
 from language.lexer import lkt_lexer as Lex
@@ -41,6 +43,10 @@ class Decl(LKNode):
     """
     name = AbstractField(type=T.DefId)
 
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name.symbol, Self),
+    )
+
 
 @abstract
 class Expr(LKNode):
@@ -64,6 +70,11 @@ class GrammarDecl(BaseGrammarDecl):
     """
     name = Field()
     rules = Field()
+
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name.symbol, Self),
+        add_env()
+    )
 
 
 class GrammarRuleDecl(Decl):
@@ -251,6 +262,11 @@ class ClassDecl(Decl):
     base_class = Field()
     decls = Field()
 
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name.symbol, Self),
+        add_env()
+    )
+
 
 class DocComment(LKNode):
     """
@@ -274,6 +290,11 @@ class FunDecl(Decl):
     args = Field()
     return_type = Field()
     body = Field()
+
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name.symbol, Self),
+        add_env()
+    )
 
 
 @abstract
@@ -462,6 +483,8 @@ class BlockExpr(Expr):
     val_defs = Field()
     expr = Field()
 
+    env_spec = EnvSpec(add_env())
+
 
 class MatchExpr(Expr):
     """
@@ -477,6 +500,10 @@ class MatchBranch(LKNode):
     """
     decl = Field()
     expr = Field()
+
+    env_spec = EnvSpec(
+        add_env()
+    )
 
 
 class MatchValDecl(BaseValDecl):
