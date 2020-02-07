@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun before (n : FooNode): Boolean = self < n
 

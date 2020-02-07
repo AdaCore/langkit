@@ -5,7 +5,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     fun get_num (): Integer
 }

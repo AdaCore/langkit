@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun can_reach (n : Entity[FooNode], from_node : Entity[FooNode]): Boolean =
     n.node.can_reach(from_node.node)

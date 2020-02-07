@@ -9,10 +9,10 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
-class DefNode : FooNode {
+@abstract class DefNode : FooNode {
 
     @export fun name (): SymbolType
 }

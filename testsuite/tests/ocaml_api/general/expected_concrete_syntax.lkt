@@ -9,7 +9,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun count (seq : Array[Entity[Example]]): Integer = seq.length
 

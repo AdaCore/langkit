@@ -11,7 +11,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
 class Identifier : FooNode {

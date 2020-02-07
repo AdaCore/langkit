@@ -9,10 +9,10 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
-class Expr : FooNode {
+@abstract class Expr : FooNode {
 }
 
 class Addition : Expr {
@@ -31,7 +31,7 @@ class Ref : Expr {
 class Name : FooNode {
 }
 
-@qualifier class Null : FooNode {
+@abstract @qualifier class Null : FooNode {
 
     ## Return whether this is an instance of NullPresent
     @export fun as_bool (): Boolean

@@ -10,7 +10,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
 class Cat1 : FooNode {

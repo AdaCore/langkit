@@ -5,7 +5,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun env_get_all (): Array[Entity[FooNode]] =
     self.children_env.get(null.to[SymbolType])

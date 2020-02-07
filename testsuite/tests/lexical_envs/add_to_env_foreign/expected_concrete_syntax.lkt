@@ -11,14 +11,14 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 }
 
 class ForeignDecl : FooNode {
     @parse_field id : Id
 }
 
-class Id : FooNode {
+@abstract class Id : FooNode {
 
     fun simple_name (): SimpleId
 

@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     fun sophisticated_predicate (): Boolean = true
 }

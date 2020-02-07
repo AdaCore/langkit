@@ -4,7 +4,7 @@ grammar None_grammar {
 }
 
 ## Root node class for Test AST nodes.
-class TestNode {
+@abstract class TestNode {
 }
 
 ## Example node.

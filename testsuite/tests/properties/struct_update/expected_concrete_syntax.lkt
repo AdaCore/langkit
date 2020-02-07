@@ -3,7 +3,7 @@ grammar None_grammar {
 
 }
 
-class FooNode {
+@abstract class FooNode {
 
     @export fun increment (kv : KV): KV = kv.update(value=kv.value + BigInt(1))
 }
