@@ -320,6 +320,7 @@ class ManageScript(object):
         #######################
 
         self.create_wheel_parser = create_parser(self.do_create_wheel, True)
+        Packager.add_platform_options(self.create_wheel_parser)
         self.create_wheel_parser.add_argument(
             '--with-python',
             help='Python intererpter to use in order to build the wheel. If'
@@ -1112,7 +1113,7 @@ class ManageScript(object):
         """
         Create a standalone Python wheel for the Python bindings.
         """
-        Packager(None, None).create_python_wheel(
+        Packager(Packager.args_to_env(args), None, None).create_python_wheel(
             args.tag,
             getattr(args, 'wheel-dir'),
             getattr(args, 'build-dir'),

@@ -15,7 +15,7 @@ class Packager(object):
     """
 
     def __init__(
-        self, library_types,
+        self, env, library_types,
         gnat_prefix,
         gmp_prefix=None,
         libiconv_prefix=None,
@@ -24,10 +24,10 @@ class Packager(object):
         gnatcoll_core_prefix=None,
         gnatcoll_gmp_prefix=None,
         gnatcoll_iconv_prefix=None,
-        langkit_support_prefix=None,
-        env=None
+        langkit_support_prefix=None
     ):
         """
+        :param e3.env.Env env: Platform for the libraries to package.
         :param langkit.libmanage.LibraryTypes library_types: Set of library
             types the packages must cover.
         :param str gnat_prefix: Directory in which GNAT is installed.
@@ -50,9 +50,8 @@ class Packager(object):
             prefix``.
         :param None|str langkit_support_prefix: Directory in which
             Langkit_Support is installed. By default, use ``gnat prefix``.
-        :param None|e3.env.Env env: Platform for the libraries to package. It
-            is mandatory for anything else than creating wheels.
         """
+        self.env = env
         self.library_types = library_types
         self.gnat_prefix = gnat_prefix
         self.gmp_prefix = gmp_prefix or gnat_prefix
@@ -64,7 +63,6 @@ class Packager(object):
         self.gnatcoll_iconv_prefix = gnatcoll_iconv_prefix or gnat_prefix
         self.langkit_support_prefix = langkit_support_prefix or gnat_prefix
 
-        self.env = env
         self.static_libdir_name = 'lib'
         if (
             self.env.target.os.name == 'linux' and
@@ -118,6 +116,7 @@ class Packager(object):
         Instanciate Packager from command-line arguments.
         """
         return cls(
+            cls.args_to_env(args),
             args.library_types,
             args.with_gnat,
             args.with_gmp,
@@ -127,8 +126,7 @@ class Packager(object):
             args.with_gnatcoll_core,
             args.with_gnatcoll_gmp,
             args.with_gnatcoll_iconv,
-            args.with_langkit_support,
-            cls.args_to_env(args)
+            args.with_langkit_support
         )
 
     def package_deps(self, package_dir):
