@@ -19,6 +19,6 @@ print('Evaluating .p_do_solving...')
 try:
     print(u.root.p_do_solving)
 except libfoolang.PropertyError as exc:
-    print('Got an exception: {}'.format(exc))
+    print('Got a {}: {}'.format(type(exc).__name__, exc))
 
 print('main.py: Done.')

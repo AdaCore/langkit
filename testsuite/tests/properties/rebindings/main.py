@@ -19,7 +19,7 @@ def process(index, n):
         try:
             return lambda_fn()
         except libfoolang.PropertyError as exc:
-            return str(exc).strip()
+            return '<{}: {}>'.format(type(exc).__name__, exc)
 
     print('Processing {} ({})'.format(n, index))
     parent = wrapped_eval(lambda: n.p_parent_rebindings)

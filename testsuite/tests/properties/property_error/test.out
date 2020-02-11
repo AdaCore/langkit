@@ -1,9 +1,7 @@
 main.py: Running...
 Evaluating p_raise_msg...
-  -> raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : Custom error message!
-
+  -> PropertyError: Custom error message!
 Evaluating p_raise_no_msg...
-  -> raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : libfoolang-implementation.adb:[line-number]
-
+  -> PropertyError: libfoolang-implementation.adb:[line-number]
 main.py: Done.
 Done

@@ -4,7 +4,7 @@ main.py: Running...
 Returned: 1
 
 == Overflow: property calls ==
-PropertyError raised: raised LANGKIT_SUPPORT.ERRORS.PROPERTY_ERROR : stack overflow
+PropertyError raised: stack overflow
 
 main.py: Done.
 Done

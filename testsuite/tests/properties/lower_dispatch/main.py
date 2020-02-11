@@ -28,6 +28,7 @@ for d in u.root:
             result = getattr(d.f_expr, prop)
         except libfoolang.PropertyError as exc:
             result = str(exc).strip()
+            result = '<{}: {}>'.format(type(exc).__name__, exc)
         print('{}.{} = {}'.format(d.f_name.text, prop, result))
     print('')
 
