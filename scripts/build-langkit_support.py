@@ -91,6 +91,7 @@ def main():
         help='Destination directory.'
     )
     Packager.add_prefix_options(pkg_deps_parser)
+    Packager.add_platform_options(pkg_deps_parser)
     pkg_deps_parser.set_defaults(cmd='package-deps')
 
     # Standalone package for dynamic libraries
@@ -103,6 +104,7 @@ def main():
         help='Destination directory.'
     )
     Packager.add_prefix_options(pkg_std_dyn_parser)
+    Packager.add_platform_options(pkg_std_dyn_parser)
     pkg_std_dyn_parser.set_defaults(cmd='package-std-dyn')
 
     args = args_parser.parse_args()
