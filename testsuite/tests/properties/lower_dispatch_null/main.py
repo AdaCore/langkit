@@ -17,7 +17,7 @@ if u.diagnostics:
 try:
     u.root.p_solve
 except libfoolang.PropertyError as exc:
-    print('Got a property error: {}'.format(exc))
+    print('Got a {}: {}'.format(type(exc).__name__, exc))
 else:
     print('ERROR: got no error')
 

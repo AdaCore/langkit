@@ -22,7 +22,7 @@ def process(name, buffer):
     try:
         u.populate_lexical_env()
     except libfoolang.PropertyError as exc:
-        print('   Got an exception: {}'.format(str(exc).strip()))
+        print('   Got a {}: {}'.format(type(exc).__name__, exc))
     else:
         print('   All good...')
 

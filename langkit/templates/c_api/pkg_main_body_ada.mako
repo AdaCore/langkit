@@ -709,15 +709,18 @@ package body ${ada_lib_name}.Implementation.C is
          % for i, e in enumerate(ctx.sorted_exception_types):
          ${'elsif' if i > 0 else 'if'} Id = ${e.name}'Identity then
             Last_Exception.Kind := ${e.kind_name};
+            Last_Exception.Information :=
+               New_String (Exception_Message (Exc));
          % endfor
          else
             Last_Exception.Kind := ${
                ctx.exception_types['native_exception'].kind_name
             };
+            Last_Exception.Information :=
+               New_String (Exception_Information (Exc));
          end if;
       end;
 
-      Last_Exception.Information := New_String (Exception_Information (Exc));
    end Set_Last_Exception;
 
    --------------------------
