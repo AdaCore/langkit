@@ -388,3 +388,5 @@ class BaseDriver(TestDriver):
             self.set_failure(' | '.join(failures))
         else:
             self.set_passed()
+
+        return failures

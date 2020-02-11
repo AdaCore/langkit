@@ -83,17 +83,16 @@ class PythonDriver(BaseDriver):
     def analyze(self):
         # RA22-015: For the transition to the concrete syntax, we want to
         # check-in and test unparsing results.
-        super(PythonDriver, self).analyze()
+        failures = super(PythonDriver, self).analyze()
 
         rewrite = (self.global_env['options'].rewrite
                    and not self.expect_failure)
-        failures = []
 
         expected_lkt = self.working_dir('expected_concrete_syntax.lkt')
         actual_lkt = self.working_dir('concrete_syntax.lkt')
 
         if not os.path.exists(actual_lkt):
-            return
+            return failures
 
         # We just open the file in append mode, to create it if it doesn't
         # exist.
