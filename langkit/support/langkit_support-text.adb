@@ -173,7 +173,7 @@ package body Langkit_Support.Text is
         (Input     => S,
          To_Code   => Text_Charset,
          From_Code => Charset);
-      pragma Assert (S'Length mod 4 = 0);
+      pragma Assert (Result'Length mod 4 = 0);
 
       Text_Result : constant Text_Type (1 .. Result'Length / 4)
          with Import, Address => Result'Address;
