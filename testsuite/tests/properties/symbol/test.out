@@ -1,0 +1,4 @@
+main.py: Running...
+p_prop(None) = <PropertyError: cannot get the symbol of a null node>
+main.py: Done.
+Done
