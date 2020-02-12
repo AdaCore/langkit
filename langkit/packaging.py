@@ -63,15 +63,27 @@ class Packager(object):
         self.gnatcoll_iconv_prefix = gnatcoll_iconv_prefix or gnat_prefix
         self.langkit_support_prefix = langkit_support_prefix or gnat_prefix
 
-        self.static_libdir_name = 'lib'
-        if (
+        self.with_static = (self.library_types.static or
+                            self.library_types.static_pic)
+        self.with_relocatable = self.library_types.relocatable
+
+        if not self.with_static:
+            self.static_libdir_name = None
+        elif (
             self.env.target.os.name == 'linux' and
             self.env.target.cpu.bits == 64
         ):
             self.static_libdir_name = 'lib64'
-        self.dyn_libdir_name = (
-            'bin' if self.env.target.os.name == 'windows' else 'lib'
-        )
+        else:
+            self.static_libdir_name = 'lib'
+
+        if self.with_relocatable:
+            self.dyn_libdir_name = (
+                'bin' if self.env.target.os.name == 'windows' else 'lib'
+            )
+        else:
+            self.dyn_libdir_name = None
+
         self.is_windows = self.env.build.os.name == 'windows'
         self.dllext = self.env.build.os.dllext
 
@@ -141,12 +153,14 @@ class Packager(object):
             be created.
         """
         # Destination directory for copies of static libs. Make sure it exists.
-        static_libdir = os.path.join(package_dir, self.static_libdir_name)
-        mkdir(static_libdir)
+        if self.with_static:
+            static_libdir = os.path.join(package_dir, self.static_libdir_name)
+            mkdir(static_libdir)
 
         # Likewise for the destination directory for copies of dynamic libs
-        dyn_libdir = os.path.join(package_dir, self.dyn_libdir_name)
-        mkdir(dyn_libdir)
+        if self.with_relocatable:
+            dyn_libdir = os.path.join(package_dir, self.dyn_libdir_name)
+            mkdir(dyn_libdir)
 
         def copy_in(filename, dirname):
             """Copy the "filename" to the "dirname" directory."""
@@ -187,23 +201,29 @@ class Packager(object):
         # directories.
         #
         # So ship gmp and libiconv.
-        lib_files = [os.path.join(self.gmp_prefix, 'lib', 'libgmp.a')]
-        if self.libiconv_prefix:
-            lib_files.append(os.path.join(
-                self.libiconv_prefix, 'lib', 'libiconv.a'
-            ))
-        for f in lib_files:
-            copy_in(f, static_libdir)
+        if self.with_static:
+            lib_files = [os.path.join(self.gmp_prefix, 'lib', 'libgmp.a')]
+            if self.libiconv_prefix:
+                lib_files.append(os.path.join(
+                    self.libiconv_prefix, 'lib', 'libiconv.a'
+                ))
+            for f in lib_files:
+                copy_in(f, static_libdir)
 
         # Ship libiconv's shared lib, as needed by the shared
         # libgnatcoll_iconv.
-        if self.libiconv_prefix:
+        if self.with_relocatable and self.libiconv_prefix:
             for item in glob.glob(os.path.join(
                 self.libiconv_prefix,
                 self.dyn_libdir_name,
                 'libiconv*' + self.dllext + '*'
             )):
                 copy_in(item, dyn_libdir)
+
+    def assert_with_relocatable(self):
+        assert self.library_types.relocatable, (
+            'Shared libraries support is disabled'
+        )
 
     def std_path(self, prefix, lib_subdir, libname):
         """
@@ -214,6 +234,7 @@ class Packager(object):
             the name of the project).
         :param str libname: Name of the project.
         """
+        self.assert_with_relocatable()
         name = libname + self.dllext
         return (os.path.join(prefix, 'bin', name)
                 if self.is_windows else
@@ -226,6 +247,7 @@ class Packager(object):
         """
         Special case for XML/Ada libraries.
         """
+        self.assert_with_relocatable()
         libname = 'libxmlada_' + name + self.dllext
         return (
             os.path.join(self.xmlada_prefix, 'bin', libname)
@@ -241,6 +263,7 @@ class Packager(object):
         Copy the shaed library (or libraries) matched by "pattern" to the
         "dest" directory.
         """
+        self.assert_with_relocatable()
         # On Linux, the name of shared objects files can (but does not need
         # to) be followed by a version number. If both flavors are present,
         # chose the ones with a version number first, as these will be the
@@ -259,6 +282,7 @@ class Packager(object):
 
         This is useful to create completely standalone Python wheels.
         """
+        self.assert_with_relocatable()
 
         # Locate the native runtime's "adalib" directory using gnatls
         gnatls_output = subprocess.check_output(
@@ -321,6 +345,7 @@ class Packager(object):
 
         See the std_path method for argument semantics.
         """
+        self.assert_with_relocatable()
         self.copy_shared_lib(
             self.std_path(prefix, lib_subdir, libname),
             package_dir
@@ -330,6 +355,7 @@ class Packager(object):
         """
         Copy the Langkit_Support dynamic library to "package_dir".
         """
+        self.assert_with_relocatable()
         self.package_std_dyn(self.langkit_support_prefix, 'langkit_support',
                              'liblangkit_support', package_dir)
 
@@ -355,6 +381,8 @@ class Packager(object):
             interpreter to use in order to build the wheel. If left to None,
             use the current interpreter.
         """
+        self.assert_with_relocatable()
+
         lib_name = lib_name or 'lib{}'.format(project_name)
         python_interpreter = python_interpreter or sys.executable
 
