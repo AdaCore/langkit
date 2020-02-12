@@ -653,7 +653,7 @@ private package ${ada_lib_name}.Implementation is
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
    function Get_Symbol (Node : ${T.root_node.name}) return Symbol_Type
-      with Pre => Is_Token_Node (Node);
+      with Pre => Node = null or else Is_Token_Node (Node);
    --  Assuming Node is a token node, return the corresponding symbol for the
    --  token it contains.
 

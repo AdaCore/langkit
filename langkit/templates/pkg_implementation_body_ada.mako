@@ -1362,6 +1362,9 @@ package body ${ada_lib_name}.Implementation is
    function Get_Symbol
      (Node : ${T.root_node.name}) return Symbol_Type is
    begin
+      if Node = null then
+         raise Property_Error with "cannot get the symbol of a null node";
+      end if;
       return Get_Symbol (Token (Node, Node.Token_Start_Index));
    end Get_Symbol;
 

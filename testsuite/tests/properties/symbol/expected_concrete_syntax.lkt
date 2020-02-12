@@ -1,0 +1,12 @@
+grammar None_grammar {
+    main_rule <- Example(@Example)
+
+}
+
+class FooNode {
+
+    @export fun prop (e : Example): SymbolType = e.symbol
+}
+
+class Example : FooNode {
+}
