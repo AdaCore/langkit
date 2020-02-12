@@ -1113,7 +1113,10 @@ class ManageScript(object):
         """
         Create a standalone Python wheel for the Python bindings.
         """
-        Packager(Packager.args_to_env(args), None, None).create_python_wheel(
+        packager = Packager(Packager.args_to_env(args),
+                            args.library_types,
+                            None)
+        packager.create_python_wheel(
             args.tag,
             getattr(args, 'wheel-dir'),
             getattr(args, 'build-dir'),
