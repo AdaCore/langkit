@@ -4,7 +4,7 @@ grammar None_grammar {
 }
 
 ## Root node class for Test AST nodes.
-@abstract class TestNode {
+@root_node class TestNode {
 }
 
 ## Example node.
@@ -13,16 +13,16 @@ grammar None_grammar {
 class ExampleNode : TestNode {
 
     ## docstring.
-    @export fun test_no_var (): Integer = # hello
+    @export fun test_no_var (): Int = # hello
     42
 
-    @export fun prop_inline (): Integer = 43
+    @export fun prop_inline (): Int = 43
 
-    @export fun prop_lambda (x : Integer): Integer = # identity
+    @export fun prop_lambda (x : Int): Int = # identity
     # yep
     x
 
-    @export fun test_cond (x : Integer): Integer = # incredible function
+    @export fun test_cond (x : Int): Int = # incredible function
     # case 0
     if (x = 0) then (
         # identity
@@ -36,7 +36,7 @@ class ExampleNode : TestNode {
     # otherwise double
     else (x + x)
 
-    @export fun test_if (): Integer = {
+    @export fun test_if (): Int = {
         # define x
         # let's see... maybe 24?
         val x = 24;
@@ -51,7 +51,7 @@ class ExampleNode : TestNode {
                 12
             ) else (
                 # finally!
-                self.test_cond(x)
+                node.test_cond(x)
             )
         ) else (
             # hoho
@@ -59,7 +59,7 @@ class ExampleNode : TestNode {
         )
     }
 
-    @export fun test_match (): Integer = match self {
+    @export fun test_match (): Int = match node {
         # first case
         case x : NodeType1 => 0
 
@@ -70,7 +70,7 @@ class ExampleNode : TestNode {
         case _ => 2
     }
 
-    @export fun test_let (): Integer = # let it go!!!
+    @export fun test_let (): Int = # let it go!!!
     # where is this comment?
     {
         # define x
