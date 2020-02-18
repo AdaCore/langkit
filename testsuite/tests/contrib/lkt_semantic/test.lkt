@@ -1,0 +1,19 @@
+@root_node class A {
+    fun identity(): A = self
+
+    fun test_int(): Int = 12
+
+    fun test_int_invalid(): A = 12
+
+    fun test_int_add(): Int = 12 + 15
+
+    fun test_int_add_invalid_1(): Int = "12" + 15
+
+    fun test_int_add_invalid_2(): Int = 15 + self
+
+    fun test_int_add_invalid_3(): A = 15 + self
+
+    fun test_if_1(): Int = if true then 1 else 2
+
+    fun test_if_invalid_1(): Int = if true then 1 else "2"
+}

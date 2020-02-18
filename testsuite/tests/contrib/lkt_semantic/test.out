@@ -1,0 +1,108 @@
+Resolving test.lkt
+==================
+Id   <RefId test.lkt:2:21-2:22>
+     references <ClassDecl "A" test.lkt:1:12-19:2>
+
+Expr <RefId test.lkt:2:25-2:29>
+     has type <ClassDecl "A" test.lkt:1:12-19:2>
+
+Id   <RefId test.lkt:2:25-2:29>
+     references <SelfDecl "self" test.lkt:1:12-19:2>
+
+Id   <RefId test.lkt:4:21-4:24>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:4:27-4:29>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId test.lkt:6:29-6:30>
+     references <ClassDecl "A" test.lkt:1:12-19:2>
+
+test.lkt:6:33: Expected instance of type 'A', got a number literal
+
+Id   <RefId test.lkt:8:25-8:28>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:8:31-8:38>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:8:31-8:33>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:8:36-8:38>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId test.lkt:10:35-10:38>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:10:41-10:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:10:41: Expected instance of type 'Int', got a string literal
+
+Expr <NumLit test.lkt:10:48-10:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId test.lkt:12:35-12:38>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:12:41-12:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:12:41-12:43>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:12:46: Expected instance of type 'Int', got type A
+
+Id   <RefId test.lkt:12:46-12:50>
+     references <SelfDecl "self" test.lkt:1:12-19:2>
+
+Id   <RefId test.lkt:14:35-14:36>
+     references <ClassDecl "A" test.lkt:1:12-19:2>
+
+Expr <BinOp test.lkt:14:39-14:48>
+     has type <ClassDecl "A" test.lkt:1:12-19:2>
+
+test.lkt:14:39: Expected instance of type 'A', got a number literal
+
+Expr <RefId test.lkt:14:44-14:48>
+     has type <ClassDecl "A" test.lkt:1:12-19:2>
+
+Id   <RefId test.lkt:14:44-14:48>
+     references <SelfDecl "self" test.lkt:1:12-19:2>
+
+Id   <RefId test.lkt:16:22-16:25>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <IfExpr test.lkt:16:28-16:49>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <RefId test.lkt:16:31-16:35>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+
+Id   <RefId test.lkt:16:31-16:35>
+     references <EnumLitDecl "true" __prelude:5:28-5:32>
+
+Expr <NumLit test.lkt:16:41-16:42>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:16:48-16:49>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId test.lkt:18:30-18:33>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <IfExpr test.lkt:18:36-18:59>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <RefId test.lkt:18:39-18:43>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+
+Id   <RefId test.lkt:18:39-18:43>
+     references <EnumLitDecl "true" __prelude:5:28-5:32>
+
+Expr <NumLit test.lkt:18:49-18:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:18:56: Expected instance of type 'Int', got a string literal
+
