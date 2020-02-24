@@ -142,6 +142,17 @@ class Location(object):
 
         return '[{}]'.format(', '.join(stack))
 
+    @classmethod
+    def from_lkt_node(cls, node):
+        """
+        Create a Location based on a LKT node.
+
+        :param liblktlang.LKNode node: Node from which to extract the location
+            information.
+        """
+        sloc = node.sloc_range.start
+        return cls(node.unit.filename, sloc.line, sloc.column)
+
 
 def extract_library_location(stack=None):
     """

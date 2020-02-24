@@ -1,0 +1,4 @@
+grammar FooGrammar {
+    grammar UnexpectedDecl {
+    }
+}
