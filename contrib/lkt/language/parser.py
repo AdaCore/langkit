@@ -287,7 +287,7 @@ class GrammarDecl(BaseGrammarDecl):
     Declaration of a language's grammar.
     """
     syn_name = Field(type=T.DefId)
-    rules = Field(type=T.GrammarRuleDecl.list)
+    rules = Field(type=T.FullDecl.list)
 
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
@@ -1079,7 +1079,7 @@ lkt_grammar.add_rules(
 
     grammar_decl=GrammarDecl(
         "grammar", G.def_id,
-        "{", List(G.grammar_rule, empty_valid=True), "}"
+        "{", List(G.decl, empty_valid=True), "}"
     ),
     grammar_rule=GrammarRuleDecl(G.def_id, "<-", G.grammar_expr),
     grammar_primary=GOr(
