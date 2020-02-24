@@ -162,12 +162,6 @@ context_stack = []
 :type: list[(str, Location, str)]
 """
 
-context_cache = (None, [])
-"""
-This will be used to cache the last context stack in case of exception.
-:type: (Exception, list[(str, Location)])
-"""
-
 
 class Context(object):
     """
@@ -198,9 +192,6 @@ class Context(object):
     def __exit__(self, exc_type, exc_value, traceback):
         del traceback
         del exc_type
-        global context_cache
-        if exc_value and context_cache[0] != exc_value:
-            context_cache = (exc_value, context_stack[:])
         context_stack.pop()
 
     def __repr__(self):
@@ -242,14 +233,14 @@ def format_severity(severity):
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
-def get_structured_context(recovered=False):
+def get_structured_context():
     """
     From the context global structures, return a structured context locations
     list.
 
     :rtype: list[(str, Location)]
     """
-    c = context_cache[1] if recovered else context_stack
+    c = context_stack
     ids = set()
     locs = set()
     msgs = []
@@ -267,7 +258,7 @@ def get_structured_context(recovered=False):
     return msgs
 
 
-def print_context(recovered=False):
+def print_context():
     """
     Print the current error context.
 
@@ -277,7 +268,7 @@ def print_context(recovered=False):
 
     # Then we'll print the context we've kept
     last_file_info = ''
-    for ctx_msg, ctx_loc in reversed(get_structured_context(recovered)):
+    for ctx_msg, ctx_loc in reversed(get_structured_context()):
         # We only want to show the file information one time if it is the same
         file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
         if last_file_info == file_info:
