@@ -89,7 +89,8 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
     os.mkdir('build')
 
     # Try to emit code
-    ctx = CompileCtx(lang_name='Foo', lexer=lexer, grammar=grammar,
+    ctx = CompileCtx(lang_name='Foo', short_name='Foo', lexer=lexer,
+                     grammar=grammar,
                      symbol_canonicalizer=symbol_canonicalizer,
                      show_property_logging=show_property_logging)
     ctx.warnings = warning_set

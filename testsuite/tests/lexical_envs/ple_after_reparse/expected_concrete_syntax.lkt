@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     defs <- list+(or(scope | var) ";")
     name <- or(Prefix(name "." id) | id)
     deps <- list+(Dep("+" name) ";")

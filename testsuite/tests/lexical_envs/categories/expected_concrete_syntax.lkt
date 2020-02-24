@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     name <- Name(@Identifier)
     main_rule <- Def(
         "def" name "{" cat1 cat2 Example("example") "}"

@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     print_stmt <- or(
         | PrintStmt("print" test_list)
         | StreamPrintStmt("print" ">>" test "," test_list)

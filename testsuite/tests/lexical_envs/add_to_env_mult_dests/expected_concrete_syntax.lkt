@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     main_rule <- elem
     scope <- Scope(id "{" list*(elem) "}")
     id <- Id(@Identifier)

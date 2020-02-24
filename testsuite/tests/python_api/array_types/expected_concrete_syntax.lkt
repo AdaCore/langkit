@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     node <- or(example | null_node)
     main_rule <- list*(node)
     example <- Example("example")

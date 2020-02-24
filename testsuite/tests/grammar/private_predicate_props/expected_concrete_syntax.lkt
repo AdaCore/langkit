@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     main_rule <- Name(@Identifier) |> when(Name.is_not_class_id)
 
 }

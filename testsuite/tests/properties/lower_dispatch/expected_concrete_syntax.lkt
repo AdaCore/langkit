@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     name <- Name(@Identifier)
     main_rule <- list*(or(Def("def" name expr) | expr))
     expr <- or(atom | plus)

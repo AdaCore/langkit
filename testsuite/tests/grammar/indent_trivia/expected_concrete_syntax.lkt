@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     def_node <- Def("def" identifier @Newline list*(indented))
     indented <- Indented(
         discard(list+(newline))
