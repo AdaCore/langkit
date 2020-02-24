@@ -23,8 +23,8 @@ from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
-from langkit.diagnostics import (Context, Severity, WarningSet,
-                                 check_source_language)
+from langkit.diagnostics import (Context, Location, Severity, WarningSet,
+                                 check_source_language, context_stack)
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
@@ -688,6 +688,32 @@ class CompileCtx(object):
 
         # Register builtin exception types
         self._register_builtin_exception_types()
+
+    @contextmanager
+    def lkt_context(self, lkt_node):
+        """
+        Context manager to set the diagnostic context to the given node.
+
+        :param liblktlang lkt_node: Node to use as a reference for this
+            diagnostic context.
+        """
+        context_stack.append(lkt_node)
+        try:
+            yield
+        finally:
+            assert context_stack.pop() is lkt_node
+
+    @staticmethod
+    def lkt_loc(lkt_node):
+        """
+        Return a Location instance corresponding to the location of
+        ``lkt_node``.
+
+        :param liblktlang lkt_node: Node to process.
+        :rtype: Location
+        """
+        sloc = lkt_node.sloc_range.start
+        return Location(lkt_node.unit.filename, sloc.line, sloc.column)
 
     def _register_builtin_exception_types(self):
         """
