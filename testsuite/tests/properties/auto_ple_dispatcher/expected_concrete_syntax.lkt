@@ -4,7 +4,7 @@ grammar FooGrammar {
         | Prefix(name "." Id(@Identifier))
         | Id(@Identifier)
     )
-    main_rule <- defs
+    @main_rule main_rule <- defs
     def_rule <- or(scope | var)
     var <- Var(Id(@Identifier) "=" name)
     scope <- Scope(Id(@Identifier) "{" defs "}")

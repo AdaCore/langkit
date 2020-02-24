@@ -118,7 +118,7 @@ grammar FooGrammar {
     yield_expr <- YieldExpr("yield" ?test_list)
     power <- or(Power(atom_expr "**" factor) | atom_expr)
     simple_stmt <- (or(small_stmt | list*(small_stmt, ";") ?";") @Newline)
-    main_rule <- FileNode(
+    @main_rule main_rule <- FileNode(
         list*(discard(list+(nl)) stmt discard(list+(nl))) @Termination
     )
     name_list <- (list*(name, ",") ?",")

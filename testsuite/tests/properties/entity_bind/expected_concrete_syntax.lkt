@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    main_rule <- Literal(@Number)
+    @main_rule main_rule <- Literal(@Number)
 
 }
 

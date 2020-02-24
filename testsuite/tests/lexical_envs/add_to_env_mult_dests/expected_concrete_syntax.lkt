@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    main_rule <- elem
+    @main_rule main_rule <- elem
     scope <- Scope(id "{" list*(elem) "}")
     id <- Id(@Identifier)
     elem <- or(scope | id)

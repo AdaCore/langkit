@@ -1,6 +1,6 @@
 grammar FooGrammar {
     node <- or(example | null_node)
-    main_rule <- list*(node)
+    @main_rule main_rule <- list*(node)
     example <- Example("example")
     null_node <- NullNode("null")
 

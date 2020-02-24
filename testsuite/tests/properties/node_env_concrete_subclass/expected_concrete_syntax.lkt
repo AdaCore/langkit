@@ -1,6 +1,6 @@
 grammar FooGrammar {
     decl <- Decl("def" name)
-    main_rule <- RootNode(list*(or(decl | subdecl | other_decl), ";"))
+    @main_rule main_rule <- RootNode(list*(or(decl | subdecl | other_decl), ";"))
     other_decl <- OtherDecl("def" "var" name)
     name <- Name(@Identifier)
     subdecl <- SubDecl("var" name)
