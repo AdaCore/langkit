@@ -159,7 +159,7 @@ def extract_library_location(stack=None):
 
 context_stack = []
 """
-:type: list[(str, Location, str)]
+:type: list[(str, Location, str)|liblktlang.LKNode]
 """
 
 
@@ -238,9 +238,23 @@ def get_structured_context():
     From the context global structures, return a structured context locations
     list.
 
-    :rtype: list[(str, Location)]
+    :rtype: list[(str, Location)] | liblktlang.LKNode
     """
-    c = context_stack
+
+    def is_regular_context(context):
+        """
+        Return whether "context" is a regular one (i.e. a tuple of file, column
+        and message). The other kind of context is LKNode instances from
+        liblktlang.
+
+        :rtype: bool
+        """
+        return isinstance(context, tuple)
+
+    if context_stack and not is_regular_context(context_stack[-1]):
+        return context_stack[-1]
+
+    stack = [item for item in context_stack if is_regular_context(item)]
     ids = set()
     locs = set()
     msgs = []
@@ -249,7 +263,7 @@ def get_structured_context():
     # 1. Remove those with null locations.
     # 2. Only keep one per registered id.
     # 3. Only keep one per unique (msg, location) pair.
-    for msg, loc, id in reversed(c):
+    for msg, loc, id in reversed(stack):
         if loc and (not id or id not in ids) and ((msg, loc) not in locs):
             msgs.append((msg, loc))
             ids.add(id)
@@ -258,17 +272,18 @@ def get_structured_context():
     return msgs
 
 
-def print_context():
+def print_context(context):
     """
     Print the current error context.
 
     Note that this makes sense only when `DiagnosticStyle.default` is enabled.
     """
     assert Diagnostics.style == DiagnosticStyle.default
+    assert isinstance(context, list)
 
     # Then we'll print the context we've kept
     last_file_info = ''
-    for ctx_msg, ctx_loc in reversed(get_structured_context()):
+    for ctx_msg, ctx_loc in reversed(context):
         # We only want to show the file information one time if it is the same
         file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
         if last_file_info == file_info:
@@ -281,6 +296,12 @@ def print_context():
             line=col(ctx_loc.line, Colors.CYAN),
             msg=ctx_msg
         ))
+
+
+def get_filename(f):
+    return (os.path.abspath(f)
+            if Diagnostics.style == DiagnosticStyle.gnu_full else
+            os.path.basename(f))
 
 
 def get_parsable_location():
@@ -299,10 +320,7 @@ def get_parsable_location():
     ctx = get_structured_context()
     if ctx:
         loc = ctx[0][1]
-        path = (P.abspath(loc.file)
-                if Diagnostics.style == DiagnosticStyle.gnu_full else
-                P.basename(loc.file))
-        return "{}:{}:1".format(path, loc.line)
+        return '{}:{}:1'.format(get_filename(loc.file), loc.line)
     else:
         return ""
 
@@ -328,6 +346,10 @@ def check_source_language(predicate, message, severity=Severity.error,
     """
     from langkit.compile_context import get_context
 
+    def context_from_node(node):
+        return '{}:{}'.format(get_filename(node.unit.filename),
+                              node.sloc_range.start)
+
     if not ok_for_codegen:
         ctx = get_context(or_none=True)
         assert ctx is None or ctx.emitter is None
@@ -341,10 +363,15 @@ def check_source_language(predicate, message, severity=Severity.error,
             message_lines[:1] + [indent + line for line in message_lines[1:]]
         )
 
-        if Diagnostics.style != DiagnosticStyle.default:
-            print('{}: {}'.format(get_parsable_location(), message))
+        context = get_structured_context()
+
+        if not isinstance(context, list):
+            print('{}: {}: {}'.format(context_from_node(context),
+                                      format_severity(severity), message))
+        elif Diagnostics.style != DiagnosticStyle.default:
+            print('{}: {}'.format(get_parsable_location(context), message))
         else:
-            print_context()
+            print_context(context)
             print('{}{}: {}'.format(
                 indent if context_stack else '',
                 format_severity(severity),
