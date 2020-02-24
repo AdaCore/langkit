@@ -1059,7 +1059,7 @@ def unparse_lang(ctx):
     ctx.emitter = None
 
     template = """
-    grammar ${ctx.short_name}_grammar {$i$hl
+    grammar ${ctx.lang_name}Grammar {$i$hl
     % for name, rule in ctx.grammar.rules.items():
         % if not rule.is_dont_skip_parser:
             ${name} <- ${emit_rule(rule, True)}$hl

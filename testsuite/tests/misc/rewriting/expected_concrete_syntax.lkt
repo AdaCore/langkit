@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     main_rule <- list+(def_rule)
     def_rule <- Def(
         "def" name ?"(" list*(name, ",") ")" "=" expr

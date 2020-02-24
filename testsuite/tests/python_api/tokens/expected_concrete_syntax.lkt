@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     main_rule <- element
     element <- or(sequence | atom)
     sequence <- ("(" list+(element) ")")

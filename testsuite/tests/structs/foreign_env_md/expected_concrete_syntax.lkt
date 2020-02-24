@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     main_rule <- list*(def_rule)
     def_rule <- Def(name ?"+" name)
     name <- Name(@Identifier)

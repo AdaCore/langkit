@@ -14,7 +14,7 @@ LangkitRoot[1:1-46:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-9:21]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -489,7 +489,7 @@ LangkitRoot[1:1-61:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-10:47]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:44]
@@ -1212,7 +1212,7 @@ LangkitRoot[1:1-28:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-5:27]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:22]
@@ -1508,7 +1508,7 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:53]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:53]
@@ -1906,7 +1906,7 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:29]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:53]
@@ -2114,7 +2114,7 @@ LangkitRoot[1:1-31:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-5:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -2434,7 +2434,7 @@ LangkitRoot[1:1-53:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-10:49]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
@@ -3020,7 +3020,7 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-5:27]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:53]
@@ -3410,7 +3410,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -3484,7 +3484,7 @@ LangkitRoot[1:1-85:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-16:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-14:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:38]
@@ -4514,7 +4514,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -4580,7 +4580,7 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -4714,7 +4714,7 @@ LangkitRoot[1:1-59:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-9:24]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -5380,7 +5380,7 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -5627,7 +5627,7 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -6027,7 +6027,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:54]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:54]
@@ -6217,7 +6217,7 @@ LangkitRoot[1:1-45:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-12:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:33]
@@ -6636,7 +6636,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -6805,7 +6805,7 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-5:42]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:48]
@@ -7089,7 +7089,7 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -7318,7 +7318,7 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -7560,7 +7560,7 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:63]
@@ -7923,7 +7923,7 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:55]
@@ -8288,7 +8288,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:40]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:40]
@@ -8378,7 +8378,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -8528,7 +8528,7 @@ LangkitRoot[1:1-27:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:34]
@@ -8772,7 +8772,7 @@ LangkitRoot[1:1-32:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:71]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:71]
@@ -9197,7 +9197,7 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:34]
@@ -9473,7 +9473,7 @@ LangkitRoot[1:1-23:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:59]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:59]
@@ -9709,7 +9709,7 @@ LangkitRoot[1:1-62:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:37]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -10385,7 +10385,7 @@ LangkitRoot[1:1-38:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-5:33]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:22]
@@ -10832,7 +10832,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:49]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:49]
@@ -10988,7 +10988,7 @@ LangkitRoot[1:1-44:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-7:27]
 |  |  |  |  |  GrammarRuleDecl[2:5-4:6]
@@ -11520,7 +11520,7 @@ LangkitRoot[1:1-35:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:39]
@@ -11847,7 +11847,7 @@ LangkitRoot[1:1-35:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:55]
@@ -12269,7 +12269,7 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:28]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
@@ -12411,7 +12411,7 @@ LangkitRoot[1:1-52:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-13:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-11:40]
 |  |  |  |  |  GrammarRuleDecl[2:5-7:6]
@@ -12948,7 +12948,7 @@ LangkitRoot[1:1-39:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:40]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:31]
@@ -13402,7 +13402,7 @@ LangkitRoot[1:1-55:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-7:27]
 |  |  |  |  |  GrammarRuleDecl[2:5-4:6]
@@ -14019,7 +14019,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -14117,7 +14117,7 @@ LangkitRoot[1:1-25:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:29]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:53]
@@ -14371,7 +14371,7 @@ LangkitRoot[1:1-46:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-9:21]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -14846,7 +14846,7 @@ LangkitRoot[1:1-28:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:33]
@@ -15152,7 +15152,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -15218,7 +15218,7 @@ LangkitRoot[1:1-73:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:59]
@@ -16055,7 +16055,7 @@ LangkitRoot[1:1-32:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-9:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:46]
@@ -16350,7 +16350,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -16416,7 +16416,7 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -16543,7 +16543,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -16609,7 +16609,7 @@ LangkitRoot[1:1-44:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-21:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-19:42]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:63]
@@ -17106,7 +17106,7 @@ LangkitRoot[1:1-24:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -17309,7 +17309,7 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:54]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:54]
@@ -17518,7 +17518,7 @@ LangkitRoot[1:1-28:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:29]
@@ -17789,7 +17789,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -17893,7 +17893,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -17959,7 +17959,7 @@ LangkitRoot[1:1-48:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -18384,7 +18384,7 @@ LangkitRoot[1:1-39:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-6:27]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:45]
@@ -18815,7 +18815,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -18889,7 +18889,7 @@ LangkitRoot[1:1-85:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:21]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -19861,7 +19861,7 @@ LangkitRoot[1:1-22:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -20082,7 +20082,7 @@ LangkitRoot[1:1-81:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-17:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-15:21]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -20981,7 +20981,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:54]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:54]
@@ -21164,7 +21164,7 @@ LangkitRoot[1:1-92:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-7:28]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:69]
@@ -21969,7 +21969,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -22080,7 +22080,7 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-4:6]
@@ -22446,7 +22446,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -22545,7 +22545,7 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -22792,7 +22792,7 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -22949,7 +22949,7 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -23060,7 +23060,7 @@ LangkitRoot[1:1-30:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -23298,7 +23298,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -23393,7 +23393,7 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -23559,7 +23559,7 @@ LangkitRoot[1:1-32:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-6:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-4:6]
@@ -23886,7 +23886,7 @@ LangkitRoot[1:1-35:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-10:37]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
@@ -24272,7 +24272,7 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -24422,7 +24422,7 @@ LangkitRoot[1:1-43:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:29]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -24851,7 +24851,7 @@ LangkitRoot[1:1-45:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-6:35]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:29]
@@ -25325,7 +25325,7 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -25529,7 +25529,7 @@ LangkitRoot[1:1-11:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:29]
@@ -25613,7 +25613,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -25687,7 +25687,7 @@ LangkitRoot[1:1-43:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:29]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -26116,7 +26116,7 @@ LangkitRoot[1:1-55:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:53]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
@@ -26731,7 +26731,7 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -26985,7 +26985,7 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -27098,7 +27098,7 @@ LangkitRoot[1:1-68:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-7:26]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:39]
@@ -27926,7 +27926,7 @@ LangkitRoot[1:1-60:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-10:58]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
@@ -28585,7 +28585,7 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:41]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:41]
@@ -28693,7 +28693,7 @@ LangkitRoot[1:1-78:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:26]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:39]
@@ -29715,7 +29715,7 @@ LangkitRoot[1:1-78:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:26]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:39]
@@ -30737,7 +30737,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -30803,7 +30803,7 @@ LangkitRoot[1:1-46:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-9:21]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -31278,7 +31278,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:65]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:65]
@@ -31388,7 +31388,7 @@ LangkitRoot[1:1-90:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:21]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -32603,7 +32603,7 @@ LangkitRoot[1:1-15:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -32733,7 +32733,7 @@ LangkitRoot[1:1-22:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -32981,7 +32981,7 @@ LangkitRoot[1:1-649:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-232:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-230:20]
 |  |  |  |  |  GrammarRuleDecl[2:5-5:6]
@@ -39775,7 +39775,7 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:26]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:26]
@@ -39871,7 +39871,7 @@ LangkitRoot[1:1-76:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-8:37]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
@@ -40722,7 +40722,7 @@ LangkitRoot[1:1-59:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-12:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:23]
@@ -41387,7 +41387,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -41478,7 +41478,7 @@ LangkitRoot[1:1-45:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-12:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:33]
@@ -41897,7 +41897,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:59]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:23]
@@ -42053,7 +42053,7 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -42189,7 +42189,7 @@ LangkitRoot[1:1-17:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -42354,7 +42354,7 @@ LangkitRoot[1:1-17:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:43]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:43]
@@ -42539,7 +42539,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -42641,7 +42641,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:38]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:38]
@@ -42742,7 +42742,7 @@ LangkitRoot[1:1-15:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -42858,7 +42858,7 @@ LangkitRoot[1:1-90:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:40]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:40]
@@ -43297,7 +43297,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-3:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:29]
@@ -43466,7 +43466,7 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-5:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:25]
@@ -43599,7 +43599,7 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -43759,7 +43759,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:34]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:34]
@@ -43828,7 +43828,7 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -43989,7 +43989,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -44055,7 +44055,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -44121,7 +44121,7 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -44233,7 +44233,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -44299,7 +44299,7 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-2:36]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:36]
@@ -44365,7 +44365,7 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-6:6]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:33]
@@ -44536,7 +44536,7 @@ LangkitRoot[1:1-26:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-10:7]
 |  |  |  |  |  GrammarRuleDecl[2:5-10:7]
@@ -44733,7 +44733,7 @@ LangkitRoot[1:1-26:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-7:30]
 |  |  |  |  |  GrammarRuleDecl[2:5-5:7]
@@ -44942,7 +44942,7 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:21]: None_grammar
+|  |  |  |  DefId[1:9-1:19]: FooGrammar
 |  |  |  |rules:
 |  |  |  |  GrammarRuleDeclList[2:5-4:56]
 |  |  |  |  |  GrammarRuleDecl[2:5-2:30]

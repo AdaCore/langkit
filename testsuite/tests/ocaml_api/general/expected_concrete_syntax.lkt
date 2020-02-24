@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     node <- or(example | null_node | var | ident | string)
     ident <- Ident(@Identifier)
     string <- StringLiteral(@String)

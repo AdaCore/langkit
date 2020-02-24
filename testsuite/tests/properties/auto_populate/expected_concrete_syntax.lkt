@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     decl <- Decl(Name(@Identifier) "(" ref_list ")")
     main_rule <- list*(decl)
     ref <- Ref(Name(@Identifier))

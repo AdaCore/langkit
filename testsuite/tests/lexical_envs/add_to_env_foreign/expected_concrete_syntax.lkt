@@ -1,4 +1,4 @@
-grammar None_grammar {
+grammar FooGrammar {
     foreign_decl <- ForeignDecl(identifier)
     main_rule <- list*(or(scope | self_decl | foreign_decl))
     self_decl <- SelfDecl("+" identifier ?"(" identifier ")")
