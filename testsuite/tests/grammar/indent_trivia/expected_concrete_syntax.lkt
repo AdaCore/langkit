@@ -14,7 +14,7 @@ grammar FooGrammar {
         discard(list+(newline))
         list+(call, ",") discard(list+(newline)) ")"
     )
-    main_rule <- list*(discard(list+(newline))
+    @main_rule main_rule <- list*(discard(list+(newline))
     def_node discard(list+(newline)))
     identifier <- Identifier(@Identifier)
 

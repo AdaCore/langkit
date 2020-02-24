@@ -1,7 +1,7 @@
 grammar FooGrammar {
     name <- Name(@Identifier)
     vars <- ("{" list*(var) "}")
-    main_rule <- list*(block)
+    @main_rule main_rule <- list*(block)
     param <- Param(name)
     params <- ("(" list*(param) ")")
     var <- BlockVar(name)

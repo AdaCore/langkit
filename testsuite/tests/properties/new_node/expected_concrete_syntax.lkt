@@ -2,7 +2,7 @@ grammar FooGrammar {
     list_rule <- LiteralSequence(
         "(" Name(@Identifier) list*(list_item, ",") ")"
     )
-    main_rule <- list_rule
+    @main_rule main_rule <- list_rule
     list_item <- Literal(@Number)
 
 }

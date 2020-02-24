@@ -7,7 +7,7 @@ grammar FooGrammar {
         lit @Newline @Indent lit @Newline @Dedent lit
     )
     nl <- NewLineNode(lit @Newline lit)
-    main_rule <- or(comp | ind | nl)
+    @main_rule main_rule <- or(comp | ind | nl)
 
 }
 

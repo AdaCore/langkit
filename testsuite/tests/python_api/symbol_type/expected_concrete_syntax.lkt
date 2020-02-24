@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    main_rule <- Example(@Identifier)
+    @main_rule main_rule <- Example(@Identifier)
 
 }
 

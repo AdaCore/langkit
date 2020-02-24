@@ -1,6 +1,6 @@
 grammar FooGrammar {
     foreign_decl <- ForeignDecl(identifier)
-    main_rule <- list*(or(scope | self_decl | foreign_decl))
+    @main_rule main_rule <- list*(or(scope | self_decl | foreign_decl))
     self_decl <- SelfDecl("+" identifier ?"(" identifier ")")
     scope <- Scope(simple_identifier "{" list+(scope) "}")
     identifier <- or(

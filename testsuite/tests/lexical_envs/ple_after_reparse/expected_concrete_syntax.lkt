@@ -3,7 +3,7 @@ grammar FooGrammar {
     name <- or(Prefix(name "." id) | id)
     deps <- list+(Dep("+" name) ";")
     var <- Var(id "=" name)
-    scope <- Scope(name "{" deps defs "}")
+    @main_rule scope <- Scope(name "{" deps defs "}")
     id <- Id(@Identifier)
 
 }

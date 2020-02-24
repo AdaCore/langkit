@@ -1,7 +1,7 @@
 grammar FooGrammar {
     defs <- list+(or(scope | var) ";")
     name <- or(Prefix(name "." id) | id)
-    main_rule <- list*(scope)
+    @main_rule main_rule <- list*(scope)
     deps <- list+(Dep("+" name) ";")
     var <- Var(id "=" name)
     scope <- Scope(name "{" deps defs "}")

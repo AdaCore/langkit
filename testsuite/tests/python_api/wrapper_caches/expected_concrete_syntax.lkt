@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    main_rule <- example_list
+    @main_rule main_rule <- example_list
     example_list <- list*(example)
     example <- Example("example" ?"(" example_list ")")
 
