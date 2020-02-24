@@ -35,6 +35,7 @@ from langkit.diagnostics import (
     Context, Location, Severity, check_source_language,
     extract_library_location
 )
+from langkit.dsl import _ASTNodeMetaclass
 from langkit.expressions import resolve_property
 from langkit.lexer import TokenAction, WithSymbol
 from langkit.utils import copy_with, issubtype, type_check_instance
@@ -190,13 +191,42 @@ class Grammar(object):
     class will automatically resolve forward references when needed.
     """
 
-    def __init__(self, main_rule_name):
+    def __init__(self, main_rule_name, location=None):
         self.rules = {}
         self.main_rule_name = main_rule_name
-        self.location = extract_library_location()
+        self.location = location or extract_library_location()
+
+        self._all_lkt_rules = {}
+        """
+        If we loaded a Lkt unit, mapping of all grammar rules it contains.
+
+        :type: dict[str, liblktlang.GrammarRuleExpr]
+        """
 
     def context(self):
         return Context("In definition of grammar", self.location)
+
+    def _add_rule(self, name, parser):
+        """
+        Add a rule to the grammar. The input parser is expected to have its
+        location properly set at this point.
+
+        :param str name: Name for the new parsing rule.
+        :param Parser parser: Root parser for this rule.
+        """
+        parser.set_name(names.Name.from_lower(name))
+        parser.set_grammar(self)
+        parser.is_root = True
+
+        with Context(
+            "In definition of rule '{}'".format(name), parser.location
+        ):
+            check_source_language(
+                name not in self.rules,
+                "Rule '{}' is already present in the grammar".format(name)
+            )
+
+        self.rules[name] = parser
 
     def add_rules(self, **kwargs):
         """
@@ -243,23 +273,9 @@ class Grammar(object):
 
         for name, rule in kwargs.items():
             rule = resolve(rule)
-            rule.set_name(names.Name.from_lower(name))
-            rule.set_grammar(self)
-
             if loc and name in keywords:
                 rule.set_location(Location(loc.file, keywords[name].lineno))
-
-            rule.is_root = True
-
-            with Context(
-                "In definition of rule '{}'".format(name), rule.location
-            ):
-                check_source_language(
-                    name not in self.rules,
-                    "Rule '{}' is already present in the grammar".format(name)
-                )
-
-            self.rules[name] = rule
+            self._add_rule(name, rule)
 
     def get_rule(self, rule_name):
         """
@@ -381,6 +397,175 @@ class Grammar(object):
                         if close_matches else ""
                     )
                 )
+
+    @classmethod
+    def create_from_lkt(cls, ctx, lkt_unit):
+        """
+        Load a grammar from a Lktlang source file.
+
+        :param liblktlang.AnalysisUnit lkt_unit: Analysis unit where to look
+            for the grammar.
+        :rtype: langkit.parsers.Grammar
+        """
+        import liblktlang
+
+        def annotations(decl):
+            """
+            Build a Python dict for ``decl``'s annotations.
+
+            :param liblktlang.FullDecl decl: Declaration whose annotations must
+                be processed.
+            :rtype: dict[str, liblktlang.LKNode]
+            """
+            result = {}
+            for a in decl.f_decl_annotations:
+                name = a.f_name.text
+                with ctx.lkt_context(a):
+                    check_source_language(name not in result,
+                                          'invalid double annotation')
+                result[name] = (a, a.f_params)
+            return result
+
+        # Look for the GrammarDecl node in the top-level list
+        full_grammar = None
+        for decl in lkt_unit.root.f_decls:
+            if not isinstance(decl.f_decl, liblktlang.GrammarDecl):
+                continue
+
+            with ctx.lkt_context(decl):
+                check_source_language(full_grammar is None,
+                                      'There can be only one grammar per file')
+                full_grammar = decl
+
+                # No annotation allowed for grammars
+                check_source_language(not annotations(decl),
+                                      'no annotation allowed')
+
+        with ctx.lkt_context(lkt_unit.root):
+            check_source_language(full_grammar is not None,
+                                  'missing grammar')
+
+        # Get the list of grammar rules. This is where we check that we only
+        # have grammar rules, that their names are unique, and that they have
+        # valid annotations.
+        all_rules = {}
+        main_rule_name = None
+        for full_rule in full_grammar.f_decl.f_rules:
+            a = annotations(full_rule)
+
+            # Make sure we have a grammar rule
+            with ctx.lkt_context(full_rule):
+                r = full_rule.f_decl
+                check_source_language(
+                    isinstance(r, liblktlang.GrammarRuleDecl),
+                    'grammar rule expected'
+                )
+
+                # TODO: remove the encoding once we support Python3. For now,
+                # the rest of the grammar machinery expects byte strings.
+                rule_name = r.f_syn_name.text.encode('ascii')
+
+            # Detect and validate the only allowed annotation
+            try:
+                annot, params = a.pop('main_rule')
+            except KeyError:
+                pass
+            else:
+                with ctx.lkt_context(annot):
+                    check_source_language(
+                        len(params) == 0,
+                        'no parameters allowed for this main_rule annotation'
+                    )
+                    check_source_language(main_rule_name is None,
+                                          'only one main rule allowed')
+                    main_rule_name = rule_name
+
+            # Reject other annotations
+            with ctx.lkt_context(full_rule):
+                remaining = sorted(a)
+                check_source_language(
+                    not remaining,
+                    'invalid annotations: {}'.format(', '.join(remaining))
+                )
+
+            all_rules[rule_name] = r.f_expr
+
+        # Now create the result grammar. We need exactly one main rule for
+        # that.
+        with ctx.lkt_context(full_grammar):
+            check_source_language(main_rule_name is not None,
+                                  'Missing main rule (@main_rule annotation)')
+        result = cls(main_rule_name, ctx.lkt_loc(full_grammar))
+
+        # Translate rules (all_rules) later, as node types are not available
+        # yet.
+        result._all_lkt_rules.update(all_rules)
+        return result
+
+    def lower_all_lkt_rules(self, ctx):
+        """
+        Translate syntactic Lkt rules to Parser objects.
+        """
+        # RA22-015: in order to allow bootstrap, we need to import liblktlang
+        # only if we are about to process LKT grammar rules.
+        if not self._all_lkt_rules:
+            return
+        import liblktlang
+
+        # Build a mapping for all nodes created in the DSL. We cannot use T
+        # (the TypeRepo instance) as types are not processed yet.
+        nodes = {n._type.raw_name.camel: n
+                 for n in _ASTNodeMetaclass.astnode_types}
+
+        def denoted_string_literal(string_lit):
+            return eval(string_lit.text)
+
+        def lower(rule):
+            """
+            Helper to lower one parser.
+
+            :param liblktlang.GrammarExpr rule: Grammar rule to lower.
+            :rtype: Parser
+            """
+            # For convenience, accept null input rules, as we generally
+            # want to forward them as-is to the lower level parsing
+            # machinery.
+            if rule is None:
+                return None
+
+            loc = ctx.lkt_loc(rule)
+            with ctx.lkt_context(rule):
+                if isinstance(rule, liblktlang.ParseNodeExpr):
+                    # Fetch the referenced node
+                    node_name = rule.f_node_name.text
+                    try:
+                        node = nodes[node_name]
+                    except KeyError:
+                        check_source_language(
+                            False, 'Unknown node: {}'.format(node_name)
+                        )
+
+                    # Lower the subparsers
+                    subparsers = [lower(subparser)
+                                  for subparser in rule.f_sub_exprs]
+
+                    # Qualifier nodes are a special case: we produce one
+                    # subclass or the other depending on whether the subparsers
+                    # accept the input.
+                    if node._type.is_bool_node:
+                        return Opt(*subparsers).as_bool(node)
+
+                    # For other nodes, always create the node when the
+                    # subparsers accept the input.
+                    return _Transform(parser=_Row(*subparsers), typ=node,
+                                      location=loc)
+
+                else:
+                    raise NotImplementedError('unhandled parser: {}'
+                                              .format(rule))
+
+        for name, rule in self._all_lkt_rules.items():
+            self._add_rule(name, lower(rule))
 
 
 class Parser(object):

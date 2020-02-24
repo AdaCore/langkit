@@ -59,7 +59,8 @@ if not langkit_root:
 unparse_destination = 'concrete_syntax.lkt'
 
 
-def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
+def prepare_context(grammar=None, lexer=None, lkt_file=None,
+                    warning_set=default_warning_set,
                     symbol_canonicalizer=None, show_property_logging=False):
     """
     Create a compile context and prepare the build directory for code
@@ -70,6 +71,9 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
 
     :param langkit.lexer.Lexer lexer: The language lexer to use for this
         context.
+
+    :param str|None lkt_file: If provided, file from which to read the Lkt
+        language spec.
 
     :param WarningSet warning_set: Set of warnings to emit.
 
@@ -92,14 +96,15 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set,
     ctx = CompileCtx(lang_name='Foo', short_name='Foo', lexer=lexer,
                      grammar=grammar,
                      symbol_canonicalizer=symbol_canonicalizer,
-                     show_property_logging=show_property_logging)
+                     show_property_logging=show_property_logging,
+                     lkt_file=lkt_file)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
     return ctx
 
 
-def emit_and_print_errors(grammar, lexer=None,
+def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
                           warning_set=default_warning_set,
                           generate_unparser=False, symbol_canonicalizer=None,
                           unparse_cs=False):
@@ -111,6 +116,9 @@ def emit_and_print_errors(grammar, lexer=None,
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
         Use `lexer_example.foo_lexer` if left to None.
+
+    :param str|None lkt_file: If provided, file from which to read the Lkt
+        language spec.
 
     :param WarningSet warning_set: Set of warnings to emit.
 
@@ -132,7 +140,7 @@ def emit_and_print_errors(grammar, lexer=None,
     unparse_dest = unparse_destination if unparse_cs else None
 
     try:
-        ctx = prepare_context(grammar, lexer, warning_set,
+        ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer)
         ctx.emit('build', generate_unparser=generate_unparser,
                  unparse_destination_file=unparse_dest)
@@ -156,10 +164,11 @@ def build(grammar, lexer=None, warning_set=default_warning_set, mains=False):
     build_and_run(grammar, lexer=lexer, warning_set=warning_set)
 
 
-def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
-                  ocaml_main=None, warning_set=default_warning_set,
-                  generate_unparser=False, symbol_canonicalizer=None,
-                  mains=False, show_property_logging=False, unparse_cs=True):
+def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
+                  lkt_file=None, ocaml_main=None,
+                  warning_set=default_warning_set, generate_unparser=False,
+                  symbol_canonicalizer=None, mains=False,
+                  show_property_logging=False, unparse_cs=True):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -168,6 +177,9 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
         See emit_and_print_errors.
+
+    :param str|None lkt_file: If provided, file from which to read the Lkt
+        language spec.
 
     :param None|str py_script: If not None, name of the Python script to run
         with the built library available.
@@ -201,7 +213,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         from lexer_example import foo_lexer
         lexer = foo_lexer
 
-    ctx = prepare_context(grammar, lexer, warning_set,
+    ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                           symbol_canonicalizer=symbol_canonicalizer,
                           show_property_logging=show_property_logging)
 

@@ -23,8 +23,9 @@ from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
-from langkit.diagnostics import (Context, Location, Severity, WarningSet,
-                                 check_source_language, context_stack)
+from langkit.diagnostics import (Context, DiagnosticError, Location, Severity,
+                                 WarningSet, check_source_language,
+                                 context_stack)
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
@@ -232,7 +233,8 @@ class CompileCtx(object):
                  default_unit_provider=None,
                  symbol_canonicalizer=None,
                  documentations=None,
-                 show_property_logging=False):
+                 show_property_logging=False,
+                 lkt_file=None):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -241,8 +243,9 @@ class CompileCtx(object):
         :param lexer: A lexer for the target language.
         :type lexer: langkit.lexer.Lexer
 
-        :param grammar: A grammar for the target language.
-        :type grammar: langkit.parsers.Grammer
+        :param grammar: A grammar for the target language. If left to None,
+            fetch the grammar in the Lktlang source.
+        :type None|grammar: langkit.parsers.Grammar
 
         :param lib_name: If provided, must be a string (mixed case and
             underscore: see langkit.names.Name), otherwise set to
@@ -303,6 +306,9 @@ class CompileCtx(object):
         :param bool show_property_logging: If true, any property that has been
             marked with tracing activated will be traced on stdout by default,
             without need for any config file.
+
+        :param None|str lkt_file: Optional name of the file to contain Lktlang
+            definitions for this language.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -339,11 +345,18 @@ class CompileCtx(object):
         :type: bool
         """
 
+        self.lkt_unit = None
+        if lkt_file is None:
+            assert grammar, 'LKT spec required when no grammar is provided'
+        else:
+            self.lkt_unit = self._load_lkt(lkt_file)
+
         self.lexer = lexer
         self.lexer.prefix = "{}_TKN_".format(self.lang_name.lower.upper())
         ":type: langkit.lexer.Lexer"
 
-        self.grammar = grammar
+        from langkit.parsers import Grammar
+        self.grammar = grammar or Grammar.create_from_lkt(self, self.lkt_unit)
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
@@ -688,6 +701,27 @@ class CompileCtx(object):
 
         # Register builtin exception types
         self._register_builtin_exception_types()
+
+    def _load_lkt(self, lkt_file):
+        """
+        Load a Lktlang source file. Raise a DiagnosticError if there are
+        parsing errors.
+
+        :param str lkt_file: Name of the file to parse.
+        :rtype: liblktlang.AnalysisUnit
+        """
+        import liblktlang
+
+        basename = os.path.basename(lkt_file)
+        result = liblktlang.AnalysisContext().get_from_file(lkt_file)
+
+        # If there are diagnostics, forward them to the user. TODO: hand them
+        # to langkit.diagnostic.
+        if result.diagnostics:
+            for d in result.diagnostics:
+                print('{}:{}'.format(basename, d))
+                raise DiagnosticError()
+        return result
 
     @contextmanager
     def lkt_context(self, lkt_node):
@@ -1715,6 +1749,8 @@ class CompileCtx(object):
                        self.lexer.compile_rules),
 
             MajorStepPass('Compiling the grammar'),
+            GlobalPass('lower Lkt parsing rules',
+                       self.grammar.lower_all_lkt_rules),
             GlobalPass('check main parsing rule',
                        self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',

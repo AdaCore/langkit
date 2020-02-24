@@ -1,0 +1,28 @@
+== annotated_grammar.lkt ==
+annotated_grammar.lkt:1:1: Error: no annotation allowed
+
+== invalid_decl.lkt ==
+invalid_decl.lkt:2:5: Error: grammar rule expected
+
+== invalid_main_rule_annot.lkt ==
+invalid_main_rule_annot.lkt:2:5: Error: no parameters allowed for this main_rule annotation
+
+== no_grammar.lkt ==
+no_grammar.lkt:1:1: Error: missing grammar
+
+== no_main_rule.lkt ==
+no_main_rule.lkt:1:1: Error: Missing main rule (@main_rule annotation)
+
+== several_main_rules.lkt ==
+several_main_rules.lkt:3:5: Error: only one main rule allowed
+
+== transform_invalid_node.lkt ==
+transform_invalid_node.lkt:2:29: Error: Unknown node: NoSuchNode
+
+== two_grammars.lkt ==
+two_grammars.lkt:2:1: Error: There can be only one grammar per file
+
+== unknown_rule_annot.lkt ==
+unknown_rule_annot.lkt:3:5: Error: invalid annotations: foo
+
+Done
