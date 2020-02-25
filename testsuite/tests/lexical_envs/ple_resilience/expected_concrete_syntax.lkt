@@ -7,7 +7,9 @@ grammar FooGrammar {
     @main_rule main_rule <- defs
     def_rule <- or(scope | var)
     var <- Var(Id(@Identifier) "=" name)
-    scope <- Scope(?"error" Id(@Identifier) "{" defs "}")
+    scope <- Scope(
+        HasError("error") Id(@Identifier) "{" defs "}"
+    )
 
 }
 

@@ -5,7 +5,7 @@ grammar FooGrammar {
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
-    ref <- Ref(?"null" name)
+    ref <- Ref(Null("null") name)
 
 }
 

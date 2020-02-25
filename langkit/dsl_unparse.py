@@ -336,11 +336,13 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, _Row):
         return " $sl".join(emit_rule(r) for r in rule.parsers)
     elif isinstance(rule, Opt):
-        return (
-            "?({})".format(emit_rule(rule.parser))
-            if isinstance(rule.parser, _Row)
-            else "?{}".format(emit_rule(rule.parser))
-        )
+        if rule._booleanize:
+            return '{}({})'.format(node_name(rule.booleanized_type),
+                                   emit_rule(rule.parser))
+        elif isinstance(rule.parser, _Row):
+            return "?({})".format(emit_rule(rule.parser))
+        else:
+            return "?{}".format(emit_rule(rule.parser))
     elif isinstance(rule, _Extract):
         r = emit_rule(rule.parser)
         if top_level:
