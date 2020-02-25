@@ -1,7 +1,7 @@
 grammar FooGrammar {
     @main_rule main_rule <- elem
     elem <- or(scope | id)
-    scope <- Scope(id "{" list*(elem) "}")
+    scope <- Scope(id "{" list+(elem) "}")
     id <- Id(@Identifier)
 
 }

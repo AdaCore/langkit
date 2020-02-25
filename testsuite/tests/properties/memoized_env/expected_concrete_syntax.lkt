@@ -1,6 +1,6 @@
 grammar FooGrammar {
     @main_rule main_rule <- Block(
-        Name(@Identifier) "(" list*(Ref(Name(@Identifier))) ")"
+        Name(@Identifier) "(" list+(Ref(Name(@Identifier))) ")"
     )
 
 }

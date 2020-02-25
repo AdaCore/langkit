@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    @main_rule main_rule <- list*(node)
+    @main_rule main_rule <- list+(node)
     node <- or(example | null_node | var | ident | string)
     example <- Example("example")
     null_node <- Null("null")

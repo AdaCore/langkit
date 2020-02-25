@@ -351,7 +351,7 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, List):
         sep_str = ", {}".format(emit_rule(rule.sep)) if rule.sep else ""
         return "list{}({}{})".format(
-            '+' if rule.empty_valid else '*', emit_rule(rule.parser), sep_str
+            '*' if rule.empty_valid else '+', emit_rule(rule.parser), sep_str
         )
     elif isinstance(rule, Null):
         return "null({})".format(

@@ -1,7 +1,7 @@
 grammar FooGrammar {
     @main_rule main_rule <- element
     element <- or(sequence | atom)
-    sequence <- ("(" list+(element) ")")
+    sequence <- ("(" list*(element) ")")
     atom <- Atom(@Identifier)
 
 }

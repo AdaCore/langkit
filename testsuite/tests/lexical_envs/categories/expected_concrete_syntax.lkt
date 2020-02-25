@@ -4,7 +4,7 @@ grammar FooGrammar {
     )
     cat1 <- Cat1(@Identifier("cat1") "{" decls "}")
     cat2 <- Cat2(@Identifier("cat2") "{" decls "}")
-    decls <- list+(var)
+    decls <- list*(var)
     var <- Var(name)
     name <- Name(@Identifier)
 

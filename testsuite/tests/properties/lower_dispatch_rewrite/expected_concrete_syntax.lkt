@@ -1,12 +1,12 @@
 grammar FooGrammar {
     name <- Name(@Identifier)
-    @main_rule main_rule <- list*(or(
+    @main_rule main_rule <- list+(or(
         | Def("def" name imports vars expr)
         | expr
     ))
-    imports <- ("(" list+(derived_ref) ")")
+    imports <- ("(" list*(derived_ref) ")")
     var <- Var(name "=" expr)
-    vars <- ("{" list+(var) "}")
+    vars <- ("{" list*(var) "}")
     expr <- or(atom | plus)
     atom <- or(lit | ref)
     lit <- Lit(@Number)

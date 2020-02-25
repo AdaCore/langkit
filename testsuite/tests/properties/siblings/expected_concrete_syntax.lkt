@@ -1,6 +1,6 @@
 grammar FooGrammar {
     @main_rule main_rule <- tuple
-    tuple <- Tuple(Name(@Identifier) "(" list+(tuple) ")")
+    tuple <- Tuple(Name(@Identifier) "(" list*(tuple) ")")
 
 }
 

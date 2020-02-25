@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    @main_rule main_rule <- list*(decl)
+    @main_rule main_rule <- list+(decl)
     decl <- or(var_decl | fun_decl)
     var_decl <- VarDecl(VarKeyword("var") name "=" expr ";")
     fun_decl <- FunDecl("def" name ";")
