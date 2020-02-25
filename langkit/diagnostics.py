@@ -71,7 +71,7 @@ class Location(object):
     Holder for a location in the source code.
     """
 
-    def __init__(self, file, line, text=''):
+    def __init__(self, file, line, column=0, text=''):
         self.file = file
         """
         Path to the file for this location.
@@ -82,6 +82,13 @@ class Location(object):
         self.line = line
         """
         Location line number (1-based).
+
+        :type: int
+        """
+
+        self.column = column
+        """
+        Column number (1-based). Zero if unspecified.
 
         :type: int
         """
@@ -104,7 +111,7 @@ class Location(object):
 
     @property
     def as_tuple(self):
-        return (self.file, self.line)
+        return (self.file, self.line, self.column)
 
     def __eq__(self, other):
         return self.as_tuple == other.as_tuple
@@ -113,7 +120,7 @@ class Location(object):
         return self.as_tuple < other.as_tuple
 
     def __repr__(self):
-        return '<Location {} {}>'.format(self.file, self.line)
+        return '<Location {} {}:{}>'.format(self.file, self.line, self.column)
 
     @property
     def short_repr(self):
@@ -127,12 +134,13 @@ class Location(object):
         stack = []
         loc = self
         while loc is not None:
-            stack.append(loc)
+            loc_str = '{}:{}'.format(P.basename(loc.file), loc.line)
+            if loc.column:
+                loc_str += ':{}'.format(loc.column)
+            stack.append(loc_str)
             loc = loc.previous_in_callstack
 
-        return '[{}]'.format(', '.join(
-            '{}:{}'.format(P.basename(loc.file), loc.line)
-            for loc in stack))
+        return '[{}]'.format(', '.join(stack))
 
 
 def extract_library_location(stack=None):
