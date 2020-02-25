@@ -1,18 +1,18 @@
 grammar FooGrammar {
     name <- Name(@Identifier)
-    vars <- ("{" list+(var) "}")
     @main_rule main_rule <- list*(or(
         | Def("def" name imports vars expr)
         | expr
     ))
-    atom <- or(lit | ref)
-    expr <- or(atom | plus)
-    lit <- Lit(@Number)
-    plus <- ("(" Plus(expr "+" expr) ")")
     imports <- ("(" list+(derived_ref) ")")
     var <- Var(name "=" expr)
-    derived_ref <- DerivedRef(name)
+    vars <- ("{" list+(var) "}")
+    expr <- or(atom | plus)
+    atom <- or(lit | ref)
+    lit <- Lit(@Number)
     ref <- Ref(name)
+    derived_ref <- DerivedRef(name)
+    plus <- ("(" Plus(expr "+" expr) ")")
 
 }
 

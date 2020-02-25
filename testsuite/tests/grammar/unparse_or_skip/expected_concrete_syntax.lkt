@@ -3,8 +3,8 @@ grammar FooGrammar {
         | DefNode("def" identifier "=" number ";")
         | skip(ErrorDef)
     ))
-    identifier <- Identifier(@Identifier)
     number <- Number(@Number)
+    identifier <- Identifier(@Identifier)
 
 }
 

@@ -1,15 +1,15 @@
 grammar FooGrammar {
-    decl <- Decl(name)
-    ref_list <- list+(ref)
-    name <- Name(@Identifier)
     @main_rule main_rule <- list*(block)
-    decl_list <- ("(" list+(decl) ")")
-    using_list <- ("(" list+(using) ")")
-    using <- Using(name)
-    ref <- Ref(name)
+    name <- Name(@Identifier)
     block <- Block(
         name decl_list "{" using_list ref_list "}"
     )
+    decl_list <- ("(" list+(decl) ")")
+    using_list <- ("(" list+(using) ")")
+    ref_list <- list+(ref)
+    decl <- Decl(name)
+    using <- Using(name)
+    ref <- Ref(name)
 
 }
 

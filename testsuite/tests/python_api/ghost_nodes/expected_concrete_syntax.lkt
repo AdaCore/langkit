@@ -1,12 +1,12 @@
 grammar FooGrammar {
     @main_rule main_rule <- list*(Param(name mode plus))
-    plus <- PlusQualifier("+")
     name <- Name(@Identifier)
     mode <- or(
         | EnumNull("null")
         | EnumExample("example")
         | EnumDefault()
     )
+    plus <- PlusQualifier("+")
 
 }
 

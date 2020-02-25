@@ -1,14 +1,14 @@
 grammar FooGrammar {
+    @main_rule main_rule <- defs
     defs <- list+(def_rule)
+    def_rule <- or(scope | var)
+    scope <- Scope(
+        HasError("error") Id(@Identifier) "{" defs "}"
+    )
+    var <- Var(Id(@Identifier) "=" name)
     name <- or(
         | Prefix(name "." Id(@Identifier))
         | Id(@Identifier)
-    )
-    @main_rule main_rule <- defs
-    def_rule <- or(scope | var)
-    var <- Var(Id(@Identifier) "=" name)
-    scope <- Scope(
-        HasError("error") Id(@Identifier) "{" defs "}"
     )
 
 }

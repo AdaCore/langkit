@@ -1,9 +1,9 @@
 grammar FooGrammar {
     @main_rule main_rule <- list*(def_node)
-    identifier <- Identifier(@Identifier)
     def_node <- DefNode(
         "(" identifier "," null(ASTList[DefNode]) ")"
     )
+    identifier <- Identifier(@Identifier)
 
 }
 

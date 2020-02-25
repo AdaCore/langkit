@@ -1,8 +1,8 @@
 grammar FooGrammar {
     @main_rule main_rule <- item
+    item <- or(couple | literal)
     couple <- Couple("(" item "," item ")")
     literal <- Literal(@Number)
-    item <- or(couple | literal)
 
 }
 

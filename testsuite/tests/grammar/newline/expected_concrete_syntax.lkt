@@ -1,12 +1,12 @@
 grammar FooGrammar {
     lit <- Literal(@Number)
+    nl <- NewLineNode(lit @Newline lit)
     ind <- IndentNode(lit @Newline @Indent lit @Dedent)
     comp <- CompositeNode(
         lit
         @Newline
         lit @Newline @Indent lit @Newline @Dedent lit
     )
-    nl <- NewLineNode(lit @Newline lit)
     @main_rule main_rule <- or(comp | ind | nl)
 
 }

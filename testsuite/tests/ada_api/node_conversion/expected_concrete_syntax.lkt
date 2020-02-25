@@ -1,11 +1,11 @@
 grammar FooGrammar {
-    name <- Name(@Identifier)
     @main_rule main_rule <- list*(var_decl)
-    number <- Number(@Number)
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
+    number <- Number(@Number)
     ref <- Ref(Null("null") name)
+    name <- Name(@Identifier)
 
 }
 

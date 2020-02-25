@@ -1,16 +1,28 @@
 grammar FooGrammar {
-    print_stmt <- or(
-        | PrintStmt("print" test_list)
-        | StreamPrintStmt("print" ">>" test "," test_list)
+    name <- Id(@Identifier)
+    number <- NumberLit(@Number)
+    string <- StringLit(@String)
+    cat_string <- ConcatStringLit(string list*(string))
+    nl <- NL(@Newline)
+    @main_rule main_rule <- FileNode(
+        list*(discard(list+(nl)) stmt discard(list+(nl))) @Termination
     )
-    dotted_as_names <- (list*(or(dotted_as_name | dotted_name), ",") ?",")
-    empty_test_list <- (list+(test, ",") ?",")
-    try_stmt <- TryStmt(
-        "try" ":" suite list+(ExceptPart(
-            "except" ?AsNameNode(test ?"as" test) ":" suite
-        )) ?else_part ?"finally" ":" suite
+    decorator <- Decorator(
+        "@" dotted_name ?"(" arg_list ")" @Newline
     )
-    test_list <- (list*(test, ",") ?",")
+    decorators <- list*(decorator)
+    decorated <- Decorated(decorators or(class_def | func_def))
+    func_def <- FuncDef("def" name parameters ":" suite)
+    parameters <- ("(" ?varargslist ")")
+    varargslist <- Params(
+        list+(SingleParam(
+            VarArgsFlag("*") KwArgsFlag("**") fpdef ?"=" test
+        ), ",")
+    )
+    fpdef <- or(name | "(" name_list ")")
+    name_list <- (list*(name, ",") ?",")
+    stmt <- or(simple_stmt | compound_stmt)
+    simple_stmt <- (or(small_stmt | list*(small_stmt, ";") ?";") @Newline)
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -22,28 +34,6 @@ grammar FooGrammar {
         | exec_stmt
         | assert_stmt
     )
-    expr_list <- (list*(expr, ",") ?",")
-    number <- NumberLit(@Number)
-    dict_assoc <- DictAssoc(test ":" test)
-    return_stmt <- ReturnStmt("return" ?test_list)
-    cat_string <- ConcatStringLit(string list*(string))
-    not_test <- or(NotOp("not" not_test) | comparison)
-    suite <- or(
-        | discard(list+(nl))
-        @Indent
-        list*(discard(list+(nl)) stmt discard(list+(nl))) @Dedent
-        | simple_stmt
-    )
-    string <- StringLit(@String)
-    flow_stmt <- or(
-        | break_stmt
-        | continue_stmt
-        | return_stmt
-        | raise_stmt
-        | yield_stmt
-    )
-    del_stmt <- DelStmt("del" expr_list)
-    comp_if <- CompIf("if" test ?comp_iter)
     expr_stmt <- or(
         | AugAssignStmt(
             test_list Op(
@@ -68,40 +58,43 @@ grammar FooGrammar {
         )
         | test_list
     )
-    nl <- NL(@Newline)
-    func_def <- FuncDef("def" name parameters ":" suite)
-    parameters <- ("(" ?varargslist ")")
+    print_stmt <- or(
+        | PrintStmt("print" test_list)
+        | StreamPrintStmt("print" ">>" test "," test_list)
+    )
+    del_stmt <- DelStmt("del" expr_list)
+    pass_stmt <- PassStmt("pass")
+    flow_stmt <- or(
+        | break_stmt
+        | continue_stmt
+        | return_stmt
+        | raise_stmt
+        | yield_stmt
+    )
+    break_stmt <- BreakStmt("break")
     continue_stmt <- ContinueStmt("continue")
-    fpdef <- or(name | "(" name_list ")")
-    shift_expr <- or(
-        | ShiftExpr(shift_expr Op(or("<<" | ">>")) arith_expr)
-        | arith_expr
+    return_stmt <- ReturnStmt("return" ?test_list)
+    yield_stmt <- yield_expr
+    raise_stmt <- RaiseStmt("raise" ?test_list)
+    import_stmt <- or(import_name | import_from)
+    import_name <- ImportName("import" dotted_as_names)
+    dot <- Dot(".")
+    import_from <- ImportFrom(
+        "from"
+        or(dotted_name | RelName(list*(dot) ?dotted_name)) "import" or(
+            | ImportStar("*")
+            | "(" import_as_names ")"
+            | import_as_names
+        )
     )
-    atom_expr <- or(
-        | DottedName(atom_expr "." name)
-        | CallExpr(atom_expr "(" arg_list ")")
-        | SubscriptExpr(atom_expr "[" subscript_list "]")
-        | atom
-    )
-    name <- Id(@Identifier)
+    as_name <- AsNameNode(name "as" name)
     dotted_as_name <- AsNameNode(dotted_name "as" name)
-    list_iter <- or(list_for | list_if)
-    list_if <- CompIf("if" test ?list_iter)
-    factor <- or(Factor(Op(or("+" | "-" | "~")) factor) | power)
-    test <- or(
-        | lambdef
-        | IfExpr(or_test "if" or_test "else" test)
-        | or_test
-    )
+    import_as_names <- (list*(or(as_name | name), ",") ?",")
+    dotted_as_names <- (list*(or(dotted_as_name | dotted_name), ",") ?",")
+    dotted_name <- or(DottedName(dotted_name "." name) | name)
     global_stmt <- GlobalStmt("global" name_list)
-    subscript <- or(
-        | EllipsisExpr("." "." ".")
-        | ExtSliceExpr(?test ":" ?test ":" ?test)
-        | SliceExpr(?test ":" ?test)
-        | test
-    )
-    with_item <- AsNameNode(test ?"as" expr)
-    decorators <- list*(decorator)
+    exec_stmt <- ExecStmt("exec" expr ?"in" test_list)
+    assert_stmt <- AssertStmt("assert" test ?"," test)
     compound_stmt <- or(
         | if_stmt
         | while_stmt
@@ -112,66 +105,38 @@ grammar FooGrammar {
         | class_def
         | decorated
     )
-    exec_stmt <- ExecStmt("exec" expr ?"in" test_list)
-    yield_stmt <- yield_expr
-    dotted_name <- or(DottedName(dotted_name "." name) | name)
-    yield_expr <- YieldExpr("yield" ?test_list)
-    power <- or(Power(atom_expr "**" factor) | atom_expr)
-    simple_stmt <- (or(small_stmt | list*(small_stmt, ";") ?";") @Newline)
-    @main_rule main_rule <- FileNode(
-        list*(discard(list+(nl)) stmt discard(list+(nl))) @Termination
+    else_part <- ElsePart("else" ":" suite)
+    if_stmt <- IfStmt(
+        "if"
+        test
+        ":"
+        suite list+("elif" ElifBranch(test ":" suite)) ?else_part
     )
-    name_list <- (list*(name, ",") ?",")
-    stmt <- or(simple_stmt | compound_stmt)
-    import_from <- ImportFrom(
-        "from"
-        or(dotted_name | RelName(list*(dot) ?dotted_name)) "import" or(
-            | ImportStar("*")
-            | "(" import_as_names ")"
-            | import_as_names
-        )
-    )
-    assert_stmt <- AssertStmt("assert" test ?"," test)
-    list_for <- CompForL(
-        "for" expr_list "in" test_list ?list_iter
-    )
+    while_stmt <- WhileStmt("while" test ":" suite ?else_part)
     for_stmt <- ForStmt(
         "for" expr_list "in" test_list ":" suite ?else_part
     )
-    break_stmt <- BreakStmt("break")
-    else_part <- ElsePart("else" ":" suite)
+    try_stmt <- TryStmt(
+        "try" ":" suite list+(ExceptPart(
+            "except" ?AsNameNode(test ?"as" test) ":" suite
+        )) ?else_part ?"finally" ":" suite
+    )
+    with_stmt <- WithStmt("with" list*(with_item, ",") ":" suite)
+    with_item <- AsNameNode(test ?"as" expr)
+    suite <- or(
+        | discard(list+(nl))
+        @Indent
+        list*(discard(list+(nl)) stmt discard(list+(nl))) @Dedent
+        | simple_stmt
+    )
+    test <- or(
+        | lambdef
+        | IfExpr(or_test "if" or_test "else" test)
+        | or_test
+    )
+    or_test <- or(OrOp(or_test "or" and_test) | and_test)
     and_test <- or(AndOp(and_test "and" not_test) | not_test)
-    lambdef <- LambdaDef("lambda" varargslist ":" test)
-    atom <- or(
-        | "(" yield_expr ")"
-        | ListGen("(" test list_for ")")
-        | TupleLit("(" ?test_list ")")
-        | ListComp("[" test list_for "]")
-        | ListLit("[" empty_test_list "]")
-        | SetComp("{" test comp_for "}")
-        | set_lit
-        | DictComp("{" dict_assoc comp_for "}")
-        | DictLit("{" list*(dict_assoc, ",") ?"," "}")
-        | InlineEval("`" test_list "`")
-        | name
-        | number
-        | cat_string
-        | string
-    )
-    import_as_names <- (list*(or(as_name | name), ",") ?",")
-    decorated <- Decorated(decorators or(class_def | func_def))
-    raise_stmt <- RaiseStmt("raise" ?test_list)
-    arg_list <- (list+(or(
-        | ArgGen(test comp_for)
-        | ArgAssoc(?test "=" test)
-        | VarArgs("*" test)
-        | KwArgs("**" test)
-    ), ",") ?",")
-    set_lit <- SetLit("{" empty_test_list "}")
-    decorator <- Decorator(
-        "@" dotted_name ?"(" arg_list ")" @Newline
-    )
-    pass_stmt <- PassStmt("pass")
+    not_test <- or(NotOp("not" not_test) | comparison)
     comparison <- or(
         | CompOp(
             comparison or(
@@ -190,46 +155,81 @@ grammar FooGrammar {
         )
         | expr
     )
-    term <- or(
-        | Term(term Op(or("*" | "/" | "%" | "//")) factor)
-        | factor
-    )
-    comp_iter <- or(comp_for | comp_if)
-    subscript_list <- (list*(subscript, ",") ?",")
-    if_stmt <- IfStmt(
-        "if"
-        test
-        ":"
-        suite list+("elif" ElifBranch(test ":" suite)) ?else_part
-    )
-    arith_expr <- or(
-        | ArithExpr(arith_expr Op(or("+" | "-")) term)
-        | term
-    )
-    import_name <- ImportName("import" dotted_as_names)
-    or_test <- or(OrOp(or_test "or" and_test) | and_test)
-    class_def <- ClassDef(
-        "class" name ?"(" ?test_list ")" ":" suite
-    )
-    with_stmt <- WithStmt("with" list*(with_item, ",") ":" suite)
-    while_stmt <- WhileStmt("while" test ":" suite ?else_part)
-    varargslist <- Params(
-        list+(SingleParam(
-            VarArgsFlag("*") KwArgsFlag("**") fpdef ?"=" test
-        ), ",")
-    )
-    comp_for <- CompFor(
-        "for" expr_list "in" or_test ?comp_iter
-    )
-    import_stmt <- or(import_name | import_from)
     expr <- or(OrExpr(expr "|" xor_expr) | xor_expr)
     xor_expr <- or(XorExpr(xor_expr "^" and_expr) | and_expr)
     and_expr <- or(
         | AndExpr(and_expr "&" shift_expr)
         | shift_expr
     )
-    as_name <- AsNameNode(name "as" name)
-    dot <- Dot(".")
+    shift_expr <- or(
+        | ShiftExpr(shift_expr Op(or("<<" | ">>")) arith_expr)
+        | arith_expr
+    )
+    arith_expr <- or(
+        | ArithExpr(arith_expr Op(or("+" | "-")) term)
+        | term
+    )
+    term <- or(
+        | Term(term Op(or("*" | "/" | "%" | "//")) factor)
+        | factor
+    )
+    factor <- or(Factor(Op(or("+" | "-" | "~")) factor) | power)
+    power <- or(Power(atom_expr "**" factor) | atom_expr)
+    atom_expr <- or(
+        | DottedName(atom_expr "." name)
+        | CallExpr(atom_expr "(" arg_list ")")
+        | SubscriptExpr(atom_expr "[" subscript_list "]")
+        | atom
+    )
+    dict_assoc <- DictAssoc(test ":" test)
+    yield_expr <- YieldExpr("yield" ?test_list)
+    atom <- or(
+        | "(" yield_expr ")"
+        | ListGen("(" test list_for ")")
+        | TupleLit("(" ?test_list ")")
+        | ListComp("[" test list_for "]")
+        | ListLit("[" empty_test_list "]")
+        | SetComp("{" test comp_for "}")
+        | set_lit
+        | DictComp("{" dict_assoc comp_for "}")
+        | DictLit("{" list*(dict_assoc, ",") ?"," "}")
+        | InlineEval("`" test_list "`")
+        | name
+        | number
+        | cat_string
+        | string
+    )
+    set_lit <- SetLit("{" empty_test_list "}")
+    lambdef <- LambdaDef("lambda" varargslist ":" test)
+    subscript_list <- (list*(subscript, ",") ?",")
+    subscript <- or(
+        | EllipsisExpr("." "." ".")
+        | ExtSliceExpr(?test ":" ?test ":" ?test)
+        | SliceExpr(?test ":" ?test)
+        | test
+    )
+    expr_list <- (list*(expr, ",") ?",")
+    test_list <- (list*(test, ",") ?",")
+    empty_test_list <- (list+(test, ",") ?",")
+    class_def <- ClassDef(
+        "class" name ?"(" ?test_list ")" ":" suite
+    )
+    arg_list <- (list+(or(
+        | ArgGen(test comp_for)
+        | ArgAssoc(?test "=" test)
+        | VarArgs("*" test)
+        | KwArgs("**" test)
+    ), ",") ?",")
+    list_iter <- or(list_for | list_if)
+    list_for <- CompForL(
+        "for" expr_list "in" test_list ?list_iter
+    )
+    list_if <- CompIf("if" test ?list_iter)
+    comp_iter <- or(comp_for | comp_if)
+    comp_for <- CompFor(
+        "for" expr_list "in" or_test ?comp_iter
+    )
+    comp_if <- CompIf("if" test ?comp_iter)
 
 }
 

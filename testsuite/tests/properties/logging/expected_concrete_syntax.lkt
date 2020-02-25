@@ -1,9 +1,9 @@
 grammar FooGrammar {
-    decl <- Decl(HasPlus("+") name "(" ref_list ")")
     @main_rule main_rule <- list*(decl)
+    decl <- Decl(HasPlus("+") name "(" ref_list ")")
+    ref_list <- list+(ref)
     ref <- Ref(name)
     name <- Name(@Identifier)
-    ref_list <- list+(ref)
 
 }
 

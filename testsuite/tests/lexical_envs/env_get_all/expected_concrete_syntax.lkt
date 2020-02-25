@@ -1,7 +1,7 @@
 grammar FooGrammar {
     @main_rule main_rule <- list*(insert)
-    ident <- Id(@Identifier)
     insert <- Insert("def" ident ident)
+    ident <- Id(@Identifier)
 
 }
 

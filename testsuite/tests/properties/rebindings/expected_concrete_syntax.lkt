@@ -1,11 +1,11 @@
 grammar FooGrammar {
-    name <- Name(@Identifier)
-    vars <- ("{" list*(var) "}")
     @main_rule main_rule <- list*(block)
-    param <- Param(name)
-    params <- ("(" list*(param) ")")
-    var <- BlockVar(name)
+    name <- Name(@Identifier)
     block <- Block(params name vars)
+    params <- ("(" list*(param) ")")
+    param <- Param(name)
+    vars <- ("{" list*(var) "}")
+    var <- BlockVar(name)
 
 }
 

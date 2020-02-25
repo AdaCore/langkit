@@ -1,12 +1,12 @@
 grammar FooGrammar {
-    name <- Name(@Identifier)
     @main_rule main_rule <- Def(
         "def" name "{" cat1 cat2 Example("example") "}"
     )
     cat1 <- Cat1(@Identifier("cat1") "{" decls "}")
     cat2 <- Cat2(@Identifier("cat2") "{" decls "}")
-    var <- Var(name)
     decls <- list+(var)
+    var <- Var(name)
+    name <- Name(@Identifier)
 
 }
 
