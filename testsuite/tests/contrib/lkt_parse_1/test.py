@@ -16,13 +16,6 @@ import sys
 LK_LIB_DIR = P.join(os.environ['LANGKIT_ROOT_DIR'], 'contrib', 'lkt')
 TESTS_DIR = P.join(os.environ['LANGKIT_ROOT_DIR'], 'testsuite', 'tests')
 
-o = subprocess.check_output(
-    [sys.executable, P.join(LK_LIB_DIR, 'manage.py'), 'make', '-P'],
-    # CWD is the lib's directory so that lib is generated in the lib's dir, not
-    # in the test dir.
-    cwd=LK_LIB_DIR
-)
-
 tests = sorted(((P.join(root, f), P.basename(root))
                 for root, _, files in os.walk(TESTS_DIR)
                 for f in files
