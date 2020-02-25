@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec, do
 from langkit.expressions import Self
-from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -33,9 +32,5 @@ class Def(FooNode):
     )
 
 
-G = Grammar('main_rule')
-G.add_rules(
-    main_rule=Def(Example('example')),
-)
-build_and_run(G, py_script='main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

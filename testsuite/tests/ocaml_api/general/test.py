@@ -12,9 +12,7 @@ from langkit.dsl import (
 from langkit.expressions import (
     ArrayLiteral, CharacterLiteral, Entity, If, No, Property, langkit_property
 )
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -103,18 +101,7 @@ class Ident(FooNode):
 class StringLiteral(FooNode):
     pass
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=List(foo_grammar.node, list_cls=Sequence),
-    node=Or(foo_grammar.example, foo_grammar.null_node, foo_grammar.var,
-            foo_grammar.ident, foo_grammar.string),
-    example=Example('example'),
-    null_node=Null('null'),
-    var=Var('var', '(', foo_grammar.main_rule, ')'),
-    ident=Ident(Token.Identifier),
-    string=StringLiteral(Token.String)
-)
 
-build_and_run(foo_grammar, ocaml_main='main',
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ocaml_main='main',
               symbol_canonicalizer=LibraryEntity('Pkg', 'Canonicalize'))
 print('Done')

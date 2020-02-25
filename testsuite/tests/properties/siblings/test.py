@@ -5,9 +5,7 @@ Test that the .next_sibling and .previous_sibling properties work as expected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
-from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -24,9 +22,5 @@ class Tuple(FooNode):
     nodes = Field()
 
 
-g = Grammar('main_rule')
-g.add_rules(main_rule=g.tuple,
-            tuple=Tuple(Name(Token.Identifier),
-                        '(', List(g.tuple, empty_valid=True), ')'))
-build_and_run(g, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

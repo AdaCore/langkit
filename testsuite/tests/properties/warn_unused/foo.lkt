@@ -1,0 +1,5 @@
+grammar foo_grammar {
+    @main_rule item <- or(example | example_list)
+    example <- Example("example")
+    example_list <- ExampleList("(" list+(item) ")")
+}

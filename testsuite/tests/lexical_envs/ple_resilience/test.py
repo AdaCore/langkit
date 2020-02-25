@@ -14,9 +14,7 @@ from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
 from langkit.expressions import (AbstractProperty, If, No, PropertyError, Self,
                                  langkit_property)
-from langkit.parsers import Grammar, List, Opt, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -79,20 +77,5 @@ class Var(DefNode):
     )
 
 
-G = Grammar('main_rule')
-G.add_rules(
-    main_rule=G.defs,
-
-    defs=List(G.def_rule, empty_valid=True),
-    def_rule=Or(G.scope, G.var),
-
-    scope=Scope(Opt('error').as_bool(HasError),
-                Id(Token.Identifier),
-                '{', G.defs, '}'),
-    var=Var(Id(Token.Identifier), '=', G.name),
-
-    name=Or(Prefix(G.name, '.', Id(Token.Identifier)),
-            Id(Token.Identifier)),
-)
-build_and_run(G, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

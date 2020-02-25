@@ -1,0 +1,27 @@
+grammar foo_grammar {
+    @main_rule main_rule <- or(rule_1 | rule_2)
+
+    rule_1 <- ExampleWrapper(
+        ?Example("example")
+        or(Example("example") | null(Example))
+        sub_rule
+        null(Example)
+        (?Example("example")).dont_skip(sub_rule)
+
+        HasExample(Example("example"))
+        Example("example")
+    )
+
+    rule_2 <- ExampleWrapper(
+        Example("example")
+        Example("example")
+        Example("example")
+        Example("example")
+        Example("example")
+
+        HasExample("example")
+        Example("example")
+    )
+
+    sub_rule <- ?Example("example")
+}

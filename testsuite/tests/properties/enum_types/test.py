@@ -6,9 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Enum, EnumValue, Field, abstract
 from langkit.expressions import AbstractProperty, Property, langkit_property
-from langkit.parsers import Grammar, List, Or, Pick
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -62,17 +60,5 @@ class Plus(Expression):
     right = Field()
 
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=List(Pick(g.decl, ';')),
-    decl=Or(VarDecl('def', g.name, '=', g.expr),
-            FuncDecl('def', g.name,
-                     '(', List(g.name, sep=','), ')',
-                     '=', g.expr)),
-    expr=Or(Plus(g.atom, '+', g.expr),
-            g.atom),
-    atom=Or(Literal(Token.Number), g.name),
-    name=Name(Token.Identifier),
-)
-build_and_run(g, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

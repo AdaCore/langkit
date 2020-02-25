@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool
 from langkit.expressions import DynamicVariable, langkit_property
-from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -24,8 +23,5 @@ class ExampleNode(RootNode):
     def prop():
         return BoolVar
 
-g = Grammar('main_rule')
-g.add_rules(main_rule=ExampleNode('example'))
-build_and_run(g, py_script='main.py')
-
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

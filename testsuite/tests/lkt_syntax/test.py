@@ -12,7 +12,6 @@ from langkit.expressions import (
 )
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithText, WithTrivia)
-from langkit.parsers import Grammar, List
 
 from utils import build_and_run
 
@@ -85,7 +84,6 @@ class Example(FooNode):
         return KV.new(key="hey", val="you")
 
 
-g = Grammar('main_rule')
-g.add_rules(main_rule=List(Example('example')))
-build_and_run(g, lexer=foo_lexer, py_script='main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt',
+              lexer=foo_lexer, py_script='main.py')
 print('Done')

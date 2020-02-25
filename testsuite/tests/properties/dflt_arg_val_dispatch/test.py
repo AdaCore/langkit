@@ -7,9 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool, Field, abstract
 from langkit.expressions import Not, langkit_property
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -40,13 +38,6 @@ class FunDecl(Decl):
     pass
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=List(Or(grammar.var_decl, grammar.fun_decl)),
-    var_decl=VarDecl('var', grammar.identifier),
-    fun_decl=FunDecl('def', grammar.identifier),
-    identifier=Identifier(Token.Identifier),
-)
-build_and_run(grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('')
 print('Done')

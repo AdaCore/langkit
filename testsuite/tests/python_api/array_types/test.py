@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T, has_abstract_list
 from langkit.expressions import Entity, Property, langkit_property
-from langkit.parsers import Grammar, List, Or
 
 from utils import build_and_run
 
@@ -35,13 +34,5 @@ class NullNode(FooNode):
     pass
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=List(foo_grammar.node, list_cls=Sequence),
-    node=Or(foo_grammar.example, foo_grammar.null_node),
-    example=Example('example'),
-    null_node=NullNode('null'),
-)
-
-build_and_run(foo_grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

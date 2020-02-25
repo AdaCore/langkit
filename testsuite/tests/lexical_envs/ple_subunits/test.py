@@ -9,9 +9,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Annotations, Field, LookupKind, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do, set_initial_env
 from langkit.expressions import AbstractProperty, Self, langkit_property
-from langkit.parsers import Grammar, List, Or, Pick
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -111,19 +109,5 @@ class Var(FooNode):
     )
 
 
-G = Grammar('main_rule')
-G.add_rules(
-    main_rule=List(G.scope),
-
-    deps=List(Pick(Dep(Pick('+', G.name)), ';'), empty_valid=True),
-
-    defs=List(Pick(Or(G.scope, G.var), ';'), empty_valid=True),
-
-    scope=Scope(G.name, '{', G.deps, G.defs, '}'),
-    var=Var(G.id, '=', G.name),
-
-    id=Id(Token.Identifier),
-    name=Or(Prefix(G.name, '.', G.id), G.id),
-)
-build_and_run(G, ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
 print('Done')

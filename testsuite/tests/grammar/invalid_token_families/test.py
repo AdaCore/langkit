@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode
 from langkit.lexer import (Lexer, LexerToken, Pattern, TokenFamily, WithSymbol,
                            WithText)
-from langkit.parsers import Grammar, Or
 
 from utils import emit_and_print_errors
 
@@ -36,10 +35,8 @@ def run(token_cls):
         (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), token_cls.Identifier),
     )
 
-    g = Grammar('main_rule')
-    g.add_rules(main_rule=Or(Identifier(token_cls.Identifier),
-                             Number(token_cls.Number)))
-    emit_and_print_errors(g, foo_lexer, generate_unparser=True)
+    emit_and_print_errors(lkt_file='foo.lkt', lexer=foo_lexer,
+                          generate_unparser=True)
 
     BaseToken.Number.name = None
     BaseToken.Identifier.name = None

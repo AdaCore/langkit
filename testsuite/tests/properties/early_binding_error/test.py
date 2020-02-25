@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T, UserField
 from langkit.expressions import Predicate, Self, langkit_property
-from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -28,7 +27,5 @@ class Example(FooNode):
         return Predicate(Example.pred, Self.a).solve
 
 
-G = Grammar('main_rule')
-G.add_rules(main_rule=Example('example'))
-build_and_run(G, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

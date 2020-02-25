@@ -4,7 +4,6 @@ from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, LexicalEnv, LogicVar, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  ignore, langkit_property)
-from langkit.parsers import Grammar, Or
 
 from utils import default_warning_set, emit_and_print_errors
 
@@ -61,14 +60,7 @@ def run(name, eq_prop):
         def prop_b(other=T.BazNode.entity):
             return other.node_env == env
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=Or(
-            BarNode('example'),
-            BazNode('example'),
-        )
-    )
-    emit_and_print_errors(grammar, warning_set=warning_set)
+    emit_and_print_errors(lkt_file='foo.lkt', warning_set=warning_set)
     print('')
 
 

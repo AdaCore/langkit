@@ -1,0 +1,4 @@
+grammar foo_grammar {
+    @main_rule main_rule <- or(Plus(atom "+" main_rule) | atom)
+    atom <- or(Literal(@number) | Name(@identifier))
+}

@@ -7,6 +7,9 @@ invalid_decl.lkt:2:5: Error: grammar rule expected
 == invalid_main_rule_annot.lkt ==
 invalid_main_rule_annot.lkt:2:5: Error: no parameters allowed for this main_rule annotation
 
+== invalid_token.lkt ==
+invalid_token.lkt:2:29: Error: Unknown token: UnknownToken
+
 == no_grammar.lkt ==
 no_grammar.lkt:1:1: Error: missing grammar
 

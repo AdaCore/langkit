@@ -1,0 +1,7 @@
+grammar foo_grammar {
+    @main_rule main_rule <- Root(or(
+        Root("example" list+(leaf, ","))
+        | list+(leaf)
+    ))
+    leaf <- or(Identifier(@identifier) | Number(@number))
+}

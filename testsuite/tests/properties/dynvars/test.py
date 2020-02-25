@@ -6,7 +6,6 @@ from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, Bool, LexicalEnv, abstract
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
-from langkit.parsers import Grammar
 
 from utils import default_warning_set, emit_and_print_errors
 
@@ -47,12 +46,7 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
     class ConcreteNode(AbstractNode):
         prop = Property(Literal(True), dynamic_vars=concrete_dyn_vars)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=ConcreteNode('example'),
-    )
-
-    if emit_and_print_errors(grammar, warning_set=warning_set):
+    if emit_and_print_errors(lkt_file='foo.lkt', warning_set=warning_set):
         for fld in (AbstractNode.prop, ConcreteNode.prop):
             print('  {}: {}'.format(fld.qualname,
                                     fmt_value(fld.dynamic_vars)))

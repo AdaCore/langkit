@@ -12,9 +12,7 @@ from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import (AbstractProperty, DynamicVariable, Entity,
                                  Self, langkit_property)
-from langkit.parsers import Grammar, List, Or, Pick
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -115,21 +113,5 @@ class Def(FooNode):
     )
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    name=Name(Token.Identifier),
-    main_rule=List(Or(
-        Def('def', grammar.name, grammar.expr),
-        grammar.expr
-    )),
-
-    expr=Or(grammar.atom, grammar.plus),
-
-    atom=Or(grammar.lit, grammar.ref),
-    lit=Lit(Token.Number),
-    ref=Ref(grammar.name),
-
-    plus=Pick('(', Plus(grammar.expr, '+', grammar.expr), ')'),
-)
-build_and_run(grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

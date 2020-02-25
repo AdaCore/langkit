@@ -1,8 +1,8 @@
-File "test.py", line 20, in FooNode.test_prop_1
-  line 22, in bind expression
+File "test.py", line 19, in FooNode.test_prop_1
+  line 21, in bind expression
     Warning: Useless bind of dynamic var 'dyn_node'
-File "test.py", line 28, in FooNode.test_prop_2
-  line 30, in bind expression
+File "test.py", line 27, in FooNode.test_prop_2
+  line 29, in bind expression
     Warning: Useless bind of dynamic var 'dyn_node'
 Code generation was successful
 Done

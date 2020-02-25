@@ -8,9 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Bool, LogicVar, T, UserField, abstract
 from langkit.expressions import (AbstractKind, Bind, Self, ignore,
                                  langkit_property)
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -54,9 +52,5 @@ class Literal(RootNode):
                 Bind(Self.var, arg2, eq_prop=Self.is_eq))
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=List(Or(Literal(Token.Number), Identifier(Token.Identifier)))
-)
-build_and_run(foo_grammar, ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
 print('Done')

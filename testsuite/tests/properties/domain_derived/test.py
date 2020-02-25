@@ -8,9 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, T, UserField
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import Self, langkit_property
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -42,10 +40,5 @@ class Name(FooNode):
         return Self.ref_var.get_value.cast(T.Definition)
 
 
-fg = Grammar('main_rule')
-fg.add_rules(
-    name=Name(Token.Identifier),
-    main_rule=List(Or(Definition('def', fg.name), fg.name), sep=','),
-)
-build_and_run(fg, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

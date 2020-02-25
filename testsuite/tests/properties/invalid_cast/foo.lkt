@@ -1,0 +1,4 @@
+grammar foo_grammar {
+    @main_rule main_rule <- BarNode("example" list_rule)
+    list_rule <- ListNode(list+(NumberNode(@number)))
+}

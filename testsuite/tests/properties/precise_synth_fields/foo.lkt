@@ -1,0 +1,6 @@
+grammar foo_grammar {
+    @main_rule main_rule <- or(literal | name | holder)
+    literal <- Literal(@number)
+    name <- Name(@identifier)
+    holder <- ParsedHolder("(" name ")")
+}

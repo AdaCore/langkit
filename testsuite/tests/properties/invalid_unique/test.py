@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
 from langkit.expressions import Self, langkit_property
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -24,9 +23,7 @@ def test_invalid(label, expr):
         def test():
             return expr.unique
 
-    g = Grammar('main_rule')
-    g.add_rules(main_rule=Example('example'))
-    emit_and_print_errors(g)
+    emit_and_print_errors(lkt_file='foo.lkt')
 
 
 test_invalid('Not an array', Self)

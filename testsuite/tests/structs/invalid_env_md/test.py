@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 import langkit
 from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -26,15 +25,12 @@ def run(md_constructor):
     class Example(FooNode):
         pass
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Example('example'))
-
     try:
         md_constructor()
     except DiagnosticError:
         langkit.reset()
     else:
-        emit_and_print_errors(grammar)
+        emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 

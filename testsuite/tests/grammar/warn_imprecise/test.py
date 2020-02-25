@@ -5,9 +5,7 @@ Test that warnings about imprecise type annotations for syntax fields.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, AbstractField, Field, T, abstract
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -36,14 +34,6 @@ class VarKeyword(FooNode):
 class Name(FooNode):
     token_node = True
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=List(g.decl),
-    decl=Or(g.var_decl, g.fun_decl),
-    var_decl=VarDecl(VarKeyword('var'), g.name, ';'),
-    fun_decl=FunDecl('def', g.name, ';'),
-    name=Name(Token.Identifier),
-)
-emit_and_print_errors(g)
 
+emit_and_print_errors(lkt_file='foo.lkt')
 print('Done')

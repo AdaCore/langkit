@@ -2,9 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T, synthetic
 from langkit.expressions import New, Property
-from langkit.parsers import Grammar, List, Pick
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -30,15 +28,7 @@ def run(name, prop_fn, prop_memoized):
     class LiteralList(Literal.list):
         prop = Property(prop_fn(), memoized=prop_memoized)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=grammar.list_rule,
-        list_rule=Pick(
-            '(', List(grammar.list_item, sep=','), ')'
-        ),
-        list_item=Literal(Token.Number),
-    )
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 

@@ -5,9 +5,7 @@ Test that a custom rule can be used to parse an analysis unit.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, abstract
-from langkit.parsers import Grammar, List, Opt, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -47,20 +45,6 @@ class Plus(Expr):
     rhs = Field()
 
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=List(g.def_rule),
-
-    name=Name(Token.Identifier),
-
-    def_rule=Def('def', g.name,
-                 Opt('(', List(g.name, sep=','), ')'),
-                 '=', g.expr),
-
-    expr=Or(Plus(g.expr, '+', g.expr),
-            ParentExpr('(', g.expr, ')'),
-            Ref(g.name),
-            Literal(Token.Number))
-)
-build_and_run(g, 'main.py', generate_unparser=True)
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+              generate_unparser=True)
 print('Done')

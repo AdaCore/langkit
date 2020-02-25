@@ -9,9 +9,7 @@ from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import AbstractKind, New, Self, langkit_property
-from langkit.parsers import Grammar, List, Opt, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -104,18 +102,5 @@ class SelfDecl(FooNode):
     )
 
 
-G = Grammar('main_rule')
-G.add_rules(
-    main_rule=List(Or(G.scope, G.self_decl, G.foreign_decl)),
-    scope=Scope(G.simple_identifier,
-                '{', List(G.scope, empty_valid=True), '}'),
-
-    identifier=Or(ScopedId(G.identifier, '.', G.simple_identifier),
-                  G.simple_identifier),
-    simple_identifier=SimpleId(Token.Identifier),
-
-    foreign_decl=ForeignDecl(G.identifier),
-    self_decl=SelfDecl('+', G.identifier, Opt('(', G.identifier, ')')),
-)
-build_and_run(G, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

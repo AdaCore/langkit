@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode
 from langkit.expressions import AbstractKind, T, langkit_property
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -60,7 +59,5 @@ class Example(FooNode):
         return True
 
 
-grammar = Grammar('item')
-grammar.add_rules(item=Example('example'))
-emit_and_print_errors(grammar, warning_set=WarningSet())
+emit_and_print_errors(lkt_file='foo.lkt', warning_set=WarningSet())
 print('Done')

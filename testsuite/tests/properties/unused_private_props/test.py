@@ -7,9 +7,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, AnalysisUnit, Field, Int, T, abstract
 from langkit.expressions import (AbstractProperty, ExternalProperty, No,
                                  Property, Self, langkit_property)
-from langkit.parsers import Grammar, Or
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -73,16 +71,5 @@ class Plus(Expression):
     names = Property(Self.left.names.concat(Self.right.names))
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=Or(
-        Plus(grammar.atom, '+', grammar.main_rule),
-        grammar.atom
-    ),
-    atom=Or(
-        Literal(Token.Number),
-        Name(Token.Identifier),
-    ),
-)
-emit_and_print_errors(grammar)
+emit_and_print_errors(lkt_file='foo.lkt')
 print('Done')

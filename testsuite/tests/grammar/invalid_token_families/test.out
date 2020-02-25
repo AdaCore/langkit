@@ -1,9 +1,9 @@
 == InvalidToken ==
-File "test.py", line 51, In definition of token family Alphanumericals
+File "test.py", line 48, In definition of token family Alphanumericals
     Error: Invalid tokens: foobar
 
 == PresentTwice ==
-File "test.py", line 56, In definition of token family Alphanumericals
+File "test.py", line 53, In definition of token family Alphanumericals
     Error: Tokens must belong to one family exclusively: Number
 
 Done

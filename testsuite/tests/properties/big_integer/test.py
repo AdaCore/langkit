@@ -10,9 +10,7 @@ from langkit.expressions import (
     AbstractProperty, BigIntLiteral, ExternalProperty, If, Self,
     langkit_property
 )
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -98,25 +96,8 @@ class LessThan(Expr):
                                 1, 0))
 
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=List(g.decl),
-    decl=Decl('def', g.name, '=', g.expr),
-
-    expr=Or(g.op, g.atom),
-
-    op=Or(Plus(g.atom, '+', g.expr),
-          Minus(g.atom, '-', g.expr),
-          Equal(g.atom, '=', g.expr),
-          LessThan(g.atom, '<', g.expr)),
-
-    atom=Or(g.ref, g.literal),
-    ref=Ref(g.name),
-
-    name=Identifier(Token.Identifier),
-    literal=Literal(Token.Number),
-)
 # The real test is the Python script, but we use the Ada program to check for
 # memory leaks in properties implementation.
-build_and_run(g, py_script='main.py', ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt',
+              py_script='main.py', ada_main='main.adb')
 print('Done')

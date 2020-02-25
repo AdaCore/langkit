@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, AnalysisUnitKind, T
 from langkit.expressions import Try, langkit_property
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -19,11 +18,7 @@ def run(name, expr):
         def p():
             return expr
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Example('example'),
-    )
-    emit_and_print_errors(foo_grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 run('Heterogeneous types', Try(1, True))

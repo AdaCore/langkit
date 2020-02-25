@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode
 from langkit.expressions import langkit_property
-from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -22,11 +21,6 @@ class Example(FooNode):
     def compute(n=FooNode):
         return n
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=Example('example'),
-)
-build_and_run(grammar, 'main.py')
-
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('')
 print('Done')

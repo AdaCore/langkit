@@ -514,13 +514,86 @@ class Grammar(object):
             return
         import liblktlang
 
+        # Build a mapping for all tokens registered in the lexer. Use lower
+        # case names, as this is what the concrete syntax is supposed to use.
+        tokens = {token.name.lower: token
+                  for token in ctx.lexer.tokens.tokens}
+
         # Build a mapping for all nodes created in the DSL. We cannot use T
         # (the TypeRepo instance) as types are not processed yet.
         nodes = {n._type.raw_name.camel: n
                  for n in _ASTNodeMetaclass.astnode_types}
 
+        # For every non-qualifier enum node, build a mapping from value names
+        # (camel cased) to the corresponding enum node subclass.
+        enum_nodes = {
+            node: {alt.name.camel: alt for alt in node._alternatives}
+            for node in nodes.values()
+            if node._type.is_enum_node and not node._type.is_bool_node
+        }
+
         def denoted_string_literal(string_lit):
             return eval(string_lit.text)
+
+        def resolve_node_ref(node_ref):
+            """
+            Helper to resolve a node name to the actual AST node.
+
+            :param liblktlang.RefID node_ref: Node that is the reference to the
+                AST node.
+            :rtype: ASTNodeType
+            """
+            if isinstance(node_ref, liblktlang.DotExpr):
+                # Get the altenatives mapping for the prefix_node enum node
+                prefix_node = resolve_node_ref(node_ref.f_prefix)
+                with ctx.lkt_context(prefix_node):
+                    try:
+                        alt_map = enum_nodes[prefix_node]
+                    except KeyError:
+                        check_source_language(
+                            False,
+                            'Non-qualifier enum node expected (got {})'
+                            .format(prefix_node.dsl_name)
+                        )
+
+                # Then resolve the alternative
+                suffix = node_ref.f_suffix.text
+                with ctx.lkt_context(node_ref.f_suffix):
+                    try:
+                        return alt_map[suffix]
+                    except KeyError:
+                        check_source_language(
+                            False,
+                            'Unknown enum node alternative: {}'.format(suffix)
+                        )
+
+            elif isinstance(node_ref, liblktlang.GenericTypeRef):
+                check_source_language(
+                    node_ref.f_type_name.text == u'ASTList',
+                    'Bad generic type name: only ASTList is valid in this'
+                    ' context'
+                )
+
+                params = node_ref.f_params
+                check_source_language(
+                    len(params) == 1,
+                    '1 type argument expected, got {}'.format(len(params))
+                )
+                return resolve_node_ref(params[0]).list
+
+            elif isinstance(node_ref, liblktlang.SimpleTypeRef):
+                return resolve_node_ref(node_ref.f_type_name)
+
+            else:
+                assert isinstance(node_ref, liblktlang.RefId)
+                with ctx.lkt_context(node_ref):
+                    node_name = node_ref.text
+                    try:
+                        return nodes[node_name]
+                    except KeyError:
+                        check_source_language(
+                            False, 'Unknown node: {}'.format(node_name)
+                        )
 
         def lower(rule):
             """
@@ -538,14 +611,7 @@ class Grammar(object):
             loc = ctx.lkt_loc(rule)
             with ctx.lkt_context(rule):
                 if isinstance(rule, liblktlang.ParseNodeExpr):
-                    # Fetch the referenced node
-                    node_name = rule.f_node_name.text
-                    try:
-                        node = nodes[node_name]
-                    except KeyError:
-                        check_source_language(
-                            False, 'Unknown node: {}'.format(node_name)
-                        )
+                    node = resolve_node_ref(rule.f_node_name)
 
                     # Lower the subparsers
                     subparsers = [lower(subparser)
@@ -557,10 +623,94 @@ class Grammar(object):
                     if node._type.is_bool_node:
                         return Opt(*subparsers).as_bool(node)
 
+                    # Likewise for enum nodes
+                    elif node._type.base and node._type.base.is_enum_node:
+                        return node.enum_node_cls._create_parser(
+                            node.type_ref, *subparsers
+                        )
+
                     # For other nodes, always create the node when the
                     # subparsers accept the input.
-                    return _Transform(parser=_Row(*subparsers), typ=node,
-                                      location=loc)
+                    else:
+                        return _Transform(parser=_Row(*subparsers), typ=node,
+                                          location=loc)
+
+                elif isinstance(rule, liblktlang.GrammarToken):
+                    token_name = rule.f_token_name.text
+                    try:
+                        val = tokens[token_name]
+                    except KeyError:
+                        check_source_language(
+                            False, 'Unknown token: {}'.format(token_name)
+                        )
+
+                    match_text = ''
+                    if rule.f_expr:
+                        # The grammar is supposed to mainain this invariant
+                        assert isinstance(rule.f_expr, liblktlang.TokenLit)
+                        match_text = denoted_string_literal(rule.f_expr)
+
+                    return _Token(val=val, match_text=match_text)
+
+                elif isinstance(rule, liblktlang.TokenLit):
+                    return _Token(denoted_string_literal(rule))
+
+                elif isinstance(rule, liblktlang.GrammarList):
+                    return List(
+                        lower(rule.f_expr),
+                        empty_valid=rule.f_kind.text == 'list*',
+                        list_cls=(resolve_node_ref(rule.f_node_name)
+                                  if rule.f_node_name else None),
+                        sep=lower(rule.f_sep))
+
+                elif isinstance(rule, (liblktlang.GrammarImplicitPick,
+                                       liblktlang.GrammarPick)):
+                    return Pick(*[lower(subparser)
+                                  for subparser in rule.f_exprs])
+
+                elif isinstance(rule, liblktlang.GrammarRuleRef):
+                    return getattr(self, rule.f_node_name.text)
+
+                elif isinstance(rule, liblktlang.GrammarOrExpr):
+                    return Or(*[lower(subparser)
+                                for subparser in rule.f_sub_exprs])
+
+                elif isinstance(rule, liblktlang.GrammarOpt):
+                    return Opt(lower(rule.f_expr))
+
+                elif isinstance(rule, liblktlang.GrammarExprList):
+                    return Pick(*[lower(subparser) for subparser in rule])
+
+                elif isinstance(rule, liblktlang.GrammarDiscard):
+                    return Discard(lower(rule.f_expr))
+
+                elif isinstance(rule, liblktlang.GrammarNull):
+                    return Null(resolve_node_ref(rule.f_name))
+
+                elif isinstance(rule, liblktlang.GrammarSkip):
+                    return Skip(resolve_node_ref(rule.f_name))
+
+                elif isinstance(rule, liblktlang.GrammarDontSkip):
+                    return DontSkip(lower(rule.f_expr),
+                                    lower(rule.f_dont_skip))
+
+                elif isinstance(rule, liblktlang.GrammarPredicate):
+                    check_source_language(
+                        isinstance(rule.f_prop_ref, liblktlang.DotExpr),
+                        'Invalid property reference'
+                    )
+                    node = resolve_node_ref(rule.f_prop_ref.f_prefix)
+                    prop_name = rule.f_prop_ref.f_suffix.text
+                    try:
+                        prop = getattr(node, prop_name)
+                    except AttributeError:
+                        check_source_language(
+                            False,
+                            '{} has no {} property'
+                            .format(node._name.camel_with_underscores,
+                                    prop_name)
+                        )
+                    return Predicate(lower(rule.f_expr), prop)
 
                 else:
                     raise NotImplementedError('unhandled parser: {}'
@@ -1111,6 +1261,7 @@ class _Token(Parser):
         :param str match_text: If val is a WithSymbol token action, allows to
             specify the exact text that should be matched by this parser.
         """
+        assert isinstance(match_text, str)
         Parser.__init__(self, location=location)
 
         self._val = val

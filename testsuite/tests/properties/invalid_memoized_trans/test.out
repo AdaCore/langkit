@@ -1,9 +1,9 @@
-File "test.py", line 23, in Example.get_var
+File "test.py", line 22, in Example.get_var
     Error: Property cannot be memoized (in Example.get_var: Cannot memoize extracting the value of a logic variable, call chain is: Example.get_var)
-File "test.py", line 39, in Example.get_var2_public_wrapper
+File "test.py", line 38, in Example.get_var2_public_wrapper
     Error: Property cannot be memoized (in Example.get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.get_var2_public_wrapper -> Example.get_var2)
-File "test.py", line 78, in Example.get_var4_public_wrapper
+File "test.py", line 77, in Example.get_var4_public_wrapper
     Error: Property cannot be memoized (in Example.get_something_unmemoizable: get_something_unmemoizable is unmemoizable, call chain is: Example.get_var4_public_wrapper -> Example.get_var4 -> Example.get_something_unmemoizable)
-File "test.py", line 45, in Example.top_wrapper
+File "test.py", line 44, in Example.top_wrapper
     Error: Property cannot be memoized (in Example.get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.top_wrapper -> Example.get_var2)
 Done

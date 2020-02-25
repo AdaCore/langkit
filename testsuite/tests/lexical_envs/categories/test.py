@@ -7,9 +7,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, reference
 from langkit.expressions import RefCategories, Self, langkit_property
-from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -74,19 +72,5 @@ class Var(FooNode):
     env_spec = EnvSpec(add_to_env_kv(Self.name.symbol, Self))
 
 
-G = Grammar('main_rule')
-G.add_rules(
-    main_rule=Def('def', G.name, '{',
-                  G.cat1,
-                  G.cat2,
-                  Example('example'),
-                  '}'),
-    cat1=Cat1(Token.Identifier('cat1'), '{', G.decls, '}'),
-    cat2=Cat2(Token.Identifier('cat2'), '{', G.decls, '}'),
-    decls=List(G.var, empty_valid=True),
-    var=Var(G.name),
-    name=Name(Token.Identifier),
-)
-
-build_and_run(G, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')
