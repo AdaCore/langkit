@@ -1,7 +1,7 @@
 grammar FooGrammar {
     @main_rule main_rule <- expression
     expression <- or(
-        | "(" expression ")"
+        | ("(" expression ")")
         | Plus(atom "+" main_rule)
         | atom
     )

@@ -1,6 +1,6 @@
 grammar FooGrammar {
     @main_rule main_rule <- list+(def_rule)
-    def_rule <- Def(name ?"+" name)
+    def_rule <- Def(name ?("+" name))
     name <- Name(@Identifier)
 
 }

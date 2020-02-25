@@ -344,10 +344,7 @@ def emit_rule(rule, top_level=False):
         else:
             return "?{}".format(emit_rule(rule.parser))
     elif isinstance(rule, _Extract):
-        r = emit_rule(rule.parser)
-        if top_level:
-            return "({})".format(r)
-        return r
+        return '({})'.format(emit_rule(rule.parser))
     elif isinstance(rule, List):
         sep_str = ", {}".format(emit_rule(rule.sep)) if rule.sep else ""
         return "list{}({}{})".format(
