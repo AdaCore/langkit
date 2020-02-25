@@ -8,20 +8,20 @@ from contextlib import contextmanager
 
 import langkit
 from langkit.dsl import ASTNode, AbstractField, Field, NullField, T, abstract
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
 
 @contextmanager
-def test(label):
+def test(label, lkt_file):
     print('== {} =='.format(label))
     yield
+    emit_and_print_errors(lkt_file=lkt_file)
     langkit.reset()
     print()
 
 
-with test('Not overriden'):
+with test('Not overriden', 'not-overriden.lkt'):
     class FooNode(ASTNode):
         pass
 
@@ -32,12 +32,10 @@ with test('Not overriden'):
     class Example(FooNode):
         token_node = True
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(main_rule=ExampleHolder(Example('example')))
-    emit_and_print_errors(foo_grammar)
+    del FooNode, ExampleHolder, Example
 
 
-with test('Partly overriden'):
+with test('Partly overriden', 'partly-overriden.lkt'):
     class FooNode(ASTNode):
         pass
 
@@ -54,12 +52,11 @@ with test('Partly overriden'):
     class Example(FooNode):
         token_node = True
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(main_rule=SomeExampleHolder(Example('example')))
-    emit_and_print_errors(foo_grammar)
+    del (FooNode, BaseExampleHolder, SomeExampleHolder, OtherExampleHolder,
+         Example)
 
 
-with test('Abstract overriding abstract'):
+with test('Abstract overriding abstract', 'abstract-overriding-abstract.lkt'):
     class FooNode(ASTNode):
         pass
 
@@ -74,12 +71,10 @@ with test('Abstract overriding abstract'):
     class Example(FooNode):
         token_node = True
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(main_rule=ExampleHolder(Example('example')))
-    emit_and_print_errors(foo_grammar)
+    del FooNode, BaseExampleHolder, ExampleHolder, Example
 
 
-with test('Abstract overriding concrete'):
+with test('Abstract overriding concrete', 'abstract-overriding-concrete.lkt'):
     class FooNode(ASTNode):
         pass
 
@@ -93,12 +88,10 @@ with test('Abstract overriding concrete'):
     class Example(FooNode):
         token_node = True
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(main_rule=ExampleHolder(Example('example')))
-    emit_and_print_errors(foo_grammar)
+    del FooNode, BaseExampleHolder, ExampleHolder, Example
 
 
-with test('Inconsistent overriding type'):
+with test('Inconsistent overriding type', 'inconsistent-overriding-type.lkt'):
     class FooNode(ASTNode):
         pass
 
@@ -112,12 +105,10 @@ with test('Inconsistent overriding type'):
     class Example(FooNode):
         token_node = True
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(main_rule=ExampleHolder(Example('example')))
-    emit_and_print_errors(foo_grammar)
+    del FooNode, BaseExampleHolder, ExampleHolder, Example
 
 
-with test('Free-standing null field'):
+with test('Free-standing null field', 'free-standing-null-field.lkt'):
     class FooNode(ASTNode):
         pass
 
@@ -127,8 +118,6 @@ with test('Free-standing null field'):
     class Example(FooNode):
         token_node = True
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(main_rule=ExampleHolder(Example('example')))
-    emit_and_print_errors(foo_grammar)
+    del FooNode, ExampleHolder, Example
 
 print('Done')

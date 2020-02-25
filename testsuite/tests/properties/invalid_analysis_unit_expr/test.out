@@ -1,6 +1,6 @@
 == Invalid field ==
-File "test.py", line 22, in Example.result
-  line 30, in access to .foobar
+File "test.py", line 21, in Example.result
+  line 27, in access to .foobar
     Error: Type AnalysisUnit has no 'foobar' field or property
 
 Done

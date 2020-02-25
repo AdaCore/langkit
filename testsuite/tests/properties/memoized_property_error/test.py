@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Bool
 from langkit.expressions import (PropertyError, Self, Var, ignore,
                                  langkit_property)
-from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -31,9 +30,5 @@ class Example(FooNode):
         return PropertyError(Bool, 'Explicit error 2')
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=Example('example'),
-)
-build_and_run(foo_grammar, ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
 print('Done')

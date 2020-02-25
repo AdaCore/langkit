@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
 from langkit.expressions import langkit_property
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -22,9 +21,5 @@ class Example(FooNode):
         return a.length == 0
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=Example('example'),
-)
-emit_and_print_errors(grammar)
+emit_and_print_errors(lkt_file='foo.lkt')
 print('Done')

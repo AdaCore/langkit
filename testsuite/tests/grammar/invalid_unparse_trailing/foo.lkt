@@ -1,0 +1,11 @@
+grammar foo_grammar {
+    @main_rule main_rule <- list+(or(decl | assignment))
+
+    assignment <- Assignment(identifier "=" number ";")
+
+    decl <- Decl("def" decl_assignment "," Example("example"))
+    decl_assignment <- Assignment(identifier "=" number)
+
+    identifier <- Identifier(@identifier)
+    number <- Number(@number)
+}

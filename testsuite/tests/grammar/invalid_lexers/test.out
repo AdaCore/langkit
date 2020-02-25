@@ -1,25 +1,25 @@
 == test_invalid_pattern_1 ==
-File "test.py", line 13, In definition of lexer rules
+File "test.py", line 12, In definition of lexer rules
     Error: unbalanced square bracket
 
 == test_invalid_pattern_2 ==
-File "test.py", line 17, In definition of lexer rules
+File "test.py", line 16, In definition of lexer rules
     Error: unknown pattern: no_such_pattern
 
 == test_invalid_pattern_3 ==
-File "test.py", line 25, In definition of lexer rules
+File "test.py", line 24, In definition of lexer rules
     Error: infinite recursion in pat1
 
 == test_invalid_pattern_4 ==
-File "test.py", line 30, In definition of lexer pattern pat
+File "test.py", line 29, In definition of lexer pattern pat
     Error: unbalanced square bracket
 
 == test_invalid_pattern_5 ==
-File "test.py", line 41, In definition of lexer rules
+File "test.py", line 40, In definition of lexer rules
     Error: nothing to repeat
 
 == test_invalid_pattern_6 ==
-File "test.py", line 47, In definition of lexer rules
+File "test.py", line 46, In definition of lexer rules
     Error: unbalanced parentheses
 
 == test_invalid_rule_1 ==

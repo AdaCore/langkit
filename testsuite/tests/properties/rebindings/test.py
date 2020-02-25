@@ -8,9 +8,7 @@ from langkit.dsl import ASTNode, Field, abstract, has_abstract_list
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (AbstractProperty, Entity, New, Property, Self,
                                  T, Var, langkit_property)
-from langkit.parsers import Grammar, List, Pick
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -90,17 +88,5 @@ class BlockVar(DefNode):
     name = Property(Self.name_field.symbol)
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=List(grammar.block),
-    name=Name(Token.Identifier),
-    block=Block(grammar.params, grammar.name, grammar.vars),
-
-    params=Pick('(', List(grammar.param, list_cls=Params), ')'),
-    param=Param(grammar.name),
-
-    vars=Pick('{', List(grammar.var), '}'),
-    var=BlockVar(grammar.name),
-)
-build_and_run(grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

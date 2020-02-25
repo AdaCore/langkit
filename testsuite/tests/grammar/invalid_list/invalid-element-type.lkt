@@ -1,0 +1,8 @@
+grammar foo_grammar {
+    example <- Example(@example)
+    num <- Num(@number)
+    @main_rule main_rule <- or(
+        list*ASTList[Example](num)
+        | ListNode(example)
+    )
+}

@@ -2,9 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import AbstractProperty
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -39,12 +37,7 @@ def run(name, runtime_check=False, abstract_root_prop=False):
         class Identifier(BaseNode):
             prop = AbstractProperty(T.Bool, runtime_check=runtime_check)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=List(Or(
-        Number(Token.Number),
-        Identifier(Token.Identifier),
-    )))
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 

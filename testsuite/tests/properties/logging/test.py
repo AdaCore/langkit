@@ -8,9 +8,7 @@ from langkit.dsl import (ASTNode, Bool, Field, Struct, T, UserField,
                          env_metadata)
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import New, Self, langkit_property
-from langkit.parsers import Grammar, List, Opt
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -52,15 +50,5 @@ class Ref(FooNode):
     name = Field()
 
 
-fg = Grammar('main_rule')
-fg.add_rules(
-    main_rule=List(fg.decl),
-    decl=Decl(Opt('+').as_bool(HasPlus),
-              fg.name,
-              '(', fg.ref_list, ')'),
-    ref_list=List(fg.ref, empty_valid=True),
-    ref=Ref(fg.name),
-    name=Name(Token.Identifier),
-)
-build_and_run(fg, ada_main='main.adb')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
 print('Done')

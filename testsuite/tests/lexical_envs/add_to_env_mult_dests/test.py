@@ -9,9 +9,7 @@ from langkit.dsl import (ASTNode, Field, LookupKind, Struct, T, UserField,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env, handle_children
 from langkit.expressions import Self, langkit_property, new_env_assoc
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -56,13 +54,5 @@ class Id(FooNode):
     env_spec = EnvSpec(add_env())
 
 
-G = Grammar('main_rule')
-G.add_rules(
-    main_rule=G.elem,
-    elem=Or(G.scope, G.id),
-    scope=Scope(G.id, '{', List(G.elem), '}'),
-    id=Id(Token.Identifier)
-)
-
-build_and_run(G, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

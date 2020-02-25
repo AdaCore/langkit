@@ -5,7 +5,6 @@ Test that the is_optional property on parse fields works as expected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
-from langkit.parsers import DontSkip, Grammar, Null, Opt, Or
 
 from utils import emit_and_print_errors
 
@@ -36,35 +35,7 @@ class HasExample(FooNode):
     qualifier = True
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=Or(foo_grammar.rule_1, foo_grammar.rule_2),
-
-    rule_1=ExampleWrapper(
-        Opt(Example("example")),
-        Or(Example("example"), Null(Example)),
-        foo_grammar.sub_rule,
-        Null(Example),
-        DontSkip(Opt(Example("example"))),
-
-        Opt(Example("example")).as_bool(HasExample),
-        Example("example")
-    ),
-    rule_2=ExampleWrapper(
-        Example("example"),
-        Example("example"),
-        Example("example"),
-        Example("example"),
-        Example("example"),
-
-        HasExample("example"),
-        Example("example")
-    ),
-
-    sub_rule=Opt(Example("example"))
-)
-
-emit_and_print_errors(foo_grammar)
+emit_and_print_errors(lkt_file='foo.lkt')
 
 fields = [
     ExampleWrapper.field_opt,

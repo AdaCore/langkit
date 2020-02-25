@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithSymbol, WithText)
-from langkit.parsers import Grammar, Or
 
 from utils import build_and_run
 
@@ -70,20 +69,6 @@ class CompositeNode(FooNode):
     lit_3 = Field()
     lit_4 = Field()
 
-foo_grammar = Grammar('main_rule')
-A = foo_grammar
-
-foo_grammar.add_rules(
-    lit=Literal(Token.Number),
-    nl=NewLineNode(A.lit, L.Newline, A.lit),
-    ind=IndentNode(A.lit, L.Newline, L.Indent, A.lit, L.Dedent),
-    comp=CompositeNode(
-        A.lit, L.Newline,
-        A.lit, L.Newline, L.Indent,
-        A.lit, L.Newline, L.Dedent,
-        A.lit
-    ),
-    main_rule=Or(A.comp, A.ind, A.nl)
-)
-build_and_run(foo_grammar, 'main.py', lexer=foo_lexer)
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+              lexer=foo_lexer)
 print('Done')

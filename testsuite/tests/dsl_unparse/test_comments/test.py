@@ -5,7 +5,6 @@ from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import (
     Cond, If, Let, Property, Self, Var, langkit_property
 )
-from langkit.parsers import Grammar
 
 from utils import build_and_run, default_warning_set
 
@@ -125,14 +124,10 @@ class NodeType2(ExampleNode):
     pass
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=ExampleNode('example')
-)
-
 warning_set = default_warning_set.clone()
 warning_set.disable(WarningSet.unused_node_type)
 warning_set.disable(WarningSet.unused_bindings)
 
-build_and_run(grammar, 'main.py', warning_set=warning_set, unparse_cs=True)
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+              warning_set=warning_set, unparse_cs=True)
 print('Done')

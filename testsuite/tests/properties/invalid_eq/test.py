@@ -2,9 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, LexicalEnv, T
 from langkit.expressions import DynamicVariable, Literal, No, Property, Self
-from langkit.parsers import Grammar, Or
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -31,12 +29,7 @@ def run(name, lhs, rhs):
     class Lit(FooNode):
         token_node = True
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=Or(Example('example'),
-                     Lit(Token.Number)),
-    )
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
     Env.unfreeze()
     print('')
 

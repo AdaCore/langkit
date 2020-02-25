@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function
 import langkit
 from langkit.dsl import ASTNode
 from langkit.lexer import Alt, Case, Lexer, Literal, Pattern
-from langkit.parsers import Grammar
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -74,12 +73,7 @@ for name, value in sorted(locals().iteritems()):
     class Example(FooNode):
         pass
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=Example('example'),
-    )
-
-    emit_and_print_errors(grammar, lexer)
+    emit_and_print_errors(lkt_file='foo.lkt', lexer=lexer)
     langkit.reset()
     print('')
 

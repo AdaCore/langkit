@@ -2,9 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.expressions import Entity, No, langkit_property
-from langkit.parsers import Grammar, List, Or, Pick
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -97,20 +95,5 @@ class Def(FooNode):
     expr = Field()
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=List(Or(
-        Def('def', Name(Token.Identifier), grammar.expr),
-        grammar.expr
-    )),
-
-    expr=Or(grammar.atom, grammar.plus),
-
-    atom=Or(grammar.lit, grammar.ref),
-    lit=Lit(Token.Number),
-    ref=Ref(Token.Identifier),
-
-    plus=Pick('(', Plus(grammar.expr, '+', grammar.expr), ')'),
-)
-build_and_run(grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

@@ -8,9 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Int, LogicVar, T, UserField
 from langkit.expressions import (AbstractProperty, Bind, Let, Property, Self,
                                  langkit_property)
-from langkit.parsers import Grammar
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -35,7 +33,5 @@ class Literal(FooNode):
         return Let(lambda _=Self.b: Self.as_bare_entity)
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(main_rule=Literal(Token.Number))
-build_and_run(foo_grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

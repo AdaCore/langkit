@@ -4,7 +4,6 @@ import itertools
 
 from langkit.dsl import ASTNode, Bool, abstract
 from langkit.expressions import AbstractProperty, Literal, Property, Self
-from langkit.parsers import Grammar, Or
 
 from utils import emit_and_print_errors
 
@@ -42,13 +41,7 @@ def run(abstract_public, concrete_public):
     class OtherConcreteNode(AbstractNode):
         prop = Property(False)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=Or(ConcreteNode('example'),
-                     OtherConcreteNode('null')),
-    )
-
-    if emit_and_print_errors(grammar):
+    if emit_and_print_errors(lkt_file='foo.lkt'):
         for fld in (AbstractNode.prop, ConcreteNode.prop):
             print('  {}: {}'.format(fld.qualname,
                                     fmt_privacy[fld.original_is_public]))

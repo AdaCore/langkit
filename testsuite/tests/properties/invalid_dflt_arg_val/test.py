@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool, T
 from langkit.expressions import DynamicVariable, Literal, Property, Self
-from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -25,11 +24,7 @@ def run(name, expr, calling_expr=True):
         p = Property(expr)
         calling = Property(calling_expr)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=Example('example'),
-    )
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 

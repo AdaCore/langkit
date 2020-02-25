@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, LogicVar, UserField
 from langkit.expressions import Predicate, Self, Var, ignore, langkit_property
-from langkit.parsers import Grammar
 
 from utils import build
 
@@ -26,10 +25,5 @@ class Example(FooNode):
         return Self.as_bare_entity
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=Example('example'),
-)
-build(grammar)
-
+build(lkt_file='expected_concrete_syntax.lkt')
 print('Compilation was successful')

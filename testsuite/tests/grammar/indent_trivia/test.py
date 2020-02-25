@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithSymbol, WithText, WithTrivia)
-from langkit.parsers import Grammar, List, Or, _
 
 from utils import build_and_run
 
@@ -61,31 +60,7 @@ class Indented(FooNode):
 class Newline(FooNode):
     token_node = True
 
-foo_grammar = Grammar('main_rule')
-G = foo_grammar
 
-
-def newlines():
-    return _(List(G.newline, empty_valid=True))
-
-
-foo_grammar.add_rules(
-    newline=Newline(L.Newline),
-    expr=Or(G.call, G.identifier, G.indented),
-
-    identifier=Identifier(Token.Identifier),
-    call=Call(G.identifier, '(',
-              newlines(),
-              List(G.call, sep=',', empty_valid=True),
-              newlines(),
-              ')'),
-    indented=Indented(newlines(), L.Indent,
-                      List(newlines(), G.expr, newlines(), sep=L.Newline),
-                      L.Dedent),
-
-    def_node=Def('def', G.identifier, L.Newline, List(G.indented)),
-
-    main_rule=List(newlines(), G.def_node, newlines())
-)
-build_and_run(foo_grammar, 'main.py', lexer=foo_lexer)
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+              lexer=foo_lexer)
 print('Done')

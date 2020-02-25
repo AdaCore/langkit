@@ -9,9 +9,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_env, do
 from langkit.expressions import Entity, PropertyError, langkit_property
-from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -32,11 +30,5 @@ class Name(FooNode):
     token_node = True
 
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=List(g.decl),
-    decl=Decl('def', List(g.name)),
-    name=Name(Token.Identifier),
-)
-build_and_run(g, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Annotations, Field, synthetic
-from langkit.parsers import Grammar, List, Opt, Or
 
 from utils import emit_and_print_errors
 
@@ -17,10 +16,7 @@ def construct_multiple():
     class Example2(FooNode):
         annotations = Annotations(ple_unit_root=True)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Or(Example1('example', ','),
-                                   Example2('example', ';')))
-    return grammar
+    return 'multiple.lkt'
 
 
 def construct_derived():
@@ -34,10 +30,7 @@ def construct_derived():
     class DerivedExample(Example):
         pass
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Or(Example('example', ','),
-                                   DerivedExample('example', ';')))
-    return grammar
+    return 'derived.lkt'
 
 
 def construct_synthetic():
@@ -52,9 +45,7 @@ def construct_synthetic():
     class SyntheticNode(FooNode):
         annotations = Annotations(ple_unit_root=True)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Example('example'))
-    return grammar
+    return 'synthetic.lkt'
 
 
 def construct_bad_main_rule_1():
@@ -68,9 +59,7 @@ def construct_bad_main_rule_1():
     class Example(FooNode):
         annotations = Annotations(ple_unit_root=True)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=ExampleWrapper(List(Example('example'))))
-    return grammar
+    return 'bad_main_rule_1.lkt'
 
 
 def construct_bad_main_rule_2():
@@ -84,9 +73,7 @@ def construct_bad_main_rule_2():
     class Example(FooNode):
         annotations = Annotations(ple_unit_root=True)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=List(ExampleWrapper(Example('example'))))
-    return grammar
+    return 'bad_main_rule_2.lkt'
 
 
 def construct_non_root_list():
@@ -98,9 +85,7 @@ def construct_non_root_list():
         annotations = Annotations(ple_unit_root=True)
         fields = Field()
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=List(Subunit('example', grammar.main_rule)))
-    return grammar
+    return 'non_root_list.lkt'
 
 
 def construct_multiple_lists():
@@ -114,10 +99,7 @@ def construct_multiple_lists():
     class ListOfExample(Example.list):
         pass
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=List(Example('example'),
-                                     list_cls=ListOfExample))
-    return grammar
+    return 'multiple_lists.lkt'
 
 
 def construct_ple_unit_root_field():
@@ -129,10 +111,7 @@ def construct_ple_unit_root_field():
         annotations = Annotations(ple_unit_root=True)
         child = Field()
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=List(grammar.example),
-                      example=Example('example', Opt(grammar.example)))
-    return grammar
+    return 'ple_unit_root_field.lkt'
 
 
 for constructor in (
@@ -146,8 +125,8 @@ for constructor in (
     construct_ple_unit_root_field
 ):
     print('= {} ='.format(constructor.__name__[10:]))
-    grammar = constructor()
-    emit_and_print_errors(grammar)
+    lkt_file = constructor()
+    emit_and_print_errors(lkt_file=lkt_file)
     print('')
 
 print('Done')

@@ -1,0 +1,4 @@
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example" ?name)
+    name <- Name(@identifier)
+}

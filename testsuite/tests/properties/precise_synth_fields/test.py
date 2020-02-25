@@ -7,9 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract, synthetic
 from langkit.expressions import AbstractKind, New, Self, langkit_property
-from langkit.parsers import Grammar, Or
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -67,14 +65,7 @@ class Name(Expr):
         return New(SynthNode, f=Self)
 
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=Or(g.literal, g.name, g.holder),
-    literal=Literal(Token.Number),
-    name=Name(Token.Identifier),
-    holder=ParsedHolder('(', g.name, ')')
-)
-ctx = emit_and_print_errors(g)
+ctx = emit_and_print_errors(lkt_file='foo.lkt')
 nodes = {n.dsl_name: n for n in ctx.astnode_types}
 
 for node_name in ['SynthNode', 'AbstractHolder']:

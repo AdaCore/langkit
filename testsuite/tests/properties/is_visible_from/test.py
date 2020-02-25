@@ -8,9 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Bool, has_abstract_list
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import EmptyEnv, If, Self, Var, langkit_property
-from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -37,10 +35,5 @@ class Scope(Name.list):
     env_spec = EnvSpec(add_env())
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=List(foo_grammar.name, list_cls=Scope),
-    name=Name(Token.Identifier),
-)
-build_and_run(foo_grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

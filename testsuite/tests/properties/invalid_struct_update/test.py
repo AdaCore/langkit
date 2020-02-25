@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import BigIntLiteral, langkit_property
-from langkit.parsers import Grammar, List
 
 from utils import emit_and_print_errors
 
@@ -26,9 +25,7 @@ def run(name, expr):
     class Example(FooNode):
         token_node = True
 
-    g = Grammar('main_rule')
-    g.add_rules(main_rule=List(Example('example')))
-    emit_and_print_errors(g)
+    emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 

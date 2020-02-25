@@ -1,5 +1,5 @@
-File "test.py", line 18, in ExampleWrapper
-  line 19, in ExampleWrapper.example
+File "test.py", line 17, in ExampleWrapper
+  line 18, in ExampleWrapper.example
     Warning: Specified type is FooNode, but it could be more specific: Example
 Code generation was successful
 Done

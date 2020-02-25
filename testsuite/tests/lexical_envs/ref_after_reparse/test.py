@@ -8,9 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, LexicalEnv
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, reference
 from langkit.expressions import DynamicVariable, Self, langkit_property
-from langkit.parsers import Grammar, List, Pick
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -73,25 +71,5 @@ class Ref(FooNode):
         return Self.as_entity.name.entity
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=List(foo_grammar.block),
-
-    name=Name(Token.Identifier),
-
-    block=Block(foo_grammar.name,
-                foo_grammar.decl_list,
-                '{', foo_grammar.using_list, foo_grammar.ref_list, '}'),
-
-    decl_list=Pick('(', List(foo_grammar.decl, empty_valid=True), ')'),
-
-    using_list=Pick('(', List(foo_grammar.using, empty_valid=True), ')'),
-
-    ref_list=List(foo_grammar.ref, empty_valid=True),
-
-    decl=Decl(foo_grammar.name),
-    using=Using(foo_grammar.name),
-    ref=Ref(foo_grammar.name),
-)
-build_and_run(foo_grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

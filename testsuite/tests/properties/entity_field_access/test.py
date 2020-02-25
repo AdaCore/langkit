@@ -13,9 +13,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import (ASTNode, Bool, EnvRebindings, Field, Struct, T,
                          UserField, env_metadata)
 from langkit.expressions import Entity, New, No, Self, langkit_property
-from langkit.parsers import Grammar, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -78,12 +76,5 @@ class Couple(FooNode):
         return Self.as_entity.get_entity(Self.as_entity.info.md)
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
-    main_rule=foo_grammar.item,
-    item=Or(foo_grammar.couple, foo_grammar.literal),
-    couple=Couple('(', foo_grammar.item, ',', foo_grammar.item, ')'),
-    literal=Literal(Token.Number),
-)
-build_and_run(foo_grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

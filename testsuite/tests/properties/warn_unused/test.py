@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Bool, Field, T
 from langkit.expressions import (Let, Property, Self, Var, ignore,
                                  langkit_property)
-from langkit.parsers import Grammar, List, Or
 
 from utils import emit_and_print_errors
 
@@ -62,13 +61,5 @@ class ExampleList(FooNode):
     )
 
 
-grammar = Grammar('item')
-grammar.add_rules(
-    item=Or(grammar.example, grammar.example_list),
-    example=Example('example'),
-    example_list=ExampleList(
-        '(', List(grammar.item), ')'
-    )
-)
-emit_and_print_errors(grammar)
+emit_and_print_errors(lkt_file='foo.lkt')
 print('Done')

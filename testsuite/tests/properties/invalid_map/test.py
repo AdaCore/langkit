@@ -2,9 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
 from langkit.expressions import Entity, Property
-from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -31,14 +29,7 @@ def run(name, expr):
     class NumberNode(FooNode):
         token_node = True
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=BarNode('example', grammar.list_rule),
-        list_rule=ListNode(
-            List(NumberNode(Token.Number))
-        ),
-    )
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
 

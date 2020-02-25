@@ -1,0 +1,4 @@
+grammar foo_grammar {
+    num <- Num(@number)
+    @main_rule main_rule <- list+ListNode(num)
+}

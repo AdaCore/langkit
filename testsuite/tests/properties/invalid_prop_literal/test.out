@@ -3,7 +3,7 @@ Code generation was successful
 Valid case
 Code generation was successful
 Invalid case
-File "test.py", line 15, in ExampleNode.b
+File "test.py", line 14, in ExampleNode.b
     Error: Invalid abstract expression: 12.9
 
 Done

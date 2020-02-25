@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
 from langkit.expressions import AbstractKind, Self, langkit_property
-from langkit.parsers import Grammar, Or
 
 from utils import emit_and_print_errors
 
@@ -36,10 +35,7 @@ class NullExample(Example):
         return Self
 
 
-g = Grammar('main_rule')
-g.add_rules(main_rule=Or(Example('example'),
-                         NullExample('null')))
-ctx = emit_and_print_errors(g)
+ctx = emit_and_print_errors(lkt_file='foo.lkt')
 assert ctx is not None
 
 
@@ -73,6 +69,4 @@ def find_path(from_property, to_property):
 
 
 assert find_path(FooNode.foo, Example.bar)
-
-
 print('Done')

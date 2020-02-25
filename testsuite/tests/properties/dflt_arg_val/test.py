@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Bool, Enum, EnumValue, T
 from langkit.expressions import No, langkit_property
-from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -35,10 +34,6 @@ class Example(FooNode):
         return arg
 
 
-grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=Example('example'),
-)
-build_and_run(grammar, 'main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('')
 print('Done')

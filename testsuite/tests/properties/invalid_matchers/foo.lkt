@@ -1,0 +1,6 @@
+grammar foo_grammar {
+    @main_rule main_rule <- ExampleNode("example"
+                                        or(expression | NullNode("null")))
+    number <- Number(@number)
+    expression <- or(Compound(number "," expression) | number)
+}

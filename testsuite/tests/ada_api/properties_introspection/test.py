@@ -8,9 +8,7 @@ from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import (AbstractKind, CharacterLiteral, No, Property,
                                  Self, langkit_property)
-from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -102,19 +100,5 @@ class Ref(Expr):
         return Self.referenced_var_decl.eval()
 
 
-g = Grammar('main_rule')
-g.add_rules(
-    main_rule=List(g.var_decl),
-    var_decl=VarDecl('var', g.name, '=', g.expr, ';'),
-
-    expr=Or(Addition(g.expr, '+', g.expr),
-            g.atom),
-    atom=Or(g.number, g.ref),
-    number=Number(Token.Number),
-    ref=Ref(g.name),
-
-    name=Name(Token.Identifier),
-)
-build_and_run(g, ada_main=['main.adb'])
-
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main=['main.adb'])
 print('Done')

@@ -8,9 +8,7 @@ from langkit.dsl import ASTNode, Field, LexicalEnv, T
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (DynamicVariable, Property, Self,
                                  langkit_property)
-from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -49,16 +47,7 @@ def run(name, prop):
         def resolve():
             return Self.node_env.get(Self.name).at(0)
 
-    grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=List(grammar.decl),
-        decl=Decl(
-            Name(Token.Identifier),
-            '(', List(grammar.ref, empty_valid=True), ')'
-        ),
-        ref=Ref(Name(Token.Identifier)),
-    )
-    emit_and_print_errors(grammar)
+    emit_and_print_errors(lkt_file='foo.lkt')
 
 run('Bad return type', Property(Self.node_env.get('foo')))
 run('Has dynamic variable', Property(Self.node_env.get('foo').at(0),
