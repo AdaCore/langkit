@@ -9,11 +9,19 @@ make () {
         cd "contrib/python"
         ./manage.py make -P
     )
+    (
+        cd "contrib/lkt"
+        ./manage.py make -P
+    )
 }
 
 setenv () {
     (
         cd "contrib/python"
+        ./manage.py setenv
+    )
+    (
+        cd "contrib/lkt"
         ./manage.py setenv
     )
 }
