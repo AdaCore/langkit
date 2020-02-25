@@ -7,7 +7,7 @@ grammar FooGrammar {
     )
     simple_identifier <- SimpleId(@Identifier)
     foreign_decl <- ForeignDecl(identifier)
-    self_decl <- SelfDecl("+" identifier ?"(" identifier ")")
+    self_decl <- SelfDecl("+" identifier ?("(" identifier ")"))
 
 }
 

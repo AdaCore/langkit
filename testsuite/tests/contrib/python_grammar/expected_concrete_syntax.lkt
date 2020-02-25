@@ -5,10 +5,10 @@ grammar FooGrammar {
     cat_string <- ConcatStringLit(string list+(string))
     nl <- NL(@Newline)
     @main_rule main_rule <- FileNode(
-        list+(discard(list*(nl)) stmt discard(list*(nl))) @Termination
+        list+((discard(list*(nl)) stmt discard(list*(nl)))) @Termination
     )
     decorator <- Decorator(
-        "@" dotted_name ?"(" arg_list ")" @Newline
+        "@" dotted_name ?("(" arg_list ")") @Newline
     )
     decorators <- list+(decorator)
     decorated <- Decorated(decorators or(class_def | func_def))
@@ -16,13 +16,13 @@ grammar FooGrammar {
     parameters <- ("(" ?varargslist ")")
     varargslist <- Params(
         list*(SingleParam(
-            VarArgsFlag("*") KwArgsFlag("**") fpdef ?"=" test
+            VarArgsFlag("*") KwArgsFlag("**") fpdef ?("=" test)
         ), ",")
     )
-    fpdef <- or(name | "(" name_list ")")
+    fpdef <- or(name | ("(" name_list ")"))
     name_list <- (list+(name, ",") ?",")
     stmt <- or(simple_stmt | compound_stmt)
-    simple_stmt <- (or(small_stmt | list+(small_stmt, ";") ?";") @Newline)
+    simple_stmt <- (or(small_stmt | (list+(small_stmt, ";") ?";")) @Newline)
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -54,7 +54,7 @@ grammar FooGrammar {
             ) or(yield_expr | test_list)
         )
         | AssignStmt(
-            test_list list+("=" or(yield_expr | test_list))
+            test_list list+(("=" or(yield_expr | test_list)))
         )
         | test_list
     )
@@ -83,7 +83,7 @@ grammar FooGrammar {
         "from"
         or(dotted_name | RelName(list+(dot) ?dotted_name)) "import" or(
             | ImportStar("*")
-            | "(" import_as_names ")"
+            | ("(" import_as_names ")")
             | import_as_names
         )
     )
@@ -93,8 +93,8 @@ grammar FooGrammar {
     dotted_as_names <- (list+(or(dotted_as_name | dotted_name), ",") ?",")
     dotted_name <- or(DottedName(dotted_name "." name) | name)
     global_stmt <- GlobalStmt("global" name_list)
-    exec_stmt <- ExecStmt("exec" expr ?"in" test_list)
-    assert_stmt <- AssertStmt("assert" test ?"," test)
+    exec_stmt <- ExecStmt("exec" expr ?("in" test_list))
+    assert_stmt <- AssertStmt("assert" test ?("," test))
     compound_stmt <- or(
         | if_stmt
         | while_stmt
@@ -110,7 +110,8 @@ grammar FooGrammar {
         "if"
         test
         ":"
-        suite list*("elif" ElifBranch(test ":" suite)) ?else_part
+        suite
+        list*(("elif" ElifBranch(test ":" suite))) ?else_part
     )
     while_stmt <- WhileStmt("while" test ":" suite ?else_part)
     for_stmt <- ForStmt(
@@ -118,15 +119,15 @@ grammar FooGrammar {
     )
     try_stmt <- TryStmt(
         "try" ":" suite list*(ExceptPart(
-            "except" ?AsNameNode(test ?"as" test) ":" suite
-        )) ?else_part ?"finally" ":" suite
+            "except" ?AsNameNode(test ?("as" test)) ":" suite
+        )) ?else_part ?("finally" ":" suite)
     )
     with_stmt <- WithStmt("with" list+(with_item, ",") ":" suite)
-    with_item <- AsNameNode(test ?"as" expr)
+    with_item <- AsNameNode(test ?("as" expr))
     suite <- or(
-        | discard(list*(nl))
+        | (discard(list*(nl))
         @Indent
-        list+(discard(list*(nl)) stmt discard(list*(nl))) @Dedent
+        list+((discard(list*(nl)) stmt discard(list*(nl)))) @Dedent)
         | simple_stmt
     )
     test <- or(
@@ -184,7 +185,7 @@ grammar FooGrammar {
     dict_assoc <- DictAssoc(test ":" test)
     yield_expr <- YieldExpr("yield" ?test_list)
     atom <- or(
-        | "(" yield_expr ")"
+        | ("(" yield_expr ")")
         | ListGen("(" test list_for ")")
         | TupleLit("(" ?test_list ")")
         | ListComp("[" test list_for "]")
@@ -192,7 +193,7 @@ grammar FooGrammar {
         | SetComp("{" test comp_for "}")
         | set_lit
         | DictComp("{" dict_assoc comp_for "}")
-        | DictLit("{" list+(dict_assoc, ",") ?"," "}")
+        | DictLit("{" (list+(dict_assoc, ",") ?",") "}")
         | InlineEval("`" test_list "`")
         | name
         | number
@@ -212,11 +213,11 @@ grammar FooGrammar {
     test_list <- (list+(test, ",") ?",")
     empty_test_list <- (list*(test, ",") ?",")
     class_def <- ClassDef(
-        "class" name ?"(" ?test_list ")" ":" suite
+        "class" name ?("(" ?test_list ")") ":" suite
     )
     arg_list <- (list*(or(
         | ArgGen(test comp_for)
-        | ArgAssoc(?test "=" test)
+        | ArgAssoc(?(test "=") test)
         | VarArgs("*" test)
         | KwArgs("**" test)
     ), ",") ?",")

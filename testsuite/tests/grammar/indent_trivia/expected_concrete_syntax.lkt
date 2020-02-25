@@ -11,12 +11,12 @@ grammar FooGrammar {
     indented <- Indented(
         discard(list*(newline))
         @Indent
-        list+(discard(list*(newline))
-        expr discard(list*(newline)), @Newline) @Dedent
+        list+((discard(list*(newline))
+        expr discard(list*(newline))), @Newline) @Dedent
     )
     def_node <- Def("def" identifier @Newline list+(indented))
-    @main_rule main_rule <- list+(discard(list*(newline))
-    def_node discard(list*(newline)))
+    @main_rule main_rule <- list+((discard(list*(newline))
+    def_node discard(list*(newline))))
 
 }
 
