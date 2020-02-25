@@ -2,7 +2,7 @@ grammar FooGrammar {
     @main_rule main_rule <- list+(block)
     name <- Name(@Identifier)
     block <- Block(params name vars)
-    params <- ("(" list+(param) ")")
+    params <- ("(" list+Params(param) ")")
     param <- Param(name)
     vars <- ("{" list+(var) "}")
     var <- BlockVar(name)

@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    @main_rule main_rule <- list+(name)
+    @main_rule main_rule <- list+Scope(name)
     name <- Name(@Identifier)
 
 }
