@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    @main_rule main_rule <- list+(node)
+    @main_rule main_rule <- list+Sequence(node)
     node <- or(example | null_node)
     example <- Example("example")
     null_node <- NullNode("null")

@@ -499,6 +499,7 @@ class GrammarList(GrammarExpr):
     separator. List can be empty ('*') or not ('+').
     """
     kind = Field(type=T.ListKind)
+    node_name = Field(type=T.RefId)
     expr = Field(type=T.GrammarExpr)
     sep = Field(type=T.GrammarExpr)
 
@@ -1146,6 +1147,7 @@ lkt_grammar.add_rules(
     grammar_rule_ref=GrammarRuleRef(G.ref_id),
     grammar_list_expr=GrammarList(
         GOr(ListKind.alt_one("list+"), ListKind.alt_zero("list*")),
+        Opt(G.ref_id),
         "(",
 
         # Main list expr
