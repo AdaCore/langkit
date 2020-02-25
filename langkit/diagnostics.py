@@ -304,7 +304,8 @@ def print_context(context):
     last_file_info = ''
     for ctx_msg, ctx_loc in reversed(context):
         # We only want to show the file information one time if it is the same
-        file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
+        file_info = 'File "{}", '.format(col(get_filename(ctx_loc.file),
+                                             Colors.CYAN))
         if last_file_info == file_info:
             file_info = '  '
         else:
