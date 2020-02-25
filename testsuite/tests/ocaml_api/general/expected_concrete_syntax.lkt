@@ -1,11 +1,11 @@
 grammar FooGrammar {
-    node <- or(example | null_node | var | ident | string)
-    ident <- Ident(@Identifier)
-    string <- StringLiteral(@String)
     @main_rule main_rule <- list*(node)
+    node <- or(example | null_node | var | ident | string)
+    example <- Example("example")
     null_node <- Null("null")
     var <- Var("var" "(" main_rule ")")
-    example <- Example("example")
+    ident <- Ident(@Identifier)
+    string <- StringLiteral(@String)
 
 }
 

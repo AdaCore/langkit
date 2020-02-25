@@ -1,22 +1,22 @@
 grammar FooGrammar {
-    def_node <- Def("def" identifier @Newline list*(indented))
-    indented <- Indented(
-        discard(list+(newline))
-        @Indent
-        list*(discard(list+(newline))
-        expr discard(list+(newline)), @Newline) @Dedent
-    )
-    expr <- or(call | identifier | indented)
     newline <- Newline(@Newline)
+    expr <- or(call | identifier | indented)
+    identifier <- Identifier(@Identifier)
     call <- Call(
         identifier
         "("
         discard(list+(newline))
         list+(call, ",") discard(list+(newline)) ")"
     )
+    indented <- Indented(
+        discard(list+(newline))
+        @Indent
+        list*(discard(list+(newline))
+        expr discard(list+(newline)), @Newline) @Dedent
+    )
+    def_node <- Def("def" identifier @Newline list*(indented))
     @main_rule main_rule <- list*(discard(list+(newline))
     def_node discard(list+(newline)))
-    identifier <- Identifier(@Identifier)
 
 }
 

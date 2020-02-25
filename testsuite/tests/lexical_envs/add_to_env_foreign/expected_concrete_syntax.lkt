@@ -1,13 +1,13 @@
 grammar FooGrammar {
-    foreign_decl <- ForeignDecl(identifier)
     @main_rule main_rule <- list*(or(scope | self_decl | foreign_decl))
-    self_decl <- SelfDecl("+" identifier ?"(" identifier ")")
     scope <- Scope(simple_identifier "{" list+(scope) "}")
     identifier <- or(
         | ScopedId(identifier "." simple_identifier)
         | simple_identifier
     )
     simple_identifier <- SimpleId(@Identifier)
+    foreign_decl <- ForeignDecl(identifier)
+    self_decl <- SelfDecl("+" identifier ?"(" identifier ")")
 
 }
 

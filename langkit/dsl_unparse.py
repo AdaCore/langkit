@@ -1060,14 +1060,19 @@ def unparse_lang(ctx):
     emitter = ctx.emitter
     ctx.emitter = None
 
+    sorted_rules = sorted(
+        ((name, rule)
+         for name, rule in ctx.grammar.rules.items()
+         if not rule.is_dont_skip_parser),
+        key=lambda (_, rule): rule._id
+    )
+
     template = """
     grammar ${ctx.lang_name}Grammar {$i$hl
-    % for name, rule in ctx.grammar.rules.items():
-        % if not rule.is_dont_skip_parser:
-            ${('@main_rule '
-               if name == ctx.grammar.main_rule_name
-               else '')}${name} <- ${emit_rule(rule, True)}$hl
-        % endif
+    % for name, rule in sorted_rules:
+        ${('@main_rule '
+           if name == ctx.grammar.main_rule_name
+           else '')}${name} <- ${emit_rule(rule, True)}$hl
     % endfor
     $d$hl
     }$hl

@@ -1,11 +1,11 @@
 grammar FooGrammar {
-    defs <- list+(or(scope | var) ";")
-    name <- or(Prefix(name "." id) | id)
     @main_rule main_rule <- list*(scope)
     deps <- list+(Dep("+" name) ";")
-    var <- Var(id "=" name)
+    defs <- list+(or(scope | var) ";")
     scope <- Scope(name "{" deps defs "}")
+    var <- Var(id "=" name)
     id <- Id(@Identifier)
+    name <- or(Prefix(name "." id) | id)
 
 }
 

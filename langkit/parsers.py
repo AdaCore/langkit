@@ -22,10 +22,12 @@ not defined in the example, but relied on explicitly.
 
 from __future__ import absolute_import, division, print_function
 
+from collections import OrderedDict
 from contextlib import contextmanager
 import difflib
 from funcy import keep
 import inspect
+from itertools import count
 
 from langkit import names
 from langkit.common import gen_name
@@ -196,7 +198,7 @@ class Grammar(object):
         self.main_rule_name = main_rule_name
         self.location = location or extract_library_location()
 
-        self._all_lkt_rules = {}
+        self._all_lkt_rules = OrderedDict()
         """
         If we loaded a Lkt unit, mapping of all grammar rules it contains.
 
@@ -448,7 +450,7 @@ class Grammar(object):
         # Get the list of grammar rules. This is where we check that we only
         # have grammar rules, that their names are unique, and that they have
         # valid annotations.
-        all_rules = {}
+        all_rules = OrderedDict()
         main_rule_name = None
         for full_rule in full_grammar.f_decl.f_rules:
             a = annotations(full_rule)
@@ -573,7 +575,14 @@ class Parser(object):
     Base class for parsers building blocks.
     """
 
+    # Hack: in order to preserve grammar rule declarations order from the DSL
+    # to the concrete syntax, generate increasing unique IDs for parser
+    # objects.
+    _counter = iter(count(0))
+
     def __init__(self, location=None):
+        self._id = next(self._counter)
+
         # Get the location of the place where this parser is created. This will
         # likely be overriden in Grammar.add_rules with a more precise
         # location if we can find the keyword argument in Python source code,

@@ -1,9 +1,9 @@
 grammar FooGrammar {
-    decl <- Decl("def" name)
     @main_rule main_rule <- RootNode(list*(or(decl | subdecl | other_decl), ";"))
+    decl <- Decl("def" name)
     other_decl <- OtherDecl("def" "var" name)
-    name <- Name(@Identifier)
     subdecl <- SubDecl("var" name)
+    name <- Name(@Identifier)
 
 }
 

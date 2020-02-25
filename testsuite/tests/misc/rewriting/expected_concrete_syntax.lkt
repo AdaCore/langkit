@@ -1,9 +1,9 @@
 grammar FooGrammar {
     @main_rule main_rule <- list+(def_rule)
+    name <- Name(@Identifier)
     def_rule <- Def(
         "def" name ?"(" list*(name, ",") ")" "=" expr
     )
-    name <- Name(@Identifier)
     expr <- or(
         | Plus(expr "+" expr)
         | ParenExpr("(" expr ")")

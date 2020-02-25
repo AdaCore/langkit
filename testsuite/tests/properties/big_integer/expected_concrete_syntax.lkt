@@ -1,17 +1,17 @@
 grammar FooGrammar {
-    decl <- Decl("def" name "=" expr)
-    name <- Identifier(@Identifier)
     @main_rule main_rule <- list*(decl)
+    decl <- Decl("def" name "=" expr)
     expr <- or(op | atom)
-    literal <- Literal(@Number)
-    atom <- or(ref | literal)
-    ref <- Ref(name)
     op <- or(
         | Plus(atom "+" expr)
         | Minus(atom "-" expr)
         | Equal(atom "=" expr)
         | LessThan(atom "<" expr)
     )
+    atom <- or(ref | literal)
+    ref <- Ref(name)
+    name <- Identifier(@Identifier)
+    literal <- Literal(@Number)
 
 }
 
