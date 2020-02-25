@@ -66,6 +66,7 @@ class Token(LexerToken):
     TryKw = WithText()
     EnumKw = WithText()
     GenericKw = WithText()
+    DiscardKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -144,6 +145,7 @@ lkt_lexer.add_rules(
     (Literal('try'),       Token.TryKw),
     (Literal('enum'),      Token.EnumKw),
     (Literal('generic'),   Token.GenericKw),
+    (Literal('discard'),   Token.DiscardKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),

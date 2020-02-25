@@ -326,6 +326,13 @@ class GrammarRuleRef(GrammarExpr):
     node_name = Field(type=T.RefId)
 
 
+class GrammarDiscard(GrammarExpr):
+    """
+    Grammar expression to discard the match.
+    """
+    expr = Field(type=T.GrammarExpr)
+
+
 class DotExpr(Expr):
     """
     Dotted expression.
@@ -1094,6 +1101,7 @@ lkt_grammar.add_rules(
         G.grammar_or_expr,
         G.grammar_rule_ref,
         G.grammar_pick,
+        G.grammar_discard_expr,
     ),
     grammar_expr=GOr(
         GrammarDontSkip(
@@ -1127,6 +1135,9 @@ lkt_grammar.add_rules(
         "or", "(",
         Opt("|"), List(List(G.grammar_expr), sep="|"),
         ")"
+    ),
+    grammar_discard_expr=GrammarDiscard(
+        "discard", "(", G.grammar_expr, ")"
     ),
     token_literal=TokenLit(Lex.String),
     parse_node_expr=ParseNodeExpr(
