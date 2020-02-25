@@ -1,5 +1,5 @@
 grammar FooGrammar {
-    @main_rule main_rule <- ?"error"
+    @main_rule main_rule <- HasError("error")
 
 }
 
