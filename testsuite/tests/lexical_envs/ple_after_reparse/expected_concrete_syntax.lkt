@@ -1,6 +1,6 @@
 grammar FooGrammar {
-    deps <- list+(Dep("+" name) ";")
-    defs <- list+(or(scope | var) ";")
+    deps <- list*(Dep("+" name) ";")
+    defs <- list*(or(scope | var) ";")
     @main_rule scope <- Scope(name "{" deps defs "}")
     var <- Var(id "=" name)
     id <- Id(@Identifier)

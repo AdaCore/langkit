@@ -1,6 +1,6 @@
 grammar FooGrammar {
-    @main_rule main_rule <- list*(decl)
-    decl <- Decl(Name(@Identifier) "(" list+(ref) ")")
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl(Name(@Identifier) "(" list*(ref) ")")
     ref <- Ref(Name(@Identifier))
 
 }

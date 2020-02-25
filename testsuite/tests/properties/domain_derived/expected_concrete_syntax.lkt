@@ -1,6 +1,6 @@
 grammar FooGrammar {
     name <- Name(@Identifier)
-    @main_rule main_rule <- list*(or(Definition("def" name) | name), ",")
+    @main_rule main_rule <- list+(or(Definition("def" name) | name), ",")
 
 }
 
