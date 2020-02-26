@@ -640,6 +640,7 @@ class _ASTNodeMetaclass(type):
         enum_type.alternatives = enum_cls._alternatives
         enum_type.is_type_resolved = True
         enum_type._alternatives = []
+        enum_type._alternatives_map = {}
 
         for alt in enum_cls._alternatives:
             alt_name = enum_cls._name + alt.name
@@ -654,7 +655,8 @@ class _ASTNodeMetaclass(type):
             alt_type = ASTNodeType(
                 name=alt_name, location=None, doc='',
                 base=enum_type,
-                fields=fields
+                fields=fields,
+                dsl_name='{}.{}'.format(enum_type.dsl_name, alt.name.camel)
             )
             alt._type = alt_type
             alt._enum_node_cls = enum_cls
@@ -662,6 +664,7 @@ class _ASTNodeMetaclass(type):
             # Make the alternative derived class accessible from the root
             # node for the enum.
             enum_type._alternatives.append(alt_type)
+            enum_type._alternatives_map[alt.name.camel] = alt_type
 
 
 class ASTNode(BaseStruct):

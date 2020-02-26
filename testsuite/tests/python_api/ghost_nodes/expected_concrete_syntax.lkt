@@ -28,9 +28,9 @@ grammar foo_grammar {
     @main_rule main_rule <- list+(Param(name mode plus))
     name <- Name(@identifier)
     mode <- or(
-        | EnumNull("null")
-        | EnumExample("example")
-        | EnumDefault()
+        | Enum.Null("null")
+        | Enum.Example("example")
+        | Enum.Default()
     )
     plus <- PlusQualifier("+")
 

@@ -365,7 +365,7 @@ class ParseNodeExpr(GrammarExpr):
     """
     Expression for the parsing of a Node.
     """
-    node_name = Field(type=T.RefId)
+    node_name = Field(type=T.TypeRef)
     sub_exprs = Field(type=T.GrammarExpr.list)
 
 
@@ -563,7 +563,7 @@ class GrammarList(GrammarExpr):
     separator. List can be empty ('*') or not ('+').
     """
     kind = Field(type=T.ListKind)
-    node_name = Field(type=T.RefId)
+    node_name = Field(type=T.TypeRef)
     expr = Field(type=T.GrammarExpr)
     sep = Field(type=T.GrammarExpr)
 
@@ -1236,12 +1236,12 @@ lkt_grammar.add_rules(
     ),
     token_pattern_literal=TokenPatternLit(Lex.PString),
     parse_node_expr=ParseNodeExpr(
-        G.ref_id, "(", List(G.grammar_expr, empty_valid=True), ")"
+        G.type_ref, "(", List(G.grammar_expr, empty_valid=True), ")"
     ),
     grammar_rule_ref=GrammarRuleRef(G.ref_id),
     grammar_list_expr=GrammarList(
         GOr(ListKind.alt_one("list+"), ListKind.alt_zero("list*")),
-        Opt(G.ref_id),
+        Opt(G.type_ref),
         "(",
 
         # Main list expr

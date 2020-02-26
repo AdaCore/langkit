@@ -61,17 +61,17 @@ Null (NULL_NODE_TYPE_ID)
   abstract
   base = FooNode
   derivations:
-    NullPresent
-    NullAbsent
+    Null.Present
+    Null.Absent
 
-NullAbsent (NULL_ABSENT_TYPE_ID)
+Null.Absent (NULL_ABSENT_TYPE_ID)
   concrete
   base = Null
   kind = FOO_NULL_ABSENT
   derivations:
     <none>
 
-NullPresent (NULL_PRESENT_TYPE_ID)
+Null.Present (NULL_PRESENT_TYPE_ID)
   concrete
   base = Null
   kind = FOO_NULL_PRESENT
