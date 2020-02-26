@@ -6,6 +6,8 @@ import json
 from langkit.passes import GlobalPass
 from contextlib import contextmanager
 
+from collections import defaultdict
+
 try:
     import libpythonlang as lpl
 except ImportError:
@@ -1051,6 +1053,130 @@ def format_token_name(name):
     return name
 
 
+def format_pattern(pat):
+    return json.dumps(pat.decode('string_escape'))
+
+
+def unparse_lexer_rule_set(families, newline_afters, rule_set):
+    from langkit.lexer import (
+        WithSymbol, WithText, WithTrivia, Literal, NoCaseLit, Pattern, Ignore,
+        Case
+    )
+
+    def unparse_matcher(matcher):
+        if isinstance(matcher, NoCaseLit):
+            return 'no_case("{}")'.format(matcher.to_match)
+        elif isinstance(matcher, Literal):
+            return '"{}"'.format(matcher.to_match)
+        elif isinstance(matcher, Pattern):
+            return "p{}".format(format_pattern(matcher.pattern))
+        else:
+            assert False
+
+    def unparse_rule_matchers(rule_set):
+        if len(rule_set) == 1:
+            return unparse_matcher(rule_set[0][0].matcher)
+        elif len(rule_set) > 1:
+            return "or($i$hl{}$d$hl)".format("$hl".join(
+                unparse_matcher(rule.matcher) for rule, _ in rule_set
+            ))
+        return "bordel"
+
+    def unparse_case_alt(alt):
+        send_str = "send({}, {})".format(
+            format_token_name(alt.send.name),
+            alt.match_size
+        )
+        if alt.prev_token_cond is not None:
+            return "if previous_token isa {} then {}".format(
+                " | ".join(
+                    format_token_name(cond.name)
+                    for cond in alt.prev_token_cond
+                ),
+                send_str
+            )
+        else:
+            return "else {}".format(send_str)
+
+    def unparse_case_action(matcher, action):
+        template = "$hlmatch {} {{$i$hl{}$d$hl}}"
+        return template.format(
+            unparse_matcher(matcher),
+            "$hl".join(unparse_case_alt(alt) for alt in action.all_alts)
+        )
+
+    first_rule, is_pre = rule_set[0]
+
+    # all rules in the rule_set have the same action
+    action = first_rule.action
+
+    res = ""
+
+    if is_pre:
+        res += "@pre_rule "
+
+    if isinstance(action, Ignore):
+        return res + "@ignore _ <- " + unparse_rule_matchers(rule_set)
+
+    if isinstance(action, Case.CaseAction):
+        assert len(rule_set) == 1
+        return res + unparse_case_action(first_rule.matcher, action)
+
+    for family_name in families[action]:
+        res += '@family("{}") '.format(family_name)
+
+    if action in newline_afters:
+        res += '@newline_after '
+
+    if isinstance(action, WithSymbol):
+        res += "@symbol"
+    elif isinstance(action, WithText):
+        res += "@text"
+    elif isinstance(action, WithTrivia):
+        res += "@trivia"
+    else:
+        return "lol"
+
+    options = []
+
+    if action.start_ignore_layout:
+        options += ['start_ignore_layout=true']
+    if action.end_ignore_layout:
+        options += ['end_ignore_layout=true']
+
+    if len(options) > 0:
+        res += "(" + ", ".join(options) + ")"
+
+    action_name = format_token_name(action.name)
+    res += " " + action_name + " <- " + unparse_rule_matchers(rule_set)
+
+    return res
+
+
+def compute_families_map(spacing_table):
+    used_token_families = set()
+
+    for tf1, m in spacing_table.iteritems():
+        for tf2, v in m.iteritems():
+            if v:
+                used_token_families.add(tf1)
+                used_token_families.add(tf2)
+
+    res = defaultdict(list)
+    for tf in used_token_families:
+        for tok in tf.tokens:
+            res[tok].append(tf.name.lower)
+
+    return res
+
+
+def compute_newline_afters(newline_after):
+    res = defaultdict(lambda _: False)
+    for tok in newline_after:
+        res[tok] = True
+    return res
+
+
 def unparse_lang(ctx):
     """
     Unparse the language currently being compiled.
@@ -1067,6 +1193,38 @@ def unparse_lang(ctx):
     # langkit code generator, because we break that invariant in the unparser.
     emitter = ctx.emitter
     ctx.emitter = None
+    lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
+    lexer_annotations += "".join(
+        '@spacing("{}", "{}")$hl'.format(tf1.name.lower, tf2.name.lower)
+        for tf1, m in ctx.lexer.spacing_table.iteritems()
+        for tf2, v in m.iteritems()
+        if v
+    )
+    lexer_newline_rule_index = next(
+        i
+        for i, r in enumerate(ctx.lexer.rules)
+        if r.signature == ('RuleAssoc', ('Literal', '\n'), ('WithText', 'Newline', False, False))
+    ) if ctx.lexer.track_indent else -1
+
+    families = compute_families_map(ctx.lexer.spacing_table)
+    newline_afters = compute_newline_afters(ctx.lexer.newline_after)
+
+    rule_sets = []
+    i = 0
+    while i < len(ctx.lexer.rules):
+        cur_set = []
+        cur_action = ctx.lexer.rules[i].action
+
+        while (i < len(ctx.lexer.rules)
+               and ctx.lexer.rules[i].action == cur_action):
+            if i < lexer_newline_rule_index:
+                cur_set.append((ctx.lexer.rules[i], True))
+            elif i > lexer_newline_rule_index:
+                cur_set.append((ctx.lexer.rules[i], False))
+            i += 1
+
+        if len(cur_set) > 0:
+            rule_sets.append(cur_set)
 
     sorted_rules = sorted(
         ((name, rule)
@@ -1076,6 +1234,18 @@ def unparse_lang(ctx):
     )
 
     template = """
+    ${lexer_annotations}lexer ${ctx.lang_name.lower}_lexer {$i$hl
+    % for name, pattern, loc in ctx.lexer.patterns:
+        val ${name} = p${format_pattern(pattern)}$hl
+    % endfor
+    $hl
+
+    % for rule_set in rule_sets:
+        ${unparse_lexer_rule_set(families, newline_afters, rule_set)}$hl
+    % endfor
+    $d$hl
+    }$hl
+
     grammar ${ctx.lang_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
         ${('@main_rule '

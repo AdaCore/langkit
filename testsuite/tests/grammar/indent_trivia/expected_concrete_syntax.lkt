@@ -1,3 +1,15 @@
+@track_indent
+lexer foo_lexer {
+
+    @ignore _ <- p"[ \r\t]+"
+    @text def <- "def"
+    @text comma <- ","
+    @text l_par <- "("
+    @text r_par <- ")"
+    @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @text comment <- p"#.*"
+
+}
 grammar foo_grammar {
     newline <- Newline(@newline)
     expr <- or(call | identifier | indented)

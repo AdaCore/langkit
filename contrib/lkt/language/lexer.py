@@ -42,6 +42,7 @@ class Token(LexerToken):
     Percent = WithText()
 
     # Keywords
+    LexerKw = WithText()
     GrammarKw = WithText()
     OrKw = WithText()
     NotKw = WithText()
@@ -73,6 +74,7 @@ class Token(LexerToken):
 
     # Literals
     String = WithText()
+    PString = WithText()
     DocComment = WithText()
     Number = WithText()
 
@@ -122,6 +124,7 @@ lkt_lexer.add_rules(
     (Literal('%'),         Token.Percent),
 
     # Keywords
+    (Literal('lexer'),     Token.LexerKw),
     (Literal('grammar'),   Token.GrammarKw),
     (Literal('class'),     Token.ClassKw),
     (Literal('struct'),    Token.StructKw),
@@ -155,6 +158,7 @@ lkt_lexer.add_rules(
 
     # Strings
     (Pattern('{STRING_SQ}|{STRING_DBQ}'), Token.String),
+    (Pattern('[a-zA-Z]{STRING_DBQ}|[a-zA-Z]{STRING_DBQ}'), Token.PString),
 
     # Comments
     (Pattern(r"#(.?)+"),     Token.Comment),
