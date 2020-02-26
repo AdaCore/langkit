@@ -5,11 +5,11 @@ if exists("b:current_syntax")
   finish
 endif
 
-syn keyword langkitKeyword grammar language class nextgroup=langkitEntity skipwhite
+syn keyword langkitKeyword grammar language class struct nextgroup=langkitEntity skipwhite
 syn keyword langkitKeyword fun nextgroup=langkitFunction skipwhite
 syn match   langkitFunction	"\h\w*" display contained
 syn match   langkitEntity	"\h\w*" display contained
-syn keyword langkitKeyword is end match when field as if elif then else block case let in do bind is_a
+syn keyword langkitKeyword is end match when field as if elif then else block case val in do bind is_a generic
 syn keyword langkitLiteral false true lfalse ltrue
 syn keyword langkitQualifier parse memoized public enum qualifier
 syn keyword langkitOperator new entity null or and dont_skip
@@ -18,6 +18,7 @@ syn match   langkitToken   "@\s*\h\%(\w\|\.\)*" display
 syn match   langkitGrammarRule   "\%(\w\|_\)\+\s*\(<-\)\@=" display
 syn match   langkitLiteral "\d\+" display
 syn match   langkitComment "#.*$"
+syn match   langkitDocComment "##.*$"
 syn match   langkitOperator "<-"
 syn match   langkitOperator "?"
 syn match   langkitOperator "list+"
@@ -36,6 +37,7 @@ hi def link langkitToken	   Define
 hi def link langkitGrammarRule Define
 hi def link langkitLiteral     Number
 hi def link langkitComment     Comment
+hi def link langkitDocComment  Comment
 " hi def link LalstateSloc            Type
 " hi def link LalstateCurrentExpr     Identifier
 " hi def link LalstateExpr            Identifier
