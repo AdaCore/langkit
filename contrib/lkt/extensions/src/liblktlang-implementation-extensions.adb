@@ -54,4 +54,25 @@ package body Liblktlang.Implementation.Extensions is
         & ":" & To_Text (Image (Sloc_Range (Node))) & ">";
    end Decl_Short_Image;
 
+   --------------------------------------
+   -- LK_Node_P_Env_From_Vals_Internal --
+   --------------------------------------
+
+   function LK_Node_P_Env_From_Vals_Internal
+     (Node : Bare_LK_Node;
+      Vals : Internal_EnvKV_Array_Access) return Lexical_Env
+   is
+     Ret : Lexical_Env;
+   begin
+      Ret := AST_Envs.Create_Lexical_Env
+        (No_Env_Getter, Node, Owner => Node.Unit);
+      Register_Destroyable (Node.Unit, Ret.Env);
+
+      for El of Vals.Items loop
+         AST_Envs.Add (Ret, El.Key, El.Value);
+      end loop;
+
+      return Ret;
+   end LK_Node_P_Env_From_Vals_Internal;
+
 end Liblktlang.Implementation.Extensions;
