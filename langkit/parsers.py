@@ -669,16 +669,15 @@ class Parser(object):
             self.dontskip_parser = _pick_impl(
                 [Null(get_context().root_grammar_class)]
                 + list(self.dontskip_parsers),
-                True
+                True,
+                location=self.location
             )
             self.dontskip_parser.is_dont_skip_parser = True
 
             # Add a named rule for the the DontSkip parsers. Don't forget to
             # compile it (compute their types).
-            grammar.add_rules(**{
-                gen_name('dontskip_{}'.format(self.name)).lower:
-                self.dontskip_parser
-            })
+            grammar._add_rule(gen_name('dontskip_{}'.format(self.name)).lower,
+                              self.dontskip_parser)
             self.dontskip_parser.compute_types()
             self.dontskip_parser.freeze_types()
 
