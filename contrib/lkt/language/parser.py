@@ -32,6 +32,14 @@ class TypingResult(Struct):
     )
 
 
+class EnvKV(Struct):
+    """
+    Utility struct that represents a key value pair in a lexical environment.
+    """
+    key = UserField(T.Symbol)
+    value = UserField(T.LKNode)
+
+
 @abstract
 class LKNode(ASTNode):
     """
@@ -71,6 +79,18 @@ class LKNode(ASTNode):
         doc="Unit method. Return the string builtin type."
     )
 
+    @langkit_property(external=True,
+                      uses_entity_info=False,
+                      uses_envs=True,
+                      return_type=T.LexicalEnv)
+    def env_from_vals_internal(vals=EnvKV.array):
+        """
+        Internal property that will create a lexical environment from a list of
+        key values associations. The lexical environment will not be
+        ref-counted, but instead associated with the node's analysis unit, so
+        being careful about how this property is used is important.
+        """
+        pass
 
 class LangkitRoot(LKNode):
     """
@@ -641,6 +661,15 @@ class NamedTypeDecl(TypeDecl):
     type_scope = Property(Entity._.decls.children_env)
 
 
+class GenericParamAssoc(Struct):
+    """
+    Generic parameter association. Associates a generic formal type to an
+    actual type.
+    """
+    formal = UserField(T.GenericFormalTypeDecl)
+    actual = UserField(T.TypeDecl)
+
+
 class GenericDecl(Decl):
     """
     Generic entity declaration.
@@ -656,10 +685,42 @@ class GenericDecl(Decl):
     )
 
     @langkit_property(memoized=True)
-    def get_instantiated_type(params=T.TypeDecl.array):
+    def get_instantiated_type(actuals=T.TypeDecl.array):
         return InstantiatedGenericType.new(
             inner_type_decl=Self.decl.cast_or_raise(T.TypeDecl),
-            params=params
+            actuals=actuals
+        )
+
+    @langkit_property(memoized=True)
+    def get_assocs(actuals=T.TypeDecl.array):
+        """
+        Return an array of GenericParamAssocs, associating the generic formal
+        types of this generic declaration with actuals given as parameter.
+        """
+        return If(
+            Entity.generic_formals.length == actuals.length,
+            Entity.generic_formals.map(
+                lambda idx, f: GenericParamAssoc.new(
+                    formal=f.node, actual=actuals.at(idx)
+                )
+            ),
+            PropertyError(T.GenericParamAssoc.array,
+                          "Actuals and formals don't match")
+        )
+
+    @langkit_property(memoized=True)
+    def get_inst_env(actuals=T.TypeDecl.array):
+        """
+        Return the lexical environment associating generic formals for this
+        generic decl with actuals given as parameters. Used to create the
+        rebinding environment for a generic instantiation.
+        """
+        return Entity.env_from_vals_internal(
+            Entity.get_assocs(actuals).map(
+                lambda assoc: EnvKV.new(
+                    key=assoc.formal.name, value=assoc.actual
+                )
+            )
         )
 
 
@@ -669,34 +730,32 @@ class InstantiatedGenericType(TypeDecl):
     Instantiated generic type.
     """
     inner_type_decl = UserField(type=T.TypeDecl, public=False)
-    params = UserField(type=T.TypeDecl.array, public=False)
+    actuals = UserField(type=T.TypeDecl.array, public=False)
     syn_name = NullField()
+    generic_decl = Property(
+        Entity.inner_type_decl.parent.as_entity.cast_or_raise(T.GenericDecl)
+    )
 
-    @langkit_property(memoized=True)
+    @langkit_property(memoized=True, public=True)
     def get_instantiated_type():
-        return InstantiatedGenericTypeInternal.entity.new(
-            node=InstantiatedGenericTypeInternal.new(
-                inner_type_decl=Self.inner_type_decl
-            ),
+        """
+        Return the instantiated type decl with proper rebindings, that can be
+        used for typing and code generation.
+        """
+        return TypeDecl.entity.new(
+            node=Self.inner_type_decl,
             info=T.entity_info.new(
                 md=No(T.Metadata),
                 from_rebound=False,
-                rebindings=Entity.info.rebindings
+                rebindings=Entity.info.rebindings.append_rebinding(
+                    Self.inner_type_decl.parent.children_env,
+                    Entity.generic_decl.get_inst_env(Self.actuals)
+                )
             )
         )
 
     type_scope = Property(Entity.get_instantiated_type.type_scope)
 
-
-@synthetic
-class InstantiatedGenericTypeInternal(TypeDecl):
-    """
-    Instantiated generic type.
-    """
-    inner_type_decl = UserField(type=T.TypeDecl, public=False)
-    syn_name = NullField()
-
-    type_scope = Property(Entity.inner_type_decl.as_entity.type_scope)
 
 
 class EnumTypeDecl(NamedTypeDecl):
