@@ -982,7 +982,9 @@ class TypeRef(LKNode):
         Entity.type_name.referenced_decl
     )
 
-    designated_type = AbstractProperty(T.TypeDecl.entity)
+    designated_type = AbstractProperty(T.TypeDecl.entity, public=True, doc="""
+        Return the type designated by this type ref.
+    """)
 
 
 class SimpleTypeRef(TypeRef):
