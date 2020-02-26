@@ -10,8 +10,8 @@ grammar foo_grammar {
     )
     atom <- or(ref | literal)
     ref <- Ref(name)
-    name <- Identifier(@Identifier)
-    literal <- Literal(@Number)
+    name <- Identifier(@identifier)
+    literal <- Literal(@number)
 
 }
 

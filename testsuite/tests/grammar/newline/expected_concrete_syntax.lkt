@@ -1,11 +1,11 @@
 grammar foo_grammar {
-    lit <- Literal(@Number)
-    nl <- NewLineNode(lit @Newline lit)
-    ind <- IndentNode(lit @Newline @Indent lit @Dedent)
+    lit <- Literal(@number)
+    nl <- NewLineNode(lit @newline lit)
+    ind <- IndentNode(lit @newline @indent lit @dedent)
     comp <- CompositeNode(
         lit
-        @Newline
-        lit @Newline @Indent lit @Newline @Dedent lit
+        @newline
+        lit @newline @indent lit @newline @dedent lit
     )
     @main_rule main_rule <- or(comp | ind | nl)
 

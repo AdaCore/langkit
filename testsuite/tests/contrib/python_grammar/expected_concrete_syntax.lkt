@@ -1,14 +1,14 @@
 grammar foo_grammar {
-    name <- Id(@Identifier)
-    number <- NumberLit(@Number)
-    string <- StringLit(@String)
+    name <- Id(@identifier)
+    number <- NumberLit(@number)
+    string <- StringLit(@string)
     cat_string <- ConcatStringLit(string list+(string))
-    nl <- NL(@Newline)
+    nl <- NL(@newline)
     @main_rule main_rule <- FileNode(
-        list+((discard(list*(nl)) stmt discard(list*(nl)))) @Termination
+        list+((discard(list*(nl)) stmt discard(list*(nl)))) @termination
     )
     decorator <- Decorator(
-        "@" dotted_name ?("(" arg_list ")") @Newline
+        "@" dotted_name ?("(" arg_list ")") @newline
     )
     decorators <- list+(decorator)
     decorated <- Decorated(decorators or(class_def | func_def))
@@ -22,7 +22,7 @@ grammar foo_grammar {
     fpdef <- or(name | ("(" name_list ")"))
     name_list <- (list+(name, ",") ?",")
     stmt <- or(simple_stmt | compound_stmt)
-    simple_stmt <- (or(small_stmt | (list+(small_stmt, ";") ?";")) @Newline)
+    simple_stmt <- (or(small_stmt | (list+(small_stmt, ";") ?";")) @newline)
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -126,8 +126,8 @@ grammar foo_grammar {
     with_item <- AsNameNode(test ?("as" expr))
     suite <- or(
         | (discard(list*(nl))
-        @Indent
-        list+((discard(list*(nl)) stmt discard(list*(nl)))) @Dedent)
+        @indent
+        list+((discard(list*(nl)) stmt discard(list*(nl)))) @dedent)
         | simple_stmt
     )
     test <- or(

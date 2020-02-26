@@ -377,7 +377,7 @@ def emit_rule(rule, top_level=False):
             return '"{}"'.format(rule._original_string)
         else:
             return "@{}{}".format(
-                rule._val.name.camel,
+                format_token_name(rule._val.name),
                 '("{}")'.format(rule.match_text)
                 if rule.match_text else ""
             )
@@ -1040,6 +1040,15 @@ def emit_node_type(node_type):
     """.strip())
 
     del base, parse_fields, enum_qual, properties
+
+
+def format_token_name(name):
+    name = name.lower
+    if name in ('val', 'if', 'elif', 'else', 'try', 'raise', 'then', 'in',
+                'class', 'not', 'and', 'or', 'null', 'generic', 'private',
+                'case'):
+        return name + "_tok"
+    return name
 
 
 def unparse_lang(ctx):

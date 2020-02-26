@@ -1,8 +1,8 @@
 grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
-    decl <- Decl(Name(@Identifier) "(" ref_list ")")
+    decl <- Decl(Name(@identifier) "(" ref_list ")")
     ref_list <- list*(ref)
-    ref <- Ref(Name(@Identifier))
+    ref <- Ref(Name(@identifier))
 
 }
 

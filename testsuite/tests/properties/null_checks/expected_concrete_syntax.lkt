@@ -5,7 +5,7 @@ grammar foo_grammar {
         | Plus(atom "+" main_rule)
         | atom
     )
-    atom <- or(Literal(@Number) | Name(@Identifier))
+    atom <- or(Literal(@number) | Name(@identifier))
 
 }
 

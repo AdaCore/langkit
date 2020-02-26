@@ -1,11 +1,11 @@
 grammar foo_grammar {
     @main_rule main_rule <- list+(or(
         | RootNode(
-            "def" null(Identifier) ?("{" Number(@Number) "}") ";"
+            "def" null(Identifier) ?("{" Number(@number) "}") ";"
         )
         | RootNode(
             "def"
-            ?("(" Identifier(@Identifier) ")") null(Number) ";"
+            ?("(" Identifier(@identifier) ")") null(Number) ";"
         )
     ))
 

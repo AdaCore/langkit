@@ -1,5 +1,5 @@
 grammar foo_grammar {
-    @main_rule main_rule <- ListNode(list+(NumberNode(@Number)))
+    @main_rule main_rule <- ListNode(list+(NumberNode(@number)))
 
 }
 

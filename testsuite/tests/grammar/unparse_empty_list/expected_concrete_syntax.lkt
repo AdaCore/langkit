@@ -3,7 +3,7 @@ grammar foo_grammar {
     def_node <- DefNode(
         "(" identifier "," null(ASTList[DefNode]) ")"
     )
-    identifier <- Identifier(@Identifier)
+    identifier <- Identifier(@identifier)
 
 }
 

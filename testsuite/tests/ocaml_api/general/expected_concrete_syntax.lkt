@@ -4,8 +4,8 @@ grammar foo_grammar {
     example <- Example("example")
     null_node <- Null("null")
     var <- Var("var" "(" main_rule ")")
-    ident <- Ident(@Identifier)
-    string <- StringLiteral(@String)
+    ident <- Ident(@identifier)
+    string <- StringLiteral(@string)
 
 }
 

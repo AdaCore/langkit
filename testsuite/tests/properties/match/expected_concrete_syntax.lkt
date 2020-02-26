@@ -1,10 +1,10 @@
 grammar foo_grammar {
     @main_rule main_rule <- list+(or(Def("def"
-    Name(@Identifier) expr) | expr))
+    Name(@identifier) expr) | expr))
     expr <- or(atom | plus)
     atom <- or(lit | ref)
-    lit <- Lit(@Number)
-    ref <- Ref(@Identifier)
+    lit <- Lit(@number)
+    ref <- Ref(@identifier)
     plus <- ("(" Plus(expr "+" expr) ")")
 
 }

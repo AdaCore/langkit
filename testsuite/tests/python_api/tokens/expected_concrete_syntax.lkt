@@ -2,7 +2,7 @@ grammar foo_grammar {
     @main_rule main_rule <- element
     element <- or(sequence | atom)
     sequence <- ("(" list*Sequence(element) ")")
-    atom <- Atom(@Identifier)
+    atom <- Atom(@identifier)
 
 }
 

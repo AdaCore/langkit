@@ -1,5 +1,5 @@
 grammar foo_grammar {
-    name <- Name(@Identifier)
+    name <- Name(@identifier)
     @main_rule main_rule <- list+(or(
         | Def("def" name imports vars expr)
         | expr
@@ -9,7 +9,7 @@ grammar foo_grammar {
     vars <- ("{" list*(var) "}")
     expr <- or(atom | plus)
     atom <- or(lit | ref)
-    lit <- Lit(@Number)
+    lit <- Lit(@number)
     ref <- Ref(name)
     derived_ref <- DerivedRef(name)
     plus <- ("(" Plus(expr "+" expr) ")")

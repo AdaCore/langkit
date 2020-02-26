@@ -3,9 +3,9 @@ grammar foo_grammar {
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)
-    number <- Number(@Number)
+    number <- Number(@number)
     ref <- Ref(Null("null") name)
-    name <- Name(@Identifier)
+    name <- Name(@identifier)
 
 }
 

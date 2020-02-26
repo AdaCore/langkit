@@ -7,8 +7,8 @@ grammar foo_grammar {
         )
     )
     expr <- or(Plus(atom "+" expr) | atom)
-    atom <- or(Literal(@Number) | name)
-    name <- Name(@Identifier)
+    atom <- or(Literal(@number) | name)
+    name <- Name(@identifier)
 
 }
 
