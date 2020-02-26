@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule main_rule <- item
     item <- or(couple | literal)
     couple <- Couple("(" item "," item ")")

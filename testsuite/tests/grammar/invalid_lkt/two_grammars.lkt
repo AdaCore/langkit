@@ -1,2 +1,2 @@
-grammar FooGrammar1 {}
-grammar FooGrammar2 {}
+grammar foo_grammar1 {}
+grammar foo_grammar2 {}

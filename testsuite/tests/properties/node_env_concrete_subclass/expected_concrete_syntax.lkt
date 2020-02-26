@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule main_rule <- RootNode(list+(or(decl | subdecl | other_decl), ";"))
     decl <- Decl("def" name)
     other_decl <- OtherDecl("def" "var" name)

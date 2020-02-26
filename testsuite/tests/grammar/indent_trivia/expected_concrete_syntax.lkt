@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     newline <- Newline(@Newline)
     expr <- or(call | identifier | indented)
     identifier <- Identifier(@Identifier)

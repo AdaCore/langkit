@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule main_rule <- list+(block)
     name <- Name(@Identifier)
     block <- Block(params name vars)

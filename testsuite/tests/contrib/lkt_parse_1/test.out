@@ -14,14 +14,14 @@ LangkitRoot[1:1-46:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-9:30]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -559,14 +559,14 @@ LangkitRoot[1:1-61:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-10:64]
 |  |  |  |  |  FullDecl[2:5-2:72]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -1340,14 +1340,14 @@ LangkitRoot[1:1-28:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-5:26]
 |  |  |  |  |  FullDecl[2:5-2:33]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -1674,14 +1674,14 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:53]
 |  |  |  |  |  FullDecl[2:5-2:64]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -2093,14 +2093,14 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:29]
 |  |  |  |  |  FullDecl[2:5-2:64]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -2322,14 +2322,14 @@ LangkitRoot[1:1-31:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-5:34]
 |  |  |  |  |  FullDecl[2:5-2:48]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -2681,14 +2681,14 @@ LangkitRoot[1:1-53:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-10:6]
 |  |  |  |  |  FullDecl[2:5-2:33]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -3321,14 +3321,14 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-5:34]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -3750,14 +3750,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -3838,14 +3838,14 @@ LangkitRoot[1:1-85:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-16:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-14:32]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -4938,14 +4938,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -5017,14 +5017,14 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -5165,14 +5165,14 @@ LangkitRoot[1:1-59:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-9:30]
 |  |  |  |  |  FullDecl[2:5-4:6]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -5885,14 +5885,14 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -6145,14 +6145,14 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -6558,14 +6558,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:65]
 |  |  |  |  |  FullDecl[2:5-2:65]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -6762,14 +6762,14 @@ LangkitRoot[1:1-45:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-12:6]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -7223,14 +7223,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -7405,14 +7405,14 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-5:42]
 |  |  |  |  |  FullDecl[2:5-2:59]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -7727,14 +7727,14 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -7969,14 +7969,14 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -8225,16 +8225,16 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:74]
 |  |  |  |  |  FullDecl[2:5-2:30]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
 |  |  |  |  |  |  |syn_name:
@@ -8610,14 +8610,14 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:34]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -9006,14 +9006,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:51]
 |  |  |  |  |  FullDecl[2:5-2:51]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -9109,14 +9109,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -9272,14 +9272,14 @@ LangkitRoot[1:1-27:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:45]
 |  |  |  |  |  FullDecl[2:5-2:45]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -9529,14 +9529,14 @@ LangkitRoot[1:1-32:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:82]
 |  |  |  |  |  FullDecl[2:5-2:82]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -9968,14 +9968,14 @@ LangkitRoot[1:1-29:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:45]
 |  |  |  |  |  FullDecl[2:5-2:45]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -10257,14 +10257,14 @@ LangkitRoot[1:1-23:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:70]
 |  |  |  |  |  FullDecl[2:5-2:70]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -10506,14 +10506,14 @@ LangkitRoot[1:1-62:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:26]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -11247,14 +11247,14 @@ LangkitRoot[1:1-38:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-5:32]
 |  |  |  |  |  FullDecl[2:5-2:33]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -11731,14 +11731,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:60]
 |  |  |  |  |  FullDecl[2:5-2:60]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -11901,14 +11901,14 @@ LangkitRoot[1:1-44:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-7:34]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -12475,14 +12475,14 @@ LangkitRoot[1:1-35:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:34]
 |  |  |  |  |  FullDecl[2:5-2:50]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -12831,14 +12831,14 @@ LangkitRoot[1:1-35:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:34]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -13284,14 +13284,14 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:50]
 |  |  |  |  |  FullDecl[2:5-2:50]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -13442,14 +13442,14 @@ LangkitRoot[1:1-52:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-13:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-11:30]
 |  |  |  |  |  FullDecl[2:5-2:46]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -14029,14 +14029,14 @@ LangkitRoot[1:1-39:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:29]
 |  |  |  |  |  FullDecl[2:5-2:49]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -14514,14 +14514,14 @@ LangkitRoot[1:1-55:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-7:34]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -15173,14 +15173,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -15284,14 +15284,14 @@ LangkitRoot[1:1-25:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:29]
 |  |  |  |  |  FullDecl[2:5-2:64]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -15559,14 +15559,14 @@ LangkitRoot[1:1-46:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-9:30]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -16104,14 +16104,14 @@ LangkitRoot[1:1-28:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:30]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -16443,14 +16443,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -16522,14 +16522,14 @@ LangkitRoot[1:1-73:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:37]
 |  |  |  |  |  FullDecl[2:5-2:48]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -17422,14 +17422,14 @@ LangkitRoot[1:1-32:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-9:31]
 |  |  |  |  |  FullDecl[2:5-2:57]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -17758,14 +17758,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -17837,14 +17837,14 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -17977,14 +17977,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -18056,16 +18056,16 @@ LangkitRoot[1:1-44:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-21:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-19:39]
 |  |  |  |  |  FullDecl[2:5-2:33]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:33]
 |  |  |  |  |  |  |syn_name:
@@ -18610,14 +18610,14 @@ LangkitRoot[1:1-24:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -18826,14 +18826,14 @@ LangkitRoot[1:1-21:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:65]
 |  |  |  |  |  FullDecl[2:5-2:65]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -19049,14 +19049,14 @@ LangkitRoot[1:1-28:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:30]
 |  |  |  |  |  FullDecl[2:5-2:45]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -19343,14 +19343,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -19460,14 +19460,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -19539,14 +19539,14 @@ LangkitRoot[1:1-48:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -19978,14 +19978,14 @@ LangkitRoot[1:1-39:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-6:30]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -20459,14 +20459,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -20547,16 +20547,16 @@ LangkitRoot[1:1-85:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:42]
 |  |  |  |  |  FullDecl[2:5-2:30]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
 |  |  |  |  |  |  |syn_name:
@@ -21581,14 +21581,14 @@ LangkitRoot[1:1-22:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -21815,16 +21815,16 @@ LangkitRoot[1:1-81:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-17:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-15:42]
 |  |  |  |  |  FullDecl[2:5-2:30]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:30]
 |  |  |  |  |  |  |syn_name:
@@ -22810,14 +22810,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:65]
 |  |  |  |  |  FullDecl[2:5-2:65]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -23007,14 +23007,14 @@ LangkitRoot[1:1-93:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:42]
 |  |  |  |  |  FullDecl[2:5-3:37]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -23866,14 +23866,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -23990,14 +23990,14 @@ LangkitRoot[1:1-34:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:6]
 |  |  |  |  |  FullDecl[2:5-4:6]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -24373,14 +24373,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -24485,14 +24485,14 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -24745,14 +24745,14 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -24915,14 +24915,14 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -25039,14 +25039,14 @@ LangkitRoot[1:1-30:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -25290,14 +25290,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -25398,14 +25398,14 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -25578,14 +25578,14 @@ LangkitRoot[1:1-32:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-6:34]
 |  |  |  |  |  FullDecl[2:5-2:38]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -25935,16 +25935,16 @@ LangkitRoot[1:1-35:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-10:48]
 |  |  |  |  |  FullDecl[2:5-2:28]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
 |  |  |  |  |  |  |syn_name:
@@ -26366,14 +26366,14 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -26530,14 +26530,14 @@ LangkitRoot[1:1-43:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:30]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -27024,14 +27024,14 @@ LangkitRoot[1:1-45:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-6:30]
 |  |  |  |  |  FullDecl[2:5-2:82]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -27544,14 +27544,14 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:30]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -27779,14 +27779,14 @@ LangkitRoot[1:1-11:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:30]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -27885,14 +27885,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -27973,14 +27973,14 @@ LangkitRoot[1:1-43:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:30]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -28467,14 +28467,14 @@ LangkitRoot[1:1-55:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:53]
 |  |  |  |  |  FullDecl[2:5-2:39]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -29114,14 +29114,14 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -29382,14 +29382,14 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -29508,16 +29508,16 @@ LangkitRoot[1:1-68:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-7:41]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:41]
 |  |  |  |  |  |  |syn_name:
@@ -30400,14 +30400,14 @@ LangkitRoot[1:1-62:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-12:6]
 |  |  |  |  |  FullDecl[2:5-2:33]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -31116,14 +31116,14 @@ LangkitRoot[1:1-14:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:52]
 |  |  |  |  |  FullDecl[2:5-2:52]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -31237,14 +31237,14 @@ LangkitRoot[1:1-78:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:41]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -32332,14 +32332,14 @@ LangkitRoot[1:1-78:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:41]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -33427,14 +33427,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -33506,14 +33506,14 @@ LangkitRoot[1:1-46:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-11:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-9:30]
 |  |  |  |  |  FullDecl[2:5-2:40]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -34051,14 +34051,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:76]
 |  |  |  |  |  FullDecl[2:5-2:76]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -34174,14 +34174,14 @@ LangkitRoot[1:1-90:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:30]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -35451,14 +35451,14 @@ LangkitRoot[1:1-15:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -35594,14 +35594,14 @@ LangkitRoot[1:1-22:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -35856,16 +35856,16 @@ LangkitRoot[1:1-652:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-235:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-233:44]
 |  |  |  |  |  FullDecl[2:5-2:28]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
-|  |  |  |  |  |  DeclAnnotationList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  DeclAnnotationList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl:
 |  |  |  |  |  |  GrammarRuleDecl[2:5-2:28]
 |  |  |  |  |  |  |syn_name:
@@ -43368,14 +43368,14 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:46]
 |  |  |  |  |  FullDecl[2:5-2:46]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -43480,14 +43480,14 @@ LangkitRoot[1:1-76:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-10:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-8:26]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -44396,14 +44396,14 @@ LangkitRoot[1:1-59:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-12:21]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -45142,14 +45142,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -45246,14 +45246,14 @@ LangkitRoot[1:1-45:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-14:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-12:6]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -45707,14 +45707,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:59]
 |  |  |  |  |  FullDecl[2:5-2:34]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -45885,14 +45885,14 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -46034,14 +46034,14 @@ LangkitRoot[1:1-17:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -46213,14 +46213,14 @@ LangkitRoot[1:1-17:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:54]
 |  |  |  |  |  FullDecl[2:5-2:54]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -46412,14 +46412,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -46527,14 +46527,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:49]
 |  |  |  |  |  FullDecl[2:5-2:49]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -46641,14 +46641,14 @@ LangkitRoot[1:1-15:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -46770,14 +46770,14 @@ LangkitRoot[1:1-90:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:51]
 |  |  |  |  |  FullDecl[2:5-2:51]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -47222,14 +47222,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-5:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-3:30]
 |  |  |  |  |  FullDecl[2:5-2:45]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -47414,14 +47414,14 @@ LangkitRoot[1:1-16:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-7:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-5:30]
 |  |  |  |  |  FullDecl[2:5-2:36]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -47586,14 +47586,14 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -47759,14 +47759,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:45]
 |  |  |  |  |  FullDecl[2:5-2:45]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -47841,14 +47841,14 @@ LangkitRoot[1:1-18:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48015,14 +48015,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48094,14 +48094,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48173,14 +48173,14 @@ LangkitRoot[1:1-12:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48298,14 +48298,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48377,14 +48377,14 @@ LangkitRoot[1:1-10:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-4:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-2:47]
 |  |  |  |  |  FullDecl[2:5-2:47]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48456,14 +48456,14 @@ LangkitRoot[1:1-19:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-8:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-6:42]
 |  |  |  |  |  FullDecl[2:5-2:44]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48657,14 +48657,14 @@ LangkitRoot[1:1-26:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-12:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-10:7]
 |  |  |  |  |  FullDecl[2:5-10:7]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -48874,14 +48874,14 @@ LangkitRoot[1:1-26:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-9:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-7:42]
 |  |  |  |  |  FullDecl[2:5-5:7]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]
@@ -49113,14 +49113,14 @@ LangkitRoot[1:1-13:2]
 |  |  |decl:
 |  |  |  GrammarDecl[1:1-6:2]
 |  |  |  |syn_name:
-|  |  |  |  DefId[1:9-1:19]: FooGrammar
+|  |  |  |  DefId[1:9-1:20]: foo_grammar
 |  |  |  |rules:
 |  |  |  |  FullDeclList[2:5-4:58]
 |  |  |  |  |  FullDecl[2:5-2:41]
 |  |  |  |  |  |doc:
-|  |  |  |  |  |  Doc[1:21-1:21]
+|  |  |  |  |  |  Doc[1:22-1:22]
 |  |  |  |  |  |  |lines:
-|  |  |  |  |  |  |  DocCommentList[1:21-1:21]: <empty list>
+|  |  |  |  |  |  |  DocCommentList[1:22-1:22]: <empty list>
 |  |  |  |  |  |decl_annotations:
 |  |  |  |  |  |  DeclAnnotationList[2:5-2:15]
 |  |  |  |  |  |  |  DeclAnnotation[2:5-2:15]

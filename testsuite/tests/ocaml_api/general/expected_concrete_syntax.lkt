@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule main_rule <- list+Sequence(node)
     node <- or(example | null_node | var | ident | string)
     example <- Example("example")
