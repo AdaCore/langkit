@@ -2,11 +2,11 @@ grammar foo_grammar {
     @main_rule main_rule <- Def(
         "def" name "{" cat1 cat2 Example("example") "}"
     )
-    cat1 <- Cat1(@Identifier("cat1") "{" decls "}")
-    cat2 <- Cat2(@Identifier("cat2") "{" decls "}")
+    cat1 <- Cat1(@identifier("cat1") "{" decls "}")
+    cat2 <- Cat2(@identifier("cat2") "{" decls "}")
     decls <- list*(var)
     var <- Var(name)
-    name <- Name(@Identifier)
+    name <- Name(@identifier)
 
 }
 

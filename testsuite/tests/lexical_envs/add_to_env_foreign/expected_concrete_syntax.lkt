@@ -5,7 +5,7 @@ grammar foo_grammar {
         | ScopedId(identifier "." simple_identifier)
         | simple_identifier
     )
-    simple_identifier <- SimpleId(@Identifier)
+    simple_identifier <- SimpleId(@identifier)
     foreign_decl <- ForeignDecl(identifier)
     self_decl <- SelfDecl("+" identifier ?("(" identifier ")"))
 

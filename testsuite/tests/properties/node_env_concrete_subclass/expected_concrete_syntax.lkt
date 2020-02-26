@@ -3,7 +3,7 @@ grammar foo_grammar {
     decl <- Decl("def" name)
     other_decl <- OtherDecl("def" "var" name)
     subdecl <- SubDecl("var" name)
-    name <- Name(@Identifier)
+    name <- Name(@identifier)
 
 }
 

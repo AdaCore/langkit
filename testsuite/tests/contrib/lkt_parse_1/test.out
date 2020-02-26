@@ -164,7 +164,7 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:22-7:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:22-7:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:23-7:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[7:23-7:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:21]
 |  |  |  |  |  |doc:
@@ -205,7 +205,7 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |  |  GrammarExprList[9:18-9:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[9:18-9:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[13:1-14:2]
 |  |  |doc:
@@ -688,7 +688,7 @@ LangkitRoot[1:1-61:2]
 |  |  |  |  |  |  |  |  GrammarExprList[8:35-8:46]
 |  |  |  |  |  |  |  |  |  GrammarToken[8:35-8:46]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:36-8:46]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[8:36-8:46]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[9:5-9:44]
 |  |  |  |  |  |doc:
@@ -1439,7 +1439,7 @@ LangkitRoot[1:1-28:2]
 |  |  |  |  |  |  |  |  GrammarExprList[5:14-5:25]
 |  |  |  |  |  |  |  |  |  GrammarToken[5:14-5:25]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[5:15-5:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[5:15-5:25]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[9:1-10:2]
 |  |  |doc:
@@ -1737,7 +1737,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:24-3:31]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:24-3:31]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:25-3:31]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:25-3:31]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[3:35-3:52]
 |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[3:35-3:52]
@@ -1747,7 +1747,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:40-3:51]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:40-3:51]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:41-3:51]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:41-3:51]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[7:1-10:2]
 |  |  |doc:
@@ -2152,7 +2152,7 @@ LangkitRoot[1:1-21:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:21-3:28]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:21-3:28]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:22-3:28]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[3:22-3:28]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[7:1-10:2]
 |  |  |doc:
@@ -2775,7 +2775,7 @@ LangkitRoot[1:1-53:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[5:23-5:34]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[5:23-5:34]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[5:24-5:34]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[5:24-5:34]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[5:36-5:39]: "{"
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[5:40-5:44]
@@ -2806,7 +2806,7 @@ LangkitRoot[1:1-53:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[6:19-6:30]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[6:19-6:30]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[6:20-6:30]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[6:20-6:30]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[6:32-6:35]: "="
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:36-6:40]
@@ -2844,7 +2844,7 @@ LangkitRoot[1:1-53:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[8:30-8:41]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[8:30-8:41]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:31-8:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:31-8:41]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[9:11-9:26]
 |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[9:11-9:26]
@@ -2854,7 +2854,7 @@ LangkitRoot[1:1-53:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[9:14-9:25]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[9:14-9:25]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[9:15-9:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[9:15-9:25]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[14:1-15:2]
 |  |  |doc:
@@ -3377,7 +3377,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:23-3:34]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:23-3:34]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:24-3:34]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:24-3:34]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[3:36-3:39]: "("
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:40-3:48]
@@ -3432,7 +3432,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[5:21-5:32]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[5:21-5:32]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[5:22-5:32]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[5:22-5:32]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[9:1-10:2]
 |  |  |doc:
@@ -4047,7 +4047,7 @@ LangkitRoot[1:1-85:2]
 |  |  |  |  |  |  |  |  GrammarExprList[13:24-13:35]
 |  |  |  |  |  |  |  |  |  GrammarToken[13:24-13:35]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[13:25-13:35]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[13:25-13:35]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[14:5-14:32]
 |  |  |  |  |  |doc:
@@ -4068,7 +4068,7 @@ LangkitRoot[1:1-85:2]
 |  |  |  |  |  |  |  |  GrammarExprList[14:24-14:31]
 |  |  |  |  |  |  |  |  |  GrammarToken[14:24-14:31]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[14:25-14:31]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[14:25-14:31]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[18:1-21:2]
 |  |  |doc:
@@ -5227,7 +5227,7 @@ LangkitRoot[1:1-59:2]
 |  |  |  |  |  |  |  |  GrammarExprList[5:18-5:51]
 |  |  |  |  |  |  |  |  |  GrammarToken[5:18-5:37]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[5:19-5:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[5:19-5:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr:
 |  |  |  |  |  |  |  |  |  |  TokenLit[5:30-5:36]: "cat1"
 |  |  |  |  |  |  |  |  |  TokenLit[5:38-5:41]: "{"
@@ -5254,7 +5254,7 @@ LangkitRoot[1:1-59:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:18-6:51]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:18-6:37]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:19-6:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[6:19-6:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr:
 |  |  |  |  |  |  |  |  |  |  TokenLit[6:30-6:36]: "cat2"
 |  |  |  |  |  |  |  |  |  TokenLit[6:38-6:41]: "{"
@@ -5325,7 +5325,7 @@ LangkitRoot[1:1-59:2]
 |  |  |  |  |  |  |  |  GrammarExprList[9:18-9:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[9:18-9:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[13:1-14:2]
 |  |  |doc:
@@ -6598,7 +6598,7 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:55-2:62]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:55-2:62]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:56-2:62]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:56-2:62]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
@@ -6813,7 +6813,7 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-6:6]
 |  |  |  |  |  |doc:
@@ -6916,7 +6916,7 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[11:19-11:26]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[11:19-11:26]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[11:20-11:26]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[11:20-11:26]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[16:1-17:2]
 |  |  |doc:
@@ -7506,7 +7506,7 @@ LangkitRoot[1:1-29:2]
 |  |  |  |  |  |  |  |  GrammarExprList[5:30-5:41]
 |  |  |  |  |  |  |  |  |  GrammarToken[5:30-5:41]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[5:31-5:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[5:31-5:41]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[9:1-10:2]
 |  |  |doc:
@@ -8247,7 +8247,7 @@ LangkitRoot[1:1-29:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:18-2:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:18-2:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:19-2:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[2:19-2:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[3:5-3:74]
 |  |  |  |  |  |doc:
@@ -8666,7 +8666,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:23-3:34]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:23-3:34]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:24-3:34]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:24-3:34]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[3:36-3:39]: "("
 |  |  |  |  |  |  |  |  |  GrammarList[3:40-3:50]
@@ -8706,7 +8706,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:21-4:32]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:21-4:32]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:22-4:32]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:22-4:32]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[8:1-9:2]
 |  |  |doc:
@@ -9299,7 +9299,7 @@ LangkitRoot[1:1-27:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:37-2:44]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:37-2:44]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:44]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:44]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[6:1-11:2]
 |  |  |doc:
@@ -9568,7 +9568,7 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:46-2:53]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:46-2:53]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:47-2:53]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:47-2:53]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:57-2:80]
 |  |  |  |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:57-2:80]
@@ -9578,7 +9578,7 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:68-2:79]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:68-2:79]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:69-2:79]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:69-2:79]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
@@ -9995,7 +9995,7 @@ LangkitRoot[1:1-29:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:37-2:44]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:37-2:44]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:44]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:44]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[6:1-11:2]
 |  |  |doc:
@@ -10288,7 +10288,7 @@ LangkitRoot[1:1-23:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:40-2:47]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:40-2:47]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:41-2:47]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:41-2:47]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[2:51-2:69]
 |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[2:51-2:69]
@@ -10557,7 +10557,7 @@ LangkitRoot[1:1-62:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-4:37]
 |  |  |  |  |  |doc:
@@ -11338,7 +11338,7 @@ LangkitRoot[1:1-38:2]
 |  |  |  |  |  |  |  |  GrammarExprList[5:24-5:31]
 |  |  |  |  |  |  |  |  |  GrammarToken[5:24-5:31]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[5:25-5:31]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[5:25-5:31]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[9:1-17:2]
 |  |  |doc:
@@ -11771,7 +11771,7 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:46-2:57]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:46-2:57]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:47-2:57]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:47-2:57]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
@@ -11963,7 +11963,7 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:27-4:38]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:27-4:38]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:28-4:38]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:28-4:38]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[4:40-4:43]: "("
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:44-4:52]
@@ -12018,7 +12018,7 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[7:21-7:32]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[7:21-7:32]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[7:22-7:32]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[7:22-7:32]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[11:1-14:2]
 |  |  |doc:
@@ -12525,7 +12525,7 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:24-3:31]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:24-3:31]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:25-3:31]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[3:25-3:31]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-4:34]
 |  |  |  |  |  |doc:
@@ -12887,7 +12887,7 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:23-3:34]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:23-3:34]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:24-3:34]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:24-3:34]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[3:36-3:39]: "("
 |  |  |  |  |  |  |  |  |  GrammarList[3:40-3:50]
@@ -12927,7 +12927,7 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:21-4:32]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:21-4:32]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:22-4:32]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:22-4:32]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[8:1-14:2]
 |  |  |doc:
@@ -13591,7 +13591,7 @@ LangkitRoot[1:1-52:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[10:24-10:31]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[10:24-10:31]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[10:25-10:31]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[10:25-10:31]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[10:35-10:39]
 |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[10:35-10:39]
@@ -13616,7 +13616,7 @@ LangkitRoot[1:1-52:2]
 |  |  |  |  |  |  |  |  GrammarExprList[11:18-11:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[11:18-11:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[11:19-11:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[11:19-11:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[15:1-18:2]
 |  |  |doc:
@@ -14105,7 +14105,7 @@ LangkitRoot[1:1-39:2]
 |  |  |  |  |  |  |  |  GrammarExprList[4:17-4:28]
 |  |  |  |  |  |  |  |  |  GrammarToken[4:17-4:28]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:18-4:28]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[4:18-4:28]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[8:1-15:2]
 |  |  |doc:
@@ -14576,7 +14576,7 @@ LangkitRoot[1:1-55:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:27-4:38]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:27-4:38]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:28-4:38]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:28-4:38]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[4:40-4:43]: "("
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:44-4:52]
@@ -14631,7 +14631,7 @@ LangkitRoot[1:1-55:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[7:21-7:32]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[7:21-7:32]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[7:22-7:32]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[7:22-7:32]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[11:1-16:2]
 |  |  |doc:
@@ -15343,7 +15343,7 @@ LangkitRoot[1:1-25:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:21-3:28]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:21-3:28]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:22-3:28]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[3:22-3:28]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[7:1-8:2]
 |  |  |doc:
@@ -15709,7 +15709,7 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:22-7:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:22-7:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:23-7:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[7:23-7:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:21]
 |  |  |  |  |  |doc:
@@ -15750,7 +15750,7 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |  |  GrammarExprList[9:18-9:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[9:18-9:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[13:1-14:2]
 |  |  |doc:
@@ -16184,7 +16184,7 @@ LangkitRoot[1:1-28:2]
 |  |  |  |  |  |  |  |  GrammarExprList[4:18-4:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[4:18-4:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:19-4:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[4:19-4:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[8:1-9:2]
 |  |  |doc:
@@ -16668,7 +16668,7 @@ LangkitRoot[1:1-73:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:20-7:31]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:20-7:31]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:21-7:31]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[7:21-7:31]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:37]
 |  |  |  |  |  |doc:
@@ -16689,7 +16689,7 @@ LangkitRoot[1:1-73:2]
 |  |  |  |  |  |  |  |  GrammarExprList[8:29-8:36]
 |  |  |  |  |  |  |  |  |  GrammarToken[8:29-8:36]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:30-8:36]: String
+|  |  |  |  |  |  |  |  |  |  RefId[8:30-8:36]: string
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[12:1-35:2]
 |  |  |doc:
@@ -17484,7 +17484,7 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-8:6]
 |  |  |  |  |  |doc:
@@ -18078,7 +18078,7 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:24-2:32]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:24-2:32]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:25-2:32]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[2:25-2:32]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[3:5-3:45]
 |  |  |  |  |  |doc:
@@ -18126,7 +18126,7 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  GrammarExprList[4:30-4:41]
 |  |  |  |  |  |  |  |  |  GrammarToken[4:30-4:41]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:31-4:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[4:31-4:41]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[5:5-10:6]
 |  |  |  |  |  |doc:
@@ -18224,7 +18224,7 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  |  GrammarToken[13:9-13:16]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[13:10-13:16]: Indent
+|  |  |  |  |  |  |  |  |  |  RefId[13:10-13:16]: indent
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarList[14:9-15:49]
 |  |  |  |  |  |  |  |  |  |kind:
@@ -18271,11 +18271,11 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  |  |sep:
 |  |  |  |  |  |  |  |  |  |  GrammarToken[15:40-15:48]
 |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  RefId[15:41-15:48]: Newline
+|  |  |  |  |  |  |  |  |  |  |  RefId[15:41-15:48]: newline
 |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarToken[15:50-15:57]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[15:51-15:57]: Dedent
+|  |  |  |  |  |  |  |  |  |  RefId[15:51-15:57]: dedent
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[17:5-17:63]
 |  |  |  |  |  |doc:
@@ -18300,7 +18300,7 @@ LangkitRoot[1:1-44:2]
 |  |  |  |  |  |  |  |  |  |  RefId[17:27-17:37]: identifier
 |  |  |  |  |  |  |  |  |  GrammarToken[17:38-17:46]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[17:39-17:46]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[17:39-17:46]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarList[17:47-17:62]
 |  |  |  |  |  |  |  |  |  |kind:
@@ -19101,7 +19101,7 @@ LangkitRoot[1:1-28:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[7:1-15:2]
 |  |  |doc:
@@ -20104,7 +20104,7 @@ LangkitRoot[1:1-39:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:18-6:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:18-6:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:19-6:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[6:19-6:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[10:1-11:2]
 |  |  |doc:
@@ -20569,7 +20569,7 @@ LangkitRoot[1:1-85:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:18-2:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:18-2:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:19-2:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[2:19-2:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[3:5-3:67]
 |  |  |  |  |  |doc:
@@ -20682,7 +20682,7 @@ LangkitRoot[1:1-85:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:16-6:23]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:16-6:23]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:17-6:23]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:17-6:23]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:21]
 |  |  |  |  |  |doc:
@@ -21837,7 +21837,7 @@ LangkitRoot[1:1-81:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:18-2:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:18-2:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:19-2:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[2:19-2:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[3:5-6:7]
 |  |  |  |  |  |doc:
@@ -22038,7 +22038,7 @@ LangkitRoot[1:1-81:2]
 |  |  |  |  |  |  |  |  GrammarExprList[12:16-12:23]
 |  |  |  |  |  |  |  |  |  GrammarToken[12:16-12:23]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[12:17-12:23]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[12:17-12:23]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[13:5-13:21]
 |  |  |  |  |  |doc:
@@ -22850,7 +22850,7 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[2:55-2:62]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[2:55-2:62]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:56-2:62]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[2:56-2:62]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  FullDecl[6:1-7:2]
@@ -23052,7 +23052,7 @@ LangkitRoot[1:1-93:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:10-3:21]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:10-3:21]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:11-3:21]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:11-3:21]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:23-3:27]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |node_name:
@@ -23127,7 +23127,7 @@ LangkitRoot[1:1-93:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:16-6:23]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:16-6:23]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:17-6:23]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:17-6:23]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:28]
 |  |  |  |  |  |doc:
@@ -23148,7 +23148,7 @@ LangkitRoot[1:1-93:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:16-7:27]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:16-7:27]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:17-7:27]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[7:17-7:27]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:42]
 |  |  |  |  |  |doc:
@@ -24022,7 +24022,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:14-3:25]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:14-3:25]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:15-3:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:15-3:25]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarPick[3:27-3:66]
 |  |  |  |  |  |  |  |  |  |exprs:
@@ -24048,7 +24048,7 @@ LangkitRoot[1:1-34:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:47-3:58]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:47-3:58]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:48-3:58]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[3:48-3:58]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  |  |  |  TokenLit[3:62-3:65]: ")"
@@ -25626,7 +25626,7 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:18-4:29]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:18-4:29]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:19-4:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[4:19-4:29]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarList[4:31-4:52]
 |  |  |  |  |  |  |  |  |  |kind:
@@ -25661,7 +25661,7 @@ LangkitRoot[1:1-32:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:26-6:33]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:26-6:33]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:27-6:33]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:27-6:33]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[10:1-11:2]
 |  |  |doc:
@@ -25957,7 +25957,7 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:20-2:27]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:20-2:27]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:21-2:27]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[2:21-2:27]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[3:5-3:40]
 |  |  |  |  |  |doc:
@@ -25981,7 +25981,7 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  |  |  RefId[3:23-3:26]: lit
 |  |  |  |  |  |  |  |  |  GrammarToken[3:27-3:35]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:28-3:35]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[3:28-3:35]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[3:36-3:39]
 |  |  |  |  |  |  |  |  |  |node_name:
@@ -26008,18 +26008,18 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  |  |  RefId[4:23-4:26]: lit
 |  |  |  |  |  |  |  |  |  GrammarToken[4:27-4:35]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:28-4:35]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[4:28-4:35]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarToken[4:36-4:43]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:37-4:43]: Indent
+|  |  |  |  |  |  |  |  |  |  RefId[4:37-4:43]: indent
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[4:44-4:47]
 |  |  |  |  |  |  |  |  |  |node_name:
 |  |  |  |  |  |  |  |  |  |  RefId[4:44-4:47]: lit
 |  |  |  |  |  |  |  |  |  GrammarToken[4:48-4:55]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:49-4:55]: Dedent
+|  |  |  |  |  |  |  |  |  |  RefId[4:49-4:55]: dedent
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[5:5-9:6]
 |  |  |  |  |  |doc:
@@ -26043,29 +26043,29 @@ LangkitRoot[1:1-35:2]
 |  |  |  |  |  |  |  |  |  |  RefId[6:9-6:12]: lit
 |  |  |  |  |  |  |  |  |  GrammarToken[7:9-7:17]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:10-7:17]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[7:10-7:17]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[8:9-8:12]
 |  |  |  |  |  |  |  |  |  |node_name:
 |  |  |  |  |  |  |  |  |  |  RefId[8:9-8:12]: lit
 |  |  |  |  |  |  |  |  |  GrammarToken[8:13-8:21]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:14-8:21]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[8:14-8:21]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarToken[8:22-8:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:23-8:29]: Indent
+|  |  |  |  |  |  |  |  |  |  RefId[8:23-8:29]: indent
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[8:30-8:33]
 |  |  |  |  |  |  |  |  |  |node_name:
 |  |  |  |  |  |  |  |  |  |  RefId[8:30-8:33]: lit
 |  |  |  |  |  |  |  |  |  GrammarToken[8:34-8:42]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:35-8:42]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[8:35-8:42]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarToken[8:43-8:50]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:44-8:50]: Dedent
+|  |  |  |  |  |  |  |  |  |  RefId[8:44-8:50]: dedent
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[8:51-8:54]
 |  |  |  |  |  |  |  |  |  |node_name:
@@ -26662,7 +26662,7 @@ LangkitRoot[1:1-43:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:22-6:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:22-6:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:34]
 |  |  |  |  |  |doc:
@@ -26709,7 +26709,7 @@ LangkitRoot[1:1-43:2]
 |  |  |  |  |  |  |  |  GrammarExprList[8:18-8:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[8:18-8:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:19-8:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[8:19-8:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[12:1-13:2]
 |  |  |doc:
@@ -27157,7 +27157,7 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:18-6:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:18-6:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:19-6:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[6:19-6:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[10:1-11:2]
 |  |  |doc:
@@ -27625,7 +27625,7 @@ LangkitRoot[1:1-19:2]
 |  |  |  |  |  |  |  |  GrammarExprList[4:18-4:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[4:18-4:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:19-4:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[4:19-4:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[8:1-9:2]
 |  |  |doc:
@@ -27830,7 +27830,7 @@ LangkitRoot[1:1-11:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[7:1-8:2]
 |  |  |doc:
@@ -28105,7 +28105,7 @@ LangkitRoot[1:1-43:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:22-6:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:22-6:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:34]
 |  |  |  |  |  |doc:
@@ -28152,7 +28152,7 @@ LangkitRoot[1:1-43:2]
 |  |  |  |  |  |  |  |  GrammarExprList[8:18-8:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[8:18-8:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:19-8:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[8:19-8:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[12:1-13:2]
 |  |  |doc:
@@ -28554,7 +28554,7 @@ LangkitRoot[1:1-55:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[8:24-8:31]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[8:24-8:31]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:25-8:31]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:25-8:31]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[8:35-8:52]
 |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[8:35-8:52]
@@ -28564,7 +28564,7 @@ LangkitRoot[1:1-55:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[8:40-8:51]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[8:40-8:51]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:41-8:51]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:41-8:51]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[12:1-31:2]
 |  |  |doc:
@@ -29660,7 +29660,7 @@ LangkitRoot[1:1-68:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:14-6:25]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:14-6:25]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:15-6:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[6:15-6:25]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:41]
 |  |  |  |  |  |doc:
@@ -30500,7 +30500,7 @@ LangkitRoot[1:1-62:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[6:30-6:41]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[6:30-6:41]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[6:31-6:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[6:31-6:41]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[6:43-6:46]: "{"
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[6:47-6:51]
@@ -30531,7 +30531,7 @@ LangkitRoot[1:1-62:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[8:19-8:30]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[8:19-8:30]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[8:20-8:30]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[8:20-8:30]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[8:32-8:35]: "="
 |  |  |  |  |  |  |  |  |  GrammarRuleRef[8:36-8:40]
@@ -30569,7 +30569,7 @@ LangkitRoot[1:1-62:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[10:30-10:41]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[10:30-10:41]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[10:31-10:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[10:31-10:41]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[11:11-11:26]
 |  |  |  |  |  |  |  |  |  |  ParseNodeExpr[11:11-11:26]
@@ -30579,7 +30579,7 @@ LangkitRoot[1:1-62:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[11:14-11:25]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[11:14-11:25]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[11:15-11:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[11:15-11:25]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[16:1-17:2]
 |  |  |doc:
@@ -31413,7 +31413,7 @@ LangkitRoot[1:1-78:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:14-7:25]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:14-7:25]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:15-7:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[7:15-7:25]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:41]
 |  |  |  |  |  |doc:
@@ -32508,7 +32508,7 @@ LangkitRoot[1:1-78:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:14-7:25]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:14-7:25]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:15-7:25]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[7:15-7:25]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:41]
 |  |  |  |  |  |doc:
@@ -33656,7 +33656,7 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:22-7:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:22-7:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:23-7:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[7:23-7:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[8:5-8:21]
 |  |  |  |  |  |doc:
@@ -33697,7 +33697,7 @@ LangkitRoot[1:1-46:2]
 |  |  |  |  |  |  |  |  GrammarExprList[9:18-9:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[9:18-9:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[9:19-9:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[13:1-14:2]
 |  |  |doc:
@@ -34080,7 +34080,7 @@ LangkitRoot[1:1-12:2]
 |  |  |  |  |  |  |  |  |  GrammarExprList[2:34-2:45]
 |  |  |  |  |  |  |  |  |  |  GrammarToken[2:34-2:45]
 |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  RefId[2:35-2:45]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  RefId[2:35-2:45]: identifier
 |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |prop_ref:
 |  |  |  |  |  |  |  |  DotExpr[2:55-2:75]
@@ -34306,7 +34306,7 @@ LangkitRoot[1:1-90:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:22-6:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:22-6:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:21]
 |  |  |  |  |  |doc:
@@ -34347,7 +34347,7 @@ LangkitRoot[1:1-90:2]
 |  |  |  |  |  |  |  |  GrammarExprList[8:18-8:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[8:18-8:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:19-8:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[8:19-8:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[12:1-37:2]
 |  |  |doc:
@@ -35878,7 +35878,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:16-2:27]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:16-2:27]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:17-2:27]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[2:17-2:27]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[3:5-3:33]
 |  |  |  |  |  |doc:
@@ -35899,7 +35899,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:25-3:32]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:25-3:32]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:26-3:32]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[3:26-3:32]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-4:33]
 |  |  |  |  |  |doc:
@@ -35920,7 +35920,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  GrammarExprList[4:25-4:32]
 |  |  |  |  |  |  |  |  |  GrammarToken[4:25-4:32]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[4:26-4:32]: String
+|  |  |  |  |  |  |  |  |  |  RefId[4:26-4:32]: string
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[5:5-5:56]
 |  |  |  |  |  |doc:
@@ -35973,7 +35973,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:14-6:22]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:14-6:22]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:15-6:22]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[6:15-6:22]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-9:6]
 |  |  |  |  |  |doc:
@@ -36042,7 +36042,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  |  GrammarToken[8:61-8:73]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[8:62-8:73]: Termination
+|  |  |  |  |  |  |  |  |  |  RefId[8:62-8:73]: termination
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[10:5-12:6]
 |  |  |  |  |  |doc:
@@ -36077,7 +36077,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  |  |  |  |  TokenLit[11:40-11:43]: ")"
 |  |  |  |  |  |  |  |  |  GrammarToken[11:45-11:53]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[11:46-11:53]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[11:46-11:53]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[13:5-13:35]
 |  |  |  |  |  |doc:
@@ -36366,7 +36366,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  TokenLit[25:62-25:65]: ";"
 |  |  |  |  |  |  |  |  |  GrammarToken[25:68-25:76]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[25:69-25:76]: Newline
+|  |  |  |  |  |  |  |  |  |  RefId[25:69-25:76]: newline
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[26:5-36:6]
 |  |  |  |  |  |doc:
@@ -37469,7 +37469,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[129:9-129:16]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[129:10-129:16]: Indent
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[129:10-129:16]: indent
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarList[130:9-130:60]
 |  |  |  |  |  |  |  |  |  |  |  |  |kind:
@@ -37516,7 +37516,7 @@ LangkitRoot[1:1-652:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |sep: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[130:61-130:68]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[130:62-130:68]: Dedent
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[130:62-130:68]: dedent
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  GrammarExprList[131:11-131:22]
 |  |  |  |  |  |  |  |  |  |  GrammarRuleRef[131:11-131:22]
@@ -43531,7 +43531,7 @@ LangkitRoot[1:1-76:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-4:37]
 |  |  |  |  |  |doc:
@@ -44447,7 +44447,7 @@ LangkitRoot[1:1-59:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-6:6]
 |  |  |  |  |  |doc:
@@ -45297,7 +45297,7 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[4:5-6:6]
 |  |  |  |  |  |doc:
@@ -45400,7 +45400,7 @@ LangkitRoot[1:1-45:2]
 |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[11:19-11:26]
 |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[11:19-11:26]
 |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[11:20-11:26]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  RefId[11:20-11:26]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[16:1-17:2]
 |  |  |doc:
@@ -45754,7 +45754,7 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  |  |  GrammarExprList[3:25-3:36]
 |  |  |  |  |  |  |  |  |  |  |  GrammarToken[3:25-3:36]
 |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:26-3:36]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  RefId[3:26-3:36]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  TokenLit[3:38-3:41]: "("
 |  |  |  |  |  |  |  |  |  GrammarList[3:42-3:54]
@@ -46554,7 +46554,7 @@ LangkitRoot[1:1-12:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:37-2:48]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:37-2:48]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:48]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:48]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -47274,7 +47274,7 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  GrammarExprList[3:18-3:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[3:18-3:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[3:19-3:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[7:1-10:2]
 |  |  |doc:
@@ -47509,7 +47509,7 @@ LangkitRoot[1:1-16:2]
 |  |  |  |  |  |  |  |  GrammarExprList[5:18-5:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[5:18-5:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[5:19-5:29]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[5:19-5:29]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[9:1-10:2]
 |  |  |doc:
@@ -47786,7 +47786,7 @@ LangkitRoot[1:1-10:2]
 |  |  |  |  |  |  |  |  GrammarExprList[2:37-2:44]
 |  |  |  |  |  |  |  |  |  GrammarToken[2:37-2:44]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:44]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[2:38-2:44]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[6:1-7:2]
 |  |  |doc:
@@ -48540,7 +48540,7 @@ LangkitRoot[1:1-19:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:30-6:41]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:30-6:41]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:31-6:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[6:31-6:41]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[10:1-11:2]
 |  |  |doc:
@@ -48713,7 +48713,7 @@ LangkitRoot[1:1-26:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[4:49-4:56]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[4:49-4:56]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[4:50-4:56]: Number
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[4:50-4:56]: number
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  TokenLit[4:58-4:61]: "}"
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  TokenLit[4:63-4:66]: ";"
@@ -48737,7 +48737,7 @@ LangkitRoot[1:1-26:2]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarExprList[8:30-8:41]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarToken[8:30-8:41]
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:31-8:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  RefId[8:31-8:41]: identifier
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  TokenLit[8:43-8:46]: ")"
 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  GrammarNull[8:48-8:60]
@@ -48946,7 +48946,7 @@ LangkitRoot[1:1-26:2]
 |  |  |  |  |  |  |  |  GrammarExprList[6:22-6:29]
 |  |  |  |  |  |  |  |  |  GrammarToken[6:22-6:29]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: Number
+|  |  |  |  |  |  |  |  |  |  RefId[6:23-6:29]: number
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  |  |  |  FullDecl[7:5-7:42]
 |  |  |  |  |  |doc:
@@ -48967,7 +48967,7 @@ LangkitRoot[1:1-26:2]
 |  |  |  |  |  |  |  |  GrammarExprList[7:30-7:41]
 |  |  |  |  |  |  |  |  |  GrammarToken[7:30-7:41]
 |  |  |  |  |  |  |  |  |  |token_name:
-|  |  |  |  |  |  |  |  |  |  RefId[7:31-7:41]: Identifier
+|  |  |  |  |  |  |  |  |  |  RefId[7:31-7:41]: identifier
 |  |  |  |  |  |  |  |  |  |expr: <null>
 |  |  FullDecl[11:1-12:2]
 |  |  |doc:

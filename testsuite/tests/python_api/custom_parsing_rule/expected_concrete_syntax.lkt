@@ -1,6 +1,6 @@
 grammar foo_grammar {
     @main_rule main_rule <- list+(def_rule)
-    name <- Name(@Identifier)
+    name <- Name(@identifier)
     def_rule <- Def(
         "def" name ?("(" list+(name, ",") ")") "=" expr
     )
@@ -8,7 +8,7 @@ grammar foo_grammar {
         | Plus(expr "+" expr)
         | ParentExpr("(" expr ")")
         | Ref(name)
-        | Literal(@Number)
+        | Literal(@number)
     )
 
 }

@@ -1,7 +1,7 @@
 grammar foo_grammar {
-    newline <- Newline(@Newline)
+    newline <- Newline(@newline)
     expr <- or(call | identifier | indented)
-    identifier <- Identifier(@Identifier)
+    identifier <- Identifier(@identifier)
     call <- Call(
         identifier
         "("
@@ -10,11 +10,11 @@ grammar foo_grammar {
     )
     indented <- Indented(
         discard(list*(newline))
-        @Indent
+        @indent
         list+((discard(list*(newline))
-        expr discard(list*(newline))), @Newline) @Dedent
+        expr discard(list*(newline))), @newline) @dedent
     )
-    def_node <- Def("def" identifier @Newline list+(indented))
+    def_node <- Def("def" identifier @newline list+(indented))
     @main_rule main_rule <- list+((discard(list*(newline))
     def_node discard(list*(newline))))
 

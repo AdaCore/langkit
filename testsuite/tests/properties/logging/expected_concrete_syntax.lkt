@@ -3,7 +3,7 @@ grammar foo_grammar {
     decl <- Decl(HasPlus("+") name "(" ref_list ")")
     ref_list <- list*(ref)
     ref <- Ref(name)
-    name <- Name(@Identifier)
+    name <- Name(@identifier)
 
 }
 
