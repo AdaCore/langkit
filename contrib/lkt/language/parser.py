@@ -92,6 +92,18 @@ class LKNode(ASTNode):
         """
         pass
 
+    @langkit_property(return_type=T.String)
+    def string_join(strns=T.String.array, sep=T.String):
+        """
+        Static method. Return the array of strings joined by separator ``sep``.
+        """
+        arr_len = Var(strns.length)
+
+        return strns.mapcat(lambda i, n: (
+            If(i == arr_len - 1, n, n.concat(sep))
+        ))
+
+
 class LangkitRoot(LKNode):
     """
     For the moment, root node of a lkt compilation unit.
@@ -759,6 +771,15 @@ class InstantiatedGenericType(TypeDecl):
     inner_type_decl = UserField(type=T.TypeDecl, public=False)
     actuals = UserField(type=T.TypeDecl.array, public=False)
     syn_name = NullField()
+    name = Property(Self.inner_type_decl.name)
+
+    full_name = Property(
+        Self.name.image.concat(String('[')).concat(
+            Self.string_join(Self.actuals.map(lambda t: t.full_name),
+                             sep=String(", "))
+        ).concat(String(']'))
+    )
+
     generic_decl = Property(
         Entity.inner_type_decl.parent.as_entity.cast_or_raise(T.GenericDecl)
     )
