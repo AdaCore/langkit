@@ -17,3 +17,21 @@
 
     fun test_if_invalid_1(): Int = if true then 1 else "2"
 }
+
+generic [C] struct Pair {
+    a : C
+    b : C
+}
+
+generic [C, D] struct Tuple2 {
+    a : C
+    b : D
+}
+
+class B : A {
+    fun test_generic_constructor(): Pair[Int] = Pair[Int](12, 15)
+    fun test_generic_component_access(): Int = Pair[Int](12,  15).a
+    fun test_invalid_generic_type(): Pair[Int] = Pair[Int](12, 15).a
+    fun test_generic_component_access_2(): Bool = Tuple2[Int, Bool](12, true).b
+    fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
+}
