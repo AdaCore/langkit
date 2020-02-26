@@ -464,6 +464,8 @@ class DotExpr(Expr):
     prefix = Field(type=T.Expr)
     suffix = Field(type=T.RefId)
 
+    expr_context_free_type = Property(Entity.suffix.expr_context_free_type)
+
 
 class NullCondDottedName(DotExpr):
     """
