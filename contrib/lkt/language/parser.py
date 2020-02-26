@@ -6,7 +6,7 @@ from langkit.dsl import (
 )
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
 from langkit.expressions import (
-    AbstractProperty, EmptyEnv, Entity, If, No, Not, Or, Property,
+    AbstractProperty, And, EmptyEnv, Entity, If, No, Not, Or, Property,
     PropertyError, Self, String, Var, ignore, langkit_property
 )
 from langkit.parsers import (
@@ -268,29 +268,64 @@ class Expr(LKNode):
         )
 
     @langkit_property(return_type=T.TypeDecl.entity)
-    def check_expected_type(expected_type=T.TypeDecl.entity,
-                            raise_if_no_type=(T.Bool, True)):
+    def check_type(typ=T.TypeDecl.entity, raise_if_no_type=(T.Bool, True)):
         """
         Check that there is an expected type, return it, or raise an error
         otherwise.
         """
-        return expected_type.then(
+        return typ.then(
             lambda et: et,
             default_val=If(raise_if_no_type,
                            PropertyError(T.TypeDecl.entity, "no type"),
-                           expected_type),
+                           typ),
             # TODO: Enhance diagnostics quality ...
         )
+
+    @langkit_property(return_type=T.TypeDecl.entity, public=True)
+    def expr_context_free_type():
+        """
+        If the type of this expression can be determined with no bottom up
+        context, return it. This will be used by `expr_type_impl`'s default
+        implementation.
+        """
+        return No(T.TypeDecl.entity)
 
     @langkit_property(return_type=TypingResult)
     def expr_type_impl(expected_type=T.TypeDecl.entity,
                        raise_if_no_type=(T.Bool, True)):
         """
-        Overriding type specific implementation for Expr.expr_type.
+        Overriding type specific implementation for Expr.expr_type. Default
+        implementation has the following behavior:
+
+        - If there is a context free type for this expression *and* an expected
+          type, then check that they match, if they don't, return an error
+          TypingResult.
+
+        - If there is only a context free type or an expected type, return this
+          type.
+
+        - If there is none, raise a PropertyError.
         """
-        return TypingResult.new(
-            expr_type=Entity.check_expected_type(expected_type,
-                                                 raise_if_no_type),
+        cf_type = Var(Entity.expr_context_free_type)
+
+        return If(
+            # We have both a context free type and an expected type: check that
+            # they match.
+            And(Not(expected_type.is_null), Not(cf_type.is_null)),
+
+            If(
+                expected_type.matches(cf_type),
+                TypingResult.new(expr_type=expected_type),
+                expected_type.expected_type_error(
+                    String("type ").concat(cf_type.full_name)
+                )
+            ),
+
+            # We don't have both types: check that there is at least one and
+            # return it, else, raise an error if raise_if_no_type is true.
+            TypingResult.new(expr_type=Entity.check_type(
+                expected_type._or(cf_type), raise_if_no_type
+            )),
         )
 
     @langkit_property(return_type=T.Decl.entity, public=True)
@@ -448,24 +483,9 @@ class RefId(Id):
     def referenced_decl():
         return Entity.scope.get_first(Self.symbol).cast(T.Decl)
 
-    @langkit_property(return_type=TypingResult)
-    def expr_type_impl(expected_type=T.TypeDecl.entity,
-                       raise_if_no_type=(T.Bool, True)):
-        ignore(raise_if_no_type)
-        id_type = Var(
-            Entity.referenced_decl.cast_or_raise(T.BaseValDecl).get_type
-        )
-
-        return expected_type.then(
-            lambda et: If(
-                et.matches(id_type),
-                TypingResult.new(expr_type=et),
-                et.expected_type_error(
-                    String("type ").concat(id_type.syn_name.text)
-                )
-            ),
-            default_val=TypingResult.new(expr_type=id_type)
-        )
+    expr_context_free_type = Property(
+        Entity.referenced_decl.cast_or_raise(T.BaseValDecl).get_type
+    )
 
     @langkit_property()
     def scope():
@@ -1161,7 +1181,7 @@ class Lit(Expr):
     def expr_type_impl(expected_type=T.TypeDecl.entity,
                        raise_if_no_type=(T.Bool, True)):
         exp_type = Var(
-            Entity.check_expected_type(expected_type, raise_if_no_type)
+            Entity.check_type(expected_type, raise_if_no_type)
         )
         return If(
             Self.lit_predicate(exp_type),
