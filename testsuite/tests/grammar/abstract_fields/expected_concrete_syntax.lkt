@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule main_rule <- list+(decl)
     decl <- or(var_decl | fun_decl)
     var_decl <- VarDecl(VarKeyword("var") name "=" expr ";")

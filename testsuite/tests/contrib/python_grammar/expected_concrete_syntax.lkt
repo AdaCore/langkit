@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     name <- Id(@Identifier)
     number <- NumberLit(@Number)
     string <- StringLit(@String)

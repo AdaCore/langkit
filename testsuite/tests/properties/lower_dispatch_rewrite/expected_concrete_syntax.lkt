@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     name <- Name(@Identifier)
     @main_rule main_rule <- list+(or(
         | Def("def" name imports vars expr)

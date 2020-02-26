@@ -1067,7 +1067,7 @@ def unparse_lang(ctx):
     )
 
     template = """
-    grammar ${ctx.lang_name}Grammar {$i$hl
+    grammar ${ctx.lang_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
         ${('@main_rule '
            if name == ctx.grammar.main_rule_name

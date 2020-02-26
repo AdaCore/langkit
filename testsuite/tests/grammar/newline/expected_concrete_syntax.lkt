@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     lit <- Literal(@Number)
     nl <- NewLineNode(lit @Newline lit)
     ind <- IndentNode(lit @Newline @Indent lit @Dedent)

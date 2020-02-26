@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule main_rule <- defs
     defs <- list*(def_rule)
     def_rule <- or(scope | var)

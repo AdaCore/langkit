@@ -1,4 +1,4 @@
-grammar FooGrammar {
+grammar foo_grammar {
     @main_rule rule1 <- Example("example")
     @foo rule2 <- Example("example")
 }
