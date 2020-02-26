@@ -1406,17 +1406,17 @@ def always_make_progress(parser):
     return not isinstance(parser, (Opt, Null))
 
 
-def Pick(*parsers):
+def Pick(*parsers, **kwargs):
     """
     Parser that scans a sequence of sub-parsers, remove tokens and ignored
     sub-parsers, and extract the only significant sub-result.
 
     If there are multiple significant sub-results, raises an error.
     """
-    return _pick_impl(parsers)
+    return _pick_impl(parsers, **kwargs)
 
 
-def _pick_impl(parsers, no_checks=False):
+def _pick_impl(parsers, no_checks=False, location=None):
     """
     Return a parser to scan a sequence of sub-parsers, removing tokens and
     ignored sub-parsers and extracting the only significant sub-result.
@@ -1424,7 +1424,7 @@ def _pick_impl(parsers, no_checks=False):
     :param bool no_checks: If left to false, check that only one parser in
         `parsers` generates an node. Otherwise, don't do this check.
     """
-    location = extract_library_location()
+    location = location or extract_library_location()
     parsers = [resolve(p) for p in parsers if p]
     pick_parser_idx = -1
     for i, p in enumerate(parsers):
@@ -1445,9 +1445,9 @@ def _pick_impl(parsers, no_checks=False):
         return parsers[0]
 
     if pick_parser_idx == -1:
-        return _Row(*parsers)
+        return _Row(*parsers, location=location)
     else:
-        return _Extract(_Row(*parsers), pick_parser_idx)
+        return _Extract(_Row(*parsers), pick_parser_idx, location=location)
 
 
 class _Row(Parser):
