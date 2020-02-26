@@ -40,6 +40,15 @@ class EnvKV(Struct):
     value = UserField(T.LKNode)
 
 
+class ParamMatch(Struct):
+    """
+    Helper data structure to implement parameter matching.
+    """
+    has_matched = UserField(type=T.Bool, default_value=True)
+    actual = UserField(type=T.Param.entity)
+    formal = UserField(type=T.BaseValDecl.entity)
+
+
 @abstract
 class LKNode(ASTNode):
     """
@@ -91,6 +100,24 @@ class LKNode(ASTNode):
         being careful about how this property is used is important.
         """
         pass
+
+    @langkit_property()
+    def static_match_params(formals=T.BaseValDecl.entity.array,
+                            actuals=T.Param.entity.array):
+        """
+        Static method. Returns an array of ParamMatch structures, matching the
+        actual parameters of a call to the formal parameters of the
+        declaration. This will work for types constructors and function calls.
+        """
+        return actuals.map(lambda i, a: If(
+            a.name.is_null,
+            formals.at(i).then(lambda f: ParamMatch.new(actual=a, formal=f)),
+            a.name.then(
+                lambda n: formals.find(lambda f: f.name == n.symbol).then(
+                    lambda f: ParamMatch.new(actual=a, formal=f)
+                )
+            )
+        ))
 
     @langkit_property(return_type=T.String)
     def string_join(strns=T.String.array, sep=T.String):
@@ -244,6 +271,10 @@ class Expr(LKNode):
                 if_expr.expected_type
             ),
 
+            lambda p=T.Param: p.call_expr.match_params().find(
+                lambda pm: pm.actual == p
+            ).then(lambda pm: pm.formal.get_type),
+
             lambda _: No(T.TypeDecl.entity)
         )
 
@@ -264,7 +295,8 @@ class Expr(LKNode):
             Entity.in_type_ref,
             Entity.is_a(T.DefId),
             Entity.in_decl_annotation,
-            Entity.in_grammar_rule
+            Entity.in_grammar_rule,
+            Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl)
         ))
 
     @langkit_property(return_type=TypingResult, public=True)
@@ -683,6 +715,11 @@ class TypeDecl(Decl):
         """
     )
 
+    fields = Property(
+        No(T.BaseValDecl.entity.array),
+        doc="""Return the list of fields for this type"""
+    )
+
 
 class GenericFormalTypeDecl(TypeDecl):
     """
@@ -700,6 +737,11 @@ class NamedTypeDecl(TypeDecl):
     decls = AbstractField(type=DeclBlock)
 
     type_scope = Property(Entity._.decls.children_env)
+
+    fields = Property(Entity.decls.filtermap(
+        lambda d: d.decl.cast_or_raise(T.BaseValDecl),
+        lambda d: d.decl.is_a(T.BaseValDecl)
+    ))
 
 
 class GenericParamAssoc(Struct):
@@ -806,6 +848,7 @@ class InstantiatedGenericType(TypeDecl):
 
     type_scope = Property(Entity.get_instantiated_type.type_scope)
 
+    fields = Property(Entity.get_instantiated_type.fields)
 
 
 class EnumTypeDecl(NamedTypeDecl):
@@ -1053,6 +1096,10 @@ class Param(LKNode):
     name = Field(type=T.RefId)
     value = Field(type=T.Expr)
 
+    call_expr = Property(
+        Entity.parents.find(lambda p: p.is_a(T.CallExpr)).cast(T.CallExpr)
+    )
+
 
 class ParenExpr(Expr):
     """
@@ -1068,6 +1115,37 @@ class CallExpr(Expr):
     name = Field(type=T.Expr)
     args = Field(type=T.Param.list)
 
+    expr_context_free_type = Property(
+        Entity.name.referenced_decl.then(
+            lambda rd: rd.match(
+                lambda fd=T.FunDecl: fd.return_type.designated_type,
+                lambda td=T.TypeDecl: td,
+                lambda _:
+                PropertyError(T.TypeDecl.entity, "should not happen"),
+            )
+        )
+    )
+
+    formals = Property(
+        Entity.name.referenced_decl.match(
+            lambda fd=T.FunDecl: fd.args.map(
+                lambda p: p.cast_or_raise(T.BaseValDecl)
+            ),
+            lambda td=T.TypeDecl: td.fields,
+            lambda _: PropertyError(T.BaseValDecl.entity.array,
+                                    "Should not happen")
+        )
+    )
+
+    @langkit_property(memoized=True)
+    def match_params():
+        """
+        Returns an array of ParamMatch structures, matching the
+        actual parameters of this call expr to the formals of the entity
+        designated by the callexpr.
+        """
+        return Self.static_match_params(Entity.formals, Entity.args.as_array)
+
 
 class NullCondCallExpr(CallExpr):
     """
@@ -1082,6 +1160,28 @@ class GenericInstantiation(Expr):
     """
     name = Field(type=T.Expr)
     args = Field(type=T.TypeRef.list)
+
+    expr_context_free_type = Property(Entity.designated_type)
+
+    @langkit_property(public=True)
+    def designated_type():
+        """
+        Get the type designated by this instantiation.
+
+        NOTE: for the moment we only have generic types, so that's enough. If
+        we want generic functions at some point we'll have to revisit.
+        """
+        generic_decl = Var(
+            Entity.name.referenced_decl.cast_or_raise(T.GenericDecl)
+        )
+        return generic_decl.get_instantiated_type(
+            Entity.args.map(
+                lambda p: p.designated_type.assert_bare
+                .cast_or_raise(T.TypeDecl)
+            )
+        ).as_bare_entity
+
+    referenced_decl = Property(Entity.designated_type)
 
 
 class ErrorOnNull(Expr):
