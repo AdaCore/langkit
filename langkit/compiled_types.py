@@ -3995,6 +3995,23 @@ class TypeRepo(object):
         def __getattr__(self, name):
             def get():
                 prefix = self.get()
+
+                # The DSL name for automatic ASTNodeType instances for enum
+                # node alternatives is: ``Foo.Bar`` where Foo is the name of
+                # the (abstract) enum node type and Bar is the name of the
+                # alternative. This syntax does not apply directly using
+                # TypeRepo shortcut, so handle it explicitly here.
+                if (
+                    # The following is True iff prefix is an abstract enum node
+                    isinstance(prefix, ASTNodeType) and
+                    prefix.is_enum_node and
+                    not prefix.base.is_enum_node
+                ):
+                    try:
+                        return prefix._alternatives_map[name]
+                    except KeyError:
+                        pass
+
                 if (
                     name in ('array', 'list', 'entity', 'new')
                     or not isinstance(prefix, BaseStructType)
@@ -4011,7 +4028,8 @@ class TypeRepo(object):
                                     if isinstance(prefix, CompiledType) else
                                     prefix),
                             attr=repr(name)
-                        )
+                        ),
+                        ok_for_codegen=True
                     )
             return TypeRepo.Defer(get, '{}.{}'.format(self.label, name))
 

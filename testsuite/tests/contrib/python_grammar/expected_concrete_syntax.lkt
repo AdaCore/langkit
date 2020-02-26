@@ -232,17 +232,17 @@ grammar foo_grammar {
     comparison <- or(
         | CompOp(
             comparison or(
-                | CompOpKindLt("<")
-                | CompOpKindGt(">")
-                | CompOpKindEq("==")
-                | CompOpKindGte(">=")
-                | CompOpKindLte("<=")
-                | CompOpKindDiamond("<>")
-                | CompOpKindNoteq("!=")
-                | CompOpKindIn("in")
-                | CompOpKindNotin("not" "in")
-                | CompOpKindIsnot("is" "not")
-                | CompOpKindIs("is")
+                | CompOpKind.Lt("<")
+                | CompOpKind.Gt(">")
+                | CompOpKind.Eq("==")
+                | CompOpKind.Gte(">=")
+                | CompOpKind.Lte("<=")
+                | CompOpKind.Diamond("<>")
+                | CompOpKind.Noteq("!=")
+                | CompOpKind.In("in")
+                | CompOpKind.Notin("not" "in")
+                | CompOpKind.Isnot("is" "not")
+                | CompOpKind.Is("is")
             ) expr
         )
         | expr
