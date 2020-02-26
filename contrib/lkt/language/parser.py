@@ -137,6 +137,13 @@ class Decl(LKNode):
         Return the symbol corresponding to the name of this declaration.
     """)
 
+    full_name = Property(
+        Self.name.image, doc="""
+        Return the full name of this type, as it should be seen by users/shown
+        in diagnostics.
+        """
+    )
+
     env_spec = EnvSpec(add_to_env_kv(Entity.name, Self))
 
     @langkit_property(return_type=T.Decl)
@@ -613,7 +620,7 @@ class TypeDecl(Decl):
     def expected_type_error(got=T.String):
         return TypingResult.new(
             error_message=String("Expected instance of type '")
-            .concat(Self.syn_name.text)
+            .concat(Self.full_name)
             .concat(String("', got ").concat(got))
         )
 
