@@ -6,8 +6,8 @@ from langkit.dsl import (
 )
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
 from langkit.expressions import (
-    AbstractProperty, Entity, If, No, Not, Or, Property, PropertyError,
-    Self, String, Var, ignore, langkit_property
+    AbstractProperty, EmptyEnv, Entity, If, No, Not, Or, Property,
+    PropertyError, Self, String, Var, ignore, langkit_property
 )
 from langkit.parsers import (
     Discard, Grammar, List, NoBacktrack as cut, Opt, Or as GOr
@@ -623,6 +623,14 @@ class TypeDecl(Decl):
     )
 
 
+class GenericFormalTypeDecl(TypeDecl):
+    """
+    Declaration of a generic formal type in a generic declaration.
+    """
+    syn_name = Field(T.TypeDefId)
+    type_scope = Property(EmptyEnv)
+
+
 @abstract
 class NamedTypeDecl(TypeDecl):
     """
@@ -637,7 +645,7 @@ class GenericDecl(Decl):
     """
     Generic entity declaration.
     """
-    generic_formals = Field(type=T.DefId.list)
+    generic_formals = Field(type=T.GenericFormalTypeDecl.list)
     decl = Field(type=T.Decl)
     name = Property(Self.decl.name)
     syn_name = NullField()
@@ -1311,8 +1319,10 @@ lkt_grammar.add_rules(
     ),
 
     generic_decl=GenericDecl(
-        "generic", "[", List(G.def_id, sep=","), "]", G.bare_decl
+        "generic", "[", List(G.generic_formal_type, sep=","), "]", G.bare_decl
     ),
+
+    generic_formal_type=GenericFormalTypeDecl(G.def_id),
 
     enum_lit_decl=EnumLitDecl(G.def_id),
 
