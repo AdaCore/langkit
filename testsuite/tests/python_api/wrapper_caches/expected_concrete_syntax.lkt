@@ -1,3 +1,29 @@
+@spacing("alphanumericals", "alphanumericals")
+lexer foo_lexer {
+
+    @text whitespace <- p"[ \n\r\t]+"
+    @family("alphanumericals") @text def <- "def"
+    @text var <- "var"
+    @family("alphanumericals") @text error <- "error"
+    @family("alphanumericals") @text example <- "example"
+    @family("alphanumericals") @text null_tok <- "null"
+    @text comma <- ","
+    @text dot <- "."
+    @text semicolon <- ";"
+    @text l_par <- "("
+    @text r_par <- ")"
+    @text l_brace <- "{"
+    @text r_brace <- "}"
+    @text equal <- "="
+    @text plus <- "+"
+    @text minus <- "-"
+    @text less_than <- "<"
+    @family("alphanumericals") @text number <- p"[0-9]+"
+    @family("alphanumericals") @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    @text string <- p"\"[^\"]*\""
+    @newline_after @text comment <- p"#(.?)+"
+
+}
 grammar foo_grammar {
     @main_rule main_rule <- example_list
     example_list <- list+(example)

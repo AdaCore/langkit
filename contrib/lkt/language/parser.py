@@ -10,7 +10,7 @@ from langkit.expressions import (
     Self, String, Var, ignore, langkit_property
 )
 from langkit.parsers import (
-    Grammar, List, NoBacktrack as cut, Opt, Or as GOr
+    Discard, Grammar, List, NoBacktrack as cut, Opt, Or as GOr
 )
 
 
@@ -275,6 +275,56 @@ class Expr(LKNode):
         return No(T.Decl.entity)
 
 
+class LexerDecl(Decl):
+    """
+    Declaration of a language's lexer.
+    """
+    syn_name = Field(type=T.DefId)
+    rules = Field(type=T.LKNode.list)
+
+
+class LexerCaseRule(LKNode):
+    """
+    Lexer construct to introduce a conditional lexing action.
+    """
+    expr = Field(type=T.GrammarExpr)
+    alts = Field(type=T.BaseLexerCaseRuleAlt.list)
+
+
+@abstract
+class BaseLexerCaseRuleAlt(LKNode):
+    """
+    Base class for the different kind of alternatives allowed in a case rule.
+    """
+    send = AbstractField(type=T.LexerCaseRuleSend)
+
+
+class LexerCaseRuleCondAlt(BaseLexerCaseRuleAlt):
+    """
+    Alternative of a case rule which sends the token only if the kind of the
+    previous token is among a given set.
+    """
+    cond_exprs = Field(type=T.RefId.list)
+    send = Field(type=T.LexerCaseRuleSend)
+
+
+class LexerCaseRuleDefaultAlt(BaseLexerCaseRuleAlt):
+    """
+    Default alternative of a case rule which sends the token if all the
+    previous alternatives failed.
+    """
+    send = Field(type=T.LexerCaseRuleSend)
+
+
+class LexerCaseRuleSend(LKNode):
+    """
+    Lexer construction used by case alternatives to represent the token to send
+    if that alternative was chosen.
+    """
+    sent = Field(type=T.RefId)
+    match_size = Field(type=T.NumLit)
+
+
 @abstract
 class BaseGrammarDecl(Decl):
     """
@@ -405,6 +455,20 @@ class RefId(Id):
 class TokenLit(GrammarExpr):
     """
     Grammar expression for a token literal.
+    """
+    token_node = True
+
+
+class TokenNoCaseLit(GrammarExpr):
+    """
+    Grammar expression for a case insensitive token literal.
+    """
+    lit = Field(type=T.TokenLit)
+
+
+class TokenPatternLit(GrammarExpr):
+    """
+    Grammar expression for a pattern literal.
     """
     token_node = True
 
@@ -1085,13 +1149,39 @@ lkt_grammar.add_rules(
 
     doc=Doc(List(G.doc_comment, empty_valid=True)),
 
+    lexer_decl=LexerDecl(
+        "lexer", G.def_id, "{",
+        List(Or(G.decl, G.lexer_case_rule), empty_valid=True),
+        "}"
+    ),
     grammar_decl=GrammarDecl(
         "grammar", G.def_id,
         "{", List(G.decl, empty_valid=True), "}"
     ),
     grammar_rule=GrammarRuleDecl(G.def_id, "<-", G.grammar_expr),
+    lexer_case_rule=LexerCaseRule(
+        "match", G.grammar_primary, "{",
+            List(G.lexer_case_alt, empty_valid=False),
+        "}"
+    ),
+    lexer_case_alt=GOr(
+        LexerCaseRuleCondAlt(
+            "if",
+            Lex.Identifier(match_text="previous_token"),
+            "isa", List(G.ref_id, sep="|", empty_valid=False),
+            "then", G.lexer_case_send
+        ),
+        LexerCaseRuleDefaultAlt(
+            "else", G.lexer_case_send
+        )
+    ),
+    lexer_case_send=LexerCaseRuleSend(
+        Lex.Identifier(match_text="send"), "(", G.ref_id, ",", G.num_lit, ")"
+    ),
     grammar_primary=GOr(
         G.token_literal,
+        G.token_no_case_literal,
+        G.token_pattern_literal,
         G.grammar_cut,
         G.grammar_skip,
         G.grammar_null,
@@ -1141,6 +1231,10 @@ lkt_grammar.add_rules(
         "discard", "(", G.grammar_expr, ")"
     ),
     token_literal=TokenLit(Lex.String),
+    token_no_case_literal=TokenNoCaseLit(
+        Lex.Identifier(match_text="no_case"), "(", G.token_literal, ")"
+    ),
+    token_pattern_literal=TokenPatternLit(Lex.PString),
     parse_node_expr=ParseNodeExpr(
         G.ref_id, "(", List(G.grammar_expr, empty_valid=True), ")"
     ),
@@ -1216,9 +1310,11 @@ lkt_grammar.add_rules(
         G.generic_decl,
         G.type_decl,
         G.fun_decl,
+        G.lexer_decl,
         G.grammar_decl,
         G.grammar_rule,
         G.field_decl,
+        G.val_decl
     ),
 
     decl=FullDecl(
@@ -1305,7 +1401,7 @@ lkt_grammar.add_rules(
     ),
 
     num_lit=NumLit(Lex.Number),
-    string_lit=StringLit(Lex.String),
+    string_lit=StringLit(GOr(Lex.String, Lex.PString)),
 
     if_expr=IfExpr(
         "if", G.expr, "then", G.expr,
