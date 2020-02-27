@@ -6,8 +6,9 @@ from langkit.dsl import (
 )
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
 from langkit.expressions import (
-    AbstractProperty, And, EmptyEnv, Entity, If, No, Not, Or, Property,
-    PropertyError, Self, String, Var, ignore, langkit_property
+    AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv, Entity, If, No,
+    Not, Or, Property, PropertyError, Self, String, Var, ignore,
+    langkit_property
 )
 from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or as GOr
 
@@ -1336,6 +1337,38 @@ class StringLit(Lit):
     String literal expression.
     """
     token_node = True
+
+    @langkit_property(public=True, return_type=T.Bool,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def is_prefixed_string():
+        """
+        Return whether this string is prefixed or not.
+        """
+        pass
+
+    @langkit_property(public=True, return_type=T.Character,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def prefix():
+        """
+        Return the prefix of this string.
+        """
+        pass
+
+    @langkit_property(public=True, return_type=T.String,
+                      external=True, uses_envs=False, uses_entity_info=False)
+    def denoted_value():
+        """
+        Return the content of the given string literal node.
+        """
+        pass
+
+    @langkit_property(return_type=T.Bool)
+    def is_regexp_literal():
+        """
+        Return whether this string literal is actually a regexp literal, by
+        checking that this string is prefixed by 'p'.
+        """
+        return Self.prefix == CharacterLiteral('p')
 
     @langkit_property()
     def lit_predicate(expected_type=T.TypeDecl.entity):

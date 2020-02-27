@@ -75,4 +75,49 @@ package body Liblktlang.Implementation.Extensions is
       return Ret;
    end LK_Node_P_Env_From_Vals_Internal;
 
+   -------------------------------------
+   -- String_Lit_P_Is_Prefixed_String --
+   -------------------------------------
+
+   function String_Lit_P_Is_Prefixed_String
+     (Node : Bare_String_Lit) return Boolean
+   is
+      Tok_Kind : constant Token_Kind :=
+         Kind (Data (Token (Node, Node.Token_Start_Index)));
+   begin
+      return Tok_Kind = lkt_P_String;
+   end String_Lit_P_Is_Prefixed_String;
+
+   -------------------------
+   -- String_Lit_P_Prefix --
+   -------------------------
+
+   function String_Lit_P_Prefix
+     (Node : Bare_String_Lit) return Character_Type
+   is
+      N_Text : constant Text_Type := Text (Node);
+   begin
+      return
+        (if String_Lit_P_Is_Prefixed_String (Node) then
+            N_Text (N_Text'First)
+         else
+            Character_Type'Val (0));
+   end String_Lit_P_Prefix;
+
+   --------------------------------
+   -- String_Lit_P_Denoted_Value --
+   --------------------------------
+
+   function String_Lit_P_Denoted_Value
+     (Node : Bare_String_Lit) return Character_Type_Array_Access
+   is
+      N_Text : constant Text_Type := Text (Node);
+   begin
+      return Create_Character_Type_Array
+        (if String_Lit_P_Is_Prefixed_String (Node) then
+            N_Text (N_Text'First + 2 .. N_Text'Last - 1)
+         else
+            N_Text (N_Text'First + 1 .. N_Text'Last - 1));
+   end String_Lit_P_Denoted_Value;
+
 end Liblktlang.Implementation.Extensions;
