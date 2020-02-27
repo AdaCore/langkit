@@ -11,6 +11,7 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin struct BigInt {}" & ASCII.LF &
      "@builtin struct String {}" & ASCII.LF &
      "@builtin struct Symbol {}" & ASCII.LF &
+     "@builtin struct Regexp {}" & ASCII.LF &
      "@builtin enum Bool (false, true) {}" & ASCII.LF &
      "@builtin generic[T] struct Array {}" & ASCII.LF &
      "";

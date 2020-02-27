@@ -87,6 +87,11 @@ class LKNode(ASTNode):
         doc="Unit method. Return the string builtin type."
     )
 
+    regexp_type = Property(
+        Self.get_builtin_type('Regexp'), public=True,
+        doc="Unit method. Return the regexp builtin type."
+    )
+
     @langkit_property(external=True,
                       uses_entity_info=False,
                       uses_envs=True,
@@ -1384,6 +1389,15 @@ class StringLit(Lit):
         checking that this string is prefixed by 'p'.
         """
         return Self.prefix == CharacterLiteral('p')
+
+    @langkit_property()
+    def expr_context_free_type():
+        return Cond(
+            Self.is_regexp_literal,
+            Self.regexp_type,
+
+            No(T.TypeDecl.entity)
+        )
 
     @langkit_property()
     def expected_type_predicate(expected_type=T.TypeDecl.entity):
