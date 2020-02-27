@@ -839,6 +839,8 @@ class GenericDecl(Decl):
     """
     Generic entity declaration.
     """
+    annotations = Annotations(rebindable=True)
+
     generic_formals = Field(type=T.GenericFormalTypeDecl.list)
     decl = Field(type=T.Decl)
     name = Property(Self.decl.name)
