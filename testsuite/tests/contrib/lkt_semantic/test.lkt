@@ -13,6 +13,13 @@
 
     fun test_int_add_invalid_3(): A = 15 + self
 
+    fun test_regexp_1(): Regexp = p"[a-z]"
+
+    fun test_regexp_2(): Regexp = {
+        val rg = p"[A-Z]";
+        rg
+    }
+
     fun test_if_1(): Int = if true then 1 else 2
 
     fun test_if_invalid_1(): Int = if true then 1 else "2"
