@@ -63,7 +63,4 @@ class Param : FooNode {
 }
 
 @qualifier class PlusQualifier : FooNode {
-
-    ## Return whether this is an instance of PlusQualifierPresent
-    @export fun as_bool (): Boolean
 }

@@ -577,9 +577,6 @@ class ImportStar : PythonNode {
 }
 
 @qualifier class KwArgsFlag : PythonNode {
-
-    ## Return whether this is an instance of KwArgsFlagPresent
-    @export fun as_bool (): Boolean
 }
 
 class NL : PythonNode {
@@ -729,9 +726,6 @@ class WithStmt : Stmt {
 }
 
 @qualifier class VarArgsFlag : PythonNode {
-
-    ## Return whether this is an instance of VarArgsFlagPresent
-    @export fun as_bool (): Boolean
 }
 
 struct EnvAssoc {

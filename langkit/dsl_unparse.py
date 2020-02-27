@@ -1045,7 +1045,7 @@ def emit_node_type(node_type):
         return any(
             builtin_name == prop.name.lower
             for builtin_name, _ in builtin_properties
-        )
+        ) or (prop.original_name.lower == "as_bool" and node_type.is_bool_node)
 
     if base and base.is_enum_node:
         return ""
