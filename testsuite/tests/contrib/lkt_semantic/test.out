@@ -78,10 +78,10 @@ Expr <IfExpr test.lkt:16:28-16:49>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <RefId "true" test.lkt:16:31-16:35>
-     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Id   <RefId "true" test.lkt:16:31-16:35>
-     references <EnumLitDecl "true" __prelude:5:28-5:32>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
 
 Expr <NumLit test.lkt:16:41-16:42>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -96,10 +96,10 @@ Expr <IfExpr test.lkt:18:36-18:59>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <RefId "true" test.lkt:18:39-18:43>
-     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Id   <RefId "true" test.lkt:18:39-18:43>
-     references <EnumLitDecl "true" __prelude:5:28-5:32>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
 
 Expr <NumLit test.lkt:18:49-18:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -199,10 +199,10 @@ Id   <RefId "a" test.lkt:34:68-34:69>
      references <FieldDecl "a" test.lkt:22:5-22:10>
 
 Id   <RefId "Bool" test.lkt:35:44-35:48>
-     references <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Expr <DotExpr test.lkt:35:51-35:80>
-     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Expr <CallExpr test.lkt:35:51-35:78>
      has type <InstantiatedGenericType "Tuple2" test.lkt:26:1-29:2>
@@ -214,19 +214,19 @@ Id   <RefId "Int" test.lkt:35:58-35:61>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Bool" test.lkt:35:63-35:67>
-     references <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Expr <NumLit test.lkt:35:69-35:71>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <RefId "true" test.lkt:35:73-35:77>
-     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Id   <RefId "true" test.lkt:35:73-35:77>
-     references <EnumLitDecl "true" __prelude:5:28-5:32>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
 
 Expr <RefId "b" test.lkt:35:79-35:80>
-     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Id   <RefId "b" test.lkt:35:79-35:80>
      references <FieldDecl "b" test.lkt:28:5-28:10>
@@ -238,10 +238,10 @@ Id   <RefId "Int" test.lkt:36:47-36:50>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Bool" test.lkt:36:52-36:56>
-     references <EnumTypeDecl "Bool" __prelude:5:10-5:36>
+     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 test.lkt:36:60: Expected instance of type 'Tuple2[Int, Bool]', got type Bool
 
 Id   <RefId "true" test.lkt:36:60-36:64>
-     references <EnumLitDecl "true" __prelude:5:28-5:32>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
 
