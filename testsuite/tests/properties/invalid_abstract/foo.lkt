@@ -1,4 +1,5 @@
 grammar foo_grammar {
-    @main_rule main_rule <- list+(or(Number(@number)
-                                   | Identifier(@identifier)))
+    @main_rule main_rule <- ASTList[BaseNode]+(
+        or(Number(@number) | Identifier(@identifier))
+    )
 }

@@ -323,9 +323,30 @@ def sf(strn):
     return t.render(**dict(frame.f_locals, **frame.f_globals))
 
 
+def node_name(node):
+    from langkit.compiled_types import ASTNodeType, T
+    from langkit.dsl import ASTNode
+    from langkit.utils.types import issubtype
+
+    if isinstance(node, T.Defer):
+        node = node.get()
+
+    if issubtype(node, ASTNode):
+        return node._name.camel
+
+    assert isinstance(node, ASTNodeType), (
+        'Unexpected node type: {}'.format(repr(node))
+    )
+
+    if node.is_root_list_type:
+        return 'ASTList[{}]'.format(node_name(node.element_type))
+
+    return node.dsl_name
+
+
 def emit_rule(rule, top_level=False):
     from langkit.parsers import (
-        _Transform, node_name, _Row, Opt, List, Or, _Token, NoBacktrack,
+        _Transform, _Row, Opt, List, Or, _Token, NoBacktrack,
         _Extract, DontSkip, Skip, Null, Parser, resolve, Defer, Predicate,
         Discard
     )
@@ -348,9 +369,9 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, _Extract):
         return '({})'.format(emit_rule(rule.parser))
     elif isinstance(rule, List):
-        return "list{kind}{list_cls}({subparser}{sep})".format(
+        return "{list_cls}{kind}({subparser}{sep})".format(
+            list_cls=node_name(rule.type),
             kind='*' if rule.empty_valid else '+',
-            list_cls=node_name(rule.list_cls) if rule.list_cls else '',
             subparser=emit_rule(rule.parser),
             sep=", {}".format(emit_rule(rule.sep)) if rule.sep else ""
         )

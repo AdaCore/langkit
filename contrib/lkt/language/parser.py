@@ -696,8 +696,8 @@ class GrammarList(GrammarExpr):
     Grammar expression to parse lists of results. Results can be separated by a
     separator. List can be empty ('*') or not ('+').
     """
+    list_type = Field(type=T.TypeRef)
     kind = Field(type=T.ListKind)
-    node_name = Field(type=T.TypeRef)
     expr = Field(type=T.GrammarExpr)
     sep = Field(type=T.GrammarExpr)
 
@@ -1541,8 +1541,7 @@ lkt_grammar.add_rules(
     ),
     grammar_rule_ref=GrammarRuleRef(G.ref_id),
     grammar_list_expr=GrammarList(
-        GOr(ListKind.alt_one("list+"), ListKind.alt_zero("list*")),
-        Opt(G.type_ref),
+        G.type_ref, GOr(ListKind.alt_one("+"), ListKind.alt_zero("*")),
         "(",
 
         # Main list expr

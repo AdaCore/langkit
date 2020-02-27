@@ -25,10 +25,11 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list*(def_rule)
+    @main_rule main_rule <- ASTList[Def]*(def_rule)
     name <- Name(@identifier)
     def_rule <- Def(
-        "def" name ?("(" list+(name, ",") ")") "=" expr
+        "def"
+        name ?("(" ASTList[Name]+(name, ",") ")") "=" expr
     )
     expr <- or(
         | Plus(expr "+" expr)

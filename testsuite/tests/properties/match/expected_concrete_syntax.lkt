@@ -25,7 +25,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+(or(Def("def"
+    @main_rule main_rule <- ASTList[FooNode]+(or(Def("def"
     Name(@identifier) expr) | expr))
     expr <- or(atom | plus)
     atom <- or(lit | ref)

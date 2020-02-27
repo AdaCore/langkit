@@ -25,8 +25,10 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+(or(scope | self_decl | foreign_decl))
-    scope <- Scope(simple_identifier "{" list*(scope) "}")
+    @main_rule main_rule <- ASTList[FooNode]+(or(scope | self_decl | foreign_decl))
+    scope <- Scope(
+        simple_identifier "{" ASTList[Scope]*(scope) "}"
+    )
     identifier <- or(
         | ScopedId(identifier "." simple_identifier)
         | simple_identifier

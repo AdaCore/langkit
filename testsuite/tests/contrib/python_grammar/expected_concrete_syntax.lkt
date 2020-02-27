@@ -93,27 +93,31 @@ grammar foo_grammar {
     name <- Id(@identifier)
     number <- NumberLit(@number)
     string <- StringLit(@string)
-    cat_string <- ConcatStringLit(string list+(string))
+    cat_string <- ConcatStringLit(string ASTList[StringLit]+(string))
     nl <- NL(@newline)
     @main_rule main_rule <- FileNode(
-        list+((discard(list*(nl)) stmt discard(list*(nl)))) @termination
+        ASTList[PythonNode]+((discard(ASTList[NL]*(nl))
+        stmt discard(ASTList[NL]*(nl)))) @termination
     )
     decorator <- Decorator(
         "@" dotted_name ?("(" arg_list ")") @newline
     )
-    decorators <- list+(decorator)
+    decorators <- ASTList[Decorator]+(decorator)
     decorated <- Decorated(decorators or(class_def | func_def))
     func_def <- FuncDef("def" name parameters ":" suite)
     parameters <- ("(" ?varargslist ")")
     varargslist <- Params(
-        list*(SingleParam(
+        ASTList[SingleParam]*(SingleParam(
             VarArgsFlag("*") KwArgsFlag("**") fpdef ?("=" test)
         ), ",")
     )
     fpdef <- or(name | ("(" name_list ")"))
-    name_list <- (list+(name, ",") ?",")
+    name_list <- (ASTList[Id]+(name, ",") ?",")
     stmt <- or(simple_stmt | compound_stmt)
-    simple_stmt <- (or(small_stmt | (list+(small_stmt, ";") ?";")) @newline)
+    simple_stmt <- (or(
+        | small_stmt
+        | (ASTList[PythonNode]+(small_stmt, ";") ?";")
+    ) @newline)
     small_stmt <- or(
         | expr_stmt
         | print_stmt
@@ -145,7 +149,8 @@ grammar foo_grammar {
             ) or(yield_expr | test_list)
         )
         | AssignStmt(
-            test_list list+(("=" or(yield_expr | test_list)))
+            test_list
+            ASTList[PythonNode]+(("=" or(yield_expr | test_list)))
         )
         | test_list
     )
@@ -171,8 +176,10 @@ grammar foo_grammar {
     import_name <- ImportName("import" dotted_as_names)
     dot <- Dot(".")
     import_from <- ImportFrom(
-        "from"
-        or(dotted_name | RelName(list+(dot) ?dotted_name)) "import" or(
+        "from" or(
+            | dotted_name
+            | RelName(ASTList[Dot]+(dot) ?dotted_name)
+        ) "import" or(
             | ImportStar("*")
             | ("(" import_as_names ")")
             | import_as_names
@@ -180,8 +187,9 @@ grammar foo_grammar {
     )
     as_name <- AsNameNode(name "as" name)
     dotted_as_name <- AsNameNode(dotted_name "as" name)
-    import_as_names <- (list+(or(as_name | name), ",") ?",")
-    dotted_as_names <- (list+(or(dotted_as_name | dotted_name), ",") ?",")
+    import_as_names <- (ASTList[PythonNode]+(or(as_name | name), ",") ?",")
+    dotted_as_names <- (ASTList[PythonNode]+(or(dotted_as_name | dotted_name), ",")
+    ?",")
     dotted_name <- or(DottedName(dotted_name "." name) | name)
     global_stmt <- GlobalStmt("global" name_list)
     exec_stmt <- ExecStmt("exec" expr ?("in" test_list))
@@ -202,23 +210,27 @@ grammar foo_grammar {
         test
         ":"
         suite
-        list*(("elif" ElifBranch(test ":" suite))) ?else_part
+        ASTList[ElifBranch]*(("elif"
+        ElifBranch(test ":" suite))) ?else_part
     )
     while_stmt <- WhileStmt("while" test ":" suite ?else_part)
     for_stmt <- ForStmt(
         "for" expr_list "in" test_list ":" suite ?else_part
     )
     try_stmt <- TryStmt(
-        "try" ":" suite list*(ExceptPart(
+        "try" ":" suite ASTList[ExceptPart]*(ExceptPart(
             "except" ?AsNameNode(test ?("as" test)) ":" suite
         )) ?else_part ?("finally" ":" suite)
     )
-    with_stmt <- WithStmt("with" list+(with_item, ",") ":" suite)
+    with_stmt <- WithStmt(
+        "with" ASTList[AsNameNode]+(with_item, ",") ":" suite
+    )
     with_item <- AsNameNode(test ?("as" expr))
     suite <- or(
-        | (discard(list*(nl))
+        | (discard(ASTList[NL]*(nl))
         @indent
-        list+((discard(list*(nl)) stmt discard(list*(nl)))) @dedent)
+        ASTList[PythonNode]+((discard(ASTList[NL]*(nl))
+        stmt discard(ASTList[NL]*(nl)))) @dedent)
         | simple_stmt
     )
     test <- or(
@@ -284,7 +296,9 @@ grammar foo_grammar {
         | SetComp("{" test comp_for "}")
         | set_lit
         | DictComp("{" dict_assoc comp_for "}")
-        | DictLit("{" (list+(dict_assoc, ",") ?",") "}")
+        | DictLit(
+            "{" (ASTList[DictAssoc]+(dict_assoc, ",") ?",") "}"
+        )
         | InlineEval("`" test_list "`")
         | name
         | number
@@ -293,20 +307,20 @@ grammar foo_grammar {
     )
     set_lit <- SetLit("{" empty_test_list "}")
     lambdef <- LambdaDef("lambda" varargslist ":" test)
-    subscript_list <- (list+(subscript, ",") ?",")
+    subscript_list <- (ASTList[Expr]+(subscript, ",") ?",")
     subscript <- or(
         | EllipsisExpr("." "." ".")
         | ExtSliceExpr(?test ":" ?test ":" ?test)
         | SliceExpr(?test ":" ?test)
         | test
     )
-    expr_list <- (list+(expr, ",") ?",")
-    test_list <- (list+(test, ",") ?",")
-    empty_test_list <- (list*(test, ",") ?",")
+    expr_list <- (ASTList[Expr]+(expr, ",") ?",")
+    test_list <- (ASTList[Expr]+(test, ",") ?",")
+    empty_test_list <- (ASTList[Expr]*(test, ",") ?",")
     class_def <- ClassDef(
         "class" name ?("(" ?test_list ")") ":" suite
     )
-    arg_list <- (list*(or(
+    arg_list <- (ASTList[Arg]*(or(
         | ArgGen(test comp_for)
         | ArgAssoc(?(test "=") test)
         | VarArgs("*" test)

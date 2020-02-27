@@ -27,7 +27,7 @@ lexer foo_lexer {
 grammar foo_grammar {
     @main_rule main_rule <- elem
     elem <- or(scope | id)
-    scope <- Scope(id "{" list+(elem) "}")
+    scope <- Scope(id "{" ASTList[FooNode]+(elem) "}")
     id <- Id(@identifier)
 
 }

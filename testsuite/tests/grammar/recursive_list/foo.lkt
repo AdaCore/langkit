@@ -1,5 +1,6 @@
 grammar foo_grammar {
-    @main_rule stmt_rule <- list*(or(def_rule
-                                   | ("{" list*(stmt_rule) "}")))
+    @main_rule stmt_rule <- ASTList[FooNode]*(
+        or(def_rule | ("{" ASTList[Def]*(stmt_rule) "}"))
+    )
     def_rule <- Def(@identifier "(" stmt_rule ")")
 }

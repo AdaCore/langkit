@@ -26,7 +26,9 @@ lexer foo_lexer {
 }
 grammar foo_grammar {
     @main_rule main_rule <- tuple
-    tuple <- Tuple(Name(@identifier) "(" list*(tuple) ")")
+    tuple <- Tuple(
+        Name(@identifier) "(" ASTList[Tuple]*(tuple) ")"
+    )
 
 }
 

@@ -1,6 +1,6 @@
 grammar foo_grammar {
     @main_rule main_rule <- element
     element <- or(atom | sequence)
-    sequence <- list*Sequence("(" element ")", ",")
+    sequence <- Sequence*("(" element ")", ",")
     atom <- @identifier
 }
