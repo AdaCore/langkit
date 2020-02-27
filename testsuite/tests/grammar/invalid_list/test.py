@@ -25,6 +25,8 @@ def run(label, lkt_file):
 
 
 run('Token element', 'token-element.lkt')
+run('Invalid list_cls', 'invalid-list-cls.lkt')
+run('Invalid ASTList', 'invalid-astlist.lkt')
 run('Non-list list_cls', 'non-list-cls.lkt')
 run('Invalid element type in list_cls', 'invalid-element-type.lkt')
 print('Done')

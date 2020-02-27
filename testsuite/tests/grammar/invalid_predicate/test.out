@@ -1,0 +1,10 @@
+== no-dot.lkt ==
+no-dot.lkt:2:29: Error: Invalid property reference
+
+== unknown-node.lkt ==
+unknown-node.lkt:2:56: Error: Unknown node: NoSuchNode
+
+== unknown-prop.lkt ==
+unknown-prop.lkt:2:29: Error: Example has no no_such_prop property
+
+Done

@@ -1,0 +1,7 @@
+== bad-token-casing.lkt ==
+bad-token-casing.lkt:2:37: Error: Unknown token: Example
+
+== unknown-token.lkt ==
+unknown-token.lkt:2:37: Error: Unknown token: no_such_token
+
+Done

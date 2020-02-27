@@ -3,6 +3,12 @@ File "token-element.lkt", line 2, In definition of grammar rule main_rule
 File "test.py", line 23, In definition of grammar rule main_rule
     Error: List parsers only accept subparsers that yield AST nodes (Token provided here)
 
+== Invalid list_cls ==
+invalid-list-cls.lkt:2:29: Error: Bad generic type name: only ASTList is valid in this context
+
+== Invalid ASTList ==
+invalid-astlist.lkt:2:29: Error: 1 type argument expected, got 2
+
 == Non-list list_cls ==
 File "test.py", line 23, In definition of grammar rule main_rule
     Error: Invalid list type for List parser: ListNode. Not a list type
