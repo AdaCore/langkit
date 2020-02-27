@@ -33,6 +33,8 @@ generic [C] struct Pair {
 generic [C, D] struct Tuple2 {
     a : C
     b : D
+
+    fun test(): C
 }
 
 class B : A {
@@ -42,4 +44,5 @@ class B : A {
     fun test_generic_component_access_2(): Bool = Tuple2[Int, Bool](12, true).b
     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
     fun test_fun_call(arg : A): Int = arg.test_int_add()
+    fun test_struct_fun(arg: Tuple2[Int, Bool]): Int = arg.test()
 }
