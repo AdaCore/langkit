@@ -1484,11 +1484,11 @@ lkt_grammar.add_rules(
 
     null_lit=NullLit("null"),
 
+    param=Param(Opt(G.ref_id, "="), G.expr),
     params=List(G.param, sep=",", empty_valid=True),
 
     decl_annotation=DeclAnnotation(
         "@", G.id, Opt("(", G.params, ")")
     ),
 
-    param=Param(Opt(G.ref_id, "="), G.expr),
 )
