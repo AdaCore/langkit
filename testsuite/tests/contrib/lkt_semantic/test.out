@@ -86,9 +86,8 @@ Expr <BlockExpr test.lkt:18:35-21:6>
 Expr <StringLit test.lkt:19:18-19:26>
      has type <StructDecl "Regexp" __prelude:5:10-5:26>
 
-Expr <RefId "rg" test.lkt:20:9-20:11>
-     has type <StructDecl "Regexp" __prelude:5:10-5:26>
-
+Resolving type of expr <RefId "rg" test.lkt:20:9-20:11> raised an error
+    dereferencing a null access
 Id   <RefId "rg" test.lkt:20:9-20:11>
      references <ValDecl "rg" test.lkt:19:9-19:26>
 
@@ -265,4 +264,22 @@ test.lkt:43:60: Expected instance of type 'Tuple2[Int, Bool]', got type Bool
 
 Id   <RefId "true" test.lkt:43:60-43:64>
      references <EnumLitDecl "true" __prelude:6:28-6:32>
+
+Id   <RefId "A" test.lkt:44:29-44:30>
+     references <ClassDecl "A" test.lkt:1:12-26:2>
+
+Id   <RefId "Int" test.lkt:44:33-44:36>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:44:39-44:57>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <RefId "arg" test.lkt:44:39-44:42>
+     has type <ClassDecl "A" test.lkt:1:12-26:2>
+
+Id   <RefId "arg" test.lkt:44:39-44:42>
+     references <FunArgDecl "arg" test.lkt:44:23-44:30>
+
+Id   <RefId "test_int_add" test.lkt:44:43-44:55>
+     references <FunDecl "test_int_add" test.lkt:8:5-8:38>
 

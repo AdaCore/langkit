@@ -41,4 +41,5 @@ class B : A {
     fun test_invalid_generic_type(): Pair[Int] = Pair[Int](12, 15).a
     fun test_generic_component_access_2(): Bool = Tuple2[Int, Bool](12, true).b
     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
+    fun test_fun_call(arg : A): Int = arg.test_int_add()
 }
