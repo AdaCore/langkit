@@ -154,13 +154,13 @@ lkt_lexer.add_rules(
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),
 
     # Numbers
-    (Pattern('[0-9]+'),      Token.Number),
+    (Pattern('[0-9]+'),    Token.Number),
 
     # Strings
     (Pattern('{STRING_SQ}|{STRING_DBQ}'), Token.String),
     (Pattern('[a-zA-Z]{STRING_DBQ}|[a-zA-Z]{STRING_DBQ}'), Token.PString),
 
     # Comments
-    (Pattern(r"#(.?)+"),     Token.Comment),
-    (Pattern(r"##(.?)+"),     Token.DocComment),
+    (Pattern(r"#(.?)+"),   Token.Comment),
+    (Pattern(r"##(.?)+"),  Token.DocComment),
 )
