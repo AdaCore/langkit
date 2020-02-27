@@ -1,4 +1,0 @@
-driver: python
-expect_failure:
-    - if: [windows]
-      then: Pending resolution of R124-008
