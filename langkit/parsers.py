@@ -626,13 +626,13 @@ class Grammar(object):
                     # subclass or the other depending on whether the subparsers
                     # accept the input.
                     if node._type.is_bool_node:
-                        return Opt(*subparsers).as_bool(node)
+                        return Opt(*subparsers, location=loc).as_bool(node)
 
                     # Likewise for enum nodes
                     elif node._type.base and node._type.base.is_enum_node:
-                        return node.enum_node_cls._create_parser(
-                            node.type_ref, *subparsers
-                        )
+                        return _Transform(_Row(*subparsers, location=loc),
+                                          node.type_ref,
+                                          location=loc)
 
                     # For other nodes, always create the node when the
                     # subparsers accept the input.
@@ -655,10 +655,10 @@ class Grammar(object):
                         assert isinstance(rule.f_expr, liblktlang.TokenLit)
                         match_text = denoted_string_literal(rule.f_expr)
 
-                    return _Token(val=val, match_text=match_text)
+                    return _Token(val=val, match_text=match_text, location=loc)
 
                 elif isinstance(rule, liblktlang.TokenLit):
-                    return _Token(denoted_string_literal(rule))
+                    return _Token(denoted_string_literal(rule), location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarList):
                     return List(
@@ -666,38 +666,43 @@ class Grammar(object):
                         empty_valid=rule.f_kind.text == 'list*',
                         list_cls=(resolve_node_ref(rule.f_node_name)
                                   if rule.f_node_name else None),
-                        sep=lower(rule.f_sep))
+                        sep=lower(rule.f_sep),
+                        location=loc)
 
                 elif isinstance(rule, (liblktlang.GrammarImplicitPick,
                                        liblktlang.GrammarPick)):
                     return Pick(*[lower(subparser)
-                                  for subparser in rule.f_exprs])
+                                  for subparser in rule.f_exprs],
+                                location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarRuleRef):
                     return getattr(self, rule.f_node_name.text)
 
                 elif isinstance(rule, liblktlang.GrammarOrExpr):
                     return Or(*[lower(subparser)
-                                for subparser in rule.f_sub_exprs])
+                                for subparser in rule.f_sub_exprs],
+                              location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarOpt):
-                    return Opt(lower(rule.f_expr))
+                    return Opt(lower(rule.f_expr), location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarExprList):
-                    return Pick(*[lower(subparser) for subparser in rule])
+                    return Pick(*[lower(subparser) for subparser in rule],
+                                location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarDiscard):
-                    return Discard(lower(rule.f_expr))
+                    return Discard(lower(rule.f_expr), location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarNull):
-                    return Null(resolve_node_ref(rule.f_name))
+                    return Null(resolve_node_ref(rule.f_name), location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarSkip):
-                    return Skip(resolve_node_ref(rule.f_name))
+                    return Skip(resolve_node_ref(rule.f_name), location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarDontSkip):
                     return DontSkip(lower(rule.f_expr),
-                                    lower(rule.f_dont_skip))
+                                    lower(rule.f_dont_skip),
+                                    location=loc)
 
                 elif isinstance(rule, liblktlang.GrammarPredicate):
                     check_source_language(
@@ -715,7 +720,7 @@ class Grammar(object):
                             .format(node._name.camel_with_underscores,
                                     prop_name)
                         )
-                    return Predicate(lower(rule.f_expr), prop)
+                    return Predicate(lower(rule.f_expr), prop, location=loc)
 
                 else:
                     raise NotImplementedError('unhandled parser: {}'
