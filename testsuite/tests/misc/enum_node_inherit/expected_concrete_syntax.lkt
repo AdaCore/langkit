@@ -37,7 +37,7 @@ grammar foo_grammar {
     @export fun prop (): Boolean = true
 }
 
-@abstract @qualifier class HasExample : EnumNode {
+@qualifier class HasExample : EnumNode {
 
     ## Return whether this is an instance of HasExamplePresent
     @export fun as_bool (): Boolean

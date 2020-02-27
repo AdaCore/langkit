@@ -719,6 +719,28 @@ class ClassDecl(NamedTypeDecl):
     decls = Field(type=DeclBlock)
 
 
+class EnumClassAltDecl(TypeDecl):
+    """
+    Alternative for an enum class decl.
+    """
+    syn_name = Field(T.DefId)
+
+    parent_type = Property(Entity.parent.parent.cast_or_raise(T.TypeDecl))
+
+    type_scope = Property(Entity.parent_type.type_scope)
+
+
+class EnumClassDecl(NamedTypeDecl):
+    """
+    Declaration for a LK class. This only cover node classes for the moment,
+    but might be extended to support regular classes in the future.
+    """
+    syn_name = Field(type=T.DefId)
+    alts = Field(type=T.EnumClassAltDecl.list)
+    base_class = Field(type=T.TypeRef)
+    decls = Field(type=DeclBlock)
+
+
 class DocComment(LKNode):
     """
     Node for one line of documentation attached to a node.
@@ -1265,6 +1287,16 @@ lkt_grammar.add_rules(
 
     type_decl=Or(
         StructDecl("struct", G.def_id, "{", G.decl_block, "}"),
+
+        EnumClassDecl(
+            "enum", "class", G.def_id,
+            "(", List(EnumClassAltDecl(G.def_id), sep=","), ")",
+            Opt(":", G.type_ref),
+            "{",
+            G.decl_block,
+            "}"
+        ),
+
         ClassDecl(
             "class", G.def_id, Opt(":", G.type_ref), "{",
             G.decl_block,
