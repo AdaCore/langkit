@@ -9,9 +9,7 @@ from langkit.expressions import (
     AbstractProperty, And, EmptyEnv, Entity, If, No, Not, Or, Property,
     PropertyError, Self, String, Var, ignore, langkit_property
 )
-from langkit.parsers import (
-    Discard, Grammar, List, NoBacktrack as cut, Opt, Or as GOr
-)
+from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or as GOr
 
 
 from language.lexer import lkt_lexer as Lex
@@ -1402,7 +1400,7 @@ lkt_grammar.add_rules(
     grammar_rule=GrammarRuleDecl(G.def_id, "<-", G.grammar_expr),
     lexer_case_rule=LexerCaseRule(
         "match", G.grammar_primary, "{",
-            List(G.lexer_case_alt, empty_valid=False),
+        List(G.lexer_case_alt, empty_valid=False),
         "}"
     ),
     lexer_case_alt=GOr(
