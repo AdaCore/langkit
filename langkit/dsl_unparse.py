@@ -963,7 +963,8 @@ def emit_node_type(node_type):
 
     walker = DSLWalker.class_from_location(node_type.location)
     base = None
-    enum_qual = ""
+    qual_node = ""
+    enum_members = ""
     builtin_properties = []
     abstract_qual = ""
     type_kind = "struct"
@@ -977,13 +978,7 @@ def emit_node_type(node_type):
         if base and base.is_generic_list_type:
             return ""
 
-        enum_qual = (
-            "@qualifier " if node_type.is_bool_node
-            else "@enum_node$i({}) $d".format(
-                ", $sl".join(alt.name.camel for alt in node_type.alternatives)
-            )
-            if node_type.is_enum_node else ""
-        )
+        qual_node = "@qualifier " if node_type.is_bool_node else ""
 
         builtin_properties = node_type.builtin_properties()
 
@@ -993,6 +988,15 @@ def emit_node_type(node_type):
         )
 
         type_kind = "class"
+
+        if node_type.is_enum_node:
+            abstract_qual = ""
+            if not node_type.is_bool_node:
+                type_kind = "enum class"
+                enum_members = "$i({})$d ".format(
+                    ", $sl".join(alt.name.camel
+                                 for alt in node_type.alternatives)
+                )
     else:
         if node_type.is_entity_type:
             return ""
@@ -1011,6 +1015,8 @@ def emit_node_type(node_type):
     properties = node_type.get_properties(include_inherited=False)
     doc = node_type.doc
 
+    strbase = ": {} ".format(type_name(base)) if base else ""
+
     def is_builtin_prop(prop):
         return any(
             builtin_name == prop.name.lower
@@ -1024,11 +1030,7 @@ def emit_node_type(node_type):
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
-    % if base:
-    ${abstract_qual}${enum_qual}${type_kind} ${type_name(node_type)} : ${type_name(base)} {$i$hl
-    % else:
-    ${abstract_qual}${enum_qual}${type_kind} ${type_name(node_type)} {$i$hl
-    % endif
+    ${abstract_qual}${qual_node}${type_kind} ${type_name(node_type)} ${enum_members}${strbase}{$i$hl
     % for field in parse_fields:
     ${emit_field(field)}$hl
     % endfor

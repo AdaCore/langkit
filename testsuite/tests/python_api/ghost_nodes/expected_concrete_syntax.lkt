@@ -39,7 +39,7 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
-@abstract @enum_node(Null, Example, Default) class Enum : FooNode {
+enum class Enum (Null, Example, Default) : FooNode {
 }
 
 class Name : FooNode {
@@ -51,7 +51,7 @@ class Param : FooNode {
     @parse_field has_plus : PlusQualifier
 }
 
-@abstract @qualifier class PlusQualifier : FooNode {
+@qualifier class PlusQualifier : FooNode {
 
     ## Return whether this is an instance of PlusQualifierPresent
     @export fun as_bool (): Boolean
