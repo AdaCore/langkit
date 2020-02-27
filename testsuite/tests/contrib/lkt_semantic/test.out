@@ -310,3 +310,24 @@ Id   <RefId "arg" test.lkt:47:56-47:59>
 Id   <RefId "test" test.lkt:47:60-47:64>
      references <FunDecl "test" test.lkt:37:5-37:18>
 
+Id   <RefId "Array" test.lkt:48:34-48:39>
+     references <GenericDecl "Array" __prelude:7:10-9:2>
+
+Id   <RefId "Int" test.lkt:48:40-48:43>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:48:47-48:50>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:48:53-48:61>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <RefId "arg" test.lkt:48:53-48:56>
+     has type <InstantiatedGenericType "Array" __prelude:7:10-9:2>
+
+Id   <RefId "arg" test.lkt:48:53-48:56>
+     references <FunArgDecl "arg" test.lkt:48:29-48:44>
+
+Expr <NumLit test.lkt:48:58-48:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
