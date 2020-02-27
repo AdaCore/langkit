@@ -180,6 +180,11 @@ def resolve(parser):
         raise Exception("Cannot resolve parser {}".format(parser))
 
 
+def reject_abstract(node):
+    check_source_language(not node.abstract,
+                          'Parsers cannot create abstract nodes')
+
+
 def reject_synthetic(node):
     check_source_language(not node.synthetic,
                           'Parsers cannot create synthetic nodes')
@@ -2204,6 +2209,7 @@ class _Transform(Parser):
             return self.cached_type
 
         result = resolve_type(self.typ)
+        reject_abstract(result)
         reject_synthetic(result)
 
         self.parse_fields = result.get_parse_fields(
