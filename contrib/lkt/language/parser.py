@@ -329,7 +329,8 @@ class Expr(LKNode):
             Entity.is_a(T.DefId),
             Entity.in_decl_annotation,
             Entity.in_grammar_rule,
-            Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl)
+            # TODO: Implement function types
+            Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl, T.FunDecl)
         ))
 
     @langkit_property(return_type=TypingResult, public=True)
@@ -573,6 +574,8 @@ class DotExpr(Expr):
     """
     prefix = Field(type=T.Expr)
     suffix = Field(type=T.RefId)
+
+    referenced_decl = Property(Entity.suffix.referenced_decl)
 
     expr_context_free_type = Property(Entity.suffix.expr_context_free_type)
 
