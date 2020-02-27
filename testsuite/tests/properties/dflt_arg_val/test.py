@@ -11,9 +11,9 @@ class FooNode(ASTNode):
 
 
 class Color(Enum):
-    Red = EnumValue()
-    Green = EnumValue()
-    Blue = EnumValue()
+    red = EnumValue()
+    green = EnumValue()
+    blue = EnumValue()
 
 
 class Example(FooNode):
@@ -25,7 +25,7 @@ class Example(FooNode):
 
     # Test default argument for a simple type: enum
     @langkit_property(public=True)
-    def prop2(arg=(Color, Color.Red)):
+    def prop2(arg=(Color, Color.red)):
         return arg
 
     # Test default argument for public entities

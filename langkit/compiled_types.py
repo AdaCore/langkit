@@ -3707,7 +3707,7 @@ class EnumValue(object):
 
         :rtype: str
         """
-        return '{}.{}'.format(self.type.dsl_name, self.name.camel)
+        return '{}.{}'.format(self.type.dsl_name, self.name.lower)
 
     @property
     def ada_name(self):

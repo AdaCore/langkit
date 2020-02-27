@@ -49,7 +49,7 @@ grammar foo_grammar {
 
     @export fun same_color (c : Color): Color = c
 
-    @export fun same_color_dflt (c : Color = Color.Red): Color = c
+    @export fun same_color_dflt (c : Color = Color.red): Color = c
 
     @export fun int_double (c : BigInt): BigInt = c + c
 
