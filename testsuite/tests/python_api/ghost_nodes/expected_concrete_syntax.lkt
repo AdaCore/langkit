@@ -25,7 +25,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+(Param(name mode plus))
+    @main_rule main_rule <- ASTList[Param]+(Param(name mode plus))
     name <- Name(@identifier)
     mode <- or(
         | Enum.Null("null")

@@ -25,8 +25,10 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+(decl)
-    decl <- Decl(Name(@identifier) "(" list*(ref) ")")
+    @main_rule main_rule <- ASTList[Decl]+(decl)
+    decl <- Decl(
+        Name(@identifier) "(" ASTList[Ref]*(ref) ")"
+    )
     ref <- Ref(Name(@identifier))
 
 }

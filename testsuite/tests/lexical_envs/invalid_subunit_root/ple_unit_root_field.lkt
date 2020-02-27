@@ -1,4 +1,4 @@
 grammar foo_grammar {
-    @main_rule main_rule <- list+(example)
+    @main_rule main_rule <- ASTList[Example]+(example)
     example <- Example("example" ?example)
 }

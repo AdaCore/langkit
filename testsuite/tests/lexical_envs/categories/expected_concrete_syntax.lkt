@@ -30,7 +30,7 @@ grammar foo_grammar {
     )
     cat1 <- Cat1(@identifier("cat1") "{" decls "}")
     cat2 <- Cat2(@identifier("cat2") "{" decls "}")
-    decls <- list*(var)
+    decls <- ASTList[Var]*(var)
     var <- Var(name)
     name <- Name(@identifier)
 

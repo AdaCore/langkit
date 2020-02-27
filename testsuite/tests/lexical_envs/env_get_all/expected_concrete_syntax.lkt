@@ -25,7 +25,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+Program(insert)
+    @main_rule main_rule <- Program+(insert)
     insert <- Insert("def" ident ident)
     ident <- Id(@identifier)
 

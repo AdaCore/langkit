@@ -25,7 +25,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ListNode(list+(NumberNode(@number)))
+    @main_rule main_rule <- ListNode(ASTList[NumberNode]+(NumberNode(@number)))
 
 }
 

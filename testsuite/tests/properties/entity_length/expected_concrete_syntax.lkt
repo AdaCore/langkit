@@ -25,7 +25,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- Names(list+(Name(@identifier)))
+    @main_rule main_rule <- Names(ASTList[Name]+(Name(@identifier)))
 
 }
 

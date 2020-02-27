@@ -25,14 +25,14 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+(block)
+    @main_rule main_rule <- ASTList[Block]+(block)
     name <- Name(@identifier)
     block <- Block(
         name decl_list "{" using_list ref_list "}"
     )
-    decl_list <- ("(" list*(decl) ")")
-    using_list <- ("(" list*(using) ")")
-    ref_list <- list*(ref)
+    decl_list <- ("(" ASTList[Decl]*(decl) ")")
+    using_list <- ("(" ASTList[Using]*(using) ")")
+    ref_list <- ASTList[Ref]*(ref)
     decl <- Decl(name)
     using <- Using(name)
     ref <- Ref(name)

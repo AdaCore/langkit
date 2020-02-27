@@ -25,7 +25,9 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- RootNode(list+(or(decl | subdecl | other_decl), ";"))
+    @main_rule main_rule <- RootNode(
+        ASTList[BaseDecl]+(or(decl | subdecl | other_decl), ";")
+    )
     decl <- Decl("def" name)
     other_decl <- OtherDecl("def" "var" name)
     subdecl <- SubDecl("var" name)

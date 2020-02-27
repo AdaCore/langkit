@@ -1,3 +1,5 @@
 grammar foo_grammar {
-    @main_rule main_rule <- ExampleWrapper(list+(Example("example")))
+    @main_rule main_rule <- ExampleWrapper(
+        ASTList[Example]+(Example("example"))
+    )
 }

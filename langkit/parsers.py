@@ -663,9 +663,8 @@ class Grammar(object):
                 elif isinstance(rule, liblktlang.GrammarList):
                     return List(
                         lower(rule.f_expr),
-                        empty_valid=rule.f_kind.text == 'list*',
-                        list_cls=(resolve_node_ref(rule.f_node_name)
-                                  if rule.f_node_name else None),
+                        empty_valid=rule.f_kind.text == '*',
+                        list_cls=resolve_node_ref(rule.f_list_type),
                         sep=lower(rule.f_sep),
                         location=loc)
 

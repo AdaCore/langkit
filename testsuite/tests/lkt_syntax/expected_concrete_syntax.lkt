@@ -6,7 +6,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- list+(Example("example"))
+    @main_rule main_rule <- ASTList[Example]+(Example("example"))
 
 }
 
