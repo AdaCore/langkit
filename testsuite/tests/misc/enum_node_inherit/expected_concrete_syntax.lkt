@@ -49,7 +49,4 @@ grammar foo_grammar {
 }
 
 @qualifier class HasExample : EnumNode {
-
-    ## Return whether this is an instance of HasExamplePresent
-    @export fun as_bool (): Boolean
 }
