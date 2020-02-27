@@ -565,6 +565,7 @@ class RefId(Id):
     """
     Reference identifier.
     """
+    annotations = Annotations(custom_short_image=True)
 
     @langkit_property()
     def referenced_decl():
