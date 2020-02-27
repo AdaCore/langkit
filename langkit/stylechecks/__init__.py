@@ -706,6 +706,7 @@ def langkit_main(langkit_root, files=[]):
     Run main() on Langkit sources.
     """
     dirs = [os.path.join('contrib', 'python'),
+            os.path.join('contrib', 'lkt'),
             os.path.join('langkit'),
             os.path.join('scripts'),
             os.path.join('testsuite'),
