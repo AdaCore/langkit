@@ -333,6 +333,28 @@ class Expr(LKNode):
         """
         return No(T.TypeDecl.entity)
 
+    @langkit_property(return_type=T.Bool)
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        """
+        Predicate to return whether the expected type is a valid type for this
+        expression. This is only called if there is no context-free type
+        available for this expression.
+
+        .. note::
+            Default implementation always returns True.
+        """
+        ignore(expected_type)
+        return True
+
+    @langkit_property()
+    def invalid_expected_type_error_name():
+        """
+        Error string to use as the actual when the expected type was not a
+        valid type for this expression. This can only be called if there is no
+        context-free type available for this expression.
+        """
+        return String("<not implemented>")
+
     @langkit_property(return_type=TypingResult)
     def expr_type_impl(expected_type=T.TypeDecl.entity,
                        raise_if_no_type=(T.Bool, True)):
@@ -344,18 +366,21 @@ class Expr(LKNode):
           type, then check that they match, if they don't, return an error
           TypingResult.
 
-        - If there is only a context free type or an expected type, return this
-          type.
+        - If there is an expected type but no context-free type, check that
+          the expected type is valid by calling the expected_type_predicate
+          property and return the expected type, otherwise fail.
+
+        - If there is only a context free type but no expected type, return
+          the context-free type.
 
         - If there is none, raise a PropertyError.
         """
         cf_type = Var(Entity.expr_context_free_type)
 
-        return If(
+        return Cond(
             # We have both a context free type and an expected type: check that
             # they match.
             And(Not(expected_type.is_null), Not(cf_type.is_null)),
-
             If(
                 expected_type.matches(cf_type),
                 TypingResult.new(expr_type=expected_type),
@@ -363,6 +388,18 @@ class Expr(LKNode):
                     String("type ").concat(cf_type.full_name)
                 )
             ),
+
+            Not(expected_type.is_null),
+            If(
+                Entity.expected_type_predicate(expected_type),
+                TypingResult.new(expr_type=expected_type),
+                expected_type.expected_type_error(
+                    got=Self.invalid_expected_type_error_name
+                )
+            ),
+
+            Not(cf_type.is_null),
+            TypingResult.new(expr_type=cf_type),
 
             # We don't have both types: check that there is at least one and
             # return it, else, raise an error if raise_if_no_type is true.
@@ -1300,29 +1337,7 @@ class Lit(Expr):
     """
     Base class for literals.
     """
-
-    @langkit_property(return_type=TypingResult)
-    def expr_type_impl(expected_type=T.TypeDecl.entity,
-                       raise_if_no_type=(T.Bool, True)):
-        exp_type = Var(
-            Entity.check_type(expected_type, raise_if_no_type)
-        )
-        return If(
-            Self.lit_predicate(exp_type),
-            TypingResult.new(expr_type=exp_type),
-            exp_type._.expected_type_error(got=Self.lit_error_name),
-        )
-
-    @langkit_property(return_type=T.Bool)
-    def lit_predicate(expected_type=T.TypeDecl.entity):
-        """
-        Predicate to return whether the expected type is a valid type for this
-        literal. Default implementation always returns True.
-        """
-        ignore(expected_type)
-        return True
-
-    lit_error_name = Property(String("<not implemented>"))
+    pass
 
 
 class NullLit(Lit):
@@ -1371,11 +1386,11 @@ class StringLit(Lit):
         return Self.prefix == CharacterLiteral('p')
 
     @langkit_property()
-    def lit_predicate(expected_type=T.TypeDecl.entity):
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
         return Or(expected_type == Self.string_type,
                   expected_type == Self.symbol_type)
 
-    lit_error_name = Property(String("a string literal"))
+    invalid_expected_type_error_name = Property(String("a string literal"))
 
 
 class NumLit(Lit):
@@ -1385,11 +1400,11 @@ class NumLit(Lit):
     token_node = True
 
     @langkit_property()
-    def lit_predicate(expected_type=T.TypeDecl.entity):
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
         return Or(expected_type == Self.int_type,
                   expected_type == Self.bigint_type)
 
-    lit_error_name = Property(String("a number literal"))
+    invalid_expected_type_error_name = Property(String("a number literal"))
 
 
 class VarBind(LKNode):
