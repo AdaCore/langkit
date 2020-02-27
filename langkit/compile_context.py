@@ -23,9 +23,8 @@ from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
-from langkit.diagnostics import (Context, DiagnosticError, Location, Severity,
-                                 WarningSet, check_source_language,
-                                 context_stack)
+from langkit.diagnostics import (Context, Location, Severity, WarningSet,
+                                 check_source_language, context_stack)
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
@@ -345,18 +344,18 @@ class CompileCtx(object):
         :type: bool
         """
 
+        from langkit.lkt_lowering import create_grammar, load_lkt
         self.lkt_unit = None
         if lkt_file is None:
             assert grammar, 'LKT spec required when no grammar is provided'
         else:
-            self.lkt_unit = self._load_lkt(lkt_file)
+            self.lkt_unit = load_lkt(lkt_file)
 
         self.lexer = lexer
         self.lexer.prefix = "{}_TKN_".format(self.lang_name.lower.upper())
         ":type: langkit.lexer.Lexer"
 
-        from langkit.parsers import Grammar
-        self.grammar = grammar or Grammar.create_from_lkt(self, self.lkt_unit)
+        self.grammar = grammar or create_grammar(self, self.lkt_unit)
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
@@ -701,27 +700,6 @@ class CompileCtx(object):
 
         # Register builtin exception types
         self._register_builtin_exception_types()
-
-    def _load_lkt(self, lkt_file):
-        """
-        Load a Lktlang source file. Raise a DiagnosticError if there are
-        parsing errors.
-
-        :param str lkt_file: Name of the file to parse.
-        :rtype: liblktlang.AnalysisUnit
-        """
-        import liblktlang
-
-        basename = os.path.basename(lkt_file)
-        result = liblktlang.AnalysisContext().get_from_file(lkt_file)
-
-        # If there are diagnostics, forward them to the user. TODO: hand them
-        # to langkit.diagnostic.
-        if result.diagnostics:
-            for d in result.diagnostics:
-                print('{}:{}'.format(basename, d))
-                raise DiagnosticError()
-        return result
 
     @contextmanager
     def lkt_context(self, lkt_node):
@@ -1733,6 +1711,7 @@ class CompileCtx(object):
         """
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
+        from langkit.lkt_lowering import lower_grammar_rules
         from langkit.parsers import Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
@@ -1750,7 +1729,7 @@ class CompileCtx(object):
 
             MajorStepPass('Compiling the grammar'),
             GlobalPass('lower Lkt parsing rules',
-                       self.grammar.lower_all_lkt_rules),
+                       lambda ctx: lower_grammar_rules(ctx)),
             GlobalPass('check main parsing rule',
                        self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',
