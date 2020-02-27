@@ -7,5 +7,5 @@ grammar foo_grammar {
     lit <- Lit(@number)
     ref <- Ref(@identifier)
 
-    plus <- ("(" Plus(expr "+" expr) ")")
+    plus <- pick("(" Plus(expr "+" expr) ")")
 }

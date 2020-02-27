@@ -27,7 +27,7 @@ lexer foo_lexer {
 grammar foo_grammar {
     @main_rule main_rule <- Block(
         Name(@identifier)
-        ("(" ASTList[Ref]+(Ref(Name(@identifier))) ")")
+        pick("(" ASTList[Ref]+(Ref(Name(@identifier))) ")")
     )
 
 }

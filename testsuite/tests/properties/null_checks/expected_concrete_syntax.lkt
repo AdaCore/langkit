@@ -27,7 +27,7 @@ lexer foo_lexer {
 grammar foo_grammar {
     @main_rule main_rule <- expression
     expression <- or(
-        | ("(" expression ")")
+        | pick("(" expression ")")
         | Plus(atom "+" main_rule)
         | atom
     )

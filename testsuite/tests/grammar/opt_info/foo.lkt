@@ -6,7 +6,7 @@ grammar foo_grammar {
         or(Example("example") | null(Example))
         sub_rule
         null(Example)
-        (?Example("example")).dont_skip(sub_rule)
+        ?(Example("example")).dont_skip(sub_rule)
 
         HasExample(Example("example"))
         Example("example")

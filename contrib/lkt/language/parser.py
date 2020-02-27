@@ -1480,6 +1480,7 @@ lkt_grammar.add_rules(
         Lex.Identifier(match_text="send"), "(", G.ref_id, ",", G.num_lit, ")"
     ),
     grammar_primary=GOr(
+        G.grammar_pick,
         G.token_literal,
         G.token_no_case_literal,
         G.token_pattern_literal,
@@ -1492,7 +1493,6 @@ lkt_grammar.add_rules(
         G.grammar_opt,
         G.grammar_or_expr,
         G.grammar_rule_ref,
-        G.grammar_pick,
         G.grammar_discard_expr,
     ),
     grammar_expr=GOr(
@@ -1510,6 +1510,7 @@ lkt_grammar.add_rules(
     ),
 
     grammar_pick=GrammarPick(
+        Lex.Identifier("pick"),
         "(", List(G.grammar_expr, empty_valid=False), ")"
     ),
 

@@ -25,7 +25,7 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Decl]+((decl ";"))
+    @main_rule main_rule <- ASTList[Decl]+(pick(decl ";"))
     decl <- or(
         | VarDecl("def" name "=" expr)
         | FuncDecl(

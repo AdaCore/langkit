@@ -25,8 +25,8 @@ lexer foo_lexer {
 
 }
 grammar foo_grammar {
-    deps <- ASTList[Dep]*((Dep(("+" name)) ";"))
-    defs <- ASTList[FooNode]*((or(scope | var) ";"))
+    deps <- ASTList[Dep]*(pick(Dep(pick("+" name)) ";"))
+    defs <- ASTList[FooNode]*(pick(or(scope | var) ";"))
     @main_rule scope <- Scope(name "{" deps defs "}")
     var <- Var(id "=" name)
     id <- Id(@identifier)
