@@ -45,4 +45,5 @@ class B : A {
     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
     fun test_fun_call(arg : A): Int = arg.test_int_add()
     fun test_struct_fun(arg: Tuple2[Int, Bool]): Int = arg.test()
+    fun test_array_indexing(arg: Array[Int]): Int = arg (12)
 }

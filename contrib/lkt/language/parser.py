@@ -797,6 +797,13 @@ class TypeDecl(Decl):
         """
     )
 
+    @langkit_property()
+    def get_fun(name=T.Symbol):
+        """
+        Return the function with name ``name`` for this type.
+        """
+        return Entity.type_scope.get_first(name).cast_or_raise(T.FunDecl)
+
     fields = Property(
         No(T.BaseValDecl.entity.array),
         doc="""Return the list of fields for this type"""
@@ -1199,8 +1206,17 @@ class CallExpr(Expr):
     name = Field(type=T.Expr)
     args = Field(type=T.Param.list)
 
+    @langkit_property()
+    def called_decl():
+        # Implement special resolution for calls to objects via __call__
+        rd = Var(Entity.name.referenced_decl)
+        call_builtin = Var(
+            rd.cast(T.BaseValDecl)._.get_type._.get_fun('__call__')
+        )
+        return call_builtin.then(lambda a: a, default_val=rd)
+
     expr_context_free_type = Property(
-        Entity.name.referenced_decl.then(
+        Entity.called_decl.then(
             lambda rd: rd.match(
                 lambda fd=T.FunDecl: fd.return_type.designated_type,
                 lambda td=T.TypeDecl: td,
@@ -1211,7 +1227,7 @@ class CallExpr(Expr):
     )
 
     formals = Property(
-        Entity.name.referenced_decl.match(
+        Entity.called_decl.match(
             lambda fd=T.FunDecl: fd.args.map(
                 lambda p: p.cast_or_raise(T.BaseValDecl)
             ),
