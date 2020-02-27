@@ -36,7 +36,7 @@ class Example : FooNode {
 
     @export fun prop1 (arg : Boolean = true): Boolean = arg
 
-    @export fun prop2 (arg : Color = Color.Red): Color = arg
+    @export fun prop2 (arg : Color = Color.red): Color = arg
 
     @export fun prop3 (arg : FooNode = null): FooNode = arg
 }
