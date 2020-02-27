@@ -962,7 +962,7 @@ class GenericInstantiation(Expr):
     Generic instantiation.
     """
     name = Field(type=T.Expr)
-    args = Field(type=T.Param.list)
+    args = Field(type=T.TypeRef.list)
 
 
 class ErrorOnNull(Expr):
@@ -1354,12 +1354,11 @@ lkt_grammar.add_rules(
     ),
 
     type_ref=GOr(
-        GenericTypeRef(
-            G.basic_name,
-            "[", List(G.type_ref, empty_valid=False, sep=","), "]"
-        ),
+        GenericTypeRef(G.basic_name, "[", G.type_list, "]"),
         SimpleTypeRef(G.basic_name),
     ),
+
+    type_list=List(G.type_ref, empty_valid=False, sep=","),
 
     decls=List(G.decl, empty_valid=True),
     decl_block=List(G.decl, empty_valid=True, list_cls=DeclBlock),
@@ -1456,7 +1455,7 @@ lkt_grammar.add_rules(
     basic_expr=GOr(
         CallExpr(G.basic_expr, "(", G.params, ")"),
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
-        GenericInstantiation(G.basic_expr, "[", G.params, "]"),
+        GenericInstantiation(G.basic_expr, "[", G.type_list, "]"),
         ErrorOnNull(G.basic_expr, "!"),
         DotExpr(G.basic_expr, ".", G.ref_id),
         NullCondDottedName(G.basic_expr, "?", ".", G.ref_id),
