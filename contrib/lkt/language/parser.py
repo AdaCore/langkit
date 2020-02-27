@@ -1402,6 +1402,9 @@ class StringLit(Lit):
 
     @langkit_property()
     def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        # We don't need to handle the case where this string literal is a
+        # regexp literal, because a regexp literal will always have a
+        # context-free type and therefore this predicate will never be called.
         return Or(expected_type == Self.string_type,
                   expected_type == Self.symbol_type)
 
