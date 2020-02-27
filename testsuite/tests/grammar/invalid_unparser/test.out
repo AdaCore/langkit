@@ -1,10 +1,10 @@
 == Pick in Or ==
 File "pick-in-or.lkt", line 2, In definition of grammar rule main_rule
-File "test.py", line 35, In definition of grammar rule main_rule
+  line 3, In definition of grammar rule main_rule
     Error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Extract(Row(Token(<WithText Example>), Transform(Row(Token(<WithSymbol Identifier>)), Identifier)), 1)
 
 == Toplevel Pick ==
-File "test.py", line 35, In definition of grammar rule main_rule
+File "toplevel-pick.lkt", line 2, In definition of grammar rule main_rule
     Error: Top-level information loss prevents unparsers generation
 
 == Several token kinds for token node (1) ==
@@ -18,7 +18,7 @@ File "several-2.lkt", line 2, In definition of grammar rule main_rule
     Error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
 
 == Pick in List ==
-File "test.py", line 35, In definition of grammar rule main_rule
+File "pick-in-list.lkt", line 2, In definition of grammar rule main_rule
     Error: Unparsers generation require list parsers to directly build nodes for each list item
 
 == Ambiguous lists ==
