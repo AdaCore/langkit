@@ -1,4 +1,4 @@
 grammar foo_grammar {
-    grammar UnexpectedDecl {
+    grammar unexpected_decl {
     }
 }
