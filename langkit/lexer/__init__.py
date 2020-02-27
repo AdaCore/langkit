@@ -455,14 +455,6 @@ class Lexer(object):
         # literal that corresponds to it.
         self.literals_map = {}
 
-        self.prefix = None
-        """
-        Prefix to use for token names. Will be set to a meaningful value by
-        the compile context.
-
-        :type: str
-        """
-
         # Map from token actions class names to set of token actions with that
         # class.
         self.token_actions = defaultdict(set)
