@@ -27,7 +27,7 @@ lexer foo_lexer {
 grammar foo_grammar {
     @main_rule main_rule <- element
     element <- or(sequence | atom)
-    sequence <- ("(" Sequence*(element) ")")
+    sequence <- pick("(" Sequence*(element) ")")
     atom <- Atom(@identifier)
 
 }

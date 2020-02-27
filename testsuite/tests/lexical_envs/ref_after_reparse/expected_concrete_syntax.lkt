@@ -30,8 +30,8 @@ grammar foo_grammar {
     block <- Block(
         name decl_list "{" using_list ref_list "}"
     )
-    decl_list <- ("(" ASTList[Decl]*(decl) ")")
-    using_list <- ("(" ASTList[Using]*(using) ")")
+    decl_list <- pick("(" ASTList[Decl]*(decl) ")")
+    using_list <- pick("(" ASTList[Using]*(using) ")")
     ref_list <- ASTList[Ref]*(ref)
     decl <- Decl(name)
     using <- Using(name)

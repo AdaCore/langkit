@@ -28,9 +28,9 @@ grammar foo_grammar {
     @main_rule main_rule <- ASTList[Block]+(block)
     name <- Name(@identifier)
     block <- Block(params name vars)
-    params <- ("(" Params+(param) ")")
+    params <- pick("(" Params+(param) ")")
     param <- Param(name)
-    vars <- ("{" ASTList[BlockVar]+(var) "}")
+    vars <- pick("{" ASTList[BlockVar]+(var) "}")
     var <- BlockVar(name)
 
 }

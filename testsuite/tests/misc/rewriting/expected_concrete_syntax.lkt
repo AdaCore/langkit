@@ -29,7 +29,7 @@ grammar foo_grammar {
     name <- Name(@identifier)
     def_rule <- Def(
         "def"
-        name ?("(" ASTList[Name]+(name, ",") ")") "=" expr
+        name ?pick("(" ASTList[Name]+(name, ",") ")") "=" expr
     )
     expr <- or(
         | Plus(expr "+" expr)

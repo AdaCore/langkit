@@ -30,15 +30,15 @@ grammar foo_grammar {
         | Def("def" name imports vars expr)
         | expr
     ))
-    imports <- ("(" ASTList[DerivedRef]*(derived_ref) ")")
+    imports <- pick("(" ASTList[DerivedRef]*(derived_ref) ")")
     var <- Var(name "=" expr)
-    vars <- ("{" ASTList[Var]*(var) "}")
+    vars <- pick("{" ASTList[Var]*(var) "}")
     expr <- or(atom | plus)
     atom <- or(lit | ref)
     lit <- Lit(@number)
     ref <- Ref(name)
     derived_ref <- DerivedRef(name)
-    plus <- ("(" Plus(expr "+" expr) ")")
+    plus <- pick("(" Plus(expr "+" expr) ")")
 
 }
 

@@ -1,4 +1,4 @@
 grammar foo_grammar {
-    @main_rule main_rule <- ("example" Root(item))
+    @main_rule main_rule <- pick("example" Root(item))
     item <- or(Identifier(@identifier) | Number(@number))
 }

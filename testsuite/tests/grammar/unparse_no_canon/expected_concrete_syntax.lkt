@@ -27,11 +27,12 @@ lexer foo_lexer {
 grammar foo_grammar {
     @main_rule main_rule <- ASTList[RootNode]+(or(
         | RootNode(
-            "def" null(Identifier) ?("{" Number(@number) "}") ";"
+            "def"
+            null(Identifier) ?pick("{" Number(@number) "}") ";"
         )
         | RootNode(
             "def"
-            ?("(" Identifier(@identifier) ")") null(Number) ";"
+            ?pick("(" Identifier(@identifier) ")") null(Number) ";"
         )
     ))
 

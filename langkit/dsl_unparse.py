@@ -367,7 +367,7 @@ def emit_rule(rule, top_level=False):
         else:
             return "?{}".format(emit_rule(rule.parser))
     elif isinstance(rule, _Extract):
-        return '({})'.format(emit_rule(rule.parser))
+        return 'pick({})'.format(emit_rule(rule.parser))
     elif isinstance(rule, List):
         return "{list_cls}{kind}({subparser}{sep})".format(
             list_cls=node_name(rule.type),
