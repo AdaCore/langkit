@@ -685,6 +685,12 @@ class Grammar(object):
                 elif isinstance(rule, liblktlang.GrammarOpt):
                     return Opt(lower(rule.f_expr), location=loc)
 
+                elif isinstance(rule, liblktlang.GrammarOptGroup):
+                    return Opt(
+                        *[lower(subparser) for subparser in rule.f_expr],
+                        location=loc
+                    )
+
                 elif isinstance(rule, liblktlang.GrammarExprList):
                     return Pick(*[lower(subparser) for subparser in rule],
                                 location=loc)
