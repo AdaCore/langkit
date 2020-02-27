@@ -7,6 +7,10 @@ package Liblktlang.Implementation.Extensions is
    --  Custom version of Short_Image for declarations. Include
    --  the names of the entities it declares.
 
+   function Ref_Id_Short_Image (Node : Bare_Ref_Id) return Text_Type;
+   --  Custom version of Short_Image for referencing identifiers. Include
+   --  the identifier.
+
    function LK_Node_P_Env_From_Vals_Internal
      (Node : Bare_LK_Node;
       Vals : Internal_EnvKV_Array_Access) return Lexical_Env;

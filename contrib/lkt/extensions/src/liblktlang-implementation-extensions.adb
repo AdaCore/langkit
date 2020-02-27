@@ -42,6 +42,19 @@ package body Liblktlang.Implementation.Extensions is
       end if;
    end Langkit_Root_P_Fetch_Prelude;
 
+   ------------------------
+   -- Ref_Id_Short_Image --
+   ------------------------
+
+   function Ref_Id_Short_Image (Node : Bare_Ref_Id) return Text_Type is
+   begin
+      return
+        "<" & To_Text (Kind_Name (Node))
+        & " """ & Text (Node) & """ "
+        & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
+        & ":" & To_Text (Image (Sloc_Range (Node))) & ">";
+   end Ref_Id_Short_Image;
+
    ----------------------
    -- Decl_Short_Image --
    ----------------------

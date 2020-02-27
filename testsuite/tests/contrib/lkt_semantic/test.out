@@ -1,26 +1,26 @@
 Resolving test.lkt
 ==================
-Id   <RefId test.lkt:2:21-2:22>
+Id   <RefId "A" test.lkt:2:21-2:22>
      references <ClassDecl "A" test.lkt:1:12-19:2>
 
-Expr <RefId test.lkt:2:25-2:29>
+Expr <RefId "self" test.lkt:2:25-2:29>
      has type <ClassDecl "A" test.lkt:1:12-19:2>
 
-Id   <RefId test.lkt:2:25-2:29>
+Id   <RefId "self" test.lkt:2:25-2:29>
      references <SelfDecl "self" test.lkt:1:12-19:2>
 
-Id   <RefId test.lkt:4:21-4:24>
+Id   <RefId "Int" test.lkt:4:21-4:24>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NumLit test.lkt:4:27-4:29>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:6:29-6:30>
+Id   <RefId "A" test.lkt:6:29-6:30>
      references <ClassDecl "A" test.lkt:1:12-19:2>
 
 test.lkt:6:33: Expected instance of type 'A', got a number literal
 
-Id   <RefId test.lkt:8:25-8:28>
+Id   <RefId "Int" test.lkt:8:25-8:28>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <BinOp test.lkt:8:31-8:38>
@@ -32,7 +32,7 @@ Expr <NumLit test.lkt:8:31-8:33>
 Expr <NumLit test.lkt:8:36-8:38>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:10:35-10:38>
+Id   <RefId "Int" test.lkt:10:35-10:38>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <BinOp test.lkt:10:41-10:50>
@@ -43,7 +43,7 @@ test.lkt:10:41: Expected instance of type 'Int', got a string literal
 Expr <NumLit test.lkt:10:48-10:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:12:35-12:38>
+Id   <RefId "Int" test.lkt:12:35-12:38>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <BinOp test.lkt:12:41-12:50>
@@ -54,10 +54,10 @@ Expr <NumLit test.lkt:12:41-12:43>
 
 test.lkt:12:46: Expected instance of type 'Int', got type A
 
-Id   <RefId test.lkt:12:46-12:50>
+Id   <RefId "self" test.lkt:12:46-12:50>
      references <SelfDecl "self" test.lkt:1:12-19:2>
 
-Id   <RefId test.lkt:14:35-14:36>
+Id   <RefId "A" test.lkt:14:35-14:36>
      references <ClassDecl "A" test.lkt:1:12-19:2>
 
 Expr <BinOp test.lkt:14:39-14:48>
@@ -65,23 +65,23 @@ Expr <BinOp test.lkt:14:39-14:48>
 
 test.lkt:14:39: Expected instance of type 'A', got a number literal
 
-Expr <RefId test.lkt:14:44-14:48>
+Expr <RefId "self" test.lkt:14:44-14:48>
      has type <ClassDecl "A" test.lkt:1:12-19:2>
 
-Id   <RefId test.lkt:14:44-14:48>
+Id   <RefId "self" test.lkt:14:44-14:48>
      references <SelfDecl "self" test.lkt:1:12-19:2>
 
-Id   <RefId test.lkt:16:22-16:25>
+Id   <RefId "Int" test.lkt:16:22-16:25>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <IfExpr test.lkt:16:28-16:49>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId test.lkt:16:31-16:35>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Expr <RefId "true" test.lkt:16:31-16:35>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
-Id   <RefId test.lkt:16:31-16:35>
-     references <EnumLitDecl "true" __prelude:6:28-6:32>
+Id   <RefId "true" test.lkt:16:31-16:35>
+     references <EnumLitDecl "true" __prelude:5:28-5:32>
 
 Expr <NumLit test.lkt:16:41-16:42>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -89,51 +89,51 @@ Expr <NumLit test.lkt:16:41-16:42>
 Expr <NumLit test.lkt:16:48-16:49>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:18:30-18:33>
+Id   <RefId "Int" test.lkt:18:30-18:33>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <IfExpr test.lkt:18:36-18:59>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId test.lkt:18:39-18:43>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Expr <RefId "true" test.lkt:18:39-18:43>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
-Id   <RefId test.lkt:18:39-18:43>
-     references <EnumLitDecl "true" __prelude:6:28-6:32>
+Id   <RefId "true" test.lkt:18:39-18:43>
+     references <EnumLitDecl "true" __prelude:5:28-5:32>
 
 Expr <NumLit test.lkt:18:49-18:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 test.lkt:18:56: Expected instance of type 'Int', got a string literal
 
-Id   <RefId test.lkt:22:9-22:10>
+Id   <RefId "C" test.lkt:22:9-22:10>
      references <GenericFormalTypeDecl "C" test.lkt:21:10-21:11>
 
-Id   <RefId test.lkt:23:9-23:10>
+Id   <RefId "C" test.lkt:23:9-23:10>
      references <GenericFormalTypeDecl "C" test.lkt:21:10-21:11>
 
-Id   <RefId test.lkt:27:9-27:10>
+Id   <RefId "C" test.lkt:27:9-27:10>
      references <GenericFormalTypeDecl "C" test.lkt:26:10-26:11>
 
-Id   <RefId test.lkt:28:9-28:10>
+Id   <RefId "D" test.lkt:28:9-28:10>
      references <GenericFormalTypeDecl "D" test.lkt:26:13-26:14>
 
-Id   <RefId test.lkt:31:11-31:12>
+Id   <RefId "A" test.lkt:31:11-31:12>
      references <ClassDecl "A" test.lkt:1:12-19:2>
 
-Id   <RefId test.lkt:32:37-32:41>
+Id   <RefId "Pair" test.lkt:32:37-32:41>
      references <GenericDecl "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:32:42-32:45>
+Id   <RefId "Int" test.lkt:32:42-32:45>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:32:49-32:66>
      has type <InstantiatedGenericType "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:32:49-32:53>
+Id   <RefId "Pair" test.lkt:32:49-32:53>
      references <GenericDecl "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:32:54-32:57>
+Id   <RefId "Int" test.lkt:32:54-32:57>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NumLit test.lkt:32:59-32:61>
@@ -142,7 +142,7 @@ Expr <NumLit test.lkt:32:59-32:61>
 Expr <NumLit test.lkt:32:63-32:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:33:42-33:45>
+Id   <RefId "Int" test.lkt:33:42-33:45>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <DotExpr test.lkt:33:48-33:68>
@@ -151,10 +151,10 @@ Expr <DotExpr test.lkt:33:48-33:68>
 Expr <CallExpr test.lkt:33:48-33:66>
      has type <InstantiatedGenericType "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:33:48-33:52>
+Id   <RefId "Pair" test.lkt:33:48-33:52>
      references <GenericDecl "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:33:53-33:56>
+Id   <RefId "Int" test.lkt:33:53-33:56>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NumLit test.lkt:33:58-33:60>
@@ -163,16 +163,16 @@ Expr <NumLit test.lkt:33:58-33:60>
 Expr <NumLit test.lkt:33:63-33:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId test.lkt:33:67-33:68>
+Expr <RefId "a" test.lkt:33:67-33:68>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:33:67-33:68>
+Id   <RefId "a" test.lkt:33:67-33:68>
      references <FieldDecl "a" test.lkt:22:5-22:10>
 
-Id   <RefId test.lkt:34:38-34:42>
+Id   <RefId "Pair" test.lkt:34:38-34:42>
      references <GenericDecl "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:34:43-34:46>
+Id   <RefId "Int" test.lkt:34:43-34:46>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 test.lkt:34:50: Expected instance of type 'Pair[Int]', got type Int
@@ -180,10 +180,10 @@ test.lkt:34:50: Expected instance of type 'Pair[Int]', got type Int
 Expr <CallExpr test.lkt:34:50-34:67>
      has type <InstantiatedGenericType "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:34:50-34:54>
+Id   <RefId "Pair" test.lkt:34:50-34:54>
      references <GenericDecl "Pair" test.lkt:21:1-24:2>
 
-Id   <RefId test.lkt:34:55-34:58>
+Id   <RefId "Int" test.lkt:34:55-34:58>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NumLit test.lkt:34:60-34:62>
@@ -192,56 +192,56 @@ Expr <NumLit test.lkt:34:60-34:62>
 Expr <NumLit test.lkt:34:64-34:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId test.lkt:34:68-34:69>
+Expr <RefId "a" test.lkt:34:68-34:69>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:34:68-34:69>
+Id   <RefId "a" test.lkt:34:68-34:69>
      references <FieldDecl "a" test.lkt:22:5-22:10>
 
-Id   <RefId test.lkt:35:44-35:48>
-     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Id   <RefId "Bool" test.lkt:35:44-35:48>
+     references <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
 Expr <DotExpr test.lkt:35:51-35:80>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
 Expr <CallExpr test.lkt:35:51-35:78>
      has type <InstantiatedGenericType "Tuple2" test.lkt:26:1-29:2>
 
-Id   <RefId test.lkt:35:51-35:57>
+Id   <RefId "Tuple2" test.lkt:35:51-35:57>
      references <GenericDecl "Tuple2" test.lkt:26:1-29:2>
 
-Id   <RefId test.lkt:35:58-35:61>
+Id   <RefId "Int" test.lkt:35:58-35:61>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:35:63-35:67>
-     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Id   <RefId "Bool" test.lkt:35:63-35:67>
+     references <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
 Expr <NumLit test.lkt:35:69-35:71>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId test.lkt:35:73-35:77>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Expr <RefId "true" test.lkt:35:73-35:77>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
-Id   <RefId test.lkt:35:73-35:77>
-     references <EnumLitDecl "true" __prelude:6:28-6:32>
+Id   <RefId "true" test.lkt:35:73-35:77>
+     references <EnumLitDecl "true" __prelude:5:28-5:32>
 
-Expr <RefId test.lkt:35:79-35:80>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Expr <RefId "b" test.lkt:35:79-35:80>
+     has type <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
-Id   <RefId test.lkt:35:79-35:80>
+Id   <RefId "b" test.lkt:35:79-35:80>
      references <FieldDecl "b" test.lkt:28:5-28:10>
 
-Id   <RefId test.lkt:36:40-36:46>
+Id   <RefId "Tuple2" test.lkt:36:40-36:46>
      references <GenericDecl "Tuple2" test.lkt:26:1-29:2>
 
-Id   <RefId test.lkt:36:47-36:50>
+Id   <RefId "Int" test.lkt:36:47-36:50>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId test.lkt:36:52-36:56>
-     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Id   <RefId "Bool" test.lkt:36:52-36:56>
+     references <EnumTypeDecl "Bool" __prelude:5:10-5:36>
 
 test.lkt:36:60: Expected instance of type 'Tuple2[Int, Bool]', got type Bool
 
-Id   <RefId test.lkt:36:60-36:64>
-     references <EnumLitDecl "true" __prelude:6:28-6:32>
+Id   <RefId "true" test.lkt:36:60-36:64>
+     references <EnumLitDecl "true" __prelude:5:28-5:32>
 
