@@ -394,8 +394,8 @@ class Expr(LKNode):
     def expr_type_impl(expected_type=T.TypeDecl.entity,
                        raise_if_no_type=(T.Bool, True)):
         """
-        Overriding type specific implementation for Expr.expr_type. Default
-        implementation has the following behavior:
+        Implementation for Expr.expr_type. This is the core of the current type
+        system for lkt. Default implementation has the following behavior:
 
         - If there is a context free type for this expression *and* an expected
           type, then check that they match, if they don't, return an error
@@ -409,6 +409,25 @@ class Expr(LKNode):
           the context-free type.
 
         - If there is none, raise a PropertyError.
+
+        Implementing typing for new constructs should be simple:
+
+        - If the construct has a definite type regardless of the context (for
+          example, a variable reference), then just override
+          ``expr_context_free_type``.
+
+        - If the construct has no definite type but imposes some constraints on
+          the typing - for example, a string literal will require it's argument
+          to be either a string or a symbol - override
+          ``expected_type_predicate`` and ``invalid_expected_type_error_name``.
+
+        - If the construct has no definite type and no constraints, you have
+          nothing to do.
+
+        - If the construct need rules that have not been planned by the above,
+          you can still override ``expr_type_impl``. This should not be
+          necessary though, and should only be done following a discussion with
+          LKT devs, and altering this comment afterwards.
         """
         cf_type = Var(Entity.expr_context_free_type)
 
