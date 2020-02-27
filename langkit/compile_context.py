@@ -352,7 +352,6 @@ class CompileCtx(object):
             self.lkt_unit = load_lkt(lkt_file)
 
         self.lexer = lexer
-        self.lexer.prefix = "{}_TKN_".format(self.lang_name.lower.upper())
         ":type: langkit.lexer.Lexer"
 
         self.grammar = grammar or create_grammar(self, self.lkt_unit)
