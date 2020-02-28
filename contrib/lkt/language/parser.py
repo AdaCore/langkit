@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import (
-    ASTNode, AbstractField, Annotations, Field, NullField, Struct, T,
-    UserField, abstract, synthetic
+    ASTNode, AbstractField, Annotations, Field, LookupKind as LK, NullField,
+    Struct, T, UserField, abstract, synthetic
 )
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
 from langkit.expressions import (
@@ -628,21 +628,23 @@ class RefId(Id):
 
     @langkit_property()
     def referenced_decl():
-        return Entity.scope.get_first(Self.symbol).cast(T.Decl)
+        lk = Var(If(Entity.dot_expr_if_suffix.is_null, LK.recursive, LK.flat))
+        return Entity.scope.get_first(Self.symbol, lookup=lk).cast(T.Decl)
 
     expr_context_free_type = Property(
         Entity.referenced_decl.cast_or_raise(T.BaseValDecl).get_type
     )
 
+    dot_expr_if_suffix = Property(
+        Entity.parent.cast(T.DotExpr).then(
+            lambda de: If(Entity == de.suffix, de, No(T.DotExpr.entity)))
+    )
+
     @langkit_property()
     def scope():
-        return Entity.parent.match(
-            lambda de=T.DotExpr: If(
-                Entity == de.suffix,
-                de.prefix.designated_scope,
-                Entity.children_env
-            ),
-            lambda _: Entity.children_env
+        return Entity.dot_expr_if_suffix.then(
+            lambda de: de.prefix.designated_scope,
+            default_val=Entity.children_env
         )
 
 

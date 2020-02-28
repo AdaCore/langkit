@@ -331,3 +331,24 @@ Id   <RefId "arg" test.lkt:48:53-48:56>
 Expr <NumLit test.lkt:48:58-48:60>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
+Id   <RefId "Int" test.lkt:51:9-51:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Resolving type of expr <NumLit test.lkt:51:15-51:17> raised an error
+    no type
+Id   <RefId "Int" test.lkt:55:41-55:44>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Resolving type of expr <DotExpr test.lkt:55:47-55:53> raised an error
+    dereferencing a null access
+Expr <RefId "self" test.lkt:55:47-55:51>
+     has type <StructDecl "Foo" test.lkt:53:1-56:2>
+
+Id   <RefId "self" test.lkt:55:47-55:51>
+     references <SelfDecl "self" test.lkt:53:1-56:2>
+
+Resolving type of expr <RefId "a" test.lkt:55:52-55:53> raised an error
+    dereferencing a null access
+Id   <RefId "a" test.lkt:55:52-55:53>
+     references None
+
