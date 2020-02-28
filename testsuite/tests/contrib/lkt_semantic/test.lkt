@@ -47,3 +47,11 @@ class B : A {
     fun test_struct_fun(arg: Tuple2[Int, Bool]): Int = arg.test()
     fun test_array_indexing(arg: Array[Int]): Int = arg (12)
 }
+
+val a : Int = 12
+
+struct Foo {
+    # Test that you cannot access toplevel declarations from a nested scope.
+    fun test_identifier_leak_invalid(): Int = self.a
+}
+
