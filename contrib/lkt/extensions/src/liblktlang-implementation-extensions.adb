@@ -1,7 +1,7 @@
 with Ada.Directories;
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Liblktlang.Analysis; use Liblktlang.Analysis;
+with Liblktlang.Analysis;          use Liblktlang.Analysis;
 with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Implementation.Extensions is
