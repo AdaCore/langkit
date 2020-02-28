@@ -1,12 +1,20 @@
-@spacing("alphanumericals", "alphanumericals")
+@spacing(alphanumericals, alphanumericals)
 lexer foo_lexer {
 
     @text whitespace <- p"[ \n\r\t]+"
-    @family("alphanumericals") @text def <- "def"
+
+    family alphanumericals {
+        @text def <- "def"
+    }
+
     @text var <- "var"
-    @family("alphanumericals") @text error <- "error"
-    @family("alphanumericals") @text example <- "example"
-    @family("alphanumericals") @text null_tok <- "null"
+
+    family alphanumericals {
+        @text error <- "error"
+        @text example <- "example"
+        @text null_tok <- "null"
+    }
+
     @text comma <- ","
     @text dot <- "."
     @text semicolon <- ";"
@@ -18,11 +26,14 @@ lexer foo_lexer {
     @text plus <- "+"
     @text minus <- "-"
     @text less_than <- "<"
-    @family("alphanumericals") @text number <- p"[0-9]+"
-    @family("alphanumericals") @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+
+    family alphanumericals {
+        @text number <- p"[0-9]+"
+        @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    }
+
     @text string <- p"\"[^\"]*\""
     @newline_after @text comment <- p"#(.?)+"
-
 }
 grammar foo_grammar {
     @main_rule main_rule <- Def(

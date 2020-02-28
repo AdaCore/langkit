@@ -1080,7 +1080,7 @@ def format_pattern(pat):
     return json.dumps(pat.decode('string_escape'))
 
 
-def unparse_lexer_rule_set(families, newline_afters, rule_set):
+def unparse_lexer_rule_set(newline_afters, rule_set):
     from langkit.lexer import (
         WithSymbol, WithText, WithTrivia, Literal, NoCaseLit, Pattern, Ignore,
         Case
@@ -1145,9 +1145,6 @@ def unparse_lexer_rule_set(families, newline_afters, rule_set):
         assert len(rule_set) == 1
         return res + unparse_case_action(first_rule.matcher, action)
 
-    for family_name in families[action]:
-        res += '@family("{}") '.format(family_name)
-
     if action in newline_afters:
         res += '@newline_after '
 
@@ -1185,10 +1182,10 @@ def compute_families_map(spacing_table):
                 used_token_families.add(tf1)
                 used_token_families.add(tf2)
 
-    res = defaultdict(list)
+    res = {}
     for tf in used_token_families:
         for tok in tf.tokens:
-            res[tok].append(tf.name.lower)
+            res[tok] = tf.name.lower
 
     return res
 
@@ -1216,9 +1213,14 @@ def unparse_lang(ctx):
     # langkit code generator, because we break that invariant in the unparser.
     emitter = ctx.emitter
     ctx.emitter = None
+
+    #################################
+    # Prepare unparsing of lexer...
+    #################################
+
     lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
     lexer_annotations += "".join(
-        '@spacing("{}", "{}")$hl'.format(tf1.name.lower, tf2.name.lower)
+        '@spacing({}, {})$hl'.format(tf1.name.lower, tf2.name.lower)
         for tf1, m in ctx.lexer.spacing_table.iteritems()
         for tf2, v in m.iteritems()
         if v
@@ -1249,6 +1251,31 @@ def unparse_lang(ctx):
         if len(cur_set) > 0:
             rule_sets.append(cur_set)
 
+    unparsed_rules = ""
+    close_last_family = "$d$hl}$hl"
+    last_family = None
+    for rule_set in rule_sets:
+        tok = rule_set[0][0].action
+        family = families.get(tok)
+        unparsed_rule = unparse_lexer_rule_set(newline_afters, rule_set)
+
+        if family != last_family:
+            last_family = family
+            open_new_family = '$hl$hlfamily {} {{$i'.format(family)
+            if family is None:
+                unparsed_rules += close_last_family
+            if last_family is not None:
+                unparsed_rules += open_new_family
+
+        unparsed_rules += "$hl" + unparsed_rule
+
+    if last_family is not None:
+        unparsed_rules += close_last_family
+
+    #################################
+    # Prepare unparsing of grammar...
+    #################################
+
     sorted_rules = sorted(
         ((name, rule)
          for name, rule in ctx.grammar.rules.items()
@@ -1261,11 +1288,9 @@ def unparse_lang(ctx):
     % for name, pattern, loc in ctx.lexer.patterns:
         val ${name} = p${format_pattern(pattern)}$hl
     % endfor
-    $hl
 
-    % for rule_set in rule_sets:
-        ${unparse_lexer_rule_set(families, newline_afters, rule_set)}$hl
-    % endfor
+    ${unparsed_rules}
+
     $d$hl
     }$hl
 

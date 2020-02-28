@@ -3,7 +3,6 @@ lexer foo_lexer {
     @ignore _ <- p"[ \n\r\t]+"
     @text example <- "example"
     @text comment <- p"#(.?)+"
-
 }
 grammar foo_grammar {
     @main_rule main_rule <- ASTList[Example]+(Example("example"))

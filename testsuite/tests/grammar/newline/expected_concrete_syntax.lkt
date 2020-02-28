@@ -12,7 +12,6 @@ lexer foo_lexer {
     @text plus <- "+"
     @text number <- p"[0-9]+"
     @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
-
 }
 grammar foo_grammar {
     lit <- Literal(@number)

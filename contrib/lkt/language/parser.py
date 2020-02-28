@@ -430,6 +430,14 @@ class LexerDecl(Decl):
     rules = Field(type=T.LKNode.list)
 
 
+class LexerFamilyDecl(Decl):
+    """
+    Declaration of a token family.
+    """
+    syn_name = Field(type=T.DefId)
+    rules = Field(type=T.LKNode.list)
+
+
 class LexerCaseRule(LKNode):
     """
     Lexer construct to introduce a conditional lexing action.
@@ -1465,7 +1473,7 @@ lkt_grammar.add_rules(
 
     lexer_decl=LexerDecl(
         "lexer", G.def_id, "{",
-        List(Or(G.decl, G.lexer_case_rule), empty_valid=True),
+        List(GOr(G.lexer_rule, G.lexer_family_decl), empty_valid=True),
         "}"
     ),
     grammar_decl=GrammarDecl(
@@ -1473,6 +1481,12 @@ lkt_grammar.add_rules(
         "{", List(G.decl, empty_valid=True), "}"
     ),
     grammar_rule=GrammarRuleDecl(G.def_id, "<-", G.grammar_expr),
+    lexer_rule=GOr(G.decl, G.lexer_case_rule),
+    lexer_family_decl=LexerFamilyDecl(
+        Lex.Identifier(match_text="family"), G.def_id, "{",
+        List(G.lexer_rule, empty_valid=False),
+        "}"
+    ),
     lexer_case_rule=LexerCaseRule(
         "match", G.grammar_primary, "{",
         List(G.lexer_case_alt, empty_valid=False),
