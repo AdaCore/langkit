@@ -37,13 +37,13 @@ lexer foo_lexer {
 }
 grammar foo_grammar {
     name <- Name(@identifier)
-    @main_rule main_rule <- ASTList[FooNode]+(or(
+    @main_rule main_rule <- list+(or(
         | Def("def" name imports vars expr)
         | expr
     ))
-    imports <- pick("(" ASTList[DerivedRef]*(derived_ref) ")")
+    imports <- pick("(" list*(derived_ref) ")")
     var <- Var(name "=" expr)
-    vars <- pick("{" ASTList[Var]*(var) "}")
+    vars <- pick("{" list*(var) "}")
     expr <- or(atom | plus)
     atom <- or(lit | ref)
     lit <- Lit(@number)

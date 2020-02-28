@@ -36,10 +36,8 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[FooNode]+(or(scope | self_decl | foreign_decl))
-    scope <- Scope(
-        simple_identifier "{" ASTList[Scope]*(scope) "}"
-    )
+    @main_rule main_rule <- list+(or(scope | self_decl | foreign_decl))
+    scope <- Scope(simple_identifier "{" list*(scope) "}")
     identifier <- or(
         | ScopedId(identifier "." simple_identifier)
         | simple_identifier

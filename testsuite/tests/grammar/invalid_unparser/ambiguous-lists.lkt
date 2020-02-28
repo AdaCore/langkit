@@ -1,7 +1,7 @@
 grammar foo_grammar {
     @main_rule main_rule <- Root(or(
-        Root("example" ASTList[FooNode]+(leaf, ","))
-        | ASTList[FooNode]+(leaf)
+        Root("example" list+(leaf, ","))
+        | list+(leaf)
     ))
     leaf <- or(Identifier(@identifier) | Number(@number))
 }

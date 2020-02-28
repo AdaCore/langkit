@@ -181,7 +181,12 @@ def lower_grammar_rules(ctx):
             AST node.
         :rtype: ASTNodeType
         """
-        if isinstance(node_ref, liblktlang.DotExpr):
+        # For convenience, accept null input nodes, as we generally want to
+        # forward them as-is to the lower level parsing machinery.
+        if node_ref is None:
+            return None
+
+        elif isinstance(node_ref, liblktlang.DotExpr):
             # Get the altenatives mapping for the prefix_node enum node
             prefix_node = resolve_node_ref(node_ref.f_prefix)
             with ctx.lkt_context(prefix_node):

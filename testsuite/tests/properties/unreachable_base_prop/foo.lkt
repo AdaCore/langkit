@@ -1,5 +1,5 @@
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Expr]+(expr)
+    @main_rule main_rule <- list+(expr)
 
     expr <- or(atom | plus)
 

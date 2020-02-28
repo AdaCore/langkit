@@ -36,12 +36,12 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Block]+(block)
+    @main_rule main_rule <- list+(block)
     name <- Name(@identifier)
     block <- Block(params name vars)
     params <- pick("(" Params+(param) ")")
     param <- Param(name)
-    vars <- pick("{" ASTList[BlockVar]+(var) "}")
+    vars <- pick("{" list+(var) "}")
     var <- BlockVar(name)
 
 }

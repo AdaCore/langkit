@@ -36,11 +36,11 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Decl]+(decl)
+    @main_rule main_rule <- list+(decl)
     decl <- Decl(
         HasPlus("+") Name(@identifier) "(" ref_list ")"
     )
-    ref_list <- ASTList[Ref]*(ref)
+    ref_list <- list*(ref)
     ref <- Ref(Name(@identifier))
 
 }

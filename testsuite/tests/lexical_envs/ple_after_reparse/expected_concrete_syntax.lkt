@@ -36,8 +36,8 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    deps <- ASTList[Dep]*(pick(Dep(pick("+" name)) ";"))
-    defs <- ASTList[FooNode]*(pick(or(scope | var) ";"))
+    deps <- list*(pick(Dep(pick("+" name)) ";"))
+    defs <- list*(pick(or(scope | var) ";"))
     @main_rule scope <- Scope(name "{" deps defs "}")
     var <- Var(id "=" name)
     id <- Id(@identifier)

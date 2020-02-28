@@ -37,7 +37,7 @@ lexer foo_lexer {
 }
 grammar foo_grammar {
     @main_rule main_rule <- example_list
-    example_list <- ASTList[Example]+(example)
+    example_list <- list+(example)
     example <- Example("example" ?pick("(" example_list ")"))
 
 }

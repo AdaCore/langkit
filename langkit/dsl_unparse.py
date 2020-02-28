@@ -369,12 +369,15 @@ def emit_rule(rule, top_level=False):
     elif isinstance(rule, _Extract):
         return 'pick({})'.format(emit_rule(rule.parser))
     elif isinstance(rule, List):
-        return "{list_cls}{kind}({subparser}{sep})".format(
-            list_cls=node_name(rule.type),
-            kind='*' if rule.empty_valid else '+',
-            subparser=emit_rule(rule.parser),
-            sep=", {}".format(emit_rule(rule.sep)) if rule.sep else ""
-        )
+        kind= '*' if rule.empty_valid else '+'
+        subparser = emit_rule(rule.parser)
+        sep = ", {}".format(emit_rule(rule.sep)) if rule.sep else ""
+        return ("{list_cls}{kind}({subparser}{sep})"
+                .format(list_cls=node_name(rule.type),
+                        kind=kind, subparser=subparser, sep=sep)
+                if rule.list_cls else
+                "list{kind}({subparser}{sep})"
+                .format(kind=kind, subparser=subparser, sep=sep))
     elif isinstance(rule, Null):
         return "null({})".format(
             emit_rule(rule.type) if isinstance(rule.type, Parser)

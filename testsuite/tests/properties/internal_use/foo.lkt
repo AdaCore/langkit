@@ -1,5 +1,5 @@
 grammar foo_grammar {
-    @main_rule stmts_rule <- ASTList[Stmt]+(stmt_rule)
-    stmt_rule <- or(def_rule | Block("{" ASTList[Stmt]*(stmt_rule) "}"))
+    @main_rule stmts_rule <- list+(stmt_rule)
+    stmt_rule <- or(def_rule | Block("{" list*(stmt_rule) "}"))
     def_rule <- Def(Name(@identifier) ?("(" stmts_rule ")"))
 }
