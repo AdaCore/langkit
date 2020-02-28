@@ -58,6 +58,44 @@ def load_lkt(lkt_file):
     return list(units_map.values())
 
 
+def find_toplevel_decl(ctx, lkt_units, node_type, label):
+    """
+    Look for a top-level declaration of type ``node_type`` in the given units.
+
+    If none or several are found, emit error diagnostics. Return the associated
+    full declaration.
+
+    :param list[liblktlang.AnalysisUnit] lkt_units: List of units where to
+        look.
+    :param langkit.compiled_types.ASTNode: Node type to look for.
+    :param str label: Human readable string for what to look for. Used to
+        create diagnostic mesages.
+    :rtype: liblktlang.FullDecl
+    """
+    result = None
+    for unit in lkt_units:
+        for decl in unit.root.f_decls:
+            if not isinstance(decl.f_decl, node_type):
+                continue
+
+            with ctx.lkt_context(decl):
+                if result is not None:
+                    check_source_language(
+                        False,
+                        'only one {} allowed (previous found at {}:{})'.format(
+                            label,
+                            os.path.basename(result.unit.filename),
+                            result.sloc_range.start
+                        )
+                    )
+                result = decl
+
+    with ctx.lkt_context(lkt_units[0].root):
+        check_source_language(result is not None, 'missing {}'.format(label))
+
+    return result
+
+
 def annotations(ctx, decl):
     """
     Build a Python dict for ``decl``'s annotations.
@@ -90,24 +128,14 @@ def create_grammar(ctx, lkt_units):
     """
     import liblktlang
 
-    # Look for the GrammarDecl node in the top-level list
-    full_grammar = None
-    for unit in lkt_units:
-        for decl in unit.root.f_decls:
-            if not isinstance(decl.f_decl, liblktlang.GrammarDecl):
-                continue
+    # Look for the GrammarDecl node in top-level lists
+    full_grammar = find_toplevel_decl(ctx, lkt_units, liblktlang.GrammarDecl,
+                                      'grammar')
 
-            with ctx.lkt_context(decl):
-                check_source_language(full_grammar is None,
-                                      'only one grammar allowed')
-                full_grammar = decl
-
-                # No annotation allowed for grammars
-                check_source_language(not annotations(ctx, decl),
-                                      'no annotation allowed')
-
-    with ctx.lkt_context(lkt_units[0].root):
-        check_source_language(full_grammar is not None, 'missing grammar')
+    # No annotation allowed for grammars
+    with ctx.lkt_context(full_grammar):
+        check_source_language(not annotations(ctx, full_grammar),
+                              'no annotation allowed')
 
     # Get the list of grammar rules. This is where we check that we only have
     # grammar rules, that their names are unique, and that they have valid

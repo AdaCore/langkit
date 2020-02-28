@@ -26,10 +26,10 @@ several_main_rules.lkt:3:5: Error: only one main rule allowed
 transform_invalid_node.lkt:2:29: Error: Unknown node: NoSuchNode
 
 == two_grammar_files.lkt ==
-basic.lkt:1:1: Error: only one grammar allowed
+basic.lkt:1:1: Error: only one grammar allowed (previous found at two_grammar_files.lkt:3:1)
 
 == two_grammars.lkt ==
-two_grammars.lkt:2:1: Error: only one grammar allowed
+two_grammars.lkt:2:1: Error: only one grammar allowed (previous found at two_grammars.lkt:1:1)
 
 == unknown_rule_annot.lkt ==
 unknown_rule_annot.lkt:3:5: Error: invalid annotations: foo
