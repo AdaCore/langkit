@@ -22,7 +22,7 @@ class Example : FooNode {
     )
 
     ## Test that sym literals with quotes in them are properly unparsed.
-    @export fun test_symlit_escape (): SymbolType = "\"=\""
+    @export fun test_symlit_escape (): Symbol = "\"=\""
 
     ## Test various valid dotexpr's LHS.
     @export fun test_dotexpr_lhs (): Int = {
@@ -49,6 +49,6 @@ class Example : FooNode {
 }
 
 struct KV {
-    key : SymbolType
-    value : SymbolType
+    key : Symbol
+    value : Symbol
 }

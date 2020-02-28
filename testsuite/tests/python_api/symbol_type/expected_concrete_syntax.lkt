@@ -45,5 +45,5 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun sym (sym : SymbolType): SymbolType = sym
+    @export fun sym (sym : Symbol): Symbol = sym
 }

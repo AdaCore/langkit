@@ -57,9 +57,9 @@ class Dep : FooNode {
 
     @export fun resolve (): FooNode
 
-    @export fun suffix_symbol (): SymbolType
+    @export fun suffix_symbol (): Symbol
 
-    @export fun symbols (): Array[SymbolType]
+    @export fun symbols (): Array[Symbol]
 
     fun referenced_unit_or_error (or_error : Bool): InternalUnit
 
@@ -71,9 +71,9 @@ class Id : Name {
 
     fun resolve (): FooNode = node.node_env.get(node, only_first=true)
 
-    fun suffix_symbol (): SymbolType = node.symbol
+    fun suffix_symbol (): Symbol = node.symbol
 
-    fun symbols (): Array[SymbolType] = node.symbol?.singleton
+    fun symbols (): Array[Symbol] = node.symbol?.singleton
 }
 
 class Prefix : Name {
@@ -83,10 +83,9 @@ class Prefix : Name {
     fun resolve (): FooNode =
     node.prefix.resolve.children_env.get(node.suffix.symbol, only_first=true)
 
-    fun suffix_symbol (): SymbolType = node.suffix.symbol
+    fun suffix_symbol (): Symbol = node.suffix.symbol
 
-    fun symbols (): Array[SymbolType] =
-    node.prefix.symbols & node.suffix.symbols
+    fun symbols (): Array[Symbol] = node.prefix.symbols & node.suffix.symbols
 }
 
 class Scope : FooNode {
@@ -108,7 +107,7 @@ class Var : FooNode {
 }
 
 struct EnvAssoc {
-    key : SymbolType
+    key : Symbol
     value : FooNode
     dest_env : LexicalEnv
     metadata : Metadata

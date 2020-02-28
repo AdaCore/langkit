@@ -977,6 +977,8 @@ def type_name(type):
         return 'Int'
     elif type.name.camel == 'Boolean':
         return 'Bool'
+    elif type.name.camel == 'SymbolType':
+        return 'Symbol'
     elif type.name.camel == 'BigIntegerType':
         return 'BigInt'
     else:
