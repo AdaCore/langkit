@@ -36,7 +36,7 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ListNode(ASTList[NumberNode]+(NumberNode(@number)))
+    @main_rule main_rule <- ListNode(list+(NumberNode(@number)))
 
 }
 

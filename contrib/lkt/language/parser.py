@@ -10,7 +10,8 @@ from langkit.expressions import (
     Not, Or, Property, PropertyError, Self, String, Var, ignore,
     langkit_property
 )
-from langkit.parsers import Grammar, List, NoBacktrack as cut, Opt, Or as GOr
+from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
+                             Or as GOr, Pick)
 
 
 from language.lexer import lkt_lexer as Lex
@@ -1508,13 +1509,13 @@ lkt_grammar.add_rules(
     ),
     grammar_primary=GOr(
         G.grammar_pick,
+        G.grammar_list_expr,
         G.token_literal,
         G.token_no_case_literal,
         G.token_pattern_literal,
         G.grammar_cut,
         G.grammar_skip,
         G.grammar_null,
-        G.grammar_list_expr,
         G.grammar_token,
         G.parse_node_expr,
         G.grammar_opt,
@@ -1569,7 +1570,12 @@ lkt_grammar.add_rules(
     ),
     grammar_rule_ref=GrammarRuleRef(G.ref_id),
     grammar_list_expr=GrammarList(
-        G.type_ref, GOr(ListKind.alt_one("+"), ListKind.alt_zero("*")),
+        # Match either "list" (type inference will determine the list type) or
+        # a specific list type.
+        GOr(Pick(Lex.Identifier(match_text="list"), Null(TypeRef)),
+            G.type_ref),
+
+        GOr(ListKind.alt_one("+"), ListKind.alt_zero("*")),
         "(",
 
         # Main list expr

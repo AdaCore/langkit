@@ -5,7 +5,7 @@ lexer foo_lexer {
     comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Example]+(Example("example"))
+    @main_rule main_rule <- list+(Example("example"))
 
 }
 

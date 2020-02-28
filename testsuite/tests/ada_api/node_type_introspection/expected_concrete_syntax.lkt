@@ -36,7 +36,7 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[VarDecl]+(var_decl)
+    @main_rule main_rule <- list+(var_decl)
     var_decl <- VarDecl("var" name "=" expr ";")
     expr <- or(Addition(expr "+" expr) | atom)
     atom <- or(number | ref)

@@ -37,7 +37,7 @@ lexer foo_lexer {
 }
 grammar foo_grammar {
     @main_rule main_rule <- defs
-    defs <- ASTList[DefNode]*(def_rule)
+    defs <- list*(def_rule)
     def_rule <- or(scope | var)
     scope <- Scope(
         HasError("error") Id(@identifier) "{" defs "}"

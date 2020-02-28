@@ -16,20 +16,18 @@ grammar foo_grammar {
     call <- Call(
         identifier
         "("
-        discard(ASTList[Newline]*(newline))
-        ASTList[Call]*(call, ",") discard(ASTList[Newline]*(newline)) ")"
+        discard(list*(newline))
+        list*(call, ",") discard(list*(newline)) ")"
     )
     indented <- Indented(
-        discard(ASTList[Newline]*(newline))
+        discard(list*(newline))
         @indent
-        ASTList[FooNode]+(pick(discard(ASTList[Newline]*(newline))
-        expr discard(ASTList[Newline]*(newline))), @newline) @dedent
+        list+(pick(discard(list*(newline))
+        expr discard(list*(newline))), @newline) @dedent
     )
-    def_node <- Def(
-        "def" identifier @newline ASTList[Indented]+(indented)
-    )
-    @main_rule main_rule <- ASTList[Def]+(pick(discard(ASTList[Newline]*(newline))
-    def_node discard(ASTList[Newline]*(newline))))
+    def_node <- Def("def" identifier @newline list+(indented))
+    @main_rule main_rule <- list+(pick(discard(list*(newline))
+    def_node discard(list*(newline))))
 
 }
 

@@ -36,8 +36,8 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Decl]+(decl)
-    decl <- Decl("def" ASTList[Name]+(name))
+    @main_rule main_rule <- list+(decl)
+    decl <- Decl("def" list+(name))
     name <- Name(@identifier)
 
 }

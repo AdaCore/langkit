@@ -32,8 +32,6 @@ class Token(LexerToken):
     RBrace = WithText()
     LBrack = WithText()
     RBrack = WithText()
-    ListPlus = WithText()
-    ListStar = WithText()
     Equal = WithText()
     GTE = WithText()
     LTE = WithText()
@@ -113,8 +111,6 @@ lkt_lexer.add_rules(
     (Literal('|>'),        Token.Comb),
     (Literal(','),         Token.Comma),
     (Literal('@'),         Token.At),
-    (Literal('list+'),     Token.ListPlus),
-    (Literal('list*'),     Token.ListStar),
     (Literal('=>'),        Token.FatRightArrow),
     (Literal('='),         Token.Equal),
     (Literal('<='),        Token.LTE),

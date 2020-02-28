@@ -38,7 +38,7 @@ lexer foo_lexer {
 grammar foo_grammar {
     @main_rule main_rule <- list_rule
     list_rule <- LiteralSequence(
-        "(" Name(@identifier) ASTList[Literal]+(list_item, ",") ")"
+        "(" Name(@identifier) list+(list_item, ",") ")"
     )
     list_item <- Literal(@number)
 

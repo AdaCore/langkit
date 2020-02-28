@@ -36,14 +36,14 @@ lexer foo_lexer {
     @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
-    @main_rule main_rule <- ASTList[Block]+(block)
+    @main_rule main_rule <- list+(block)
     name <- Name(@identifier)
     block <- Block(
         name decl_list "{" using_list ref_list "}"
     )
-    decl_list <- pick("(" ASTList[Decl]*(decl) ")")
-    using_list <- pick("(" ASTList[Using]*(using) ")")
-    ref_list <- ASTList[Ref]*(ref)
+    decl_list <- pick("(" list*(decl) ")")
+    using_list <- pick("(" list*(using) ")")
+    ref_list <- list*(ref)
     decl <- Decl(name)
     using <- Using(name)
     ref <- Ref(name)
