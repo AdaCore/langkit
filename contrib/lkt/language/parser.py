@@ -1327,6 +1327,15 @@ class ValDecl(UserValDecl):
     decl_type = Field(type=T.TypeRef)
     val = Field(type=T.Expr)
 
+    get_type = Property(
+        # If no type was given for the val declaration, infer it using its
+        # expression.
+        Entity.decl_type.then(
+            lambda tpe: tpe.designated_type,
+            default_val=Entity.val.expr_type._.expr_type
+        )
+    )
+
 
 class Op(LKNode):
     """
