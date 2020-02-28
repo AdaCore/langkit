@@ -344,17 +344,18 @@ class CompileCtx(object):
         :type: bool
         """
 
-        from langkit.lkt_lowering import create_grammar, load_lkt
-        self.lkt_unit = None
+        from langkit.lkt_lowering import load_lkt
+        self.lkt_units = None
         if lkt_file is None:
             assert grammar, 'LKT spec required when no grammar is provided'
         else:
-            self.lkt_unit = load_lkt(lkt_file)
+            self.lkt_units = load_lkt(lkt_file)
 
         self.lexer = lexer
         ":type: langkit.lexer.Lexer"
 
-        self.grammar = grammar or create_grammar(self, self.lkt_unit)
+        from langkit.lkt_lowering import create_grammar
+        self.grammar = grammar or create_grammar(self, self.lkt_units)
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)

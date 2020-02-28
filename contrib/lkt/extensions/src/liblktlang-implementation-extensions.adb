@@ -89,6 +89,23 @@ package body Liblktlang.Implementation.Extensions is
       return Ret;
    end LK_Node_P_Env_From_Vals_Internal;
 
+   ----------------------------------------------
+   -- LK_Node_P_Internal_Fetch_Referenced_Unit --
+   ----------------------------------------------
+
+   function LK_Node_P_Internal_Fetch_Referenced_Unit
+     (Node : Bare_LK_Node;
+      Name : Character_Type_Array_Access) return Internal_Unit
+   is
+   begin
+      return Get_From_Provider
+        (Context => Node.Unit.Context,
+         Name    => Name.Items,
+         Kind    => Unit_Body,
+         Charset => "ascii",
+         Reparse => False);
+   end LK_Node_P_Internal_Fetch_Referenced_Unit;
+
    -------------------------------------
    -- String_Lit_P_Is_Prefixed_String --
    -------------------------------------

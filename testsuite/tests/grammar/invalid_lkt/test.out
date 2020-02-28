@@ -1,6 +1,9 @@
 == annotated_grammar.lkt ==
 annotated_grammar.lkt:1:1: Error: no annotation allowed
 
+== basic.lkt ==
+Code generation was successful
+
 == invalid_decl.lkt ==
 invalid_decl.lkt:2:5: Error: grammar rule expected
 
@@ -22,8 +25,11 @@ several_main_rules.lkt:3:5: Error: only one main rule allowed
 == transform_invalid_node.lkt ==
 transform_invalid_node.lkt:2:29: Error: Unknown node: NoSuchNode
 
+== two_grammar_files.lkt ==
+basic.lkt:1:1: Error: only one grammar allowed
+
 == two_grammars.lkt ==
-two_grammars.lkt:2:1: Error: There can be only one grammar per file
+two_grammars.lkt:2:1: Error: only one grammar allowed
 
 == unknown_rule_annot.lkt ==
 unknown_rule_annot.lkt:3:5: Error: invalid annotations: foo

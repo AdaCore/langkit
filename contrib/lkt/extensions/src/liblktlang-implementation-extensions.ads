@@ -15,6 +15,11 @@ package Liblktlang.Implementation.Extensions is
      (Node : Bare_LK_Node;
       Vals : Internal_EnvKV_Array_Access) return Lexical_Env;
 
+   function LK_Node_P_Internal_Fetch_Referenced_Unit
+     (Node : Bare_LK_Node;
+      Name : Character_Type_Array_Access) return Internal_Unit;
+   --  Return the unit that this name designates. Load it if needed.
+
    function String_Lit_P_Is_Prefixed_String
      (Node : Bare_String_Lit) return Boolean;
    --  Return whether this string is prefixed or not

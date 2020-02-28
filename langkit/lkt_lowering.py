@@ -19,24 +19,43 @@ from langkit.parsers import (Discard, DontSkip, Grammar, List, Null, Opt, Or,
 
 def load_lkt(lkt_file):
     """
-    Load a Lktlang source file. Raise a DiagnosticError if there are parsing
-    errors.
+    Load a Lktlang source file and return the closure of Lkt units referenced.
+    Raise a DiagnosticError if there are parsing errors.
 
     :param str lkt_file: Name of the file to parse.
     :rtype: liblktlang.AnalysisUnit
     """
     import liblktlang
 
-    basename = os.path.basename(lkt_file)
-    result = liblktlang.AnalysisContext().get_from_file(lkt_file)
+    units_map = OrderedDict()
+    diagnostics = []
 
-    # If there are diagnostics, forward them to the user. TODO: hand them
-    # to langkit.diagnostic.
-    if result.diagnostics:
-        for d in result.diagnostics:
+    def process_unit(unit):
+        if unit.filename in units_map:
+            return
+
+        # Register this unit and its diagnostics
+        units_map[unit.filename] = unit
+        diagnostics.extend(unit.diagnostics)
+
+        # Recursively process the units it imports. In case of parsing error,
+        # just stop the recursion: the collection of diagnostics is enough.
+        if not unit.diagnostics:
+            import_stmts = list(unit.root.f_imports)
+            for imp in import_stmts:
+                process_unit(imp.p_referenced_unit)
+
+    # Load ``lkt_file`` and all the units it references, transitively
+    basename = os.path.basename(lkt_file)
+    process_unit(liblktlang.AnalysisContext().get_from_file(lkt_file))
+
+    # If there are diagnostics, forward them to the user. TODO: hand them to
+    # langkit.diagnostic.
+    if diagnostics:
+        for d in diagnostics:
             print('{}:{}'.format(basename, d))
-            raise DiagnosticError()
-    return result
+        raise DiagnosticError()
+    return list(units_map.values())
 
 
 def annotations(ctx, decl):
@@ -57,36 +76,37 @@ def annotations(ctx, decl):
     return result
 
 
-def create_grammar(ctx, lkt_unit):
+def create_grammar(ctx, lkt_units):
     """
-    Create a grammar from a Lktlang unit.
+    Create a grammar from a set of Lktlang units.
 
     Note that this only initializes a grammar and fetches relevant declarations
     in the Lktlang unit. The actual lowering on grammar rules happens in a
     separate pass: see lower_all_lkt_rules.
 
-    :param liblktlang.AnalysisUnit lkt_unit: Analysis unit where to look
-        for the grammar.
+    :param list[liblktlang.AnalysisUnit] lkt_unit: Non-empty list of analysis
+        units where to look for the grammar.
     :rtype: langkit.parsers.Grammar
     """
     import liblktlang
 
     # Look for the GrammarDecl node in the top-level list
     full_grammar = None
-    for decl in lkt_unit.root.f_decls:
-        if not isinstance(decl.f_decl, liblktlang.GrammarDecl):
-            continue
+    for unit in lkt_units:
+        for decl in unit.root.f_decls:
+            if not isinstance(decl.f_decl, liblktlang.GrammarDecl):
+                continue
 
-        with ctx.lkt_context(decl):
-            check_source_language(full_grammar is None,
-                                  'There can be only one grammar per file')
-            full_grammar = decl
+            with ctx.lkt_context(decl):
+                check_source_language(full_grammar is None,
+                                      'only one grammar allowed')
+                full_grammar = decl
 
-            # No annotation allowed for grammars
-            check_source_language(not annotations(ctx, decl),
-                                  'no annotation allowed')
+                # No annotation allowed for grammars
+                check_source_language(not annotations(ctx, decl),
+                                      'no annotation allowed')
 
-    with ctx.lkt_context(lkt_unit.root):
+    with ctx.lkt_context(lkt_units[0].root):
         check_source_language(full_grammar is not None, 'missing grammar')
 
     # Get the list of grammar rules. This is where we check that we only have
