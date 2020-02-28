@@ -2,8 +2,11 @@
 
 from __future__ import absolute_import, division, print_function
 
-import liblktlang as lkt
 from os import path as P
+
+from langkit.utils.colors import Colors, col, printcol
+
+import liblktlang as lkt
 
 
 class Resolve(lkt.App):
@@ -21,9 +24,9 @@ class Resolve(lkt.App):
     def main(self):
         for unit_name, unit in self.units.items():
             if unit.diagnostics:
-                print("Syntax errors in {}, skipping".format(
+                printcol("Syntax errors in {}, skipping".format(
                     P.basename(unit_name)
-                ))
+                ), Colors.RED)
                 for diag in unit.diagnostics:
                     print(str(diag))
                 continue
@@ -35,7 +38,8 @@ class Resolve(lkt.App):
                 print()
                 print("Source:")
                 print()
-                print(unit.root.text)
+                for i, l in enumerate(unit.root.text.splitlines()):
+                    print("{: <3}: {}".format(i + 1, l))
                 print()
 
             for node in unit.root.finditer(lambda _: True):
@@ -52,14 +56,18 @@ class Resolve(lkt.App):
                                   .format(expr_type.expr_type))
                             print()
                 except lkt.PropertyError as e:
-                    print("Resolving type of expr {} raised an error".format(
-                        node
-                    ))
+                    printcol(
+                        "Resolving type of expr {} raised an error"
+                        .format(node),
+                        Colors.RED,
+                    )
                     print("    {}".format(e.message))
 
                 if node.is_a(lkt.RefId):
                     print("Id   {}".format(node))
-                    print("     references {}".format(node.p_referenced_decl))
+                    refd = node.p_referenced_decl
+                    res = "     references {}".format(node.p_referenced_decl)
+                    print(col(res, Colors.RED) if refd is None else res)
                     print()
 
 
