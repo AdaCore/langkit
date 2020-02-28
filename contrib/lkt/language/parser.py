@@ -135,11 +135,20 @@ class LKNode(ASTNode):
             If(i == arr_len - 1, n, n.concat(sep))
         ))
 
+    @langkit_property(external=True, uses_entity_info=False, uses_envs=False,
+                      return_type=T.AnalysisUnit)
+    def internal_fetch_referenced_unit(name=T.String):
+        """
+        Return the unit that this unit name designates. Load it if needed.
+        """
+        pass
+
 
 class LangkitRoot(LKNode):
     """
     For the moment, root node of a lkt compilation unit.
     """
+    imports = Field(type=T.Import.list)
     decls = Field(type=T.FullDecl.list)
 
     @langkit_property(external=True,
@@ -155,6 +164,25 @@ class LangkitRoot(LKNode):
 
     env_spec = EnvSpec(
         do(Self.fetch_prelude)
+    )
+
+
+class Import(LKNode):
+    """
+    Statement to import another source file.
+    """
+    name = Field(type=T.RefId)
+
+    @langkit_property(public=True)
+    def referenced_unit():
+        """
+        Return the unit that this import statements designates. Load it if
+        needed.
+        """
+        return Self.internal_fetch_referenced_unit(Self.name.text)
+
+    env_spec = EnvSpec(
+        do(Self.referenced_unit)
     )
 
 
@@ -1462,11 +1490,14 @@ lkt_grammar = Grammar('main_rule')
 G = lkt_grammar
 lkt_grammar.add_rules(
     main_rule=LangkitRoot(
-        G.decls, Lex.Termination
+        G.imports, G.decls, Lex.Termination
     ),
     id=Id(Lex.Identifier),
     ref_id=RefId(Lex.Identifier),
     def_id=DefId(Lex.Identifier),
+
+    import_stmt=Import("import", G.ref_id),
+    imports=List(G.import_stmt, empty_valid=True),
 
     doc_comment=DocComment(Lex.DocComment),
 
