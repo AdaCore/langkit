@@ -45,5 +45,5 @@ grammar foo_grammar {
 
 class Name : FooNode {
 
-    fun is_not_class_id (): Boolean = not (node.symbol = "class")
+    fun is_not_class_id (): Bool = not (node.symbol = "class")
 }

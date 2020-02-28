@@ -42,7 +42,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export @memoized fun prop (): Boolean = true
+    @export @memoized fun prop (): Bool = true
 }
 
 class Example : FooNode {

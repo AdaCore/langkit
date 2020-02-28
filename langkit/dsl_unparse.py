@@ -975,6 +975,8 @@ def type_name(type):
         return "{}.node".format(type.name.camel)
     elif type.name.camel == 'Integer':
         return 'Int'
+    elif type.name.camel == 'Boolean':
+        return 'Bool'
     elif type.name.camel == 'BigIntegerType':
         return 'BigInt'
     else:

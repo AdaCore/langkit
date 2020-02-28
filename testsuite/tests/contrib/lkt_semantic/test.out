@@ -86,8 +86,9 @@ Expr <BlockExpr test.lkt:18:35-21:6>
 Expr <StringLit test.lkt:19:18-19:26>
      has type <StructDecl "Regexp" __prelude:5:10-5:26>
 
-Resolving type of expr <RefId "rg" test.lkt:20:9-20:11> raised an error
-    dereferencing a null access
+Expr <RefId "rg" test.lkt:20:9-20:11>
+     has type <StructDecl "Regexp" __prelude:5:10-5:26>
+
 Id   <RefId "rg" test.lkt:20:9-20:11>
      references <ValDecl "rg" test.lkt:19:9-19:26>
 

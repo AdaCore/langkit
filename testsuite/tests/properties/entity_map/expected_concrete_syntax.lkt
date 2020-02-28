@@ -47,7 +47,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun b_set (): Boolean = self.info.md.b
+    @export fun b_set (): Bool = self.info.md.b
 }
 
 class Decl : FooNode {

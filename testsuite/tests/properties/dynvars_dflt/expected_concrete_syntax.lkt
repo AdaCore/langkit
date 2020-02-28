@@ -45,5 +45,5 @@ grammar foo_grammar {
 
 class ExampleNode : RootNode {
 
-    @export fun prop (): Boolean = bool_var
+    @export fun prop (): Bool = bool_var
 }

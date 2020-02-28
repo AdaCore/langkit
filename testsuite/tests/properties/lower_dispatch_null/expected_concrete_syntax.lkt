@@ -46,14 +46,14 @@ grammar foo_grammar {
 
 @abstract class SomeNode : FooNode {
 
-    fun test_prop (): Boolean
+    fun test_prop (): Bool
 }
 
 class Example : SomeNode {
 
-    fun test_prop (): Boolean = true
+    fun test_prop (): Bool = true
 
-    @export fun solve (): Boolean = (%domain(node.v, [null])) and (
+    @export fun solve (): Bool = (%domain(node.v, [null])) and (
         %predicate(BareSomeNode.test_prop, node.v)
     ).solve
 }

@@ -45,11 +45,11 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    fun failing_property (): Boolean = raise PropertyError()
+    fun failing_property (): Bool = raise PropertyError()
 
-    @export fun failsafe_property (): Boolean =
+    @export fun failsafe_property (): Bool =
     try node.failing_property or (false)
 
-    @export fun failsafe_property_2 (): Boolean =
+    @export fun failsafe_property_2 (): Bool =
     try node.failing_property
 }

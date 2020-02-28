@@ -45,9 +45,9 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun first_set (): Boolean = self.info.md.is_first
+    @export fun first_set (): Bool = self.info.md.is_first
 
-    @export fun second_set (): Boolean = self.info.md.is_second
+    @export fun second_set (): Bool = self.info.md.is_second
 
     @export fun test_main (): FooNode =
     node.as_entity.to[Couple].first_entity.first

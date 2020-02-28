@@ -57,13 +57,13 @@ class Decl : FooNode {
     @parse_field name : Name
     @parse_field items : ASTList[Ref]
 
-    @export fun test_env (other : FooNode): Boolean =
+    @export fun test_env (other : FooNode): Bool =
     node.children_env.env_orphan = other.children_env.env_orphan
 
-    @export fun test_struct (other : FooNode): Boolean =
+    @export fun test_struct (other : FooNode): Bool =
     node.env_struct = other.env_struct
 
-    @export fun test_array (other : FooNode): Boolean =
+    @export fun test_array (other : FooNode): Bool =
     node.env_array = other.env_array
 }
 
