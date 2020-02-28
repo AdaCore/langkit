@@ -48,7 +48,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun id_bool (id : Boolean): Boolean = id
+    @export fun id_bool (id : Bool): Bool = id
 
     @export fun id_int (id : Int): Int = id
 
@@ -91,7 +91,7 @@ class Number : Expr {
 
     fun eval (): Int
 
-    @export fun id_dflt_bool (id : Boolean = true): Boolean = id
+    @export fun id_dflt_bool (id : Bool = true): Bool = id
 
     @export fun id_dflt_int (id : Int = 42): Int = id
 

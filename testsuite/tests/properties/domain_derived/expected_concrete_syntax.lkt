@@ -51,7 +51,7 @@ class Definition : FooNode {
 class Name : FooNode {
     ref_var : LogicVar
 
-    @export fun resolve (): Boolean =
+    @export fun resolve (): Bool =
     %domain(node.ref_var, node.node_env.get(node).map((d) => d.to[Definition])).solve
 
     @export fun definition (): Definition =

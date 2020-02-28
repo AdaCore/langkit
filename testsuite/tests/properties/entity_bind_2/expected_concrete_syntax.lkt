@@ -48,7 +48,7 @@ grammar foo_grammar {
 
     fun xref_eq (arg1 : FooNode, arg2 : FooNode): LogicEquation
 
-    @export fun solve_eq (arg1 : FooNode, arg2 : FooNode): Boolean =
+    @export fun solve_eq (arg1 : FooNode, arg2 : FooNode): Bool =
     node.xref_eq(arg1, arg2).solve
 }
 
@@ -60,7 +60,7 @@ class Identifier : RootNode {
 
 class Literal : RootNode {
 
-    fun is_eq (other : Literal): Boolean = node.as_entity = other
+    fun is_eq (other : Literal): Bool = node.as_entity = other
 
     fun xref_eq (arg1 : FooNode, arg2 : FooNode): LogicEquation =
     (%domain(node.var, [arg1])) and (

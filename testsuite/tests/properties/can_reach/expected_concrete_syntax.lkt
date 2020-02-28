@@ -42,7 +42,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun can_reach (n : FooNode, from_node : FooNode): Boolean =
+    @export fun can_reach (n : FooNode, from_node : FooNode): Bool =
     n.node.can_reach(from_node.node)
 }
 

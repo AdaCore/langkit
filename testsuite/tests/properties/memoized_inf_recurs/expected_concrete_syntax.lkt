@@ -45,5 +45,5 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export @memoized fun recurse (): Boolean = node.recurse
+    @export @memoized fun recurse (): Bool = node.recurse
 }

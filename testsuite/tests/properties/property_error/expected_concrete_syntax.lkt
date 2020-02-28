@@ -45,8 +45,8 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    @export fun raise_msg (): Boolean =
+    @export fun raise_msg (): Bool =
     raise PropertyError('Custom error message!')
 
-    @export fun raise_no_msg (): Boolean = raise PropertyError()
+    @export fun raise_no_msg (): Bool = raise PropertyError()
 }

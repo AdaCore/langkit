@@ -42,9 +42,9 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun eval_unit (): Boolean = null.prop
+    @export fun eval_unit (): Bool = null.prop
 
-    fun prop (): Boolean = true
+    fun prop (): Bool = true
 }
 
 class Example : FooNode {
