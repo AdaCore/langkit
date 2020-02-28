@@ -49,10 +49,9 @@ grammar foo_grammar {
 
 @abstract class BaseDecl : FooNode {
 
-    @export fun lookup (n : SymbolType): FooNode =
-    node.env_lookup(node.node_env, n)
+    @export fun lookup (n : Symbol): FooNode = node.env_lookup(node.node_env, n)
 
-    fun env_lookup (env : LexicalEnv, n : SymbolType): FooNode =
+    fun env_lookup (env : LexicalEnv, n : Symbol): FooNode =
     env.get(n, only_first=true)
 }
 
@@ -75,7 +74,7 @@ class RootNode : FooNode {
 }
 
 struct EnvAssoc {
-    key : SymbolType
+    key : Symbol
     value : FooNode
     dest_env : LexicalEnv
     metadata : Metadata

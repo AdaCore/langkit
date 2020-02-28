@@ -42,7 +42,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun prop (e : Example): SymbolType = e.symbol
+    @export fun prop (e : Example): Symbol = e.symbol
 }
 
 class Example : FooNode {

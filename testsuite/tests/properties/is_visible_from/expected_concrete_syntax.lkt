@@ -58,7 +58,7 @@ class Name : FooNode {
 }
 
 struct EnvAssoc {
-    key : SymbolType
+    key : Symbol
     value : FooNode
     dest_env : LexicalEnv
     metadata : Metadata

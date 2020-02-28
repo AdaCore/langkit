@@ -92,7 +92,7 @@ class Sequence : ASTList[FooNode] {
 
 class Ident : FooNode {
 
-    @export fun sym (sym : SymbolType): SymbolType = sym
+    @export fun sym (sym : Symbol): Symbol = sym
 }
 
 class Null : FooNode {

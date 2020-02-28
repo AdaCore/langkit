@@ -51,7 +51,7 @@ grammar foo_grammar {
 
 @abstract class DefNode : FooNode {
 
-    @export fun name (): SymbolType
+    @export fun name (): Symbol
 }
 
 class Block : DefNode {
@@ -59,7 +59,7 @@ class Block : DefNode {
     @parse_field name_field : Name
     @parse_field vars : ASTList[BlockVar]
 
-    fun name (): SymbolType = node.name_field.symbol
+    fun name (): Symbol = node.name_field.symbol
 
     @export fun rebind (from_block : Block, to_block : Block): Block = {
         val rbdng = self.info.rebindings.append_rebinding(
@@ -76,13 +76,13 @@ class Block : DefNode {
 class BlockVar : DefNode {
     @parse_field name_field : Name
 
-    fun name (): SymbolType = node.name_field.symbol
+    fun name (): Symbol = node.name_field.symbol
 }
 
 class Param : DefNode {
     @parse_field name_field : Name
 
-    fun name (): SymbolType = node.name_field.symbol
+    fun name (): Symbol = node.name_field.symbol
 }
 
 class Params : ASTList[Param] {
@@ -92,7 +92,7 @@ class Name : FooNode {
 }
 
 struct EnvAssoc {
-    key : SymbolType
+    key : Symbol
     value : FooNode
     dest_env : LexicalEnv
     metadata : Metadata

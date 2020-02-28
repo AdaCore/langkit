@@ -505,7 +505,7 @@ class DottedName : Name {
 class Id : Name {
 
     ## Shortcut to get the symbol of this node
-    fun sym (): SymbolType = node.symbol
+    fun sym (): Symbol = node.symbol
 }
 
 class NotOp : Expr {
@@ -729,7 +729,7 @@ class WithStmt : Stmt {
 }
 
 struct EnvAssoc {
-    key : SymbolType
+    key : Symbol
     value : PythonNode
     dest_env : LexicalEnv
     metadata : Metadata

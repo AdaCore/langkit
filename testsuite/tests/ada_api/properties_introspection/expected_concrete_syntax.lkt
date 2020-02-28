@@ -58,7 +58,7 @@ grammar foo_grammar {
 
     @export fun id_token (id : TokenReference): TokenReference = id
 
-    @export fun id_sym (id : SymbolType): SymbolType = id
+    @export fun id_sym (id : Symbol): Symbol = id
 
     @export fun id_unit (id : InternalUnit): InternalUnit = id
 
@@ -120,7 +120,7 @@ class VarDecl : FooNode {
 }
 
 struct EnvAssoc {
-    key : SymbolType
+    key : Symbol
     value : FooNode
     dest_env : LexicalEnv
     metadata : Metadata
