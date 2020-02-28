@@ -1148,15 +1148,6 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
     if action in newline_afters:
         res += '@newline_after '
 
-    if isinstance(action, WithSymbol):
-        res += "@symbol"
-    elif isinstance(action, WithText):
-        res += "@text"
-    elif isinstance(action, WithTrivia):
-        res += "@trivia"
-    else:
-        return "lol"
-
     options = []
 
     if action.start_ignore_layout:
@@ -1165,10 +1156,26 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
         options += ['end_ignore_layout=true']
 
     if len(options) > 0:
-        res += "(" + ", ".join(options) + ")"
+        args = "(" + ", ".join(options) + ") "
+    else:
+        args = " "
+
+    if isinstance(action, WithSymbol):
+        res += "@symbol"
+    elif isinstance(action, WithText):
+        if len(options) > 0:
+            res += "@text"
+        else:
+            args = ""
+    elif isinstance(action, WithTrivia):
+        res += "@trivia"
+    else:
+        assert False
+
+    res += args
 
     action_name = format_token_name(action.name)
-    res += " " + action_name + " <- " + unparse_rule_matchers(rule_set)
+    res += action_name + " <- " + unparse_rule_matchers(rule_set)
 
     return res
 

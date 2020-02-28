@@ -1,39 +1,39 @@
 @spacing(alphanumericals, alphanumericals)
 lexer foo_lexer {
 
-    @text whitespace <- p"[ \n\r\t]+"
+    whitespace <- p"[ \n\r\t]+"
 
     family alphanumericals {
-        @text def <- "def"
+        def <- "def"
     }
 
-    @text var <- "var"
+    var <- "var"
 
     family alphanumericals {
-        @text error <- "error"
-        @text example <- "example"
-        @text null_tok <- "null"
+        error <- "error"
+        example <- "example"
+        null_tok <- "null"
     }
 
-    @text comma <- ","
-    @text dot <- "."
-    @text semicolon <- ";"
-    @text l_par <- "("
-    @text r_par <- ")"
-    @text l_brace <- "{"
-    @text r_brace <- "}"
-    @text equal <- "="
-    @text plus <- "+"
-    @text minus <- "-"
-    @text less_than <- "<"
+    comma <- ","
+    dot <- "."
+    semicolon <- ";"
+    l_par <- "("
+    r_par <- ")"
+    l_brace <- "{"
+    r_brace <- "}"
+    equal <- "="
+    plus <- "+"
+    minus <- "-"
+    less_than <- "<"
 
     family alphanumericals {
-        @text number <- p"[0-9]+"
+        number <- p"[0-9]+"
         @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
     }
 
-    @text string <- p"\"[^\"]*\""
-    @newline_after @text comment <- p"#(.?)+"
+    string <- p"\"[^\"]*\""
+    @newline_after comment <- p"#(.?)+"
 }
 grammar foo_grammar {
     @main_rule main_rule <- ASTList[VarDecl]+(var_decl)
