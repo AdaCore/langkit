@@ -2,15 +2,15 @@
 lexer foo_lexer {
 
     @ignore _ <- p"[ \r\t]+"
-    @text example <- "example"
-    @text null_tok <- "null"
-    @text comma <- ","
-    @text l_par <- "("
-    @text r_par <- ")"
-    @text l_brace <- "{"
-    @text r_brace <- "}"
-    @text plus <- "+"
-    @text number <- p"[0-9]+"
+    example <- "example"
+    null_tok <- "null"
+    comma <- ","
+    l_par <- "("
+    r_par <- ")"
+    l_brace <- "{"
+    r_brace <- "}"
+    plus <- "+"
+    number <- p"[0-9]+"
     @symbol identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
 }
 grammar foo_grammar {
