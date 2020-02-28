@@ -4,11 +4,11 @@ from langkit.dsl import (
     ASTNode, AbstractField, Annotations, Field, LookupKind as LK, NullField,
     Struct, T, UserField, abstract, synthetic
 )
-from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
+from langkit.envs import EnvSpec, add_env, add_to_env, add_to_env_kv, do
 from langkit.expressions import (
     AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv, Entity, If, No,
     Not, Or, Property, PropertyError, Self, String, Var, ignore,
-    langkit_property
+    langkit_property, new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
                              Or as GOr, Pick)
@@ -253,10 +253,16 @@ class Expr(LKNode):
 
     @langkit_property()
     def designated_scope():
-        # NOTE: for the moment, every dotted expression has a typed value on
-        # the RHS, and we'll use the type to go search valid fields and methods
-        # on it. We need to add support for packages/namespaces someday.
-        return Entity.expr_type.expr_type._.type_scope
+        ref_decl = Var(Entity.referenced_decl)
+
+        # If the RHS is a type, then use the type's scope to lookup operations
+        # directly. TODO: Be careful, functions are accessible that way, but we
+        # didn't define a semantic for this kind of calls.
+        return ref_decl.cast(T.TypeDecl).then(
+            lambda td: td.type_scope,
+            # Else, take the RHS's expression type, and return the type's scope
+            default_val=Entity.expr_type.expr_type._.type_scope
+        )
 
     @langkit_property(return_type=T.TypeDecl.entity, activate_tracing=True)
     def expected_type():
@@ -1001,6 +1007,9 @@ class EnumClassAltDecl(TypeDecl):
 
     type_scope = Property(Entity.parent_type.type_scope)
 
+    # Empty env spec: alts are added as part of EnumClassDecl's env_spec
+    env_spec = EnvSpec()
+
 
 class EnumClassDecl(NamedTypeDecl):
     """
@@ -1011,6 +1020,14 @@ class EnumClassDecl(NamedTypeDecl):
     alts = Field(type=T.EnumClassAltDecl.list)
     base_class = Field(type=T.TypeRef)
     decls = Field(type=DeclBlock)
+
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name, Self),
+        add_env(),
+        add_to_env(Entity.alts.map(lambda alt: new_env_assoc(
+            key=alt.name, val=alt.node, dest_env=Self.children_env
+        )))
+    )
 
 
 class DocComment(LKNode):

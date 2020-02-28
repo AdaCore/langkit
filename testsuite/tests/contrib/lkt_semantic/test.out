@@ -352,3 +352,6 @@ Resolving type of expr <RefId "a" test.lkt:55:52-55:53> raised an error
 Id   <RefId "a" test.lkt:55:52-55:53>
      references None
 
+Id   <RefId "D" test.lkt:59:16-59:17>
+     references <EnumClassAltDecl "D" test.lkt:58:15-58:16>
+
