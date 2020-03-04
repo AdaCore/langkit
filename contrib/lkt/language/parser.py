@@ -6,9 +6,9 @@ from langkit.dsl import (
 )
 from langkit.envs import EnvSpec, add_env, add_to_env, add_to_env_kv, do
 from langkit.expressions import (
-    AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv, Entity, If, No,
-    Not, Or, Property, PropertyError, Self, String, Var, ignore,
-    langkit_property, new_env_assoc
+    AbstractKind, AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv,
+    Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String, Try,
+    Var, ignore, langkit_property, new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
                              Or as GOr, Pick)
@@ -19,24 +19,42 @@ from language.lexer import lkt_lexer as Lex
 
 class SemanticResult(Struct):
     """
-    Result for a call to a semantic property that can return an error. The
-    result can be either:
+    Result for a call to a semantic property that can return an error.
+
+    In every case, the node field will be populated with the node upon which
+    the request was made. Then, the result can be either:
 
     * ``result_type`` if the property was a type returning property.
     * ``result_ref`` if the property was a reference returning property
     * ``error_message`` if an error was found as part of the resolution
       process.
 
-    Only one field can have a value. If all fields are null, it means that
-    ``expr_type`` has been called on a non regular expression.
+    Only one of those fields can have a value.
 
-    TODO: Turn this into a real variant when we have variants.
+    If all fields are null, it means that ``expr_type`` has been called on a
+    non regular expression.
+
+    TODO: Turn this into a real variant record when we have variants.
     """
+    node = UserField(T.LKNode, default_value=No(T.LKNode))
+
     result_type = UserField(
         T.TypeDecl.entity, default_value=No(T.TypeDecl.entity)
     )
     result_ref = UserField(T.Decl.entity, default_value=No(T.Decl.entity))
+    has_error = UserField(T.Bool, default_value=False)
     error_message = UserField(T.String, default_value=No(T.String))
+
+
+class TreeSemanticResult(Struct):
+    """
+    Collection of semantic results for a subtree. This will carry both:
+
+    * An array of semantic results for all of the subtree's nodes.
+    * A flag indicating whether the subtree contained errors or not.
+    """
+    results = UserField(T.SemanticResult.array)
+    has_error = UserField(T.Bool)
 
 
 class EnvKV(Struct):
@@ -167,6 +185,97 @@ class LKNode(ASTNode):
             args_types, return_type
         )
 
+    @langkit_property()
+    def expected_type_error(expected=T.TypeDecl.entity, got=T.String):
+        return SemanticResult.new(
+            node=Self,
+            error_message=String("Mismatched types: expected '")
+            .concat(expected.full_name)
+            .concat(String("', got ").concat(got)),
+            has_error=True
+        )
+
+    @langkit_property(return_type=T.TreeSemanticResult, public=True)
+    def check_semantic():
+        """
+        Run name and type resolution on all relevant entities in this subtree,
+        aggregating and returning the results.
+
+        If you ran this and the result's `has_error` flag is false, then you
+        *know* that you can call semantic properties such as `referenced_decl`
+        and `expr_type`, and those will never raise.
+        """
+        # Compute the results for children of this subtree
+        children_results = Var(Entity.children.then(
+            lambda children: children.map(
+                lambda child: child._.check_semantic()
+            )
+        ))
+
+        # Aggregate the arrays of results for every child of this node
+        aggregated_results = Var(children_results.mapcat(
+            lambda res: res.results
+        ))
+
+        # Store whether any children has errors
+        children_have_errors = Var(
+            children_results.any(lambda res: res.has_error)
+        )
+
+        own_results = Var(Entity.check_semantic_impl())
+
+        return TreeSemanticResult.new(
+            results=aggregated_results.concat(own_results.results),
+            has_error=Or(children_have_errors, own_results.has_error)
+        )
+
+    @langkit_property(return_type=T.TreeSemanticResult)
+    def check_semantic_impl():
+        """
+        Do semantic checking for this node. This will resolve names for RefIds,
+        and types for Exprs, and aggregate this in a TreeSemanticResult.
+        """
+
+        # TODO: For the moment, for lack of a better more practical solution,
+        # we'll catch all errors with Try blocks, should an error happen inside
+        # a property computing a result.
+        #
+        # This is suboptimal because this doesn't distinguish between expected
+        # errors due to erroneous input and unexpected errors due to bugs in
+        # LKT. To handle this correctly we'd need either:
+        #
+        # 1. Different exception kinds, so that we can discriminate between
+        #    expected an unexpected errors.
+        #
+        # 2. Error types (more generally sum types), that would allow
+        #    propagating failure in a way that is more convenient than what we
+        #    can do now (we could do it with bare structs but it would be
+        #    tedious and error prone, and is considered not worth it at this
+        #    stage).
+
+        err = Var(SemanticResult.new(has_error=True))
+
+        # Compute the results (resolve names + resolve types)
+        results = Var(Entity.match(
+            lambda r=T.RefId: Let(
+                lambda rd=Try(r.referenced_decl, err): rd.singleton.concat(
+                    # Don't try to compute the type if we couldn't find the ref
+                    If(Not(rd.has_error),
+                       Try(r.expr_type, err)._.singleton,
+                       No(T.SemanticResult.array))
+                ),
+            ),
+            lambda e=T.Expr: Try(e.expr_type, err)._.singleton,
+            lambda _: No(T.SemanticResult.array)
+        ))
+
+        return TreeSemanticResult.new(
+            results=results,
+            # If there is an error in any of the results, has_error will be
+            # true.
+            has_error=results.any(lambda r: r.has_error)
+        )
+
 
 class LangkitRoot(LKNode):
     """
@@ -191,9 +300,37 @@ class LangkitRoot(LKNode):
                              return_type=T.TypeDecl):
         return FunctionType.new(args=args_types, return_type=return_type)
 
-    env_spec = EnvSpec(
-        do(Self.fetch_prelude)
-    )
+    @langkit_property(return_type=T.SemanticResult.array, public=True)
+    def check_legality():
+        """
+        Run all legality checks on this tree. Return a list of diagnostics (For
+        the moment, pending on real discriminated records, SemanticResults
+        which necessarily have an error_message).
+        """
+        res = Var(Entity.check_semantic())
+
+        # Crude sanity check: since for the moment the Try blocks in
+        # check_semantic will catch any exception happening in subcalls to
+        # semantic properties, we want to check that, if we have internal
+        # errors, we also have user errors (eg. diagnostics). If we have an
+        # internal error and no user errors, then we caught something we were
+        # not supposed to.
+        # TODO: Assess whether this is still needed when we migrate to a better
+        # error handling mechanism (see check_semantic_impl).
+
+        errs = Var(res.results.filter(lambda r: r.has_error))
+        diags = Var(errs.filter(lambda r: Not(r.error_message.is_null)))
+
+        has_internal_errors = Var(errs.any(lambda r: r.error_message.is_null))
+
+        return If(
+            has_internal_errors & (diags.length == 0),
+            PropertyError(T.SemanticResult.array,
+                          "ERROR: internal errors without diagnostics"),
+            diags
+        )
+
+    env_spec = EnvSpec(do(Self.fetch_prelude))
 
 
 class Import(LKNode):
@@ -282,14 +419,12 @@ class Expr(LKNode):
 
     @langkit_property()
     def designated_scope():
-        ref_decl = Var(Entity.referenced_decl)
-
-        # If the RHS is a type, then use the type's scope to lookup operations
-        # directly. TODO: Be careful, functions are accessible that way, but we
-        # didn't define a semantic for this kind of calls.
-        return ref_decl.cast(T.TypeDecl).then(
+        # If Self is a type, then use the type's scope to lookup operations
+        # directly. TODO: Functions are accessible that way, but we
+        # didn't define a semantic for this kind of calls yet.
+        return Entity.referenced_decl.result_ref.cast(T.TypeDecl).then(
             lambda td: td.type_scope,
-            # Else, take the RHS's expression type, and return the type's scope
+            # Else, take the type of self, and return the type's scope
             default_val=Entity.check_expr_type.type_scope
         )
 
@@ -342,6 +477,10 @@ class Expr(LKNode):
                 lambda pm: pm.actual == p
             ).then(lambda pm: pm.formal.get_type),
 
+            lambda val_decl=T.BaseValDecl: val_decl.get_type(
+                no_inference=True
+            ),
+
             lambda _: No(T.TypeDecl.entity)
         )
 
@@ -364,7 +503,7 @@ class Expr(LKNode):
             Entity.in_decl_annotation,
             Entity.in_grammar_rule,
             # TODO: Implement function types
-            Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl)
+            Entity.referenced_decl.result_ref.is_a(T.TypeDecl, T.GenericDecl)
         ))
 
     @langkit_property(return_type=SemanticResult, public=True)
@@ -493,38 +632,49 @@ class Expr(LKNode):
             And(Not(expected_type.is_null), Not(cf_type.is_null)),
             If(
                 expected_type.matches(cf_type),
-                SemanticResult.new(result_type=expected_type),
-                expected_type.expected_type_error(
-                    String("type ").concat(cf_type.full_name)
+                SemanticResult.new(node=Self, result_type=expected_type),
+                Self.expected_type_error(
+                    expected_type,
+                    String("'").concat(cf_type.full_name).concat(String("'"))
                 )
             ),
 
             Not(expected_type.is_null),
             If(
                 Entity.expected_type_predicate(expected_type),
-                SemanticResult.new(result_type=expected_type),
-                expected_type.expected_type_error(
+                SemanticResult.new(result_type=expected_type, node=Self),
+                Self.expected_type_error(
+                    expected_type,
                     got=Self.invalid_expected_type_error_name
                 )
             ),
 
             Not(cf_type.is_null),
-            SemanticResult.new(result_type=cf_type),
+            SemanticResult.new(result_type=cf_type, node=Self),
 
             # We don't have both types: check that there is at least one and
             # return it, else, raise an error if raise_if_no_type is true.
             SemanticResult.new(result_type=Entity.check_type(
                 expected_type._or(cf_type), raise_if_no_type
-            )),
+            ), node=Self),
         )
 
-    @langkit_property(return_type=T.Decl.entity, public=True)
+    @langkit_property(return_type=SemanticResult, public=True)
     def referenced_decl():
         """
         Return the declaration referenced by this expression, if applicable,
         null otherwise.
         """
-        return No(T.Decl.entity)
+        return No(SemanticResult)
+
+    @langkit_property(return_type=T.Decl.entity, public=True)
+    def check_referenced_decl():
+        """
+        Return the referenced decl of this expr, raise otherwise.
+        """
+        return Entity.referenced_decl._.result_ref.then(
+            lambda rr: rr,
+        )._or(PropertyError(T.Decl.entity, "No referenced decl error"))
 
 
 class LexerDecl(Decl):
@@ -650,7 +800,9 @@ class DotExpr(Expr):
     prefix = Field(type=T.Expr)
     suffix = Field(type=T.RefId)
 
-    referenced_decl = Property(Entity.suffix.referenced_decl)
+    referenced_decl = Property(SemanticResult.new(
+        result_ref=Entity.suffix.check_referenced_decl, node=Self
+    ))
 
     expr_context_free_type = Property(Entity.suffix.expr_context_free_type)
 
@@ -685,10 +837,15 @@ class RefId(Id):
     @langkit_property()
     def referenced_decl():
         lk = Var(If(Entity.dot_expr_if_suffix.is_null, LK.recursive, LK.flat))
-        return Entity.scope.get_first(Self.symbol, lookup=lk).cast(T.Decl)
+        return (
+            Entity.scope.get_first(Self.symbol, lookup=lk).cast(T.Decl).then(
+                lambda d: SemanticResult.new(result_ref=d, node=Self),
+                default_val=Self.ref_not_found_error
+            )
+        )
 
     expr_context_free_type = Property(
-        Entity.referenced_decl.cast_or_raise(T.BaseValDecl).get_type
+        Entity.check_referenced_decl.cast_or_raise(T.BaseValDecl).get_type
     )
 
     dot_expr_if_suffix = Property(
@@ -701,6 +858,15 @@ class RefId(Id):
         return Entity.dot_expr_if_suffix.then(
             lambda de: de.prefix.designated_scope,
             default_val=Entity.children_env
+        )
+
+    @langkit_property()
+    def ref_not_found_error():
+        return SemanticResult.new(
+            node=Self,
+            error_message=String("Cannot find entity '")
+            .concat(Self.text).concat(String("' in this scope")),
+            has_error=True
         )
 
 
@@ -840,14 +1006,6 @@ class TypeDecl(Decl):
     """
     Abstract base class for type declarations.
     """
-
-    @langkit_property()
-    def expected_type_error(got=T.String):
-        return SemanticResult.new(
-            error_message=String("Expected instance of type '")
-            .concat(Self.full_name)
-            .concat(String("', got ").concat(got))
-        )
 
     @langkit_property()
     def matches(other=T.TypeDecl.entity):
@@ -1120,7 +1278,12 @@ class BaseValDecl(Decl):
     Abstract class for named values declarations, such as arguments, local
     value bindings, fields, etc.
     """
-    get_type = AbstractProperty(type=T.TypeDecl.entity)
+
+    @langkit_property(kind=AbstractKind.abstract,
+                      return_type=T.TypeDecl.entity)
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        pass
 
 
 class FunDecl(BaseValDecl):
@@ -1146,17 +1309,21 @@ class FunDecl(BaseValDecl):
         )),
     )
 
-    get_type = Property(Self.function_type(
-        # If there is an owning type, then the type of this function contain:
-        # the type of the self argument, which (we imagine, it won't be used
-        # yet) will need to be passed "self" explicitly, when passed around as
-        # a function object.
-        Self.owning_type.then(lambda ot: ot.singleton)
-        .concat(Entity.args.map(
-            lambda a: a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
-        )),
-        Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
-    ).as_entity)
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        return Self.function_type(
+            # If there is an owning type, then the type of this function
+            # contain: the type of the self argument, which (we imagine, it
+            # won't be used yet) will need to be passed "self" explicitly, when
+            # passed around as a function object.
+            Self.owning_type.then(lambda ot: ot.singleton)
+            .concat(Entity.args.map(
+                lambda a:
+                a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
+            )),
+            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+        ).as_entity
 
 
 @synthetic
@@ -1168,7 +1335,11 @@ class SelfDecl(BaseValDecl):
 
     syn_name = NullField()
     name = Property('self')
-    get_type = Property(Entity.parent.cast_or_raise(T.TypeDecl))
+
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        return Entity.parent.cast_or_raise(T.TypeDecl)
 
 
 @synthetic
@@ -1180,7 +1351,11 @@ class NodeDecl(BaseValDecl):
 
     syn_name = NullField()
     name = Property('node')
-    get_type = Property(Entity.parent.cast_or_raise(T.TypeDecl))
+
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        return Entity.parent.cast_or_raise(T.TypeDecl)
 
 
 @abstract
@@ -1191,7 +1366,10 @@ class UserValDecl(BaseValDecl):
     syn_name = Field(type=T.DefId)
     decl_type = AbstractField(type=T.TypeRef)
 
-    get_type = Property(Entity.decl_type.designated_type)
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        return Entity.decl_type.designated_type
 
 
 class EnumLitDecl(UserValDecl):
@@ -1199,10 +1377,14 @@ class EnumLitDecl(UserValDecl):
     Enum literal declaration.
     """
     decl_type = NullField()
-    get_type = Property(
-        Entity.parents.find(lambda t: t.is_a(T.EnumTypeDecl))
-        .cast_or_raise(T.TypeDecl)
-    )
+
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        return (
+            Entity.parents.find(lambda t: t.is_a(T.EnumTypeDecl))
+            .cast_or_raise(T.TypeDecl)
+        )
 
 
 class FunArgDecl(UserValDecl):
@@ -1246,7 +1428,7 @@ class SimpleTypeRef(TypeRef):
 
     @langkit_property()
     def designated_type():
-        return Entity.type_name.referenced_decl.cast_or_raise(T.TypeDecl)
+        return Entity.type_name.check_referenced_decl.cast_or_raise(T.TypeDecl)
 
 
 class GenericTypeRef(TypeRef):
@@ -1259,7 +1441,7 @@ class GenericTypeRef(TypeRef):
     @langkit_property()
     def designated_type():
         generic_decl = Var(
-            Entity.type_name.referenced_decl.cast_or_raise(T.GenericDecl)
+            Entity.type_name.check_referenced_decl.cast_or_raise(T.GenericDecl)
         )
         return generic_decl.get_instantiated_type(
             Entity.params.map(
@@ -1346,7 +1528,7 @@ class CallExpr(Expr):
     @langkit_property()
     def called_decl():
         # Implement special resolution for calls to objects via __call__
-        rd = Var(Entity.name.referenced_decl)
+        rd = Var(Entity.name.check_referenced_decl)
         call_builtin = Var(
             rd.cast(T.BaseValDecl)._.get_type._.get_fun('__call__')
         )
@@ -1409,7 +1591,7 @@ class GenericInstantiation(Expr):
         we want generic functions at some point we'll have to revisit.
         """
         generic_decl = Var(
-            Entity.name.referenced_decl.cast_or_raise(T.GenericDecl)
+            Entity.name.check_referenced_decl.cast_or_raise(T.GenericDecl)
         )
         return generic_decl.get_instantiated_type(
             Entity.args.map(
@@ -1418,7 +1600,9 @@ class GenericInstantiation(Expr):
             )
         ).as_bare_entity
 
-    referenced_decl = Property(Entity.designated_type)
+    referenced_decl = Property(
+        SemanticResult.new(result_ref=Entity.designated_type, node=Self)
+    )
 
 
 class ErrorOnNull(Expr):
@@ -1522,14 +1706,18 @@ class ValDecl(UserValDecl):
     decl_type = Field(type=T.TypeRef)
     val = Field(type=T.Expr)
 
-    get_type = Property(
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
         # If no type was given for the val declaration, infer it using its
         # expression.
-        Entity.decl_type.then(
+        return Entity.decl_type.then(
             lambda tpe: tpe.designated_type,
-            default_val=Entity.val.check_expr_type
+            default_val=If(
+                no_inference,
+                No(T.TypeDecl.entity),
+                Entity.val.check_expr_type
+            )
         )
-    )
 
 
 class Op(LKNode):

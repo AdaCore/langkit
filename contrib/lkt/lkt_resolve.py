@@ -42,32 +42,24 @@ class Resolve(lkt.App):
                     print("{: <3}: {}".format(i + 1, l))
                 print()
 
-            for node in unit.root.finditer(lambda _: True):
-                try:
-                    if node.is_a(lkt.Expr) and node.p_is_regular_expr:
-                        expr_type = node.p_expr_type
-                        if expr_type.error_message != "":
-                            print("{}{}".format(node.full_sloc_image,
-                                                expr_type.error_message))
-                            print()
-                        else:
-                            print("Expr {}".format(node))
-                            print("     has type {}"
-                                  .format(expr_type.result_type))
-                            print()
-                except lkt.PropertyError as e:
-                    printcol(
-                        "Resolving type of expr {} raised an error"
-                        .format(node),
-                        Colors.RED,
-                    )
-                    print("    {}".format(e.message))
+            def print_error(res):
+                print("{}{}".format(res.node.full_sloc_image,
+                                    res.error_message))
+                print()
 
-                if node.is_a(lkt.RefId):
-                    print("Id   {}".format(node))
-                    refd = node.p_referenced_decl
-                    res = "     references {}".format(node.p_referenced_decl)
-                    print(col(res, Colors.RED) if refd is None else res)
+            results = unit.root.p_check_semantic
+            for result in results.results:
+                if result.error_message:
+                    print_error(result)
+                elif result.result_type is not None:
+                    print("Expr {}".format(result.node))
+                    print("     has type {}".format(result.result_type))
+                    print()
+                elif result.result_ref is not None:
+                    print("Id   {}".format(result.node))
+                    res = "     references {}".format(result.result_ref)
+                    print(col(res, Colors.RED)
+                          if result.result_ref is None else res)
                     print()
 
 
