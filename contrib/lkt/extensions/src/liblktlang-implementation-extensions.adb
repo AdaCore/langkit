@@ -68,7 +68,7 @@ package body Liblktlang.Implementation.Extensions is
    begin
       return
         "<" & To_Text (Kind_Name (Node))
-        & " """ & Image (Dispatcher_Decl_P_Name (Node)) & """ "
+        & " """ & Dispatcher_Decl_P_Full_Name (Node).Items & """ "
         & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
         & ":" & To_Text (Image (Sloc_Range (Node))) & ">";
    end Decl_Short_Image;

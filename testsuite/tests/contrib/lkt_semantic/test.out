@@ -152,7 +152,7 @@ Id   <RefId "Int" test.lkt:41:42-41:45>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:41:49-41:66>
-     has type <InstantiatedGenericType "Pair" test.lkt:28:1-31:2>
+     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "Pair" test.lkt:41:49-41:53>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
@@ -173,7 +173,7 @@ Expr <DotExpr test.lkt:42:48-42:68>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:42:48-42:66>
-     has type <InstantiatedGenericType "Pair" test.lkt:28:1-31:2>
+     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "Pair" test.lkt:42:48-42:52>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
@@ -202,7 +202,7 @@ Id   <RefId "Int" test.lkt:43:43-43:46>
 test.lkt:43:50: Expected instance of type 'Pair[Int]', got type Int
 
 Expr <CallExpr test.lkt:43:50-43:67>
-     has type <InstantiatedGenericType "Pair" test.lkt:28:1-31:2>
+     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "Pair" test.lkt:43:50-43:54>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
@@ -229,7 +229,7 @@ Expr <DotExpr test.lkt:44:51-44:80>
      has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Expr <CallExpr test.lkt:44:51-44:78>
-     has type <InstantiatedGenericType "Tuple2" test.lkt:33:1-38:2>
+     has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:33:1-38:2>
 
 Id   <RefId "Tuple2" test.lkt:44:51-44:57>
      references <GenericDecl "Tuple2" test.lkt:33:1-38:2>
@@ -303,7 +303,7 @@ Expr <CallExpr test.lkt:47:56-47:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <RefId "arg" test.lkt:47:56-47:59>
-     has type <InstantiatedGenericType "Tuple2" test.lkt:33:1-38:2>
+     has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:33:1-38:2>
 
 Id   <RefId "arg" test.lkt:47:56-47:59>
      references <FunArgDecl "arg" test.lkt:47:25-47:47>
@@ -312,7 +312,7 @@ Id   <RefId "test" test.lkt:47:60-47:64>
      references <FunDecl "test" test.lkt:37:5-37:18>
 
 Id   <RefId "Array" test.lkt:48:34-48:39>
-     references <GenericDecl "Array" __prelude:7:10-9:2>
+     references <GenericDecl "Array" __prelude:7:10-10:2>
 
 Id   <RefId "Int" test.lkt:48:40-48:43>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -324,7 +324,7 @@ Expr <CallExpr test.lkt:48:53-48:61>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <RefId "arg" test.lkt:48:53-48:56>
-     has type <InstantiatedGenericType "Array" __prelude:7:10-9:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:7:10-10:2>
 
 Id   <RefId "arg" test.lkt:48:53-48:56>
      references <FunArgDecl "arg" test.lkt:48:29-48:44>
