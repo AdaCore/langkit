@@ -70,7 +70,13 @@ package body Liblktlang.Implementation.Extensions is
         "<" & To_Text (Kind_Name (Node))
         & " """ & Dispatcher_Decl_P_Full_Name (Node).Items & """ "
         & To_Text (Ada.Directories.Simple_Name (Get_Filename (Unit (Node))))
-        & ":" & To_Text (Image (Sloc_Range (Node))) & ">";
+
+        --  Don't show the sloc for function types, because it will be the root
+        --  node's sloc, and thus will always change when we add stuff to the
+        --  file, which is not helpful nor practical for tests.
+        & (if Node.Kind = lkt_Function_Type
+           then ""
+           else ":" & To_Text (Image (Sloc_Range (Node)))) & ">";
    end Decl_Short_Image;
 
    --------------------------------------
