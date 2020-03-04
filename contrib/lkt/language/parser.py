@@ -456,6 +456,12 @@ class Expr(LKNode):
           you can still override ``expr_type_impl``. This should not be
           necessary though, and should only be done following a discussion with
           LKT devs, and altering this comment afterwards.
+
+        NOTE: In the absence of a solver based more clever type inference
+        system (for now at least), we have to make a decision about the
+        direction types commonly flow in LKT. What follows from the previous
+        description is that type commonly flow upwards, from parent nodes to
+        leaves.
         """
         cf_type = Var(Entity.expr_context_free_type)
 
