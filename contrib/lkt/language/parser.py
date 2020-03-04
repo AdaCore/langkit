@@ -143,6 +143,23 @@ class LKNode(ASTNode):
         """
         pass
 
+    @langkit_property()
+    def function_type(args_types=T.TypeDecl.array, return_type=T.TypeDecl):
+
+        # We create function types in the unit of the return type of the
+        # function, else, if we just create the function types in any unit,
+        # `(Int) -> Int` coming from file a.lkt won't be equal to `(Int) ->
+        # Int` coming from file b.lkt.
+        #
+        # This also helps limit the number of function types.
+        #
+        # TODO: For the moment we don't have support for multiple files. As
+        # soon as we do, test that this works correctly.
+
+        return return_type.unit.root.cast(T.LangkitRoot).function_type_helper(
+            args_types, return_type
+        )
+
 
 class LangkitRoot(LKNode):
     """
@@ -161,6 +178,11 @@ class LangkitRoot(LKNode):
         predefined types and values.
         """
         pass
+
+    @langkit_property(memoized=True, return_type=T.FunctionType)
+    def function_type_helper(args_types=T.TypeDecl.array,
+                             return_type=T.TypeDecl):
+        return FunctionType.new(args=args_types, return_type=return_type)
 
     env_spec = EnvSpec(
         do(Self.fetch_prelude)
@@ -211,7 +233,7 @@ class Decl(LKNode):
 
     full_name = Property(
         Self.name.image, doc="""
-        Return the full name of this type, as it should be seen by users/shown
+        Return the full name of this decl, as it should be seen by users/shown
         in diagnostics.
         """
     )
@@ -336,7 +358,7 @@ class Expr(LKNode):
             Entity.in_decl_annotation,
             Entity.in_grammar_rule,
             # TODO: Implement function types
-            Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl, T.FunDecl)
+            Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl)
         ))
 
     @langkit_property(return_type=TypingResult, public=True)
@@ -837,6 +859,26 @@ class TypeDecl(Decl):
     )
 
 
+@synthetic
+class FunctionType(TypeDecl):
+    """
+    Function type.
+    """
+    args = UserField(T.TypeDecl.array, public=False)
+    return_type = UserField(T.TypeDecl, public=False)
+
+    syn_name = NullField()
+    full_name = Property(
+        String("(").concat(
+            Self.string_join(
+                Self.args.map(lambda t: t.full_name), sep=String(", ")
+            )
+        ).concat(String(") -> ")).concat(Self.return_type.full_name)
+    )
+
+    type_scope = Property(EmptyEnv)
+
+
 class GenericFormalTypeDecl(TypeDecl):
     """
     Declaration of a generic formal type in a generic declaration.
@@ -1044,7 +1086,16 @@ class Doc(LKNode):
     lines = Field(type=T.DocComment.list)
 
 
-class FunDecl(Decl):
+@abstract
+class BaseValDecl(Decl):
+    """
+    Abstract class for named values declarations, such as arguments, local
+    value bindings, fields, etc.
+    """
+    get_type = AbstractProperty(type=T.TypeDecl.entity)
+
+
+class FunDecl(BaseValDecl):
     """
     Function declaration.
     """
@@ -1060,18 +1111,24 @@ class FunDecl(Decl):
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
         add_env(),
-        add_to_env_kv("self", Self.owning_type._.self_decl),
-        add_to_env_kv("node", Self.owning_type._.node_decl),
+        # Add node & self if there is an owning type
+        add_to_env(Self.owning_type.then(
+            lambda ot: [new_env_assoc("self", ot.self_decl),
+                        new_env_assoc("node", ot.node_decl)]
+        )),
     )
 
-
-@abstract
-class BaseValDecl(Decl):
-    """
-    Abstract class for named values declarations, such as arguments, local
-    value bindings, fields, etc.
-    """
-    get_type = AbstractProperty(type=T.TypeDecl.entity)
+    get_type = Property(Self.function_type(
+        # If there is an owning type, then the type of this function contain:
+        # the type of the self argument, which (we imagine, it won't be used
+        # yet) will need to be passed "self" explicitly, when passed around as
+        # a function object.
+        Self.owning_type.then(lambda ot: ot.singleton)
+        .concat(Entity.args.map(
+            lambda a: a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
+        )),
+        Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+    ).as_entity)
 
 
 @synthetic
@@ -1148,12 +1205,6 @@ class TypeRef(LKNode):
     """
     Base class for a reference to a type.
     """
-    type_name = Field(type=T.Expr)
-
-    designated_entity = Property(
-        Entity.type_name.referenced_decl
-    )
-
     designated_type = AbstractProperty(T.TypeDecl.entity, public=True, doc="""
         Return the type designated by this type ref.
     """)
@@ -1163,22 +1214,24 @@ class SimpleTypeRef(TypeRef):
     """
     Simple reference to a type.
     """
+    type_name = Field(type=T.Expr)
 
     @langkit_property()
     def designated_type():
-        return Entity.designated_entity.cast_or_raise(T.TypeDecl)
+        return Entity.type_name.referenced_decl.cast_or_raise(T.TypeDecl)
 
 
 class GenericTypeRef(TypeRef):
     """
     Reference to a generic type.
     """
+    type_name = Field(type=T.Expr)
     params = Field(type=T.TypeRef.list)
 
     @langkit_property()
     def designated_type():
         generic_decl = Var(
-            Entity.designated_entity.cast_or_raise(T.GenericDecl)
+            Entity.type_name.referenced_decl.cast_or_raise(T.GenericDecl)
         )
         return generic_decl.get_instantiated_type(
             Entity.params.map(
@@ -1186,6 +1239,24 @@ class GenericTypeRef(TypeRef):
                 .cast_or_raise(T.TypeDecl)
             )
         ).as_bare_entity
+
+
+class FunctionTypeRef(TypeRef):
+    """
+    Reference to a function type.
+    """
+    args_types = Field(T.TypeRef.list)
+    return_type = Field(T.TypeRef)
+
+    @langkit_property()
+    def designated_type():
+        return Self.function_type(
+            Entity.args_types.map(
+                lambda a:
+                a.designated_type.assert_bare.cast(T.TypeDecl)
+            ),
+            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+        ).as_entity
 
 
 class ArrayLiteral(Expr):
@@ -1760,6 +1831,7 @@ lkt_grammar.add_rules(
     type_ref=GOr(
         GenericTypeRef(G.basic_name, "[", G.type_list, "]"),
         SimpleTypeRef(G.basic_name),
+        FunctionTypeRef("(", G.type_list, ")", "->", G.type_ref)
     ),
 
     type_list=List(G.type_ref, empty_valid=False, sep=","),

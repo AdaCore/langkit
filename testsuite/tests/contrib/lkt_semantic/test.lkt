@@ -58,3 +58,9 @@ struct Foo {
 enum class C (D, E) {
     fun wot(): D
 }
+
+# Test function types
+fun add (a : Int, b : Int): Int = a + b
+fun get_fn(): (Int, Int) -> Int = add
+fun get_method(b_inst: B): (B) -> Int = b_inst.test_generic_component_access
+fun get_method_invalid(b_inst: B): (B) -> Int = b_inst.test_fun_call
