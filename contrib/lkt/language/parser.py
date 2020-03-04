@@ -17,19 +17,26 @@ from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
 from language.lexer import lkt_lexer as Lex
 
 
-class TypingResult(Struct):
+class SemanticResult(Struct):
     """
-    Result for a call to ``Expr.expr_type``. The result can be either the
-    expression's type, or an error message. Only one field can have a value. If
-    both fields are null, means that ``expr_type`` has been called on a non
-    regular expression.
+    Result for a call to a semantic property that can return an error. The
+    result can be either:
+
+    * ``result_type`` if the property was a type returning property.
+    * ``result_ref`` if the property was a reference returning property
+    * ``error_message`` if an error was found as part of the resolution
+      process.
+
+    Only one field can have a value. If all fields are null, it means that
+    ``expr_type`` has been called on a non regular expression.
+
+    TODO: Turn this into a real variant when we have variants.
     """
-    expr_type = UserField(
+    result_type = UserField(
         T.TypeDecl.entity, default_value=No(T.TypeDecl.entity)
     )
-    error_message = UserField(
-        T.String, default_value=No(T.String)
-    )
+    result_ref = UserField(T.Decl.entity, default_value=No(T.Decl.entity))
+    error_message = UserField(T.String, default_value=No(T.String))
 
 
 class EnvKV(Struct):
@@ -283,7 +290,7 @@ class Expr(LKNode):
         return ref_decl.cast(T.TypeDecl).then(
             lambda td: td.type_scope,
             # Else, take the RHS's expression type, and return the type's scope
-            default_val=Entity.expr_type.expr_type._.type_scope
+            default_val=Entity.check_expr_type.type_scope
         )
 
     @langkit_property(return_type=T.TypeDecl.entity, activate_tracing=True)
@@ -293,25 +300,24 @@ class Expr(LKNode):
 
             lambda fun_arg_decl=T.FunArgDecl: fun_arg_decl.get_type,
 
+            # Expression of a match branch: return the expected type of the
+            # match expression.
             lambda match_branch=T.MatchBranch:
-            match_branch.parent.parent.cast_or_raise(T.Expr)
-            .expr_type.expr_type,
+            match_branch.parent.parent.cast_or_raise(T.Expr).check_expr_type,
 
             lambda bin_op=T.BinOp: If(
                 # For those operators, there is no expected type flowing from
                 # upward: we use the type of the other operand, if it exists.
-
+                #
                 # NOTE: In some cases none of the operands will have a type, as
                 # in "0 = 0" (because int literals are polymorphic). We
-                # consider this an edge case for the moment. Possible solutions
-                # would be either forcing the user to qualify the type in those
-                # cases, or having no polymorphic expressions at all (which
-                # seems impractical for null).
+                # consider this a legality error for the moment. If there is a
+                # realistic use case that appears, we'll reconsider this.
                 bin_op.op.is_a(Op.alt_lte, Op.alt_gte, Op.alt_gt, Op.alt_lt,
                                Op.alt_eq),
 
                 If(Entity == bin_op.left, bin_op.left, bin_op.right)
-                .expr_type_impl(No(T.TypeDecl.entity), False).expr_type,
+                .expr_type_impl(No(T.TypeDecl.entity), False).result_type,
 
                 # For other operators, the return type is the same as the type
                 # of both operands, so we use the upward flowing type.
@@ -361,7 +367,7 @@ class Expr(LKNode):
             Entity.referenced_decl.is_a(T.TypeDecl, T.GenericDecl)
         ))
 
-    @langkit_property(return_type=TypingResult, public=True)
+    @langkit_property(return_type=SemanticResult, public=True)
     def expr_type():
         """
         Return the type of this expression, if it is a regular expression (see
@@ -370,7 +376,23 @@ class Expr(LKNode):
         return If(
             Entity.is_regular_expr,
             Entity.expr_type_impl(Entity.expected_type),
-            No(TypingResult),
+            No(SemanticResult),
+        )
+
+    @langkit_property(return_type=T.TypeDecl.entity, public=True)
+    def check_expr_type():
+        """
+        Return the type of this expression. Assumes that this is a regular and
+        valid expression. If this is called on a non regular or non valid
+        expression, it will raise an error.
+        """
+        return If(
+            Entity.is_regular_expr,
+            Entity.expr_type.result_type.then(
+                lambda rt: rt,
+                default_val=PropertyError(T.TypeDecl.entity, "Typing error")
+            ),
+            PropertyError(T.TypeDecl.entity, "non regular expression")
         )
 
     @langkit_property(return_type=T.TypeDecl.entity)
@@ -418,7 +440,7 @@ class Expr(LKNode):
         """
         return String("<not implemented>")
 
-    @langkit_property(return_type=TypingResult)
+    @langkit_property(return_type=SemanticResult)
     def expr_type_impl(expected_type=T.TypeDecl.entity,
                        raise_if_no_type=(T.Bool, True)):
         """
@@ -427,7 +449,7 @@ class Expr(LKNode):
 
         - If there is a context free type for this expression *and* an expected
           type, then check that they match, if they don't, return an error
-          TypingResult.
+          SemanticResult.
 
         - If there is an expected type but no context-free type, check that
           the expected type is valid by calling the expected_type_predicate
@@ -471,7 +493,7 @@ class Expr(LKNode):
             And(Not(expected_type.is_null), Not(cf_type.is_null)),
             If(
                 expected_type.matches(cf_type),
-                TypingResult.new(expr_type=expected_type),
+                SemanticResult.new(result_type=expected_type),
                 expected_type.expected_type_error(
                     String("type ").concat(cf_type.full_name)
                 )
@@ -480,18 +502,18 @@ class Expr(LKNode):
             Not(expected_type.is_null),
             If(
                 Entity.expected_type_predicate(expected_type),
-                TypingResult.new(expr_type=expected_type),
+                SemanticResult.new(result_type=expected_type),
                 expected_type.expected_type_error(
                     got=Self.invalid_expected_type_error_name
                 )
             ),
 
             Not(cf_type.is_null),
-            TypingResult.new(expr_type=cf_type),
+            SemanticResult.new(result_type=cf_type),
 
             # We don't have both types: check that there is at least one and
             # return it, else, raise an error if raise_if_no_type is true.
-            TypingResult.new(expr_type=Entity.check_type(
+            SemanticResult.new(result_type=Entity.check_type(
                 expected_type._or(cf_type), raise_if_no_type
             )),
         )
@@ -821,7 +843,7 @@ class TypeDecl(Decl):
 
     @langkit_property()
     def expected_type_error(got=T.String):
-        return TypingResult.new(
+        return SemanticResult.new(
             error_message=String("Expected instance of type '")
             .concat(Self.full_name)
             .concat(String("', got ").concat(got))
@@ -1505,7 +1527,7 @@ class ValDecl(UserValDecl):
         # expression.
         Entity.decl_type.then(
             lambda tpe: tpe.designated_type,
-            default_val=Entity.val.expr_type._.expr_type
+            default_val=Entity.val.check_expr_type
         )
     )
 

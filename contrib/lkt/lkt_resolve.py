@@ -53,7 +53,7 @@ class Resolve(lkt.App):
                         else:
                             print("Expr {}".format(node))
                             print("     has type {}"
-                                  .format(expr_type.expr_type))
+                                  .format(expr_type.result_type))
                             print()
                 except lkt.PropertyError as e:
                     printcol(
