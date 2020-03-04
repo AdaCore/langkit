@@ -3,11 +3,11 @@ Resolving test.lkt
 Id   <RefId "A" test.lkt:2:21-2:22>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-Expr <RefId "self" test.lkt:2:25-2:29>
-     has type <ClassDecl "A" test.lkt:1:12-26:2>
-
 Id   <RefId "self" test.lkt:2:25-2:29>
      references <SelfDecl "self" test.lkt:1:12-26:2>
+
+Expr <RefId "self" test.lkt:2:25-2:29>
+     has type <ClassDecl "A" test.lkt:1:12-26:2>
 
 Id   <RefId "Int" test.lkt:4:21-4:24>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -18,13 +18,10 @@ Expr <NumLit test.lkt:4:27-4:29>
 Id   <RefId "A" test.lkt:6:29-6:30>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-test.lkt:6:33: Expected instance of type 'A', got a number literal
+test.lkt:6:33: Mismatched types: expected 'A', got a number literal
 
 Id   <RefId "Int" test.lkt:8:25-8:28>
      references <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <BinOp test.lkt:8:31-8:38>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <NumLit test.lkt:8:31-8:33>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -32,44 +29,47 @@ Expr <NumLit test.lkt:8:31-8:33>
 Expr <NumLit test.lkt:8:36-8:38>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
+Expr <BinOp test.lkt:8:31-8:38>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
 Id   <RefId "Int" test.lkt:10:35-10:38>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <BinOp test.lkt:10:41-10:50>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-test.lkt:10:41: Expected instance of type 'Int', got a string literal
+test.lkt:10:41: Mismatched types: expected 'Int', got a string literal
 
 Expr <NumLit test.lkt:10:48-10:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:10:41-10:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Int" test.lkt:12:35-12:38>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <BinOp test.lkt:12:41-12:50>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
 Expr <NumLit test.lkt:12:41-12:43>
      has type <StructDecl "Int" __prelude:1:10-1:23>
-
-test.lkt:12:46: Expected instance of type 'Int', got type A
 
 Id   <RefId "self" test.lkt:12:46-12:50>
      references <SelfDecl "self" test.lkt:1:12-26:2>
 
+test.lkt:12:46: Mismatched types: expected 'Int', got 'A'
+
+Expr <BinOp test.lkt:12:41-12:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
 Id   <RefId "A" test.lkt:14:35-14:36>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-Expr <BinOp test.lkt:14:39-14:48>
-     has type <ClassDecl "A" test.lkt:1:12-26:2>
+test.lkt:14:39: Mismatched types: expected 'A', got a number literal
 
-test.lkt:14:39: Expected instance of type 'A', got a number literal
+Id   <RefId "self" test.lkt:14:44-14:48>
+     references <SelfDecl "self" test.lkt:1:12-26:2>
 
 Expr <RefId "self" test.lkt:14:44-14:48>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
-Id   <RefId "self" test.lkt:14:44-14:48>
-     references <SelfDecl "self" test.lkt:1:12-26:2>
+Expr <BinOp test.lkt:14:39-14:48>
+     has type <ClassDecl "A" test.lkt:1:12-26:2>
 
 Id   <RefId "Regexp" test.lkt:16:26-16:32>
      references <StructDecl "Regexp" __prelude:5:10-5:26>
@@ -80,29 +80,26 @@ Expr <StringLit test.lkt:16:35-16:43>
 Id   <RefId "Regexp" test.lkt:18:26-18:32>
      references <StructDecl "Regexp" __prelude:5:10-5:26>
 
-Expr <BlockExpr test.lkt:18:35-21:6>
-     has type <StructDecl "Regexp" __prelude:5:10-5:26>
-
 Expr <StringLit test.lkt:19:18-19:26>
-     has type <StructDecl "Regexp" __prelude:5:10-5:26>
-
-Expr <RefId "rg" test.lkt:20:9-20:11>
      has type <StructDecl "Regexp" __prelude:5:10-5:26>
 
 Id   <RefId "rg" test.lkt:20:9-20:11>
      references <ValDecl "rg" test.lkt:19:9-19:26>
 
+Expr <RefId "rg" test.lkt:20:9-20:11>
+     has type <StructDecl "Regexp" __prelude:5:10-5:26>
+
+Expr <BlockExpr test.lkt:18:35-21:6>
+     has type <StructDecl "Regexp" __prelude:5:10-5:26>
+
 Id   <RefId "Int" test.lkt:23:22-23:25>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <IfExpr test.lkt:23:28-23:49>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+Id   <RefId "true" test.lkt:23:31-23:35>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
 
 Expr <RefId "true" test.lkt:23:31-23:35>
      has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
-
-Id   <RefId "true" test.lkt:23:31-23:35>
-     references <EnumLitDecl "true" __prelude:6:28-6:32>
 
 Expr <NumLit test.lkt:23:41-23:42>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -110,22 +107,25 @@ Expr <NumLit test.lkt:23:41-23:42>
 Expr <NumLit test.lkt:23:48-23:49>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "Int" test.lkt:25:30-25:33>
-     references <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <IfExpr test.lkt:25:36-25:59>
+Expr <IfExpr test.lkt:23:28-23:49>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId "true" test.lkt:25:39-25:43>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+Id   <RefId "Int" test.lkt:25:30-25:33>
+     references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "true" test.lkt:25:39-25:43>
      references <EnumLitDecl "true" __prelude:6:28-6:32>
 
+Expr <RefId "true" test.lkt:25:39-25:43>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+
 Expr <NumLit test.lkt:25:49-25:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-test.lkt:25:56: Expected instance of type 'Int', got a string literal
+test.lkt:25:56: Mismatched types: expected 'Int', got a string literal
+
+Expr <IfExpr test.lkt:25:36-25:59>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "C" test.lkt:29:9-29:10>
      references <GenericFormalTypeDecl "C" test.lkt:28:10-28:11>
@@ -151,9 +151,6 @@ Id   <RefId "Pair" test.lkt:41:37-41:41>
 Id   <RefId "Int" test.lkt:41:42-41:45>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <CallExpr test.lkt:41:49-41:66>
-     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
-
 Id   <RefId "Pair" test.lkt:41:49-41:53>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
 
@@ -166,14 +163,11 @@ Expr <NumLit test.lkt:41:59-41:61>
 Expr <NumLit test.lkt:41:63-41:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
+Expr <CallExpr test.lkt:41:49-41:66>
+     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
+
 Id   <RefId "Int" test.lkt:42:42-42:45>
      references <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <DotExpr test.lkt:42:48-42:68>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <CallExpr test.lkt:42:48-42:66>
-     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "Pair" test.lkt:42:48-42:52>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
@@ -187,22 +181,23 @@ Expr <NumLit test.lkt:42:58-42:60>
 Expr <NumLit test.lkt:42:63-42:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId "a" test.lkt:42:67-42:68>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+Expr <CallExpr test.lkt:42:48-42:66>
+     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "a" test.lkt:42:67-42:68>
      references <FieldDecl "a" test.lkt:29:5-29:10>
+
+Expr <RefId "a" test.lkt:42:67-42:68>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <DotExpr test.lkt:42:48-42:68>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Pair" test.lkt:43:38-43:42>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
 
 Id   <RefId "Int" test.lkt:43:43-43:46>
      references <StructDecl "Int" __prelude:1:10-1:23>
-
-test.lkt:43:50: Expected instance of type 'Pair[Int]', got type Int
-
-Expr <CallExpr test.lkt:43:50-43:67>
-     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "Pair" test.lkt:43:50-43:54>
      references <GenericDecl "Pair" test.lkt:28:1-31:2>
@@ -216,20 +211,19 @@ Expr <NumLit test.lkt:43:60-43:62>
 Expr <NumLit test.lkt:43:64-43:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId "a" test.lkt:43:68-43:69>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+Expr <CallExpr test.lkt:43:50-43:67>
+     has type <InstantiatedGenericType "Pair[Int]" test.lkt:28:1-31:2>
 
 Id   <RefId "a" test.lkt:43:68-43:69>
      references <FieldDecl "a" test.lkt:29:5-29:10>
 
+Expr <RefId "a" test.lkt:43:68-43:69>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:43:50: Mismatched types: expected 'Pair[Int]', got 'Int'
+
 Id   <RefId "Bool" test.lkt:44:44-44:48>
      references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
-
-Expr <DotExpr test.lkt:44:51-44:80>
-     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
-
-Expr <CallExpr test.lkt:44:51-44:78>
-     has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:33:1-38:2>
 
 Id   <RefId "Tuple2" test.lkt:44:51-44:57>
      references <GenericDecl "Tuple2" test.lkt:33:1-38:2>
@@ -243,17 +237,23 @@ Id   <RefId "Bool" test.lkt:44:63-44:67>
 Expr <NumLit test.lkt:44:69-44:71>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
+Id   <RefId "true" test.lkt:44:73-44:77>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
+
 Expr <RefId "true" test.lkt:44:73-44:77>
      has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
-Id   <RefId "true" test.lkt:44:73-44:77>
-     references <EnumLitDecl "true" __prelude:6:28-6:32>
+Expr <CallExpr test.lkt:44:51-44:78>
+     has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:33:1-38:2>
+
+Id   <RefId "b" test.lkt:44:79-44:80>
+     references <FieldDecl "b" test.lkt:35:5-35:10>
 
 Expr <RefId "b" test.lkt:44:79-44:80>
      has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
-Id   <RefId "b" test.lkt:44:79-44:80>
-     references <FieldDecl "b" test.lkt:35:5-35:10>
+Expr <DotExpr test.lkt:44:51-44:80>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
 Id   <RefId "Tuple2" test.lkt:45:40-45:46>
      references <GenericDecl "Tuple2" test.lkt:33:1-38:2>
@@ -264,10 +264,10 @@ Id   <RefId "Int" test.lkt:45:47-45:50>
 Id   <RefId "Bool" test.lkt:45:52-45:56>
      references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
-test.lkt:45:60: Expected instance of type 'Tuple2[Int, Bool]', got type Bool
-
 Id   <RefId "true" test.lkt:45:60-45:64>
      references <EnumLitDecl "true" __prelude:6:28-6:32>
+
+test.lkt:45:60: Mismatched types: expected 'Tuple2[Int, Bool]', got 'Bool'
 
 Id   <RefId "A" test.lkt:46:29-46:30>
      references <ClassDecl "A" test.lkt:1:12-26:2>
@@ -275,23 +275,23 @@ Id   <RefId "A" test.lkt:46:29-46:30>
 Id   <RefId "Int" test.lkt:46:33-46:36>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <CallExpr test.lkt:46:39-46:57>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <DotExpr test.lkt:46:39-46:55>
-     has type <FunctionType "(A) -> Int" __prelude>
+Id   <RefId "arg" test.lkt:46:39-46:42>
+     references <FunArgDecl "arg" test.lkt:46:23-46:30>
 
 Expr <RefId "arg" test.lkt:46:39-46:42>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
-Id   <RefId "arg" test.lkt:46:39-46:42>
-     references <FunArgDecl "arg" test.lkt:46:23-46:30>
+Id   <RefId "test_int_add" test.lkt:46:43-46:55>
+     references <FunDecl "test_int_add" test.lkt:8:5-8:38>
 
 Expr <RefId "test_int_add" test.lkt:46:43-46:55>
      has type <FunctionType "(A) -> Int" __prelude>
 
-Id   <RefId "test_int_add" test.lkt:46:43-46:55>
-     references <FunDecl "test_int_add" test.lkt:8:5-8:38>
+Expr <DotExpr test.lkt:46:39-46:55>
+     has type <FunctionType "(A) -> Int" __prelude>
+
+Expr <CallExpr test.lkt:46:39-46:57>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Tuple2" test.lkt:47:30-47:36>
      references <GenericDecl "Tuple2" test.lkt:33:1-38:2>
@@ -305,23 +305,23 @@ Id   <RefId "Bool" test.lkt:47:42-47:46>
 Id   <RefId "Int" test.lkt:47:50-47:53>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <CallExpr test.lkt:47:56-47:66>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <DotExpr test.lkt:47:56-47:64>
-     has type <FunctionType "(Tuple2) -> Int" __prelude>
+Id   <RefId "arg" test.lkt:47:56-47:59>
+     references <FunArgDecl "arg" test.lkt:47:25-47:47>
 
 Expr <RefId "arg" test.lkt:47:56-47:59>
      has type <InstantiatedGenericType "Tuple2[Int, Bool]" test.lkt:33:1-38:2>
 
-Id   <RefId "arg" test.lkt:47:56-47:59>
-     references <FunArgDecl "arg" test.lkt:47:25-47:47>
+Id   <RefId "test" test.lkt:47:60-47:64>
+     references <FunDecl "test" test.lkt:37:5-37:18>
 
 Expr <RefId "test" test.lkt:47:60-47:64>
      has type <FunctionType "(Tuple2) -> Int" __prelude>
 
-Id   <RefId "test" test.lkt:47:60-47:64>
-     references <FunDecl "test" test.lkt:37:5-37:18>
+Expr <DotExpr test.lkt:47:56-47:64>
+     has type <FunctionType "(Tuple2) -> Int" __prelude>
+
+Expr <CallExpr test.lkt:47:56-47:66>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:48:34-48:39>
      references <GenericDecl "Array" __prelude:7:10-10:2>
@@ -332,38 +332,34 @@ Id   <RefId "Int" test.lkt:48:40-48:43>
 Id   <RefId "Int" test.lkt:48:47-48:50>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <CallExpr test.lkt:48:53-48:61>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+Id   <RefId "arg" test.lkt:48:53-48:56>
+     references <FunArgDecl "arg" test.lkt:48:29-48:44>
 
 Expr <RefId "arg" test.lkt:48:53-48:56>
      has type <InstantiatedGenericType "Array[Int]" __prelude:7:10-10:2>
 
-Id   <RefId "arg" test.lkt:48:53-48:56>
-     references <FunArgDecl "arg" test.lkt:48:29-48:44>
-
 Expr <NumLit test.lkt:48:58-48:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:48:53-48:61>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Int" test.lkt:51:9-51:12>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Resolving type of expr <NumLit test.lkt:51:15-51:17> raised an error
-    no type
+Expr <NumLit test.lkt:51:15-51:17>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
 Id   <RefId "Int" test.lkt:55:41-55:44>
      references <StructDecl "Int" __prelude:1:10-1:23>
-
-Resolving type of expr <DotExpr test.lkt:55:47-55:53> raised an error
-    dereferencing a null access
-Expr <RefId "self" test.lkt:55:47-55:51>
-     has type <StructDecl "Foo" test.lkt:53:1-56:2>
 
 Id   <RefId "self" test.lkt:55:47-55:51>
      references <SelfDecl "self" test.lkt:53:1-56:2>
 
-Resolving type of expr <RefId "a" test.lkt:55:52-55:53> raised an error
-    dereferencing a null access
-Id   <RefId "a" test.lkt:55:52-55:53>
-     references None
+Expr <RefId "self" test.lkt:55:47-55:51>
+     has type <StructDecl "Foo" test.lkt:53:1-56:2>
+
+test.lkt:55:52: Cannot find entity 'a' in this scope
 
 Id   <RefId "D" test.lkt:59:16-59:17>
      references <EnumClassAltDecl "D" test.lkt:58:15-58:16>
@@ -377,20 +373,20 @@ Id   <RefId "Int" test.lkt:63:23-63:26>
 Id   <RefId "Int" test.lkt:63:29-63:32>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <BinOp test.lkt:63:35-63:40>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
+Id   <RefId "a" test.lkt:63:35-63:36>
+     references <FunArgDecl "a" test.lkt:63:10-63:17>
 
 Expr <RefId "a" test.lkt:63:35-63:36>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "a" test.lkt:63:35-63:36>
-     references <FunArgDecl "a" test.lkt:63:10-63:17>
+Id   <RefId "b" test.lkt:63:39-63:40>
+     references <FunArgDecl "b" test.lkt:63:19-63:26>
 
 Expr <RefId "b" test.lkt:63:39-63:40>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "b" test.lkt:63:39-63:40>
-     references <FunArgDecl "b" test.lkt:63:19-63:26>
+Expr <BinOp test.lkt:63:35-63:40>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Int" test.lkt:64:16-64:19>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -401,11 +397,11 @@ Id   <RefId "Int" test.lkt:64:21-64:24>
 Id   <RefId "Int" test.lkt:64:29-64:32>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <RefId "add" test.lkt:64:35-64:38>
-     has type <FunctionType "(Int, Int) -> Int" __prelude>
-
 Id   <RefId "add" test.lkt:64:35-64:38>
      references <FunDecl "add" test.lkt:63:1-63:40>
+
+Expr <RefId "add" test.lkt:64:35-64:38>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
 
 Id   <RefId "B" test.lkt:65:24-65:25>
      references <ClassDecl "B" test.lkt:40:1-49:2>
@@ -416,20 +412,20 @@ Id   <RefId "B" test.lkt:65:29-65:30>
 Id   <RefId "Int" test.lkt:65:35-65:38>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Expr <DotExpr test.lkt:65:41-65:77>
-     has type <FunctionType "(B) -> Int" __prelude>
+Id   <RefId "b_inst" test.lkt:65:41-65:47>
+     references <FunArgDecl "b_inst" test.lkt:65:16-65:25>
 
 Expr <RefId "b_inst" test.lkt:65:41-65:47>
      has type <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "b_inst" test.lkt:65:41-65:47>
-     references <FunArgDecl "b_inst" test.lkt:65:16-65:25>
+Id   <RefId "test_generic_component_access" test.lkt:65:48-65:77>
+     references <FunDecl "test_generic_component_access" test.lkt:42:5-42:68>
 
 Expr <RefId "test_generic_component_access" test.lkt:65:48-65:77>
      has type <FunctionType "(B) -> Int" __prelude>
 
-Id   <RefId "test_generic_component_access" test.lkt:65:48-65:77>
-     references <FunDecl "test_generic_component_access" test.lkt:42:5-42:68>
+Expr <DotExpr test.lkt:65:41-65:77>
+     has type <FunctionType "(B) -> Int" __prelude>
 
 Id   <RefId "B" test.lkt:66:32-66:33>
      references <ClassDecl "B" test.lkt:40:1-49:2>
@@ -440,17 +436,17 @@ Id   <RefId "B" test.lkt:66:37-66:38>
 Id   <RefId "Int" test.lkt:66:43-66:46>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-test.lkt:66:49: Expected instance of type '(B) -> Int', got type (B, A) -> Int
+Id   <RefId "b_inst" test.lkt:66:49-66:55>
+     references <FunArgDecl "b_inst" test.lkt:66:24-66:33>
 
 Expr <RefId "b_inst" test.lkt:66:49-66:55>
      has type <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "b_inst" test.lkt:66:49-66:55>
-     references <FunArgDecl "b_inst" test.lkt:66:24-66:33>
+Id   <RefId "test_fun_call" test.lkt:66:56-66:69>
+     references <FunDecl "test_fun_call" test.lkt:46:5-46:57>
 
 Expr <RefId "test_fun_call" test.lkt:66:56-66:69>
      has type <FunctionType "(B, A) -> Int" __prelude>
 
-Id   <RefId "test_fun_call" test.lkt:66:56-66:69>
-     references <FunDecl "test_fun_call" test.lkt:46:5-46:57>
+test.lkt:66:49: Mismatched types: expected '(B) -> Int', got '(B, A) -> Int'
 
