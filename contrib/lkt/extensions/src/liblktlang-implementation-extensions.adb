@@ -15,6 +15,9 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin enum Bool (false, true) {}" & ASCII.LF &
      "@builtin generic[T] struct Array {" & ASCII.LF &
      "    fun __call__(index : Int): T" & ASCII.LF &
+     "    fun length(): int" & ASCII.LF &
+     "}" & ASCII.LF &
+     "@builtin generic[T] struct ASTList {" & ASCII.LF &
      "}" & ASCII.LF &
      "";
 
