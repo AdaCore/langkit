@@ -8,7 +8,7 @@ import sys
 
 import langkit
 import langkit.compile_context
-from langkit.compile_context import CompileCtx
+from langkit.compile_context import CompileCtx, UnparseScript
 from langkit.diagnostics import DiagnosticError, Diagnostics, WarningSet
 from langkit.libmanage import ManageScript
 
@@ -57,6 +57,7 @@ if not langkit_root:
 
 # When unparsing the concrete syntax, name of the file to write
 unparse_destination = 'concrete_syntax.lkt'
+unparse_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
 
 
 def prepare_context(grammar=None, lexer=None, lkt_file=None,
@@ -107,7 +108,7 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
                           warning_set=default_warning_set,
                           generate_unparser=False, symbol_canonicalizer=None,
-                          unparse_cs=False):
+                          unparse_script=None):
     """
     Compile and emit code for CTX. Return the compile context if this was
     successful, None otherwise.
@@ -129,21 +130,19 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
 
     :rtype: None|langkit.compile_context.CompileCtx
 
-    :param bool unparse_cs: If true, unparse the language to a concrete syntax
-        lkt file.
+    :param None|str unparse_script: Script to unparse the language spec.
     """
 
     if lexer is None:
         from lexer_example import foo_lexer
         lexer = foo_lexer
 
-    unparse_dest = unparse_destination if unparse_cs else None
-
     try:
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer)
         ctx.emit('build', generate_unparser=generate_unparser,
-                 unparse_destination_file=unparse_dest)
+                 unparse_script=(UnparseScript(unparse_script)
+                                 if unparse_script else None))
         # ... and tell about how it went
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
@@ -170,7 +169,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   lkt_file=None, ocaml_main=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
-                  show_property_logging=False, unparse_cs=True):
+                  show_property_logging=False, unparse_script=unparse_script):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -207,8 +206,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         marked with tracing activated will be traced on stdout by default,
         without need for any config file.
 
-    :param bool unparse_cs: If true, unparse the language to a concrete syntax
-        lkt file.
+    :param None|str unparse_script: Script to unparse the language spec.
     """
 
     if lexer is None:
@@ -256,9 +254,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         argv.append('--disable-all-mains')
 
     # RA22-015: Unparse the language to concrete syntax
-    if unparse_cs:
-        argv.append('--unparse-destination')
-        argv.append(unparse_destination)
+    if unparse_script:
+        argv.append('--unparse-script')
+        argv.append(unparse_script)
 
     m.run(argv)
 

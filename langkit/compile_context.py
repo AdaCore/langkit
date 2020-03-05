@@ -146,6 +146,47 @@ class Verbosity(object):
         ]
 
 
+class UnparseScript(object):
+    """
+    Sequence of actions to generate concrete syntax DSL.
+    """
+
+    def __init__(self, spec):
+        self.actions = self.parse(spec)
+
+    @staticmethod
+    def parse(spec):
+        result = []
+
+        # Do the parsing itself
+        for action in spec.split(','):
+            if ':' not in action:
+                key = action
+                value = None
+            else:
+                key, value = action.split(':', 1)
+            result.append((key, value))
+
+        # Validate actions
+        if not len(result):
+            raise ValueError('At least one action expected')
+        for i, (action, arg) in enumerate(result):
+            if i == 0 and action != 'to':
+                raise ValueError('First action must be to:')
+
+            if action in ('to', 'import'):
+                if arg is None:
+                    raise ValueError('Missing argument for {}:'.format(action))
+            elif action in ('nodes', 'lexer', 'grammar'):
+                if arg is not None:
+                    raise ValueError('Unexpected argument for {}:'
+                                     .format(action))
+            else:
+                raise ValueError('Unknown action: {}:'.format(action))
+
+        return result
+
+
 class LibraryEntity(object):
     """
     Reference to an entity in the generated library.

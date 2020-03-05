@@ -129,5 +129,5 @@ warning_set.disable(WarningSet.unused_node_type)
 warning_set.disable(WarningSet.unused_bindings)
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              warning_set=warning_set, unparse_cs=True)
+              warning_set=warning_set)
 print('Done')

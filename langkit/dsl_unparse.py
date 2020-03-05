@@ -1211,27 +1211,11 @@ def compute_newline_afters(newline_after):
     return res
 
 
-def unparse_lang(ctx):
+def unparse_lexer(ctx, f):
     """
-    Unparse the language currently being compiled.
+    Unparse the lexer for the current language to the given file.
     """
-
-    dest_file = ctx.emitter.unparse_destination_file
-
-    # If there is no destination file, then the pass does nothing.
-    if not ctx.emitter.unparse_destination_file:
-        return
-
-    # By setting the context's emitter to `None`, we disable the sanity checks
-    # done to ensure that we don't intermix codegen and semantic checks in the
-    # langkit code generator, because we break that invariant in the unparser.
-    emitter = ctx.emitter
-    ctx.emitter = None
-
-    #################################
-    # Prepare unparsing of lexer...
-    #################################
-
+    # Prepare unparsing of lexer
     lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
     lexer_annotations += "".join(
         '@spacing({}, {})$hl'.format(tf1.name.lower, tf2.name.lower)
@@ -1242,7 +1226,9 @@ def unparse_lang(ctx):
     lexer_newline_rule_index = next(
         i
         for i, r in enumerate(ctx.lexer.rules)
-        if r.signature == ('RuleAssoc', ('Literal', '\n'), ('WithText', 'Newline', False, False))
+        if r.signature == ('RuleAssoc',
+                           ('Literal', '\n'),
+                           ('WithText', 'Newline', False, False))
     ) if ctx.lexer.track_indent else -1
 
     families = compute_families_map(ctx.lexer.spacing_table)
@@ -1286,17 +1272,6 @@ def unparse_lang(ctx):
     if last_family is not None:
         unparsed_rules += close_last_family
 
-    #################################
-    # Prepare unparsing of grammar...
-    #################################
-
-    sorted_rules = sorted(
-        ((name, rule)
-         for name, rule in ctx.grammar.rules.items()
-         if not rule.is_dont_skip_parser),
-        key=lambda (_, rule): rule._id
-    )
-
     template = """
     ${lexer_annotations}lexer ${ctx.lang_name.lower}_lexer {$i$hl
     % for name, pattern, loc in ctx.lexer.patterns:
@@ -1307,7 +1282,23 @@ def unparse_lang(ctx):
 
     $d$hl
     }$hl
+    """
 
+    f.write(pp(sf(template)))
+
+
+def unparse_grammar(ctx, f):
+    """
+    Unparse the grammar for the current language to the given file.
+    """
+    sorted_rules = sorted(
+        ((name, rule)
+         for name, rule in ctx.grammar.rules.items()
+         if not rule.is_dont_skip_parser),
+        key=lambda (_, rule): rule._id
+    )
+
+    template = """
     grammar ${ctx.lang_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
         ${('@main_rule '
@@ -1316,15 +1307,15 @@ def unparse_lang(ctx):
     % endfor
     $d$hl
     }$hl
-
-    <% types = keep(emit_node_type(t) for t in ctx.astnode_types + ctx._struct_types) %>
-
-    % for t in types:
-        $hl
-        ${t}
-    % endfor
     """
 
+    f.write(pp(sf(template)))
+
+
+def unparse_nodes(ctx, f):
+    """
+    Unparse the nodes for the current language to the given file.
+    """
     from langkit.diagnostics import check_source_language, Severity
     check_source_language(
         predicate=lpl is not None,
@@ -1333,9 +1324,53 @@ def unparse_lang(ctx):
         do_raise=False
     )
 
-    lang_def = pp(sf(template))
-    with open(dest_file, 'w') as f:
-        f.write(lang_def)
+    types = keep(emit_node_type(t)
+                 for t in ctx.astnode_types + ctx._struct_types)
+
+    template = """
+    % for t in types:
+        $hl
+        ${t}
+    % endfor
+    """
+    f.write(pp(sf(template)))
+
+
+def unparse_lang(ctx):
+    """
+    Unparse the language currently being compiled.
+    """
+    # If there is no unparse script, then the pass does nothing
+    if not ctx.emitter.unparse_script:
+        return
+    unparse_script = ctx.emitter.unparse_script
+
+    # By setting the context's emitter to `None`, we disable the sanity checks
+    # done to ensure that we don't intermix codegen and semantic checks in the
+    # langkit code generator, because we break that invariant in the unparser.
+    emitter = ctx.emitter
+    ctx.emitter = None
+
+    f = None
+    try:
+        for action, value in unparse_script.actions:
+            if action == 'to':
+                if f is not None:
+                    f.close()
+                f = open(value, 'w')
+            elif action == 'import':
+                f.write('import {}\n'.format(value))
+            elif action == 'nodes':
+                unparse_nodes(ctx, f)
+            elif action == 'lexer':
+                unparse_lexer(ctx, f)
+            elif action == 'grammar':
+                unparse_grammar(ctx, f)
+            else:
+                assert False
+    finally:
+        if f is not None:
+            f.close()
 
     ctx.emitter = emitter
 

@@ -126,7 +126,7 @@ class Emitter(object):
                  pretty_print=False, post_process_ada=None,
                  post_process_cpp=None, post_process_python=None,
                  coverage=False, relative_project=False,
-                 unparse_destination_file=None):
+                 unparse_script=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -294,12 +294,12 @@ class Emitter(object):
             self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
         )
 
-        self.unparse_destination_file = unparse_destination_file
+        self.unparse_script = unparse_script
         """
         RA22-015: If set to something else than None, then the "dsl unparse"
-        pass will be run, and the output will be stored in this file.
+        pass will be run on the given script.
 
-        :type: str|None
+        :type: langkit.compile_context.UnparseScript|None
         """
 
         # Determine whether we have user external properties. If so,
