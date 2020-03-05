@@ -13,7 +13,7 @@ File "test.py", line 67, in ExampleHolder
     Error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Abstract overriding concrete ==
-File "abstract-overriding-concrete.lkt", line 2, In definition of grammar rule main_rule
+File "abstract-overriding-concrete.lkt", line 4, In definition of grammar rule main_rule
     Error: Transform parser generates 1 values, but ExampleHolder has 0 fields
 
 == Inconsistent overriding type ==
@@ -21,7 +21,7 @@ File "test.py", line 103, in ExampleHolder.f
     Error: Type of overriding field (FooNode) does not match type of abstract field (Example)
 
 == Free-standing null field ==
-File "free-standing-null-field.lkt", line 2, In definition of grammar rule main_rule
+File "free-standing-null-field.lkt", line 4, In definition of grammar rule main_rule
     Error: Transform parser generates 1 values, but ExampleHolder has 0 fields
 
 Done

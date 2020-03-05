@@ -86,10 +86,6 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     :param bool show_property_logging: See CompileCtx.show_property_logging.
     """
 
-    if lexer is None:
-        from lexer_example import foo_lexer
-        lexer = foo_lexer
-
     # Have a clean build directory
     if P.exists('build'):
         shutil.rmtree('build')
@@ -140,10 +136,6 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
     :param None|str unparse_script: Script to unparse the language spec.
     """
 
-    if lexer is None:
-        from lexer_example import foo_lexer
-        lexer = foo_lexer
-
     try:
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer)
@@ -159,7 +151,8 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
         print('Code generation was successful')
         return ctx
     finally:
-        lexer._dfa_code = None
+        if lexer is not None:
+            lexer._dfa_code = None
         langkit.reset()
 
 
@@ -215,10 +208,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param None|str unparse_script: Script to unparse the language spec.
     """
-
-    if lexer is None:
-        from lexer_example import foo_lexer
-        lexer = foo_lexer
 
     ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                           symbol_canonicalizer=symbol_canonicalizer,

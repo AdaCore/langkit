@@ -1,21 +1,21 @@
 == Token element ==
-File "token-element.lkt", line 2, In definition of grammar rule main_rule
-  line 2, In definition of grammar rule main_rule
+File "token-element.lkt", line 4, In definition of grammar rule main_rule
+  line 4, In definition of grammar rule main_rule
     Error: List parsers only accept subparsers that yield AST nodes (Token provided here)
 
 == Invalid list_cls ==
-invalid-list-cls.lkt:2:29: Error: Bad generic type name: only ASTList is valid in this context
+invalid-list-cls.lkt:4:29: Error: Bad generic type name: only ASTList is valid in this context
 
 == Invalid ASTList ==
-invalid-astlist.lkt:2:29: Error: 1 type argument expected, got 2
+invalid-astlist.lkt:4:29: Error: 1 type argument expected, got 2
 
 == Non-list list_cls ==
-File "non-list-cls.lkt", line 3, In definition of grammar rule main_rule
+File "non-list-cls.lkt", line 5, In definition of grammar rule main_rule
     Error: Invalid list type for List parser: ListNode. Not a list type
 
 == Invalid element type in list_cls ==
-File "invalid-element-type.lkt", line 4, In definition of grammar rule main_rule
-  line 5, In definition of grammar rule main_rule
+File "invalid-element-type.lkt", line 6, In definition of grammar rule main_rule
+  line 7, In definition of grammar rule main_rule
     Error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
 
 Done

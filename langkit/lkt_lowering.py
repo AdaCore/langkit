@@ -6,10 +6,15 @@ structures.
 from __future__ import absolute_import, division, print_function
 
 from collections import OrderedDict
+import json
 import os.path
 
 from langkit.diagnostics import DiagnosticError, check_source_language
 from langkit.dsl import _ASTNodeMetaclass
+from langkit.lexer import (Alt, Case, Ignore, Lexer, LexerToken, Literal,
+                           NoCaseLit, Pattern, TokenFamily, WithSymbol,
+                           WithText, WithTrivia)
+import langkit.names as names
 from langkit.parsers import (Discard, DontSkip, Grammar, List, Null, Opt, Or,
                              Pick, Predicate, Skip, _Row, _Token, _Transform)
 
@@ -27,6 +32,33 @@ def text_as_str(token_node):
     # TODO: remove the encoding once we support Python3. For now, the rest of
     # the grammar machinery expects byte strings.
     return token_node.text.encode('ascii')
+
+
+def pattern_as_str(str_lit):
+    """
+    Return the regexp string associated to this string literal node.
+
+    :type str_lit: liblktlang.StringLit
+    :rtype: str
+    """
+    return json.loads(text_as_str(str_lit)[1:])
+
+
+def parse_static_bool(ctx, expr):
+    """
+    Return the bool value that this expression denotes.
+
+    :param liblktlang.Expr expr: Expression tree to parse.
+    :rtype: bool
+    """
+    import liblktlang
+
+    with ctx.lkt_context(expr):
+        check_source_language(isinstance(expr, liblktlang.RefId)
+                              and text_as_str(expr) in ('false', 'true'),
+                              'Boolean literal expected')
+
+    return text_as_str(expr) == 'true'
 
 
 def load_lkt(lkt_file):
@@ -193,11 +225,82 @@ class FlagAnnotationSpec(AnnotationSpec):
         return True
 
 
+class SpacingAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for @spacing annotations for lexer.
+    """
+    def __init__(self):
+        super(SpacingAnnotationSpec, self).__init__('spacing', unique=False,
+                                                    require_args=True)
+
+    def interpret(self, ctx, args, kwargs):
+        import liblktlang
+
+        check_source_language(len(args) == 2 and not kwargs,
+                              'Exactly two positional arguments expected')
+        couple = []
+        for f in args:
+            # Check that we only have RefId nodes, but do not attempt to
+            # translate them to TokenFamily instances: at the point we
+            # interpret annotations, the set of token families is not ready
+            # yet.
+            check_source_language(isinstance(f, liblktlang.RefId),
+                                  'Token family name expected')
+            couple.append(f)
+        return tuple(couple)
+
+
+class TokenAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for @text/symbol/trivia annotations for tokens.
+    """
+    def __init__(self, name):
+        super(TokenAnnotationSpec, self).__init__(name, unique=True,
+                                                  require_args=True)
+
+    def interpret(self, ctx, args, kwargs):
+        check_source_language(not args, 'No positional argument allowed')
+
+        try:
+            start_ignore_layout = kwargs.pop('start_ignore_layout')
+        except KeyError:
+            start_ignore_layout = False
+        else:
+            start_ignore_layout = parse_static_bool(ctx, start_ignore_layout)
+
+        try:
+            end_ignore_layout = kwargs.pop('end_ignore_layout')
+        except KeyError:
+            end_ignore_layout = False
+        else:
+            end_ignore_layout = parse_static_bool(ctx, end_ignore_layout)
+
+        check_source_language(
+            not kwargs,
+            'Invalid arguments: {}'.format(', '.join(sorted(kwargs)))
+        )
+
+        return (start_ignore_layout, end_ignore_layout)
+
+
 # Annotation specs to use when no annotation is allowed
 no_annotations = []
 
 # Annotation specs for grammar rules
 grammar_rule_annotations = [FlagAnnotationSpec('main_rule')]
+
+# Annotation specs for lexers
+lexer_annotations = [SpacingAnnotationSpec(),
+                     FlagAnnotationSpec('track_indent')]
+token_annotations = [TokenAnnotationSpec('text'),
+                     TokenAnnotationSpec('trivia'),
+                     TokenAnnotationSpec('symbol'),
+                     FlagAnnotationSpec('newline_after'),
+                     FlagAnnotationSpec('pre_rule'),
+                     FlagAnnotationSpec('ignore')]
+token_cls_map = {'text': WithText,
+                 'trivia': WithTrivia,
+                 'symbol': WithSymbol}
 
 
 def parse_annotations(ctx, specs, full_decl):
@@ -235,6 +338,318 @@ def parse_annotations(ctx, specs, full_decl):
                 'Invalid annotation: {}'.format(name)
             )
             spec.parse_single_annotation(ctx, result, a)
+
+    return result
+
+
+def create_lexer(ctx, lkt_units):
+    """
+    Create and populate a lexer from a Lktlang unit.
+
+    :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
+        units where to look for the grammar.
+    :rtype: langkit.lexer.Lexer
+    """
+    import liblktlang
+
+    # Look for the LexerDecl node in top-level lists
+    full_lexer = find_toplevel_decl(ctx, lkt_units, liblktlang.LexerDecl,
+                                    'lexer')
+    with ctx.lkt_context(full_lexer):
+        lexer_annot = parse_annotations(ctx, lexer_annotations, full_lexer)
+
+    patterns = {}
+    """
+    Mapping from pattern names to the corresponding regular expression.
+
+    :type: dict[names.Name, str]
+    """
+
+    token_family_sets = {}
+    """
+    Mapping from token family names to the corresponding sets of tokens that
+    belong to this family.
+
+    :type: dict[names.Name, Token]
+    """
+
+    token_families = {}
+    """
+    Mapping from token family names to the corresponding token families.  We
+    build this late, once we know all tokens and all families.
+
+    :type: dict[names.Name, TokenFamily]
+    """
+
+    tokens = {}
+    """
+    Mapping from token names to the corresponding tokens.
+
+    :type: dict[names.Name, Token]
+    """
+
+    rules = []
+    pre_rules = []
+    """
+    Lists of regular and pre lexing rules for this lexer.
+
+    :type: list[(langkit.lexer.Matcher, langkit.lexer.Action)]
+    """
+
+    newline_after = []
+    """
+    List of tokens after which we must introduce a newline during unparsing.
+
+    :type: list[Token]
+    """
+
+    def ignore_constructor(start_ignore_layout, end_ignore_layout):
+        """
+        Adapter to build a Ignore instance with the same API as WithText
+        constructors.
+        """
+        del start_ignore_layout, end_ignore_layout
+        return Ignore()
+
+    def process_family(f):
+        """
+        Process a LexerFamilyDecl node. Register the token family and process
+        the rules it contains.
+
+        :type f: liblktlang.LexerFamilyDecl
+        """
+        with ctx.lkt_context(f):
+            # Create the token family, if needed
+            name = names.Name.from_lower(text_as_str(f.f_syn_name))
+            token_set = token_family_sets.setdefault(name, set())
+
+            for r in f.f_rules:
+                check_source_language(
+                    isinstance(r.f_decl, liblktlang.GrammarRuleDecl),
+                    'Only lexer rules allowed in family blocks'
+                )
+                process_token_rule(r, token_set)
+
+    def process_token_rule(r, token_set=None):
+        """
+        Process the full declaration of a GrammarRuleDecl node: create the
+        token it declares and lower the optional associated lexing rule.
+
+        :param liblktlang.FullDecl r: Full declaration for the GrammarRuleDecl
+            to process.
+        :param None|set[TokenAction] token_set: If this declaration appears in
+            the context of a token family, this adds the new token to this set.
+            Must be left to None otherwise.
+        """
+        with ctx.lkt_context(r):
+            rule_annot = parse_annotations(ctx, token_annotations, r)
+
+            # Gather token action info from the annotations. If absent,
+            # fallback to WithText.
+            token_cons = None
+            start_ignore_layout = False
+            end_ignore_layout = False
+            if 'ignore' in rule_annot:
+                token_cons = ignore_constructor
+            for name in ('text', 'trivia', 'symbol'):
+                try:
+                    start_ignore_layout, end_ignore_layout = rule_annot[name]
+                except KeyError:
+                    continue
+
+                check_source_language(token_cons is None,
+                                      'At most one token action allowed')
+                token_cons = token_cls_map[name]
+            is_pre = rule_annot.get('pre_rule', False)
+            if token_cons is None:
+                token_cons = WithText
+
+            # Create the token and register it where needed: the global token
+            # mapping, its token family (if any) and the "newline_after" group
+            # if the corresponding annotation is present.
+            token_lower_name = text_as_str(r.f_decl.f_syn_name)
+            token_name = names.Name.from_lower(token_lower_name)
+
+            check_source_language(
+                token_lower_name not in ('termination', 'lexing_failure'),
+                '{} is a reserved token name'.format(token_lower_name)
+            )
+            check_source_language(token_name not in tokens,
+                                  'Duplicate token name')
+
+            token = token_cons(start_ignore_layout, end_ignore_layout)
+            tokens[token_name] = token
+            if token_set is not None:
+                token_set.add(token)
+            if 'newline_after' in rule_annot:
+                newline_after.append(token)
+
+            # Lower the lexing rule, if present
+            matcher_expr = r.f_decl.f_expr
+            if matcher_expr is not None:
+                rule = (lower_matcher(matcher_expr), token)
+                if is_pre:
+                    pre_rules.append(rule)
+                else:
+                    rules.append(rule)
+
+    def process_pattern(full_decl):
+        """
+        Process a pattern declaration.
+
+        :param liblktlang.FullDecl r: Full declaration for the ValDecl to
+            process.
+        """
+        parse_annotations(ctx, [], full_decl)
+        decl = full_decl.f_decl
+        lower_name = text_as_str(decl.f_syn_name)
+        name = names.Name.from_lower(lower_name)
+
+        with ctx.lkt_context(decl):
+            check_source_language(name not in patterns,
+                                  'Duplicate pattern name')
+            check_source_language(decl.f_decl_type is None,
+                                  'Patterns must have automatic types in'
+                                  ' lexers')
+            check_source_language(
+                isinstance(decl.f_val, liblktlang.StringLit)
+                and decl.f_val.p_is_regexp_literal,
+                'Pattern string literal expected'
+            )
+            # TODO: use StringLit.p_denoted_value when properly implemented
+            patterns[name] = pattern_as_str(decl.f_val)
+
+    def lower_matcher(expr):
+        """
+        Lower a token matcher to our internals.
+
+        :type expr: liblktlang.GrammarExpr
+        :rtype: langkit.lexer.Matcher
+        """
+        with ctx.lkt_context(expr):
+            if isinstance(expr, liblktlang.TokenLit):
+                return Literal(json.loads(text_as_str(expr)))
+            elif isinstance(expr, liblktlang.TokenNoCaseLit):
+                return NoCaseLit(json.loads(text_as_str(expr)))
+            elif isinstance(expr, liblktlang.TokenPatternLit):
+                return Pattern(pattern_as_str(expr))
+            else:
+                check_source_language(False, 'Invalid lexing expression')
+
+    def lower_token_ref(ref):
+        """
+        Return the Token that `ref` refers to.
+
+        :type ref: liblktlang.RefId
+        :rtype: Token
+        """
+        with ctx.lkt_context(ref):
+            token_name = names.Name.from_lower(text_as_str(ref))
+            check_source_language(token_name in tokens,
+                                  'Unknown token: {}'.format(token_name.lower))
+            return tokens[token_name]
+
+    def lower_family_ref(ref):
+        """
+        Return the TokenFamily that `ref` refers to.
+
+        :type ref: liblktlang.RefId
+        :rtype: TokenFamily
+        """
+        with ctx.lkt_context(ref):
+            name_lower = text_as_str(ref)
+            name = names.Name.from_lower(name_lower)
+            check_source_language(
+                name in token_families,
+                'Unknown token family: {}'.format(name_lower)
+            )
+            return token_families[name]
+
+    def lower_case_alt(alt):
+        """
+        Lower the alternative of a case lexing rule.
+
+        :type alt: liblktlang.BaseLexerCaseRuleAlt
+        :rtype: Alt
+        """
+        prev_token_cond = None
+        if isinstance(alt, liblktlang.LexerCaseRuleCondAlt):
+            prev_token_cond = [lower_token_ref(ref)
+                               for ref in alt.f_cond_exprs]
+        return Alt(prev_token_cond=prev_token_cond,
+                   send=lower_token_ref(alt.f_send.f_sent),
+                   match_size=int(alt.f_send.f_match_size.text))
+
+    # Go through all rules to register tokens, their token families and lexing
+    # rules.
+    for full_decl in full_lexer.f_decl.f_rules:
+        with ctx.lkt_context(full_decl):
+            if isinstance(full_decl, liblktlang.LexerFamilyDecl):
+                # This is a family block: go through all declarations inside it
+                process_family(full_decl)
+
+            elif isinstance(full_decl, liblktlang.FullDecl):
+                # There can be various types of declarations in lexers...
+                decl = full_decl.f_decl
+
+                if isinstance(decl, liblktlang.GrammarRuleDecl):
+                    # Here, we have a token declaration, potentially associated
+                    # with a lexing rule.
+                    process_token_rule(full_decl)
+
+                elif isinstance(decl, liblktlang.ValDecl):
+                    # This is the declaration of a pattern
+                    process_pattern(full_decl)
+
+                else:
+                    check_source_language(False,
+                                          'Unexpected declaration in lexer')
+
+            elif isinstance(full_decl, liblktlang.LexerCaseRule):
+                syn_alts = list(full_decl.f_alts)
+
+                # This is a rule for conditional lexing: lower its matcher and
+                # its alternative rules.
+                matcher = lower_matcher(full_decl.f_expr)
+                check_source_language(
+                    len(syn_alts) == 2 and
+                    isinstance(syn_alts[0],
+                               liblktlang.LexerCaseRuleCondAlt) and
+                    isinstance(syn_alts[1],
+                               liblktlang.LexerCaseRuleDefaultAlt),
+                    'Invalid case rule topology'
+                )
+                rules.append(Case(matcher,
+                                  lower_case_alt(syn_alts[0]),
+                                  lower_case_alt(syn_alts[1])))
+
+            else:
+                # The grammar should make the following dead code
+                assert False, 'Invalid lexer rule: {}'.format(full_decl)
+
+    # Create the LexerToken subclass to define all tokens and token families
+    items = {}
+    for name, token in tokens.items():
+        items[name.camel] = token
+    for name, token_set in token_family_sets.items():
+        tf = TokenFamily(*list(token_set))
+        token_families[name] = tf
+        items[name.camel] = tf
+    token_class = type('Token', (LexerToken, ), items)
+
+    # Create the Lexer instance and register all patterns and lexing rules
+    result = Lexer(token_class,
+                   'track_indent' in lexer_annot,
+                   pre_rules)
+    for name, regexp in patterns.items():
+        result.add_patterns((name.lower, regexp))
+    result.add_rules(*rules)
+
+    # Register spacing/newline rules
+    for tf1, tf2 in lexer_annot.get('spacing', []):
+        result.add_spacing((lower_family_ref(tf1),
+                            lower_family_ref(tf2)))
+    result.add_newline_after(*newline_after)
 
     return result
 

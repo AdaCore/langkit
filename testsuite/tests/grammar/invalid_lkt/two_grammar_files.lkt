@@ -1,3 +1,4 @@
+import lexer_example
 import basic
 
 grammar foo_grammar {

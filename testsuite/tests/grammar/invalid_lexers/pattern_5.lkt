@@ -1,0 +1,11 @@
+lexer foo_lexer {
+    ex1 <- p"a"
+    ex2 <- p"b"
+    ex3 <- p"+"
+    ex4 <- p"c"
+    ex5 <- p"d"
+}
+
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}

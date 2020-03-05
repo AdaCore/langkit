@@ -1,1 +1,3 @@
+import lexer_example
+
 @foo grammar foo_grammar {}

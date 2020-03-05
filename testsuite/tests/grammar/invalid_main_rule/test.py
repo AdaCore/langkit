@@ -19,5 +19,5 @@ grammar = Grammar('main_rulezz')
 grammar.add_rules(
     main_rule=ExampleNode('example')
 )
-emit_and_print_errors(grammar)
+emit_and_print_errors(grammar, lkt_file='foo.lkt')
 print('Done')
