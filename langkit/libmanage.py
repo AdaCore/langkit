@@ -16,7 +16,7 @@ import subprocess
 import sys
 import traceback
 
-from langkit.compile_context import Verbosity
+from langkit.compile_context import UnparseScript, Verbosity
 from langkit.diagnostics import (
     Context, DiagnosticError, DiagnosticStyle, Diagnostics, Location,
     WarningSet, check_source_language, extract_library_location
@@ -464,9 +464,16 @@ class ManageScript(object):
         # RA22-015: option to dump the results of the unparsing concrete syntax
         # to a file.
         subparser.add_argument(
-            '--unparse-destination', type=str, default=None,
-            help='If specified, generate concrete syntax definition of the'
-                 ' source language, and store it in this file.'
+            '--unparse-script', type=UnparseScript, default=None,
+            help='If specified, sequence of actions to generate definition of'
+                 ' the source language using the concrete syntax DSL. Actions'
+                 ' are separated by commas. These can be:'
+                 ' to:FILE (write the next actions to the given file),'
+                 ' import:MODULE (write an import statement for the given'
+                 ' module name,'
+                 ' nodes (write definitions for nodes),'
+                 ' lexer (write the lexer definition),'
+                 ' grammar (write the grammar definition).'
         )
 
     def add_build_mode_arg(self, subparser):
@@ -768,7 +775,7 @@ class ManageScript(object):
             pretty_print=not args.no_pretty_print,
             coverage=args.coverage,
             relative_project=args.relative_project,
-            unparse_destination_file=args.unparse_destination
+            unparse_script=args.unparse_script
         )
 
         if args.check_only:

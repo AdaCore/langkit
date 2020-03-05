@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import sys
 
-from utils import emit_and_print_errors, langkit_root
+from utils import emit_and_print_errors, langkit_root, unparse_script
 
 
 # Make the Python grammar importable
@@ -18,4 +18,4 @@ from language import lexer, parser
 
 
 emit_and_print_errors(parser.python_grammar, lexer.python_lexer,
-                      unparse_cs=True)
+                      unparse_script=unparse_script)
