@@ -1,0 +1,8 @@
+lexer foo_lexer {
+    val pat = p"["
+    example <- p"{pat}"
+}
+
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+}

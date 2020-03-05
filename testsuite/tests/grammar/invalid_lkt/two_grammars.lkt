@@ -1,2 +1,4 @@
+import lexer_example
+
 grammar foo_grammar1 {}
 grammar foo_grammar2 {}

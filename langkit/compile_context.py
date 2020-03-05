@@ -392,7 +392,8 @@ class CompileCtx(object):
         else:
             self.lkt_units = load_lkt(lkt_file)
 
-        self.lexer = lexer
+        from langkit.lkt_lowering import create_lexer
+        self.lexer = lexer or create_lexer(self, self.lkt_units)
         ":type: langkit.lexer.Lexer"
 
         from langkit.lkt_lowering import create_grammar

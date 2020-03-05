@@ -10,23 +10,8 @@ from langkit.expressions import (
     ArrayLiteral, CharacterLiteral as Char, Let, Self, String, Var, ignore,
     langkit_property
 )
-from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
-                           WithText, WithTrivia)
 
 from utils import build_and_run, unparse_all_script
-
-
-class Token(LexerToken):
-    Example = WithText()
-    Comment = WithTrivia()
-
-
-foo_lexer = Lexer(Token)
-foo_lexer.add_rules(
-    (Pattern(r'[ \n\r\t]+'), Ignore()),
-    (Literal('example'),     Token.Example),
-    (Pattern('#(.?)+'),      Token.Comment),
-)
 
 
 class FooNode(ASTNode):
@@ -84,7 +69,6 @@ class Example(FooNode):
         return KV.new(key="hey", val="you")
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              lexer=foo_lexer, py_script='main.py',
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
               unparse_script=unparse_all_script)
 print('Done')
