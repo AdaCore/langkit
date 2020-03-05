@@ -8,7 +8,7 @@ Code generation was successful
 invalid_decl.lkt:2:5: Error: grammar rule expected
 
 == invalid_main_rule_annot.lkt ==
-invalid_main_rule_annot.lkt:2:5: Error: no parameters allowed for this main_rule annotation
+invalid_main_rule_annot.lkt:2:5: Error: This annotation accepts no argument
 
 == invalid_token.lkt ==
 invalid_token.lkt:2:29: Error: Unknown token: UnknownToken
@@ -32,6 +32,6 @@ basic.lkt:1:1: Error: only one grammar allowed (previous found at two_grammar_fi
 two_grammars.lkt:2:1: Error: only one grammar allowed (previous found at two_grammars.lkt:1:1)
 
 == unknown_rule_annot.lkt ==
-unknown_rule_annot.lkt:3:5: Error: invalid annotations: foo
+unknown_rule_annot.lkt:3:5: Error: Invalid annotation: foo
 
 Done

@@ -17,6 +17,18 @@ from langkit.parsers import (Discard, DontSkip, Grammar, List, Null, Opt, Or,
 # we are about to process LKT grammar rules.
 
 
+def text_as_str(token_node):
+    """
+    Return the text associated to this token node as a native string.
+
+    :param liblktlang.LKNode token_node: Node from which to extract text.
+    :rtype: str
+    """
+    # TODO: remove the encoding once we support Python3. For now, the rest of
+    # the grammar machinery expects byte strings.
+    return token_node.text.encode('ascii')
+
+
 def load_lkt(lkt_file):
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
@@ -96,21 +108,134 @@ def find_toplevel_decl(ctx, lkt_units, node_type, label):
     return result
 
 
-def annotations(ctx, decl):
+class AnnotationSpec(object):
     """
-    Build a Python dict for ``decl``'s annotations.
+    Synthetic description of how a declaration annotation works.
+    """
 
-    :param liblktlang.FullDecl decl: Declaration whose annotations must be
-        processed.
-    :rtype: dict[str, liblktlang.LKNode]
+    def __init__(self, name, unique, require_args):
+        """
+        :param str name: Name of the annotation (``foo`` for the ``@foo``
+            annotation).
+        :param bool unique: Whether this annotation can appear at most once for
+            a given declaration.
+        :param bool require_args: Whether this annotation requires arguments.
+        """
+        self.name = name
+        self.unique = unique
+        self.require_args = require_args
+
+    def interpret(self, ctx, args, kwargs):
+        """
+        Subclasses must override this in order to interpret an annotation.
+
+        This method must validate and interpret ``args`` and ``kwargs``, and
+        return a value suitable for annotations processing.
+
+        :param list[liblktlang.Expr] args: Positional arguments for the
+            annotation.
+        :param dict[str, liblktlang.Expr] kwargs: Keyword arguments for the
+            annotation.
+        """
+        raise NotImplementedError
+
+    def parse_single_annotation(self, ctx, result, annotation):
+        """
+        Parse an annotation node according to this spec. Add the result to
+        ``result``.
+        """
+        # Check that parameters presence comply to the spec
+        if annotation.f_params.is_ghost:
+            check_source_language(not self.require_args,
+                                  'Arguments required for this annotation')
+            value = None
+        else:
+            check_source_language(self.require_args,
+                                  'This annotation accepts no argument')
+
+            # Collect positional and named arguments
+            args = []
+            kwargs = {}
+            for param in annotation.f_params:
+                with ctx.lkt_context(param):
+                    if param.f_name:
+                        name = text_as_str(param.f_name)
+                        check_source_language(name not in kwargs,
+                                              'Named argument repeated')
+                        kwargs[name] = param.f_value
+
+                    else:
+                        check_source_language(not kwargs,
+                                              'Positional arguments must'
+                                              ' appear before named ones')
+                        args.append(param.f_value)
+
+            # Evaluate this annotation
+            value = self.interpret(ctx, args, kwargs)
+
+        # Store annotation evaluation into the result
+        if self.unique:
+            result[self.name] = value
+        else:
+            result.setdefault(self.name, [])
+            result[self.name].append(value)
+
+
+class FlagAnnotationSpec(AnnotationSpec):
     """
+    Convenience subclass for flags.
+    """
+    def __init__(self, name):
+        super(FlagAnnotationSpec, self).__init__(name, unique=True,
+                                                 require_args=False)
+
+    def interpret(self, ctx, args, kwargs):
+        return True
+
+
+# Annotation specs to use when no annotation is allowed
+no_annotations = []
+
+# Annotation specs for grammar rules
+grammar_rule_annotations = [FlagAnnotationSpec('main_rule')]
+
+
+def parse_annotations(ctx, specs, full_decl):
+    """
+    Parse annotations according to the given specs. Return a dict that
+    contains the intprereted annotation values for each present annotation.
+
+    :param list[AnnotationSpec] specs: Annotation specifications for
+        allowed annotations.
+    :param liblktlang.FullDecl full_decl: Declaration whose annotations are to
+        be parsed.
+    :rtype: dict[str, object]
+    """
+    annotations = list(full_decl.f_decl_annotations)
+
+    # If no annotations are allowed, just check there are none
+    if not specs:
+        check_source_language(len(annotations) == 0, 'no annotation allowed')
+        return {}
+
+    # Build a mapping for all specs
+    specs_map = {}
+    for s in specs:
+        assert s.name not in specs_map
+        specs_map[s.name] = s
+
+    # Process annotations
     result = {}
-    for a in decl.f_decl_annotations:
-        name = a.f_name.text
+    for a in annotations:
+        name = text_as_str(a.f_name)
+        spec = specs_map.get(name, None)
         with ctx.lkt_context(a):
-            check_source_language(name not in result,
-                                  'invalid double annotation')
-        result[name] = (a, a.f_params)
+            check_source_language(
+                spec is not None,
+                'Invalid annotation: {}'.format(name)
+            )
+            spec.parse_single_annotation(ctx, result, a)
+
     return result
 
 
@@ -134,8 +259,7 @@ def create_grammar(ctx, lkt_units):
 
     # No annotation allowed for grammars
     with ctx.lkt_context(full_grammar):
-        check_source_language(not annotations(ctx, full_grammar),
-                              'no annotation allowed')
+        parse_annotations(ctx, [], full_grammar)
 
     # Get the list of grammar rules. This is where we check that we only have
     # grammar rules, that their names are unique, and that they have valid
@@ -143,42 +267,22 @@ def create_grammar(ctx, lkt_units):
     all_rules = OrderedDict()
     main_rule_name = None
     for full_rule in full_grammar.f_decl.f_rules:
-        a = annotations(ctx, full_rule)
-
-        # Make sure we have a grammar rule
         with ctx.lkt_context(full_rule):
             r = full_rule.f_decl
+
+            # Make sure we have a grammar rule
             check_source_language(isinstance(r, liblktlang.GrammarRuleDecl),
                                   'grammar rule expected')
+            rule_name = text_as_str(r.f_syn_name)
 
-            # TODO: remove the encoding once we support Python3. For now, the
-            # rest of the grammar machinery expects byte strings.
-            rule_name = r.f_syn_name.text.encode('ascii')
-
-        # Detect and validate the only allowed annotation
-        try:
-            annot, params = a.pop('main_rule')
-        except KeyError:
-            pass
-        else:
-            with ctx.lkt_context(annot):
-                check_source_language(
-                    len(params) == 0,
-                    'no parameters allowed for this main_rule annotation'
-                )
+            # Register the main rule if the appropriate annotation is present
+            a = parse_annotations(ctx, grammar_rule_annotations, full_rule)
+            if 'main_rule' in a:
                 check_source_language(main_rule_name is None,
                                       'only one main rule allowed')
                 main_rule_name = rule_name
 
-        # Reject other annotations
-        with ctx.lkt_context(full_rule):
-            remaining = sorted(a)
-            check_source_language(
-                not remaining,
-                'invalid annotations: {}'.format(', '.join(remaining))
-            )
-
-        all_rules[rule_name] = r.f_expr
+            all_rules[rule_name] = r.f_expr
 
     # Now create the result grammar. We need exactly one main rule for that.
     with ctx.lkt_context(full_grammar):
