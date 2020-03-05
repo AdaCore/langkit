@@ -26,7 +26,7 @@ fi
 if ! [ -f $INSTALL_DIR/bin/gcc ]
 then
     GNAT_INSTALLER=$TOOLS_DIR/gnat-community-2019-20190517-x86_64-linux-bin
-    GNAT_INSTALLER_URL=http://mirrors.cdn.adacore.com/art/5cdffc5409dcd015aaf82626
+    GNAT_INSTALLER_URL="https://community.download.adacore.com/v1/0cd3e2a668332613b522d9612ffa27ef3eb0815b?filename=gnat-community-2019-20190517-x86_64-linux-bin"
 
     wget -O $GNAT_INSTALLER $GNAT_INSTALLER_URL
     sh gnat_community_install_script/install_package.sh \
