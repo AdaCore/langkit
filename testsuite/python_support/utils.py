@@ -57,7 +57,9 @@ if not langkit_root:
 
 # When unparsing the concrete syntax, name of the file to write
 unparse_destination = 'concrete_syntax.lkt'
-unparse_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
+unparse_script = ('to:{},import:lexer_example,grammar,nodes'
+                  .format(unparse_destination))
+unparse_all_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
 
 
 def prepare_context(grammar=None, lexer=None, lkt_file=None,
@@ -92,6 +94,11 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     if P.exists('build'):
         shutil.rmtree('build')
     os.mkdir('build')
+
+    # Make this directory available to LKT import statements
+    lkt_dir = P.dirname(P.abspath(__file__))
+    os.environ['LKT_PATH'] = ('{}:{}'.format(lkt_dir, os.environ['LKT_PATH'])
+                              if os.environ.get('LKT_PATH', None) else lkt_dir)
 
     # Try to emit code
     ctx = CompileCtx(lang_name='Foo', short_name='Foo', lexer=lexer,

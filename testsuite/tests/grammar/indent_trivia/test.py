@@ -8,7 +8,7 @@ from langkit.dsl import ASTNode, Field
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithSymbol, WithText, WithTrivia)
 
-from utils import build_and_run
+from utils import build_and_run, unparse_all_script
 
 
 class Token(LexerToken):
@@ -62,5 +62,5 @@ class Newline(FooNode):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              lexer=foo_lexer)
+              lexer=foo_lexer, unparse_script=unparse_all_script)
 print('Done')
