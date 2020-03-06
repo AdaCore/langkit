@@ -247,7 +247,7 @@ def create_grammar(ctx, lkt_units):
     in the Lktlang unit. The actual lowering on grammar rules happens in a
     separate pass: see lower_all_lkt_rules.
 
-    :param list[liblktlang.AnalysisUnit] lkt_unit: Non-empty list of analysis
+    :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
         units where to look for the grammar.
     :rtype: langkit.parsers.Grammar
     """
