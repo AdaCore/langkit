@@ -1087,6 +1087,38 @@ def format_pattern(pat):
     return json.dumps(pat.decode('string_escape'))
 
 
+def unparse_token_decl(token, newline_afters, is_pre):
+    from langkit.lexer import WithSymbol, WithText, WithTrivia
+
+    result = []
+
+    if is_pre:
+        result.append('@pre_rule')
+    if token in newline_afters:
+        result.append('@newline_after')
+
+    options = []
+    if token.start_ignore_layout:
+        options += ['start_ignore_layout=true']
+    if token.end_ignore_layout:
+        options += ['end_ignore_layout=true']
+
+    if isinstance(token, WithSymbol):
+        kind = 'symbol'
+    elif isinstance(token, WithText):
+        kind = 'text'
+    elif isinstance(token, WithTrivia):
+        kind = 'trivia'
+    else:
+        assert False
+
+    if kind != 'text' or options:
+        result.append('@{}({})'.format(kind, ', '.join(options)))
+    result.append(format_token_name(token.name))
+
+    return ' '.join(result)
+
+
 def unparse_lexer_rule_set(newline_afters, rule_set):
     from langkit.lexer import (
         WithSymbol, WithText, WithTrivia, Literal, NoCaseLit, Pattern, Ignore,
@@ -1140,65 +1172,18 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
     # all rules in the rule_set have the same action
     action = first_rule.action
 
-    res = ""
-
-    if is_pre:
-        res += "@pre_rule "
-
     if isinstance(action, Ignore):
-        return res + "@ignore _ <- " + unparse_rule_matchers(rule_set)
+        return "{}@ignore _ <- {}".format("@pre_rule " if is_pre else "",
+                                          unparse_rule_matchers(rule_set))
 
     if isinstance(action, Case.CaseAction):
         assert len(rule_set) == 1
-        return res + unparse_case_action(first_rule.matcher, action)
+        return unparse_case_action(first_rule.matcher, action)
 
-    if action in newline_afters:
-        res += '@newline_after '
-
-    options = []
-
-    if action.start_ignore_layout:
-        options += ['start_ignore_layout=true']
-    if action.end_ignore_layout:
-        options += ['end_ignore_layout=true']
-
-    args = "(" + ", ".join(options) + ") "
-
-    if isinstance(action, WithSymbol):
-        res += "@symbol"
-    elif isinstance(action, WithText):
-        if len(options) > 0:
-            res += "@text"
-        else:
-            args = ""
-    elif isinstance(action, WithTrivia):
-        res += "@trivia"
-    else:
-        assert False
-
-    res += args
-
-    action_name = format_token_name(action.name)
-    res += action_name + " <- " + unparse_rule_matchers(rule_set)
-
-    return res
-
-
-def compute_families_map(spacing_table):
-    used_token_families = set()
-
-    for tf1, m in spacing_table.iteritems():
-        for tf2, v in m.iteritems():
-            if v:
-                used_token_families.add(tf1)
-                used_token_families.add(tf2)
-
-    res = {}
-    for tf in used_token_families:
-        for tok in tf.tokens:
-            res[tok] = tf.name.lower
-
-    return res
+    return '{} <- {}'.format(
+        unparse_token_decl(action, newline_afters, is_pre),
+        unparse_rule_matchers(rule_set)
+    )
 
 
 def compute_newline_afters(newline_after):
@@ -1212,6 +1197,8 @@ def unparse_lexer(ctx, f):
     """
     Unparse the lexer for the current language to the given file.
     """
+    from langkit.lexer import TokenAction
+
     # Prepare unparsing of lexer
     lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
     lexer_annotations += "".join(
@@ -1228,8 +1215,28 @@ def unparse_lexer(ctx, f):
                            ('WithText', 'Newline', False, False))
     ) if ctx.lexer.track_indent else -1
 
-    families = compute_families_map(ctx.lexer.spacing_table)
     newline_afters = compute_newline_afters(ctx.lexer.newline_after)
+
+    # These tokens are implicitly created: do not create explicit declarations
+    # for them.
+    token_blacklist = {
+        ctx.lexer.tokens.Termination,
+        ctx.lexer.tokens.LexingFailure,
+    }
+    if ctx.lexer.track_indent:
+        token_blacklist.update({
+            ctx.lexer.tokens.Indent,
+            ctx.lexer.tokens.Dedent,
+            ctx.lexer.tokens.Newline,
+        })
+
+    # Mapping from tokens to their owning families
+    token_to_family = {t: f
+                       for f in ctx.lexer.tokens.token_families
+                       for t in f.tokens}
+
+    # Set of tokens created by at lesat one simple rules (i.e. not with cases)
+    simple_rule_tokens = set()
 
     rule_sets = []
     i = 0
@@ -1239,6 +1246,13 @@ def unparse_lexer(ctx, f):
 
         while (i < len(ctx.lexer.rules)
                and ctx.lexer.rules[i].action == cur_action):
+
+            # If this is a simple token production rule, keep a note about this
+            # token.
+            rule = ctx.lexer.rules[i]
+            if isinstance(rule.action, TokenAction):
+                simple_rule_tokens.add(rule.action)
+
             if i < lexer_newline_rule_index:
                 cur_set.append((ctx.lexer.rules[i], True))
             elif i > lexer_newline_rule_index:
@@ -1248,27 +1262,49 @@ def unparse_lexer(ctx, f):
         if len(cur_set) > 0:
             rule_sets.append(cur_set)
 
-    unparsed_rules = ""
-    close_last_family = "$d$hl}$hl"
-    last_family = None
+    result = []
+    last_family = [None]
+
+    def open_family(family):
+        if last_family[0] == family:
+            return
+
+        if last_family[0]:
+            close_family()
+
+        # Keep the token family implicit
+        if family and family.name.lower != 'default_family':
+            result.append('$hl$hlfamily {} {{$i'
+                          .format(family.name.lower))
+            last_family[0] = family
+
+    def close_family():
+        if last_family[0]:
+            result.append("$d$hl}$hl")
+        last_family[0] = None
+
+    # Emit stub declarations for tokens that are never produced by simple
+    # lexing rules.
+    for t in sorted(set(ctx.lexer.tokens.tokens) - simple_rule_tokens,
+                    key=lambda t: t.name):
+        # Skip automatically created tokens
+        if t in token_blacklist:
+            continue
+        open_family(token_to_family.get(t))
+        result.append('$hl' +
+                      unparse_token_decl(t, newline_afters, is_pre=False))
+
+    # Emit lexing rules
     for rule_set in rule_sets:
         tok = rule_set[0][0].action
-        family = families.get(tok)
+        family = token_to_family.get(tok)
         unparsed_rule = unparse_lexer_rule_set(newline_afters, rule_set)
 
-        if family != last_family:
-            last_family = family
-            open_new_family = '$hl$hlfamily {} {{$i'.format(family)
-            if family is None:
-                unparsed_rules += close_last_family
-            if last_family is not None:
-                unparsed_rules += open_new_family
+        open_family(token_to_family.get(tok))
+        result.append("$hl" + unparsed_rule)
+    close_family()
 
-        unparsed_rules += "$hl" + unparsed_rule
-
-    if last_family is not None:
-        unparsed_rules += close_last_family
-
+    unparsed_rules = '\n'.join(result)
     template = """
     ${lexer_annotations}lexer ${ctx.lang_name.lower}_lexer {$i$hl
     % for name, pattern, loc in ctx.lexer.patterns:
