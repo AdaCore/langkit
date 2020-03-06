@@ -13,7 +13,7 @@ from langkit.expressions import (
 from langkit.lexer import (Ignore, Lexer, LexerToken, Literal, Pattern,
                            WithText, WithTrivia)
 
-from utils import build_and_run
+from utils import build_and_run, unparse_all_script
 
 
 class Token(LexerToken):
@@ -85,5 +85,6 @@ class Example(FooNode):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              lexer=foo_lexer, py_script='main.py')
+              lexer=foo_lexer, py_script='main.py',
+              unparse_script=unparse_all_script)
 print('Done')
