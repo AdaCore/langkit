@@ -1162,10 +1162,7 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
     if action.end_ignore_layout:
         options += ['end_ignore_layout=true']
 
-    if len(options) > 0:
-        args = "(" + ", ".join(options) + ") "
-    else:
-        args = " "
+    args = "(" + ", ".join(options) + ") "
 
     if isinstance(action, WithSymbol):
         res += "@symbol"
