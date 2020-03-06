@@ -48,7 +48,8 @@ def load_lkt(lkt_file):
 
         # Register this unit and its diagnostics
         units_map[unit.filename] = unit
-        diagnostics.extend(unit.diagnostics)
+        for d in unit.diagnostics:
+            diagnostics.append((unit, d))
 
         # Recursively process the units it imports. In case of parsing error,
         # just stop the recursion: the collection of diagnostics is enough.
@@ -58,14 +59,13 @@ def load_lkt(lkt_file):
                 process_unit(imp.p_referenced_unit)
 
     # Load ``lkt_file`` and all the units it references, transitively
-    basename = os.path.basename(lkt_file)
     process_unit(liblktlang.AnalysisContext().get_from_file(lkt_file))
 
     # If there are diagnostics, forward them to the user. TODO: hand them to
     # langkit.diagnostic.
     if diagnostics:
-        for d in diagnostics:
-            print('{}:{}'.format(basename, d))
+        for u, d in diagnostics:
+            print('{}:{}'.format(os.path.basename(u.filename), d))
         raise DiagnosticError()
     return list(units_map.values())
 

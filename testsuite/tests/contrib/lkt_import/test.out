@@ -1,5 +1,5 @@
 == Unit not found ==
-other-dir.lkt:Cannot open source file
+a.lkt:Cannot open source file
 
 == Unit in path, relative ==
 Code generation was successful
