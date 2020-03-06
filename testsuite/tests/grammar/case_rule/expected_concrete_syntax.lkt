@@ -1,0 +1,45 @@
+lexer foo_lexer {
+
+    dot <- "."
+    id <- p"[a-zA-Z]+"
+    tick <- "'"
+    newline <- p"\n"
+
+    match p"'.'" {
+        if previous_token isa id then send(tick, 1)
+        else send(char, 3)
+    }
+}
+grammar foo_grammar {
+    @main_rule expr <- or(
+        | DotExpr(expr "." name)
+        | AttrRef(expr "'" name)
+        | char_lit
+        | name
+    )
+    char_lit <- CharLit(@char)
+    name <- Name(@id)
+
+}
+
+@root_node class FooNode {
+}
+
+@abstract class Expr : FooNode {
+}
+
+class AttrRef : Expr {
+    @parse_field prefix : Expr
+    @parse_field name : Name
+}
+
+class CharLit : Expr {
+}
+
+class DotExpr : Expr {
+    @parse_field prefix : Expr
+    @parse_field suffix : Name
+}
+
+class Name : Expr {
+}
