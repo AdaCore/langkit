@@ -1,5 +1,6 @@
 lexer foo_lexer {
 
+    char
     dot <- "."
     id <- p"[a-zA-Z]+"
     tick <- "'"

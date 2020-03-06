@@ -1851,14 +1851,14 @@ lkt_grammar.add_rules(
 
     lexer_decl=LexerDecl(
         "lexer", G.def_id, "{",
-        List(GOr(G.lexer_rule, G.lexer_family_decl), empty_valid=True),
+        List(GOr(G.lexer_family_decl, G.lexer_rule), empty_valid=True),
         "}"
     ),
     grammar_decl=GrammarDecl(
         "grammar", G.def_id,
         "{", List(G.decl, empty_valid=True), "}"
     ),
-    grammar_rule=GrammarRuleDecl(G.def_id, "<-", G.grammar_expr),
+    grammar_rule=GrammarRuleDecl(G.def_id, Opt("<-", G.grammar_expr)),
     lexer_rule=GOr(G.decl, G.lexer_case_rule),
     lexer_family_decl=LexerFamilyDecl(
         Lex.Identifier(match_text="family"), G.def_id, "{",
@@ -2035,9 +2035,9 @@ lkt_grammar.add_rules(
         G.fun_decl,
         G.lexer_decl,
         G.grammar_decl,
-        G.grammar_rule,
         G.field_decl,
-        G.val_decl
+        G.val_decl,
+        G.grammar_rule,
     ),
 
     decl=FullDecl(
