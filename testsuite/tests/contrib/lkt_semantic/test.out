@@ -525,3 +525,14 @@ Expr <NumLit test.lkt:72:66-72:68>
 Expr <CallExpr test.lkt:72:60-72:69>
      has type <StructDecl "String" __prelude:3:10-3:26>
 
+Id   <RefId "ASTList" test.lkt:80:30-80:37>
+     references <GenericDecl "ASTList" __prelude:11:10-14:2>
+
+Id   <RefId "String" test.lkt:80:38-80:44>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Id   <RefId "String" test.lkt:80:48-80:54>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+test.lkt:80:57: Cannot find entity 'self' in this scope
+
