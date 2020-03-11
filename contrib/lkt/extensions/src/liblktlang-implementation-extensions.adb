@@ -1,3 +1,4 @@
+with Ada.Assertions; use Ada.Assertions;
 with Ada.Directories;
 with Ada.Text_IO; use Ada.Text_IO;
 
@@ -37,11 +38,30 @@ package body Liblktlang.Implementation.Extensions is
       if Prelude.Root = No_LK_Node then
          Prelude := Ctx.Get_From_Buffer ("__prelude", "ascii", Prelude_Content);
 
+         --  Check if we have syntactic or semantic errors in the prelude. If
+         --  we do, raise an assertion error.
+
          if Prelude.Diagnostics'Length > 0 then
             for Diagnostic of Prelude.Diagnostics loop
                Put_Line (To_Pretty_String (Diagnostic));
             end loop;
+            raise Assertion_Error with "Errors in prelude";
          end if;
+
+         declare
+            Errors : Semantic_Result_Array :=
+              Prelude.Root.As_Langkit_Root.P_Check_Legality;
+         begin
+            if Errors'Length > 0 then
+               for R of Errors loop
+                  Put_Line
+                    (Image (Analysis.Node (R).Full_Sloc_Image
+                     & Error_Message (R)));
+               end loop;
+               raise Assertion_Error with "Errors in prelude";
+            end if;
+         end;
+
          Populate_Lexical_Env (Prelude);
          return True;
       else
