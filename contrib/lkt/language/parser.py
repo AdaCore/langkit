@@ -4,7 +4,9 @@ from langkit.dsl import (
     ASTNode, AbstractField, Annotations, Field, LookupKind as LK, NullField,
     Struct, T, UserField, abstract, synthetic
 )
-from langkit.envs import EnvSpec, add_env, add_to_env, add_to_env_kv, do
+from langkit.envs import (
+    EnvSpec, RefKind, add_env, add_to_env, add_to_env_kv, do, reference
+)
 from langkit.expressions import (
     AbstractKind, AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv,
     Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String, Try,
@@ -998,7 +1000,26 @@ class DeclBlock(FullDecl.list):
     """
     List of declarations that also introduces a containing lexical scope.
     """
-    env_spec = EnvSpec(add_env())
+    env_spec = EnvSpec(
+        add_env(),
+
+        # Reference the base type scope, through which will be made
+        # visible things such as inherited methods & fields.
+        reference(
+            Entity.owning_type._.node.cast(T.LKNode).singleton,
+            through=T.TypeDecl.type_base_scope,
+            kind=RefKind.transitive
+        )
+    )
+
+    @langkit_property()
+    def owning_type():
+        """
+        Return the type to which this decl block belongs, or null.
+        """
+        return Entity.parents.find(
+            lambda p: p.is_a(T.TypeDecl)
+        ).cast(T.TypeDecl)
 
 
 @abstract
@@ -1044,6 +1065,17 @@ class TypeDecl(Decl):
         doc="""Return the list of fields for this type"""
     )
 
+    traits = AbstractField(T.TypeRef.list, doc="Traits for this type")
+    traits_decls = Property(Entity.traits.map(lambda t: t.designated_type))
+
+    @langkit_property()
+    def type_base_scope():
+        """
+        Return the base scope for this type, containing everything that is
+        implicitly visible in the scope of definition of this type.
+        """
+        return Entity.traits_decls.map(lambda td: td.type_scope).env_group()
+
 
 @synthetic
 class FunctionType(TypeDecl):
@@ -1052,8 +1084,9 @@ class FunctionType(TypeDecl):
     """
     args = UserField(T.TypeDecl.array, public=False)
     return_type = UserField(T.TypeDecl, public=False)
-
     syn_name = NullField()
+    traits = NullField()
+
     full_name = Property(
         String("(").concat(
             Self.string_join(
@@ -1070,6 +1103,7 @@ class GenericFormalTypeDecl(TypeDecl):
     Declaration of a generic formal type in a generic declaration.
     """
     syn_name = Field(T.TypeDefId)
+    traits = NullField()
     type_scope = Property(EmptyEnv)
 
 
@@ -1161,6 +1195,7 @@ class InstantiatedGenericType(TypeDecl):
     inner_type_decl = UserField(type=T.TypeDecl, public=False)
     actuals = UserField(type=T.TypeDecl.array, public=False)
     syn_name = NullField()
+    traits = NullField()
     name = Property(Self.inner_type_decl.name)
 
     full_name = Property(
@@ -1197,6 +1232,26 @@ class InstantiatedGenericType(TypeDecl):
     fields = Property(Entity.get_instantiated_type.fields)
 
 
+class TraitDecl(NamedTypeDecl):
+    """
+    Trait declaration. For the moment, a Trait can just be used to group
+    behavior for built-in types. It's not usable as a type-bound since we don't
+    have generics, and you cannot implement one either.
+
+    The reason they're added is to lay down the basics of what we want the LKT
+    type system to be.
+
+    TODO: Traits are *not* types. They're treated as such in the grammar for
+    convenience for now, but it's probably not a good idea. Migrate away from
+    this.
+    """
+
+    syn_name = Field(type=T.DefId)
+    traits = NullField()
+
+    decls = Field(type=DeclBlock)
+
+
 class EnumTypeDecl(NamedTypeDecl):
     """
     Enum type declaration.
@@ -1204,6 +1259,7 @@ class EnumTypeDecl(NamedTypeDecl):
 
     syn_name = Field(type=T.DefId)
     literals = Field(type=T.EnumLitDecl.list)
+    traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
 
 
@@ -1212,6 +1268,7 @@ class StructDecl(NamedTypeDecl):
     Declaration for a LK struct.
     """
     syn_name = Field(type=T.DefId)
+    traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
 
 
@@ -1222,6 +1279,7 @@ class ClassDecl(NamedTypeDecl):
     """
     syn_name = Field(type=T.DefId)
     base_class = Field(type=T.TypeRef)
+    traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
 
 
@@ -1230,6 +1288,7 @@ class EnumClassAltDecl(TypeDecl):
     Alternative for an enum class decl.
     """
     syn_name = Field(T.DefId)
+    traits = NullField()
 
     parent_type = Property(Entity.parent.parent.cast_or_raise(T.TypeDecl))
 
@@ -1247,6 +1306,7 @@ class EnumClassDecl(NamedTypeDecl):
     syn_name = Field(type=T.DefId)
     alts = Field(type=T.EnumClassAltDecl.list)
     base_class = Field(type=T.TypeRef)
+    traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
 
     env_spec = EnvSpec(
@@ -1990,27 +2050,36 @@ lkt_grammar.add_rules(
     ),
 
     type_decl=Or(
-        StructDecl("struct", G.def_id, "{", G.decl_block, "}"),
+        StructDecl(
+            "struct", G.def_id, Opt("implements", G.type_list),
+            "{", G.decl_block, "}"
+        ),
 
         EnumClassDecl(
             "enum", "class", G.def_id,
             "(", List(EnumClassAltDecl(G.def_id), sep=","), ")",
             Opt(":", G.type_ref),
+            Opt("implements", G.type_list),
             "{",
             G.decl_block,
             "}"
         ),
 
         ClassDecl(
-            "class", G.def_id, Opt(":", G.type_ref), "{",
+            "class", G.def_id, Opt(":", G.type_ref),
+            Opt("implements", G.type_list),
+            "{",
             G.decl_block,
             "}"
         ),
 
         EnumTypeDecl(
             "enum", G.def_id, "(", List(G.enum_lit_decl, sep=","), ")",
+            Opt("implements", G.type_list),
             "{", G.decl_block, "}"
         ),
+
+        TraitDecl("trait", G.def_id, "{", G.decl_block, "}"),
 
     ),
 
