@@ -389,7 +389,7 @@ def check_source_language(predicate, message, severity=Severity.error,
             print('{}: {}: {}'.format(context_from_node(context),
                                       format_severity(severity), message))
         elif Diagnostics.style != DiagnosticStyle.default:
-            print('{}: {}'.format(get_parsable_location(context), message))
+            print('{}: {}'.format(get_parsable_location(), message))
         else:
             print_context(context)
             print('{}{}: {}'.format(
