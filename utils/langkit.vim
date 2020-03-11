@@ -9,7 +9,7 @@ syn keyword langkitKeyword grammar language class struct nextgroup=langkitEntity
 syn keyword langkitKeyword fun nextgroup=langkitFunction skipwhite
 syn match   langkitFunction	"\h\w*" display contained
 syn match   langkitEntity	"\h\w*" display contained
-syn keyword langkitKeyword is end match when field as if elif then else block case val in do bind is_a generic
+syn keyword langkitKeyword is end match when field as if elif then else block case val in do bind is_a generic implements trait
 syn keyword langkitLiteral false true lfalse ltrue
 syn keyword langkitQualifier parse memoized public enum qualifier
 syn keyword langkitOperator new entity null or and dont_skip

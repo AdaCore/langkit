@@ -68,6 +68,8 @@ class Token(LexerToken):
     GenericKw = WithText()
     DiscardKw = WithText()
     ImportKw = WithText()
+    ImplementsKw = WithText()
+    TraitKw = WithText()
 
     # Trivia
     Comment = WithTrivia()
@@ -123,32 +125,34 @@ lkt_lexer.add_rules(
     (Literal('%'),         Token.Percent),
 
     # Keywords
-    (Literal('lexer'),     Token.LexerKw),
-    (Literal('grammar'),   Token.GrammarKw),
-    (Literal('class'),     Token.ClassKw),
-    (Literal('struct'),    Token.StructKw),
-    (Literal('fun'),       Token.FunKw),
-    (Literal('public'),    Token.PublicKw),
-    (Literal('private'),   Token.PrivateKw),
-    (Literal('null'),      Token.NullKw),
-    (Literal('isa'),       Token.IsaKw),
-    (Literal('val'),       Token.ValKw),
-    (Literal('if'),        Token.IfKw),
-    (Literal('elif'),      Token.ElifKw),
-    (Literal('else'),      Token.ElseKw),
-    (Literal('then'),      Token.ThenKw),
-    (Literal('and'),       Token.AndKw),
-    (Literal('or'),        Token.OrKw),
-    (Literal('not'),       Token.NotKw),
-    (Literal('bind'),      Token.BindKw),
-    (Literal('match'),     Token.MatchKw),
-    (Literal('case'),      Token.CaseKw),
-    (Literal('raise'),     Token.RaiseKw),
-    (Literal('try'),       Token.TryKw),
-    (Literal('enum'),      Token.EnumKw),
-    (Literal('generic'),   Token.GenericKw),
-    (Literal('discard'),   Token.DiscardKw),
-    (Literal('import'),    Token.ImportKw),
+    (Literal('lexer'),      Token.LexerKw),
+    (Literal('grammar'),    Token.GrammarKw),
+    (Literal('class'),      Token.ClassKw),
+    (Literal('struct'),     Token.StructKw),
+    (Literal('fun'),        Token.FunKw),
+    (Literal('public'),     Token.PublicKw),
+    (Literal('private'),    Token.PrivateKw),
+    (Literal('null'),       Token.NullKw),
+    (Literal('isa'),        Token.IsaKw),
+    (Literal('val'),        Token.ValKw),
+    (Literal('if'),         Token.IfKw),
+    (Literal('elif'),       Token.ElifKw),
+    (Literal('else'),       Token.ElseKw),
+    (Literal('then'),       Token.ThenKw),
+    (Literal('and'),        Token.AndKw),
+    (Literal('or'),         Token.OrKw),
+    (Literal('not'),        Token.NotKw),
+    (Literal('bind'),       Token.BindKw),
+    (Literal('match'),      Token.MatchKw),
+    (Literal('case'),       Token.CaseKw),
+    (Literal('raise'),      Token.RaiseKw),
+    (Literal('try'),        Token.TryKw),
+    (Literal('enum'),       Token.EnumKw),
+    (Literal('generic'),    Token.GenericKw),
+    (Literal('discard'),    Token.DiscardKw),
+    (Literal('import'),     Token.ImportKw),
+    (Literal('implements'), Token.ImplementsKw),
+    (Literal('trait'),      Token.TraitKw),
 
     # Identifiers
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),
