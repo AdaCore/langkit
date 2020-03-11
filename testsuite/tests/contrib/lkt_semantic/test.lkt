@@ -78,3 +78,21 @@ fun test_astlist_indexing(self: ASTList[String]): String = self (12)
 # `12` first, it's going to need to resolve `self, which doesn't exist. This
 # shouldn't crash.
 fun test_astlist_indexing(a: ASTList[String]): String = self (12)
+
+# Test traits, part 1: test that trait methods are visible in types
+# implementing them.
+
+trait Sized {
+    @builtin fun length(): Int
+}
+
+generic [T] trait Indexable {
+    @builtin fun __call__(index : Int): T
+}
+
+generic [T] class Vec implements Sized, Indexable[T] {
+}
+
+val a : Vec[String] = null
+val b : Int = a.length()
+val c : String = a (1)

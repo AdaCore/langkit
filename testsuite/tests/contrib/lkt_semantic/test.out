@@ -536,3 +536,66 @@ Id   <RefId "String" test.lkt:80:48-80:54>
 
 test.lkt:80:57: Cannot find entity 'self' in this scope
 
+Id   <RefId "Int" test.lkt:86:28-86:31>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:90:35-90:38>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "T" test.lkt:90:41-90:42>
+     references <GenericFormalTypeDecl "T" test.lkt:89:10-89:11>
+
+Id   <RefId "Sized" test.lkt:93:34-93:39>
+     references <TraitDecl "Sized" test.lkt:85:1-87:2>
+
+Id   <RefId "Indexable" test.lkt:93:41-93:50>
+     references <GenericDecl "Indexable" test.lkt:89:1-91:2>
+
+Id   <RefId "T" test.lkt:93:51-93:52>
+     references <GenericFormalTypeDecl "T" test.lkt:93:10-93:11>
+
+Id   <RefId "Vec" test.lkt:96:9-96:12>
+     references <GenericDecl "Vec" test.lkt:93:1-94:2>
+
+Id   <RefId "String" test.lkt:96:13-96:19>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Expr <NullLit test.lkt:96:23-96:27>
+     has type <InstantiatedGenericType "Vec[String]" test.lkt:93:1-94:2>
+
+Id   <RefId "Int" test.lkt:97:9-97:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "a" test.lkt:97:15-97:16>
+     references <ValDecl "a" test.lkt:96:1-96:27>
+
+Expr <RefId "a" test.lkt:97:15-97:16>
+     has type <InstantiatedGenericType "Vec[String]" test.lkt:93:1-94:2>
+
+Id   <RefId "length" test.lkt:97:17-97:23>
+     references <FunDecl "length" test.lkt:86:14-86:31>
+
+Expr <RefId "length" test.lkt:97:17-97:23>
+     has type <FunctionType "(Sized) -> Int" __prelude>
+
+Expr <DotExpr test.lkt:97:15-97:23>
+     has type <FunctionType "(Sized) -> Int" __prelude>
+
+Expr <CallExpr test.lkt:97:15-97:25>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "String" test.lkt:98:9-98:15>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Id   <RefId "a" test.lkt:98:18-98:19>
+     references <ValDecl "a" test.lkt:96:1-96:27>
+
+Expr <RefId "a" test.lkt:98:18-98:19>
+     has type <InstantiatedGenericType "Vec[String]" test.lkt:93:1-94:2>
+
+Expr <NumLit test.lkt:98:21-98:22>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:98:18-98:23>
+     has type <StructDecl "String" __prelude:3:10-3:26>
+
