@@ -43,8 +43,10 @@ class Resolve(lkt.App):
                 print()
 
             def print_error(res):
-                print("{}{}".format(res.node.full_sloc_image,
-                                    res.error_message))
+                printcol(
+                    "{}{}".format(res.node.full_sloc_image, res.error_message),
+                    Colors.RED
+                )
                 print()
 
             results = unit.root.p_check_semantic
