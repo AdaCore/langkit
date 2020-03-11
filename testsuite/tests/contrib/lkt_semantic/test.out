@@ -324,7 +324,7 @@ Expr <CallExpr test.lkt:47:56-47:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:48:34-48:39>
-     references <GenericDecl "Array" __prelude:7:10-10:2>
+     references <GenericDecl "Array" __prelude:13:10-14:2>
 
 Id   <RefId "Int" test.lkt:48:40-48:43>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -336,7 +336,7 @@ Id   <RefId "arg" test.lkt:48:53-48:56>
      references <FunArgDecl "arg" test.lkt:48:29-48:44>
 
 Expr <RefId "arg" test.lkt:48:53-48:56>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:7:10-10:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:13:10-14:2>
 
 Expr <NumLit test.lkt:48:58-48:60>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -451,7 +451,7 @@ Expr <RefId "test_fun_call" test.lkt:66:56-66:69>
 test.lkt:66:49: Mismatched types: expected '(B) -> Int', got '(B, A) -> Int'
 
 Id   <RefId "ASTList" test.lkt:70:28-70:35>
-     references <GenericDecl "ASTList" __prelude:11:10-14:2>
+     references <GenericDecl "ASTList" __prelude:15:10-16:2>
 
 Id   <RefId "String" test.lkt:70:36-70:42>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -463,22 +463,22 @@ Id   <RefId "self" test.lkt:70:52-70:56>
      references <FunArgDecl "self" test.lkt:70:22-70:43>
 
 Expr <RefId "self" test.lkt:70:52-70:56>
-     has type <InstantiatedGenericType "ASTList[String]" __prelude:11:10-14:2>
+     has type <InstantiatedGenericType "ASTList[String]" __prelude:15:10-16:2>
 
 Id   <RefId "length" test.lkt:70:57-70:63>
-     references <FunDecl "length" __prelude:13:5-13:22>
+     references <FunDecl "length" test.lkt:86:14-86:31>
 
 Expr <RefId "length" test.lkt:70:57-70:63>
-     has type <FunctionType "(ASTList) -> Int" __prelude>
+     has type <FunctionType "(Sized) -> Int" __prelude>
 
 Expr <DotExpr test.lkt:70:52-70:63>
-     has type <FunctionType "(ASTList) -> Int" __prelude>
+     has type <FunctionType "(Sized) -> Int" __prelude>
 
 Expr <CallExpr test.lkt:70:52-70:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:71:26-71:31>
-     references <GenericDecl "Array" __prelude:7:10-10:2>
+     references <GenericDecl "Array" __prelude:13:10-14:2>
 
 Id   <RefId "String" test.lkt:71:32-71:38>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -490,22 +490,22 @@ Id   <RefId "self" test.lkt:71:48-71:52>
      references <FunArgDecl "self" test.lkt:71:20-71:39>
 
 Expr <RefId "self" test.lkt:71:48-71:52>
-     has type <InstantiatedGenericType "Array[String]" __prelude:7:10-10:2>
+     has type <InstantiatedGenericType "Array[String]" __prelude:13:10-14:2>
 
 Id   <RefId "length" test.lkt:71:53-71:59>
-     references <FunDecl "length" __prelude:9:5-9:22>
+     references <FunDecl "length" test.lkt:86:14-86:31>
 
 Expr <RefId "length" test.lkt:71:53-71:59>
-     has type <FunctionType "(Array) -> Int" __prelude>
+     has type <FunctionType "(Sized) -> Int" __prelude>
 
 Expr <DotExpr test.lkt:71:48-71:59>
-     has type <FunctionType "(Array) -> Int" __prelude>
+     has type <FunctionType "(Sized) -> Int" __prelude>
 
 Expr <CallExpr test.lkt:71:48-71:61>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "ASTList" test.lkt:72:33-72:40>
-     references <GenericDecl "ASTList" __prelude:11:10-14:2>
+     references <GenericDecl "ASTList" __prelude:15:10-16:2>
 
 Id   <RefId "String" test.lkt:72:41-72:47>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -517,7 +517,7 @@ Id   <RefId "self" test.lkt:72:60-72:64>
      references <FunArgDecl "self" test.lkt:72:27-72:48>
 
 Expr <RefId "self" test.lkt:72:60-72:64>
-     has type <InstantiatedGenericType "ASTList[String]" __prelude:11:10-14:2>
+     has type <InstantiatedGenericType "ASTList[String]" __prelude:15:10-16:2>
 
 Expr <NumLit test.lkt:72:66-72:68>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -526,7 +526,7 @@ Expr <CallExpr test.lkt:72:60-72:69>
      has type <StructDecl "String" __prelude:3:10-3:26>
 
 Id   <RefId "ASTList" test.lkt:80:30-80:37>
-     references <GenericDecl "ASTList" __prelude:11:10-14:2>
+     references <GenericDecl "ASTList" __prelude:15:10-16:2>
 
 Id   <RefId "String" test.lkt:80:38-80:44>
      references <StructDecl "String" __prelude:3:10-3:26>

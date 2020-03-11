@@ -14,13 +14,17 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin struct Symbol {}" & ASCII.LF &
      "@builtin struct Regexp {}" & ASCII.LF &
      "@builtin enum Bool (false, true) {}" & ASCII.LF &
-     "@builtin generic[T] struct Array {" & ASCII.LF &
-     "    fun __call__(index : Int): T" & ASCII.LF &
-     "    fun length(): Int" & ASCII.LF &
+     "@builtin trait Sized {" & ASCII.LF &
+     "    @builtin fun length(): Int" & ASCII.LF &
      "}" & ASCII.LF &
-     "@builtin generic[T] struct ASTList {" & ASCII.LF &
-     "    fun __call__(index : Int): T" & ASCII.LF &
-     "    fun length(): Int" & ASCII.LF &
+     "@builtin generic[T] trait Indexable {" & ASCII.LF &
+     "    @builtin fun __call__(index : Int): T" & ASCII.LF &
+     "}" & ASCII.LF &
+     "@builtin generic[T] struct Array " &
+     "implements Sized, Indexable[T] {" & ASCII.LF &
+     "}" & ASCII.LF &
+     "@builtin generic[T] struct ASTList " &
+     "implements Sized, Indexable[T] {" & ASCII.LF &
      "}" & ASCII.LF &
      "";
 
