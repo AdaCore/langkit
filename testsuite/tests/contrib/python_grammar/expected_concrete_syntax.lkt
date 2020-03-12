@@ -8,7 +8,7 @@ lexer foo_lexer {
     @pre_rule @ignore _ <- p"\\\n[ \r\t]*"
     string <- p"(u|U)?(r|R)?({MLSTRING_SQ}|{MLSTRING_DBQ}|{STRING_SQ}|{STRING_DBQ})"
     @ignore _ <- p"[ \r\t]+"
-    comment <- p"#(.?)+"
+    @trivia() comment <- p"#(.?)+"
     rsh_assign <- ">>="
     is <- "is"
     equals <- "=="

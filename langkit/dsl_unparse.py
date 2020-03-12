@@ -1103,12 +1103,13 @@ def unparse_token_decl(token, newline_afters, is_pre):
     if token.end_ignore_layout:
         options += ['end_ignore_layout=true']
 
+    # Check WithText last, as WithTrivia derives from it
     if isinstance(token, WithSymbol):
         kind = 'symbol'
-    elif isinstance(token, WithText):
-        kind = 'text'
     elif isinstance(token, WithTrivia):
         kind = 'trivia'
+    elif isinstance(token, WithText):
+        kind = 'text'
     else:
         assert False
 

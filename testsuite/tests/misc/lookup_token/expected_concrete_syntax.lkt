@@ -2,7 +2,7 @@ lexer foo_lexer {
 
     @ignore _ <- p"[ \n\r\t]+"
     example <- "example"
-    comment <- p"#(.?)+"
+    @trivia() comment <- p"#(.?)+"
 }
 grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))
