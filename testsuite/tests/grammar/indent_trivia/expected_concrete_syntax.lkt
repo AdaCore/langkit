@@ -7,7 +7,7 @@ lexer foo_lexer {
     l_par <- "("
     r_par <- ")"
     @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
-    comment <- p"#.*"
+    @trivia() comment <- p"#.*"
 }
 grammar foo_grammar {
     newline <- Newline(@newline)
