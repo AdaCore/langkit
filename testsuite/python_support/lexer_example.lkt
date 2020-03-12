@@ -1,7 +1,7 @@
 @spacing(alphanumericals, alphanumericals)
 lexer foo_lexer {
 
-    whitespace <- p"[ \n\r\t]+"
+    @trivia() whitespace <- p"[ \n\r\t]+"
 
     family alphanumericals {
         def <- "def"
@@ -15,15 +15,19 @@ lexer foo_lexer {
         null_tok <- "null"
     }
 
-    comma <- ","
-    dot <- "."
-    semicolon <- ";"
-    l_par <- "("
-    r_par <- ")"
-    l_brace <- "{"
-    r_brace <- "}"
-    equal <- "="
-    plus <- "+"
+
+    family punctuation {
+        comma <- ","
+        dot <- "."
+        semicolon <- ";"
+        l_par <- "("
+        r_par <- ")"
+        l_brace <- "{"
+        r_brace <- "}"
+        equal <- "="
+        plus <- "+"
+    }
+
     minus <- "-"
     less_than <- "<"
 
@@ -33,5 +37,9 @@ lexer foo_lexer {
     }
 
     string <- p"\"[^\"]*\""
-    @newline_after comment <- p"#(.?)+"
+
+    family comments {
+        @newline_after @trivia() comment <- p"#(.?)+"
+    }
+
 }
