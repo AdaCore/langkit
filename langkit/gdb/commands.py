@@ -2,8 +2,15 @@ from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
 from functools import partial
-from StringIO import StringIO
 import sys
+
+
+# Cope with Python2/3 inconsistencies
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 import gdb
 
