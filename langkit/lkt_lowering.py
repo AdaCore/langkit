@@ -145,7 +145,7 @@ class AnnotationSpec(object):
         ``result``.
         """
         # Check that parameters presence comply to the spec
-        if annotation.f_params.is_ghost:
+        if not annotation.f_params:
             check_source_language(not self.require_args,
                                   'Arguments required for this annotation')
             value = None
@@ -156,7 +156,7 @@ class AnnotationSpec(object):
             # Collect positional and named arguments
             args = []
             kwargs = {}
-            for param in annotation.f_params:
+            for param in annotation.f_params.f_params:
                 with ctx.lkt_context(param):
                     if param.f_name:
                         name = text_as_str(param.f_name)

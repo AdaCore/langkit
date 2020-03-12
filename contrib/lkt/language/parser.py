@@ -1496,6 +1496,15 @@ class DeclAnnotation(LKNode):
     Compile time annotation attached to a declaration.
     """
     name = Field(type=T.Id)
+    params = Field(type=T.DeclAnnotationParams)
+
+
+class DeclAnnotationParams(LKNode):
+    """
+    List of arguments for an annotation with a call syntax. This intermediate
+    node is necessary in order to determine after parsing whether there is no
+    param list, or if the list is empty.
+    """
     params = Field(type=T.Param.list)
 
 
@@ -2178,8 +2187,7 @@ lkt_grammar.add_rules(
     param=Param(Opt(G.ref_id, "="), G.expr),
     params=List(G.param, sep=",", empty_valid=True),
 
-    decl_annotation=DeclAnnotation(
-        "@", G.id, Opt("(", G.params, ")")
-    ),
+    decl_annotation_params=Opt(DeclAnnotationParams("(", G.params, ")")),
+    decl_annotation=DeclAnnotation("@", G.id, G.decl_annotation_params),
 
 )
