@@ -30,7 +30,7 @@ setup(
               'langkit.stylechecks',
               'langkit.utils'],
     package_data={'langkit': [
-        'support/*.adb', 'support/*.ads', 'support/*.gpr',
+        'coverage.css', 'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako'
     ]},
     scripts=[os.path.join('scripts', 'create-project.py')]
