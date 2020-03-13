@@ -19,6 +19,10 @@ class Resolve(lkt.App):
             '-p', '--print-lkt', action="store_true",
             help="Print the lkt source"
         )
+        self.parser.add_argument(
+            '-C', '--check-only', action="store_true",
+            help="Only print diagnostics"
+        )
         super(Resolve, self).add_arguments()
 
     def main(self):
@@ -31,8 +35,9 @@ class Resolve(lkt.App):
                     print(str(diag))
                 continue
 
-            msg = "Resolving {}".format(unit_name)
-            print("{}\n{}".format(msg, "=" * len(msg)))
+            if not self.args.check_only:
+                msg = "Resolving {}".format(unit_name)
+                print("{}\n{}".format(msg, "=" * len(msg)))
 
             if self.args.print_lkt:
                 print()
@@ -48,21 +53,26 @@ class Resolve(lkt.App):
                     Colors.RED
                 )
                 print()
+            diags = unit.root.p_check_legality
 
-            results = unit.root.p_check_semantic
-            for result in results.results:
-                if result.error_message:
-                    print_error(result)
-                elif result.result_type is not None:
-                    print("Expr {}".format(result.node))
-                    print("     has type {}".format(result.result_type))
-                    print()
-                elif result.result_ref is not None:
-                    print("Id   {}".format(result.node))
-                    res = "     references {}".format(result.result_ref)
-                    print(col(res, Colors.RED)
-                          if result.result_ref is None else res)
-                    print()
+            if self.args.check_only:
+                for diag in diags:
+                    print_error(diag, source)
+            else:
+                results = unit.root.p_check_semantic
+                for result in results.results:
+                    if result.error_message:
+                        print_error(result, source)
+                    elif result.result_type is not None:
+                        print("Expr {}".format(result.node))
+                        print("     has type {}".format(result.result_type))
+                        print()
+                    elif result.result_ref is not None:
+                        print("Id   {}".format(result.node))
+                        res = "     references {}".format(result.result_ref)
+                        print(col(res, Colors.RED)
+                              if result.result_ref is None else res)
+                        print()
 
 
 if __name__ == '__main__':
