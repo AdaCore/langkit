@@ -394,6 +394,15 @@ class Decl(LKNode):
             PropertyError(T.Decl, "Type decl has rebindings but shouldn't")
         )
 
+    @langkit_property()
+    def call_scope():
+        """
+        If this is a declaration that can be called (either a type
+        instantiation or a function call), return the scope in which
+        parameters for the call are defined.
+        """
+        return EmptyEnv
+
 
 @abstract
 class Expr(LKNode):
@@ -855,11 +864,25 @@ class RefId(Id):
             lambda de: If(Entity == de.suffix, de, No(T.DotExpr.entity)))
     )
 
+    param_if_param_name = Property(
+        Entity.parent.cast(T.Param).then(
+            lambda p: If(Entity == p.name, p, No(T.Param.entity))
+        )
+    )
+
     @langkit_property()
     def scope():
+        # The scope of this referenced id is either:
         return Entity.dot_expr_if_suffix.then(
+            # The scope of it's prefix if it is the suffix in a dotted name
             lambda de: de.prefix.designated_scope,
-            default_val=Entity.children_env
+        )._or(Entity.param_if_param_name.then(
+            # The scope of it's called declaration if it's a parameter name in
+            # a CallExpr.
+            lambda p: p.call_expr.called_decl.call_scope
+        ))._or(
+            # It's regular environment in other cases
+            Entity.children_env
         )
 
     @langkit_property()
@@ -1075,6 +1098,8 @@ class TypeDecl(Decl):
         implicitly visible in the scope of definition of this type.
         """
         return Entity.traits_decls.map(lambda td: td.type_scope).env_group()
+
+    call_scope = Property(Entity.type_scope)
 
 
 @synthetic
@@ -1407,6 +1432,8 @@ class FunDecl(UserValDecl):
                         new_env_assoc("node", ot.node_decl)]
         )),
     )
+
+    call_scope = Property(Entity.children_env)
 
     @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
