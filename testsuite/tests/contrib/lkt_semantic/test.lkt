@@ -110,3 +110,14 @@ enum class EnClass (SubclassA, SubclassB, SubclassC) {}
 val en_class_inst : EnClass.SubclassB = EnClass.SubclassB()
 # Test that those classes don't leak
 val invalid_en_class : SubclassB = SubclassB()
+
+# Test errors for mismatched actuals & formals in function calls
+
+fun test(a: Int, b: Int): Int = a + b
+
+val t : Int = test(12, 15) # Correct call
+val u : Int = test(12) # Missing params
+val v : Int = test(b=12) # Missing params in call with kwargs
+val x : Int = test(12, 15, 17) # Too many params
+val y : Int = test(a=1, b=12, c=15) # Too many params kwargs
+val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr

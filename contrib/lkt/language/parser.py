@@ -47,6 +47,10 @@ class SemanticResult(Struct):
     result_ref = UserField(T.Decl.entity, default_value=No(T.Decl.entity))
     has_error = UserField(T.Bool, default_value=False)
     error_message = UserField(T.String, default_value=No(T.String))
+    exempt_analysis = UserField(
+        T.Bool, default_value=False,
+        doc="Internal value. Used to skip analysis of some nodes"
+    )
 
 
 class TreeSemanticResult(Struct):
@@ -172,13 +176,29 @@ class LKNode(ASTNode):
         )
 
     @langkit_property()
-    def expected_type_error(expected=T.TypeDecl.entity, got=T.String):
+    def exempt():
+        """
+        Convenience function to construct an exempt error from Self.
+        """
         return SemanticResult.new(
-            node=Self,
-            error_message=String("Mismatched types: expected '")
+            node=Self, has_error=True, exempt_analysis=True
+        )
+
+    @langkit_property()
+    def error(message=T.String):
+        """
+        Convenience function to construct an error from Self and ``message``.
+        """
+        return SemanticResult.new(
+            node=Self, error_message=message, has_error=True,
+        )
+
+    @langkit_property()
+    def expected_type_error(expected=T.TypeDecl.entity, got=T.String):
+        return Self.error(
+            String("Mismatched types: expected `")
             .concat(expected.full_name)
-            .concat(String("', got ").concat(got)),
-            has_error=True
+            .concat(String("`, got ").concat(got)),
         )
 
     @langkit_property(return_type=T.TreeSemanticResult, public=True)
@@ -191,11 +211,35 @@ class LKNode(ASTNode):
         *know* that you can call semantic properties such as `referenced_decl`
         and `expr_type`, and those will never raise.
         """
+        return Entity.check_sem_internal()
+
+    @langkit_property(return_type=T.TreeSemanticResult)
+    def check_sem_internal(
+        exempted_nodes=(T.LKNode.array, No(T.LKNode.array))
+    ):
+
+        # First, run a pre-analysis correctness check phase on self. This might
+        # produce user diagnostics, as well as diagnostics exempting analysis
+        # for some child nodes.
+        own_diagnostics = Var(Entity.check_correctness())
+        exemptions = Var(exempted_nodes.concat(own_diagnostics.filtermap(
+            lambda d: d.node, lambda d: d.exempt_analysis
+        )))
+
         # Compute the results for children of this subtree
         children_results = Var(Entity.children.then(
-            lambda children: children.map(
-                lambda child: child._.check_semantic()
-            )
+            lambda children: children.map(lambda child: If(
+                # For each child, check if we have a diagnostic exempting
+                # analysis on this node due to errors. If not, recurse on
+                # it.
+                # NOTE: This might be computationally expensive because we
+                # don't use a map, so this is `O(len_diags * len_children)`. We
+                # rely on the fact that the set of diagnostics is probably
+                # small. To be verified.
+                exemptions.find(lambda n: n == child.node).is_null,
+                child._.check_sem_internal(exemptions),
+                No(T.TreeSemanticResult)
+            ))
         ))
 
         # Aggregate the arrays of results for every child of this node
@@ -211,9 +255,24 @@ class LKNode(ASTNode):
         own_results = Var(Entity.check_semantic_impl())
 
         return TreeSemanticResult.new(
-            results=aggregated_results.concat(own_results.results),
-            has_error=Or(children_have_errors, own_results.has_error)
+            results=own_diagnostics.concat(aggregated_results)
+            .concat(own_results.results),
+            has_error=Or(
+                children_have_errors, own_results.has_error,
+                own_diagnostics.length > 0
+            )
         )
+
+    @langkit_property(return_type=T.SemanticResult.array, memoized=True)
+    def check_correctness():
+        """
+        Custom hook to implement legality checks for a given node. If no
+        errors, returns a null array.
+
+        .. WARNING: This must *not* raise exceptions, so must make sure that
+            any queried semantic results are queried in a safe fashion.
+        """
+        return No(T.SemanticResult.array)
 
     @langkit_property(return_type=T.TreeSemanticResult)
     def check_semantic_impl():
@@ -293,10 +352,10 @@ class LangkitRoot(LKNode):
         the moment, pending on real discriminated records, SemanticResults
         which necessarily have an error_message).
         """
-        res = Var(Entity.check_semantic())
+        res = Var(Entity.check_sem_internal())
 
         # Crude sanity check: since for the moment the Try blocks in
-        # check_semantic will catch any exception happening in subcalls to
+        # check_sem_internal will catch any exception happening in subcalls to
         # semantic properties, we want to check that, if we have internal
         # errors, we also have user errors (eg. diagnostics). If we have an
         # internal error and no user errors, then we caught something we were
@@ -630,7 +689,7 @@ class Expr(LKNode):
                 SemanticResult.new(node=Self, result_type=expected_type),
                 Self.expected_type_error(
                     expected_type,
-                    String("'").concat(cf_type.full_name).concat(String("'"))
+                    String("`").concat(cf_type.full_name).concat(String("`"))
                 )
             ),
 
@@ -871,11 +930,9 @@ class RefId(Id):
 
     @langkit_property()
     def ref_not_found_error():
-        return SemanticResult.new(
-            node=Self,
-            error_message=String("Cannot find entity '")
-            .concat(Self.text).concat(String("' in this scope")),
-            has_error=True
+        return Self.error(
+            String("Cannot find entity `")
+            .concat(Self.text).concat(String("` in this scope")),
         )
 
 
@@ -1623,6 +1680,42 @@ class CallExpr(Expr):
     """
     name = Field(type=T.Expr)
     args = Field(type=T.Param.list)
+
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_correctness():
+
+        rd = Var(Entity.name.referenced_decl)
+
+        return If(
+            rd.has_error,
+            No(T.SemanticResult.array),
+
+            Entity.match_params().filter(lambda pm: Not(pm.has_matched))
+            .mapcat(
+                lambda pm: If(
+                    pm.formal.is_null,
+
+                    pm.actual.error(
+                        String("Unmatched actual in call to `")
+                        .concat(Entity.called_decl.full_name)
+                        .concat(String("`")),
+                    ).singleton.concat(
+                        # If there is an unmmatched actual that is named, then
+                        # exempt the resolution of the name, because it's going
+                        # to fail.
+                        pm.actual.name._.exempt.singleton
+                    ),
+
+                    Self.error(
+                        String("No value for parameter `")
+                        .concat(pm.formal.full_name)
+                        .concat(String("` in call to `"))
+                        .concat(Entity.called_decl.full_name)
+                        .concat(String("`"))
+                    ).singleton
+                )
+            )
+        )
 
     @langkit_property()
     def called_decl():
