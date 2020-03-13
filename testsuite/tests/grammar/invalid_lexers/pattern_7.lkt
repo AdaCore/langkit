@@ -1,0 +1,4 @@
+lexer foo_lexer {
+    val pat = p"example"
+    val pat = p"example"
+}

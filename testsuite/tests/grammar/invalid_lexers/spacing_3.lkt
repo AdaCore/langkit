@@ -1,0 +1,4 @@
+@spacing(ids, ids)
+lexer foo_lexer {
+    example <- "example"
+}

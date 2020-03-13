@@ -1,3 +1,30 @@
+== bad_rule_1.lkt ==
+bad_rule_1.lkt:2:5: Error: Unexpected declaration in lexer
+
+== case_1.lkt ==
+case_1.lkt:3:11-3:12: Expected 'discard', got Number
+
+== case_2.lkt ==
+case_2.lkt:3:5: Error: Invalid case rule topology
+
+== case_3.lkt ==
+case_3.lkt:3:5: Error: Invalid case rule topology
+
+== case_4.lkt ==
+case_4.lkt:3:5: Error: Invalid case rule topology
+
+== case_5.lkt ==
+case_5.lkt:4:37: Error: Unknown token: bar
+
+== case_6.lkt ==
+case_6.lkt:5:24-5:27: Expected Number, got Identifier
+
+== case_7.lkt ==
+case_7.lkt:5:19: Error: Unknown token: bar
+
+== family_1.lkt ==
+family_1.lkt:2:5: Error: Only lexer rules allowed in family blocks
+
 == foo.lkt ==
 Code generation was successful
 
@@ -25,10 +52,49 @@ File "test.py", line 20, In definition of lexer rules
 File "test.py", line 20, In definition of lexer rules
     Error: unbalanced parentheses
 
+== pattern_7.lkt ==
+pattern_7.lkt:3:5: Error: Duplicate pattern name
+
+== pattern_8.lkt ==
+pattern_8.lkt:2:5: Error: Patterns must have automatic types in lexers
+
+== pattern_9.lkt ==
+pattern_9.lkt:2:5: Error: Pattern string literal expected
+
 == rule_1.lkt ==
 rule_1.lkt:2:5: Error: termination is a reserved token name
 
 == rule_2.lkt ==
 rule_2.lkt:2:5: Error: lexing_failure is a reserved token name
+
+== spacing_1.lkt ==
+spacing_1.lkt:1:1: Error: Exactly two positional arguments expected
+
+== spacing_2.lkt ==
+spacing_2.lkt:1:1: Error: Token family name expected
+
+== spacing_3.lkt ==
+spacing_3.lkt:1:10: Error: Unknown token family: ids
+
+== token_action_1.lkt ==
+token_action_1.lkt:2:5: Error: Arguments required for this annotation
+
+== token_action_2.lkt ==
+token_action_2.lkt:2:5: Error: No positional argument allowed
+
+== token_action_3.lkt ==
+token_action_3.lkt:2:5: Error: Invalid arguments: bar
+
+== token_action_4.lkt ==
+token_action_4.lkt:2:31: Error: Boolean literal expected
+
+== token_action_5.lkt ==
+token_action_5.lkt:2:5: Error: At most one token action allowed
+
+== token_matcher.lkt ==
+token_matcher.lkt:2:16: Error: Invalid lexing expression
+
+== token_name.lkt ==
+token_name.lkt:3:5: Error: Duplicate token name
 
 Done

@@ -1,0 +1,6 @@
+lexer foo_example {
+    foo
+    match 1 {
+        else send(foo, 3)
+    }
+}

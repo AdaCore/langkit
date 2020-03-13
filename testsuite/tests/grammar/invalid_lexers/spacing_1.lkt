@@ -1,0 +1,3 @@
+@spacing()
+lexer foo_lexer {
+}

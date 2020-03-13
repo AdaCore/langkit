@@ -1,0 +1,6 @@
+lexer foo_example {
+    foo
+    match p"foo" {
+        if previous_token isa foo then send(foo, 3)
+    }
+}
