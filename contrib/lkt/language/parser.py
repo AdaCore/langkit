@@ -5,7 +5,8 @@ from langkit.dsl import (
     Struct, T, UserField, abstract, synthetic
 )
 from langkit.envs import (
-    EnvSpec, RefKind, add_env, add_to_env, add_to_env_kv, do, reference
+    EnvSpec, RefKind, add_env, add_to_env, add_to_env_kv, do, handle_children,
+    reference
 )
 from langkit.expressions import (
     AbstractKind, AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv,
@@ -1319,9 +1320,9 @@ class EnumClassDecl(NamedTypeDecl):
 
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
-        add_env(),
+        handle_children(),
         add_to_env(Entity.alts.map(lambda alt: new_env_assoc(
-            key=alt.name, val=alt.node, dest_env=Self.children_env
+            key=alt.name, val=alt.node, dest_env=Self.decls.children_env
         )))
     )
 
