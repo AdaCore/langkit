@@ -18,7 +18,7 @@ Expr <NumLit test.lkt:4:27-4:29>
 Id   <RefId "A" test.lkt:6:29-6:30>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-test.lkt:6:33: error: Mismatched types: expected 'A', got a number literal
+test.lkt:6:33: error: Mismatched types: expected `A`, got a number literal
 5 |     fun test_int_invalid(): A = 12
   |                                 ^^
 
@@ -37,7 +37,7 @@ Expr <BinOp test.lkt:8:31-8:38>
 Id   <RefId "Int" test.lkt:10:35-10:38>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-test.lkt:10:41: error: Mismatched types: expected 'Int', got a string literal
+test.lkt:10:41: error: Mismatched types: expected `Int`, got a string literal
  9 |     fun test_int_add_invalid_1(): Int = "12" + 15
    |                                         ^^^^     
 
@@ -56,7 +56,7 @@ Expr <NumLit test.lkt:12:41-12:43>
 Id   <RefId "self" test.lkt:12:46-12:50>
      references <SelfDecl "self" test.lkt:1:12-26:2>
 
-test.lkt:12:46: error: Mismatched types: expected 'Int', got 'A'
+test.lkt:12:46: error: Mismatched types: expected `Int`, got `A`
 11 |     fun test_int_add_invalid_2(): Int = 15 + self
    |                                              ^^^^
 
@@ -66,7 +66,7 @@ Expr <BinOp test.lkt:12:41-12:50>
 Id   <RefId "A" test.lkt:14:35-14:36>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-test.lkt:14:39: error: Mismatched types: expected 'A', got a number literal
+test.lkt:14:39: error: Mismatched types: expected `A`, got a number literal
 13 |     fun test_int_add_invalid_3(): A = 15 + self
    |                                       ^^       
 
@@ -130,7 +130,7 @@ Expr <RefId "true" test.lkt:25:39-25:43>
 Expr <NumLit test.lkt:25:49-25:50>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-test.lkt:25:56: error: Mismatched types: expected 'Int', got a string literal
+test.lkt:25:56: error: Mismatched types: expected `Int`, got a string literal
 24 |     fun test_if_invalid_1(): Int = if true then 1 else "2"
    |                                                        ^^^
 
@@ -230,7 +230,7 @@ Id   <RefId "a" test.lkt:43:68-43:69>
 Expr <RefId "a" test.lkt:43:68-43:69>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
-test.lkt:43:50: error: Mismatched types: expected 'Pair[Int]', got 'Int'
+test.lkt:43:50: error: Mismatched types: expected `Pair[Int]`, got `Int`
 42 |     fun test_invalid_generic_type(): Pair[Int] = Pair[Int](12, 15).a
    |                                                  ^^^^^^^^^^^^^^^^^^^
 
@@ -279,7 +279,7 @@ Id   <RefId "Bool" test.lkt:45:52-45:56>
 Id   <RefId "true" test.lkt:45:60-45:64>
      references <EnumLitDecl "true" __prelude:6:28-6:32>
 
-test.lkt:45:60: error: Mismatched types: expected 'Tuple2[Int, Bool]', got 'Bool'
+test.lkt:45:60: error: Mismatched types: expected `Tuple2[Int, Bool]`, got `Bool`
 44 |     fun test_invalid_generic_type_2(): Tuple2[Int, Bool] = true
    |                                                            ^^^^
 
@@ -373,7 +373,7 @@ Id   <RefId "self" test.lkt:55:47-55:51>
 Expr <RefId "self" test.lkt:55:47-55:51>
      has type <StructDecl "Foo" test.lkt:53:1-56:2>
 
-test.lkt:55:52: error: Cannot find entity 'a' in this scope
+test.lkt:55:52: error: Cannot find entity `a` in this scope
 54 |     fun test_identifier_leak_invalid(): Int = self.a
    |                                                    ^
 
@@ -464,7 +464,7 @@ Id   <RefId "test_fun_call" test.lkt:66:56-66:69>
 Expr <RefId "test_fun_call" test.lkt:66:56-66:69>
      has type <FunctionType "(B, A) -> Int" __prelude>
 
-test.lkt:66:49: error: Mismatched types: expected '(B) -> Int', got '(B, A) -> Int'
+test.lkt:66:49: error: Mismatched types: expected `(B) -> Int`, got `(B, A) -> Int`
 65 | fun get_method_invalid(b_inst: B): (B) -> Int = b_inst.test_fun_call
    |                                                 ^^^^^^^^^^^^^^^^^^^^
 
@@ -552,7 +552,7 @@ Id   <RefId "String" test.lkt:80:38-80:44>
 Id   <RefId "String" test.lkt:80:48-80:54>
      references <StructDecl "String" __prelude:3:10-3:26>
 
-test.lkt:80:57: error: Cannot find entity 'self' in this scope
+test.lkt:80:57: error: Cannot find entity `self` in this scope
 79 | fun test_astlist_indexing(a: ASTList[String]): String = self (12)
    |                                                         ^^^^     
 
@@ -667,11 +667,191 @@ Id   <RefId "SubclassB" test.lkt:110:49-110:58>
 Expr <CallExpr test.lkt:110:41-110:60>
      has type <EnumClassAltDecl "SubclassB" test.lkt:108:32-108:41>
 
-test.lkt:112:24: error: Cannot find entity 'SubclassB' in this scope
+test.lkt:112:24: error: Cannot find entity `SubclassB` in this scope
 111 | val invalid_en_class : SubclassB = SubclassB()
     |                        ^^^^^^^^^              
 
-test.lkt:112:36: error: Cannot find entity 'SubclassB' in this scope
+test.lkt:112:36: error: Cannot find entity `SubclassB` in this scope
 111 | val invalid_en_class : SubclassB = SubclassB()
     |                                    ^^^^^^^^^  
+
+Id   <RefId "Int" test.lkt:116:13-116:16>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:116:21-116:24>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:116:27-116:30>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "a" test.lkt:116:33-116:34>
+     references <FunArgDecl "a" test.lkt:116:10-116:16>
+
+Expr <RefId "a" test.lkt:116:33-116:34>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "b" test.lkt:116:37-116:38>
+     references <FunArgDecl "b" test.lkt:116:18-116:24>
+
+Expr <RefId "b" test.lkt:116:37-116:38>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:116:33-116:38>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:118:9-118:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "test" test.lkt:118:15-118:19>
+     references <FunDecl "test" test.lkt:116:1-116:38>
+
+Expr <RefId "test" test.lkt:118:15-118:19>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
+
+Expr <NumLit test.lkt:118:20-118:22>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:118:24-118:26>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:118:15-118:27>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:119:9-119:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:119:15: error: No value for parameter `b` in call to `test`
+118 | val u : Int = test(12) # Missing params
+    |               ^^^^^^^^                 
+
+Id   <RefId "test" test.lkt:119:15-119:19>
+     references <FunDecl "test" test.lkt:116:1-116:38>
+
+Expr <RefId "test" test.lkt:119:15-119:19>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
+
+Expr <NumLit test.lkt:119:20-119:22>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:119:15-119:23>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:120:9-120:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:120:15: error: No value for parameter `a` in call to `test`
+119 | val v : Int = test(b=12) # Missing params in call with kwargs
+    |               ^^^^^^^^^^                                     
+
+Id   <RefId "test" test.lkt:120:15-120:19>
+     references <FunDecl "test" test.lkt:116:1-116:38>
+
+Expr <RefId "test" test.lkt:120:15-120:19>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
+
+Id   <RefId "b" test.lkt:120:20-120:21>
+     references <FunArgDecl "b" test.lkt:116:18-116:24>
+
+Expr <RefId "b" test.lkt:120:20-120:21>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:120:22-120:24>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:120:15-120:25>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:121:9-121:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:121:28: error: Unmatched actual in call to `test`
+120 | val x : Int = test(12, 15, 17) # Too many params
+    |                            ^^                   
+
+Id   <RefId "test" test.lkt:121:15-121:19>
+     references <FunDecl "test" test.lkt:116:1-116:38>
+
+Expr <RefId "test" test.lkt:121:15-121:19>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
+
+Expr <NumLit test.lkt:121:20-121:22>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:121:24-121:26>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:121:15-121:31>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:122:9-122:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:122:31: error: Unmatched actual in call to `test`
+121 | val y : Int = test(a=1, b=12, c=15) # Too many params kwargs
+    |                               ^^^^                          
+
+Id   <RefId "test" test.lkt:122:15-122:19>
+     references <FunDecl "test" test.lkt:116:1-116:38>
+
+Expr <RefId "test" test.lkt:122:15-122:19>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
+
+Id   <RefId "a" test.lkt:122:20-122:21>
+     references <FunArgDecl "a" test.lkt:116:10-116:16>
+
+Expr <RefId "a" test.lkt:122:20-122:21>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:122:22-122:23>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "b" test.lkt:122:25-122:26>
+     references <FunArgDecl "b" test.lkt:116:18-116:24>
+
+Expr <RefId "b" test.lkt:122:25-122:26>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:122:27-122:29>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:122:15-122:36>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:123:9-123:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:123:31: error: Unmatched actual in call to `test`
+122 | val z : Int = test(a=1, b=12, c=foo)
+    |                               ^^^^^ 
+
+Id   <RefId "test" test.lkt:123:15-123:19>
+     references <FunDecl "test" test.lkt:116:1-116:38>
+
+Expr <RefId "test" test.lkt:123:15-123:19>
+     has type <FunctionType "(Int, Int) -> Int" __prelude>
+
+Id   <RefId "a" test.lkt:123:20-123:21>
+     references <FunArgDecl "a" test.lkt:116:10-116:16>
+
+Expr <RefId "a" test.lkt:123:20-123:21>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:123:22-123:23>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "b" test.lkt:123:25-123:26>
+     references <FunArgDecl "b" test.lkt:116:18-116:24>
+
+Expr <RefId "b" test.lkt:123:25-123:26>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:123:27-123:29>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:123:33: error: Cannot find entity `foo` in this scope
+122 | val z : Int = test(a=1, b=12, c=foo)
+    |                                 ^^^ 
+
+Expr <CallExpr test.lkt:123:15-123:37>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
