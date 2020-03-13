@@ -177,6 +177,8 @@ package body Liblktlang.Implementation.Extensions is
    is
       N_Text : constant Text_Type := Text (Node);
    begin
+      --  TODO: handle escape sequences
+
       return Create_Character_Type_Array
         (if String_Lit_P_Is_Prefixed_String (Node) then
             N_Text (N_Text'First + 2 .. N_Text'Last - 1)
