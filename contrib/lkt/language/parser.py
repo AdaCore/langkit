@@ -1757,6 +1757,11 @@ class NullLit(Lit):
 class StringLit(Lit):
     """
     String literal expression.
+
+    Note that in order to reduce the size of the node type hierarchy, we define
+    only one node (StringLit) for all our string literals (only regular strings
+    and pattern string literals at the moment). This will also make it easy to
+    add new string prefixes in the future.
     """
     token_node = True
 
