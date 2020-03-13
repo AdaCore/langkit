@@ -1346,46 +1346,6 @@ class BaseValDecl(Decl):
         pass
 
 
-class FunDecl(BaseValDecl):
-    """
-    Function declaration.
-    """
-    syn_name = Field(type=T.DefId)
-    args = Field(type=T.FunArgDecl.list)
-    return_type = Field(type=T.TypeRef)
-    body = Field(type=T.Expr)
-
-    owning_type = Property(
-        Self.parents.find(lambda t: t.is_a(T.TypeDecl)).cast(T.TypeDecl)
-    )
-
-    env_spec = EnvSpec(
-        add_to_env_kv(Entity.name, Self),
-        add_env(),
-        # Add node & self if there is an owning type
-        add_to_env(Self.owning_type.then(
-            lambda ot: [new_env_assoc("self", ot.self_decl),
-                        new_env_assoc("node", ot.node_decl)]
-        )),
-    )
-
-    @langkit_property()
-    def get_type(no_inference=(T.Bool, False)):
-        ignore(no_inference)
-        return Self.function_type(
-            # If there is an owning type, then the type of this function
-            # contain: the type of the self argument, which (we imagine, it
-            # won't be used yet) will need to be passed "self" explicitly, when
-            # passed around as a function object.
-            Self.owning_type.then(lambda ot: ot.singleton)
-            .concat(Entity.args.map(
-                lambda a:
-                a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
-            )),
-            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
-        ).as_entity
-
-
 @synthetic
 class SelfDecl(BaseValDecl):
     """
@@ -1424,20 +1384,51 @@ class UserValDecl(BaseValDecl):
     Class for user declared val declarations (not synthetic).
     """
     syn_name = Field(type=T.DefId)
-    decl_type = AbstractField(type=T.TypeRef)
+
+
+class FunDecl(UserValDecl):
+    """
+    Function declaration.
+    """
+    args = Field(type=T.FunArgDecl.list)
+    return_type = Field(type=T.TypeRef)
+    body = Field(type=T.Expr)
+
+    owning_type = Property(
+        Self.parents.find(lambda t: t.is_a(T.TypeDecl)).cast(T.TypeDecl)
+    )
+
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name, Self),
+        add_env(),
+        # Add node & self if there is an owning type
+        add_to_env(Self.owning_type.then(
+            lambda ot: [new_env_assoc("self", ot.self_decl),
+                        new_env_assoc("node", ot.node_decl)]
+        )),
+    )
 
     @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
-        return Entity.decl_type.designated_type
+        return Self.function_type(
+            # If there is an owning type, then the type of this function
+            # contain: the type of the self argument, which (we imagine, it
+            # won't be used yet) will need to be passed "self" explicitly, when
+            # passed around as a function object.
+            Self.owning_type.then(lambda ot: ot.singleton)
+            .concat(Entity.args.map(
+                lambda a:
+                a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
+            )),
+            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+        ).as_entity
 
 
 class EnumLitDecl(UserValDecl):
     """
     Enum literal declaration.
     """
-    decl_type = NullField()
-
     @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
@@ -1447,7 +1438,33 @@ class EnumLitDecl(UserValDecl):
         )
 
 
-class FunArgDecl(UserValDecl):
+@abstract
+class ExplicitlyTypedDecl(UserValDecl):
+    """
+    Subset of user declared value declarations for values that have a type that
+    can be syntactically annotated by the user.
+    """
+    decl_type = AbstractField(type=T.TypeRef)
+
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        ignore(no_inference)
+        return Entity.decl_type.designated_type
+
+
+@abstract
+class ComponentDecl(ExplicitlyTypedDecl):
+    """
+    Subset of explicitly typed declarations for value declarations that:
+
+    1. Have an optional default value.
+    2. Are part of a bigger declaration that can be referred to via a call
+       expression (either a type or a function).
+    """
+    default_val = AbstractField(type=T.Expr)
+
+
+class FunArgDecl(ComponentDecl):
     """
     Function argument declaration.
     """
@@ -1455,7 +1472,7 @@ class FunArgDecl(UserValDecl):
     default_val = Field(type=T.Expr)
 
 
-class LambdaArgDecl(UserValDecl):
+class LambdaArgDecl(ComponentDecl):
     """
     Function argument declaration.
     """
@@ -1463,11 +1480,12 @@ class LambdaArgDecl(UserValDecl):
     default_val = Field(type=T.Expr)
 
 
-class FieldDecl(UserValDecl):
+class FieldDecl(ComponentDecl):
     """
     Field declaration.
     """
     decl_type = Field(type=T.TypeRef)
+    default_val = Field(type=T.Expr)
 
 
 @abstract
@@ -1743,7 +1761,7 @@ class MatchBranch(LKNode):
     )
 
 
-class MatchValDecl(UserValDecl):
+class MatchValDecl(ExplicitlyTypedDecl):
     """
     Value declaration in a match branch.
     """
@@ -1759,7 +1777,7 @@ class BinOp(Expr):
     right = Field(type=T.Expr)
 
 
-class ValDecl(UserValDecl):
+class ValDecl(ExplicitlyTypedDecl):
     """
     Value declaration.
     """
@@ -2095,7 +2113,8 @@ lkt_grammar.add_rules(
     field_decl=FieldDecl(
         G.def_id,
         ":",
-        G.type_ref
+        G.type_ref,
+        Opt("=", G.expr)
     ),
 
     bare_decl=GOr(
