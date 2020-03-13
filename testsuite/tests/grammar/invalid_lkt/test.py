@@ -11,7 +11,7 @@ from langkit.dsl import ASTNode
 from utils import emit_and_print_errors
 
 
-for i, lkt_file in enumerate(sorted(glob.glob('*.lkt'))):
+for lkt_file in sorted(glob.glob('*.lkt')):
     print('== {} =='.format(lkt_file))
 
     class FooNode(ASTNode):
