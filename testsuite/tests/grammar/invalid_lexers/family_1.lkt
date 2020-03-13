@@ -1,0 +1,5 @@
+lexer foo_lexer {
+    family keywords {
+        val bar = 1
+    }
+}

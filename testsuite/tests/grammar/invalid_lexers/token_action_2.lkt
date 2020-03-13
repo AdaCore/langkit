@@ -1,0 +1,3 @@
+lexer foo_lexer {
+    @text(1) example <- "example"
+}

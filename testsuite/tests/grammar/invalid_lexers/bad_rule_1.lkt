@@ -1,0 +1,4 @@
+lexer foo_lexer {
+    lexer bar_lexer {
+    }
+}

@@ -1,0 +1,6 @@
+lexer foo_example {
+    foo
+    match p"foo" {
+        else send(foo, 3)
+    }
+}

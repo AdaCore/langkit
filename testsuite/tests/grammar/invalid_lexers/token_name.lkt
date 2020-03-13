@@ -1,0 +1,4 @@
+lexer foo_lexer {
+    example <- "example"
+    example <- "null"
+}
