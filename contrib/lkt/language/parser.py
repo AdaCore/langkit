@@ -71,9 +71,10 @@ class ParamMatch(Struct):
     """
     Helper data structure to implement parameter matching.
     """
-    has_matched = UserField(type=T.Bool, default_value=True)
-    actual = UserField(type=T.Param.entity)
-    formal = UserField(type=T.BaseValDecl.entity)
+    has_matched = UserField(type=T.Bool)
+    actual = UserField(type=T.Param.entity, default_value=No(T.Param.entity))
+    formal = UserField(type=T.ComponentDecl.entity,
+                       default_value=No(T.ComponentDecl.entity))
 
 
 @abstract
@@ -132,24 +133,6 @@ class LKNode(ASTNode):
         being careful about how this property is used is important.
         """
         pass
-
-    @langkit_property()
-    def static_match_params(formals=T.BaseValDecl.entity.array,
-                            actuals=T.Param.entity.array):
-        """
-        Static method. Returns an array of ParamMatch structures, matching the
-        actual parameters of a call to the formal parameters of the
-        declaration. This will work for types constructors and function calls.
-        """
-        return actuals.map(lambda i, a: If(
-            a.name.is_null,
-            formals.at(i).then(lambda f: ParamMatch.new(actual=a, formal=f)),
-            a.name.then(
-                lambda n: formals.find(lambda f: f.name == n.symbol).then(
-                    lambda f: ParamMatch.new(actual=a, formal=f)
-                )
-            )
-        ))
 
     @langkit_property(return_type=T.String)
     def string_join(strns=T.String.array, sep=T.String):
@@ -1084,7 +1067,7 @@ class TypeDecl(Decl):
         return Entity.type_scope.get_first(name).cast_or_raise(T.FunDecl)
 
     fields = Property(
-        No(T.BaseValDecl.entity.array),
+        No(T.ComponentDecl.entity.array),
         doc="""Return the list of fields for this type"""
     )
 
@@ -1142,8 +1125,8 @@ class NamedTypeDecl(TypeDecl):
     type_scope = Property(Entity._.decls.children_env)
 
     fields = Property(Entity.decls.filtermap(
-        lambda d: d.decl.cast_or_raise(T.BaseValDecl),
-        lambda d: d.decl.is_a(T.BaseValDecl)
+        lambda d: d.decl.cast_or_raise(T.ComponentDecl),
+        lambda d: d.decl.is_a(T.ComponentDecl)
     ))
 
 
@@ -1489,6 +1472,7 @@ class ComponentDecl(ExplicitlyTypedDecl):
        expression (either a type or a function).
     """
     default_val = AbstractField(type=T.Expr)
+    has_default_value = Property(Not(Self.default_val.is_null))
 
 
 class FunArgDecl(ComponentDecl):
@@ -1662,13 +1646,46 @@ class CallExpr(Expr):
     formals = Property(
         Entity.called_decl.match(
             lambda fd=T.FunDecl: fd.args.map(
-                lambda p: p.cast_or_raise(T.BaseValDecl)
+                lambda p: p.cast_or_raise(T.ComponentDecl)
             ),
             lambda td=T.TypeDecl: td.fields,
-            lambda _: PropertyError(T.BaseValDecl.entity.array,
+            lambda _: PropertyError(T.ComponentDecl.entity.array,
                                     "Should not happen")
         )
     )
+
+    @langkit_property()
+    def static_match_params(formals=T.ComponentDecl.entity.array,
+                            actuals=T.Param.entity.array):
+        """
+        Static method. Returns an array of ParamMatch structures, matching the
+        actual parameters of a call to the formal parameters of the
+        declaration. This will work for types constructors and function calls.
+
+        This will also contain entries for unmmatched actuals and formals.
+        """
+        actual_matches = Var(actuals.map(lambda i, a: If(
+            a.name.is_null,
+            formals.at(i).then(
+                lambda f: ParamMatch.new(has_matched=True, actual=a, formal=f),
+                default_val=ParamMatch.new(has_matched=False, actual=a)
+            ),
+            formals.find(lambda f: f.name == a.name.symbol).then(
+                lambda f: ParamMatch.new(has_matched=True, actual=a, formal=f),
+                default_val=ParamMatch.new(has_matched=False, actual=a)
+            )
+        )))
+
+        # Create param matches for every formal that is unmatched
+        formal_misses = Var(formals.filter(
+            lambda formal:
+            formal.has_default_value
+            | actual_matches.find(
+                lambda pm: pm.formal == formal
+            ).is_null
+        ).map(lambda formal: ParamMatch.new(has_matched=False, formal=formal)))
+
+        return actual_matches.concat(formal_misses)
 
     @langkit_property(memoized=True)
     def match_params():
