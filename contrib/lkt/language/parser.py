@@ -1790,7 +1790,7 @@ class StringLit(Lit):
         """
         pass
 
-    @langkit_property(return_type=T.Bool)
+    @langkit_property(return_type=T.Bool, public=True)
     def is_regexp_literal():
         """
         Return whether this string literal is actually a regexp literal, by
