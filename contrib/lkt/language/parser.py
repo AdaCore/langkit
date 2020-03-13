@@ -1777,7 +1777,8 @@ class StringLit(Lit):
                       external=True, uses_envs=False, uses_entity_info=False)
     def prefix():
         """
-        Return the prefix of this string.
+        Return the prefix of this string, or the null character if there is no
+        prefix.
         """
         pass
 
