@@ -229,7 +229,7 @@ def go_step_inside(context):
         def filter(e):
             if not isinstance(e, PropertyCall):
                 return False
-            line_no = event.line_range.first_line
+            line_no = e.line_range.first_line
             if line_no not in expr_range:
                 return False
             for fr in filter_ranges:
