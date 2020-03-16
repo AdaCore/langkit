@@ -93,7 +93,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 
     # Make this directory available to LKT import statements
     lkt_dir = P.dirname(P.abspath(__file__))
-    os.environ['LKT_PATH'] = ('{}:{}'.format(lkt_dir, os.environ['LKT_PATH'])
+    os.environ['LKT_PATH'] = ('{}{}{}'.format(lkt_dir, os.path.pathsep,
+                                              os.environ['LKT_PATH'])
                               if os.environ.get('LKT_PATH', None) else lkt_dir)
 
     # Try to emit code

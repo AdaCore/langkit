@@ -3,6 +3,8 @@ with Ada.Directories;
 with Ada.Environment_Variables;
 with Ada.Strings.Unbounded;
 
+with GNAT.OS_Lib;
+
 with Liblktlang.Common; use Liblktlang.Common;
 
 package body Liblktlang.Default_Provider is
@@ -161,14 +163,15 @@ package body Liblktlang.Default_Provider is
       Append (Dirs.Current_Directory);
 
       if Path /= "" then
-         --  Import all semicolon-separated directories from the environment
-         --  variable as lookup directories.
+         --  Import all directory names from the environment variable as lookup
+         --  directories. Directory names are separated by the OS-dependent
+         --  path separator.
 
          declare
             First : Positive := Path'First;
          begin
             for I in Path'Range loop
-               if Path (I) = ':' then
+               if Path (I) = GNAT.OS_Lib.Path_Separator then
                   Append (Path (First .. I - 1));
                   First := I + 1;
                end if;
