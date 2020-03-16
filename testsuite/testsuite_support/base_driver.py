@@ -105,6 +105,11 @@ class BaseDriver(TestDriver):
                                            .replace('\n', ' ').strip())
             self.expect_failure = True
 
+        # Make the "python_support" directory available to LKT import
+        # statements.
+        self.add_path('LKT_PATH',
+                      os.path.join(self.testsuite_dir, 'python_support'))
+
     def read_file(self, filename):
         """Return the content of `filename`."""
         with open(filename, 'r') as f:
