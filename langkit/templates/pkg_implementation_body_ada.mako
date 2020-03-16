@@ -3937,9 +3937,15 @@ package body ${ada_lib_name}.Implementation is
      (Unit          : Internal_Unit;
       Foreign_Nodes : in out ${T.root_node.name}_Vectors.Vector) is
    begin
+      --  Go through all foreign nodes registered in Unit's lexical
+      --  environments.
       for FN of Unit.Foreign_Nodes loop
+         --  Collect them
          Foreign_Nodes.Append (FN.Node);
 
+         --  For each foreign node, remove the corresponding exiled entry in
+         --  that foreign unit (each foreign node in unit A has a corresponding
+         --  exiled entry in unit B).
          declare
             Exiled_Entries : Exiled_Entry_Vectors.Vector renames
                FN.Unit.Exiled_Entries;
@@ -3964,7 +3970,6 @@ package body ${ada_lib_name}.Implementation is
    procedure Reroot_Foreign_Node (Node : ${T.root_node.name}) is
       Unit : constant Internal_Unit := Node.Unit;
    begin
-
       --  First, filter the exiled entries in foreign units so that they don't
       --  contain references to this unit's lexical environments.  We need to
       --  do that before running the partial Populate_Lexical_Env pass so that

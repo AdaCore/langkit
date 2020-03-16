@@ -1313,15 +1313,19 @@ private package ${ada_lib_name}.Implementation is
    --  Destroy all destroyables objects in Unit and clear this list in Unit
 
    procedure Remove_Exiled_Entries (Unit : Internal_Unit);
-   --  Remove lexical environment entries that reference some of Unit's nodes,
-   --  in lexical environments it does not own.
+   --  Remove lexical environment entries referencing nodes in Unit from
+   --  lexical environments Unit does not own. Remove foreign node entries in
+   --  foreign units that correspond to these exiled entries. Clear
+   --  Unit.Exiled_Entries afterwards.
 
    procedure Extract_Foreign_Nodes
      (Unit          : Internal_Unit;
       Foreign_Nodes : in out ${T.root_node.name}_Vectors.Vector);
-   --  Collect from Unit all the foreign nodes that belong to an analysis unit
-   --  which is not in the populate lexical env queue, appending them to
-   --  Foreign_Nodes. Clear Unit.Foreign_Nodes afterwards.
+   --  Collect in Foreign_Nodes all foreign nodes in Unit's lexical
+   --  environments (i.e. lexical env entries that refer to nodes which belongs
+   --  to other analysis units). Remove the exiled entries in foreign units
+   --  that correspond to these foreign nodes. Clear Unit.Foreign_Nodes
+   --  afterwards.
 
    procedure Reroot_Foreign_Node (Node : ${T.root_node.name});
    --  Re-create the lexical env entry for Node. This is to be used in
