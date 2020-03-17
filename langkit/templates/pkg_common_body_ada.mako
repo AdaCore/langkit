@@ -18,7 +18,7 @@ with Ada.Environment_Variables;
 with Interfaces.C;
 
 with GNATcov_RTS.Buffers.Lists.${ada_lib_name};
-with GNATcov_RTS.Traces.Output;
+with GNATcov_RTS.Traces.Output.Files;
 % endif
 
 package body ${ada_lib_name}.Common is
@@ -451,7 +451,7 @@ package body ${ada_lib_name}.Common is
             then Env.Value ("${env_var}")
             else "");
       begin
-         GNATcov_RTS.Traces.Output.Write_Trace_File
+         GNATcov_RTS.Traces.Output.Files.Write_Trace_File
            (Buffers  => GNATcov_RTS.Buffers.Lists.${ada_lib_name}.List,
             Filename => Filename);
       end Dump_Source_Trace;
