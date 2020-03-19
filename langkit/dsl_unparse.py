@@ -813,6 +813,8 @@ def emit_expr(expr, **ctx):
             return ee(expr.expr_0, overload_coll_name="find")
 
         return "{}?({})".format(ee(expr.expr_0), ee(expr.expr_1))
+    elif is_a("to_iterator"):
+        return "{}.to_iterator".format(ee(expr.expr_0))
     elif is_a("at_or_raise"):
         return "{}({})".format(ee(expr.expr_0), ee(expr.expr_1))
     elif isinstance(expr, FieldAccess):

@@ -1,9 +1,10 @@
 ## vim: filetype=makocpp
 
-<%namespace name="array_types"   file="array_types_c.mako" />
-<%namespace name="struct_types"  file="struct_types_c.mako" />
-<%namespace name="astnode_types" file="astnode_types_c.mako" />
-<%namespace name="exts"          file="../extensions.mako" />
+<%namespace name="array_types"    file="array_types_c.mako" />
+<%namespace name="iterator_types" file="iterator_types_c.mako" />
+<%namespace name="struct_types"   file="struct_types_c.mako" />
+<%namespace name="astnode_types"  file="astnode_types_c.mako" />
+<%namespace name="exts"           file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>
 
@@ -155,6 +156,16 @@ ${array_types.incomplete_decl(T.entity.array)}
             array_type.exposed and \
             array_type.emit_c_type:
         ${array_types.incomplete_decl(array_type)}
+    % endif
+% endfor
+
+/*
+ * Iterator types incomplete declarations
+ */
+
+% for iterator_type in ctx.iterator_types:
+    % if iterator_type.exposed and iterator_type.emit_c_type:
+        ${iterator_types.incomplete_decl(iterator_type)}
     % endif
 % endfor
 

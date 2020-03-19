@@ -522,6 +522,13 @@ class CompileCtx(object):
         :type: list[langkit.compiled_types.ArrayType]
         """
 
+        self._iterator_types = None
+        """
+        List of all IteratorType instances.
+
+        :type: list[langkit.compiled_types.IteratorType]
+        """
+
         self._composite_types = None
         """
         Dependency-sorted list of array and struct types.
@@ -1721,6 +1728,11 @@ class CompileCtx(object):
         return self._array_types
 
     @property
+    def iterator_types(self):
+        assert self._iterator_types is not None
+        return self._iterator_types
+
+    @property
     def struct_types(self):
         assert self._struct_types is not None
         return self._struct_types
@@ -2103,7 +2115,7 @@ class CompileCtx(object):
                 if typ.is_entity_type and not typ.element_type.is_root_node:
                     result.append(typ.element_type.base.entity)
 
-            elif typ.is_array_type:
+            elif typ.is_array_type or typ.is_iterator_type:
                 result = [typ.element_type]
 
             else:
@@ -2116,13 +2128,16 @@ class CompileCtx(object):
         # by accident.
         struct_types = CompiledTypeRepo.struct_types
         array_types = CompiledTypeRepo.array_types
+        iterator_types = CompiledTypeRepo.iterator_types
         CompiledTypeRepo.struct_types = None
         CompiledTypeRepo.array_types = None
+        CompiledTypeRepo.iterator_types = None
 
         # Sort the struct and array types by dependency order
         types_and_deps = (
             [(st, dependencies(st)) for st in struct_types]
-            + [(at, dependencies(at)) for at in array_types])
+            + [(at, dependencies(at)) for at in array_types]
+            + [(it, dependencies(it)) for it in iterator_types])
         try:
             self._composite_types = topological_sort(types_and_deps)
         except TopologicalSortError as exc:
@@ -2137,6 +2152,8 @@ class CompileCtx(object):
 
         self._array_types = [t for t in self._composite_types
                              if t.is_array_type]
+        self._iterator_types = [t for t in self._composite_types
+                                if t.is_iterator_type]
         self._struct_types = [t for t in self._composite_types
                               if t.is_struct_type]
         self._entity_types = [t for t in self._composite_types

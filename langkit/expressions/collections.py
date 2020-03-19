@@ -748,6 +748,25 @@ def collection_get(self, collection, index, or_null):
 
 
 @auto_attr
+def to_iterator(self, array):
+    array_expr = construct(array)
+    check_source_language(
+        array_expr.type.is_array_type,
+        '.at prefix must be an array: got {} instead'.format(
+            array_expr.type.dsl_name
+        )
+    )
+    elem_type = array_expr.type.element_type
+    result_type = elem_type.iterator
+
+    result = CallExpr('To_Iterator_Result', 'Iterator_From_Array', result_type,
+                      [array_expr])
+
+    result.abstract_expr = self
+    return result
+
+
+@auto_attr
 def length(self, collection):
     """
     Compute the length of `collection`.

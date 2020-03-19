@@ -50,6 +50,9 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda _: '{}.wrap({{}})'.format(
                 self.array_wrapper(type)
             )),
+            (ct.IteratorType, lambda _: '{}.wrap({{}})'.format(
+                self.iterator_wrapper(type)
+            )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
             (T.BigInt, lambda _: '_big_integer.wrap({})'),
@@ -137,6 +140,8 @@ class PythonAPISettings(AbstractAPISettings):
                 self.type_public_name(ct.T.root_node))),
             (ct.ArrayType, lambda cls:
                 '{}.c_type'.format(self.array_wrapper(cls))),
+            (ct.IteratorType, lambda cls:
+                '{}.c_type'.format(self.iterator_wrapper(cls))),
             (T.entity_info, lambda _: '_EntityInfo_c_type'),
             (T.env_md, lambda _: '_Metadata_c_type'),
             (ct.EntityType, lambda _: '_Entity_c_type'),
@@ -149,6 +154,11 @@ class PythonAPISettings(AbstractAPISettings):
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
                 array_type).py_converter
+
+    def iterator_wrapper(self, iterator_type):
+        return (ct.T.entity.iterator
+                if iterator_type.element_type.is_entity_type else
+                iterator_type).py_converter
 
     def type_public_name(self, type):
         """
@@ -171,6 +181,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda _: 'list[{}]'.format(
                 self.type_public_name(type.element_type)
             )),
+            (ct.IteratorType, lambda _: type.api_name.camel),
             (ct.StructType, lambda _: type.api_name.camel),
             (T.BigInt, lambda _: 'int'),
         ])
