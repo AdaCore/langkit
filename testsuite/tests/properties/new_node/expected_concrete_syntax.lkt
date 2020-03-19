@@ -21,7 +21,7 @@ class LiteralSequence : FooNode {
     @memoized fun new_node (): SynthNode =
     SynthNode(items=node.items, name=node.name)
 
-    @export fun prop (): SynthNode = node.new_node.as_bare_entity
+    @export fun prop (): SynthNode = node.new_node().as_bare_entity
 }
 
 class Name : FooNode {

@@ -31,7 +31,7 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun decl (): Decl = node.children_env.get(node.name)?(0).to[Decl]!
+    @export fun decl (): Decl = node.children_env().get(node.name)?(0).to[Decl]!
 }
 
 struct EnvAssoc {

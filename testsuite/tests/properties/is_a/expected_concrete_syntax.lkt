@@ -8,10 +8,10 @@ grammar foo_grammar {
 
     fun null_node (): FooNode = null
 
-    @export fun is_null_a_def (): Bool = node.null_node isa Def
+    @export fun is_null_a_def (): Bool = node.null_node() isa Def
 
     @export fun is_null_a_def_or_example (): Bool =
-    node.null_node isa Def | Example
+    node.null_node() isa Def | Example
 }
 
 class Def : FooNode {

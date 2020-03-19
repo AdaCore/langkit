@@ -21,7 +21,7 @@ grammar foo_grammar {
             case _ => null
         }
     ) & (
-        self.children.mapcat((c) => c.find_atoms)
+        self.children.mapcat((c) => c.find_atoms())
     )
 
     @export fun find_atoms_or_exprs (): Array[Expr] = (
@@ -36,7 +36,7 @@ grammar foo_grammar {
             case _ => null
         }
     ) & (
-        self.children.mapcat((c) => c.find_atoms_or_exprs)
+        self.children.mapcat((c) => c.find_atoms_or_exprs())
     )
 
     @export fun find_exprs (): Array[Expr] = (
@@ -52,7 +52,7 @@ grammar foo_grammar {
             case _ => null
         }
     ) & (
-        self.children.mapcat((c) => c.find_exprs)
+        self.children.mapcat((c) => c.find_exprs())
     )
 }
 
@@ -72,7 +72,7 @@ class Def : FooNode {
             case _ => null
         }
     ) & (
-        self.children.mapcat((c) => c.to[Expr]!.find_refs)
+        self.children.mapcat((c) => c.to[Expr]!.find_refs())
     )
 }
 

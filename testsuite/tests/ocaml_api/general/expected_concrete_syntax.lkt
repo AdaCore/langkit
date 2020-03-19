@@ -12,7 +12,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun count (seq : Array[Example]): Int = seq.length
+    @export fun count (seq : Array[Example]): Int = seq.length()
 
     @export fun get_a (c : CharacterType = 'a'): CharacterType = c
 

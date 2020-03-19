@@ -19,5 +19,5 @@ class Example : SomeNode {
 
     @export fun solve (): Bool = (%domain(node.v, [null])) and (
         %predicate(BareSomeNode.test_prop, node.v)
-    ).solve
+    ).solve()
 }

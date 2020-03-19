@@ -539,7 +539,8 @@ def needs_parens(expr):
               "append_rebinding", "concat_rebindings", "env_node",
               "rebindings_new_env", "rebindings_old_env", "get_value",
               "solve", "is_referenced_from", "env_group", "length",
-              "can_reach", "as_int", "unique", "env_orphan")
+              "can_reach", "as_int", "unique", "env_orphan",
+              "is_visible_from", "as_array", "rebind_env")
     )
 
 
@@ -603,7 +604,8 @@ def emit_expr(expr, **ctx):
         Quantifier, If, IsNull, Cast, DynamicVariable, IsA, Not, SymbolLiteral,
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
-        StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains
+        StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
+        PropertyDef
     )
 
     def is_a(*names):
@@ -619,13 +621,13 @@ def emit_expr(expr, **ctx):
         return "({}) => {}".format(vars_str, ee(expr))
         del vars_str
 
-    def emit_method_call(receiver, name, args=[], as_multiline=False):
-        if not args:
-            return "{}.{}".format(receiver, name)
-        else:
-            return "{}.{}{}".format(
-                receiver, name, emit_paren(", ".join(args), as_multiline)
-            )
+    def emit_method_call(receiver, name, args=[],
+                         force_parens=True, as_multiline=False):
+        return "{}.{}{}".format(
+            receiver, name,
+            emit_paren(", ".join(args), as_multiline)
+            if force_parens or args else ""
+        )
 
     def emit_let(expr):
         if len(expr.vars) == 0:
@@ -861,13 +863,20 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, GetSymbol):
         return "{}.symbol".format(ee(expr.node_expr))
-    elif is_a("as_entity", "as_bare_entity", "children",
-              "env_parent", "rebindings_parent", "parents", "parent", "root",
-              "append_rebinding", "concat_rebindings", "env_node",
-              "rebindings_new_env", "rebindings_old_env", "get_value",
-              "solve", "is_referenced_from", "env_group", "length",
-              "can_reach", "as_int", "unique", "env_orphan",
-              "is_visible_from", "as_array", "rebind_env"):
+
+    elif is_a("as_entity", "as_bare_entity", "children", "env_parent",
+              "rebindings_parent", "parents", "parent", "root", "env_node",
+              "rebindings_new_env", "rebindings_old_env"):
+        # Field like expressions
+        exprs = expr.sub_expressions
+        return emit_method_call(ee(exprs[0]), type(expr).__name__,
+                                map(ee, exprs[1:]), False)
+
+    elif is_a("append_rebinding", "concat_rebindings", "env_node", "get_value",
+              "solve", "is_referenced_from", "env_group", "length", "can_reach",
+              "as_int", "unique", "env_orphan", "is_visible_from", "as_array",
+              "rebind_env"):
+        # Method like expressions
         exprs = expr.sub_expressions
         return emit_method_call(ee(exprs[0]), type(expr).__name__,
                                 map(ee, exprs[1:]))
@@ -888,11 +897,13 @@ def emit_expr(expr, **ctx):
         args = [ee(expr.symbol)]
         if expr.sequential_from:
             args.append("from={}".format(ee(expr.sequential_from)))
-        if expr.only_first:
-            args.append("only_first={}".format(ee(expr.only_first)))
         if expr.categories:
             args.append('categories={}'.format(ee(expr.categories)))
-        return emit_method_call(ee(expr.env), "get", args)
+        return emit_method_call(
+            ee(expr.env),
+            "get_first" if expr.only_first else "get",
+            args
+        )
 
     elif is_a("at"):
         # Recognize find
@@ -906,6 +917,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, FieldAccess):
         args = []
         has_any_commented_arg = False
+        is_property = isinstance(expr.constructed_expr.node_data, PropertyDef)
         if expr.arguments:
             with walker.method_call(expr.field):
                 field_coms = walker.emit_comments()
@@ -930,7 +942,8 @@ def emit_expr(expr, **ctx):
             receiver_str,
             expr.field,
             args,
-            as_multiline=has_any_commented_arg
+            as_multiline=has_any_commented_arg,
+            force_parens=is_property
         )
 
     elif isinstance(expr, Concat):

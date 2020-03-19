@@ -16,7 +16,7 @@ class Example : FooNode {
 
     @export @memoized fun mmz_prop (i : Int): Int = {
         # Update context version by parsing a new unit
-        val _ = node.fetch_example_unit;
+        val _ = node.fetch_example_unit();
 
         # Trigger a cache clear by calling another property
         # (which will call Reset_Caches).

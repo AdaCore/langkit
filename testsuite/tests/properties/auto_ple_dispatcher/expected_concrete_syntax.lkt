@@ -35,7 +35,7 @@ class Var : DefNode {
 
 class Id : Name {
 
-    fun resolve (): FooNode = node.node_env.get(node, only_first=true)
+    fun resolve (): FooNode = node.node_env().get_first(node)
 }
 
 class Prefix : Name {
@@ -43,7 +43,7 @@ class Prefix : Name {
     @parse_field suffix : Id
 
     fun resolve (): FooNode =
-    node.prefix.resolve.children_env.get(node.suffix.symbol, only_first=true)
+    node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }
 
 struct EnvAssoc {
