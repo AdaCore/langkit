@@ -2917,6 +2917,8 @@ class ArrayLiteral(AbstractExpression):
             )
 
     def construct(self):
+        self.element_type = resolve_type(self.element_type)
+
         resolved_elements = []
         if self.elements:
             resolved_elements = [construct(el) for el in self.elements]
@@ -2936,7 +2938,7 @@ class ArrayLiteral(AbstractExpression):
                 'Missing element type for empty array literal'
             )
 
-        self.array_type = resolve_type(self.element_type).array
+        self.array_type = self.element_type.array
 
         return self.construct_static(
             resolved_elements, self.array_type, abstract_expr=self
