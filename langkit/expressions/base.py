@@ -3403,6 +3403,8 @@ class PropertyDef(AbstractNodeData):
         of its evaluation.
         """
 
+        self._is_reachable: Opt[bool] = None
+
     @property
     def has_debug_info(self):
         """
@@ -4072,6 +4074,21 @@ class PropertyDef(AbstractNodeData):
             'Cannot use lexical environments, as explicitly forbidden'
         )
         self._uses_envs = True
+
+    @property
+    def is_reachable(self) -> bool:
+        """
+        Return whether this property is considered reachable.
+        """
+        assert self._is_reachable is not None
+        return self._is_reachable
+
+    def set_is_reachable(self, value: bool) -> None:
+        """
+        Set whether this property is to be considered reachable.
+        """
+        assert self._is_reachable is None
+        self._is_reachable = value
 
     def require_untyped_wrapper(self):
         """

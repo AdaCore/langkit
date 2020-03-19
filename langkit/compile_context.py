@@ -1334,6 +1334,75 @@ class CompileCtx:
         self.properties_forwards_callgraph = forwards
         self.properties_backwards_callgraph = backwards
 
+    def compute_reachability(
+        self,
+        forward_map: Dict[PropertyDef, Set[PropertyDef]],
+    ) -> Set[PropertyDef]:
+        """
+        Compute the set of properties that are transitively called (according
+        to the given forward map) by a public property, Predicate parsers in
+        the grammar or resolvers in env specs. Also assume that all internal
+        properties are reachable.
+        """
+        from langkit.expressions import resolve_property
+        from langkit.parsers import Predicate
+
+        reachable_set = set()
+
+        # First compute the set of properties called by Predicate parsers
+        called_by_grammar = set()
+
+        def visit_parser(parser):
+            if isinstance(parser, Predicate):
+                called_by_grammar.add(resolve_property(parser.property_ref))
+            for child in parser.children:
+                visit_parser(child)
+
+        for rule in self.grammar.rules.values():
+            visit_parser(rule)
+
+        # Consider the following internal properties as "first reachables":
+        #
+        # * public and internal properties;
+        # * properties with "warn_on_unused" disabled;
+        # * properties used as entity/env resolvers.
+
+        queue = {p
+                 for p in forward_map
+                 if p.is_public or p.is_internal or not p.warn_on_unused}
+        queue.update(called_by_grammar)
+
+        for astnode in self.astnode_types:
+            if astnode.env_spec:
+                queue.update(
+                    action.resolver for action in astnode.env_spec.actions
+                    if action.resolver
+                )
+
+        # Propagate the "reachability" attribute to called properties,
+        # transitively.
+        while queue:
+            prop = queue.pop()
+            reachable_set.add(prop)
+            queue.update(p for p in forward_map[prop]
+                         if p not in reachable_set)
+
+        return reachable_set
+
+    def compute_is_reachable_attr(self) -> None:
+        """
+        Pass that will compute the `is_reachable` attribute for every property.
+        Reachable properties are properties that transitively called by a
+        public property, Predicate parsers in the grammar or resolvers in env
+        specs. Also assume that all internal properties are reachable.
+        """
+        assert self.properties_forwards_callgraph is not None
+        reachable_properties = self.compute_reachability(
+            self.properties_forwards_callgraph
+        )
+        for prop in self.all_properties(include_inherited=False):
+            prop.set_is_reachable(prop in reachable_properties)
+
     def compute_uses_entity_info_attr(self):
         """
         Pass that will compute the `uses_entity_info` attribute for every
@@ -1436,9 +1505,6 @@ class CompileCtx:
         Check that all private properties are actually used: if one is not,
         it is useless, so emit a warning for it.
         """
-        from langkit.expressions import resolve_property
-        from langkit.parsers import Predicate
-
         forwards_strict = self.properties_forwards_callgraph
 
         # Compute the callgraph with flattened subclassing information:
@@ -1448,48 +1514,10 @@ class CompileCtx:
             root = prop.root_property
             forwards[root].update(c.root_property for c in called)
 
-        # Compute the set of properties that are transitively called by a
-        # public property or by Predicate parsers in the grammar. Assume that
-        # internal properties are used.
-
-        # First compute the set of properties called by Predicate parsers
-        called_by_grammar = set()
-
-        def visit_parser(parser):
-            if isinstance(parser, Predicate):
-                called_by_grammar.add(resolve_property(parser.property_ref))
-            for child in parser.children:
-                visit_parser(child)
-
-        for rule in self.grammar.rules.values():
-            visit_parser(rule)
-
         # The first is for strict analysis while the second one simplifies
         # properties to their root.
-        reachable_by_public_strict = set()
-        reachable_by_public = set()
-
-        def compute_reachable(reachable_set, forward_map):
-            queue = {p for p in forward_map
-                     if p.is_public or p.is_internal or not p.warn_on_unused}
-            queue.update(called_by_grammar)
-
-            # Don't forget to tag properties used as entity/env resolvers as
-            # reachable.
-            for astnode in self.astnode_types:
-                if astnode.env_spec:
-                    queue.update(
-                        action.resolver for action in astnode.env_spec.actions
-                        if action.resolver
-                    )
-
-            while queue:
-                prop = queue.pop()
-                reachable_set.add(prop)
-                queue.update(p for p in forward_map[prop]
-                             if p not in reachable_set)
-        compute_reachable(reachable_by_public_strict, forwards_strict)
-        compute_reachable(reachable_by_public, forwards)
+        reachable_by_public_strict = self.compute_reachability(forwards_strict)
+        reachable_by_public = self.compute_reachability(forwards)
 
         # The unused private properties are the ones that are not part of this
         # set.
@@ -1972,6 +2000,8 @@ class CompileCtx:
             GlobalPass('compute uses envs attribute',
                        CompileCtx.compute_uses_envs_attr),
             EnvSpecPass('check env specs', EnvSpec.check_spec),
+            GlobalPass('compute is reachable attribute',
+                       CompileCtx.compute_is_reachable_attr),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
             GlobalPass('warn on unreachable base properties',
