@@ -1944,8 +1944,9 @@ package body ${ada_lib_name}.Implementation is
             end if;
 
             --  Call recursively on children
-            for C of ${root_node_array.array_type_name}'(Children (Node)) loop
-               Result := Populate_Internal (C, Node.Self_Env) or else Result;
+            for I in First_Child_Index (Node) .. Last_Child_Index (Node) loop
+               Result := Populate_Internal
+                 (Child (Node, I), Node.Self_Env) or else Result;
             end loop;
 
             Post_Env_Actions (Node, Initial_Env, Root_Env);
