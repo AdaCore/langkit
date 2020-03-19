@@ -1,10 +1,11 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="extensions.mako" />
-<%namespace name="memoization"   file="memoization_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="extensions.mako" />
+<%namespace name="memoization"    file="memoization_ada.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
@@ -1167,6 +1168,12 @@ package body ${ada_lib_name}.Implementation is
 
    % for array_type in ctx.array_types:
       ${array_types.body(array_type)}
+   % endfor
+
+   % for iterator_type in ctx.iterator_types:
+      % if iterator_type.is_used:
+         ${iterator_types.body(iterator_type)}
+      % endif
    % endfor
 
    ---------
@@ -4743,6 +4750,39 @@ package body ${ada_lib_name}.Implementation is
       if Self.Context.Released
          or else Self.Context.Serial_Number /= Self.Context_Serial
          or else Self.Unit.Unit_Version /= Self.Unit_Version
+      then
+         raise Stale_Reference_Error;
+      end if;
+   end Check_Safety_Net;
+
+   -----------------------
+   -- Create_Safety_Net --
+   -----------------------
+
+   function Create_Safety_Net
+     (Context : Internal_Context) return Iterator_Safety_Net
+   is
+   begin
+      return (Context         => Context,
+              Context_Serial  => Context.Serial_Number,
+              Context_Version => Context.Cache_Version);
+   end Create_Safety_Net;
+
+   ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Self : Iterator_Safety_Net) is
+   begin
+      if Self.Context = null then
+         return;
+      end if;
+
+      --  Check that Self's context has not been release (see the
+      --  Context_Pool). Then check that the context version is the same.
+      if Self.Context.Released
+         or else Self.Context.Serial_Number /= Self.Context_Serial
+         or else Self.Context.Cache_Version /= Self.Context_Version
       then
          raise Stale_Reference_Error;
       end if;

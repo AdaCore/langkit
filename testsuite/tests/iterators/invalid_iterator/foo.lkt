@@ -1,0 +1,16 @@
+import lexer_example
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+
+}
+
+@root_node class FooNode {
+}
+
+class Example : FooNode {
+
+    @export fun values_array (): Array[Int] = [1, 2, 3]
+
+    @export fun values_iterator (): Iterator[Int] =
+    node.values_array().to_iterator
+}

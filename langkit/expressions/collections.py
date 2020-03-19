@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from itertools import count
 import types
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import funcy
 
@@ -13,10 +13,10 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
-    FieldAccessExpr, NullCheckExpr, PropertyDef, SequenceExpr, T,
-    UncheckedCastExpr, attr_call, attr_expr, auto_attr, auto_attr_custom,
-    construct, render, unsugar
+    AbstractExpression, AbstractNodeData, AbstractVariable, Argument, CallExpr,
+    ComputingExpr, FieldAccessExpr, NullCheckExpr, PropertyDef,
+    ResolvedExpression, SequenceExpr, T, UncheckedCastExpr, attr_call,
+    attr_expr, auto_attr, auto_attr_custom, construct, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -924,3 +924,35 @@ class Concat(AbstractExpression):
 
     def __repr__(self):
         return '<Concat>'
+
+
+def make_to_iterator(
+    prefix: ResolvedExpression,
+    node_data: AbstractNodeData,
+    args: List[Tuple[Argument, ResolvedExpression]],
+    abstract_expr: Optional[AbstractExpression] = None
+) -> ResolvedExpression:
+    """
+    Turn an array into an iterator.
+
+    :param prefix: Expression for the array to turn into an iterator.
+    :param node_data: "to_iterator" property that this expression calls in the
+        DSL.
+    :param args: Arguments for the "to_iterator" property (i.e. an empty list).
+    :param abstract_expr: See ResolvedExpression's constructor.
+    :return: Resolved expression for the iterator creator.
+    """
+    assert not args
+    elt_type = prefix.type.element_type
+
+    # Make sure we generate code for this iterator type
+    elt_type.create_iterator(used=True)
+
+    return CallExpr(
+        result_var_name="Iter",
+        name=node_data.name,
+        type=elt_type.iterator,
+        exprs=[prefix, "Self.Unit.Context"],
+        shadow_args=[node_data],
+        abstract_expr=abstract_expr,
+    )

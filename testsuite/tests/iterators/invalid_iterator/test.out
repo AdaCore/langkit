@@ -1,0 +1,2 @@
+test.py:XXX: error: Type Int has no 'to_iterator' field or property
+Done

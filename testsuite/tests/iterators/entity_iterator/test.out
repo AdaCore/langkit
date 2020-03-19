@@ -1,0 +1,21 @@
+main.py: Running...
+Array result:
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+Iterator result:
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+main.py: Done.
+main.adb: Running...
+Iterating though array...
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+Iterating though iterator...
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+  <Example main.txt:1:1-1:8>
+main.adb: Done.
+Done

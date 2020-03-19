@@ -1,9 +1,10 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="../extensions.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>
 
@@ -521,6 +522,16 @@ private package ${ada_lib_name}.Implementation.C is
       % endif
    % endfor
 
+   --------------------
+   -- Iterator types --
+   --------------------
+
+   % for iterator_type in ctx.iterator_types:
+       % if iterator_type.exposed and iterator_type.emit_c_type:
+           ${iterator_types.decl(iterator_type)}
+       % endif
+   % endfor
+
    ----------
    -- Misc --
    ----------
@@ -677,6 +688,15 @@ private package ${ada_lib_name}.Implementation.C is
            (${array_type.name}, ${T.entity.array.name});
          function Convert is new Ada.Unchecked_Conversion
            (${T.entity.array.name}, ${array_type.name});
+      % endif
+   % endfor
+
+   % for iterator_type in ctx.iterator_types:
+      % if iterator_type.element_type.is_entity_type and \
+            iterator_type.element_type != T.entity and \
+            iterator_type.is_used:
+         function Convert is new Ada.Unchecked_Conversion
+           (${iterator_type.name}, ${T.entity.iterator.name});
       % endif
    % endfor
 

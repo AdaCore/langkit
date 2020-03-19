@@ -1,11 +1,12 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="extensions.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="extensions.mako" />
 <%namespace name="public_properties"
             file="properties/public_wrappers_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
 
 with Ada.Containers;
 private with Ada.Finalization;
@@ -354,6 +355,10 @@ package ${ada_lib_name}.Analysis is
          % if t.exposed:
             ${array_types.public_api_decl(t)}
          % endif
+      % elif t.is_iterator_type:
+        % if t.exposed:
+            ${iterator_types.public_api_decl(t)}
+        % endif
       % elif t.is_struct_type:
          % if t.exposed and not t.is_entity_type:
             ${struct_types.public_api_decl(t)}
@@ -649,6 +654,10 @@ private
          % if t.exposed:
             ${array_types.public_api_private_decl(t)}
          % endif
+      % elif t.is_iterator_type:
+        % if t.exposed:
+            ${iterator_types.public_api_private_decl(t)}
+        % endif
       % elif t.is_struct_type:
          % if t.exposed and not t.is_entity_type:
             ${struct_types.public_api_private_decl(t)}

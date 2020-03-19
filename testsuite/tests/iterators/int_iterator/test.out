@@ -1,0 +1,36 @@
+main.py: Running...
+Iterating through iterator...
+[1, 2, 3]
+1
+2
+3
+
+Identity on a null iterator...
+-> None
+
+Identity on a stale iterator...
+... got no exception
+
+main.py: Done.
+main.adb: Running...
+Iterating through array...
+ 1
+ 2
+ 3
+
+Iterating though iterator...
+ 1
+ 2
+ 3
+
+Identity on an unintialized (null) iterator...
+... got no exception
+
+Next on an unintialized (null) iterator...
+... got a precondition failure
+
+Identity on a stale iterator...
+... got a stale reference error
+
+main.adb: Done.
+Done

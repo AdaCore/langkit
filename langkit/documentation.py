@@ -575,6 +575,45 @@ base_langkit_docs = {
     """,
 
     #
+    # Iterators
+    #
+
+    'langkit.iterator_type': """
+        % if lang == 'python':
+        Base class for Ada iterator bindings.
+
+        % endif;
+        An iterator provides a mean to retrieve values one-at-a-time.
+
+        % if lang == 'ada':
+        Resource management for iterators is automatic.
+        % endif
+
+        Currently, each iterator is bound to the analysis context used to
+        create it. Iterators are invalidated as soon as any unit of that
+        analysis is reparsed. Due to the nature of iterators (lazy
+        computations), this invalidation is necessary to avoid use of
+        inconsistent state, such as an iterator trying to use analysis context
+        data that is stale.
+    """,
+
+    'langkit.iterator_next': """
+        % if lang == 'c':
+        Set the next value from the iterator in the given element pointer.
+        Return ``1`` if successful, otherwise ``0``.
+        % elif lang == 'ada':
+        Set the next value from the iterator in the given out argument.
+        Return True if successful, otherwise False.
+        % elif lang == 'python':
+        Return the next value from the iterator. Raises ``StopIteration`` if
+        there is no more element to retrieve.
+        % endif
+
+        This raises a ``Stale_Reference_Error`` exception if the iterator is
+        invalidated.
+    """,
+
+    #
     # Unit providers
     #
 

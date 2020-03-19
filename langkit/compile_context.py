@@ -35,7 +35,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 
 
 if TYPE_CHECKING:
-    from langkit.compiled_types import StructType, UserField
+    from langkit.compiled_types import IteratorType, StructType, UserField
     from langkit.expressions import PropertyDef
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
@@ -559,6 +559,11 @@ class CompileCtx:
         automatically happen.
 
         :type: list[langkit.compiled_types.ArrayType]
+        """
+
+        self._iterator_types: List[IteratorType] = None
+        """
+        List of all IteratorType instances.
         """
 
         self._composite_types = None
@@ -1894,6 +1899,11 @@ class CompileCtx:
         return self._array_types
 
     @property
+    def iterator_types(self) -> List[IteratorType]:
+        assert self._iterator_types is not None
+        return self._iterator_types
+
+    @property
     def struct_types(self):
         assert self._struct_types is not None
         return self._struct_types
@@ -2286,7 +2296,7 @@ class CompileCtx:
         types. For instance: (1) is an array of (2) and (2) is a struct that
         contains (1).
         """
-        from langkit.compiled_types import CompiledTypeRepo
+        from langkit.compiled_types import CompiledTypeRepo, T
 
         def dependencies(typ):
             """
@@ -2306,6 +2316,9 @@ class CompileCtx:
             elif typ.is_array_type:
                 result = [typ.element_type]
 
+            elif typ.is_iterator_type:
+                result = [typ.element_type]
+
             else:
                 assert False, 'Invalid composite type: {}'.format(typ.dsl_name)
 
@@ -2316,13 +2329,24 @@ class CompileCtx:
         # by accident.
         struct_types = CompiledTypeRepo.struct_types
         array_types = CompiledTypeRepo.array_types
+        iterator_types = set(CompiledTypeRepo.iterator_types)
         CompiledTypeRepo.struct_types = None
         CompiledTypeRepo.array_types = None
+        CompiledTypeRepo.iterator_types = None
 
-        # Sort the struct and array types by dependency order
+        # To avoid generating too much bloat, we generate C API interfacing
+        # code only for iterators on root entities.  Bindings for iterators on
+        # all other entity types can re-use this code, as all entity types have
+        # the same ABI. This means we expose iterator for root entities as soon
+        # as an iterator on any entity type is exposed.
+        if any(t.element_type.is_entity_type for t in iterator_types):
+            iterator_types.add(T.entity.iterator)
+
+        # Sort the composite types by dependency order
         types_and_deps = (
             [(st, dependencies(st)) for st in struct_types]
-            + [(at, dependencies(at)) for at in array_types])
+            + [(at, dependencies(at)) for at in array_types]
+            + [(it, dependencies(it)) for it in iterator_types])
         try:
             self._composite_types = topological_sort(types_and_deps)
         except TopologicalSortError as exc:
@@ -2337,6 +2361,8 @@ class CompileCtx:
 
         self._array_types = [t for t in self._composite_types
                              if t.is_array_type]
+        self._iterator_types = [t for t in self._composite_types
+                                if t.is_iterator_type]
         self._struct_types = [t for t in self._composite_types
                               if t.is_struct_type]
         self._entity_types = [t for t in self._composite_types
@@ -2348,7 +2374,9 @@ class CompileCtx:
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, Field, StructType
+        from langkit.compiled_types import (
+            ArrayType, Field, IteratorType, StructType, T
+        )
 
         def expose(t, to_internal, for_field, type_use, traceback):
             """
@@ -2394,6 +2422,15 @@ class CompileCtx:
 
                 expose(t.element_type, to_internal, for_field, 'element type',
                        traceback + ['array of {}'.format(t.dsl_name)])
+
+            elif isinstance(t, IteratorType):
+                # See processing for iterators in "compute_composite_types"
+                if t.element_type.is_entity_type:
+                    T.entity.iterator.exposed = True
+                    T.entity.iterator._usage_forced = True
+
+                expose(t.element_type, to_internal, for_field, 'element type',
+                       traceback + ['iterator of {}'.format(t.dsl_name)])
 
             elif isinstance(t, StructType):
                 # Expose all record fields

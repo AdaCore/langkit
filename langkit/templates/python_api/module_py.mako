@@ -8,10 +8,11 @@ Please consider all exported entities whose names that start with an underscore
 directly.
 """
 
-<%namespace name="array_types"   file="array_types_py.mako" />
-<%namespace name="astnode_types" file="astnode_types_py.mako" />
-<%namespace name="struct_types"  file="struct_types_py.mako" />
-<%namespace name="exts"          file="/extensions.mako" />
+<%namespace name="array_types"    file="array_types_py.mako" />
+<%namespace name="iterator_types" file="iterator_types_py.mako" />
+<%namespace name="astnode_types"  file="astnode_types_py.mako" />
+<%namespace name="struct_types"   file="struct_types_py.mako" />
+<%namespace name="exts"           file="/extensions.mako" />
 
 from __future__ import absolute_import, division, print_function
 
@@ -1524,6 +1525,13 @@ ${array_types.base_decl()}
 % for array_type in ctx.array_types:
     % if array_type.exposed and array_type.emit_c_type:
 ${array_types.decl(array_type)}
+    % endif
+% endfor
+
+${iterator_types.base_decl()}
+% for iterator_type in ctx.iterator_types:
+    % if iterator_type.exposed and iterator_type.emit_c_type:
+${iterator_types.decl(iterator_type)}
     % endif
 % endfor
 

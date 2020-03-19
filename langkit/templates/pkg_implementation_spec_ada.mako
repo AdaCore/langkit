@@ -1,12 +1,16 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="extensions.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
-<%namespace name="memoization"   file="memoization_ada.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="extensions.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
+<%namespace name="memoization"    file="memoization_ada.mako" />
 
-<% root_node_array = T.root_node.array %>
+<%
+root_node_array = T.root_node.array
+root_node_iterator = T.root_node.iterator
+%>
 
 with Ada.Containers;              use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
@@ -130,6 +134,28 @@ private package ${ada_lib_name}.Implementation is
    ${ada_doc('langkit.node_is_synthetic', 3)}
 
    ---------------------------
+   -- Iterators safety nets --
+   ---------------------------
+
+   type Iterator_Safety_Net is record
+      Context         : Internal_Context;
+      Context_Serial  : Version_Number;
+      Context_Version : Natural;
+      --  Analysis context, its serial number and version number at the time
+      --  this safety net was produced.
+   end record;
+
+   No_Iterator_Safety_Net : constant Iterator_Safety_Net := (null, 0, 0);
+
+   function Create_Safety_Net
+     (Context : Internal_Context) return Iterator_Safety_Net;
+   --  Create an iterator safety net from the given Context
+
+   procedure Check_Safety_Net (Self : Iterator_Safety_Net);
+   --  Check that the given iterator safety net is still valid, raising a
+   --  Stale_Reference_Error if it is not.
+
+   ---------------------------
    -- Environments handling --
    ---------------------------
 
@@ -150,7 +176,15 @@ private package ${ada_lib_name}.Implementation is
    is (Self.Metadata);
 
    ${array_types.incomplete_decl(T.inner_env_assoc.array)}
+   % if T.inner_env_assoc.iterator.is_used:
+      ${iterator_types.incomplete_decl(T.inner_env_assoc.iterator)}
+   % endif
+
    ${array_types.decl(T.inner_env_assoc.array)}
+   % if T.inner_env_assoc.iterator.is_used:
+      ${iterator_types.decl(T.inner_env_assoc.iterator)}
+   % endif
+
    function Inner_Env_Assoc_Get
      (Self  : ${T.inner_env_assoc.array.name};
       Index : Positive) return ${T.inner_env_assoc.name}
@@ -382,6 +416,16 @@ private package ${ada_lib_name}.Implementation is
       % endif
    % endfor
 
+   ----------------------------------------------
+   -- Iterator types (incomplete declarations) --
+   ----------------------------------------------
+
+   % for iterator_type in ctx.iterator_types:
+      % if not iterator_type.has_early_decl and iterator_type.is_used:
+         ${iterator_types.incomplete_decl(iterator_type)}
+      % endif
+   % endfor
+
    -----------------------------------------
    -- Structure types (full declarations) --
    -----------------------------------------
@@ -402,6 +446,16 @@ private package ${ada_lib_name}.Implementation is
    % for array_type in ctx.array_types:
       % if not array_type.has_early_decl:
          ${array_types.decl(array_type)}
+      % endif
+   % endfor
+
+   --------------------
+   -- Iterator types --
+   --------------------
+
+   % for iterator_type in ctx.iterator_types:
+      % if not iterator_type.has_early_decl and iterator_type.is_used:
+         ${iterator_types.decl(iterator_type)}
       % endif
    % endfor
 
