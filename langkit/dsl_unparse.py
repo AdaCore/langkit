@@ -570,6 +570,10 @@ def emit_expr(expr, **ctx):
         return emit_expr(expr, **full_ctx)
 
     def ee_pexpr(expr, **extra_ctx):
+        # We don't want to carry an arg_expr data left in the context from a
+        # previous call, it needs to be specified in each call to ee_pexpr.
+        ctx.pop('arg_expr', None)
+
         full_ctx = dict(ctx, **extra_ctx)
         return emit_paren_expr(expr, **full_ctx)
 
