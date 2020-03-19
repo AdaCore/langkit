@@ -1,0 +1,22 @@
+lexer foo_lexer {
+
+    example <- "e"
+    @trivia() whitespace <- " "
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("e"))
+
+}
+
+@abstract class FooNode : Node {
+
+    @export fun get_as_array (): Array[FooNode] =
+    node.children_env().get("example")
+
+    @export fun get_as_iterator (): Iterator[FooNode] =
+    node.get_as_array().to_iterator()
+}
+
+class Example : FooNode {
+}

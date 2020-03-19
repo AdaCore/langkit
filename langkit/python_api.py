@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, cast
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import ArrayType, CompiledType, T
+from langkit.compiled_types import ArrayType, CompiledType, IteratorType, T
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type
 
@@ -69,6 +69,9 @@ class PythonAPISettings(AbstractAPISettings):
                 self.array_wrapper(cast(ArrayType, type)),
                 from_field_access
             )),
+            (ct.IteratorType, lambda _: '{}._wrap({{}})'.format(
+                self.iterator_wrapper(cast(IteratorType, type))
+            )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
             (T.BigInt, lambda _: '_big_integer.wrap({})'),
@@ -118,6 +121,8 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda cls:
                 '{}.unwrap({{value}}{{context}})'
                 .format(self.array_wrapper(cls))),
+            (ct.IteratorType, lambda cls:
+                '{}.unwrap({{value}})'.format(self.iterator_wrapper(cls))),
             (ct.StructType, lambda _:
                 '{}._unwrap({{value}}{{context}})'
                 .format(self.type_public_name(type))),
@@ -133,11 +138,15 @@ class PythonAPISettings(AbstractAPISettings):
         """
         See ``unwrap_value``.
         """
-        # All ref-counted types are translated to fully native Python objects.
-        # For them, we need to create a wrapper that owns the C value during
-        # the call to a property. Such wrappers always have a "c_value"
-        # attribute to get the actual value to pass to C APIs.
-        return '{}.c_value'.format(value) if type.is_refcounted else value
+        # All ref-counted types except iterators are translated to fully native
+        # Python objects. For them, we need to create a wrapper that owns the C
+        # value during the call to a property. Such wrappers always have a
+        # "c_value" attribute to get the actual value to pass to C APIs.
+        return (
+            value
+            if type.is_iterator_type or not type.is_refcounted
+            else '{}.c_value'.format(value)
+        )
 
     def c_type(self, type: CompiledType) -> str:
         """
@@ -161,6 +170,8 @@ class PythonAPISettings(AbstractAPISettings):
                 self.type_public_name(ct.T.root_node))),
             (ct.ArrayType, lambda cls:
                 '{}.c_type'.format(self.array_wrapper(cls))),
+            (ct.IteratorType, lambda cls:
+                '{}._c_type'.format(self.iterator_wrapper(cls))),
             (T.entity_info, lambda _: '_EntityInfo_c_type'),
             (T.env_md, lambda _: '_Metadata_c_type'),
             (ct.EntityType, lambda _: '_Entity_c_type'),
@@ -173,6 +184,11 @@ class PythonAPISettings(AbstractAPISettings):
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
                 array_type).py_converter
+
+    def iterator_wrapper(self, iterator_type: IteratorType) -> str:
+        return (ct.T.entity.iterator
+                if iterator_type.element_type.is_entity_type else
+                iterator_type).api_name.camel
 
     def type_public_name(self, type: CompiledType) -> str:
         """
@@ -196,6 +212,7 @@ class PythonAPISettings(AbstractAPISettings):
                 if type.element_type.is_character_type
                 else'List[{}]'.format(self.type_public_name(type.element_type))
             )),
+            (ct.IteratorType, lambda _: type.api_name.camel),
             (ct.StructType, lambda _: type.api_name.camel),
             (T.BigInt, lambda _: 'int'),
         ])

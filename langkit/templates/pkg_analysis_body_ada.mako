@@ -1,9 +1,10 @@
 ## vim: filetype=makoada
 
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="exts"          file="extensions.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="exts"           file="extensions.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
 <%namespace name="public_properties"
             file="properties/public_wrappers_ada.mako" />
 
@@ -46,6 +47,10 @@ package body ${ada_lib_name}.Analysis is
 
    % for array_type in ctx.array_types:
       ${array_types.ada_api_converters_decl(array_type)}
+   % endfor
+
+   % for iterator_type in ctx.iterator_types:
+      ${iterator_types.ada_api_converters_decl(iterator_type)}
    % endfor
 
    % for struct_type in ctx.struct_types:
@@ -759,6 +764,12 @@ package body ${ada_lib_name}.Analysis is
 
    % for array_type in ctx.array_types:
       ${array_types.ada_api_converters_body(array_type)}
+   % endfor
+
+   % for iterator_type in ctx.iterator_types:
+      % if iterator_type.exposed:
+         ${iterator_types.public_api_body(iterator_type)}
+      % endif
    % endfor
 
    % for struct_type in ctx.struct_types:
