@@ -318,7 +318,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_lookup_token', 3)}
 
    procedure Dump_Lexical_Env (Unit : Analysis_Unit'Class);
-   --  Debug helper: output the lexical envs for given analysis unit
+   ${ada_doc('langkit.unit_dump_lexical_env', 3)}
 
    procedure Trigger_Envs_Debug (Is_Active : Boolean);
    --  Debug helper: activate debug traces for lexical envs lookups

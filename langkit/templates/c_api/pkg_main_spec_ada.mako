@@ -316,6 +316,12 @@ private package ${ada_lib_name}.Implementation.C is
            External_Name => "${capi.get_name('unit_lookup_token')}";
    ${ada_c_doc('langkit.unit_lookup_token', 3)}
 
+   procedure ${capi.get_name('unit_dump_lexical_env')}
+     (Unit : ${analysis_unit_type})
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name('unit_dump_lexical_env')}";
+
    function ${capi.get_name('unit_filename')}
      (Unit : ${analysis_unit_type})
       return chars_ptr

@@ -709,6 +709,11 @@ class AnalysisUnit(object):
         _unit_lookup_token(unit, ctypes.byref(_sloc), ctypes.byref(tok))
         return tok._wrap()
 
+    def _dump_lexical_env(self):
+        ${py_doc('langkit.unit_dump_lexical_env', 8)}
+        unit = AnalysisUnit._unwrap(self)
+        _unit_dump_lexical_env(unit)
+
     def iter_tokens(self):
         """
         Return an iterator that yields all the tokens in this unit.
@@ -1711,6 +1716,10 @@ _unit_lookup_token = _import_func(
      ctypes.POINTER(Sloc._c_type),
      ctypes.POINTER(Token)],
     None
+)
+_unit_dump_lexical_env = _import_func(
+    "${capi.get_name('unit_dump_lexical_env')}",
+    [AnalysisUnit._c_type], None
 )
 _unit_filename = _import_func(
     "${capi.get_name('unit_filename')}",

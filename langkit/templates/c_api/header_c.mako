@@ -306,6 +306,10 @@ ${c_doc('langkit.unit_trivia_count')}
 extern int
 ${capi.get_name('unit_trivia_count')}(${analysis_unit_type} unit);
 
+${c_doc('langkit.unit_dump_lexical_env')}
+extern void
+${capi.get_name('unit_dump_lexical_env')}(${analysis_unit_type} unit);
+
 ${c_doc('langkit.unit_filename')}
 extern char *
 ${capi.get_name('unit_filename')}(${analysis_unit_type} unit);
