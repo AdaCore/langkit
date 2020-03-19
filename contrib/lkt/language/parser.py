@@ -1627,6 +1627,24 @@ class NotExpr(Expr):
     expr = Field(type=T.Expr)
 
 
+class ExcludesNull(LKNode):
+    """
+    Whether the containing cast expression will raise on null cast result or
+    not.
+    """
+    enum_node = True
+    qualifier = True
+
+
+class CastExpr(Expr):
+    """
+    Cast expression.
+    """
+    expr = Field(type=T.Expr)
+    excludes_null = Field(type=T.ExcludesNull)
+    dest_type = Field(type=T.TypeRef)
+
+
 class Isa(Expr):
     """
     Isa expression.
@@ -2102,7 +2120,7 @@ lkt_grammar.add_rules(
         LexerCaseRuleCondAlt(
             "if",
             Lex.Identifier(match_text="previous_token"),
-            "isa", List(G.ref_id, sep="|", empty_valid=False),
+            "is", List(G.ref_id, sep="|", empty_valid=False),
             "then", G.lexer_case_send
         ),
         LexerCaseRuleDefaultAlt(
@@ -2341,7 +2359,7 @@ lkt_grammar.add_rules(
     ),
 
     isa_or_primary=GOr(
-        Isa(G.primary, "isa", List(G.type_ref, sep="|", empty_valid=False)),
+        Isa(G.primary, "is", List(G.type_ref, sep="|", empty_valid=False)),
         G.primary
     ),
 
@@ -2387,6 +2405,12 @@ lkt_grammar.add_rules(
         NullCondCallExpr(G.basic_expr, "?", "(", G.params, ")"),
         GenericInstantiation(G.basic_expr, "[", G.type_list, "]"),
         ErrorOnNull(G.basic_expr, "!"),
+        CastExpr(
+            G.basic_expr, ".",
+            Lex.Identifier(match_text="as"),
+            ExcludesNull("!"),
+            "[", G.type_ref, "]"
+        ),
         DotExpr(G.basic_expr, ".", G.ref_id),
         NullCondDottedName(G.basic_expr, "?", ".", G.ref_id),
         G.term

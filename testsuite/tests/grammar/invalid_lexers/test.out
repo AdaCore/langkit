@@ -14,7 +14,7 @@ case_3.lkt:3:5: Error: Invalid case rule topology
 case_4.lkt:3:5: Error: Invalid case rule topology
 
 == case_5.lkt ==
-case_5.lkt:4:37: Error: Unknown token: bar
+case_5.lkt:4:36: Error: Unknown token: bar
 
 == case_6.lkt ==
 case_6.lkt:5:24-5:27: Expected Number, got Identifier

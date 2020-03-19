@@ -23,7 +23,7 @@ grammar foo_grammar {
 
     @export fun null_node_unit (): InternalUnit = node.null_node().unit()
 
-    @export fun cast_null_node (): Name = node.null_node().to[Name]
+    @export fun cast_null_node (): Name = node.null_node().as[Name]
 
     @export fun match_null_node (): Expression = match node.null_node().node {
         case l : Literal => l

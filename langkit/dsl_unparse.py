@@ -670,7 +670,7 @@ def emit_expr(expr, **ctx):
             repr(expr.message) if expr.message else ""
         )
     elif isinstance(expr, IsA):
-        return "{} isa {}".format(
+        return "{} is {}".format(
             ee_pexpr(expr.expr),
             "{}".format(" | ".join(type_name(t) for t in expr.astnodes))
         )
@@ -773,7 +773,7 @@ def emit_expr(expr, **ctx):
         return "{}.is_null".format(ee(expr.expr))
 
     elif isinstance(expr, Cast):
-        return "{}.to[{}]{}".format(
+        return "{}.as[{}]{}".format(
             ee(expr.expr),
             type_name(expr.dest_type),
             "!" if expr.do_raise else "",
@@ -1276,7 +1276,7 @@ def unparse_lexer_rule_set(newline_afters, rule_set):
             alt.match_size
         )
         if alt.prev_token_cond is not None:
-            return "if previous_token isa {} then {}".format(
+            return "if previous_token is {} then {}".format(
                 " | ".join(
                     format_token_name(cond.name)
                     for cond in alt.prev_token_cond

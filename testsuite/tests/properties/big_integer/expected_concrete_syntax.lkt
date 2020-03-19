@@ -74,7 +74,7 @@ class Ref : Expr {
     @parse_field name : Identifier
 
     fun evaluate (): BigInt =
-    node.node_env().get_first(node.name.symbol).to[Decl].expr_tree.evaluate()
+    node.node_env().get_first(node.name.symbol).as[Decl].expr_tree.evaluate()
 }
 
 class Identifier : FooNode {

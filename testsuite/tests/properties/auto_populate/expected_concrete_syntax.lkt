@@ -24,7 +24,7 @@ class Ref : FooNode {
     @export fun decl_wrapper (): Decl = self.decl()
 
     @export fun decl (): Decl =
-    node.children_env().get_first(node.name).to[Decl]!
+    node.children_env().get_first(node.name).as[Decl]!
 }
 
 struct EnvAssoc {

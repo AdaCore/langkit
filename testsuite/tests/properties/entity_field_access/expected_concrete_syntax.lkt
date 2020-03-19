@@ -14,7 +14,7 @@ grammar foo_grammar {
     @export fun second_set (): Bool = self.info.md.is_second
 
     @export fun test_main (): FooNode =
-    node.as_entity.to[Couple].first_entity().first
+    node.as_entity.as[Couple].first_entity().first
 }
 
 class Couple : FooNode {
