@@ -876,6 +876,10 @@ class FieldAccess(AbstractExpression):
             self.receiver_expr, to_get, arg_exprs, self.is_deref,
             abstract_expr=self
         )
+
+        # RA22-015: keep a reference to the constructed expr, so that we can
+        # introspect which field is accessed in dsl_unparse.
+        self.constructed_expr = ret
         return ret
 
     def __call__(self, *args, **kwargs):

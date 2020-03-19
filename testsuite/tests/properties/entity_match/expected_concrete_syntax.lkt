@@ -22,14 +22,14 @@ class Literal : FooNode {
 
     fun a (): FooNode
 
-    @export fun b (): Int = match node.a {
-        case e : Example => e.get_num
-        case c : FooNode => c.get_num
+    @export fun b (): Int = match node.a() {
+        case e : Example => e.get_num()
+        case c : FooNode => c.get_num()
     }
 
-    @export fun c (): Int = match node.a {
-        case e : Example => e.get_num
-        case c : FooNode => c.get_num
+    @export fun c (): Int = match node.a() {
+        case e : Example => e.get_num()
+        case c : FooNode => c.get_num()
     }
 
     fun a (): FooNode

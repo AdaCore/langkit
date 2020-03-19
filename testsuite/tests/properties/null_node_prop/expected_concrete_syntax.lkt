@@ -6,7 +6,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun eval_unit (): Bool = null.prop
+    @export fun eval_unit (): Bool = null.prop()
 
     fun prop (): Bool = true
 }

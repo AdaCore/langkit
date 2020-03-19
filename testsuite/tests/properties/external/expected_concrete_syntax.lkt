@@ -22,5 +22,5 @@ class Plus : Expression {
     @parse_field left : Literal
     @parse_field right : Expression
 
-    fun result (): Int = node.left.result + node.right.result
+    fun result (): Int = node.left.result() + node.right.result()
 }

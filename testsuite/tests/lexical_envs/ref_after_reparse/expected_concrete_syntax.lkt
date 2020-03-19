@@ -33,19 +33,19 @@ class Name : FooNode {
     fun ambiant_entity (): FooNode = env.get(node)?(0)
 
     fun designated_env (): LexicalEnv =
-    node.unit.root.node_env.get(node)?(0).children_env
+    node.unit().root.node_env().get(node)?(0).children_env()
 
     @export fun entity (): FooNode = {
-        bind env = node.node_env;
+        bind env = node.node_env();
 
-        node.ambiant_entity
+        node.ambiant_entity()
     }
 }
 
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun entity (): FooNode = node.as_entity.name.entity
+    @export fun entity (): FooNode = node.as_entity.name.entity()
 }
 
 class Using : FooNode {

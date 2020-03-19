@@ -12,8 +12,7 @@ grammar foo_grammar {
 
 class Id : FooNode {
 
-    @export fun get_scope (): FooNode =
-    node.children_env.get("Scope", only_first=true)
+    @export fun get_scope (): FooNode = node.children_env().get_first("Scope")
 }
 
 class Scope : FooNode {

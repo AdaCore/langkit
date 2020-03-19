@@ -49,13 +49,13 @@ class Ref : Atom {
     @parse_field name : Name
 
     @export fun resolve (): Def =
-    node.node_env.get(node.name.symbol, only_first=true).to[Def]!
+    node.node_env().get_first(node.name.symbol).to[Def]!
 
-    fun evaluate_abstract (): Int = node.resolve.expr.evaluate_abstract
+    fun evaluate_abstract (): Int = node.resolve().expr.evaluate_abstract()
 
-    fun evaluate_concrete (): Int = node.resolve.expr.evaluate_concrete
+    fun evaluate_concrete (): Int = node.resolve().expr.evaluate_concrete()
 
-    fun evaluate_entity (): Int = self.resolve.expr.evaluate_entity
+    fun evaluate_entity (): Int = self.resolve().expr.evaluate_entity()
 }
 
 class Plus : Expr {
@@ -63,16 +63,16 @@ class Plus : Expr {
     @parse_field rhs : Expr
 
     fun evaluate_abstract (): Int =
-    node.lhs.evaluate_abstract + node.rhs.evaluate_abstract
+    node.lhs.evaluate_abstract() + node.rhs.evaluate_abstract()
 
     fun evaluate_rtcheck (): Int =
-    node.lhs.evaluate_rtcheck + node.rhs.evaluate_rtcheck
+    node.lhs.evaluate_rtcheck() + node.rhs.evaluate_rtcheck()
 
     fun evaluate_concrete (): Int =
-    node.lhs.evaluate_concrete + node.rhs.evaluate_concrete
+    node.lhs.evaluate_concrete() + node.rhs.evaluate_concrete()
 
     fun evaluate_entity (): Int =
-    self.lhs.evaluate_entity + self.rhs.evaluate_entity
+    self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
 }
 
 class Name : FooNode {

@@ -41,14 +41,14 @@ grammar foo_grammar {
 
     @export fun eval (): Int
 
-    @export fun eval_plus (addend : Expr): Int = node.eval + addend.eval
+    @export fun eval_plus (addend : Expr): Int = node.eval() + addend.eval()
 }
 
 class Addition : Expr {
     @parse_field lhs : Expr
     @parse_field rhs : Expr
 
-    fun eval (): Int = node.lhs.eval + node.rhs.eval
+    fun eval (): Int = node.lhs.eval() + node.rhs.eval()
 }
 
 class Number : Expr {
@@ -68,9 +68,9 @@ class Ref : Expr {
     @parse_field name : Name
 
     @export fun referenced_var_decl (): VarDecl =
-    node.node_env.get(node.name, only_first=true).to[VarDecl]!
+    node.node_env().get_first(node.name).to[VarDecl]!
 
-    fun eval (): Int = node.referenced_var_decl.eval
+    fun eval (): Int = node.referenced_var_decl().eval()
 }
 
 class Name : FooNode {
@@ -80,7 +80,7 @@ class VarDecl : FooNode {
     @parse_field name : Name
     @parse_field value : Expr
 
-    @export fun eval (): Int = node.value.eval
+    @export fun eval (): Int = node.value.eval()
 }
 
 struct EnvAssoc {

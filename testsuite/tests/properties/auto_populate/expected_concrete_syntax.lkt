@@ -21,10 +21,10 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun decl_wrapper (): Decl = self.decl
+    @export fun decl_wrapper (): Decl = self.decl()
 
     @export fun decl (): Decl =
-    node.children_env.get(node.name, only_first=true).to[Decl]!
+    node.children_env().get_first(node.name).to[Decl]!
 }
 
 struct EnvAssoc {

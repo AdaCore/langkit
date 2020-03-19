@@ -24,12 +24,12 @@ class DottedName : Name {
     @parse_field prefix : Name
     @parse_field suffix : Identifier
 
-    fun referenced_name (): Symbol = node.suffix.referenced_name
+    fun referenced_name (): Symbol = node.suffix.referenced_name()
 
-    fun referenced_parent_scope (): LexicalEnv = node.prefix.referenced_scope
+    fun referenced_parent_scope (): LexicalEnv = node.prefix.referenced_scope()
 
     fun referenced_scope (): LexicalEnv =
-    node.suffix.resolve_scope(node.referenced_parent_scope)
+    node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
 class Identifier : Name {
@@ -38,13 +38,13 @@ class Identifier : Name {
 
     fun resolve_scope (from_env : LexicalEnv): LexicalEnv = {
         val env = from_env.do(
-            (e) => e, default_val=node.referenced_parent_scope
+            (e) => e, default_val=node.referenced_parent_scope()
         );
 
-        env.get(node.symbol)?(0).children_env
+        env.get(node.symbol)?(0).children_env()
     }
 
-    fun referenced_parent_scope (): LexicalEnv = node.unit.root.children_env
+    fun referenced_parent_scope (): LexicalEnv = node.unit().root.children_env()
 
     fun referenced_scope (): LexicalEnv = node.resolve_scope(_)
 }
@@ -52,7 +52,7 @@ class Identifier : Name {
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun resolve (): FooNode = node.name.referenced_scope.env_node
+    @export fun resolve (): FooNode = node.name.referenced_scope().env_node
 }
 
 class Scope : FooNode {

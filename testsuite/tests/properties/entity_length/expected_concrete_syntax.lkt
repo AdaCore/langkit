@@ -13,5 +13,5 @@ class Name : FooNode {
 class Names : FooNode {
     @parse_field names : ASTList[Name]
 
-    @export fun count (): Int = self.names.length
+    @export fun count (): Int = self.names.length()
 }

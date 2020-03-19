@@ -18,10 +18,11 @@ class Literal : FooNode {
 
     fun node (): Literal = node.as_entity
 
-    fun b (): LogicEquation = %eq(node.var, node.a, conv_prop=BareLiteral.node)
+    fun b (): LogicEquation =
+    %eq(node.var, node.a(), conv_prop=BareLiteral.node)
 
     @export fun public_pro (): Literal = {
-        val _ = node.b;
+        val _ = node.b();
 
         node.as_bare_entity
     }

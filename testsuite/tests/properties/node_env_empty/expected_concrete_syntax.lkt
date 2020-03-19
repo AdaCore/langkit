@@ -12,8 +12,7 @@ grammar foo_grammar {
 class Decl : FooNode {
     @parse_field names : ASTList[Name]
 
-    @export fun lookup (n : Name): FooNode =
-    self.node_env.get(n.symbol, only_first=true)
+    @export fun lookup (n : Name): FooNode = self.node_env().get_first(n.symbol)
 }
 
 class Name : FooNode {

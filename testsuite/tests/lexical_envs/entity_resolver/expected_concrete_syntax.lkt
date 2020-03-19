@@ -9,7 +9,7 @@ grammar foo_grammar {
 @root_node class FooNode {
 
     fun resolve_ref (): FooNode = match node {
-        case r : Ref => r.parent.parent.node_env.get(r.name)?(0)
+        case r : Ref => r.parent.parent.node_env().get(r.name)?(0)
         case _ => null
     }
 }
@@ -25,7 +25,7 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 
-    @export fun resolve (): FooNode = node.node_env.get(node.name)?(0)
+    @export fun resolve (): FooNode = node.node_env().get(node.name)?(0)
 }
 
 struct EnvAssoc {

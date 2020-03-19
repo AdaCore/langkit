@@ -11,9 +11,10 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    fun env_struct (): EnvStruct = EnvStruct(env=node.children_env.env_orphan)
+    fun env_struct (): EnvStruct =
+    EnvStruct(env=node.children_env().env_orphan())
 
-    fun env_array (): Array[LexicalEnv] = [node.children_env.env_orphan]
+    fun env_array (): Array[LexicalEnv] = [node.children_env().env_orphan()]
 }
 
 class Decl : FooNode {
@@ -22,13 +23,13 @@ class Decl : FooNode {
     @parse_field items : ASTList[Ref]
 
     @export fun test_env (other : FooNode): Bool =
-    node.children_env.env_orphan = other.children_env.env_orphan
+    node.children_env().env_orphan() = other.children_env().env_orphan()
 
     @export fun test_struct (other : FooNode): Bool =
-    node.env_struct = other.env_struct
+    node.env_struct() = other.env_struct()
 
     @export fun test_array (other : FooNode): Bool =
-    node.env_array = other.env_array
+    node.env_array() = other.env_array()
 }
 
 @qualifier class HasPlus : FooNode {

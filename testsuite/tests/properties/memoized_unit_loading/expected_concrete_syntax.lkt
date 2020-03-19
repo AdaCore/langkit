@@ -14,17 +14,17 @@ class Example : FooNode {
     fun ext_unit_count (): Int
 
     @memoized fun fetch_example_unit (): InternalUnit =
-    node.ext_fetch_example_unit
+    node.ext_fetch_example_unit()
 
-    @memoized fun unit_count (): Int = node.ext_unit_count
+    @memoized fun unit_count (): Int = node.ext_unit_count()
 
     @export @memoized fun mmz_prop (): Array[Int] = {
         # Both calls to unit_count are memoized, but when called for the first
         # time, the first one's result will be different from the second one.
-        val before = [node.unit_count];
+        val before = [node.unit_count()];
         # Update context version by parsing a new unit
-        val _ = node.fetch_example_unit;
-        val after = [node.unit_count];
+        val _ = node.fetch_example_unit();
+        val after = [node.unit_count()];
 
         before & after
     }

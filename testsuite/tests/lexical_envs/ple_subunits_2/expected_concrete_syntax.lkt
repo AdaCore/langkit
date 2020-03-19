@@ -33,11 +33,11 @@ class Dep : FooNode {
 
 class Id : Name {
 
-    fun resolve (): FooNode = node.node_env.get(node, only_first=true)
+    fun resolve (): FooNode = node.node_env().get_first(node)
 
     fun suffix_symbol (): Symbol = node.symbol
 
-    fun symbols (): Array[Symbol] = node.symbol?.singleton
+    fun symbols (): Array[Symbol] = node.symbol?.singleton()
 }
 
 class Prefix : Name {
@@ -45,11 +45,12 @@ class Prefix : Name {
     @parse_field suffix : Id
 
     fun resolve (): FooNode =
-    node.prefix.resolve.children_env.get(node.suffix.symbol, only_first=true)
+    node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 
     fun suffix_symbol (): Symbol = node.suffix.symbol
 
-    fun symbols (): Array[Symbol] = node.prefix.symbols & node.suffix.symbols
+    fun symbols (): Array[Symbol] =
+    node.prefix.symbols() & node.suffix.symbols()
 }
 
 class Scope : FooNode {
@@ -58,10 +59,10 @@ class Scope : FooNode {
     @parse_field defs : ASTList[FooNode]
 
     fun initial_env (): LexicalEnv = match node.name {
-        case p : Prefix => p.prefix.referenced_unit.root.to[ASTList[Scope]]!.filter(
-            (scope) => scope.name.symbols = p.prefix.symbols
-        )(0).children_env
-        case _ => node.children_env
+        case p : Prefix => p.prefix.referenced_unit().root.to[ASTList[Scope]]!.filter(
+            (scope) => scope.name.symbols() = p.prefix.symbols()
+        )(0).children_env()
+        case _ => node.children_env()
     }
 }
 

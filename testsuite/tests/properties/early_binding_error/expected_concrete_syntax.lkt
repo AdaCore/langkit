@@ -12,5 +12,6 @@ class Example : FooNode {
 
     fun pred (): Bool = false
 
-    @export fun do_solving (): Bool = %predicate(BareExample.pred, node.a).solve
+    @export fun do_solving (): Bool =
+    %predicate(BareExample.pred, node.a).solve()
 }
