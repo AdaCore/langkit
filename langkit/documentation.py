@@ -418,6 +418,9 @@ base_langkit_docs = {
         falls after the last token, return the last token. If there is no token
         in this unit, return no token.
     """,
+    'langkit.unit_dump_lexical_env': """
+        Debug helper: output the lexical envs for the given analysis unit.
+    """,
     'langkit.unit_filename': """
         Return the filename this unit is associated to.
 

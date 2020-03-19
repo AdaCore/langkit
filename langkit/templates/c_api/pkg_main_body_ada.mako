@@ -329,6 +329,16 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
+   procedure ${capi.get_name('unit_dump_lexical_env')}
+     (Unit : ${analysis_unit_type}) is
+   begin
+      Clear_Last_Exception;
+      Dump_Lexical_Env (Unit);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    function ${capi.get_name('unit_filename')}
      (Unit : ${analysis_unit_type}) return chars_ptr is
    begin

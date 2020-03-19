@@ -1,0 +1,31 @@
+import lexer_example
+grammar foo_grammar {
+    @main_rule main_rule <- list+(any_decl)
+    any_decl <- or(scope | decl)
+    scope <- Scope(identifier "{" list*(any_decl) "}")
+    decl <- Decl(identifier)
+    identifier <- Identifier(@identifier)
+
+}
+
+@root_node class FooNode {
+}
+
+class Decl : FooNode {
+    @parse_field id : Identifier
+}
+
+class Identifier : FooNode {
+}
+
+class Scope : FooNode {
+    @parse_field name : Identifier
+    @parse_field content : ASTList[FooNode]
+}
+
+struct EnvAssoc {
+    key : Symbol
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
+}
