@@ -1,0 +1,17 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class Example : FooNode {
+
+    @export fun entities_array (): Array[Example] = [self, self, self]
+
+    @export fun entities_iterator (): Iterator[Example] =
+    self.entities_array().to_iterator
+}
