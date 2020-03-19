@@ -2124,6 +2124,10 @@ class CompileCtx(object):
             # Filter types that are relevant for dependency analysis
             return [t for t in result if t.is_struct_type or t.is_array_type]
 
+        # Force creation of the entity iterator type, so that it is available
+        # later during public APIs generation.
+        CompiledTypeRepo.root_grammar_class.entity.iterator
+
         # Collect existing types and make sure we don't create other ones later
         # by accident.
         struct_types = CompiledTypeRepo.struct_types

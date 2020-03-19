@@ -5,7 +5,10 @@
 
   function Next
     (I : ${cls.api_name};
-     E : out ${cls.element_type.api_name}) return Boolean;
+     E : out ${"{}{}".format(
+         cls.element_type.api_name,
+         "'Class" if cls.element_type.is_entity_type else ''
+     )}) return Boolean;
 </%def>
 
 <%def name="public_api_private_decl(cls)">
@@ -46,14 +49,22 @@
 
   function Next
     (I : ${cls.api_name};
-     E : out ${cls.element_type.api_name}) return Boolean
+     E : out ${"{}{}".format(
+         cls.element_type.api_name,
+         "'Class" if cls.element_type.is_entity_type else ''
+     )}) return Boolean
   is
      Internal_Element : ${cls.element_type.name};
      Result           : Boolean :=
         Next (I.Internal_Iterator, Internal_Element);
   begin
      if Result then
+     % if cls.element_type.is_entity_type:
+        E := ${cls.element_type.api_name}'Class
+          (${cls.element_type.to_public_expr('Internal_Element')});
+     % else:
         E := ${cls.element_type.to_public_expr('Internal_Element')};
+     % endif
      end if;
      return Result;
   end Next;

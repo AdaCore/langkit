@@ -690,6 +690,14 @@ private package ${ada_lib_name}.Implementation.C is
       % endif
    % endfor
 
+   % for iterator_type in ctx.iterator_types:
+      % if iterator_type.element_type.is_entity_type and \
+            iterator_type.element_type != T.entity:
+         function Convert is new Ada.Unchecked_Conversion
+           (${iterator_type.name}, ${T.entity.iterator.name});
+      % endif
+   % endfor
+
    pragma Warnings (On, "possible aliasing problem for type");
 
 end ${ada_lib_name}.Implementation.C;
