@@ -9,7 +9,7 @@ from typing import (Dict, List, Optional as Opt, Set, TYPE_CHECKING, Tuple,
                     Union)
 
 from langkit import names
-from langkit.c_api import CAPIType
+from langkit.c_api import CAPISettings, CAPIType
 from langkit.common import is_keyword
 from langkit.compile_context import (CompileCtx, get_context,
                                      get_context_or_none)
@@ -24,7 +24,7 @@ from langkit.utils.types import TypeSet
 
 
 if TYPE_CHECKING:
-    from langkit.expressions import AbstractExpression
+    from langkit.expressions import AbstractExpression, PropertyDef
 
 
 def gdb_helper(*args):
@@ -139,6 +139,11 @@ class CompiledTypeRepo:
     Set of all created ArrayType instances.
     """
 
+    iterator_types: List[IteratorType] = []
+    """
+    Set of all created IteratorType instances.
+    """
+
     root_grammar_class: ASTNodeType
     """
     The ASTNodeType instances used as a root type. Every other ASTNodeType
@@ -171,6 +176,7 @@ class CompiledTypeRepo:
         cls.struct_types = []
         cls.pending_list_types = []
         cls.array_types = set()
+        cls.iterator_types = []
         cls.root_grammar_class = None
         cls.env_metadata = None
         cls.entity_info = None
@@ -1020,6 +1026,13 @@ class CompiledType:
         return isinstance(self, ArrayType)
 
     @property
+    def is_iterator_type(self) -> bool:
+        """
+        Return whether this is an instance of IteratorType.
+        """
+        return isinstance(self, IteratorType)
+
+    @property
     def is_bool_type(self):
         """
         Return whether this is the boolean type.
@@ -1157,8 +1170,8 @@ class CompiledType:
     @property
     def element_type(self):
         """
-        Assuming this is a collection type (array or list) or an entity, return
-        the corresponding element type.
+        Assuming this is a collection type (array, iterator, list) or an
+        entity, return the corresponding element type.
 
         :rtype: CompiledType
         """
@@ -1328,6 +1341,16 @@ class CompiledType:
         """
         return ArrayType(name=self.name + names.Name('Array_Type'),
                          element_type=self)
+
+    # Memoize so that we have only one iterator type for each element type
+    @property  # type: ignore
+    @memoized
+    def iterator(self) -> IteratorType:
+        """
+        Create an iterator type whose element type is `self`.
+        """
+        return IteratorType(name=self.name + names.Name('Iterator_Type'),
+                            element_type=self)
 
     @property
     def is_base_struct_type(self):
@@ -3569,6 +3592,8 @@ class ArrayType(CompiledType):
         nothing)'.
         """
 
+        self._init_fields(self.builtin_properties())
+
     @property
     def name(self):
         return self.element_type.name + names.Name('Array_Access')
@@ -3763,6 +3788,132 @@ class ArrayType(CompiledType):
         # depends on arrays of T.inner_env_assoc, so we need to declare it
         # early.
         return self.element_type == T.inner_env_assoc
+
+    def builtin_properties(self) -> List[Tuple[str, PropertyDef]]:
+        """
+        Return properties available for all array types.
+        """
+        from langkit.expressions import PropertyDef
+
+        builtins = [
+            ('to_iterator', PropertyDef(
+                expr=None, prefix=None, type=self.element_type.iterator,
+                public=False, external=True, uses_entity_info=False,
+                uses_envs=False, optional_entity_info=False,
+                warn_on_unused=False, dynamic_vars=[],
+                doc='Return an iterator on values of this array'
+            ))
+        ]
+
+        # TODO: this is a hack to work around the fact that it is possible for
+        # some types to be created after the "compute_base_properties" pass,
+        # meaning their _base_property field is never initialized.
+        # A real fix would be to have this field be computed lazily on-demand,
+        # but it seems to be incompatible with how dispatching properties
+        # are expanded (see e54387eb3 for more details).
+        for _, property_def in builtins:
+            property_def._base_property = None
+
+        return builtins
+
+
+class IteratorType(CompiledType):
+    """
+    Base class for iterator types.
+    """
+    def __init__(self, name, element_type):
+        self.null_constant: names.Name = names.Name('No') + name
+
+        # By default, iterator types are not exposed. A compilation pass will
+        # tag only the ones that are exposed through the public API.
+        super(IteratorType, self).__init__(
+            name=name, is_ptr=True,
+            is_refcounted=True,
+            nullexpr=self.null_constant.camel_with_underscores,
+            element_type=element_type,
+            has_equivalent_function=False,
+            hashable=False,
+            exposed=False)
+
+        CompiledTypeRepo.iterator_types.append(self)
+
+    @property
+    def name(self) -> names.Name:
+        return self.element_type.name + names.Name('Iterator_Access')
+
+    @property
+    def api_name(self) -> names.Name:
+        """
+        Name of the public iterator type.
+        """
+        return self.element_type.api_name + names.Name('Iterator')
+
+    @property
+    def py_converter(self) -> str:
+        """
+        Name of the Python class used to convert back and forth between
+        user-facing values (iterators) and C API values (pointers to iterator
+        records).
+        """
+        return '_{}Converter'.format(self.api_name.camel)
+
+    def c_type(self, c_api_settings: CAPISettings) -> CAPIType:
+        if (self.element_type.is_entity_type and
+                not self.element_type.emit_c_type):
+            return T.entity.iterator.c_type(c_api_settings)
+        else:
+            return CAPIType(c_api_settings, self.api_name)
+
+    def c_next(self, capi: CAPISettings) -> str:
+        """
+        Name of the C API function to get the next value out of the iterator.
+
+        :param capi: Settings for the C API.
+        """
+        return capi.get_name(self.api_name + names.Name('Next'))
+
+    def c_inc_ref(self, capi: CAPISettings) -> str:
+        """
+        Name of the C API function to inc-ref an iterator value.
+
+        :param capi: Settings for the C API.
+        """
+        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
+
+    def c_dec_ref(self, capi: CAPISettings) -> str:
+        """
+        Name of the C API function to dec-ref an iterator value.
+
+        :param capi: Settings for the C API.
+        """
+        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
+
+    @property
+    def to_public_converter(self) -> names.Name:
+        return names.Name('To_Public') + self.api_name
+
+    @property
+    def emit_c_type(self) -> bool:
+        """
+        Return whether to emit a C type for this type.
+
+        See StructType.emit_c_type.
+        """
+        return (not self.element_type.is_struct_type or
+                self.element_type.emit_c_type)
+
+    @property
+    def iterator_type_name(self) -> names.Name:
+        """
+        Name of the Ada iterator type.
+        """
+        return (names.Name('Internal') +
+                self.element_type.name +
+                names.Name('Iterator'))
+
+    @property
+    def exposed_types(self) -> List[CompiledType]:
+        return [self.element_type]
 
 
 class EnumType(CompiledType):
@@ -4185,7 +4336,7 @@ class TypeRepo:
                         pass
 
                 if (
-                    name in ('array', 'list', 'entity', 'new')
+                    name in ('array', 'list', 'iterator', 'entity', 'new')
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)

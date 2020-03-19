@@ -1,9 +1,10 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="../extensions.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>
 
@@ -1179,6 +1180,12 @@ package body ${ada_lib_name}.Implementation.C is
                        Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;
 
+   ${array_types.body(T.root_node.array)}
+
+   ${array_types.body(T.root_node.entity.array)}
+
+   ${iterator_types.body(T.entity.iterator)}
+
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------
@@ -1199,6 +1206,14 @@ package body ${ada_lib_name}.Implementation.C is
       % if array_type.exposed and array_type.emit_c_type:
          ${array_types.body(array_type)}
       % endif
+   % endfor
+
+   % for iterator_type in ctx.iterator_types:
+       % if iterator_type.element_type != T.entity and \
+             iterator_type.exposed and \
+             iterator_type.emit_c_type:
+           ${iterator_types.body(iterator_type)}
+       % endif
    % endfor
 
 end ${ada_lib_name}.Implementation.C;

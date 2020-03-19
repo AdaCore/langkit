@@ -1,10 +1,11 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="extensions.mako" />
-<%namespace name="memoization"   file="memoization_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="extensions.mako" />
+<%namespace name="memoization"    file="memoization_ada.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
@@ -1152,6 +1153,10 @@ package body ${ada_lib_name}.Implementation is
 
    % for array_type in ctx.array_types:
       ${array_types.body(array_type)}
+   % endfor
+
+   % for iterator_type in ctx.iterator_types:
+   ${iterator_types.body(iterator_type)}
    % endfor
 
    ---------

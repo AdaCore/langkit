@@ -109,6 +109,7 @@ class OCamlAPISettings(AbstractAPISettings):
                 len(t.concrete_subclasses) == 0),
             (ct.EntityType, lambda t: self.is_empty_type(t.astnode)),
             (ct.ArrayType, lambda t: self.is_empty_type(t.element_type)),
+            (ct.IteratorType, lambda t: self.is_empty_type(t.element_type)),
             (ct.StructType, lambda t:
                 all(self.is_empty_type(field.type)
                     for field in t.get_fields())),
@@ -207,6 +208,11 @@ class OCamlAPISettings(AbstractAPISettings):
                 if array_type.element_type.is_entity_type
                 else array_type).api_name.camel
 
+    def iterator_wrapper(self, iterator_type: ct.IteratorType) -> str:
+        return (ct.T.entity.iterator
+                if iterator_type.element_type.is_entity_type
+                else iterator_type).api_name.camel
+
     def struct_name(self, type: ct.CompiledType) -> str:
         """
         Returns the OCaml module containing the low-level structure for the
@@ -223,6 +229,9 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: 'EntityStruct'),
             (T.AnalysisUnit, lambda t: '{}Struct'.format(self.module_name(t))),
             (ct.ArrayType, lambda t: '{}Struct'.format(self.array_wrapper(t))),
+            (ct.IteratorType, lambda t: '{}Struct'.format(
+                self.iterator_wrapper(t)
+            )),
             (ct.StructType, lambda t: '{}Struct'.format(self.module_name(t))),
             (T.BigInt, lambda t: self.module_name(t)),
         ])
@@ -254,6 +263,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda t: '{}Type'.format(self.node_name(t))),
             (T.AnalysisUnit, lambda t: t.api_name.camel),
             (ct.ArrayType, lambda t: t.api_name.camel),
+            (ct.IteratorType, lambda t: t.api_name.camel),
             (ct.StructType, lambda t: t.api_name.camel),
             (T.BigInt, lambda t: 'BigInteger'),
         ])
@@ -277,6 +287,8 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: False),
             (T.Character, lambda _: False),
             (ct.ArrayType, lambda t:
+                self.wrap_requires_context(t.element_type)),
+            (ct.IteratorType, lambda t:
                 self.wrap_requires_context(t.element_type)),
             (ct.StructType, lambda t:
                 any(self.wrap_requires_context(field.type)
@@ -307,6 +319,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Int, lambda _: True),
             (T.Character, lambda _: True),
             (ct.ArrayType, lambda _: False),
+            (ct.IteratorType, lambda _: False),
             (ct.StructType, lambda _: False),
             (T.BigInt, lambda _: False),
             (T.EnvRebindings, lambda _: True),
@@ -426,6 +439,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: True),
             (T.AnalysisUnit, lambda _: True),
             (ct.ArrayType, lambda _: True),
+            (ct.IteratorType, lambda _: True),
             (ct.StructType, lambda _: True),
             (T.BigInt, lambda _: False),
             (T.EnvRebindings, lambda _: False),
@@ -485,6 +499,8 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.AnalysisUnit, lambda t:
                 '{}.c_type'.format(self.struct_name(t))),
             (ct.ArrayType, lambda t: '{}.c_type'.format(self.struct_name(t))),
+            (ct.IteratorType, lambda t:
+                '{}.c_type'.format(self.struct_name(t))),
             (ct.StructType, lambda t: "{}.c_type".format(self.struct_name(t))),
             (T.BigInt, lambda t: '{}.c_type'.format(self.module_name(t))),
             (T.EnvRebindings, lambda _: '(ptr void)'),
@@ -519,6 +535,8 @@ class OCamlAPISettings(AbstractAPISettings):
                 '{}.t'.format(self.struct_name(t))),
             (ct.ArrayType, lambda t:
                 '{}.t structure ptr'.format(self.struct_name(t))),
+            (ct.IteratorType, lambda t:
+                '{}.t structure ptr'.format(self.struct_name(t))),
             (ct.StructType, lambda t:
                 '{}.t structure'.format(self.struct_name(t))),
             (T.BigInt, lambda _: 'unit ptr'),
@@ -550,6 +568,9 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda t:
                 'string' if t.is_string_type else
                 '{} list'.format(self.type_public_name(type.element_type))),
+            (ct.IteratorType, lambda t: '{} iterator'.format(
+                self.type_public_name(type.element_type)
+            )),
             (ct.StructType, lambda _: "{}.t".format(type.api_name.camel)),
             (T.BigInt, lambda t: '{}.t'.format(self.module_name(t))),
             (T.EnvRebindings, lambda _: 'Rebindings.t'),

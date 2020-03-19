@@ -1,12 +1,16 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts"          file="extensions.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
-<%namespace name="memoization"   file="memoization_ada.mako" />
+<%namespace name="array_types"    file="array_types_ada.mako" />
+<%namespace name="iterator_types" file="iterator_types_ada.mako" />
+<%namespace name="astnode_types"  file="astnode_types_ada.mako" />
+<%namespace name="exts"           file="extensions.mako" />
+<%namespace name="struct_types"   file="struct_types_ada.mako" />
+<%namespace name="memoization"    file="memoization_ada.mako" />
 
-<% root_node_array = T.root_node.array %>
+<%
+root_node_array = T.root_node.array
+root_node_iterator = T.root_node.iterator
+%>
 
 with Ada.Containers;              use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
@@ -256,6 +260,23 @@ private package ${ada_lib_name}.Implementation is
    --  Helper for properties code generation: wrapper around
    --  AST_Envs.Create_Dynamic_Lexical_Env.
 
+   ## Declare arrays of lexical environments here because we need them for the
+   ## Group operation below.
+   ${array_types.incomplete_decl(T.LexicalEnv.array)}
+   ${iterator_types.incomplete_decl(T.LexicalEnv.iterator)}
+   ${array_types.decl(T.LexicalEnv.array)}
+
+   ## See ASTNodeType.entity
+   ${array_types.incomplete_decl(T.root_node.entity.array)}
+   ${iterator_types.incomplete_decl(T.root_node.entity.iterator)}
+   ${array_types.decl(T.root_node.entity.array)}
+
+   ## Declare arrays of root nodes here since some primitives rely on it and
+   ## since the declarations require AST_Envs.
+   ${array_types.incomplete_decl(root_node_array)}
+   ${iterator_types.incomplete_decl(root_node_iterator)}
+   ${array_types.decl(root_node_array)}
+
    ## Generate Hash functions for "built-in types" if need be
    % if T.Bool.requires_hash_function:
       function Hash (B : Boolean) return Hash_Type;
@@ -381,6 +402,16 @@ private package ${ada_lib_name}.Implementation is
       % endif
    % endfor
 
+   ----------------------------------------------
+   -- Iterator types (incomplete declarations) --
+   ----------------------------------------------
+
+   % for iterator_type in ctx.iterator_types:
+   % if iterator_type.element_type.should_emit_array_type:
+   ${iterator_types.incomplete_decl(iterator_type)}
+   % endif
+   % endfor
+
    -----------------------------------------
    -- Structure types (full declarations) --
    -----------------------------------------
@@ -402,6 +433,14 @@ private package ${ada_lib_name}.Implementation is
       % if not array_type.has_early_decl:
          ${array_types.decl(array_type)}
       % endif
+   % endfor
+
+   --------------------
+   -- Iterator types --
+   --------------------
+
+   % for iterator_type in ctx.iterator_types:
+   ${iterator_types.decl(iterator_type)}
    % endfor
 
    ------------------------
@@ -772,6 +811,7 @@ private package ${ada_lib_name}.Implementation is
    procedure Assign_Names_To_Logic_Vars (Node : ${T.root_node.name});
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.
+
 
    -------------------------------
    -- Root AST node (internals) --

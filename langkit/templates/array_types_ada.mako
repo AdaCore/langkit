@@ -145,6 +145,10 @@
    procedure Inc_Ref (T : ${cls.name});
    procedure Dec_Ref (T : in out ${cls.name});
 
+   function To_Iterator
+     (Self : ${cls.name}) return ${cls.element_type.iterator.name};
+   --  Return an iterator on values of this array
+
    function Equivalent (L, R : ${cls.name}) return Boolean;
 
    % if ctx.properties_logging:
@@ -311,6 +315,18 @@
          return Result;
       end;
    % endif
+
+   -----------------
+   -- To_Iterator --
+   -----------------
+
+   function To_Iterator
+     (Self : ${cls.name}) return ${cls.element_type.iterator.name} is
+   begin
+      Inc_Ref (Self);
+      return new ${cls.element_type.iterator.iterator_type_name}'
+        (Ref_Count => 1, Elements => Self, Index => 1);
+   end To_Iterator;
 
    ----------------
    -- Equivalent --

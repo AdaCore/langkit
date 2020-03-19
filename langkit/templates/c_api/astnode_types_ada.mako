@@ -34,6 +34,7 @@
    <%
       struct = field.struct
       accessor_name = capi.get_name(field.accessor_basename)
+      is_array_or_iterator = field.type.is_array or field.type.is_iterator_type
 
       def simple_wrapping(t):
          return (t.is_lexical_env_type
@@ -135,7 +136,7 @@
                    (Result, Node.Info)
                % elif field.type.is_entity_type:
                   (Result.Node, Result.Info)
-               % elif field.type.is_array and not field.type.emit_c_type:
+               % elif is_array_or_iterator and not field.type.emit_c_type:
                   Convert (Result)
                % elif field.type.is_token_type:
                    Wrap (Result)

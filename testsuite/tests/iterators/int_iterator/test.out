@@ -1,0 +1,17 @@
+main.py: Running...
+[1, 2, 3]
+1
+2
+3
+main.py: Done.
+main.adb: Running...
+Iterating through array...
+ 1
+ 2
+ 3
+Iterating though iterator...
+ 1
+ 2
+ 3
+main.adb: Done.
+Done
