@@ -16,10 +16,10 @@ class Name : FooNode {
     ref_var : LogicVar
 
     @export fun resolve (): Bool =
-    %domain(node.ref_var, node.node_env().get(node).map((d) => d.to[Definition])).solve()
+    %domain(node.ref_var, node.node_env().get(node).map((d) => d.as[Definition])).solve()
 
     @export fun definition (): Definition =
-    node.ref_var.get_value().to[Definition]
+    node.ref_var.get_value().as[Definition]
 }
 
 struct EnvAssoc {

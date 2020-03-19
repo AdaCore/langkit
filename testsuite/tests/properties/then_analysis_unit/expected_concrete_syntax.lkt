@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 @root_node class FooNode {
 
-    @export fun node_unit (): InternalUnit = (node.to[Name]).do((n) => n.unit())
+    @export fun node_unit (): InternalUnit = (node.as[Name]).do((n) => n.unit())
 }
 
 class Scope : ASTList[Name] {

@@ -8,7 +8,7 @@ grammar foo_grammar {
 @root_node class FooNode {
 
     @export fun eval_unit (u : InternalUnit): Int =
-    u.root.to[Expression].result()
+    u.root.as[Expression].result()
 }
 
 @abstract class Expression : FooNode {
@@ -25,7 +25,7 @@ class Name : Expression {
 
     fun designated_unit (): InternalUnit
 
-    fun result (): Int = node.designated_unit().root.to[Expression].result()
+    fun result (): Int = node.designated_unit().root.as[Expression].result()
 }
 
 class Plus : Expression {

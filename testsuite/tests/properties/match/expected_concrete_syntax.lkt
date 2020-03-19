@@ -27,7 +27,7 @@ grammar foo_grammar {
     @export fun find_atoms_or_exprs (): Array[Expr] = (
         match self {
             # This should match Lit .. Ref
-            case a : Atom => [a.to[Expr]]
+            case a : Atom => [a.as[Expr]]
 
             # This should match the only remaining expression: Plus
             case e : Expr => [e]
@@ -46,7 +46,7 @@ grammar foo_grammar {
 
             # This should match nothing (Atom is an Expr subclass), so emit a
             # warning.
-            case a : Atom => [a.to[Expr]]
+            case a : Atom => [a.as[Expr]]
 
             # This should match Def | FooNode.list
             case _ => null
@@ -72,7 +72,7 @@ class Def : FooNode {
             case _ => null
         }
     ) & (
-        self.children.mapcat((c) => c.to[Expr]!.find_refs())
+        self.children.mapcat((c) => c.as[Expr]!.find_refs())
     )
 }
 

@@ -7,7 +7,7 @@ lexer foo_lexer {
     newline <- p"\n"
 
     match p"'.'" {
-        if previous_token isa id then send(tick, 1)
+        if previous_token is id then send(tick, 1)
         else send(char, 3)
     }
 }

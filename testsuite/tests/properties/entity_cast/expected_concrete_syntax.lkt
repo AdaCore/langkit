@@ -14,11 +14,11 @@ class Literal : FooNode {
 
     fun a (): FooNode
 
-    fun b (): BarNode = node.a().to[BarNode]
+    fun b (): BarNode = node.a().as[BarNode]
 
     @export fun c (): BarNode = node.b()
 
-    @export fun d (): BarNode = node.a().to[BarNode]
+    @export fun d (): BarNode = node.a().as[BarNode]
 
     fun a (): FooNode
 }

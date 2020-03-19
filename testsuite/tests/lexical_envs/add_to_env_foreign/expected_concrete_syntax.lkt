@@ -42,7 +42,7 @@ class ScopedId : Id {
     fun simple_name (): SimpleId = node.name
 
     fun resolve (base_env : LexicalEnv): Scope =
-    node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.to[Scope]
+    node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
 class SimpleId : Id {
@@ -50,7 +50,7 @@ class SimpleId : Id {
     fun simple_name (): SimpleId = node
 
     fun resolve (base_env : LexicalEnv): Scope =
-    base_env.get_first(node.symbol).node.to[Scope]
+    base_env.get_first(node.symbol).node.as[Scope]
 }
 
 class Scope : FooNode {
