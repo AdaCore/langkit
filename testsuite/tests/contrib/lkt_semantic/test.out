@@ -1401,3 +1401,61 @@ Expr <ParenExpr test.lkt:219:43-219:51>
 Expr <BinOp test.lkt:219:31-219:51>
      has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
 
+Id   <RefId "Int" test.lkt:222:34-222:37>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:222:42-222:45>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:222:51-222:54>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:222:59-222:62>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:222:65-222:68>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:223:25-223:28>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "test_lambda_leak_support" test.lkt:224:5-224:29>
+     references <FunDecl "test_lambda_leak_support" test.lkt:222:1-222:68>
+
+Expr <RefId "test_lambda_leak_support" test.lkt:224:5-224:29>
+     has type <FunctionType "((Int) -> Int, (Int) -> Int) -> Int" __prelude>
+
+Id   <RefId "xxx" test.lkt:225:18-225:21>
+     references <LambdaArgDecl "xxx" test.lkt:225:10-225:13>
+
+Expr <RefId "xxx" test.lkt:225:18-225:21>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:225:24-225:25>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:225:18-225:25>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <LambdaExpr test.lkt:225:9-225:25>
+     has type <FunctionType "(Int) -> Int" __prelude>
+
+test.lkt:226:18: error: Cannot find entity `xxx` in this scope
+225 |         (yyy) => xxx * yyy
+    |                  ^^^      
+
+Id   <RefId "yyy" test.lkt:226:24-226:27>
+     references <LambdaArgDecl "yyy" test.lkt:226:10-226:13>
+
+Expr <RefId "yyy" test.lkt:226:24-226:27>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:226:18-226:27>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <LambdaExpr test.lkt:226:9-226:27>
+     has type <FunctionType "(Int) -> Int" __prelude>
+
+Expr <CallExpr test.lkt:224:5-228:6>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+

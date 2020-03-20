@@ -217,3 +217,14 @@ fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
 
 # Test rel operator
 fun test_rel(a : Int): Bool = (a = 15) or (a = 18)
+
+# Test that lambda params don't leak in their outside env
+fun test_lambda_leak_support(a: (Int) -> Int, b: (Int) -> Int): Int
+fun test_lambda_leak(): Int =
+    test_lambda_leak_support(
+        (xxx) => xxx * 2,
+        (yyy) => xxx * yyy
+#                ^ should be undefined
+    )
+
+
