@@ -577,7 +577,7 @@ package Langkit_Support.Lexical_Env is
       --  Returned entity
 
       Filter_From : Boolean;
-      --  Wether to filter with Can_Reach
+      --  Whether to filter with Can_Reach
 
       Override_Filter_Node : Node_Type := No_Node;
       --  Node to use when filtering with Can_Reach, if different from the
