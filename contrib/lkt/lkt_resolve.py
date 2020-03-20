@@ -128,7 +128,7 @@ class Resolve(lkt.App):
 
     def main(self):
         for unit_name, unit in self.units.items():
-            source = unit.root.text.splitlines()
+            source = unit.text.splitlines()
             if unit.diagnostics:
                 printcol("Syntax errors in {}, skipping".format(
                     P.basename(unit_name)
