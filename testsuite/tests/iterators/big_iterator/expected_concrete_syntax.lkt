@@ -1,0 +1,24 @@
+import lexer_example
+grammar foo_grammar {
+    @main_rule main_rule <- list*(Example("example"))
+
+}
+
+@root_node class FooNode {
+
+    @export fun get_all_examples (): Array[FooNode] =
+    node.children_env.get("example")
+
+    @export fun iter_examples (): InternalEntityIteratorAccess =
+    node.get_all_examples.to_iterator
+}
+
+class Example : FooNode {
+}
+
+struct EnvAssoc {
+    key : Symbol
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
+}
