@@ -126,3 +126,6 @@ val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check tha
 
 val a : Int = 1
 val b : Int = a.plus(2)
+
+ # Test that LKNode.bool_type resolves correctly
+fun test_if_2(a: Int, b: Int): Int = if a = b then a else b

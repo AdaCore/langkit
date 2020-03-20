@@ -874,3 +874,42 @@ test.lkt:128:17: error: Cannot find entity `plus` in this scope
 127 | val b : Int = a.plus(2)
     |                 ^^^^   
 
+Id   <RefId "Int" test.lkt:131:18-131:21>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:131:26-131:29>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:131:32-131:35>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "a" test.lkt:131:41-131:42>
+     references <FunArgDecl "a" test.lkt:131:15-131:21>
+
+Expr <RefId "a" test.lkt:131:41-131:42>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "b" test.lkt:131:45-131:46>
+     references <FunArgDecl "b" test.lkt:131:23-131:29>
+
+Expr <RefId "b" test.lkt:131:45-131:46>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:131:41-131:46>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+
+Id   <RefId "a" test.lkt:131:52-131:53>
+     references <FunArgDecl "a" test.lkt:131:15-131:21>
+
+Expr <RefId "a" test.lkt:131:52-131:53>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "b" test.lkt:131:59-131:60>
+     references <FunArgDecl "b" test.lkt:131:23-131:29>
+
+Expr <RefId "b" test.lkt:131:59-131:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <IfExpr test.lkt:131:38-131:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
