@@ -338,7 +338,7 @@ Expr <CallExpr test.lkt:47:56-47:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:48:34-48:39>
-     references <GenericDecl "Array" __prelude:13:10-14:2>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:48:40-48:43>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -350,7 +350,7 @@ Id   <RefId "arg" test.lkt:48:53-48:56>
      references <FunArgDecl "arg" test.lkt:48:29-48:44>
 
 Expr <RefId "arg" test.lkt:48:53-48:56>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:13:10-14:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:17:10-18:2>
 
 Expr <NumLit test.lkt:48:58-48:60>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -469,7 +469,7 @@ test.lkt:66:49: error: Mismatched types: expected `(B) -> Int`, got `(B, A) -> I
    |                                                 ^^^^^^^^^^^^^^^^^^^^
 
 Id   <RefId "ASTList" test.lkt:70:28-70:35>
-     references <GenericDecl "ASTList" __prelude:15:10-16:2>
+     references <GenericDecl "ASTList" __prelude:19:10-20:2>
 
 Id   <RefId "String" test.lkt:70:36-70:42>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -481,7 +481,7 @@ Id   <RefId "self" test.lkt:70:52-70:56>
      references <FunArgDecl "self" test.lkt:70:22-70:43>
 
 Expr <RefId "self" test.lkt:70:52-70:56>
-     has type <InstantiatedGenericType "ASTList[String]" __prelude:15:10-16:2>
+     has type <InstantiatedGenericType "ASTList[String]" __prelude:19:10-20:2>
 
 Id   <RefId "length" test.lkt:70:57-70:63>
      references <FunDecl "length" __prelude:8:14-8:31>
@@ -496,7 +496,7 @@ Expr <CallExpr test.lkt:70:52-70:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:71:26-71:31>
-     references <GenericDecl "Array" __prelude:13:10-14:2>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
 
 Id   <RefId "String" test.lkt:71:32-71:38>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -508,7 +508,7 @@ Id   <RefId "self" test.lkt:71:48-71:52>
      references <FunArgDecl "self" test.lkt:71:20-71:39>
 
 Expr <RefId "self" test.lkt:71:48-71:52>
-     has type <InstantiatedGenericType "Array[String]" __prelude:13:10-14:2>
+     has type <InstantiatedGenericType "Array[String]" __prelude:17:10-18:2>
 
 Id   <RefId "length" test.lkt:71:53-71:59>
      references <FunDecl "length" __prelude:8:14-8:31>
@@ -523,7 +523,7 @@ Expr <CallExpr test.lkt:71:48-71:61>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "ASTList" test.lkt:72:33-72:40>
-     references <GenericDecl "ASTList" __prelude:15:10-16:2>
+     references <GenericDecl "ASTList" __prelude:19:10-20:2>
 
 Id   <RefId "String" test.lkt:72:41-72:47>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -535,7 +535,7 @@ Id   <RefId "self" test.lkt:72:60-72:64>
      references <FunArgDecl "self" test.lkt:72:27-72:48>
 
 Expr <RefId "self" test.lkt:72:60-72:64>
-     has type <InstantiatedGenericType "ASTList[String]" __prelude:15:10-16:2>
+     has type <InstantiatedGenericType "ASTList[String]" __prelude:19:10-20:2>
 
 Expr <NumLit test.lkt:72:66-72:68>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -544,7 +544,7 @@ Expr <CallExpr test.lkt:72:60-72:69>
      has type <StructDecl "String" __prelude:3:10-3:26>
 
 Id   <RefId "ASTList" test.lkt:80:30-80:37>
-     references <GenericDecl "ASTList" __prelude:15:10-16:2>
+     references <GenericDecl "ASTList" __prelude:19:10-20:2>
 
 Id   <RefId "String" test.lkt:80:38-80:44>
      references <StructDecl "String" __prelude:3:10-3:26>
@@ -1083,7 +1083,7 @@ Id   <RefId "T" test.lkt:167:32-167:33>
      references <GenericFormalTypeDecl "T" test.lkt:167:10-167:11>
 
 Id   <RefId "Array" test.lkt:167:36-167:41>
-     references <GenericDecl "Array" __prelude:13:10-14:2>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
 
 Id   <RefId "T" test.lkt:167:42-167:43>
      references <GenericFormalTypeDecl "T" test.lkt:167:10-167:11>
@@ -1137,7 +1137,7 @@ Expr <CallExpr test.lkt:172:37-172:54>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:173:32-173:37>
-     references <GenericDecl "Array" __prelude:13:10-14:2>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:173:38-173:41>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1155,7 +1155,7 @@ Expr <NumLit test.lkt:173:60-173:62>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:173:45-173:63>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:13:10-14:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:176:18-176:21>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1269,7 +1269,7 @@ Expr <CallExpr test.lkt:194:28-194:40>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:198:23-198:28>
-     references <GenericDecl "Array" __prelude:13:10-14:2>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:198:29-198:32>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1281,7 +1281,7 @@ Expr <NumLit test.lkt:198:46-198:48>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:198:36-198:49>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:13:10-14:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:201:28-201:31>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1321,7 +1321,7 @@ Id   <RefId "fooz" test.lkt:205:51-205:55>
      references <GenericDecl "fooz" test.lkt:204:1-204:38>
 
 Id   <RefId "Array" test.lkt:208:31-208:36>
-     references <GenericDecl "Array" __prelude:13:10-14:2>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:208:37-208:40>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1334,7 +1334,7 @@ test.lkt:208:54: error: Mismatched types: expected `Int`, got a string literal
     |                                                      ^^^^^ 
 
 Expr <CallExpr test.lkt:208:44-208:60>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:13:10-14:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:17:10-18:2>
 
 Id   <RefId "Int" test.lkt:211:33-211:36>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1458,4 +1458,109 @@ Expr <LambdaExpr test.lkt:226:9-226:27>
 
 Expr <CallExpr test.lkt:224:5-228:6>
      has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Array" test.lkt:233:20-233:25>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
+
+Id   <RefId "Int" test.lkt:233:26-233:29>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Array" test.lkt:233:33-233:38>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
+
+Id   <RefId "String" test.lkt:233:39-233:45>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Id   <RefId "ints" test.lkt:233:49-233:53>
+     references <FunArgDecl "ints" test.lkt:233:14-233:30>
+
+Expr <RefId "ints" test.lkt:233:49-233:53>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:17:10-18:2>
+
+Id   <RefId "map" test.lkt:233:54-233:57>
+     references <GenericDecl "map" __prelude:14:14-14:61>
+
+Id   <RefId "convert_int" test.lkt:233:65-233:76>
+     references <GenericDecl "convert_int" test.lkt:165:1-165:41>
+
+Id   <RefId "String" test.lkt:233:77-233:83>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Expr <GenericInstantiation test.lkt:233:65-233:84>
+     has type <FunctionType "(Int) -> String" __prelude>
+
+Id   <RefId "i" test.lkt:233:85-233:86>
+     references <LambdaArgDecl "i" test.lkt:233:59-233:60>
+
+Expr <RefId "i" test.lkt:233:85-233:86>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:233:65-233:87>
+     has type <StructDecl "String" __prelude:3:10-3:26>
+
+Expr <LambdaExpr test.lkt:233:58-233:87>
+     has type <FunctionType "(Int) -> String" __prelude>
+
+Expr <CallExpr test.lkt:233:49-233:88>
+     has type <InstantiatedGenericType "Array[String]" __prelude:17:10-18:2>
+
+Id   <RefId "Array" test.lkt:236:26-236:31>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
+
+Id   <RefId "Int" test.lkt:236:32-236:35>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Array" test.lkt:236:39-236:44>
+     references <GenericDecl "Array" __prelude:17:10-18:2>
+
+Id   <RefId "String" test.lkt:236:45-236:51>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Id   <RefId "ints" test.lkt:237:5-237:9>
+     references <FunArgDecl "ints" test.lkt:236:20-236:36>
+
+Expr <RefId "ints" test.lkt:237:5-237:9>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:17:10-18:2>
+
+Id   <RefId "filtermap" test.lkt:237:10-237:19>
+     references <GenericDecl "filtermap" __prelude:15:14-15:97>
+
+Id   <RefId "convert_int" test.lkt:238:16-238:27>
+     references <GenericDecl "convert_int" test.lkt:165:1-165:41>
+
+Id   <RefId "String" test.lkt:238:28-238:34>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Expr <GenericInstantiation test.lkt:238:16-238:35>
+     has type <FunctionType "(Int) -> String" __prelude>
+
+Id   <RefId "i" test.lkt:238:36-238:37>
+     references <LambdaArgDecl "i" test.lkt:238:10-238:11>
+
+Expr <RefId "i" test.lkt:238:36-238:37>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:238:16-238:38>
+     has type <StructDecl "String" __prelude:3:10-3:26>
+
+Expr <LambdaExpr test.lkt:238:9-238:38>
+     has type <FunctionType "(Int) -> String" __prelude>
+
+Id   <RefId "i" test.lkt:239:16-239:17>
+     references <LambdaArgDecl "i" test.lkt:239:10-239:11>
+
+Expr <RefId "i" test.lkt:239:16-239:17>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:239:20-239:21>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:239:16-239:21>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+
+Expr <LambdaExpr test.lkt:239:9-239:21>
+     has type <FunctionType "(Int) -> Bool" __prelude>
+
+Expr <CallExpr test.lkt:237:5-240:6>
+     has type <InstantiatedGenericType "Array[String]" __prelude:17:10-18:2>
 
