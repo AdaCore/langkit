@@ -1467,8 +1467,12 @@ class BaseValDecl(Decl):
     """
 
     @langkit_property(kind=AbstractKind.abstract,
-                      return_type=T.TypeDecl.entity)
+                      return_type=T.TypeDecl.entity,
+                      public=True)
     def get_type(no_inference=(T.Bool, False)):
+        """
+        Get the type of this value declaration.
+        """
         ignore(no_inference)
         pass
 
