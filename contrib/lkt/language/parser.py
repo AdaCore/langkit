@@ -210,6 +210,13 @@ class LKNode(ASTNode):
 
     @langkit_property()
     def expected_type_error(expected=T.TypeDecl.entity, got=T.String):
+        """
+        Return an error of the form::
+
+            Mismatched types: expected ``expected.full_name``, got ``got``
+
+        Where `expected` is a type and ``got`` is a string.
+        """
         return Self.error(
             S("Mismatched types: expected `")
             .concat(expected.full_name)
@@ -232,6 +239,9 @@ class LKNode(ASTNode):
     def check_sem_internal(
         exempted_nodes=(T.LKNode.array, No(T.LKNode.array))
     ):
+        """
+        Internal recursive visitor for check_semantic pass.
+        """
 
         # First, run a pre-analysis correctness check phase on self. This might
         # produce user diagnostics, as well as diagnostics exempting analysis
