@@ -223,6 +223,21 @@ class LKNode(ASTNode):
             .concat(S("`, got ").concat(got)),
         )
 
+    @langkit_property()
+    def type_mismatch_error(expected=T.TypeDecl.entity, got=T.TypeDecl.entity):
+        """
+        Return an error of the form::
+
+            Mismatched types: expected ``expected.full_name``, got
+            ``got.full_name``
+
+        Where ``expected`` and ``got`` are types.
+        """
+        return Self.expected_type_error(
+            expected,
+            S("`").concat(got.full_name).concat(S("`"))
+        )
+
     @langkit_property(return_type=T.TreeSemanticResult, public=True)
     def check_semantic():
         """
@@ -715,16 +730,19 @@ class Expr(LKNode):
             If(
                 expected_type.matches(cf_type),
                 SemanticResult.new(node=Self, result_type=expected_type),
-                Self.expected_type_error(
-                    expected_type,
-                    S("`").concat(cf_type.full_name).concat(S("`"))
-                )
+
+                # If they don't match, emit an error
+                Self.type_mismatch_error(expected_type, cf_type)
             ),
 
+            # We only have an expected type: run `expected_type_predicate` on
+            # it.
             Not(expected_type.is_null),
             If(
                 Entity.expected_type_predicate(expected_type),
                 SemanticResult.new(result_type=expected_type, node=Self),
+
+                #  If it returns false, return an error
                 Self.expected_type_error(
                     expected_type,
                     got=Self.invalid_expected_type_error_name
@@ -734,10 +752,10 @@ class Expr(LKNode):
             Not(cf_type.is_null),
             SemanticResult.new(result_type=cf_type, node=Self),
 
-            # We don't have both types: check that there is at least one and
-            # return it, else, raise an error if raise_if_no_type is true.
+            # We don't have an expected type: Check that there is a context
+            # free type and return it.
             SemanticResult.new(result_type=Entity.check_type(
-                expected_type._or(cf_type), raise_if_no_type
+                cf_type, raise_if_no_type
             ), node=Self),
         )
 
