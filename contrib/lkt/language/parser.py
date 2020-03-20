@@ -10,14 +10,29 @@ from langkit.envs import (
 )
 from langkit.expressions import (
     AbstractKind, AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv,
-    Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String, Try,
-    Var, ignore, langkit_property, new_env_assoc
+    Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String, Try as
+    _Try, Var, ignore, langkit_property, new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
                              Or as GOr, Pick)
 
 
 from language.lexer import lkt_lexer as Lex
+
+
+NO_EXC_CATCHING = False
+"""
+If True, deactivates the catching of exceptions via `Try` blocks. This is
+needed because we catch exceptions in semantic passes, and since we have only
+one exception type, we'll sometimes silence a useful/informative error.
+"""
+
+
+def Try(expr, *args):
+    if NO_EXC_CATCHING:
+        return expr
+    else:
+        return _Try(expr, *args)
 
 
 class SemanticResult(Struct):
