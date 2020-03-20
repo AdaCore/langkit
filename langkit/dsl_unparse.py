@@ -707,6 +707,7 @@ def emit_expr(expr, **ctx):
         elif op_name == "filter_map":
             args.append(emit_lambda(expr.expr, vars))
             args.append(emit_lambda(expr.filter_expr, vars))
+            op_name = "filtermap"
         elif op_name == "take_while":
             args.append(emit_lambda(expr.take_while_expr, vars))
 
