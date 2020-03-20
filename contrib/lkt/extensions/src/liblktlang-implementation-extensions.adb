@@ -20,11 +20,16 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin generic[T] trait Indexable {" & ASCII.LF &
      "    @builtin fun __call__(index : Int): T" & ASCII.LF &
      "}" & ASCII.LF &
+     "@builtin generic[T] trait Iterator {" & ASCII.LF &
+     "    @builtin generic [U] fun map(map_fn: (T) -> U): Array[U]" & ASCII.LF &
+     "    @builtin generic [U] fun filtermap" &
+     "      (map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]" & ASCII.LF &
+     "}" & ASCII.LF &
      "@builtin generic[T] struct Array " &
-     "implements Sized, Indexable[T] {" & ASCII.LF &
+     "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin generic[T] struct ASTList " &
-     "implements Sized, Indexable[T] {" & ASCII.LF &
+     "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
      "}" & ASCII.LF &
      "";
 

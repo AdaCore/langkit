@@ -227,4 +227,14 @@ fun test_lambda_leak(): Int =
 #                ^ should be undefined
     )
 
+# Implicit instantiations 2
 
+# Test the built-in map function
+fun test_map(ints: Array[Int]): Array[String] = ints.map((i) => convert_int[String](i))
+
+# Test the built-in filtermap function
+fun test_filtermap(ints: Array[Int]): Array[String] =
+    ints.filtermap(
+        (i) => convert_int[String](i),
+        (i) => i = 0
+    )
