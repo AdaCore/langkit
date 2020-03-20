@@ -1856,7 +1856,8 @@ class CallExpr(Expr):
     @langkit_property(return_type=T.SemanticResult.array)
     def check_correctness():
 
-        rd = Var(Entity.name.referenced_decl)
+        rd = Var(Try(Entity.name.referenced_decl,
+                     SemanticResult.new(has_error=True)))
 
         generic_inst_error = Var(If(
             rd.has_error,
