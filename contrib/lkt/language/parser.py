@@ -10,8 +10,8 @@ from langkit.envs import (
 )
 from langkit.expressions import (
     AbstractKind, AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv,
-    Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String, Try as
-    _Try, Var, ignore, langkit_property, new_env_assoc
+    Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String as S,
+    Try as _Try, Var, ignore, langkit_property, new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
                              Or as GOr, Pick)
@@ -211,9 +211,9 @@ class LKNode(ASTNode):
     @langkit_property()
     def expected_type_error(expected=T.TypeDecl.entity, got=T.String):
         return Self.error(
-            String("Mismatched types: expected `")
+            S("Mismatched types: expected `")
             .concat(expected.full_name)
-            .concat(String("`, got ").concat(got)),
+            .concat(S("`, got ").concat(got)),
         )
 
     @langkit_property(return_type=T.TreeSemanticResult, public=True)
@@ -646,7 +646,7 @@ class Expr(LKNode):
         valid type for this expression. This can only be called if there is no
         context-free type available for this expression.
         """
-        return String("<not implemented>")
+        return S("<not implemented>")
 
     @langkit_property(return_type=SemanticResult)
     def expr_type_impl(expected_type=T.TypeDecl.entity,
@@ -704,7 +704,7 @@ class Expr(LKNode):
                 SemanticResult.new(node=Self, result_type=expected_type),
                 Self.expected_type_error(
                     expected_type,
-                    String("`").concat(cf_type.full_name).concat(String("`"))
+                    S("`").concat(cf_type.full_name).concat(S("`"))
                 )
             ),
 
@@ -943,8 +943,8 @@ class RefId(Id):
     @langkit_property()
     def ref_not_found_error():
         return Self.error(
-            String("Cannot find entity `")
-            .concat(Self.text).concat(String("` in this scope")),
+            S("Cannot find entity `")
+            .concat(Self.text).concat(S("` in this scope")),
         )
 
 
@@ -1166,11 +1166,11 @@ class FunctionType(TypeDecl):
     traits = NullField()
 
     full_name = Property(
-        String("(").concat(
+        S("(").concat(
             Self.string_join(
-                Self.args.map(lambda t: t.full_name), sep=String(", ")
+                Self.args.map(lambda t: t.full_name), sep=S(", ")
             )
-        ).concat(String(") -> ")).concat(Self.return_type.full_name)
+        ).concat(S(") -> ")).concat(Self.return_type.full_name)
     )
 
     type_scope = Property(EmptyEnv)
@@ -1277,10 +1277,10 @@ class InstantiatedGenericType(TypeDecl):
     name = Property(Self.inner_type_decl.name)
 
     full_name = Property(
-        Self.name.image.concat(String('[')).concat(
+        Self.name.image.concat(S('[')).concat(
             Self.string_join(Self.actuals.map(lambda t: t.full_name),
-                             sep=String(", "))
-        ).concat(String(']'))
+                             sep=S(", "))
+        ).concat(S(']'))
     )
 
     generic_decl = Property(
@@ -1726,9 +1726,9 @@ class CallExpr(Expr):
                     pm.formal.is_null,
 
                     pm.actual.error(
-                        String("Unmatched actual in call to `")
+                        S("Unmatched actual in call to `")
                         .concat(Entity.called_decl.full_name)
-                        .concat(String("`")),
+                        .concat(S("`")),
                     ).singleton.concat(
                         # If there is an unmmatched actual that is named, then
                         # exempt the resolution of the name, because it's going
@@ -1737,11 +1737,11 @@ class CallExpr(Expr):
                     ),
 
                     Self.error(
-                        String("No value for parameter `")
+                        S("No value for parameter `")
                         .concat(pm.formal.full_name)
-                        .concat(String("` in call to `"))
+                        .concat(S("` in call to `"))
                         .concat(Entity.called_decl.full_name)
-                        .concat(String("`"))
+                        .concat(S("`"))
                     ).singleton
                 )
             )
@@ -2061,7 +2061,7 @@ class StringLit(Lit):
         return Or(expected_type == Self.string_type,
                   expected_type == Self.symbol_type)
 
-    invalid_expected_type_error_name = Property(String("a string literal"))
+    invalid_expected_type_error_name = Property(S("a string literal"))
 
 
 class NumLit(Lit):
@@ -2075,7 +2075,7 @@ class NumLit(Lit):
         return Or(expected_type == Self.int_type,
                   expected_type == Self.bigint_type)
 
-    invalid_expected_type_error_name = Property(String("a number literal"))
+    invalid_expected_type_error_name = Property(S("a number literal"))
 
 
 class VarBind(LKNode):
