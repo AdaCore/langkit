@@ -7,7 +7,7 @@ grammar foo_grammar {
         | simple_identifier
     )
     simple_identifier <- SimpleId(@identifier)
-    foreign_decl <- ForeignDecl(identifier)
+    foreign_decl <- ForeignDecl(Synth(".") identifier)
     self_decl <- SelfDecl(
         "+" identifier ?pick("(" identifier ")")
     )
@@ -17,8 +17,15 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
+class DummySyntheticNode : FooNode {
+}
+
 class ForeignDecl : FooNode {
+    @parse_field create_synthetic : Synth
     @parse_field id : Id
+
+    @memoized fun node_for_env (): FooNode =
+    if node.create_synthetic.as_bool then (DummySyntheticNode()) else node
 }
 
 @abstract class Id : FooNode {
@@ -54,6 +61,9 @@ class Scope : FooNode {
 class SelfDecl : FooNode {
     @parse_field id : Id
     @parse_field md_node : Id
+}
+
+@qualifier class Synth : FooNode {
 }
 
 struct EnvAssoc {

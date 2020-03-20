@@ -6,9 +6,9 @@ or metadata field) are properly rejected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import (ASTNode, Field, Struct, T, UserField, abstract,
-                         env_metadata)
+                         env_metadata, synthetic)
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
-from langkit.expressions import AbstractKind, New, Self, langkit_property
+from langkit.expressions import AbstractKind, If, New, Self, langkit_property
 
 from utils import build_and_run
 
@@ -70,12 +70,29 @@ class ScopedId(Id):
                 .cast(T.Scope))
 
 
+class Synth(FooNode):
+    enum_node = True
+    qualifier = True
+
+
+@synthetic
+class DummySyntheticNode(FooNode):
+    pass
+
+
 class ForeignDecl(FooNode):
+    create_synthetic = Field(type=T.Synth)
     id = Field(type=T.Id)
+
+    @langkit_property(memoized=True)
+    def node_for_env():
+        return If(Self.create_synthetic.as_bool,
+                  New(T.DummySyntheticNode),
+                  Self)
 
     env_spec = EnvSpec(
         add_to_env_kv(
-            key=Self.id.simple_name.symbol, val=Self,
+            key=Self.id.simple_name.symbol, val=Self.node_for_env,
             dest_env=Self.id.match(
                 lambda simple=T.SimpleId:
                     simple.node_env,
