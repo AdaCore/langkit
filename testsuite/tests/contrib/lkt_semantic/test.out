@@ -1067,3 +1067,135 @@ test.lkt:158:49: error: Cannot find entity `bar` in this scope
 157 | fun test_base_type_methods(arg: Baz): Int = arg.bar()
     |                                                 ^^^  
 
+Id   <RefId "Int" test.lkt:165:34-165:37>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "T" test.lkt:165:40-165:41>
+     references <GenericFormalTypeDecl "T" test.lkt:165:10-165:11>
+
+Id   <RefId "T" test.lkt:166:31-166:32>
+     references <GenericFormalTypeDecl "T" test.lkt:166:10-166:11>
+
+Id   <RefId "T" test.lkt:166:35-166:36>
+     references <GenericFormalTypeDecl "T" test.lkt:166:10-166:11>
+
+Id   <RefId "T" test.lkt:167:32-167:33>
+     references <GenericFormalTypeDecl "T" test.lkt:167:10-167:11>
+
+Id   <RefId "Array" test.lkt:167:36-167:41>
+     references <GenericDecl "Array" __prelude:13:10-14:2>
+
+Id   <RefId "T" test.lkt:167:42-167:43>
+     references <GenericFormalTypeDecl "T" test.lkt:167:10-167:11>
+
+Id   <RefId "T" test.lkt:168:29-168:30>
+     references <GenericFormalTypeDecl "T" test.lkt:168:10-168:11>
+
+Id   <RefId "T" test.lkt:168:35-168:36>
+     references <GenericFormalTypeDecl "T" test.lkt:168:10-168:11>
+
+Id   <RefId "T" test.lkt:168:41-168:42>
+     references <GenericFormalTypeDecl "T" test.lkt:168:10-168:11>
+
+Id   <RefId "T" test.lkt:168:45-168:46>
+     references <GenericFormalTypeDecl "T" test.lkt:168:10-168:11>
+
+Id   <RefId "String" test.lkt:171:29-171:35>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Id   <RefId "convert_int" test.lkt:171:38-171:49>
+     references <GenericDecl "convert_int" test.lkt:165:1-165:41>
+
+Id   <RefId "String" test.lkt:171:50-171:56>
+     references <StructDecl "String" __prelude:3:10-3:26>
+
+Expr <GenericInstantiation test.lkt:171:38-171:57>
+     has type <FunctionType "(Int) -> String" __prelude>
+
+Expr <NumLit test.lkt:171:58-171:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:171:38-171:61>
+     has type <StructDecl "String" __prelude:3:10-3:26>
+
+Id   <RefId "Int" test.lkt:172:31-172:34>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "identity" test.lkt:172:37-172:45>
+     references <GenericDecl "identity" test.lkt:166:1-166:36>
+
+Id   <RefId "Int" test.lkt:172:46-172:49>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <GenericInstantiation test.lkt:172:37-172:50>
+     has type <FunctionType "(Int) -> Int" __prelude>
+
+Expr <NumLit test.lkt:172:51-172:53>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:172:37-172:54>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Array" test.lkt:173:32-173:37>
+     references <GenericDecl "Array" __prelude:13:10-14:2>
+
+Id   <RefId "Int" test.lkt:173:38-173:41>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "singleton" test.lkt:173:45-173:54>
+     references <GenericDecl "singleton" test.lkt:167:1-167:44>
+
+Id   <RefId "Int" test.lkt:173:55-173:58>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <GenericInstantiation test.lkt:173:45-173:59>
+     has type <FunctionType "(Int) -> Array[Int]" __prelude>
+
+Expr <NumLit test.lkt:173:60-173:62>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:173:45-173:63>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:13:10-14:2>
+
+Id   <RefId "Int" test.lkt:176:18-176:21>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:176:24-176:27>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "arg" test.lkt:176:30-176:33>
+     references <FunArgDecl "arg" test.lkt:176:13-176:21>
+
+Expr <RefId "arg" test.lkt:176:30-176:33>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:176:36-176:37>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <BinOp test.lkt:176:30-176:37>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:177:19-177:22>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "apply" test.lkt:177:25-177:30>
+     references <GenericDecl "apply" test.lkt:168:1-168:46>
+
+Id   <RefId "Int" test.lkt:177:31-177:34>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <GenericInstantiation test.lkt:177:25-177:35>
+     has type <FunctionType "((Int) -> Int, Int) -> Int" __prelude>
+
+Id   <RefId "double" test.lkt:177:36-177:42>
+     references <FunDecl "double" test.lkt:176:1-176:37>
+
+Expr <RefId "double" test.lkt:177:36-177:42>
+     has type <FunctionType "(Int) -> Int" __prelude>
+
+Expr <NumLit test.lkt:177:44-177:46>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:177:25-177:47>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+

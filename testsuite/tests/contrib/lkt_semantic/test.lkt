@@ -156,3 +156,22 @@ class Foo {
 class Baz : Foo {}
 
 fun test_base_type_methods(arg: Baz): Int = arg.bar()
+
+#
+# Generic functions instantiation tests
+#
+
+# Support generics
+generic [T] fun convert_int(var: Int): T
+generic [T] fun identity(var: T): T
+generic [T] fun singleton(var: T): Array[T]
+generic [T] fun apply (fn: (T) -> T, v: T): T
+
+# Explicit instantiations
+fun test_explicit_int_to(): String = convert_int[String](12)
+fun test_explicit_identity(): Int = identity[Int](12)
+fun test_explicit_singleton(): Array[Int] = singleton[Int](12)
+
+# Explicit generic instantiation with function argument
+fun double (arg: Int): Int = arg * 2
+fun test_apply(): Int = apply[Int](double, 12)

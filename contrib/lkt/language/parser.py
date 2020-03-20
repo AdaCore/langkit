@@ -1269,6 +1269,32 @@ class GenericDecl(Decl):
         add_env()
     )
 
+    @langkit_property(return_type=T.Decl.entity)
+    def instantiate(actuals=T.TypeDecl.array):
+        """
+        Instantiate this generic decl with the given actuals.
+        """
+        fd = Var(Self.decl.cast(FunDecl))
+        return Cond(
+            Entity.decl.is_a(TypeDecl),
+            Entity.get_instantiated_type(actuals).cast(T.Decl).as_bare_entity,
+
+            Entity.decl.is_a(FunDecl),
+            FunDecl.entity.new(
+                node=fd,
+                info=T.entity_info.new(
+                    md=No(T.Metadata),
+                    from_rebound=False,
+                    rebindings=Entity.info.rebindings.append_rebinding(
+                        Self.children_env,
+                        Entity.get_inst_env(actuals)
+                    )
+                )
+            ).cast(T.Decl.entity),
+
+            PropertyError(T.Decl.entity, "should not happen")
+        )
+
     @langkit_property(memoized=True)
     def get_instantiated_type(actuals=T.TypeDecl.array):
         return InstantiatedGenericType.new(
@@ -1555,7 +1581,7 @@ class FunDecl(UserValDecl):
                 a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
             )),
             Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
-        ).as_entity
+        ).as_bare_entity
 
 
 class EnumLitDecl(UserValDecl):
@@ -1710,7 +1736,7 @@ class FunctionTypeRef(TypeRef):
                 a.designated_type.assert_bare.cast(T.TypeDecl)
             ),
             Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
-        ).as_entity
+        ).as_bare_entity
 
 
 class ArrayLiteral(Expr):
@@ -1920,28 +1946,34 @@ class GenericInstantiation(Expr):
     name = Field(type=T.Expr)
     args = Field(type=T.TypeRef.list)
 
-    expr_context_free_type = Property(Entity.designated_type)
+    expr_context_free_type = Property(
+        Entity.instantiated_decl.match(
+            lambda t=T.TypeDecl: t,
+            lambda f=T.FunDecl: f.get_type(),
+            lambda _: PropertyError(T.TypeDecl.entity, "")
+        )
+    )
 
     @langkit_property(public=True)
-    def designated_type():
+    def instantiated_decl():
         """
         Get the type designated by this instantiation.
-
-        NOTE: for the moment we only have generic types, so that's enough. If
-        we want generic functions at some point we'll have to revisit.
         """
+        # Get the non instantiated generic declaration
         generic_decl = Var(
             Entity.name.check_referenced_decl.cast_or_raise(T.GenericDecl)
         )
-        return generic_decl.get_instantiated_type(
+
+        # Then instantiate it with the given types as generic actuals
+        return generic_decl.instantiate(
             Entity.args.map(
                 lambda p: p.designated_type.assert_bare
                 .cast_or_raise(T.TypeDecl)
             )
-        ).as_bare_entity
+        )
 
     referenced_decl = Property(
-        SemanticResult.new(result_ref=Entity.designated_type, node=Self)
+        SemanticResult.new(result_ref=Entity.instantiated_decl, node=Self)
     )
 
 
