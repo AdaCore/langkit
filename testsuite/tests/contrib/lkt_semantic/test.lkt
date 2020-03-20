@@ -144,3 +144,15 @@ fun lambda_test_incorrect_1(): Int = lambda_test_helper(12, (x : Int, y) => x + 
 
 # Test 3: Errors on mismatching lambda type
 fun lambda_test_incorrect_2(): Int = lambda_test_helper(12, (x : String, y : String): Int => 12)
+
+#
+# Test availability of base type's methods
+#
+
+class Foo {
+    fun bar(): Int
+}
+
+class Baz : Foo {}
+
+fun test_base_type_methods(arg: Baz): Int = arg.bar()

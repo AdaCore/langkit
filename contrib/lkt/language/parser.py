@@ -1175,13 +1175,24 @@ class TypeDecl(Decl):
     traits = AbstractField(T.TypeRef.list, doc="Traits for this type")
     traits_decls = Property(Entity.traits.map(lambda t: t.designated_type))
 
+    base_type = AbstractField(T.TypeRef)
+
     @langkit_property()
     def type_base_scope():
         """
         Return the base scope for this type, containing everything that is
         implicitly visible in the scope of definition of this type.
         """
-        return Entity.traits_decls.map(lambda td: td.type_scope).env_group()
+        return (
+            # Take operations from traits
+            Entity.traits_decls.map(
+                lambda td: td.type_scope
+            )
+            # Plus operations from the base type
+            .concat(Entity.base_type._.designated_type.type_scope.singleton)
+            # And group them together
+            .env_group()
+        )
 
     call_scope = Property(Entity.type_scope)
 
@@ -1195,6 +1206,7 @@ class FunctionType(TypeDecl):
     return_type = UserField(T.TypeDecl, public=False)
     syn_name = NullField()
     traits = NullField()
+    base_type = NullField()
 
     full_name = Property(
         S("(").concat(
@@ -1213,6 +1225,7 @@ class GenericFormalTypeDecl(TypeDecl):
     """
     syn_name = Field(T.TypeDefId)
     traits = NullField()
+    base_type = NullField()
     type_scope = Property(EmptyEnv)
 
 
@@ -1305,6 +1318,7 @@ class InstantiatedGenericType(TypeDecl):
     actuals = UserField(type=T.TypeDecl.array, public=False)
     syn_name = NullField()
     traits = NullField()
+    base_type = NullField()
     name = Property(Self.inner_type_decl.name)
 
     full_name = Property(
@@ -1357,6 +1371,7 @@ class TraitDecl(NamedTypeDecl):
 
     syn_name = Field(type=T.DefId)
     traits = NullField()
+    base_type = NullField()
 
     decls = Field(type=DeclBlock)
 
@@ -1369,6 +1384,7 @@ class EnumTypeDecl(NamedTypeDecl):
     syn_name = Field(type=T.DefId)
     literals = Field(type=T.EnumLitDecl.list)
     traits = Field(type=T.TypeRef.list)
+    base_type = NullField()
     decls = Field(type=DeclBlock)
 
 
@@ -1378,6 +1394,7 @@ class StructDecl(NamedTypeDecl):
     """
     syn_name = Field(type=T.DefId)
     traits = Field(type=T.TypeRef.list)
+    base_type = NullField()
     decls = Field(type=DeclBlock)
 
 
@@ -1387,7 +1404,7 @@ class ClassDecl(NamedTypeDecl):
     but might be extended to support regular classes in the future.
     """
     syn_name = Field(type=T.DefId)
-    base_class = Field(type=T.TypeRef)
+    base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
 
@@ -1398,6 +1415,7 @@ class EnumClassAltDecl(TypeDecl):
     """
     syn_name = Field(T.DefId)
     traits = NullField()
+    base_type = NullField()
 
     parent_type = Property(Entity.parent.parent.cast_or_raise(T.TypeDecl))
 
@@ -1414,7 +1432,7 @@ class EnumClassDecl(NamedTypeDecl):
     """
     syn_name = Field(type=T.DefId)
     alts = Field(type=T.EnumClassAltDecl.list)
-    base_class = Field(type=T.TypeRef)
+    base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
 
