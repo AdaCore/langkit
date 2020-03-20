@@ -9,9 +9,10 @@ from langkit.envs import (
     reference
 )
 from langkit.expressions import (
-    AbstractKind, AbstractProperty, And, CharacterLiteral, Cond, EmptyEnv,
-    Entity, If, Let, No, Not, Or, Property, PropertyError, Self, String as S,
-    Try as _Try, Var, ignore, langkit_property, new_env_assoc
+    AbstractKind, AbstractProperty, And, ArrayLiteral as A, CharacterLiteral,
+    Cond, EmptyEnv, Entity, If, Let, No, Not, Or, Property, PropertyError,
+    Self, String as S, Try as _Try, Var, ignore, langkit_property,
+    new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
                              Or as GOr, Pick)
@@ -485,6 +486,19 @@ class Decl(LKNode):
         parameters for the call are defined.
         """
         return EmptyEnv
+
+    @langkit_property()
+    def called_decl_type():
+        """
+        Get the type of the expression resulting of calling this decl (type
+        itself it the decl is a type, return type if the decl is a
+        function).
+        """
+        return Entity.match(
+            lambda t=TypeDecl: t,
+            lambda f=FunDecl: f.return_type.designated_type,
+            lambda _: PropertyError(T.TypeDecl.entity, "Should not happen")
+        )
 
 
 @abstract
@@ -1231,6 +1245,8 @@ class GenericFormalTypeDecl(TypeDecl):
     base_type = NullField()
     type_scope = Property(EmptyEnv)
 
+    generic_decl = Property(Entity.parent.parent.cast_or_raise(T.GenericDecl))
+
 
 @abstract
 class NamedTypeDecl(TypeDecl):
@@ -1254,6 +1270,19 @@ class GenericParamAssoc(Struct):
     """
     formal = UserField(T.GenericFormalTypeDecl)
     actual = UserField(T.TypeDecl)
+
+
+class InferInstantiation(Struct):
+    """
+    Result of an instantiation inference. The result will either be:
+
+    * An array of generic param associations, if the inference succeeded.
+    * An error, if the inference failed.
+    """
+    result = UserField(
+        T.GenericParamAssoc.array, default_value=No(T.GenericParamAssoc.array)
+    )
+    error = UserField(T.SemanticResult, default_value=No(T.SemanticResult))
 
 
 class GenericDecl(Decl):
@@ -1830,8 +1859,19 @@ class CallExpr(Expr):
 
         rd = Var(Entity.name.referenced_decl)
 
-        return If(
+        generic_inst_error = Var(If(
             rd.has_error,
+            No(T.SemanticResult.array),
+            rd.result_ref.cast(T.GenericDecl).then(
+                lambda generic_decl: Entity.infer_actuals(
+                    generic_decl,
+                    Entity.expected_type
+                ).then(lambda iir: iir.error.then(lambda e: e.singleton))
+            )
+        ))
+
+        arity_error = Var(If(
+            rd.has_error | Not(generic_inst_error.is_null),
             No(T.SemanticResult.array),
 
             Entity.match_params().filter(lambda pm: Not(pm.has_matched))
@@ -1839,16 +1879,15 @@ class CallExpr(Expr):
                 lambda pm: If(
                     pm.formal.is_null,
 
-                    pm.actual.error(
+                    A([pm.actual.error(
                         S("Unmatched actual in call to `")
                         .concat(Entity.called_decl.full_name)
-                        .concat(S("`")),
-                    ).singleton.concat(
+                        .concat(S("`"))),
+
                         # If there is an unmmatched actual that is named, then
                         # exempt the resolution of the name, because it's going
                         # to fail.
-                        pm.actual.name._.exempt.singleton
-                    ),
+                        pm.actual.name._.exempt]),
 
                     Self.error(
                         S("No value for parameter `")
@@ -1859,16 +1898,187 @@ class CallExpr(Expr):
                     ).singleton
                 )
             )
+        ))
+
+        return generic_inst_error.concat(arity_error)
+
+    @langkit_property(return_type=T.InferInstantiation)
+    def infer_actuals_impl(
+        generic_decl=T.GenericDecl.entity,
+        gen_type=T.TypeDecl.entity,
+        expected_type=T.TypeDecl.entity
+    ):
+        """
+        Recursive implementation method for ``infer_actuals``. Recursively
+        traverse the expected_type and the generic type, accumulating
+        associations from generic formal types to generic actuals in the
+        process.
+
+        Return a single error result on any encountered errors. This means that
+        we stop at the first error. NOTE: At the moment, the generated error
+        has no message, instead just containing an error flag, deferring the
+        error message creation to ``infer_actuals``.
+        """
+        return gen_type.match(
+            # First case: we have a generic formal on the gen type side: in
+            # that case, return the assoc between the formal and expected_type.
+            lambda gen_form=GenericFormalTypeDecl: If(
+                gen_form.generic_decl.node == generic_decl.node,
+                InferInstantiation.new(
+                    result=GenericParamAssoc.new(
+                        formal=gen_form.node,
+                        actual=expected_type.node
+                    ).singleton,
+                ),
+                # This really should never happen: any generic formal
+                # referenced in gen_type should be from the generic_decl.
+                PropertyError(InferInstantiation, "should not happen")
+            ),
+
+            # Second case: we have an instantiated generic type on the gen type
+            # side: in that case, we ensure that we also have an instantiated
+            # generic type on the expected_type side, that the generic matches,
+            # and we then recurse on the actuals.
+            lambda inst=InstantiatedGenericType:
+            expected_type.cast(InstantiatedGenericType).then(
+                lambda etype: Cond(
+                    # Ensure that the instantiated generic types are the same,
+                    # return an error if they're not.
+                    (inst.inner_type_decl != etype.inner_type_decl),
+                    InferInstantiation.new(
+                        error=SemanticResult.new(has_error=True)
+                    ),
+
+                    # If they're the same, iterate on the actuals of both
+                    # types, and call ``infer_actuals_impl`` recursively,
+                    # searching for generic formals on the gen type side.
+                    inst.actuals.map(
+                        lambda i, actual: Entity.infer_actuals_impl(
+                            generic_decl,
+                            actual.as_bare_entity,
+                            etype.actuals.at(i).as_bare_entity
+                        )
+                    ).then(
+                        # If the result of any subresult is an error, return it
+                        lambda subresults:
+                        subresults.find(lambda sr: Not(sr.error.is_null)).then(
+                            lambda sr: sr,
+                            # Else, concatenate the subresults and return that
+                            default_val=InferInstantiation.new(
+                                result=subresults.mapcat(lambda sr: sr.result)
+                            )
+                        ),
+                    ),
+                ),
+
+                # If the expected_type is not a generic, error
+                default_val=InferInstantiation.new(
+                    error=SemanticResult.new(has_error=True)
+                ),
+            ),
+
+            # General case: the gen type is neither a generic formal nor an
+            # instantiated generic type: we have nothing to do, return an empty
+            # result.
+            lambda _: No(InferInstantiation)
         )
 
-    @langkit_property()
-    def called_decl():
-        # Implement special resolution for calls to objects via __call__
-        rd = Var(Entity.name.check_referenced_decl)
-        call_builtin = Var(
-            rd.cast(T.BaseValDecl)._.get_type._.get_fun('__call__')
+    @langkit_property(return_type=T.InferInstantiation)
+    def infer_actuals(
+        generic_decl=T.GenericDecl.entity,
+        expected_type=T.TypeDecl.entity
+    ):
+        """
+        Infer the actuals for ``generic_decl``, given an ``expected_type`` for
+        the call of the declaration. Return an error result if incorrect.
+        """
+        unsorted_actuals = Var(Entity.infer_actuals_impl(
+            generic_decl,
+            generic_decl.decl.called_decl_type, expected_type
+        ))
+
+        return Cond(
+            # Inference returned an error without message -> emit a general
+            # unification error.
+            Not(unsorted_actuals.error.is_null)
+            & unsorted_actuals.error.error_message.is_null,
+            InferInstantiation.new(error=Self.error(
+                S("Cannot instantiate callee: cannot unify `")
+                .concat(generic_decl.decl.called_decl_type.full_name)
+                .concat(S("` with `")).concat(expected_type.full_name)
+                .concat(S("`"))
+            )),
+
+            # Inference returned an error with message -> propagate it
+            Not(unsorted_actuals.error.is_null),
+            unsorted_actuals,
+
+            # We don't have all the actuals needed to infer -> return an error
+            unsorted_actuals.result.length
+            < generic_decl.generic_formals.length,
+            InferInstantiation.new(
+                error=Self.error(
+                    S("Not enough information to infer "
+                      "instantiation of generic callee")
+                ),
+            ),
+
+            # Third case: everything is fine -> return the result
+            unsorted_actuals
         )
-        return call_builtin.then(lambda a: a, default_val=rd)
+
+    @langkit_property(return_type=T.TypeDecl.array)
+    def check_infer_actuals(
+        generic_decl=T.GenericDecl.entity,
+        expected_type=T.TypeDecl.entity
+    ):
+        """
+        Infer the actuals for ``generic_decl``, when this decl
+        is being called by this CallExpr, given an ``expected_type`` for the
+        call. Raise on error.
+        """
+        unsorted_actuals = Var(
+            Entity.infer_actuals(generic_decl, expected_type)
+        )
+
+        # Sort the assocs, and return only the actuals, so that they can be
+        # used for an instantiation.
+        return If(
+            unsorted_actuals.error.is_null,
+            generic_decl.generic_formals.map(
+                lambda gen_form: unsorted_actuals.result.find(
+                    lambda a: a.formal == gen_form.node
+                ).actual
+            ),
+            PropertyError(T.TypeDecl.array, "Generic inference error")
+        )
+
+    @langkit_property(public=True)
+    def called_decl():
+        """
+        Return the declaration that is called by this call expression.
+        """
+        refd_decl = Var(Entity.name.check_referenced_decl)
+
+        # Implement special resolution for calls to objects via __call__
+        called_decl = Var(
+            refd_decl.cast(T.BaseValDecl)
+            ._.get_type._.get_fun('__call__')
+            .then(lambda a: a, default_val=refd_decl)
+        )
+
+        return called_decl.cast(T.GenericDecl).then(
+            # If the called decl is a generic decl, then we need to instantiate
+            # it: Infer the actuals of the generic decl being called..
+            lambda gd: Entity.check_infer_actuals(gd, Entity.expected_type)
+            .then(
+                # And instantiate the generic declaration with those inferred
+                # actuals.
+                lambda actuals: gd.instantiate(actuals)
+            ),
+            # If not a generic decl, fall back on the initially found decl
+            default_val=called_decl
+        )
 
     expr_context_free_type = Property(
         Entity.called_decl.then(

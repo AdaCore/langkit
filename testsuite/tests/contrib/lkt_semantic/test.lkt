@@ -181,3 +181,36 @@ fun test_paren_expr(): Int = (if true then 12 else null)
 
 # Test null exclusion expr
 fun test_null_excl_expr(): Int = (if true then 12 else null)!
+
+# Implicit instantiations
+
+# Check that we can instantiate a function depending on its target type,
+# without any dependent parameters.
+fun test_int_to(): String = convert_int(12)
+
+# Check that we can instantiate a function depending on its target type, and
+# properly resolve parameters with types that depend on the generic formal
+# types.
+fun test_identity(): Int = identity(12)
+
+# Check that we can instantiate a function with a more complex return type that
+# is a composed generic type.
+fun test_singleton(): Array[Int] = singleton(12)
+
+# Implicit generic instantiation with function argument
+fun test_implicit_apply(): Int = apply(double, 12)
+
+# Ambiguous generic instantiation
+generic [T] fun fooz(x: T, y: T): Int
+fun test_ambiguous_generic_instantiation(): Int = fooz(1, "lol")
+
+# Instantiation is fine, wrong param
+fun test_invalid_singleton(): Array[Int] = singleton("lol")
+
+# Instantiation with wrong expected type 1
+fun test_invalid_singleton_2(): Int = singleton("lol")
+
+generic [T, U] struct Dummy {}
+
+# Instantiation with wrong expected type 1
+fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
