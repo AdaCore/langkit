@@ -1199,3 +1199,48 @@ Expr <NumLit test.lkt:177:44-177:46>
 Expr <CallExpr test.lkt:177:25-177:47>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
+Id   <RefId "Int" test.lkt:175:24-175:27>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "true" test.lkt:175:34-175:38>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
+
+Expr <RefId "true" test.lkt:175:34-175:38>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+
+Expr <NumLit test.lkt:175:44-175:46>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NullLit test.lkt:175:52-175:56>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <IfExpr test.lkt:175:31-175:56>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <ParenExpr test.lkt:175:30-175:57>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:178:28-178:31>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "true" test.lkt:178:38-178:42>
+     references <EnumLitDecl "true" __prelude:6:28-6:32>
+
+Expr <RefId "true" test.lkt:178:38-178:42>
+     has type <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+
+Expr <NumLit test.lkt:178:48-178:50>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NullLit test.lkt:178:56-178:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <IfExpr test.lkt:178:35-178:60>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <ParenExpr test.lkt:178:34-178:61>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <ErrorOnNull test.lkt:178:34-178:62>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+

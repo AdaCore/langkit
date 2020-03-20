@@ -570,6 +570,9 @@ class Expr(LKNode):
                 if_expr.expected_type
             ),
 
+            lambda err_on_null=T.ErrorOnNull: err_on_null.expected_type,
+            lambda paren_expr=T.ParenExpr: paren_expr.expected_type,
+
             lambda p=T.Param: p.call_expr.match_params().find(
                 lambda pm: pm.actual == p
             ).then(lambda pm: pm.formal.get_type),
