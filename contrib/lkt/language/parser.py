@@ -1747,8 +1747,7 @@ class GenericTypeRef(TypeRef):
         )
         return generic_decl.get_instantiated_type(
             Entity.params.map(
-                lambda p: p.designated_type.assert_bare
-                .cast_or_raise(T.TypeDecl)
+                lambda p: p.designated_type.node
             )
         ).as_bare_entity
 
@@ -1765,9 +1764,9 @@ class FunctionTypeRef(TypeRef):
         return Self.function_type(
             Entity.args_types.map(
                 lambda a:
-                a.designated_type.assert_bare.cast(T.TypeDecl)
+                a.designated_type.node
             ),
-            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+            Entity.return_type.designated_type.node
         ).as_bare_entity
 
 
