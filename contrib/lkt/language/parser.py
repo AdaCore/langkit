@@ -562,7 +562,7 @@ class Expr(LKNode):
                 bin_op.op.is_a(Op.alt_lte, Op.alt_gte, Op.alt_gt, Op.alt_lt,
                                Op.alt_eq),
 
-                If(Entity == bin_op.left, bin_op.left, bin_op.right)
+                If(Entity == bin_op.left, bin_op.right, bin_op.left)
                 .expr_type_impl(No(T.TypeDecl.entity), False).result_type,
 
                 # For other operators, the return type is the same as the type

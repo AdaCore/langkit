@@ -214,3 +214,6 @@ generic [T, U] struct Dummy {}
 
 # Instantiation with wrong expected type 1
 fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
+
+# Test rel operator
+fun test_rel(a : Int): Bool = (a = 15) or (a = 18)
