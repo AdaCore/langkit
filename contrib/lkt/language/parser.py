@@ -707,8 +707,8 @@ class Expr(LKNode):
           to be either a string or a symbol - override
           ``expected_type_predicate`` and ``invalid_expected_type_error_name``.
 
-        - If the construct has no definite type and no constraints, you have
-          nothing to do.
+        - If the construct imposes some constraints on its sub expressions, you
+          must encode them in ``Expr.expected_type``.
 
         - If the construct need rules that have not been planned by the above,
           you can still override ``expr_type_impl``. This should not be
