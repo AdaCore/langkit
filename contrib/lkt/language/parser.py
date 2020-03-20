@@ -501,6 +501,9 @@ class Expr(LKNode):
     def expected_type():
         return Entity.parent.match(
             lambda fun_decl=T.FunDecl: fun_decl.return_type.designated_type,
+            lambda lbd=T.LambdaExpr:
+            lbd.expected_type.cast_or_raise(FunctionType)
+            .return_type.as_bare_entity,
 
             lambda fun_arg_decl=T.FunArgDecl: fun_arg_decl.get_type,
 
@@ -1560,6 +1563,38 @@ class LambdaArgDecl(ComponentDecl):
     decl_type = Field(type=T.TypeRef)
     default_val = Field(type=T.Expr)
 
+    owning_lambda = Property(
+        Entity.parents.find(lambda p: p.is_a(LambdaExpr)).cast(T.LambdaExpr)
+    )
+
+    @langkit_property(memoized=True)
+    def index():
+        """
+        Return the index of this argument in the containing lambda.
+        """
+        return Entity.parent.cast_or_raise(T.LambdaArgDecl.list).filtermap(
+            lambda i, arg: i,
+            lambda arg: (arg == Entity)
+        ).at(0)
+
+    @langkit_property()
+    def get_type(no_inference=(T.Bool, False)):
+        return If(
+            # If no inference, return the explicitly declared type - that might
+            # be null.
+            no_inference,
+            Entity.decl_type.designated_type,
+
+            # If inference: return the infered type. NOTE: we might still need
+            # to fall back on the explicit type in some cases? This might
+            # return an erroneous result in case of erroneous file, but will be
+            # correct when the file is correct.
+            Entity.owning_lambda.expected_type
+            .cast_or_raise(FunctionType).then(
+                lambda ft: ft.args.at(Entity.index).as_entity
+            )
+        )
+
 
 class FieldDecl(ComponentDecl):
     """
@@ -1872,7 +1907,62 @@ class LambdaExpr(Expr):
     Lambda expression.
     """
     params = Field(type=T.LambdaArgDecl.list)
+    return_type = Field(type=T.TypeRef)
     body = Field(type=T.Expr)
+
+    @langkit_property()
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        return expected_type.is_a(FunctionType)
+
+    invalid_expected_type_error_name = Property(S("a function literal"))
+
+    @langkit_property()
+    def is_annotated():
+        """
+        Returns whether this lambda is type annotated or not. NOTE: will return
+        incorrect results if the lambda expr is incorrect, ie. partially
+        annotated.
+        """
+        return Not(Entity.return_type.is_null)
+
+    expr_context_free_type = Property(If(
+        # If the lambda has annotations, create a context free type from them
+        Entity.is_annotated,
+        Self.function_type(
+            Entity.params.map(
+                lambda p:
+                p.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
+            ),
+            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+        ).as_bare_entity,
+        # Else, no context free type
+        No(T.TypeDecl.entity)
+    ))
+
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_correctness():
+        # Check that either all types have type annotations, or no type have
+        # type annotations, to simplify our job later in terms of inference.
+        typs = Var(Entity.params.map(
+            lambda p: Not(p.decl_type.is_null)
+        ))
+
+        return Cond(
+            # Either:
+            Not(Or(
+                # No types have annotations
+                Not(typs.any(lambda t: t)),
+                # All types have annotations
+                typs.all(lambda t: t)
+            )),
+            # If that's not the case, then error
+            Self.params.error(
+                S("Invalid type annotations for lambda parameters.\n"
+                  "Annotate either all or no params")
+            ).singleton,
+
+            No(T.SemanticResult.array)
+        )
 
 
 class TryExpr(Expr):
@@ -2448,7 +2538,8 @@ lkt_grammar.add_rules(
     ),
 
 
-    lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")", "=>", cut(), G.expr),
+    lambda_expr=LambdaExpr("(", G.lambda_arg_list, ")",
+                           Opt(":", G.type_ref), "=>", cut(), G.expr),
 
     null_lit=NullLit("null"),
 

@@ -129,3 +129,18 @@ val b : Int = a.plus(2)
 
  # Test that LKNode.bool_type resolves correctly
 fun test_if_2(a: Int, b: Int): Int = if a = b then a else b
+
+#
+# Test lambda expressions and parameters
+#
+
+fun lambda_test_helper(int: Int, fn: (Int, Int) -> Int): Int
+
+# Test 1: test that type of parameters is correctly infered
+fun lambda_test_1(): Int = lambda_test_helper(12, (x, y) => x + y * 2)
+
+# Test 2: test that either all or no lambda params have type annotations
+fun lambda_test_incorrect_1(): Int = lambda_test_helper(12, (x : Int, y) => x + y * 2)
+
+# Test 3: Errors on mismatching lambda type
+fun lambda_test_incorrect_2(): Int = lambda_test_helper(12, (x : String, y : String): Int => 12)
