@@ -2258,6 +2258,8 @@ class LambdaExpr(Expr):
             No(T.SemanticResult.array)
         )
 
+    env_spec = EnvSpec(add_env())
+
 
 class TryExpr(Expr):
     """
