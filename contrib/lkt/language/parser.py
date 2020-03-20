@@ -117,7 +117,7 @@ class LKNode(ASTNode):
     )
 
     bool_type = Property(
-        Self.get_builtin_type('Boolean'), public=True,
+        Self.get_builtin_type('Bool'), public=True,
         doc="Unit method. Return the boolean builtin type."
     )
 
