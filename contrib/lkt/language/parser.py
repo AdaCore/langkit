@@ -1575,7 +1575,7 @@ class FunDecl(UserValDecl):
         ignore(no_inference)
         return Self.function_type(
             # If there is an owning type, then the type of this function
-            # contain: the type of the self argument, which (we imagine, it
+            # contains the type of the self argument, which (we imagine, it
             # won't be used yet) will need to be passed "self" explicitly, when
             # passed around as a function object.
             Self.owning_type.then(lambda ot: ot.singleton)
