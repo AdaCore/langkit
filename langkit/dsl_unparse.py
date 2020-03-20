@@ -973,6 +973,8 @@ def type_name(type):
             return type.raw_name.camel
     elif type.is_array_type:
         return "Array[{}]".format(type_name(type.element_type))
+    elif type.is_iterator_type:
+        return "Iterator[{}]".format(type_name(type.element_type))
     elif type.is_entity_type:
         return type_name(type.element_type)
     elif type.is_struct_type:

@@ -9,7 +9,7 @@ grammar foo_grammar {
     @export fun get_all_examples (): Array[FooNode] =
     node.children_env.get("example")
 
-    @export fun iter_examples (): InternalEntityIteratorAccess =
+    @export fun iter_examples (): Iterator[FooNode] =
     node.get_all_examples.to_iterator
 }
 

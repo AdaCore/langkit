@@ -11,6 +11,6 @@ class Example : FooNode {
 
     @export fun entities_array (): Array[Example] = [self, self, self]
 
-    @export fun entities_iterator (): InternalEntityExampleIteratorAccess =
+    @export fun entities_iterator (): Iterator[Example] =
     self.entities_array.to_iterator
 }
