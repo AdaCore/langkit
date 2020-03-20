@@ -175,3 +175,9 @@ fun test_explicit_singleton(): Array[Int] = singleton[Int](12)
 # Explicit generic instantiation with function argument
 fun double (arg: Int): Int = arg * 2
 fun test_apply(): Int = apply[Int](double, 12)
+
+# Test paren expr
+fun test_paren_expr(): Int = (if true then 12 else null)
+
+# Test null exclusion expr
+fun test_null_excl_expr(): Int = (if true then 12 else null)!
