@@ -1218,6 +1218,15 @@ package body ${ada_lib_name}.Implementation is
             end if;
          % endif
 
+         if (Dest_Env.Env.Node = null
+             or else Dest_Env.Env.Node.Unit /= Self.Unit)
+            and then Is_Synthetic (Mapping.Val)
+         then
+            raise Property_Error with
+               "Cannot add a synthetic node to a lexical env from another"
+               & " analysis unit";
+         end if;
+
          --  Add the element to the environment
          Add (Self     => Dest_Env,
               Key      => Mapping.Key,
