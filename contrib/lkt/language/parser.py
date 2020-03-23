@@ -565,7 +565,8 @@ class Expr(LKNode):
                                Op.alt_eq),
 
                 If(Entity == bin_op.left, bin_op.right, bin_op.left)
-                .expr_type_impl(No(T.TypeDecl.entity), False).result_type,
+                .expr_type_impl(No(T.TypeDecl.entity), False)
+                .result_type._.root_type,
 
                 # For other operators, the return type is the same as the type
                 # of both operands, so we use the upward flowing type.
@@ -747,7 +748,7 @@ class Expr(LKNode):
             # they match.
             And(Not(expected_type.is_null), Not(cf_type.is_null)),
             If(
-                expected_type.matches(cf_type),
+                cf_type.matches(expected_type),
                 SemanticResult.new(node=Self, result_type=expected_type),
 
                 # If they don't match, emit an error
@@ -1162,7 +1163,7 @@ class TypeDecl(Decl):
         # TODO: here we can add specific logic wrt. type matching (for example
         # entity/node type equivalence, subtyping, etc). As in ada, we might
         # need several match predicates, for different cases.
-        return Entity == other
+        return (Entity == other) | Entity.is_subtype(other)
 
     @langkit_property(memoized=True)
     def self_decl():
@@ -1195,6 +1196,34 @@ class TypeDecl(Decl):
     traits_decls = Property(Entity.traits.map(lambda t: t.designated_type))
 
     base_type = AbstractField(T.TypeRef)
+
+    @langkit_property(memoized=True, return_type=T.TypeDecl.entity.array,
+                      public=True)
+    def base_types():
+        """
+        Return the chain of base types for this type, if applicable, else null.
+        """
+        return Entity.base_type._.designated_type.then(
+            lambda b: b.singleton.concat(b.base_types)
+        )
+
+    @langkit_property(memoized=True, return_type=T.TypeDecl.entity,
+                      public=True)
+    def root_type():
+        """
+        Return the root type of this type, if applicable, else null.
+        """
+        return Entity.base_type._.designated_type.then(
+            lambda b: b.root_type
+        )._or(Entity)
+
+    @langkit_property(public=True)
+    def is_subtype(potential_base=T.TypeDecl.entity):
+        """
+        Return whether ``self`` is a subtype of ``potential_base``.
+        """
+        ignore(potential_base)
+        return False
 
     @langkit_property()
     def type_base_scope():
@@ -1467,6 +1496,12 @@ class ClassDecl(NamedTypeDecl):
     base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
     decls = Field(type=DeclBlock)
+
+    @langkit_property()
+    def is_subtype(potential_base=T.TypeDecl.entity):
+        return Not(
+            Entity.base_types.find(lambda bt: bt == potential_base).is_null
+        )
 
 
 class EnumClassAltDecl(TypeDecl):
