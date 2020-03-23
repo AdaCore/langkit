@@ -19,10 +19,3 @@ class Program : FooNode {
     @parse_field name : Id
     @parse_field program_list : ASTList[Program]
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

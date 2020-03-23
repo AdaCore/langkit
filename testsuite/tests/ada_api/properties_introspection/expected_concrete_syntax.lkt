@@ -82,10 +82,3 @@ class VarDecl : FooNode {
 
     @export fun eval (): Int = node.value.eval()
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

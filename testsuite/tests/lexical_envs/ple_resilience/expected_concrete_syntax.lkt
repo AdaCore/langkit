@@ -51,10 +51,3 @@ class Prefix : Name {
     fun resolve (): FooNode =
     node.prefix.resolve().children_env().get_first(node.suffix.symbol)
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

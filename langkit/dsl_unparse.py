@@ -1113,7 +1113,7 @@ def type_name(type):
 
 def emit_node_type(node_type):
 
-    from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
+    from langkit.compiled_types import ASTNodeType, CompiledTypeRepo, T
 
     walker = DSLWalker.class_from_location(node_type.location)
     base = None
@@ -1159,6 +1159,8 @@ def emit_node_type(node_type):
         elif node_type == CompiledTypeRepo.entity_info:
             return ""
         elif node_type == CompiledTypeRepo.env_metadata:
+            return ""
+        elif node_type == T.env_assoc:
             return ""
 
     parse_fields = [

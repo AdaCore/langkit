@@ -33,10 +33,3 @@ class Ref : FooNode {
 
     @export fun decl (): Decl = node.children_env().get(node.name)?(0).as[Decl]!
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

@@ -79,10 +79,3 @@ class Ref : Expr {
 
 class Identifier : FooNode {
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

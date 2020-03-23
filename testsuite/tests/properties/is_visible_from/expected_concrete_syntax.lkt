@@ -20,10 +20,3 @@ class Scope : ASTList[Name] {
 
 class Name : FooNode {
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

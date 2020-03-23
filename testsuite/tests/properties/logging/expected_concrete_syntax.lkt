@@ -28,10 +28,3 @@ class Name : FooNode {
 class Ref : FooNode {
     @parse_field name : Name
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}
