@@ -1156,8 +1156,6 @@ def emit_node_type(node_type):
             return ""
         elif node_type == CompiledTypeRepo.entity_info:
             return ""
-        elif node_type == CompiledTypeRepo.entity_info:
-            return ""
         elif node_type == CompiledTypeRepo.env_metadata:
             return ""
         elif node_type == T.env_assoc:
