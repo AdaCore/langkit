@@ -1237,7 +1237,11 @@ class TypeDecl(Decl):
                 lambda td: td.type_scope
             )
             # Plus operations from the base type
-            .concat(Entity.base_type._.designated_type.type_scope.singleton)
+            .concat(
+                # Wrap in Try in case we cannot resolve the base type scope
+                Try(Entity.base_type._.designated_type.type_scope,
+                    EmptyEnv).singleton
+            )
             # And group them together
             .env_group()
         )
@@ -2113,9 +2117,14 @@ class CallExpr(Expr):
 
         # Implement special resolution for calls to objects via __call__
         called_decl = Var(
-            refd_decl.cast(T.BaseValDecl)
-            ._.get_type._.get_fun('__call__')
-            .then(lambda a: a, default_val=refd_decl)
+            refd_decl.match(
+                # Don't try to look for __call__ on function decls
+                lambda _=FunDecl: refd_decl,
+                lambda v=BaseValDecl:
+                v._.get_type._.get_fun('__call__')
+                .then(lambda a: a, default_val=refd_decl),
+                lambda _: refd_decl,
+            )
         )
 
         return called_decl.cast(T.GenericDecl).then(
