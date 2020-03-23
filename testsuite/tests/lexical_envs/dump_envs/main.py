@@ -24,10 +24,12 @@ if u.diagnostics:
         print('{}:{}'.format(u.filename, d))
     sys.exit(1)
 print('== Before PLE ==')
+sys.stdout.flush()
 u._dump_lexical_env()
 print('')
 
 print('== After PLE ==')
+sys.stdout.flush()
 u.populate_lexical_env()
 u._dump_lexical_env()
 print('')
