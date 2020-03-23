@@ -27,10 +27,3 @@ class Ref : FooNode {
 
     @export fun resolve (): FooNode = node.node_env().get(node.name)?(0)
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

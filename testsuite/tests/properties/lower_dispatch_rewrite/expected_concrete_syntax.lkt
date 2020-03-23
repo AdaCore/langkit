@@ -73,10 +73,3 @@ class Var : FooNode {
     @parse_field name : Name
     @parse_field expr : Expr
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

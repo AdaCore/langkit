@@ -65,10 +65,3 @@ class SelfDecl : FooNode {
 
 @qualifier class Synth : FooNode {
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

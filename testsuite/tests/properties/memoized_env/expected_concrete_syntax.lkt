@@ -26,10 +26,3 @@ class Ref : FooNode {
     @memoized fun referenced_env (): LexicalEnv =
     node.node_env().get(node.name.symbol)?(0).children_env()
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

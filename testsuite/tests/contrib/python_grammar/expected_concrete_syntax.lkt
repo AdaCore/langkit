@@ -727,10 +727,3 @@ class WithStmt : Stmt {
 
 @qualifier class VarArgsFlag : PythonNode {
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : PythonNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

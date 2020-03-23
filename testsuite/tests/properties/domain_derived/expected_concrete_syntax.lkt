@@ -21,10 +21,3 @@ class Name : FooNode {
     @export fun definition (): Definition =
     node.ref_var.get_value().as[Definition]
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}

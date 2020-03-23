@@ -59,10 +59,3 @@ class Scope : FooNode {
     @parse_field name : Name
     @parse_field content : ASTList[FooNode]
 }
-
-struct EnvAssoc {
-    key : Symbol
-    value : FooNode
-    dest_env : LexicalEnv
-    metadata : Metadata
-}
