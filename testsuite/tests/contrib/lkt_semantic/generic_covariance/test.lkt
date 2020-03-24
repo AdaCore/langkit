@@ -1,0 +1,13 @@
+generic [@out T] struct Entity {
+    node : T
+    other : Int
+}
+
+class Node {}
+class Expr : Node {}
+class Statement : Node {}
+class Lit : Expr {}
+
+A : Entity[Lit]
+B : Entity[Node] = A
+@invalid C : Entity[Statement] = A

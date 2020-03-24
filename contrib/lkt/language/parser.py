@@ -445,6 +445,15 @@ class FullDecl(LKNode):
     decl_annotations = Field(type=T.DeclAnnotation.list)
     decl = Field(type=T.Decl)
 
+    @langkit_property()
+    def get_annotation(name=T.Symbol):
+        """
+        Return the annotation with name ``name``.
+        """
+        return Self.decl_annotations.find(
+            lambda ann: ann.name.symbol == name
+        )
+
 
 @abstract
 class Decl(LKNode):
@@ -1154,14 +1163,54 @@ class TypeDecl(Decl):
     """
 
     @langkit_property()
+    def concrete_matches(other=T.TypeDecl.entity):
+        """
+        Return whether ``self`` matches ``other`` for non generic types.
+        """
+        return (Entity == other) | Entity.is_subtype(other)
+
+    @langkit_property(return_type=T.Bool)
     def matches(other=T.TypeDecl.entity):
         """
         Return whether ``self`` matches ``other``.
         """
-        # TODO: here we can add specific logic wrt. type matching (for example
-        # entity/node type equivalence, subtyping, etc). As in ada, we might
-        # need several match predicates, for different cases.
-        return (Entity == other) | Entity.is_subtype(other)
+        return Entity.cast(T.InstantiatedGenericType).then(
+            lambda e: other.cast(T.InstantiatedGenericType).then(
+
+                # Both types are generic instantiations: Handle covariance
+                # annotations, by manually checking that the type matches, and
+                # that the actuals used for instantiation match, taking into
+                # account covariance annotations.
+                lambda o:
+                # First, check that the instantiated generic type matches
+                e.inner_type_decl.as_bare_entity.matches(
+                    o.inner_type_decl.as_bare_entity
+                )
+                # Second, check that the actuals matches, taking into account
+                # potential covariance annotations.
+                & e.actuals.all(lambda i, actual_1: Let(
+                    lambda
+                    formal=e.generic_decl.generic_formal_decls.at(i),
+                    actual_2=o.actuals.at(i):
+                    If(
+                        Not(formal.get_annotation('out').is_null),
+
+                        # We have an out annotation on the formal. It means
+                        # that this formal is covariant, and so we should use
+                        # the type matching algorithm on it.
+                        actual_1.as_bare_entity.matches(
+                            actual_2.as_bare_entity
+                        ),
+
+                        # We have a non covariant formal: just check for basic
+                        # equality.
+                        actual_1 == actual_2
+                    )
+                )),
+                # Concrete types cases
+                default_val=Entity.concrete_matches(other)
+            ), default_val=Entity.concrete_matches(other)
+        )
 
     @langkit_property(memoized=True)
     def self_decl():
@@ -1246,6 +1295,11 @@ class TypeDecl(Decl):
 
     call_scope = Property(Entity.type_scope)
 
+    is_generic = Property(
+        Entity.is_a(T.InstantiatedGenericType), public=True,
+        doc="Returns whether this type is an instantiated generic type."
+    )
+
 
 @synthetic
 class FunctionType(TypeDecl):
@@ -1278,7 +1332,9 @@ class GenericFormalTypeDecl(TypeDecl):
     base_type = NullField()
     type_scope = Property(EmptyEnv)
 
-    generic_decl = Property(Entity.parent.parent.cast_or_raise(T.GenericDecl))
+    generic_decl = Property(
+        Entity.parent.parent.parent.cast_or_raise(T.GenericDecl)
+    )
 
 
 @abstract
@@ -1324,7 +1380,7 @@ class GenericDecl(Decl):
     """
     annotations = Annotations(rebindable=True)
 
-    generic_formals = Field(type=T.GenericFormalTypeDecl.list)
+    generic_formal_decls = Field(type=T.FullDecl.list)
     decl = Field(type=T.Decl)
     name = Property(Self.decl.name)
     syn_name = NullField()
@@ -1333,6 +1389,10 @@ class GenericDecl(Decl):
         add_to_env_kv(Entity.name, Self),
         add_env()
     )
+
+    generic_formals = Property(Entity.generic_formal_decls.map(
+        lambda gfd: gfd.decl.cast(T.GenericFormalTypeDecl)
+    ))
 
     @langkit_property(return_type=T.Decl.entity)
     def instantiate(actuals=T.TypeDecl.array):
@@ -2718,7 +2778,11 @@ lkt_grammar.add_rules(
         "generic", "[", List(G.generic_formal_type, sep=","), "]", G.bare_decl
     ),
 
-    generic_formal_type=GenericFormalTypeDecl(G.def_id),
+    generic_formal_type=FullDecl(
+        G.doc,
+        List(G.decl_annotation, empty_valid=True),
+        GenericFormalTypeDecl(G.def_id)
+    ),
 
     enum_lit_decl=EnumLitDecl(G.def_id),
 
