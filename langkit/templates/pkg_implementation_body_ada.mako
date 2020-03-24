@@ -2020,6 +2020,15 @@ package body ${ada_lib_name}.Implementation is
      (Node : ${T.root_node.name}) return ${T.root_node.name}
    is (Node.Parent);
 
+   ---------------
+   -- Node_Unit --
+   ---------------
+
+   function Node_Unit (Node : ${T.root_node.name}) return Internal_Unit is
+   begin
+      return Node.Unit;
+   end Node_Unit;
+
    ----------
    -- Hash --
    ----------
@@ -2675,6 +2684,43 @@ package body ${ada_lib_name}.Implementation is
       Index : Token_Index) return Token_Reference
    is
      (Wrap_Token_Reference (Token_Data (Node.Unit), (Index, No_Token_Index)));
+
+   ---------
+   -- "<" --
+   ---------
+
+   function "<" (Left, Right : ${T.root_node.name}) return Boolean is
+   begin
+      --  Reject invalid inputs
+      if Left /= null and Is_Synthetic (Left) then
+         raise Property_Error with "left node is synthetic";
+      elsif Right /= null and Is_Synthetic (Right) then
+         raise Property_Error with "right node is synthetic";
+      end if;
+
+      --  Null nodes come first
+      if Left = null then
+         return Right /= null;
+      elsif Right = null then
+         return False;
+      end if;
+
+      --  So we have two non-null nodes. Sort by unit filename
+      if Left.Unit < Right.Unit then
+         return True;
+      elsif Left.Unit /= Right.Unit then
+         return False;
+      end if;
+
+      --  Both nodes come from the same unit: compare their token indexes
+      if Left.Token_Start_Index < Right.Token_Start_Index then
+         return True;
+      elsif Left.Token_Start_Index > Right.Token_Start_Index then
+         return False;
+      else
+         return Left.Token_End_Index < Right.Token_End_Index;
+      end if;
+   end "<";
 
    -------------
    -- Is_Null --

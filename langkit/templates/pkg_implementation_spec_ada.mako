@@ -80,6 +80,10 @@ private package ${ada_lib_name}.Implementation is
    ${T.root_node.null_constant} : constant ${T.root_node.name} := null;
    --  Most generic AST node type
 
+   function "<" (Left, Right : ${T.root_node.name}) return Boolean;
+   --  Abritrary but deterministic ordering criteria for parsing nodes. This
+   --  handles null nodes as well. Raise a Property_Error for synthetic nodes.
+
    function Is_Null (Node : ${T.root_node.name}) return Boolean;
    function Kind (Node : ${T.root_node.name}) return ${T.node_kind};
 
@@ -163,6 +167,7 @@ private package ${ada_lib_name}.Implementation is
      (Node : ${T.root_node.name}) return ${T.root_node.name};
 
    function Hash (Node : ${T.root_node.name}) return Hash_Type;
+   function Node_Unit (Node : ${T.root_node.name}) return Internal_Unit;
    function Named_Hash (Node : ${T.root_node.name}) return Hash_Type is
      (Hash (Node));
 
@@ -191,6 +196,7 @@ private package ${ada_lib_name}.Implementation is
       Node_Metadata            => ${T.env_md.name},
       No_Node                  => null,
       Empty_Metadata           => No_Metadata,
+      Node_Unit                => Node_Unit,
       Node_Hash                => Named_Hash,
       Metadata_Hash            => Hash,
       Combine                  => Combine,

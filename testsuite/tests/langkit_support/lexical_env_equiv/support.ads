@@ -17,6 +17,7 @@ package Support is
    Default_MD : constant Metadata := (I => 0);
 
    function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
+   function Node_Unit (Dummy_C : Character) return Boolean is (True);
    function Metadata_Hash (Dummy_MD : Metadata) return Hash_Type is (0);
    function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
    function Parent (Dummy_Node : Character) return Character is (' ');

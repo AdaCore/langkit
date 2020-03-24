@@ -99,6 +99,12 @@ package body Langkit_Support.Lexical_Env is
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
 
+   function Is_Foreign (Self : Lexical_Env; Node : Node_Type) return Boolean
+   is (Self.Env.Node = No_Node
+       or else Node_Unit (Self.Env.Node) /= Node_Unit (Node))
+   with Pre => Self.Kind = Primary;
+   --  Return whether Node is foreign node relative to Self
+
    ----------------
    -- Text_Image --
    ----------------
@@ -467,9 +473,22 @@ package body Langkit_Support.Lexical_Env is
          return;
       end if;
 
+      --  Invalidate the cache, and make sure we have an entry in the internal
+      --  map for the given key.
       Self.Env.Lookup_Cache_Valid := False;
-      Map.Insert (Key, Internal_Map_Node_Vectors.Empty_Vector, C, Dummy);
-      Reference (Map, C).Element.Append (Node);
+      Map.Insert (Key, Empty_Internal_Map_Element, C, Dummy);
+
+      declare
+         E : Internal_Map_Element renames Reference (Map, C).Element.all;
+      begin
+         --  If Self and Value belong to the same analysis unit, consider Node
+         --  as native. In all other cases, it's a foreign node.
+         if Is_Foreign (Self, Value) then
+            E.Foreign_Nodes.Insert (Node.Node, Node);
+         else
+            E.Native_Nodes.Append (Node);
+         end if;
+      end;
    end Add;
 
    ------------
@@ -478,23 +497,28 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
    is
-      V : constant Internal_Envs.Reference_Type :=
+      Ref : constant Internal_Envs.Reference_Type :=
          Self.Env.Map.Reference (Key);
+      V   : Internal_Map_Node_Vectors.Vector renames Ref.Native_Nodes;
    begin
       if Self = Empty_Env then
          return;
       end if;
 
-      --  Get rid of element. Do this in reverse order so that removing one
-      --  element does not make us "step over" the next item. Also don't do
-      --  this in place (using V.Pop) as we need to preserve the order of
-      --  elements.
-      for I in reverse 1 .. V.Length loop
-         if V.Get (I).Node = Value then
-            V.Remove_At (I);
-            exit;
-         end if;
-      end loop;
+      if Is_Foreign (Self, Value) then
+         Ref.Foreign_Nodes.Delete (Value);
+      else
+         --  Get rid of the element. Do this in reverse order so that removing
+         --  one element does not make us "step over" the next item. Also don't
+         --  do this in place (using V.Pop) as we need to preserve the order of
+         --  elements.
+         for I in reverse 1 .. V.Length loop
+            if V.Get (I).Node = Value then
+               V.Remove_At (I);
+               exit;
+            end if;
+         end loop;
+      end if;
 
       Self.Env.Lookup_Cache_Valid := False;
    end Remove;
@@ -636,7 +660,7 @@ package body Langkit_Support.Lexical_Env is
          for C of All_Elements loop
             declare
                Nodes : constant Internal_Map_Node_Vectors.Vector :=
-                  Internal_Envs.Element (C);
+                  Internal_Envs.Element (C).Native_Nodes;
             begin
                for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
                   Append_Result
@@ -654,8 +678,8 @@ package body Langkit_Support.Lexical_Env is
       function Get_Nodes
         (Env : Lexical_Env; From_Rebound : Boolean := False) return Boolean
       is
-         C     : Cursor := Internal_Envs.No_Element;
-         Nodes : Internal_Map_Node_Vectors.Vector;
+         Map : constant Internal_Map := Env.Env.Map;
+         C   : Cursor := Internal_Envs.No_Element;
       begin
 
          if Env.Env.Map /= null then
@@ -668,20 +692,29 @@ package body Langkit_Support.Lexical_Env is
             end if;
 
             --  Else, find the elements in the map corresponding to Key
-            C := Env.Env.Map.Find (Key);
+            C := Map.Find (Key);
          end if;
 
          if Has_Element (C) then
-            Nodes := Element (C);
+            declare
+               E : Internal_Map_Element renames Reference (Map.all, C);
+            begin
+               --  First add nodes that belong to the same environment as Self.
+               --  Add them in reverse order, so that last inserted results are
+               --  returned first.
+               for I in reverse 1 .. E.Native_Nodes.Last_Index loop
+                  Append_Result
+                    (E.Native_Nodes.Get (I),
+                     Metadata, Current_Rebindings, From_Rebound);
+               end loop;
 
-            --  We iterate in reverse, so that last inserted results are
-            --  returned first.
-
-            --  TODO??? Use "for ... of reverse" next GPL release
-            for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
-               Append_Result
-                 (Nodes.Get (I), Metadata, Current_Rebindings, From_Rebound);
-            end loop;
+               --  Then add foreign nodes: just iterate on the ordered map
+               for Pos in E.Foreign_Nodes.Iterate loop
+                  Append_Result
+                    (Internal_Map_Node_Maps.Element (Pos),
+                     Metadata, Current_Rebindings, From_Rebound);
+               end loop;
+            end;
             return True;
          end if;
 
@@ -1326,8 +1359,8 @@ package body Langkit_Support.Lexical_Env is
             --  Release the internal map. Don't assume it was allocated, as
             --  it's convenient for testing not to allocate it.
             if Self.Env.Map /= null then
-               for Elts of Self.Env.Map.all loop
-                  Internal_Map_Node_Vectors.Destroy (Elts);
+               for Element of Self.Env.Map.all loop
+                  Internal_Map_Node_Vectors.Destroy (Element.Native_Nodes);
                end loop;
                Destroy (Self.Env.Map);
             end if;
@@ -1751,8 +1784,22 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
    begin
       return Vector : Env_Pair_Vectors.Vector do
-         for El in Env.Iterate loop
-            Vector.Append ((Key (El), Element (El)));
+         for Pos in Env.Iterate loop
+            --  Append a new entry, and then fill it in place to avoid needless
+            --  copying.
+            Vector.Append
+              ((Key (Pos), Internal_Map_Node_Vectors.Empty_Vector));
+            declare
+               Element : Internal_Map_Element renames
+                  Env.Constant_Reference (Pos);
+               V       : Internal_Map_Node_Vectors.Vector renames
+                  Vector.Last_Element.all.Value;
+            begin
+               V.Concat (Element.Native_Nodes);
+               for Node of Element.Foreign_Nodes loop
+                  V.Append (Node);
+               end loop;
+            end;
          end loop;
          Sort (Vector);
       end return;

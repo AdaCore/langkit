@@ -12,6 +12,7 @@ package Support is
 
    type String_Access is access all String;
    procedure Destroy is new Ada.Unchecked_Deallocation (String, String_Access);
+   function "<" (Left, Right : String_Access) return Boolean is (False);
 
    type Metadata is record
       I : Integer;
@@ -20,6 +21,7 @@ package Support is
    Default_MD : constant Metadata := (I => 0);
 
    function Node_Hash (Dummy_S : String_Access) return Hash_Type is (0);
+   function Node_Unit (Dummy_S : String_Access) return Boolean is (True);
    function Metadata_Hash (Dummy_MD : Metadata) return Hash_Type is (0);
    function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
    function Parent (S : String_Access) return String_Access is
@@ -61,6 +63,7 @@ package Support is
       No_Node                  => new String'(""),
       Empty_Metadata           => Default_MD,
       Node_Hash                => Node_Hash,
+      Node_Unit                => Node_Unit,
       Metadata_Hash            => Metadata_Hash,
       Combine                  => Combine,
       Can_Reach                => Can_Reach,
