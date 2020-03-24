@@ -1,0 +1,68 @@
+import lexer_example
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    scope <- Scope(name "{" list*(or(scope | ref)) "}")
+    ref <- Ref(name)
+    identifier <- Identifier(@identifier)
+    name <- or(DottedName(name "." identifier) | identifier)
+
+}
+
+@root_node class FooNode {
+}
+
+@abstract class Name : FooNode {
+
+    fun referenced_name (): Symbol
+
+    fun referenced_scope (): LexicalEnv
+
+    fun referenced_parent_scope (): LexicalEnv
+}
+
+class DottedName : Name {
+    @parse_field prefix : Name
+    @parse_field suffix : Identifier
+
+    fun referenced_name (): Symbol = node.suffix.referenced_name
+
+    fun referenced_parent_scope (): LexicalEnv = node.prefix.referenced_scope
+
+    fun referenced_scope (): LexicalEnv =
+    node.suffix.resolve_scope(node.referenced_parent_scope)
+}
+
+class Identifier : Name {
+
+    fun referenced_name (): Symbol = node.symbol
+
+    fun resolve_scope (from_env : LexicalEnv): LexicalEnv = {
+        val env = from_env.do(
+            (e) => e, default_val=node.referenced_parent_scope
+        );
+
+        env.get(node.symbol)?(0).children_env
+    }
+
+    fun referenced_parent_scope (): LexicalEnv = node.unit.root.children_env
+
+    fun referenced_scope (): LexicalEnv = node.resolve_scope(_)
+}
+
+class Ref : FooNode {
+    @parse_field name : Name
+
+    @export fun resolve (): FooNode = node.name.referenced_scope.env_node
+}
+
+class Scope : FooNode {
+    @parse_field name : Name
+    @parse_field content : ASTList[FooNode]
+}
+
+struct EnvAssoc {
+    key : Symbol
+    value : FooNode
+    dest_env : LexicalEnv
+    metadata : Metadata
+}

@@ -16,6 +16,7 @@ package Support is
    Property_Error: exception;
 
    function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
+   function Node_Unit (Dummy_C : Character) return Boolean is (True);
    function Metadata_Hash (Dummy_MD : Metadata) return Hash_Type is (0);
    function Combine (Dummy_L, Dummy_R : Metadata) return Metadata
    is ((null record));

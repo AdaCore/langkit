@@ -23,6 +23,7 @@
 
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Ordered_Maps;
 with Ada.Unchecked_Deallocation;
 
 with System;
@@ -75,9 +76,13 @@ generic
    No_Node        : Node_Type;
    Empty_Metadata : Node_Metadata;
 
+   with function "<" (Left, Right : Node_Type) return Boolean is <>;
+   with function "=" (Left, Right : Node_Type) return Boolean is <>;
+
    type Ref_Category is (<>);
    type Ref_Categories is array (Ref_Category) of Boolean;
 
+   with function Node_Unit (Node : Node_Type) return Unit_T is <>;
    with function Node_Hash (Node : Node_Type) return Hash_Type;
    with function Metadata_Hash (Metadata : Node_Metadata) return Hash_Type;
 
@@ -674,12 +679,30 @@ package Langkit_Support.Lexical_Env is
    subtype Internal_Map_Node_Array is
       Internal_Map_Node_Vectors.Elements_Array;
 
+   package Internal_Map_Node_Maps is new Ada.Containers.Ordered_Maps
+     (Key_Type     => Node_Type,
+      Element_Type => Internal_Map_Node);
+
+   type Internal_Map_Element is record
+      Native_Nodes : Internal_Map_Node_Vectors.Vector;
+      --  List of node that belong to the same unit as the lexical env that
+      --  owns the map.
+
+      Foreign_Nodes : Internal_Map_Node_Maps.Map;
+      --  List of nodes that belong to other units (as keys), and associated
+      --  metadata/resolvers when applicable (as values). Nodes are sorted by
+      --  unit filename/sloc range to preserve determinism.
+   end record;
+   --  Set of nodes associated to a symbol in a lexical environment
+
+   Empty_Internal_Map_Element : constant Internal_Map_Element :=
+     (others => <>);
+
    package Internal_Envs is new Ada.Containers.Hashed_Maps
      (Key_Type        => Symbol_Type,
-      Element_Type    => Internal_Map_Node_Vectors.Vector,
+      Element_Type    => Internal_Map_Element,
       Hash            => Hash,
-      Equivalent_Keys => "=",
-      "="             => Internal_Map_Node_Vectors."=");
+      Equivalent_Keys => "=");
 
    type Internal_Map is access all Internal_Envs.Map;
    --  Internal maps of Symbols to vectors of nodes
