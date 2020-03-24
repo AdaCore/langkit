@@ -194,6 +194,26 @@ class EnvSpec(object):
         :type: langkit.compiled_types.ASTNodeType
         """
 
+        # Analyze the given list of actions
+        self._parse_actions(actions)
+
+        # Property that returns the initial environment taht environment
+        # actions will use.
+        self.initial_env_prop = None
+        ":type: PropertyDef"
+
+        self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
+        """
+        Whether this spec create an environment.
+        """
+
+    def _parse_actions(self, actions):
+        """
+        Analyze the given list of actions and extract pre/post actions, i.e.
+        actions executed before and after handling children.
+
+        :rtype: (list[EnvAction], list[EnvAction])
+        """
         actions = list(actions)
 
         # If present, allow Do actions to come before SetInitialEnv
@@ -217,13 +237,6 @@ class EnvSpec(object):
         self.pre_actions = pre
         self.post_actions = post
         self.actions = self.pre_actions + self.post_actions
-
-        # These are the property attributes
-
-        self.initial_env_prop = None
-        ":type: PropertyDef"
-
-        self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
 
     @property
     def diagnostic_context(self):
