@@ -493,10 +493,9 @@ def emit_paren_expr(expr, **ctx):
     strn, has_coms = prepend_comments(expr, **ctx)
 
     if not needs_parens(expr) and not has_coms:
-        strn = emit_expr(expr, **ctx)
         return emit_paren(strn) if len(strn) > 40 else strn
     elif isinstance(expr, Let):
-        return emit_expr(expr, **ctx)
+        return strn
     else:
         return emit_paren(strn, force=has_coms)
 
