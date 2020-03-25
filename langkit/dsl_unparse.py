@@ -320,6 +320,19 @@ class DSLWalker(object):
 
         assert False
 
+    def arg_keyword(self, index):
+        """
+        If the cursor is on a function/method call, return the keyword name
+        used in the argument assocation corresponding to the ``index`` th
+        argument passed to that call.
+
+        :type index: int
+        :rtype: str
+        """
+        assert self.current_node.is_a(lpl.CallExpr)
+        kw = self.current_node.f_suffix[index].f_name
+        return kw.text if kw is not None else None
+
     def arg_count(self):
         """
         If the cursor is on a function/method call or boolean binop, return
@@ -606,12 +619,12 @@ def emit_expr(expr, **ctx):
         return "({}) => {}".format(vars_str, ee(expr))
         del vars_str
 
-    def emit_method_call(receiver, name, args=[]):
+    def emit_method_call(receiver, name, args=[], as_multiline=False):
         if not args:
             return "{}.{}".format(receiver, name)
         else:
             return "{}.{}{}".format(
-                receiver, name, emit_paren(", ".join(args))
+                receiver, name, emit_paren(", ".join(args), as_multiline)
             )
 
     def emit_let(expr):
@@ -892,13 +905,33 @@ def emit_expr(expr, **ctx):
         return "{}({})".format(ee(expr.expr_0), ee(expr.expr_1))
     elif isinstance(expr, FieldAccess):
         args = []
+        has_any_commented_arg = False
         if expr.arguments:
-            for arg in expr.arguments.args:
-                args.append(ee(arg))
-            for name, arg in expr.arguments.kwargs.items():
-                args.append("{}={}".format(name, ee(arg)))
+            with walker.method_call(expr.field):
+                field_coms = walker.emit_comments()
+                receiver_str = ee(expr.receiver)
 
-        return emit_method_call(ee(expr.receiver), expr.field, args)
+                for i in range(walker.arg_count()):
+                    kw = walker.arg_keyword(i)
+                    with walker.arg(i):
+                        arg_coms = walker.emit_comments()
+                        if kw is None:
+                            args.append(arg_coms + ee(expr.arguments.args[i]))
+                        else:
+                            args.append(arg_coms + "{}={}".format(
+                                kw, ee(expr.arguments.kwargs[kw])
+                            ))
+                        has_any_commented_arg |= arg_coms != ""
+        else:
+            field_coms = ""
+            receiver_str = ee(expr.receiver)
+
+        return field_coms + emit_method_call(
+            receiver_str,
+            expr.field,
+            args,
+            as_multiline=has_any_commented_arg
+        )
 
     elif isinstance(expr, Concat):
         return "{} & {}".format(ee_pexpr(expr.array_1), ee_pexpr(expr.array_2))
