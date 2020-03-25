@@ -12,7 +12,7 @@ class Example : FooNode {
     var2 : LogicVar
 
     fun predicate (n : FooNode, flag1 : Bool = false, flag2 : Bool = true): Bool =
-    (flag1 and (n.is_null)) and flag2
+    flag1 and (n.is_null) and flag2
 
     @export fun prop (): Example = {
         val _ = %predicate(BareExample.predicate, node.var1, node.var2);

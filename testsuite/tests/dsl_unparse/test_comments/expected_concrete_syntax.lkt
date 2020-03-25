@@ -82,6 +82,30 @@ class ExampleNode : TestNode {
         # compute
         x + y
     }
+
+    @export fun test_bool_binops (x : Bool, y : Bool): Bool = (
+        # hehe
+        (
+            (
+                # hoho
+                x and (
+                    # hihi
+                    y
+                )
+            ) and x
+        ) or x
+    ) and (
+        # wow
+        x or (
+            (
+                # True
+                x = true
+            ) or (
+                # False
+                x = false
+            )
+        )
+    )
 }
 
 class NodeType1 : ExampleNode {
