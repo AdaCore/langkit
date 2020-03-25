@@ -78,7 +78,21 @@ directory. Check in particular:
 * ``build/python``, which contains the Python binding for the generated
   library.
 
-If everything went fine, you should be able to run the ``parse`` test binary:
+In order to be able to use the library directly in its build directory, you
+need to update your environment. The following command does that:
+
+.. code-block:: text
+
+    $ eval $(./manage.py setenv)
+
+.. note::
+
+   For real life use, the generated library is supposed to be installed. If it
+   is installed in a standard location (for instance ``/usr`` on Unix systems),
+   this will make this environment update unnecessary.
+
+If everything went fine so far, you should be able to run the ``parse`` test
+binary:
 
 .. code-block:: text
 
