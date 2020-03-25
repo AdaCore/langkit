@@ -209,7 +209,10 @@ class DSLWalker(object):
         :type fun_name: str
         """
         def matches(n):
-            return n.is_a(lpl.CallExpr) and n.f_prefix.text == fun_name
+            return (
+                n.is_a(lpl.CallExpr) and n.f_prefix.text == fun_name and
+                n.token_start >= self.last_token
+            )
 
         call_node = (
             self.current_node
@@ -241,6 +244,45 @@ class DSLWalker(object):
 
         return self._with_current_node(call_node)
 
+    def boolean_binop(self, kind):
+        """
+        Moves the cursor to the next occurrence of a boolean binop of the
+        given kind. This handles boolean binops introduced with the ``&`` and
+        ``|`` operators, the ``And`` and ``Or`` calls and also the ``any_of``
+        method call.
+
+        .. note:: is a context manager.
+
+        :type kind: str
+        """
+        from langkit.expressions import BinaryBooleanOperator
+
+        if kind == BinaryBooleanOperator.AND:
+            call_name = 'And'
+            expr_type = lpl.AndExpr
+        else:
+            call_name = 'Or'
+            expr_type = lpl.OrExpr
+
+        def matches(n):
+            if n.is_a(lpl.CallExpr):
+                if n.f_prefix.text == call_name:
+                    return True
+                elif n.f_prefix.is_a(lpl.DottedName):
+                    if n.f_prefix.f_suffix.text == 'any_of':
+                        return kind == BinaryBooleanOperator.OR
+            elif n.is_a(expr_type):
+                return True
+            return False
+
+        binop_node = (
+            self.current_node
+            if matches(self.current_node)
+            else self.current_node.find(matches)
+        )
+
+        return self._with_current_node(binop_node)
+
     def self_arg(self):
         """
         If the cursor is on a method call, moves the cursor to the prefix
@@ -254,17 +296,43 @@ class DSLWalker(object):
 
     def arg(self, index):
         """
-        If the cursor is on a function/method call, moves the cursor to the
-        ``index``th argument of the call.
+        If the cursor is on a function/method or boolean binop call, moves the
+        cursor to the ``index``th argument/operand of the call.
 
         .. note:: is a context manager.
 
         :type index: int
         """
-        assert self.current_node.is_a(lpl.CallExpr)
-        return self._with_current_node(
-            self.current_node.f_suffix[index].f_expr
-        )
+
+        if self.current_node.is_a(lpl.CallExpr):
+            return self._with_current_node(
+                self.current_node.f_suffix[index].f_expr
+            )
+        elif self.current_node.is_a(lpl.AndExpr, lpl.OrExpr):
+            if index == 0:
+                return self._with_current_node(
+                    self.current_node.f_left
+                )
+            elif index == 1:
+                return self._with_current_node(
+                    self.current_node.f_right
+                )
+
+        assert False
+
+    def arg_count(self):
+        """
+        If the cursor is on a function/method call or boolean binop, return
+        the number of arguments/operands that are passed in the call.
+
+        :rtype: int
+        """
+        if self.current_node.is_a(lpl.CallExpr):
+            return len(self.current_node.f_suffix)
+        elif self.current_node.is_a(lpl.AndExpr, lpl.OrExpr):
+            return 2
+
+        assert False
 
     def missed_comments(self):
         """
@@ -731,13 +799,23 @@ def emit_expr(expr, **ctx):
         return "{} = {}".format(ee(expr.lhs), ee(expr.rhs))
 
     elif isinstance(expr, BinaryBooleanOperator):
-        return "{} {} {}".format(
-            emit_paren_expr(expr.lhs),
-            expr.kind, emit_paren_expr(expr.rhs)
-        )
+        with walker.boolean_binop(expr.kind):
+            def emit_bool_op_rec(expr, depth):
+                if depth == 2:
+                    lhs = emit_paren_expr(expr.lhs, arg_expr=0, **ctx)
+                else:
+                    lhs = emit_bool_op_rec(expr.lhs, depth - 1)
+
+                return "{} {} {}".format(
+                    lhs,
+                    expr.kind,
+                    emit_paren_expr(expr.rhs, arg_expr=depth - 1, **ctx)
+                )
+
+            return emit_bool_op_rec(expr, walker.arg_count())
 
     elif isinstance(expr, Not):
-        return "not {}".format(emit_paren_expr(expr.expr))
+        return "not {}".format(emit_paren_expr(expr.expr, **ctx))
 
     elif isinstance(expr, Then):
         if expr.var_expr.source_name is None:
@@ -760,8 +838,6 @@ def emit_expr(expr, **ctx):
                 if expr.default_val else None
             ])
         )
-
-        return res
 
     elif isinstance(expr, OrderingTest):
         return "{} {} {}".format(

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import (
-    Cond, If, Let, Property, Self, Var, langkit_property
+    And, Cond, If, Let, Or, Property, Self, Var, langkit_property
 )
 
 from utils import build_and_run, default_warning_set
@@ -113,6 +113,28 @@ class ExampleNode(TestNode):
             y=24:
             # compute
             x + y
+        )
+
+    @langkit_property(return_type=T.Bool, public=True)
+    def test_bool_binops(x=T.Bool, y=T.Bool):
+        return And(
+            # hehe
+            And(
+                # hoho
+                x  # hihi
+                & y,
+                x
+            ) | x,
+            # wow
+            Or(
+                x,
+                x.any_of(
+                    # True
+                    True,
+                    # False
+                    False
+                )
+            )
         )
 
 
