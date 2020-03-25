@@ -52,7 +52,10 @@ class ExampleNode : TestNode {
                 12
             ) else (
                 # finally!
-                node.test_cond(x)
+                node.test_cond(
+                    # arg
+                    x
+                )
             )
         ) else (
             # hoho

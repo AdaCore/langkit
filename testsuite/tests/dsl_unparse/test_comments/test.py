@@ -81,7 +81,10 @@ class ExampleNode(TestNode):
                 # nope
                 12,
                 # finally!
-                Self.test_cond(x)
+                Self.test_cond(
+                    # arg
+                    x
+                )
             ),
 
             # hoho
