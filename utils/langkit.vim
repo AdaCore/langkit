@@ -13,7 +13,7 @@ syn keyword langkitKeyword is end match when field as if elif then else block ca
 syn keyword langkitLiteral false true lfalse ltrue
 syn keyword langkitQualifier parse memoized public enum qualifier
 syn keyword langkitOperator new entity null or and dont_skip
-syn region  langkitString  start=+"+ skip=+""+ end=+"+
+syn region  langkitString  start=+"+ skip=+\\"+ end=+"+
 syn match   langkitToken   "@\s*\h\%(\w\|\.\)*" display
 syn match   langkitGrammarRule   "\%(\w\|_\)\+\s*\(<-\)\@=" display
 syn match   langkitLiteral "\d\+" display
