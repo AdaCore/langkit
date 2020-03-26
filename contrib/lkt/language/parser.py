@@ -854,10 +854,7 @@ class DotExpr(Expr):
     prefix = Field(type=T.Expr)
     suffix = Field(type=T.RefId)
 
-    referenced_decl = Property(SemanticResult.new(
-        result_ref=Entity.suffix.check_referenced_decl, node=Self
-    ))
-
+    referenced_decl = Property(Entity.suffix.referenced_decl)
     expr_context_free_type = Property(Entity.suffix.expr_context_free_type)
 
 
