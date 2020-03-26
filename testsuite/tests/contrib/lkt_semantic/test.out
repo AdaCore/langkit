@@ -821,8 +821,8 @@ Id   <RefId "Int" test.lkt:123:9-123:12>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 test.lkt:123:31: error: Unmatched actual in call to `test`
-122 | val z : Int = test(a=1, b=12, c=foo)
-    |                               ^^^^^ 
+122 | val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
+    |                               ^^^^^                                                                                     
 
 Id   <RefId "test" test.lkt:123:15-123:19>
      references <FunDecl "test" test.lkt:116:1-116:38>
@@ -849,9 +849,28 @@ Expr <NumLit test.lkt:123:27-123:29>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 test.lkt:123:33: error: Cannot find entity `foo` in this scope
-122 | val z : Int = test(a=1, b=12, c=foo)
-    |                                 ^^^ 
+122 | val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
+    |                                 ^^^                                                                                     
 
 Expr <CallExpr test.lkt:123:15-123:37>
      has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:127:9-127:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <NumLit test.lkt:127:15-127:16>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Int" test.lkt:128:9-128:12>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "a" test.lkt:128:15-128:16>
+     references <ValDecl "a" test.lkt:51:1-51:17>
+
+Expr <RefId "a" test.lkt:128:15-128:16>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:128:17: error: Cannot find entity `plus` in this scope
+127 | val b : Int = a.plus(2)
+    |                 ^^^^   
 
