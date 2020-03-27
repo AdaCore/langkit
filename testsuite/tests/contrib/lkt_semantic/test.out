@@ -1564,19 +1564,47 @@ Expr <LambdaExpr test.lkt:239:9-239:21>
 Expr <CallExpr test.lkt:237:5-240:6>
      has type <InstantiatedGenericType "Array[String]" __prelude:17:10-18:2>
 
-Id   <RefId "A" test.lkt:238:32-238:33>
+Id   <RefId "A" test.lkt:243:32-243:33>
      references <ClassDecl "A" test.lkt:1:12-26:2>
 
-Id   <RefId "Int" test.lkt:238:36-238:39>
+Id   <RefId "Int" test.lkt:243:36-243:39>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "arg" test.lkt:238:42-238:45>
-     references <FunArgDecl "arg" test.lkt:238:26-238:33>
+Id   <RefId "arg" test.lkt:243:42-243:45>
+     references <FunArgDecl "arg" test.lkt:243:26-243:33>
 
-Expr <RefId "arg" test.lkt:238:42-238:45>
+Expr <RefId "arg" test.lkt:243:42-243:45>
      has type <ClassDecl "A" test.lkt:1:12-26:2>
 
-test.lkt:238:46: error: Cannot find entity `method_doesnt_exist` in this scope
-237 | fun test_handle_ce_error(arg : A): Int = arg.method_doesnt_exist()
+test.lkt:243:46: error: Cannot find entity `method_doesnt_exist` in this scope
+242 | fun test_handle_ce_error(arg : A): Int = arg.method_doesnt_exist()
     |                                              ^^^^^^^^^^^^^^^^^^^  
+
+Id   <RefId "T" test.lkt:247:27-247:28>
+     references <GenericFormalTypeDecl "T" test.lkt:247:10-247:11>
+
+Id   <RefId "Pair" test.lkt:247:31-247:35>
+     references <GenericDecl "Pair" test.lkt:28:1-31:2>
+
+Id   <RefId "T" test.lkt:247:36-247:37>
+     references <GenericFormalTypeDecl "T" test.lkt:247:10-247:11>
+
+Id   <RefId "T" test.lkt:247:39-247:40>
+     references <GenericFormalTypeDecl "T" test.lkt:247:10-247:11>
+
+Id   <RefId "Pair" test.lkt:248:33-248:37>
+     references <GenericDecl "Pair" test.lkt:28:1-31:2>
+
+Id   <RefId "Int" test.lkt:248:38-248:41>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "Bool" test.lkt:248:43-248:47>
+     references <EnumTypeDecl "Bool" __prelude:6:10-6:36>
+
+test.lkt:248:51: error: Instantiation error: conflicting actual types for formal `T`: `Int` and `Bool`
+247 | fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
+    |                                                   ^^^^^^^^^
+
+Id   <RefId "mkPair" test.lkt:248:51-248:57>
+     references <GenericDecl "mkPair" test.lkt:247:1-247:41>
 
