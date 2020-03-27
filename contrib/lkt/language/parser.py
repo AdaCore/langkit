@@ -468,6 +468,8 @@ class Decl(LKNode):
         """
     )
 
+    quoted_name = Property(S("`").concat(Self.full_name).concat(S("`")))
+
     env_spec = EnvSpec(add_to_env_kv(Entity.name, Self))
 
     @langkit_property(return_type=T.Decl)
@@ -2009,10 +2011,6 @@ class CallExpr(Expr):
                 .concat(S("`"))
             )),
 
-            # Inference returned an error with message -> propagate it
-            Not(unsorted_actuals.error.is_null),
-            unsorted_actuals,
-
             # We don't have all the actuals needed to infer -> return an error
             unsorted_actuals.result.length
             < generic_decl.generic_formals.length,
@@ -2023,8 +2021,26 @@ class CallExpr(Expr):
                 ),
             ),
 
-            # Third case: everything is fine -> return the result
-            unsorted_actuals
+            # Check that we don't have conflicting actuals for formals
+            unsorted_actuals.result.map(
+                lambda a: unsorted_actuals.result.find(
+                    lambda a2:
+                    (a.formal == a2.formal) & (a.actual != a2.actual)
+                ).then(lambda a2: InferInstantiation.new(
+                    error=Self.error(
+                        S("Instantiation error: "
+                          "conflicting actual types for formal ")
+                        .concat(a.formal.quoted_name).concat(S(": "))
+                        .concat(a.actual.quoted_name).concat(S(" and "))
+                        .concat(a2.actual.quoted_name)
+                    )
+                ))
+            ).at(0)
+
+            # At this stage, either everything is fine or inference returned
+            # with an error and an error message (which never happens in the
+            # current implementation) -> return the result.
+            ._or(unsorted_actuals)
         )
 
     @langkit_property(return_type=T.TypeDecl.array)

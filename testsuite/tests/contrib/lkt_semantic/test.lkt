@@ -242,3 +242,7 @@ fun test_filtermap(ints: Array[Int]): Array[String] =
 # Check that errors are handled correctly even for a call with a dotexpr prefix
 fun test_handle_ce_error(arg : A): Int = arg.method_doesnt_exist()
 # The method call should emit an error but not crash
+
+# Check that conflicting actuals are correctly flagged
+generic [T] fun mkPair(x: T): Pair[T, T]
+fun test_conflicting_actuals(): Pair[Int, Bool] = mkPair(1)
