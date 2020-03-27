@@ -82,20 +82,20 @@ fun test_astlist_indexing(a: ASTList[String]): String = self (12)
 # Test traits, part 1: test that trait methods are visible in types
 # implementing them.
 
-trait Sized {
+trait WithLength {
     @builtin fun length(): Int
 }
 
-generic [T] trait Indexable {
+generic [T] trait WithIndex {
     @builtin fun __call__(index : Int): T
 }
 
-generic [T] class Vec implements Sized, Indexable[T] {
+generic [T] class Vec implements WithLength, WithIndex[T] {
 }
 
-val a : Vec[String] = null
-val b : Int = a.length()
-val c : String = a (1)
+val vec : Vec[String] = null
+val vec_length : Int = vec.length()
+val vec_item : String = vec (1)
 
 # Test resolution of named parameters
 
