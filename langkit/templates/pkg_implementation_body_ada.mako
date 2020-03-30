@@ -3845,6 +3845,12 @@ package body ${ada_lib_name}.Implementation is
    procedure Update_After_Reparse
      (Unit : Internal_Unit; Reparsed : in out Reparsed_Unit) is
    begin
+      --  Remove the `symbol -> AST node` associations for Unit's nodes in
+      --  foreign lexical environments. Do this before any deallocation because
+      --  lexical environments need the node ordering predicate to run
+      --  correctly in order to update their data structures.
+      Remove_Exiled_Entries (Unit);
+
       --  Replace Unit's diagnostics by Reparsed's
       Unit.Diagnostics := Reparsed.Diagnostics;
       Reparsed.Diagnostics.Clear;
@@ -3903,10 +3909,6 @@ package body ${ada_lib_name}.Implementation is
          GNATCOLL.Traces.Increase_Indent (Main_Trace);
 
          Context.In_Populate_Lexical_Env := True;
-
-         --  Remove the `symbol -> AST node` associations in foreign lexical
-         --  environments.
-         Remove_Exiled_Entries (Unit);
 
          --  Collect all nodes that are foreign in this Unit's lexical envs.
          --  Exclude them from the corresponding lists of exiled entries.
