@@ -1940,13 +1940,18 @@ package body Langkit_Support.Lexical_Env is
                   V : Env_Pair_Vectors.Vector :=
                      To_Sorted_Env (Self.Env.Map.all);
                begin
-                  for Pair of V loop
-                     Append
-                       (Result,
-                        Sub_Prefix & "  "
-                        & Langkit_Support.Text.Image (Pair.Key.all) & ": "
-                        & Image (Pair.Value)
-                        & ASCII.LF);
+                  for I in V.First_Index .. V.Last_Index loop
+                     declare
+                        Pair : Env_Pair renames V.Get_Access (I).all;
+                     begin
+                        Append
+                          (Result,
+                           Sub_Prefix & "  "
+                           & Langkit_Support.Text.Image (Pair.Key.all) & ": "
+                           & Image (Pair.Value)
+                           & ASCII.LF);
+                        Internal_Map_Node_Vectors.Destroy (Pair.Value);
+                     end;
                   end loop;
                   V.Destroy;
                end;
