@@ -38,6 +38,7 @@ for label, loaders in [
     for l in loaders:
         l()
     u = ctx.get_from_file('main.txt')
+    sys.stdout.flush()
     u._dump_lexical_env()
     print('')
 
