@@ -3632,14 +3632,12 @@ class EnumType(CompiledType):
     Ada-like enumeration type.
     """
 
-    def __init__(self, name, location, doc, value_names):
+    def __init__(self, name, location, doc,
+                 value_names,
+                 default_val_name=None):
         """
         :type value_names: list[name.Names]
         """
-        super(EnumType, self).__init__(
-            name, location, doc, is_ptr=False, exposed=True,
-            null_allowed=False, hashable=True)
-
         self.values = [EnumValue(self, vn, i)
                        for i, vn in enumerate(value_names)]
 
@@ -3650,7 +3648,24 @@ class EnumType(CompiledType):
         :type: dict[names.Name: EnumValue]
         """
 
+        self.default_val_name = default_val_name
+        """
+        Name of the default value for this enum, if any.
+
+        :type: names.Name|None
+        """
+
         CompiledTypeRepo.enum_types.append(self)
+
+        super(EnumType, self).__init__(
+            name, location, doc, is_ptr=False, exposed=True,
+            null_allowed=default_val_name is not None,
+            nullexpr=(
+                self.values_dict[default_val_name].ada_name
+                if default_val_name is not None else None
+            ),
+            hashable=True
+        )
 
     @property
     def py_helper(self):

@@ -941,6 +941,7 @@ class _EnumMetaclass(type):
 
             # Get the list of values, initializing their name
             values = []
+            default_val_name = None
             for key, value in dct.items():
                 # Ignore __special__ fields
                 if key.startswith('__') and key.endswith('__'):
@@ -958,6 +959,15 @@ class _EnumMetaclass(type):
                 )
                 value._name = names.Name.from_lower(key)
                 values.append(value)
+
+                # If this is the default value for this enum type, store it
+                if value.is_default_val:
+                    check_source_language(
+                        default_val_name is None,
+                        'Only one default value is allowed'
+                    )
+                    default_val_name = value._name
+
             values.sort(key=lambda v: v._id)
             dct['_values'] = values
 
@@ -970,7 +980,8 @@ class _EnumMetaclass(type):
 
         # Now create the CompiledType instance, register it where needed
         enum_type = EnumType(cls._name, cls._location, cls._doc,
-                             [v._name for v in cls._values])
+                             [v._name for v in cls._values],
+                             default_val_name=default_val_name)
         enum_type.dsl_decl = cls
         cls._type = enum_type
 
@@ -1006,11 +1017,14 @@ class Enum(DSLType):
 class EnumValue(object):
     """
     Enumeration value, to be used when subclassing Enum.
+
+    An enum type is nullable when it has an EnumValue that is the default value
+    for this enum.
     """
 
     _next_id = iter(itertools.count(0))
 
-    def __init__(self):
+    def __init__(self, is_default=False):
         self._id = next(self._next_id)
         """
         Program-wide unique identifier used to sort enumeration values by
@@ -1034,6 +1048,11 @@ class EnumValue(object):
         self._type = None
         """
         Enum subclass that owns this value.
+        """
+
+        self.is_default_val = is_default
+        """
+        Whether this value is the default value for this enum.
         """
 
 
