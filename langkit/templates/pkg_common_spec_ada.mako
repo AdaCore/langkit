@@ -111,6 +111,13 @@ package ${ada_lib_name}.Common is
         (${', '.join(str(v.name) for v in enum_type.values)})
          with Convention => C;
       ${ada_doc(enum_type, 6)}
+
+
+      % if ctx.properties_logging:
+      function Trace_Image (Self : ${enum_type.api_name}) return String
+      is (Self'Image);
+      % endif
+
    % endfor
 
    Default_Grammar_Rule : constant Grammar_Rule := ${ctx.main_rule_api_name};
