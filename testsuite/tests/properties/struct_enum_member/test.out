@@ -1,0 +1,5 @@
+main.py: Running...
+<VarDecl main.txt:1:1-1:10>.with_kind = <DeclAndKind dcl=<VarDecl main.txt:1:1-1:10> knd=var>
+<FuncDecl main.txt:1:12-1:25>.with_kind = <DeclAndKind dcl=<FuncDecl main.txt:1:12-1:25> knd=func>
+main.py: Done.
+Done
