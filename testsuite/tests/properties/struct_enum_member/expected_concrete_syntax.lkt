@@ -1,0 +1,59 @@
+import lexer_example
+grammar foo_grammar {
+    @main_rule main_rule <- list+(pick(decl ";"))
+    decl <- or(
+        | VarDecl("def" name "=" expr)
+        | FuncDecl(
+            "def" name "(" list+(name, ",") ")" "=" expr
+        )
+    )
+    expr <- or(Plus(atom "+" expr) | atom)
+    atom <- or(Literal(@number) | name)
+    name <- Name(@identifier)
+
+}
+
+@root_node class FooNode {
+}
+
+@abstract class Decl : FooNode {
+
+    @export fun decl_kind (): DeclKind
+
+    @export fun with_kind (): DeclAndKind =
+    DeclAndKind(dcl=node, knd=node.decl_kind())
+}
+
+class FuncDecl : Decl {
+    @parse_field name : Name
+    @parse_field args : ASTList[Name]
+    @parse_field expr : Expression
+
+    fun decl_kind (): DeclKind = DeclKind.func
+}
+
+class VarDecl : Decl {
+    @parse_field name : Name
+    @parse_field expr : Expression
+
+    fun decl_kind (): DeclKind = DeclKind.var
+}
+
+@abstract class Expression : FooNode {
+}
+
+class Literal : Expression {
+}
+
+class Name : Expression {
+}
+
+class Plus : Expression {
+    @parse_field left : Expression
+    @parse_field right : Expression
+}
+
+struct DeclAndKind {
+    dcl : Decl
+    knd : DeclKind
+}
