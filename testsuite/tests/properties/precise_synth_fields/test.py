@@ -5,7 +5,9 @@ coming from synthetization properties.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T, abstract, synthetic
+from langkit.dsl import (
+    ASTNode, Field, T, abstract, has_abstract_list, synthetic
+)
 from langkit.expressions import AbstractKind, New, Self, langkit_property
 
 from utils import emit_and_print_errors
@@ -16,12 +18,28 @@ class FooNode(ASTNode):
 
 
 @abstract
+@has_abstract_list
 class AbstractHolder(FooNode):
     f = Field(type=T.Expr)
 
 
 class ParsedHolder(AbstractHolder):
     pass
+
+
+class HolderList(AbstractHolder.list):
+    pass
+
+
+@abstract
+class AbstractManyHolder(FooNode):
+    f = Field(type=AbstractHolder.list)
+
+
+class ParsedManyHolder(AbstractManyHolder):
+    @langkit_property(public=True, memoized=True)
+    def synth():
+        return New(SyntheticManyHolder, f=Self.f)
 
 
 # Case of a field that only synthetic nodes can hold
@@ -33,6 +51,11 @@ class SynthNode(FooNode):
 # Case of a field that both synthetic and parsed nodes can hold
 @synthetic
 class SynthHolder(AbstractHolder):
+    pass
+
+
+@synthetic
+class SyntheticManyHolder(AbstractManyHolder):
     pass
 
 
@@ -68,12 +91,18 @@ class Name(Expr):
 ctx = emit_and_print_errors(lkt_file='foo.lkt')
 nodes = {n.dsl_name: n for n in ctx.astnode_types}
 
-for node_name in ['SynthNode', 'AbstractHolder']:
+for node_name in ['SynthNode', 'AbstractHolder', 'AbstractManyHolder']:
     node = nodes[node_name]
     fields = {f.original_name.lower: f for f in node.get_fields()}
     f = fields['f']
-    print('Precise types for {}:'.format(f.qualname))
-    for t in f.precise_types.minimal_matched_types:
-        print('  * {}'.format(t.dsl_name))
+
+    if not f.type.is_list_type:
+        print('Precise types for {}:'.format(f.qualname))
+        for t in f.precise_types.minimal_matched_types:
+            print('  * {}'.format(t.dsl_name))
+    else:
+        print('Precise elements types for {}:'.format(f.qualname))
+        for t in f.precise_element_types.minimal_matched_types:
+            print('  * {}'.format(t.dsl_name))
 
 print('Done')

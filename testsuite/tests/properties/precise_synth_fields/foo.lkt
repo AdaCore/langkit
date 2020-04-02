@@ -1,8 +1,9 @@
 import lexer_example
 
 grammar foo_grammar {
-    @main_rule main_rule <- or(literal | name | holder)
+    @main_rule main_rule <- or(literal | name | holder | many_holder)
     literal <- Literal(@number)
     name <- Name(@identifier)
     holder <- ParsedHolder("(" name ")")
+    many_holder <- ParsedManyHolder("(" HolderList+(holder, ",") ")")
 }
