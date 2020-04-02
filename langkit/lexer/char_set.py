@@ -45,7 +45,7 @@ class CharSet(object):
     """
     Whether __repr__ should put an ellipsis for characters beyond ASCII.
 
-    :bool: True
+    :type: bool
     """
 
     def __init__(self, *items):

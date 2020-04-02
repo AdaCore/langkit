@@ -4210,7 +4210,7 @@ def resolve_type(typeref):
 T = TypeRepo()
 """
 Default type repository instance, to be used to refer to a type before its
-declaration
+declaration.
 """
 
 create_builtin_types()

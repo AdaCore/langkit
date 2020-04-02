@@ -2050,7 +2050,7 @@ class AbstractVariable(AbstractExpression):
 
         self._ignored = False
         """
-        Whether this variable was explicitly ignored
+        Whether this variable was explicitly ignored.
         """
 
     def create_local_variable(self, scope=None):
@@ -3203,7 +3203,9 @@ class PropertyDef(AbstractNodeData):
         """
 
         self.in_type = False
-        "Recursion guard for the construct pass"
+        """
+        Recursion guard for the construct pass.
+        """
 
         self.logic_predicates = []
         """
