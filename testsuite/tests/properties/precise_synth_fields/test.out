@@ -3,4 +3,6 @@ Precise types for SynthNode.f:
   * Expr
 Precise types for AbstractHolder.f:
   * Expr
+Precise elements types for AbstractManyHolder.f:
+  * AbstractHolder
 Done

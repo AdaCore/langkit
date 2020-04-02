@@ -1903,7 +1903,8 @@ class Field(BaseField):
             types.update(self.types_from_synthesis)
             if is_list:
                 for t in self.types_from_synthesis.matched_types:
-                    etypes.update(t.element_type)
+                    if t.is_list_type:
+                        etypes.include(t.element_type)
 
         self._precise_types = types
         self._precise_element_types = etypes
