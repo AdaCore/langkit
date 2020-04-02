@@ -381,7 +381,7 @@ testcases = (
             This is a multi-line docstring.
             Yes
             """
-    ''', [(6, 0, 'Docstring sentences must end with periods')]),
+    ''', [(7, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_3.py', '''
         from __future__ import absolute_import, division, print_function
 
@@ -403,7 +403,7 @@ testcases = (
 
             But with an empty line.
             """
-    ''', [(5, 0, 'Docstring sentences must end with periods')]),
+    ''', [(6, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_5.py', '''
         from __future__ import absolute_import, division, print_function
 
@@ -414,7 +414,7 @@ testcases = (
 
             But with an empty line
             """
-    ''', [(7, 0, 'Docstring sentences must end with periods')]),
+    ''', [(8, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_6.py', '''
         from __future__ import absolute_import, division, print_function
 
@@ -436,7 +436,7 @@ testcases = (
 
             No dot, free style
             """
-    ''', [(7, 0, 'Docstring sentences must end with periods')]),
+    ''', [(8, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_8.py', '''
         from __future__ import absolute_import, division, print_function
 
@@ -499,7 +499,7 @@ testcases = (
             :param arg: Argument
             :type arg: str
             """
-    ''', [(7, 0, 'Docstring sentences must end with periods')]),
+    ''', [(8, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_13.py', '''
         from __future__ import absolute_import, division, print_function
 
@@ -523,7 +523,7 @@ testcases = (
             :param str arg: Long description for this argument which is
                 supposed to be a string
             """
-    ''', [(8, 0, 'Docstring sentences must end with periods')]),
+    ''', [(9, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_15.py', '''
         from __future__ import absolute_import, division, print_function
 
@@ -551,7 +551,30 @@ testcases = (
 
                 foo + bar(True)
             """
-    ''', [(7, 0, 'Extra space before double punctuation')]),
+    ''', [(8, 0, 'Extra space before double punctuation')]),
+    Testcase('docstring_multi_17.py', '''
+        from __future__ import absolute_import, division, print_function
+
+
+        def foo():
+            """
+            Documenting some function
+
+            :rtype: bool
+            """
+    ''', [(6, 0, 'Docstring sentences must end with periods')]),
+    Testcase('docstring_multi_18.py', '''
+        from __future__ import absolute_import, division, print_function
+
+
+        def foo():
+            a = True
+            """
+            Meaningless local variable
+
+            :rtype: bool
+            """
+    ''', [(7, 0, 'Docstring sentences must end with periods')]),
 
     #
     # "from __future__ testing

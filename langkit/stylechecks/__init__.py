@@ -112,6 +112,41 @@ def indent_level(line):
     return len(line) - len(line.lstrip(' '))
 
 
+def preprocess_docstring(text):
+    """
+    Strip expected whitespaces in a Python docstring.
+
+    Return the preprocessed docstring, plus the number of leading lines
+    stripped.
+    """
+    lineno_offset = 0
+    lines = text.splitlines()
+    if not len(lines):
+        return ('', lineno_offset)
+
+    # Remove the first and the last lines if they are empty
+    if not lines[0].strip():
+        lines.pop(0)
+        lineno_offset += 1
+        first_line = None
+    else:
+        # Consider the first line specifically, as we allow it to contain
+        # meaningful content and not to be indented.
+        first_line = lines.pop(0)
+
+    if lines and not lines[-1].strip():
+        lines.pop()
+
+    # Remove the minimum indentation level on all non-empty lines
+    min_indent = min(indent_level(line)
+                     for line in lines
+                     if line.strip()) if lines else 0
+    lines = [line[min_indent:] for line in lines]
+    if first_line:
+        lines.insert(0, first_line)
+    return ('\n'.join(lines), lineno_offset)
+
+
 class PackageChecker(object):
     """Helper to check the order of imported packages."""
 
@@ -543,17 +578,6 @@ class PythonLang(LanguageChecker):
                 future_seen = set()
 
                 for node in ast.walk(root):
-                    try:
-                        docstring = ast.get_docstring(node)
-                    except TypeError:
-                        pass
-                    else:
-                        if docstring:
-                            check_text(report, filename, self,
-                                       node_lineno(node),
-                                       docstring,
-                                       False)
-
                     if isinstance(node, ast.ImportFrom):
                         if node.module == '__future__':
                             future_seen.update(alias.name
@@ -561,6 +585,31 @@ class PythonLang(LanguageChecker):
                         else:
                             report.set_context(filename, node_lineno(node) - 1)
                             self._check_imported_entities(report, node)
+
+                    elif (
+                        isinstance(node, ast.stmt) and
+                        isinstance(node, ast.Expr) and
+                        isinstance(node.value, ast.Str)
+                    ):
+                        # Sometimes we use docstrings on local variables, and
+                        # ast.get_docstring does not allow us to catch that.
+                        # Instead, process all string literals that appear at
+                        # the root of a statement.
+                        raw_docstring = node.value.s
+                        docstring, lineno_offset = preprocess_docstring(
+                            raw_docstring
+                        )
+
+                        # Due to how as works, a string lineno is the line
+                        # number of its ending delimiter (plus one?). So adjust
+                        # it to be the lineno of the first meaningful content
+                        # in the string instead.
+                        lineno = (node_lineno(node) - 1 -
+                                  raw_docstring.count('\n') +
+                                  lineno_offset)
+
+                        check_text(report, filename, self, lineno, docstring,
+                                   False)
 
                 report.set_context(filename, 1)
                 if not future_seen:
