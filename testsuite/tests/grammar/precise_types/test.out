@@ -20,6 +20,11 @@ This field contains a list that itself contains one of the following nodes:
 * ${node_name(T.A)}
 * ${node_name(T.B)}
 
+== Doc for Holder.special_a_list ==
+This field contains a list that itself contains one of the following nodes:
+
+* ${node_name(T.A)}
+
 == Doc for Holder.special_a_list_or_special_b_list ==
 This field contains a list that itself contains one of the following nodes:
 

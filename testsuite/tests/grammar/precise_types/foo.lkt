@@ -5,6 +5,7 @@ grammar foo_grammar {
         or(a | b)
         list+(or(a | b))
         or(list+(a) | list+(b))
+        SpecialList+(a)
         or(SpecialList+(a) | SpecialList+(b))
         or(SpecialList+(or(a | b)))
     )
