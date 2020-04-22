@@ -1,0 +1,13 @@
+import lexer_example
+
+grammar foo_grammar {
+    @main_rule main_rule <- Holder(
+        or(a | b)
+        list+(or(a | b))
+        or(list+(a) | list+(b))
+        or(SpecialList+(a) | SpecialList+(b))
+        or(SpecialList+(or(a | b)))
+    )
+    a <- A(@identifier("a"))
+    b <- B(@identifier("b"))
+}
