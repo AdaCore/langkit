@@ -1,7 +1,8 @@
 import lexer_example
 grammar foo_grammar {
-    @main_rule main_rule <- Program+(insert)
-    insert <- Insert("def" ident ident)
+    @main_rule program <- Program(
+        "def" ident ?pick("{" list+(program) "}")
+    )
     ident <- Id(@identifier)
 
 }
@@ -9,27 +10,14 @@ grammar foo_grammar {
 @root_node class FooNode {
 
     @export fun env_get_all (): Array[FooNode] = node.children_env().get(null)
-
-    @memoized fun make_id (s : Symbol): FooNode = SynthId(sym=s)
-
-    fun unique_id (s : Symbol): FooNode = node.unit().root.make_id(s)
-}
-
-class Program : ASTList[Insert] {
 }
 
 class Id : FooNode {
 }
 
-class Insert : FooNode {
-    @parse_field sym : Id
-    @parse_field node : Id
-}
-
-class SynthId : FooNode {
-    sym : Symbol
-
-    @export fun get_sym (): Array[CharacterType] = node.sym.image()
+class Program : FooNode {
+    @parse_field name : Id
+    @parse_field program_list : ASTList[Program]
 }
 
 struct EnvAssoc {

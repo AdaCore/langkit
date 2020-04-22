@@ -659,12 +659,24 @@ package body Langkit_Support.Lexical_Env is
 
          for C of All_Elements loop
             declare
-               Nodes : constant Internal_Map_Node_Vectors.Vector :=
+               I_Nodes : constant Internal_Map_Node_Vectors.Vector :=
                   Internal_Envs.Element (C).Native_Nodes;
+               F_Nodes : constant Internal_Map_Node_Maps.Map :=
+                  Internal_Envs.Element (C).Foreign_Nodes;
             begin
-               for I in reverse Nodes.First_Index .. Nodes.Last_Index loop
+
+               --  Append internal nodes
+               for I in reverse I_Nodes.First_Index .. I_Nodes.Last_Index loop
                   Append_Result
-                    (Nodes.Get (I), Metadata, Current_Rebindings,
+                    (I_Nodes.Get (I), Metadata, Current_Rebindings,
+                     From_Rebound);
+               end loop;
+
+               --  Append foreign nodes
+               for C in F_Nodes.Iterate loop
+                  Append_Result
+                    (Internal_Map_Node_Maps.Element (C),
+                     Metadata, Current_Rebindings,
                      From_Rebound);
                end loop;
             end;
