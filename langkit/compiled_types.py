@@ -1926,12 +1926,16 @@ class Field(BaseField):
 
         precise_types = self.precise_types.minimal_matched_types
 
-        # If the field always contains a list, try to give precise types
+        # If the field always contains a list, and that we know it holds one or
+        # several types more precise that its element type, give precise types
         # for the list items.
         if len(precise_types) == 1 and self.type.is_list_type:
-            precise_element_types = (self.precise_element_types
-                                     .minimal_matched_types)
-            if len(precise_element_types) > 1:
+            precise_element_types = list(self.precise_element_types
+                                         .minimal_matched_types)
+            if (
+                len(precise_element_types) > 1
+                or precise_element_types[0] != self.type.element_type
+            ):
                 return amended(
                     'This field contains a list that itself contains'
                     ' one of the following nodes:',
@@ -2641,9 +2645,9 @@ class ASTNodeType(BaseStructType):
         # If this is a list node and that parsers build it, add a precise list
         # of types it can contain: the element type might be too generic.
         if self.is_list and not self.synthetic:
-            precise_types = (self.precise_list_element_types
-                             .minimal_matched_types)
-            if len(precise_types) > 1:
+            precise_types = list(self.precise_list_element_types
+                                 .minimal_matched_types)
+            if len(precise_types) > 1 or precise_types[0] != self.element_type:
                 addition = indent(
                     precise_types_doc(
                         'This list node can contain one of the following'

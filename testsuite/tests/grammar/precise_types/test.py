@@ -29,6 +29,7 @@ class Holder(FooNode):
     a_or_b = Field(type=T.FooNode)
     a_or_b_list = Field(type=T.FooNode.list)
     a_list_or_b_list = Field(type=T.FooNode)
+    special_a_list = Field(type=SpecialList)
     special_a_list_or_special_b_list = Field(type=SpecialList)
     special_a_or_b_list = Field(type=SpecialList)
 
