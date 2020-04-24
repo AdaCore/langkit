@@ -165,7 +165,7 @@ def extract_library_location(stack=None):
     stack = stack or traceback.extract_stack()
 
     # Create Location instances for each stack frame
-    locs = [Location(t[0], t[1], t[3])
+    locs = [Location(file=t[0], line=t[1], text=t[3])
             for t in stack
             if Diagnostics.is_langkit_dsl(t[0]) and "manage.py" not in t[0]]
 
