@@ -41,7 +41,7 @@ class _BaseArray(object):
         self.clear()
 
     @classmethod
-    def wrap(cls, c_value):
+    def wrap(cls, c_value, from_field_access):
         helper = cls(c_value)
 
         result = []
@@ -60,6 +60,12 @@ class _BaseArray(object):
             except TypeError:
                 pass
             result.append(helper.wrap_item(item))
+
+        # If this array value comes from a structure field, we must not call
+        # its dec_ref primitive, as it is up to the structure's dec_ref
+        # primitive to take care of it.
+        if from_field_access:
+            helper.clear()
 
         return result
 
@@ -123,7 +129,7 @@ class ${cls.py_converter}(_BaseArray):
     ## instances.
     % if cls.is_string_type:
     @classmethod
-    def wrap(cls, c_value):
+    def wrap(cls, c_value, from_field_access):
         # Reinterpret this array of uint32_t values as the equivalent array of
         # characters, then decode it using the appropriate UTF-32 encoding.
         chars = ctypes.cast(ctypes.pointer(c_value.contents.items),
