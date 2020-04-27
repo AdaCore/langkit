@@ -27,7 +27,7 @@ ${exts.with_clauses(with_clauses)}
 --  .. code-block:: ada
 --
 --     declare
---        It   : Traverse_Iterator := Traverse (My_Unit.Root);
+--        It   : Traverse_Iterator'Class := Traverse (My_Unit.Root);
 --        Node : ${node};
 --     begin
 --        while It.Next (Node) loop
