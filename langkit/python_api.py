@@ -47,8 +47,8 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Int, lambda _: '{{}}{}'.format(value_suffix)),
             (T.Character, lambda _: '_py2to3.unicode_character({{}}{})'
                                     .format(value_suffix)),
-            (ct.ArrayType, lambda _: '{}.wrap({{}})'.format(
-                self.array_wrapper(type)
+            (ct.ArrayType, lambda _: '{}.wrap({{}}, {})'.format(
+                self.array_wrapper(type), from_field_access
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
