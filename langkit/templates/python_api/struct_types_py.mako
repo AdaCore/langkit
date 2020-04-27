@@ -72,7 +72,8 @@ class ${public_name}(_BaseStruct):
 
     <% field_names = [f.name.lower for f in cls.get_fields()] %>
 
-    __slots__ = (${', '.join([repr('_' + f) for f in field_names])})
+    __slots__ = (${', '.join(repr('_' + f) for f in field_names)}${(
+        ', ' if len(field_names) == 1 else '')})
 
     def __init__(self, ${', '.join(field_names)}):
         % for f in field_names:
