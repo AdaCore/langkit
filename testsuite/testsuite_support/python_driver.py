@@ -26,7 +26,8 @@ class PythonDriver(BaseDriver):
     @catch_test_errors
     def tear_up(self):
         super(PythonDriver, self).tear_up()
-        self.check_file('test.py')
+        for f in self.mandatory_files():
+            self.check_file(f)
 
         # Unless this mechanism is specifically disabled, make the Langkit
         # library relative to this testsuite available to tests.
@@ -41,6 +42,20 @@ class PythonDriver(BaseDriver):
                 os.path.abspath(testsuite_support.__file__)
             ))
         )
+
+    def mandatory_files(self):
+        """
+        Return the set of mandatory files for this driver. Meant to be
+        overloaded by subclasses.
+        """
+        return ["test.py"]
+
+    def script_and_args(self):
+        """
+        Return the name of the python script to run, as well as the arguments.
+        Meant to be overloaded by subclasses.
+        """
+        return ["test.py"]
 
     @catch_test_errors
     def run(self):
@@ -71,7 +86,7 @@ class PythonDriver(BaseDriver):
         if self.valgrind_enabled:
             derived_env['VALGRIND_ENABLED'] = '1'
 
-        self.run_and_check(argv + ['test.py'], derived_env)
+        self.run_and_check(argv + self.script_and_args(), derived_env)
 
     @property
     def support_dir(self):
