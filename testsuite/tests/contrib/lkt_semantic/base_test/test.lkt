@@ -64,17 +64,3 @@ fun add (a : Int, b : Int): Int = a + b
 fun get_fn(): (Int, Int) -> Int = add
 fun get_method(b_inst: B): (B) -> Int = b_inst.test_generic_component_access
 fun get_method_invalid(b_inst: B): (B) -> Int = b_inst.test_fun_call
-
-# Test Array/ASTList primitives
-
-fun test_astlist_len(self: ASTList[String]): Int = self.length()
-fun test_array_len(self: Array[String]): Int = self.length()
-fun test_astlist_indexing(self: ASTList[String]): String = self (12)
-
-# Test that errors flowing from a subtree to its children don't raise an
-# exception
-
-# Here, self doesn't exist. Since we're going to try to resolve the type of
-# `12` first, it's going to need to resolve `self, which doesn't exist. This
-# shouldn't crash.
-fun test_astlist_indexing(a: ASTList[String]): String = self (12)
