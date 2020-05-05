@@ -101,12 +101,3 @@ val vec_item : String = vec (1)
 
 fun test_named_parameters(a: Int): Int = a
 val ss : Int = test_named_parameters(a=12)
-
-# Test resolution of enum class subclasses (should be accessible via dot
-# notation on the root enum class type).
-
-enum class EnClass (SubclassA, SubclassB, SubclassC) {}
-
-val en_class_inst : EnClass.SubclassB = EnClass.SubclassB()
-# Test that those classes don't leak
-val invalid_en_class : SubclassB = SubclassB()
