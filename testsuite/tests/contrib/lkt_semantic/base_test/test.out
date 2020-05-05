@@ -619,36 +619,3 @@ Expr <NumLit test.lkt:98:30-98:31>
 Expr <CallExpr test.lkt:98:25-98:32>
      has type <StructDecl "String" __prelude:3:10-3:26>
 
-Id   <RefId "Int" test.lkt:102:30-102:33>
-     references <StructDecl "Int" __prelude:1:10-1:23>
-
-Id   <RefId "Int" test.lkt:102:36-102:39>
-     references <StructDecl "Int" __prelude:1:10-1:23>
-
-Id   <RefId "a" test.lkt:102:42-102:43>
-     references <FunArgDecl "a" test.lkt:102:27-102:33>
-
-Expr <RefId "a" test.lkt:102:42-102:43>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-Id   <RefId "Int" test.lkt:103:10-103:13>
-     references <StructDecl "Int" __prelude:1:10-1:23>
-
-Id   <RefId "test_named_parameters" test.lkt:103:16-103:37>
-     references <FunDecl "test_named_parameters" test.lkt:102:1-102:43>
-
-Expr <RefId "test_named_parameters" test.lkt:103:16-103:37>
-     has type <FunctionType "(Int) -> Int" __prelude>
-
-Id   <RefId "a" test.lkt:103:38-103:39>
-     references <FunArgDecl "a" test.lkt:102:27-102:33>
-
-Expr <RefId "a" test.lkt:103:38-103:39>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <NumLit test.lkt:103:40-103:42>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-
-Expr <CallExpr test.lkt:103:16-103:43>
-     has type <StructDecl "Int" __prelude:1:10-1:23>
-

@@ -96,8 +96,3 @@ generic [T] class Vec implements WithLength, WithIndex[T] {
 val vec : Vec[String] = null
 val vec_length : Int = vec.length()
 val vec_item : String = vec (1)
-
-# Test resolution of named parameters
-
-fun test_named_parameters(a: Int): Int = a
-val ss : Int = test_named_parameters(a=12)
