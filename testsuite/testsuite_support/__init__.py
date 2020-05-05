@@ -22,6 +22,7 @@ if not with_gnatpython:
 
 
 import testsuite_support.langkit_support_driver
+import testsuite_support.lkt_resolve_driver
 import testsuite_support.python_driver
 
 
@@ -30,7 +31,8 @@ class Testsuite(BaseTestsuite):
     DRIVERS = {
         'python': testsuite_support.python_driver.PythonDriver,
         'langkit_support':
-        testsuite_support.langkit_support_driver.LangkitSupportDriver
+        testsuite_support.langkit_support_driver.LangkitSupportDriver,
+        'lkt': testsuite_support.lkt_resolve_driver.LktResolveDriver,
     }
 
     def add_options(self):
