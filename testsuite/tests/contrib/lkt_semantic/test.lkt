@@ -149,11 +149,11 @@ fun lambda_test_incorrect_2(): Int = lambda_test_helper(12, (x : String, y : Str
 # Test availability of base type's methods
 #
 
-class Foo {
+class Foo1 {
     fun bar(): Int
 }
 
-class Baz : Foo {}
+class Baz : Foo1 {}
 
 fun test_base_type_methods(arg: Baz): Int = arg.bar()
 
