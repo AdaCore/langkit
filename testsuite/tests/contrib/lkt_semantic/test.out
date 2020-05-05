@@ -1048,11 +1048,11 @@ Expr <CallExpr test.lkt:146:38-146:97>
 Id   <RefId "Int" test.lkt:153:16-153:19>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "Foo" test.lkt:156:13-156:16>
-     references <StructDecl "Foo" test.lkt:53:1-56:2>
+Id   <RefId "Foo1" test.lkt:156:13-156:17>
+     references <ClassDecl "Foo1" test.lkt:152:1-154:2>
 
 Id   <RefId "Baz" test.lkt:158:33-158:36>
-     references <ClassDecl "Baz" test.lkt:156:1-156:19>
+     references <ClassDecl "Baz" test.lkt:156:1-156:20>
 
 Id   <RefId "Int" test.lkt:158:39-158:42>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -1061,11 +1061,19 @@ Id   <RefId "arg" test.lkt:158:45-158:48>
      references <FunArgDecl "arg" test.lkt:158:28-158:36>
 
 Expr <RefId "arg" test.lkt:158:45-158:48>
-     has type <ClassDecl "Baz" test.lkt:156:1-156:19>
+     has type <ClassDecl "Baz" test.lkt:156:1-156:20>
 
-test.lkt:158:49: error: Cannot find entity `bar` in this scope
-157 | fun test_base_type_methods(arg: Baz): Int = arg.bar()
-    |                                                 ^^^  
+Id   <RefId "bar" test.lkt:158:49-158:52>
+     references <FunDecl "bar" test.lkt:153:5-153:19>
+
+Expr <RefId "bar" test.lkt:158:49-158:52>
+     has type <FunctionType "(Foo1) -> Int" __prelude>
+
+Expr <DotExpr test.lkt:158:45-158:52>
+     has type <FunctionType "(Foo1) -> Int" __prelude>
+
+Expr <CallExpr test.lkt:158:45-158:54>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Int" test.lkt:165:34-165:37>
      references <StructDecl "Int" __prelude:1:10-1:23>
