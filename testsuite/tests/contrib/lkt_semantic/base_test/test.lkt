@@ -122,10 +122,3 @@ val x : Int = test(12, 15, 17) # Too many params
 val y : Int = test(a=1, b=12, c=15) # Too many params kwargs
 val z : Int = test(a=1, b=12, c=foo) # Invalid kwarg with wrong value: check that there is an error message for the expr
 
-# Regression test for semantic failure over dotted names
-
-val a : Int = 1
-val b : Int = a.plus(2)
-
- # Test that LKNode.bool_type resolves correctly
-fun test_if_2(a: Int, b: Int): Int = if a = b then a else b
