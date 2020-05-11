@@ -119,6 +119,9 @@ class Location(object):
     def __lt__(self, other):
         return self.as_tuple < other.as_tuple
 
+    def __hash__(self):
+        return hash(self.as_tuple)
+
     def __repr__(self):
         return '<Location {} {}:{}>'.format(self.file, self.line, self.column)
 
