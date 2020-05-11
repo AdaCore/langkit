@@ -818,7 +818,7 @@ class CompileCtx(object):
             no_prefix = e.doc_entity.split('.', 1)[1]
 
             section_name = (
-                None if '.' not in no_prefix else
+                '' if '.' not in no_prefix else
                 no_prefix.split('.')[0].replace('_', ' ').capitalize())
 
             sections[section_name].append(e)
