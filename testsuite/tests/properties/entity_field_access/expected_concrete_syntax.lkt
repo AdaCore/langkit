@@ -25,9 +25,9 @@ class Couple : FooNode {
     node.as_entity.get_entity(Metadata(is_first=true, is_second=false))
 
     fun get_entity (md : Metadata): Couple = Couple(
-        info=EntityInfo(
-            md=md, from_rebound=false, rebindings=null
-        ), node=node
+        node=node, info=EntityInfo(
+            md=md, rebindings=null, from_rebound=false
+        )
     )
 
     @export fun property_on_entity (): Couple =
