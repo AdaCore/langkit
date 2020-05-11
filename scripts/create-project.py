@@ -38,7 +38,7 @@ def generate(lang_name):
         with open(filename, 'w') as f:
             f.write(template.format(**template_args))
 
-    os.chmod('manage.py', 0755)
+    os.chmod('manage.py', 0o755)
 
 
 MANAGE_TEMPLATE = '''#! /usr/bin/env python
