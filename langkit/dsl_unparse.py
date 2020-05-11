@@ -1210,7 +1210,15 @@ def format_token_name(name):
 
 
 def format_pattern(pat):
-    return json.dumps(pat.decode('string_escape'))
+    # Decode backslash encodings in "pat"
+    escaped = {
+        '\f': '\\f',
+        '\n': '\\n',
+        '\r': '\\r',
+        '\t': '\\t',
+        '"': '\\"',
+    }
+    return '"{}"'.format(''.join(escaped.get(c, c) for c in pat))
 
 
 def unparse_token_decl(token, newline_afters, is_pre):
