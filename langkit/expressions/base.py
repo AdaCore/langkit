@@ -480,6 +480,12 @@ class AbstractExpression(Frozable):
     def __init__(self):
         self.location = extract_library_location()
 
+    def __hash__(self):
+        # AbstractExpression instances appear heavily as memoized functions
+        # arguments, so we need them to be hashable. There is no need for
+        # structural hashing in this context.
+        return id(self)
+
     def do_prepare(self):
         """
         This method will automatically be called before construct on every
