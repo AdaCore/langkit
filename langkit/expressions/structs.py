@@ -255,9 +255,14 @@ class New(AbstractExpression):
             )
 
         def _iter_ordered(self):
+            def key(field_expr):
+                field, _ = field_expr
+                return field.name
+
             return sorted(
                 [(field, expr) for field, expr in self.assocs.items()],
-                key=lambda (field, _): field.name)
+                key=key
+            )
 
         def _render_fields(self):
             """
