@@ -498,7 +498,12 @@ class NFAState(object):
     Single state in a non-deterministic finite state machine.
     """
 
+    # Generator of unique IDs (integers) for NFAState instances
+    _id_generator = itertools.count(0)
+
     def __init__(self):
+        self._id = next(self._id_generator)
+
         self.label = None
         """
         Annotation for this node. If non-None, this annotation is propagated to
@@ -514,6 +519,10 @@ class NFAState(object):
 
         :type: list[(None|CharSet, NFAState)]
         """
+
+    def __lt__(self, other):
+        assert isinstance(other, NFAState)
+        return self._id < other._id
 
     def add_transition(self, chars, next_state):
         """
