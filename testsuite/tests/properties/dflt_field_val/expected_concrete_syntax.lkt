@@ -9,7 +9,7 @@ grammar foo_grammar {
     @export fun build_1 (key : Array[CharacterType]): KV = KV(key=key)
 
     @export fun build_2 (key : Array[CharacterType], value : Int): KV =
-    KV(value=value, key=key)
+    KV(key=key, value=value)
 }
 
 class Example : FooNode {

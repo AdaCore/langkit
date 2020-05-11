@@ -970,12 +970,23 @@ def emit_expr(expr, **ctx):
         else:
             return "[{}]".format(ee(expr.expr))
     elif isinstance(expr, New):
+        def key(name_field):
+            _, field = name_field
+            return field._serial
+
+        # The order of arguments in the source is lost during the call to New's
+        # constructor. Sort arguments by field declaration order to get the
+        # most likely order.
+        fields = sorted(expr.struct_type.required_fields_in_exprs.items(),
+                        key=key)
+        field_exprs = [(name, expr.field_values[name])
+                       for name, _ in fields
+                       if name in expr.field_values]
+
         return "{}{}".format(
             type_name(expr.struct_type),
-            emit_paren(", ".join(
-                "{}={}".format(unparsed_name(k), ee(v))
-                for k, v in expr.field_values.items()
-            ))
+            emit_paren(", ".join("{}={}".format(unparsed_name(k), ee(v))
+                                 for k, v in field_exprs))
         )
     elif isinstance(expr, StructUpdate):
         return '{}.update({})'.format(

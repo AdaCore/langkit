@@ -10,7 +10,7 @@ grammar foo_grammar {
 class Example : FooNode {
 
     @export fun get_struct (): MyStruct = MyStruct(
-        bigint_field=BigInt(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000), entity_field=node, array_field=[node.as[FooNode].as_bare_entity, node.parent.as_bare_entity]
+        entity_field=node, array_field=[node.as[FooNode].as_bare_entity, node.parent.as_bare_entity], bigint_field=BigInt(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
     )
 
     @export fun struct_identity (s : MyStruct): MyStruct = s

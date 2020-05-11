@@ -30,18 +30,18 @@ class Block : DefNode {
             from_block.params.children_env(), to_block.children_env()
         );
         val e_info = EntityInfo(
-            md=self.info.md, from_rebound=false, rebindings=rbdng
+            md=self.info.md, rebindings=rbdng, from_rebound=false
         );
 
-        Block(info=e_info, node=node)
+        Block(node=node, info=e_info)
     }
 
     @export fun parent_rebindings (): Block = {
         val e_info = EntityInfo(
-            md=self.info.md, from_rebound=false, rebindings=self.info.rebindings.get_parent
+            md=self.info.md, rebindings=self.info.rebindings.get_parent, from_rebound=false
         );
 
-        Block(info=e_info, node=node)
+        Block(node=node, info=e_info)
     }
 
     @export fun new (): FooNode =
