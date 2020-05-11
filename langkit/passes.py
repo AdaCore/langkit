@@ -170,7 +170,8 @@ class GrammarRulePass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context):
-        for name, rule in context.grammar.rules.items():
+        # Sort grammar rules by name, so that the pass order is deterministic
+        for name, rule in sorted(context.grammar.rules.items()):
             with rule.diagnostic_context:
                 self.pass_fn(rule)
 
