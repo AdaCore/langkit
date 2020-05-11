@@ -692,7 +692,8 @@ def reindent_content(tc):
     :param Testcase tc: Testcase to process.
     :rtype: str
     """
-    lines = tc.content.rstrip().split('\n')
+    # Do not strip non-ASCII whitespaces
+    lines = tc.content.rstrip(' \n').split('\n')
     assert not lines[0], (
         'First content line for {} must be empty'.format(tc.filename)
     )

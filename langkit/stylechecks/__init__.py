@@ -181,7 +181,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         docstring.
     """
 
-    lines = text.split(b'\n')
+    lines = text.split('\n')
     chars = set(lines[0])
     if len(chars) == 1 and chars == set(lang.comment_start):
         # This is a comment box
@@ -194,7 +194,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         # Each line must start and end with language comment start
         for i, line in enumerate(lines[1:-1], 1):
             report.set_context(filename, first_line + i)
-            if (not line.endswith(b' ' + lang.comment_start) or
+            if (not line.endswith(' ' + lang.comment_start) or
                     len(lines[0]) != len(line)):
                 report.add('Badly formatted comment box')
         return
@@ -235,7 +235,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 else:
                     return
 
-            ends = (b'.', b'?', b'!', b':', b'...', b'::')
+            ends = ('.', '?', '!', ':', '...', '::')
 
             if is_comment:
                 if ((self.lines_count > 1 or not is_last) and
@@ -249,8 +249,8 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 elif (is_last and
                         self.lines_count == 1 and
                         self.first_block and
-                        self.last_end == b'.' and
-                        len([c for c in self.last_line if c == b'.']) == 1):
+                        self.last_end == '.' and
+                        len([c for c in self.last_line if c == '.']) == 1):
                     report.add('Single-line comment must not have a final'
                                ' period')
             elif (not self.is_sphinx and
@@ -263,7 +263,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
 
     def has_prompt(line):
         """Return whether "line" starts with a Python prompt."""
-        return line.lstrip().startswith(b'>>> ')
+        return line.lstrip().startswith('>>> ')
 
     s = State()
 
@@ -271,7 +271,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         empty_line = not line.strip()
 
         if s.quote_indent is not None:
-            if line.startswith(b' ' * s.quote_indent) or empty_line:
+            if line.startswith(' ' * s.quote_indent) or empty_line:
                 continue
             else:
                 s.quote_indent = None
@@ -280,12 +280,12 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 continue
             s.is_prompt = False
 
-        if (line.startswith(b':type')
-                or line.startswith(b':rtype:')
-                or line.startswith(b'.. code')):
+        if (line.startswith(':type')
+                or line.startswith(':rtype:')
+                or line.startswith('.. code')):
             s.end_block(False)
             s.is_sphinx = True
-        elif line.startswith(b':param'):
+        elif line.startswith(':param'):
             s.end_block(False)
         elif has_prompt(line):
             s.is_prompt = True
@@ -304,12 +304,12 @@ def check_text(report, filename, lang, first_line, text, is_comment):
             if not sphinx_role_re.match(match):
                 report.add('Extra space before double punctuation')
 
-        if line.endswith(b'::'):
-            s.last_end = b'::'
+        if line.endswith('::'):
+            s.last_end = '::'
             s.quote_indent = indent_level(line) + 1
-        elif line.endswith(b'...'):
-            s.last_end = b'...'
-        elif line.startswith(b'.. '):
+        elif line.endswith('...'):
+            s.last_end = '...'
+        elif line.startswith('.. '):
             s.quote_indent = indent_level(line) + 1
         elif not empty_line:
             s.last_end = line[-1:]
@@ -354,8 +354,8 @@ def check_generic(report, filename, content, lang):
 
                        # Ignored lines starting with '%': they are directives
                        # for documentation generators.
-                       b'\n'.join(l[indent:] for l in comment_block
-                                  if not l.startswith('%')),
+                       '\n'.join(l[indent:] for l in comment_block
+                                 if not l.startswith('%')),
                        True)
         comment_block[:] = []
 
@@ -377,8 +377,8 @@ def check_generic(report, filename, content, lang):
                 break
 
         if (len(line) > 80 and
-                b'http://' not in line and
-                b'https://' not in line):
+                'http://' not in line and
+                'https://' not in line):
             report.add('Too long line')
         comment_start = line.find(lang.comment_start)
 
@@ -428,8 +428,8 @@ class LanguageChecker(object):
 
 
 class AdaLang(LanguageChecker):
-    comment_start = b'--'
-    with_re = re.compile(b'^with (?P<name>[a-zA-Z0-9_.]+);.*')
+    comment_start = '--'
+    with_re = re.compile('^with (?P<name>[a-zA-Z0-9_.]+);.*')
 
     def check(self, report, filename, content, parse):
         pcheck = PackageChecker(report)
@@ -444,11 +444,11 @@ class AdaLang(LanguageChecker):
 
 
 class PythonLang(LanguageChecker):
-    comment_start = b'#'
-    import_re = re.compile(b'^import (?P<name>[a-zA-Z0-9_.]+)'
-                           b'( as [a-zA-Z0-9_.]+)?'
-                           b'(?P<remaining>.*)')
-    from_import_re = re.compile(b'^from (?P<name>[a-zA-Z0-9_.]+) import.*')
+    comment_start = '#'
+    import_re = re.compile('^import (?P<name>[a-zA-Z0-9_.]+)'
+                           '( as [a-zA-Z0-9_.]+)?'
+                           '(?P<remaining>.*)')
+    from_import_re = re.compile('^from (?P<name>[a-zA-Z0-9_.]+) import.*')
 
     future_expected = {'absolute_import', 'division', 'print_function'}
 
@@ -637,7 +637,7 @@ class PythonLang(LanguageChecker):
 
 
 class MakoLang(LanguageChecker):
-    comment_start = b'##'
+    comment_start = '##'
 
     def check(self, report, filename, content, parse):
         first_line = content.split('\n', 1)[0]
@@ -687,8 +687,12 @@ def check_file(report, filename):  # pragma: no cover
     :param Report report: The report in which diagnostics must be emitted.
     :param str filename: Filename from which the text to check comes.
     """
+    # TODO: once the transition to Python3 is complete, force the use of UTF-8
     with open(filename, 'r') as f:
-        content = f.read()
+        try:
+            content = f.read()
+        except UnicodeDecodeError as exc:
+            print("{}: cannot decode as UTF-8: {}".format(exc))
     check_file_content(report, filename, content)
 
 
