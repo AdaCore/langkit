@@ -665,6 +665,10 @@ class Lexer(object):
                 for t in tokens
             ))
 
+        # Sort token families by name to ensure legality checks and code
+        # generation determinism.
+        self.tokens.token_families.sort(key=lambda tf: tf.name)
+
         all_tokens = set(self.tokens)
         seen_tokens = set()
 
@@ -690,9 +694,6 @@ class Lexer(object):
         default_family = TokenFamily(*list(all_tokens - seen_tokens))
         default_family.name = Name('Default_Family')
         self.tokens.token_families.append(default_family)
-
-        # Sort token families by name to ensure code generation determinism
-        self.tokens.token_families.sort(key=lambda tf: tf.name)
 
         # Make it easy to get the family a token belongs to
         for tf in self.tokens.token_families:
