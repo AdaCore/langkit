@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import libfoolang
 from libfoolang import _py2to3
 

@@ -2,8 +2,6 @@
 Check that trivia are properly scanned when the lexer tracks indentation.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import build_and_run, unparse_all_script

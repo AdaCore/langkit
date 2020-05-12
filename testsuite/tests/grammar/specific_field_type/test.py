@@ -3,8 +3,6 @@ Test that a warning is emitted when the type of a parsing field is not as
 specific as it could be.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import emit_and_print_errors

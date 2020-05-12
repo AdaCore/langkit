@@ -2,8 +2,6 @@
 Test the behavior of the .is_a operation on null nodes.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T
 from langkit.expressions import No, Self, langkit_property
 

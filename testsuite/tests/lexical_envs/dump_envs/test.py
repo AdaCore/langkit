@@ -3,8 +3,6 @@ Test that add_to_env actions that try to insert foreign nodes (as mapping value
 or metadata field) are properly rejected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Self

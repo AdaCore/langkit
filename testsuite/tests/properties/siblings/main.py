@@ -1,13 +1,13 @@
-from __future__ import absolute_import, division, print_function
+print('main.py: Running...')
+
+
 import sys
 
 import libfoolang
 
 
-print('main.py: Running...')
-
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('main.txt', b"""
+u = ctx.get_from_buffer('main.txt', """
 Root(
     A( a() )
     B( a() b() )

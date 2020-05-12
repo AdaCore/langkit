@@ -1,21 +1,21 @@
 == Missing type ==
-File "test.py", line 35, in AbstractExample.p
+File "test.py", line 33, in AbstractExample.p
     Error: This property requires an explicit return type
 
 == Invalid abstract ==
-File "test.py", line 39, in AbstractExample.p
+File "test.py", line 37, in AbstractExample.p
     Error: An external property cannot be abstract
 
 == Invalid memoized ==
-File "test.py", line 44, in AbstractExample.p
+File "test.py", line 42, in AbstractExample.p
     Error: An external property cannot be memoized
 
 == Missing uses_entity_info=... ==
-File "test.py", line 47, in AbstractExample.p
+File "test.py", line 45, in AbstractExample.p
     Error: uses_entity_info is required for external properties
 
 == Missing uses_envs=... ==
-File "test.py", line 49, in AbstractExample.p
+File "test.py", line 47, in AbstractExample.p
     Error: uses_envs is required for external properties
 
 Done

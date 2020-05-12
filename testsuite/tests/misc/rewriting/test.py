@@ -2,8 +2,6 @@
 Test that basic rewriting API usage behaves as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, abstract
 
 from utils import build_and_run

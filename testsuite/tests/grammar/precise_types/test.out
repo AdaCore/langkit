@@ -1,5 +1,5 @@
-File "test.py", line 28, in Holder
-  line 31, in Holder.a_list_or_b_list
+File "test.py", line 26, in Holder
+  line 29, in Holder.a_list_or_b_list
     Warning: Specified type is FooNode, but it could be more specific: FooNodeBaseList
 Code generation was successful
 == Doc for Holder.a_list_or_b_list ==

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Annotations, Field, synthetic
 
 from utils import emit_and_print_errors

@@ -2,8 +2,6 @@
 Test token-related primitives.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -36,7 +34,7 @@ while t is not None:
 # Print all tokens, for output clarity
 print('Tokens:')
 for t in tokens:
-    print('  ', t)
+    print('   {}'.format(t))
 print('')
 
 # Print the whole text buffer

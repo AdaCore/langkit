@@ -2,8 +2,6 @@
 Check that the callgraph is correct in the presence of property dispatchers.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import AbstractKind, Self, langkit_property
 

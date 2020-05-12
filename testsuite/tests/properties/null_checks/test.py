@@ -3,8 +3,6 @@ Test that property checks are properly emitted when null checks should trigger
 them.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, AnalysisUnit, Field, T, abstract
 from langkit.expressions import No, Property, Self
 

@@ -3,8 +3,6 @@ Test that 1) populate lexicale env is done asynchronously after a reparse and
 that 2) semantic analysis still works after that.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do, set_initial_env
 from langkit.expressions import AbstractProperty, Self, langkit_property

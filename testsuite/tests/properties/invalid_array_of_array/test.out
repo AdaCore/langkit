@@ -1,6 +1,6 @@
-File "test.py", line 14, in Example.array_of_nodes
+File "test.py", line 12, in Example.array_of_nodes
     Error: return type is Example.array, an array of bare AST nodes, which is forbidden in public API
-File "test.py", line 15, in Example.array_of_array
+File "test.py", line 13, in Example.array_of_array
     Error: return type is Example.array.array, an array of arrays, which is forbidden in public API
 
 Done

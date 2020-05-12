@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Bool, T
 from langkit.expressions import DynamicVariable, Literal, Property, Self
 

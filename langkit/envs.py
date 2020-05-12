@@ -17,8 +17,6 @@ following way::
 Read the documentation below for more details.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count

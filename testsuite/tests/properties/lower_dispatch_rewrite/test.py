@@ -3,8 +3,6 @@ Test that the lowering pass for properties dispatching works properly rewrites
 references to all transformed properties.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract, synthetic
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, reference
 from langkit.expressions import No, Self, langkit_property

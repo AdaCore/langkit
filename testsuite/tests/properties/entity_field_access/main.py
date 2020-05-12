@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -20,6 +18,7 @@ def entity_repr(e):
                                                    e.p_second_set)
 
 
-print('.test_main:', entity_repr(u.root.p_test_main))
-print('.property_on_entity:', entity_repr(u.root.p_property_on_entity))
+print('.test_main: {}'.format(entity_repr(u.root.p_test_main)))
+print('.property_on_entity: {}'
+      .format(entity_repr(u.root.p_property_on_entity)))
 print('main.py: Done.')

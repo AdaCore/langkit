@@ -3,8 +3,6 @@ Test that inconsistencies in regular node postfix parsers are properly
 reported.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import emit_and_print_errors

@@ -2,8 +2,6 @@
 Test that categories are properly considered during lexical env lookups.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, reference
 from langkit.expressions import RefCategories, Self, langkit_property

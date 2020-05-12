@@ -10,8 +10,6 @@ this is the way it is done for the Ada language::
     context.emit(...)
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import defaultdict
 from contextlib import contextmanager
 from functools import reduce

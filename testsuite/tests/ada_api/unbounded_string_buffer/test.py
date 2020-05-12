@@ -3,8 +3,6 @@ Test that the $.Analysis.Get_From_Buffer overload that reads an unbounded
 string works as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 
 from utils import build_and_run

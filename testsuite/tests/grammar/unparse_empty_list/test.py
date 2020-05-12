@@ -3,8 +3,6 @@ Test that nodes that contain empty lists with no token associated are properly
 unparsed.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import build_and_run

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -30,6 +28,6 @@ for label, nodes in [
 ]:
     print('{}:'.format(label))
     for n in nodes:
-        print('  ', n)
+        print('   {}'.format(n))
 
 print('main.py: Done.')

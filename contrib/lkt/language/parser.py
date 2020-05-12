@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import (
     ASTNode, AbstractField, Annotations, Field, LookupKind as LK, NullField,
     Struct, T, UserField, abstract, synthetic

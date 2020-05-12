@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -15,6 +13,6 @@ if u.diagnostics:
     sys.exit(1)
 
 
-print('Count:', u.root.p_count)
+print('Count: {}'.format(u.root.p_count))
 
 print('main.py: Done.')

@@ -2,8 +2,6 @@
 Check that .rebindings related built-in properties behave as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, abstract, has_abstract_list
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import (AbstractProperty, Entity, New, Property, Self,

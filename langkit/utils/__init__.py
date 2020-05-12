@@ -4,8 +4,6 @@ library for langkit, aggregating general python utilities that we could not
 find in the standard library.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from copy import copy
 import os
 import shutil

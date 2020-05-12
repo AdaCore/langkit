@@ -5,8 +5,6 @@ that the result of memoized properties are consistent, and would be the same as
 if properties were not memoized.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, AnalysisUnit, T
 from langkit.expressions import Self, Var, ignore, langkit_property
 

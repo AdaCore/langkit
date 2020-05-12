@@ -2,8 +2,6 @@
 Check that map expressions on entity types work properly.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 from langkit.expressions import Entity, langkit_property
 

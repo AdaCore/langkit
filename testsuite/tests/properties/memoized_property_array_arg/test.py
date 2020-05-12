@@ -3,8 +3,6 @@ Check that memoized properties that have arguments of array types work as
 advertised.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import ArrayLiteral, If, String, langkit_property
 

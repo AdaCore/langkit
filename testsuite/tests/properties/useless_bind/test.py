@@ -3,8 +3,6 @@ Check that warnings are correctly issued when a dynamic variable is bound but
 is not used in the expression.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import DynamicVariable, Self, langkit_property
 

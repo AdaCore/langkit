@@ -1,6 +1,6 @@
-File "test.py", line 26, in FooNode.undoc_prop
+File "test.py", line 24, in FooNode.undoc_prop
     Warning: This property is public but it lacks documentation
-File "test.py", line 32, in FooNode.will_doc_prop
+File "test.py", line 30, in FooNode.will_doc_prop
     Warning: This property is public but it lacks documentation
 Code generation was successful
 Done

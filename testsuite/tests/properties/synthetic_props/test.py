@@ -3,8 +3,6 @@ Check the specific behavior of several properties (.is_synthetic, .text and
 .sloc_range) when given a synthetic node.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, synthetic
 from langkit.expressions import New, langkit_property
 

@@ -3,8 +3,6 @@ Test that there is no memory leak when a reference resolved aborts with a
 property error.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.envs import EnvSpec, add_env, reference
 from langkit.expressions import PropertyError, Self, langkit_property

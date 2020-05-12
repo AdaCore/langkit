@@ -3,8 +3,6 @@ Check that Self_Env in nodes have are default initialized to the empty
 environment when Populate_Lexical_Env haven't processed them yet.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec, do
 from langkit.expressions import Self

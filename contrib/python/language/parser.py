@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env
 from langkit.expressions import No, Property, Self, new_env_assoc

@@ -4,8 +4,6 @@ in an arbitrary order, so that first nodes in the top-level list can use
 lexical environments created by list items that appear later.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Annotations, Field, LookupKind, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do, set_initial_env
 from langkit.expressions import AbstractProperty, Self, langkit_property

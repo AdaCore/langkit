@@ -3,8 +3,6 @@ Test that property dispatchers properly fail (i.e. raising a Property_Error
 instead of dereferencing a null access) when their Self argument is null.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T, UserField, abstract
 from langkit.expressions import (AbstractKind, No, Predicate, Self,
                                  langkit_property)

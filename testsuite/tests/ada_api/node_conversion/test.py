@@ -3,8 +3,6 @@ Test that the introspection API works as expected for queries related to node
 types.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, abstract
 
 from utils import build_and_run

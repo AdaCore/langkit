@@ -2,8 +2,6 @@
 Test that cast expressions work on entity prefixes.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 from langkit.expressions import AbstractProperty, Property, Self
 

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import langkit.compiled_types as ct
 from langkit.compiled_types import T
 from langkit.language_api import AbstractAPISettings

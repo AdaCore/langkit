@@ -2,8 +2,6 @@
 Test that nested trailing empty lists are correctly handled in node creation.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import build_and_run

@@ -3,8 +3,6 @@ Test that default values for struct fields have intended effects on New
 expressions.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import New, No, langkit_property
 

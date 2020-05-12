@@ -1,16 +1,16 @@
 == .old_env: invalid input type ==
-File "test.py", line 21, in Example.p
-  line 28, in access to .old_env
+File "test.py", line 19, in Example.p
+  line 26, in access to .old_env
     Error: Type FooNode has no 'old_env' field or property
 
 == .new_env: invalid input type ==
-File "test.py", line 21, in Example.p
-  line 30, in access to .new_env
+File "test.py", line 19, in Example.p
+  line 28, in access to .new_env
     Error: Type FooNode has no 'new_env' field or property
 
 == .get_parent: invalid input type ==
-File "test.py", line 21, in Example.p
-  line 32, in access to .get_parent
+File "test.py", line 19, in Example.p
+  line 30, in access to .get_parent
     Error: Type FooNode has no 'get_parent' field or property
 
 Done

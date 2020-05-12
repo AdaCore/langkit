@@ -1,32 +1,32 @@
 = multiple =
-File "test.py", line 16, in Example2
+File "test.py", line 14, in Example2
     Error: Only one PLE unit root is allowed: Example1
 
 = derived =
-File "test.py", line 27, in Example
+File "test.py", line 25, in Example
     Error: No node can derive from PLE unit roots: here we have DerivedExample
 
 = synthetic =
-File "test.py", line 45, in SyntheticNode
+File "test.py", line 43, in SyntheticNode
     Error: Synthetic nodes cannot be PLE unit roots
 
 = bad_main_rule_1 =
-File "test.py", line 57, in ExampleWrapper.example
+File "test.py", line 55, in ExampleWrapper.example
     Error: Example.list cannot appear anywhere in trees except as a root node
 
 = bad_main_rule_2 =
 Error: At least one parser must create lists of PLE unit roots
 
 = non_root_list =
-File "test.py", line 86, in Subunit.fields
+File "test.py", line 84, in Subunit.fields
     Error: Subunit.list cannot appear anywhere in trees except as a root node
 
 = multiple_lists =
-File "test.py", line 99, in ListOfExample
+File "test.py", line 97, in ListOfExample
     Error: Lists of PLE unit roots cannot be subclassed
 
 = ple_unit_root_field =
-File "test.py", line 112, in Example.child
+File "test.py", line 110, in Example.child
     Error: Example cannot appear anywhere in trees except as a child of Example.list nodes
 
 Done

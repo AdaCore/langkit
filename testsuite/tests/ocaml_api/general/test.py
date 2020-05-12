@@ -2,8 +2,6 @@
 Test that OCaml API is properly working.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.compile_context import LibraryEntity
 from langkit.dsl import (
     ASTNode, Bool, Enum, EnumValue, Field, Struct, Symbol, T, UserField,

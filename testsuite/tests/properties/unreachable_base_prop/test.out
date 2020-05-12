@@ -1,8 +1,8 @@
-File "test.py", line 25, in Expr.prop2
+File "test.py", line 23, in Expr.prop2
     Warning: Unreachable property: all concrete subclasses override it
-File "test.py", line 28, in Expr.prop3
+File "test.py", line 26, in Expr.prop3
     Warning: Unreachable property: all concrete subclasses override it
-File "test.py", line 36, in Atom.prop1
+File "test.py", line 34, in Atom.prop1
     Warning: Unreachable property: all concrete subclasses override it
 Code generation was successful
 Done

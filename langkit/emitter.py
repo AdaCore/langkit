@@ -2,8 +2,6 @@
 Code emission for Langkit-generated libraries.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import ast
 from distutils.spawn import find_executable
 from io import StringIO

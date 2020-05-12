@@ -3,8 +3,6 @@ Test the "get all" procedure of lexical envs, and in particular its
 determinism.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import No, Self, langkit_property

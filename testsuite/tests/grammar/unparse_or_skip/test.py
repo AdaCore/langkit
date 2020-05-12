@@ -3,8 +3,6 @@ Test the generation of unparsers involving Or parsers that contain Skip parsers
 as alternatives.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import build_and_run

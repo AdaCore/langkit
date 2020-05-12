@@ -3,8 +3,6 @@ Test that when a property B overrides a property A, B's return type must be a
 subtype of A's.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import AbstractProperty, No, Property, Self
 

@@ -3,8 +3,6 @@ Test that invalid uses of analysis unit in the properties DSL are properly
 detected and reported.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 from langkit.expressions import Property, Self
 

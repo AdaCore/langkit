@@ -2,8 +2,6 @@
 Test that Lkt's import statements work as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import namedtuple
 import os
 import subprocess

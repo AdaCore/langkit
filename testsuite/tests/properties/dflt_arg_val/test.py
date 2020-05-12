@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Bool, Enum, EnumValue, T
 from langkit.expressions import No, langkit_property
 

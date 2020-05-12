@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -35,7 +33,7 @@ for name, computation in [
     print('Trying to compute: {}...'.format(name))
     try:
         computation(root)
-    except libfoolang.StaleReferenceError as exc:
+    except libfoolang.StaleReferenceError:
         print('   StaleReferenceError raised!')
     else:
         print('   No error raised...')

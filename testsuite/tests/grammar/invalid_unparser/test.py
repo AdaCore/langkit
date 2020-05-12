@@ -3,8 +3,6 @@ Test that grammars which are troublesome for the unparsing machinery are
 properly detected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import emit_and_print_errors

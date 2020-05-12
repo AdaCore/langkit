@@ -4,8 +4,6 @@ lexical env request behave the same way no matter the order in which lexical
 envs were populated by cross units.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, set_initial_env
 from langkit.expressions import (AbstractKind, EmptyEnv, Self, Var,

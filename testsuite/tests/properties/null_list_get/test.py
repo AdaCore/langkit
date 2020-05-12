@@ -3,8 +3,6 @@ Test that trying to get an element out of a null AST list is properly turned
 into a Property_Error.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import No, Self, langkit_property
 

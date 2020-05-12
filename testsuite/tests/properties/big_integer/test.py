@@ -2,8 +2,6 @@
 Test that big integers work as expected in the DSL.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, BigInt, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import (

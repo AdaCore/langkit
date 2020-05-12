@@ -3,8 +3,6 @@ Check that memoization for properties that deal with side effects is properly
 rejected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T, UserField
 from langkit.expressions import Entity, Self, langkit_property
 

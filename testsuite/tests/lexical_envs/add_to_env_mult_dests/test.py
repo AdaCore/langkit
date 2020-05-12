@@ -3,8 +3,6 @@ Test add_to_env with multiple env_assoc having different destination
 environments.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import (ASTNode, Field, LookupKind, Struct, T, UserField,
                          env_metadata)
 from langkit.envs import EnvSpec, add_env, add_to_env, handle_children

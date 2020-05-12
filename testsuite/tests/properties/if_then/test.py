@@ -2,8 +2,6 @@
 Test that doing If(...).then(...) compiles properly. It used not to.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 from langkit.expressions import If, Self, langkit_property
 

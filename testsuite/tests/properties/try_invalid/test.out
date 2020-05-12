@@ -1,11 +1,11 @@
 == Heterogeneous types ==
-File "test.py", line 17, in Example.p
-  line 24, in Try expression
+File "test.py", line 15, in Example.p
+  line 22, in Try expression
     Error: Mismatching types in Try expression: Int and Bool
 
 == Not nullable type ==
-File "test.py", line 17, in Example.p
-  line 25, in Try expression
+File "test.py", line 15, in Example.p
+  line 23, in Try expression
     Error: Try expression should have a default value provided, in cases where the type of the provided fallback expression (here AnalysisUnitKind) does not have a default null value.
 
 Done

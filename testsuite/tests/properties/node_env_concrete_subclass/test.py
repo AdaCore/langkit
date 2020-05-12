@@ -3,8 +3,6 @@ Test that node_env works correctly for a subclass of a concrete node with an
 add_env directive.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, LookupKind as LK, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import Self, langkit_property

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from os import path as P
 from testsuite_support.python_driver import PythonDriver
 

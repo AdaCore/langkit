@@ -3,8 +3,6 @@ Test that Adalog's Early_Binding_Error exception is turned into a
 Property_Error exception.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T, UserField
 from langkit.expressions import Predicate, Self, langkit_property
 
