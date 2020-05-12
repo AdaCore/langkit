@@ -5,68 +5,60 @@ import os.path
 import sys
 
 import testsuite_support
-from testsuite_support.base_driver import (
-    BaseDriver, catch_test_errors, with_gnatpython
-)
-
-
-if with_gnatpython:
-    from gnatpython import fileutils
-else:
-    from testsuite_support.polyfill import fileutils
+from testsuite_support.base_driver import BaseDriver
 
 
 class PythonDriver(BaseDriver):
-    TIMEOUT = 600
+    default_process_timeout = 600
 
     #
     # Driver entry poins
     #
 
-    @catch_test_errors
-    def tear_up(self):
-        super(PythonDriver, self).tear_up()
-        for f in self.mandatory_files():
+    def set_up(self):
+        super().set_up()
+        for f in self.mandatory_files:
             self.check_file(f)
 
-        # Unless this mechanism is specifically disabled, make the Langkit
-        # library relative to this testsuite available to tests.
-        if not self.global_env['options'].no_auto_path:
-            self.add_path(b'PYTHONPATH', self.langkit_root_dir)
-
-        # Make the common Python modules available from the testcase script
-        self.add_path(b'PYTHONPATH', self.support_dir)
-        self.add_path(
-            b'PYTHONPATH',
-            os.path.dirname(os.path.dirname(
-                os.path.abspath(testsuite_support.__file__)
-            ))
-        )
-
+    @property
     def mandatory_files(self):
         """
         Return the set of mandatory files for this driver. Meant to be
         overloaded by subclasses.
         """
-        return ["test.py"]
+        return ['test.py']
 
+    @property
     def script_and_args(self):
         """
         Return the name of the python script to run, as well as the arguments.
         Meant to be overloaded by subclasses.
         """
-        return ["test.py"]
+        return ['test.py']
 
-    @catch_test_errors
     def run(self):
         # The "test.py" script will not import a generated library, however
         # another spawned script could: provide the path to the interpreter in
         # the environment so it can use it.
         derived_env = dict(os.environ)
-        derived_env[b'PYTHON_INTERPRETER'] = self.python_interpreter
-        derived_env[b'LANGKIT_ROOT_DIR'] = self.langkit_root_dir
+        derived_env['PYTHON_INTERPRETER'] = self.python_interpreter
+        derived_env['LANGKIT_ROOT_DIR'] = self.langkit_root_dir
         derived_env['LANGKIT_PRETTY_PRINT'] = str(
-            int(self.global_env['pretty_print']))
+            int(self.env.options.pretty_print))
+
+        # Unless this mechanism is specifically disabled, make the Langkit
+        # library relative to this testsuite available to tests.
+        if not self.env.options.no_auto_path:
+            self.add_path(derived_env, 'PYTHONPATH', self.langkit_root_dir)
+
+        # Make the common Python modules available from the testcase script
+        self.add_path(derived_env, 'PYTHONPATH', self.support_dir)
+        self.add_path(
+            derived_env, 'PYTHONPATH',
+            os.path.dirname(os.path.dirname(
+                os.path.abspath(testsuite_support.__file__)
+            ))
+        )
 
         # If code coverage is requested, run the test script under the
         # "coverage" program.
@@ -86,26 +78,25 @@ class PythonDriver(BaseDriver):
         if self.valgrind_enabled:
             derived_env['VALGRIND_ENABLED'] = '1'
 
-        self.run_and_check(argv + self.script_and_args(), derived_env)
+        self.run_and_check(argv + self.script_and_args, derived_env)
 
     @property
     def support_dir(self):
         """
         Return the absolute path to the directory for support Python modules.
         """
-        return os.path.join(self.testsuite_dir, b'python_support')
+        return os.path.join(self.testsuite_dir, 'python_support')
 
-    def analyze(self):
+    def compute_failures(self):
         # RA22-015: For the transition to the concrete syntax, we want to
         # check-in and test unparsing results.
-        failures = super(PythonDriver, self).analyze()
+        failures = super().compute_failures()
 
-        rewrite = (self.global_env['options'].rewrite
-                   and not self.expect_failure)
-
-        expected_lkt = self.working_dir('expected_concrete_syntax.lkt')
+        expected_lkt = self.test_dir('expected_concrete_syntax.lkt')
         actual_lkt = self.working_dir('concrete_syntax.lkt')
 
+        # Some tests do not create a concrete_syntax.lkt file. There is nothing
+        # to compare for them.
         if not os.path.exists(actual_lkt):
             return failures
 
@@ -113,23 +104,11 @@ class PythonDriver(BaseDriver):
         # exist.
         with open(expected_lkt, 'a+'):
             pass
+        expected = self.read_file(expected_lkt)
 
-        # Check for the test output itself
-        diff = fileutils.diff(expected_lkt, actual_lkt,
-                              ignore_white_chars=False)
-        if diff:
-            if rewrite:
-                new_baseline = self.read_file(actual_lkt)
-                with open(os.path.join(
-                    self.test_dir, 'expected_concrete_syntax.lkt'
-                ), 'w') as f:
-                    f.write(new_baseline)
-            self.result.actual_output += diff
-            failures.append('output is not as expected{}'.format(
-                ' (baseline updated)' if rewrite else ''
-            ))
-
-        if failures:
-            self.set_failure(' | '.join(failures))
-        else:
-            self.set_passed()
+        failures += self.compute_diff(
+            expected_lkt, expected,
+            self.read_file(actual_lkt),
+            failure_message="unexpected concrete syntax"
+        )
+        return failures

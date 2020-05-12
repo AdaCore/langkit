@@ -76,11 +76,11 @@ def col(msg, color):
 def printcol(msg, color):
     """
     Utility print function that will print `msg` in color `color`.
-    :param basestring msg: The message to print.
-    :param basestring color: The color escape sequence from the enum class
+    :param str msg: The message to print.
+    :param str color: The color escape sequence from the enum class
         Colors which represents the color to use.
     :return: The color-escaped string, resetting the color to blank at the end.
-    :rtype: basestring
+    :rtype: str
     """
     print(col(msg, color))
 

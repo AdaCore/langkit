@@ -2,8 +2,9 @@ from __future__ import absolute_import, division, print_function
 
 import inspect
 from itertools import count
-
 import types
+
+import funcy
 
 from langkit import names
 from langkit.compiled_types import get_context
@@ -265,7 +266,7 @@ class CollectionExpression(AbstractExpression):
 
         return self.ConstructCommonResult(
             collection_expr,
-            zip(elt_vars, elt_var_inits),
+            funcy.lzip(elt_vars, elt_var_inits),
             construct(self.index_var) if self.index_var else None,
             inner_expr,
             inner_scope

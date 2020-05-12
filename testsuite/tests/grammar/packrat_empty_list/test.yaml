@@ -1,4 +1,3 @@
 driver: python
-expect_failure:
-   - if: []
-     then: 'Pending resolution of RB20-049'
+control:
+    - [XFAIL, "True", 'Pending resolution of RB20-049']

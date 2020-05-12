@@ -2,15 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
 from functools import partial
-import sys
-
-
-# Cope with Python2/3 inconsistencies
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
+from io import StringIO
 
 import gdb
 
@@ -18,14 +10,6 @@ from langkit.gdb.control_flow import go_next, go_out, go_step_inside
 from langkit.gdb.debug_info import DSLLocation, ExprStart, Scope
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors
-
-
-def get_input(prompt):
-    """
-    Wrapper around raw_input/input depending on the Python version.
-    """
-    input_fn = input if sys.version_info.major > 2 else raw_input
-    return input_fn(prompt)
 
 
 class BaseCommand(gdb.Command):
@@ -352,7 +336,7 @@ For instance::
 
             print('Please chose one of the above locations [default=1]:')
             try:
-                choice = get_input('> ')
+                choice = input('> ')
             except EOFError:
                 print('Aborting: no breakpoint created')
                 return

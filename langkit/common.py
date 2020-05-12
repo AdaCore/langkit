@@ -62,7 +62,7 @@ def is_keyword(name):
     """
 
     str_name = name.lower if isinstance(name, names.Name) else name
-    assert isinstance(str_name, basestring)
+    assert isinstance(str_name, str)
 
     return str_name.lower() in ada_keywords
 
@@ -78,7 +78,7 @@ def gen_name(var_name):
         it needs to be a lower case with underscores string.
     :rtype: names.Name
     """
-    if isinstance(var_name, basestring):
+    if isinstance(var_name, str):
         var_name = names.Name.from_lower(var_name)
 
     var_id = next(__next_ids[var_name.lower])

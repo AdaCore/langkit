@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+from functools import reduce
 import funcy
 import inspect
 
@@ -585,7 +586,7 @@ class Cond(AbstractExpression):
 
         :rtype: list[(AbstractExpression, AbstractExpression)]
         """
-        return funcy.partition(2, self.args)
+        return funcy.lpartition(2, self.args)
 
     @property
     def else_expr(self):

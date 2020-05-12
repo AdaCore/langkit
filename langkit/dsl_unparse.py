@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from funcy import keep
+from funcy import keep, lmap
 import json
 
 from langkit.passes import GlobalPass
@@ -385,9 +385,9 @@ def sf(strn):
     >>> r = range(5)
     >>> sf("${a - b} : ${', '.join(str(c) for c in r)}")
 
-    :param basestring strn: The string to format, containing regular python
-                            expressions in ${} blocks.
-    :rtype: unicode
+    :param str strn: The string to format, containing regular Python
+        expressions in ${} blocks.
+    :rtype: str
     """
 
     from mako.template import Template
@@ -871,7 +871,7 @@ def emit_expr(expr, **ctx):
         # Field like expressions
         exprs = expr.sub_expressions
         return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                map(ee, exprs[1:]), False)
+                                lmap(ee, exprs[1:]), False)
 
     elif is_a("append_rebinding", "concat_rebindings", "env_node", "get_value",
               "solve", "is_referenced_from", "env_group", "length", "can_reach",
@@ -880,7 +880,7 @@ def emit_expr(expr, **ctx):
         # Method like expressions
         exprs = expr.sub_expressions
         return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                map(ee, exprs[1:]))
+                                lmap(ee, exprs[1:]))
 
     elif isinstance(expr, EnumLiteral):
         return expr.value.dsl_name
@@ -970,15 +970,11 @@ def emit_expr(expr, **ctx):
         else:
             return "[{}]".format(ee(expr.expr))
     elif isinstance(expr, New):
-        def key(name_field):
-            _, field = name_field
-            return field._serial
-
         # The order of arguments in the source is lost during the call to New's
         # constructor. Sort arguments by field declaration order to get the
         # most likely order.
         fields = sorted(expr.struct_type.required_fields_in_exprs.items(),
-                        key=key)
+                        key=lambda assoc: assoc[1]._serial)
         field_exprs = [(name, expr.field_values[name])
                        for name, _ in fields
                        if name in expr.field_values]
@@ -998,14 +994,13 @@ def emit_expr(expr, **ctx):
         if not len(expr.elements):
             return '[]'
         elif isinstance(expr.elements[0], CharacterLiteral):
-            return repr(u"".join(e.literal for e in expr.elements))[1:]
+            return repr("".join(e.literal for e in expr.elements))
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
     elif isinstance(expr, CharacterLiteral):
-        # Get rid of the 'u' unicode prefix
-        return repr(expr.literal)[1:]
+        return repr(expr.literal)
     elif isinstance(expr, BigIntLiteral):
         return 'BigInt({})'.format(str(expr.expr)
-                                   if isinstance(expr.expr, (int, long)) else
+                                   if isinstance(expr.expr, int) else
                                    ee(expr.expr))
     elif isinstance(expr, RefCategories):
         return 'RefCats({})'.format(', '.join(
@@ -1349,8 +1344,8 @@ def unparse_lexer(ctx, f):
     lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
     lexer_annotations += "".join(
         '@spacing({}, {})$hl'.format(tf1.name.lower, tf2.name.lower)
-        for tf1, m in ctx.lexer.spacing_table.iteritems()
-        for tf2, v in m.iteritems()
+        for tf1, m in ctx.lexer.spacing_table.items()
+        for tf2, v in m.items()
         if v
     )
     lexer_newline_rule_index = next(
@@ -1474,7 +1469,7 @@ def unparse_grammar(ctx, f):
         ((name, rule)
          for name, rule in ctx.grammar.rules.items()
          if not rule.is_dont_skip_parser),
-        key=lambda (_, rule): rule._id
+        key=lambda assoc: assoc[1]._id,
     )
 
     template = """
@@ -1536,7 +1531,7 @@ def unparse_lang(ctx):
             if action == 'to':
                 if f is not None:
                     f.close()
-                f = open(value, 'w')
+                f = open(value, 'w', encoding='utf-8')
             elif action == 'import':
                 f.write('import {}\n'.format(value))
             elif action == 'nodes':
@@ -1559,7 +1554,7 @@ def create():
 
 
 def pp(strn, indent_step=4, line_size=80):
-    from cStringIO import StringIO
+    from io import StringIO
     import re
     buf = re.split("(\$hl|\$sl|\$i|\$d)", strn)
     file_str = StringIO()

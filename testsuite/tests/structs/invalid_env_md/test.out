@@ -1,6 +1,6 @@
 == not_a_struct ==
 File "test.py", line 39, In call to the env_metadata decorator
-    Error: The env_metadata decorator must be called on a Struct subclass (here, got: <class '__main__.Metadata'>)
+    Error: The env_metadata decorator must be called on a Struct subclass (here, got: <class '__main__.not_a_struct.<locals>.Metadata'>)
 
 == two_md ==
 File "test.py", line 51, in Metadata

@@ -29,6 +29,8 @@ from funcy import keep
 import inspect
 from itertools import count
 
+import funcy
+
 from langkit import names
 from langkit.common import gen_name
 from langkit.compile_context import CompileCtx, get_context
@@ -122,13 +124,6 @@ class VarDef(object):
         """
         return str(self.name)
 
-    def __unicode__(self):
-        """
-        Helper, expand var defs to their name when converted to strings,
-        allows easy use of VarDef instances in code generation.
-        """
-        return unicode(self.name)
-
 
 class GeneratedParser(object):
     """
@@ -171,7 +166,7 @@ def resolve(parser):
     """
     if isinstance(parser, Parser):
         return parser
-    elif isinstance(parser, basestring):
+    elif isinstance(parser, str):
         return _Token(parser)
     elif isinstance(parser, TokenAction):
         return _Token(parser)
@@ -957,7 +952,7 @@ class _Token(Parser):
         Keep the original token string that was used to determine the token we
         want to parse.
 
-        :type: basestring|None
+        :type: str|None
         """
 
         self.match_text = match_text
@@ -981,7 +976,7 @@ class _Token(Parser):
 
     def _compile(self):
         # Resolve the token action associated with this parser
-        if isinstance(self._val, basestring):
+        if isinstance(self._val, str):
             self._original_string = self._val
             self._val = get_context().lexer.get_token(self._val)
         else:
@@ -1920,12 +1915,13 @@ class _Transform(Parser):
 
     def generate_code(self):
         if isinstance(self.parser, _Row):
-            subparsers = zip(self.parser.parsers, self.parser.subresults)
+            subparsers = funcy.lzip(self.parser.parsers,
+                                    self.parser.subresults)
         else:
             subparsers = [(self.parser, self.parser.res_var)]
 
         # Remove subparsers that do not contribute to field creation
-        subparsers = filter(lambda (p, v): v, subparsers)
+        subparsers = [(p, v) for p, v in subparsers if v]
         assert len(self.parse_fields) == len(subparsers)
 
         return self.render('transform_code_ada',

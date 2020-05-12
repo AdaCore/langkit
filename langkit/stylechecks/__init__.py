@@ -494,9 +494,9 @@ class PythonLang(LanguageChecker):
         lines_map = [(None, None)]
         current = True
         for line in content.splitlines():
-            if line.strip() == b"# pyflakes off":
+            if line.strip() == "# pyflakes off":
                 current = False
-            elif line.strip() == b"# pyflakes on":
+            elif line.strip() == "# pyflakes on":
                 current = True
             lines_map.append((current, line))
 
@@ -671,11 +671,7 @@ def check_file_content(report, filename, content):
     :param str content: Text on which the checks must be performed.
     """
     ext = filename.split('.')[-1]
-    try:
-        lang = langs[ext]
-    except KeyError:
-        return
-
+    lang = langs[ext]
     check_generic(report, filename, content, lang)
     lang.check(report, filename, content, parse=True)
 
@@ -687,12 +683,16 @@ def check_file(report, filename):  # pragma: no cover
     :param Report report: The report in which diagnostics must be emitted.
     :param str filename: Filename from which the text to check comes.
     """
-    # TODO: once the transition to Python3 is complete, force the use of UTF-8
-    with open(filename, 'r') as f:
+    ext = filename.split('.')[-1]
+    if ext not in langs:
+        return
+
+    with open(filename, 'r', encoding='utf-8') as f:
         try:
             content = f.read()
         except UnicodeDecodeError as exc:
-            print("{}: cannot decode as UTF-8: {}".format(exc))
+            print("{}: cannot decode as UTF-8: {}".format(filename, exc))
+            return
     check_file_content(report, filename, content)
 
 

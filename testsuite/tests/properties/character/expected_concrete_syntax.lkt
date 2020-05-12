@@ -11,7 +11,7 @@ class Example : FooNode {
 
     @export fun get_a (c : CharacterType = 'a'): CharacterType = c
 
-    @export fun get_eacute (c : CharacterType = '\xe9'): CharacterType = c
+    @export fun get_eacute (c : CharacterType = 'é'): CharacterType = c
 
     @export fun identity (c : CharacterType): CharacterType = c
 

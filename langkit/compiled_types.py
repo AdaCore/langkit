@@ -1421,13 +1421,14 @@ class CompiledType(object):
 
         :rtype: list[AbstractNodeData]
         """
-        result = filter(
-            predicate or (lambda f: True),
-            self.get_abstract_node_data_dict(include_inherited,
-                                             field_class).values()
+        return sorted(
+            filter(
+                predicate or (lambda f: True),
+                self.get_abstract_node_data_dict(include_inherited,
+                                                 field_class).values()
+            ),
+            key=lambda f: f._serial
         )
-        result.sort(key=lambda f: f._serial)
-        return result
 
     def get_properties(self, predicate=None, include_inherited=True):
         """

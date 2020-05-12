@@ -386,7 +386,7 @@ class LexerToken(object):
                 sorted(t.signature for t in self.tokens),
                 sorted(tf.signature for tf in self.token_families),
                 sorted((t.name.camel, tf.name.camel)
-                       for t, tf in self.token_to_family.iteritems()))
+                       for t, tf in self.token_to_family.items()))
 
 
 class Lexer(object):
@@ -501,9 +501,9 @@ class Lexer(object):
 
                 sorted((t1.name.camel,
                         sorted(t2.name.camel
-                               for t2, present in mapping.iteritems()
+                               for t2, present in mapping.items()
                                if present))
-                       for t1, mapping in self.spacing_table.iteritems()),
+                       for t1, mapping in self.spacing_table.items()),
 
                 sorted(tf.name.camel for tf in self.newline_after))
 
@@ -531,8 +531,8 @@ class Lexer(object):
         """
         loc = extract_library_location()
         for k, v in patterns:
-            assert isinstance(k, basestring)
-            assert isinstance(v, basestring)
+            assert isinstance(k, str)
+            assert isinstance(v, str)
             self.patterns.append((k, v, loc))
 
     def add_rules(self, *rules):
@@ -626,7 +626,7 @@ class Lexer(object):
             insensitive token name).
         :rtype: Name
         """
-        assert isinstance(literal, basestring), (
+        assert isinstance(literal, str), (
             "Bad type for {}, supposed to be str|{}".format(
                 literal, self.tokens.__name__
             )

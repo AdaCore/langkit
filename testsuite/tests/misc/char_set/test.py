@@ -10,7 +10,7 @@ from langkit.lexer.char_set import CharSet
 def check_ranges(label, cs):
 
     def format_char(char):
-        return (unichr(char)
+        return (chr(char)
                 if ord(' ') < char and char <= ord('~') else
                 '\\U+{:04X}'.format(char))
 

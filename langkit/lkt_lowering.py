@@ -29,9 +29,7 @@ def text_as_str(token_node):
     :param liblktlang.LKNode token_node: Node from which to extract text.
     :rtype: str
     """
-    # TODO: remove the encoding once we support Python3. For now, the rest of
-    # the grammar machinery expects byte strings.
-    return token_node.text.encode('ascii')
+    return token_node.text
 
 
 def pattern_as_str(str_lit):

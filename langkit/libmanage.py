@@ -1199,11 +1199,7 @@ class ManageScript(object):
         env = dict(os.environ)
 
         def add_path(name, p):
-            if isinstance(name, unicode):
-                name = name.encode('ascii')
-            if isinstance(p, unicode):
-                p = p.encode('ascii')
-            env[name] = path.pathsep.join(keep([p, env.get(name, b'')]))
+            env[name] = path.pathsep.join(keep([p, env.get(name, '')]))
 
         self.setup_environment(build_mode, add_path)
         return env

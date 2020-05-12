@@ -242,15 +242,13 @@ class _StructMetaclass(type):
         dct['_fields'] = fields
 
 
-class Struct(BaseStruct):
+class Struct(BaseStruct, metaclass=_StructMetaclass):
     """
     Base class for all POD struct types.
 
     To define a new struct type, subclass Struct and put in its definition
     several Field or UserField instances.
     """
-
-    __metaclass__ = _StructMetaclass
 
     _is_env_metadata = False
     """
@@ -667,15 +665,13 @@ class _ASTNodeMetaclass(type):
             enum_type._alternatives_map[alt.name.camel] = alt_type
 
 
-class ASTNode(BaseStruct):
+class ASTNode(BaseStruct, metaclass=_ASTNodeMetaclass):
     """
     Base class for all AST node types.
 
     Exactly one class must derive from ASTNode directly, then all other
     subclasses must derive from this first subclass.
     """
-
-    __metaclass__ = _ASTNodeMetaclass
 
     _base = None
     """
@@ -994,7 +990,7 @@ class _EnumMetaclass(type):
         return cls
 
 
-class Enum(DSLType):
+class Enum(DSLType, metaclass=_EnumMetaclass):
     """
     Subclass this in order to create enumeration types.
 
@@ -1004,7 +1000,6 @@ class Enum(DSLType):
             a = EnumValue()
             b = EnumValue()
     """
-    __metaclass__ = _EnumMetaclass
 
     _values = None
     """

@@ -1,4 +1,5 @@
 driver: python
-expect_failure:
-    We know this is failing, but fixing the grammar typing issue is not a
-    priority.
+control:
+    - [XFAIL, "True",
+       "We know this is failing, but fixing the grammar typing issue is not a
+       priority."]

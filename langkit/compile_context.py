@@ -19,6 +19,8 @@ import importlib
 import os
 from os import path
 
+from funcy import lzip
+
 from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
@@ -823,7 +825,7 @@ class CompileCtx(object):
 
             sections[section_name].append(e)
 
-        return sorted(sections.iteritems())
+        return sorted(sections.items())
 
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False,
                         is_private=False):
@@ -896,7 +898,7 @@ class CompileCtx(object):
         """
         Return the API name of the given grammar rule name.
 
-        :type rule: basestring
+        :type rule: str
         :rtype: names.Name
         """
         return names.Name.from_lower(rule + '_rule')
@@ -2368,8 +2370,8 @@ class CompileCtx(object):
                 dispatch_types, remainder = collapse_concrete_nodes(
                     prop.struct, reversed([p.struct for p in static_props]))
                 assert not remainder
-                prop.dispatch_table = zip(reversed(dispatch_types),
-                                          static_props)
+                prop.dispatch_table = lzip(reversed(dispatch_types),
+                                           static_props)
                 # TODO: emit a warning for unreachable properties earlier in
                 # the compilation pipeline. Here we can see them with an empty
                 # set of types in the dispatch table.

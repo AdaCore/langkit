@@ -45,7 +45,7 @@ def write_source_file(file_path, source, post_process=None):
         if context.verbosity.debug:
             printcol('Rewriting stale source: {}'.format(file_path),
                      Colors.OKBLUE)
-        with open(file_path, 'wb') as f:
+        with open(file_path, 'w', encoding='utf-8') as f:
             f.write(source)
         return True
     return False
@@ -634,7 +634,7 @@ class Emitter(object):
             exc = None
             try:
                 pp_code = pretty_print(strip_white_lines(code))
-            except SyntaxError as exc:
+            except SyntaxError:
                 pp_code = code
 
             write_source_file(file_path, pp_code, self.post_process_python)

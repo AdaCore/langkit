@@ -41,7 +41,7 @@ class Cache(object):
         :rtype: bool
         """
         m = hashlib.md5()
-        m.update(content)
+        m.update(content.encode('utf-8'))
         new_hash = m.hexdigest()
 
         try:

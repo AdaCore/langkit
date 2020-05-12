@@ -15,7 +15,7 @@ File "test.py", line 22, in Example.p
 
 == Bad condition type ==
 File "test.py", line 22, in Example.p
-  line 3, in SelfVariable expression
+File "<frozen importlib._bootstrap>", line 219, in SelfVariable expression
     Error: Condition in Cond expression should be Bool, got Example
 
 == Bad return type ==
