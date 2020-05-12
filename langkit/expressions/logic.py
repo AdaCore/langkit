@@ -447,7 +447,7 @@ class Predicate(AbstractExpression):
 
         # Separate logic variable expressions from extra argument expressions
         exprs = [construct(e) for e in self.exprs]
-        logic_var_exprs, closure_exprs = funcy.split_by(
+        logic_var_exprs, closure_exprs = funcy.lsplit_by(
             lambda e: e.type == T.LogicVar, exprs
         )
         check_source_language(

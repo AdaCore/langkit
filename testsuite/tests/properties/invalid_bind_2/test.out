@@ -6,7 +6,7 @@ Code generation was successful
 
 == Bind(entity, logic_var) ==
 File "test.py", line 22, in ExampleNode.resolve
-  line 3, in EntityVariable expression
+File "<frozen importlib._bootstrap>", line 219, in EntityVariable expression
     Error: Expected type LogicVar, got ExampleNode.entity
 
 == Bind(logic_var, bool) ==

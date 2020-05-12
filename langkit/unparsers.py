@@ -6,9 +6,11 @@ Generation of automatic unparsers for Langkit grammars.
 from __future__ import absolute_import, division, print_function
 
 from collections import defaultdict
+from io import StringIO
 import itertools
-from StringIO import StringIO
 import sys
+
+import funcy
 
 from langkit.common import string_repr
 from langkit.compiled_types import get_context
@@ -776,8 +778,8 @@ class RegularNodeUnparser(NodeUnparser):
 
         :rtype: list[(FieldUnparser, TokenSequenceUnparser)]
         """
-        return zip(self.field_unparsers,
-                   [TokenSequenceUnparser()] + self.inter_tokens)
+        return funcy.lzip(self.field_unparsers,
+                          [TokenSequenceUnparser()] + self.inter_tokens)
 
     def _dump(self, stream):
         stream.write('Unparser for {}:\n'.format(self.node.dsl_name))

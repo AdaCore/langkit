@@ -13,7 +13,7 @@ File "test.py", line 24, in Example.p
 
 == Bad Self use ==
 File "test.py", line 24, in Example.p
-  line 3, in SelfVariable expression
+File "<frozen importlib._bootstrap>", line 219, in SelfVariable expression
     Error: Self is not bound in this context
 
 == Bad dynamic variable use ==

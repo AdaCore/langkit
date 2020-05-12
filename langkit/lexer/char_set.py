@@ -17,7 +17,7 @@ def format_char(char):
     """
     return ('\\U{:x}'.format(char)
             if char < ord(' ') or ord('~') < char else
-            unichr(char))
+            chr(char))
 
 
 def format_char_ranges(ranges):
@@ -58,7 +58,7 @@ class CharSet(object):
         """
 
         for item in items:
-            if isinstance(item, basestring):
+            if isinstance(item, str):
                 self.add(item)
             elif isinstance(item, tuple):
                 low, high = item
@@ -104,7 +104,7 @@ class CharSet(object):
         """
         Return whether a character is in this set.
 
-        :type char: unicode
+        :type char: str
         :rtype: bool
         """
         char = ord(char)
@@ -144,7 +144,7 @@ class CharSet(object):
         def format_char(char):
             return ("Character_Type'Val (16#{:0x}#)".format(char)
                     if char < ord(' ') or ord('~') < char else
-                    "'{}'".format(unichr(char)))
+                    "'{}'".format(chr(char)))
 
         return ' | '.join(
             (format_char(l) if l == h else
@@ -270,7 +270,7 @@ class CharSet(object):
         """
         Add a single character to this set.
 
-        :type char: unicode
+        :type char: str
         """
         self.add_range(char, char)
 
@@ -333,8 +333,8 @@ class CharSet(object):
         """
         Add a range of characters to this set.
 
-        :type low: unicode
-        :type righ: unicode
+        :type low: str
+        :type righ: str
         """
         self.add_int_range(ord(low), ord(high))
 
@@ -361,8 +361,8 @@ def compute_unicode_categories_char_sets():
     # Langkit.
     sets = {}
     for i in range(MAXUNICODE + 1):
-        char = unichr(i)
-        cat = unicodedata.category(unichr(i))
+        char = chr(i)
+        cat = unicodedata.category(chr(i))
         for subcat in (cat, cat[0]):
             sets.setdefault(subcat, CharSet())
             sets[subcat].add(char)
@@ -379,7 +379,7 @@ def compute_unicode_categories_char_sets():
         '',
         'unicode_categories_char_sets = {',
     ]
-    for cat, char_set in sorted(sets.iteritems()):
+    for cat, char_set in sorted(sets.items()):
         lines.append('    {}: CharSet.from_int_ranges(*['.format(repr(cat)))
         for low, high in char_set.ranges:
             lines.append('        ({}, {}),'.format(low, high))

@@ -30,7 +30,7 @@ class Log():
         return decorator
 
     @staticmethod
-    def log(trace, *args, **kwargs):
+    def log(trace, message, *args, **kwargs):
         """
         Log arguments on given trace.
         """
@@ -38,7 +38,9 @@ class Log():
             sys.stdout.write(col("[{}] ".format(trace), Colors.YELLOW))
             if Log.nesting_level:
                 sys.stdout.write("  " * Log.nesting_level)
-            print(*args, **kwargs)
+            if args or kwargs:
+                message = message.format(*args, **kwargs)
+            print(message)
 
     def logger(self, trace):
         """

@@ -57,7 +57,7 @@ ${exts.with_clauses(with_clauses + [
 ## parameter. and emitting the default action.
 <%def name="case_dispatch(pred)">
    <%
-   node_types = list(reversed(filter(pred, ctx.astnode_types)))
+   node_types = list(reversed([n for n in ctx.astnode_types if pred(n)]))
    concrete_types, _ = ctx.collapse_concrete_nodes(
        ctx.root_grammar_class, node_types
    )

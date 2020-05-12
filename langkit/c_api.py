@@ -109,10 +109,10 @@ class CAPISettings(AbstractAPISettings):
         """
         Wrap `name` as a top-level scope symbol.
 
-        :type name: Name|basestring
+        :type name: Name|str
         :rtype: str
         """
-        if isinstance(name, basestring):
+        if isinstance(name, str):
             name = names.Name(name)
         return names.Name('{}_{}'.format(self.symbol_prefix, name.base_name)
                           if self.symbol_prefix else name).lower

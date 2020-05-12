@@ -647,11 +647,11 @@ class NFAState(object):
                 self.removing = set()
 
         events = defaultdict(Event)
-        for next_state, chars in transitions.iteritems():
+        for next_state, chars in transitions.items():
             for r in chars.ranges:
                 events[r[0]].adding.add(next_state)
                 events[r[1]].removing.add(next_state)
-        events = sorted(events.iteritems())
+        events = sorted(events.items())
 
         # The final step is to compute the set of transitions for which
         # character sets are disjoint: just follow the stream of events.
@@ -720,7 +720,7 @@ class NFAState(object):
 
             for next_states, char_set in self.deterministic_transitions(
                 states
-            ).iteritems():
+            ).items():
                 if next_states not in dfa_states:
                     queue.add(next_states)
                 transitions.append((states, char_set, next_states))
@@ -952,7 +952,7 @@ class DFACodeGenHolder(object):
         """
         tables = sorted(
             (table_name, char_set)
-            for char_set, table_name in self.charset_to_tablename.iteritems()
+            for char_set, table_name in self.charset_to_tablename.items()
         )
 
         lines = []

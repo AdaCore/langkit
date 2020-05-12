@@ -2,6 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 import inspect
 
+import funcy
+
 from langkit import names
 from langkit.compiled_types import AbstractNodeData, Field, resolve_type
 from langkit.diagnostics import Context, Severity, check_source_language
@@ -255,13 +257,9 @@ class New(AbstractExpression):
             )
 
         def _iter_ordered(self):
-            def key(field_expr):
-                field, _ = field_expr
-                return field.name
-
             return sorted(
                 [(field, expr) for field, expr in self.assocs.items()],
-                key=key
+                key=lambda assoc: assoc[0].name
             )
 
         def _render_fields(self):
@@ -751,8 +749,10 @@ class FieldAccess(AbstractExpression):
             call_debug_info = (self.node_data.is_property and
                                not self.node_data.external)
 
-            sub_exprs = [self.receiver_expr] + filter(lambda e: e is not None,
-                                                      self.arguments)
+            sub_exprs = [self.receiver_expr] + funcy.lfilter(
+                lambda e: e is not None,
+                self.arguments
+            )
             result = [e.render_pre() for e in sub_exprs]
 
             if call_debug_info:

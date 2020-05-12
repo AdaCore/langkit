@@ -46,9 +46,7 @@ def unsugar(expr, ignore_errors=False):
     # WARNING: Since bools are ints in python, bool needs to be before int
     if isinstance(expr, (bool, int)):
         expr = Literal(expr)
-    if isinstance(expr, long):
-        expr = BigIntLiteral(expr)
-    elif isinstance(expr, basestring):
+    elif isinstance(expr, str):
         expr = SymbolLiteral(expr)
     elif isinstance(expr, TypeRepo.Defer):
         expr = expr.get()
@@ -1295,9 +1293,9 @@ class ResolvedExpression(object):
             if values is None:
                 return []
             elif isinstance(values, (list, tuple)):
-                return funcy.mapcat(explore, values)
+                return funcy.lmapcat(explore, values)
             elif isinstance(values, dict):
-                return funcy.mapcat(explore, values.values())
+                return funcy.lmapcat(explore, values.values())
             elif filter(values):
                 return [values]
             else:
@@ -2727,7 +2725,7 @@ class Let(AbstractExpression):
             scope.add(var.local_var)
             var_exprs.append(var_expr)
 
-        vars = map(construct, self.vars)
+        vars = funcy.lmap(construct, self.vars)
 
         return Let.Expr(vars, var_exprs, construct(self.expr),
                         abstract_expr=self)
@@ -2885,7 +2883,7 @@ class Var(AbstractVariable):
         # variable from the creator's stack frame.
         if self._creator_stack_frame:
             local_names = set(name for name, value
-                              in self._creator_stack_frame.f_locals.iteritems()
+                              in self._creator_stack_frame.f_locals.items()
                               if value is self)
 
             # If we have multiple local variables that point to self, take the
@@ -4099,7 +4097,7 @@ class PropertyDef(AbstractNodeData):
         Render the given property to generated code.
 
         :type context: langkit.compile_context.CompileCtx
-        :rtype: basestring
+        :rtype: str
         """
 
         with self.bind(), Self.bind_type(self.struct):
@@ -4123,8 +4121,8 @@ class PropertyDef(AbstractNodeData):
 
     @property
     def natural_arguments(self):
-        non_art, art = funcy.split_by(lambda a: not a.is_artificial,
-                                      self.arguments)
+        non_art, art = funcy.lsplit_by(lambda a: not a.is_artificial,
+                                       self.arguments)
         assert all(a.is_artificial for a in art), (
             'All artificial arguments must come after all the other ones'
         )
@@ -4454,9 +4452,7 @@ class CharacterLiteral(AbstractExpression):
 
     def __init__(self, literal):
         super(CharacterLiteral, self).__init__()
-        self.literal = (literal
-                        if isinstance(str, unicode) else
-                        unicode(literal))
+        self.literal = literal
         check_source_language(
             len(self.literal) == 1,
             'Character literal must be a 1-element string (got {} elements'
@@ -4546,13 +4542,13 @@ class BasicExpr(ComputingExpr):
 
     def _render_pre(self):
         expr = self.template.format(*[
-            (e if isinstance(e, basestring) else e.render_expr())
+            (e if isinstance(e, str) else e.render_expr())
             for e in self.operands
         ])
         return '\n'.join(
             [e.render_pre()
              for e in self.operands
-             if not isinstance(e, basestring)]
+             if not isinstance(e, str)]
             + [assign_var(self.result_var.ref_expr, expr,
                           self.requires_incref)]
         )
@@ -4873,7 +4869,7 @@ class LocalVars(object):
         """
         def children(s):
             return s.sub_scopes
-        return funcy.tree_nodes(self.root_scope, children, children)
+        return funcy.ltree_nodes(self.root_scope, children, children)
 
     def render(self):
         return "\n".join(lv.render() for lv in self.local_vars.values())
@@ -4983,7 +4979,7 @@ class BigIntLiteral(AbstractExpression):
         # Integer and use the overload of Create_Big_Integer to create a big
         # int from its base-10 string representation.
         expr = ('"{}"'.format(self.expr)
-                if isinstance(self.expr, (int, long)) else
+                if isinstance(self.expr, int) else
                 construct(self.expr, T.Int))
         return BigIntLiteral.Expr(expr, abstract_expr=self)
 

@@ -13,7 +13,7 @@
                     <th>Source file</th>
                     <th>Summary</th>
                 </tr>
-                % for _, f in sorted(group.files.iteritems()):
+                % for _, f in sorted(group.files.items()):
                     <tr>
                         <td><a href="${f.html_file}">${f.name}</a></td>
                         <td>

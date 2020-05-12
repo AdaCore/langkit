@@ -203,7 +203,7 @@ class EnvGet(AbstractExpression):
         super(EnvGet, self).__init__()
 
         check_source_language(
-            isinstance(symbol, (AbstractExpression, basestring)),
+            isinstance(symbol, (AbstractExpression, str)),
             'Invalid key argument for Env.get: {}'.format(repr(symbol))
         )
 

@@ -3,185 +3,48 @@ from __future__ import absolute_import, division, print_function
 import os
 import os.path
 
+from e3.testsuite.driver.classic import TestAbortWithError, TestSkip
+from e3.testsuite.driver.diff import DiffTestDriver
 
-# pyflakes off
-with_gnatpython = False
-if not os.environ.get('WITHOUT_GNATPYTHON'):
-    try:
-        from gnatpython import fileutils
-        from gnatpython.ex import Run, STDOUT
-        from gnatpython.testsuite.driver import TestDriver
-        with_gnatpython = True
-    except ImportError:
-        pass
-if not with_gnatpython:
-    from testsuite_support.polyfill import Run, STDOUT, TestDriver, fileutils
-# pyflakes on
-
-
-from testsuite_support import discriminants
 from testsuite_support.valgrind import valgrind_cmd
 
 
-class SetupError(Exception):
-    """Exception to raise when the testcase is invalid.
-
-    Helper exception to work with catch_test_errors: see below.
-    """
-    pass
-
-
-class TestError(Exception):
-    """Exception to raise when the testcase fails.
-
-    Helper exception to work with catch_test_errors: see below.
-    """
-    pass
-
-
-def catch_test_errors(func):
-    """
-    Helper decorator for driver entry points.
-
-    This returns a wrapper around func that catches SetupError and TestError
-    exceptions and that turns them into the appropriate test status. Using
-    exceptions is convenient to stop any method from any point: this simplifies
-    the control flow.
-    """
-
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except SetupError as exc:
-            self.set_setup_error(exc.message)
-        except TestError as exc:
-            self.set_failure(exc.message)
-    return wrapper
-
-
-class BaseDriver(TestDriver):
+class BaseDriver(DiffTestDriver):
     """
     Base class to provide common test driver helpers.
-
-    Ideally, these should end up in GNATpython, but this base class acts as a
-    staging area: once it has been proven that some feature is useful, it may
-    be easier to submit it upstream...
     """
 
-    TIMEOUT = None
-
-    def tear_up(self):
-        super(BaseDriver, self).tear_up()
+    def set_up(self):
+        super().set_up()
 
         if (
             self.test_env.get('require_ocaml', False) and
-            self.global_env['options'].disable_ocaml
+            self.env.options.disable_ocaml
         ):
-            self.result.set_status('DEAD', 'Test requires OCaml')
-            return
-
-        self.create_test_workspace()
-        self.check_file(self.expected_file)
-
-        discriminants.add_discriminants(self.global_env['options']
-                                        .discriminants)
-
-        # Load the expected failure matcher for this testcase
-        try:
-            expect_failure_matcher = discriminants.Matcher.from_json(
-                self.test_env.get('expect_failure', [])
-            )
-        except ValueError as exc:
-            raise SetupError('Invalid "expect_failure" entry: {}'.format(exc))
-
-        # Determine whether we do have an expected failure
-        self.expect_failure_comment = expect_failure_matcher.matches()
-        if self.expect_failure_comment is None:
-            self.expect_failure = False
-        else:
-            # Because of wrapping in the YAML file, we can get multi-line
-            # strings, which is not valid for comments.
-            self.expect_failure_comment = (self.expect_failure_comment
-                                           .replace('\n', ' ').strip())
-            self.expect_failure = True
-
-        # Make the "python_support" directory available to LKT import
-        # statements.
-        self.add_path('LKT_PATH',
-                      os.path.join(self.testsuite_dir, 'python_support'))
+            raise TestSkip('Test requires OCaml')
 
     def read_file(self, filename):
         """Return the content of `filename`."""
         with open(filename, 'r') as f:
             return f.read()
 
-    def set_setup_error(self, message):
-        self.result.set_status('PROBLEM', message)
-
-    def set_failure(self, message):
-        if self.expect_failure:
-            self.result.set_status('XFAIL', '{}{}'.format(
-                message,
-                ' ({})'.format(self.expect_failure_comment)
-                if self.expect_failure_comment else ''
-            ))
-        else:
-            self.result.set_status('FAILED', message)
-
-    def set_passed(self):
-        if self.expect_failure:
-            msg = (
-                'Failure was expected: {}'.format(self.expect_failure_comment)
-                if self.expect_failure_comment else None
-            )
-            self.result.set_status('UOK', msg)
-        else:
-            self.result.set_status('PASSED')
-
     # Convenience path builders
 
     @property
     def langkit_root_dir(self):
         """Return the absolute path to the repository root directory."""
-        return os.path.abspath(
-            os.path.join(self.testsuite_dir, b'..')
-        )
+        return os.path.abspath(os.path.join(self.testsuite_dir, '..'))
 
     @property
     def testsuite_dir(self):
         """Return the absolute path to the testsuite root directory."""
         result = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              b'..')
+                              '..')
         return os.path.abspath(result)
 
     @property
-    def test_dir(self):
-        """Return the path of the current testcase directory."""
-        return self.test_env['test_dir']
-
-    def working_dir(self, *args):
-        """
-        Return the working dir, plus any path elements joined to it if passed
-        in *args.
-        """
-        return os.path.join(self.global_env['working_dir'],
-                            self.test_env['test_name'], *args)
-
-    @property
-    def output_file(self):
-        return self.working_dir('actual.out')
-
-    @property
-    def expected_file(self):
-        return self.working_dir('test.out')
-
-    @property
-    def original_expected_file(self):
-        return os.path.join(self.test_dir, 'test.out')
-
-    @property
     def coverage_enabled(self):
-        return self.global_env['options'].coverage
+        return self.env.options.coverage
 
     def coverage_file(self, ext):
         """
@@ -192,13 +55,13 @@ class BaseDriver(TestDriver):
         :rtype: str
         """
         return os.path.join(
-            self.global_env['coverage_dir'],
+            self.env.coverage_dir,
             self.test_env['test_name'] + '.' + ext
         )
 
     @property
     def valgrind_enabled(self):
-        return self.global_env['options'].valgrind
+        return self.env.options.valgrind
 
     #
     # Tear up helpers
@@ -206,7 +69,7 @@ class BaseDriver(TestDriver):
 
     @property
     def python_interpreter(self):
-        return self.global_env['options'].with_python or b'python'
+        return self.env.options.with_python or 'python'
 
     def check_file(self, filename):
         """
@@ -214,8 +77,10 @@ class BaseDriver(TestDriver):
 
         If the file does not exist test is aborted.
         """
-        if not os.path.isfile(os.path.join(self.test_dir, filename)):
-            raise SetupError('Missing mandatory file: {}'.format(filename))
+        if not os.path.isfile(self.test_dir(filename)):
+            raise TestAbortWithError(
+                'Missing mandatory file: {}'.format(filename)
+            )
 
     def check_file_list(self, what, file_list, can_be_empty=True):
         """Raise a SetupError if `file_list` is not a list of existing files.
@@ -226,50 +91,42 @@ class BaseDriver(TestDriver):
         # First check we have a list of strings
         if (not isinstance(file_list, list) or
                 (not can_be_empty and len(file_list) == 0) or
-                not all(isinstance(fn, basestring) for fn in file_list)):
+                not all(isinstance(fn, str) for fn in file_list)):
             empty_msg = 'non-empty '
-            raise SetupError(
+            raise TestAbortWithError(
                 '{} must be a {}list of strings'.format(what, empty_msg))
 
         # Then check that these are existing files
         for filename in file_list:
             self.check_file(filename)
 
-    def create_test_workspace(self):
-        """
-        Create a test workspace.
-
-        This function copies the test sources into the working directory.
-        """
-
-        fileutils.sync_tree(self.test_dir, self.working_dir())
-
-    def add_path(self, env_var, path):
+    def add_path(self, env, env_var, path):
         """
         Add a path to some environment variable.
 
+        :param dict[str, str] env: Environment to modify.
         :param str env_var: Name of the environment variable to define/extend.
         :param str path: Path to prepend.
         """
         assert isinstance(env_var, str)
         assert isinstance(path, str)
-        path_list = os.environ.get(env_var, b'')
+        path_list = env.get(env_var, '')
         assert isinstance(path_list, str)
         if path_list:
-            path_list = b'{}{}{}'.format(
+            path_list = '{}{}{}'.format(
                 path, os.path.pathsep, path_list
             )
         else:
             path_list = path
 
-        os.environ[env_var] = path_list
+        env[env_var] = path_list
 
     #
     # Run helpers
     #
 
     def run_and_check(self, argv, env=None, for_coverage=False,
-                      memcheck=False):
+                      memcheck=False, analyze_output=True):
         """
         Run a subprocess with `argv` and check it completes with status code 0.
 
@@ -285,9 +142,9 @@ class BaseDriver(TestDriver):
             this process under Valgrind. If there are memory issues, they be
             reported on the testcase output and the process will return
             non-zero.
+        :param bool analyze_output: See
+            e3.testsuite.driver.classic.ClassicTestDriver.shell.
         """
-        program = argv[0]
-
         if for_coverage and self.coverage_enabled:
             trace_file = self.coverage_file('trace')
             argv = ['gnatcov', 'run', '-o', trace_file] + argv
@@ -295,18 +152,7 @@ class BaseDriver(TestDriver):
         if memcheck and self.valgrind_enabled:
             argv = valgrind_cmd(argv)
 
-        p = Run(argv, cwd=self.working_dir(),
-                timeout=self.TIMEOUT,
-                output=self.output_file,
-                error=STDOUT,
-                env=env)
-
-        if p.status != 0:
-            self.result.actual_output += (
-                '{} returned status code {}\n'.format(program, p.status))
-            self.result.actual_output += self.read_file(self.output_file)
-            raise TestError(
-                '{} returned status code {}'.format(program, p.status))
+        self.shell(argv, env=env, analyze_output=analyze_output)
 
     def create_project_file(self, project_file, mains):
         """
@@ -351,7 +197,7 @@ class BaseDriver(TestDriver):
         argv = ['gprbuild', '-P', project_file, '-p']
         if self.coverage_enabled:
             argv.append('--subdirs=gnatcov')
-        self.run_and_check(argv)
+        self.run_and_check(argv, analyze_output=False)
 
     def program_path(self, main_source_file):
         """
@@ -366,32 +212,3 @@ class BaseDriver(TestDriver):
         return (self.working_dir('obj', 'gnatcov', program_name)
                 if self.coverage_enabled else
                 self.working_dir('obj', program_name))
-
-    #
-    # Analysis helpers
-    #
-
-    def analyze(self):
-        rewrite = (self.global_env['options'].rewrite
-                   and not self.expect_failure)
-        failures = []
-
-        # Check for the test output itself
-        diff = fileutils.diff(self.expected_file, self.output_file,
-                              ignore_white_chars=False)
-        if diff:
-            if rewrite:
-                new_baseline = self.read_file(self.output_file)
-                with open(self.original_expected_file, 'w') as f:
-                    f.write(new_baseline)
-            self.result.actual_output += diff
-            failures.append('output is not as expected{}'.format(
-                ' (baseline updated)' if rewrite else ''
-            ))
-
-        if failures:
-            self.set_failure(' | '.join(failures))
-        else:
-            self.set_passed()
-
-        return failures

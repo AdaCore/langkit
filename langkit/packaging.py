@@ -287,7 +287,8 @@ class Packager(object):
         # Locate the native runtime's "adalib" directory using gnatls
         gnatls_output = subprocess.check_output(
             [os.path.join(self.gnat_prefix, 'bin', 'gnatls'),
-             '-a', 'system.o'])
+             '-a', 'system.o'],
+            encoding='ascii')
         adalib = os.path.dirname(gnatls_output.splitlines()[0])
 
         # Compute the list of all dynamic libraries to copy

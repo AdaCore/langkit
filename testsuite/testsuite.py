@@ -8,12 +8,8 @@ Usage::
 Run the Langkit testsuite.
 """
 
-from __future__ import absolute_import, division, print_function
-
-import os
-
-from testsuite_support import Testsuite
+from testsuite_support import LangkitTestsuite
 
 
 if __name__ == '__main__':
-    Testsuite(os.path.dirname(__file__)).testsuite_main()
+    LangkitTestsuite().testsuite_main()

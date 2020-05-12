@@ -20,7 +20,7 @@ Read the documentation below for more details.
 from __future__ import absolute_import, division, print_function
 
 from enum import Enum
-from funcy import split_by
+from funcy import lsplit_by
 from itertools import count
 
 from langkit import names
@@ -227,7 +227,7 @@ class EnvSpec(object):
         if actions and isinstance(actions[0], SetInitialEnv):
             self.initial_env = actions.pop(0)
 
-        pre, post = split_by(
+        pre, post = lsplit_by(
             lambda a: not isinstance(a, HandleChildren), actions
         )
 

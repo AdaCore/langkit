@@ -13,7 +13,7 @@ is
 
    % for name, typ in var_context:
       ${name} :
-         % if isinstance(typ, basestring):
+         % if isinstance(typ, str):
             ${typ};
          % else:
             ${typ.storage_type_name}
