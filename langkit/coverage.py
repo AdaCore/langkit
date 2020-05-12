@@ -2,8 +2,6 @@
 Generation of code coverage reports for generated libraries.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import OrderedDict
 import glob
 import json

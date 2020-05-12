@@ -2,8 +2,6 @@
 Test that Symbol bindings in the Python API are properly working.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.compile_context import LibraryEntity
 from langkit.dsl import ASTNode, Symbol
 from langkit.expressions import langkit_property

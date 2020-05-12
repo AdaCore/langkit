@@ -2,8 +2,6 @@
 Test AST node synthetization and a basic use of it in the Python API.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, synthetic
 from langkit.expressions import New, Self, langkit_property
 

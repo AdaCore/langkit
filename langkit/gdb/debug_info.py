@@ -3,8 +3,6 @@ Data structures for mapping from generated library source lines to the
 properties DSL level.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import inspect
 import shlex
 

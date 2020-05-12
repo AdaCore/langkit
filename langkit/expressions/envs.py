@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit import names
 from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language

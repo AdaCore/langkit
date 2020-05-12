@@ -2,8 +2,6 @@
 Test that ".symbol" raises a property error on null nodes.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import langkit_property
 

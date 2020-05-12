@@ -2,8 +2,6 @@
 Test that stack overflow migitations work as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Int
 from langkit.expressions import If, Self, langkit_property
 

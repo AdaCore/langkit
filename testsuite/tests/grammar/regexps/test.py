@@ -2,8 +2,6 @@
 Test the parsing of regular expressions in lexer specifications.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.diagnostics import DiagnosticError
 from langkit.lexer.char_set import CharSet
 from langkit.lexer.regexp import RegexpCollection

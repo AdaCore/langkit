@@ -2,8 +2,6 @@
 Test that the Character type works as expected in generated APIs.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import (ArrayLiteral, CharacterLiteral,
                                  langkit_property)

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 
 def memoized(func, pre_cache_miss=None):
     """

@@ -3,8 +3,6 @@ Check that default argument values are correctly handled in the properties
 dispach lowering pass.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Bool, Field, abstract
 from langkit.expressions import Not, langkit_property
 

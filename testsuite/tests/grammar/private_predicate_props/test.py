@@ -3,8 +3,6 @@ Check that having private properties used as predicates in the grammar
 generates valid Ada code.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 from langkit.expressions import Not, Self, langkit_property
 

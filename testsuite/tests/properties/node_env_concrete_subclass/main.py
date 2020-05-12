@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -17,7 +15,7 @@ if u.diagnostics:
 
 def_node = u.root.f_decls[0]
 var_node = u.root.f_decls[1]
-print('def_node lookup "a"', def_node.p_lookup('a'))
-print('var node lookup "d"', var_node.p_lookup('d'))
+print('def_node lookup "a" {}'.format(def_node.p_lookup('a')))
+print('var node lookup "d" {}'.format(var_node.p_lookup('d')))
 
 print('main.py: Done.')

@@ -3,8 +3,6 @@ Test that the automatic (un)wrapping of bare nodes in the interface of public
 properties works as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 from langkit.expressions import langkit_property
 

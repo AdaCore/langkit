@@ -3,8 +3,6 @@ Module to gather the logic to lower Lkt syntax trees to Langkit internal data
 structures.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import OrderedDict
 import json
 import os.path

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.diagnostics import WarningSet
 from langkit.dsl import ASTNode, LexicalEnv, LogicVar, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,

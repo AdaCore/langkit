@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import sys
 
 import libfoolang
@@ -25,9 +23,9 @@ def process(index, n):
     parent = wrapped_eval(lambda: n.p_parent_rebindings)
     new = wrapped_eval(lambda: n.p_new)
     old = wrapped_eval(lambda: n.p_old)
-    print('  parent =', parent)
-    print('  new =', new)
-    print('  old =', old)
+    print('  parent = {}'.format(parent))
+    print('  new = {}'.format(new))
+    print('  old = {}'.format(old))
 
     # Computing "parent" raised a PropertyError => "parent" is a string
     if not isinstance(parent, str):

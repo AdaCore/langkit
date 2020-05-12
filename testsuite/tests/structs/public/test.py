@@ -2,8 +2,6 @@
 Test that structure types are properly bound in public APIs.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import (ArrayLiteral, BigIntLiteral, New, Self,
                                  langkit_property)

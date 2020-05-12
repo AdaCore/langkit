@@ -2,8 +2,6 @@
 Test that we create Predicate on properties of the root AST node.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, LogicVar, UserField
 from langkit.expressions import Predicate, Self, Var, ignore, langkit_property
 

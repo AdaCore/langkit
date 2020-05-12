@@ -1,2 +1,2 @@
-Code generation was successful
-Done.
+foo.lkt:5:24-5:27: Expected '(', got String
+Done

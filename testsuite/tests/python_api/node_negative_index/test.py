@@ -3,8 +3,6 @@ Test the handling of negative indexes in the Python binding of AST nodes child
 getters.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 
 from utils import build_and_run

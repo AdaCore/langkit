@@ -3,8 +3,6 @@ Check that precise types for fields of synthetized nodes account for types
 coming from synthetization properties.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import (
     ASTNode, Field, T, abstract, has_abstract_list, synthetic
 )

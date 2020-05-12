@@ -3,8 +3,6 @@ Test that calling a memoized property on a null node triggers the expected
 error.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode
 from langkit.expressions import langkit_property
 

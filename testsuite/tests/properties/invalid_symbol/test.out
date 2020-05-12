@@ -2,13 +2,13 @@
 Code generation was successful
 
 == Invalid - Bad type ==
-File "test.py", line 27, in Example.p
-  line 27, in GetSymbol expression
+File "test.py", line 25, in Example.p
+  line 25, in GetSymbol expression
     Error: Token node expected, but got instead Bool
 
 == Invalid - Non-token node ==
-File "test.py", line 27, in Example.p
-  line 27, in GetSymbol expression
+File "test.py", line 25, in Example.p
+  line 25, in GetSymbol expression
     Error: Token node expected, but the input FooNode node is not a token node
 
 Done

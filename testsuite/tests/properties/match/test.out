@@ -1,5 +1,5 @@
-File "test.py", line 37, in FooNode.find_exprs
-  line 48, in Match expression
+File "test.py", line 35, in FooNode.find_exprs
+  line 46, in Match expression
     Warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
 main.py: Running...
 Atoms:

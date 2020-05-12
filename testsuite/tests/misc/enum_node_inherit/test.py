@@ -3,8 +3,6 @@ Test that getting a unit using different filenames for the same file return the
 same unit (i.e. that the filename is canonicalized).
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, abstract
 from langkit.expressions import Property
 

@@ -3,8 +3,6 @@ Test that Bind works when binding entities, and using an equality property that
 takes entities.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Int, LogicVar, T, UserField
 from langkit.expressions import (AbstractProperty, Bind, Let, Property, Self,
                                  langkit_property)

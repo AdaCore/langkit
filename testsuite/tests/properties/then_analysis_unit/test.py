@@ -3,8 +3,6 @@ Test that automatic default values are provided for Then expressions that
 return analysis units.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T, has_abstract_list
 from langkit.expressions import Property, Self
 

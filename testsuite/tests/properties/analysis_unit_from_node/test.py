@@ -2,8 +2,6 @@
 Test getting the analysis unit of a node in the properties DSL.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, abstract
 from langkit.expressions import (
     Property, Self

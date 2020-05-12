@@ -2,8 +2,6 @@
 Test that parsers that produce a synthetic node are rejected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, has_abstract_list, synthetic
 
 from utils import emit_and_print_errors

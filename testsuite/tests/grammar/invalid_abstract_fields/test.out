@@ -1,15 +1,15 @@
 == Not overriden ==
-File "test.py", line 28, in ExampleHolder
+File "test.py", line 26, in ExampleHolder
     Error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Partly overriden ==
-File "test.py", line 49, in OtherExampleHolder
+File "test.py", line 47, in OtherExampleHolder
     Error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
 
 == Abstract overriding abstract ==
-File "test.py", line 68, in ExampleHolder.f1
+File "test.py", line 66, in ExampleHolder.f1
     Error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
-File "test.py", line 67, in ExampleHolder
+File "test.py", line 65, in ExampleHolder
     Error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Abstract overriding concrete ==
@@ -17,7 +17,7 @@ File "abstract-overriding-concrete.lkt", line 4, In definition of grammar rule m
     Error: Transform parser generates 1 values, but ExampleHolder has 0 fields
 
 == Inconsistent overriding type ==
-File "test.py", line 103, in ExampleHolder.f
+File "test.py", line 101, in ExampleHolder.f
     Error: Type of overriding field (FooNode) does not match type of abstract field (Example)
 
 == Free-standing null field ==

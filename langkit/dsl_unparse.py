@@ -1,12 +1,10 @@
-from __future__ import absolute_import, division, print_function
-
-from funcy import keep, lmap
+from collections import defaultdict
+from contextlib import contextmanager
 import json
 
-from langkit.passes import GlobalPass
-from contextlib import contextmanager
+from funcy import keep, lmap
 
-from collections import defaultdict
+from langkit.passes import GlobalPass
 
 try:
     import libpythonlang as lpl

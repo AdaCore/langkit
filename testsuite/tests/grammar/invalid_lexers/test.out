@@ -29,27 +29,27 @@ family_1.lkt:2:5: Error: Only lexer rules allowed in family blocks
 Code generation was successful
 
 == pattern_1.lkt ==
-File "test.py", line 20, In definition of lexer rules
+File "test.py", line 18, In definition of lexer rules
     Error: unbalanced square bracket
 
 == pattern_2.lkt ==
-File "test.py", line 20, In definition of lexer rules
+File "test.py", line 18, In definition of lexer rules
     Error: unknown pattern: no_such_pattern
 
 == pattern_3.lkt ==
-File "test.py", line 20, In definition of lexer rules
+File "test.py", line 18, In definition of lexer rules
     Error: infinite recursion in pat1
 
 == pattern_4.lkt ==
-File "test.py", line 20, In definition of lexer pattern pat
+File "test.py", line 18, In definition of lexer pattern pat
     Error: unbalanced square bracket
 
 == pattern_5.lkt ==
-File "test.py", line 20, In definition of lexer rules
+File "test.py", line 18, In definition of lexer rules
     Error: nothing to repeat
 
 == pattern_6.lkt ==
-File "test.py", line 20, In definition of lexer rules
+File "test.py", line 18, In definition of lexer rules
     Error: unbalanced parentheses
 
 == pattern_7.lkt ==

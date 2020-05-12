@@ -1,5 +1,5 @@
-File "test.py", line 14, in ExampleNode.prop
-  line 14, in Cast expression
+File "test.py", line 12, in ExampleNode.prop
+  line 12, in Cast expression
     Warning: Casting to the same type
 Code generation was successful
 Done

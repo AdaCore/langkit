@@ -3,8 +3,6 @@ Test that assigning a default value to a dynamic variable generates the
 expected public API.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Bool
 from langkit.expressions import DynamicVariable, langkit_property
 

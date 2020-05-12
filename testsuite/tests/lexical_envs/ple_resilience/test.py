@@ -8,8 +8,6 @@ Test that the populate lexical env pass is resilent to errors:
   a Property_Error.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, do
 from langkit.expressions import (AbstractProperty, If, No, PropertyError, Self,

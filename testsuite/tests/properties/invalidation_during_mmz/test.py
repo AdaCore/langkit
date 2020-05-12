@@ -3,8 +3,6 @@ Check that memoization of a property does not crash when side effects that
 invalidate the cache are triggered during the execution of that property.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, AnalysisUnit, T
 from langkit.expressions import (If, PropertyError, Self, Var, ignore,
                                  langkit_property)

@@ -3,8 +3,6 @@ Test that the referenced envs link that cross analysis units stay valid after
 reparsing.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, LexicalEnv
 from langkit.envs import EnvSpec, add_env, add_to_env_kv, reference
 from langkit.expressions import DynamicVariable, Self, langkit_property

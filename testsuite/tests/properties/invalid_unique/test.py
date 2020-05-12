@@ -2,8 +2,6 @@
 Test the "unique" array operation in the DSL (invalid usages).
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import Self, langkit_property
 

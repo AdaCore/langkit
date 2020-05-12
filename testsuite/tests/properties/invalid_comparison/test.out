@@ -1,4 +1,4 @@
-File "test.py", line 16, in Example.compare
-  line 17, in OrderingTest expression
+File "test.py", line 14, in Example.compare
+  line 15, in OrderingTest expression
     Error: Comparisons require the same type for both operands (got Int and BigInt)
 Done

@@ -2,8 +2,6 @@
 Helpers to manage compilation passes.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.compiled_types import CompiledTypeRepo
 from langkit.diagnostics import errors_checkpoint
 from langkit.utils import Colors, printcol

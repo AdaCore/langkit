@@ -3,8 +3,6 @@ Check that Populate_Lexical_Env is automatically called in public property
 dispatchers.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env_kv
 from langkit.expressions import AbstractProperty, Self, langkit_property

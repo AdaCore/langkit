@@ -3,8 +3,6 @@ Check that property memoization is properly rejected when using unsupported
 argument types.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, T
 from langkit.expressions import langkit_property
 

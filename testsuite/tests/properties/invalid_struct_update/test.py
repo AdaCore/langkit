@@ -2,8 +2,6 @@
 Check that invalid struct updates are properly rejected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import BigIntLiteral, langkit_property
 

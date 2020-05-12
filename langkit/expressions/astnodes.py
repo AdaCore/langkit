@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.compiled_types import T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (CallExpr, FieldAccessExpr, auto_attr,

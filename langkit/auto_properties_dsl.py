@@ -2,8 +2,6 @@
 Sphinx extension to generate documentation for the properties DSL.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from docutils import nodes
 import docutils.parsers.rst
 from docutils.statemachine import StringList

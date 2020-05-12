@@ -4,8 +4,6 @@ self-env is also EmptyEnv. It used to return null, which is an erroneous
 environment value in the DSL.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_env, do
 from langkit.expressions import Entity, PropertyError, langkit_property

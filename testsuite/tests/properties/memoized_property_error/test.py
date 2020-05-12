@@ -2,8 +2,6 @@
 Check that memoized properties that raise a PropertyError work as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Bool
 from langkit.expressions import (PropertyError, Self, Var, ignore,
                                  langkit_property)

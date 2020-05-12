@@ -2,8 +2,6 @@
 Test basic features for enumeration types.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Enum, EnumValue, Field, abstract
 from langkit.expressions import AbstractProperty, Property, langkit_property
 

@@ -2,8 +2,6 @@
 Test that the is_optional property on parse fields works as expected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import emit_and_print_errors

@@ -3,8 +3,6 @@ Test that we properly warn for properties that are unreachable because they are
 defined on an abstract node while all concrete subclasses have it overriden.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.expressions import AbstractProperty, Property
 

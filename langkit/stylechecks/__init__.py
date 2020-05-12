@@ -9,8 +9,6 @@ algoritms are not decently commented: in order to see what this is supposed to
 handle, have a look at the testsuite in the stylechecks.tests module.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 import argparse
 import ast
 import os
@@ -450,8 +448,6 @@ class PythonLang(LanguageChecker):
                            '(?P<remaining>.*)')
     from_import_re = re.compile('^from (?P<name>[a-zA-Z0-9_.]+) import.*')
 
-    future_expected = {'absolute_import', 'division', 'print_function'}
-
     def check(self, report, filename, content, parse):
         self.custom_check(report, filename, content, parse)
         if os.path.exists(filename):
@@ -575,13 +571,10 @@ class PythonLang(LanguageChecker):
                 def node_lineno(node):
                     return getattr(node, 'lineno', 0) + 1
 
-                future_seen = set()
-
                 for node in ast.walk(root):
                     if isinstance(node, ast.ImportFrom):
                         if node.module == '__future__':
-                            future_seen.update(alias.name
-                                               for alias in node.names)
+                            report.add('No __future__ import allowed')
                         else:
                             report.set_context(filename, node_lineno(node) - 1)
                             self._check_imported_entities(report, node)
@@ -610,21 +603,6 @@ class PythonLang(LanguageChecker):
 
                         check_text(report, filename, self, lineno, docstring,
                                    False)
-
-                report.set_context(filename, 1)
-                if not future_seen:
-                    report.add('Missing __future__ imports')
-                else:
-                    missing = self.future_expected - future_seen
-                    extraneous = future_seen - self.future_expected
-                    if missing:
-                        report.add('Missing __future__ imports: {}'.format(
-                            ', '.join(sorted(missing))
-                        ))
-                    if extraneous:
-                        report.add('Extraneous __future__ imports: {}'.format(
-                            ', '.join(sorted(extraneous))
-                        ))
 
     def _check_imported_entities(self, report, import_node):
         last = None

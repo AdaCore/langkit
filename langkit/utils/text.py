@@ -2,8 +2,6 @@
 Various helpers to format text.
 """
 
-from __future__ import absolute_import, division, print_function
-
 
 def append_paragraph(text, paragraph):
     """

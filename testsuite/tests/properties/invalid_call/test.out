@@ -2,18 +2,18 @@
 Code generation was successful
 
 == Incorrect call code 1 ==
-File "test.py", line 24, in BarNode.prop
-  line 31, in access to .non_exisisting_prop
+File "test.py", line 22, in BarNode.prop
+  line 29, in access to .non_exisisting_prop
     Error: Type BarNode has no 'non_exisisting_prop' field or property
 
 == Incorrect call code 2 ==
-File "test.py", line 24, in BarNode.prop
-  line 32, in access to .prop_2
+File "test.py", line 22, in BarNode.prop
+  line 30, in access to .prop_2
     Error: The last argument is unexpected
 
 == Incorrect call code 3 ==
-File "test.py", line 24, in BarNode.prop
-  line 33, in No expression
+File "test.py", line 22, in BarNode.prop
+  line 31, in No expression
     Error: Invalid "x" actual (#1) for BarNode.prop_2: expected Int but got FooNode
 
 Done

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Int
 from langkit.expressions import Property

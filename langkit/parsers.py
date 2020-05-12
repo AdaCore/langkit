@@ -20,8 +20,6 @@ declared for if_stmt, and for the `expression` and `statements` rule, that are
 not defined in the example, but relied on explicitly.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import OrderedDict
 from contextlib import contextmanager
 import difflib

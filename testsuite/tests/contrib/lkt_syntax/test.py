@@ -3,8 +3,6 @@ Test that covers syntactic problems uncovered during transition to concrete
 syntax, that were not covered by the existing testsuite.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Struct, T, UserField
 from langkit.expressions import (
     ArrayLiteral, CharacterLiteral as Char, Let, Self, String, Var, ignore,

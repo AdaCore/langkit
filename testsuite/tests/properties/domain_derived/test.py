@@ -3,8 +3,6 @@ Check that creating domains with arrays of non-root entity types generates
 valid and correctly running code.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field, T, UserField
 from langkit.envs import EnvSpec, add_to_env_kv
 from langkit.expressions import Self, langkit_property

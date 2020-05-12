@@ -2,8 +2,6 @@
 Test the Kind_In node iterator predicate.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, AbstractField, Field, NullField, T, abstract
 
 from utils import build_and_run

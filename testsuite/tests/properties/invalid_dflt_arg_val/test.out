@@ -1,63 +1,63 @@
 == Bad tuple ==
-File "test.py", line 24, in Example.p
+File "test.py", line 22, in Example.p
     Error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
 
 == Bad expr ==
-File "test.py", line 24, in Example.p
+File "test.py", line 22, in Example.p
     Error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
 
 == Bad type ==
-File "test.py", line 24, in Example.p
-  line 27, in Literal expression
+File "test.py", line 22, in Example.p
+  line 25, in Literal expression
     Error: Expected type Bool, got Int
 
 == Bad Self use ==
-File "test.py", line 24, in Example.p
+File "test.py", line 22, in Example.p
 File "<frozen importlib._bootstrap>", line 219, in SelfVariable expression
     Error: Self is not bound in this context
 
 == Bad dynamic variable use ==
-File "test.py", line 24, in Example.p
-  line 9, in DynamicVariable expression
+File "test.py", line 22, in Example.p
+  line 7, in DynamicVariable expression
     Error: Dynamic variables cannot be bound in this context
 
 == Missing argument (1) ==
-File "test.py", line 25, in Example.calling
-  line 41, in access to .p
+File "test.py", line 23, in Example.calling
+  line 39, in access to .p
     Error: Missing actual for argument a
 
 == Missing argument (2) ==
-File "test.py", line 25, in Example.calling
-  line 44, in access to .p
+File "test.py", line 23, in Example.calling
+  line 42, in access to .p
     Error: Missing actual for argument a
 
 == Bad keyword argument ==
-File "test.py", line 25, in Example.calling
-  line 27, in Literal expression
+File "test.py", line 23, in Example.calling
+  line 25, in Literal expression
     Error: Invalid "a" actual for Example.p: expected Bool but got Int
 
 == Too many arguments (1) ==
-File "test.py", line 25, in Example.calling
-  line 52, in access to .p
+File "test.py", line 23, in Example.calling
+  line 50, in access to .p
     Error: The last argument is unexpected
 
 == Too many arguments (2) ==
-File "test.py", line 25, in Example.calling
-  line 55, in access to .p
+File "test.py", line 23, in Example.calling
+  line 53, in access to .p
     Error: The last argument is unexpected
 
 == Too many arguments (3) ==
-File "test.py", line 25, in Example.calling
-  line 58, in access to .p
+File "test.py", line 23, in Example.calling
+  line 56, in access to .p
     Error: Invalid keyword arguments: c
 
 == Too many arguments (4) ==
-File "test.py", line 25, in Example.calling
-  line 61, in access to .p
+File "test.py", line 23, in Example.calling
+  line 59, in access to .p
     Error: The last 2 arguments are unexpected
 
 == Non-literal argument ==
-File "test.py", line 24, in Example.p
+File "test.py", line 22, in Example.p
     Error: Default value must be a compile-time known constant (got <Eq>)
 
 Done

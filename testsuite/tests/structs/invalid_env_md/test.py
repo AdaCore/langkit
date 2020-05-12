@@ -2,8 +2,6 @@
 Test that invalid environment metadata structs are properly rejected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import langkit
 from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata

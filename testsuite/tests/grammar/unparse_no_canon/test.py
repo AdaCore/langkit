@@ -4,8 +4,6 @@ cannonical parser that contains all information for unparsing. As a
 consequence, this also checks that unparsers are properly combined.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Field
 
 from utils import build_and_run

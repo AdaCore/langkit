@@ -2,8 +2,6 @@
 Test that invalid uses of abstract fields are duly diagnosed and rejected.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from contextlib import contextmanager
 
 import langkit

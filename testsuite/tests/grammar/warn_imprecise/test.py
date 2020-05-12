@@ -2,8 +2,6 @@
 Test that warnings about imprecise type annotations for syntax fields.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, AbstractField, Field, T, abstract
 
 from utils import emit_and_print_errors

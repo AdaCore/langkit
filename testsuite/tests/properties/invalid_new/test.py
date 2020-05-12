@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 from langkit.dsl import ASTNode, Int, Struct, UserField
 from langkit.expressions import (Literal, New, No, Property, Self, Var,
                                  langkit_property)

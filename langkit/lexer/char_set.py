@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os.path
 import unicodedata
 
@@ -368,8 +366,6 @@ def compute_unicode_categories_char_sets():
             sets[subcat].add(char)
 
     lines = [
-        'from __future__ import absolute_import, division, print_function',
-        '',
         'from langkit.lexer.char_set import CharSet',
         '',
         '# Character sets for Unicode general categories. The following',
