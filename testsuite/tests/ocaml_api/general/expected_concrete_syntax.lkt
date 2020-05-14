@@ -36,6 +36,8 @@ grammar foo_grammar {
 }
 
 class Example : FooNode {
+
+    @export fun singleton (): SomeStruct = SomeStruct(examples=[self])
 }
 
 ## This list node can contain one of the following nodes:
@@ -71,4 +73,8 @@ class Var : FooNode {
 
 struct FooNodeStruct {
     node : FooNode
+}
+
+struct SomeStruct {
+    examples : Array[Example]
 }

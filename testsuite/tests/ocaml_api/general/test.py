@@ -10,7 +10,8 @@ from langkit.dsl import (
     has_abstract_list
 )
 from langkit.expressions import (
-    ArrayLiteral, CharacterLiteral, Entity, If, No, Property, langkit_property
+    ArrayLiteral, CharacterLiteral, Entity, If, New, No, Property,
+    langkit_property
 )
 
 from utils import build_and_run
@@ -24,6 +25,10 @@ class Color(Enum):
 
 class FooNodeStruct(Struct):
     node = UserField(T.FooNode.entity)
+
+
+class SomeStruct(Struct):
+    examples = UserField(T.Example.entity.array)
 
 
 @has_abstract_list
@@ -79,7 +84,10 @@ class Sequence(FooNode.list):
 
 
 class Example(FooNode):
-    pass
+
+    @langkit_property(public=True)
+    def singleton():
+        return New(SomeStruct, examples=[Entity])
 
 
 class Null(FooNode):

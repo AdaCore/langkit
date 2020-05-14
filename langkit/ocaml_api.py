@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import langkit.compiled_types as ct
-from langkit.compiled_types import T
+from langkit.compiled_types import T, resolve_type
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type
 
@@ -18,17 +18,45 @@ class OCamlAPISettings(AbstractAPISettings):
         """
         pass
 
+    def actual_c_type(self, typ):
+        """
+        Return the C type used to encode ``typ`` values.
+
+        In the C/OCaml binding layer, some types are encoded as other types.
+        For instance: all entities are exposed as the root entity type.
+
+        :param CompiledType typ: Type to encode in the C/OCaml binding layer.
+        :rtype: CompiledType
+        """
+        # AnalysisContextType is a placeholder, not a real CompiledType
+        if isinstance(typ, self.AnalysisContextType):
+            return typ
+
+        if typ.is_entity_type:
+            # Expose all entity types as the root entity type
+            result = T.entity
+        elif typ.is_array_type:
+            result = self.actual_c_type(typ.element_type).array
+        else:
+            result = typ
+
+        # Make sure we get a CompiledType instance
+        return resolve_type(result)
+
     def add_dep(self, typ, dep):
         """
         Adds the dependency dep to the type typ in the type_graph.
         """
-        if typ not in self.type_graph:
-            self.type_graph[typ] = []
+        # Add a dependency both to the actual C type (for C structs order) and
+        # to the given type (for OCaml modules order).
+        for dep in [dep, self.actual_c_type(dep)]:
+            # Make sure that both "dep" and "typ" are both valid vertexes
+            self.type_graph.setdefault(dep, [])
+            deps = self.type_graph.setdefault(typ, [])
 
-        if dep not in self.type_graph:
-            self.type_graph[dep] = []
-
-        self.type_graph[typ].append(dep)
+            # Append the typ -> dep vertex if not already present
+            if dep not in deps:
+                deps.append(dep)
 
     def __init__(self, ctx, c_api_settings):
         self.context = ctx
@@ -510,14 +538,7 @@ class OCamlAPISettings(AbstractAPISettings):
         :param CompiledType typ: The type we want to register in the graph.
         """
         for f in typ.get_fields(lambda t: not self.is_empty_type(t.type)):
-            if f.type.is_entity_type:
-                # For an entity type, we append the root entity since it is
-                # the only struct generated.
-                field_type = T.root_node.entity
-            else:
-                field_type = f.type
-
-            self.add_dep(typ, field_type)
+            self.add_dep(typ, f.type)
 
     def register_array_type(self, typ):
         """
@@ -526,10 +547,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param CompiledType typ: The type we want to register in the graph.
         """
-        if typ.element_type.is_entity_type:
-            self.add_dep(typ, T.root_node.entity)
-        else:
-            self.add_dep(typ, typ.element_type)
+        self.add_dep(typ, typ.element_type)
 
     def ordered_types(self):
         """
