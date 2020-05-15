@@ -10,7 +10,6 @@ package body Liblktlang.Implementation.Extensions is
    Prelude_Content : String :=
      "@builtin struct Int {}" & ASCII.LF &
      "@builtin struct BigInt {}" & ASCII.LF &
-     "@builtin struct String {}" & ASCII.LF &
      "@builtin struct Symbol {}" & ASCII.LF &
      "@builtin struct Regexp {}" & ASCII.LF &
      "@builtin enum Bool (false, true) {}" & ASCII.LF &
@@ -31,6 +30,9 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin generic[T] struct ASTList " &
      "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
      "}" & ASCII.LF &
+     "@builting struct Char {}" & ASCII.LF &
+     "@builtin struct String " &
+     "implements Sized, Indexable[Char], Iterator[Char] {}" & ASCII.LF &
      "";
 
    ----------------------------------
