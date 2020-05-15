@@ -992,7 +992,7 @@ def emit_expr(expr, **ctx):
         if not len(expr.elements):
             return '[]'
         elif isinstance(expr.elements[0], CharacterLiteral):
-            return repr("".join(e.literal for e in expr.elements))
+            return json.dumps("".join(e.literal for e in expr.elements))
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
     elif isinstance(expr, CharacterLiteral):
         return repr(expr.literal)
