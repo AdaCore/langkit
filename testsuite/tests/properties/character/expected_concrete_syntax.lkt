@@ -15,8 +15,7 @@ class Example : FooNode {
 
     @export fun identity (c : CharacterType): CharacterType = c
 
-    @export fun double (c : CharacterType): Array[CharacterType] = [c, c]
+    @export fun double (c : CharacterType): String = [c, c]
 
-    @export fun text_identity (s : Array[CharacterType]): Array[CharacterType] =
-    s
+    @export fun text_identity (s : String): String = s
 }

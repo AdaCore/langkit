@@ -13,6 +13,6 @@ class Example : FooNode {
 }
 
 struct KV {
-    key : Array[CharacterType]
+    key : String
     value : BigInt
 }
