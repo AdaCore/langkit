@@ -32,7 +32,7 @@ class Example : FooNode {
 
             b
         }.find((v) => v = 1);
-        val c = 'hello'.find((c) => c = 'h');
+        val c = "hello".find((c) => c = 'h');
 
         a
     }
