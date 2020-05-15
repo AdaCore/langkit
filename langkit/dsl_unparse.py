@@ -1096,6 +1096,8 @@ def type_name(type):
         else:
             return type.raw_name.camel
     elif type.is_array_type:
+        if type.element_type.name.camel == 'CharacterType':
+            return "String"
         return "Array[{}]".format(type_name(type.element_type))
     elif type.is_entity_type:
         return type_name(type.element_type)
