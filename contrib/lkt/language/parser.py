@@ -426,7 +426,7 @@ class Import(LKNode):
     """
     Statement to import another source file.
     """
-    name = Field(type=T.RefId)
+    name = Field(type=T.ModuleRefId)
 
     @langkit_property(public=True)
     def referenced_unit():
@@ -965,12 +965,16 @@ class RefId(Id):
 
     @langkit_property()
     def referenced_decl():
-        lk = Var(If(Entity.dot_expr_if_suffix.is_null, LK.recursive, LK.flat))
-        return (
-            Entity.scope.get_first(Self.symbol, lookup=lk).cast(T.Decl).then(
-                lambda d: SemanticResult.new(result_ref=d, node=Self),
-                default_val=Self.ref_not_found_error
+
+        return Entity.scope.get_first(
+            Self.symbol, lookup=If(
+                Entity.dot_expr_if_suffix.is_null,
+                LK.recursive,
+                LK.flat
             )
+        ).cast(T.Decl).then(
+            lambda d: SemanticResult.new(result_ref=d, node=Self),
+            default_val=Self.ref_not_found_error
         )
 
     expr_context_free_type = Property(
@@ -1009,6 +1013,17 @@ class RefId(Id):
             S("Cannot find entity `")
             .concat(Self.text).concat(S("` in this scope")),
         )
+
+
+class ModuleRefId(RefId):
+    """
+    Id referencing a langkit module.
+    """
+    # TODO: Being able to cross-reference modules seems like a good ability,
+    # but for the moment they don't fit in the framework, because they're not
+    # decls.
+    referenced_decl = Property(No(SemanticResult))
+    expr_type = Property(No(SemanticResult))
 
 
 class TokenLit(GrammarExpr):
@@ -2626,7 +2641,7 @@ lkt_grammar.add_rules(
     ref_id=RefId(Lex.Identifier),
     def_id=DefId(Lex.Identifier),
 
-    import_stmt=Import("import", G.ref_id),
+    import_stmt=Import("import", ModuleRefId(Lex.Identifier)),
     imports=List(G.import_stmt, empty_valid=True),
 
     doc_comment=DocComment(Lex.DocComment),
