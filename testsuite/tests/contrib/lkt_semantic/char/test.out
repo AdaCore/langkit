@@ -1,0 +1,30 @@
+Resolving test.lkt
+==================
+Id   <RefId "String" test.lkt:1:9-1:15>
+     references <StructDecl "String" __prelude:21:10-21:76>
+
+Expr <StringLit test.lkt:1:18-1:23>
+     has type <StructDecl "String" __prelude:21:10-21:76>
+
+Id   <RefId "Char" test.lkt:2:9-2:13>
+     references <StructDecl "Char" __prelude:20:11-20:25>
+
+test.lkt:2:16: error: Mismatched types: expected `Char`, got a string literal
+1 | val b : Char = 'l'
+  |                ^^^
+
+Id   <RefId "Char" test.lkt:3:9-3:13>
+     references <StructDecl "Char" __prelude:20:11-20:25>
+
+Id   <RefId "a" test.lkt:3:16-3:17>
+     references <ValDecl "a" test.lkt:1:1-1:23>
+
+Expr <RefId "a" test.lkt:3:16-3:17>
+     has type <StructDecl "String" __prelude:21:10-21:76>
+
+Expr <NumLit test.lkt:3:19-3:20>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CallExpr test.lkt:3:16-3:21>
+     has type <StructDecl "Char" __prelude:20:11-20:25>
+
