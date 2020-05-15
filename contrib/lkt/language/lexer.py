@@ -75,6 +75,7 @@ class Token(LexerToken):
     # Literals
     String = WithText()
     PString = WithText()
+    Char = WithText()
     DocComment = WithText()
     Number = WithText()
 
@@ -83,7 +84,7 @@ lkt_lexer = Lexer(Token)
 
 lkt_lexer.add_patterns(
     ("STRING_DBQ", r'\"(\\\"|[^\n\"])*\"'),
-    ("STRING_SQ",  r"'(\\'|[^\n'])*'"),
+    ("CHAR_LIT",  r"'(\\'|[^\n'])'"),
 )
 
 
@@ -158,9 +159,10 @@ lkt_lexer.add_rules(
     # Numbers
     (Pattern('[0-9]+'),    Token.Number),
 
-    # Strings
-    (Pattern('{STRING_SQ}|{STRING_DBQ}'), Token.String),
-    (Pattern('[a-zA-Z]{STRING_DBQ}|[a-zA-Z]{STRING_DBQ}'), Token.PString),
+    # Strings & chars
+    (Pattern('{STRING_DBQ}'),         Token.String),
+    (Pattern('[a-zA-Z]{STRING_DBQ}'), Token.PString),
+    (Pattern('{CHAR_LIT}'),           Token.Char),
 
     # Comments
     (Pattern(r"#(.?)+"),   Token.Comment),

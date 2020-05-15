@@ -14,6 +14,7 @@ syn keyword langkitLiteral false true lfalse ltrue
 syn keyword langkitQualifier parse memoized public enum qualifier
 syn keyword langkitOperator new entity null or and dont_skip
 syn region  langkitString  start=+"+ skip=+\\"+ end=+"+
+syn region  langkitChar  start=+'+ skip=+\\"+ end=+'+
 syn match   langkitToken   "@\s*\h\%(\w\|\.\)*" display
 syn match   langkitGrammarRule   "\%(\w\|_\)\+\s*\(<-\)\@=" display
 syn match   langkitLiteral "\d\+" display
@@ -30,6 +31,7 @@ syn match   langkitOperator "|>"
 hi def link langkitKeyword     Statement
 hi def link langkitQualifier   Identifier
 hi def link langkitString      String
+hi def link langkitChar        String
 hi def link langkitOperator    Special
 hi def link langkitFunction	   Define
 hi def link langkitEntity	   Function

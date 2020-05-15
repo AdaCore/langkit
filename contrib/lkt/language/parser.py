@@ -110,6 +110,11 @@ class LKNode(ASTNode):
     def get_builtin_type(entity_name=T.Symbol):
         return Self.root_get(entity_name).cast(T.TypeDecl)
 
+    char_type = Property(
+        Self.get_builtin_type('Char'), public=True,
+        doc="Unit method. Return the character builtin type."
+    )
+
     int_type = Property(
         Self.get_builtin_type('Int'), public=True,
         doc="Unit method. Return the integer builtin type."
@@ -2569,6 +2574,19 @@ class StringLit(Lit):
     invalid_expected_type_error_name = Property(S("a string literal"))
 
 
+class CharLit(Lit):
+    """
+    Character literal expression.
+    """
+    token_node = True
+
+    @langkit_property()
+    def expected_type_predicate(expected_type=T.TypeDecl.entity):
+        return expected_type == Self.char_type
+
+    invalid_expected_type_error_name = Property(S("a character literal"))
+
+
 class NumLit(Lit):
     """
     Number literal expression.
@@ -2905,6 +2923,7 @@ lkt_grammar.add_rules(
 
     num_lit=NumLit(Lex.Number),
     string_lit=StringLit(GOr(Lex.String, Lex.PString)),
+    char_lit=CharLit(Lex.Char),
 
     if_expr=IfExpr(
         "if", G.expr, "then", G.expr,
@@ -2948,6 +2967,7 @@ lkt_grammar.add_rules(
         G.block,
         G.num_lit,
         G.string_lit,
+        G.char_lit,
         G.array_literal,
     ),
 
