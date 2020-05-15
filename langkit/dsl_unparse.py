@@ -661,21 +661,27 @@ def emit_expr(expr, **ctx):
 
     if isinstance(expr, Literal):
         return str(expr.literal).lower()
+
     elif isinstance(expr, SymbolLiteral):
         return json.dumps(expr.name)
+
     elif isinstance(expr, PropertyError):
         return "raise PropertyError({})".format(
             repr(expr.message) if expr.message else ""
         )
+
     elif isinstance(expr, IsA):
         return "{} is {}".format(
             ee_pexpr(expr.expr),
             "{}".format(" | ".join(type_name(t) for t in expr.astnodes))
         )
+
     elif isinstance(expr, LogicTrue):
         return "%true"
+
     elif isinstance(expr, LogicFalse):
         return "%false"
+
     elif is_a("bind"):
 
         bind = "bind {} = {};$hl".format(
@@ -685,6 +691,7 @@ def emit_expr(expr, **ctx):
         return "{{$i$hl{}$hl{}$hl$d}}".format(
             bind, ee(expr.expr_2)
         )
+
     elif isinstance(expr, Let):
         if isinstance(expr, Block):
             return emit_let(expr)
@@ -692,6 +699,7 @@ def emit_expr(expr, **ctx):
             with walker.call('Let'):
                 with walker.arg(0):
                     return walker.emit_comments() + emit_let(expr)
+
     elif isinstance(expr, Map):
         op_name = expr.kind
         args = []
@@ -780,6 +788,7 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, All):
         return ee(expr.equation_array, overload_coll_name="logic_all")
+
     elif isinstance(expr, Any):
         return ee(expr.equation_array, overload_coll_name="logic_any")
 
@@ -911,8 +920,10 @@ def emit_expr(expr, **ctx):
             return ee(expr.expr_0, overload_coll_name="find")
 
         return "{}?({})".format(ee(expr.expr_0), ee(expr.expr_1))
+
     elif is_a("at_or_raise"):
         return "{}({})".format(ee(expr.expr_0), ee(expr.expr_1))
+
     elif isinstance(expr, FieldAccess):
         args = []
         has_any_commented_arg = False
@@ -950,23 +961,29 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, EntityVariable):
         return "self"
+
     elif isinstance(expr, SelfVariable):
         return "node"
+
     elif isinstance(expr, DynamicVariable):
         return expr.argument_name.lower
+
     elif isinstance(expr, AbstractVariable):
         if then_underscore_var:
             if id(then_underscore_var) == id(expr):
                 return ""
         return var_name(expr)
+
     elif isinstance(expr, No):
         return "null".format(type_name(expr.expr_type))
         # TODO: Emit valid null values for other types, eg. [] for arrays.
+
     elif isinstance(expr, CollectionSingleton):
         if then_underscore_var:
             return emit_method_call(ee(expr.expr), "singleton")
         else:
             return "[{}]".format(ee(expr.expr))
+
     elif isinstance(expr, New):
         # The order of arguments in the source is lost during the call to New's
         # constructor. Sort arguments by field declaration order to get the
@@ -982,20 +999,24 @@ def emit_expr(expr, **ctx):
             emit_paren(", ".join("{}={}".format(unparsed_name(k), ee(v))
                                  for k, v in field_exprs))
         )
+
     elif isinstance(expr, StructUpdate):
         return '{}.update({})'.format(
             ee(expr.expr),
             ', '.join('{}={}'.format(name, ee(field_expr))
                       for name, field_expr in sorted(expr.assocs.items()))
         )
+
     elif isinstance(expr, ArrayLiteral):
         if not len(expr.elements):
             return '[]'
         elif isinstance(expr.elements[0], CharacterLiteral):
             return json.dumps("".join(e.literal for e in expr.elements))
         return "[{}]".format(", ".join(ee(el) for el in expr.elements))
+
     elif isinstance(expr, CharacterLiteral):
         return repr(expr.literal)
+
     elif isinstance(expr, BigIntLiteral):
         return 'BigInt({})'.format(str(expr.expr)
                                    if isinstance(expr.expr, int) else
@@ -1006,19 +1027,23 @@ def emit_expr(expr, **ctx):
             for name, value in
             list(sorted(expr.cat_map.items())) + [("others", expr.default)]
         ))
+
     elif isinstance(expr, Predicate):
         return "%predicate({})".format(", ".join(keep([
             fqn(expr.pred_property),
             ee(expr.exprs[0]),
         ] + [ee(e) for e in expr.exprs[1:]])))
+
     elif is_a("domain"):
         return "%domain({}, {})".format(ee(expr.expr_0), ee(expr.expr_1))
+
     elif isinstance(expr, Bind):
         return "%eq({})".format(", ".join(keep([
             ee(expr.from_expr), ee(expr.to_expr),
             "eq_prop={}".format(fqn(expr.eq_prop)) if expr.eq_prop else ""
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
         ])))
+
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)
