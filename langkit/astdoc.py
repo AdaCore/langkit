@@ -89,7 +89,7 @@ def format_doc(entity):
 
         return '<div class="doc">{}</div>'.format(formatted_doc)
     else:
-        return '<div class="disabled">No documentation</div>'.format(doc)
+        return '<div class="disabled">No documentation</div>'
 
 
 def print_struct(context, file, struct):
