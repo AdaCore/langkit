@@ -1711,7 +1711,28 @@ class CharacterLiteralExpr(BindableLiteralExpr):
         return self.ada_value
 
     def render_python_constant(self):
-        return repr(self.value)
+        # Stick to ASCII in generated sources, so that Python2 interpreters do
+        # not emit warnings when processing the generated Python code.
+        char = self.value
+        num = ord(char)
+
+        # Escape metacharacters
+        if char in ("'", '\\'):
+            char = '\\' + char
+
+        # Forward other printable ASCII codepoints as-is
+        elif 32 <= num <= 127:
+            pass
+
+        # Use the appropriate escape sequence otherwise
+        elif num < 2 ** 8:
+            char = '\\x{:02x}'.format(num)
+        elif num < 2 ** 16:
+            char = '\\u{:04x}'.format(num)
+        else:
+            char = '\\U{:08x}'.format(num)
+
+        return "'{}'".format(char)
 
     def render_ocaml_constant(self):
         # In OCaml bindings, a character is represented as a utf-8 string, not

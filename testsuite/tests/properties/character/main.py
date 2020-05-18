@@ -29,10 +29,10 @@ def unirepr(value):
         return repr(value)
 
 
-print(".get_a() = {}".format(unirepr(n.p_get_a())))
-print(".get_eacute() = {}".format(unirepr(n.p_get_eacute())))
+print('.get_a() = {}'.format(unirepr(n.p_get_a())))
+print('.get_eacute() = {}'.format(unirepr(n.p_get_eacute())))
 for arg in (b'a', u'\u03c0'):
-    print(".identity({}) = {}".format(unirepr(arg),
+    print('.identity({}) = {}'.format(unirepr(arg),
                                       unirepr(n.p_identity(arg))))
 
 for obj in (1, b'aa', u'aa'):
