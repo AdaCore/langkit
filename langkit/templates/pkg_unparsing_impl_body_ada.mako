@@ -987,11 +987,11 @@ package body ${ada_lib_name}.Unparsing_Implementation is
                      fields += [('Kind', 'Token')]
 
                   else:
-                     ## This node is synthetic, so it cannot be unparsed:
-                     ## provide a dummy entry.
+                     ## This node is synthetic/an error node, so it cannot be
+                     ## unparsed: provide a dummy entry.
                      assert (
-                        (node.abstract or node.synthetic) and
-                        unparser is None
+                        (node.abstract or node.synthetic or node.is_error_node)
+                        and unparser is None
                      ), ('Unexpected unparser for {}: {}'
                          .format(node.dsl_name, unparser))
                      fields += [('Kind', 'Token')]

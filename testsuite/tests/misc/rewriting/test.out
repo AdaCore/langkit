@@ -72,6 +72,10 @@ revert.adb: Done.
 == rewrite.adb ==
 Try assigning a child that is already tied to a tree...
    Got a precondition failure
+Try creating an error node (Create_Node)...
+   Got a precondition failure
+Try creating an error node (Create_Regular_Node)...
+   Got a precondition failure
 
 Replace the middle definition (b) with a clone of the last definition (c)
 

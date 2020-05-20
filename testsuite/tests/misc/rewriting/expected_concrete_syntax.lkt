@@ -24,6 +24,9 @@ class Def : FooNode {
     @parse_field expr : Expr
 }
 
+class ErrorDef : FooNode implements ErrorNode {
+}
+
 @abstract class Expr : FooNode {
 }
 
