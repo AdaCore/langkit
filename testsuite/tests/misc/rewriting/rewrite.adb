@@ -85,19 +85,44 @@ begin
    N := Handle (Root (U1));
 
    declare
-      procedure Proc;
+      procedure Set_Tied_Child;
+      procedure Create_Error_Node;
+      procedure Create_Regular_Error_Node;
 
       ----------
       -- Proc --
       ----------
 
-      procedure Proc is
+      procedure Set_Tied_Child is
       begin
          Set_Child (N, 2, Child (N, 3));
-      end Proc;
+      end Set_Tied_Child;
+
+      -----------------------
+      -- Create_Error_Node --
+      -----------------------
+
+      procedure Create_Error_Node is
+      begin
+         N := Create_Node (RH, Foo_Error_Def);
+      end Create_Error_Node;
+
+      -------------------------------
+      -- Create_Regular_Error_Node --
+      -------------------------------
+
+      procedure Create_Regular_Error_Node is
+      begin
+         N := Create_Regular_Node (RH, Foo_Error_Def, (1 .. 0 => <>));
+      end Create_Regular_Error_Node;
+
    begin
       Try ("Try assigning a child that is already tied to a tree",
-           Proc'Access);
+           Set_Tied_Child'Access);
+      Try ("Try creating an error node (Create_Node)",
+           Create_Error_Node'Access);
+      Try ("Try creating an error node (Create_Regular_Node)",
+           Create_Regular_Error_Node'Access);
 
       New_Line;
       Put_Line ("Replace the middle definition (b) with a clone of the last"

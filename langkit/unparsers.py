@@ -1104,9 +1104,10 @@ class Unparsers:
         for node_type in CompiledTypeRepo.astnode_types:
             with node_type.diagnostic_context:
                 WarningSet.unused_node_type.warn_if(
-                    node_type not in self.nodes_to_rules.keys() and
-                    not node_type.abstract and
-                    not node_type.synthetic,
+                    node_type not in self.nodes_to_rules.keys()
+                    and not node_type.abstract
+                    and not node_type.synthetic
+                    and not node_type.is_error_node,
                     '{} has no parser, and is marked neither abstract nor'
                     ' synthetic'.format(node_type.dsl_name)
                 )
@@ -1115,31 +1116,34 @@ class Unparsers:
         """
         Pass to finalize the preparation of unparsers code generation.
         """
-        if self.context.generate_unparser:
-            ignore_tokens = []
-            for rule_assoc in self.context.lexer.rules:
-                if isinstance(rule_assoc.action, Ignore):
-                    ignore_tokens.append(rule_assoc.action)
-            check_source_language(
-                not ignore_tokens,
-                'Ignore() tokens are incompatible with unparsers.'
-                ' Consider using WithTrivia() instead.'
-            )
+        if not self.context.generate_unparser:
+            return
 
-        # Combine all unparsers for each node, checking that they are
-        # consistent. Iterate on all nodes first to get deterministic
-        # iteration.
+        ignore_tokens = []
+        for rule_assoc in self.context.lexer.rules:
+            if isinstance(rule_assoc.action, Ignore):
+                ignore_tokens.append(rule_assoc.action)
+        check_source_language(
+            not ignore_tokens,
+            'Ignore() tokens are incompatible with unparsers.'
+            ' Consider using WithTrivia() instead.'
+        )
+
+        # Combine all unparsers for each node, except synthetic/error/abstract
+        # nodes. Check that they are consistent. Iterate on all nodes first to
+        # get deterministic iteration.
         for node in self.context.astnode_types:
-            unparsers = self.unparsers[node]
-            if not unparsers:
+            if node.abstract or node.synthetic or node.is_error_node:
                 continue
 
-            # TODO: previous validation passes are supposed to ensure the
-            # assertion that follows, right?
-            unparsers = [u for u in unparsers
+            # Make sure we had at least one non-null unparser for every node
+            unparsers = [u for u in self.unparsers[node]
                          if not isinstance(u, NullNodeUnparser)]
-            assert unparsers, ('No non-null unparser for non-synthetic node:'
-                               ' {}'.format(node.dsl_name))
+            check_source_language(
+                unparsers,
+                'No non-null unparser for non-synthetic node: {}'
+                .format(node.dsl_name)
+            )
 
             combined = unparsers.pop(0)
             for unparser in unparsers:

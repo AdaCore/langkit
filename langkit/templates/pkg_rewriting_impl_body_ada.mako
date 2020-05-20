@@ -113,6 +113,13 @@ package body ${ada_lib_name}.Rewriting_Implementation is
          "Expected a token node. Got " & ${kind}'Image);
    </%def>
 
+   <%def name="pre_check_is_not_error_kind(kind)">
+      ## Check that the given node kind corresponds to a token node kind
+      Pre_Check
+        (not Is_Error_Node (${kind}),
+         "Expected a non-error node. Got " & ${kind}'Image);
+   </%def>
+
    <%def name="pre_check_is_list_kind(kind)">
       ## Check that the given node kind corresponds to a list node kind
       Pre_Check
@@ -941,6 +948,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
       Kind   : ${T.node_kind}) return Node_Rewriting_Handle is
    begin
       ${pre_check_rw_handle('Handle')}
+      ${pre_check_is_not_error_kind('Kind')}
 
       if Is_Token_Node (Kind) then
          return Create_Token_Node (Handle, Kind, "");
@@ -989,6 +997,7 @@ package body ${ada_lib_name}.Rewriting_Implementation is
    begin
       ${pre_check_rw_handle('Handle')}
       ${pre_check_is_not_token_kind('Kind')}
+      ${pre_check_is_not_error_kind('Kind')}
       for One_Child of Children loop
          ${pre_check_null_or_untied('One_Child')}
       end loop;

@@ -15,6 +15,10 @@ class Name(FooNode):
     token_node = True
 
 
+class ErrorDef(FooNode):
+    error_node = True
+
+
 class Def(FooNode):
     name = Field()
     args = Field()
