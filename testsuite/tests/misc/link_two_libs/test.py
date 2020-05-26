@@ -6,21 +6,28 @@ import os.path
 import subprocess
 import sys
 
+from e3.os.fs import which
+
 import langkit
 
 from utils import add_gpr_path
-
-
-def python(script, *args):
-    subprocess.check_call([sys.executable, script] + list(args))
 
 
 scripts_dir = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(langkit.__file__))),
     'scripts')
 
-create_project_py = os.path.join(scripts_dir, 'create-project.py')
-build_lksp = os.path.join(scripts_dir, 'build-langkit_support.py')
+
+def python(script, *args):
+    subprocess.check_call([sys.executable, script] + list(args))
+
+
+def locate_script(name):
+    return which(name, default=os.path.join(scripts_dir, name))
+
+
+create_project_py = locate_script('create-project.py')
+build_lksp = locate_script('build-langkit_support.py')
 
 
 # Build Langkit_Support and make it available to gprbuild
