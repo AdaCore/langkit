@@ -95,6 +95,10 @@ gcc -v
 # Install Langkit itself and its Python dependencies
 pip install .
 
+# Install the testsuite framework
+pip install git+https://github.com/AdaCore/e3-core.git#egg=e3-core
+pip install git+https://github.com/AdaCore/e3-testsuite.git#egg=e3-testsuite
+
 # Also install flake8 to have complete style checks
 pip install flake8
 
