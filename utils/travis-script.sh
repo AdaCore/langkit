@@ -25,5 +25,5 @@ gprbuild -v
     --disable-ocaml \
     | tee TESTSUITE_OUT
 
-# Exit with an error if there is a FAILED line in TESTSUITE_OUT
-! grep "FAILED   " TESTSUITE_OUT > /dev/null
+# Exit with an error if there is a FAIL or ERROR line in TESTSUITE_OUT
+! grep "^INFO \+\(FAIL\|ERROR\) " TESTSUITE_OUT > /dev/null
