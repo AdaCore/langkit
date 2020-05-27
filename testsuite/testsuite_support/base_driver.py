@@ -2,7 +2,7 @@ import os
 import os.path
 
 from e3.testsuite.driver.classic import TestAbortWithError, TestSkip
-from e3.testsuite.driver.diff import DiffTestDriver
+from e3.testsuite.driver.diff import DiffTestDriver, PatternSubstitute
 
 from testsuite_support.valgrind import valgrind_cmd
 
@@ -20,6 +20,14 @@ class BaseDriver(DiffTestDriver):
             self.env.options.disable_ocaml
         ):
             raise TestSkip('Test requires OCaml')
+
+    @property
+    def output_refiners(self):
+        # RA22-015: Line numbers for Python DSL diagnostics vary depending on
+        # Python versions, so hide actual line numbers.
+        return super().output_refiners + [
+            PatternSubstitute(r' line \d+, ', ' line XXX, ')
+        ]
 
     def read_file(self, filename):
         """Return the content of `filename`."""
