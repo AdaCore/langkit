@@ -1183,6 +1183,7 @@ class ManageScript(object):
         for lib in libs:
             add_path('LIBRARY_PATH', lib_subdir(lib, 'static'))
             add_path('LD_LIBRARY_PATH', lib_subdir(lib, 'relocatable'))
+            add_path('DYLD_LIBRARY_PATH', lib_subdir(lib, 'relocatable'))
             add_path('PATH', lib_subdir(lib, 'relocatable'))
 
         add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
