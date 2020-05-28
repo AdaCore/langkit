@@ -43,7 +43,9 @@ def write_source_file(file_path, source, post_process=None):
         if context.verbosity.debug:
             printcol('Rewriting stale source: {}'.format(file_path),
                      Colors.OKBLUE)
-        with open(file_path, 'w', encoding='utf-8') as f:
+        # Emit all source files as UTF-8 with "\n" line endings, no matter the
+        # current platform.
+        with open(file_path, 'w', encoding='utf-8', newline='') as f:
             f.write(source)
         return True
     return False
