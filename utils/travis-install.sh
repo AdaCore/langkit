@@ -103,4 +103,4 @@ pip install git+https://github.com/AdaCore/e3-testsuite.git#egg=e3-testsuite
 pip install flake8
 
 # RA22-015: Install libpythonlang to make it available to dsl_unparse
-./scripts/manage.sh make
+./manage.py make
