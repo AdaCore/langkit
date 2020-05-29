@@ -4,7 +4,7 @@ import os.path
 from e3.testsuite.driver.classic import TestAbortWithError, TestSkip
 from e3.testsuite.driver.diff import DiffTestDriver, PatternSubstitute
 
-from testsuite_support.valgrind import valgrind_cmd
+from drivers.valgrind import valgrind_cmd
 
 
 class BaseDriver(DiffTestDriver):

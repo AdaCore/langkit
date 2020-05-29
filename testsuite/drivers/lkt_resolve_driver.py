@@ -1,5 +1,6 @@
 from os import path as P
-from testsuite_support.python_driver import PythonDriver
+
+from drivers.python_driver import PythonDriver
 
 
 class LktResolveDriver(PythonDriver):

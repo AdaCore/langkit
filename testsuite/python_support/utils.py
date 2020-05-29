@@ -10,7 +10,7 @@ from langkit.compile_context import CompileCtx, UnparseScript
 from langkit.diagnostics import DiagnosticError, Diagnostics, WarningSet
 from langkit.libmanage import ManageScript
 
-from testsuite_support.valgrind import valgrind_cmd
+from drivers.valgrind import valgrind_cmd
 
 
 Diagnostics.blacklisted_paths.append(P.dirname(P.abspath(__file__)))

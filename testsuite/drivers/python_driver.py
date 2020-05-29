@@ -2,8 +2,7 @@ import os
 import os.path
 import sys
 
-import testsuite_support
-from testsuite_support.base_driver import BaseDriver
+from drivers.base_driver import BaseDriver
 
 
 class PythonDriver(BaseDriver):
@@ -51,12 +50,7 @@ class PythonDriver(BaseDriver):
 
         # Make the common Python modules available from the testcase script
         self.add_path(derived_env, 'PYTHONPATH', self.support_dir)
-        self.add_path(
-            derived_env, 'PYTHONPATH',
-            os.path.dirname(os.path.dirname(
-                os.path.abspath(testsuite_support.__file__)
-            ))
-        )
+        self.add_path(derived_env, 'PYTHONPATH', self.env.root_dir)
 
         # If code coverage is requested, run the test script under the
         # "coverage" program.
