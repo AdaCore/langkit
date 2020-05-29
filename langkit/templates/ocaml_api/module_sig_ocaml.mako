@@ -116,7 +116,7 @@ module Token : sig
 end
 
 module BigInteger : sig
-  type t = int
+  type t = Z.t
 end
 
 module BareNode : sig
