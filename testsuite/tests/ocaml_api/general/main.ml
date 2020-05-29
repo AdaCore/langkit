@@ -406,7 +406,10 @@ let test_big_int () =
   let u = AnalysisContext.get_from_file ctx "foo.txt" in
   print_exit_if_diags u ;
   let root = root_exn u in
-  Format.printf "@[<v>int_double 42: %d@ @]" (FooNode.p_int_double root 42) ;
+  Format.printf "@[<v>int_double 42: %s@ @]"
+    (Z.to_string (FooNode.p_int_double root (Z.of_int 42))) ;
+  Format.printf "@[<v>int_double 10**100: %s@ @]"
+    (Z.to_string (FooNode.p_int_double root Z.(pow (of_int 10) 100))) ;
   Format.printf "@[<v>=======================@ @ @]"
 
 let test_struct () =

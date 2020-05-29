@@ -204,8 +204,7 @@ end
 
 module BigInteger = struct
 
-  (* TODO: use a int for now, should switch to a big integer. *)
-  type t = int
+  type t = Z.t
 
   let c_type = ptr void
 
@@ -222,10 +221,10 @@ module BigInteger = struct
     let c_text_ptr = allocate_n Text.c_type ~count:1 in
     text c_value c_text_ptr;
     decref c_value;
-    int_of_string (!@ c_text_ptr)
+    Z.of_string (!@ c_text_ptr)
 
   let unwrap (value : t) : unit ptr =
-    create (allocate Text.c_type (string_of_int value))
+    create (allocate Text.c_type (Z.to_string value))
 end
 
 % for enum_type in ctx.enum_types:
