@@ -1271,8 +1271,7 @@ class ${root_astnode_name}(object):
         """
         Dump the sub-tree to a string in a human-readable format.
         """
-        import StringIO
-        output = StringIO.StringIO()
+        output = _py2to3.StringIO()
         self.dump(file=output)
         ret = output.getvalue()
         output.close()
