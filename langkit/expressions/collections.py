@@ -698,7 +698,7 @@ class Quantifier(CollectionExpression):
                       ' index is out of bounds.')
 def collection_get(self, collection, index, or_null):
     """
-    Get the `index`\ -th element from `collection`.
+    Get the `index`\\ -th element from `collection`.
 
     Indexes are 0-based. As in Python, `index` can be negative, to retrieve
     elements in reverse order. For instance, ``expr.at(-1)`` will return the

@@ -17,6 +17,7 @@ def check_ranges(label, cs):
                    for l, h in cs.ranges))
     print('')
 
+
 check_ranges('Single', CharSet('a'))
 check_ranges('Adjacent 2 singles', CharSet('a', 'b'))
 check_ranges('Non-adjacent 2 singles', CharSet('a', 'c'))

@@ -20,7 +20,7 @@ for p in ('p_raise_msg', 'p_raise_no_msg'):
     try:
         _ = getattr(u.root, p)
     except libfoolang.PropertyError as exc:
-        msg = re.sub('\d+', '[line-number]', str(exc))
+        msg = re.sub(r'\d+', '[line-number]', str(exc))
         print('  -> {}: {}'.format(type(exc).__name__, msg))
     else:
         print('No exception raised...')

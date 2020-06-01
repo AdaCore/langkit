@@ -44,12 +44,15 @@ def run(token_cls):
 class InvalidToken(BaseToken):
     Alphanumericals = TokenFamily(BaseToken.Number, BaseToken.Identifier,
                                   'foobar')
+
+
 run(InvalidToken)
 
 
 class PresentTwice(BaseToken):
     Alphanumericals = TokenFamily(BaseToken.Number, BaseToken.Identifier)
     Numbers = TokenFamily(BaseToken.Number)
-run(PresentTwice)
 
+
+run(PresentTwice)
 print('Done')

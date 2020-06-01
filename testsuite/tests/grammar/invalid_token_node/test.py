@@ -9,6 +9,7 @@ class FooNode(ASTNode):
 class TokenNode(FooNode):
     token_node = True
 
+
 try:
     class NonTokenNode(TokenNode):
         token_node = False

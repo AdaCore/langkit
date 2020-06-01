@@ -9,6 +9,7 @@ class FooNode(ASTNode):
 class StructA(Struct):
     a = UserField(type=Int)
 
+
 try:
     class StructB(StructA):
         b = UserField(type=Int)

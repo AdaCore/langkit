@@ -21,5 +21,6 @@ class ExampleNode(RootNode):
     def prop():
         return BoolVar
 
+
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('Done')

@@ -14,6 +14,7 @@ def load_unit(name, buffer):
         sys.exit(1)
     return u
 
+
 ctx = libfoolang.AnalysisContext()
 ctx.discard_errors_in_populate_lexical_env(False)
 

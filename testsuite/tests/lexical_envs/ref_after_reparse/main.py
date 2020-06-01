@@ -29,6 +29,8 @@ def Name_repr(self):
         os.path.basename(self.unit.filename),
         self.sloc_range
     )
+
+
 for cls in [libfoolang.Decl, libfoolang.Using, libfoolang.Ref]:
     cls.__repr__ = Name_repr
 

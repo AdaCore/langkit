@@ -312,7 +312,7 @@ def print_context(context):
         else:
             last_file_info = file_info
 
-        print ('{file_info}line {line}, {msg}'.format(
+        print('{file_info}line {line}, {msg}'.format(
             file_info=file_info,
             line=col(ctx_loc.line, Colors.CYAN),
             msg=ctx_msg
@@ -617,7 +617,7 @@ def check_type(obj, typ, message=None):
     try:
         return assert_type(obj, typ)
     except AssertionError as e:
-        message = "{}\n{}".format(e.message, message) if message else e.message
+        message = "{}\n{}".format(e.args[0], message) if message else e.args[0]
         check_source_language(False, message)
 
 

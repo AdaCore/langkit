@@ -49,7 +49,7 @@ class Matcher(object):
 
 
 class Pattern(Matcher):
-    """
+    r"""
     Regular-expression based matcher.
 
     The following subset of regular expressions is supported:
@@ -506,7 +506,7 @@ class Lexer(object):
                 sorted(tf.name.camel for tf in self.newline_after))
 
     def add_patterns(self, *patterns):
-        """
+        r"""
         Add the list of named patterns to the lexer's internal patterns. A
         named pattern is a pattern that you can refer to through the {}
         notation in another pattern, or directly via the lexer instance::
@@ -879,7 +879,7 @@ class Case(RuleAssoc):
             self.location = extract_library_location()
             self.match_length = match_length
 
-            for i, alt in enumerate(alts):
+            for alt in alts:
                 check_source_language(
                     isinstance(alt, Alt),
                     'Invalid alternative to Case matcher: {}'.format(alt)

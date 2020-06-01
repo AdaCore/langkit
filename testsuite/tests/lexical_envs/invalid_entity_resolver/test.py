@@ -47,6 +47,7 @@ def run(name, prop):
 
     emit_and_print_errors(lkt_file='foo.lkt')
 
+
 run('Bad return type', Property(Self.node_env.get('foo')))
 run('Has dynamic variable', Property(Self.node_env.get('foo').at(0),
                                      dynamic_vars=[Env]))
