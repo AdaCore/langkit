@@ -19,11 +19,17 @@ semantic engine for the Ada programming language.
 Dependencies
 ------------
 
-To use Langkit:
+To use Langkit, you will need:
 
-* A Python 3.7+ intererpter. Python2 is no longer supported.
-* The mako template system for Python (see `REQUIREMENTS.dev`).
-* Clang-format.
+* A Python 3.7+ interpreter. Python2 is no longer supported.
+* Some python libraries, including the mako template system for Python (see
+  `REQUIREMENTS.dev` for the full list).
+* A recent version of the GNAT Ada compiler, either from your OS's packages, or
+  from [here](https://www.adacore.com/download).
+* The [gnatcoll-core](https://github.com/AdaCore/gnatcoll-core) library.
+* Ada bindings for GMP and Libiconv, from
+  [gnatcoll-bindings](https://github.com/AdaCore/gnatcoll-bindings).
+* Clang-format, optionally, if you want C/C++ files to be formated.
 
 Install
 -------
@@ -32,6 +38,12 @@ There is no proper distribution for the langkit Python package, so just add the
 top-level langkit directory to your `PYTHONPATH` in order to use it. Note that
 this directory is self-contained, so you can copy it somewhere else.
 
+Build
+-----
+
+Langkit requires a build step: run `./manage.py make`. If you installed all the
+necessary dependencies, the build should succeed.
+
 Testing
 -------
 
@@ -39,9 +51,9 @@ First, make sure the langkit package is available from the Python interpreter
 (see Install).  Then, in order to run the testsuite, launch the following
 command from the top-level directory:
 
-    $ scripts/interactive_testsuite
+    $ ./manage.py test
 
-This is just a wrapper script passing convenient options to the real testsuite
+This is just a wrapper passing convenient options to the real testsuite
 driver that is in `testsuite/testsuite.py`.
 
 If you want to learn more about this test driver's options (for instance to run
