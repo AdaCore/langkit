@@ -40,6 +40,7 @@ class Def(FooNode):
         )
     )
 
+
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
 print('')
 print('Done')

@@ -458,19 +458,30 @@ class PythonLang(LanguageChecker):
         """
         Run pep8 checks on given filename, adding pep8 reports to report.
         """
+        # Try to use pycodestyle, and fallback on pep8 if not available. If
+        # nothing is available, don't do anything.
         try:
-            import pep8
+            try:
+                import pycodestyle as pep8
+            except ImportError:
+                import pep8
         except ImportError:
             return
 
         class CustomReport(pep8.BaseReport):
             def error(self, line_number, offset, text, check):
+                # Due to the great architecture of PEP8/pycodestyle, we have to
+                # duplicate this check here in order to not show certain (but
+                # not all) errors that should be ignored.
+                code = text[:4]
+                if self._ignore_code(code):
+                    return
                 report.add(text, filename, line_number, offset)
 
         sg = pep8.StyleGuide(
             quiet=True,
             ignore=["W503", "E121", "E123", "E126", "E226", "E24",
-                    "E704", "E402", "E721"]
+                    "E704", "E402", "E721", "W504", "E741"]
         )
         sg.init_report(CustomReport)
         sg.check_files([filename])

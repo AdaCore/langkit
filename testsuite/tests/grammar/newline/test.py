@@ -31,6 +31,7 @@ class CompositeNode(FooNode):
     lit_3 = Field()
     lit_4 = Field()
 
+
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
               unparse_script=unparse_all_script)
 print('Done')

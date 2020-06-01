@@ -9,6 +9,8 @@ def def_repr(n):
         n.p_name,
         n.sloc_range
     )
+
+
 libfoolang.DefNode.__repr__ = def_repr
 
 

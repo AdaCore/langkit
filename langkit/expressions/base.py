@@ -434,9 +434,9 @@ class DocumentedExpression(object):
 
         # Describe variadic constructors as such
         if varargs:
-            argspec.append('\*' + varargs)
+            argspec.append(r'\*' + varargs)
         if keywords:
-            argspec.append('\*\*' + keywords)
+            argspec.append(r'\*\*' + keywords)
 
         if self.parameterless:
             argspec = None
@@ -2455,6 +2455,7 @@ class EntityVariable(AbstractVariable):
         PropertyDef.get().set_uses_entity_info()
         PropertyDef.get()._has_self_entity = True
         return super(EntityVariable, self).construct()
+
 
 Entity = EntityVariable()
 

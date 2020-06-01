@@ -45,6 +45,7 @@ def var_repr(self):
         parent_def(self).f_name.text
     )
 
+
 libfoolang.Ref.__repr__ = ref_repr
 libfoolang.Var.__repr__ = var_repr
 

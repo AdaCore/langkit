@@ -20,5 +20,6 @@ class Manage(ManageScript):
             )
         )
 
+
 if __name__ == '__main__':
     Manage().run()

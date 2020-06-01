@@ -13,6 +13,7 @@ def run(lit):
 
     emit_and_print_errors(lkt_file='foo.lkt')
 
+
 print('Valid case')
 run(12)
 print('Valid case')

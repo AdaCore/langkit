@@ -14,5 +14,6 @@ class Manage(ManageScript):
                           lexer=python_lexer,
                           grammar=python_grammar)
 
+
 if __name__ == '__main__':
     Manage().run()

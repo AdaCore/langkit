@@ -19,6 +19,7 @@ def run(name, expr):
     emit_and_print_errors(lkt_file='foo.lkt')
     print('')
 
+
 run('Heterogeneous types', Try(1, True))
 run('Not nullable type', Try(AnalysisUnitKind.unit_body))
 print('Done')
