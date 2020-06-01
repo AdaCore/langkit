@@ -16,10 +16,12 @@ if python2:
     bytes_type = str
     text_type = unicode
     is_int = lambda value: isinstance(value, (int, long))
+    from StringIO import StringIO
 else:
     bytes_type = bytes
     text_type = str
     is_int = lambda value: isinstance(value, int)
+    from io import StringIO
 
 
 def text_to_bytes(text):

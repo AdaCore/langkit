@@ -1,0 +1,11 @@
+import lexer_example
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+
+}
+
+@root_node class FooNode {
+}
+
+class Example : FooNode {
+}
