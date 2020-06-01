@@ -13,6 +13,7 @@ except ImportError:
 
 templates = {}
 
+
 def fqn(prop):
     return "{}.{}".format(prop.struct.name.camel, prop._original_name.lower)
 
@@ -93,14 +94,14 @@ class DSLWalker(object):
             return DSLWalker.NoOpWalker()
 
         unit = DSLWalker.ctx.get_from_file(loc.file)
-        class_def = unit.root.find(
-            lambda n:
-            n.is_a(lpl.ClassDef) and
-            n.sloc_range.start.line == loc.line
-        )
 
-        if not class_def:
-            return DSLWalker.NoOpWalker()
+        class_def = unit.root.lookup(lpl.Sloc(loc.line, 1))
+
+        # If there is a decorator in place of the class def, go get the class
+        # def in the tree.
+        if class_def.is_a(lpl.Decorator):
+            class_def = class_def.parent.parent[1]
+        assert class_def.is_a(lpl.ClassDef)
 
         return DSLWalker(class_def)
 
