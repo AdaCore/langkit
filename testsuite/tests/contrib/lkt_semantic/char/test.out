@@ -9,9 +9,8 @@ Expr <StringLit test.lkt:1:18-1:23>
 Id   <RefId "Char" test.lkt:2:9-2:13>
      references <StructDecl "Char" __prelude:20:11-20:25>
 
-test.lkt:2:16: error: Mismatched types: expected `Char`, got a string literal
-1 | val b : Char = 'l'
-  |                ^^^
+Expr <CharLit test.lkt:2:16-2:19>
+     has type <StructDecl "Char" __prelude:20:11-20:25>
 
 Id   <RefId "Char" test.lkt:3:9-3:13>
      references <StructDecl "Char" __prelude:20:11-20:25>
