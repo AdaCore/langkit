@@ -20,7 +20,6 @@ gprbuild -v
 # TODO: adjust the Travis CI setup to provide a viable OCaml environment and
 # enable the corresponding testcases.
 ./scripts/interactive_testsuite \
-    --discriminants gnat_community_2018 \
     --no-auto-path \
     --disable-ocaml \
     | tee TESTSUITE_OUT
