@@ -41,11 +41,6 @@ class LangkitTestsuite(Testsuite):
 
     def add_options(self, parser):
         parser.add_argument(
-            '--discriminants',
-            help='Comma-separated list of additional discriminants'
-        )
-
-        parser.add_argument(
             '--with-python',
             help='If provided, use as the Python interpreter in testcases.'
         )
