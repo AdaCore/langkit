@@ -667,7 +667,7 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, PropertyError):
         return "raise PropertyError({})".format(
-            repr(expr.message) if expr.message else ""
+            json.dumps(expr.message) if expr.message else ""
         )
 
     elif isinstance(expr, IsA):
