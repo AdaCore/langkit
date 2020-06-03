@@ -87,7 +87,7 @@ lkt_lexer.add_patterns(
     ("HEX_DIGITS_2", r'{HEX_DIGIT}{HEX_DIGIT}'),
     ("HEX_DIGITS_4", r'{HEX_DIGITS_2}{HEX_DIGITS_2}'),
     ("HEX_DIGITS_8", r'{HEX_DIGITS_4}{HEX_DIGITS_4}'),
-    ("STRING_DBQ", r'\"(\\\"|[^\n\"])*\"'),
+    ("STRING_LIT", r'\"(\\\"|[^\n\"])*\"'),
     ("CHAR_LIT",
      r"'(\\'|[^\n']|\\x{HEX_DIGITS_2}|\\u{HEX_DIGITS_4}|\\U{HEX_DIGITS_8})'"),
 )
@@ -165,8 +165,8 @@ lkt_lexer.add_rules(
     (Pattern('[0-9]+'),    Token.Number),
 
     # Strings & chars
-    (Pattern('{STRING_DBQ}'),         Token.String),
-    (Pattern('[a-zA-Z]{STRING_DBQ}'), Token.PString),
+    (Pattern('{STRING_LIT}'),         Token.String),
+    (Pattern('[a-zA-Z]{STRING_LIT}'), Token.PString),
     (Pattern('{CHAR_LIT}'),           Token.Char),
 
     # Comments
