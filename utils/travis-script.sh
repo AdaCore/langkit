@@ -15,14 +15,12 @@ which gprbuild
 gcc -v
 gprbuild -v
 
-# Duplicate output of testsuite in file TESTSUITE_OUT.
+# Exit with an error if there is a test failure/error.
 #
 # TODO: adjust the Travis CI setup to provide a viable OCaml environment and
 # enable the corresponding testcases.
 ./scripts/interactive_testsuite \
     --no-auto-path \
     --disable-ocaml \
-    | tee TESTSUITE_OUT
+    --failure-exit-code=1
 
-# Exit with an error if there is a FAIL or ERROR line in TESTSUITE_OUT
-! grep "^INFO \+\(FAIL\|ERROR\) " TESTSUITE_OUT > /dev/null
