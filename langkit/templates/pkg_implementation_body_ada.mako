@@ -1827,7 +1827,9 @@ package body ${ada_lib_name}.Implementation is
 
       Result : ${T.root_node.name};
    begin
-      if Relative_Get (Node, Index, Result) then
+      if Node = null and then Or_Null then
+         return null;
+      elsif Relative_Get (Node, Index, Result) then
          return Result;
       elsif Or_Null then
          return null;
@@ -3162,7 +3164,7 @@ package body ${ada_lib_name}.Implementation is
    ------------
 
    function Length (Node : ${ctx.generic_list_type.name}) return Natural
-   is (Children_Count (Node));
+   is (if Node = null then 0 else Children_Count (Node));
 
    % if ctx.properties_logging:
 

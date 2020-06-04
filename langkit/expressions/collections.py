@@ -726,11 +726,13 @@ def collection_get(self, collection, index, or_null):
         )
     )
 
-    # Insert a null check before getting the collection item
-    if coll_expr.type.is_ast_node:
-        coll_expr = NullCheckExpr(coll_expr)
-    elif coll_expr.type.is_entity_type:
-        coll_expr = NullCheckExpr(coll_expr, implicit_deref=True)
+    # We process null list nodes as empty lists, so insert a null check before
+    # getting the collection item only if asked to raise an exception.
+    if not or_null:
+        if coll_expr.type.is_ast_node:
+            coll_expr = NullCheckExpr(coll_expr)
+        elif coll_expr.type.is_entity_type:
+            coll_expr = NullCheckExpr(coll_expr, implicit_deref=True)
 
     coll_expr, element_type = canonicalize_list(coll_expr, to_root_list=True)
 
