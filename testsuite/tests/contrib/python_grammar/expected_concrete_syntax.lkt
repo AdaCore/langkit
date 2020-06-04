@@ -10,7 +10,7 @@ lexer foo_lexer {
     @ignore _ <- p"[ \r\t]+"
     @trivia() comment <- p"#(.?)+"
     rsh_assign <- ">>="
-    is <- "is"
+    is_tok <- "is"
     equals <- "=="
     def <- "def"
     lte <- "<="

@@ -5,6 +5,7 @@ import json
 from funcy import keep, lmap
 
 from langkit.passes import GlobalPass
+from langkit import names
 
 try:
     import libpythonlang as lpl
@@ -501,12 +502,19 @@ def emit_rule(rule, top_level=False):
         raise NotImplementedError(rule.__class__)
 
 
-def unparsed_name(strn):
+def unparsed_name(strn_or_name, suffix="_var"):
+    if isinstance(strn_or_name, names.Name):
+        strn = strn_or_name.lower
+    else:
+        strn = strn_or_name
+
     # Special cases: some variable names are keywords. Rename them.
     if strn == "val":
         return "value"
-    elif strn == "match":
-        return "matched"
+    elif strn in ('if', 'is', 'elif', 'else', 'try', 'raise', 'then', 'in',
+                  'class', 'not', 'and', 'or', 'null', 'generic', 'private',
+                  'case', 'match'):
+        return strn + suffix
     else:
         return strn
 
@@ -1242,12 +1250,7 @@ def emit_node_type(node_type):
 
 
 def format_token_name(name):
-    name = name.lower
-    if name in ('val', 'if', 'elif', 'else', 'try', 'raise', 'then', 'in',
-                'class', 'not', 'and', 'or', 'null', 'generic', 'private',
-                'case'):
-        return name + "_tok"
-    return name
+    return unparsed_name(name, "_tok")
 
 
 def format_pattern(pat):
