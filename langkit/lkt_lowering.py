@@ -298,6 +298,9 @@ token_cls_map = {'text': WithText,
                  'trivia': WithTrivia,
                  'symbol': WithSymbol}
 
+# Annotations for node declarations
+node_annotations = [FlagAnnotationSpec('root_node')]
+
 
 def parse_annotations(ctx, specs, full_decl):
     """
@@ -929,9 +932,144 @@ def lower_grammar_rules(ctx):
 
 def create_types(ctx, lkt_units):
     """
-    Create nodes from Lktlang units.
+    Create types from Lktlang units.
 
     :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
-        units where to look for nodes.
+        units where to look for type declarations.
     """
-    raise NotImplementedError
+    import liblktlang
+
+    # Go through all units, build a map for all type definitions, indexed by
+    # Name. This first pass allows the check of unique names.
+    syntax_types = {}
+    for unit in lkt_units:
+        for full_decl in unit.root.f_decls:
+            if not isinstance(full_decl.f_decl, liblktlang.TypeDecl):
+                continue
+            name_str = text_as_str(full_decl.f_decl.f_syn_name)
+            name = names.Name.from_camel(name_str)
+            check_source_language(
+                name not in syntax_types,
+                'Duplicate type name: {}'.format(name_str)
+            )
+            syntax_types[name] = full_decl
+
+    # Now create CompiledType instances for each type. To properly handle
+    # node derivation, recurse on bases first and reject inheritance loops.
+
+    # Map indexed by type Name. Unvisited types are absent, fully processed
+    # types have an entry with the corresponding CompiledType, and currently
+    # processed types have an entry associated with None.
+    compiled_types = {}
+
+    def resolve_type_ref(ref):
+        """
+        Fetch (or create, if needed) the CompiledType instance corresponding to
+        the given type reference.
+
+        :param liblktlang.TypeRef ref: Type reference to resolve.
+        :rtype: CompiledType
+        """
+        with ctx.lkt_context(ref):
+            if isinstance(ref, liblktlang.SimpleTypeRef):
+                return create_type_from_name(names.Name.from_camel(
+                    text_as_str(ref.f_type_name)
+                ))
+            else:
+                raise NotImplementedError(
+                    'Unhandled type reference: {}'.format(ref)
+                )
+
+    def create_type_from_name(name):
+        """
+        Fetch (or create, if nedeed) the CompilationType instance corresponding
+        to the given type name.
+
+        :param names.Name name: Name of the type to create.
+        :rtype: CompiledType
+        """
+        full_decl = syntax_types.get(name)
+        check_source_language(
+            full_decl is not None,
+            'Invalid type name: {}'.format(name.camel)
+        )
+        decl = full_decl.f_decl
+
+        # Directly return already created CompiledType instances and raise an
+        # error for cycles in the type inheritance graph.
+        compiled_type = compiled_types.get(name, "not-visited")
+        if isinstance(compiled_type, CompiledType):
+            return compiled_type
+        with ctx.lkt_context(decl):
+            check_source_language(
+                compiled_type is not None,
+                'Type inheritance loop detected'
+            )
+            compiled_types[name] = None
+
+            # Dispatch now to the appropriate type creation helper
+            if isinstance(decl, liblktlang.ClassDecl):
+                specs = node_annotations
+                creator = create_node
+
+            else:
+                raise NotImplementedError(
+                    'Unhandled type declaration: {}'.format(decl)
+                )
+
+            annotations = parse_annotations(ctx, specs, full_decl)
+            result = creator(name, decl, annotations)
+            compiled_types[name] = result
+            return result
+
+    def create_node(name, decl, annotations):
+        """
+        Create an ASTNodeType instance.
+
+        :param names.Name name: DSL name for this node type.
+        :param liblktlang.ClassDecl decl: Corresponding declaration node.
+        :param dict[str, T] annotations: Annotations for this declaration.
+        :rtype: ASTNodeType
+        """
+        # Resolve the base node (if any)
+        base = (resolve_type_ref(decl.f_base_type)
+                if decl.f_base_type else None)
+
+        # Make sure the root_node annotation is used when appropriate
+        root_node = annotations.get('root_node')
+        if base is None:
+            check_source_language(
+                root_node,
+                'The root node requires a @root_node annotation'
+            )
+            if CompiledTypeRepo.root_grammar_class is not None:
+                check_source_language(
+                    False,
+                    'There can be only one root node ({})'.format(
+                        CompiledTypeRepo.root_grammar_class.dsl_name
+                    )
+                )
+        else:
+            check_source_language(
+                not root_node,
+                'Only the root node can have the @root_node annotation'
+            )
+
+        check_source_language(not len(decl.f_traits),
+                              'Nodes cannot use traits')
+
+        fields = []
+        assert not len(decl.f_decls), (
+            'Class inner decls not currently supported'
+        )
+
+        return ASTNodeType(
+            name,
+            location=ctx.lkt_loc(decl),
+            doc=ctx.lkt_doc(full_decl),
+            base=base,
+            fields=fields
+        )
+
+    for name in sorted(syntax_types):
+        create_type_from_name(name)

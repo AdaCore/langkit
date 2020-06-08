@@ -778,6 +778,16 @@ class CompileCtx(object):
         sloc = lkt_node.sloc_range.start
         return Location(lkt_node.unit.filename, sloc.line, sloc.column)
 
+    @staticmethod
+    def lkt_doc(full_decl):
+        """
+        Return the documentation attached to the ``full_decl`` node, if any.
+
+        :param liblktlang.FullDecl full_decl: Declaration to process.
+        :rtype: None|str
+        """
+        return '\n'.join(l.text for l in full_decl.f_doc)
+
     def _register_builtin_exception_types(self):
         """
         Register exception types for all builtin exceptions.
