@@ -11,7 +11,7 @@ import sys
 import funcy
 
 from langkit.common import string_repr
-from langkit.compiled_types import get_context
+from langkit.compiled_types import get_context, resolve_type
 from langkit.diagnostics import WarningSet, check_source_language
 from langkit.lexer import Ignore, LexerToken
 import langkit.names as names
@@ -338,7 +338,8 @@ class NodeUnparser(Unparser):
                     # So in both cases, we create an unparser, but we emit
                     # tokens only for the "present" alternative.
                     result = RegularNodeUnparser(node)
-                    if node is parser._booleanize.alt_present.type:
+                    qual_type = resolve_type(parser._booleanize)
+                    if node is qual_type._alternatives_map['Present']:
                         NodeUnparser._emit_to_token_sequence(parser.parser,
                                                              result.pre_tokens)
                     return result
@@ -1033,8 +1034,9 @@ class Unparsers(object):
                 pass
 
             elif isinstance(p, Opt) and p._booleanize:
-                for alt in p._booleanize._alternatives:
-                    append(alt.type, p)
+                qual_type = resolve_type(p._booleanize)
+                for alt_type in qual_type._alternatives:
+                    append(alt_type, p)
                 toplevel = False
 
             elif isinstance(p, (List, _Transform)):

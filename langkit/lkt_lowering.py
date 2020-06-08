@@ -722,15 +722,15 @@ def lower_grammar_rules(ctx):
 
     # Build a mapping for all nodes created in the DSL. We cannot use T (the
     # TypeRepo instance) as types are not processed yet.
-    nodes = {n._type.raw_name.camel: n
-             for n in _ASTNodeMetaclass.astnode_types}
+    nodes = {n.raw_name.camel: n
+             for n in CompiledTypeRepo.astnode_types}
 
     # For every non-qualifier enum node, build a mapping from value names
     # (camel cased) to the corresponding enum node subclass.
     enum_nodes = {
-        node: {alt.name.camel: alt for alt in node._alternatives}
+        node: node._alternatives_map
         for node in nodes.values()
-        if node._type.is_enum_node and not node._type.is_bool_node
+        if node.is_enum_node and not node.is_bool_node
     }
 
     def denoted_string_literal(string_lit):
@@ -823,13 +823,13 @@ def lower_grammar_rules(ctx):
                 # Qualifier nodes are a special case: we produce one subclass
                 # or the other depending on whether the subparsers accept the
                 # input.
-                if node._type.is_bool_node:
+                if node.is_bool_node:
                     return Opt(*subparsers, location=loc).as_bool(node)
 
                 # Likewise for enum nodes
-                elif node._type.base and node._type.base.is_enum_node:
+                elif node.base and node.base.is_enum_node:
                     return _Transform(_Row(*subparsers, location=loc),
-                                      node.type_ref,
+                                      node,
                                       location=loc)
 
                 # For other nodes, always create the node when the subparsers
@@ -911,13 +911,12 @@ def lower_grammar_rules(ctx):
                 node = resolve_node_ref(rule.f_prop_ref.f_prefix)
                 prop_name = rule.f_prop_ref.f_suffix.text
                 try:
-                    prop = getattr(node, prop_name)
-                except AttributeError:
+                    prop = node.get_abstract_node_data_dict()[prop_name]
+                except KeyError:
                     check_source_language(
                         False,
                         '{} has no {} property'
-                        .format(node._name.camel_with_underscores,
-                                prop_name)
+                        .format(node.dsl_name, prop_name)
                     )
                 return Predicate(lower(rule.f_expr), prop, location=loc)
 
