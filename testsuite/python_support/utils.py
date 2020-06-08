@@ -62,7 +62,8 @@ unparse_all_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
 
 def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     warning_set=default_warning_set,
-                    symbol_canonicalizer=None, show_property_logging=False):
+                    symbol_canonicalizer=None, show_property_logging=False,
+                    types_from_lkt=False):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -82,6 +83,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
         Symbol canonicalizer to use for this context, if any.
 
     :param bool show_property_logging: See CompileCtx.show_property_logging.
+
+    :param bool types_from_lkt: See CompileCtx.types_from_lkt.
     """
 
     # Have a clean build directory
@@ -94,7 +97,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      grammar=grammar,
                      symbol_canonicalizer=symbol_canonicalizer,
                      show_property_logging=show_property_logging,
-                     lkt_file=lkt_file)
+                     lkt_file=lkt_file,
+                     types_from_lkt=types_from_lkt)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -159,7 +163,7 @@ def build(grammar=None, lexer=None, lkt_file=None,
 
 
 def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
-                  lkt_file=None, ocaml_main=None,
+                  lkt_file=None, types_from_lkt=False, ocaml_main=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
                   show_property_logging=False, unparse_script=unparse_script):
@@ -174,6 +178,10 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param str|None lkt_file: If provided, file from which to read the Lkt
         language spec.
+
+    :param bool types_from_lkt: If true (valid only when `lkt_file` is not
+        None), first unparse the DSL and then do the build based on node
+        definitions from the unparsing result. False by default.
 
     :param None|str py_script: If not None, name of the Python script to run
         with the built library available.
@@ -201,58 +209,89 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param None|str unparse_script: Script to unparse the language spec.
     """
-
-    ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
-                          symbol_canonicalizer=symbol_canonicalizer,
-                          show_property_logging=show_property_logging)
+    assert not types_from_lkt or lkt_file is not None
 
     class Manage(ManageScript):
+        def __init__(self, ctx):
+            self._cached_context = ctx
+            super().__init__()
+
         def create_context(self, args):
-            return ctx
-
-    m = Manage()
-
-    extensions_dir = P.abspath('extensions')
-    if P.isdir(extensions_dir):
-        ctx.extensions_dir = extensions_dir
-
-    # First build the library. Forward all test.py's arguments to the libmanage
-    # call so that manual testcase runs can pass "-g", for instance. Also avoid
-    # rebuilding Langkit_Support, as the testsuite already built one for us.
-    argv = sys.argv[1:] + ['--full-error-traces', '-vnone',
-                           '--no-langkit-support']
-
-    # Generate the public Ada API only when necessary (i.e. if we have mains
-    # that do use this API). This reduces the time it takes to run tests.
-    if not mains and not ada_main:
-        argv.append('--no-ada-api')
-
-    argv.append('make')
+            return self._cached_context
 
     build_mode = 'dev'
-    argv.append('--build-mode={}'.format(build_mode))
-    for w in WarningSet.available_warnings:
-        argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
-    if not pretty_print:
-        argv.append('--no-pretty-print')
-    if generate_unparser:
-        argv.append('--generate-unparser')
 
-    # For testsuite performance, do not generate mains unless told otherwise
-    if not mains:
-        argv.append('--disable-all-mains')
+    def manage_run(generate_only, types_from_lkt, additional_args):
+        ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
+                              symbol_canonicalizer=symbol_canonicalizer,
+                              show_property_logging=show_property_logging,
+                              types_from_lkt=types_from_lkt)
 
-    # RA22-015: Unparse the language to concrete syntax
-    if unparse_script:
-        argv.append('--unparse-script')
-        argv.append(unparse_script)
+        m = Manage(ctx)
 
-    m.run(argv)
+        extensions_dir = P.abspath('extensions')
+        if P.isdir(extensions_dir):
+            ctx.extensions_dir = extensions_dir
 
-    # Flush stdout and stderr, so that diagnostics appear deterministically
-    # before the script/program output.
-    sys.stdout.flush()
-    sys.stderr.flush()
+        # First build the library. Forward all test.py's arguments to the
+        # libmanage call so that manual testcase runs can pass "-g", for
+        # instance. Also avoid rebuilding Langkit_Support, as the testsuite
+        # already built one for us.
+        argv = sys.argv[1:] + ['--full-error-traces', '-vnone',
+                               '--no-langkit-support']
+
+        # Generate the public Ada API only when necessary (i.e. if we have
+        # mains that do use this API). This reduces the time it takes to run
+        # tests.
+        if not mains and not ada_main:
+            argv.append('--no-ada-api')
+
+        argv.append('make')
+
+        argv.append('--build-mode={}'.format(build_mode))
+        for w in WarningSet.available_warnings:
+            argv.append(
+                '-{}{}'.format('W' if w in warning_set else 'w', w.name)
+            )
+        if not pretty_print:
+            argv.append('--no-pretty-print')
+        if generate_unparser:
+            argv.append('--generate-unparser')
+
+        # For testsuite performance, do not generate mains unless told
+        # otherwise.
+        if not mains:
+            argv.append('--disable-all-mains')
+
+        argv.extend(additional_args)
+        m.run(argv)
+
+        # Flush stdout and stderr, so that diagnostics appear deterministically
+        # before the script/program output.
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        return ctx, m
+
+    unparse_args = (['--unparse-script', unparse_script]
+                    if unparse_script else [])
+
+    if unparse_script and types_from_lkt:
+        # RA22-015: Unparse the language to concrete syntax, then use the
+        # result to do a full build. Note that we don't unparse the DSL during
+        # the second run, as dsl_unparse requires Python sources, which the
+        # second run does not have access to.
+        manage_run(generate_only=True,
+                   types_from_lkt=False,
+                   additional_args=unparse_args)
+        langkit.reset()
+        ctx, m = manage_run(generate_only=False,
+                            types_from_lkt=True,
+                            additional_args=[])
+    else:
+        ctx, m = manage_run(generate_only=False,
+                            types_from_lkt=False,
+                            additional_args=unparse_args)
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:

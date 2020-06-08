@@ -274,7 +274,8 @@ class CompileCtx(object):
                  symbol_canonicalizer=None,
                  documentations=None,
                  show_property_logging=False,
-                 lkt_file=None):
+                 lkt_file=None,
+                 types_from_lkt=False):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -349,6 +350,10 @@ class CompileCtx(object):
 
         :param None|str lkt_file: Optional name of the file to contain Lktlang
             definitions for this language.
+
+        :param bool types_from_lkt: When loading definitions from Lktlang
+            files, whether to load type definitions. This is not done by
+            default during the transition from our Python DSL to Lktlang.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -399,6 +404,10 @@ class CompileCtx(object):
         from langkit.lkt_lowering import create_grammar
         self.grammar = grammar or create_grammar(self, self.lkt_units)
         ":type: langkit.parsers.Grammar"
+
+        from langkit.lkt_lowering import create_types
+        if types_from_lkt and self.lkt_units:
+            create_types(self, self.lkt_units)
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
 
