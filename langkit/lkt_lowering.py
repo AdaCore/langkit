@@ -7,8 +7,8 @@ from collections import OrderedDict
 import json
 import os.path
 
+from langkit.compiled_types import ASTNodeType, CompiledType, CompiledTypeRepo
 from langkit.diagnostics import DiagnosticError, check_source_language
-from langkit.dsl import _ASTNodeMetaclass
 from langkit.lexer import (Alt, Case, Ignore, Lexer, LexerToken, Literal,
                            NoCaseLit, Pattern, TokenFamily, WithSymbol,
                            WithText, WithTrivia)
@@ -176,7 +176,7 @@ class AnnotationSpec(object):
         if not annotation.f_params:
             check_source_language(not self.require_args,
                                   'Arguments required for this annotation')
-            value = None
+            value = self.interpret(ctx, (), {})
         else:
             check_source_language(self.require_args,
                                   'This annotation accepts no argument')
