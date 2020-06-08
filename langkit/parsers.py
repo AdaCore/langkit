@@ -1026,7 +1026,11 @@ class Skip(Parser):
         """
         Parser.__init__(self, location=location)
         self.dest_node = dest_node
-        self.dest_node_parser = dest_node()
+        self.dest_node_parser = (
+            _Transform(_Row(), dest_node)
+            if isinstance(dest_node, ASTNodeType)
+            else dest_node()
+        )
 
     def __repr__(self):
         return 'Skip({})'.format(node_name(self.dest_node))
@@ -1585,7 +1589,9 @@ class Opt(Parser):
 
         :rtype: Opt
         """
-        assert dest._is_enum_node
+        assert (dest.is_enum_node
+                if isinstance(dest, ASTNodeType)
+                else dest._is_enum_node)
         return copy_with(self, _booleanize=dest)
 
     @property
@@ -1607,8 +1613,7 @@ class Opt(Parser):
         if self._booleanize is None:
             return self.parser._eval_type()
         else:
-            assert self._booleanize._type
-            result = resolve_type(self._booleanize._type)
+            result = resolve_type(self._booleanize)
             reject_synthetic(result)
             return result
 
