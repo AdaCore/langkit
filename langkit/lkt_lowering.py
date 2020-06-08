@@ -926,3 +926,13 @@ def lower_grammar_rules(ctx):
 
     for name, rule in grammar._all_lkt_rules.items():
         grammar._add_rule(name, lower(rule))
+
+
+def create_types(ctx, lkt_units):
+    """
+    Create nodes from Lktlang units.
+
+    :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
+        units where to look for nodes.
+    """
+    raise NotImplementedError
