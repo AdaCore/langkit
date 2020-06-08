@@ -1218,7 +1218,10 @@ package body ${ada_lib_name}.Implementation is
             end if;
          % endif
 
-         if (Dest_Env.Env.Node = null
+         if Dest_Env.Kind /= Primary then
+            raise Property_Error with
+               "Cannot add elements to a non-primary lexical env";
+         elsif (Dest_Env.Env.Node = null
              or else Dest_Env.Env.Node.Unit /= Self.Unit)
             and then Is_Synthetic (Mapping.Val)
          then
