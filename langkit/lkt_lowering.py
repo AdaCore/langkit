@@ -7,8 +7,11 @@ from collections import OrderedDict
 import json
 import os.path
 
-from langkit.compiled_types import ASTNodeType, CompiledType, CompiledTypeRepo
+from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
+                                    CompiledType, CompiledTypeRepo, Field, T,
+                                    UserField)
 from langkit.diagnostics import DiagnosticError, check_source_language
+from langkit.expressions import PropertyDef
 from langkit.lexer import (Alt, Case, Ignore, Lexer, LexerToken, Literal,
                            NoCaseLit, Pattern, TokenFamily, WithSymbol,
                            WithText, WithTrivia)
@@ -308,6 +311,9 @@ token_cls_map = {'text': WithText,
 node_annotations = [FlagAnnotationSpec('root_node'),
                     FlagAnnotationSpec('abstract'),
                     FlagAnnotationSpec('token_node')]
+field_annotations = [FlagAnnotationSpec('abstract'),
+                     FlagAnnotationSpec('null_field'),
+                     FlagAnnotationSpec('parse_field')]
 
 
 def parse_annotations(ctx, specs, full_decl):
@@ -979,37 +985,46 @@ def create_types(ctx, lkt_units):
     # processed types have an entry associated with None.
     compiled_types = {}
 
-    def resolve_type_ref(ref):
+    def resolve_type_ref(ref, defer):
         """
-        Fetch (or create, if needed) the CompiledType instance corresponding to
-        the given type reference.
+        Fetch the CompiledType instance corresponding to the given type
+        reference.
 
         :param liblktlang.TypeRef ref: Type reference to resolve.
-        :rtype: CompiledType
+        :param bool defer: If True and this type is not lowered yet, return a
+            TypeRepo.Defer instance. Lower the type if necessary in all other
+            cases.
+        :rtype: CompiledType|TypeRepo.Defer
         """
         with ctx.lkt_context(ref):
             if isinstance(ref, liblktlang.SimpleTypeRef):
-                return create_type_from_name(names.Name.from_camel(
-                    ref.f_type_name.text
-                ))
+                return create_type_from_name(
+                    names.Name.from_camel(ref.f_type_name.text),
+                    defer
+                )
             else:
                 raise NotImplementedError(
                     'Unhandled type reference: {}'.format(ref)
                 )
 
-    def create_type_from_name(name):
+    def create_type_from_name(name, defer):
         """
-        Fetch (or create, if nedeed) the CompilationType instance corresponding
-        to the given type name.
+        Fetch the CompiledType instance corresponding to the given type
+        reference.
 
         :param names.Name name: Name of the type to create.
-        :rtype: CompiledType
+        :param bool defer: If True and this type is not lowered yet, return a
+            TypeRepo.Defer instance. Lower the type if necessary in all other
+            cases.
+        :rtype: CompiledType|TypeRepo.Defer
         """
         full_decl = syntax_types.get(name)
         check_source_language(
             full_decl is not None,
             'Invalid type name: {}'.format(name.camel)
         )
+        if defer:
+            return getattr(T, name.camel)
         decl = full_decl.f_decl
 
         # Directly return already created CompiledType instances and raise an
@@ -1039,6 +1054,64 @@ def create_types(ctx, lkt_units):
             compiled_types[name] = result
             return result
 
+    def lower_fields(decls, allowed_field_types):
+        """
+        Lower the fields described in the given DeclBlock node.
+
+        :param liblktlang.DeclBlock decls: Declarations to process.
+        :param tuple[type] allowed_field_types: Set of types allowed for the
+            fields to load.
+        :rtype: list[(names.Name, AbstractNodeData)]
+        """
+        result = []
+        for full_decl in decls:
+            decl = full_decl.f_decl
+            annotations = parse_annotations(ctx, field_annotations, full_decl)
+            field_type = resolve_type_ref(decl.f_decl_type, defer=True)
+
+            # Check field name conformity
+            name = decl.f_syn_name.text
+            check_source_language(
+                not name.startswith('_'),
+                'Underscore-prefixed field names are not allowed'
+            )
+            check_source_language(
+                name.lower() == name,
+                'Field names must be lower-case'
+            )
+            name = names.Name.from_lower(name)
+
+            if decl.f_default_val:
+                raise NotImplementedError(
+                    'Field default values not handled yet'
+                )
+
+            if annotations.parse_field:
+                cls = Field
+                kwargs = {'abstract': annotations.abstract,
+                          'null': annotations.null_field}
+            else:
+                check_source_language(
+                    not annotations.abstract,
+                    'Regular fields cannot be abstract'
+                )
+                check_source_language(
+                    not annotations.null_field,
+                    'Regular fields cannot be null'
+                )
+                cls = UserField
+                kwargs = {}
+
+            check_source_language(
+                issubclass(cls, allowed_field_types),
+                'Invalid field type in this context'
+            )
+
+            field = cls(type=field_type, doc=ctx.lkt_doc(full_decl), **kwargs)
+            field.location = ctx.lkt_loc(decl)
+            result.append((name, field))
+        return result
+
     def create_node(name, decl, annotations):
         """
         Create an ASTNodeType instance.
@@ -1049,7 +1122,7 @@ def create_types(ctx, lkt_units):
         :rtype: ASTNodeType
         """
         # Resolve the base node (if any)
-        base = (resolve_type_ref(decl.f_base_type)
+        base = (resolve_type_ref(decl.f_base_type, defer=False)
                 if decl.f_base_type else None)
 
         # Make sure the root_node annotation is used when appropriate
@@ -1075,17 +1148,21 @@ def create_types(ctx, lkt_units):
         check_source_language(not len(decl.f_traits),
                               'Nodes cannot use traits')
 
-        fields = []
-        assert not len(decl.f_decls), (
-            'Class inner decls not currently supported'
-        )
-
         # This is a token node if either the annotation is present, or if the
         # base node is a token node itself.
         is_token_node = (
             annotations.token_node
-            or (base is not None and bsae.is_token_node)
+            or (base is not None and base.is_token_node)
         )
+
+        # Lower fields. Regular nodes can hold all types of fields, but token
+        # nodes can hold only user field and properties.
+        allowed_field_types = (
+            (UserField, PropertyDef)
+            if is_token_node
+            else (AbstractNodeData, )
+        )
+        fields = lower_fields(decl.f_decls, allowed_field_types)
 
         return ASTNodeType(
             name,
@@ -1098,4 +1175,4 @@ def create_types(ctx, lkt_units):
         )
 
     for name in sorted(syntax_types):
-        create_type_from_name(name)
+        create_type_from_name(name, defer=False)

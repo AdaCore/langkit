@@ -35,5 +35,6 @@ class AttrRef(Expr):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              unparse_script=unparse_all_script)
+              unparse_script=unparse_all_script,
+              types_from_lkt=True)
 print('Done')
