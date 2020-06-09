@@ -20,16 +20,6 @@ from langkit.parsers import (Discard, DontSkip, Grammar, List, Null, Opt, Or,
 # we are about to process LKT grammar rules.
 
 
-def text_as_str(token_node):
-    """
-    Return the text associated to this token node as a native string.
-
-    :param liblktlang.LKNode token_node: Node from which to extract text.
-    :rtype: str
-    """
-    return token_node.text
-
-
 def pattern_as_str(str_lit):
     """
     Return the regexp string associated to this string literal node.
@@ -37,7 +27,7 @@ def pattern_as_str(str_lit):
     :type str_lit: liblktlang.StringLit
     :rtype: str
     """
-    return json.loads(text_as_str(str_lit)[1:])
+    return json.loads(str_lit.text[1:])
 
 
 def parse_static_bool(ctx, expr):
@@ -51,10 +41,10 @@ def parse_static_bool(ctx, expr):
 
     with ctx.lkt_context(expr):
         check_source_language(isinstance(expr, liblktlang.RefId)
-                              and text_as_str(expr) in ('false', 'true'),
+                              and expr.text in ('false', 'true'),
                               'Boolean literal expected')
 
-    return text_as_str(expr) == 'true'
+    return expr.text == 'true'
 
 
 def load_lkt(lkt_file):
@@ -187,7 +177,7 @@ class AnnotationSpec(object):
             for param in annotation.f_params.f_params:
                 with ctx.lkt_context(param):
                     if param.f_name:
-                        name = text_as_str(param.f_name)
+                        name = param.f_name.text
                         check_source_language(name not in kwargs,
                                               'Named argument repeated')
                         kwargs[name] = param.f_value
@@ -330,7 +320,7 @@ def parse_annotations(ctx, specs, full_decl):
     # Process annotations
     result = {}
     for a in annotations:
-        name = text_as_str(a.f_name)
+        name = a.f_name.text
         spec = specs_map.get(name, None)
         with ctx.lkt_context(a):
             check_source_language(
@@ -420,7 +410,7 @@ def create_lexer(ctx, lkt_units):
         """
         with ctx.lkt_context(f):
             # Create the token family, if needed
-            name = names.Name.from_lower(text_as_str(f.f_syn_name))
+            name = names.Name.from_lower(f.f_syn_name.text)
             token_set = token_family_sets.setdefault(name, set())
 
             for r in f.f_rules:
@@ -467,7 +457,7 @@ def create_lexer(ctx, lkt_units):
             # Create the token and register it where needed: the global token
             # mapping, its token family (if any) and the "newline_after" group
             # if the corresponding annotation is present.
-            token_lower_name = text_as_str(r.f_decl.f_syn_name)
+            token_lower_name = r.f_decl.f_syn_name.text
             token_name = names.Name.from_lower(token_lower_name)
 
             check_source_language(
@@ -502,7 +492,7 @@ def create_lexer(ctx, lkt_units):
         """
         parse_annotations(ctx, [], full_decl)
         decl = full_decl.f_decl
-        lower_name = text_as_str(decl.f_syn_name)
+        lower_name = decl.f_syn_name.text
         name = names.Name.from_lower(lower_name)
 
         with ctx.lkt_context(decl):
@@ -528,9 +518,9 @@ def create_lexer(ctx, lkt_units):
         """
         with ctx.lkt_context(expr):
             if isinstance(expr, liblktlang.TokenLit):
-                return Literal(json.loads(text_as_str(expr)))
+                return Literal(json.loads(expr.text))
             elif isinstance(expr, liblktlang.TokenNoCaseLit):
-                return NoCaseLit(json.loads(text_as_str(expr)))
+                return NoCaseLit(json.loads(expr.text))
             elif isinstance(expr, liblktlang.TokenPatternLit):
                 return Pattern(pattern_as_str(expr))
             else:
@@ -544,7 +534,7 @@ def create_lexer(ctx, lkt_units):
         :rtype: Token
         """
         with ctx.lkt_context(ref):
-            token_name = names.Name.from_lower(text_as_str(ref))
+            token_name = names.Name.from_lower(ref.text)
             check_source_language(token_name in tokens,
                                   'Unknown token: {}'.format(token_name.lower))
             return tokens[token_name]
@@ -557,7 +547,7 @@ def create_lexer(ctx, lkt_units):
         :rtype: TokenFamily
         """
         with ctx.lkt_context(ref):
-            name_lower = text_as_str(ref)
+            name_lower = ref.text
             name = names.Name.from_lower(name_lower)
             check_source_language(
                 name in token_families,
@@ -688,7 +678,7 @@ def create_grammar(ctx, lkt_units):
             # Make sure we have a grammar rule
             check_source_language(isinstance(r, liblktlang.GrammarRuleDecl),
                                   'grammar rule expected')
-            rule_name = text_as_str(r.f_syn_name)
+            rule_name = r.f_syn_name.text
 
             # Register the main rule if the appropriate annotation is present
             a = parse_annotations(ctx, grammar_rule_annotations, full_rule)
@@ -947,7 +937,7 @@ def create_types(ctx, lkt_units):
         for full_decl in unit.root.f_decls:
             if not isinstance(full_decl.f_decl, liblktlang.TypeDecl):
                 continue
-            name_str = text_as_str(full_decl.f_decl.f_syn_name)
+            name_str = full_decl.f_decl.f_syn_name.text
             name = names.Name.from_camel(name_str)
             check_source_language(
                 name not in syntax_types,
@@ -974,7 +964,7 @@ def create_types(ctx, lkt_units):
         with ctx.lkt_context(ref):
             if isinstance(ref, liblktlang.SimpleTypeRef):
                 return create_type_from_name(names.Name.from_camel(
-                    text_as_str(ref.f_type_name)
+                    ref.f_type_name.text
                 ))
             else:
                 raise NotImplementedError(
