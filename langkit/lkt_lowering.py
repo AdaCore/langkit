@@ -131,17 +131,20 @@ class AnnotationSpec(object):
     Synthetic description of how a declaration annotation works.
     """
 
-    def __init__(self, name, unique, require_args):
+    def __init__(self, name, unique, require_args, default_value=None):
         """
         :param str name: Name of the annotation (``foo`` for the ``@foo``
             annotation).
         :param bool unique: Whether this annotation can appear at most once for
             a given declaration.
         :param bool require_args: Whether this annotation requires arguments.
+        :param default_value: For unique annotations, value to use in case the
+            annotation is absent.
         """
         self.name = name
         self.unique = unique
         self.require_args = require_args
+        self.default_value = default_value if unique else []
 
     def interpret(self, ctx, args, kwargs):
         """
@@ -162,6 +165,11 @@ class AnnotationSpec(object):
         Parse an annotation node according to this spec. Add the result to
         ``result``.
         """
+        check_source_language(
+            self.name not in result or not self.unique,
+            'This annotation cannot appear multiple times'
+        )
+
         # Check that parameters presence comply to the spec
         if not annotation.f_params:
             check_source_language(not self.require_args,
@@ -199,13 +207,21 @@ class AnnotationSpec(object):
             result[self.name].append(value)
 
 
+class ParsedAnnotations:
+    """
+    Namespace object to hold annotation parsed values.
+    """
+    pass
+
+
 class FlagAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for flags.
     """
     def __init__(self, name):
-        super(FlagAnnotationSpec, self).__init__(name, unique=True,
-                                                 require_args=False)
+        super(FlagAnnotationSpec, self).__init__(
+            name, unique=True, require_args=False, default_value=False
+        )
 
     def interpret(self, ctx, args, kwargs):
         return True
@@ -318,7 +334,7 @@ def parse_annotations(ctx, specs, full_decl):
         specs_map[s.name] = s
 
     # Process annotations
-    result = {}
+    values = {}
     for a in annotations:
         name = a.f_name.text
         spec = specs_map.get(name, None)
@@ -327,8 +343,17 @@ def parse_annotations(ctx, specs, full_decl):
                 spec is not None,
                 'Invalid annotation: {}'.format(name)
             )
-            spec.parse_single_annotation(ctx, result, a)
+            spec.parse_single_annotation(ctx, values, a)
 
+
+    # Use the default value for absent annotations
+    for s in specs:
+        values.setdefault(s.name, s.default_value)
+
+    # Create the namespace object to hold results
+    result = ParsedAnnotations()
+    for k, v in values.items():
+        setattr(result, k, v)
     return result
 
 
@@ -439,18 +464,18 @@ def create_lexer(ctx, lkt_units):
             token_cons = None
             start_ignore_layout = False
             end_ignore_layout = False
-            if 'ignore' in rule_annot:
+            if rule_annot.ignore:
                 token_cons = ignore_constructor
             for name in ('text', 'trivia', 'symbol'):
-                try:
-                    start_ignore_layout, end_ignore_layout = rule_annot[name]
-                except KeyError:
+                annot = getattr(rule_annot, name)
+                if not annot:
                     continue
+                start_ignore_layout, end_ignore_layout = annot
 
                 check_source_language(token_cons is None,
                                       'At most one token action allowed')
                 token_cons = token_cls_map[name]
-            is_pre = rule_annot.get('pre_rule', False)
+            is_pre = rule_annot.pre_rule
             if token_cons is None:
                 token_cons = WithText
 
@@ -471,7 +496,7 @@ def create_lexer(ctx, lkt_units):
             tokens[token_name] = token
             if token_set is not None:
                 token_set.add(token)
-            if 'newline_after' in rule_annot:
+            if rule_annot.newline_after:
                 newline_after.append(token)
 
             # Lower the lexing rule, if present
@@ -629,14 +654,14 @@ def create_lexer(ctx, lkt_units):
 
     # Create the Lexer instance and register all patterns and lexing rules
     result = Lexer(token_class,
-                   'track_indent' in lexer_annot,
+                   lexer_annot.track_indent,
                    pre_rules)
     for name, regexp in patterns.items():
         result.add_patterns((name.lower, regexp))
     result.add_rules(*rules)
 
     # Register spacing/newline rules
-    for tf1, tf2 in lexer_annot.get('spacing', []):
+    for tf1, tf2 in lexer_annot.spacing:
         result.add_spacing((lower_family_ref(tf1),
                             lower_family_ref(tf2)))
     result.add_newline_after(*newline_after)
@@ -682,7 +707,7 @@ def create_grammar(ctx, lkt_units):
 
             # Register the main rule if the appropriate annotation is present
             a = parse_annotations(ctx, grammar_rule_annotations, full_rule)
-            if 'main_rule' in a:
+            if a.main_rule:
                 check_source_language(main_rule_name is None,
                                       'only one main rule allowed')
                 main_rule_name = rule_name
@@ -1019,7 +1044,7 @@ def create_types(ctx, lkt_units):
 
         :param names.Name name: DSL name for this node type.
         :param liblktlang.ClassDecl decl: Corresponding declaration node.
-        :param dict[str, T] annotations: Annotations for this declaration.
+        :param ParsedAnnotations annotations: Annotations for this declaration.
         :rtype: ASTNodeType
         """
         # Resolve the base node (if any)
@@ -1027,7 +1052,7 @@ def create_types(ctx, lkt_units):
                 if decl.f_base_type else None)
 
         # Make sure the root_node annotation is used when appropriate
-        root_node = annotations.get('root_node')
+        root_node = annotations.root_node
         if base is None:
             check_source_language(
                 root_node,
@@ -1060,7 +1085,7 @@ def create_types(ctx, lkt_units):
             doc=ctx.lkt_doc(full_decl),
             base=base,
             fields=fields,
-            is_abstract=annotations.get('abstract'),
+            is_abstract=annotations.abstract,
         )
 
     for name in sorted(syntax_types):
