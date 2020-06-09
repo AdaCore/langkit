@@ -299,7 +299,8 @@ token_cls_map = {'text': WithText,
                  'symbol': WithSymbol}
 
 # Annotations for node declarations
-node_annotations = [FlagAnnotationSpec('root_node')]
+node_annotations = [FlagAnnotationSpec('root_node'),
+                    FlagAnnotationSpec('abstract')]
 
 
 def parse_annotations(ctx, specs, full_decl):
@@ -1068,7 +1069,8 @@ def create_types(ctx, lkt_units):
             location=ctx.lkt_loc(decl),
             doc=ctx.lkt_doc(full_decl),
             base=base,
-            fields=fields
+            fields=fields,
+            is_abstract=annotations.get('abstract'),
         )
 
     for name in sorted(syntax_types):
