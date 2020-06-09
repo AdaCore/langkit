@@ -15,7 +15,7 @@ class Decl : FooNode {
     @parse_field id : Identifier
 }
 
-class Identifier : FooNode {
+@token_node class Identifier : FooNode {
 }
 
 class Scope : FooNode {

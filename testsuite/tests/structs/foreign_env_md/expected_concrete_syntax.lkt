@@ -14,7 +14,7 @@ class Def : FooNode {
     @parse_field ref : Name
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 
     fun sym (): Symbol = node.symbol
 

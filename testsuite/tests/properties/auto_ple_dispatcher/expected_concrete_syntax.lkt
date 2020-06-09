@@ -33,7 +33,7 @@ class Var : DefNode {
     @export fun resolve (): FooNode
 }
 
-class Id : Name {
+@token_node class Id : Name {
 
     fun resolve (): FooNode = node.node_env().get_first(node)
 }

@@ -12,7 +12,7 @@ grammar foo_grammar {
     KV(key=key, value=value)
 }
 
-class Example : FooNode {
+@token_node class Example : FooNode {
 }
 
 struct KV {

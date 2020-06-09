@@ -10,7 +10,7 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
-class Atom : FooNode {
+@token_node class Atom : FooNode {
 }
 
 class Sequence : ASTList[FooNode] {

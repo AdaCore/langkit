@@ -17,7 +17,7 @@ grammar foo_grammar {
 enum class Enum (Null, Example, Default) : FooNode {
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class Param : FooNode {

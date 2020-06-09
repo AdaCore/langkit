@@ -56,7 +56,7 @@ class Sequence : ASTList[FooNode] {
     )
 }
 
-class Ident : FooNode {
+@token_node class Ident : FooNode {
 
     @export fun sym (sym : Symbol): Symbol = sym
 }

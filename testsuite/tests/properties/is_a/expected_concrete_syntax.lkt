@@ -18,5 +18,5 @@ class Def : FooNode {
     @parse_field example : Example
 }
 
-class Example : FooNode {
+@token_node class Example : FooNode {
 }

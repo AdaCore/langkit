@@ -19,7 +19,7 @@ class Decl : FooNode {
     @parse_field refs : ASTList[Ref]
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class Ref : FooNode {

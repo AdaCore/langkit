@@ -51,7 +51,7 @@ class Addition : Expr {
     fun eval (): Int = node.lhs.eval() + node.rhs.eval()
 }
 
-class Number : Expr {
+@token_node class Number : Expr {
 
     fun eval (): Int
 
@@ -73,7 +73,7 @@ class Ref : Expr {
     fun eval (): Int = node.referenced_var_decl().eval()
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class VarDecl : FooNode {

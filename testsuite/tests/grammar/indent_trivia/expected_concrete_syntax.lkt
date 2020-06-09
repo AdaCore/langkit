@@ -44,12 +44,12 @@ class Def : FooNode {
     @parse_field stmts : ASTList[Indented]
 }
 
-class Identifier : FooNode {
+@token_node class Identifier : FooNode {
 }
 
 class Indented : FooNode {
     @parse_field inner : ASTList[FooNode]
 }
 
-class Newline : FooNode {
+@token_node class Newline : FooNode {
 }

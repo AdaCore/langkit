@@ -36,7 +36,7 @@ class Def : FooNode {
 @abstract class Atom : Expr {
 }
 
-class Lit : Atom {
+@token_node class Lit : Atom {
 
     fun evaluate_abstract (): Int = 1
 
@@ -75,5 +75,5 @@ class Plus : Expr {
     self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }

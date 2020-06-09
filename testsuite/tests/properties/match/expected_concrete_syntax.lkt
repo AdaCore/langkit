@@ -76,13 +76,13 @@ class Def : FooNode {
     )
 }
 
-@abstract class Atom : Expr {
+@abstract @token_node class Atom : Expr {
 }
 
-class Lit : Atom {
+@token_node class Lit : Atom {
 }
 
-class Ref : Atom {
+@token_node class Ref : Atom {
 }
 
 class Plus : Expr {
@@ -90,5 +90,5 @@ class Plus : Expr {
     @parse_field rhs : Expr
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
