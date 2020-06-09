@@ -21,7 +21,7 @@ grammar foo_grammar {
 
 class FunDecl : Decl {
     @parse_field name : Name
-    @parse_field value : Expr
+    @parse_field @null_field value : Expr
 }
 
 class VarDecl : Decl {
