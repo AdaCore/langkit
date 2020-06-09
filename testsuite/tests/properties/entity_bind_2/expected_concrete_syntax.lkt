@@ -16,13 +16,13 @@ grammar foo_grammar {
     node.xref_eq(arg1, arg2).solve()
 }
 
-class Identifier : RootNode {
+@token_node class Identifier : RootNode {
 
     fun xref_eq (arg1 : FooNode, arg2 : FooNode): LogicEquation =
     %domain(node.var, [node])
 }
 
-class Literal : RootNode {
+@token_node class Literal : RootNode {
 
     fun is_eq (other : Literal): Bool = node.as_entity = other
 

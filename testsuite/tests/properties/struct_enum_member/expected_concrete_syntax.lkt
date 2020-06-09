@@ -42,10 +42,10 @@ class VarDecl : Decl {
 @abstract class Expression : FooNode {
 }
 
-class Literal : Expression {
+@token_node class Literal : Expression {
 }
 
-class Name : Expression {
+@token_node class Name : Expression {
 }
 
 class Plus : Expression {

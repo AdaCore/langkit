@@ -33,15 +33,15 @@ class VarDecl : Decl {
 @abstract class Expr : FooNode {
 }
 
-class Number : Expr {
+@token_node class Number : Expr {
 }
 
 class Ref : Expr {
     @parse_field name : Name
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
-class VarKeyword : FooNode {
+@token_node class VarKeyword : FooNode {
 }

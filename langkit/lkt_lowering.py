@@ -306,7 +306,8 @@ token_cls_map = {'text': WithText,
 
 # Annotations for node declarations
 node_annotations = [FlagAnnotationSpec('root_node'),
-                    FlagAnnotationSpec('abstract')]
+                    FlagAnnotationSpec('abstract'),
+                    FlagAnnotationSpec('token_node')]
 
 
 def parse_annotations(ctx, specs, full_decl):
@@ -1079,6 +1080,13 @@ def create_types(ctx, lkt_units):
             'Class inner decls not currently supported'
         )
 
+        # This is a token node if either the annotation is present, or if the
+        # base node is a token node itself.
+        is_token_node = (
+            annotations.token_node
+            or (base is not None and bsae.is_token_node)
+        )
+
         return ASTNodeType(
             name,
             location=ctx.lkt_loc(decl),
@@ -1086,6 +1094,7 @@ def create_types(ctx, lkt_units):
             base=base,
             fields=fields,
             is_abstract=annotations.abstract,
+            is_token_node=is_token_node,
         )
 
     for name in sorted(syntax_types):

@@ -8,7 +8,7 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class Tuple : FooNode {

@@ -15,5 +15,5 @@ class Decl : FooNode {
     @export fun lookup (n : Name): FooNode = self.node_env().get_first(n.symbol)
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }

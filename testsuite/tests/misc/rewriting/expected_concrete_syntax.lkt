@@ -26,7 +26,7 @@ class Def : FooNode {
 @abstract class Expr : FooNode {
 }
 
-class Literal : Expr {
+@token_node class Literal : Expr {
 }
 
 class ParenExpr : Expr {
@@ -42,5 +42,5 @@ class Ref : Expr {
     @parse_field name : Name
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }

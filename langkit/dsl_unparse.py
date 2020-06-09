@@ -1154,6 +1154,7 @@ def emit_node_type(node_type):
     enum_members = ""
     builtin_properties = []
     abstract_qual = ""
+    token_node = ''
     type_kind = "struct"
 
     if isinstance(node_type, ASTNodeType):
@@ -1173,6 +1174,8 @@ def emit_node_type(node_type):
             "@root_node " if node_type.is_root_node
             else "@abstract " if node_type.abstract else ""
         )
+
+        token_node = '@token_node ' if node_type.is_token_node else ''
 
         type_kind = "class"
 
@@ -1217,7 +1220,7 @@ def emit_node_type(node_type):
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
-    ${abstract_qual}${qual_node}${type_kind} ${type_name(node_type)} ${enum_members}${strbase}{$i$hl
+    ${abstract_qual}${qual_node}${token_node}${type_kind} ${type_name(node_type)} ${enum_members}${strbase}{$i$hl
     % for field in parse_fields:
     ${emit_field(field)}$hl
     % endfor

@@ -34,7 +34,7 @@ class AttrRef : Expr {
     @parse_field name : Name
 }
 
-class CharLit : Expr {
+@token_node class CharLit : Expr {
 }
 
 class DotExpr : Expr {
@@ -42,5 +42,5 @@ class DotExpr : Expr {
     @parse_field suffix : Name
 }
 
-class Name : Expr {
+@token_node class Name : Expr {
 }

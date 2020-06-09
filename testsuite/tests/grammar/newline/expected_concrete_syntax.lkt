@@ -41,7 +41,7 @@ class IndentNode : FooNode {
     @parse_field lit_2 : Literal
 }
 
-class Literal : FooNode {
+@token_node class Literal : FooNode {
 }
 
 class NewLineNode : FooNode {

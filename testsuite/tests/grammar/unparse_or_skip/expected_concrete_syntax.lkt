@@ -20,8 +20,8 @@ class DefNode : FooNode {
 class ErrorDef : FooNode {
 }
 
-class Identifier : FooNode {
+@token_node class Identifier : FooNode {
 }
 
-class Number : FooNode {
+@token_node class Number : FooNode {
 }

@@ -10,7 +10,7 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
-class Id : FooNode {
+@token_node class Id : FooNode {
 
     @export fun get_scope (): FooNode = node.children_env().get_first("Scope")
 }

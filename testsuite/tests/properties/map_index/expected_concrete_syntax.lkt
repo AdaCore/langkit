@@ -13,5 +13,5 @@ class ListNode : FooNode {
     @export fun prop (): Array[Int] = node.nb_list.map((_, i) => i)
 }
 
-class NumberNode : FooNode {
+@token_node class NumberNode : FooNode {
 }

@@ -52,5 +52,5 @@ class Param : DefNode {
 class Params : ASTList[Param] {
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }

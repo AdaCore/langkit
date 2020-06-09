@@ -29,7 +29,7 @@ class Def : FooNode {
     @parse_field example : Example
 }
 
-class Example : FooNode {
+@token_node class Example : FooNode {
 
     @export fun lookup_all (name : Symbol): Array[FooNode] =
     node.children_env().get(name)
@@ -45,7 +45,7 @@ class Example : FooNode {
     )
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class Var : FooNode {

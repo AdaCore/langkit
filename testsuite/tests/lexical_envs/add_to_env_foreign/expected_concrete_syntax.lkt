@@ -45,7 +45,7 @@ class ScopedId : Id {
     node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
-class SimpleId : Id {
+@token_node class SimpleId : Id {
 
     fun simple_name (): SimpleId = node
 

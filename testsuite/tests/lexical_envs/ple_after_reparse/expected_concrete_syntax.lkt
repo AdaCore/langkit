@@ -28,7 +28,7 @@ class Dep : FooNode {
     node.referenced_unit_or_error(false)
 }
 
-class Id : Name {
+@token_node class Id : Name {
 
     fun resolve (): FooNode = node.node_env().get_first(node)
 

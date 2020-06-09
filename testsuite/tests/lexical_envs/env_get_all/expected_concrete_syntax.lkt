@@ -12,7 +12,7 @@ grammar foo_grammar {
     @export fun env_get_all (): Array[FooNode] = node.children_env().get(null)
 }
 
-class Id : FooNode {
+@token_node class Id : FooNode {
 }
 
 class Program : FooNode {

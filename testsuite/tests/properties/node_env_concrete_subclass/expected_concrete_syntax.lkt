@@ -30,7 +30,7 @@ class OtherDecl : BaseDecl {
     @parse_field name : Name
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class RootNode : FooNode {

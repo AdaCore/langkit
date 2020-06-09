@@ -16,7 +16,7 @@ class Example : FooNode {
     fun get_num (): Int = 2
 }
 
-class Literal : FooNode {
+@token_node class Literal : FooNode {
 
     fun get_num (): Int = 3
 

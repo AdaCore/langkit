@@ -25,7 +25,7 @@ class Decl : FooNode {
 @qualifier class HasPlus : FooNode {
 }
 
-class Name : FooNode {
+@token_node class Name : FooNode {
 }
 
 class Ref : FooNode {

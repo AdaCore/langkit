@@ -16,5 +16,5 @@ class DefNode : FooNode {
     @parse_field values : ASTList[DefNode]
 }
 
-class Identifier : FooNode {
+@token_node class Identifier : FooNode {
 }
