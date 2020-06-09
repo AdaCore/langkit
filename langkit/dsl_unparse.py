@@ -1095,9 +1095,10 @@ def emit_field(field):
     from langkit.compiled_types import BaseField, Field
 
     if isinstance(field, BaseField):
-        return "{}{}{} : {}".format(
+        return "{}{}{}{} : {}".format(
             "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
+            "@null_field " if field.null else "",
             unparsed_name(field._indexing_name), type_name(field.type)
         )
     else:
