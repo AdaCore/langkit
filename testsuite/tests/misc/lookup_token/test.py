@@ -16,5 +16,6 @@ class Example(FooNode):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
-              ada_main='main.adb', unparse_script=unparse_all_script)
+              ada_main='main.adb', unparse_script=unparse_all_script,
+              types_from_lkt=True)
 print('Done')
