@@ -1002,6 +1002,25 @@ def create_types(ctx, lkt_units):
                     names.Name.from_camel(ref.f_type_name.text),
                     defer
                 )
+
+            elif isinstance(ref, liblktlang.GenericTypeRef):
+                check_source_language(
+                    isinstance(ref.f_type_name, liblktlang.RefId),
+                    'Invalid generic type'
+                )
+                gen_type = ref.f_type_name.text
+                gen_args = list(ref.f_params)
+                if gen_type == 'ASTList':
+                    check_source_language(
+                        len(gen_args) == 1,
+                        'Exactly one type argument expected'
+                    )
+                    elt_type = resolve_type_ref(gen_args[0], defer)
+                    return elt_type.list
+
+                else:
+                    check_source_language(False, 'Unknown generic type')
+
             else:
                 raise NotImplementedError(
                     'Unhandled type reference: {}'.format(ref)
