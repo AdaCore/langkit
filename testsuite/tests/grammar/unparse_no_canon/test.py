@@ -27,6 +27,6 @@ class Number(FooNode):
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt',
-              ada_main='main.adb', generate_unparser=True)
+              ada_main='main.adb', generate_unparser=True, types_from_lkt=True)
 
 print('Done')

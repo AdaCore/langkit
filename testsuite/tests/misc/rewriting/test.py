@@ -55,5 +55,6 @@ build_and_run(lkt_file='expected_concrete_syntax.lkt',
                         'preserve_formatting.adb',
                         'preserve_formatting_wrap.adb',
                         'clone_synthetic.adb'],
-              generate_unparser=True)
+              generate_unparser=True,
+              types_from_lkt=True)
 print('Done')
