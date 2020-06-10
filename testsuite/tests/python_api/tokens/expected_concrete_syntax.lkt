@@ -7,7 +7,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@root_node @has_abstract_list class FooNode {
 }
 
 @token_node class Atom : FooNode {

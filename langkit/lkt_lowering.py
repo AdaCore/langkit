@@ -308,8 +308,9 @@ token_cls_map = {'text': WithText,
                  'symbol': WithSymbol}
 
 # Annotations for node declarations
-node_annotations = [FlagAnnotationSpec('root_node'),
-                    FlagAnnotationSpec('abstract'),
+node_annotations = [FlagAnnotationSpec('abstract'),
+                    FlagAnnotationSpec('has_abstract_list'),
+                    FlagAnnotationSpec('root_node'),
                     FlagAnnotationSpec('token_node')]
 field_annotations = [FlagAnnotationSpec('abstract'),
                      FlagAnnotationSpec('null_field'),
@@ -1191,6 +1192,7 @@ def create_types(ctx, lkt_units):
             fields=fields,
             is_abstract=annotations.abstract,
             is_token_node=is_token_node,
+            has_abstract_list=annotations.has_abstract_list,
         )
 
     for name in sorted(syntax_types):

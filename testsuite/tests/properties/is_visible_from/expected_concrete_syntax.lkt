@@ -18,5 +18,5 @@ grammar foo_grammar {
 class Scope : ASTList[Name] {
 }
 
-@token_node class Name : FooNode {
+@token_node @has_abstract_list class Name : FooNode {
 }

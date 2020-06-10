@@ -43,7 +43,7 @@ class BlockVar : DefNode {
     fun name (): Symbol = node.name_field.symbol
 }
 
-class Param : DefNode {
+@has_abstract_list class Param : DefNode {
     @parse_field name_field : Name
 
     fun name (): Symbol = node.name_field.symbol
