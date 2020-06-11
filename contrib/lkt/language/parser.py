@@ -1602,16 +1602,27 @@ class EnumClassAltDecl(TypeDecl):
     env_spec = EnvSpec()
 
 
+class EnumClassCase(LKNode):
+    """
+    case branch for an enum class declaration.
+    """
+    decls = Field(T.EnumClassAltDecl)
+
+
 class EnumClassDecl(NamedTypeDecl):
     """
     Declaration for a LK class. This only cover node classes for the moment,
     but might be extended to support regular classes in the future.
     """
     syn_name = Field(type=T.DefId)
-    alts = Field(type=T.EnumClassAltDecl.list)
     base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
+    branches = Field(type=T.EnumClassCase.list)
     decls = Field(type=DeclBlock)
+
+    alts = Property(Entity.branches.mapcat(
+        lambda branch: branch.decls.map(lambda d: d)
+    ))
 
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
@@ -2781,10 +2792,12 @@ lkt_grammar.add_rules(
 
         EnumClassDecl(
             "enum", "class", G.def_id,
-            "(", List(EnumClassAltDecl(G.def_id), sep=","), ")",
             Opt(":", G.type_ref),
             Opt("implements", G.type_list),
             "{",
+            List(EnumClassCase(
+                "case", List(EnumClassAltDecl(G.def_id), sep=",")
+            ), empty_valid=True),
             G.decl_block,
             "}"
         ),

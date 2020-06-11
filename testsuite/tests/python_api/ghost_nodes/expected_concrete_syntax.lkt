@@ -14,7 +14,8 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
-enum class Enum (Null, Example, Default) : FooNode {
+enum class Enum : FooNode {
+    case Null, Example, Default
 }
 
 @token_node class Name : FooNode {

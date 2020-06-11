@@ -55,7 +55,8 @@ struct Foo {
     fun test_identifier_leak_invalid(): Int = self.a
 }
 
-enum class C (D, E) {
+enum class C {
+    case D, E
     fun wot(): D
 }
 

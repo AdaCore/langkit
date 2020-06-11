@@ -1196,7 +1196,7 @@ def emit_node_type(node_type):
             abstract_qual = ""
             if not node_type.is_bool_node:
                 type_kind = "enum class"
-                enum_members = "$i({})$d ".format(
+                enum_members = (
                     ", $sl".join(alt.name.camel
                                  for alt in node_type.alternatives)
                 )
@@ -1233,7 +1233,11 @@ def emit_node_type(node_type):
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
-    ${abstract_qual}${qual_node}${token_node}${has_abstract_list}${type_kind} ${type_name(node_type)} ${enum_members}${strbase}{$i$hl
+    ${abstract_qual}${qual_node}${token_node}${has_abstract_list}${type_kind} ${type_name(node_type)} ${strbase}{$i$hl
+    % if enum_members:
+    case ${enum_members}
+    $hl
+    % endif
     % for field in parse_fields:
     ${emit_field(field)}$hl
     % endfor
