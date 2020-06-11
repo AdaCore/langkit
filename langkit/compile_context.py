@@ -390,23 +390,27 @@ class CompileCtx:
         :type: bool
         """
 
-        from langkit.lkt_lowering import load_lkt
         self.lkt_units = None
         if lkt_file is None:
             assert grammar, 'LKT spec required when no grammar is provided'
         else:
+            from langkit.lkt_lowering import load_lkt
             self.lkt_units = load_lkt(lkt_file)
 
-        from langkit.lkt_lowering import create_lexer
-        self.lexer = lexer or create_lexer(self, self.lkt_units)
+        self.lexer = lexer
         ":type: langkit.lexer.Lexer"
+        if lexer is None:
+            from langkit.lkt_lowering import create_lexer
+            self.lexer = create_lexer(self, self.lkt_units)
 
-        from langkit.lkt_lowering import create_grammar
-        self.grammar = grammar or create_grammar(self, self.lkt_units)
+        self.grammar = grammar
         ":type: langkit.parsers.Grammar"
+        if grammar is None:
+            from langkit.lkt_lowering import create_grammar
+            self.grammar = create_grammar(self, self.lkt_units)
 
-        from langkit.lkt_lowering import create_types
         if types_from_lkt and self.lkt_units:
+            from langkit.lkt_lowering import create_types
             create_types(self, self.lkt_units)
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
@@ -1772,12 +1776,19 @@ class CompileCtx:
         """
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
-        from langkit.lkt_lowering import lower_grammar_rules
         from langkit.parsers import Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
             MajorStepPass, PropertyPass, errors_checkpoint_pass
         )
+
+        # RA22-015: in order to allow bootstrap, we need to import liblktlang
+        # only if we are about to process LKT grammar rules.
+        def lower_grammar_rules(ctx):
+            if not ctx.grammar._all_lkt_rules:
+                return
+            from langkit.lkt_lowering import lower_grammar_rules
+            lower_grammar_rules(ctx)
 
         return [
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
@@ -1789,8 +1800,7 @@ class CompileCtx:
                        self.lexer.compile_rules),
 
             MajorStepPass('Compiling the grammar'),
-            GlobalPass('lower Lkt parsing rules',
-                       lambda ctx: lower_grammar_rules(ctx)),
+            GlobalPass('lower Lkt parsing rules', lower_grammar_rules),
             GlobalPass('check main parsing rule',
                        self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',
