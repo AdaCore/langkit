@@ -951,39 +951,49 @@ def lower_grammar_rules(ctx):
         grammar._add_rule(name, lower(rule))
 
 
-def create_types(ctx, lkt_units):
+class LktTypesLoader:
     """
-    Create types from Lktlang units.
-
-    :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
-        units where to look for type declarations.
+    Helper class to instanciate ``CompiledType`` for all types described in
+    Lkt.
     """
-    import liblktlang
 
-    # Go through all units, build a map for all type definitions, indexed by
-    # Name. This first pass allows the check of unique names.
-    syntax_types = {}
-    for unit in lkt_units:
-        for full_decl in unit.root.f_decls:
-            if not isinstance(full_decl.f_decl, liblktlang.TypeDecl):
-                continue
-            name_str = full_decl.f_decl.f_syn_name.text
-            name = names.Name.from_camel(name_str)
-            check_source_language(
-                name not in syntax_types,
-                'Duplicate type name: {}'.format(name_str)
-            )
-            syntax_types[name] = full_decl
+    def __init__(self, ctx, lkt_units):
+        """
+        :param CompiledType ctx: Context in which to create these types.
+        :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of
+            analysis units where to look for type declarations.
+        """
+        import liblktlang
 
-    # Now create CompiledType instances for each type. To properly handle
-    # node derivation, recurse on bases first and reject inheritance loops.
+        self.ctx = ctx
+        self.L = liblktlang
 
-    # Map indexed by type Name. Unvisited types are absent, fully processed
-    # types have an entry with the corresponding CompiledType, and currently
-    # processed types have an entry associated with None.
-    compiled_types = {}
+        # Go through all units, build a map for all type definitions, indexed
+        # by Name. This first pass allows the check of unique names.
+        self.syntax_types = {}
+        for unit in lkt_units:
+            for full_decl in unit.root.f_decls:
+                if not isinstance(full_decl.f_decl, self.L.TypeDecl):
+                    continue
+                name_str = full_decl.f_decl.f_syn_name.text
+                name = names.Name.from_camel(name_str)
+                check_source_language(
+                    name not in self.syntax_types,
+                    'Duplicate type name: {}'.format(name_str)
+                )
+                self.syntax_types[name] = full_decl
 
-    def resolve_type_ref(ref, defer):
+        # Now create CompiledType instances for each type. To properly handle
+        # node derivation, recurse on bases first and reject inheritance loops.
+
+        # Map indexed by type Name. Unvisited types are absent, fully processed
+        # types have an entry with the corresponding CompiledType, and
+        # currently processed types have an entry associated with None.
+        self.compiled_types = {}
+        for name in sorted(self.syntax_types):
+            self.create_type_from_name(name, defer=False)
+
+    def resolve_type_ref(self, ref, defer):
         """
         Fetch the CompiledType instance corresponding to the given type
         reference.
@@ -994,16 +1004,16 @@ def create_types(ctx, lkt_units):
             cases.
         :rtype: CompiledType|TypeRepo.Defer
         """
-        with ctx.lkt_context(ref):
-            if isinstance(ref, liblktlang.SimpleTypeRef):
-                return create_type_from_name(
+        with self.ctx.lkt_context(ref):
+            if isinstance(ref, self.L.SimpleTypeRef):
+                return self.create_type_from_name(
                     names.Name.from_camel(ref.f_type_name.text),
                     defer
                 )
 
-            elif isinstance(ref, liblktlang.GenericTypeRef):
+            elif isinstance(ref, self.L.GenericTypeRef):
                 check_source_language(
-                    isinstance(ref.f_type_name, liblktlang.RefId),
+                    isinstance(ref.f_type_name, self.L.RefId),
                     'Invalid generic type'
                 )
                 gen_type = ref.f_type_name.text
@@ -1013,7 +1023,7 @@ def create_types(ctx, lkt_units):
                         len(gen_args) == 1,
                         'Exactly one type argument expected'
                     )
-                    elt_type = resolve_type_ref(gen_args[0], defer)
+                    elt_type = self.resolve_type_ref(gen_args[0], defer)
                     return elt_type.list
 
                 else:
@@ -1024,7 +1034,7 @@ def create_types(ctx, lkt_units):
                     'Unhandled type reference: {}'.format(ref)
                 )
 
-    def create_type_from_name(name, defer):
+    def create_type_from_name(self, name, defer):
         """
         Fetch the CompiledType instance corresponding to the given type
         reference.
@@ -1035,7 +1045,7 @@ def create_types(ctx, lkt_units):
             cases.
         :rtype: CompiledType|TypeRepo.Defer
         """
-        full_decl = syntax_types.get(name)
+        full_decl = self.syntax_types.get(name)
         check_source_language(
             full_decl is not None,
             'Invalid type name: {}'.format(name.camel)
@@ -1046,32 +1056,32 @@ def create_types(ctx, lkt_units):
 
         # Directly return already created CompiledType instances and raise an
         # error for cycles in the type inheritance graph.
-        compiled_type = compiled_types.get(name, "not-visited")
+        compiled_type = self.compiled_types.get(name, "not-visited")
         if isinstance(compiled_type, CompiledType):
             return compiled_type
-        with ctx.lkt_context(decl):
+        with self.ctx.lkt_context(decl):
             check_source_language(
                 compiled_type is not None,
                 'Type inheritance loop detected'
             )
-            compiled_types[name] = None
+            self.compiled_types[name] = None
 
             # Dispatch now to the appropriate type creation helper
-            if isinstance(decl, liblktlang.ClassDecl):
+            if isinstance(decl, self.L.ClassDecl):
                 specs = node_annotations
-                creator = create_node
+                creator = self.create_node
 
             else:
                 raise NotImplementedError(
                     'Unhandled type declaration: {}'.format(decl)
                 )
 
-            annotations = parse_annotations(ctx, specs, full_decl)
+            annotations = parse_annotations(self.ctx, specs, full_decl)
             result = creator(name, decl, annotations)
-            compiled_types[name] = result
+            self.compiled_types[name] = result
             return result
 
-    def lower_fields(decls, allowed_field_types):
+    def lower_fields(self, decls, allowed_field_types):
         """
         Lower the fields described in the given DeclBlock node.
 
@@ -1083,8 +1093,10 @@ def create_types(ctx, lkt_units):
         result = []
         for full_decl in decls:
             decl = full_decl.f_decl
-            annotations = parse_annotations(ctx, field_annotations, full_decl)
-            field_type = resolve_type_ref(decl.f_decl_type, defer=True)
+            annotations = parse_annotations(
+                self.ctx, field_annotations, full_decl
+            )
+            field_type = self.resolve_type_ref(decl.f_decl_type, defer=True)
 
             # Check field name conformity
             name = decl.f_syn_name.text
@@ -1124,12 +1136,14 @@ def create_types(ctx, lkt_units):
                 'Invalid field type in this context'
             )
 
-            field = cls(type=field_type, doc=ctx.lkt_doc(full_decl), **kwargs)
-            field.location = ctx.lkt_loc(decl)
+            field = cls(
+                type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs
+            )
+            field.location = self.ctx.lkt_loc(decl)
             result.append((name, field))
         return result
 
-    def create_node(name, decl, annotations):
+    def create_node(self, name, decl, annotations):
         """
         Create an ASTNodeType instance.
 
@@ -1139,7 +1153,7 @@ def create_types(ctx, lkt_units):
         :rtype: ASTNodeType
         """
         # Resolve the base node (if any)
-        base = (resolve_type_ref(decl.f_base_type, defer=False)
+        base = (self.resolve_type_ref(decl.f_base_type, defer=False)
                 if decl.f_base_type else None)
 
         # Make sure the root_node annotation is used when appropriate
@@ -1179,12 +1193,12 @@ def create_types(ctx, lkt_units):
             if is_token_node
             else (AbstractNodeData, )
         )
-        fields = lower_fields(decl.f_decls, allowed_field_types)
+        fields = self.lower_fields(decl.f_decls, allowed_field_types)
 
         return ASTNodeType(
             name,
-            location=ctx.lkt_loc(decl),
-            doc=ctx.lkt_doc(full_decl),
+            location=self.ctx.lkt_loc(decl),
+            doc=self.ctx.lkt_doc(decl.parent),
             base=base,
             fields=fields,
             is_abstract=annotations.abstract,
@@ -1192,5 +1206,13 @@ def create_types(ctx, lkt_units):
             has_abstract_list=annotations.has_abstract_list,
         )
 
-    for name in sorted(syntax_types):
-        create_type_from_name(name, defer=False)
+
+def create_types(ctx, lkt_units):
+    """
+    Create types from Lktlang units.
+
+    :param CompiledType ctx: Context in which to create these types.
+    :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
+        units where to look for type declarations.
+    """
+    LktTypesLoader(ctx, lkt_units)
