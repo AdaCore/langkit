@@ -18,12 +18,10 @@ from langkit.gdb.state import Binding, ExpressionEvaluation
 
 class ParseError(Exception):
     def __init__(self, line_no, message):
-        super(ParseError, self).__init__(
-            'line {}: {}'.format(line_no, message)
-        )
+        super().__init__('line {}: {}'.format(line_no, message))
 
 
-class DebugInfo(object):
+class DebugInfo:
     """
     Holder for all info that maps generated code to the properties DSL level.
     """
@@ -271,7 +269,7 @@ class DebugInfo(object):
         return self.properties_dict[name]
 
 
-class DSLLocation(object):
+class DSLLocation:
     """
     Source location in the DSL.
     """
@@ -322,7 +320,7 @@ class DSLLocation(object):
         return '<DSLLocation {}>'.format(self)
 
 
-class LineRange(object):
+class LineRange:
     """
     Range of lines in the $-implementation.adb source file.
     """
@@ -342,7 +340,7 @@ class LineRange(object):
         return '{}-{}'.format(self.first_line, self.last_line)
 
 
-class BaseEvent(object):
+class BaseEvent:
     pass
 
 
@@ -396,7 +394,7 @@ class Scope(BaseEvent):
         )
 
 
-class PropertyCall(object):
+class PropertyCall:
     def __init__(self, line_range, name):
         self.line_range = line_range
         self.name = name
@@ -420,7 +418,7 @@ class PropertyCall(object):
 
 class Property(Scope):
     def __init__(self, line_range, name, dsl_sloc, is_dispatcher):
-        super(Property, self).__init__(line_range, name)
+        super().__init__(line_range, name)
         self.name = name
         self.dsl_sloc = dsl_sloc
         self.is_dispatcher = is_dispatcher
@@ -461,7 +459,7 @@ class Event(BaseEvent):
 
 class Bind(Event):
     def __init__(self, line_no, dsl_name, gen_name):
-        super(Bind, self).__init__(line_no, dsl_name)
+        super().__init__(line_no, dsl_name)
         self.dsl_name = dsl_name
         self.gen_name = gen_name
 
@@ -476,7 +474,7 @@ class Bind(Event):
 
 class ExprStart(Event):
     def __init__(self, line_no, expr_id, expr_repr, result_var, dsl_sloc):
-        super(ExprStart, self).__init__(line_no)
+        super().__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
@@ -531,7 +529,7 @@ class ExprStart(Event):
 
 class ExprDone(Event):
     def __init__(self, line_no, expr_id):
-        super(ExprDone, self).__init__(line_no)
+        super().__init__(line_no)
         self.expr_id = expr_id
 
     def apply_on_state(self, scope_state):
@@ -560,7 +558,7 @@ class MemoizationReturn(Event):
         return '<MemoizationReturn, line {}>'.format(self.line_no)
 
 
-class Directive(object):
+class Directive:
     """
     Holder for GDB helper directives as parsed from source files.
     """
@@ -606,7 +604,7 @@ class Directive(object):
 
 class PropertyStart(Directive):
     def __init__(self, name, dsl_sloc, is_dispatcher, line_no):
-        super(PropertyStart, self).__init__(line_no)
+        super().__init__(line_no)
         self.name = name
         self.dsl_sloc = dsl_sloc
         self.is_dispatcher = is_dispatcher
@@ -632,7 +630,7 @@ class PropertyBodyStart(Directive):
 
 class PropertyCallStart(Directive):
     def __init__(self, name, line_no):
-        super(PropertyCallStart, self).__init__(line_no)
+        super().__init__(line_no)
         self.name = name
 
     @classmethod
@@ -663,7 +661,7 @@ class ScopeStart(Directive):
 
 class BindDirective(Directive):
     def __init__(self, dsl_name, gen_name, line_no):
-        super(BindDirective, self).__init__(line_no)
+        super().__init__(line_no)
         self.dsl_name = dsl_name
         self.gen_name = gen_name
 
@@ -681,7 +679,7 @@ class End(Directive):
 
 class ExprStartDirective(Directive):
     def __init__(self, expr_id, expr_repr, result_var, dsl_sloc, line_no):
-        super(ExprStartDirective, self).__init__(line_no)
+        super().__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
@@ -696,7 +694,7 @@ class ExprStartDirective(Directive):
 
 class ExprDoneDirective(Directive):
     def __init__(self, expr_id, line_no):
-        super(ExprDoneDirective, self).__init__(line_no)
+        super().__init__(line_no)
         self.expr_id = expr_id
 
     @classmethod

@@ -114,7 +114,7 @@ def write_ada_file(out_dir, source_kind, qual_name, content,
     write_source_file(file_path, content, post_process)
 
 
-class Emitter(object):
+class Emitter:
     """
     Code and data holder for code emission.
     """
@@ -438,7 +438,7 @@ class Emitter(object):
         Emit Ada sources for the generated library.
         """
 
-        class Unit(object):
+        class Unit:
             def __init__(self, template_base_name, rel_qual_name,
                          has_body=True, ada_api=False, unparser=False,
                          cached_body=False):

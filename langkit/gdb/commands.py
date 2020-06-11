@@ -21,7 +21,7 @@ class BaseCommand(gdb.Command):
                   'command_class': command_class}
         if completer_class is not None:
             kwargs['completer_class'] = completer_class
-        super(BaseCommand, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.context = context
 
 
@@ -38,7 +38,7 @@ only displays information for this variable.
 """
 
     def __init__(self, context):
-        super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
+        super().__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
         args = arg.split()
@@ -68,7 +68,7 @@ only displays information for this variable.
                      var_name=var_name).run()
 
 
-class StatePrinter(object):
+class StatePrinter:
     """
     Helper class to embed code to display the state of the currently running
     property.
@@ -210,8 +210,7 @@ For instance::
 """
 
     def __init__(self, context):
-        super(BreakCommand, self).__init__(context, 'break',
-                                           gdb.COMMAND_BREAKPOINTS, None)
+        super().__init__(context, 'break', gdb.COMMAND_BREAKPOINTS, None)
 
     def complete(self, text, word):
         """
@@ -365,7 +364,7 @@ class NextCommand(BaseCommand):
     """Continue execution until reaching another expression."""
 
     def __init__(self, context):
-        super(NextCommand, self).__init__(context, 'next', gdb.COMMAND_RUNNING)
+        super().__init__(context, 'next', gdb.COMMAND_RUNNING)
 
     def invoke(self, arg, from_tty):
         if arg:
@@ -380,7 +379,7 @@ sub-expression.
     """
 
     def __init__(self, context):
-        super(OutCommand, self).__init__(context, 'out', gdb.COMMAND_RUNNING)
+        super().__init__(context, 'out', gdb.COMMAND_RUNNING)
 
     def invoke(self, arg, from_tty):
         if arg:
@@ -395,8 +394,7 @@ dispatch properties in order to land directly in the dispatched property.
     """
 
     def __init__(self, context):
-        super(StepInsideCommand, self).__init__(context, 'si',
-                                                gdb.COMMAND_RUNNING)
+        super().__init__(context, 'si', gdb.COMMAND_RUNNING)
 
     def invoke(self, arg, from_tty):
         if arg:

@@ -62,7 +62,7 @@ def _to_dot(starting_state, get_transitions, get_state_label):
     return '\n'.join(['digraph g {'] + nodes + edges + ['}'])
 
 
-class SequenceReader(object):
+class SequenceReader:
     def __init__(self, sequence):
         self.sequence = sequence
         self.index = 0
@@ -89,9 +89,9 @@ class SequenceReader(object):
         return self.index == len(self.sequence)
 
 
-class RegexpCollection(object):
+class RegexpCollection:
 
-    class Parser(object):
+    class Parser:
         """Base class for regexp components."""
 
         def to_nfa(self, regexps):
@@ -491,7 +491,7 @@ class RegexpCollection(object):
         return cls.Range(char_set)
 
 
-class NFAState(object):
+class NFAState:
     """
     Single state in a non-deterministic finite state machine.
     """
@@ -639,7 +639,7 @@ class NFAState(object):
         #    's': Event(adding=S2,removing=S2),
         #    'z': Event(removing=S1),
         # }.
-        class Event(object):
+        class Event:
             def __init__(self):
                 self.adding = set()
                 self.removing = set()
@@ -739,7 +739,7 @@ class NFAState(object):
         return _to_dot(self, lambda s: s.transitions, lambda s: s.label)
 
 
-class DFAState(object):
+class DFAState:
     """
     Single state in a deterministic state machine.
     """
@@ -795,12 +795,12 @@ class DFAState(object):
                        lambda s: '\n'.join(str(l) for l in sorted(s.labels)))
 
 
-class DFACodeGenHolder(object):
+class DFACodeGenHolder:
     """
     Holder for convenient data structures to generate code for the DFA.
     """
 
-    class State(object):
+    class State:
         def __init__(self, dfa_state, label, transitions, action):
             self.dfa_state = dfa_state
             """

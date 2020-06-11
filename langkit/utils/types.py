@@ -81,7 +81,7 @@ def assert_type(obj, typ):
     return obj
 
 
-class TypeSet(object):
+class TypeSet:
     """
     This class is an helper for when you need to check wether an abstract
     operation was fulfilled for a whole hierarchy of classes, given that if

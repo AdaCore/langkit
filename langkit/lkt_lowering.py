@@ -129,7 +129,7 @@ def find_toplevel_decl(ctx, lkt_units, node_type, label):
     return result
 
 
-class AnnotationSpec(object):
+class AnnotationSpec:
     """
     Synthetic description of how a declaration annotation works.
     """
@@ -222,7 +222,7 @@ class FlagAnnotationSpec(AnnotationSpec):
     Convenience subclass for flags.
     """
     def __init__(self, name):
-        super(FlagAnnotationSpec, self).__init__(
+        super().__init__(
             name, unique=True, require_args=False, default_value=False
         )
 
@@ -235,8 +235,7 @@ class SpacingAnnotationSpec(AnnotationSpec):
     Interpreter for @spacing annotations for lexer.
     """
     def __init__(self):
-        super(SpacingAnnotationSpec, self).__init__('spacing', unique=False,
-                                                    require_args=True)
+        super().__init__('spacing', unique=False, require_args=True)
 
     def interpret(self, ctx, args, kwargs):
         import liblktlang
@@ -260,8 +259,7 @@ class TokenAnnotationSpec(AnnotationSpec):
     Interpreter for @text/symbol/trivia annotations for tokens.
     """
     def __init__(self, name):
-        super(TokenAnnotationSpec, self).__init__(name, unique=True,
-                                                  require_args=True)
+        super().__init__(name, unique=True, require_args=True)
 
     def interpret(self, ctx, args, kwargs):
         check_source_language(not args, 'No positional argument allowed')
@@ -352,7 +350,6 @@ def parse_annotations(ctx, specs, full_decl):
                 'Invalid annotation: {}'.format(name)
             )
             spec.parse_single_annotation(ctx, values, a)
-
 
     # Use the default value for absent annotations
     for s in specs:

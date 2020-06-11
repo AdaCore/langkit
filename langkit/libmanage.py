@@ -24,7 +24,7 @@ from langkit.packaging import Packager
 from langkit.utils import Colors, Log, col, printcol
 
 
-class Directories(object):
+class Directories:
     """
     Helper class used to get various path in source/build/install trees.
     """
@@ -84,7 +84,7 @@ def get_cpu_count():
         return 1
 
 
-class LibraryTypes(object):
+class LibraryTypes:
 
     types = {'static', 'static-pic', 'relocatable'}
 
@@ -127,7 +127,7 @@ class LibraryTypes(object):
                    relocatable='relocatable' in library_type_set)
 
 
-class ManageScript(object):
+class ManageScript:
 
     BUILD_MODES = ('dev', 'prod')
 

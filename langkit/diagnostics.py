@@ -21,7 +21,7 @@ class DiagnosticStyle(enum.Enum):
     """Standard GNU format with basenames."""
 
 
-class Diagnostics(object):
+class Diagnostics:
     """
     Holder class that'll store the language definition source dir. Meant to
     be called by manage before functions depending on knowing the language
@@ -64,7 +64,7 @@ class Diagnostics(object):
         cls.style = style
 
 
-class Location(object):
+class Location:
     """
     Holder for a location in the source code.
     """
@@ -183,7 +183,7 @@ context_stack = []
 """
 
 
-class Context(object):
+class Context:
     """
     Add context for diagnostics. For the moment this context is constituted
     of a message and a location.
@@ -404,7 +404,7 @@ def check_source_language(predicate, message, severity=Severity.error,
             Diagnostics.has_pending_error = True
 
 
-class WarningDescriptor(object):
+class WarningDescriptor:
     """
     Embed information about a class of warnings. Allows to log warning messages
     via the `warn_if` method.
@@ -441,7 +441,7 @@ class WarningDescriptor(object):
                               severity=Severity.warning)
 
 
-class WarningSet(object):
+class WarningSet:
     """
     Set of enabled warnings.
     """

@@ -20,7 +20,7 @@ def copy_with(obj, **kwargs):
 
     Example use::
 
-        class A(object):
+        class A:
             def __init__(self, a, b):
                 self.a = a
                 self.b = b
@@ -56,9 +56,10 @@ class TopologicalSortError(Exception):
     """
 
     def __init__(self, loop):
-        super(TopologicalSortError, self).__init__(
+        super().__init__(
             'Dependency loop detected: {}'
-            .format(', '.join(str(item) for item in loop)))
+            .format(', '.join(str(item) for item in loop))
+        )
         self.loop = loop
 
 

@@ -7,7 +7,7 @@ from langkit.diagnostics import errors_checkpoint
 from langkit.utils import Colors, printcol
 
 
-class PassManager(object):
+class PassManager:
     """
     Holder for compilation passes. Handles passes sequential execution.
     """
@@ -52,7 +52,7 @@ class PassManager(object):
                 p.run(context)
 
 
-class AbstractPass(object):
+class AbstractPass:
     """
     Base class for all specialized compilation passes.
 
@@ -81,7 +81,7 @@ class MajorStepPass(AbstractPass):
     """
 
     def __init__(self, message):
-        super(MajorStepPass, self).__init__(None)
+        super().__init__(None)
         self.message = message
 
     def run(self, context):
@@ -103,7 +103,7 @@ class GlobalPass(AbstractPass):
 
         :param bool disabled: See AbstractPass.
         """
-        super(GlobalPass, self).__init__(name, disabled)
+        super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):
@@ -125,7 +125,7 @@ class EmitterPass(AbstractPass):
 
         :param bool disabled: See AbstractPass.
         """
-        super(EmitterPass, self).__init__(name, disabled)
+        super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):
@@ -140,7 +140,7 @@ class EmbedIpythonPass(AbstractPass):  # no-code-coverage
     """
 
     def __init__(self):
-        super(EmbedIpythonPass, self).__init__("Embed IPython")
+        super().__init__("Embed IPython")
 
     def run(self, context):
         from IPython import embed
@@ -164,7 +164,7 @@ class GrammarRulePass(AbstractPass):
 
         :param bool disabled: See AbstractPass.
         """
-        super(GrammarRulePass, self).__init__(name, disabled)
+        super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):
@@ -194,7 +194,7 @@ class ASTNodePass(AbstractPass):
         :param bool auto_context: If True, setup a diagnostic context for the
             current AST node.
         """
-        super(ASTNodePass, self).__init__(name, disabled)
+        super().__init__(name, disabled)
         self.pass_fn = pass_fn
         self.auto_context = auto_context
 
@@ -228,7 +228,7 @@ class EnvSpecPass(AbstractPass):
             CompiledTypeRepo.astnode_types. Otherwise, iterate on the
             context's list of AST node types.
         """
-        super(EnvSpecPass, self).__init__(name, disabled)
+        super().__init__(name, disabled)
         self.pass_fn = pass_fn
         self.iter_metaclass = iter_metaclass
 
@@ -260,7 +260,7 @@ class PropertyPass(AbstractPass):
 
         :param bool disabled: See AbstractPass.
         """
-        super(PropertyPass, self).__init__(name, disabled)
+        super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):

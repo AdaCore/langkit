@@ -5,7 +5,7 @@ from langkit.gdb.state import State
 from langkit.names import Name
 
 
-class Context(object):
+class Context:
     """
     Holder for generated library-specific information.
     """

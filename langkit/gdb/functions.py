@@ -14,7 +14,7 @@ class Match(gdb.Function):
     def __init__(self, context):
         self.context = context
         self.name = '{}match'.format(context.prefix)
-        super(Match, self).__init__(self.name)
+        super().__init__(self.name)
 
     def invoke(self, *args):
         if len(args) != 2:

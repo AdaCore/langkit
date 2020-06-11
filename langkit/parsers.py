@@ -64,7 +64,7 @@ def add_var_context():
     get_context().parsers_varcontext_stack.pop()
 
 
-class VarDef(object):
+class VarDef:
     """
     Holder object for a variable in parsers. Creating an instance of vardef
     requires a context to exist already.
@@ -123,7 +123,7 @@ class VarDef(object):
         return str(self.name)
 
 
-class GeneratedParser(object):
+class GeneratedParser:
     """
     Simple holder for generated parsers.
     """
@@ -182,7 +182,7 @@ def reject_synthetic(node):
                           'Parsers cannot create synthetic nodes')
 
 
-class Grammar(object):
+class Grammar:
     """
     Holder for parsing rules.
 
@@ -398,7 +398,7 @@ class Grammar(object):
                 )
 
 
-class Parser(object):
+class Parser:
     """
     Base class for parsers building blocks.
     """

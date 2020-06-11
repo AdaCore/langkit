@@ -42,7 +42,7 @@ class BinaryBooleanOperator(AbstractExpression):
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
-        super(BinaryBooleanOperator, self).__init__()
+        super().__init__()
         assert kind in (self.AND, self.OR)
         self.kind = kind
         self.lhs = lhs
@@ -148,7 +148,7 @@ class Eq(AbstractExpression):
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
-        super(Eq, self).__init__()
+        super().__init__()
         self.lhs = lhs
         self.rhs = rhs
 
@@ -242,7 +242,7 @@ class OrderingTest(AbstractExpression):
                 OrderingTest.OPERATOR_IMAGE[self.operator]
             )
 
-            super(OrderingTest.Expr, self).__init__(
+            super().__init__(
                 'Comp_Result', template, T.Bool, [lhs, rhs],
                 abstract_expr=abstract_expr
             )
@@ -259,7 +259,7 @@ class OrderingTest(AbstractExpression):
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
-        super(OrderingTest, self).__init__()
+        super().__init__()
         assert operator in OrderingTest.OPERATOR_IMAGE
         self.operator = operator
         self.lhs = lhs
@@ -336,8 +336,7 @@ class If(AbstractExpression):
             self.else_then = else_then
             self.static_type = then.type
 
-            super(If.Expr, self).__init__('If_Result',
-                                          abstract_expr=abstract_expr)
+            super().__init__('If_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/if_ada', expr=self)
@@ -359,7 +358,7 @@ class If(AbstractExpression):
         :param else_then: If "cond" is evaluated to false,
             this part is returned.
         """
-        super(If, self).__init__()
+        super().__init__()
         self.cond = cond
         self._then = then
         self.else_then = else_then
@@ -389,7 +388,7 @@ class Not(AbstractExpression):
         """
         :param AbstractExpression expr: Operand for the "not" expression.
         """
-        super(Not, self).__init__()
+        super().__init__()
         self.expr = expr
 
     def construct(self):
@@ -430,8 +429,7 @@ class Then(AbstractExpression):
             self.then_scope = then_scope
             self.static_type = self.then_expr.type
 
-            super(Then.Expr, self).__init__('Result_Var',
-                                            abstract_expr=abstract_expr)
+            super().__init__('Result_Var', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/then_ada', then=self)
@@ -468,7 +466,7 @@ class Then(AbstractExpression):
         :param AbstractExpression default_val: The expression to use as
             fallback if expr is null.
         """
-        super(Then, self).__init__()
+        super().__init__()
         self.expr = expr
         self.then_fn = then_fn
         self.default_val = default_val
@@ -570,7 +568,7 @@ class Cond(AbstractExpression):
                 elsif arg N-1 then arg N
                 else               arg N+1
         """
-        super(Cond, self).__init__()
+        super().__init__()
         self.args = args
 
     @property

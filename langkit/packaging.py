@@ -7,7 +7,7 @@ from e3.env import Env
 from e3.fs import cp, mkdir, sync_tree
 
 
-class Packager(object):
+class Packager:
     """
     Helper to distribute Langkit-generated libraries.
     """

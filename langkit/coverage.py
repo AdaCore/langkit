@@ -38,7 +38,7 @@ def html_escape(content):
     return content
 
 
-class InstrumentationMetadata(object):
+class InstrumentationMetadata:
     """
     Holder for metadata produced during source code instrumentation and
     required in order to produce final coverage reports.
@@ -96,12 +96,12 @@ class InstrumentationMetadata(object):
         return result
 
 
-class CoverageReport(object):
+class CoverageReport:
     """
     Code coverage report.
     """
 
-    class Group(object):
+    class Group:
         """
         Group of several source file coverage report.
         """
@@ -110,7 +110,7 @@ class CoverageReport(object):
             self.label = label
             self.files = {}
 
-    class File(object):
+    class File:
         """
         Coverage report for a single file.
         """
@@ -138,7 +138,7 @@ class CoverageReport(object):
         def html_file(self):
             return self.name + '.html'
 
-    class Line(object):
+    class Line:
         """
         Coverage report for a single line.
         """
@@ -148,7 +148,7 @@ class CoverageReport(object):
             self.state = state
             self.annotations = []
 
-    class Annotation(object):
+    class Annotation:
         """
         Coverage annotation related to a line.
         """
@@ -258,12 +258,12 @@ class CoverageReport(object):
                     f.write(r.render('coverage/file_html', src_file=src_file))
 
 
-class PropertyDSLCoverage(object):
+class PropertyDSLCoverage:
     """
     Helper to compute the coverage of the property DSL.
     """
 
-    class Data(object):
+    class Data:
         """
         Coverage data for a DSL expression.
         """
@@ -445,7 +445,7 @@ class PropertyDSLCoverage(object):
                             ))
 
 
-class GNATcov(object):
+class GNATcov:
     """
     Simple wrapper around the "gnatcov" tool.
     """

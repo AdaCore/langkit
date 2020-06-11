@@ -1,5 +1,5 @@
 
-class Name(object):
+class Name:
     """
     Code generation helpers to format names with various casing conventions.
 
@@ -167,7 +167,7 @@ class Name(object):
         return Name(name_or_str)
 
 
-class Convention(object):
+class Convention:
     """Guard to set a default convention."""
 
     def __init__(self, name):

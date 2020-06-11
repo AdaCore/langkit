@@ -85,7 +85,7 @@ class Bind(AbstractExpression):
 
             constructor_args.append(sloc_info_arg(abstract_expr.location))
 
-            super(Bind.Expr, self).__init__(
+            super().__init__(
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
                 T.Equation, constructor_args,
@@ -143,7 +143,7 @@ class Bind(AbstractExpression):
                another parameter.
             2. The two parameters must be of exactly the same type.
         """
-        super(Bind, self).__init__()
+        super().__init__()
         self.from_expr = from_expr
         self.to_expr = to_expr
         self.conv_prop = conv_prop
@@ -301,8 +301,7 @@ class DomainExpr(ComputingExpr):
         # for the default case (no convertion nor equality properties).
         get_context().do_generate_logic_binder()
 
-        super(DomainExpr, self).__init__('Domain_Equation',
-                                         abstract_expr=abstract_expr)
+        super().__init__('Domain_Equation', abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return render('properties/domain_ada', expr=self)
@@ -399,7 +398,7 @@ class Predicate(AbstractExpression):
             self.pred_id = pred_id
             self.logic_var_exprs = logic_var_exprs
 
-            super(Predicate.Expr, self).__init__(
+            super().__init__(
                 'Pred', '{}_Pred.Create'.format(pred_id),
                 T.Equation, logic_var_exprs,
                 abstract_expr=abstract_expr
@@ -423,7 +422,7 @@ class Predicate(AbstractExpression):
         :param [AbstractExpression] exprs: Every argument to pass to the
             predicate, logical variables first, and extra arguments last.
         """
-        super(Predicate, self).__init__()
+        super().__init__()
         self.pred_property = predicate
         self.exprs = exprs
 
@@ -608,7 +607,7 @@ class LogicBooleanOp(AbstractExpression):
         :param AbstractExpression equation_array: An array of equations to
             logically combine via the or operator.
         """
-        super(LogicBooleanOp, self).__init__()
+        super().__init__()
         self.equation_array = equation_array
         self.kind = kind
 
@@ -643,7 +642,7 @@ class Any(LogicBooleanOp):
     """
 
     def __init__(self, equations):
-        super(Any, self).__init__(equations, LogicBooleanOp.KIND_OR)
+        super().__init__(equations, LogicBooleanOp.KIND_OR)
 
 
 @dsl_document
@@ -654,7 +653,7 @@ class All(LogicBooleanOp):
     """
 
     def __init__(self, equations):
-        super(All, self).__init__(equations, LogicBooleanOp.KIND_AND)
+        super().__init__(equations, LogicBooleanOp.KIND_AND)
 
 
 @dsl_document
@@ -664,7 +663,7 @@ class LogicTrue(AbstractExpression):
     """
 
     def __init__(self):
-        super(LogicTrue, self).__init__()
+        super().__init__()
 
     def construct(self):
         return CallExpr('Logic_True', 'True_Rel', T.Equation,
@@ -681,7 +680,7 @@ class LogicFalse(AbstractExpression):
     """
 
     def __init__(self):
-        super(LogicFalse, self).__init__()
+        super().__init__()
 
     def construct(self):
         return CallExpr('Logic_False', 'False_Rel', T.Equation,
@@ -703,7 +702,7 @@ class ResetLogicVar(ResolvedExpression):
         assert logic_var_expr.type == T.LogicVar
         self.logic_var_expr = logic_var_expr
         self.static_type = T.LogicVar
-        super(ResetLogicVar, self).__init__()
+        super().__init__()
 
     def _render_pre(self):
         return '\n'.join([

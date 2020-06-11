@@ -1,7 +1,7 @@
 import gdb
 
 
-class BreakpointGroup(object):
+class BreakpointGroup:
     """
     List of breakpoints to be considered as a single temporary one.
 
@@ -36,7 +36,7 @@ class _Breakpoint(gdb.Breakpoint):
     """
 
     def __init__(self, context, line_no):
-        super(_Breakpoint, self).__init__(
+        super().__init__(
             '{}:{}'.format(context.debug_info.filename, line_no),
             internal=True
         )

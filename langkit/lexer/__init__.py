@@ -15,7 +15,7 @@ from langkit.names import Name
 # the state machine sources, which can be costly.
 
 
-class Matcher(object):
+class Matcher:
     """
     Base class for a matcher. A matcher specificies in which case a given
     input will trigger a match.
@@ -92,7 +92,7 @@ class Pattern(Matcher):
     """
 
     def __init__(self, pattern, location=None):
-        super(Pattern, self).__init__(location)
+        super().__init__(location)
         self.pattern = pattern
 
     @property
@@ -114,7 +114,7 @@ class Pattern(Matcher):
         return ('Pattern', self.pattern)
 
 
-class Action(object):
+class Action:
     """
     Base class for an action. An action specificies what to do with a given
     match.
@@ -270,7 +270,7 @@ class WithSymbol(TokenAction):
     pass
 
 
-class TokenFamily(object):
+class TokenFamily:
     """
     Set of tokens.
 
@@ -313,7 +313,7 @@ class TokenFamily(object):
         )
 
 
-class LexerToken(object):
+class LexerToken:
     """
     Base class from which your token class must derive. Every member needs to
     be an instanciation of a subclass of TokenAction, specifiying what is done
@@ -387,7 +387,7 @@ class LexerToken(object):
                        for t, tf in self.token_to_family.items()))
 
 
-class Lexer(object):
+class Lexer:
     """
     This is the main lexer object, through which you will define your Lexer.
     At initialization time, you will need to provide an enum class to it, that
@@ -762,7 +762,7 @@ class Literal(Matcher):
         Literal("a+")   # Matches "a" followed by "+"
     """
     def __init__(self, to_match, location=None):
-        super(Literal, self).__init__(location)
+        super().__init__(location)
         self.to_match = to_match
 
     @property
@@ -807,7 +807,7 @@ class Ignore(Action):
         return 'Ignore'
 
 
-class RuleAssoc(object):
+class RuleAssoc:
     """
     Base class for a matcher -> action association. This class should not be
     used directly, since you can provide a tuple to add_rules, that will be
@@ -823,7 +823,7 @@ class RuleAssoc(object):
         return ('RuleAssoc', self.matcher.signature, self.action.signature)
 
 
-class Alt(object):
+class Alt:
     """
     Holder class used to specify the alternatives to a Case rule. Can only
     be used in this context.
@@ -875,7 +875,7 @@ class Case(RuleAssoc):
 
     class CaseAction(Action):
         def __init__(self, match_length, *alts):
-            super(Case.CaseAction, self).__init__()
+            super().__init__()
             self.location = extract_library_location()
             self.match_length = match_length
 
@@ -911,6 +911,6 @@ class Case(RuleAssoc):
                     sorted(alt.signature for alt in self.all_alts))
 
     def __init__(self, matcher, *alts):
-        super(Case, self).__init__(
+        super().__init__(
             matcher, Case.CaseAction(matcher.match_length, *alts)
         )

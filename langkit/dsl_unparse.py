@@ -18,7 +18,7 @@ def fqn(prop):
     return "{}.{}".format(prop.struct.name.camel, prop._original_name.lower)
 
 
-class DSLWalker(object):
+class DSLWalker:
     """
     DSLWalker can be used to traverse the *Python* syntax tree in which the
     language description is written (with the current langkit DSL).
@@ -57,7 +57,7 @@ class DSLWalker(object):
     if lpl is not None:
         ctx = lpl.AnalysisContext()
 
-    class NoOpWalker(object):
+    class NoOpWalker:
         """
         Helper object that accepts any method call and attribute access without
         doing anything. Useful for substituting an actual DSLWalker when it's

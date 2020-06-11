@@ -271,7 +271,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
         return ret
 
 
-class Frozable(object):
+class Frozable:
     """
     Trait class that defines:
 
@@ -351,7 +351,7 @@ class Frozable(object):
         return wrapper
 
 
-class DocumentedExpression(object):
+class DocumentedExpression:
     """
     Holder for documentation data associated to a property DSL constructor
     (attribute or class constructor).
@@ -937,7 +937,7 @@ def auto_attr(fn):
     return auto_attr_custom(None)(fn)
 
 
-class ResolvedExpression(object):
+class ResolvedExpression:
     """
     Resolved expressions are expressions that can be readily rendered to code
     that will correspond to the initial expression, depending on the bound
@@ -1397,7 +1397,7 @@ class VariableExpr(ResolvedExpression):
         self.abstract_var = abstract_var
         self._ignored = False
 
-        super(VariableExpr, self).__init__(skippable_refcount=True)
+        super().__init__(skippable_refcount=True)
 
     @property
     def result_var(self):
@@ -1472,7 +1472,7 @@ class ErrorExpr(ResolvedExpression):
         self.static_type = expr_type
         self.exception_name = exception_name
         self.message = message
-        super(ErrorExpr, self).__init__(skippable_refcount=True)
+        super().__init__(skippable_refcount=True)
 
     def _render_expr(self):
         result = 'raise {}'.format(self.exception_name)
@@ -1491,7 +1491,7 @@ class UnreachableExpr(ErrorExpr):
     """
 
     def __init__(self, expr_type):
-        super(UnreachableExpr, self).__init__(
+        super().__init__(
             expr_type, names.Name('Program_Error'),
             'Executing supposedly unreachable code'
         )
@@ -1508,7 +1508,7 @@ class PropertyError(AbstractExpression):
     def __init__(self, expr_type, message=None):
         self.expr_type = expr_type
         self.message = message
-        super(PropertyError, self).__init__()
+        super().__init__()
 
     def construct(self):
         check_source_language(
@@ -1541,8 +1541,7 @@ class LiteralExpr(ResolvedExpression):
         self.template = template
         self.operands = operands
 
-        super(LiteralExpr, self).__init__(skippable_refcount=True,
-                                          abstract_expr=abstract_expr)
+        super().__init__(skippable_refcount=True, abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return '\n'.join(o.render_pre() for o in self.operands)
@@ -1645,8 +1644,7 @@ class BooleanLiteralExpr(BindableLiteralExpr):
 
     def __init__(self, value, abstract_expr=None):
         self.value = value
-        super(BooleanLiteralExpr, self).__init__(str(value), T.Bool,
-                                                 abstract_expr=abstract_expr)
+        super().__init__(str(value), T.Bool, abstract_expr=abstract_expr)
 
     def render_private_ada_constant(self):
         return str(self.value)
@@ -1668,9 +1666,7 @@ class IntegerLiteralExpr(BindableLiteralExpr):
 
     def __init__(self, value, abstract_expr=None):
         self.value = value
-        super(IntegerLiteralExpr, self).__init__(
-            str(value), T.Int, abstract_expr=abstract_expr
-        )
+        super().__init__(str(value), T.Int, abstract_expr=abstract_expr)
 
     def render_private_ada_constant(self):
         return str(self.value)
@@ -1696,7 +1692,7 @@ class CharacterLiteralExpr(BindableLiteralExpr):
 
         self.ada_value = "Character_Type'Val ({})".format(ord(self.value))
 
-        super(CharacterLiteralExpr, self).__init__(
+        super().__init__(
             self.ada_value, T.Character, abstract_expr=abstract_expr
         )
 
@@ -1743,7 +1739,7 @@ class EnumLiteralExpr(BindableLiteralExpr):
 
     def __init__(self, value, abstract_expr=None):
         self.value = value
-        super(EnumLiteralExpr, self).__init__(
+        super().__init__(
             self.render_private_ada_constant(),
             self.value.type,
             abstract_expr=abstract_expr
@@ -1776,8 +1772,7 @@ class NullExpr(BindableLiteralExpr):
     """
 
     def __init__(self, type, abstract_expr=None):
-        super(NullExpr, self).__init__(type.nullexpr, type,
-                                       abstract_expr=abstract_expr)
+        super().__init__(type.nullexpr, type, abstract_expr=abstract_expr)
 
     def render_private_ada_constant(self):
         return self._render_expr()
@@ -1823,7 +1818,7 @@ class UncheckedCastExpr(ResolvedExpression):
         self.expr = expr
         self.dest_type = dest_type
         self.static_type = dest_type
-        super(UncheckedCastExpr, self).__init__()
+        super().__init__()
 
     def _render_pre(self):
         return self.expr.render_pre()
@@ -1856,8 +1851,7 @@ class ComputingExpr(ResolvedExpression):
     """
 
     def __init__(self, result_var_name, abstract_expr=None):
-        super(ComputingExpr, self).__init__(result_var_name,
-                                            abstract_expr=abstract_expr)
+        super().__init__(result_var_name, abstract_expr=abstract_expr)
 
     def _render_expr(self):
         return self.result_var.name.camel_with_underscores
@@ -1881,9 +1875,8 @@ class SavedExpr(ResolvedExpression):
             self.exposed_result_var = expr.result_var
             result_var_name = None
 
-        super(SavedExpr, self).__init__(result_var_name,
-                                        skippable_refcount=True,
-                                        abstract_expr=abstract_expr)
+        super().__init__(result_var_name, skippable_refcount=True,
+                         abstract_expr=abstract_expr)
 
         if result_var_name:
             self.exposed_result_var = self._result_var
@@ -1947,8 +1940,7 @@ class SequenceExpr(ResolvedExpression):
         # This expression completely delegates the work of managing the result
         # value to `post_expr`, so we can safely avoid all ref-counting
         # activity here.
-        super(SequenceExpr, self).__init__(skippable_refcount=True,
-                                           abstract_expr=abstract_expr)
+        super().__init__(skippable_refcount=True, abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return '{}\n{}'.format(self.pre_expr.render_pre(),
@@ -1970,7 +1962,7 @@ class SequenceExpr(ResolvedExpression):
             self.dest_var = dest_var
             self.expr = expr
             self.static_type = dest_var.type
-            super(SequenceExpr._ForwardExpr, self).__init__()
+            super().__init__()
 
         def _render_pre(self):
             result = [self.expr.render_pre()]
@@ -2049,7 +2041,7 @@ class AbstractVariable(AbstractExpression):
         :param names.Name|None source_name: If this variables comes from the
             language specification, hold its original name.
         """
-        super(AbstractVariable, self).__init__()
+        super().__init__()
 
         # Kludge: in DynamicVariable and only there, name can be None
         if name is not None and name.lower == '_':
@@ -2151,7 +2143,7 @@ class DynamicVariable(AbstractVariable):
         :param CompiledType type: Variable type.
         """
         self.argument_name = names.Name.from_lower(name)
-        super(DynamicVariable, self).__init__(None, type)
+        super().__init__(None, type)
 
     @property
     def dsl_name(self):
@@ -2233,7 +2225,7 @@ class DynamicVariable(AbstractVariable):
                 self.argument_name.lower
             )
         )
-        return super(DynamicVariable, self).construct()
+        return super().construct()
 
     def __repr__(self):
         return '<DynamicVariable {}>'.format(self.argument_name.lower)
@@ -2286,10 +2278,7 @@ class DynamicVariableBindExpr(ComputingExpr):
         self.to_eval_expr = to_eval_expr
         self.static_type = self.to_eval_expr.type
 
-        super(DynamicVariableBindExpr, self).__init__(
-            'Dyn_Var_Bind_Result',
-            abstract_expr=abstract_expr
-        )
+        super().__init__('Dyn_Var_Bind_Result', abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return '\n'.join([
@@ -2408,7 +2397,7 @@ class SelfVariable(AbstractVariable):
         assert SelfVariable._singleton is None
         SelfVariable._singleton = self
         self._type = None
-        super(SelfVariable, self).__init__(names.Name('Self'))
+        super().__init__(names.Name('Self'))
 
     @contextmanager
     def bind_type(self, type):
@@ -2437,7 +2426,7 @@ class SelfVariable(AbstractVariable):
         return self.construct_nocheck()
 
     def construct_nocheck(self):
-        return super(SelfVariable, self).construct()
+        return super().construct()
 
 
 Self = SelfVariable()
@@ -2449,12 +2438,12 @@ class EntityVariable(AbstractVariable):
     def __init__(self):
         assert EntityVariable._singleton is None
         EntityVariable._singleton = self
-        super(EntityVariable, self).__init__(names.Name('Ent'))
+        super().__init__(names.Name('Ent'))
 
     def construct(self):
         PropertyDef.get().set_uses_entity_info()
         PropertyDef.get()._has_self_entity = True
-        return super(EntityVariable, self).construct()
+        return super().construct()
 
 
 Entity = EntityVariable()
@@ -2468,7 +2457,7 @@ class GetSymbol(AbstractExpression):
     """
 
     def __init__(self, node):
-        super(GetSymbol, self).__init__()
+        super().__init__()
         self.node_expr = node
 
     def construct(self):
@@ -2510,9 +2499,7 @@ class SymbolLiteral(AbstractExpression):
             self.name = name
             get_context().add_symbol_literal(self.name)
 
-            super(SymbolLiteral.Expr, self).__init__(
-                'Sym', abstract_expr=abstract_expr
-            )
+            super().__init__('Sym', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return assign_var(
@@ -2529,7 +2516,7 @@ class SymbolLiteral(AbstractExpression):
         """
         :type name: str
         """
-        super(SymbolLiteral, self).__init__()
+        super().__init__()
         self.name = name
 
     def construct(self):
@@ -2565,8 +2552,7 @@ class BindingScope(ComputingExpr):
 
         # Create a local variable that belong to the outer scope so that at
         # finalization time, our result is still live.
-        super(BindingScope, self).__init__('Scope_Result',
-                                           abstract_expr=abstract_expr)
+        super().__init__('Scope_Result', abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return render('properties/binding_scope', expr=self)
@@ -2622,8 +2608,7 @@ class Let(AbstractExpression):
             # This expression does not create itself the result value: expr
             # does. Hence, relying on expr's result variable to make sure there
             # is no ref-counting issue is fine.
-            super(Let.Expr, self).__init__('Let_Result',
-                                           abstract_expr=abstract_expr)
+            super().__init__('Let_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             prop = PropertyDef.get()
@@ -2671,7 +2656,7 @@ class Let(AbstractExpression):
             with default values (AbstractExpression instances) and that returns
             another AbstractExpression.
         """
-        super(Let, self).__init__()
+        super().__init__()
         argspec = inspect.getargspec(lambda_fn)
 
         self.vars = None
@@ -2802,8 +2787,7 @@ class Try(AbstractExpression):
             self.else_expr = else_expr
             self.static_type = try_expr.type
 
-            super(Try.Expr, self).__init__('Try_Result',
-                                           abstract_expr=abstract_expr)
+            super().__init__('Try_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/try_ada', expr=self)
@@ -2823,7 +2807,7 @@ class Try(AbstractExpression):
             expression is evaluated. If "else_expr" is None, the fallback
             expression is the null expression of the expected type.
         """
-        super(Try, self).__init__()
+        super().__init__()
         self.try_expr = try_expr
         self.else_expr = else_expr
 
@@ -2850,7 +2834,7 @@ class Var(AbstractVariable):
     """
 
     def __init__(self, expr):
-        super(Var, self).__init__(names.Name("Block_Var"), create_local=True)
+        super().__init__(names.Name("Block_Var"), create_local=True)
 
         # For debug purposes, preserve a link to the block that contains this
         # variable. We can't store the block itself as an attribute or we'll
@@ -2876,7 +2860,7 @@ class Var(AbstractVariable):
         del stack
 
     def do_prepare(self):
-        super(Var, self).do_prepare()
+        super().do_prepare()
 
         # If the information is available, find the source name for this
         # variable from the creator's stack frame.
@@ -2908,7 +2892,7 @@ class ArrayLiteral(AbstractExpression):
     """
 
     def __init__(self, elements=[], element_type=None):
-        super(ArrayLiteral, self).__init__()
+        super().__init__()
         self.element_type = element_type
         self.array_type = None
         self.elements = list(elements)
@@ -2967,7 +2951,7 @@ class EnumLiteral(AbstractExpression):
     """
 
     def __init__(self, value):
-        super(EnumLiteral, self).__init__()
+        super().__init__()
         assert isinstance(value, EnumValue)
         self.value = value
 
@@ -3205,7 +3189,7 @@ class PropertyDef(AbstractNodeData):
 
         self.prefix = prefix
 
-        super(PropertyDef, self).__init__(name=name, public=public)
+        super().__init__(name=name, public=public)
 
         self._original_is_public = None
         """
@@ -4418,7 +4402,7 @@ class Literal(AbstractExpression):
     """
 
     def __init__(self, literal):
-        super(Literal, self).__init__()
+        super().__init__()
         self.literal = literal
 
     def construct(self):
@@ -4450,7 +4434,7 @@ class CharacterLiteral(AbstractExpression):
     """
 
     def __init__(self, literal):
-        super(CharacterLiteral, self).__init__()
+        super().__init__()
         self.literal = literal
         check_source_language(
             len(self.literal) == 1,
@@ -4536,8 +4520,7 @@ class BasicExpr(ComputingExpr):
         self.static_type = type
         self.operands = operands
         self.requires_incref = requires_incref
-        super(BasicExpr, self).__init__(result_var_name,
-                                        abstract_expr=abstract_expr)
+        super().__init__(result_var_name, abstract_expr=abstract_expr)
 
     def _render_pre(self):
         expr = self.template.format(*[
@@ -4569,7 +4552,7 @@ class No(AbstractExpression):
         :param CompiledType expr_type: Type for the value this expression
             creates.
         """
-        super(No, self).__init__()
+        super().__init__()
         self.expr_type = expr_type
 
     def do_prepare(self):
@@ -4615,7 +4598,7 @@ class FieldAccessExpr(BasicExpr):
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
-        super(FieldAccessExpr, self).__init__(
+        super().__init__(
             'Fld', '{}.{}', resolve_type(result_type),
             [NullCheckExpr(prefix_expr), field_name],
             requires_incref=do_explicit_incref,
@@ -4633,7 +4616,7 @@ class FieldAccessExpr(BasicExpr):
                                                   self.type.name.camel)
 
 
-class LocalVars(object):
+class LocalVars:
     """
     Represents the state of local variables in a property definition.
     """
@@ -4643,7 +4626,7 @@ class LocalVars(object):
         self.root_scope = LocalVars.Scope(self, None)
         self.current_scope = self.root_scope
 
-    class Scope(object):
+    class Scope:
         """
         Local variables are organized in a traditional scope hierarchy.
 
@@ -4754,7 +4737,7 @@ class LocalVars(object):
             yield self
             self.vars.current_scope = old_scope
 
-    class LocalVar(object):
+    class LocalVar:
         """
         Represents one local variable in a property definition.
         """
@@ -4898,9 +4881,8 @@ class CallExpr(BasicExpr):
             args=', '.join(['{}'] * len(exprs))
         )
 
-        super(CallExpr, self).__init__(result_var_name, template, type, exprs,
-                                       requires_incref=False,
-                                       abstract_expr=abstract_expr)
+        super().__init__(result_var_name, template, type, exprs,
+                         requires_incref=False, abstract_expr=abstract_expr)
 
     @property
     def subexprs(self):
@@ -4933,7 +4915,7 @@ class NullCheckExpr(ResolvedExpression):
         # There is no need for ref-counting handling because this expression
         # only forwards the result of the "expr" operand to the user, without
         # storing it in a local variable.
-        super(NullCheckExpr, self).__init__(skippable_refcount=True)
+        super().__init__(skippable_refcount=True)
 
     @property
     def type(self):
@@ -4961,7 +4943,7 @@ class BigIntLiteral(AbstractExpression):
 
     class Expr(CallExpr):
         def __init__(self, expr, abstract_expr=None):
-            super(BigIntLiteral.Expr, self).__init__(
+            super().__init__(
                 'Big_Int', 'Create_Big_Integer', T.BigInt,
                 [expr], abstract_expr=abstract_expr
             )
@@ -4970,7 +4952,7 @@ class BigIntLiteral(AbstractExpression):
             return '<BigInteger.Expr {}>'.format(self.expr)
 
     def __init__(self, expr):
-        super(BigIntLiteral, self).__init__()
+        super().__init__()
         self.expr = expr
 
     def construct(self):
@@ -5009,7 +4991,7 @@ class Arithmetic(AbstractExpression):
         :param AbstractExpression r: Right operand.
         :param str op: The operator to use, as a string.
         """
-        super(Arithmetic, self).__init__()
+        super().__init__()
         self.l, self.r, self.op = l, r, op
 
     def construct(self):
