@@ -68,7 +68,7 @@ ADA_SPEC = "spec"
 ADA_BODY = "body"
 
 
-class Verbosity(object):
+class Verbosity:
     """
     Helper object to handle verbosity level of notifications during code
     generation.
@@ -146,7 +146,7 @@ class Verbosity(object):
         ]
 
 
-class UnparseScript(object):
+class UnparseScript:
     """
     Sequence of actions to generate concrete syntax DSL.
     """
@@ -187,7 +187,7 @@ class UnparseScript(object):
         return result
 
 
-class LibraryEntity(object):
+class LibraryEntity:
     """
     Reference to an entity in the generated library.
     """
@@ -214,7 +214,7 @@ class LibraryEntity(object):
         return '{}.{}'.format(self.unit_fqn, self.entity_name)
 
 
-class GeneratedException(object):
+class GeneratedException:
     """
     Describe an exception in generated libraries.
     """
@@ -260,7 +260,7 @@ class GeneratedException(object):
         return names.Name('Exception') + self.name
 
 
-class CompileCtx(object):
+class CompileCtx:
     """State holder for native code emission."""
 
     def __init__(self, lang_name, lexer, grammar,
@@ -2458,7 +2458,7 @@ class CompileCtx(object):
             API. Otherwise (the default), assume it is an internal node.
         """
 
-        class Matcher(object):
+        class Matcher:
             """
             Holder for "when ... =>" clauses in a CASE block.
             """
@@ -2492,7 +2492,7 @@ class CompileCtx(object):
                 """
                 return names.Name('N') + astnode.name
 
-        class Case(object):
+        class Case:
             """
             Holder for a generated CASE blocks.
             """
@@ -2647,7 +2647,7 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import T
 
-        class Annotation(object):
+        class Annotation:
             """
             Analysis annotation for a property.
             """

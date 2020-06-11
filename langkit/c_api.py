@@ -5,7 +5,7 @@ from langkit.diagnostics import check_source_language
 from langkit.language_api import AbstractAPISettings
 
 
-class CAPIType(object):
+class CAPIType:
     """
     C API generation helper: encapsulate the logic of C types formatting.
     """

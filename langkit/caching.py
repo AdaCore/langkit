@@ -2,7 +2,7 @@ import hashlib
 import json
 
 
-class Cache(object):
+class Cache:
     """
     General purpose content cache.
 

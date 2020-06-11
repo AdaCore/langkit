@@ -18,7 +18,7 @@ class RefCategories(AbstractExpression):
     class Expr(BindableLiteralExpr):
         def __init__(self, cats, abstract_expr=None):
             self.cats = cats
-            super(RefCategories.Expr, self).__init__(
+            super().__init__(
                 self.render_private_ada_constant(),
                 T.RefCategories,
                 abstract_expr=abstract_expr
@@ -40,7 +40,7 @@ class RefCategories(AbstractExpression):
             return {'cats': self.cats}
 
     def __init__(self, default=False, **kwargs):
-        super(RefCategories, self).__init__()
+        super().__init__()
         self.default = default
         self.cat_map = kwargs
 
@@ -128,8 +128,7 @@ class EnvGet(AbstractExpression):
             )
 
             self.only_first = only_first
-            super(EnvGet.Expr, self).__init__('Env_Get_Result',
-                                              abstract_expr=abstract_expr)
+            super().__init__('Env_Get_Result', abstract_expr=abstract_expr)
 
             PropertyDef.get().set_uses_envs()
 
@@ -198,7 +197,7 @@ class EnvGet(AbstractExpression):
             LookupKind, which controls whether lookup must be performed
             recursively on parent/referenced environments.
         """
-        super(EnvGet, self).__init__()
+        super().__init__()
 
         check_source_language(
             isinstance(symbol, (AbstractExpression, str)),
@@ -307,7 +306,7 @@ def is_visible_from(self, referenced_env, base_env):
 
 class IsVisibleFromExpr(CallExpr):
     def __init__(self, referenced_env, base_env, abstract_expr=None):
-        super(IsVisibleFromExpr, self).__init__(
+        super().__init__(
             'Is_Visible', 'Is_Visible_From', T.Bool,
             [construct(referenced_env, T.LexicalEnv),
              construct(base_env, T.LexicalEnv)],

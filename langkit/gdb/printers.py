@@ -16,7 +16,7 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     """
 
     def __init__(self, context):
-        super(GDBPrettyPrinters, self).__init__(context.lib_name, [])
+        super().__init__(context.lib_name, [])
         self.context = context
 
     def append(self, printer_cls):
@@ -37,7 +37,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
     """Holder for PrettyPrinter subclasses."""
 
     def __init__(self, cls, context):
-        super(GDBSubprinter, self).__init__(cls.name)
+        super().__init__(cls.name)
         self.cls = cls
         self.context = context
 
@@ -49,7 +49,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
         return self.cls(value, self.context)
 
 
-class BasePrinter(object):
+class BasePrinter:
     """
     Base class for pretty-printers.
 
@@ -189,7 +189,7 @@ class ASTNodePrinter(BasePrinter):
         return '<{}>'.format(self.node_to_string())
 
 
-class LexicalEnv(object):
+class LexicalEnv:
     """
     Wrapper for Lexical_Env/Lexical_Env_Access values.
     """

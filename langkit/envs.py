@@ -171,7 +171,7 @@ def do(expr):
     return Do(expr)
 
 
-class EnvSpec(object):
+class EnvSpec:
     """
     Class defining a lexical environment specification for an ASTNode subclass.
     """
@@ -352,7 +352,7 @@ class EnvSpec(object):
         return self._render_field_access(self.initial_env_prop)
 
 
-class EnvAction(object):
+class EnvAction:
 
     resolver = None
     """

@@ -50,8 +50,7 @@ class Cast(AbstractExpression):
             self.unsafe = unsafe
             self.expr = SavedExpr('Cast_Expr', expr)
             self.static_type = dest_type
-            super(Cast.Expr, self).__init__('Cast_Result',
-                                            abstract_expr=abstract_expr)
+            super().__init__('Cast_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/cast_ada', expr=self)
@@ -107,7 +106,7 @@ class Cast(AbstractExpression):
         :param bool do_raise: Whether the exception should raise an
             exception or return null when the cast is invalid.
         """
-        super(Cast, self).__init__()
+        super().__init__()
         self.expr = node
         self.dest_type = dest_type
         self.do_raise = do_raise
@@ -164,7 +163,7 @@ class IsNull(AbstractExpression):
         :param AbstractExpression expr: Expression on which the test is
             performed.
         """
-        super(IsNull, self).__init__()
+        super().__init__()
         self.expr = expr
 
     @classmethod
@@ -249,7 +248,7 @@ class New(AbstractExpression):
             self.assocs = {field_or_lookup(field): expr
                            for field, expr in assocs.items()}
 
-            super(New.StructExpr, self).__init__(
+            super().__init__(
                 result_var_name or 'New_Struct',
                 abstract_expr=abstract_expr
             )
@@ -312,11 +311,11 @@ class New(AbstractExpression):
         """
 
         def __init__(self, astnode, assocs, abstract_expr=None):
-            super(New.NodeExpr, self).__init__(astnode, assocs, 'New_Node',
-                                               abstract_expr=abstract_expr)
+            super().__init__(astnode, assocs, 'New_Node',
+                             abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            return (super(New.NodeExpr, self)._render_fields()
+            return (super()._render_fields()
                     + render('properties/new_astnode_ada', expr=self))
 
     def __init__(self, struct_type, **field_values):
@@ -327,7 +326,7 @@ class New(AbstractExpression):
         :param dict[str, AbstractExpression] fields: Values to assign to the
             fields for the created struct value.
         """
-        super(New, self).__init__()
+        super().__init__()
         self.struct_type = struct_type
         self.field_values = field_values
 
@@ -437,7 +436,7 @@ class FieldAccess(AbstractExpression):
     evaluation.
     """
 
-    class Arguments(object):
+    class Arguments:
         """
         Holder for arguments to pass to a property.
 
@@ -590,7 +589,7 @@ class FieldAccess(AbstractExpression):
             # needed because the property will return an owning reference, so
             # we need it to be attached to the scope. In other cases, this can
             # make debugging easier.
-            super(FieldAccess.Expr, self).__init__(
+            super().__init__(
                 None if self.simple_field_access else 'Fld',
                 abstract_expr=abstract_expr,
             )
@@ -792,7 +791,7 @@ class FieldAccess(AbstractExpression):
         :param FieldAccess.Arguments arguments: Assuming field is a property
             that takes arguments, these are passed to it.
         """
-        super(FieldAccess, self).__init__()
+        super().__init__()
         self.receiver = receiver
         self.field = field
         self.arguments = arguments
@@ -929,7 +928,7 @@ class IsA(AbstractExpression):
             self.astnodes = [a.element_type if a.is_entity_type else a
                              for a in astnodes]
 
-            super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
+            super().__init__('Is_A', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             target = (('{}.Node' if self.expr.type.is_entity_type else '{}')
@@ -962,7 +961,7 @@ class IsA(AbstractExpression):
             is performed.
         :param ASTNode astnode: ASTNode subclass to use for the test.
         """
-        super(IsA, self).__init__()
+        super().__init__()
         self.expr = node_or_entity
         self.astnodes = astnodes
 
@@ -1054,7 +1053,7 @@ class Match(AbstractExpression):
                   lambda e: Y)
     """
 
-    class Matcher(object):
+    class Matcher:
         def __init__(self, match_var, match_expr, inner_scope):
             """
             :param VariableExpr match_var: Variable to hold the matched
@@ -1169,8 +1168,7 @@ class Match(AbstractExpression):
             for matcher, matched in zip(self.matchers, matched_types):
                 matcher.matched_concrete_nodes = matched
 
-            super(Match.Expr, self).__init__('Match_Result',
-                                             abstract_expr=abstract_expr)
+            super().__init__('Match_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/match_ada', expr=self)
@@ -1190,7 +1188,7 @@ class Match(AbstractExpression):
         :param matchers: See the class docstring.
         :type matchers: list[() -> AbstractExpression]
         """
-        super(Match, self).__init__()
+        super().__init__()
         self.matched_expr = node_or_entity
         self.matchers_functions = matchers
 
@@ -1348,10 +1346,7 @@ class StructUpdate(AbstractExpression):
             self.static_type = expr.type
             self.expr = expr
             self.assocs = assocs
-            super(StructUpdate.Expr, self).__init__(
-                'Update_Result',
-                abstract_expr=abstract_expr
-            )
+            super().__init__('Update_Result', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/update_ada', expr=self)
@@ -1371,7 +1366,7 @@ class StructUpdate(AbstractExpression):
         :param dict[str, AbstractExpression] kwargs: Field/value associations
             to replace in the copy.
         """
-        super(StructUpdate, self).__init__()
+        super().__init__()
         self.expr = expr
         self.assocs = kwargs
 

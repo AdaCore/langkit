@@ -58,7 +58,7 @@ class CollectionExpression(AbstractExpression):
 
     _counter = count()
 
-    class ConstructCommonResult(object):
+    class ConstructCommonResult:
         """
         Holder for the result of the "construct_common" method.
         """
@@ -133,7 +133,7 @@ class CollectionExpression(AbstractExpression):
             an induction variable for the iteration index.
         :type collection: AbstractExpression
         """
-        super(CollectionExpression, self).__init__()
+        super().__init__()
         self.collection = collection
         self.expr_fn = expr
         self.expr = None
@@ -284,10 +284,7 @@ class Contains(CollectionExpression):
         :param AbstractExpression item: The item to check in "collection".
         """
         self.item = item
-        super(Contains, self).__init__(
-            collection,
-            lambda item: item.equals(self.item),
-        )
+        super().__init__(collection, lambda item: item.equals(self.item))
 
     def construct(self):
         """
@@ -416,8 +413,7 @@ class Map(CollectionExpression):
             self.static_type = element_type.array
 
             with iter_scope.parent.use():
-                super(Map.Expr, self).__init__('Map_Result',
-                                               abstract_expr=abstract_expr)
+                super().__init__('Map_Result', abstract_expr=abstract_expr)
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
@@ -468,7 +464,7 @@ class Map(CollectionExpression):
             whether to continue the map or not.
         :type take_while_pred: None|(AbstractExpression) -> AbstractExpression
         """
-        super(Map, self).__init__(collection, expr)
+        super().__init__(collection, expr)
 
         self.filter_fn = filter
 
@@ -478,7 +474,7 @@ class Map(CollectionExpression):
         self.take_while_expr = None
 
     def do_prepare(self):
-        super(Map, self).do_prepare()
+        super().do_prepare()
 
         self.filter_expr = check_type(
             self.filter_fn, types.FunctionType,
@@ -625,7 +621,7 @@ class Quantifier(CollectionExpression):
             self.static_type = T.Bool
 
             with iter_scope.parent.use():
-                super(Quantifier.Expr, self).__init__(
+                super().__init__(
                     'Quantifier_Result', abstract_expr=abstract_expr
                 )
 
@@ -667,7 +663,7 @@ class Quantifier(CollectionExpression):
             all elements in "collection" while ANY checks that it holds on at
             least one of them.
         """
-        super(Quantifier, self).__init__(collection, predicate)
+        super().__init__(collection, predicate)
         assert kind in (self.ALL, self.ANY)
         self.kind = kind
 
@@ -813,9 +809,7 @@ class CollectionSingleton(AbstractExpression):
             self.expr = expr
             self.static_type = self.expr.type.array
 
-            super(CollectionSingleton.Expr, self).__init__(
-                'Singleton', abstract_expr=abstract_expr
-            )
+            super().__init__('Singleton', abstract_expr=abstract_expr)
 
         def _render_pre(self):
             result_var = self.result_var.name
@@ -842,7 +836,7 @@ class CollectionSingleton(AbstractExpression):
         :param bool coerce_null: If False, always return a 1-sized array.
             Otherwise, return an empty array when `expr` is null.
         """
-        super(CollectionSingleton, self).__init__()
+        super().__init__()
         self.expr = expr
 
     def construct(self):
@@ -864,7 +858,7 @@ class Concat(AbstractExpression):
         :param AbstractExpression array_1: The first array expression.
         :param AbstractExpression array_2: The second array expression.
         """
-        super(Concat, self).__init__()
+        super().__init__()
         self.array_1 = array_1
         self.array_2 = array_2
 

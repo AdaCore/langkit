@@ -26,7 +26,7 @@ import textwrap
 from mako.template import Template
 
 
-class DocDatabase(object):
+class DocDatabase:
     """
     Database for documentation entries.
     """

@@ -8,7 +8,7 @@ except ImportError:
     gdb = None
 
 
-class Colors(object):
+class Colors:
     """
     Utility escape sequences to color output in terminal.
     """

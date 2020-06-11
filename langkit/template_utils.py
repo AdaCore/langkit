@@ -9,7 +9,7 @@ from langkit.diagnostics import DiagnosticError
 from langkit.names import Name
 
 
-class Renderer(object):
+class Renderer:
 
     def __init__(self, template_env=None, **kwargs):
         self.env = dict(template_env or {})

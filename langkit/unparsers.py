@@ -38,7 +38,7 @@ def unwrap(parser):
             return parser
 
 
-class Unparser(object):
+class Unparser:
     """
     Abstract class for unparsers.
     """
@@ -900,7 +900,7 @@ class TokenNodeUnparser(NodeUnparser):
         pass
 
 
-class TokenSequenceUnparserPool(object):
+class TokenSequenceUnparserPool:
     """
     Helper to help removing redundant token sequence unparsers.
     """
@@ -940,7 +940,7 @@ class TokenSequenceUnparserPool(object):
             tok_seq._serial_number = i
 
 
-class Unparsers(object):
+class Unparsers:
     """
     Holder for the creation of unparsing tables.
 

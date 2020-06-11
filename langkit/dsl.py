@@ -12,7 +12,7 @@ import langkit.names as names
 from langkit.utils import classproperty, inherited_property, issubtype
 
 
-class DSLType(object):
+class DSLType:
     """
     Base class for the representation of types in the DSL.
     """
@@ -295,7 +295,7 @@ def env_metadata(cls):
 inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 
 
-class Annotations(object):
+class Annotations:
     def __init__(self, repr_name=None, generic_list_type=None,
                  warn_on_node=None, rebindable=False,
                  custom_short_image=False, snaps=False,
@@ -790,7 +790,7 @@ def has_abstract_list(cls):
     return cls
 
 
-class _EnumNodeAlternative(object):
+class _EnumNodeAlternative:
     def __init__(self, name):
         """
         :param names.Name name: Alternative name.
@@ -1007,7 +1007,7 @@ class Enum(DSLType, metaclass=_EnumMetaclass):
     """
 
 
-class EnumValue(object):
+class EnumValue:
     """
     Enumeration value, to be used when subclassing Enum.
 
@@ -1059,7 +1059,7 @@ class _BuiltinType(DSLType):
         return CompiledTypeRepo.type_dict[cls._name.camel]
 
 
-class _BuiltinValue(object):
+class _BuiltinValue:
     """
     Base class for all built-in values.
     """

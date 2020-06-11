@@ -89,7 +89,7 @@ def template_extensions(ctx):
     }
 
 
-class CompiledTypeRepo(object):
+class CompiledTypeRepo:
     """
     Namespace class: Repository for every compiled type. This is used to have a
     comprehensive list of every compiled type instance, so that you can use a
@@ -183,7 +183,7 @@ class CompiledTypeRepo(object):
         cls.entity_info = None
 
 
-class AbstractNodeData(object):
+class AbstractNodeData:
     """
     This class defines an abstract base class for fields and properties on
     AST nodes.
@@ -578,7 +578,7 @@ class AbstractNodeData(object):
                 self.api_name).camel_with_underscores
 
 
-class CompiledType(object):
+class CompiledType:
     """
     Descriptor for a type in the generated code.
     """
@@ -1524,7 +1524,7 @@ class LogicVarType(CompiledType):
     """
 
     def __init__(self):
-        super(LogicVarType, self).__init__(
+        super().__init__(
             name='LogicVar',
             nullexpr='null',
             is_ptr=False,
@@ -1554,7 +1554,7 @@ class EnvRebindingsType(CompiledType):
     """
 
     def __init__(self):
-        super(EnvRebindingsType, self).__init__(
+        super().__init__(
             name='EnvRebindings',
             exposed=True,
             null_allowed=True,
@@ -1572,7 +1572,7 @@ class TokenType(CompiledType):
     """
 
     def __init__(self):
-        super(TokenType, self).__init__(
+        super().__init__(
             name='TokenReference',
             dsl_name='Token',
             introspection_prefix='Token',
@@ -1599,7 +1599,7 @@ class TokenType(CompiledType):
         return 'Stored_Token ({}, {})'.format(node_expr, base_expr)
 
 
-class Argument(object):
+class Argument:
     """
     Holder for properties arguments.
     """
@@ -1704,7 +1704,7 @@ class BaseField(AbstractNodeData):
 
         assert self.concrete, 'BaseField itself cannot be instantiated'
 
-        super(BaseField, self).__init__(
+        super().__init__(
             public=True, access_needs_incref=access_needs_incref,
             internal_name=internal_name
         )
@@ -1766,7 +1766,7 @@ class Field(BaseField):
 
     def __init__(self, repr=True, doc='', type=None, abstract=False,
                  null=False):
-        super(Field, self).__init__(repr, doc, type)
+        super().__init__(repr, doc, type)
 
         assert not abstract or not null
         self._abstract = abstract
@@ -1913,7 +1913,7 @@ class Field(BaseField):
         # If parsers build this field, add a precise list of types it can
         # contain: the field type might be too generic.
 
-        result = super(Field, self).doc
+        result = super().doc
 
         # Synthetic nodes are not built by parsers, so for now we don't have
         # precise type information for them.
@@ -2026,7 +2026,7 @@ class UserField(BaseField):
         :param None|AbstractExpression default_value: Default value for this
             field, when omitted from New expressions.
         """
-        super(UserField, self).__init__(
+        super().__init__(
             repr, doc, type, access_needs_incref=access_needs_incref,
             internal_name=internal_name
         )
@@ -2048,7 +2048,7 @@ class BuiltinField(UserField):
     prefix = None
 
     def __init__(self, *args, **kwargs):
-        super(BuiltinField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.should_emit = False
 
 
@@ -2065,7 +2065,7 @@ class BaseStructType(CompiledType):
         if is_keyword(name):
             name = name + names.Name('Node')
 
-        super(BaseStructType, self).__init__(name, location, doc, **kwargs)
+        super().__init__(name, location, doc, **kwargs)
 
     @property
     def py_nullexpr(self):
@@ -2114,7 +2114,7 @@ class StructType(BaseStructType):
             in this list.
         """
         internal_name = names.Name('Internal') + name
-        super(StructType, self).__init__(
+        super().__init__(
             internal_name, location, doc,
             is_ptr=False,
             null_allowed=True,
@@ -2137,7 +2137,7 @@ class StructType(BaseStructType):
                    for f in self.get_fields())
 
     def add_as_memoization_key(self, context):
-        super(StructType, self).add_as_memoization_key(context)
+        super().add_as_memoization_key(context)
         for f in self.get_fields():
             f.type.add_as_memoization_key(context)
 
@@ -2146,7 +2146,7 @@ class StructType(BaseStructType):
         return any(f.type.has_equivalent_function for f in self.get_fields())
 
     def require_hash_function(self):
-        super(StructType, self).require_hash_function()
+        super().require_hash_function()
         for f in self.get_fields():
             f.type.require_hash_function()
 
@@ -2251,7 +2251,7 @@ class EntityType(StructType):
         if not self.astnode.is_root_node:
             name += self.astnode.kwless_raw_name
 
-        super(EntityType, self).__init__(
+        super().__init__(
             name, None, None,
             [('node', BuiltinField(self.astnode, doc='The stored AST node')),
              ('info', BuiltinField(self.astnode.entity_info(),
@@ -2437,7 +2437,7 @@ class ASTNodeType(BaseStructType):
         if is_root_list:
             doc = doc or 'List of {}.'.format(element_type.dsl_name)
 
-        super(ASTNodeType, self).__init__(
+        super().__init__(
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
@@ -2639,7 +2639,7 @@ class ASTNodeType(BaseStructType):
 
     @property
     def doc(self):
-        result = super(ASTNodeType, self).doc
+        result = super().doc
 
         # If this is a list node and that parsers build it, add a precise list
         # of types it can contain: the element type might be too generic.
@@ -3426,7 +3426,7 @@ class ArrayType(CompiledType):
 
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
-        super(ArrayType, self).__init__(
+        super().__init__(
             name=name, is_ptr=True,
             is_refcounted=True,
             nullexpr=self.null_constant.camel_with_underscores,
@@ -3623,7 +3623,7 @@ class ArrayType(CompiledType):
         self._requires_unique_function = True
 
     def require_hash_function(self):
-        super(ArrayType, self).require_hash_function()
+        super().require_hash_function()
 
         # Array hash functions uses the element type's hash function, so
         # it has to be required.
@@ -3660,7 +3660,7 @@ class EnumType(CompiledType):
 
         CompiledTypeRepo.enum_types.append(self)
 
-        super(EnumType, self).__init__(
+        super().__init__(
             name, location, doc, is_ptr=False, exposed=True,
             null_allowed=default_val_name is not None,
             nullexpr=(
@@ -3691,7 +3691,7 @@ class EnumType(CompiledType):
                 .to_abstract_expr)
 
 
-class EnumValue(object):
+class EnumValue:
     """
     Possible value for an enumeration type.
     """
@@ -3760,7 +3760,7 @@ class EnumValue(object):
 
 class BigIntegerType(CompiledType):
     def __init__(self):
-        super(BigIntegerType, self).__init__(
+        super().__init__(
             'BigIntegerType',
             dsl_name='BigInt',
             exposed=True,
@@ -3784,7 +3784,7 @@ class AnalysisUnitType(CompiledType):
     def __init__(self):
         from langkit.expressions import PropertyDef
 
-        super(AnalysisUnitType, self).__init__(
+        super().__init__(
             'InternalUnit',
             exposed=True,
             nullexpr='null',
@@ -3824,7 +3824,7 @@ class SymbolType(CompiledType):
     def __init__(self):
         from langkit.expressions import PropertyDef
 
-        super(SymbolType, self).__init__(
+        super().__init__(
             'SymbolType',
             dsl_name='Symbol',
             introspection_prefix='Unbounded_Text',
@@ -3973,7 +3973,7 @@ def create_builtin_types():
                  hashable=True)
 
 
-class TypeRepo(object):
+class TypeRepo:
     """
     Repository of types. Used to be able to do early references to not yet
     declared types, in this fashion::
@@ -3989,7 +3989,7 @@ class TypeRepo(object):
     Only Struct and AST node types are reachable through the type repository.
     """
 
-    class Defer(object):
+    class Defer:
         """
         Internal class representing a not-yet resolved type.
         """

@@ -34,7 +34,7 @@ def format_char_ranges(ranges):
                                    for interval in ranges))
 
 
-class CharSet(object):
+class CharSet:
     """
     Set of characters.
     """

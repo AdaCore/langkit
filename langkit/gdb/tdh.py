@@ -1,7 +1,7 @@
 import gdb
 
 
-class TDH(object):
+class TDH:
     """
     Helper to deal with tokens data handlers.
     """
@@ -48,7 +48,7 @@ class TDH(object):
                      token_no, trivia_no)
 
 
-class Token(object):
+class Token:
     """
     Helper to deal with tokens.
     """
@@ -95,7 +95,7 @@ class Token(object):
         )
 
 
-class Sloc(object):
+class Sloc:
     def __init__(self, line, column):
         self.line = line
         self.column = column
@@ -104,7 +104,7 @@ class Sloc(object):
         return '{}:{}'.format(self.line, self.column)
 
 
-class SlocRange(object):
+class SlocRange:
     def __init__(self, value):
         self.start = Sloc(int(value['start_line']),
                           int(value['start_column']))

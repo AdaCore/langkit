@@ -24,7 +24,7 @@ def analysis_line_no(context, frame):
     return frame.find_sal().line
 
 
-class State(object):
+class State:
     """
     Holder for the execution state of a property.
     """
@@ -175,7 +175,7 @@ class State(object):
         return result
 
 
-class ScopeState(object):
+class ScopeState:
     """
     Holder for the execution state of a specific scope in a property.
     """
@@ -245,7 +245,7 @@ class ScopeState(object):
         return done_exprs, last_started
 
 
-class Binding(object):
+class Binding:
     """
     Describe the mapping between a DSL-level variable and an Ada one in the
     generated code.
@@ -265,7 +265,7 @@ class Binding(object):
         """
 
 
-class ExpressionEvaluation(object):
+class ExpressionEvaluation:
     """
     Describe the state of evaluation of an expression.
     """

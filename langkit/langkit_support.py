@@ -3,7 +3,7 @@ import os.path
 from langkit.template_utils import Renderer
 
 
-class LangkitSupport(object):
+class LangkitSupport:
     """
     Helper class to generate a project file to build Langkit_Support.
     """

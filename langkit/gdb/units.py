@@ -1,7 +1,7 @@
 from langkit.gdb.utils import dereference_fat_array_ptr
 
 
-class AnalysisUnit(object):
+class AnalysisUnit:
     """
     Helper to deal with analysis units.
     """

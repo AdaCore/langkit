@@ -45,7 +45,7 @@ def strip_colors(msg):
             return msg
 
 
-class Report(object):
+class Report:
 
     """Container for diagnostic messages."""
 
@@ -145,7 +145,7 @@ def preprocess_docstring(text):
     return ('\n'.join(lines), lineno_offset)
 
 
-class PackageChecker(object):
+class PackageChecker:
     """Helper to check the order of imported packages."""
 
     def __init__(self, report):
@@ -198,7 +198,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         return
 
     # Otherwise, assume this is regular text
-    class State(object):
+    class State:
 
         """Helper for checking state-tracking."""
 
@@ -402,7 +402,7 @@ def check_generic(report, filename, content, lang):
         check_comment()
 
 
-class LanguageChecker(object):
+class LanguageChecker:
 
     """Base class for language-specific checkers."""
 

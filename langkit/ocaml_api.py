@@ -9,7 +9,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
     name = 'ocaml'
 
-    class AnalysisContextType(object):
+    class AnalysisContextType:
         """
         Placeholder to represent the analysis context type in our depedency
         tracking system (see the type_graph and add_dep methods below).
