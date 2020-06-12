@@ -1569,14 +1569,21 @@ class StructDecl(NamedTypeDecl):
     decls = Field(type=DeclBlock)
 
 
-class ClassDecl(NamedTypeDecl):
+@abstract
+class BasicClassDecl(NamedTypeDecl):
     """
-    Declaration for a LK class. This only cover node classes for the moment,
-    but might be extended to support regular classes in the future.
+    Common ancestor for declarations of regular classes and enum classes.
     """
     syn_name = Field(type=T.DefId)
     base_type = Field(type=T.TypeRef)
     traits = Field(type=T.TypeRef.list)
+
+
+class ClassDecl(BasicClassDecl):
+    """
+    Declaration for a LK class. This only cover node classes for the moment,
+    but might be extended to support regular classes in the future.
+    """
     decls = Field(type=DeclBlock)
 
     @langkit_property()
@@ -1609,14 +1616,11 @@ class EnumClassCase(LKNode):
     decls = Field(T.EnumClassAltDecl)
 
 
-class EnumClassDecl(NamedTypeDecl):
+class EnumClassDecl(BasicClassDecl):
     """
     Declaration for a LK class. This only cover node classes for the moment,
     but might be extended to support regular classes in the future.
     """
-    syn_name = Field(type=T.DefId)
-    base_type = Field(type=T.TypeRef)
-    traits = Field(type=T.TypeRef.list)
     branches = Field(type=T.EnumClassCase.list)
     decls = Field(type=DeclBlock)
 
