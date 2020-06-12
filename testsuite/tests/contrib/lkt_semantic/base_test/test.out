@@ -299,10 +299,10 @@ Id   <RefId "test_int_add" test.lkt:46:43-46:55>
      references <FunDecl "test_int_add" test.lkt:8:5-8:38>
 
 Expr <RefId "test_int_add" test.lkt:46:43-46:55>
-     has type <FunctionType "(A) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <DotExpr test.lkt:46:39-46:55>
-     has type <FunctionType "(A) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <CallExpr test.lkt:46:39-46:57>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -329,10 +329,10 @@ Id   <RefId "test" test.lkt:47:60-47:64>
      references <FunDecl "test" test.lkt:37:5-37:18>
 
 Expr <RefId "test" test.lkt:47:60-47:64>
-     has type <FunctionType "(Tuple2) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <DotExpr test.lkt:47:56-47:64>
-     has type <FunctionType "(Tuple2) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <CallExpr test.lkt:47:56-47:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -422,49 +422,46 @@ Expr <RefId "add" test.lkt:65:35-65:38>
 Id   <RefId "B" test.lkt:66:24-66:25>
      references <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "B" test.lkt:66:29-66:30>
-     references <ClassDecl "B" test.lkt:40:1-49:2>
-
-Id   <RefId "Int" test.lkt:66:35-66:38>
+Id   <RefId "Int" test.lkt:66:34-66:37>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "b_inst" test.lkt:66:41-66:47>
+Id   <RefId "b_inst" test.lkt:66:40-66:46>
      references <FunArgDecl "b_inst" test.lkt:66:16-66:25>
 
-Expr <RefId "b_inst" test.lkt:66:41-66:47>
+Expr <RefId "b_inst" test.lkt:66:40-66:46>
      has type <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "test_generic_component_access" test.lkt:66:48-66:77>
+Id   <RefId "test_generic_component_access" test.lkt:66:47-66:76>
      references <FunDecl "test_generic_component_access" test.lkt:42:5-42:68>
 
-Expr <RefId "test_generic_component_access" test.lkt:66:48-66:77>
-     has type <FunctionType "(B) -> Int" __prelude>
+Expr <RefId "test_generic_component_access" test.lkt:66:47-66:76>
+     has type <FunctionType "() -> Int" __prelude>
 
-Expr <DotExpr test.lkt:66:41-66:77>
-     has type <FunctionType "(B) -> Int" __prelude>
+Expr <DotExpr test.lkt:66:40-66:76>
+     has type <FunctionType "() -> Int" __prelude>
 
-Id   <RefId "B" test.lkt:67:32-67:33>
+Id   <RefId "B" test.lkt:67:41-67:42>
      references <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "B" test.lkt:67:37-67:38>
+Id   <RefId "B" test.lkt:67:46-67:47>
      references <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "Int" test.lkt:67:43-67:46>
+Id   <RefId "Int" test.lkt:67:52-67:55>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "b_inst" test.lkt:67:49-67:55>
-     references <FunArgDecl "b_inst" test.lkt:67:24-67:33>
+Id   <RefId "b_inst" test.lkt:67:58-67:64>
+     references <FunArgDecl "b_inst" test.lkt:67:33-67:42>
 
-Expr <RefId "b_inst" test.lkt:67:49-67:55>
+Expr <RefId "b_inst" test.lkt:67:58-67:64>
      has type <ClassDecl "B" test.lkt:40:1-49:2>
 
-Id   <RefId "test_fun_call" test.lkt:67:56-67:69>
+Id   <RefId "test_fun_call" test.lkt:67:65-67:78>
      references <FunDecl "test_fun_call" test.lkt:46:5-46:57>
 
-Expr <RefId "test_fun_call" test.lkt:67:56-67:69>
-     has type <FunctionType "(B, A) -> Int" __prelude>
+Expr <RefId "test_fun_call" test.lkt:67:65-67:78>
+     has type <FunctionType "(A) -> Int" __prelude>
 
-test.lkt:67:49: error: Mismatched types: expected `(B) -> Int`, got `(B, A) -> Int`
-66 | fun get_method_invalid(b_inst: B): (B) -> Int = b_inst.test_fun_call
-   |                                                 ^^^^^^^^^^^^^^^^^^^^
+test.lkt:67:58: error: Mismatched types: expected `(B) -> Int`, got `(A) -> Int`
+66 | @invalid fun get_method_invalid(b_inst: B): (B) -> Int = b_inst.test_fun_call
+   |                                                          ^^^^^^^^^^^^^^^^^^^^
 

@@ -22,10 +22,10 @@ Id   <RefId "bar" test.lkt:11:49-11:52>
      references <FunDecl "bar" test.lkt:6:5-6:19>
 
 Expr <RefId "bar" test.lkt:11:49-11:52>
-     has type <FunctionType "(Foo1) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <DotExpr test.lkt:11:45-11:52>
-     has type <FunctionType "(Foo1) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <CallExpr test.lkt:11:45-11:54>
      has type <StructDecl "Int" __prelude:1:10-1:23>

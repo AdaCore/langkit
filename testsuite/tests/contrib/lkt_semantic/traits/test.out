@@ -40,10 +40,10 @@ Id   <RefId "length" test.lkt:16:28-16:34>
      references <FunDecl "length" test.lkt:5:14-5:31>
 
 Expr <RefId "length" test.lkt:16:28-16:34>
-     has type <FunctionType "(WithLength) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <DotExpr test.lkt:16:24-16:34>
-     has type <FunctionType "(WithLength) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <CallExpr test.lkt:16:24-16:36>
      has type <StructDecl "Int" __prelude:1:10-1:23>
