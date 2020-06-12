@@ -12,5 +12,5 @@ grammar foo_grammar {
     @export fun prop (): Bool = true
 }
 
-@qualifier class HasExample : EnumNode {
+@qualifier enum class HasExample : EnumNode {
 }

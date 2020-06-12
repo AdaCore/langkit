@@ -575,7 +575,7 @@ class FileNode : PythonNode {
 class ImportStar : PythonNode {
 }
 
-@qualifier class KwArgsFlag : PythonNode {
+@qualifier enum class KwArgsFlag : PythonNode {
 }
 
 class NL : PythonNode {
@@ -724,5 +724,5 @@ class WithStmt : Stmt {
     @parse_field statements : PythonNode
 }
 
-@qualifier class VarArgsFlag : PythonNode {
+@qualifier enum class VarArgsFlag : PythonNode {
 }

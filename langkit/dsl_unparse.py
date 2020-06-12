@@ -1194,8 +1194,8 @@ def emit_node_type(node_type):
 
         if node_type.is_enum_node:
             abstract_qual = ""
+            type_kind = "enum class"
             if not node_type.is_bool_node:
-                type_kind = "enum class"
                 enum_members = (
                     ", $sl".join(alt.name.camel
                                  for alt in node_type.alternatives)

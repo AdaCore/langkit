@@ -63,5 +63,5 @@ class SelfDecl : FooNode {
     @parse_field md_node : Id
 }
 
-@qualifier class Synth : FooNode {
+@qualifier enum class Synth : FooNode {
 }

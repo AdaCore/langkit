@@ -32,7 +32,7 @@ class Ref : Expr {
 @token_node class Name : FooNode {
 }
 
-@qualifier class Null : FooNode {
+@qualifier enum class Null : FooNode {
 }
 
 class VarDecl : FooNode {

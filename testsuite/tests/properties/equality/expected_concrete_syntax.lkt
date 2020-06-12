@@ -32,7 +32,7 @@ class Decl : FooNode {
     node.env_array() = other.env_array()
 }
 
-@qualifier class HasPlus : FooNode {
+@qualifier enum class HasPlus : FooNode {
 }
 
 @token_node class Name : FooNode {

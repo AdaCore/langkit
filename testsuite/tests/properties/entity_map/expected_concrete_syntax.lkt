@@ -22,7 +22,7 @@ class Decl : FooNode {
     @export fun entity_items (): Array[Ref] = node.as_entity.items.map((i) => i)
 }
 
-@qualifier class HasPlus : FooNode {
+@qualifier enum class HasPlus : FooNode {
 }
 
 @token_node class Name : FooNode {
