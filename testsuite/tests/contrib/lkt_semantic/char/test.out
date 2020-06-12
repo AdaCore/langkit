@@ -7,13 +7,13 @@ Expr <StringLit test.lkt:1:18-1:23>
      has type <StructDecl "String" __prelude:21:10-21:76>
 
 Id   <RefId "Char" test.lkt:2:9-2:13>
-     references <StructDecl "Char" __prelude:20:11-20:25>
+     references <StructDecl "Char" __prelude:20:10-20:24>
 
 Expr <CharLit test.lkt:2:16-2:19>
-     has type <StructDecl "Char" __prelude:20:11-20:25>
+     has type <StructDecl "Char" __prelude:20:10-20:24>
 
 Id   <RefId "Char" test.lkt:3:9-3:13>
-     references <StructDecl "Char" __prelude:20:11-20:25>
+     references <StructDecl "Char" __prelude:20:10-20:24>
 
 Id   <RefId "a" test.lkt:3:16-3:17>
      references <ValDecl "a" test.lkt:1:1-1:23>
@@ -25,5 +25,5 @@ Expr <NumLit test.lkt:3:19-3:20>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:3:16-3:21>
-     has type <StructDecl "Char" __prelude:20:11-20:25>
+     has type <StructDecl "Char" __prelude:20:10-20:24>
 
