@@ -58,3 +58,5 @@ contrib/lkt/build
 
 .gdb_history
 .vscode
+
+.mypy_cache
