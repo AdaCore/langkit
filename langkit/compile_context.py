@@ -761,9 +761,15 @@ class CompileCtx:
         """
         Context manager to set the diagnostic context to the given node.
 
-        :param liblktlang lkt_node: Node to use as a reference for this
+        :param liblktlang.LKNode lkt_node: Node to use as a reference for this
             diagnostic context.
         """
+        # Invalid type passed here will fail much later and only if a
+        # check_source_language call fails. To ease debugging, check that
+        # "lkt_node" has the right type here.
+        import liblktlang
+        assert isinstance(lkt_node, liblktlang.LKNode)
+
         context_stack.append(lkt_node)
         try:
             yield
