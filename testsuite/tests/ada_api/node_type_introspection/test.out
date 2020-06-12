@@ -3,10 +3,10 @@ FooNode (FOO_NODE_TYPE_ID)
   is root node
   derivations:
     FooNodeBaseList
-    VarDecl
-    Name
     Expr
+    Name
     Null
+    VarDecl
 
 Expr (EXPR_TYPE_ID)
   abstract

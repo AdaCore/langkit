@@ -9,11 +9,12 @@ import os.path
 
 import liblktlang as L
 
-from langkit.compiled_types import (ASTNodeType, AbstractNodeData,
-                                    CompiledType, CompiledTypeRepo, Field, T,
-                                    UserField)
+from langkit.compiled_types import (
+    ASTNodeType, AbstractNodeData, CompiledType, CompiledTypeRepo,
+    EnumNodeAlternative, Field, T, UserField
+)
 from langkit.diagnostics import DiagnosticError, check_source_language
-from langkit.expressions import PropertyDef
+from langkit.expressions import AbstractProperty, Property, PropertyDef
 from langkit.lexer import (Alt, Case, Ignore, Lexer, LexerToken, Literal,
                            NoCaseLit, Pattern, TokenFamily, WithSymbol,
                            WithText, WithTrivia)
@@ -303,6 +304,9 @@ node_annotations = [FlagAnnotationSpec('abstract'),
                     FlagAnnotationSpec('has_abstract_list'),
                     FlagAnnotationSpec('root_node'),
                     FlagAnnotationSpec('token_node')]
+enum_node_annotations = [FlagAnnotationSpec('qualifier'),
+                         FlagAnnotationSpec('has_abstract_list'),
+                         FlagAnnotationSpec('token_node')]
 field_annotations = [FlagAnnotationSpec('abstract'),
                      FlagAnnotationSpec('null_field'),
                      FlagAnnotationSpec('parse_field')]
@@ -1044,9 +1048,14 @@ class LktTypesLoader:
             self.compiled_types[name] = None
 
             # Dispatch now to the appropriate type creation helper
-            if isinstance(decl, L.ClassDecl):
-                specs = node_annotations
+            kwargs = {}
+            if isinstance(decl, L.BasicClassDecl):
+                is_enum_node = isinstance(decl, L.EnumClassDecl)
+                specs = (enum_node_annotations
+                         if is_enum_node
+                         else node_annotations)
                 creator = self.create_node
+                kwargs = {'is_enum_node': is_enum_node}
 
             else:
                 raise NotImplementedError(
@@ -1054,7 +1063,7 @@ class LktTypesLoader:
                 )
 
             annotations = parse_annotations(self.ctx, specs, full_decl)
-            result = creator(name, decl, annotations)
+            result = creator(name, decl, annotations, **kwargs)
             self.compiled_types[name] = result
             return result
 
@@ -1120,21 +1129,35 @@ class LktTypesLoader:
             result.append((name, field))
         return result
 
-    def create_node(self, name, decl, annotations):
+    def create_node(self, name, decl, annotations, is_enum_node):
         """
         Create an ASTNodeType instance.
 
         :param names.Name name: DSL name for this node type.
-        :param liblktlang.ClassDecl decl: Corresponding declaration node.
+        :param liblktlang.BasicClassDecl decl: Corresponding declaration node.
         :param ParsedAnnotations annotations: Annotations for this declaration.
+        :param bool is_enum_node: Whether this encodes an enum type.
         :rtype: ASTNodeType
         """
+        loc = self.ctx.lkt_loc(decl)
+
         # Resolve the base node (if any)
+        check_source_language(
+            not is_enum_node or decl.f_base_type is not None,
+            'Enum nodes need a base node'
+        )
         base = (self.resolve_type_ref(decl.f_base_type, defer=False)
                 if decl.f_base_type else None)
+        check_source_language(
+            base is None or not base.is_enum_node,
+            'Inheritting from an enum node is forbiddn'
+        )
+
+        check_source_language(not len(decl.f_traits),
+                              'Nodes cannot use traits')
 
         # Make sure the root_node annotation is used when appropriate
-        root_node = annotations.root_node
+        root_node = not is_enum_node and annotations.root_node
         if base is None:
             check_source_language(
                 root_node,
@@ -1153,9 +1176,6 @@ class LktTypesLoader:
                 'Only the root node can have the @root_node annotation'
             )
 
-        check_source_language(not len(decl.f_traits),
-                              'Nodes cannot use traits')
-
         # This is a token node if either the annotation is present, or if the
         # base node is a token node itself.
         is_token_node = (
@@ -1164,24 +1184,122 @@ class LktTypesLoader:
         )
 
         # Lower fields. Regular nodes can hold all types of fields, but token
-        # nodes can hold only user field and properties.
+        # nodes and enum nodes can hold only user field and properties.
         allowed_field_types = (
             (UserField, PropertyDef)
-            if is_token_node
+            if is_token_node or is_enum_node
             else (AbstractNodeData, )
         )
         fields = self.lower_fields(decl.f_decls, allowed_field_types)
 
-        return ASTNodeType(
+        # For qualifier enum nodes, add the synthetic "as_bool" abstract
+        # property that each alternative will override.
+        is_bool_node = False
+        if is_enum_node and annotations.qualifier:
+            prop = AbstractProperty(
+                type=T.Bool, public=True,
+                doc='Return whether this node is present'
+            )
+            prop.location = loc
+            fields.append(('as_bool', prop))
+            is_bool_node = True
+
+        result = ASTNodeType(
             name,
-            location=self.ctx.lkt_loc(decl),
+            location=loc,
             doc=self.ctx.lkt_doc(decl.parent),
             base=base,
             fields=fields,
-            is_abstract=annotations.abstract,
+            is_abstract=is_enum_node or annotations.abstract,
             is_token_node=is_token_node,
             has_abstract_list=annotations.has_abstract_list,
+            is_enum_node=is_enum_node,
+            is_bool_node=is_bool_node,
         )
+
+        # Create alternatives for enum nodes
+        if is_enum_node:
+            self.create_enum_node_alternatives(
+                alternatives=sum(
+                    (list(b.f_decls) for b in decl.f_branches), []
+                ),
+                enum_node=result,
+                qualifier=annotations.qualifier
+            )
+
+        return result
+
+    def create_enum_node_alternatives(
+        self, alternatives, enum_node, qualifier
+    ):
+        """
+        Create ASTNodeType instances for the alternatives of an enum node.
+
+        :param list[L.EnumClassAltDecl] alternatives: Declarations for the
+            alternatives to lower.
+        :param ASTNodeType enum_node: Enum node that owns these alternatives.
+        :param bool qualifier: Whether this enum node has the "@qualifier"
+            annotation.
+        """
+        # RA22-015: initialize this to True for enum nodes directly in
+        # ASTNodeType's constructor.
+        enum_node.is_type_resolved = True
+
+        enum_node._alternatives = []
+        enum_node._alternatives_map = {}
+
+        # All enum classes must have at least one alternative, except those
+        # with the "@qualifier" annotation, which implies automatic
+        # alternatives.
+        if qualifier:
+            check_source_language(
+                not len(alternatives),
+                'Enum nodes with @qualifier cannot have explicit alternatives'
+            )
+            alternatives = [
+                EnumNodeAlternative(names.Name(alt_name),
+                                    enum_node,
+                                    None,
+                                    enum_node.location)
+                for alt_name in ('Present', 'Absent')
+            ]
+        else:
+            check_source_language(
+                len(alternatives),
+                'Missing alternatives for this enum node'
+            )
+            alternatives = [
+                EnumNodeAlternative(names.Name.from_camel(alt.f_syn_name.text),
+                                    enum_node,
+                                    None,
+                                    self.ctx.lkt_loc(alt))
+                for alt in alternatives
+            ]
+
+        # Now create the ASTNodeType instances themselves
+        for i, alt in enumerate(alternatives):
+            # Override the abstract "as_bool" property that all qualifier enum
+            # nodes define.
+            fields = []
+            if qualifier:
+                is_present = i == 0
+                prop = Property(is_present)
+                prop.location = enum_node.location
+                fields.append(('as_bool', prop))
+
+            alt.alt_node = ASTNodeType(
+                name=alt.full_name, location=enum_node.location, doc='',
+                base=enum_node,
+                fields=fields,
+                dsl_name='{}.{}'.format(enum_node.dsl_name,
+                                        alt.base_name.camel)
+            )
+
+        # Finally create enum node-local indexes to easily fetch the
+        # ASTNodeType instances later on.
+        enum_node._alternatives = [alt.alt_node for alt in alternatives]
+        enum_node._alternatives_map = {alt.base_name.camel: alt.alt_node
+                                       for alt in alternatives}
 
 
 def create_types(ctx, lkt_units):
