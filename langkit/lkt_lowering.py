@@ -6,39 +6,38 @@ structures.
 from collections import OrderedDict
 import json
 import os.path
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import liblktlang as L
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledType, CompiledTypeRepo,
-    EnumNodeAlternative, Field, T, UserField
+    EnumNodeAlternative, Field, T, TypeRepo, UserField
 )
 from langkit.diagnostics import DiagnosticError, check_source_language
 from langkit.expressions import AbstractProperty, Property, PropertyDef
-from langkit.lexer import (Alt, Case, Ignore, Lexer, LexerToken, Literal,
-                           NoCaseLit, Pattern, TokenFamily, WithSymbol,
-                           WithText, WithTrivia)
+from langkit.lexer import (Action, Alt, Case, Ignore, Lexer, LexerToken,
+                           Literal, Matcher, NoCaseLit, Pattern, TokenAction,
+                           TokenFamily, WithSymbol, WithText, WithTrivia)
 import langkit.names as names
-from langkit.parsers import (Discard, DontSkip, Grammar, List, Null, Opt, Or,
-                             Pick, Predicate, Skip, _Row, _Token, _Transform)
+from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
+                             Opt, Or, Parser, Pick, Predicate, Skip, _Row,
+                             _Token, _Transform)
 
 
-def pattern_as_str(str_lit):
+CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
+
+
+def pattern_as_str(str_lit: L.StringLit) -> str:
     """
     Return the regexp string associated to this string literal node.
-
-    :type str_lit: L.StringLit
-    :rtype: str
     """
     return json.loads(str_lit.text[1:])
 
 
-def parse_static_bool(ctx, expr):
+def parse_static_bool(ctx, expr: L.Expr) -> bool:
     """
     Return the bool value that this expression denotes.
-
-    :param L.Expr expr: Expression tree to parse.
-    :rtype: bool
     """
     with ctx.lkt_context(expr):
         check_source_language(isinstance(expr, L.RefId)
@@ -48,13 +47,12 @@ def parse_static_bool(ctx, expr):
     return expr.text == 'true'
 
 
-def load_lkt(lkt_file):
+def load_lkt(lkt_file: str) -> L.AnalysisUnit:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
     Raise a DiagnosticError if there are parsing errors.
 
-    :param str lkt_file: Name of the file to parse.
-    :rtype: L.AnalysisUnit
+    :param lkt_file: Name of the file to parse.
     """
     units_map = OrderedDict()
     diagnostics = []
@@ -87,19 +85,20 @@ def load_lkt(lkt_file):
     return list(units_map.values())
 
 
-def find_toplevel_decl(ctx, lkt_units, node_type, label):
+def find_toplevel_decl(ctx,
+                       lkt_units: List[L.AnalysisUnit],
+                       node_type: type,
+                       label: str) -> L.FullDecl:
     """
     Look for a top-level declaration of type ``node_type`` in the given units.
 
     If none or several are found, emit error diagnostics. Return the associated
     full declaration.
 
-    :param list[L.AnalysisUnit] lkt_units: List of units where to
-        look.
-    :param langkit.compiled_types.ASTNode: Node type to look for.
-    :param str label: Human readable string for what to look for. Used to
-        create diagnostic mesages.
-    :rtype: L.FullDecl
+    :param lkt_units: List of units where to look.
+    :param node_type: Node type to look for.
+    :param label: Human readable string for what to look for. Used to create
+        diagnostic mesages.
     """
     result = None
     for unit in lkt_units:
@@ -130,13 +129,14 @@ class AnnotationSpec:
     Synthetic description of how a declaration annotation works.
     """
 
-    def __init__(self, name, unique, require_args, default_value=None):
+    def __init__(self, name: str, unique: bool, require_args: bool,
+                 default_value: Any = None):
         """
-        :param str name: Name of the annotation (``foo`` for the ``@foo``
+        :param name: Name of the annotation (``foo`` for the ``@foo``
             annotation).
-        :param bool unique: Whether this annotation can appear at most once for
-            a given declaration.
-        :param bool require_args: Whether this annotation requires arguments.
+        :param unique: Whether this annotation can appear at most once for a
+            given declaration.
+        :param require_args: Whether this annotation requires arguments.
         :param default_value: For unique annotations, value to use in case the
             annotation is absent.
         """
@@ -145,17 +145,16 @@ class AnnotationSpec:
         self.require_args = require_args
         self.default_value = default_value if unique else []
 
-    def interpret(self, ctx, args, kwargs):
+    def interpret(self, ctx,
+                  args: List[L.Expr], kwargs: Dict[str, L.Expr]) -> None:
         """
         Subclasses must override this in order to interpret an annotation.
 
         This method must validate and interpret ``args`` and ``kwargs``, and
         return a value suitable for annotations processing.
 
-        :param list[L.Expr] args: Positional arguments for the
-            annotation.
-        :param dict[str, L.Expr] kwargs: Keyword arguments for the
-            annotation.
+        :param args: Positional arguments for the annotation.
+        :param kwargs: Keyword arguments for the annotation.
         """
         raise NotImplementedError
 
@@ -309,16 +308,15 @@ field_annotations = [FlagAnnotationSpec('abstract'),
                      FlagAnnotationSpec('parse_field')]
 
 
-def parse_annotations(ctx, specs, full_decl):
+def parse_annotations(ctx,
+                      specs: List[AnnotationSpec],
+                      full_decl: L.FullDecl) -> Dict[str, Any]:
     """
     Parse annotations according to the given specs. Return a dict that
     contains the intprereted annotation values for each present annotation.
 
-    :param list[AnnotationSpec] specs: Annotation specifications for
-        allowed annotations.
-    :param L.FullDecl full_decl: Declaration whose annotations are to
-        be parsed.
-    :rtype: dict[str, object]
+    :param specs: Annotation specifications for allowed annotations.
+    :param full_decl: Declaration whose annotations are to be parsed.
     """
     annotations = list(full_decl.f_decl_annotations)
 
@@ -356,62 +354,49 @@ def parse_annotations(ctx, specs, full_decl):
     return result
 
 
-def create_lexer(ctx, lkt_units):
+def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     """
     Create and populate a lexer from a Lktlang unit.
 
-    :param list[L.AnalysisUnit] lkt_units: Non-empty list of analysis units
-        where to look for the grammar.
-    :rtype: langkit.lexer.Lexer
+    :param lkt_units: Non-empty list of analysis units where to look for the
+        grammar.
     """
     # Look for the LexerDecl node in top-level lists
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
     with ctx.lkt_context(full_lexer):
         lexer_annot = parse_annotations(ctx, lexer_annotations, full_lexer)
 
-    patterns = {}
+    patterns: Dict[names.Name, str] = {}
     """
     Mapping from pattern names to the corresponding regular expression.
-
-    :type: dict[names.Name, str]
     """
 
-    token_family_sets = {}
+    token_family_sets: Dict[names.Name, Set[TokenAction]] = {}
     """
     Mapping from token family names to the corresponding sets of tokens that
     belong to this family.
-
-    :type: dict[names.Name, Token]
     """
 
-    token_families = {}
+    token_families: Dict[names.Name, TokenFamily] = {}
     """
     Mapping from token family names to the corresponding token families.  We
     build this late, once we know all tokens and all families.
-
-    :type: dict[names.Name, TokenFamily]
     """
 
-    tokens = {}
+    tokens: Dict[names.Name, TokenAction] = {}
     """
     Mapping from token names to the corresponding tokens.
-
-    :type: dict[names.Name, Token]
     """
 
-    rules = []
-    pre_rules = []
+    rules: List[Tuple[Matcher, Action]] = []
+    pre_rules: List[Tuple[Matcher, Action]] = []
     """
     Lists of regular and pre lexing rules for this lexer.
-
-    :type: list[(langkit.lexer.Matcher, langkit.lexer.Action)]
     """
 
-    newline_after = []
+    newline_after: List[TokenAction] = []
     """
     List of tokens after which we must introduce a newline during unparsing.
-
-    :type: list[Token]
     """
 
     def ignore_constructor(start_ignore_layout, end_ignore_layout):
@@ -441,16 +426,16 @@ def create_lexer(ctx, lkt_units):
                 )
                 process_token_rule(r, token_set)
 
-    def process_token_rule(r, token_set=None):
+    def process_token_rule(r: L.FullDecl,
+                           token_set: Optional[Set[TokenAction]] = None):
         """
         Process the full declaration of a GrammarRuleDecl node: create the
         token it declares and lower the optional associated lexing rule.
 
-        :param L.FullDecl r: Full declaration for the GrammarRuleDecl to
-            process.
-        :param None|set[TokenAction] token_set: If this declaration appears in
-            the context of a token family, this adds the new token to this set.
-            Must be left to None otherwise.
+        :param r: Full declaration for the GrammarRuleDecl to process.
+        :param token_set: If this declaration appears in the context of a token
+            family, this adds the new token to this set.  Must be left to None
+            otherwise.
         """
         with ctx.lkt_context(r):
             rule_annot = parse_annotations(ctx, token_annotations, r)
@@ -504,11 +489,11 @@ def create_lexer(ctx, lkt_units):
                 else:
                     rules.append(rule)
 
-    def process_pattern(full_decl):
+    def process_pattern(full_decl: L.FullDecl):
         """
         Process a pattern declaration.
 
-        :param L.FullDecl r: Full declaration for the ValDecl to process.
+        :param full_decl: Full declaration for the ValDecl to process.
         """
         parse_annotations(ctx, [], full_decl)
         decl = full_decl.f_decl
@@ -529,12 +514,9 @@ def create_lexer(ctx, lkt_units):
             # TODO: use StringLit.p_denoted_value when properly implemented
             patterns[name] = pattern_as_str(decl.f_val)
 
-    def lower_matcher(expr):
+    def lower_matcher(expr: L.GrammarExpr) -> Matcher:
         """
         Lower a token matcher to our internals.
-
-        :type expr: L.GrammarExpr
-        :rtype: langkit.lexer.Matcher
         """
         with ctx.lkt_context(expr):
             if isinstance(expr, L.TokenLit):
@@ -546,12 +528,9 @@ def create_lexer(ctx, lkt_units):
             else:
                 check_source_language(False, 'Invalid lexing expression')
 
-    def lower_token_ref(ref):
+    def lower_token_ref(ref: L.RefId) -> TokenAction:
         """
         Return the Token that `ref` refers to.
-
-        :type ref: L.RefId
-        :rtype: Token
         """
         with ctx.lkt_context(ref):
             token_name = names.Name.from_lower(ref.text)
@@ -559,12 +538,9 @@ def create_lexer(ctx, lkt_units):
                                   'Unknown token: {}'.format(token_name.lower))
             return tokens[token_name]
 
-    def lower_family_ref(ref):
+    def lower_family_ref(ref: L.RefId) -> TokenFamily:
         """
         Return the TokenFamily that `ref` refers to.
-
-        :type ref: L.RefId
-        :rtype: TokenFamily
         """
         with ctx.lkt_context(ref):
             name_lower = ref.text
@@ -575,12 +551,9 @@ def create_lexer(ctx, lkt_units):
             )
             return token_families[name]
 
-    def lower_case_alt(alt):
+    def lower_case_alt(alt: L.BaseLexerCaseRuleAlt) -> Alt:
         """
         Lower the alternative of a case lexing rule.
-
-        :type alt: L.BaseLexerCaseRuleAlt
-        :rtype: Alt
         """
         prev_token_cond = None
         if isinstance(alt, L.LexerCaseRuleCondAlt):
@@ -662,7 +635,7 @@ def create_lexer(ctx, lkt_units):
     return result
 
 
-def create_grammar(ctx, lkt_units):
+def create_grammar(ctx, lkt_units: List[L.AnalysisUnit]) -> Grammar:
     """
     Create a grammar from a set of Lktlang units.
 
@@ -670,9 +643,8 @@ def create_grammar(ctx, lkt_units):
     in the Lktlang unit. The actual lowering on grammar rules happens in a
     separate pass: see lower_all_lkt_rules.
 
-    :param list[L.AnalysisUnit] lkt_units: Non-empty list of analysis units
-        where to look for the grammar.
-    :rtype: langkit.parsers.Grammar
+    :param lkt_units: Non-empty list of analysis units where to look for the
+        grammar.
     """
     # Look for the GrammarDecl node in top-level lists
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
@@ -717,7 +689,7 @@ def create_grammar(ctx, lkt_units):
 
 def lower_grammar_rules(ctx):
     """
-    Translate syntactic Lkt rules to Parser objects.
+    Translate syntactic L rules to Parser objects.
     """
     grammar = ctx.grammar
 
@@ -804,12 +776,11 @@ def lower_grammar_rules(ctx):
                     check_source_language(False,
                                           'Unknown node: {}'.format(node_name))
 
-    def lower(rule):
+    def lower(rule: L.GrammarExpr) -> Parser:
         """
         Helper to lower one parser.
 
-        :param L.GrammarExpr rule: Grammar rule to lower.
-        :rtype: Parser
+        :param rule: Grammar rule to lower.
         """
         # For convenience, accept null input rules, as we generally want to
         # forward them as-is to the lower level parsing machinery.
@@ -864,11 +835,11 @@ def lower_grammar_rules(ctx):
                 return _Token(denoted_string_literal(rule), location=loc)
 
             elif isinstance(rule, L.GrammarList):
-                return List(lower(rule.f_expr),
-                            empty_valid=rule.f_kind.text == '*',
-                            list_cls=resolve_node_ref(rule.f_list_type),
-                            sep=lower(rule.f_sep),
-                            location=loc)
+                return PList(lower(rule.f_expr),
+                             empty_valid=rule.f_kind.text == '*',
+                             list_cls=resolve_node_ref(rule.f_list_type),
+                             sep=lower(rule.f_sep),
+                             location=loc)
 
             elif isinstance(rule, (L.GrammarImplicitPick,
                                    L.GrammarPick)):
@@ -938,11 +909,11 @@ class LktTypesLoader:
     Lkt.
     """
 
-    def __init__(self, ctx, lkt_units):
+    def __init__(self, ctx, lkt_units: List[L.AnalysisUnit]):
         """
-        :param CompiledType ctx: Context in which to create these types.
-        :param list[L.AnalysisUnit] lkt_units: Non-empty list of analysis units
-            where to look for type declarations.
+        :param ctx: Context in which to create these types.
+        :param lkt_units: Non-empty list of analysis units where to look for
+            type declarations.
         """
         self.ctx = ctx
 
@@ -971,16 +942,17 @@ class LktTypesLoader:
         for name in sorted(self.syntax_types):
             self.create_type_from_name(name, defer=False)
 
-    def resolve_type_ref(self, ref, defer):
+    def resolve_type_ref(self,
+                         ref: L.TypeRef,
+                         defer: bool) -> CompiledTypeOrDefer:
         """
         Fetch the CompiledType instance corresponding to the given type
         reference.
 
-        :param liblktlang.TypeRef ref: Type reference to resolve.
-        :param bool defer: If True and this type is not lowered yet, return a
+        :param ref: Type reference to resolve.
+        :param defer: If True and this type is not lowered yet, return a
             TypeRepo.Defer instance. Lower the type if necessary in all other
             cases.
-        :rtype: CompiledType|TypeRepo.Defer
         """
         with self.ctx.lkt_context(ref):
             if isinstance(ref, L.SimpleTypeRef):
@@ -1012,16 +984,17 @@ class LktTypesLoader:
                     'Unhandled type reference: {}'.format(ref)
                 )
 
-    def create_type_from_name(self, name, defer):
+    def create_type_from_name(self,
+                              name: names.Name,
+                              defer: bool) -> CompiledTypeOrDefer:
         """
         Fetch the CompiledType instance corresponding to the given type
         reference.
 
-        :param names.Name name: Name of the type to create.
-        :param bool defer: If True and this type is not lowered yet, return a
+        :param name: Name of the type to create.
+        :param defer: If True and this type is not lowered yet, return a
             TypeRepo.Defer instance. Lower the type if necessary in all other
             cases.
-        :rtype: CompiledType|TypeRepo.Defer
         """
         full_decl = self.syntax_types.get(name)
         check_source_language(
@@ -1064,14 +1037,16 @@ class LktTypesLoader:
             self.compiled_types[name] = result
             return result
 
-    def lower_fields(self, decls, allowed_field_types):
+    def lower_fields(self,
+                     decls: L.DeclBlock,
+                     allowed_field_types: Tuple[type]) \
+            -> List[Tuple[names.Name, AbstractNodeData]]:
         """
         Lower the fields described in the given DeclBlock node.
 
-        :param liblktlang.DeclBlock decls: Declarations to process.
-        :param tuple[type] allowed_field_types: Set of types allowed for the
-            fields to load.
-        :rtype: list[(names.Name, AbstractNodeData)]
+        :param decls: Declarations to process.
+        :param allowed_field_types: Set of types allowed for the fields to
+        load.
         """
         result = []
         for full_decl in decls:
@@ -1126,15 +1101,18 @@ class LktTypesLoader:
             result.append((name, field))
         return result
 
-    def create_node(self, name, decl, annotations, is_enum_node):
+    def create_node(self,
+                    name: names.Name,
+                    decl: L.ClassDecl,
+                    annotations: ParsedAnnotations,
+                    is_enum_node: bool) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
 
-        :param names.Name name: DSL name for this node type.
-        :param liblktlang.BasicClassDecl decl: Corresponding declaration node.
-        :param ParsedAnnotations annotations: Annotations for this declaration.
-        :param bool is_enum_node: Whether this encodes an enum type.
-        :rtype: ASTNodeType
+        :param name: DSL name for this node type.
+        :param decl: Corresponding declaration node.
+        :param annotations: Annotations for this declaration.
+        :param is_enum_node: Whether this encodes an enum type.
         """
         loc = self.ctx.lkt_loc(decl)
 
