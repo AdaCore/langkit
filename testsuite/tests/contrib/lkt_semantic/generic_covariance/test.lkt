@@ -1,13 +1,13 @@
-generic [@out T] struct Entity {
+generic [@out T] struct TestEntity {
     node : T
     other : Int
 }
 
-class Node {}
-class Expr : Node {}
-class Statement : Node {}
+class TestNode {}
+class Expr : TestNode {}
+class Statement : TestNode {}
 class Lit : Expr {}
 
-A : Entity[Lit]
-B : Entity[Node] = A
-@invalid C : Entity[Statement] = A
+A : TestEntity[Lit]
+B : TestEntity[TestNode] = A
+@invalid C : TestEntity[Statement] = A
