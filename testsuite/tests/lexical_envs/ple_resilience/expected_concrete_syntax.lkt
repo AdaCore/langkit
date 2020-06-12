@@ -31,7 +31,7 @@ class Var : DefNode {
     @parse_field value : Name
 }
 
-@qualifier class HasError : FooNode {
+@qualifier enum class HasError : FooNode {
 }
 
 @abstract class Name : FooNode {

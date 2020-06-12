@@ -7,5 +7,5 @@ grammar foo_grammar {
 @root_node class FooNode {
 }
 
-@qualifier class HasError : FooNode {
+@qualifier enum class HasError : FooNode {
 }
