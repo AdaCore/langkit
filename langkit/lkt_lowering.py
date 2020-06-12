@@ -756,7 +756,7 @@ def lower_grammar_rules(ctx):
         elif isinstance(node_ref, L.DotExpr):
             # Get the altenatives mapping for the prefix_node enum node
             prefix_node = resolve_node_ref(node_ref.f_prefix)
-            with ctx.lkt_context(prefix_node):
+            with ctx.lkt_context(node_ref.f_prefix):
                 try:
                     alt_map = enum_nodes[prefix_node]
                 except KeyError:
