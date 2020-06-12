@@ -35,10 +35,10 @@ from langkit.envs import (
     reference
 )
 from langkit.expressions import (
-    AbstractKind, AbstractProperty, And, ArrayLiteral as A, CharacterLiteral,
-    Cond, EmptyEnv, Entity, If, Let, No, Not, Or, Property, PropertyError,
-    Self, String as S, Try as _Try, Var, ignore, langkit_property,
-    new_env_assoc
+    AbstractKind, AbstractProperty, And, ArrayLiteral as Array,
+    CharacterLiteral, Cond, EmptyEnv, Entity, If, Let, No, Not, Or, Property,
+    PropertyError, Self, String as S, Try as _Try, Var, ignore,
+    langkit_property, new_env_assoc
 )
 from langkit.parsers import (Grammar, List, NoBacktrack as cut, Null, Opt,
                              Or as GOr, Pick)
@@ -120,8 +120,7 @@ class ParamMatch(Struct):
     """
     has_matched = UserField(type=T.Bool)
     actual = UserField(type=T.Param.entity, default_value=No(T.Param.entity))
-    formal = UserField(type=T.ComponentDecl.entity,
-                       default_value=No(T.ComponentDecl.entity))
+    formal = UserField(type=T.FormalParam, default_value=No(T.FormalParam))
 
 
 @abstract
@@ -632,7 +631,7 @@ class Expr(LKNode):
 
             lambda p=T.Param: p.call_expr.match_params().find(
                 lambda pm: pm.actual == p
-            ).then(lambda pm: pm.formal.get_type),
+            ).then(lambda pm: pm.formal.formal_type),
 
             lambda val_decl=T.BaseValDecl: val_decl.get_type(
                 no_inference=True
@@ -1816,7 +1815,15 @@ class ComponentDecl(ExplicitlyTypedDecl):
        expression (either a type or a function).
     """
     default_val = AbstractField(type=T.Expr)
-    has_default_value = Property(Not(Self.default_val.is_null))
+
+    @langkit_property()
+    def to_formal_param():
+        """
+        Return a ``FormalParam`` structure from this component decl.
+        """
+        return FormalParam.new(formal_name=Self.name,
+                               formal_type=Entity.get_type,
+                               default_value=Entity.default_val)
 
 
 class FunArgDecl(ComponentDecl):
@@ -2009,6 +2016,16 @@ class ParenExpr(Expr):
     expr = Field(type=T.Expr)
 
 
+class FormalParam(Struct):
+    """
+    Represent all the information of a formal parameter. Note that formal_name
+    can (and will) be null for formals of function types.
+    """
+    formal_name = UserField(type=T.Symbol)
+    formal_type = UserField(type=T.TypeDecl.entity)
+    default_value = UserField(type=T.Expr.entity)
+
+
 class CallExpr(Expr):
     """
     Call expression.
@@ -2022,48 +2039,68 @@ class CallExpr(Expr):
         rd = Var(Try(Entity.name.referenced_decl,
                      SemanticResult.new(has_error=True)))
 
-        generic_inst_error = Var(If(
-            rd.has_error,
-            No(T.SemanticResult.array),
-            rd.result_ref.cast(T.GenericDecl).then(
-                lambda generic_decl: Entity.infer_actuals(
-                    generic_decl,
-                    Entity.expected_type
-                ).then(lambda iir: iir.error.then(lambda e: e.singleton))
-            )
+        et = Var(Try(
+            Entity.name.expr_type, SemanticResult.new(has_error=True)
         ))
 
-        arity_error = Var(If(
-            rd.has_error | Not(generic_inst_error.is_null),
+        return If(
+            rd.has_error | et.has_error,
             No(T.SemanticResult.array),
 
-            Entity.match_params().filter(lambda pm: Not(pm.has_matched))
-            .mapcat(
-                lambda pm: If(
-                    pm.formal.is_null,
+            If(
+                # We have a call to an object (either __call__ able object or
+                # function type object).
+                rd.is_null,
+                No(T.SemanticResult.array),
 
-                    A([pm.actual.error(
-                        S("Unmatched actual in call to `")
-                        .concat(Entity.called_decl.full_name)
-                        .concat(S("`"))),
+                # Generic instantiation errors
+                rd.result_ref.cast(T.GenericDecl).then(
+                    lambda generic_decl: Entity.infer_actuals(
+                        generic_decl,
+                        Entity.expected_type
+                    ).then(lambda iir: iir.error.then(lambda e: e.singleton))
+                )
+            )._or(
+                # Arity errors
+                Entity.match_params().filter(lambda pm: Not(pm.has_matched))
+                .mapcat(
+                    lambda pm: If(
+                        pm.formal.is_null,
 
-                        # If there is an unmmatched actual that is named, then
-                        # exempt the resolution of the name, because it's going
-                        # to fail.
-                        pm.actual.name._.exempt]),
+                        Array([
+                            pm.actual.error(If(
+                                rd.is_null,
 
-                    Self.error(
-                        S("No value for parameter `")
-                        .concat(pm.formal.full_name)
-                        .concat(S("` in call to `"))
-                        .concat(Entity.called_decl.full_name)
-                        .concat(S("`"))
-                    ).singleton
+                                S("Unmatched actual"),
+
+                                S("Unmatched actual in call to `")
+                                .concat(Entity.called_decl.full_name)
+                                .concat(S("`"))
+                            )),
+
+                            # If there is an unmatched actual that is named,
+                            # then exempt the resolution of the name, because
+                            # it's going to fail.
+                            pm.actual.name._.exempt]),
+
+                        Self.error(
+                            If(
+                                rd.is_null,
+
+                                S("No value for parameter"),
+
+                                S("No value for parameter `")
+                                .concat(pm.formal.formal_name.image)
+                                .concat(S("` in call to `"))
+                                .concat(Entity.called_decl.full_name)
+                                .concat(S("`"))
+
+                            )
+                        ).singleton
+                    )
                 )
             )
-        ))
-
-        return generic_inst_error.concat(arity_error)
+        )
 
     @langkit_property(return_type=T.InferInstantiation)
     def infer_actuals_impl(
@@ -2231,22 +2268,35 @@ class CallExpr(Expr):
         )
 
     @langkit_property(public=True)
+    def called_object_type():
+        """
+        Return the type of the called object.
+        """
+        exp_type = Var(Entity.name.check_expr_type)
+        return exp_type.match(
+            lambda fun_type=T.FunctionType: fun_type,
+            lambda t: t.get_fun('__call__').get_type,
+        )
+
+    @langkit_property(public=True)
     def called_decl():
         """
         Return the declaration that is called by this call expression.
         """
-        refd_decl = Var(Entity.name.check_referenced_decl)
+        refd_decl = Var(Entity.name.referenced_decl.then(
+            lambda sr: sr.result_ref
+        ))
 
         # Implement special resolution for calls to objects via __call__
         called_decl = Var(
-            refd_decl.match(
+            refd_decl.then(lambda refd_decl: refd_decl.match(
                 # Don't try to look for __call__ on function decls
                 lambda _=FunDecl: refd_decl,
                 lambda v=BaseValDecl:
                 v._.get_type._.get_fun('__call__')
                 .then(lambda a: a, default_val=refd_decl),
                 lambda _: refd_decl,
-            )
+            ))
         )
 
         return called_decl.cast(T.GenericDecl).then(
@@ -2262,8 +2312,9 @@ class CallExpr(Expr):
             default_val=called_decl
         )
 
-    expr_context_free_type = Property(
-        Entity.called_decl.then(
+    @langkit_property()
+    def expr_context_free_type():
+        return Entity.called_decl.then(
             lambda rd: rd.match(
                 lambda fd=T.FunDecl: fd.return_type.designated_type,
                 lambda td=T.TypeDecl: td,
@@ -2271,21 +2322,38 @@ class CallExpr(Expr):
                 PropertyError(T.TypeDecl.entity, "should not happen"),
             )
         )
-    )
 
-    formals = Property(
-        Entity.called_decl.match(
-            lambda fd=T.FunDecl: fd.args.map(
-                lambda p: p.cast_or_raise(T.ComponentDecl)
+    @langkit_property(return_type=T.FormalParam.array)
+    def formals():
+        """
+        Return an array of ``FormalParam`` corresponding to the formals of the
+        called object.
+        """
+        return Entity.called_decl.then(
+            lambda cd: cd.match(
+                lambda fd=T.FunDecl: fd.args.map(
+                    lambda p: p.cast_or_raise(T.ComponentDecl).to_formal_param,
+                ),
+                lambda td=T.TypeDecl:
+                td.fields.map(lambda c: c.to_formal_param),
+                lambda _:
+                PropertyError(T.FormalParam.array, "Should not happen")
             ),
-            lambda td=T.TypeDecl: td.fields,
-            lambda _: PropertyError(T.ComponentDecl.entity.array,
-                                    "Should not happen")
+            default_val=Entity.called_object_type.match(
+                lambda ft=T.FunctionType: ft.args.map(
+                    lambda a: FormalParam.new(
+                        formal_name=No(T.Symbol),
+                        formal_type=a.as_entity,
+                        default_value=No(T.Expr.entity)
+                    )
+                ),
+                lambda _:
+                PropertyError(T.FormalParam.array, "Should not happen")
+            )
         )
-    )
 
     @langkit_property()
-    def static_match_params(formals=T.ComponentDecl.entity.array,
+    def static_match_params(formals=T.FormalParam.array,
                             actuals=T.Param.entity.array):
         """
         Static method. Returns an array of ParamMatch structures, matching the
@@ -2300,7 +2368,7 @@ class CallExpr(Expr):
                 lambda f: ParamMatch.new(has_matched=True, actual=a, formal=f),
                 default_val=ParamMatch.new(has_matched=False, actual=a)
             ),
-            formals.find(lambda f: f.name == a.name.symbol).then(
+            formals.find(lambda f: f.formal_name == a.name.symbol).then(
                 lambda f: ParamMatch.new(has_matched=True, actual=a, formal=f),
                 default_val=ParamMatch.new(has_matched=False, actual=a)
             )
@@ -2309,7 +2377,7 @@ class CallExpr(Expr):
         # Create param matches for every formal that is unmatched
         formal_misses = Var(formals.filter(
             lambda formal:
-            formal.has_default_value
+            Not(formal.default_value.is_null)
             | actual_matches.find(
                 lambda pm: pm.formal == formal
             ).is_null
