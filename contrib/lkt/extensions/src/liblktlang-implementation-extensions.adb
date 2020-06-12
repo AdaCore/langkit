@@ -30,7 +30,7 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin generic[T] struct ASTList " &
      "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
      "}" & ASCII.LF &
-     "@builting struct Char {}" & ASCII.LF &
+     "@builtin struct Char {}" & ASCII.LF &
      "@builtin struct String " &
      "implements Sized, Indexable[Char], Iterator[Char] {}" & ASCII.LF &
      "";
