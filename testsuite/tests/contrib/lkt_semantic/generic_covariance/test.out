@@ -6,43 +6,43 @@ Id   <RefId "T" test.lkt:2:12-2:13>
 Id   <RefId "Int" test.lkt:3:13-3:16>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
-Id   <RefId "Node" test.lkt:7:14-7:18>
-     references <ClassDecl "Node" test.lkt:6:1-6:14>
+Id   <RefId "TestNode" test.lkt:7:14-7:22>
+     references <ClassDecl "TestNode" test.lkt:6:1-6:18>
 
-Id   <RefId "Node" test.lkt:8:19-8:23>
-     references <ClassDecl "Node" test.lkt:6:1-6:14>
+Id   <RefId "TestNode" test.lkt:8:19-8:27>
+     references <ClassDecl "TestNode" test.lkt:6:1-6:18>
 
 Id   <RefId "Expr" test.lkt:9:13-9:17>
-     references <ClassDecl "Expr" test.lkt:7:1-7:21>
+     references <ClassDecl "Expr" test.lkt:7:1-7:25>
 
-Id   <RefId "Entity" test.lkt:11:5-11:11>
-     references <GenericDecl "Entity" test.lkt:1:1-4:2>
+Id   <RefId "TestEntity" test.lkt:11:5-11:15>
+     references <GenericDecl "TestEntity" test.lkt:1:1-4:2>
 
-Id   <RefId "Lit" test.lkt:11:12-11:15>
+Id   <RefId "Lit" test.lkt:11:16-11:19>
      references <ClassDecl "Lit" test.lkt:9:1-9:20>
 
-Id   <RefId "Entity" test.lkt:12:5-12:11>
-     references <GenericDecl "Entity" test.lkt:1:1-4:2>
+Id   <RefId "TestEntity" test.lkt:12:5-12:15>
+     references <GenericDecl "TestEntity" test.lkt:1:1-4:2>
 
-Id   <RefId "Node" test.lkt:12:12-12:16>
-     references <ClassDecl "Node" test.lkt:6:1-6:14>
+Id   <RefId "TestNode" test.lkt:12:16-12:24>
+     references <ClassDecl "TestNode" test.lkt:6:1-6:18>
 
-Id   <RefId "A" test.lkt:12:20-12:21>
-     references <FieldDecl "A" test.lkt:11:1-11:16>
+Id   <RefId "A" test.lkt:12:28-12:29>
+     references <FieldDecl "A" test.lkt:11:1-11:20>
 
-Expr <RefId "A" test.lkt:12:20-12:21>
-     has type <InstantiatedGenericType "Entity[Node]" test.lkt:1:1-4:2>
+Expr <RefId "A" test.lkt:12:28-12:29>
+     has type <InstantiatedGenericType "TestEntity[TestNode]" test.lkt:1:1-4:2>
 
-Id   <RefId "Entity" test.lkt:13:14-13:20>
-     references <GenericDecl "Entity" test.lkt:1:1-4:2>
+Id   <RefId "TestEntity" test.lkt:13:14-13:24>
+     references <GenericDecl "TestEntity" test.lkt:1:1-4:2>
 
-Id   <RefId "Statement" test.lkt:13:21-13:30>
-     references <ClassDecl "Statement" test.lkt:8:1-8:26>
+Id   <RefId "Statement" test.lkt:13:25-13:34>
+     references <ClassDecl "Statement" test.lkt:8:1-8:30>
 
-Id   <RefId "A" test.lkt:13:34-13:35>
-     references <FieldDecl "A" test.lkt:11:1-11:16>
+Id   <RefId "A" test.lkt:13:38-13:39>
+     references <FieldDecl "A" test.lkt:11:1-11:20>
 
-test.lkt:13:34: error: Mismatched types: expected `Entity[Statement]`, got `Entity[Lit]`
-12 | @invalid C : Entity[Statement] = A
-   |                                  ^
+test.lkt:13:38: error: Mismatched types: expected `TestEntity[Statement]`, got `TestEntity[Lit]`
+12 | @invalid C : TestEntity[Statement] = A
+   |                                      ^
 
