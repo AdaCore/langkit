@@ -19,10 +19,10 @@ Id   <RefId "length" test.lkt:3:57-3:63>
      references <FunDecl "length" __prelude:7:14-7:31>
 
 Expr <RefId "length" test.lkt:3:57-3:63>
-     has type <FunctionType "(Sized) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <DotExpr test.lkt:3:52-3:63>
-     has type <FunctionType "(Sized) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <CallExpr test.lkt:3:52-3:65>
      has type <StructDecl "Int" __prelude:1:10-1:23>
@@ -46,10 +46,10 @@ Id   <RefId "length" test.lkt:4:53-4:59>
      references <FunDecl "length" __prelude:7:14-7:31>
 
 Expr <RefId "length" test.lkt:4:53-4:59>
-     has type <FunctionType "(Sized) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <DotExpr test.lkt:4:48-4:59>
-     has type <FunctionType "(Sized) -> Int" __prelude>
+     has type <FunctionType "() -> Int" __prelude>
 
 Expr <CallExpr test.lkt:4:48-4:61>
      has type <StructDecl "Int" __prelude:1:10-1:23>

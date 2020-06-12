@@ -1765,15 +1765,16 @@ class FunDecl(UserValDecl):
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
         return Self.function_type(
-            # If there is an owning type, then the type of this function
-            # contains the type of the self argument, which (we imagine, it
-            # won't be used yet) will need to be passed "self" explicitly, when
-            # passed around as a function object.
-            Self.owning_type.then(lambda ot: ot.singleton)
-            .concat(Entity.args.map(
+            # NOTE: For methods, we don't add the owning type. We consider that
+            # for the moment the only kind of references to method's function
+            # types are with the self argument bound (ie. via dot notation).
+            #
+            # At some stage we might want to create a notation for a "free
+            # method", where `self` is not bound, but that doesn't exist yet.
+            Entity.args.map(
                 lambda a:
                 a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
-            )),
+            ),
             Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
         ).as_bare_entity
 
@@ -2905,7 +2906,10 @@ lkt_grammar.add_rules(
     type_ref=GOr(
         GenericTypeRef(G.basic_name, "[", G.type_list, "]"),
         SimpleTypeRef(G.basic_name),
-        FunctionTypeRef("(", G.type_list, ")", "->", G.type_ref)
+        FunctionTypeRef(
+            "(", List(G.type_ref, empty_valid=True, sep=","), ")",
+            "->", G.type_ref
+        )
     ),
 
     type_list=List(G.type_ref, empty_valid=False, sep=","),
