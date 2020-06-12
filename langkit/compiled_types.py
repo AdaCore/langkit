@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
@@ -8,7 +9,7 @@ from langkit.c_api import CAPIType
 from langkit.common import is_keyword
 from langkit.compile_context import CompileCtx, get_context
 from langkit.diagnostics import (
-    Context, Severity, WarningSet, check_source_language,
+    Context, Location, Severity, WarningSet, check_source_language,
     extract_library_location
 )
 from langkit.utils import issubtype, memoized, not_implemented_error
@@ -3414,6 +3415,44 @@ class ASTNodeType(BaseStructType):
 # dependency between the @abstract decorator and the ASTNodeType class, which
 # is caused by the assert statement that is inside the decorator.
 ASTNodeType.abstract = True
+
+
+@dataclass()
+class EnumNodeAlternative:
+    """
+    Synthetic description of an enum node alternative.
+    """
+    base_name: names.Name
+    """
+    Name of the alternative, as found in the language spec.
+    """
+
+    enum_node: ASTNodeType
+    """
+    Enum node that owns this alternative.
+    """
+
+    alt_node: ASTNodeType
+    """
+    Node that implements this alternative.
+    """
+
+    location: Location
+    """
+    Location in the language spec where this alternative was created. This is
+    the location of the enum node declaration itself for alternatives
+    synthetized by the @qualifier annotation.
+    """
+
+    @property
+    def full_name(self):
+        """
+        Name of the node that implements this alternative. This is the node of
+        the enum node, suffixed with the base name.
+
+        :rtype: names.Name
+        """
+        return self.enum_node.raw_name + self.base_name
 
 
 class ArrayType(CompiledType):
