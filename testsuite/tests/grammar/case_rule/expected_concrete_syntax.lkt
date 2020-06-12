@@ -23,7 +23,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 @abstract class Expr : FooNode {
@@ -34,7 +34,7 @@ class AttrRef : Expr {
     @parse_field name : Name
 }
 
-@token_node class CharLit : Expr {
+class CharLit : Expr implements SymbolNode {
 }
 
 class DotExpr : Expr {
@@ -42,5 +42,5 @@ class DotExpr : Expr {
     @parse_field suffix : Name
 }
 
-@token_node class Name : Expr {
+class Name : Expr implements SymbolNode {
 }

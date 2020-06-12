@@ -31,7 +31,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class Call : FooNode {
@@ -44,12 +44,12 @@ class Def : FooNode {
     @parse_field stmts : ASTList[Indented]
 }
 
-@token_node class Identifier : FooNode {
+class Identifier : FooNode implements SymbolNode {
 }
 
 class Indented : FooNode {
     @parse_field inner : ASTList[FooNode]
 }
 
-@token_node class Newline : FooNode {
+class Newline : FooNode implements SymbolNode {
 }

@@ -33,6 +33,10 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin struct Char {}" & ASCII.LF &
      "@builtin struct String " &
      "implements Sized, Indexable[Char], Iterator[Char] {}" & ASCII.LF &
+     "@builtin trait Node {" & ASCII.LF &
+     "}" & ASCII.LF &
+     "@builtin trait SymbolNode {" & ASCII.LF &
+     "}" & ASCII.LF &
      "";
 
    ----------------------------------

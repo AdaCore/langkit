@@ -12,7 +12,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 @abstract class DefNode : FooNode {
@@ -33,7 +33,7 @@ class Var : DefNode {
     @export fun resolve (): FooNode
 }
 
-@token_node class Id : Name {
+class Id : Name implements SymbolNode {
 
     fun resolve (): FooNode = node.node_env().get_first(node)
 }

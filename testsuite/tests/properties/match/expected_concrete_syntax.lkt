@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun find_atoms (): Array[Atom] = (
         match self {
@@ -76,13 +76,13 @@ class Def : FooNode {
     )
 }
 
-@abstract @token_node class Atom : Expr {
+@abstract class Atom : Expr implements SymbolNode {
 }
 
-@token_node class Lit : Atom {
+class Lit : Atom implements SymbolNode {
 }
 
-@token_node class Ref : Atom {
+class Ref : Atom implements SymbolNode {
 }
 
 class Plus : Expr {
@@ -90,5 +90,5 @@ class Plus : Expr {
     @parse_field rhs : Expr
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }

@@ -6,7 +6,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class Def : FooNode {
@@ -14,7 +14,7 @@ class Def : FooNode {
     @parse_field ref : Name
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 
     fun sym (): Symbol = node.symbol
 

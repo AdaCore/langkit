@@ -1287,7 +1287,17 @@ class TypeDecl(Decl):
     )
 
     traits = AbstractField(T.TypeRef.list, doc="Traits for this type")
-    traits_decls = Property(Entity.traits.map(lambda t: t.designated_type))
+
+    @langkit_property(public=True, return_type=T.TypeDecl.entity.array)
+    def implemented_traits():
+        """
+        Traits implemented by this type.
+        """
+        return Entity.traits.map(lambda t: t.designated_type).concat(
+            Entity.base_types.mapcat(
+                lambda bt: bt.implemented_traits
+            )
+        )
 
     base_type = AbstractField(T.TypeRef)
 
@@ -1327,7 +1337,7 @@ class TypeDecl(Decl):
         """
         return (
             # Take operations from traits
-            Entity.traits_decls.map(
+            Entity.implemented_traits.map(
                 lambda td: td.type_scope
             )
             # Plus operations from the base type

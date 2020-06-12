@@ -16,7 +16,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun identity (value : BigInt): BigInt = value
 }
@@ -51,7 +51,7 @@ class LessThan : Expr {
     ) then (1) else (0))
 }
 
-@token_node class Literal : Expr {
+class Literal : Expr implements SymbolNode {
 
     fun evaluate (): BigInt
 }
@@ -77,5 +77,5 @@ class Ref : Expr {
     node.node_env().get_first(node.name.symbol).as[Decl].expr_tree.evaluate()
 }
 
-@token_node class Identifier : FooNode {
+class Identifier : FooNode implements SymbolNode {
 }

@@ -17,7 +17,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class Def : FooNode {
@@ -33,7 +33,7 @@ class Def : FooNode {
 @abstract class Atom : Expr {
 }
 
-@token_node class Lit : Atom {
+class Lit : Atom implements SymbolNode {
 }
 
 class Ref : Atom {
@@ -66,7 +66,7 @@ class Plus : Expr {
     @parse_field rhs : Expr
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }
 
 class Var : FooNode {

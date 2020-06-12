@@ -8,7 +8,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 @abstract class Name : FooNode {
@@ -32,7 +32,7 @@ class DottedName : Name {
     node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
-@token_node class Identifier : Name {
+class Identifier : Name implements SymbolNode {
 
     fun referenced_name (): Symbol = node.symbol
 

@@ -4,12 +4,12 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun integers_neq (a : Int, b : Int): Bool = not (a = b)
 }
 
-@token_node class Example : FooNode {
+class Example : FooNode implements SymbolNode {
 
     @export fun not_eq (other : Example): Bool = not (node = other)
 }

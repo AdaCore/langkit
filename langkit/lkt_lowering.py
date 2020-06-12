@@ -28,6 +28,16 @@ from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
 CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
 
 
+def get_trait(decl: L.TypeDecl, trait_name: str) -> L.TypeDecl:
+    """
+    Return the trait named ``trait_name`` on declaration ``decl``.
+    """
+    for trait in decl.f_traits:
+        trait_decl: L.TypeDecl = trait.p_designated_type
+        if trait_decl.f_syn_name.text == trait_name:
+            return trait_decl
+
+
 def pattern_as_str(str_lit: L.StringLit) -> str:
     """
     Return the regexp string associated to this string literal node.
@@ -297,12 +307,9 @@ token_cls_map = {'text': WithText,
 
 # Annotations for node declarations
 node_annotations = [FlagAnnotationSpec('abstract'),
-                    FlagAnnotationSpec('has_abstract_list'),
-                    FlagAnnotationSpec('root_node'),
-                    FlagAnnotationSpec('token_node')]
+                    FlagAnnotationSpec('has_abstract_list')]
 enum_node_annotations = [FlagAnnotationSpec('qualifier'),
-                         FlagAnnotationSpec('has_abstract_list'),
-                         FlagAnnotationSpec('token_node')]
+                         FlagAnnotationSpec('has_abstract_list')]
 field_annotations = [FlagAnnotationSpec('abstract'),
                      FlagAnnotationSpec('null_field'),
                      FlagAnnotationSpec('parse_field')]
@@ -1128,15 +1135,12 @@ class LktTypesLoader:
             'Inheritting from an enum node is forbiddn'
         )
 
-        check_source_language(not len(decl.f_traits),
-                              'Nodes cannot use traits')
-
-        # Make sure the root_node annotation is used when appropriate
-        root_node = not is_enum_node and annotations.root_node
+        # Make sure the Node trait is used correctly
+        root_node = get_trait(decl, "Node")
         if base is None:
             check_source_language(
-                root_node,
-                'The root node requires a @root_node annotation'
+                root_node is not None,
+                'The root node should derive from Node'
             )
             if CompiledTypeRepo.root_grammar_class is not None:
                 check_source_language(
@@ -1145,18 +1149,10 @@ class LktTypesLoader:
                         CompiledTypeRepo.root_grammar_class.dsl_name
                     )
                 )
-        else:
-            check_source_language(
-                not root_node,
-                'Only the root node can have the @root_node annotation'
-            )
 
         # This is a token node if either the annotation is present, or if the
         # base node is a token node itself.
-        is_token_node = (
-            annotations.token_node
-            or (base is not None and base.is_token_node)
-        )
+        is_token_node = get_trait(decl, "SymbolNode") is not None
 
         # Lower fields. Regular nodes can hold all types of fields, but token
         # nodes and enum nodes can hold only user field and properties.

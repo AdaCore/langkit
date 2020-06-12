@@ -4,7 +4,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun build_1 (key : String): KV = KV(key=key)
 
@@ -12,7 +12,7 @@ grammar foo_grammar {
     KV(key=key, value=value)
 }
 
-@token_node class Example : FooNode {
+class Example : FooNode implements SymbolNode {
 }
 
 struct KV {

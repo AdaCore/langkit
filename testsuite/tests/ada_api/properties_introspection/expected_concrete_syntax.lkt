@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun id_bool (id : Bool): Bool = id
 
@@ -51,7 +51,7 @@ class Addition : Expr {
     fun eval (): Int = node.lhs.eval() + node.rhs.eval()
 }
 
-@token_node class Number : Expr {
+class Number : Expr implements SymbolNode {
 
     fun eval (): Int
 
@@ -73,7 +73,7 @@ class Ref : Expr {
     fun eval (): Int = node.referenced_var_decl().eval()
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }
 
 class VarDecl : FooNode {

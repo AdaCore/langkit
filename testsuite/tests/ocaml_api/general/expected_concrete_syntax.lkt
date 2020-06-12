@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 }
 
-@root_node @has_abstract_list class FooNode {
+@abstract @has_abstract_list class FooNode implements Node {
 
     @export fun count (seq : Array[Example]): Int = seq.length()
 
@@ -56,7 +56,7 @@ class Sequence : ASTList[FooNode] {
     )
 }
 
-@token_node class Ident : FooNode {
+class Ident : FooNode implements SymbolNode {
 
     @export fun sym (sym : Symbol): Symbol = sym
 }

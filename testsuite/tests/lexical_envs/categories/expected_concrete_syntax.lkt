@@ -11,7 +11,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class Cat1 : FooNode {
@@ -29,7 +29,7 @@ class Def : FooNode {
     @parse_field example : Example
 }
 
-@token_node class Example : FooNode {
+class Example : FooNode implements SymbolNode {
 
     @export fun lookup_all (name : Symbol): Array[FooNode] =
     node.children_env().get(name)
@@ -45,7 +45,7 @@ class Def : FooNode {
     )
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }
 
 class Var : FooNode {

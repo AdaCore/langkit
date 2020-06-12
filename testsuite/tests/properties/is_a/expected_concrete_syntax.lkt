@@ -4,7 +4,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     fun null_node (): FooNode = null
 
@@ -18,5 +18,5 @@ class Def : FooNode {
     @parse_field example : Example
 }
 
-@token_node class Example : FooNode {
+class Example : FooNode implements SymbolNode {
 }

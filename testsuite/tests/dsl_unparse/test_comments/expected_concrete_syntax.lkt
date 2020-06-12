@@ -5,7 +5,7 @@ grammar foo_grammar {
 }
 
 ## Root node class for Test AST nodes.
-@root_node class TestNode {
+@abstract class TestNode implements Node {
 }
 
 ## Example node.

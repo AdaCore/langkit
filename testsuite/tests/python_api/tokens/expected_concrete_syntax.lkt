@@ -7,10 +7,10 @@ grammar foo_grammar {
 
 }
 
-@root_node @has_abstract_list class FooNode {
+@abstract @has_abstract_list class FooNode implements Node {
 }
 
-@token_node class Atom : FooNode {
+class Atom : FooNode implements SymbolNode {
 }
 
 class Sequence : ASTList[FooNode] {

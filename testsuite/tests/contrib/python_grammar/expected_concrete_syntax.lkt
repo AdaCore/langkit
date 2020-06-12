@@ -326,7 +326,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class PythonNode {
+@abstract class PythonNode implements Node {
 }
 
 @abstract class Arg : PythonNode {
@@ -501,7 +501,7 @@ class DottedName : Name {
     @parse_field suffix : Id
 }
 
-@token_node class Id : Name {
+class Id : Name implements SymbolNode {
 
     ## Shortcut to get the symbol of this node
     fun sym (): Symbol = node.symbol
@@ -511,7 +511,7 @@ class NotOp : Expr {
     @parse_field expr : Expr
 }
 
-@token_node class NumberLit : Expr {
+class NumberLit : Expr implements SymbolNode {
 }
 
 class OrExpr : Expr {
@@ -547,7 +547,7 @@ class ExtSliceExpr : SliceExpr {
     @parse_field stride : Expr
 }
 
-@token_node class StringLit : Expr {
+class StringLit : Expr implements SymbolNode {
 }
 
 class SubscriptExpr : Expr {
@@ -581,7 +581,7 @@ class ImportStar : PythonNode {
 class NL : PythonNode {
 }
 
-@token_node class Op : PythonNode {
+class Op : PythonNode implements SymbolNode {
 }
 
 class Params : PythonNode {
