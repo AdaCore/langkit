@@ -14,7 +14,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class Block : FooNode {
@@ -28,7 +28,7 @@ class Decl : FooNode {
     @parse_field name : Name
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 
     fun ambiant_entity (): FooNode = env.get(node)?(0)
 

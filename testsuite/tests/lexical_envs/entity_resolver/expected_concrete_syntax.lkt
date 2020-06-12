@@ -6,7 +6,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     fun resolve_ref (): FooNode = match node {
         case r : Ref => r.parent.parent.node_env().get(r.name)?(0)
@@ -19,7 +19,7 @@ class Decl : FooNode {
     @parse_field refs : ASTList[Ref]
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }
 
 class Ref : FooNode {

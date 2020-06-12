@@ -6,7 +6,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class Block : FooNode {
@@ -14,7 +14,7 @@ class Block : FooNode {
     @parse_field content : ASTList[Ref]
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }
 
 class Ref : FooNode {

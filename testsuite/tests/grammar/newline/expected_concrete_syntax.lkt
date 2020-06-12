@@ -26,7 +26,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class CompositeNode : FooNode {
@@ -41,7 +41,7 @@ class IndentNode : FooNode {
     @parse_field lit_2 : Literal
 }
 
-@token_node class Literal : FooNode {
+class Literal : FooNode implements SymbolNode {
 }
 
 class NewLineNode : FooNode {

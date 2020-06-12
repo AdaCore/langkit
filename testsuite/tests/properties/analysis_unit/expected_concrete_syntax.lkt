@@ -5,7 +5,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun eval_unit (u : InternalUnit): Int =
     u.root.as[Expression].result()
@@ -16,12 +16,12 @@ grammar foo_grammar {
     @export fun result (): Int
 }
 
-@token_node class Literal : Expression {
+class Literal : Expression implements SymbolNode {
 
     fun result (): Int
 }
 
-@token_node class Name : Expression {
+class Name : Expression implements SymbolNode {
 
     fun designated_unit (): InternalUnit
 

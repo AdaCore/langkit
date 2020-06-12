@@ -9,7 +9,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
 class DefNode : FooNode {
@@ -20,8 +20,8 @@ class DefNode : FooNode {
 class ErrorDef : FooNode {
 }
 
-@token_node class Identifier : FooNode {
+class Identifier : FooNode implements SymbolNode {
 }
 
-@token_node class Number : FooNode {
+class Number : FooNode implements SymbolNode {
 }

@@ -5,7 +5,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun prop (empty1 : Bool, empty2 : Bool): Bool = {
         val arg1 = if empty1 then _ else node.children_env();
@@ -18,5 +18,5 @@ grammar foo_grammar {
 class Scope : ASTList[Name] {
 }
 
-@token_node @has_abstract_list class Name : FooNode {
+@has_abstract_list class Name : FooNode implements SymbolNode {
 }

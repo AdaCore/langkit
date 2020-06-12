@@ -1162,6 +1162,7 @@ def emit_node_type(node_type):
     qual_node = ""
     enum_members = ""
     builtin_properties = []
+    traits = []
     abstract_qual = ""
     token_node = ''
     has_abstract_list = ''
@@ -1180,12 +1181,13 @@ def emit_node_type(node_type):
 
         builtin_properties = node_type.builtin_properties()
 
-        abstract_qual = (
-            "@root_node " if node_type.is_root_node
-            else "@abstract " if node_type.abstract else ""
-        )
+        if node_type.is_root_node:
+            traits.append('Node')
 
-        token_node = '@token_node ' if node_type.is_token_node else ''
+        abstract_qual = "@abstract " if node_type.abstract else ""
+
+        if node_type.is_token_node:
+            traits.append('SymbolNode')
 
         has_abstract_list = (
             '@has_abstract_list ' if node_type.has_abstract_list else ''
@@ -1220,6 +1222,7 @@ def emit_node_type(node_type):
     doc = node_type.doc
 
     strbase = ": {} ".format(type_name(base)) if base else ""
+    strtraits = "implements {} ".format(", ".join(traits)) if traits else ""
 
     def is_builtin_prop(prop):
         return any(
@@ -1234,7 +1237,8 @@ def emit_node_type(node_type):
     % if doc:
     ${emit_doc(doc)}$hl
     % endif
-    ${abstract_qual}${qual_node}${token_node}${has_abstract_list}${type_kind} ${type_name(node_type)} ${strbase}{$i$hl
+    ${abstract_qual}${qual_node}${has_abstract_list}
+    ${type_kind} ${type_name(node_type)} ${strbase}${strtraits}{$i$hl
     % if enum_members:
     case ${enum_members}
     $hl

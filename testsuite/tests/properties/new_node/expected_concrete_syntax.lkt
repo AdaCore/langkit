@@ -8,10 +8,10 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 }
 
-@token_node class Literal : FooNode {
+class Literal : FooNode implements SymbolNode {
 }
 
 class LiteralSequence : FooNode {
@@ -24,7 +24,7 @@ class LiteralSequence : FooNode {
     @export fun prop (): SynthNode = node.new_node().as_bare_entity
 }
 
-@token_node class Name : FooNode {
+class Name : FooNode implements SymbolNode {
 }
 
 class SynthNode : FooNode {

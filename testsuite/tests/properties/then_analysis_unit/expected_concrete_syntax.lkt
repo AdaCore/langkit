@@ -5,7 +5,7 @@ grammar foo_grammar {
 
 }
 
-@root_node class FooNode {
+@abstract class FooNode implements Node {
 
     @export fun node_unit (): InternalUnit = (node.as[Name]).do((n) => n.unit())
 }
@@ -13,5 +13,5 @@ grammar foo_grammar {
 class Scope : ASTList[Name] {
 }
 
-@token_node @has_abstract_list class Name : FooNode {
+@has_abstract_list class Name : FooNode implements SymbolNode {
 }
