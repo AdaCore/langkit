@@ -158,7 +158,7 @@
       % if field.type.is_bool_node:
          function ${field.api_name} (Node : ${type_name}'Class) return Boolean
          is (${ret_type.api_name}'(Node.${field.api_name}).Kind
-             = ${field.type.alternatives[0].type.ada_kind_name});
+             = ${field.type._alternatives[0].ada_kind_name});
 
       % elif field.type.is_enum_node:
          function ${field.api_name}
