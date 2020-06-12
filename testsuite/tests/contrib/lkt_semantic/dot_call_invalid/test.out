@@ -19,3 +19,6 @@ test.lkt:4:26: error: Cannot find entity `plus` in this scope
 3 | @invalid val b : Int = a.plus(2)
   |                          ^^^^   
 
+Expr <CallExpr test.lkt:4:24-4:33>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
