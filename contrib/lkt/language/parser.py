@@ -1,3 +1,31 @@
+"""
+The Lkt language is still a work in progress, so it does not have a proper
+reference manual or some serious documentation for the moment. In the meantime,
+this docstring is an attempt to give keys for the concepts behind the language
+design.
+
+
+Annotations:
+
+* We want to use annotations as much as possible to avoid the introduction of
+  new syntax for specific cases.
+
+
+Classes:
+
+* For now, except for builtins, only nodes are allowed as classes: exactly one
+  class definition with no base must have the @root_node annotation, and all
+  other classes must derive it, or derive one of its subclasses.
+
+
+Enum classes:
+
+* No class can derive from enum classes (they are "final").
+* The @qualifier annotation for enum classes creates automatic Present/Absent
+  alternatives, so no explicit alternative is allowed when the @qualifier
+  annotation is present.
+"""
+
 from langkit.dsl import (
     ASTNode, AbstractField, Annotations, Field, LookupKind as LK, NullField,
     Struct, T, UserField, abstract, synthetic
