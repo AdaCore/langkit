@@ -1604,7 +1604,7 @@ class EnumClassAltDecl(TypeDecl):
 
 class EnumClassCase(LKNode):
     """
-    case branch for an enum class declaration.
+    Case branch for an enum class declaration.
     """
     decls = Field(T.EnumClassAltDecl)
 
