@@ -1,5 +1,6 @@
 from collections import defaultdict
 import itertools
+from typing import DefaultDict, Iterator
 
 from langkit import names
 
@@ -65,7 +66,9 @@ def is_keyword(name):
     return str_name.lower() in ada_keywords
 
 
-__next_ids = defaultdict(lambda: itertools.count(0))
+__next_ids: DefaultDict[str, Iterator[int]] = (
+    defaultdict(lambda: itertools.count(0))
+)
 
 
 def gen_name(var_name):

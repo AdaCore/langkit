@@ -2,6 +2,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from functools import partial
 import sys
+from typing import DefaultDict
 
 from langkit.utils.colors import Colors, col
 
@@ -11,7 +12,7 @@ class Log():
     This class is a relatively generic logging handler. It includes decorators
     and context managers to make logging easier.
     """
-    enabled = defaultdict(bool)
+    enabled: DefaultDict[str, bool] = defaultdict(bool)
     nesting_level = 0
 
     @staticmethod

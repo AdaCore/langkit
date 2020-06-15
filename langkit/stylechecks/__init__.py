@@ -584,11 +584,8 @@ class PythonLang(LanguageChecker):
 
                 for node in ast.walk(root):
                     if isinstance(node, ast.ImportFrom):
-                        if node.module == '__future__':
-                            report.add('No __future__ import allowed')
-                        else:
-                            report.set_context(filename, node_lineno(node) - 1)
-                            self._check_imported_entities(report, node)
+                        report.set_context(filename, node_lineno(node) - 1)
+                        self._check_imported_entities(report, node)
 
                     elif (
                         isinstance(node, ast.stmt) and

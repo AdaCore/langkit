@@ -1,3 +1,5 @@
+from typing import List
+
 
 class Name:
     """
@@ -9,7 +11,7 @@ class Name:
     """
 
     default_formatting = None
-    formatting_stack = []
+    formatting_stack: List[str] = []
 
     def __init__(self, mixed_with_underscores):
         """
@@ -170,13 +172,13 @@ class Name:
 class Convention:
     """Guard to set a default convention."""
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, convention: str):
+        self.convention = convention
 
     def __enter__(self):
         """Set the current convention to self's convention."""
         Name.formatting_stack.append(Name.default_formatting)
-        Name.default_formatting = self.name
+        Name.default_formatting = self.convention
 
     def __exit__(self, exc, exc_type, traceback):
         """Sets the convention back to the old convention."""

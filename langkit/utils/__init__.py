@@ -4,6 +4,7 @@ library for langkit, aggregating general python utilities that we could not
 find in the standard library.
 """
 
+from contextlib import ExitStack, contextmanager
 from copy import copy
 import os
 import shutil
@@ -173,20 +174,16 @@ def copy_to_dir(filename, dirname):
     shutil.copy(filename, os.path.join(dirname, os.path.basename(filename)))
 
 
-try:
-    from contextlib import nested  # Python 2
-except ImportError:
-    from contextlib import ExitStack, contextmanager
+@contextmanager
+def nested(*contexts):
+    """
+    Reimplementation of nested in python 3.
+    """
+    with ExitStack() as stack:
+        for ctx in contexts:
+            stack.enter_context(ctx)
+        yield contexts
 
-    @contextmanager
-    def nested(*contexts):
-        """
-        Reimplementation of nested in python 3.
-        """
-        with ExitStack() as stack:
-            for ctx in contexts:
-                stack.enter_context(ctx)
-            yield contexts
 
 # pyflakes off
 from langkit.utils.colors import *

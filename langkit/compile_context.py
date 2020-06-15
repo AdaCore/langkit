@@ -9,6 +9,7 @@ this is the way it is done for the Ada language::
     ...
     context.emit(...)
 """
+from __future__ import annotations
 
 from collections import defaultdict
 from contextlib import contextmanager
@@ -16,6 +17,7 @@ from functools import reduce
 import importlib
 import os
 from os import path
+from typing import Any, Callable, Dict, List
 
 from funcy import lzip
 
@@ -1515,7 +1517,7 @@ class CompileCtx:
                     severity=Severity.warning
                 )
 
-    _template_extensions_fns = []
+    _template_extensions_fns: List[Callable[[CompileCtx], Dict[str, Any]]] = []
     """
     List of functions to create the default template environment.
 
@@ -1530,7 +1532,7 @@ class CompileCtx:
     :type: bool
     """
 
-    @property
+    @property  # type: ignore
     @memoized
     def template_extensions(self):
         """
@@ -1562,7 +1564,7 @@ class CompileCtx:
                 base_env[k] = v
         return base_env
 
-    @property
+    @property  # type: ignore
     @memoized
     def renderer(self):
         """

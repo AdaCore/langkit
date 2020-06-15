@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import itertools
+from typing import List
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
@@ -72,10 +75,9 @@ class DSLType:
     :type: langkit.compiled_types.CompiledType
     """
 
-    _name = None
+    _name: names.Name
     """
     Name for this type.
-    :type: names.Name
     """
 
     _location = None
@@ -187,7 +189,7 @@ class _StructMetaclass(type):
     that language specifications declare.
     """
 
-    struct_types = []
+    struct_types: List[Struct] = []
     """
     List of all Struct subclasses, excluding Struct itself.
 
@@ -383,11 +385,9 @@ class _ASTNodeMetaclass(type):
     subclasses that language specifications declare.
     """
 
-    astnode_types = []
+    astnode_types: List[ASTNode] = []
     """
     List of all ASTNode subclasses, excluding ASTNode itself.
-
-    :type: list[ASTNode]
     """
 
     root_type = None
@@ -908,11 +908,9 @@ class _EnumMetaclass(type):
     This is set to Enum once this class it built.
     """
 
-    enum_types = []
+    enum_types: List[Enum] = []
     """
     List of all Enum subclasses.
-
-    :type: list[Enum]
     """
 
     @classmethod
