@@ -4,9 +4,12 @@ structures.
 """
 
 from collections import OrderedDict
+from dataclasses import dataclass
 import json
 import os.path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
+)
 
 import liblktlang as L
 
@@ -216,13 +219,6 @@ class AnnotationSpec:
             result[self.name].append(value)
 
 
-class ParsedAnnotations:
-    """
-    Namespace object to hold annotation parsed values.
-    """
-    ignore: bool
-
-
 class FlagAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for flags.
@@ -291,75 +287,125 @@ class TokenAnnotationSpec(AnnotationSpec):
 
 
 # Annotation specs for grammar rules
-grammar_rule_annotations = [FlagAnnotationSpec('main_rule')]
 
-# Annotation specs for lexers
-lexer_annotations = [SpacingAnnotationSpec(),
-                     FlagAnnotationSpec('track_indent')]
-token_annotations = [TokenAnnotationSpec('text'),
-                     TokenAnnotationSpec('trivia'),
-                     TokenAnnotationSpec('symbol'),
-                     FlagAnnotationSpec('newline_after'),
-                     FlagAnnotationSpec('pre_rule'),
-                     FlagAnnotationSpec('ignore')]
 token_cls_map = {'text': WithText,
                  'trivia': WithTrivia,
                  'symbol': WithSymbol}
 
-# Annotations for node declarations
-node_annotations = [FlagAnnotationSpec('abstract'),
-                    FlagAnnotationSpec('has_abstract_list')]
-enum_node_annotations = [FlagAnnotationSpec('qualifier'),
-                         FlagAnnotationSpec('has_abstract_list')]
-field_annotations = [FlagAnnotationSpec('abstract'),
-                     FlagAnnotationSpec('null_field'),
-                     FlagAnnotationSpec('parse_field')]
+
+@dataclass
+class ParsedAnnotations:
+    """
+    Namespace object to hold annotation parsed values.
+    """
+
+    annotations: ClassVar[List[AnnotationSpec]]
+
+
+@dataclass
+class GrammarRuleAnnotations(ParsedAnnotations):
+    main_rule: bool
+    annotations = [FlagAnnotationSpec('main_rule')]
+
+
+@dataclass
+class TokenAnnotations(ParsedAnnotations):
+    ignore: bool
+    pre_rule: bool
+    newline_after: bool
+    symbol: bool
+    trivia: bool
+    text: bool
+    annotations = [TokenAnnotationSpec('text'),
+                   TokenAnnotationSpec('trivia'),
+                   TokenAnnotationSpec('symbol'),
+                   FlagAnnotationSpec('newline_after'),
+                   FlagAnnotationSpec('pre_rule'),
+                   FlagAnnotationSpec('ignore')]
+
+
+@dataclass
+class LexerAnnotations(ParsedAnnotations):
+    spacing: Tuple[L.RefId, L.RefId]
+    track_indent: bool
+    annotations = [SpacingAnnotationSpec(),
+                   FlagAnnotationSpec('track_indent')]
+
+
+@dataclass
+class NodeAnnotations(ParsedAnnotations):
+    abstract: bool
+    has_abstract_list: bool
+    annotations = [FlagAnnotationSpec('abstract'),
+                   FlagAnnotationSpec('has_abstract_list')]
+
+
+@dataclass
+class EnumNodeAnnotations(ParsedAnnotations):
+    qualifier: bool
+    has_abstract_list: bool
+    annotations = [FlagAnnotationSpec('qualifier'),
+                   FlagAnnotationSpec('has_abstract_list')]
+
+
+@dataclass
+class FieldAnnotations(ParsedAnnotations):
+    abstract: bool
+    null_field: bool
+    parse_field: bool
+    annotations = [FlagAnnotationSpec('abstract'),
+                   FlagAnnotationSpec('null_field'),
+                   FlagAnnotationSpec('parse_field')]
+
+
+def check_no_annotations(full_decl: L.FullDecl) -> None:
+    """
+    Check that the declaration has no annotations.
+    """
+    check_source_language(
+        len(full_decl.f_decl_annotations) == 0, 'no annotation allowed'
+    )
+
+
+AnyPA = TypeVar('AnyPA', bound=ParsedAnnotations)
 
 
 def parse_annotations(ctx: CompileCtx,
-                      specs: List[AnnotationSpec],
-                      full_decl: L.FullDecl) -> ParsedAnnotations:
+                      annotation_class: Type[AnyPA],
+                      full_decl: L.FullDecl) -> AnyPA:
     """
-    Parse annotations according to the given specs. Return a dict that
-    contains the interpreted annotation values for each present annotation.
+    Parse annotations according to the given specs. Return an AnnotationSpec
+    that contains the interpreted annotation values for each present
+    annotation.
 
     :param specs: Annotation specifications for allowed annotations.
     :param full_decl: Declaration whose annotations are to be parsed.
     """
-    result = ParsedAnnotations()
-    annotations = list(full_decl.f_decl_annotations)
-
-    # If no annotations are allowed, just check there are none
-    if not specs:
-        check_source_language(len(annotations) == 0, 'no annotation allowed')
-        return result
-
     # Build a mapping for all specs
     specs_map: Dict[str, AnnotationSpec] = {}
-    for s in specs:
+    for s in annotation_class.annotations:
         assert s.name not in specs_map
         specs_map[s.name] = s
 
     # Process annotations
     values: Dict[str, Any] = {}
-    for a in annotations:
+    for a in full_decl.f_decl_annotations:
         name = a.f_name.text
-        spec: AnnotationSpec = specs_map[name]
+        spec = specs_map.get(name)
         with ctx.lkt_context(a):
-            check_source_language(
-                spec is not None,
-                'Invalid annotation: {}'.format(name)
-            )
-            spec.parse_single_annotation(ctx, values, a)
+            if spec is None:
+                check_source_language(
+                    False, 'Invalid annotation: {}'.format(name)
+                )
+            else:
+                spec.parse_single_annotation(ctx, values, a)
 
     # Use the default value for absent annotations
-    for s in specs:
+    for s in annotation_class.annotations:
         values.setdefault(s.name, s.default_value)
 
     # Create the namespace object to hold results
-    for k, v in values.items():
-        setattr(result, k, v)
-    return result
+    return annotation_class(**values)  # type: ignore
 
 
 def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
@@ -372,7 +418,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     # Look for the LexerDecl node in top-level lists
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
     with ctx.lkt_context(full_lexer):
-        lexer_annot = parse_annotations(ctx, lexer_annotations, full_lexer)
+        lexer_annot = parse_annotations(ctx, LexerAnnotations, full_lexer)
 
     patterns: Dict[names.Name, str] = {}
     """
@@ -446,7 +492,9 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             otherwise.
         """
         with ctx.lkt_context(r):
-            rule_annot = parse_annotations(ctx, token_annotations, r)
+            rule_annot: TokenAnnotations = parse_annotations(
+                ctx, TokenAnnotations, r
+            )
 
             # Gather token action info from the annotations. If absent,
             # fallback to WithText.
@@ -503,7 +551,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
         :param full_decl: Full declaration for the ValDecl to process.
         """
-        parse_annotations(ctx, [], full_decl)
+        check_no_annotations(full_decl)
         decl = full_decl.f_decl
         lower_name = decl.f_syn_name.text
         name = names.Name.from_lower(lower_name)
@@ -659,7 +707,7 @@ def create_grammar(ctx, lkt_units: List[L.AnalysisUnit]) -> Grammar:
 
     # No annotation allowed for grammars
     with ctx.lkt_context(full_grammar):
-        parse_annotations(ctx, [], full_grammar)
+        check_no_annotations(full_grammar)
 
     # Get the list of grammar rules. This is where we check that we only have
     # grammar rules, that their names are unique, and that they have valid
@@ -676,7 +724,7 @@ def create_grammar(ctx, lkt_units: List[L.AnalysisUnit]) -> Grammar:
             rule_name = r.f_syn_name.text
 
             # Register the main rule if the appropriate annotation is present
-            a = parse_annotations(ctx, grammar_rule_annotations, full_rule)
+            a = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
             if a.main_rule:
                 check_source_language(main_rule_name is None,
                                       'only one main rule allowed')
@@ -1029,9 +1077,9 @@ class LktTypesLoader:
             kwargs = {}
             if isinstance(decl, L.BasicClassDecl):
                 is_enum_node = isinstance(decl, L.EnumClassDecl)
-                specs = (enum_node_annotations
+                specs = (EnumNodeAnnotations
                          if is_enum_node
-                         else node_annotations)
+                         else NodeAnnotations)
                 creator = self.create_node
                 kwargs = {'is_enum_node': is_enum_node}
 
@@ -1060,7 +1108,7 @@ class LktTypesLoader:
         for full_decl in decls:
             decl = full_decl.f_decl
             annotations = parse_annotations(
-                self.ctx, field_annotations, full_decl
+                self.ctx, FieldAnnotations, full_decl
             )
             field_type = self.resolve_type_ref(decl.f_decl_type, defer=True)
 
@@ -1112,7 +1160,7 @@ class LktTypesLoader:
     def create_node(self,
                     name: names.Name,
                     decl: L.ClassDecl,
-                    annotations: ParsedAnnotations,
+                    annotations: NodeAnnotations,
                     is_enum_node: bool) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
