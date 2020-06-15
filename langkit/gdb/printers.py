@@ -57,7 +57,7 @@ class BasePrinter:
     (https://sourceware.org/gdb/onlinedocs/gdb/Pretty-Printing-API.html).
     """
 
-    name = None
+    name: str
     """
     Human-readable string to describe this pretty-printer.
 
@@ -624,7 +624,7 @@ class LangkitVectorPrinter(BasePrinter):
                 and (set(f.name for f in value.type.fields())
                      == {'_tag', 'e', 'size', 'capacity', 'sv'}))
 
-    @property
+    @property  # type: ignore
     @memoized
     def fields(self):
         """

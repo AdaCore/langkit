@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from collections import OrderedDict
 from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
+from typing import Dict, List, Optional as Opt, Set
 
 from langkit import names
 from langkit.c_api import CAPIType
@@ -97,66 +100,50 @@ class CompiledTypeRepo:
     TypeRepo instance to refer to any compiled type.
     """
 
-    type_dict = {}
+    type_dict: Dict[str, CompiledType] = {}
     """
     Mapping: type name -> CompiledType instance. Used in TypeRepo for type
     lookup by name.
-
-    :rtype: dict[str, CompiledType]
     """
 
-    enum_types = []
+    enum_types: List[EnumType] = []
     """
     List of EnumType instances. This list is updated every time a new instance
     is created.
-
-    :type: list[EnumType]
     """
 
-    astnode_types = []
+    astnode_types: List[ASTNodeType] = []
     """
     List of ASTNodeType instances. This list is updated every time a new
     instance is created.
-
-    :type: list[ASTNodeType]
     """
 
-    struct_types = []
+    struct_types: List[StructType] = []
     """
     List of all StructType instances.
-
-    :type: list[StructType]
     """
 
-    pending_list_types = []
+    pending_list_types: List[ASTNodeType] = []
     """
     Set of ASTNodeType instances for list types that are created while there
     is no context.
-
-    :type: list[ASTNodeType]
     """
 
-    array_types = set()
+    array_types: Set[ArrayType] = set()
     """
     Set of all created ArrayType instances.
-
-    :type: set[langkit.compiled_types.ArrayType]
     """
 
-    root_grammar_class = None
+    root_grammar_class: ASTNodeType
     """
     The ASTNodeType instances used as a root type. Every other ASTNodeType
     instances must derive directly or indirectly from that class.
-
-    :type: ASTNodeType
     """
 
-    env_metadata = None
+    env_metadata: StructType
     """
     The StrucType instances used as metadata for the lexical environments
     values.
-
-    :type: StructType
     """
 
     entity_info = None
@@ -220,12 +207,10 @@ class AbstractNodeData:
     # accessors.
     entity_info_name = names.Name('E_Info')
 
-    prefix = None
+    prefix: Opt[names.Name] = None
     """
     This can be overriden in subclasses of AbstractNodeData to add a prefix to
     the name of AbstractNodeData instances.
-
-    :type: names.Name|None
     """
 
     _abstract = False
@@ -480,7 +465,7 @@ class AbstractNodeData:
         else:
             return self.name
 
-    @property
+    @property  # type: ignore
     @memoized
     def api_name(self):
         """
@@ -1275,7 +1260,7 @@ class CompiledType:
             return self is formal
 
     # Memoize so that we have only one array type for each element type
-    @property
+    @property  # type: ignore
     @memoized
     def array(self):
         """
@@ -1686,7 +1671,7 @@ class BaseField(AbstractNodeData):
     of BaseField must put that field to True in their definition.
     """
 
-    prefix = AbstractNodeData.PREFIX_FIELD
+    prefix: Opt[names.Name] = AbstractNodeData.PREFIX_FIELD
 
     _null = False
 
@@ -1736,6 +1721,8 @@ class BaseField(AbstractNodeData):
         self._type = resolve_type(self._type)
         return self._type
 
+    # TODO: RA22-015: Remove this, and make AbstractNodeData.type read-only,
+    # when transition to the DSL is done.
     @type.setter
     def type(self, typ):
         assert isinstance(typ, CompiledType)
@@ -2855,7 +2842,7 @@ class ASTNodeType(BaseStructType):
         """
         return self._base
 
-    @property
+    @property  # type: ignore
     @memoized
     def concrete_subclasses(self):
         """
@@ -2935,7 +2922,7 @@ class ASTNodeType(BaseStructType):
             predicate=lambda f: not f.abstract and not f.null
         )
 
-    @property
+    @property  # type: ignore
     @memoized
     def has_fields_initializer(self):
         """
@@ -2951,7 +2938,7 @@ class ASTNodeType(BaseStructType):
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, 'base_node')
 
-    @property
+    @property  # type: ignore
     @memoized
     def hierarchical_name(self):
         """
@@ -3027,7 +3014,7 @@ class ASTNodeType(BaseStructType):
     # We want structural equality on lists whose elements have the same types.
     # Memoization is one way to make sure that, for each CompiledType instance
     # X: X.list is X.list.
-    @property
+    @property  # type: ignore
     @memoized
     def list(self):
         """
@@ -3078,7 +3065,7 @@ class ASTNodeType(BaseStructType):
             )
         return CompiledTypeRepo.entity_info
 
-    @property
+    @property  # type: ignore
     @memoized
     def entity(self):
         """
@@ -4147,7 +4134,7 @@ class TypeRepo:
         assert result
         return result
 
-    @property
+    @property  # type: ignore
     @memoized
     def node_kind(self):
         """
@@ -4188,7 +4175,7 @@ class TypeRepo:
         """
         return self.root_node.entity
 
-    @property
+    @property  # type: ignore
     @memoized
     def env_assoc(self):
         """

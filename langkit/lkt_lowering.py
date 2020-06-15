@@ -280,9 +280,6 @@ class TokenAnnotationSpec(AnnotationSpec):
         return (start_ignore_layout, end_ignore_layout)
 
 
-# Annotation specs to use when no annotation is allowed
-no_annotations = []
-
 # Annotation specs for grammar rules
 grammar_rule_annotations = [FlagAnnotationSpec('main_rule')]
 

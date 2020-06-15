@@ -602,7 +602,7 @@ class Emitter:
                 return code
 
             try:
-                from yapf.yapflib.yapf_api import FormatCode
+                from yapf.yapflib.yapf_api import FormatCode  # type: ignore
                 return FormatCode(code)[0]
             except ImportError:
                 check_source_language(
@@ -614,7 +614,7 @@ class Emitter:
                 )
 
             try:
-                from autopep8 import fix_code
+                from autopep8 import fix_code  # type: ignore
                 return fix_code(code)
             except ImportError:
                 check_source_language(

@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
+from typing import Any, Dict, List, Optional as Opt
 
 from enum import Enum
 import funcy
@@ -465,8 +468,10 @@ class AbstractExpression(Frozable):
     a resolved tree of ResolvedExpression objects.
     """
 
-    attrs_dict = {}
-    constructors = []
+    # NOTE: not bothering to type this further, because hopefully we'll get rid
+    # of AbstractExpressions pretty soon.
+    attrs_dict: Dict[Any, Any] = {}
+    constructors: List[Any] = []
 
     @property
     def diagnostic_context(self):
@@ -616,7 +621,7 @@ class AbstractExpression(Frozable):
         them in attrs or it would cause infinite recursion.
         """
         from langkit.expressions.boolean import Or
-        from langkit.expressions.logic import All, Any
+        from langkit.expressions.logic import All, Any as LogicAny
 
         return {
             '_or': lambda alt: self.then(lambda e: e, default_val=alt),
@@ -628,7 +633,7 @@ class AbstractExpression(Frozable):
                 self.filtermap(lambda e: e.cast(cls),
                                lambda e: e.is_a(cls)),
             'logic_all': lambda e: All(self.map(e)),
-            'logic_any': lambda e: Any(self.map(e)),
+            'logic_any': lambda e: LogicAny(self.map(e)),
             'find_or_raise': lambda filter_expr:
                 self.filter(filter_expr).at_or_raise(0),
         }
@@ -2731,7 +2736,7 @@ class Block(Let):
             ...
     """
 
-    blocks = []
+    blocks: List[Any] = []
 
     @classmethod
     @contextmanager
@@ -3047,13 +3052,11 @@ class PropertyDef(AbstractNodeData):
     consistency of the passed arguments.
     """
 
-    __current_properties__ = []
+    __current_properties__: List[Opt[PropertyDef]] = []
     """
     Stack for the properties that are currently bound.
 
     See the "bind" method.
-
-    :type: list[Property|None]
     """
 
     # Overridings for AbstractNodeData class attributes
@@ -3375,7 +3378,7 @@ class PropertyDef(AbstractNodeData):
     def ignore_warn_on_node(self):
         return self._ignore_warn_on_node
 
-    @property
+    @property  # type: ignore
     @self_memoized
     def all_overriding_properties(self):
         """
@@ -3498,7 +3501,8 @@ class PropertyDef(AbstractNodeData):
         yield
         cls.__current_properties__.pop()
 
-    @property
+    # NOTE: ignore type errors here because the base property is RW
+    @property  # type:ignore
     def type(self):
         """
         Return the type of the underlying expression after resolution.
@@ -3551,7 +3555,7 @@ class PropertyDef(AbstractNodeData):
                 isinstance(self._base_property, PropertyDef))
         return self._base_property
 
-    @property
+    @property  # type: ignore
     @self_memoized
     def root_property(self):
         """
@@ -3907,7 +3911,7 @@ class PropertyDef(AbstractNodeData):
                 abstract_var=dynvar
             ))
 
-    @property
+    @property  # type: ignore
     @memoized
     def entity_info_arg(self):
         """

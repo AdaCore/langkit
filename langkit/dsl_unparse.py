@@ -1,6 +1,7 @@
 from collections import defaultdict
 from contextlib import contextmanager
 import json
+from typing import Dict
 
 from funcy import keep, lmap
 
@@ -12,7 +13,7 @@ try:
 except ImportError:
     lpl = None
 
-templates = {}
+templates: Dict[str, str] = {}
 
 
 def fqn(prop):
@@ -984,7 +985,7 @@ def emit_expr(expr, **ctx):
         return var_name(expr)
 
     elif isinstance(expr, No):
-        return "null".format(type_name(expr.expr_type))
+        return "null"
         # TODO: Emit valid null values for other types, eg. [] for arrays.
 
     elif isinstance(expr, CollectionSingleton):

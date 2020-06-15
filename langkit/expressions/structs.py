@@ -613,7 +613,7 @@ class FieldAccess(AbstractExpression):
                 and self.node_data.type.is_ast_node
             )
 
-        @property
+        @property  # type: ignore
         @memoized
         def prefix(self):
             """
@@ -628,7 +628,7 @@ class FieldAccess(AbstractExpression):
 
             return prefix
 
-        @property
+        @property  # type: ignore
         @memoized
         def entity_info_expr(self):
             """

@@ -5,6 +5,7 @@ properties DSL level.
 
 import inspect
 import shlex
+from typing import Dict
 
 
 try:
@@ -563,7 +564,7 @@ class Directive:
     Holder for GDB helper directives as parsed from source files.
     """
 
-    name_to_cls = {}
+    name_to_cls: Dict[str, type] = {}
 
     def __init__(self, line_no):
         self.line_no = line_no
@@ -578,8 +579,8 @@ class Directive:
 
         :rtype: str
         """
-        for name, dir_type in self.name_to_cls.items():
-            if isinstance(self, dir_type):
+        for name, directive_type in self.name_to_cls.items():
+            if isinstance(self, directive_type):
                 return name
         raise KeyError('Unknown directive: {}'.format(self))
 
