@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import liblktlang as L
 
+from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledType, CompiledTypeRepo,
     EnumNodeAlternative, Field, T, TypeRepo, UserField
@@ -219,7 +220,7 @@ class ParsedAnnotations:
     """
     Namespace object to hold annotation parsed values.
     """
-    pass
+    ignore: bool
 
 
 class FlagAnnotationSpec(AnnotationSpec):
@@ -315,34 +316,35 @@ field_annotations = [FlagAnnotationSpec('abstract'),
                      FlagAnnotationSpec('parse_field')]
 
 
-def parse_annotations(ctx,
+def parse_annotations(ctx: CompileCtx,
                       specs: List[AnnotationSpec],
-                      full_decl: L.FullDecl) -> Dict[str, Any]:
+                      full_decl: L.FullDecl) -> ParsedAnnotations:
     """
     Parse annotations according to the given specs. Return a dict that
-    contains the intprereted annotation values for each present annotation.
+    contains the interpreted annotation values for each present annotation.
 
     :param specs: Annotation specifications for allowed annotations.
     :param full_decl: Declaration whose annotations are to be parsed.
     """
+    result = ParsedAnnotations()
     annotations = list(full_decl.f_decl_annotations)
 
     # If no annotations are allowed, just check there are none
     if not specs:
         check_source_language(len(annotations) == 0, 'no annotation allowed')
-        return {}
+        return result
 
     # Build a mapping for all specs
-    specs_map = {}
+    specs_map: Dict[str, AnnotationSpec] = {}
     for s in specs:
         assert s.name not in specs_map
         specs_map[s.name] = s
 
     # Process annotations
-    values = {}
+    values: Dict[str, Any] = {}
     for a in annotations:
         name = a.f_name.text
-        spec = specs_map.get(name, None)
+        spec: AnnotationSpec = specs_map[name]
         with ctx.lkt_context(a):
             check_source_language(
                 spec is not None,
@@ -355,7 +357,6 @@ def parse_annotations(ctx,
         values.setdefault(s.name, s.default_value)
 
     # Create the namespace object to hold results
-    result = ParsedAnnotations()
     for k, v in values.items():
         setattr(result, k, v)
     return result
