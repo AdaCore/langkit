@@ -70,7 +70,7 @@ class Location:
     Holder for a location in the source code.
     """
 
-    def __init__(self, file, line, column=0, text=''):
+    def __init__(self, file, line, column=0):
         self.file = file
         """
         Path to the file for this location.
@@ -90,13 +90,6 @@ class Location:
         Column number (1-based). Zero if unspecified.
 
         :type: int
-        """
-
-        self.text = text
-        """
-        Optional text for the line this location targets.
-
-        :type: str
         """
 
         self.previous_in_callstack = None
@@ -167,7 +160,7 @@ def extract_library_location(stack=None):
     stack = stack or traceback.extract_stack()
 
     # Create Location instances for each stack frame
-    locs = [Location(file=t[0], line=t[1], text=t[3])
+    locs = [Location(file=t[0], line=t[1])
             for t in stack
             if Diagnostics.is_langkit_dsl(t[0]) and "manage.py" not in t[0]]
 
