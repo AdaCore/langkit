@@ -20,8 +20,8 @@ class DefNode : FooNode {
 class ErrorDef : FooNode {
 }
 
-class Identifier : FooNode implements SymbolNode {
+class Identifier : FooNode implements TokenNode {
 }
 
-class Number : FooNode implements SymbolNode {
+class Number : FooNode implements TokenNode {
 }

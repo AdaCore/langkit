@@ -18,5 +18,5 @@ class Def : FooNode {
     @parse_field example : Example
 }
 
-class Example : FooNode implements SymbolNode {
+class Example : FooNode implements TokenNode {
 }

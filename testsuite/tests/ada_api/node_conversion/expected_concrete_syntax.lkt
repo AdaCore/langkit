@@ -21,7 +21,7 @@ class Addition : Expr {
     @parse_field rhs : Expr
 }
 
-class Number : Expr implements SymbolNode {
+class Number : Expr implements TokenNode {
 }
 
 class Ref : Expr {
@@ -29,7 +29,7 @@ class Ref : Expr {
     @parse_field name : Name
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }
 
 @qualifier enum class Null : FooNode {

@@ -10,7 +10,7 @@ grammar foo_grammar {
 @abstract class FooNode implements Node {
 }
 
-class Id : FooNode implements SymbolNode {
+class Id : FooNode implements TokenNode {
 
     @export fun get_scope (): FooNode = node.children_env().get_first("Scope")
 }

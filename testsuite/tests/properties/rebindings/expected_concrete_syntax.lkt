@@ -66,5 +66,5 @@ class BlockVar : DefNode {
 class Params : ASTList[Param] {
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }

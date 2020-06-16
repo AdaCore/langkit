@@ -1187,7 +1187,7 @@ def emit_node_type(node_type):
         abstract_qual = "@abstract " if node_type.abstract else ""
 
         if node_type.is_token_node:
-            traits.append('SymbolNode')
+            traits.append('TokenNode')
 
         has_abstract_list = (
             '@has_abstract_list ' if node_type.has_abstract_list else ''

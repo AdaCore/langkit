@@ -35,7 +35,7 @@ package body Liblktlang.Implementation.Extensions is
      "implements Sized, Indexable[Char], Iterator[Char] {}" & ASCII.LF &
      "@builtin trait Node {" & ASCII.LF &
      "}" & ASCII.LF &
-     "@builtin trait SymbolNode {" & ASCII.LF &
+     "@builtin trait TokenNode {" & ASCII.LF &
      "}" & ASCII.LF &
      "";
 

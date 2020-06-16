@@ -28,7 +28,7 @@ class Decl : FooNode {
     @parse_field name : Name
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 
     fun ambiant_entity (): FooNode = env.get(node)?(0)
 

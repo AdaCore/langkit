@@ -14,7 +14,7 @@ class Def : FooNode {
     @parse_field ref : Name
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 
     fun sym (): Symbol = node.symbol
 

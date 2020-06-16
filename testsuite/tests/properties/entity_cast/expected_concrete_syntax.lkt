@@ -10,7 +10,7 @@ grammar foo_grammar {
 class BarNode : FooNode {
 }
 
-class Literal : FooNode implements SymbolNode {
+class Literal : FooNode implements TokenNode {
 
     fun a (): FooNode
 

@@ -26,7 +26,7 @@ class Def : FooNode {
 @abstract class Expr : FooNode {
 }
 
-class Literal : Expr implements SymbolNode {
+class Literal : Expr implements TokenNode {
 }
 
 class ParentExpr : Expr {
@@ -42,5 +42,5 @@ class Ref : Expr {
     @parse_field name : Name
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }

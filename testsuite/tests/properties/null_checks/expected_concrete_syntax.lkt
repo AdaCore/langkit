@@ -35,10 +35,10 @@ grammar foo_grammar {
 @abstract class Expression : FooNode {
 }
 
-class Literal : Expression implements SymbolNode {
+class Literal : Expression implements TokenNode {
 }
 
-class Name : Expression implements SymbolNode {
+class Name : Expression implements TokenNode {
 
     fun env_element (): FooNode = node.children_env().get(node.symbol)?(0)
 

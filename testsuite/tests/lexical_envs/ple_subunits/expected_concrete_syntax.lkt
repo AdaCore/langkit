@@ -31,7 +31,7 @@ class Dep : FooNode {
     node.referenced_unit_or_error(false)
 }
 
-class Id : Name implements SymbolNode {
+class Id : Name implements TokenNode {
 
     fun resolve (): FooNode = node.node_env().get_first(node)
 

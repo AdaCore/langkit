@@ -35,7 +35,7 @@ class Decl : FooNode {
 @qualifier enum class HasPlus : FooNode {
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {
