@@ -361,10 +361,10 @@ class FieldAnnotations(ParsedAnnotations):
 
 def check_no_annotations(full_decl: L.FullDecl) -> None:
     """
-    Check that the declaration has no annotations.
+    Check that the declaration has no annotation.
     """
     check_source_language(
-        len(full_decl.f_decl_annotations) == 0, 'no annotation allowed'
+        len(full_decl.f_decl_annotations) == 0, 'No annotation allowed'
     )
 
 

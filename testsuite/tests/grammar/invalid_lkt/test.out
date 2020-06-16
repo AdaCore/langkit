@@ -1,5 +1,5 @@
 == annotated_grammar.lkt ==
-annotated_grammar.lkt:3:1: Error: no annotation allowed
+annotated_grammar.lkt:3:1: Error: No annotation allowed
 
 == basic.lkt ==
 Code generation was successful
