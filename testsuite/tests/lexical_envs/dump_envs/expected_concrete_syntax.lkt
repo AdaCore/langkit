@@ -15,7 +15,7 @@ class Decl : FooNode {
     @parse_field id : Identifier
 }
 
-class Identifier : FooNode implements SymbolNode {
+class Identifier : FooNode implements TokenNode {
 }
 
 class Scope : FooNode {

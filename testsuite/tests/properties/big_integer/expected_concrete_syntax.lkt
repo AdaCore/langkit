@@ -51,7 +51,7 @@ class LessThan : Expr {
     ) then (1) else (0))
 }
 
-class Literal : Expr implements SymbolNode {
+class Literal : Expr implements TokenNode {
 
     fun evaluate (): BigInt
 }
@@ -77,5 +77,5 @@ class Ref : Expr {
     node.node_env().get_first(node.name.symbol).as[Decl].expr_tree.evaluate()
 }
 
-class Identifier : FooNode implements SymbolNode {
+class Identifier : FooNode implements TokenNode {
 }

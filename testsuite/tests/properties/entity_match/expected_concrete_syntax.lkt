@@ -16,7 +16,7 @@ class Example : FooNode {
     fun get_num (): Int = 2
 }
 
-class Literal : FooNode implements SymbolNode {
+class Literal : FooNode implements TokenNode {
 
     fun get_num (): Int = 3
 

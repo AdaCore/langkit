@@ -26,5 +26,5 @@ class VarDecl : Decl {
     fun prop (arg : Bool = false): Bool = not arg
 }
 
-class Identifier : FooNode implements SymbolNode {
+class Identifier : FooNode implements TokenNode {
 }

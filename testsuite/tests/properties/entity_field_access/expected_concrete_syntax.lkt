@@ -35,5 +35,5 @@ class Couple : FooNode {
     node.as_entity.get_entity(node.as_entity.info.md)
 }
 
-class Literal : FooNode implements SymbolNode {
+class Literal : FooNode implements TokenNode {
 }

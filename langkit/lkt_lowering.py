@@ -1205,9 +1205,9 @@ class LktTypesLoader:
                     )
                 )
 
-        # This is a token node if either the annotation is present, or if the
-        # base node is a token node itself.
-        is_token_node = get_trait(decl, "SymbolNode") is not None
+        # This is a token node if either the TokenNode trait is implemented or
+        # if the base node is a token node itself.
+        is_token_node = get_trait(decl, "TokenNode") is not None
 
         # Lower fields. Regular nodes can hold all types of fields, but token
         # nodes and enum nodes can hold only user field and properties.

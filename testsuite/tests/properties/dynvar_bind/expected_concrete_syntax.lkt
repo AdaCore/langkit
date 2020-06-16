@@ -14,7 +14,7 @@ class Decl : FooNode {
     @parse_field refs : ASTList[Ref]
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }
 
 class Ref : FooNode {

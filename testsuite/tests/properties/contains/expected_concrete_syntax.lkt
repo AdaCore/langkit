@@ -13,5 +13,5 @@ class ListNode : FooNode {
     @export fun prop (): Bool = node.nb_list.map((_, i) => i).contains(1)
 }
 
-class NumberNode : FooNode implements SymbolNode {
+class NumberNode : FooNode implements TokenNode {
 }

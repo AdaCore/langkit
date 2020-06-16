@@ -34,7 +34,7 @@ class AttrRef : Expr {
     @parse_field name : Name
 }
 
-class CharLit : Expr implements SymbolNode {
+class CharLit : Expr implements TokenNode {
 }
 
 class DotExpr : Expr {
@@ -42,5 +42,5 @@ class DotExpr : Expr {
     @parse_field suffix : Name
 }
 
-class Name : Expr implements SymbolNode {
+class Name : Expr implements TokenNode {
 }

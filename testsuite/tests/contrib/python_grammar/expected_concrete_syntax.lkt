@@ -501,7 +501,7 @@ class DottedName : Name {
     @parse_field suffix : Id
 }
 
-class Id : Name implements SymbolNode {
+class Id : Name implements TokenNode {
 
     ## Shortcut to get the symbol of this node
     fun sym (): Symbol = node.symbol
@@ -511,7 +511,7 @@ class NotOp : Expr {
     @parse_field expr : Expr
 }
 
-class NumberLit : Expr implements SymbolNode {
+class NumberLit : Expr implements TokenNode {
 }
 
 class OrExpr : Expr {
@@ -547,7 +547,7 @@ class ExtSliceExpr : SliceExpr {
     @parse_field stride : Expr
 }
 
-class StringLit : Expr implements SymbolNode {
+class StringLit : Expr implements TokenNode {
 }
 
 class SubscriptExpr : Expr {
@@ -581,7 +581,7 @@ class ImportStar : PythonNode {
 class NL : PythonNode {
 }
 
-class Op : PythonNode implements SymbolNode {
+class Op : PythonNode implements TokenNode {
 }
 
 class Params : PythonNode {

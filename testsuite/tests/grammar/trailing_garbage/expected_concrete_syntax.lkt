@@ -7,5 +7,5 @@ grammar foo_grammar {
 @abstract class FooNode implements Node {
 }
 
-class Literal : FooNode implements SymbolNode {
+class Literal : FooNode implements TokenNode {
 }

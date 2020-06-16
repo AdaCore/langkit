@@ -16,12 +16,12 @@ grammar foo_grammar {
     @export fun result (): Int
 }
 
-class Literal : Expression implements SymbolNode {
+class Literal : Expression implements TokenNode {
 
     fun result (): Int
 }
 
-class Name : Expression implements SymbolNode {
+class Name : Expression implements TokenNode {
 
     fun designated_unit (): InternalUnit
 

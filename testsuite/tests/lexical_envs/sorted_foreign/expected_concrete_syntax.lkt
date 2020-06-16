@@ -32,7 +32,7 @@ class DottedName : Name {
     node.suffix.resolve_scope(node.referenced_parent_scope())
 }
 
-class Identifier : Name implements SymbolNode {
+class Identifier : Name implements TokenNode {
 
     fun referenced_name (): Symbol = node.symbol
 

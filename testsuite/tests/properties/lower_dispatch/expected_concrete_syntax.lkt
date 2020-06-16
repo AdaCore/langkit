@@ -36,7 +36,7 @@ class Def : FooNode {
 @abstract class Atom : Expr {
 }
 
-class Lit : Atom implements SymbolNode {
+class Lit : Atom implements TokenNode {
 
     fun evaluate_abstract (): Int = 1
 
@@ -75,5 +75,5 @@ class Plus : Expr {
     self.lhs.evaluate_entity() + self.rhs.evaluate_entity()
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }

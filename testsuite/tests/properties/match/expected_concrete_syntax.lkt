@@ -76,13 +76,13 @@ class Def : FooNode {
     )
 }
 
-@abstract class Atom : Expr implements SymbolNode {
+@abstract class Atom : Expr implements TokenNode {
 }
 
-class Lit : Atom implements SymbolNode {
+class Lit : Atom implements TokenNode {
 }
 
-class Ref : Atom implements SymbolNode {
+class Ref : Atom implements TokenNode {
 }
 
 class Plus : Expr {
@@ -90,5 +90,5 @@ class Plus : Expr {
     @parse_field rhs : Expr
 }
 
-class Name : FooNode implements SymbolNode {
+class Name : FooNode implements TokenNode {
 }
