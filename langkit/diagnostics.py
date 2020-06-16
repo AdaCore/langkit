@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
 import enum
 import os
 import os.path as P
@@ -65,77 +68,51 @@ class Diagnostics:
         cls.style = style
 
 
+@dataclass(order=True, frozen=True)
 class Location:
     """
     Holder for a location in the source code.
     """
 
-    def __init__(self, file, line, column=0):
-        self.file = file
-        """
-        Path to the file for this location.
+    file: str
+    """
+    Path to the file for this location.
+    """
 
-        :type: str
-        """
+    line: int
+    """
+    Line number (1-based).
+    """
 
-        self.line = line
-        """
-        Location line number (1-based).
+    column: int = field(default=0)
+    """
+    Column number (1-based). Zero if unspecified.
 
-        :type: int
-        """
+    :type: int
+    """
 
-        self.column = column
-        """
-        Column number (1-based). Zero if unspecified.
+    end_line: int = field(default=0)
+    end_column: int = field(default=0)
+    """
+    End line and column numbers. Zero if unspecified.
+    """
 
-        :type: int
-        """
-
-        self.previous_in_callstack = None
-        """
-        If this location is created in the context of a call stack, link to the
-        location of the previous (i.e. caller) frame in this stack. Use the
-        `short_repr` property to format the whole call stack.
-
-        :type: None|Location
-        """
+    # RA22-015 TODO: Remove this "zero if unspecified" business when we get rid
+    # of the legacy DSL.
 
     @property
-    def as_tuple(self):
-        return (self.file, self.line, self.column)
-
-    def __eq__(self, other):
-        return self.as_tuple == other.as_tuple
-
-    def __lt__(self, other):
-        return self.as_tuple < other.as_tuple
-
-    def __hash__(self):
-        return hash(self.as_tuple)
-
-    def __repr__(self):
-        return '<Location {} {}:{}>'.format(self.file, self.line, self.column)
-
-    @property
-    def short_repr(self):
+    def gnu_style_repr(self) -> str:
         """
-        Return a representation for this location (and its callers, if this
-        info is present) as a human readable string.
+        Return a GNU style representation for this Location, in the form::
 
-        :rtype: str
+            file:line:column
+
+        :param relative: When True, the file path will be relative.
         """
-        # Reconstruct the call stack
-        stack = []
-        loc = self
-        while loc is not None:
-            loc_str = '{}:{}'.format(P.basename(loc.file), loc.line)
-            if loc.column:
-                loc_str += ':{}'.format(loc.column)
-            stack.append(loc_str)
-            loc = loc.previous_in_callstack
-
-        return '[{}]'.format(', '.join(stack))
+        return ":".join([
+            P.basename(self.file) if relative else self.file,
+            str(self.line),
+        ] + ([str(self.column)] if self.column > 0 else []))
 
     @classmethod
     def from_lkt_node(cls, node):
@@ -149,13 +126,11 @@ class Location:
         return cls(node.unit.filename, sloc.line, sloc.column)
 
 
-def extract_library_location(stack=None):
+def extract_library_location(stack=None) -> Location:
     """
     Extract the location of the definition of an entity in the language
     specification from a stack trace. Use `traceback.extract_stack()` if no
     stack is provided.
-
-    :rtype: Location|None
     """
     stack = stack or traceback.extract_stack()
 
@@ -163,10 +138,6 @@ def extract_library_location(stack=None):
     locs = [Location(file=t[0], line=t[1])
             for t in stack
             if Diagnostics.is_langkit_dsl(t[0]) and "manage.py" not in t[0]]
-
-    # Chain Location instances together
-    for prev_loc, loc in zip(locs[:-1], locs[1:]):
-        loc.previous_in_callstack = prev_loc
 
     return locs[-1] if locs else None
 
