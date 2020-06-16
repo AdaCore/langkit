@@ -1105,6 +1105,50 @@ class LktTypesLoader:
             self.compiled_types[name] = result
             return result
 
+    def lower_base_field(
+        self,
+        full_decl: L.FullDecl,
+        allowed_field_types: Tuple[Type[AbstractNodeData], ...]
+    ) -> BaseField:
+        """
+        Lower the BaseField described in ``decl``.
+
+        :param allowed_field_types: Set of types allowed for the fields to
+            load.
+        """
+        decl = full_decl.f_decl
+        annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
+        field_type = self.resolve_type_ref(decl.f_decl_type, defer=True)
+
+        cls: Type[BaseField]
+        if decl.f_default_val:
+            raise NotImplementedError(
+                'Field default values not handled yet'
+            )
+
+        if annotations.parse_field:
+            cls = Field
+            kwargs = {'abstract': annotations.abstract,
+                      'null': annotations.null_field}
+        else:
+            check_source_language(
+                not annotations.abstract,
+                'Regular fields cannot be abstract'
+            )
+            check_source_language(
+                not annotations.null_field,
+                'Regular fields cannot be null'
+            )
+            cls = UserField
+            kwargs = {}
+
+        check_source_language(
+            issubclass(cls, allowed_field_types),
+            'Invalid field type in this context'
+        )
+
+        return cls(type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs)
+
     def lower_fields(self,
                      decls: L.DeclBlock,
                      allowed_field_types: Tuple[Type[AbstractNodeData], ...]) \
@@ -1119,10 +1163,6 @@ class LktTypesLoader:
         result = []
         for full_decl in decls:
             decl = full_decl.f_decl
-            annotations = parse_annotations(
-                self.ctx, FieldAnnotations, full_decl
-            )
-            field_type = self.resolve_type_ref(decl.f_decl_type, defer=True)
 
             # Check field name conformity
             name_text = decl.f_syn_name.text
@@ -1136,36 +1176,7 @@ class LktTypesLoader:
             )
             name = names.Name.from_lower(name_text)
 
-            cls: Type[BaseField]
-            if decl.f_default_val:
-                raise NotImplementedError(
-                    'Field default values not handled yet'
-                )
-
-            if annotations.parse_field:
-                cls = Field
-                kwargs = {'abstract': annotations.abstract,
-                          'null': annotations.null_field}
-            else:
-                check_source_language(
-                    not annotations.abstract,
-                    'Regular fields cannot be abstract'
-                )
-                check_source_language(
-                    not annotations.null_field,
-                    'Regular fields cannot be null'
-                )
-                cls = UserField
-                kwargs = {}
-
-            check_source_language(
-                issubclass(cls, allowed_field_types),
-                'Invalid field type in this context'
-            )
-
-            field = cls(
-                type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs
-            )
+            field = self.lower_base_field(full_decl, allowed_field_types)
             field.location = self.ctx.lkt_loc(decl)
             result.append((name, cast(AbstractNodeData, field)))
         return result
