@@ -375,11 +375,12 @@ def parse_annotations(ctx: CompileCtx,
                       annotation_class: Type[AnyPA],
                       full_decl: L.FullDecl) -> AnyPA:
     """
-    Parse annotations according to the given specs. Return an AnnotationSpec
-    that contains the interpreted annotation values for each present
-    annotation.
+    Parse annotations according to the specs in
+    ``annotation_class.annotations``. Return a ParsedAnnotations that contains
+    the interpreted annotation values for each present annotation.
 
-    :param specs: Annotation specifications for allowed annotations.
+    :param annotation_class: ParsedAnnotations subclass for the result, holding
+        the annotation specs to guide parsing.
     :param full_decl: Declaration whose annotations are to be parsed.
     """
     # Build a mapping for all specs
