@@ -5078,4 +5078,4 @@ def sloc_info_arg(loc):
     """
     return ('(if Langkit_Support.Adalog.Debug.Debug'
             ' then new String\'("{}")'
-            ' else null)'.format(loc.short_repr))
+            ' else null)'.format(loc.gnu_style_repr))
