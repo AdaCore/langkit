@@ -3,6 +3,7 @@ import os
 import os.path as P
 import sys
 import traceback
+from typing import NoReturn
 
 import langkit.documentation
 from langkit.utils import Colors, assert_type, col
@@ -344,6 +345,16 @@ def get_parsable_location():
         return '{}:{}:1'.format(get_filename(loc.file), loc.line)
     else:
         return ""
+
+
+def error(message: str) -> NoReturn:
+    """
+    Shortcut around ``check_source_language``, for fatal errors.
+    """
+    check_source_language(False, message)
+    # NOTE: The following raise is useless, but is there because mypy is not
+    # clever enough to know  that the previous call will never return.
+    raise AssertionError("should not happen")
 
 
 def check_source_language(predicate, message, severity=Severity.error,

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import json
 import os.path
 from typing import (
-    Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
+    Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 )
 
 import liblktlang as L
@@ -18,11 +18,12 @@ from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledType, CompiledTypeRepo,
     EnumNodeAlternative, Field, T, TypeRepo, UserField
 )
-from langkit.diagnostics import DiagnosticError, check_source_language
+from langkit.diagnostics import DiagnosticError, check_source_language, error
 from langkit.expressions import AbstractProperty, Property, PropertyDef
 from langkit.lexer import (Action, Alt, Case, Ignore, Lexer, LexerToken,
-                           Literal, Matcher, NoCaseLit, Pattern, TokenAction,
-                           TokenFamily, WithSymbol, WithText, WithTrivia)
+                           Literal, Matcher, NoCaseLit, Pattern, RuleAssoc,
+                           TokenAction, TokenFamily, WithSymbol, WithText,
+                           WithTrivia)
 import langkit.names as names
 from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
                              Opt, Or, Parser, Pick, Predicate, Skip, _Row,
@@ -442,7 +443,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     Mapping from token names to the corresponding tokens.
     """
 
-    rules: List[Tuple[Matcher, Action]] = []
+    rules: List[Union[RuleAssoc, Tuple[Matcher, Action]]] = []
     pre_rules: List[Tuple[Matcher, Action]] = []
     """
     Lists of regular and pre lexing rules for this lexer.
@@ -582,7 +583,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             elif isinstance(expr, L.TokenPatternLit):
                 return Pattern(pattern_as_str(expr))
             else:
-                check_source_language(False, 'Invalid lexing expression')
+                error('Invalid lexing expression')
 
     def lower_token_ref(ref: L.RefId) -> TokenAction:
         """
@@ -665,7 +666,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 assert False, 'Invalid lexer rule: {}'.format(full_decl)
 
     # Create the LexerToken subclass to define all tokens and token families
-    items = {}
+    items: Dict[str, Union[TokenAction, TokenFamily]] = {}
     for name, token in tokens.items():
         items[name.camel] = token
     for name, token_set in token_family_sets.items():
@@ -832,7 +833,7 @@ def lower_grammar_rules(ctx):
                     check_source_language(False,
                                           'Unknown node: {}'.format(node_name))
 
-    def lower(rule: L.GrammarExpr) -> Parser:
+    def lower(rule: L.GrammarExpr) -> Optional[Parser]:
         """
         Helper to lower one parser.
 
@@ -965,6 +966,9 @@ class LktTypesLoader:
     Lkt.
     """
 
+    syntax_types: Dict[names.Name, L.FullDecl]
+    compiled_types: Dict[names.Name, Optional[CompiledTypeOrDefer]]
+
     def __init__(self, ctx, lkt_units: List[L.AnalysisUnit]):
         """
         :param ctx: Context in which to create these types.
@@ -1030,10 +1034,10 @@ class LktTypesLoader:
                         'Exactly one type argument expected'
                     )
                     elt_type = self.resolve_type_ref(gen_args[0], defer)
-                    return elt_type.list
+                    return cast(ASTNodeType, elt_type).list
 
                 else:
-                    check_source_language(False, 'Unknown generic type')
+                    error('Unknown generic type')
 
             else:
                 raise NotImplementedError(
@@ -1053,10 +1057,10 @@ class LktTypesLoader:
             cases.
         """
         full_decl = self.syntax_types.get(name)
-        check_source_language(
-            full_decl is not None,
-            'Invalid type name: {}'.format(name.camel)
-        )
+
+        if full_decl is None:
+            error('Invalid type name: {}'.format(name.camel))
+
         if defer:
             return getattr(T, name.camel)
         decl = full_decl.f_decl
@@ -1064,8 +1068,10 @@ class LktTypesLoader:
         # Directly return already created CompiledType instances and raise an
         # error for cycles in the type inheritance graph.
         compiled_type = self.compiled_types.get(name, "not-visited")
+
         if isinstance(compiled_type, CompiledType):
             return compiled_type
+
         with self.ctx.lkt_context(decl):
             check_source_language(
                 compiled_type is not None,
@@ -1074,22 +1080,22 @@ class LktTypesLoader:
             self.compiled_types[name] = None
 
             # Dispatch now to the appropriate type creation helper
-            kwargs = {}
             if isinstance(decl, L.BasicClassDecl):
                 is_enum_node = isinstance(decl, L.EnumClassDecl)
                 specs = (EnumNodeAnnotations
                          if is_enum_node
                          else NodeAnnotations)
-                creator = self.create_node
-                kwargs = {'is_enum_node': is_enum_node}
+                result = self.create_node(
+                    name, decl,
+                    parse_annotations(self.ctx, specs, full_decl),
+                    is_enum_node=is_enum_node
+                )
 
             else:
                 raise NotImplementedError(
                     'Unhandled type declaration: {}'.format(decl)
                 )
 
-            annotations = parse_annotations(self.ctx, specs, full_decl)
-            result = creator(name, decl, annotations, **kwargs)
             self.compiled_types[name] = result
             return result
 
