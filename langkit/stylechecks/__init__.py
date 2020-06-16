@@ -585,7 +585,13 @@ class PythonLang(LanguageChecker):
                 for node in ast.walk(root):
                     if isinstance(node, ast.ImportFrom):
                         report.set_context(filename, node_lineno(node) - 1)
-                        self._check_imported_entities(report, node)
+                        if node.module == '__future__':
+                            for alias in node.names:
+                                if alias.name != 'annotations':
+                                    report.add('Forbidden annotation: {}'
+                                               .format(alias.name))
+                        else:
+                            self._check_imported_entities(report, node)
 
                     elif (
                         isinstance(node, ast.stmt) and
