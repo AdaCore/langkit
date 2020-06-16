@@ -15,6 +15,9 @@ which gprbuild
 gcc -v
 gprbuild -v
 
+# Type check Langkit using mypy
+mypy --config-file=mypy.ini
+
 # Exit with an error if there is a test failure/error.
 #
 # TODO: adjust the Travis CI setup to provide a viable OCaml environment and
