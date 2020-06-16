@@ -15,7 +15,7 @@ import liblktlang as L
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, CompiledType, CompiledTypeRepo,
+    ASTNodeType, AbstractNodeData, BaseField, CompiledType, CompiledTypeRepo,
     EnumNodeAlternative, Field, T, TypeRepo, UserField
 )
 from langkit.diagnostics import DiagnosticError, check_source_language, error
@@ -33,7 +33,7 @@ from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
 CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
 
 
-def get_trait(decl: L.TypeDecl, trait_name: str) -> L.TypeDecl:
+def get_trait(decl: L.TypeDecl, trait_name: str) -> Optional[L.TypeDecl]:
     """
     Return the trait named ``trait_name`` on declaration ``decl``.
     """
@@ -41,6 +41,7 @@ def get_trait(decl: L.TypeDecl, trait_name: str) -> L.TypeDecl:
         trait_decl: L.TypeDecl = trait.p_designated_type
         if trait_decl.f_syn_name.text == trait_name:
             return trait_decl
+    return None
 
 
 def pattern_as_str(str_lit: L.StringLit) -> str:
@@ -311,12 +312,12 @@ class GrammarRuleAnnotations(ParsedAnnotations):
 
 @dataclass
 class TokenAnnotations(ParsedAnnotations):
-    ignore: bool
-    pre_rule: bool
+    text: Tuple[bool, bool]
+    trivia: Tuple[bool, bool]
+    symbol: Tuple[bool, bool]
     newline_after: bool
-    symbol: bool
-    trivia: bool
-    text: bool
+    pre_rule: bool
+    ignore: bool
     annotations = [TokenAnnotationSpec('text'),
                    TokenAnnotationSpec('trivia'),
                    TokenAnnotationSpec('symbol'),
@@ -334,19 +335,25 @@ class LexerAnnotations(ParsedAnnotations):
 
 
 @dataclass
-class NodeAnnotations(ParsedAnnotations):
-    abstract: bool
+class BaseNodeAnnotations(ParsedAnnotations):
     has_abstract_list: bool
-    annotations = [FlagAnnotationSpec('abstract'),
-                   FlagAnnotationSpec('has_abstract_list')]
+    annotations = [FlagAnnotationSpec('has_abstract_list')]
 
 
 @dataclass
-class EnumNodeAnnotations(ParsedAnnotations):
+class NodeAnnotations(BaseNodeAnnotations):
+    abstract: bool
+    annotations = BaseNodeAnnotations.annotations + [
+        FlagAnnotationSpec('abstract')
+    ]
+
+
+@dataclass
+class EnumNodeAnnotations(BaseNodeAnnotations):
     qualifier: bool
-    has_abstract_list: bool
-    annotations = [FlagAnnotationSpec('qualifier'),
-                   FlagAnnotationSpec('has_abstract_list')]
+    annotations = BaseNodeAnnotations.annotations + [
+        FlagAnnotationSpec('qualifier')
+    ]
 
 
 @dataclass
@@ -1082,14 +1089,12 @@ class LktTypesLoader:
 
             # Dispatch now to the appropriate type creation helper
             if isinstance(decl, L.BasicClassDecl):
-                is_enum_node = isinstance(decl, L.EnumClassDecl)
                 specs = (EnumNodeAnnotations
-                         if is_enum_node
+                         if isinstance(decl, L.EnumClassDecl)
                          else NodeAnnotations)
                 result = self.create_node(
                     name, decl,
-                    parse_annotations(self.ctx, specs, full_decl),
-                    is_enum_node=is_enum_node
+                    parse_annotations(self.ctx, specs, full_decl)
                 )
 
             else:
@@ -1102,7 +1107,7 @@ class LktTypesLoader:
 
     def lower_fields(self,
                      decls: L.DeclBlock,
-                     allowed_field_types: Tuple[type]) \
+                     allowed_field_types: Tuple[Type[AbstractNodeData], ...]) \
             -> List[Tuple[names.Name, AbstractNodeData]]:
         """
         Lower the fields described in the given DeclBlock node.
@@ -1120,17 +1125,18 @@ class LktTypesLoader:
             field_type = self.resolve_type_ref(decl.f_decl_type, defer=True)
 
             # Check field name conformity
-            name = decl.f_syn_name.text
+            name_text = decl.f_syn_name.text
             check_source_language(
-                not name.startswith('_'),
+                not name_text.startswith('_'),
                 'Underscore-prefixed field names are not allowed'
             )
             check_source_language(
-                name.lower() == name,
+                name_text.lower() == name_text,
                 'Field names must be lower-case'
             )
-            name = names.Name.from_lower(name)
+            name = names.Name.from_lower(name_text)
 
+            cls: Type[BaseField]
             if decl.f_default_val:
                 raise NotImplementedError(
                     'Field default values not handled yet'
@@ -1161,22 +1167,21 @@ class LktTypesLoader:
                 type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs
             )
             field.location = self.ctx.lkt_loc(decl)
-            result.append((name, field))
+            result.append((name, cast(AbstractNodeData, field)))
         return result
 
     def create_node(self,
                     name: names.Name,
                     decl: L.ClassDecl,
-                    annotations: NodeAnnotations,
-                    is_enum_node: bool) -> ASTNodeType:
+                    annotations: BaseNodeAnnotations) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
 
         :param name: DSL name for this node type.
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
-        :param is_enum_node: Whether this encodes an enum type.
         """
+        is_enum_node = isinstance(annotations, EnumNodeAnnotations)
         loc = self.ctx.lkt_loc(decl)
 
         # Resolve the base node (if any)
@@ -1184,18 +1189,19 @@ class LktTypesLoader:
             not is_enum_node or decl.f_base_type is not None,
             'Enum nodes need a base node'
         )
-        base = (self.resolve_type_ref(decl.f_base_type, defer=False)
+        base = (cast(ASTNodeType,
+                     self.resolve_type_ref(decl.f_base_type, defer=False))
                 if decl.f_base_type else None)
         check_source_language(
             base is None or not base.is_enum_node,
             'Inheritting from an enum node is forbiddn'
         )
 
-        # Make sure the Node trait is used correctly
-        root_node = get_trait(decl, "Node")
+        # Make sure the Node trait is used exactly once, on the root node
+        node_trait = get_trait(decl, "Node")
         if base is None:
             check_source_language(
-                root_node is not None,
+                node_trait is not None,
                 'The root node should derive from Node'
             )
             if CompiledTypeRepo.root_grammar_class is not None:
@@ -1222,13 +1228,16 @@ class LktTypesLoader:
         # For qualifier enum nodes, add the synthetic "as_bool" abstract
         # property that each alternative will override.
         is_bool_node = False
-        if is_enum_node and annotations.qualifier:
+        if (
+            isinstance(annotations, EnumNodeAnnotations)
+            and annotations.qualifier
+        ):
             prop = AbstractProperty(
                 type=T.Bool, public=True,
                 doc='Return whether this node is present'
             )
             prop.location = loc
-            fields.append(('as_bool', prop))
+            fields.append((names.Name('As_Bool'), prop))
             is_bool_node = True
 
         result = ASTNodeType(
@@ -1237,7 +1246,8 @@ class LktTypesLoader:
             doc=self.ctx.lkt_doc(decl.parent),
             base=base,
             fields=fields,
-            is_abstract=is_enum_node or annotations.abstract,
+            is_abstract=(not isinstance(annotations, NodeAnnotations)
+                         or annotations.abstract),
             is_token_node=is_token_node,
             has_abstract_list=annotations.has_abstract_list,
             is_enum_node=is_enum_node,
@@ -1245,7 +1255,7 @@ class LktTypesLoader:
         )
 
         # Create alternatives for enum nodes
-        if is_enum_node:
+        if isinstance(annotations, EnumNodeAnnotations):
             self.create_enum_node_alternatives(
                 alternatives=sum(
                     (list(b.f_decls) for b in decl.f_branches), []
