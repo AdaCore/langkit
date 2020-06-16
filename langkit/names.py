@@ -1,4 +1,6 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, Union
 
 
 class Name:
@@ -13,14 +15,14 @@ class Name:
     default_formatting = None
     formatting_stack: List[str] = []
 
-    def __init__(self, mixed_with_underscores):
+    def __init__(self, mixed_with_underscores: str):
         """
         Create a name from a string with mixed case and underscores.
 
         For instance: C_OOP_Extension.
 
-        :param str mixed_with_underscores: Name in the mixed case and
-            underscore format.
+        :param mixed_with_underscores: Name in the mixed case and underscore
+            format.
         """
         self.base_name = mixed_with_underscores
 
@@ -40,56 +42,45 @@ class Name:
         return self.base_name < other.base_name
 
     @property
-    def camel_with_underscores(self):
+    def camel_with_underscores(self) -> str:
         """
         Format to mixed case with undercore (e.g. C_OOP_Extension).
-
-        :rtype: str
         """
         return self.base_name
 
     @property
-    def camel(self):
+    def camel(self) -> str:
         """
         Format to camel case (e.g. COOPExtension).
-
-        :rtype: str
         """
         return self.base_name.replace('_', '')
 
     @property
-    def lower(self):
+    def lower(self) -> str:
         """
         Format to lower case (e.g. c_oop_extension).
-
-        :rtype: str
         """
         return self.base_name.lower()
 
     @property
-    def upper(self):
+    def upper(self) -> str:
         """
         Format to upper case (e.g. C_OOP_EXTENSION).
-
-        :rtype: str
         """
         return self.base_name.upper()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Format to default casing convention."""
         assert Name.default_formatting is not None
         return getattr(self, Name.default_formatting)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Name {}>".format(self.camel_with_underscores)
 
-    def __add__(self, other):
+    def __add__(self, other: Name) -> Name:
         """
         Returns a name which is a concatenation of two names, so that
         A_Name + Another_Name = A_Name_Another_Name.
-
-        :type other: Name
-        :rtype: Name
         """
         if self.base_name == '':
             return other
@@ -99,25 +90,23 @@ class Name:
             return Name('{}_{}'.format(self.base_name, other.base_name))
 
     @classmethod
-    def from_camel_with_underscores(cls, name):
+    def from_camel_with_underscores(cls, name: str) -> Name:
         """
         Creates a name from a string, which is formatted according to the
         camel case with underscores convention, such as
         "Camel_Case_With_Underscores".
 
-        :param str name: The string to create the name from.
-        :rtype: Name
+        :param name: The string to create the name from.
         """
         return cls(name)
 
     @classmethod
-    def from_camel(cls, name):
+    def from_camel(cls, name: str) -> Name:
         """
         Creates a name from a string, which is formatted according to the
         camel case convention, such as "CamelCaseName".
 
-        :param str name: The string to create the name from.
-        :rtype: Name
+        :param name: The string to create the name from.
         """
         result = list(name)
         inserted_underscores = []
@@ -132,37 +121,32 @@ class Name:
         return cls(''.join(result))
 
     @classmethod
-    def from_lower(cls, name):
+    def from_lower(cls, name: str) -> Name:
         """
         Creates a name from a string, which is formatted according to the
         lower case convention, such as "lower_case_name".
 
-        :param str name: The string to create the name from.
-        :rtype: Name
+        :param name: The string to create the name from.
         """
         return cls('_'.join(word.lower().capitalize()
                             for word in name.split('_')))
 
     @classmethod
-    def from_upper(cls, name):
+    def from_upper(cls, name: str) -> Name:
         """
         Creates a name from a string, which is formatted according to the
         lower case convention, such as "UPPER_CASE_NAME".
 
-        :param str name: The string to create the name from.
-        :rtype: Name
+        :param name: The string to create the name from.
         """
         return cls('_'.join(word.lower().capitalize()
                             for word in name.split('_')))
 
     @classmethod
-    def get(cls, name_or_str):
+    def get(cls, name_or_str: Union[str, Name]) -> Name:
         """
         Convenience function that will take a name or a string, and return a
         name.
-
-        :param str|Name name_or_str:
-        :rtype: Name
         """
         if isinstance(name_or_str, Name):
             return name_or_str
