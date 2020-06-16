@@ -2331,6 +2331,13 @@ class ASTNodeType(BaseStructType):
     Type for an AST node.
     """
 
+    # If this is an enum onde, list of descriptions for its enum alternatives
+    _alternatives: List[EnumNodeAlternative]
+
+    # If this is an enum node, mapping from alternative camel name to
+    # ASTNodeType instance for the alternative.
+    _alternatives_map: Dict[str, ASTNodeType]
+
     # Various names for the "is_env_populated" field for PLE unit roots
     is_env_populated_name = names.Name('Is_Env_Populated')
     is_env_populated_indexing_name = (
@@ -3419,9 +3426,12 @@ class EnumNodeAlternative:
     Enum node that owns this alternative.
     """
 
-    alt_node: ASTNodeType
+    alt_node: Opt[ASTNodeType]
     """
     Node that implements this alternative.
+
+    This is None when the EnumNodeAlternative object was just created, as the
+    corresponding ASTNodeType is instantiated only after that.
     """
 
     location: Location

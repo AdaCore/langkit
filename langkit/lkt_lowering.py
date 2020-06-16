@@ -1267,15 +1267,17 @@ class LktTypesLoader:
         return result
 
     def create_enum_node_alternatives(
-        self, alternatives, enum_node, qualifier
-    ):
+        self,
+        alternatives: List[L.EnumClassAltDecl],
+        enum_node: ASTNodeType,
+        qualifier: bool
+    ) -> None:
         """
         Create ASTNodeType instances for the alternatives of an enum node.
 
-        :param list[L.EnumClassAltDecl] alternatives: Declarations for the
-            alternatives to lower.
-        :param ASTNodeType enum_node: Enum node that owns these alternatives.
-        :param bool qualifier: Whether this enum node has the "@qualifier"
+        :param alternatives: Declarations for the alternatives to lower.
+        :param enum_node: Enum node that owns these alternatives.
+        :param qualifier: Whether this enum node has the "@qualifier"
             annotation.
         """
         # RA22-015: initialize this to True for enum nodes directly in
@@ -1339,12 +1341,12 @@ class LktTypesLoader:
                                        for alt in alternatives}
 
 
-def create_types(ctx, lkt_units):
+def create_types(ctx: CompiledType, lkt_units: List[L.AnalysisUnit]) -> None:
     """
     Create types from Lktlang units.
 
-    :param CompiledType ctx: Context in which to create these types.
-    :param list[liblktlang.AnalysisUnit] lkt_units: Non-empty list of analysis
-        units where to look for type declarations.
+    :param ctx: Context in which to create these types.
+    :param lkt_units: Non-empty list of analysis units where to look for type
+        declarations.
     """
     LktTypesLoader(ctx, lkt_units)
