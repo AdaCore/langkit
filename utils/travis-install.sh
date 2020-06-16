@@ -102,5 +102,9 @@ pip install git+https://github.com/AdaCore/e3-testsuite.git#egg=e3-testsuite
 # Also install flake8 to have complete style checks
 pip install flake8
 
+# Install a known version of mypy to perform type checks on the Langkit
+# codebase.
+pip install mypy==0.780
+
 # RA22-015: Install libpythonlang to make it available to dsl_unparse
 ./manage.py make
