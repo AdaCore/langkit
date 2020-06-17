@@ -18,13 +18,13 @@ grammar foo_grammar {
 
     @export fun id_bigint (id : BigInt): BigInt = id
 
-    @export fun id_char (id : CharacterType): CharacterType = id
+    @export fun id_char (id : Char): Char = id
 
-    @export fun id_token (id : TokenReference): TokenReference = id
+    @export fun id_token (id : Token): Token = id
 
     @export fun id_sym (id : Symbol): Symbol = id
 
-    @export fun id_unit (id : InternalUnit): InternalUnit = id
+    @export fun id_unit (id : AnalysisUnit): AnalysisUnit = id
 
     @export fun id_root_node (id : FooNode): FooNode = id
 
@@ -59,7 +59,7 @@ class Number : Expr implements TokenNode {
 
     @export fun id_dflt_int (id : Int = 42): Int = id
 
-    @export fun id_dflt_char (id : CharacterType = '\x00'): CharacterType = id
+    @export fun id_dflt_char (id : Char = '\x00'): Char = id
 
     @export fun id_dflt_root_node (id : FooNode = null): FooNode = id
 }

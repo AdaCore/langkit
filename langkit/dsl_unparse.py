@@ -1132,7 +1132,7 @@ def type_name(type):
         else:
             return type.raw_name.camel
     elif type.is_array_type:
-        if type.element_type.name.camel == 'CharacterType':
+        if type.is_string_type:
             return "String"
         return "Array[{}]".format(type_name(type.element_type))
     elif type.is_entity_type:
@@ -1140,17 +1140,11 @@ def type_name(type):
     elif type.is_struct_type:
         return type.api_name.camel
     elif type.is_ast_node:
-        return "{}.node".format(type.name.camel)
-    elif type.name.camel == 'Integer':
-        return 'Int'
-    elif type.name.camel == 'Boolean':
-        return 'Bool'
-    elif type.name.camel == 'SymbolType':
-        return 'Symbol'
-    elif type.name.camel == 'BigIntegerType':
-        return 'BigInt'
+        return "{}.node".format(type.dsl_name)
+    elif type.is_character_type:
+        return 'Char'
     else:
-        return type.name.camel
+        return type.dsl_name
 
 
 def emit_node_type(node_type):
