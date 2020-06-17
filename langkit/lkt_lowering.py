@@ -3,12 +3,15 @@ Module to gather the logic to lower Lkt syntax trees to Langkit internal data
 structures.
 """
 
+from __future__ import annotations
+
 from collections import OrderedDict
 from dataclasses import dataclass
 import json
 import os.path
 from typing import (
-    Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
+    Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union,
+    cast
 )
 
 import liblktlang as L
@@ -22,8 +25,7 @@ from langkit.diagnostics import DiagnosticError, check_source_language, error
 from langkit.expressions import AbstractProperty, Property, PropertyDef
 from langkit.lexer import (Action, Alt, Case, Ignore, Lexer, LexerToken,
                            Literal, Matcher, NoCaseLit, Pattern, RuleAssoc,
-                           TokenAction, TokenFamily, WithSymbol, WithText,
-                           WithTrivia)
+                           TokenFamily, WithSymbol, WithText, WithTrivia)
 import langkit.names as names
 from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
                              Opt, Or, Parser, Pick, Predicate, Skip, _Row,
@@ -51,7 +53,7 @@ def pattern_as_str(str_lit: L.StringLit) -> str:
     return json.loads(str_lit.text[1:])
 
 
-def parse_static_bool(ctx, expr: L.Expr) -> bool:
+def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
     """
     Return the bool value that this expression denotes.
     """
@@ -73,7 +75,7 @@ def load_lkt(lkt_file: str) -> L.AnalysisUnit:
     units_map = OrderedDict()
     diagnostics = []
 
-    def process_unit(unit):
+    def process_unit(unit: L.AnalysisUnit) -> None:
         if unit.filename in units_map:
             return
 
@@ -101,7 +103,7 @@ def load_lkt(lkt_file: str) -> L.AnalysisUnit:
     return list(units_map.values())
 
 
-def find_toplevel_decl(ctx,
+def find_toplevel_decl(ctx: CompileCtx,
                        lkt_units: List[L.AnalysisUnit],
                        node_type: type,
                        label: str) -> L.FullDecl:
@@ -161,8 +163,9 @@ class AnnotationSpec:
         self.require_args = require_args
         self.default_value = default_value if unique else []
 
-    def interpret(self, ctx,
-                  args: List[L.Expr], kwargs: Dict[str, L.Expr]) -> None:
+    def interpret(self, ctx: CompileCtx,
+                  args: List[L.Expr],
+                  kwargs: Dict[str, L.Expr]) -> Any:
         """
         Subclasses must override this in order to interpret an annotation.
 
@@ -174,7 +177,10 @@ class AnnotationSpec:
         """
         raise NotImplementedError
 
-    def parse_single_annotation(self, ctx, result, annotation):
+    def parse_single_annotation(self,
+                                ctx: CompileCtx,
+                                result: Dict[str, Any],
+                                annotation: L.DeclAnnotation) -> None:
         """
         Parse an annotation node according to this spec. Add the result to
         ``result``.
@@ -188,7 +194,7 @@ class AnnotationSpec:
         if not annotation.f_params:
             check_source_language(not self.require_args,
                                   'Arguments required for this annotation')
-            value = self.interpret(ctx, (), {})
+            value = self.interpret(ctx, [], {})
         else:
             check_source_language(self.require_args,
                                   'This annotation accepts no argument')
@@ -225,12 +231,15 @@ class FlagAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for flags.
     """
-    def __init__(self, name):
+    def __init__(self, name: str):
         super().__init__(
             name, unique=True, require_args=False, default_value=False
         )
 
-    def interpret(self, ctx, args, kwargs):
+    def interpret(self,
+                  ctx: CompileCtx,
+                  args: List[L.Expr],
+                  kwargs: Dict[str, L.Expr]) -> Any:
         return True
 
 
@@ -238,13 +247,16 @@ class SpacingAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @spacing annotations for lexer.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('spacing', unique=False, require_args=True)
 
-    def interpret(self, ctx, args, kwargs):
+    def interpret(self,
+                  ctx: CompileCtx,
+                  args: List[L.Expr],
+                  kwargs: Dict[str, L.Expr]) -> Tuple[str, str]:
+
         check_source_language(len(args) == 2 and not kwargs,
                               'Exactly two positional arguments expected')
-        couple = []
         for f in args:
             # Check that we only have RefId nodes, but do not attempt to
             # translate them to TokenFamily instances: at the point we
@@ -252,18 +264,21 @@ class SpacingAnnotationSpec(AnnotationSpec):
             # yet.
             check_source_language(isinstance(f, L.RefId),
                                   'Token family name expected')
-            couple.append(f)
-        return tuple(couple)
+        left, right = args
+        return (left, right)
 
 
 class TokenAnnotationSpec(AnnotationSpec):
     """
     Interpreter for @text/symbol/trivia annotations for tokens.
     """
-    def __init__(self, name):
+    def __init__(self, name: str):
         super().__init__(name, unique=True, require_args=True)
 
-    def interpret(self, ctx, args, kwargs):
+    def interpret(self,
+                  ctx: CompileCtx,
+                  args: List[L.Expr],
+                  kwargs: Dict[str, L.Expr]) -> Tuple[bool, bool]:
         check_source_language(not args, 'No positional argument allowed')
 
         try:
@@ -417,7 +432,7 @@ def parse_annotations(ctx: CompileCtx,
     return annotation_class(**values)  # type: ignore
 
 
-def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
+def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     """
     Create and populate a lexer from a Lktlang unit.
 
@@ -434,7 +449,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     Mapping from pattern names to the corresponding regular expression.
     """
 
-    token_family_sets: Dict[names.Name, Set[TokenAction]] = {}
+    token_family_sets: Dict[names.Name, Set[Action]] = {}
     """
     Mapping from token family names to the corresponding sets of tokens that
     belong to this family.
@@ -446,7 +461,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     build this late, once we know all tokens and all families.
     """
 
-    tokens: Dict[names.Name, TokenAction] = {}
+    tokens: Dict[names.Name, Action] = {}
     """
     Mapping from token names to the corresponding tokens.
     """
@@ -457,12 +472,13 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     Lists of regular and pre lexing rules for this lexer.
     """
 
-    newline_after: List[TokenAction] = []
+    newline_after: List[Action] = []
     """
     List of tokens after which we must introduce a newline during unparsing.
     """
 
-    def ignore_constructor(start_ignore_layout, end_ignore_layout):
+    def ignore_constructor(start_ignore_layout: bool,
+                           end_ignore_layout: bool) -> Action:
         """
         Adapter to build a Ignore instance with the same API as WithText
         constructors.
@@ -470,12 +486,10 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         del start_ignore_layout, end_ignore_layout
         return Ignore()
 
-    def process_family(f):
+    def process_family(f: L.LexerFamilyDecl) -> None:
         """
         Process a LexerFamilyDecl node. Register the token family and process
         the rules it contains.
-
-        :type f: L.LexerFamilyDecl
         """
         with ctx.lkt_context(f):
             # Create the token family, if needed
@@ -489,8 +503,10 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 )
                 process_token_rule(r, token_set)
 
-    def process_token_rule(r: L.FullDecl,
-                           token_set: Optional[Set[TokenAction]] = None):
+    def process_token_rule(
+        r: L.FullDecl,
+        token_set: Optional[Set[Action]] = None
+    ) -> None:
         """
         Process the full declaration of a GrammarRuleDecl node: create the
         token it declares and lower the optional associated lexing rule.
@@ -554,7 +570,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 else:
                     rules.append(rule)
 
-    def process_pattern(full_decl: L.FullDecl):
+    def process_pattern(full_decl: L.FullDecl) -> None:
         """
         Process a pattern declaration.
 
@@ -593,7 +609,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             else:
                 error('Invalid lexing expression')
 
-    def lower_token_ref(ref: L.RefId) -> TokenAction:
+    def lower_token_ref(ref: L.RefId) -> Action:
         """
         Return the Token that `ref` refers to.
         """
@@ -674,7 +690,7 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 assert False, 'Invalid lexer rule: {}'.format(full_decl)
 
     # Create the LexerToken subclass to define all tokens and token families
-    items: Dict[str, Union[TokenAction, TokenFamily]] = {}
+    items: Dict[str, Union[Action, TokenFamily]] = {}
     for name, token in tokens.items():
         items[name.camel] = token
     for name, token_set in token_family_sets.items():
@@ -700,7 +716,8 @@ def create_lexer(ctx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     return result
 
 
-def create_grammar(ctx, lkt_units: List[L.AnalysisUnit]) -> Grammar:
+def create_grammar(ctx: CompileCtx,
+                   lkt_units: List[L.AnalysisUnit]) -> Grammar:
     """
     Create a grammar from a set of Lktlang units.
 
@@ -752,7 +769,7 @@ def create_grammar(ctx, lkt_units: List[L.AnalysisUnit]) -> Grammar:
     return result
 
 
-def lower_grammar_rules(ctx):
+def lower_grammar_rules(ctx: CompileCtx) -> None:
     """
     Translate syntactic L rules to Parser objects.
     """
@@ -776,33 +793,34 @@ def lower_grammar_rules(ctx):
         if node.is_enum_node and not node.is_bool_node
     }
 
-    def denoted_string_literal(string_lit):
+    def denoted_string_literal(string_lit: L.StringLit) -> str:
         return eval(string_lit.text)
 
-    def resolve_node_ref(node_ref):
+    def resolve_node_ref_or_none(
+        node_ref: Optional[L.RefId]
+    ) -> Optional[ASTNodeType]:
+        """
+        Convenience wrapper around resolve_node_ref to handle None values.
+        """
+        if node_ref is None:
+            return None
+        return resolve_node_ref(node_ref)
+
+    def resolve_node_ref(node_ref: L.RefId) -> ASTNodeType:
         """
         Helper to resolve a node name to the actual AST node.
 
-        :param L.RefID node_ref: Node that is the reference to the AST node.
-        :rtype: ASTNodeType
+        :param node_ref: Node that is the reference to the AST node.
         """
-        # For convenience, accept null input nodes, as we generally want to
-        # forward them as-is to the lower level parsing machinery.
-        if node_ref is None:
-            return None
-
-        elif isinstance(node_ref, L.DotExpr):
+        if isinstance(node_ref, L.DotExpr):
             # Get the altenatives mapping for the prefix_node enum node
             prefix_node = resolve_node_ref(node_ref.f_prefix)
             with ctx.lkt_context(node_ref.f_prefix):
                 try:
                     alt_map = enum_nodes[prefix_node]
                 except KeyError:
-                    check_source_language(
-                        False,
-                        'Non-qualifier enum node expected (got {})'
-                        .format(prefix_node.dsl_name)
-                    )
+                    error('Non-qualifier enum node expected (got {})'
+                          .format(prefix_node.dsl_name))
 
             # Then resolve the alternative
             suffix = node_ref.f_suffix.text
@@ -810,10 +828,7 @@ def lower_grammar_rules(ctx):
                 try:
                     return alt_map[suffix]
                 except KeyError:
-                    check_source_language(
-                        False,
-                        'Unknown enum node alternative: {}'.format(suffix)
-                    )
+                    error('Unknown enum node alternative: {}'.format(suffix))
 
         elif isinstance(node_ref, L.GenericTypeRef):
             check_source_language(
@@ -838,8 +853,7 @@ def lower_grammar_rules(ctx):
                 try:
                     return nodes[node_name]
                 except KeyError:
-                    check_source_language(False,
-                                          'Unknown node: {}'.format(node_name))
+                    error('Unknown node: {}'.format(node_name))
 
     def lower(rule: L.GrammarExpr) -> Optional[Parser]:
         """
@@ -900,11 +914,13 @@ def lower_grammar_rules(ctx):
                 return _Token(denoted_string_literal(rule), location=loc)
 
             elif isinstance(rule, L.GrammarList):
-                return PList(lower(rule.f_expr),
-                             empty_valid=rule.f_kind.text == '*',
-                             list_cls=resolve_node_ref(rule.f_list_type),
-                             sep=lower(rule.f_sep),
-                             location=loc)
+                return PList(
+                    lower(rule.f_expr),
+                    empty_valid=rule.f_kind.text == '*',
+                    list_cls=resolve_node_ref_or_none(rule.f_list_type),
+                    sep=lower(rule.f_sep),
+                    location=loc
+                )
 
             elif isinstance(rule, (L.GrammarImplicitPick,
                                    L.GrammarPick)):
@@ -977,7 +993,7 @@ class LktTypesLoader:
     syntax_types: Dict[names.Name, L.FullDecl]
     compiled_types: Dict[names.Name, Optional[CompiledTypeOrDefer]]
 
-    def __init__(self, ctx, lkt_units: List[L.AnalysisUnit]):
+    def __init__(self, ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]):
         """
         :param ctx: Context in which to create these types.
         :param lkt_units: Non-empty list of analysis units where to look for
@@ -1352,7 +1368,7 @@ class LktTypesLoader:
                                        for alt in alternatives}
 
 
-def create_types(ctx: CompiledType, lkt_units: List[L.AnalysisUnit]) -> None:
+def create_types(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> None:
     """
     Create types from Lktlang units.
 
