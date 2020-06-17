@@ -1482,7 +1482,7 @@ class LktTypesLoader:
             ]
         else:
             check_source_language(
-                len(alternatives),
+                len(alternatives) > 0,
                 'Missing alternatives for this enum node'
             )
             alternatives = [

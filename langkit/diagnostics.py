@@ -8,7 +8,9 @@ import os.path as P
 import re
 import sys
 import traceback
-from typing import Any, List, NoReturn, Optional, Union
+from typing import (
+    Any, List, NoReturn, Optional as Opt, TextIO, Tuple, Type, TypeVar, Union
+)
 
 
 try:
@@ -105,7 +107,7 @@ class Location:
     # RA22-015 TODO: Remove this "zero if unspecified" business when we get rid
     # of the legacy DSL.
 
-    lkt_unit: Optional[L.AnalysisUnit] = field(default=None)
+    lkt_unit: Opt[L.AnalysisUnit] = field(default=None)
 
     def gnu_style_repr(self, relative: bool = True) -> str:
         """
@@ -135,7 +137,7 @@ class Location:
         )
 
 
-def extract_library_location(stack: List[Any] = None) -> Optional[Location]:
+def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
     """
     Extract the location of the definition of an entity in the language
     specification from a stack trace. Use `traceback.extract_stack()` if no
@@ -199,38 +201,27 @@ SEVERITY_COLORS = {
 }
 
 
-def format_severity(severity):
-    """
-    :param Severity severity:
-    """
+def format_severity(severity: Severity) -> str:
     msg = ('Error'
            if severity == Severity.non_blocking_error else
            severity.name.capitalize())
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
-def get_structured_context():
+def get_structured_context() -> List[Location]:
     """
     From the context global structures, return a structured context locations
     list.
-
-    :rtype: list[(str, Location)]
     """
     return list(reversed(context_stack))
 
 
-def get_filename(f):
-    return (os.path.abspath(f)
-            if Diagnostics.style == DiagnosticStyle.gnu_full else
-            os.path.basename(f))
-
-
-def get_current_location() -> Optional[Location]:
+def get_current_location() -> Opt[Location]:
     ctx = get_structured_context()
     return ctx[0] if ctx else None
 
 
-def get_parsable_location():
+def get_parsable_location() -> str:
     """
     Returns an error location in the common tool parsable format::
 
@@ -243,9 +234,8 @@ def get_parsable_location():
     :rtype: str
     """
     assert Diagnostics.style != DiagnosticStyle.default
-    ctx = get_structured_context()
-    if ctx:
-        loc = ctx[0][1]
+    loc = get_current_location()
+    if loc:
         path = (P.abspath(loc.file)
                 if Diagnostics.style == DiagnosticStyle.gnu_full else
                 P.basename(loc.file))
@@ -264,8 +254,11 @@ def error(message: str) -> NoReturn:
     raise AssertionError("should not happen")
 
 
-def check_source_language(predicate, message, severity=Severity.error,
-                          do_raise=True, ok_for_codegen=False):
+def check_source_language(predicate: bool,
+                          message: str,
+                          severity: Severity = Severity.error,
+                          do_raise: bool = True,
+                          ok_for_codegen: bool = False) -> None:
     """
     Check predicates related to the user's input in the input language
     definition. Show error messages and eventually terminate if those error
@@ -309,38 +302,28 @@ def check_source_language(predicate, message, severity=Severity.error,
             Diagnostics.has_pending_error = True
 
 
+@dataclass(frozen=True)
 class WarningDescriptor:
     """
     Embed information about a class of warnings. Allows to log warning messages
     via the `warn_if` method.
     """
-
-    def __init__(self, name, enabled_by_default, description):
-        self.name = name
-        self.description = description
-        self.enabled_by_default = enabled_by_default
+    name: str
+    enabled_by_default: bool
+    description: str
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         """
         Return whether this warning is enabled in the current context.
-
-        :rtype: bool
         """
         from langkit.compile_context import get_context
         return self in get_context().warnings
 
-    def __repr__(self):
-        return '<WarningDescriptor {}>'.format(self.name)
-
-    def warn_if(self, predicate, message):
+    def warn_if(self, predicate: bool, message: str) -> None:
         """
         Helper around check_source_language, to raise warnings, depending on
         whether self is enabled or not in the current context.
-
-        :param bool predicate: The predicate to check.
-        :param str message: The base message to display if predicate happens to
-            be false.
         """
         check_source_language(not self.enabled or not predicate, message,
                               severity=Severity.warning)
@@ -389,83 +372,65 @@ class WarningSet:
         imprecise_field_type_annotations,
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.enabled_warnings = {w for w in self.available_warnings
                                  if w.enabled_by_default}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<WarningSet [{}]>'.format(', '.join(
             w.name for w in self.enabled_warnings
         ))
 
-    def enable(self, warning):
+    def enable(self, warning: Union[WarningDescriptor, str]) -> None:
         """
         Enable the given warning in this WarningSet instance.
-
-        :type warning: WarningDescriptor|str
         """
-        if isinstance(warning, str):
-            warning = self.lookup(warning)
-        self.enabled_warnings.add(warning)
+        warn = self.lookup(warning) if isinstance(warning, str) else warning
+        self.enabled_warnings.add(warn)
 
-    def disable(self, warning):
+    def disable(self, warning: Union[WarningDescriptor, str]) -> None:
         """
         Disable the given warning in this WarningSet instance.
-
-        :type warning: WarningDescriptor|str
         """
-        if isinstance(warning, str):
-            warning = self.lookup(warning)
-        self.enabled_warnings.discard(warning)
+        warn = self.lookup(warning) if isinstance(warning, str) else warning
+        self.enabled_warnings.discard(warn)
 
-    def clone(self):
+    def clone(self) -> WarningSet:
         """
         Return a copy of this WarningSet instance.
-
-        :rtype: WarningSet
         """
         other = WarningSet()
         other.enabled_warnings = set(self.enabled_warnings)
         return other
 
-    def with_enabled(self, warning):
+    def with_enabled(self,
+                     warning: Union[WarningDescriptor, str]) -> WarningSet:
         """
         Return a copy of this WarningSet instance where `warning` is enabled.
-
-        :type warning: WarningDescriptor|str
-        :rtype WarningSet
         """
         other = self.clone()
         other.enable(warning)
         return other
 
-    def with_disabled(self, warning):
+    def with_disabled(self,
+                      warning: Union[WarningDescriptor, str]) -> WarningSet:
         """
         Return a copy of this WarningSet instance where `warning` is disabled.
-
-        :type warning: WarningDescriptor|str
-        :rtype WarningSet
         """
         other = self.clone()
         other.disable(warning)
         return other
 
-    def __contains__(self, warning):
+    def __contains__(self, warning: WarningDescriptor) -> bool:
         """
         Return whether `warning` is enabled:
-
-        :type: WarningDescriptor
-        :rtype: bool
         """
         return warning in self.enabled_warnings
 
-    def lookup(self, name):
+    def lookup(self, name: str) -> WarningDescriptor:
         """
         Look for the WarningDescriptor whose name is `name`. Raise a ValueError
         if none matches.
-
-        :type name: str
-        :rtype warning: WarningDescriptor
         """
         for w in self.available_warnings:
             if w.name == name:
@@ -474,13 +439,14 @@ class WarningSet:
             raise ValueError('Invalid warning: {}'.format(name))
 
     @classmethod
-    def print_list(cls, out=sys.stdout, width=None):
+    def print_list(cls,
+                   out: TextIO = sys.stdout,
+                   width: Opt[int] = None) -> None:
         """
         Display the list of available warnings in `f`.
 
-        :param file out: File in which the list is displayed.
-        :param None|int width: Width of the message. If None, use
-            os.environ['COLUMNS'].
+        :param out: File in which the list is displayed.
+        :param width: Width of the message. If None, use os.environ['COLUMNS'].
         """
         if width is None:
             try:
@@ -497,7 +463,8 @@ class WarningSet:
                   file=out)
 
 
-def check_multiple(predicates_and_messages, severity=Severity.error):
+def check_multiple(predicates_and_messages: List[Tuple[bool, str]],
+                   severity: Severity = Severity.error) -> None:
     """
     Helper around check_source_language, check multiple predicates at once.
 
@@ -509,24 +476,25 @@ def check_multiple(predicates_and_messages, severity=Severity.error):
         check_source_language(predicate, message, severity)
 
 
-def check_type(obj, typ, message=None):
+T = TypeVar('T')
+
+
+def check_type(obj: Any, typ: Type[T], message: Opt[str] = None) -> T:
     """
     Like utils.assert_type, but produces a client error instead.
 
-    :param Any obj: The object to check.
-    :param T typ: The expected type of obj.
+    :param obj: The object to check.
+    :param typ: The expected type of obj.
     :param str|None message: The base message to display if type check fails.
-
-    :rtype: T
     """
     try:
         return assert_type(obj, typ)
     except AssertionError as e:
         message = "{}\n{}".format(e.args[0], message) if message else e.args[0]
-        check_source_language(False, message)
+        error(message)
 
 
-def errors_checkpoint():
+def errors_checkpoint() -> None:
     """
     If there was a non-blocking error, exit the compilation process.
     """
@@ -579,7 +547,7 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     # Precompute the format string for the listing left column
     prefix_fmt = "{{: >{}}} | ".format(line_nb_width)
 
-    def append_line(line_nb, line):
+    def append_line(line_nb: Union[int, str], line: str) -> None:
         """
         Append a line to the source listing, given a line number and a line.
         """
@@ -607,7 +575,8 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     return "".join(ret)
 
 
-def print_error(message: str, location: Union[Location, L.LKNode, None]):
+def print_error(message: str,
+                location: Union[Location, L.LKNode, None]) -> None:
     """
     Prints an error.
     """
@@ -634,7 +603,7 @@ def print_error(message: str, location: Union[Location, L.LKNode, None]):
         print(source_listing(location))
 
 
-def print_error_from_sem_result(sem_result: L.SemanticResult):
+def print_error_from_sem_result(sem_result: L.SemanticResult) -> None:
     """
     Prints an error from an lkt semantic result.
     """
