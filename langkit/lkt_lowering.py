@@ -1016,13 +1016,25 @@ class LktTypesLoader:
                 )
                 self.syntax_types[name] = full_decl
 
-        # Now create CompiledType instances for each type. To properly handle
-        # node derivation, recurse on bases first and reject inheritance loops.
-
         # Map indexed by type Name. Unvisited types are absent, fully processed
         # types have an entry with the corresponding CompiledType, and
         # currently processed types have an entry associated with None.
         self.compiled_types = {}
+
+        # Pre-fill it with builtin types. Use camel-case type repo names,
+        # except for the character type, which gets a special name in Lkt.
+        for type_name, t in CompiledTypeRepo.type_dict.items():
+            dsl_name = (names.Name('Char')
+                        if t.is_character_type
+                        else names.Name.from_camel(type_name))
+            self.compiled_types[dsl_name] = t
+
+        # String is a special shortcut
+        self.compiled_types[names.Name('String')] = T.Character.array
+
+        # Now create CompiledType instances for each user type. To properly
+        # handle node derivation, recurse on bases first and reject inheritance
+        # loops.
         for name in sorted(self.syntax_types):
             self.create_type_from_name(name, defer=False)
 
@@ -1080,11 +1092,20 @@ class LktTypesLoader:
             TypeRepo.Defer instance. Lower the type if necessary in all other
             cases.
         """
-        full_decl = self.syntax_types.get(name)
+        # First, look for an already translated type (this can be a builtin
+        # type).
+        result = self.compiled_types.get(name)
+        if result is not None:
+            return result
 
+        # Then, look for user-defined types, which may not have been translated
+        # yet.
+        full_decl = self.syntax_types.get(name)
         if full_decl is None:
             error('Invalid type name: {}'.format(name.camel))
 
+        # If it's present, we know it wasn't translated yet, so return a defer
+        # stub for it when requested. Otherwise, we will translate it now.
         if defer:
             return getattr(T, name.camel)
         decl = full_decl.f_decl
