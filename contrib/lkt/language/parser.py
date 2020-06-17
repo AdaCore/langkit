@@ -137,6 +137,10 @@ class LKNode(ASTNode):
     def get_builtin_type(entity_name=T.Symbol):
         return Self.root_get(entity_name).cast(T.TypeDecl)
 
+    @langkit_property(return_type=T.GenericDecl.entity)
+    def get_builtin_gen_decl(entity_name=T.Symbol):
+        return Self.root_get(entity_name).cast(T.GenericDecl)
+
     char_type = Property(
         Self.get_builtin_type('Char'), public=True,
         doc="Unit method. Return the character builtin type."
@@ -172,9 +176,15 @@ class LKNode(ASTNode):
         doc="Unit method. Return the regexp builtin type."
     )
 
-    array_type = Property(
-        Self.get_builtin_type('Array'), public=True,
+    array_gen_type = Property(
+        Self.get_builtin_gen_decl('Array').decl.cast(T.TypeDecl), public=True,
         doc="Unit method. Return the array builtin type."
+    )
+
+    astlist_gen_type = Property(
+        Self.get_builtin_gen_decl('ASTList').decl.cast(T.TypeDecl),
+        public=True,
+        doc="Unit method. Return the ASTList builtin generic type."
     )
 
     @langkit_property(external=True,

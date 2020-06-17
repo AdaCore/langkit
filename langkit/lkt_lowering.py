@@ -19,7 +19,8 @@ import liblktlang as L
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, BaseField, CompiledType,
-    CompiledTypeRepo, EnumNodeAlternative, Field, T, TypeRepo, UserField
+    CompiledTypeRepo, EnumNodeAlternative, Field, T, TypeRepo, UserField,
+    resolve_type
 )
 from langkit.diagnostics import DiagnosticError, check_source_language, error
 from langkit.expressions import (
@@ -1039,8 +1040,15 @@ class LktTypesLoader:
     Lkt.
     """
 
-    syntax_types: Dict[names.Name, L.FullDecl]
-    compiled_types: Dict[names.Name, Optional[CompiledTypeOrDefer]]
+    # Map Lkt type declarations to the corresponding CompiledType instances, or
+    # to None when the type declaration is currently being lowered. Keeping a
+    # None entry in this case helps detecting illegal circular type
+    # dependencies.
+    compiled_types: Dict[L.TypeDecl, Optional[CompiledType]]
+
+    # Map Lkt type declarations to TypeRepo.Defer instances that resolve to the
+    # corresponding CompiledType instances.
+    type_refs: Dict[L.TypeDecl, TypeRepo.Defer]
 
     def __init__(self, ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]):
         """
@@ -1049,18 +1057,18 @@ class LktTypesLoader:
             type declarations.
         """
         self.ctx = ctx
+        self.type_refs = {}
+
+        root = lkt_units[0].root
+
+        # Pre-fetch the declaration of generic types to that resolve_type_decl
+        # has an efficient access to them.
+        self.array_gen_type = root.p_array_gen_type
+        self.astlist_gen_type = root.p_astlist_gen_type
 
         # Map Lkt nodes for the declarations of builtin types to the
         # corresponding CompiledType instances.
-        #
-        # TODO: remove the syntax_types/compiled_types dictionaries and extend
-        # the builtin_types dictionary to all type declarations in Lkt. This
-        # will allow us to stop resolving type references ourselves: Lkt
-        # properties can do that themselves, so that we would only deal with
-        # L.TypeDecl instances here.
-        root = lkt_units[0].root
-        self.array_type = root.p_array_type
-        self.builtin_types = {
+        self.compiled_types = {
             root.p_char_type: T.Character,
             root.p_int_type: T.Int,
             root.p_bool_type: T.Bool,
@@ -1070,165 +1078,123 @@ class LktTypesLoader:
         }
 
         # Go through all units, build a map for all type definitions, indexed
-        # by Name. This first pass allows the check of unique names.
-        self.syntax_types = {}
+        # by name. This first pass allows to check for type name unicity.
+        named_type_decls: Dict[str, L.FullTypeDecl] = {}
         for unit in lkt_units:
             for full_decl in unit.root.f_decls:
                 if not isinstance(full_decl.f_decl, L.TypeDecl):
                     continue
-                name_str = full_decl.f_decl.f_syn_name.text
-                name = names.Name.from_camel(name_str)
+                name = full_decl.f_decl.f_syn_name.text
                 check_source_language(
-                    name not in self.syntax_types,
-                    'Duplicate type name: {}'.format(name_str)
+                    name not in named_type_decls,
+                    'Duplicate type name: {}'.format(name)
                 )
-                self.syntax_types[name] = full_decl
-
-        # Map indexed by type Name. Unvisited types are absent, fully processed
-        # types have an entry with the corresponding CompiledType, and
-        # currently processed types have an entry associated with None.
-        self.compiled_types = {}
-
-        # Pre-fill it with builtin types. Use camel-case type repo names,
-        # except for the character type, which gets a special name in Lkt.
-        for type_name, t in CompiledTypeRepo.type_dict.items():
-            dsl_name = (names.Name('Char')
-                        if t.is_character_type
-                        else names.Name.from_camel(type_name))
-            self.compiled_types[dsl_name] = t
-
-        # String is a special shortcut
-        self.compiled_types[names.Name('String')] = T.Character.array
+                named_type_decls[name] = full_decl
 
         # Now create CompiledType instances for each user type. To properly
-        # handle node derivation, recurse on bases first and reject inheritance
-        # loops.
-        for name in sorted(self.syntax_types):
-            self.create_type_from_name(name, defer=False)
+        # handle node derivation, this recurses on bases first and reject
+        # inheritance loops.
+        for _, decl in sorted(named_type_decls.items()):
+            self.lower_type_decl(decl.f_decl)
 
     def resolve_type_decl(self, decl: L.TypeDecl) -> CompiledTypeOrDefer:
         """
         Fetch the CompiledType instance corresponding to the given type
-        declaration.
+        declaration. If it's not lowered yet, return an appropriate
+        TypeRepo.Defer instance instead.
 
         :param decl: Lkt type declaration to resolve.
         """
-        if isinstance(decl, L.InstantiatedGenericType):
-            inner_type = decl.p_get_inner_type
-            actuals = decl.p_inner_type
+        result: Optional[CompiledTypeOrDefer]
 
-            if inner_type == self.array_type:
-                assert len(actuals) == 1
-                return self.resolve_type_decl(actuals[0]).array
-
-            else:
-                assert False, 'Unknown generic type: {}'.format(decl)
-
-        else:
-            return self.builtin_types[decl]
-
-    def resolve_type_ref(self,
-                         ref: L.TypeRef,
-                         defer: bool) -> CompiledTypeOrDefer:
-        """
-        Fetch the CompiledType instance corresponding to the given type
-        reference.
-
-        :param ref: Type reference to resolve.
-        :param defer: If True and this type is not lowered yet, return a
-            TypeRepo.Defer instance. Lower the type if necessary in all other
-            cases.
-        """
-        with self.ctx.lkt_context(ref):
-            if isinstance(ref, L.SimpleTypeRef):
-                return self.create_type_from_name(
-                    names.Name.from_camel(ref.f_type_name.text),
-                    defer
-                )
-
-            elif isinstance(ref, L.GenericTypeRef):
-                check_source_language(
-                    isinstance(ref.f_type_name, L.RefId),
-                    'Invalid generic type'
-                )
-                gen_type = ref.f_type_name.text
-                gen_args = list(ref.f_params)
-                if gen_type == 'ASTList':
-                    check_source_language(
-                        len(gen_args) == 1,
-                        'Exactly one type argument expected'
-                    )
-                    elt_type = self.resolve_type_ref(gen_args[0], defer)
-                    return cast(ASTNodeType, elt_type).list
-
-                else:
-                    error('Unknown generic type')
-
-            else:
-                raise NotImplementedError(
-                    'Unhandled type reference: {}'.format(ref)
-                )
-
-    def create_type_from_name(self,
-                              name: names.Name,
-                              defer: bool) -> CompiledTypeOrDefer:
-        """
-        Fetch the CompiledType instance corresponding to the given type
-        reference.
-
-        :param name: Name of the type to create.
-        :param defer: If True and this type is not lowered yet, return a
-            TypeRepo.Defer instance. Lower the type if necessary in all other
-            cases.
-        """
-        # First, look for an already translated type (this can be a builtin
-        # type).
-        result = self.compiled_types.get(name)
+        # First, look for an actual CompiledType instance
+        result = self.compiled_types.get(decl)
         if result is not None:
             return result
 
-        # Then, look for user-defined types, which may not have been translated
-        # yet.
-        full_decl = self.syntax_types.get(name)
-        if full_decl is None:
-            error('Invalid type name: {}'.format(name.camel))
+        # Not found: look now for an existing TypeRepo.Defer instance
+        result = self.type_refs.get(decl)
+        if result is not None:
+            return result
 
-        # If it's present, we know it wasn't translated yet, so return a defer
-        # stub for it when requested. Otherwise, we will translate it now.
-        if defer:
-            return getattr(T, name.camel)
-        decl = full_decl.f_decl
+        # Not found neither: create the TypeRepo.Defer instance
+        if isinstance(decl, L.InstantiatedGenericType):
+            inner_type = decl.p_get_inner_type
+            actuals = decl.p_get_actuals
 
-        # Directly return already created CompiledType instances and raise an
-        # error for cycles in the type inheritance graph.
-        compiled_type = self.compiled_types.get(name, "not-visited")
+            if inner_type == self.array_gen_type:
+                assert len(actuals) == 1
+                result = self.resolve_type_decl(actuals[0]).array
 
-        if isinstance(compiled_type, CompiledType):
-            return compiled_type
+            elif inner_type == self.astlist_gen_type:
+                assert len(actuals) == 1
+                node = self.resolve_type_decl(actuals[0])
+                assert isinstance(node, (ASTNodeType, TypeRepo.Defer))
+                result = node.list
 
+            else:
+                assert False, (
+                    'Unknown generic type: {} (from {})'
+                    .format(inner_type, decl)
+                )
+
+        else:
+            assert isinstance(decl, L.NamedTypeDecl)
+            result = getattr(T, decl.f_syn_name.text)
+
+        if isinstance(result, TypeRepo.Defer):
+            self.type_refs[decl] = result
+        else:
+            assert isinstance(result, CompiledType)
+            self.compiled_types[decl] = result
+        return result
+
+    def lower_type_decl(self, decl: L.TypeDecl) -> CompiledType:
+        """
+        Create the CompiledType instance corresponding to the given Lkt type
+        declaration. Do nothing if it has been already lowered, and stop with
+        an error if the lowering for this type is already running (case of
+        invalid circular type dependency).
+        """
         with self.ctx.lkt_context(decl):
-            check_source_language(
-                compiled_type is not None,
-                'Type inheritance loop detected'
-            )
-            self.compiled_types[name] = None
+            # Sentinel for the dict lookup below, as compiled_type can contain
+            # None entries.
+            try:
+                t = self.compiled_types[decl]
+            except KeyError:
+                # The type is not lowered yet: let's do it
+                pass
+            else:
+                if t is None:
+                    error('Type inheritance loop detected')
+                else:
+                    # The type is already lowered: there is nothing to do
+                    return t
 
-            # Dispatch now to the appropriate type creation helper
+            # Dispatch now to the appropriate lowering helper
             if isinstance(decl, L.BasicClassDecl):
+                full_decl = decl.parent
+                assert isinstance(full_decl, L.FullDecl)
                 specs = (EnumNodeAnnotations
                          if isinstance(decl, L.EnumClassDecl)
                          else NodeAnnotations)
                 result = self.create_node(
-                    name, decl,
-                    parse_annotations(self.ctx, specs, full_decl)
+                    decl, parse_annotations(self.ctx, specs, full_decl)
                 )
+
+            elif isinstance(decl, L.InstantiatedGenericType):
+                # At this stage, the only generic types should come from the
+                # prelude (Array, ASTList), so there is no need to do anything
+                # special for them: just let the resolution mechanism build the
+                # CompiledType through CompiledType attribute access magic.
+                return resolve_type(self.resolve_type_decl(decl))
 
             else:
                 raise NotImplementedError(
                     'Unhandled type declaration: {}'.format(decl)
                 )
 
-            self.compiled_types[name] = result
+            self.compiled_types[decl] = result
             return result
 
     def lower_base_field(
@@ -1244,7 +1210,7 @@ class LktTypesLoader:
         """
         decl = full_decl.f_decl
         annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
-        field_type = self.resolve_type_ref(decl.f_decl_type, defer=True)
+        field_type = self.resolve_type_decl(decl.f_decl_type.p_designated_type)
 
         cls: Type[BaseField]
         if decl.f_default_val:
@@ -1307,7 +1273,9 @@ class LktTypesLoader:
         """
         decl = full_decl.f_decl
         annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
-        return_type = self.resolve_type_ref(decl.f_return_type, defer=True)
+        return_type = self.resolve_type_decl(
+            decl.f_return_type.p_designated_type
+        )
 
         env = Environment()
         env.push()
@@ -1325,7 +1293,7 @@ class LktTypesLoader:
 
             arg = Argument(
                 name=names.Name.from_lower(a.f_syn_name.text),
-                type=self.resolve_type_ref(a.f_decl_type, defer=True),
+                type=self.resolve_type_decl(a.f_decl_type.p_designated_type),
                 default_value=default_value
             )
             args.append(arg)
@@ -1403,13 +1371,11 @@ class LktTypesLoader:
         return result
 
     def create_node(self,
-                    name: names.Name,
                     decl: L.ClassDecl,
                     annotations: BaseNodeAnnotations) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
 
-        :param name: DSL name for this node type.
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
         """
@@ -1417,21 +1383,24 @@ class LktTypesLoader:
         loc = self.ctx.lkt_loc(decl)
 
         # Resolve the base node (if any)
+        base_type: Optional[ASTNodeType]
         check_source_language(
             not is_enum_node or decl.f_base_type is not None,
             'Enum nodes need a base node'
         )
-        base = (cast(ASTNodeType,
-                     self.resolve_type_ref(decl.f_base_type, defer=False))
-                if decl.f_base_type else None)
+        if decl.f_base_type is None:
+            base_type = None
+        else:
+            base_type_decl = decl.f_base_type.p_designated_type
+            base_type = cast(ASTNodeType, self.lower_type_decl(base_type_decl))
         check_source_language(
-            base is None or not base.is_enum_node,
+            base_type is None or not base_type.is_enum_node,
             'Inheritting from an enum node is forbiddn'
         )
 
         # Make sure the Node trait is used exactly once, on the root node
         node_trait = get_trait(decl, "Node")
-        if base is None:
+        if base_type is None:
             check_source_language(
                 node_trait is not None,
                 'The root node should derive from Node'
@@ -1473,10 +1442,10 @@ class LktTypesLoader:
             is_bool_node = True
 
         result = ASTNodeType(
-            name,
+            names.Name.from_camel(decl.f_syn_name.text),
             location=loc,
             doc=self.ctx.lkt_doc(decl.parent),
-            base=base,
+            base=base_type,
             fields=fields,
             is_abstract=(not isinstance(annotations, NodeAnnotations)
                          or annotations.abstract),
