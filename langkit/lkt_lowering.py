@@ -1005,33 +1005,9 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         grammar._add_rule(name, lower(rule))
 
 
-EnvType = Dict[L.BaseValDecl, AbstractVariable]
-
-
-class Environment:
-    """
-    Helper to track the association between Lkt definitions and our
-    corresponding internal data structures.
-    """
-
-    env_stack: List[EnvType]
-
-    def __init__(self) -> None:
-        self.env_stack = []
-
-    def push(self, empty_env: bool = False) -> None:
-        self.env_stack.append({}
-                              if empty_env or not self.env_stack
-                              else dict(self.env_stack[-1]))
-
-    def pop(self) -> None:
-        self.env_stack.pop()
-
-    def set(self, decl: L.BaseValDecl, var: AbstractVariable) -> None:
-        self.env_stack[-1][decl] = var
-
-    def get(self, decl: L.BaseValDecl) -> AbstractVariable:
-        return self.env_stack[-1][decl]
+# Mapping to associate declarations to the corresponding AbstractVariable
+# instances. This is useful when lowering expressions.
+LocalsEnv = Dict[L.BaseValDecl, AbstractVariable]
 
 
 class LktTypesLoader:
@@ -1241,7 +1217,7 @@ class LktTypesLoader:
 
         return cls(type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs)
 
-    def lower_expr(self, expr: L.Expr, env: Environment) -> AbstractExpression:
+    def lower_expr(self, expr: L.Expr, env: LocalsEnv) -> AbstractExpression:
         """
         Lower the given expression.
 
@@ -1252,7 +1228,7 @@ class LktTypesLoader:
 
         def helper(expr: L.Expr) -> AbstractExpression:
             if isinstance(expr, L.RefId):
-                return env.get(expr.p_check_referenced_decl)
+                return env[expr.p_check_referenced_decl]
 
             elif isinstance(expr, L.CharLit):
                 return CharacterLiteral(denoted_char_lit(expr))
@@ -1277,8 +1253,7 @@ class LktTypesLoader:
             decl.f_return_type.p_designated_type
         )
 
-        env = Environment()
-        env.push()
+        env: LocalsEnv = {}
 
         # Lower arguments and register them in the environment
         args: List[Argument] = []
@@ -1286,9 +1261,7 @@ class LktTypesLoader:
             if a.f_default_val is None:
                 default_value = None
             else:
-                env.push(empty_env=True)
                 default_value = self.lower_expr(a.f_default_val, env)
-                env.pop()
                 default_value.prepare()
 
             arg = Argument(
@@ -1297,11 +1270,10 @@ class LktTypesLoader:
                 default_value=default_value
             )
             args.append(arg)
-            env.set(a, arg.var)
+            env[a] = arg.var
 
         # Lower the expression itself
         expr = self.lower_expr(decl.f_body, env)
-        env.pop()
 
         result = PropertyDef(
             expr=expr,
