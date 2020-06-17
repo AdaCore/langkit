@@ -18,11 +18,14 @@ import liblktlang as L
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
-    ASTNodeType, AbstractNodeData, BaseField, CompiledType, CompiledTypeRepo,
-    EnumNodeAlternative, Field, T, TypeRepo, UserField
+    ASTNodeType, AbstractNodeData, Argument, BaseField, CompiledType,
+    CompiledTypeRepo, EnumNodeAlternative, Field, T, TypeRepo, UserField
 )
 from langkit.diagnostics import DiagnosticError, check_source_language, error
-from langkit.expressions import AbstractProperty, Property, PropertyDef
+from langkit.expressions import (
+    AbstractExpression, AbstractProperty, AbstractVariable, Property,
+    PropertyDef
+)
 from langkit.lexer import (Action, Alt, Case, Ignore, Lexer, LexerToken,
                            Literal, Matcher, NoCaseLit, Pattern, RuleAssoc,
                            TokenFamily, WithSymbol, WithText, WithTrivia)
@@ -63,6 +66,17 @@ def parse_static_bool(ctx: CompileCtx, expr: L.Expr) -> bool:
                               'Boolean literal expected')
 
     return expr.text == 'true'
+
+
+def denoted_char_lit(char_lit: L.CharLit) -> str:
+    """
+    Return the character that ``char_lit`` denotes.
+    """
+    text = char_lit.text
+    assert text[0] == "'" and text[-1] == "'"
+    result = json.loads('"' + text[1:-1] + '"')
+    assert len(result) == 1
+    return result
 
 
 def load_lkt(lkt_file: str) -> L.AnalysisUnit:
@@ -379,6 +393,12 @@ class FieldAnnotations(ParsedAnnotations):
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('parse_field')]
+
+
+@dataclass
+class FunAnnotations(ParsedAnnotations):
+    export: bool
+    annotations = [FlagAnnotationSpec('export')]
 
 
 def check_no_annotations(full_decl: L.FullDecl) -> None:
@@ -984,6 +1004,35 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         grammar._add_rule(name, lower(rule))
 
 
+EnvType = Dict[L.BaseValDecl, AbstractVariable]
+
+
+class Environment:
+    """
+    Helper to track the association between Lkt definitions and our
+    corresponding internal data structures.
+    """
+
+    env_stack: List[EnvType]
+
+    def __init__(self) -> None:
+        self.env_stack = []
+
+    def push(self, empty_env: bool = False) -> None:
+        self.env_stack.append({}
+                              if empty_env or not self.env_stack
+                              else dict(self.env_stack[-1]))
+
+    def pop(self) -> None:
+        self.env_stack.pop()
+
+    def set(self, decl: L.BaseValDecl, var: AbstractVariable) -> None:
+        self.env_stack[-1][decl] = var
+
+    def get(self, decl: L.BaseValDecl) -> AbstractVariable:
+        return self.env_stack[-1][decl]
+
+
 class LktTypesLoader:
     """
     Helper class to instanciate ``CompiledType`` for all types described in
@@ -1000,6 +1049,25 @@ class LktTypesLoader:
             type declarations.
         """
         self.ctx = ctx
+
+        # Map Lkt nodes for the declarations of builtin types to the
+        # corresponding CompiledType instances.
+        #
+        # TODO: remove the syntax_types/compiled_types dictionaries and extend
+        # the builtin_types dictionary to all type declarations in Lkt. This
+        # will allow us to stop resolving type references ourselves: Lkt
+        # properties can do that themselves, so that we would only deal with
+        # L.TypeDecl instances here.
+        root = lkt_units[0].root
+        self.array_type = root.p_array_type
+        self.builtin_types = {
+            root.p_char_type: T.Character,
+            root.p_int_type: T.Int,
+            root.p_bool_type: T.Bool,
+            root.p_bigint_type: T.BigInt,
+            root.p_string_type: T.String,
+            root.p_symbol_type: T.Symbol,
+        }
 
         # Go through all units, build a map for all type definitions, indexed
         # by Name. This first pass allows the check of unique names.
@@ -1037,6 +1105,27 @@ class LktTypesLoader:
         # loops.
         for name in sorted(self.syntax_types):
             self.create_type_from_name(name, defer=False)
+
+    def resolve_type_decl(self, decl: L.TypeDecl) -> CompiledTypeOrDefer:
+        """
+        Fetch the CompiledType instance corresponding to the given type
+        declaration.
+
+        :param decl: Lkt type declaration to resolve.
+        """
+        if isinstance(decl, L.InstantiatedGenericType):
+            inner_type = decl.p_get_inner_type
+            actuals = decl.p_inner_type
+
+            if inner_type == self.array_type:
+                assert len(actuals) == 1
+                return self.resolve_type_decl(actuals[0]).array
+
+            else:
+                assert False, 'Unknown generic type: {}'.format(decl)
+
+        else:
+            return self.builtin_types[decl]
 
     def resolve_type_ref(self,
                          ref: L.TypeRef,
@@ -1186,6 +1275,92 @@ class LktTypesLoader:
 
         return cls(type=field_type, doc=self.ctx.lkt_doc(full_decl), **kwargs)
 
+    def lower_expr(self, expr: L.Expr, env: Environment) -> AbstractExpression:
+        """
+        Lower the given expression.
+
+        :param expr: Expression to lower.
+        :param env: Variable to use when resolving references.
+        """
+        from langkit.expressions import ArrayLiteral, CharacterLiteral
+
+        def helper(expr: L.Expr) -> AbstractExpression:
+            if isinstance(expr, L.RefId):
+                return env.get(expr.p_check_referenced_decl)
+
+            elif isinstance(expr, L.CharLit):
+                return CharacterLiteral(denoted_char_lit(expr))
+
+            elif isinstance(expr, L.ArrayLiteral):
+                elts = [helper(e) for e in expr.f_exprs]
+                array_type = self.resolve_type_decl(expr.p_check_expr_type)
+                return ArrayLiteral(elts, element_type=array_type.element_type)
+
+            else:
+                assert False, 'Unhandled expression: {}'.format(expr)
+
+        return helper(expr)
+
+    def lower_property(self, full_decl: L.FullDecl) -> PropertyDef:
+        """
+        Lower the property described in ``decl``.
+        """
+        decl = full_decl.f_decl
+        annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
+        return_type = self.resolve_type_ref(decl.f_return_type, defer=True)
+
+        env = Environment()
+        env.push()
+
+        # Lower arguments and register them in the environment
+        args: List[Argument] = []
+        for a in decl.f_args:
+            if a.f_default_val is None:
+                default_value = None
+            else:
+                env.push(empty_env=True)
+                default_value = self.lower_expr(a.f_default_val, env)
+                env.pop()
+                default_value.prepare()
+
+            arg = Argument(
+                name=names.Name.from_lower(a.f_syn_name.text),
+                type=self.resolve_type_ref(a.f_decl_type, defer=True),
+                default_value=default_value
+            )
+            args.append(arg)
+            env.set(a, arg.var)
+
+        # Lower the expression itself
+        expr = self.lower_expr(decl.f_body, env)
+        env.pop()
+
+        result = PropertyDef(
+            expr=expr,
+            prefix=AbstractNodeData.PREFIX_PROPERTY,
+            doc=self.ctx.lkt_doc(full_decl),
+            public=annotations.export,
+            abstract=False,
+            type=return_type,
+            abstract_runtime_check=False,
+            dynamic_vars=None,
+            memoized=False,
+            call_memoizable=False,
+            memoize_in_populate=False,
+            external=False,
+            uses_entity_info=None,
+            uses_envs=None,
+            optional_entity_info=False,
+            warn_on_unused=True,
+            ignore_warn_on_node=None,
+            call_non_memoizable_because=None,
+            activate_tracing=False,
+            dump_ir=False
+        )
+        result.arguments.extend(args)
+
+        return result
+
     def lower_fields(self,
                      decls: L.DeclBlock,
                      allowed_field_types: Tuple[Type[AbstractNodeData], ...]) \
@@ -1213,7 +1388,16 @@ class LktTypesLoader:
             )
             name = names.Name.from_lower(name_text)
 
-            field = self.lower_base_field(full_decl, allowed_field_types)
+            field: AbstractNodeData
+            if isinstance(decl, L.FunDecl):
+                check_source_language(
+                    any(issubclass(PropertyDef, cls)
+                        for cls in allowed_field_types),
+                    'Properties not allowed in this context'
+                )
+                field = self.lower_property(full_decl)
+            else:
+                field = self.lower_base_field(full_decl, allowed_field_types)
             field.location = self.ctx.lkt_loc(decl)
             result.append((name, cast(AbstractNodeData, field)))
         return result
