@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Union
+from typing import Any, List, Optional, Type, Union
 
 
 class Name:
@@ -12,7 +12,7 @@ class Name:
     hashing and order checking are supported and behave as one could expect.
     """
 
-    default_formatting = None
+    default_formatting: Optional[str] = None
     formatting_stack: List[str] = []
 
     def __init__(self, mixed_with_underscores: str):
@@ -26,19 +26,19 @@ class Name:
         """
         self.base_name = mixed_with_underscores
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.base_name)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.base_name)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, Name) and self.base_name == other.base_name
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: Name) -> bool:
         return self.base_name < other.base_name
 
     @property
@@ -159,15 +159,23 @@ class Convention:
     def __init__(self, convention: str):
         self.convention = convention
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Set the current convention to self's convention."""
-        Name.formatting_stack.append(Name.default_formatting)
+        if Name.default_formatting is not None:
+            Name.formatting_stack.append(Name.default_formatting)
         Name.default_formatting = self.convention
 
-    def __exit__(self, exc, exc_type, traceback):
+    def __exit__(self,
+                 exc: Exception,
+                 exc_type: Type[Exception],
+                 traceback: Any) -> None:
         """Sets the convention back to the old convention."""
         del exc, exc_type, traceback
-        Name.default_formatting = Name.formatting_stack.pop()
+        Name.default_formatting = (
+            Name.formatting_stack.pop()
+            if Name.formatting_stack
+            else None
+        )
 
 
 camel_with_underscores = Convention('camel_with_underscores')
