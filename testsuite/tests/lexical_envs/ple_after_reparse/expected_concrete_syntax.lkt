@@ -22,9 +22,9 @@ class Dep : FooNode {
 
     @export fun suffix_symbol (): Symbol
 
-    fun referenced_unit_or_error (or_error : Bool): InternalUnit
+    fun referenced_unit_or_error (or_error : Bool): AnalysisUnit
 
-    @export fun referenced_unit (): InternalUnit =
+    @export fun referenced_unit (): AnalysisUnit =
     node.referenced_unit_or_error(false)
 }
 

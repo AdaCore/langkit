@@ -14,13 +14,13 @@ grammar foo_grammar {
 
     @export fun count (seq : Array[Example]): Int = seq.length()
 
-    @export fun get_a (c : CharacterType = 'a'): CharacterType = c
+    @export fun get_a (c : Char = 'a'): Char = c
 
-    @export fun get_eacute (c : CharacterType = 'é'): CharacterType = c
+    @export fun get_eacute (c : Char = 'é'): Char = c
 
-    @export fun identity (c : CharacterType): CharacterType = c
+    @export fun identity (c : Char): Char = c
 
-    @export fun double (c : CharacterType): String = [c, c]
+    @export fun double (c : Char): String = [c, c]
 
     @export fun same_color (c : Color): Color = c
 

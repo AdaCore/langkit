@@ -18,8 +18,7 @@ class Literal : FooNode implements TokenNode {
 
     fun node (): Literal = node.as_entity
 
-    fun b (): LogicEquation =
-    %eq(node.var, node.a(), conv_prop=BareLiteral.node)
+    fun b (): Equation = %eq(node.var, node.a(), conv_prop=BareLiteral.node)
 
     @export fun public_pro (): Literal = {
         val _ = node.b();

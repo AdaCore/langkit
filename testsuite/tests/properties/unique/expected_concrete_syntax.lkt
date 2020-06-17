@@ -9,5 +9,5 @@ grammar foo_grammar {
 
 class Example : FooNode implements TokenNode {
 
-    @export fun test (a : Array[InternalUnit]): Array[InternalUnit] = a.unique()
+    @export fun test (a : Array[AnalysisUnit]): Array[AnalysisUnit] = a.unique()
 }

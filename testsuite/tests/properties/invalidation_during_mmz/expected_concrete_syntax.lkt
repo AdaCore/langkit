@@ -9,7 +9,7 @@ grammar foo_grammar {
 
 class Example : FooNode {
 
-    fun fetch_example_unit (): InternalUnit
+    fun fetch_example_unit (): AnalysisUnit
 
     @memoized fun internal_mmz_prop (i : Int): Int =
     if (i = 0) then (raise PropertyError()) else i
