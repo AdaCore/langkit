@@ -172,6 +172,11 @@ class LKNode(ASTNode):
         doc="Unit method. Return the regexp builtin type."
     )
 
+    array_type = Property(
+        Self.get_builtin_type('Array'), public=True,
+        doc="Unit method. Return the array builtin type."
+    )
+
     @langkit_property(external=True,
                       uses_entity_info=False,
                       uses_envs=True,
@@ -1539,6 +1544,21 @@ class InstantiatedGenericType(TypeDecl):
     generic_decl = Property(
         Entity.inner_type_decl.parent.as_entity.cast_or_raise(T.GenericDecl)
     )
+
+    @langkit_property(public=True)
+    def get_inner_type():
+        """
+        Return the generic type that ``self`` instantiates.
+        """
+        return Entity.inner_type_decl
+
+    @langkit_property(public=True)
+    def get_actuals():
+        """
+        Return the declaration of types that were passed as generic actuals to
+        create ``self``.
+        """
+        return Entity.actuals.map(lambda a: a.as_entity)
 
     @langkit_property(memoized=True, public=True)
     def get_instantiated_type():
