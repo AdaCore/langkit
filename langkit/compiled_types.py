@@ -324,8 +324,7 @@ class AbstractNodeData:
 
     @property
     def diagnostic_context(self):
-        ctx_message = 'in {}'.format(self.qualname)
-        return Context(ctx_message, self.location)
+        return Context(self.location)
 
     @property
     def is_public(self):
@@ -927,8 +926,7 @@ class CompiledType:
 
     @property
     def diagnostic_context(self):
-        ctx_message = 'in {}'.format(self.dsl_name)
-        return Context(ctx_message, self.location)
+        return Context(self.location)
 
     @property
     def doc(self):

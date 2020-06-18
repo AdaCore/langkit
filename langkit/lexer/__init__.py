@@ -307,10 +307,7 @@ class TokenFamily:
 
     @property
     def diagnostic_context(self):
-        return Context(
-            'In definition of token family {}'.format(self.dsl_name),
-            self.location
-        )
+        return Context(self.location)
 
 
 class LexerToken:
@@ -708,8 +705,7 @@ class Lexer:
 
         # Import patterns into regexps
         for name, pattern, loc in self.patterns:
-            with Context('In definition of lexer pattern {}'.format(name),
-                         loc):
+            with Context(loc):
                 regexps.add_pattern(name, pattern)
 
         # Now turn each rule into a NFA
@@ -737,7 +733,7 @@ class Lexer:
                 assert isinstance(a.action, TokenAction)
                 check(a.action)
 
-            with Context('In definition of lexer rules', a.location):
+            with Context(a.location):
                 nfa_start, nfa_end = regexps.nfa_for(a.matcher.regexp)
             nfas.append(nfa_start)
 
