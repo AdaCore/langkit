@@ -2,11 +2,11 @@
 test.py:21: error: Missing element type for empty array literal
 
 == Empty: ok ==
-test.py:19: error: This private property is unused
+test.py:19: warning: This private property is unused
 Code generation was successful
 
 == Single: ok ==
-test.py:19: error: This private property is unused
+test.py:19: warning: This private property is unused
 Code generation was successful
 
 == Multiple: heterogeneous types ==

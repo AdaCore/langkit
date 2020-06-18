@@ -294,7 +294,7 @@ def check_source_language(predicate: bool,
         if Diagnostics.style != DiagnosticStyle.default:
             print('{}: {}'.format(get_parsable_location(), message))
         else:
-            print_error(message, get_current_location())
+            print_error(message, get_current_location(), severity)
 
         if severity == Severity.error and do_raise:
             raise DiagnosticError()
@@ -576,11 +576,18 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
 
 
 def print_error(message: str,
-                location: Union[Location, L.LKNode, None]) -> None:
+                location: Union[Location, L.LKNode, None],
+                severity: Severity = Severity.error) -> None:
     """
     Prints an error.
     """
-    error_marker = col(col("error: ", Colors.RED), Colors.BOLD)
+    if severity == Severity.warning:
+        name = 'warning'
+        color = Colors.YELLOW
+    else:
+        name = 'error'
+        color = Colors.RED
+    error_marker = col("{}: ".format(name), color + Colors.BOLD)
 
     if location is None:
         print(error_marker + message)
