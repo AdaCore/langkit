@@ -4,6 +4,9 @@ grammar foo_grammar {
 
 }
 
+enum Color (red, green, blue) {
+}
+
 @abstract class FooNode implements Node {
 }
 
