@@ -8,7 +8,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node {
 
-    fun get_num (): Int
+    @abstract fun get_num (): Int
 }
 
 class Example : FooNode {
@@ -20,8 +20,6 @@ class Literal : FooNode implements TokenNode {
 
     fun get_num (): Int = 3
 
-    fun a (): FooNode
-
     @export fun b (): Int = match node.a() {
         case e : Example => e.get_num()
         case c : FooNode => c.get_num()
@@ -32,5 +30,5 @@ class Literal : FooNode implements TokenNode {
         case c : FooNode => c.get_num()
     }
 
-    fun a (): FooNode
+    @abstract @abstract_stub fun a (): FooNode
 }

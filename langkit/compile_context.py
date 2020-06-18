@@ -2378,6 +2378,7 @@ class CompileCtx:
 
                     root_static.struct = prop.struct
                     root_static.location = prop.location
+                    prop.is_artificial_dispatcher = True
 
                 else:
                     # If there is no runtime check for abstract properties, the
@@ -2406,6 +2407,7 @@ class CompileCtx:
                     p._is_public = False
                     p._abstract = False
                     p.reset_inheritance_info()
+                    p.dispatcher = prop
                     redirected_props[p] = prop
 
                 # Now turn the root property into a dispatcher

@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 @abstract class SomeNode : FooNode {
 
-    fun test_prop (): Bool
+    @abstract fun test_prop (): Bool
 }
 
 class Example : SomeNode {

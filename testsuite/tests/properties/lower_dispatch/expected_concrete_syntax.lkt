@@ -20,17 +20,13 @@ class Def : FooNode {
 
 @abstract class Expr : FooNode {
 
-    @export fun evaluate_abstract (): Int
+    @export @abstract fun evaluate_abstract (): Int
 
-    @export fun evaluate_rtcheck (): Int
+    @export @abstract fun evaluate_entity (): Int
+
+    @export @abstract @abstract_stub fun evaluate_rtcheck (): Int
 
     @export fun evaluate_concrete (): Int = 1
-
-    @export fun evaluate_entity (): Int
-
-    fun evaluate_rtcheck (): Int
-
-    fun evaluate_concrete (): Int
 }
 
 @abstract class Atom : Expr {

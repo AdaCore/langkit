@@ -3212,6 +3212,21 @@ class PropertyDef(AbstractNodeData):
         :type: bool
         """
 
+        self.is_artificial_dispatcher = False
+        """
+        Whether this property is a dispatcher, and that can be considered as
+        artificial, i.e. not coming from the sources. The only dispatchers that
+        come from sources are property roots that are abstract with no runtime
+        check.
+        """
+
+        self.dispatcher: Opt[PropertyDef] = None
+        """
+        After property dispatch lowering, this holds a reference to the
+        dispatcher that covers ``self``, if ``self`` is part of a property
+        dispatching tree.
+        """
+
         self.in_type = False
         """
         Recursion guard for the construct pass.

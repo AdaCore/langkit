@@ -30,7 +30,7 @@ class Var : DefNode {
 
 @abstract class Name : FooNode {
 
-    @export fun resolve (): FooNode
+    @export @abstract fun resolve (): FooNode
 }
 
 class Id : Name implements TokenNode {

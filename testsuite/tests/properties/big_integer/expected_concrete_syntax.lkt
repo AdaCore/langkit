@@ -28,7 +28,7 @@ class Decl : FooNode {
 
 @abstract class Expr : FooNode {
 
-    @export fun evaluate (): BigInt
+    @export @abstract fun evaluate (): BigInt
 
     @export fun evaluate_as_int (): Int = node.evaluate().as_int()
 }
@@ -53,7 +53,7 @@ class LessThan : Expr {
 
 class Literal : Expr implements TokenNode {
 
-    fun evaluate (): BigInt
+    @abstract fun evaluate (): BigInt
 }
 
 class Minus : Expr {

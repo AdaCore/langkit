@@ -30,9 +30,9 @@ class ForeignDecl : FooNode {
 
 @abstract class Id : FooNode {
 
-    fun simple_name (): SimpleId
+    @abstract fun simple_name (): SimpleId
 
-    fun resolve (base_env : LexicalEnv): Scope
+    @abstract fun resolve (base_env : LexicalEnv): Scope
 }
 
 class ScopedId : Id {
