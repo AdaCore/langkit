@@ -16,7 +16,7 @@ from typing import (
 try:
     import liblktlang as L
 except ImportError:
-    pass
+    L = None
 
 
 import langkit.documentation
@@ -586,7 +586,7 @@ def print_error(message: str,
         print(error_marker + message)
         return
 
-    if isinstance(location, L.LKNode):
+    if L and isinstance(location, L.LKNode):
         location = Location.from_lkt_node(location)
 
     # Print the basic error (with colors if in tty)
