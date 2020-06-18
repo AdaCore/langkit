@@ -258,9 +258,9 @@ class FlagAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for flags.
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str, default_value: Any = False):
         super().__init__(
-            name, unique=True, require_args=False, default_value=False
+            name, unique=True, require_args=False, default_value=default_value
         )
 
     def interpret(self,
@@ -416,7 +416,12 @@ class EnumAnnotations(ParsedAnnotations):
 @dataclass
 class FunAnnotations(ParsedAnnotations):
     export: bool
-    annotations = [FlagAnnotationSpec('export')]
+    annotations = [
+        # When the @export annotation is missing, use "None" to mean
+        # "public status unspecified", as the property can be public thanks to
+        # inheritance.
+        FlagAnnotationSpec('export', default_value=None)
+    ]
 
 
 def check_no_annotations(full_decl: L.FullDecl) -> None:
