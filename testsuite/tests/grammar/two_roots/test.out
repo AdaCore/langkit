@@ -1,3 +1,2 @@
-File "test.py", line 9, in OtherNode
-    Error: Only one class can derive from ASTNode (previous was: FooNode)
+test.py:10: error: Only one class can derive from ASTNode (previous was: FooNode)
 Done

@@ -1,63 +1,40 @@
 == Bad tuple ==
-File "test.py", line 22, in Example.p
-    Error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
+test.py:22: error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
 
 == Bad expr ==
-File "test.py", line 22, in Example.p
-    Error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
+test.py:22: error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
 
 == Bad type ==
-File "test.py", line 22, in Example.p
-  line 25, in Literal expression
-    Error: Expected type Bool, got Int
+test.py:25: error: Expected type Bool, got Int
 
 == Bad Self use ==
-File "test.py", line 22, in Example.p
-File "<frozen importlib._bootstrap>", line 219, in SelfVariable expression
-    Error: Self is not bound in this context
+<frozen importlib._bootstrap>:219: error: Self is not bound in this context
 
 == Bad dynamic variable use ==
-File "test.py", line 22, in Example.p
-  line 7, in DynamicVariable expression
-    Error: Dynamic variables cannot be bound in this context
+test.py:7: error: Dynamic variables cannot be bound in this context
 
 == Missing argument (1) ==
-File "test.py", line 23, in Example.calling
-  line 39, in access to .p
-    Error: Missing actual for argument a
+test.py:39: error: Missing actual for argument a
 
 == Missing argument (2) ==
-File "test.py", line 23, in Example.calling
-  line 42, in access to .p
-    Error: Missing actual for argument a
+test.py:42: error: Missing actual for argument a
 
 == Bad keyword argument ==
-File "test.py", line 23, in Example.calling
-  line 25, in Literal expression
-    Error: Invalid "a" actual for Example.p: expected Bool but got Int
+test.py:25: error: Invalid "a" actual for Example.p: expected Bool but got Int
 
 == Too many arguments (1) ==
-File "test.py", line 23, in Example.calling
-  line 50, in access to .p
-    Error: The last argument is unexpected
+test.py:50: error: The last argument is unexpected
 
 == Too many arguments (2) ==
-File "test.py", line 23, in Example.calling
-  line 53, in access to .p
-    Error: The last argument is unexpected
+test.py:53: error: The last argument is unexpected
 
 == Too many arguments (3) ==
-File "test.py", line 23, in Example.calling
-  line 56, in access to .p
-    Error: Invalid keyword arguments: c
+test.py:56: error: Invalid keyword arguments: c
 
 == Too many arguments (4) ==
-File "test.py", line 23, in Example.calling
-  line 59, in access to .p
-    Error: The last 2 arguments are unexpected
+test.py:59: error: The last 2 arguments are unexpected
 
 == Non-literal argument ==
-File "test.py", line 22, in Example.p
-    Error: Default value must be a compile-time known constant (got <Eq>)
+test.py:22: error: Default value must be a compile-time known constant (got <Eq>)
 
 Done

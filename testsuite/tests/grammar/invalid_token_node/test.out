@@ -1,3 +1,2 @@
-File "test.py", line 13, in NonTokenNode
-    Error: "token_node" annotation inconsistent with inherited AST node
+test.py:14: error: "token_node" annotation inconsistent with inherited AST node
 Done

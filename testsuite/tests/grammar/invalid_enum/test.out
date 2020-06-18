@@ -1,15 +1,19 @@
 == no-dot.lkt ==
-File "no-dot.lkt", line XXX, In definition of grammar rule main_rule
-    Error: Parsers cannot create abstract nodes
+no-dot.lkt:4:29: error: Parsers cannot create abstract nodes
+3 |     @main_rule main_rule <- Example("example")
+  |                             ^^^^^^^^^^^^^^^^^^
+
 
 == bad-prefix.lkt ==
-File "bad-prefix.lkt", line XXX, 
-  line XXX, 
-    Error: Unknown node: NoSuchNode
+bad-prefix.lkt:4:29: error: Unknown node: NoSuchNode
+3 |     @main_rule main_rule <- NoSuchNode.Example("example")
+  |                             ^^^^^^^^^^                   
+
 
 == bad-alt.lkt ==
-File "bad-alt.lkt", line XXX, 
-  line XXX, 
-    Error: Unknown enum node alternative: NoSuchAlt
+bad-alt.lkt:4:37: error: Unknown enum node alternative: NoSuchAlt
+3 |     @main_rule main_rule <- Example.NoSuchAlt("example")
+  |                                     ^^^^^^^^^           
+
 
 Done

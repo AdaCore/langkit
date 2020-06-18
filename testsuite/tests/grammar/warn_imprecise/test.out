@@ -1,8 +1,4 @@
-File "test.py", line 15, in Decl
-  line 16, in Decl.name
-    Warning: Specified type is FooNode, but it could be more specific: Name
-File "test.py", line 19, in VarDecl
-  line 20, in VarDecl.var_kw
-    Warning: Specified type is FooNode, but it could be more specific: VarKeyword
+test.py:16: error: Specified type is FooNode, but it could be more specific: Name
+test.py:20: error: Specified type is FooNode, but it could be more specific: VarKeyword
 Code generation was successful
 Done

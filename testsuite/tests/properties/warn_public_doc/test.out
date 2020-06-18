@@ -1,6 +1,4 @@
-File "test.py", line 24, in FooNode.undoc_prop
-    Warning: This property is public but it lacks documentation
-File "test.py", line 30, in FooNode.will_doc_prop
-    Warning: This property is public but it lacks documentation
+test.py:24: error: This property is public but it lacks documentation
+test.py:30: error: This property is public but it lacks documentation
 Code generation was successful
 Done

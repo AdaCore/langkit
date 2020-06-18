@@ -1,2 +1,2 @@
-Error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
+error: Ignore() tokens are incompatible with unparsers. Consider using WithTrivia() instead.
 Done

@@ -1,3 +1,2 @@
-File "test.py", line 11, in BarNode._prop
-    Error: Underscore-prefixed field names are not allowed
+test.py:11: error: Underscore-prefixed field names are not allowed
 Done

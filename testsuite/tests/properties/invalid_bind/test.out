@@ -1,22 +1,14 @@
 == Incorrect bind eq_prop 1 ==
-File "test.py", line 32, in BarNode.main_prop
-  line 32, in Bind expression
-    Error: Equality property must return boolean
+test.py:32: error: Equality property must return boolean
 
 == Incorrect bind eq_prop 2 ==
-File "test.py", line 32, in BarNode.main_prop
-  line 32, in Bind expression
-    Error: Equality property: expected 1 argument, got 0
+test.py:32: error: Equality property: expected 1 argument, got 0
 
 == Incorrect bind eq_prop 3 ==
-File "test.py", line 32, in BarNode.main_prop
-  line 32, in Bind expression
-    Error: First arg of equality property should be an entity type
+test.py:32: error: First arg of equality property should be an entity type
 
 == Incorrect bind eq_prop 4 ==
-File "test.py", line 32, in BarNode.main_prop
-  line 32, in Bind expression
-    Error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
+test.py:32: error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
 
 == Correct bind eq_prop A ==
 Code generation was successful

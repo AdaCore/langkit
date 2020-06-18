@@ -1,13 +1,9 @@
 == too_many_defaults ==
-File "test.py", line 10, in MyEnum
-    Error: Only one default value is allowed
+test.py:10: error: Only one default value is allowed
 == invalid_base ==
-File "test.py", line 16, in MyEnum
-    Error: Enumeration types must derive from and only from Enum
+test.py:16: error: Enumeration types must derive from and only from Enum
 == invalid_field ==
-File "test.py", line 22, in MyEnum
-    Error: Enum subclass can only contain EnumValue instances (here, c is 12)
+test.py:22: error: Enum subclass can only contain EnumValue instances (here, c is 12)
 == enumval_aliasing ==
-File "test.py", line 32, in MyEnum2
-    Error: EnumValue instances cannot be used in multiple Enum subclasses (here: a)
+test.py:32: error: EnumValue instances cannot be used in multiple Enum subclasses (here: a)
 Done

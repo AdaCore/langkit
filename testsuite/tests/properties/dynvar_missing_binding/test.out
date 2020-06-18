@@ -1,5 +1,2 @@
-File "test.py", line 18, in Example.p1
-  line 19, in Example.p2
-  line 7, in DynamicVariable expression
-    Error: dynvar is not bound in this context: please use the .bind construct to bind it first.
+test.py:7: error: dynvar is not bound in this context: please use the .bind construct to bind it first.
 Done
