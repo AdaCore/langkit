@@ -157,7 +157,7 @@ def extract_library_location(stack=None) -> Optional[Location]:
 
 context_stack = []
 """
-:type: list[(str, Location, str)|liblktlang.LKNode]
+:type: list[(str, Location, str)]
 """
 
 
@@ -236,23 +236,9 @@ def get_structured_context():
     From the context global structures, return a structured context locations
     list.
 
-    :rtype: list[(str, Location)] | liblktlang.LKNode
+    :rtype: list[(str, Location)]
     """
-
-    def is_regular_context(context):
-        """
-        Return whether "context" is a regular one (i.e. a tuple of file, column
-        and message). The other kind of context is LKNode instances from
-        liblktlang.
-
-        :rtype: bool
-        """
-        return isinstance(context, tuple)
-
-    if context_stack and not is_regular_context(context_stack[-1]):
-        return context_stack[-1]
-
-    stack = [item for item in context_stack if is_regular_context(item)]
+    c = context_stack
     ids = set()
     locs = set()
     msgs = []
@@ -261,7 +247,7 @@ def get_structured_context():
     # 1. Remove those with null locations.
     # 2. Only keep one per registered id.
     # 3. Only keep one per unique (msg, location) pair.
-    for msg, loc, id in reversed(stack):
+    for msg, loc, id in reversed(c):
         if loc and (not id or id not in ids) and ((msg, loc) not in locs):
             msgs.append((msg, loc))
             ids.add(id)
@@ -319,7 +305,10 @@ def get_parsable_location():
     ctx = get_structured_context()
     if ctx:
         loc = ctx[0][1]
-        return '{}:{}:1'.format(get_filename(loc.file), loc.line)
+        path = (P.abspath(loc.file)
+                if Diagnostics.style == DiagnosticStyle.gnu_full else
+                P.basename(loc.file))
+        return "{}:{}:1".format(path, loc.line)
     else:
         return ""
 
@@ -355,10 +344,6 @@ def check_source_language(predicate, message, severity=Severity.error,
     """
     from langkit.compile_context import get_context
 
-    def context_from_node(node):
-        return '{}:{}'.format(get_filename(node.unit.filename),
-                              node.sloc_range.start)
-
     if not ok_for_codegen:
         ctx = get_context(or_none=True)
         assert ctx is None or ctx.emitter is None
@@ -374,10 +359,7 @@ def check_source_language(predicate, message, severity=Severity.error,
 
         context = get_structured_context()
 
-        if not isinstance(context, list):
-            print('{}: {}: {}'.format(context_from_node(context),
-                                      format_severity(severity), message))
-        elif Diagnostics.style != DiagnosticStyle.default:
+        if Diagnostics.style != DiagnosticStyle.default:
             print('{}: {}'.format(get_parsable_location(), message))
         else:
             print_context(context)

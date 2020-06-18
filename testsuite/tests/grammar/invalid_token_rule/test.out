@@ -1,7 +1,11 @@
 == bad-token-casing.lkt ==
-bad-token-casing.lkt:4:37: Error: Unknown token: Example
+File "bad-token-casing.lkt", line XXX, 
+  line XXX, 
+    Error: Unknown token: Example
 
 == unknown-token.lkt ==
-unknown-token.lkt:4:37: Error: Unknown token: no_such_token
+File "unknown-token.lkt", line XXX, 
+  line XXX, 
+    Error: Unknown token: no_such_token
 
 Done
