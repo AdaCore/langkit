@@ -2,7 +2,6 @@
 Code generation was successful
 
 == Incorrect No usage ==
-File "test.py", line 21, in BarNode.prop
-    Error: Invalid type for No expression: Int
+test.py:21: error: Invalid type for No expression: Int
 
 Done

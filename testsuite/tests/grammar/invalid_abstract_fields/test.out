@@ -1,27 +1,26 @@
 == Not overriden ==
-File "test.py", line 26, in ExampleHolder
-    Error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+test.py:26: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Partly overriden ==
-File "test.py", line 47, in OtherExampleHolder
-    Error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
+test.py:47: error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
 
 == Abstract overriding abstract ==
-File "test.py", line 66, in ExampleHolder.f1
-    Error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
-File "test.py", line 65, in ExampleHolder
-    Error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+test.py:66: error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
+test.py:65: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Abstract overriding concrete ==
-File "abstract-overriding-concrete.lkt", line 4, In definition of grammar rule main_rule
-    Error: Transform parser generates 1 values, but ExampleHolder has 0 fields
+abstract-overriding-concrete.lkt:4:29: error: Transform parser generates 1 values, but ExampleHolder has 0 fields
+3 |     @main_rule main_rule <- ExampleHolder(Example("example"))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Inconsistent overriding type ==
-File "test.py", line 101, in ExampleHolder.f
-    Error: Type of overriding field (FooNode) does not match type of abstract field (Example)
+test.py:101: error: Type of overriding field (FooNode) does not match type of abstract field (Example)
 
 == Free-standing null field ==
-File "free-standing-null-field.lkt", line 4, In definition of grammar rule main_rule
-    Error: Transform parser generates 1 values, but ExampleHolder has 0 fields
+free-standing-null-field.lkt:4:29: error: Transform parser generates 1 values, but ExampleHolder has 0 fields
+3 |     @main_rule main_rule <- ExampleHolder(Example("example"))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 Done

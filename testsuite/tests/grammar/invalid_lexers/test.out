@@ -1,132 +1,160 @@
 == bad_rule_1.lkt ==
-File "bad_rule_1.lkt", line XXX, 
-    Error: Unexpected declaration in lexer
+bad_rule_1.lkt:2:5: error: Unexpected declaration in lexer
+1 |     lexer bar_lexer {
+  |     ^                
+
 
 == case_1.lkt ==
 case_1.lkt:3:11-3:12: Expected 'discard', got Number
 
 == case_2.lkt ==
-File "case_2.lkt", line XXX, 
-    Error: Invalid case rule topology
+case_2.lkt:3:5: error: Invalid case rule topology
+2 |     match p"foo" {
+  |     ^             
+
 
 == case_3.lkt ==
-File "case_3.lkt", line XXX, 
-    Error: Invalid case rule topology
+case_3.lkt:3:5: error: Invalid case rule topology
+2 |     match p"foo" {
+  |     ^             
+
 
 == case_4.lkt ==
-File "case_4.lkt", line XXX, 
-    Error: Invalid case rule topology
+case_4.lkt:3:5: error: Invalid case rule topology
+2 |     match p"foo" {
+  |     ^             
+
 
 == case_5.lkt ==
-File "case_5.lkt", line XXX, 
-  line XXX, 
-    Error: Unknown token: bar
+case_5.lkt:4:36: error: Unknown token: bar
+3 |         if previous_token is foo | bar then send(foo, 3)
+  |                                    ^^^                  
+
 
 == case_6.lkt ==
 case_6.lkt:5:24-5:27: Expected Number, got Identifier
 
 == case_7.lkt ==
-File "case_7.lkt", line XXX, 
-  line XXX, 
-    Error: Unknown token: bar
+case_7.lkt:5:19: error: Unknown token: bar
+4 |         else send(bar, 3)
+  |                   ^^^    
+
 
 == family_1.lkt ==
-File "family_1.lkt", line XXX, 
-    Error: Only lexer rules allowed in family blocks
+family_1.lkt:2:5: error: Only lexer rules allowed in family blocks
+1 |     family keywords {
+  |     ^                
+
 
 == foo.lkt ==
 Code generation was successful
 
 == pattern_1.lkt ==
-File "test.py", line XXX, In definition of lexer rules
-    Error: unbalanced square bracket
+test.py:18: error: unbalanced square bracket
 
 == pattern_2.lkt ==
-File "test.py", line XXX, In definition of lexer rules
-    Error: unknown pattern: no_such_pattern
+test.py:18: error: unknown pattern: no_such_pattern
 
 == pattern_3.lkt ==
-File "test.py", line XXX, In definition of lexer rules
-    Error: infinite recursion in pat1
+test.py:18: error: infinite recursion in pat1
 
 == pattern_4.lkt ==
-File "test.py", line XXX, In definition of lexer pattern pat
-    Error: unbalanced square bracket
+test.py:18: error: unbalanced square bracket
 
 == pattern_5.lkt ==
-File "test.py", line XXX, In definition of lexer rules
-    Error: nothing to repeat
+test.py:18: error: nothing to repeat
 
 == pattern_6.lkt ==
-File "test.py", line XXX, In definition of lexer rules
-    Error: unbalanced parentheses
+test.py:18: error: unbalanced parentheses
 
 == pattern_7.lkt ==
-File "pattern_7.lkt", line XXX, 
-    Error: Duplicate pattern name
+pattern_7.lkt:3:5: error: Duplicate pattern name
+2 |     val pat = p"example"
+  |     ^^^^^^^^^^^^^^^^^^^^
+
 
 == pattern_8.lkt ==
-File "pattern_8.lkt", line XXX, 
-    Error: Patterns must have automatic types in lexers
+pattern_8.lkt:2:5: error: Patterns must have automatic types in lexers
+1 |     val pat : Int = p"example"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == pattern_9.lkt ==
-File "pattern_9.lkt", line XXX, 
-    Error: Pattern string literal expected
+pattern_9.lkt:2:5: error: Pattern string literal expected
+1 |     val pat = 1
+  |     ^^^^^^^^^^^
+
 
 == rule_1.lkt ==
-File "rule_1.lkt", line XXX, 
-    Error: termination is a reserved token name
+rule_1.lkt:2:5: error: termination is a reserved token name
+1 |     termination <- "def"
+  |     ^^^^^^^^^^^^^^^^^^^^
+
 
 == rule_2.lkt ==
-File "rule_2.lkt", line XXX, 
-    Error: lexing_failure is a reserved token name
+rule_2.lkt:2:5: error: lexing_failure is a reserved token name
+1 |     lexing_failure <- "example"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == spacing_1.lkt ==
-File "spacing_1.lkt", line XXX, 
-  line XXX, 
-    Error: Exactly two positional arguments expected
+spacing_1.lkt:1:1: error: Exactly two positional arguments expected
+0 | @spacing()
+  | ^^^^^^^^^^
+
 
 == spacing_2.lkt ==
-File "spacing_2.lkt", line XXX, 
-  line XXX, 
-    Error: Token family name expected
+spacing_2.lkt:1:1: error: Token family name expected
+0 | @spacing(1, ids)
+  | ^^^^^^^^^^^^^^^^
+
 
 == spacing_3.lkt ==
-File "spacing_3.lkt", line XXX, 
-    Error: Unknown token family: ids
+spacing_3.lkt:1:10: error: Unknown token family: ids
+0 | @spacing(ids, ids)
+  |          ^^^      
+
 
 == token_action_1.lkt ==
-File "token_action_1.lkt", line XXX, 
-  line XXX, 
-    Error: Arguments required for this annotation
+token_action_1.lkt:2:5: error: Arguments required for this annotation
+1 |     @text example <- "example"
+  |     ^^^^^                     
+
 
 == token_action_2.lkt ==
-File "token_action_2.lkt", line XXX, 
-  line XXX, 
-    Error: No positional argument allowed
+token_action_2.lkt:2:5: error: No positional argument allowed
+1 |     @text(1) example <- "example"
+  |     ^^^^^^^^                     
+
 
 == token_action_3.lkt ==
-File "token_action_3.lkt", line XXX, 
-  line XXX, 
-    Error: Invalid arguments: bar
+token_action_3.lkt:2:5: error: Invalid arguments: bar
+1 |     @text(bar=true) example <- "example"
+  |     ^^^^^^^^^^^^^^^                     
+
 
 == token_action_4.lkt ==
-File "token_action_4.lkt", line XXX, 
-  line XXX, 
-  line XXX, 
-    Error: Boolean literal expected
+token_action_4.lkt:2:31: error: Boolean literal expected
+1 |     @text(start_ignore_layout=1) example <- "example"
+  |                               ^                      
+
 
 == token_action_5.lkt ==
-File "token_action_5.lkt", line XXX, 
-    Error: At most one token action allowed
+token_action_5.lkt:2:5: error: At most one token action allowed
+1 |     @ignore @text() example <- "example"
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == token_matcher.lkt ==
-File "token_matcher.lkt", line XXX, 
-  line XXX, 
-    Error: Invalid lexing expression
+token_matcher.lkt:2:16: error: Invalid lexing expression
+1 |     example <- Foo()
+  |                ^^^^^
+
 
 == token_name.lkt ==
-File "token_name.lkt", line XXX, 
-    Error: Duplicate token name
+token_name.lkt:3:5: error: Duplicate token name
+2 |     example <- "null"
+  |     ^^^^^^^^^^^^^^^^^
+
 
 Done

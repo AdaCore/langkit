@@ -256,37 +256,15 @@ def get_structured_context():
     return msgs
 
 
-def print_context(context):
-    """
-    Print the current error context.
-
-    Note that this makes sense only when `DiagnosticStyle.default` is enabled.
-    """
-    assert Diagnostics.style == DiagnosticStyle.default
-    assert isinstance(context, list)
-
-    # Then we'll print the context we've kept
-    last_file_info = ''
-    for ctx_msg, ctx_loc in reversed(context):
-        # We only want to show the file information one time if it is the same
-        file_info = 'File "{}", '.format(col(get_filename(ctx_loc.file),
-                                             Colors.CYAN))
-        if last_file_info == file_info:
-            file_info = '  '
-        else:
-            last_file_info = file_info
-
-        print('{file_info}line {line}, {msg}'.format(
-            file_info=file_info,
-            line=col(ctx_loc.line, Colors.CYAN),
-            msg=ctx_msg
-        ))
-
-
 def get_filename(f):
     return (os.path.abspath(f)
             if Diagnostics.style == DiagnosticStyle.gnu_full else
             os.path.basename(f))
+
+
+def get_current_location() -> Optional[Location]:
+    ctx = get_structured_context()
+    return ctx[0][1] if ctx else None
 
 
 def get_parsable_location():
@@ -357,17 +335,11 @@ def check_source_language(predicate, message, severity=Severity.error,
             message_lines[:1] + [indent + line for line in message_lines[1:]]
         )
 
-        context = get_structured_context()
-
         if Diagnostics.style != DiagnosticStyle.default:
             print('{}: {}'.format(get_parsable_location(), message))
         else:
-            print_context(context)
-            print('{}{}: {}'.format(
-                indent if context_stack else '',
-                format_severity(severity),
-                message
-            ))
+            print_error(message, get_current_location())
+
         if severity == Severity.error and do_raise:
             raise DiagnosticError()
         elif severity == Severity.non_blocking_error:
@@ -672,10 +644,16 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     return "".join(ret)
 
 
-def print_error(message: str, location: Union[Location, L.LKNode]):
+def print_error(message: str, location: Union[Location, L.LKNode, None]):
     """
     Prints an error.
     """
+    error_marker = col(col("error: ", Colors.RED), Colors.BOLD)
+
+    if location is None:
+        print(error_marker + message)
+        return
+
     if isinstance(location, L.LKNode):
         location = Location.from_lkt_node(location)
 
@@ -683,7 +661,7 @@ def print_error(message: str, location: Union[Location, L.LKNode]):
     print(
         "{}: {}{}".format(
             col(location.gnu_style_repr(), Colors.BOLD),
-            col(col("error: ", Colors.RED), Colors.BOLD),
+            error_marker,
             style_diagnostic_message(message),
         ),
     )

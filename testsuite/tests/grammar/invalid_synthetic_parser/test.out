@@ -1,20 +1,25 @@
 == List ==
-File "list.lkt", line XXX, In definition of grammar rule main_rule
-  line XXX, In definition of grammar rule main_rule
-    Error: Parsers cannot create synthetic nodes
+list.lkt:4:47: error: Parsers cannot create synthetic nodes
+3 |     @main_rule main_rule <- Example("example" ListSynthExample+("example"))
+  |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
 
 == Null ==
-File "null.lkt", line XXX, In definition of grammar rule main_rule
-    Error: Parsers cannot create synthetic nodes
+null.lkt:4:29: error: Parsers cannot create synthetic nodes
+3 |     @main_rule main_rule <- Example("example" null(SynthExample))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Skip ==
-File "skip.lkt", line XXX, 
-  line XXX, 
-  line XXX, 
-    Error: Unknown node: SynthExapmle
+skip.lkt:4:52: error: Unknown node: SynthExapmle
+3 |     @main_rule main_rule <- Example("example" skip(SynthExapmle))
+  |                                                    ^^^^^^^^^^^^  
+
 
 == Transform ==
-File "transform.lkt", line XXX, In definition of grammar rule main_rule
-    Error: Parsers cannot create synthetic nodes
+transform.lkt:4:29: error: Parsers cannot create synthetic nodes
+3 |     @main_rule main_rule <- Example("example" SynthExample())
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 Done

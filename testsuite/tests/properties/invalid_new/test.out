@@ -2,21 +2,12 @@
 Code generation was successful
 
 == Incorrect new 1 ==
-File "test.py", line 26, in BarNode.public_prop
-  line 31, in BarNode.prop
-  line 38, in New expression
-    Error: Values are missing for MyStruct fields: b
+test.py:38: error: Values are missing for MyStruct fields: b
 
 == Incorrect new 2 ==
-File "test.py", line 26, in BarNode.public_prop
-  line 31, in BarNode.prop
-  line 39, in New expression
-    Error: Wrong type for field B: expected Int, got FooNode
+test.py:39: error: Wrong type for field B: expected Int, got FooNode
 
 == Incorrect new 1 ==
-File "test.py", line 26, in BarNode.public_prop
-  line 31, in BarNode.prop
-  line 41, in New expression
-    Error: Extraneous fields for MyStruct: c
+test.py:41: error: Extraneous fields for MyStruct: c
 
 Done

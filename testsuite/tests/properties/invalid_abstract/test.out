@@ -1,12 +1,10 @@
 == Abstract overrides without runtime check ==
-File "test.py", line 36, in Identifier.prop
-    Error: Abstract properties with no runtime check cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
+test.py:36: error: Abstract properties with no runtime check cannot override another property. Here, Identifier.prop is abstract and overrides BaseNode.prop.
 
 == Abstract overrides with runtime check ==
 Code generation was successful
 
 == Abstract in root not overriden in list ==
-File "test.py", line 12, in FooNode.root_prop
-    Error: Abstract property root_prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
+test.py:12: error: Abstract property root_prop is not overriden in all subclasses. Missing overriding properties on classes: BaseNode.list
 
 Done

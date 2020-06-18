@@ -1,27 +1,34 @@
 == Pick in Or ==
-File "pick-in-or.lkt", line 4, In definition of grammar rule main_rule
-  line 5, In definition of grammar rule main_rule
-    Error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Extract(Row(Token(<WithText Example>), Transform(Row(Token(<WithSymbol Identifier>)), Identifier)), 1)
+pick-in-or.lkt:5:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Extract(Row(Token(<WithText Example>), Transform(Row(Token(<WithSymbol Identifier>)), Identifier)), 1)
+4 |         pick("example" Identifier(@identifier))
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Toplevel Pick ==
-File "toplevel-pick.lkt", line 4, In definition of grammar rule main_rule
-    Error: Top-level information loss prevents unparsers generation
+toplevel-pick.lkt:4:29: error: Top-level information loss prevents unparsers generation
+3 |     @main_rule main_rule <- pick("example" Root(item))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Several token kinds for token node (1) ==
-File "several-1.lkt", line 4, In definition of grammar rule main_rule
-  line 5, In definition of grammar rule main_rule
-    Error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Transform(Row(Or(Token(<WithSymbol Identifier>), Token(<WithText Example>))), Identifier)
+several-1.lkt:5:9: error: Unsupported token node parser for unparsers generation, only direct token parsers are accepted: Transform(Row(Or(Token(<WithSymbol Identifier>), Token(<WithText Example>))), Identifier)
+4 |         Identifier(or(@identifier | @example))
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Several token kinds for token node (2) ==
-File "several-2.lkt", line 4, In definition of grammar rule main_rule
-  line 6, In definition of grammar rule main_rule
-    Error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+several-2.lkt:6:11: error: The Identifier token node can be associated to only one token kind: here we have Example, but we already had Identifier
+5 |         | Identifier(@example)
+  |           ^^^^^^^^^^^^^^^^^^^^
+
 
 == Pick in List ==
-File "pick-in-list.lkt", line 4, In definition of grammar rule main_rule
-    Error: Unparsers generation require list parsers to directly build nodes for each list item
+pick-in-list.lkt:4:29: error: Unparsers generation require list parsers to directly build nodes for each list item
+3 |     @main_rule main_rule <- list+("example" Root(or(
+  |                                                     
+
 
 == Ambiguous lists ==
-Error: Inconsistent separation token for FooNode.list: , and <none>
+error: Inconsistent separation token for FooNode.list: , and <none>
 
 Done

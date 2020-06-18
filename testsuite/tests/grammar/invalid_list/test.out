@@ -1,23 +1,31 @@
 == Token element ==
-File "token-element.lkt", line XXX, In definition of grammar rule main_rule
-  line XXX, In definition of grammar rule main_rule
-    Error: List parsers only accept subparsers that yield AST nodes (Token provided here)
+token-element.lkt:4:38: error: List parsers only accept subparsers that yield AST nodes (Token provided here)
+3 |     @main_rule main_rule <- ListNode(list+(@number))
+  |                                      ^^^^^^^^^^^^^^ 
+
 
 == Invalid list_cls ==
-File "invalid-list-cls.lkt", line XXX, 
-    Error: Bad generic type name: only ASTList is valid in this context
+invalid-list-cls.lkt:4:29: error: Bad generic type name: only ASTList is valid in this context
+3 |     @main_rule main_rule <- NoSuchGeneric[Example]+(Example("example"))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Invalid ASTList ==
-File "invalid-astlist.lkt", line XXX, 
-    Error: 1 type argument expected, got 2
+invalid-astlist.lkt:4:29: error: 1 type argument expected, got 2
+3 |     @main_rule main_rule <- ASTList[Example, Example]+(Example("example"))
+  |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 == Non-list list_cls ==
-File "non-list-cls.lkt", line XXX, In definition of grammar rule main_rule
-    Error: Invalid list type for List parser: ListNode. Not a list type
+non-list-cls.lkt:5:29: error: Invalid list type for List parser: ListNode. Not a list type
+4 |     @main_rule main_rule <- ListNode+(num)
+  |                             ^^^^^^^^^^^^^^
+
 
 == Invalid element type in list_cls ==
-File "invalid-element-type.lkt", line XXX, In definition of grammar rule main_rule
-  line XXX, In definition of grammar rule main_rule
-    Error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
+invalid-element-type.lkt:7:9: error: Invalid list type for List parser: sub-parser produces Num nodes while Example.list accepts only Example nodes
+6 |         ASTList[Example]*(num)
+  |         ^^^^^^^^^^^^^^^^^^^^^^
+
 
 Done

@@ -1,11 +1,11 @@
 == \ ==
-Error: bogus escape
+error: bogus escape
 
 == \u ==
-Error: bogus Unicode escape
+error: bogus Unicode escape
 
 == \u0 ==
-Error: bogus Unicode escape
+error: bogus Unicode escape
 
 == \u1234 ==
 Or(Seq([\U1234]))
@@ -35,13 +35,13 @@ Or(Seq([\U0:\U10ffff]))
 Or(Seq([^, a]))
 
 == [a-] ==
-Error: dangling dash
+error: dangling dash
 
 == [-b] ==
-Error: dangling dash
+error: dangling dash
 
 == [a-c-] ==
-Error: dangling dash
+error: dangling dash
 
 == [\]] ==
 Or(Seq([]]))

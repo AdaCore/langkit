@@ -1,16 +1,9 @@
-File "test.py", line 22, in ExampleList.unused_param
-    Warning: The following bindings are not used: ex_param
-File "test.py", line 22, in ExampleList.unused_param
-    Warning: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
-File "test.py", line 26, in ExampleList.unused_block_var
-    Warning: The following bindings are not used: block_var
-File "test.py", line 34, in ExampleList.unused_let_var
-    Warning: The following bindings are not used: ex_list
-File "test.py", line 40, in ExampleList.unused_loop_var
-    Warning: The following bindings are not used: ex_item
-File "test.py", line 45, in ExampleList.unused_then_var
-    Warning: The following bindings are not used: ex_items
-File "test.py", line 58, in ExampleList.unused_match_var
-    Warning: The following bindings are not used: ex
+test.py:22: error: The following bindings are not used: ex_param
+test.py:22: error: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
+test.py:26: error: The following bindings are not used: block_var
+test.py:34: error: The following bindings are not used: ex_list
+test.py:40: error: The following bindings are not used: ex_item
+test.py:45: error: The following bindings are not used: ex_items
+test.py:58: error: The following bindings are not used: ex
 Code generation was successful
 Done

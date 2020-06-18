@@ -1,4 +1,4 @@
-Error: Inconsistent postfix tokens for Assignment:
+error: Inconsistent postfix tokens for Assignment:
       ;
     and:
       <no token>

@@ -1,3 +1,2 @@
-File "test.py", line 16, In definition of grammar
-    Error: Invalid rule name specified for main rule: "main_rulezz". Did you mean "main_rule"?
+test.py:16: error: Invalid rule name specified for main rule: "main_rulezz". Did you mean "main_rule"?
 Done

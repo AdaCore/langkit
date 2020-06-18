@@ -1,3 +1,5 @@
-File "foo.lkt", line 5, In definition of grammar rule element
-    Error: Alternatives yield incompatible types: Sequence, Token
+foo.lkt:5:16: error: Alternatives yield incompatible types: Sequence, Token
+4 |     element <- or(atom | sequence)
+  |                ^^^^^^^^^^^^^^^^^^^
+
 Done

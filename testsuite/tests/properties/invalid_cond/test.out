@@ -1,26 +1,16 @@
 == Missing args ==
-File "test.py", line 20, in Example.p
-  line 26, in Cond expression
-    Error: Missing Cond arguments
+test.py:26: error: Missing Cond arguments
 
 == Missing args ==
-File "test.py", line 20, in Example.p
-  line 27, in Cond expression
-    Error: Missing Cond arguments
+test.py:27: error: Missing Cond arguments
 
 == Missing last ==
-File "test.py", line 20, in Example.p
-  line 28, in Cond expression
-    Error: Missing last Cond argument
+test.py:28: error: Missing last Cond argument
 
 == Bad condition type ==
-File "test.py", line 20, in Example.p
-File "<frozen importlib._bootstrap>", line 219, in SelfVariable expression
-    Error: Condition in Cond expression should be Bool, got Example
+<frozen importlib._bootstrap>:219: error: Condition in Cond expression should be Bool, got Example
 
 == Bad return type ==
-File "test.py", line 20, in Example.p
-  line 30, in Cond expression
-    Error: Mismatching types in Cond expression: Bool expected but got Example instead
+test.py:30: error: Mismatching types in Cond expression: Bool expected but got Example instead
 
 Done

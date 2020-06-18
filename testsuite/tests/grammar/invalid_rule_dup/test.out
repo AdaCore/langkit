@@ -1,3 +1,2 @@
-File "test.py", line 22, In definition of rule 'sec_rule'
-    Error: Rule 'sec_rule' is already present in the grammar
+test.py:22: error: Rule 'sec_rule' is already present in the grammar
 Done

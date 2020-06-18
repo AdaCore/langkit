@@ -1,3 +1,2 @@
-File "test.py", line 18, in Example.prop
-    Error: This property cannot be memoized because argument a (of type Token.array) is not hashable
+test.py:18: error: This property cannot be memoized because argument a (of type Token.array) is not hashable
 Done

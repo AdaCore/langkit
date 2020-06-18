@@ -1,3 +1,2 @@
-File "test.py", line 24, in Expr.name
-    Error: Expr.name cannot override RootNode.name unless the former is a concrete field and the latter is an abstract one
+test.py:24: error: Expr.name cannot override RootNode.name unless the former is a concrete field and the latter is an abstract one
 Done

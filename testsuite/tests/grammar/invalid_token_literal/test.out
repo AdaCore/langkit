@@ -1,3 +1,5 @@
-File "foo.lkt", line 4, In definition of grammar rule main_rule
-    Error: '\n' token literal is not part of the valid tokens for this this grammar
+foo.lkt:4:29: error: '\n' token literal is not part of the valid tokens for this this grammar
+3 |     @main_rule main_rule <- list+(
+  |                                   
+
 Done

@@ -5,13 +5,9 @@ Code generation was successful
 Code generation was successful
 
 == Bind(entity, logic_var) ==
-File "test.py", line 20, in ExampleNode.resolve
-File "<frozen importlib._bootstrap>", line 219, in EntityVariable expression
-    Error: Expected type LogicVar, got ExampleNode.entity
+<frozen importlib._bootstrap>:219: error: Expected type LogicVar, got ExampleNode.entity
 
 == Bind(logic_var, bool) ==
-File "test.py", line 20, in ExampleNode.resolve
-  line 34, in Bind expression
-    Error: Right operand must be either a logic variable or an entity, got Bool
+test.py:34: error: Right operand must be either a logic variable or an entity, got Bool
 
 Done
