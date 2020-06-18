@@ -522,6 +522,8 @@ class Decl(LKNode):
         """
     )
 
+    full_decl = Property(Entity.parent.cast_or_raise(T.FullDecl))
+
     quoted_name = Property(S("`").concat(Self.full_name).concat(S("`")))
 
     env_spec = EnvSpec(add_to_env_kv(Entity.name, Self))
@@ -1803,19 +1805,27 @@ class FunDecl(UserValDecl):
     @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
-        return Self.function_type(
-            # NOTE: For methods, we don't add the owning type. We consider that
-            # for the moment the only kind of references to method's function
-            # types are with the self argument bound (ie. via dot notation).
-            #
-            # At some stage we might want to create a notation for a "free
-            # method", where `self` is not bound, but that doesn't exist yet.
-            Entity.args.map(
-                lambda a:
-                a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
-            ),
-            Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
-        ).as_bare_entity
+        return If(
+            Entity.full_decl.get_annotation('property').is_null,
+
+            Self.function_type(
+                # NOTE: For methods, we don't add the owning type. We consider
+                # that for the moment the only kind of references to method's
+                # function types are with the self argument bound (ie. via dot
+                # notation).
+                #
+                # At some stage we might want to create a notation for a "free
+                # method", where `self` is not bound, but that doesn't exist
+                # yet.
+                Entity.args.map(
+                    lambda a:
+                    a.decl_type.designated_type.assert_bare.cast(T.TypeDecl)
+                ),
+                Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
+            ).as_bare_entity,
+
+            Entity.return_type.designated_type
+        )
 
 
 class EnumLitDecl(UserValDecl):
