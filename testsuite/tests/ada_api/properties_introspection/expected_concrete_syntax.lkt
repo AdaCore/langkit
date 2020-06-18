@@ -39,7 +39,7 @@ grammar foo_grammar {
 
 @abstract class Expr : FooNode {
 
-    @export fun eval (): Int
+    @export @abstract fun eval (): Int
 
     @export fun eval_plus (addend : Expr): Int = node.eval() + addend.eval()
 }
@@ -53,7 +53,7 @@ class Addition : Expr {
 
 class Number : Expr implements TokenNode {
 
-    fun eval (): Int
+    @abstract fun eval (): Int
 
     @export fun id_dflt_bool (id : Bool = true): Bool = id
 

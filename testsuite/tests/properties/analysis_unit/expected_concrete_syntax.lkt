@@ -13,17 +13,17 @@ grammar foo_grammar {
 
 @abstract class Expression : FooNode {
 
-    @export fun result (): Int
+    @export @abstract fun result (): Int
 }
 
 class Literal : Expression implements TokenNode {
 
-    fun result (): Int
+    @abstract fun result (): Int
 }
 
 class Name : Expression implements TokenNode {
 
-    fun designated_unit (): AnalysisUnit
+    @abstract fun designated_unit (): AnalysisUnit
 
     fun result (): Int = node.designated_unit().root.as[Expression].result()
 }

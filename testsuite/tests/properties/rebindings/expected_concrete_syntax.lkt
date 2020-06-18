@@ -15,7 +15,7 @@ grammar foo_grammar {
 
 @abstract class DefNode : FooNode {
 
-    @export fun name (): Symbol
+    @export @abstract fun name (): Symbol
 }
 
 class Block : DefNode {

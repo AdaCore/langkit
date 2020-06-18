@@ -6,15 +6,11 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node {
 
-    @export fun prop (): Int
-
-    fun prop (): Int
+    @export @abstract @abstract_stub fun prop (): Int
 }
 
 class Literal : FooNode implements TokenNode {
     var : LogicVar
-
-    fun a (): FooNode
 
     fun b (): Equation = %eq(node.var, node.a())
 
@@ -24,5 +20,5 @@ class Literal : FooNode implements TokenNode {
         node.as_bare_entity
     }
 
-    fun a (): FooNode
+    @abstract @abstract_stub fun a (): FooNode
 }

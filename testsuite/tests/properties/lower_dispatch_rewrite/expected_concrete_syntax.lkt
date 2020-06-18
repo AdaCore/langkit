@@ -46,8 +46,6 @@ class Ref : Atom {
     node.referenced_env().get(node.name.symbol)
 
     fun referenced_env (): LexicalEnv = null
-
-    fun referenced_env (): LexicalEnv
 }
 
 class MiddleRef : Ref {

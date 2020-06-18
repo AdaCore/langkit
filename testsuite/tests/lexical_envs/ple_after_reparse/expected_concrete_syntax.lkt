@@ -18,11 +18,11 @@ class Dep : FooNode {
 
 @abstract class Name : FooNode {
 
-    @export fun resolve (): FooNode
+    @export @abstract fun resolve (): FooNode
 
-    @export fun suffix_symbol (): Symbol
+    @export @abstract fun suffix_symbol (): Symbol
 
-    fun referenced_unit_or_error (or_error : Bool): AnalysisUnit
+    @abstract fun referenced_unit_or_error (or_error : Bool): AnalysisUnit
 
     @export fun referenced_unit (): AnalysisUnit =
     node.referenced_unit_or_error(false)

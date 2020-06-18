@@ -1068,11 +1068,24 @@ def emit_doc(doc):
 def emit_prop(prop, walker):
     quals = ""
 
-    if prop.is_public:
+    # When a property declared in the DSL happens to be the root of a property
+    # dispatching tree, it is hidden by an artificial property (the
+    # "dispatcher", see CompileCtx.lower_properties_dispatching). The actual
+    # "is_public" and abstract expression for this root property are still
+    # attached to the dispatcher.
+    assert not prop.is_artificial_dispatcher
+    dispatcher = prop.dispatcher
+    prop_for_walker = (dispatcher
+                       if dispatcher and not prop.base
+                       else prop)
+
+    if prop_for_walker.is_public:
         quals += "@export "
 
-    if prop.abstract:
-        quals += "abstract "
+    if not prop.constructed_expr:
+        quals += "@abstract "
+        if prop.abstract_runtime_check:
+            quals += "@abstract_stub "
 
     if prop.memoized:
         quals += "@memoized "
@@ -1093,9 +1106,10 @@ def emit_prop(prop, walker):
         quals, prop.original_name.lower, args, type_name(prop.type)
     )
 
-    if prop.expr:
-        with walker.property(prop):
-            res += " = $sl{}".format(emit_expr(prop.expr, walker=walker))
+    if prop_for_walker.expr:
+        with walker.property(prop_for_walker):
+            res += " = $sl{}".format(emit_expr(prop_for_walker.expr,
+                                               walker=walker))
 
     return res
 
@@ -1224,6 +1238,9 @@ def emit_node_type(node_type):
             for builtin_name, _ in builtin_properties
         ) or (prop.original_name.lower == "as_bool" and node_type.is_bool_node)
 
+    def to_emit_dispatcher(prop):
+        return prop.is_dispatcher and prop.is_artificial_dispatcher
+
     if base and base.is_enum_node:
         return ""
 
@@ -1241,7 +1258,7 @@ def emit_node_type(node_type):
     ${emit_field(field)}$hl
     % endfor
     % for prop in properties:
-    % if not prop.is_internal and not is_builtin_prop(prop):
+    % if not prop.is_internal and not is_builtin_prop(prop) and not prop.is_artificial_dispatcher:
     ${emit_prop(prop, walker)}$hl
     % endif
     % endfor

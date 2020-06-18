@@ -23,7 +23,7 @@ enum DeclKind (func, var) {
 
 @abstract class Decl : FooNode {
 
-    @export fun decl_kind (): DeclKind
+    @export @abstract fun decl_kind (): DeclKind
 }
 
 class FuncDecl : Decl {
