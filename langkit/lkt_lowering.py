@@ -25,6 +25,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, error
 )
+import langkit.expressions as E
 from langkit.expressions import (
     AbstractExpression, AbstractProperty, AbstractVariable, Property,
     PropertyDef
@@ -1235,49 +1236,51 @@ class LktTypesLoader:
         :param expr: Expression to lower.
         :param env: Variable to use when resolving references.
         """
-        from langkit.expressions import (
-            ArrayLiteral, CharacterLiteral, Entity, Eq, Not, Self,
-            SymbolLiteral
-        )
-
         def helper(expr: L.Expr) -> AbstractExpression:
-            if isinstance(expr, L.RefId):
-                decl = expr.p_check_referenced_decl
-                if isinstance(decl, L.NodeDecl):
-                    return Self
-                elif isinstance(decl, L.SelfDecl):
-                    return Entity
-                else:
-                    return env[decl]
-
-            elif isinstance(expr, L.CharLit):
-                return CharacterLiteral(denoted_char_lit(expr))
-
-            elif isinstance(expr, L.NotExpr):
-                return Not(helper(expr.f_expr))
-
-            elif isinstance(expr, L.ParenExpr):
-                return helper(expr.f_expr)
+            if isinstance(expr, L.ArrayLiteral):
+                elts = [helper(e) for e in expr.f_exprs]
+                array_type = self.resolve_type_decl(expr.p_check_expr_type)
+                return E.ArrayLiteral(elts,
+                                      element_type=array_type.element_type)
 
             elif isinstance(expr, L.BinOp):
                 left = helper(expr.f_left)
                 right = helper(expr.f_right)
                 if isinstance(expr.f_op, L.OpEq):
-                    return Eq(left, right)
+                    return E.Eq(left, right)
                 else:
                     assert False, 'Unhandled expression: {}'.format(expr)
+
+            elif isinstance(expr, L.CharLit):
+                return E.CharacterLiteral(denoted_char_lit(expr))
 
             elif isinstance(expr, L.DotExpr):
                 prefix = helper(expr.f_prefix)
                 return getattr(prefix, expr.f_suffix.text)
 
-            elif isinstance(expr, L.ArrayLiteral):
-                elts = [helper(e) for e in expr.f_exprs]
-                array_type = self.resolve_type_decl(expr.p_check_expr_type)
-                return ArrayLiteral(elts, element_type=array_type.element_type)
+            elif isinstance(expr, L.NotExpr):
+                return E.Not(helper(expr.f_expr))
+
+            elif isinstance(expr, L.ParenExpr):
+                return helper(expr.f_expr)
 
             elif isinstance(expr, L.StringLit):
-                return SymbolLiteral(denoted_string_lit(expr))
+                return E.SymbolLiteral(denoted_string_lit(expr))
+
+            elif isinstance(expr, L.RefId):
+                decl = expr.p_check_referenced_decl
+                if isinstance(decl, L.NodeDecl):
+                    return E.Self
+                elif isinstance(decl, L.SelfDecl):
+                    return E.Entity
+                elif isinstance(decl, L.EnumLitDecl):
+                    # TODO: handle all enum types
+                    enum_type = decl.p_get_type()
+                    assert self.compiled_types.get(enum_type) == T.Bool
+                    assert decl.text in ('true', 'false')
+                    return E.Literal(decl.text == 'true')
+                else:
+                    return env[decl]
 
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
