@@ -772,23 +772,12 @@ class CompileCtx:
         import liblktlang
         assert isinstance(lkt_node, liblktlang.LKNode)
 
-        context_stack.append(lkt_node)
+        context_stack.append(("", Location.from_lkt_node(lkt_node), ""))
+
         try:
             yield
         finally:
-            assert context_stack.pop() is lkt_node
-
-    @staticmethod
-    def lkt_loc(lkt_node):
-        """
-        Return a Location instance corresponding to the location of
-        ``lkt_node``.
-
-        :param liblktlang lkt_node: Node to process.
-        :rtype: Location
-        """
-        sloc = lkt_node.sloc_range.start
-        return Location(lkt_node.unit.filename, sloc.line, sloc.column)
+            context_stack.pop()
 
     @staticmethod
     def lkt_doc(full_decl):

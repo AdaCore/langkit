@@ -1,11 +1,15 @@
 == no-dot.lkt ==
-File "no-dot.lkt", line 4, In definition of grammar rule main_rule
+File "no-dot.lkt", line XXX, In definition of grammar rule main_rule
     Error: Parsers cannot create abstract nodes
 
 == bad-prefix.lkt ==
-bad-prefix.lkt:4:29: Error: Unknown node: NoSuchNode
+File "bad-prefix.lkt", line XXX, 
+  line XXX, 
+    Error: Unknown node: NoSuchNode
 
 == bad-alt.lkt ==
-bad-alt.lkt:4:37: Error: Unknown enum node alternative: NoSuchAlt
+File "bad-alt.lkt", line XXX, 
+  line XXX, 
+    Error: Unknown enum node alternative: NoSuchAlt
 
 Done

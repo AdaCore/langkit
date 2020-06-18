@@ -1,17 +1,20 @@
 == List ==
-File "list.lkt", line 4, In definition of grammar rule main_rule
-  line 4, In definition of grammar rule main_rule
+File "list.lkt", line XXX, In definition of grammar rule main_rule
+  line XXX, In definition of grammar rule main_rule
     Error: Parsers cannot create synthetic nodes
 
 == Null ==
-File "null.lkt", line 4, In definition of grammar rule main_rule
+File "null.lkt", line XXX, In definition of grammar rule main_rule
     Error: Parsers cannot create synthetic nodes
 
 == Skip ==
-skip.lkt:4:52: Error: Unknown node: SynthExapmle
+File "skip.lkt", line XXX, 
+  line XXX, 
+  line XXX, 
+    Error: Unknown node: SynthExapmle
 
 == Transform ==
-File "transform.lkt", line 4, In definition of grammar rule main_rule
+File "transform.lkt", line XXX, In definition of grammar rule main_rule
     Error: Parsers cannot create synthetic nodes
 
 Done

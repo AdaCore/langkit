@@ -22,7 +22,9 @@ from langkit.compiled_types import (
     CompiledTypeRepo, EnumNodeAlternative, Field, T, TypeRepo, UserField,
     resolve_type
 )
-from langkit.diagnostics import DiagnosticError, check_source_language, error
+from langkit.diagnostics import (
+    DiagnosticError, Location, check_source_language, error
+)
 from langkit.expressions import (
     AbstractExpression, AbstractProperty, AbstractVariable, Property,
     PropertyDef
@@ -783,7 +785,7 @@ def create_grammar(ctx: CompileCtx,
     with ctx.lkt_context(full_grammar):
         check_source_language(main_rule_name is not None,
                               'Missing main rule (@main_rule annotation)')
-    result = Grammar(main_rule_name, ctx.lkt_loc(full_grammar))
+    result = Grammar(main_rule_name, Location.from_lkt_node(full_grammar))
 
     # Translate rules (all_rules) later, as node types are not available yet
     result._all_lkt_rules.update(all_rules)
@@ -887,7 +889,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         if rule is None:
             return None
 
-        loc = ctx.lkt_loc(rule)
+        loc = Location.from_lkt_node(rule)
         with ctx.lkt_context(rule):
             if isinstance(rule, L.ParseNodeExpr):
                 node = resolve_node_ref(rule.f_node_name)
@@ -1329,6 +1331,7 @@ class LktTypesLoader:
             name = names.Name.from_lower(name_text)
 
             field: AbstractNodeData
+
             if isinstance(decl, L.FunDecl):
                 check_source_language(
                     any(issubclass(PropertyDef, cls)
@@ -1338,8 +1341,10 @@ class LktTypesLoader:
                 field = self.lower_property(full_decl)
             else:
                 field = self.lower_base_field(full_decl, allowed_field_types)
-            field.location = self.ctx.lkt_loc(decl)
+
+            field.location = Location.from_lkt_node(decl)
             result.append((name, cast(AbstractNodeData, field)))
+
         return result
 
     def create_node(self,
@@ -1352,7 +1357,7 @@ class LktTypesLoader:
         :param annotations: Annotations for this declaration.
         """
         is_enum_node = isinstance(annotations, EnumNodeAnnotations)
-        loc = self.ctx.lkt_loc(decl)
+        loc = Location.from_lkt_node(decl)
 
         # Resolve the base node (if any)
         base_type: Optional[ASTNodeType]
@@ -1484,7 +1489,7 @@ class LktTypesLoader:
                 EnumNodeAlternative(names.Name.from_camel(alt.f_syn_name.text),
                                     enum_node,
                                     None,
-                                    self.ctx.lkt_loc(alt))
+                                    Location.from_lkt_node(alt))
                 for alt in alternatives
             ]
 
