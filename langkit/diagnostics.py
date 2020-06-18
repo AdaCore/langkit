@@ -8,7 +8,7 @@ import os.path as P
 import re
 import sys
 import traceback
-from typing import List, NoReturn, Optional, Union
+from typing import Any, List, NoReturn, Optional, Union
 
 
 try:
@@ -56,12 +56,9 @@ class Diagnostics:
     """
 
     @classmethod
-    def is_langkit_dsl(cls, python_file):
+    def is_langkit_dsl(cls, python_file: str) -> bool:
         """
         Return wether `python_file` is langkit DSL.
-
-        :type python_file: str
-        :rtype: bool
         """
         # We check that the path of the file is not in the list of blacklisted
         # paths.
@@ -69,10 +66,9 @@ class Diagnostics:
         return all(path not in python_file for path in cls.blacklisted_paths)
 
     @classmethod
-    def set_style(cls, style):
+    def set_style(cls, style: DiagnosticStyle) -> None:
         """
         Set the diagnostic output format.
-        :type style: DiagnosticStyle
         """
         cls.style = style
 
@@ -139,7 +135,7 @@ class Location:
         )
 
 
-def extract_library_location(stack=None) -> Optional[Location]:
+def extract_library_location(stack: List[Any] = None) -> Optional[Location]:
     """
     Extract the location of the definition of an entity in the language
     specification from a stack trace. Use `traceback.extract_stack()` if no
