@@ -1244,12 +1244,34 @@ class LktTypesLoader:
                                       element_type=array_type.element_type)
 
             elif isinstance(expr, L.BinOp):
+                # Lower both operands
                 left = helper(expr.f_left)
                 right = helper(expr.f_right)
+
+                # Dispatch to the appropriate abstract expression constructor
                 if isinstance(expr.f_op, L.OpEq):
                     return E.Eq(left, right)
+
+                elif isinstance(expr.f_op, (L.OpLt, L.OpGt, L.OpLte, L.OpGte)):
+                    operator = {
+                        L.OpLt: E.OrderingTest.LT,
+                        L.OpLte: E.OrderingTest.LE,
+                        L.OpGt: E.OrderingTest.GT,
+                        L.OpGte: E.OrderingTest.GE,
+                    }[type(expr.f_op)]
+                    return E.OrderingTest(operator, left, right)
+
                 else:
-                    assert False, 'Unhandled expression: {}'.format(expr)
+                    operator = {
+                        L.OpAmp: '&',
+                        L.OpAnd: '&',
+                        L.OpOr: '|',
+                        L.OpPlus: '+',
+                        L.OpMinus: '-',
+                        L.OpMult: '*',
+                        L.OpDiv: '/',
+                    }[type(expr.f_op)]
+                    return E.Arithmetic(left, right, operator)
 
             elif isinstance(expr, L.CharLit):
                 return E.CharacterLiteral(denoted_char_lit(expr))
