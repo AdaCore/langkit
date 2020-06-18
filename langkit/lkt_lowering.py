@@ -1273,6 +1273,24 @@ class LktTypesLoader:
                     }[type(expr.f_op)]
                     return E.Arithmetic(left, right, operator)
 
+            elif isinstance(expr, L.CallExpr):
+                # For now, the only legal call expression is the method
+                # invocation.
+                callee = helper(expr.f_name)
+                assert isinstance(callee, E.FieldAccess)
+
+                # Collect positional and keyword arguments
+                args = []
+                kwargs = {}
+                for arg in expr.f_args:
+                    value = helper(arg.f_value)
+                    if arg.f_name:
+                        kwargs[arg.f_name.text] = value
+                    else:
+                        args.append(value)
+
+                return callee(*args, **kwargs)
+
             elif isinstance(expr, L.CharLit):
                 return E.CharacterLiteral(denoted_char_lit(expr))
 
