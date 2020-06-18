@@ -14,23 +14,23 @@ test.py:42: error: Invalid matching type: Bool
 test.py:69: error: Cannot match FooNode (input type is BodyNode)
 
 == Default case after full coverage ==
-test.py:75: error: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
+test.py:75: warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (1) ==
-test.py:80: error: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+test.py:80: warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (2) ==
-test.py:84: error: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+test.py:84: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (1) ==
-test.py:89: error: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+test.py:89: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (2) ==
-test.py:95: error: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+test.py:95: warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 Done
