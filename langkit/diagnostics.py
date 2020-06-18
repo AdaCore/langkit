@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import enum
+from functools import lru_cache
 import os
 import os.path as P
+import re
 import sys
 import traceback
-from typing import NoReturn, Optional
+from typing import List, NoReturn, Optional, Union
 
 
 try:
@@ -614,3 +616,104 @@ def errors_checkpoint():
     if Diagnostics.has_pending_error:
         Diagnostics.has_pending_error = False
         raise DiagnosticError()
+
+
+@lru_cache()
+def splitted_text(unit: L.AnalysisUnit) -> List[str]:
+    """
+    Memoized function to get the splitted text of an unit. Used to not have to
+    compute this every time.
+    """
+    return unit.text.splitlines()
+
+
+def style_diagnostic_message(string: str) -> str:
+    """
+    Given a diagnostic message containing possible variable references
+    surrounded by backticks, style those references.
+    """
+    return re.sub("`.*?`", lambda m: col(m.group(), Colors.BOLD), string)
+
+
+def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
+    """
+    Create a source listing for an error message, centered around a specific
+    sloc, that will be highlighted/careted, as in the following example::
+
+        65 | fun test(): Int = b_inst.fun_call
+           |                   ^^^^^^^^^^^^^^^
+
+    :param highlight_sloc: The source location that will allow us
+        to create the specific listing.
+    :param lines_after: The number of lines to print after the given sloc.
+    """
+
+    source_buffer = splitted_text(highlight_sloc.lkt_unit)
+
+    ret = []
+
+    line_nb = highlight_sloc.line - 1
+    start_offset = highlight_sloc.column - 1
+    end_offset = highlight_sloc.end_column - 1
+
+    # Compute the width of the column needed to print line numbers
+    line_nb_width = len(str(highlight_sloc.line + lines_after))
+
+    # Precompute the format string for the listing left column
+    prefix_fmt = "{{: >{}}} | ".format(line_nb_width)
+
+    def append_line(line_nb, line):
+        """
+        Append a line to the source listing, given a line number and a line.
+        """
+        ret.append(col(prefix_fmt.format(line_nb, line),
+                       Colors.BLUE + Colors.BOLD))
+        ret.append(line)
+        ret.append("\n")
+
+    # Append the line containing the sloc
+    append_line(line_nb, source_buffer[line_nb])
+
+    # Append the line caretting the sloc in the line above
+    caret_line = "".join("^" if start_offset <= i < end_offset else " "
+                         for i in range(len(source_buffer[line_nb])))
+    append_line("", col(caret_line, Colors.RED + Colors.BOLD))
+
+    # Append following lines up to ``lines_after`` lines
+    for line_nb, line in enumerate(
+        source_buffer[line_nb + 1:
+                      min(line_nb + lines_after + 1, len(source_buffer))],
+        line_nb + 1
+    ):
+        append_line(line_nb, line)
+
+    return "".join(ret)
+
+
+def print_error(message: str, location: Union[Location, L.LKNode]):
+    """
+    Prints an error.
+    """
+    if isinstance(location, L.LKNode):
+        location = Location.from_lkt_node(location)
+
+    # Print the basic error (with colors if in tty)
+    print(
+        "{}: {}{}".format(
+            col(location.gnu_style_repr(), Colors.BOLD),
+            col(col("error: ", Colors.RED), Colors.BOLD),
+            style_diagnostic_message(message),
+        ),
+    )
+
+    # Print the source listing
+    if location.lkt_unit is not None:
+        print(source_listing(location))
+
+
+def print_error_from_sem_result(sem_result: L.SemanticResult):
+    """
+    Prints an error from an lkt semantic result.
+    """
+    print_error(sem_result.error_message,
+                Location.from_lkt_node(sem_result.node))
