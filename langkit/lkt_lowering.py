@@ -1298,6 +1298,29 @@ class LktTypesLoader:
                 prefix = helper(expr.f_prefix)
                 return getattr(prefix, expr.f_suffix.text)
 
+            elif isinstance(expr, L.IfExpr):
+                # We want to turn the following pattern::
+                #
+                #   IfExpr(C1, E1, [(C2, E2), (C3, E3), ...], E_last)
+                #
+                # into the following expression tree::
+                #
+                #   If(C1, E1,
+                #      If(C2, E2,
+                #         If(C3, E3,
+                #            ... E_Last)))
+                #
+                # so first translate the "else" expression (E_last), then
+                # reverse iterate on the alternatives to wrap this expression
+                # with the conditional checks.
+                result = helper(expr.f_else_expr)
+                conditions = [(alt.f_cond_expr, alt.f_then_expr)
+                              for alt in expr.f_alternatives]
+                conditions.append((expr.f_cond_expr, expr.f_then_expr))
+                for c, e in reversed(conditions):
+                    result = E.If(helper(c), helper(e), result)
+                return result
+
             elif isinstance(expr, L.NotExpr):
                 return E.Not(helper(expr.f_expr))
 
