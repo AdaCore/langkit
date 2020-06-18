@@ -949,6 +949,11 @@ class ManageScript:
 
         base_argv = ['gprinstall', '-p',
                      '-P{}'.format(project_file),
+
+                     # Set the installation name so that gprinstall accepts to
+                     # overwrite existing installations.
+                     '--install-name={}'.format(project_name.lower()),
+
                      '--prefix={}'.format(self.dirs.install_dir()),
                      '--build-var=LIBRARY_TYPE',
                      '--build-var={}_LIBRARY_TYPE'.format(project_name)]
