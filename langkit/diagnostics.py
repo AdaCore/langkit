@@ -6,7 +6,14 @@ import os
 import os.path as P
 import sys
 import traceback
-from typing import NoReturn
+from typing import NoReturn, Optional
+
+
+try:
+    import liblktlang as L
+except ImportError:
+    pass
+
 
 import langkit.documentation
 from langkit.utils import Colors, assert_type, col
@@ -100,8 +107,9 @@ class Location:
     # RA22-015 TODO: Remove this "zero if unspecified" business when we get rid
     # of the legacy DSL.
 
-    @property
-    def gnu_style_repr(self) -> str:
+    lkt_unit: Optional[L.AnalysisUnit] = field(default=None)
+
+    def gnu_style_repr(self, relative: bool = True) -> str:
         """
         Return a GNU style representation for this Location, in the form::
 
@@ -115,18 +123,21 @@ class Location:
         ] + ([str(self.column)] if self.column > 0 else []))
 
     @classmethod
-    def from_lkt_node(cls, node):
+    def from_lkt_node(cls, node: L.LKNode) -> Location:
         """
         Create a Location based on a LKT node.
-
-        :param liblktlang.LKNode node: Node from which to extract the location
-            information.
         """
-        sloc = node.sloc_range.start
-        return cls(node.unit.filename, sloc.line, sloc.column)
+        return cls(
+            node.unit.filename,
+            node.sloc_range.start.line,
+            node.sloc_range.start.column,
+            node.sloc_range.end.line,
+            node.sloc_range.end.column,
+            node.unit
+        )
 
 
-def extract_library_location(stack=None) -> Location:
+def extract_library_location(stack=None) -> Optional[Location]:
     """
     Extract the location of the definition of an entity in the language
     specification from a stack trace. Use `traceback.extract_stack()` if no

@@ -1,24 +1,26 @@
 #! /usr/bin/env python
 
+from functools import lru_cache
 from os import path as P
 import re
+from typing import List, Union
 
+from langkit.diagnostics import Location
 from langkit.utils.colors import Colors, col, printcol
 
-import liblktlang as lkt
+import liblktlang as L
 
 
-def style_slice(string, color, start, end):
+@lru_cache()
+def splitted_text(unit: L.AnalysisUnit) -> List[str]:
     """
-    Return ``string`` with the slice ``[start:end]`` styled with given
-    ``color``.
+    Memoized function to get the splitted text of an unit. Used to not have to
+    compute this every time.
     """
-    return "{}{}{}".format(
-        string[:start], col(string[start:end], color), string[end:]
-    )
+    return unit.text.splitlines()
 
 
-def style_diagnostic_message(string):
+def style_diagnostic_message(string: str) -> str:
     """
     Given a diagnostic message containing possible variable references
     surrounded by backticks, style those references.
@@ -26,7 +28,7 @@ def style_diagnostic_message(string):
     return re.sub("`.*?`", lambda m: col(m.group(), Colors.BOLD), string)
 
 
-def source_listing(source_buffer, highlight_sloc, lines_after=0):
+def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     """
     Create a source listing for an error message, centered around a specific
     sloc, that will be highlighted/careted, as in the following example::
@@ -34,22 +36,21 @@ def source_listing(source_buffer, highlight_sloc, lines_after=0):
         65 | fun test(): Int = b_inst.fun_call
            |                   ^^^^^^^^^^^^^^^
 
-
-    :param [str] source_buffer: the source buffer from which to get the source.
-    :param lkt.SlocRange highlight_sloc: The source location that will allow us
+    :param highlight_sloc: The source location that will allow us
         to create the specific listing.
-    :param int lines_after: The number of lines to print after the given sloc.
-
+    :param lines_after: The number of lines to print after the given sloc.
     """
+
+    source_buffer = splitted_text(highlight_sloc.lkt_unit)
 
     ret = []
 
-    line_nb = highlight_sloc.start.line - 1
-    start_offset = highlight_sloc.start.column - 1
-    end_offset = highlight_sloc.end.column - 1
+    line_nb = highlight_sloc.line - 1
+    start_offset = highlight_sloc.column - 1
+    end_offset = highlight_sloc.end_column - 1
 
     # Compute the width of the column needed to print line numbers
-    line_nb_width = len(str(highlight_sloc.start.line + lines_after))
+    line_nb_width = len(str(highlight_sloc.line + lines_after))
 
     # Precompute the format string for the listing left column
     prefix_fmt = "{{: >{}}} | ".format(line_nb_width)
@@ -82,33 +83,38 @@ def source_listing(source_buffer, highlight_sloc, lines_after=0):
     return "".join(ret)
 
 
-def print_error(sem_result, source_buffer=None):
+def print_error(message: str, location: Union[Location, L.LKNode]):
     """
-    Prints an error from an lkt semantic result and an optional source buffer.
-    If the source buffer is passed, print a verbose style error with partial
-    source listing and caret.
-
-    TODO: This should be moved in langkit.diagnostics once we use LKT.
-
-    :param lkt.SemanticResult sem_result: The semantic result to consider.
-    :param [str]|None source_buffer: The source buffer as a list of lines.
+    Prints an error.
     """
+    if isinstance(location, L.LKNode):
+        location = Location.from_lkt_node(location)
+
     # Print the basic error (with colors if in tty)
     print(
-        "{}{}{}".format(
-            col(sem_result.node.full_sloc_image, Colors.BOLD),
+        "{}: {}{}".format(
+            col(location.gnu_style_repr(), Colors.BOLD),
             col(col("error: ", Colors.RED), Colors.BOLD),
-            style_diagnostic_message(sem_result.error_message),
+            style_diagnostic_message(message),
         ),
     )
 
-    # If the source buffer is passed, print the source listing
-    if source_buffer:
-        sloc = sem_result.node.sloc_range
-        print(source_listing(source_buffer, sloc))
+    # Print the source listing
+    if location.lkt_unit is not None:
+        print(source_listing(location))
 
 
-class Resolve(lkt.App):
+def print_error_from_sem_result(sem_result: L.SemanticResult):
+    """
+    Prints an error from an lkt semantic result.
+
+    TODO: This should be moved in langkit.diagnostics once we use LKT.
+    """
+    print_error(sem_result.error_message,
+                Location.from_lkt_node(sem_result.node))
+
+
+class Resolve(L.App):
     """
     This script will resolve every type and RefId in a LKT source file.
     """
@@ -124,9 +130,8 @@ class Resolve(lkt.App):
         )
         super(Resolve, self).add_arguments()
 
-    def main(self):
+    def main(self) -> None:
         for unit_name, unit in self.units.items():
-            source = unit.text.splitlines()
             if unit.diagnostics:
                 printcol("Syntax errors in {}, skipping".format(
                     P.basename(unit_name)
@@ -151,12 +156,12 @@ class Resolve(lkt.App):
 
             if self.args.check_only:
                 for diag in diags:
-                    print_error(diag, source)
+                    print_error_from_sem_result(diag)
             else:
                 results = unit.root.p_check_semantic
                 for result in results.results:
                     if result.error_message:
-                        print_error(result, source)
+                        print_error_from_sem_result(result)
                     elif result.result_type is not None:
                         print("Expr {}".format(result.node))
                         print("     has type {}".format(result.result_type))
