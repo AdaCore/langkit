@@ -82,6 +82,15 @@ def denoted_char_lit(char_lit: L.CharLit) -> str:
     return result
 
 
+def denoted_string_lit(string_lit: L.StringLit) -> str:
+    """
+    Return the string that ``string_lit`` denotes.
+    """
+    result = json.loads(string_lit.text)
+    assert isinstance(result, str)
+    return result
+
+
 def load_lkt(lkt_file: str) -> L.AnalysisUnit:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
@@ -1226,19 +1235,49 @@ class LktTypesLoader:
         :param expr: Expression to lower.
         :param env: Variable to use when resolving references.
         """
-        from langkit.expressions import ArrayLiteral, CharacterLiteral
+        from langkit.expressions import (
+            ArrayLiteral, CharacterLiteral, Entity, Eq, Not, Self,
+            SymbolLiteral
+        )
 
         def helper(expr: L.Expr) -> AbstractExpression:
             if isinstance(expr, L.RefId):
-                return env[expr.p_check_referenced_decl]
+                decl = expr.p_check_referenced_decl
+                if isinstance(decl, L.NodeDecl):
+                    return Self
+                elif isinstance(decl, L.SelfDecl):
+                    return Entity
+                else:
+                    return env[decl]
 
             elif isinstance(expr, L.CharLit):
                 return CharacterLiteral(denoted_char_lit(expr))
+
+            elif isinstance(expr, L.NotExpr):
+                return Not(helper(expr.f_expr))
+
+            elif isinstance(expr, L.ParenExpr):
+                return helper(expr.f_expr)
+
+            elif isinstance(expr, L.BinOp):
+                left = helper(expr.f_left)
+                right = helper(expr.f_right)
+                if isinstance(expr.f_op, L.OpEq):
+                    return Eq(left, right)
+                else:
+                    assert False, 'Unhandled expression: {}'.format(expr)
+
+            elif isinstance(expr, L.DotExpr):
+                prefix = helper(expr.f_prefix)
+                return getattr(prefix, expr.f_suffix.text)
 
             elif isinstance(expr, L.ArrayLiteral):
                 elts = [helper(e) for e in expr.f_exprs]
                 array_type = self.resolve_type_decl(expr.p_check_expr_type)
                 return ArrayLiteral(elts, element_type=array_type.element_type)
+
+            elif isinstance(expr, L.StringLit):
+                return SymbolLiteral(denoted_string_lit(expr))
 
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
