@@ -1,0 +1,3 @@
+@property fun test(): Int = 12
+
+a : Int = test
