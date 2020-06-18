@@ -19,8 +19,8 @@ import liblktlang as L
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, BaseField, CompiledType,
-    CompiledTypeRepo, EnumNodeAlternative, Field, T, TypeRepo, UserField,
-    resolve_type
+    CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, T, TypeRepo,
+    UserField, resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, error
@@ -406,6 +406,11 @@ class FieldAnnotations(ParsedAnnotations):
     annotations = [FlagAnnotationSpec('abstract'),
                    FlagAnnotationSpec('null_field'),
                    FlagAnnotationSpec('parse_field')]
+
+
+@dataclass
+class EnumAnnotations(ParsedAnnotations):
+    annotations: ClassVar[List[AnnotationSpec]] = []
 
 
 @dataclass
@@ -1160,27 +1165,35 @@ class LktTypesLoader:
                     return t
 
             # Dispatch now to the appropriate lowering helper
-            if isinstance(decl, L.BasicClassDecl):
-                full_decl = decl.parent
-                assert isinstance(full_decl, L.FullDecl)
-                specs = (EnumNodeAnnotations
-                         if isinstance(decl, L.EnumClassDecl)
-                         else NodeAnnotations)
-                result = self.create_node(
-                    decl, parse_annotations(self.ctx, specs, full_decl)
-                )
-
-            elif isinstance(decl, L.InstantiatedGenericType):
+            result: CompiledType
+            if isinstance(decl, L.InstantiatedGenericType):
                 # At this stage, the only generic types should come from the
                 # prelude (Array, ASTList), so there is no need to do anything
                 # special for them: just let the resolution mechanism build the
                 # CompiledType through CompiledType attribute access magic.
-                return resolve_type(self.resolve_type_decl(decl))
-
+                result = resolve_type(self.resolve_type_decl(decl))
             else:
-                raise NotImplementedError(
-                    'Unhandled type declaration: {}'.format(decl)
-                )
+                full_decl = decl.parent
+                assert isinstance(full_decl, L.FullDecl)
+                if isinstance(decl, L.BasicClassDecl):
+
+                    specs = (EnumNodeAnnotations
+                             if isinstance(decl, L.EnumClassDecl)
+                             else NodeAnnotations)
+                    result = self.create_node(
+                        decl, parse_annotations(self.ctx, specs, full_decl)
+                    )
+
+                elif isinstance(decl, L.EnumTypeDecl):
+                    result = self.create_enum(
+                        decl,
+                        parse_annotations(self.ctx, EnumAnnotations, full_decl)
+                    )
+
+                else:
+                    raise NotImplementedError(
+                        'Unhandled type declaration: {}'.format(decl)
+                    )
 
             self.compiled_types[decl] = result
             return result
@@ -1295,8 +1308,24 @@ class LktTypesLoader:
                 return E.CharacterLiteral(denoted_char_lit(expr))
 
             elif isinstance(expr, L.DotExpr):
-                prefix = helper(expr.f_prefix)
-                return getattr(prefix, expr.f_suffix.text)
+                # Depending on its prefix, this syntactic construct can have
+                # different meanings.
+                prefix_decl = expr.f_prefix.p_check_referenced_decl
+
+                if isinstance(prefix_decl, L.EnumTypeDecl):
+                    # This can designate an enum literal, if the prefix
+                    # designates an enum type.
+                    name = names.Name.from_lower(expr.f_suffix.text)
+                    enum_type = self.compiled_types[prefix_decl]
+                    assert isinstance(enum_type, EnumType)
+                    return enum_type.values_dict[name].to_abstract_expr
+
+                else:
+                    # Otherwise, the prefix is an expression that resolves to a
+                    # struct, and this accesses one of its fields.
+                    prefix = helper(expr.f_prefix)
+                    assert isinstance(prefix, E.AbstractExpression)
+                    return getattr(prefix, expr.f_suffix.text)
 
             elif isinstance(expr, L.IfExpr):
                 # We want to turn the following pattern::
@@ -1629,6 +1658,37 @@ class LktTypesLoader:
         enum_node._alternatives = [alt.alt_node for alt in alternatives]
         enum_node._alternatives_map = {alt.base_name.camel: alt.alt_node
                                        for alt in alternatives}
+
+    def create_enum(self,
+                    decl: L.EnumTypeDecl,
+                    annotations: EnumAnnotations) -> EnumType:
+        """
+        Create an EnumType instance.
+
+        :param decl: Corresponding declaration node.
+        :param annotations: Annotations for this declaration.
+        """
+        # Decode the list of enum literals and validate them
+        value_names = []
+        for lit in decl.f_literals:
+            name = lit.f_syn_name.text
+            check_source_language(
+                name not in value_names,
+                'The "{}" literal is present twice'
+            )
+            value_names.append(name)
+
+        check_source_language(
+            len(decl.f_traits) == 0,
+            'No traits allowed for enum types'
+        )
+
+        return EnumType(
+            name=names.Name.from_camel(decl.f_syn_name.text),
+            location=Location.from_lkt_node(decl),
+            doc=self.ctx.lkt_doc(decl.parent),
+            value_names=[names.Name.from_lower(n) for n in value_names],
+        )
 
 
 def create_types(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> None:
