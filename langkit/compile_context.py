@@ -1001,7 +1001,8 @@ class CompileCtx:
                  location=None,
                  doc="Gramar rule to use for parsing.",
                  value_names=[self.grammar_rule_api_name(n)
-                              for n in self.grammar.user_defined_rules])
+                              for n in self.grammar.user_defined_rules],
+                 is_builtin_type=True)
 
         # Now that all types are known, construct default values for fields
         for st in CompiledTypeRepo.struct_types:

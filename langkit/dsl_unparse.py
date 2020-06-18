@@ -1252,6 +1252,17 @@ def emit_node_type(node_type):
     del base, parse_fields, enum_qual, properties
 
 
+def emit_enum_type(enum_type):
+    literals = ", ".join(l.name.lower for l in enum_type.values)
+    return sf("""
+    % if enum_type.doc:
+    ${emit_doc(enum_type.doc)}$hl
+    % endif
+    enum ${enum_type.dsl_name} (${literals}) {$hl
+    }$hl
+    """.strip())
+
+
 def format_token_name(name):
     return unparsed_name(name, "_tok")
 
@@ -1539,10 +1550,18 @@ def unparse_nodes(ctx, f):
         do_raise=False
     )
 
+    enum_types = [emit_enum_type(t)
+                  for t in ctx.enum_types
+                  if not t.is_builtin_type]
+
     types = keep(emit_node_type(t)
                  for t in ctx.astnode_types + ctx._struct_types)
 
     template = """
+    % for t in enum_types:
+        $hl
+        ${t}
+    % endfor
     % for t in types:
         $hl
         ${t}

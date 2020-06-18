@@ -13,6 +13,9 @@ grammar foo_grammar {
 
 }
 
+enum DeclKind (func, var, none) {
+}
+
 @abstract class FooNode implements Node {
 }
 

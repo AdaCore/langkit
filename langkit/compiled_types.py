@@ -3671,7 +3671,7 @@ class EnumType(CompiledType):
 
     def __init__(self, name, location, doc,
                  value_names,
-                 default_val_name=None):
+                 default_val_name=None, is_builtin_type=False):
         """
         :type value_names: list[name.Names]
         """
@@ -3693,6 +3693,14 @@ class EnumType(CompiledType):
         """
 
         CompiledTypeRepo.enum_types.append(self)
+
+        self.is_builtin_type = is_builtin_type
+        """
+        Whether Langkit automatically created this enum type. This is thus
+        False for all enum types defined in the user language specification.
+
+        :type: bool
+        """
 
         super().__init__(
             name, location, doc, is_ptr=False, exposed=True,
@@ -3905,7 +3913,8 @@ def create_builtin_types():
              implementation for the corresponding interface.
              """,
              value_names=[names.Name('Unit_Specification'),
-                          names.Name('Unit_Body')])
+                          names.Name('Unit_Body')],
+             is_builtin_type=True)
 
     CompiledType('RefCategories', null_allowed=False)
 
@@ -3915,7 +3924,8 @@ def create_builtin_types():
              """,
              value_names=[names.Name('Recursive'),
                           names.Name('Flat'),
-                          names.Name('Minimal')])
+                          names.Name('Minimal')],
+             is_builtin_type=True)
     lex_env_type = CompiledType(
         'LexicalEnv',
         nullexpr='Empty_Env',
