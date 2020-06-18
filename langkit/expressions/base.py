@@ -475,8 +475,7 @@ class AbstractExpression(Frozable):
 
     @property
     def diagnostic_context(self):
-        ctx_message = 'in {} expression'.format(self.__class__.__name__)
-        return Context(ctx_message, self.location, "abstract_expr")
+        return Context(self.location)
 
     def __init__(self):
         self.location = extract_library_location()

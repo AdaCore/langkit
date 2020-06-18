@@ -203,7 +203,7 @@ class Grammar:
         """
 
     def context(self):
-        return Context("In definition of grammar", self.location)
+        return Context(self.location)
 
     def _add_rule(self, name, parser):
         """
@@ -217,9 +217,7 @@ class Grammar:
         parser.set_grammar(self)
         parser.is_root = True
 
-        with Context(
-            "In definition of rule '{}'".format(name), parser.location
-        ):
+        with Context(parser.location):
             check_source_language(
                 name not in self.rules,
                 "Rule '{}' is already present in the grammar".format(name)
@@ -643,8 +641,7 @@ class Parser:
         Helper that will return a diagnostic context manager with parameters
         set for the grammar definition.
         """
-        return Context("In definition of grammar rule {}".format(self.name),
-                       self.location)
+        return Context(self.location)
 
     def set_grammar(self, grammar):
         """
@@ -1262,7 +1259,7 @@ def _pick_impl(parsers, no_checks=False, location=None):
     for i, p in enumerate(parsers):
         if p.discard():
             continue
-        with Context("", location):
+        with Context(location):
             check_source_language(
                 no_checks or pick_parser_idx == -1,
                 "Pick parser can have only one sub-parser that is not a token",

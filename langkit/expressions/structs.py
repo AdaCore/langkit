@@ -799,8 +799,7 @@ class FieldAccess(AbstractExpression):
 
     @property
     def diagnostic_context(self):
-        return Context('in access to .{}'.format(self.field), self.location,
-                       'abstract_expr')
+        return Context(self.location)
 
     def resolve_field(self):
         """

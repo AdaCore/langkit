@@ -661,7 +661,7 @@ class ManageScript:
                 loc = Location(e.filename, e.lineno)
             else:
                 loc = extract_library_location(traceback.extract_tb(tb))
-            with Context("", loc, "recovery"):
+            with Context(loc):
                 check_source_language(False, str(e), do_raise=False)
 
             # Keep Langkit bug "pretty" for users: display the Python stack

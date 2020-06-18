@@ -241,9 +241,7 @@ class EnvSpec:
         """
         Diagnostic context for env specs.
         """
-
-        ctx_message = 'in env spec'
-        return Context(ctx_message, self.location)
+        return Context(self.location)
 
     def create_internal_property(self, name, expr, type):
         """

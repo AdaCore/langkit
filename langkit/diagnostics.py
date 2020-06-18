@@ -151,10 +151,7 @@ def extract_library_location(stack: List[Any] = None) -> Optional[Location]:
     return locs[-1] if locs else None
 
 
-context_stack = []
-"""
-:type: list[(str, Location, str)]
-"""
+context_stack: List[Location] = []
 
 
 class Context:
@@ -163,37 +160,22 @@ class Context:
     of a message and a location.
     """
 
-    def __init__(self, message, location, id=""):
+    def __init__(self, location: Location):
         """
-        :param str message: The message to display when displaying the
-            diagnostic, to contextualize the location.
-
         :param Location location: The location associated to the context.
-
-        :param str id: A string that is meant to uniquely identify a category
-            of diagnostic. Only one message (the latest) will be shown for each
-            category when diagnostics are printed. If id is empty (the default)
-            then the context has no category, and it will be considered
-            unique, and always be shown.
         """
-        self.message = message
         self.location = location
-        self.id = id
 
-    def __enter__(self):
-        context_stack.append((self.message, self.location, self.id))
+    def __enter__(self) -> None:
+        context_stack.append(self.location)
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         del traceback
         del exc_type
         context_stack.pop()
 
-    def __repr__(self):
-        return (
-            '<diagnostics.Context message={}, location={}, id={}>'.format(
-                self.message, self.location, self.id
-            )
-        )
+    def __repr__(self) -> str:
+        return '<diagnostics.Context location={}>'.format(self.location)
 
 
 class DiagnosticError(Exception):
@@ -234,22 +216,7 @@ def get_structured_context():
 
     :rtype: list[(str, Location)]
     """
-    c = context_stack
-    ids = set()
-    locs = set()
-    msgs = []
-
-    # We'll iterate once on diagnostic contexts, to:
-    # 1. Remove those with null locations.
-    # 2. Only keep one per registered id.
-    # 3. Only keep one per unique (msg, location) pair.
-    for msg, loc, id in reversed(c):
-        if loc and (not id or id not in ids) and ((msg, loc) not in locs):
-            msgs.append((msg, loc))
-            ids.add(id)
-            locs.add((msg, loc))
-
-    return msgs
+    return list(reversed(context_stack))
 
 
 def get_filename(f):
@@ -260,7 +227,7 @@ def get_filename(f):
 
 def get_current_location() -> Optional[Location]:
     ctx = get_structured_context()
-    return ctx[0][1] if ctx else None
+    return ctx[0] if ctx else None
 
 
 def get_parsable_location():

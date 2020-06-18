@@ -772,7 +772,7 @@ class CompileCtx:
         import liblktlang
         assert isinstance(lkt_node, liblktlang.LKNode)
 
-        context_stack.append(("", Location.from_lkt_node(lkt_node), ""))
+        context_stack.append(Location.from_lkt_node(lkt_node))
 
         try:
             yield
@@ -1289,11 +1289,7 @@ class CompileCtx:
         )
         for prop in props_using_einfo:
             for p in prop.property_set():
-                with Context(
-                    'By inheritance from {} to {}'.format(prop.qualname,
-                                                          p.struct.dsl_name),
-                    p.location
-                ):
+                with Context(p.location):
                     p.set_uses_entity_info()
 
         all_props = list(self.all_properties(include_inherited=False))
@@ -1311,7 +1307,7 @@ class CompileCtx:
                 context_mgr = (
                     expr.abstract_expr.diagnostic_context
                     if expr.abstract_expr else
-                    Context('', None, '')
+                    Context(None)
                 )
 
                 with context_mgr:

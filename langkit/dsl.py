@@ -40,8 +40,7 @@ class DSLType:
 
     @classmethod
     def _diagnostic_context(cls):
-        ctx_message = 'in {}'.format(cls._name.camel)
-        return Context(ctx_message, cls._location)
+        return Context(cls._location)
 
     @staticmethod
     def _import_base_type_info(name, location, dct):
@@ -135,7 +134,7 @@ class BaseStruct(DSLType):
             if f_n.startswith('__') and f_n.endswith('__'):
                 continue
 
-            with Context('in {}.{}'.format(owning_type, f_n), location):
+            with Context(location):
                 expected_types = (field_cls
                                   if isinstance(field_cls, tuple) else
                                   (field_cls, ))
@@ -172,8 +171,7 @@ def _check_decorator_use(decorator, expected_cls, cls):
     `expected_cls`.
     """
     location = extract_library_location()
-    with Context('In call to the {} decorator'.format(decorator.__name__),
-                 location):
+    with Context(location):
         check_source_language(
             issubtype(cls, expected_cls),
             'The {} decorator must be called on a {} subclass'
@@ -231,7 +229,7 @@ class _StructMetaclass(type):
     def process_subclass(mcs, name, bases, dct):
         location = extract_library_location()
 
-        with Context('in {}'.format(name), location):
+        with Context(location):
             check_source_language(
                 bases == (Struct, ),
                 'Struct subclasses must derive from Struct only',
@@ -433,7 +431,7 @@ class _ASTNodeMetaclass(type):
         is_list_type = issubclass(base, _ASTNodeList)
         is_root_list_type = base is _ASTNodeList
 
-        node_ctx = Context('in {}'.format(name), location)
+        node_ctx = Context(location)
 
         with node_ctx:
             check_source_language(len(bases) == 1,
@@ -925,7 +923,7 @@ class _EnumMetaclass(type):
             return result
 
         location = extract_library_location()
-        with Context('in {}'.format(name), location):
+        with Context(location):
             check_source_language(
                 bases == (Enum, ),
                 'Enumeration types must derive from and only from Enum'
