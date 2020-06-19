@@ -1,0 +1,16 @@
+Resolving test.lkt
+==================
+test.lkt:4:5: error: Invalid type reference
+3 | a : U
+  |     ^
+
+Id   <RefId "U" test.lkt:4:5-4:6>
+     references <GenericDecl "U" test.lkt:1:1-2:2>
+
+test.lkt:6:11: error: Invalid type reference
+5 | class V : U {
+  |           ^  
+
+Id   <RefId "U" test.lkt:6:11-6:12>
+     references <GenericDecl "U" test.lkt:1:1-2:2>
+

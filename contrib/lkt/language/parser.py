@@ -1942,6 +1942,16 @@ class SimpleTypeRef(TypeRef):
     def designated_type():
         return Entity.type_name.check_referenced_decl.cast_or_raise(T.TypeDecl)
 
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_correctness():
+        d = Var(Entity.type_name.referenced_decl)
+        return d.result_ref.then(
+            lambda d: d.cast(T.TypeDecl).then(
+                lambda _: No(T.SemanticResult.array),
+                default_val=Entity.error(S("Invalid type reference")).singleton
+            )
+        )
+
 
 class GenericTypeRef(TypeRef):
     """
