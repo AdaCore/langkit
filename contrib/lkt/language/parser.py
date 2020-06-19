@@ -522,7 +522,14 @@ class Decl(LKNode):
         """
     )
 
-    full_decl = Property(Entity.parent.cast_or_raise(T.FullDecl))
+    @langkit_property(return_type=T.FullDecl.entity)
+    def full_decl():
+        return Entity.parent.match(
+            lambda fd=T.FullDecl: fd,
+            lambda gd=T.GenericDecl: gd.full_decl,
+            lambda _: PropertyError(T.FullDecl.entity, "should not happen")
+
+        )
 
     quoted_name = Property(S("`").concat(Self.full_name).concat(S("`")))
 
