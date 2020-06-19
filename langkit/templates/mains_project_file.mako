@@ -12,14 +12,14 @@ project Mains is
 
    <% all_source_dirs = source_dirs | {'.'} %>
    for Source_Dirs use (
-      ${', '.join(string_repr(sdir) for sdir in all_source_dirs)}
+      ${', '.join(sorted(string_repr(sdir) for sdir in all_source_dirs))}
    );
    for Exec_Dir use "../bin";
    for Object_Dir use "../obj/mains";
 
    for Main use (
-      ${', '.join(string_repr('{}.adb'.format(main))
-                  for main in main_programs)}
+      ${', '.join(sorted(string_repr('{}.adb'.format(main))
+                         for main in main_programs))}
    );
 
    package Compiler is
