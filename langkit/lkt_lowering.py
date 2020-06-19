@@ -19,8 +19,8 @@ import liblktlang as L
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, BaseField, CompiledType,
-    CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, T, TypeRepo,
-    UserField, resolve_type
+    CompiledTypeRepo, EnumNodeAlternative, EnumType, Field, StructType, T,
+    TypeRepo, UserField, resolve_type
 )
 from langkit.diagnostics import (
     DiagnosticError, Location, check_source_language, error
@@ -410,6 +410,11 @@ class FieldAnnotations(ParsedAnnotations):
 
 @dataclass
 class EnumAnnotations(ParsedAnnotations):
+    annotations: ClassVar[List[AnnotationSpec]] = []
+
+
+@dataclass
+class StructAnnotations(ParsedAnnotations):
     annotations: ClassVar[List[AnnotationSpec]] = []
 
 
@@ -1195,6 +1200,14 @@ class LktTypesLoader:
                         parse_annotations(self.ctx, EnumAnnotations, full_decl)
                     )
 
+                elif isinstance(decl, L.StructDecl):
+                    result = self.create_struct(
+                        decl,
+                        parse_annotations(
+                            self.ctx, StructAnnotations, full_decl
+                        )
+                    )
+
                 else:
                     raise NotImplementedError(
                         'Unhandled type declaration: {}'.format(decl)
@@ -1219,15 +1232,15 @@ class LktTypesLoader:
         field_type = self.resolve_type_decl(decl.f_decl_type.p_designated_type)
 
         cls: Type[BaseField]
-        if decl.f_default_val:
-            raise NotImplementedError(
-                'Field default values not handled yet'
-            )
+        kwargs: Dict[str, Any]
+        default_value = (self.lower_expr(decl.f_default_val, {})
+                         if decl.f_default_val else None)
 
         if annotations.parse_field:
             cls = Field
             kwargs = {'abstract': annotations.abstract,
                       'null': annotations.null_field}
+            assert default_value is None
         else:
             check_source_language(
                 not annotations.abstract,
@@ -1238,7 +1251,7 @@ class LktTypesLoader:
                 'Regular fields cannot be null'
             )
             cls = UserField
-            kwargs = {}
+            kwargs = {'default_value': default_value}
 
         check_source_language(
             issubclass(cls, allowed_field_types),
@@ -1292,12 +1305,7 @@ class LktTypesLoader:
                     return E.Arithmetic(left, right, operator)
 
             elif isinstance(expr, L.CallExpr):
-                # For now, the only legal call expression is the method
-                # invocation.
-                callee = helper(expr.f_name)
-                assert isinstance(callee, E.FieldAccess)
-
-                # Collect positional and keyword arguments
+                # Collect call positional and keyword arguments
                 args = []
                 kwargs = {}
                 for arg in expr.f_args:
@@ -1307,7 +1315,22 @@ class LktTypesLoader:
                     else:
                         args.append(value)
 
-                return callee(*args, **kwargs)
+                # Depending on its name, a call can have different meanings
+                name_decl = expr.f_name.p_check_referenced_decl
+
+                if isinstance(name_decl, L.StructDecl):
+                    # If the name refers to a struct type, this expression
+                    # create a struct value.
+                    struct_type = self.resolve_type_decl(name_decl)
+                    assert not args
+                    return E.New(struct_type, **kwargs)
+
+                else:
+                    # Otherwise, this call must be a method invocation
+                    # invocation.
+                    callee = helper(expr.f_name)
+                    assert isinstance(callee, E.FieldAccess)
+                    return callee(*args, **kwargs)
 
             elif isinstance(expr, L.CharLit):
                 return E.CharacterLiteral(denoted_char_lit(expr))
@@ -1693,6 +1716,27 @@ class LktTypesLoader:
             location=Location.from_lkt_node(decl),
             doc=self.ctx.lkt_doc(decl.parent),
             value_names=[names.Name.from_lower(n) for n in value_names],
+        )
+
+    def create_struct(self,
+                      decl: L.StructTypeDecl,
+                      annotations: StructAnnotations) -> StructType:
+        """
+        Create an StructType instance.
+
+        :param decl: Corresponding declaration node.
+        :param annotations: Annotations for this declaration.
+        """
+        check_source_language(
+            len(decl.f_traits) == 0,
+            'No traits allowed for struct types'
+        )
+
+        return StructType(
+            name=names.Name.from_camel(decl.f_syn_name.text),
+            location=Location.from_lkt_node(decl),
+            doc=self.ctx.lkt_doc(decl.parent),
+            fields=self.lower_fields(decl.f_decls, (UserField, )),
         )
 
 
