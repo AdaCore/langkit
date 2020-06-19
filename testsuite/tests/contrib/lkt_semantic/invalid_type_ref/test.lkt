@@ -1,0 +1,7 @@
+generic [T] class U {
+}
+
+a : U
+
+class V : U {
+}
