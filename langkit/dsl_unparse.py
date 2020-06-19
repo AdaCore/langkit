@@ -1115,15 +1115,21 @@ def emit_prop(prop, walker):
 
 
 def emit_field(field):
-    from langkit.compiled_types import BaseField, Field
+    from langkit.compiled_types import BaseField, Field, UserField
 
     if isinstance(field, BaseField):
-        return "{}{}{}{} : {}".format(
+        result = "{}{}{}{} : {}".format(
             "@abstract " if isinstance(field, Field) and field.abstract else "",
             "@parse_field " if isinstance(field, Field) else "",
             "@null_field " if field.null else "",
             unparsed_name(field._indexing_name), type_name(field.type)
         )
+        if (
+            isinstance(field, UserField)
+            and field.abstract_default_value is not None
+        ):
+            result += " = {}".format(emit_expr(field.abstract_default_value))
+        return result
     else:
         raise NotImplementedError()
 

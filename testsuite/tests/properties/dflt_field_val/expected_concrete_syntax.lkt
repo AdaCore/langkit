@@ -17,6 +17,6 @@ class Example : FooNode implements TokenNode {
 
 struct KV {
     key : String
-    value : Int
-    node : FooNode
+    value : Int = 42
+    node : FooNode = null
 }
