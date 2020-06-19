@@ -420,12 +420,15 @@ class StructAnnotations(ParsedAnnotations):
 
 @dataclass
 class FunAnnotations(ParsedAnnotations):
+    abstract: bool
     export: bool
     annotations = [
+        FlagAnnotationSpec('abstract'),
+
         # When the @export annotation is missing, use "None" to mean
         # "public status unspecified", as the property can be public thanks to
         # inheritance.
-        FlagAnnotationSpec('export', default_value=None)
+        FlagAnnotationSpec('export', default_value=None),
     ]
 
 
@@ -1444,14 +1447,18 @@ class LktTypesLoader:
             env[a] = arg.var
 
         # Lower the expression itself
-        expr = self.lower_expr(decl.f_body, env)
+        if annotations.abstract:
+            assert decl.f_body is None
+            expr = None
+        else:
+            expr = self.lower_expr(decl.f_body, env)
 
         result = PropertyDef(
             expr=expr,
             prefix=AbstractNodeData.PREFIX_PROPERTY,
             doc=self.ctx.lkt_doc(full_decl),
             public=annotations.export,
-            abstract=False,
+            abstract=annotations.abstract,
             type=return_type,
             abstract_runtime_check=False,
             dynamic_vars=None,
