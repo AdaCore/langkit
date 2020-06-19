@@ -1344,7 +1344,7 @@ class LktTypesLoader:
                     # This can designate an enum literal, if the prefix
                     # designates an enum type.
                     name = names.Name.from_lower(expr.f_suffix.text)
-                    enum_type = self.compiled_types[prefix_decl]
+                    enum_type = self.lower_type_decl(prefix_decl)
                     assert isinstance(enum_type, EnumType)
                     return enum_type.values_dict[name].to_abstract_expr
 
