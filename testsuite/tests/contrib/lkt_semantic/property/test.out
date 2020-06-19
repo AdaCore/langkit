@@ -15,3 +15,39 @@ Id   <RefId "test" test.lkt:3:11-3:15>
 Expr <RefId "test" test.lkt:3:11-3:15>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
+Id   <RefId "U" test.lkt:6:42-6:43>
+     references <GenericFormalTypeDecl "U" test.lkt:6:24-6:25>
+
+Id   <RefId "BaseClass" test.lkt:9:11-9:20>
+     references <ClassDecl "BaseClass" test.lkt:5:1-7:2>
+
+Id   <RefId "BaseClass" test.lkt:10:11-10:20>
+     references <ClassDecl "BaseClass" test.lkt:5:1-7:2>
+
+Id   <RefId "D" test.lkt:12:8-12:9>
+     references <ClassDecl "D" test.lkt:9:1-9:23>
+
+Id   <RefId "D" test.lkt:12:12-12:13>
+     references <ClassDecl "D" test.lkt:9:1-9:23>
+
+Expr <CallExpr test.lkt:12:12-12:15>
+     has type <ClassDecl "D" test.lkt:9:1-9:23>
+
+Id   <RefId "BaseClass" test.lkt:13:8-13:17>
+     references <ClassDecl "BaseClass" test.lkt:5:1-7:2>
+
+Id   <RefId "inst" test.lkt:13:20-13:24>
+     references <FieldDecl "inst" test.lkt:12:1-12:15>
+
+Expr <RefId "inst" test.lkt:13:20-13:24>
+     has type <ClassDecl "D" test.lkt:9:1-9:23>
+
+Id   <RefId "convert" test.lkt:13:25-13:32>
+     references <GenericDecl "convert" test.lkt:6:15-6:43>
+
+Id   <RefId "BaseClass" test.lkt:13:33-13:42>
+     references <ClassDecl "BaseClass" test.lkt:5:1-7:2>
+
+Expr <GenericInstantiation test.lkt:13:20-13:43>
+     has type <ClassDecl "BaseClass" test.lkt:5:1-7:2>
+
