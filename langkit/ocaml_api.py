@@ -62,6 +62,11 @@ class OCamlAPISettings(AbstractAPISettings):
 
         self.AnalysisContext = self.AnalysisContextType()
 
+    def init_type_graph(self):
+        """
+        Initialize the type graph.
+        """
+
         # Dependency graph for types
         self.type_graph = {}
 
