@@ -180,7 +180,8 @@ private package ${ada_lib_name}.Implementation is
    function Context_Version (Unit : Internal_Unit) return Integer;
    --  Return the version of the analysis context associated with Unit
 
-   type Ref_Category is (${", ".join(str(cat) for cat in ctx.ref_cats)});
+   type Ref_Category is
+     (${", ".join(sorted(str(cat) for cat in ctx.ref_cats))});
    type Ref_Categories is array (Ref_Category) of Boolean;
    pragma Pack (Ref_Categories);
 
