@@ -401,21 +401,12 @@ class CompileCtx:
 
         self.lexer = lexer
         ":type: langkit.lexer.Lexer"
-        if lexer is None:
-            from langkit.lkt_lowering import create_lexer
-            self.lexer = create_lexer(self, self.lkt_units)
 
         self.grammar = grammar
         ":type: langkit.parsers.Grammar"
-        if grammar is None:
-            from langkit.lkt_lowering import create_grammar
-            self.grammar = create_grammar(self, self.lkt_units)
-
-        if types_from_lkt and self.lkt_units:
-            from langkit.lkt_lowering import create_types
-            create_types(self, self.lkt_units)
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
+        self.types_from_lkt = types_from_lkt
 
         self.ocaml_api_settings = (
             OCamlAPISettings(self, self.c_api_settings)
@@ -1686,9 +1677,29 @@ class CompileCtx:
             finally:
                 self.emitter = None
 
+    def lower_lkt(self):
+        """
+        Run the lkt lowering passes over lkt input files.
+        """
+
+        if self.lexer is None:
+            from langkit.lkt_lowering import create_lexer
+            self.lexer = create_lexer(self, self.lkt_units)
+
+        if self.grammar is None:
+            from langkit.lkt_lowering import create_grammar
+            self.grammar = create_grammar(self, self.lkt_units)
+
+        if self.types_from_lkt and self.lkt_units:
+            from langkit.lkt_lowering import create_types
+            create_types(self, self.lkt_units)
+
     def prepare_compilation(self):
         """
         Prepare this context to compile the DSL.
+
+        TODO: this pass seems like a weird grab bag of verifications and a
+        potentially useless assignment. See if it can be removed later.
         """
         from langkit.compiled_types import CompiledTypeRepo
 
@@ -1770,7 +1781,8 @@ class CompileCtx:
         """
         from langkit.envs import EnvSpec
         from langkit.expressions import PropertyDef
-        from langkit.parsers import Parser
+        from langkit.lexer import Lexer
+        from langkit.parsers import Grammar, Parser
         from langkit.passes import (
             ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
             MajorStepPass, PropertyPass, errors_checkpoint_pass
@@ -1784,21 +1796,30 @@ class CompileCtx:
             from langkit.lkt_lowering import lower_grammar_rules
             lower_grammar_rules(ctx)
 
+        def LexerPass(name, fn):
+            def internal(ctx):
+                return fn(self.lexer, ctx)
+            return GlobalPass(name, internal)
+
+        def GrammarPass(name, fn):
+            def internal(ctx):
+                return fn(self.grammar, ctx)
+            return GlobalPass(name, internal)
+
         return [
+            MajorStepPass('LKT processing'),
+            GlobalPass('lower lkt', CompileCtx.lower_lkt),
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
 
             MajorStepPass('Compiling the lexer'),
-            GlobalPass('check token families',
-                       self.lexer.check_token_families),
-            GlobalPass('compile lexer rules',
-                       self.lexer.compile_rules),
+            LexerPass('check token families', Lexer.check_token_families),
+            LexerPass('compile lexer rules', Lexer.compile_rules),
 
             MajorStepPass('Compiling the grammar'),
             GlobalPass('lower Lkt parsing rules', lower_grammar_rules),
-            GlobalPass('check main parsing rule',
-                       self.grammar.check_main_rule),
-            GlobalPass('warn on unreferenced parsing rules',
-                       self.grammar.warn_unreferenced_parsing_rules),
+            GrammarPass('check main parsing rule', Grammar.check_main_rule),
+            GrammarPass('warn on unreferenced parsing rules',
+                        Grammar.warn_unreferenced_parsing_rules),
             EnvSpecPass('create internal properties for env specs',
                         EnvSpec.create_properties,
                         iter_metaclass=True),

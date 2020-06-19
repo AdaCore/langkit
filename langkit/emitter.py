@@ -729,6 +729,8 @@ class Emitter:
         if not ctx.ocaml_api_settings:
             return
 
+        ctx.ocaml_api_settings.init_type_graph()
+
         if not os.path.isdir(self.ocaml_path):
             os.mkdir(self.ocaml_path)
 
