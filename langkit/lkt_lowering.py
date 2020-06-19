@@ -1381,6 +1381,14 @@ class LktTypesLoader:
                     result = E.If(helper(c), helper(e), result)
                 return result
 
+            elif isinstance(expr, L.Isa):
+                subexpr = helper(expr.f_expr)
+                nodes = [
+                    self.resolve_type_decl(type_ref.p_designated_type)
+                    for type_ref in expr.f_dest_type
+                ]
+                return E.IsA(subexpr, *nodes)
+
             elif isinstance(expr, L.NotExpr):
                 return E.Not(helper(expr.f_expr))
 
