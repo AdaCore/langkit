@@ -1324,6 +1324,10 @@ class LktTypesLoader:
             elif isinstance(expr, L.NotExpr):
                 return E.Not(helper(expr.f_expr))
 
+            elif isinstance(expr, L.NullLit):
+                result_type = self.resolve_type_decl(expr.p_check_expr_type)
+                return E.No(result_type)
+
             elif isinstance(expr, L.NumLit):
                 return E.Literal(int(expr.text))
 
