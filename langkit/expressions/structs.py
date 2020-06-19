@@ -911,7 +911,6 @@ class IsA(AbstractExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = T.Bool
         pretty_class_name = 'IsA'
 
         def __init__(self, expr, astnodes, abstract_expr=None):
@@ -923,6 +922,7 @@ class IsA(AbstractExpression):
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
+            self.static_type = T.Bool
             self.expr = expr
             self.astnodes = [a.element_type if a.is_entity_type else a
                              for a in astnodes]
