@@ -1387,21 +1387,29 @@ package body ${ada_lib_name}.Implementation is
    function Text
      (Node : ${T.root_node.name}) return Text_Type
    is
-      Start_T : constant Token_Reference :=
-         Token (Node, Node.Token_Start_Index);
-      End_T   : constant Token_Reference := Token (Node, Node.Token_End_Index);
    begin
-      --  No text is associated to synthetic and ghost nodes
-
-      if Is_Synthetic (Node) then
-         return "";
+      if Node = null then
+         raise Property_Error with "cannot get the text of a null node";
       end if;
 
-      if Is_Ghost (Node) then
-         return "";
-      end if;
+      declare
+         Start_T : constant Token_Reference :=
+            Token (Node, Node.Token_Start_Index);
+         End_T   : constant Token_Reference :=
+            Token (Node, Node.Token_End_Index);
+      begin
+         --  No text is associated to synthetic and ghost nodes
 
-      return Text (Start_T, End_T);
+         if Is_Synthetic (Node) then
+            return "";
+         end if;
+
+         if Is_Ghost (Node) then
+            return "";
+         end if;
+
+         return Text (Start_T, End_T);
+      end;
    end Text;
 
    ---------------------
