@@ -533,7 +533,9 @@ def source_listing(highlight_sloc: Location, lines_after: int = 0) -> str:
     :param lines_after: The number of lines to print after the given sloc.
     """
 
-    source_buffer = splitted_text(highlight_sloc.lkt_unit)
+    # Make sure we have at least one line, since locations can refer to "line
+    # 1" even for empty source files.
+    source_buffer = splitted_text(highlight_sloc.lkt_unit) or ['']
 
     ret = []
 
