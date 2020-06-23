@@ -333,19 +333,19 @@ class _big_integer(object):
 
 class _Enum(object):
 
-    name = None
+    _name = None
     """
     Name for this enumeration type.
     :type: str
     """
 
-    c_to_py = None
+    _c_to_py = None
     """
     Mapping from C values to user-level Python values.
     :type: list[str]
     """
 
-    py_to_c = None
+    _py_to_c = None
     """
     Mapping from user-level Python values to C values.
     :type: dict[str, int]
@@ -356,15 +356,15 @@ class _Enum(object):
         if not isinstance(py_value, str):
             _raise_type_error('str', py_value)
         try:
-            return _py2to3.text_to_bytes(cls.py_to_c[py_value])
+            return _py2to3.text_to_bytes(cls._py_to_c[py_value])
         except KeyError:
-            raise ValueError('Invalid {}: {}'.format(cls.name, py_value))
+            raise ValueError('Invalid {}: {}'.format(cls._name, py_value))
 
     @classmethod
     def _wrap(cls, c_value):
         if isinstance(c_value, ctypes.c_int):
             c_value = c_value.value
-        return cls.c_to_py[c_value]
+        return cls._c_to_py[c_value]
 
 
 % for enum_type in ctx.enum_types:
@@ -375,10 +375,10 @@ class ${enum_type.py_helper}(_Enum):
     ${v.name.lower} = ${repr(v.name.lower)}
     % endfor
 
-    name = ${repr(enum_type.api_name.camel)}
-    c_to_py = [
+    _name = ${repr(enum_type.api_name.camel)}
+    _c_to_py = [
         ${', '.join(v.name.lower for v in enum_type.values)}]
-    py_to_c = {name: index for index, name in enumerate(c_to_py)}
+    _py_to_c = {name: index for index, name in enumerate(_c_to_py)}
 % endfor
 
 
