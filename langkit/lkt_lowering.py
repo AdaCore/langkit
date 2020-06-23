@@ -947,7 +947,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                     return _Transform(parser=_Row(*subparsers), typ=node,
                                       location=loc)
 
-            elif isinstance(rule, L.GrammarToken):
+            elif isinstance(rule, L.TokenRef):
                 token_name = rule.f_token_name.text
                 try:
                     val = tokens[token_name]

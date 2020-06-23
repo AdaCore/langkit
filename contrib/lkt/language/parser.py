@@ -1113,7 +1113,7 @@ class GrammarImplicitPick(GrammarPick):
     pass
 
 
-class GrammarToken(GrammarExpr):
+class TokenRef(GrammarExpr):
     """
     Grammar expression for a token reference.
     """
@@ -2948,7 +2948,7 @@ lkt_grammar.add_rules(
         "null", "(", G.type_ref, ")"
     ),
 
-    grammar_token=GrammarToken(
+    grammar_token=TokenRef(
         "@", G.ref_id, Opt("(", G.token_literal, ")")
     ),
 
