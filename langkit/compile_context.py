@@ -392,7 +392,7 @@ class CompileCtx:
         :type: bool
         """
 
-        self.lkt_units = None
+        self.lkt_units: List[L.AnalysisUnit] = []
         if lkt_file is None:
             assert grammar, 'LKT spec required when no grammar is provided'
         else:
