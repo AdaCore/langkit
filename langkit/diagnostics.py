@@ -125,18 +125,26 @@ class Location:
         ] + ([str(self.column)] if self.column > 0 else []))
 
     @classmethod
+    def from_sloc_range(cls, unit: L.AnalysisUnit,
+                        sloc: L.SlocRange) -> Location:
+        """
+        Create a Location based on a LKT SlocRange and AnalysisUnit.
+        """
+        return cls(
+            unit.filename,
+            sloc.start.line,
+            sloc.start.column,
+            sloc.end.line,
+            sloc.end.column,
+            unit
+        )
+
+    @classmethod
     def from_lkt_node(cls, node: L.LKNode) -> Location:
         """
         Create a Location based on a LKT node.
         """
-        return cls(
-            node.unit.filename,
-            node.sloc_range.start.line,
-            node.sloc_range.start.column,
-            node.sloc_range.end.line,
-            node.sloc_range.end.column,
-            node.unit
-        )
+        return cls.from_sloc_range(node.unit, node.sloc_range)
 
 
 def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
