@@ -666,7 +666,7 @@ class CompiledType:
 
         :param bool conversion_requires_context: Whether converting this type
             from public to internal values requires an analysis context.
-    """
+        """
         if isinstance(name, str):
             name = names.Name.from_camel(name)
         if isinstance(api_name, str):
@@ -723,6 +723,14 @@ class CompiledType:
         """
         List of AbstractNodeData fields for this type.
         """
+
+    @property
+    def mypy_type_hint(self) -> str:
+        """
+        Type hint to use for this type when generating Mypy stub files for the
+        Python bindings.
+        """
+        return get_context().python_api_settings.type_public_name(self)
 
     def __lt__(self, other):
         assert isinstance(other, CompiledType)
