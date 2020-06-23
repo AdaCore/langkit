@@ -17,7 +17,7 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, cast
 
 from funcy import lzip
 
@@ -26,12 +26,18 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (Context, Location, Severity, WarningSet,
-                                 check_source_language, context_stack)
+                                 check_source_language, context_stack,
+                                 print_error, print_error_from_sem_result)
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
 
 compile_ctx = None
+
+try:
+    import liblktlang as L
+except ImportError:
+    pass
 
 
 def get_context(or_none=False):
@@ -277,7 +283,8 @@ class CompileCtx:
                  documentations=None,
                  show_property_logging=False,
                  lkt_file=None,
-                 types_from_lkt=False):
+                 types_from_lkt=False,
+                 lkt_semantic_checks=False):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -356,6 +363,9 @@ class CompileCtx:
         :param bool types_from_lkt: When loading definitions from Lktlang
             files, whether to load type definitions. This is not done by
             default during the transition from our Python DSL to Lktlang.
+
+        :param bool lkt_semantic_checks: Whether to run lkt semantic checks
+            (Off by default).
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -407,6 +417,7 @@ class CompileCtx:
 
         self.python_api_settings = PythonAPISettings(self, self.c_api_settings)
         self.types_from_lkt = types_from_lkt
+        self.lkt_semantic_checks = lkt_semantic_checks or types_from_lkt
 
         self.ocaml_api_settings = (
             OCamlAPISettings(self, self.c_api_settings)
@@ -760,8 +771,7 @@ class CompileCtx:
         # Invalid type passed here will fail much later and only if a
         # check_source_language call fails. To ease debugging, check that
         # "lkt_node" has the right type here.
-        import liblktlang
-        assert isinstance(lkt_node, liblktlang.LKNode)
+        assert isinstance(lkt_node, L.LKNode)
 
         context_stack.append(Location.from_lkt_node(lkt_node))
 
@@ -1694,6 +1704,34 @@ class CompileCtx:
             from langkit.lkt_lowering import create_types
             create_types(self, self.lkt_units)
 
+    def check_lkt(self) -> None:
+        """
+        Run checks on the lkt sources.
+        """
+        errors = False
+        for unit in self.lkt_units:
+            if unit.diagnostics:
+                for diag in unit.diagnostics:
+                    errors = True
+                    print_error(
+                        diag.message,
+                        Location.from_sloc_range(unit, diag.sloc_range)
+                    )
+                # NOTE: for the moment let's not even try to analyze anything
+                # if we have syntax errors.
+                return
+
+            if self.lkt_semantic_checks:
+                diags = cast(L.LangkitRoot, unit.root).p_check_legality
+                for d in diags:
+                    errors = True
+                    print_error_from_sem_result(d)
+
+        if errors:
+            check_source_language(
+                False, "Errors during LKT analysis", severity=Severity.warning
+            )
+
     def prepare_compilation(self):
         """
         Prepare this context to compile the DSL.
@@ -1808,6 +1846,7 @@ class CompileCtx:
 
         return [
             MajorStepPass('LKT processing'),
+            GlobalPass('Lkt semantic analysis', CompileCtx.check_lkt),
             GlobalPass('lower lkt', CompileCtx.lower_lkt),
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
 
