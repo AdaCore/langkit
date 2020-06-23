@@ -60,3 +60,6 @@ contrib/lkt/build
 .vscode
 
 .mypy_cache
+
+# Build artifacts
+b__*.ad?
