@@ -1159,11 +1159,6 @@ class ${root_astnode_name}(object):
         return self._kind_name
 
     @property
-    def unit(self):
-        ${py_doc('langkit.node_unit', 8)}
-        return self._unit
-
-    @property
     def is_token_node(self):
         ${py_doc('langkit.node_is_token_node', 8)}
         node = self._unwrap(self)
