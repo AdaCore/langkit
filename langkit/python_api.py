@@ -159,15 +159,17 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.Bool, lambda _: 'bool'),
             (T.Int, lambda _: 'int'),
-            (T.Character, lambda _: 'unicode'),
+            (T.Character, lambda _: 'str'),
             (T.Token, lambda _: 'Token'),
-            (T.Symbol, lambda _: 'unicode'),
+            (T.Symbol, lambda _: 'str'),
             (ct.EnumType, lambda _: 'str'),
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
             (ct.EntityType, lambda t: t.astnode.kwless_raw_name.camel),
             (T.AnalysisUnit, lambda t: t.api_name),
-            (ct.ArrayType, lambda _: 'list[{}]'.format(
-                self.type_public_name(type.element_type)
+            (ct.ArrayType, lambda _: (
+                'str'
+                if type.element_type.is_character_type
+                else'List[{}]'.format(self.type_public_name(type.element_type))
             )),
             (ct.StructType, lambda _: type.api_name.camel),
             (T.BigInt, lambda _: 'int'),
