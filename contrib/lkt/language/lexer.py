@@ -159,7 +159,7 @@ lkt_lexer.add_rules(
     (Literal('trait'),      Token.TraitKw),
 
     # Identifiers
-    (Pattern('[a-zA-Z_][a-zA-Z0-9_]*[!?]?'), Token.Identifier),
+    (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
 
     # Numbers
     (Pattern('[0-9]+'),    Token.Number),
