@@ -93,6 +93,54 @@
     % endif
 </%def>
 
+<%def name="mypy_field_decls(cls, or_pass=True)">
+    <%
+        fields = cls.fields_with_accessors()
+        is_list = cls.is_list_type
+    %>
+
+    ## Type hints for field accessors
+    % for field in fields:
+    <%
+        arg_list = ['self'] + [
+            (
+                '{}: {}'.format(a.name.lower, a.type.mypy_type_hint)
+                if a.default_value is None else
+                '{}: {} = {}'.format(
+                    a.name.lower,
+                    a.type.mypy_type_hint,
+                    a.default_value.render_python_constant()
+                )
+            )
+            for a in field.arguments
+        ]
+    %>
+    % if not field.arguments:
+    @property
+    % endif
+    def ${field.api_name.lower}(
+        ${', '.join(arg_list)}
+    ) -> ${field.type.mypy_type_hint}: ...
+    % endfor
+
+    ## __iter__ refinement for more precise list element types
+    % if is_list:
+    def __iter__(self) -> Iterator[${cls.element_type.mypy_type_hint}]: ...
+    % endif
+
+    ## "pass" when needed to keep the class declaration syntax valid
+    % if or_pass and not (fields or is_list):
+    pass
+    % endif
+
+</%def>
+
+<%def name="mypy_decl(cls)">
+class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):
+${mypy_field_decls(cls)}
+
+</%def>
+
 <%def name="decl(cls)">
 
 class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):

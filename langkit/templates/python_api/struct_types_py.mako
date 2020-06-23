@@ -169,3 +169,20 @@ class ${public_name}(_BaseStruct):
     % endif
 
 </%def>
+
+<%def name="mypy_decl(cls)">
+
+class ${pyapi.type_public_name(cls)}(object):
+    def __init__(
+        self,
+        % for f in cls.get_fields():
+        ${f.name.lower}: ${f.type.mypy_type_hint},
+        % endfor
+    ) -> None: ...
+
+    % for f in cls.get_fields():
+    @property
+    def ${f.name.lower}(self) -> ${f.type.mypy_type_hint}: ...
+    % endfor
+
+</%def>

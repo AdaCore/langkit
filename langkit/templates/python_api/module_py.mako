@@ -1194,6 +1194,13 @@ class ${root_astnode_name}(object):
         return True
     __nonzero__ = __bool__
 
+    def __iter__(self):
+        """
+        Return an iterator on the children of this node.
+        """
+        for i in range(len(self)):
+            yield self[i]
+
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
         node = self._unwrap(self)
