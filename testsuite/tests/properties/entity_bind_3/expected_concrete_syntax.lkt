@@ -6,7 +6,7 @@ grammar foo_grammar {
 
 @abstract class FooNode implements Node {
 
-    @export @abstract @abstract_stub fun prop (): Int
+    @export @not_implemented fun prop (): Int
 }
 
 class Literal : FooNode implements TokenNode {
@@ -22,5 +22,5 @@ class Literal : FooNode implements TokenNode {
         node.as_bare_entity
     }
 
-    @abstract @abstract_stub fun a (): FooNode
+    @not_implemented fun a (): FooNode
 }
