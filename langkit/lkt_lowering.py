@@ -783,9 +783,12 @@ def create_grammar(ctx: CompileCtx,
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
-    # No annotation allowed for grammars
-    with ctx.lkt_context(full_grammar):
-        check_no_annotations(full_grammar)
+    for a in full_grammar.f_decl_annotations:
+        with ctx.lkt_context(full_grammar):
+            check_source_language(
+                a.f_name.text == 'with_lexer',
+                "Invalid annotation: {}".format(a.f_name.text)
+            )
 
     # Get the list of grammar rules. This is where we check that we only have
     # grammar rules, that their names are unique, and that they have valid
