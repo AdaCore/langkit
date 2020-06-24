@@ -1,0 +1,2 @@
+langkit/compile_context.py:395: undefined name 'L'
+langkit/support/langkit_support-ansi_colors.ads:2: Imported package "Langkit_Support.Text" must appear after "GNATCOLL.Terminal"
