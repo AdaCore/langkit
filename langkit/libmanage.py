@@ -1188,6 +1188,7 @@ class ManageScript:
 
         add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
         add_path('PYTHONPATH', self.dirs.build_dir('python'))
+        add_path('MYPYPATH', self.dirs.build_dir('python'))
         add_path('PYTHONPATH', self.dirs.lang_source_dir('python_src'))
 
     def derived_env(self, build_mode):
