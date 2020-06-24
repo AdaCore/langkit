@@ -8,10 +8,11 @@ from funcy import keep, lmap
 from langkit.passes import GlobalPass
 from langkit import names
 
+libpythonlang_available = True
 try:
     import libpythonlang as lpl
 except ImportError:
-    lpl = None
+    libpythonlang_available = False
 
 templates: Dict[str, str] = {}
 
@@ -56,7 +57,7 @@ class DSLWalker:
     comments that have been written between the last call to ``emit_comments``
     and the current position of the cursor.
     """
-    if lpl is not None:
+    if libpythonlang_available:
         ctx = lpl.AnalysisContext()
 
     class NoOpWalker:
@@ -92,7 +93,7 @@ class DSLWalker:
         :type loc: langkit.diagnostics.Location
         :rtype: DSLWalker
         """
-        if lpl is None or loc is None:
+        if not libpythonlang_available or loc is None:
             return DSLWalker.NoOpWalker()
 
         unit = DSLWalker.ctx.get_from_file(loc.file)

@@ -2338,7 +2338,7 @@ class ASTNodeType(BaseStructType):
     """
 
     # If this is an enum onde, list of descriptions for its enum alternatives
-    _alternatives: List[EnumNodeAlternative]
+    _alternatives: List[ASTNodeType]
 
     # If this is an enum node, mapping from alternative camel name to
     # ASTNodeType instance for the alternative.

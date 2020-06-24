@@ -9,10 +9,8 @@ from collections import OrderedDict
 from dataclasses import dataclass
 import json
 import os.path
-from typing import (
-    Any, ClassVar, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union,
-    cast
-)
+from typing import (Any, ClassVar, Dict, List, Optional, Set, Tuple, Type,
+                    TypeVar, Union, cast)
 
 import liblktlang as L
 
@@ -53,7 +51,7 @@ def get_trait(decl: L.TypeDecl, trait_name: str) -> Optional[L.TypeDecl]:
     return None
 
 
-def pattern_as_str(str_lit: L.StringLit) -> str:
+def pattern_as_str(str_lit: Union[L.StringLit, L.TokenPatternLit]) -> str:
     """
     Return the regexp string associated to this string literal node.
     """
@@ -83,7 +81,7 @@ def denoted_char_lit(char_lit: L.CharLit) -> str:
     return result
 
 
-def denoted_string_lit(string_lit: L.StringLit) -> str:
+def denoted_string_lit(string_lit: Union[L.StringLit, L.TokenLit]) -> str:
     """
     Return the string that ``string_lit`` denotes.
     """
@@ -92,7 +90,7 @@ def denoted_string_lit(string_lit: L.StringLit) -> str:
     return result
 
 
-def load_lkt(lkt_file: str) -> L.AnalysisUnit:
+def load_lkt(lkt_file: str) -> List[L.AnalysisUnit]:
     """
     Load a Lktlang source file and return the closure of Lkt units referenced.
     Raise a DiagnosticError if there are parsing errors.
@@ -114,6 +112,7 @@ def load_lkt(lkt_file: str) -> L.AnalysisUnit:
         # Recursively process the units it imports. In case of parsing error,
         # just stop the recursion: the collection of diagnostics is enough.
         if not unit.diagnostics:
+            assert isinstance(unit.root, L.LangkitRoot)
             import_stmts = list(unit.root.f_imports)
             for imp in import_stmts:
                 process_unit(imp.p_referenced_unit)
@@ -147,6 +146,7 @@ def find_toplevel_decl(ctx: CompileCtx,
     """
     result = None
     for unit in lkt_units:
+        assert isinstance(unit.root, L.LangkitRoot)
         for decl in unit.root.f_decls:
             if not isinstance(decl.f_decl, node_type):
                 continue
@@ -164,7 +164,8 @@ def find_toplevel_decl(ctx: CompileCtx,
                 result = decl
 
     with ctx.lkt_context(lkt_units[0].root):
-        check_source_language(result is not None, 'missing {}'.format(label))
+        if result is None:
+            error('missing {}'.format(label))
 
     return result
 
@@ -280,18 +281,20 @@ class SpacingAnnotationSpec(AnnotationSpec):
     def interpret(self,
                   ctx: CompileCtx,
                   args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> Tuple[str, str]:
+                  kwargs: Dict[str, L.Expr]) -> Tuple[L.RefId, L.RefId]:
+
+        def check(expr: L.Expr) -> L.RefId:
+            """
+            Helper to check the type of `expr`.
+            """
+            if not isinstance(expr, L.RefId):
+                error('Token family name expected')
+            return expr
 
         check_source_language(len(args) == 2 and not kwargs,
                               'Exactly two positional arguments expected')
-        for f in args:
-            # Check that we only have RefId nodes, but do not attempt to
-            # translate them to TokenFamily instances: at the point we
-            # interpret annotations, the set of token families is not ready
-            # yet.
-            check_source_language(isinstance(f, L.RefId),
-                                  'Token family name expected')
-        left, right = args
+        left = check(args[0])
+        right = check(args[1])
         return (left, right)
 
 
@@ -309,18 +312,18 @@ class TokenAnnotationSpec(AnnotationSpec):
         check_source_language(not args, 'No positional argument allowed')
 
         try:
-            start_ignore_layout = kwargs.pop('start_ignore_layout')
+            expr = kwargs.pop('start_ignore_layout')
         except KeyError:
             start_ignore_layout = False
         else:
-            start_ignore_layout = parse_static_bool(ctx, start_ignore_layout)
+            start_ignore_layout = parse_static_bool(ctx, expr)
 
         try:
-            end_ignore_layout = kwargs.pop('end_ignore_layout')
+            expr = kwargs.pop('end_ignore_layout')
         except KeyError:
             end_ignore_layout = False
         else:
-            end_ignore_layout = parse_static_bool(ctx, end_ignore_layout)
+            end_ignore_layout = parse_static_bool(ctx, expr)
 
         check_source_language(
             not kwargs,
@@ -370,7 +373,7 @@ class TokenAnnotations(ParsedAnnotations):
 
 @dataclass
 class LexerAnnotations(ParsedAnnotations):
-    spacing: Tuple[L.RefId, L.RefId]
+    spacing: List[Tuple[L.RefId, L.RefId]]
     track_indent: bool
     annotations = [SpacingAnnotationSpec(),
                    FlagAnnotationSpec('track_indent')]
@@ -492,6 +495,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     """
     # Look for the LexerDecl node in top-level lists
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
+    assert isinstance(full_lexer.f_decl, L.LexerDecl)
     with ctx.lkt_context(full_lexer):
         lexer_annot = parse_annotations(ctx, LexerAnnotations, full_lexer)
 
@@ -548,10 +552,8 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             token_set = token_family_sets.setdefault(name, set())
 
             for r in f.f_rules:
-                check_source_language(
-                    isinstance(r.f_decl, L.GrammarRuleDecl),
-                    'Only lexer rules allowed in family blocks'
-                )
+                if not isinstance(r.f_decl, L.GrammarRuleDecl):
+                    error('Only lexer rules allowed in family blocks')
                 process_token_rule(r, token_set)
 
     def process_token_rule(
@@ -613,6 +615,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 newline_after.append(token)
 
             # Lower the lexing rule, if present
+            assert isinstance(r.f_decl, L.GrammarRuleDecl)
             matcher_expr = r.f_decl.f_expr
             if matcher_expr is not None:
                 rule = (lower_matcher(matcher_expr), token)
@@ -629,6 +632,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
         """
         check_no_annotations(full_decl)
         decl = full_decl.f_decl
+        assert isinstance(decl, L.ValDecl)
         lower_name = decl.f_syn_name.text
         name = names.Name.from_lower(lower_name)
 
@@ -638,11 +642,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             check_source_language(decl.f_decl_type is None,
                                   'Patterns must have automatic types in'
                                   ' lexers')
-            check_source_language(
-                isinstance(decl.f_val, L.StringLit)
-                and decl.f_val.p_is_regexp_literal,
-                'Pattern string literal expected'
-            )
+            if (
+                not isinstance(decl.f_val, L.StringLit)
+                or not decl.f_val.p_is_regexp_literal
+            ):
+                error('Pattern string literal expected')
             # TODO: use StringLit.p_denoted_value when properly implemented
             patterns[name] = pattern_as_str(decl.f_val)
 
@@ -781,6 +785,7 @@ def create_grammar(ctx: CompileCtx,
     """
     # Look for the GrammarDecl node in top-level lists
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
+    assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
     # No annotation allowed for grammars
     with ctx.lkt_context(full_grammar):
@@ -796,8 +801,8 @@ def create_grammar(ctx: CompileCtx,
             r = full_rule.f_decl
 
             # Make sure we have a grammar rule
-            check_source_language(isinstance(r, L.GrammarRuleDecl),
-                                  'grammar rule expected')
+            if not isinstance(r, L.GrammarRuleDecl):
+                error('grammar rule expected')
             rule_name = r.f_syn_name.text
 
             # Register the main rule if the appropriate annotation is present
@@ -844,11 +849,10 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         if node.is_enum_node and not node.is_bool_node
     }
 
-    def denoted_string_literal(string_lit: L.StringLit) -> str:
-        return eval(string_lit.text)
+    NodeRefTypes = Union[L.DotExpr, L.TypeRef, L.RefId]
 
     def resolve_node_ref_or_none(
-        node_ref: Optional[L.RefId]
+        node_ref: Optional[NodeRefTypes]
     ) -> Optional[ASTNodeType]:
         """
         Convenience wrapper around resolve_node_ref to handle None values.
@@ -857,7 +861,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
             return None
         return resolve_node_ref(node_ref)
 
-    def resolve_node_ref(node_ref: L.RefId) -> ASTNodeType:
+    def resolve_node_ref(node_ref: NodeRefTypes) -> ASTNodeType:
         """
         Helper to resolve a node name to the actual AST node.
 
@@ -865,7 +869,8 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         """
         if isinstance(node_ref, L.DotExpr):
             # Get the altenatives mapping for the prefix_node enum node
-            prefix_node = resolve_node_ref(node_ref.f_prefix)
+            prefix_node = resolve_node_ref(cast(NodeRefTypes,
+                                                node_ref.f_prefix))
             with ctx.lkt_context(node_ref.f_prefix):
                 try:
                     alt_map = enum_nodes[prefix_node]
@@ -892,10 +897,10 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 len(params) == 1,
                 '1 type argument expected, got {}'.format(len(params))
             )
-            return resolve_node_ref(params[0]).list
+            return resolve_node_ref(cast(NodeRefTypes, params[0])).list
 
         elif isinstance(node_ref, L.SimpleTypeRef):
-            return resolve_node_ref(node_ref.f_type_name)
+            return resolve_node_ref(cast(NodeRefTypes, node_ref.f_type_name))
 
         else:
             assert isinstance(node_ref, L.RefId)
@@ -906,7 +911,9 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 except KeyError:
                     error('Unknown node: {}'.format(node_name))
 
-    def lower(rule: L.GrammarExpr) -> Optional[Parser]:
+    def lower(
+        rule: Union[L.GrammarExpr, L.GrammarExprList]
+    ) -> Optional[Parser]:
         """
         Helper to lower one parser.
 
@@ -920,7 +927,7 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
         loc = Location.from_lkt_node(rule)
         with ctx.lkt_context(rule):
             if isinstance(rule, L.ParseNodeExpr):
-                node = resolve_node_ref(rule.f_node_name)
+                node = resolve_node_ref(cast(NodeRefTypes, rule.f_node_name))
 
                 # Lower the subparsers
                 subparsers = [lower(subparser)
@@ -957,12 +964,12 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 if rule.f_expr:
                     # The grammar is supposed to mainain this invariant
                     assert isinstance(rule.f_expr, L.TokenLit)
-                    match_text = denoted_string_literal(rule.f_expr)
+                    match_text = denoted_string_lit(rule.f_expr)
 
                 return _Token(val=val, match_text=match_text, location=loc)
 
             elif isinstance(rule, L.TokenLit):
-                return _Token(denoted_string_literal(rule), location=loc)
+                return _Token(denoted_string_lit(rule), location=loc)
 
             elif isinstance(rule, L.GrammarList):
                 return PList(
@@ -1012,11 +1019,10 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                                 location=loc)
 
             elif isinstance(rule, L.GrammarPredicate):
-                check_source_language(
-                    isinstance(rule.f_prop_ref, L.DotExpr),
-                    'Invalid property reference'
-                )
-                node = resolve_node_ref(rule.f_prop_ref.f_prefix)
+                if not isinstance(rule.f_prop_ref, L.DotExpr):
+                    error('Invalid property reference')
+                node = resolve_node_ref(cast(NodeRefTypes,
+                                             rule.f_prop_ref.f_prefix))
                 prop_name = rule.f_prop_ref.f_suffix.text
                 try:
                     prop = node.get_abstract_node_data_dict()[prop_name]
@@ -1085,8 +1091,9 @@ class LktTypesLoader:
 
         # Go through all units, build a map for all type definitions, indexed
         # by name. This first pass allows to check for type name unicity.
-        named_type_decls: Dict[str, L.FullTypeDecl] = {}
+        named_type_decls: Dict[str, L.FullDecl] = {}
         for unit in lkt_units:
+            assert isinstance(unit.root, L.LangkitRoot)
             for full_decl in unit.root.f_decls:
                 if not isinstance(full_decl.f_decl, L.TypeDecl):
                     continue
@@ -1101,6 +1108,7 @@ class LktTypesLoader:
         # handle node derivation, this recurses on bases first and reject
         # inheritance loops.
         for _, decl in sorted(named_type_decls.items()):
+            assert isinstance(decl.f_decl, L.TypeDecl)
             self.lower_type_decl(decl.f_decl)
 
     def resolve_type_decl(self, decl: L.TypeDecl) -> CompiledTypeOrDefer:
@@ -1231,6 +1239,7 @@ class LktTypesLoader:
             load.
         """
         decl = full_decl.f_decl
+        assert isinstance(decl, L.FieldDecl)
         annotations = parse_annotations(self.ctx, FieldAnnotations, full_decl)
         field_type = self.resolve_type_decl(decl.f_decl_type.p_designated_type)
 
@@ -1413,11 +1422,12 @@ class LktTypesLoader:
                     return E.Entity
                 elif isinstance(decl, L.EnumLitDecl):
                     # TODO: handle all enum types
-                    enum_type = decl.p_get_type()
-                    assert self.compiled_types.get(enum_type) == T.Bool
+                    enum_type_decl = decl.p_get_type()
+                    assert self.compiled_types.get(enum_type_decl) == T.Bool
                     assert decl.text in ('true', 'false')
                     return E.Literal(decl.text == 'true')
                 else:
+                    assert isinstance(decl, L.BaseValDecl)
                     return env[decl]
 
             else:
@@ -1430,6 +1440,7 @@ class LktTypesLoader:
         Lower the property described in ``decl``.
         """
         decl = full_decl.f_decl
+        assert isinstance(decl, L.FunDecl)
         annotations = parse_annotations(self.ctx, FunAnnotations, full_decl)
         return_type = self.resolve_type_decl(
             decl.f_return_type.p_designated_type
@@ -1532,7 +1543,7 @@ class LktTypesLoader:
         return result
 
     def create_node(self,
-                    decl: L.ClassDecl,
+                    decl: L.BasicClassDecl,
                     annotations: BaseNodeAnnotations) -> ASTNodeType:
         """
         Create an ASTNodeType instance.
@@ -1618,6 +1629,7 @@ class LktTypesLoader:
 
         # Create alternatives for enum nodes
         if isinstance(annotations, EnumNodeAnnotations):
+            assert isinstance(decl, L.EnumClassDecl)
             self.create_enum_node_alternatives(
                 alternatives=sum(
                     (list(b.f_decls) for b in decl.f_branches), []
@@ -1657,7 +1669,7 @@ class LktTypesLoader:
                 not len(alternatives),
                 'Enum nodes with @qualifier cannot have explicit alternatives'
             )
-            alternatives = [
+            alt_descriptions = [
                 EnumNodeAlternative(names.Name(alt_name),
                                     enum_node,
                                     None,
@@ -1669,7 +1681,7 @@ class LktTypesLoader:
                 len(alternatives) > 0,
                 'Missing alternatives for this enum node'
             )
-            alternatives = [
+            alt_descriptions = [
                 EnumNodeAlternative(names.Name.from_camel(alt.f_syn_name.text),
                                     enum_node,
                                     None,
@@ -1678,7 +1690,8 @@ class LktTypesLoader:
             ]
 
         # Now create the ASTNodeType instances themselves
-        for i, alt in enumerate(alternatives):
+        alt_nodes: List[ASTNodeType] = []
+        for i, alt in enumerate(alt_descriptions):
             # Override the abstract "as_bool" property that all qualifier enum
             # nodes define.
             fields = []
@@ -1695,12 +1708,15 @@ class LktTypesLoader:
                 dsl_name='{}.{}'.format(enum_node.dsl_name,
                                         alt.base_name.camel)
             )
+            alt_nodes.append(alt.alt_node)
 
         # Finally create enum node-local indexes to easily fetch the
         # ASTNodeType instances later on.
-        enum_node._alternatives = [alt.alt_node for alt in alternatives]
-        enum_node._alternatives_map = {alt.base_name.camel: alt.alt_node
-                                       for alt in alternatives}
+        enum_node._alternatives = alt_nodes
+        enum_node._alternatives_map = {
+            alt.base_name.camel: alt_node
+            for alt, alt_node in zip(alt_descriptions, alt_nodes)
+        }
 
     def create_enum(self,
                     decl: L.EnumTypeDecl,
@@ -1734,7 +1750,7 @@ class LktTypesLoader:
         )
 
     def create_struct(self,
-                      decl: L.StructTypeDecl,
+                      decl: L.StructDecl,
                       annotations: StructAnnotations) -> StructType:
         """
         Create an StructType instance.
