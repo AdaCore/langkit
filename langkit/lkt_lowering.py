@@ -1279,17 +1279,22 @@ class LktTypesLoader:
         :param expr: Expression to lower.
         :param env: Variable to use when resolving references.
         """
-        def helper(expr: L.Expr) -> AbstractExpression:
+        def lower(expr: L.Expr) -> AbstractExpression:
+            """
+            Do the actual expression lowering. Since all recursive calls use
+            the same environment, this helper allows to skip passing it.
+            """
+
             if isinstance(expr, L.ArrayLiteral):
-                elts = [helper(e) for e in expr.f_exprs]
+                elts = [lower(e) for e in expr.f_exprs]
                 array_type = self.resolve_type_decl(expr.p_check_expr_type)
                 return E.ArrayLiteral(elts,
                                       element_type=array_type.element_type)
 
             elif isinstance(expr, L.BinOp):
                 # Lower both operands
-                left = helper(expr.f_left)
-                right = helper(expr.f_right)
+                left = lower(expr.f_left)
+                right = lower(expr.f_right)
 
                 # Dispatch to the appropriate abstract expression constructor
                 if isinstance(expr.f_op, L.OpEq):
@@ -1321,7 +1326,7 @@ class LktTypesLoader:
                 args = []
                 kwargs = {}
                 for arg in expr.f_args:
-                    value = helper(arg.f_value)
+                    value = lower(arg.f_value)
                     if arg.f_name:
                         kwargs[arg.f_name.text] = value
                     else:
@@ -1340,7 +1345,7 @@ class LktTypesLoader:
                 else:
                     # Otherwise, this call must be a method invocation
                     # invocation.
-                    callee = helper(expr.f_name)
+                    callee = lower(expr.f_name)
                     assert isinstance(callee, E.FieldAccess)
                     return callee(*args, **kwargs)
 
@@ -1363,7 +1368,7 @@ class LktTypesLoader:
                 else:
                     # Otherwise, the prefix is an expression that resolves to a
                     # struct, and this accesses one of its fields.
-                    prefix = helper(expr.f_prefix)
+                    prefix = lower(expr.f_prefix)
                     assert isinstance(prefix, E.AbstractExpression)
                     return getattr(prefix, expr.f_suffix.text)
 
@@ -1382,16 +1387,16 @@ class LktTypesLoader:
                 # so first translate the "else" expression (E_last), then
                 # reverse iterate on the alternatives to wrap this expression
                 # with the conditional checks.
-                result = helper(expr.f_else_expr)
+                result = lower(expr.f_else_expr)
                 conditions = [(alt.f_cond_expr, alt.f_then_expr)
                               for alt in expr.f_alternatives]
                 conditions.append((expr.f_cond_expr, expr.f_then_expr))
                 for c, e in reversed(conditions):
-                    result = E.If(helper(c), helper(e), result)
+                    result = E.If(lower(c), lower(e), result)
                 return result
 
             elif isinstance(expr, L.Isa):
-                subexpr = helper(expr.f_expr)
+                subexpr = lower(expr.f_expr)
                 nodes = [
                     self.resolve_type_decl(type_ref.p_designated_type)
                     for type_ref in expr.f_dest_type
@@ -1399,7 +1404,7 @@ class LktTypesLoader:
                 return E.IsA(subexpr, *nodes)
 
             elif isinstance(expr, L.NotExpr):
-                return E.Not(helper(expr.f_expr))
+                return E.Not(lower(expr.f_expr))
 
             elif isinstance(expr, L.NullLit):
                 result_type = self.resolve_type_decl(expr.p_check_expr_type)
@@ -1409,7 +1414,7 @@ class LktTypesLoader:
                 return E.Literal(int(expr.text))
 
             elif isinstance(expr, L.ParenExpr):
-                return helper(expr.f_expr)
+                return lower(expr.f_expr)
 
             elif isinstance(expr, L.StringLit):
                 return E.SymbolLiteral(denoted_string_lit(expr))
@@ -1433,7 +1438,7 @@ class LktTypesLoader:
             else:
                 assert False, 'Unhandled expression: {}'.format(expr)
 
-        return helper(expr)
+        return lower(expr)
 
     def lower_property(self, full_decl: L.FullDecl) -> PropertyDef:
         """
@@ -1753,7 +1758,7 @@ class LktTypesLoader:
                       decl: L.StructDecl,
                       annotations: StructAnnotations) -> StructType:
         """
-        Create an StructType instance.
+        Create a StructType instance.
 
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
