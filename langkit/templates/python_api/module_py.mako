@@ -561,32 +561,6 @@ class AnalysisUnit(object):
     __slots__ = ('_c_value', '_context_link', '_cache_version_number',
                  '_node_cache')
 
-    class DiagnosticsList(object):
-        """List of analysis unit diagnostics."""
-        def __init__(self, unit):
-            self.unit = unit
-
-        def __repr__(self):
-            return 'DiagnosticsList({})'.format(repr(list(self)))
-
-        def __len__(self):
-            return _unit_diagnostic_count(self.unit._c_value)
-
-        def __getitem__(self, key):
-            if not isinstance(key, int):
-                msg = 'list indices must be integers, not {}'.format(
-                    type(key))
-                raise TypeError(msg)
-
-            diag = Diagnostic._c_type()
-            success = _unit_diagnostic(self.unit._c_value, key,
-                                       ctypes.byref(diag))
-            if not success:
-                raise IndexError('diagnostic index out of range')
-            else:
-                result = diag._wrap()
-                return result
-
     class TokenIterator(object):
         """Iterator over the tokens in an analysis unit."""
         def __init__(self, first):
@@ -729,7 +703,13 @@ class AnalysisUnit(object):
     @property
     def diagnostics(self):
         """Diagnostics for this unit."""
-        return self.DiagnosticsList(self)
+        count = _unit_diagnostic_count(self._c_value)
+        result = []
+        diag = Diagnostic._c_type()
+        for i in range(count):
+            assert _unit_diagnostic(self._c_value, i, ctypes.byref(diag))
+            result.append(diag._wrap())
+        return result
 
     def __repr__(self):
         return '<AnalysisUnit {}>'.format(repr(
