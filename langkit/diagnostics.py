@@ -9,14 +9,16 @@ import re
 import sys
 import traceback
 from typing import (
-    Any, List, NoReturn, Optional as Opt, TextIO, Tuple, Type, TypeVar, Union
+    Any, List, NoReturn, Optional as Opt, TextIO, Tuple, Type,
+    TypeVar, Union
 )
 
 
+liblktlang_available = True
 try:
     import liblktlang as L
 except ImportError:
-    L = None
+    liblktlang_available = False
 
 
 import langkit.documentation
@@ -595,8 +597,12 @@ def print_error(message: str,
         print(error_marker + message)
         return
 
-    if L and isinstance(location, L.LKNode):
+    # If "location" is a node from liblktlang, turn it into a Location
+    # instance. Note that this possible only if liblktlang is available, so we
+    # know that we'll have a Location instance afterwards.
+    if liblktlang_available and isinstance(location, L.LKNode):
         location = Location.from_lkt_node(location)
+    assert isinstance(location, Location)
 
     # Print the basic error (with colors if in tty)
     print(
