@@ -1549,6 +1549,7 @@ def unparse_grammar(ctx, f):
     )
 
     template = """
+    @with_lexer(${ctx.lang_name.lower}_lexer)$hl
     grammar ${ctx.lang_name.lower}_grammar {$i$hl
     % for name, rule in sorted_rules:
         ${('@main_rule '
