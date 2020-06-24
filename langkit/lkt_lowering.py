@@ -259,10 +259,9 @@ class FlagAnnotationSpec(AnnotationSpec):
     """
     Convenience subclass for flags.
     """
-    def __init__(self, name: str, default_value: Any = False):
-        super().__init__(
-            name, unique=True, require_args=False, default_value=default_value
-        )
+    def __init__(self, name: str):
+        super().__init__(name, unique=True, require_args=False,
+                         default_value=False)
 
     def interpret(self,
                   ctx: CompileCtx,
@@ -428,10 +427,7 @@ class FunAnnotations(ParsedAnnotations):
     annotations = [
         FlagAnnotationSpec('abstract'),
 
-        # When the @export annotation is missing, use "None" to mean
-        # "public status unspecified", as the property can be public thanks to
-        # inheritance.
-        FlagAnnotationSpec('export', default_value=None),
+        FlagAnnotationSpec('export'),
     ]
 
 
@@ -1481,7 +1477,12 @@ class LktTypesLoader:
             expr=expr,
             prefix=AbstractNodeData.PREFIX_PROPERTY,
             doc=self.ctx.lkt_doc(full_decl),
-            public=annotations.export,
+
+            # When the @export annotation is missing, use "None" to mean
+            # "public status unspecified", as the property can still be public
+            # thanks to inheritance.
+            public=annotations.export or None,
+
             abstract=annotations.abstract,
             type=return_type,
             abstract_runtime_check=False,
