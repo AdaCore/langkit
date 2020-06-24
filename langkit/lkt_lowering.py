@@ -1181,6 +1181,13 @@ class LktTypesLoader:
                     # The type is already lowered: there is nothing to do
                     return t
 
+            check_source_language(
+                isinstance(decl, L.BasicClassDecl)
+                or decl.f_traits is None
+                or len(decl.f_traits) == 0,
+                'No traits allowed except on nodes'
+            )
+
             # Dispatch now to the appropriate lowering helper
             result: CompiledType
             if isinstance(decl, L.InstantiatedGenericType):
@@ -1743,11 +1750,6 @@ class LktTypesLoader:
             )
             value_names.append(name)
 
-        check_source_language(
-            len(decl.f_traits) == 0,
-            'No traits allowed for enum types'
-        )
-
         return EnumType(
             name=names.Name.from_camel(decl.f_syn_name.text),
             location=Location.from_lkt_node(decl),
@@ -1764,11 +1766,6 @@ class LktTypesLoader:
         :param decl: Corresponding declaration node.
         :param annotations: Annotations for this declaration.
         """
-        check_source_language(
-            len(decl.f_traits) == 0,
-            'No traits allowed for struct types'
-        )
-
         return StructType(
             name=names.Name.from_camel(decl.f_syn_name.text),
             location=Location.from_lkt_node(decl),
