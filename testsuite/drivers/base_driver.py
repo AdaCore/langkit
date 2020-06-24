@@ -26,7 +26,8 @@ class BaseDriver(DiffTestDriver):
         # RA22-015: Line numbers for Python DSL diagnostics vary depending on
         # Python versions, so hide actual line numbers.
         return super().output_refiners + [
-            PatternSubstitute(r' line \d+, ', ' line XXX, ')
+            PatternSubstitute(r' line \d+, ', ' line XXX, '),
+            PatternSubstitute(r'test\.py:\d+\:', 'test.py:XXX:'),
         ]
 
     def read_file(self, filename):
