@@ -266,13 +266,13 @@ def check_source_language(predicate: bool,
     definition. Show error messages and eventually terminate if those error
     messages are critical.
 
-    :param bool predicate: The predicate to check.
-    :param str message: The base message to display if predicate happens to
+    :param predicate: The predicate to check.
+    :param message: The base message to display if predicate happens to be
+        false.
+    :param severity: The severity of the diagnostic.
+    :param do_raise: If True, raise a DiagnosticError if predicate happens to
         be false.
-    :param Severity severity: The severity of the diagnostic.
-    :param bool do_raise: If True, raise a DiagnosticError if predicate happens
-        to be false.
-    :param bool ok_for_codegen: If True, allow checks to be performed during
+    :param ok_for_codegen: If True, allow checks to be performed during
         code generation. This is False by default as it should be an
         exceptional situation: we want, when possible, most checks to be
         performed before we attempt to emit the generated library (for
