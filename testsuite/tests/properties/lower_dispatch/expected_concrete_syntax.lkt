@@ -24,7 +24,7 @@ class Def : FooNode {
 
     @export @abstract fun evaluate_entity (): Int
 
-    @export @abstract @abstract_stub fun evaluate_rtcheck (): Int
+    @export @not_implemented fun evaluate_rtcheck (): Int
 
     @export fun evaluate_concrete (): Int = 1
 }

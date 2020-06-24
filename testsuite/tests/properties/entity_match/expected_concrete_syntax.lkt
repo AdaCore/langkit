@@ -30,5 +30,5 @@ class Literal : FooNode implements TokenNode {
         case c : FooNode => c.get_num()
     }
 
-    @abstract @abstract_stub fun a (): FooNode
+    @not_implemented fun a (): FooNode
 }

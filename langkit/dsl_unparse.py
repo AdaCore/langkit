@@ -1084,9 +1084,9 @@ def emit_prop(prop, walker):
         quals += "@export "
 
     if not prop.constructed_expr:
-        quals += "@abstract "
-        if prop.abstract_runtime_check:
-            quals += "@abstract_stub "
+        quals += ("@not_implemented "
+                  if prop.abstract_runtime_check
+                  else "@abstract ")
 
     if prop.memoized:
         quals += "@memoized "

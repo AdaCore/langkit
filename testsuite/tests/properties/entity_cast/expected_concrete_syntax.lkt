@@ -18,5 +18,5 @@ class Literal : FooNode implements TokenNode {
 
     @export fun d (): BarNode = node.a().as[BarNode]
 
-    @abstract @abstract_stub fun a (): FooNode
+    @not_implemented fun a (): FooNode
 }
