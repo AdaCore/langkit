@@ -867,6 +867,11 @@ class LexerDecl(Decl):
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.LKNode.list)
 
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name, Self),
+        add_env()
+    )
+
 
 class LexerFamilyDecl(Decl):
     """
@@ -931,6 +936,12 @@ class GrammarDecl(BaseGrammarDecl):
     """
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.FullDecl.list)
+
+    lexer = Property(
+        Entity.full_decl.get_annotation('with_lexer')
+        .params.params.at(0).value.as_entity.check_referenced_decl,
+        public=True
+    )
 
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
@@ -1053,6 +1064,12 @@ class RefId(Id):
             # The scope of it's called declaration if it's a parameter name in
             # a CallExpr.
             lambda p: p.call_expr.called_decl.call_scope
+        ))._or(Self.parent.cast(TokenRef).then(
+            # The scope of the grammar's lexer, if this is a RefId inside a
+            # TokenRef.
+            lambda _:
+            Entity.parents.find(lambda n: n.is_a(GrammarDecl))
+            .cast(GrammarDecl).lexer.children_env
         ))._or(
             # It's regular environment in other cases
             Entity.children_env

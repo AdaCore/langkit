@@ -145,13 +145,15 @@ package body Liblktlang.Implementation.Extensions is
      (Node : Bare_LK_Node;
       Name : Character_Type_Array_Access) return Internal_Unit
    is
-   begin
-      return Get_From_Provider
+      I : constant Internal_Unit := Get_From_Provider
         (Context => Node.Unit.Context,
          Name    => Name.Items,
          Kind    => Unit_Body,
          Charset => "ascii",
          Reparse => False);
+   begin
+      Populate_Lexical_Env (Wrap_Unit (I));
+      return I;
    end LK_Node_P_Internal_Fetch_Referenced_Unit;
 
    -------------------------------------
