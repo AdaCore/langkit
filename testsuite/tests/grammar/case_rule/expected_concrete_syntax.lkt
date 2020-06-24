@@ -11,6 +11,7 @@ lexer foo_lexer {
         else send(char, 3)
     }
 }
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule expr <- or(
         | DotExpr(expr "." name)

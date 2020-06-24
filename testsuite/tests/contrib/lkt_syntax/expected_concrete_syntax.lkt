@@ -4,6 +4,7 @@ lexer foo_lexer {
     example <- "example"
     @trivia() comment <- p"#(.?)+"
 }
+@with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list+(Example("example"))
 
