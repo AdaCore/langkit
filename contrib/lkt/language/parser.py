@@ -864,7 +864,7 @@ class LexerFamilyDecl(Decl):
     Declaration of a token family.
     """
     syn_name = Field(type=T.DefId)
-    rules = Field(type=T.LKNode.list)
+    rules = Field(type=T.FullDecl.list)
 
 
 class LexerCaseRule(LKNode):
@@ -2813,7 +2813,7 @@ lkt_grammar.add_rules(
     lexer_rule=GOr(G.decl, G.lexer_case_rule),
     lexer_family_decl=LexerFamilyDecl(
         Lex.Identifier(match_text="family"), G.def_id, "{",
-        List(G.lexer_rule, empty_valid=False),
+        List(G.decl, empty_valid=False),
         "}"
     ),
     lexer_case_rule=LexerCaseRule(
