@@ -1,4 +1,6 @@
-@spacing(ids, ids)
 lexer foo_lexer {
-    example <- "example"
+    @unparse_spacing(with=foo)
+    family ids {
+        example <- "example"
+    }
 }

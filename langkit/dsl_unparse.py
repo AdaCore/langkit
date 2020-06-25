@@ -1418,12 +1418,6 @@ def unparse_lexer(ctx, f):
 
     # Prepare unparsing of lexer
     lexer_annotations = "@track_indent$hl" if ctx.lexer.track_indent else ""
-    lexer_annotations += "".join(
-        '@spacing({}, {})$hl'.format(tf1.name.lower, tf2.name.lower)
-        for tf1, m in ctx.lexer.spacing_table.items()
-        for tf2, v in m.items()
-        if v
-    )
     lexer_newline_rule_index = next(
         i
         for i, r in enumerate(ctx.lexer.rules)
@@ -1491,7 +1485,15 @@ def unparse_lexer(ctx, f):
 
         # Keep the token family implicit
         if family and family.name.lower != 'default_family':
-            result.append('$hl$hlfamily {} {{$i'
+            result.append('$hl$hl')
+            # Handle spacing annotations
+            spacings = ctx.lexer.spacing_table[family]
+            for otherfam, has_spacing in spacings.items():
+                if has_spacing:
+                    result.append(
+                        f'@unparse_spacing(with={otherfam.name.lower})$hl'
+                    )
+            result.append('family {} {{$i'
                           .format(family.name.lower))
             last_family[0] = family
 
