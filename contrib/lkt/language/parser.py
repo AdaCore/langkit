@@ -2849,10 +2849,12 @@ lkt_grammar.add_rules(
         List(GOr(G.lexer_family_decl, G.lexer_rule), empty_valid=True),
         "}"
     ),
+
     grammar_decl=GrammarDecl(
         "grammar", G.def_id,
         "{", List(G.decl, empty_valid=True), "}"
     ),
+
     grammar_rule=GrammarRuleDecl(G.def_id, Opt("<-", G.grammar_expr)),
 
     lexer_rule=GOr(G.lexer_family_decl, G.decl, G.lexer_case_rule),
@@ -2866,11 +2868,13 @@ lkt_grammar.add_rules(
             "}"
         )
     ),
+
     lexer_case_rule=LexerCaseRule(
         "match", G.grammar_primary, "{",
         List(G.lexer_case_alt, empty_valid=False),
         "}"
     ),
+
     lexer_case_alt=GOr(
         LexerCaseRuleCondAlt(
             "if",
@@ -2882,9 +2886,11 @@ lkt_grammar.add_rules(
             "else", G.lexer_case_send
         )
     ),
+
     lexer_case_send=LexerCaseRuleSend(
         Lex.Identifier(match_text="send"), "(", G.ref_id, ",", G.num_lit, ")"
     ),
+
     grammar_primary=GOr(
         G.grammar_pick,
         G.grammar_list_expr,
@@ -2901,6 +2907,7 @@ lkt_grammar.add_rules(
         G.grammar_rule_ref,
         G.grammar_discard_expr,
     ),
+
     grammar_expr=GOr(
         GrammarDontSkip(
             G.grammar_expr,
@@ -2930,23 +2937,31 @@ lkt_grammar.add_rules(
     ),
 
     grammar_cut=GrammarCut("/"),
+
     grammar_or_expr=GrammarOrExpr(
         "or", "(",
         Opt("|"), List(List(G.grammar_expr), sep="|"),
         ")"
     ),
+
     grammar_discard_expr=GrammarDiscard(
         "discard", "(", G.grammar_expr, ")"
     ),
+
     token_literal=TokenLit(Lex.String),
+
     token_no_case_literal=TokenNoCaseLit(
         Lex.Identifier(match_text="no_case"), "(", G.token_literal, ")"
     ),
+
     token_pattern_literal=TokenPatternLit(Lex.PString),
+
     parse_node_expr=ParseNodeExpr(
         G.type_ref, "(", List(G.grammar_expr, empty_valid=True), ")"
     ),
+
     grammar_rule_ref=GrammarRuleRef(G.ref_id),
+
     grammar_list_expr=GrammarList(
         # Match either "list" (type inference will determine the list type) or
         # a specific list type.
