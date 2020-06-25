@@ -732,11 +732,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     # rules.
     for full_decl in full_lexer.f_decl.f_rules:
         with ctx.lkt_context(full_decl):
-            if isinstance(full_decl, L.LexerFamilyDecl):
-                # This is a family block: go through all declarations inside it
-                process_family(full_decl)
-
-            elif isinstance(full_decl, L.FullDecl):
+            if isinstance(full_decl, L.FullDecl):
                 # There can be various types of declarations in lexers...
                 decl = full_decl.f_decl
 
@@ -748,6 +744,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 elif isinstance(decl, L.ValDecl):
                     # This is the declaration of a pattern
                     process_pattern(full_decl)
+
+                elif isinstance(decl, L.LexerFamilyDecl):
+                    # This is a family block: go through all declarations
+                    # inside it.
+                    process_family(decl)
 
                 else:
                     check_source_language(False,

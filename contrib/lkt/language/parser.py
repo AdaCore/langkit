@@ -2854,11 +2854,17 @@ lkt_grammar.add_rules(
         "{", List(G.decl, empty_valid=True), "}"
     ),
     grammar_rule=GrammarRuleDecl(G.def_id, Opt("<-", G.grammar_expr)),
-    lexer_rule=GOr(G.decl, G.lexer_case_rule),
-    lexer_family_decl=LexerFamilyDecl(
-        Lex.Identifier(match_text="family"), G.def_id, "{",
-        List(G.decl, empty_valid=False),
-        "}"
+
+    lexer_rule=GOr(G.lexer_family_decl, G.decl, G.lexer_case_rule),
+
+    lexer_family_decl=FullDecl(
+        G.doc,
+        List(G.decl_annotation, empty_valid=True),
+        LexerFamilyDecl(
+            Lex.Identifier(match_text="family"), G.def_id, "{",
+            List(G.decl, empty_valid=False),
+            "}"
+        )
     ),
     lexer_case_rule=LexerCaseRule(
         "match", G.grammar_primary, "{",
