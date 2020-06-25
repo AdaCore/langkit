@@ -272,29 +272,29 @@ class FlagAnnotationSpec(AnnotationSpec):
 
 class SpacingAnnotationSpec(AnnotationSpec):
     """
-    Interpreter for @spacing annotations for lexer.
+    Interpreter for @spacing annotations for token families.
     """
     def __init__(self) -> None:
-        super().__init__('spacing', unique=False, require_args=True)
+        super().__init__('unparse_spacing', unique=False, require_args=True)
 
     def interpret(self,
                   ctx: CompileCtx,
                   args: List[L.Expr],
-                  kwargs: Dict[str, L.Expr]) -> Tuple[L.RefId, L.RefId]:
+                  kwargs: Dict[str, L.Expr]) -> L.RefId:
+        check_source_language(not args, 'No positional argument allowed')
 
-        def check(expr: L.Expr) -> L.RefId:
-            """
-            Helper to check the type of `expr`.
-            """
+        try:
+            expr = kwargs.pop('with')
+        except KeyError:
+            error('Missing "with" argument')
+        else:
+            check_source_language(
+                not kwargs,
+                'Invalid arguments: {}'.format(', '.join(sorted(kwargs)))
+            )
             if not isinstance(expr, L.RefId):
                 error('Token family name expected')
             return expr
-
-        check_source_language(len(args) == 2 and not kwargs,
-                              'Exactly two positional arguments expected')
-        left = check(args[0])
-        right = check(args[1])
-        return (left, right)
 
 
 class TokenAnnotationSpec(AnnotationSpec):
@@ -392,23 +392,27 @@ class TokenAnnotations(ParsedAnnotations):
     text: Tuple[bool, bool]
     trivia: Tuple[bool, bool]
     symbol: Tuple[bool, bool]
-    newline_after: bool
+    unparse_newline_after: bool
     pre_rule: bool
     ignore: bool
     annotations = [TokenAnnotationSpec('text'),
                    TokenAnnotationSpec('trivia'),
                    TokenAnnotationSpec('symbol'),
-                   FlagAnnotationSpec('newline_after'),
+                   FlagAnnotationSpec('unparse_newline_after'),
                    FlagAnnotationSpec('pre_rule'),
                    FlagAnnotationSpec('ignore')]
 
 
 @dataclass
 class LexerAnnotations(ParsedAnnotations):
-    spacing: List[Tuple[L.RefId, L.RefId]]
     track_indent: bool
-    annotations = [SpacingAnnotationSpec(),
-                   FlagAnnotationSpec('track_indent')]
+    annotations = [FlagAnnotationSpec('track_indent')]
+
+
+@dataclass
+class TokenFamilyAnnotations(ParsedAnnotations):
+    unparse_spacing: List[L.RefId]
+    annotations = [SpacingAnnotationSpec()]
 
 
 @dataclass
@@ -525,6 +529,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     # Look for the LexerDecl node in top-level lists
     full_lexer = find_toplevel_decl(ctx, lkt_units, L.LexerDecl, 'lexer')
     assert isinstance(full_lexer.f_decl, L.LexerDecl)
+
     with ctx.lkt_context(full_lexer):
         lexer_annot = parse_annotations(ctx, LexerAnnotations, full_lexer)
 
@@ -543,6 +548,13 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     """
     Mapping from token family names to the corresponding token families.  We
     build this late, once we know all tokens and all families.
+    """
+
+    spacings: List[Tuple[names.Name, L.RefId]] = []
+    """
+    Couple of names for token family between which unparsing must insert
+    spaces. The first name is known to be valid, but not the second one, so we
+    keep it as a node to create a diagnostic context.
     """
 
     tokens: Dict[names.Name, Action] = {}
@@ -584,6 +596,12 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
                 if not isinstance(r.f_decl, L.GrammarRuleDecl):
                     error('Only lexer rules allowed in family blocks')
                 process_token_rule(r, token_set)
+
+            family_annotations = parse_annotations(ctx, TokenFamilyAnnotations,
+                                                   cast(L.FullDecl, f.parent))
+
+            for spacing in family_annotations.unparse_spacing:
+                spacings.append((name, spacing))
 
     def process_token_rule(
         r: L.FullDecl,
@@ -640,7 +658,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             tokens[token_name] = token
             if token_set is not None:
                 token_set.add(token)
-            if rule_annot.newline_after:
+            if rule_annot.unparse_newline_after:
                 newline_after.append(token)
 
             # Lower the lexing rule, if present
@@ -702,19 +720,6 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
             check_source_language(token_name in tokens,
                                   'Unknown token: {}'.format(token_name.lower))
             return tokens[token_name]
-
-    def lower_family_ref(ref: L.RefId) -> TokenFamily:
-        """
-        Return the TokenFamily that `ref` refers to.
-        """
-        with ctx.lkt_context(ref):
-            name_lower = ref.text
-            name = names.Name.from_lower(name_lower)
-            check_source_language(
-                name in token_families,
-                'Unknown token family: {}'.format(name_lower)
-            )
-            return token_families[name]
 
     def lower_case_alt(alt: L.BaseLexerCaseRuleAlt) -> Alt:
         """
@@ -793,9 +798,15 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     result.add_rules(*rules)
 
     # Register spacing/newline rules
-    for tf1, tf2 in lexer_annot.spacing:
-        result.add_spacing((lower_family_ref(tf1),
-                            lower_family_ref(tf2)))
+    for f1_name, f2_ref in spacings:
+        f2_name = names.Name.from_lower(f2_ref.text)
+        with ctx.lkt_context(f2_ref):
+            check_source_language(
+                f2_name in token_families,
+                'Unknown token family: {}'.format(f2_name.lower)
+            )
+        result.add_spacing((token_families[f1_name],
+                            token_families[f2_name]))
     result.add_newline_after(*newline_after)
 
     return result
@@ -835,8 +846,8 @@ def create_grammar(ctx: CompileCtx,
             rule_name = r.f_syn_name.text
 
             # Register the main rule if the appropriate annotation is present
-            a = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
-            if a.main_rule:
+            anns = parse_annotations(ctx, GrammarRuleAnnotations, full_rule)
+            if anns.main_rule:
                 check_source_language(main_rule_name is None,
                                       'only one main rule allowed')
                 main_rule_name = rule_name
