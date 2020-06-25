@@ -64,13 +64,19 @@ def make(args: Namespace) -> None:
     shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
     shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
 
-    subprocess.check_call(
+    m1 = subprocess.Popen(
         ["./manage.py", "-Dgnu-full", "make", "-P",
          "--disable-warning", "undocumented-nodes"],
         cwd=PYTHON_LIB_ROOT
     )
-    subprocess.check_call(["./manage.py", "-Dgnu-full", "make", "-P"],
-                          cwd=LKT_LIB_ROOT)
+    m2 = subprocess.Popen(
+        ["./manage.py", "-Dgnu-full", "make", "-P"],
+        cwd=LKT_LIB_ROOT
+    )
+    m1.wait()
+    m2.wait()
+    assert m1.returncode == 0
+    assert m2.returncode == 0
 
 
 def test(args: Namespace, remaining_args: List[str]) -> None:
