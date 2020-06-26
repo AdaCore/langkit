@@ -11,7 +11,8 @@ grammar foo_grammar {
 
 }
 
-enum Color (red, green, blue) {
+enum Color {
+    case red, green, blue
 }
 
 @abstract @has_abstract_list class FooNode implements Node {
