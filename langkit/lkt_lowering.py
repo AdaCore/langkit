@@ -40,6 +40,10 @@ from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
 CompiledTypeOrDefer = Union[CompiledType, TypeRepo.Defer]
 
 
+# List of annotations that we don't compute here but that we can safely ignore
+ANNOTATIONS_WHITELIST = ['builtin']
+
+
 def get_trait(decl: L.TypeDecl, trait_name: str) -> Optional[L.TypeDecl]:
     """
     Return the trait named ``trait_name`` on declaration ``decl``.
@@ -472,9 +476,10 @@ def parse_annotations(ctx: CompileCtx,
         spec = specs_map.get(name)
         with ctx.lkt_context(a):
             if spec is None:
-                check_source_language(
-                    False, 'Invalid annotation: {}'.format(name)
-                )
+                if name not in ANNOTATIONS_WHITELIST:
+                    check_source_language(
+                        False, 'Invalid annotation: {}'.format(name)
+                    )
             else:
                 spec.parse_single_annotation(ctx, values, a)
 
@@ -1590,17 +1595,24 @@ class LktTypesLoader:
             base_type = None
         else:
             base_type_decl = decl.f_base_type.p_designated_type
-            base_type = cast(ASTNodeType, self.lower_type_decl(base_type_decl))
+            if base_type_decl == base_type_decl.p_node_type:
+                base_type = None
+            else:
+                base_type = cast(ASTNodeType,
+                                 self.lower_type_decl(base_type_decl))
+
         check_source_language(
             base_type is None or not base_type.is_enum_node,
-            'Inheritting from an enum node is forbiddn'
+            'Inheritting from an enum node is forbidden'
         )
 
         # Make sure the Node trait is used exactly once, on the root node
-        node_trait = get_trait(decl, "Node")
         if base_type is None:
             check_source_language(
-                node_trait is not None,
+                # The only case in which base_type can be None is if
+                # base_type_decl is not (and hence is the root node type, see
+                # above)
+                base_type_decl is not None,
                 'The root node should derive from Node'
             )
             if CompiledTypeRepo.root_grammar_class is not None:

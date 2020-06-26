@@ -9,7 +9,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode implements Node {
+@abstract class FooNode : Node {
 }
 
 class Decl : FooNode {

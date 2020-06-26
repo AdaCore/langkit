@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode implements Node {
+@abstract class FooNode : Node {
 
     fun env_struct (): EnvStruct =
     EnvStruct(env=node.children_env().env_orphan())

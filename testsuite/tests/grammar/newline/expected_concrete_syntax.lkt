@@ -13,7 +13,6 @@ lexer foo_lexer {
     number <- p"[0-9]+"
     @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
 }
-
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     lit <- Literal(@number)
@@ -28,7 +27,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode implements Node {
+@abstract class FooNode : Node {
 }
 
 class CompositeNode : FooNode {

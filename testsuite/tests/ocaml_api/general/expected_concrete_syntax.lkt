@@ -15,7 +15,7 @@ enum Color {
     case red, green, blue
 }
 
-@abstract @has_abstract_list class FooNode implements Node {
+@abstract @has_abstract_list class FooNode : Node {
 
     @export fun count (seq : Array[Example]): Int = seq.length()
 
