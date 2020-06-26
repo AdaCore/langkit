@@ -12,7 +12,9 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin struct BigInt {}" & ASCII.LF &
      "@builtin struct Symbol {}" & ASCII.LF &
      "@builtin struct Regexp {}" & ASCII.LF &
-     "@builtin enum Bool (false, true) {}" & ASCII.LF &
+     "@builtin @open enum Bool {" & ASCII.LF &
+     "    case false, true" & ASCII.LF &
+     "}" & ASCII.LF &
      "@builtin trait Sized {" & ASCII.LF &
      "    @builtin fun length(): Int" & ASCII.LF &
      "}" & ASCII.LF &

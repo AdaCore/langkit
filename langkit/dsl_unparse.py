@@ -1282,8 +1282,9 @@ def emit_enum_type(enum_type):
     % if enum_type.doc:
     ${emit_doc(enum_type.doc)}$hl
     % endif
-    enum ${enum_type.dsl_name} (${literals}) {$hl
-    }$hl
+    enum ${enum_type.dsl_name} {$i$hl
+        case ${literals}$hl
+    $d}$hl
     """.strip())
 
 
