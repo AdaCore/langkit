@@ -18,7 +18,7 @@ enum DeclKind {
     case func, var, none
 }
 
-@abstract class FooNode implements Node {
+@abstract class FooNode : Node {
 }
 
 @abstract class Decl : FooNode {

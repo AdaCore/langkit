@@ -147,6 +147,11 @@ class LKNode(ASTNode):
     def get_builtin_gen_decl(entity_name=T.Symbol):
         return Self.root_get(entity_name).cast(T.GenericDecl)
 
+    node_type = Property(
+        Self.get_builtin_type('Node'), public=True,
+        doc="Unit method. Return the Node base class."
+    )
+
     char_type = Property(
         Self.get_builtin_type('Char'), public=True,
         doc="Unit method. Return the character builtin type."
