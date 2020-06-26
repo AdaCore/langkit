@@ -1182,12 +1182,14 @@ def emit_node_type(node_type):
     token_node = ''
     has_abstract_list = ''
     type_kind = "struct"
+    base_name = ""
 
     if isinstance(node_type, ASTNodeType):
         if node_type.is_generic_list_type:
             return ""
 
         base = node_type.base
+        base_name = type_name(base) if base else ""
 
         if base and base.is_generic_list_type:
             return ""
@@ -1197,7 +1199,7 @@ def emit_node_type(node_type):
         builtin_properties = node_type.builtin_properties()
 
         if node_type.is_root_node:
-            traits.append('Node')
+            base_name = "Node"
 
         abstract_qual = "@abstract " if node_type.abstract else ""
 
@@ -1236,7 +1238,7 @@ def emit_node_type(node_type):
     properties = node_type.get_properties(include_inherited=False)
     doc = node_type.doc
 
-    strbase = ": {} ".format(type_name(base)) if base else ""
+    strbase = ": {} ".format(base_name) if base_name else ""
     strtraits = "implements {} ".format(", ".join(traits)) if traits else ""
 
     def is_builtin_prop(prop):

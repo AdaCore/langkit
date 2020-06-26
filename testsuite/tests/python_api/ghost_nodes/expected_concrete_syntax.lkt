@@ -12,7 +12,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode implements Node {
+@abstract class FooNode : Node {
 }
 
 enum class Enum : FooNode {
