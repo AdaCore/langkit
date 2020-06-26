@@ -17,6 +17,12 @@ Classes:
   class definition with no base must have the @root_node annotation, and all
   other classes must derive it, or derive one of its subclasses.
 
+Enum types:
+
+* Maps to a discrete value type. Small memory footprint.
+* Is just an enum, cannot contain data (enum classes are meant for that, longer
+  term).
+* Syntax is similar to enum classes ("enum A { case b, c, d }").
 
 Enum classes:
 
@@ -491,6 +497,13 @@ class FullDecl(LKNode):
     doc = Field(type=T.Doc)
     decl_annotations = Field(type=T.DeclAnnotation.list)
     decl = Field(type=T.Decl)
+
+    @langkit_property()
+    def has_annotation(name=T.Symbol):
+        """
+        Return whether this node has an annotation with name ``name``.
+        """
+        return Not(Self.get_annotation(name).is_null)
 
     @langkit_property()
     def get_annotation(name=T.Symbol):
@@ -1322,7 +1335,7 @@ class TypeDecl(Decl):
                     formal=e.generic_decl.generic_formal_decls.at(i),
                     actual_2=o.actuals.at(i):
                     If(
-                        Not(formal.get_annotation('out').is_null),
+                        formal.has_annotation('out'),
 
                         # We have an out annotation on the formal. It means
                         # that this formal is covariant, and so we should use
@@ -1687,10 +1700,29 @@ class EnumTypeDecl(NamedTypeDecl):
     """
 
     syn_name = Field(type=T.DefId)
-    literals = Field(type=T.EnumLitDecl.list)
     traits = Field(type=T.TypeRef.list)
     base_type = NullField()
+    literals = Field(type=T.EnumLitDecl.list)
     decls = Field(type=DeclBlock)
+
+    env_spec = EnvSpec(
+        add_to_env_kv(Entity.name, Self),
+        handle_children(),
+        # Add enum literals to the DeclBlock env
+        add_to_env(Entity.literals.map(lambda lit: new_env_assoc(
+                key=lit.name, val=lit.node, dest_env=Self.decls.children_env
+        ))),
+
+        # If the enum is marked as @open, add enum literals to the enum type's
+        # containing env.
+        add_to_env(If(
+            Entity.full_decl.has_annotation('open'),
+            Entity.literals.map(lambda lit: new_env_assoc(
+                key=lit.name, val=lit.node, dest_env=Self.node_env
+            )),
+            No(T.env_assoc.array)
+        ))
+    )
 
 
 class StructDecl(NamedTypeDecl):
@@ -1871,7 +1903,9 @@ class FunDecl(UserValDecl):
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
         return If(
-            Entity.full_decl.get_annotation('property').is_null,
+            Entity.full_decl.has_annotation('property'),
+
+            Entity.return_type.designated_type,
 
             Self.function_type(
                 # NOTE: For methods, we don't add the owning type. We consider
@@ -1888,8 +1922,6 @@ class FunDecl(UserValDecl):
                 ),
                 Entity.return_type.designated_type.assert_bare.cast(T.TypeDecl)
             ).as_bare_entity,
-
-            Entity.return_type.designated_type
         )
 
 
@@ -1904,6 +1936,9 @@ class EnumLitDecl(UserValDecl):
             Entity.parents.find(lambda t: t.is_a(T.EnumTypeDecl))
             .cast_or_raise(T.TypeDecl)
         )
+
+    # Empty env spec: enum lits are added as part of EnumTypeDecl's env_spec
+    env_spec = EnvSpec()
 
 
 @abstract
@@ -2139,6 +2174,7 @@ class ParenExpr(Expr):
     Parenthesized expression.
     """
     expr = Field(type=T.Expr)
+
 
 
 class FormalParam(Struct):
@@ -3058,9 +3094,12 @@ lkt_grammar.add_rules(
         ),
 
         EnumTypeDecl(
-            "enum", G.def_id, "(", List(G.enum_lit_decl, sep=","), ")",
+            "enum", G.def_id,
             Opt("implements", G.type_list),
-            "{", G.decl_block, "}"
+            "{",
+            "case", List(G.enum_lit_decl, sep=","),
+            G.decl_block,
+            "}"
         ),
 
         TraitDecl("trait", G.def_id, "{", G.decl_block, "}"),
