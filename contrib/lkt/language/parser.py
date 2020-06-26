@@ -867,9 +867,21 @@ class LexerDecl(Decl):
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.LKNode.list)
 
+    @langkit_property(return_type=T.env_assoc.array, memoized=True)
+    def builtin_decls():
+        return Array(['newline', 'indent', 'dedent']).map(
+            lambda sym:
+            new_env_assoc(
+                key=sym,
+                val=SyntheticLexerDecl.new(sym=sym),
+                dest_env=Self.children_env
+            ),
+        )
+
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
-        add_env()
+        add_env(),
+        add_to_env(Self.builtin_decls())
     )
 
 
@@ -949,12 +961,30 @@ class GrammarDecl(BaseGrammarDecl):
     )
 
 
-class GrammarRuleDecl(Decl):
+@abstract
+class BaseGrammarRuleDecl(Decl):
+    """
+    Base class for grammar rules inside of grammars/lexers.
+    """
+    expr = AbstractField(type=T.GrammarExpr)
+
+
+class GrammarRuleDecl(BaseGrammarRuleDecl):
     """
     Declaration of a grammar rule inside of a grammar.
     """
     syn_name = Field(type=T.DefId)
     expr = Field(type=T.GrammarExpr)
+
+
+@synthetic
+class SyntheticLexerDecl(BaseGrammarRuleDecl):
+    """
+    """
+    sym = UserField(T.Symbol, public=False)
+    name = Property(Self.sym)
+    syn_name = NullField()
+    expr = NullField()
 
 
 @abstract
@@ -1028,15 +1058,26 @@ class RefId(Id):
     @langkit_property()
     def referenced_decl():
 
-        return Entity.scope.get_first(
-            Self.symbol, lookup=If(
-                Entity.dot_expr_if_suffix.is_null,
-                LK.recursive,
-                LK.flat
+        param_if_name = Var(Entity.param_if_param_name)
+        is_annot_param = Var(
+            Not(param_if_name.is_null)
+            & Not(param_if_name.parents
+                  .find(lambda n: n.is_a(DeclAnnotation)).is_null)
+        )
+
+        return If(
+            is_annot_param,
+            No(T.SemanticResult),
+            Entity.scope.get_first(
+                Self.symbol, lookup=If(
+                    Entity.dot_expr_if_suffix.is_null,
+                    LK.recursive,
+                    LK.flat
+                )
+            ).cast(T.Decl).then(
+                lambda d: SemanticResult.new(result_ref=d, node=Self),
+                default_val=Self.ref_not_found_error
             )
-        ).cast(T.Decl).then(
-            lambda d: SemanticResult.new(result_ref=d, node=Self),
-            default_val=Self.ref_not_found_error
         )
 
     expr_context_free_type = Property(
