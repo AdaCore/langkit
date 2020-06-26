@@ -2538,8 +2538,8 @@ class CallExpr(Expr):
         # Create param matches for every formal that is unmatched
         formal_misses = Var(formals.filter(
             lambda formal:
-            Not(formal.default_value.is_null)
-            | actual_matches.find(
+            formal.default_value.is_null
+            & actual_matches.find(
                 lambda pm: pm.formal == formal
             ).is_null
         ).map(lambda formal: ParamMatch.new(has_matched=False, formal=formal)))
