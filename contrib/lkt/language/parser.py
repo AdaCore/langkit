@@ -2758,6 +2758,20 @@ class BinOp(Expr):
     op = Field(type=T.Op)
     right = Field(type=T.Expr)
 
+    @langkit_property()
+    def expr_context_free_type():
+        return Cond(
+            # If op is a relational operator, the cf type is bool
+            Self.op.is_a(Op.alt_and, Op.alt_or, Op.alt_lt, Op.alt_gt,
+                         Op.alt_lte, Op.alt_gte, Op.alt_eq),
+
+            Self.bool_type,
+
+            # Else, no idea for the moment. NOTE: we can probably improve that
+            # by forwarding the type of operands.
+            No(T.TypeDecl.entity)
+        )
+
 
 class ValDecl(ExplicitlyTypedDecl):
     """
