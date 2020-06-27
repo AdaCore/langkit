@@ -2180,6 +2180,8 @@ class ParenExpr(Expr):
     """
     expr = Field(type=T.Expr)
 
+    # Forward the type of the inner expression
+    expr_context_free_type = Property(Entity.expr.expr_context_free_type)
 
 
 class FormalParam(Struct):
