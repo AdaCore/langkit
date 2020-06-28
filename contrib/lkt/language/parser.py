@@ -918,6 +918,13 @@ class LexerCaseRule(LKNode):
     expr = Field(type=T.GrammarExpr)
     alts = Field(type=T.BaseLexerCaseRuleAlt.list)
 
+    # For the moment exempt resolution for children of LexerCaseRule, because
+    # even though we want to name-res them eventually, it's not a priority, and
+    # it might require a rethinking of this part of the DSL.
+    check_correctness = Property(Self.children.map(
+        lambda c: SemanticResult.new(node=c, exempt_analysis=True)
+    ))
+
 
 @abstract
 class BaseLexerCaseRuleAlt(LKNode):
