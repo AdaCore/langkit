@@ -364,8 +364,8 @@ class CompileCtx:
             files, whether to load type definitions. This is not done by
             default during the transition from our Python DSL to Lktlang.
 
-        :param bool lkt_semantic_checks: Whether to run lkt semantic checks
-            (Off by default).
+        :param bool lkt_semantic_checks: Whether to force Lkt semantic checks
+            (by default, enabled only if ``types_from_lkt`` is true).
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -404,7 +404,7 @@ class CompileCtx:
 
         self.lkt_units: List[L.AnalysisUnit] = []
         if lkt_file is None:
-            assert grammar, 'LKT spec required when no grammar is provided'
+            assert grammar, 'Lkt spec required when no grammar is provided'
         else:
             from langkit.lkt_lowering import load_lkt
             self.lkt_units = load_lkt(lkt_file)
@@ -1689,7 +1689,7 @@ class CompileCtx:
 
     def lower_lkt(self):
         """
-        Run the lkt lowering passes over lkt input files.
+        Run the Lkt lowering passes over Lkt input files.
         """
 
         if self.lexer is None:
@@ -1835,9 +1835,9 @@ class CompileCtx:
             lower_grammar_rules(ctx)
 
         return [
-            MajorStepPass('LKT processing'),
+            MajorStepPass('Lkt processing'),
             GlobalPass('Lkt semantic analysis', CompileCtx.check_lkt),
-            GlobalPass('lower lkt', CompileCtx.lower_lkt),
+            GlobalPass('lower Lkt', CompileCtx.lower_lkt),
             GlobalPass('prepare compilation', CompileCtx.prepare_compilation),
 
             MajorStepPass('Compiling the lexer'),
