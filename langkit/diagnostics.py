@@ -125,7 +125,8 @@ class Location:
         ] + ([str(self.column)] if self.column > 0 else []))
 
     @classmethod
-    def from_sloc_range(cls, unit: L.AnalysisUnit,
+    def from_sloc_range(cls,
+                        unit: L.AnalysisUnit,
                         sloc: L.SlocRange) -> Location:
         """
         Create a Location based on a LKT SlocRange and AnalysisUnit.
@@ -142,7 +143,7 @@ class Location:
     @classmethod
     def from_lkt_node(cls, node: L.LKNode) -> Location:
         """
-        Create a Location based on a LKT node.
+        Create a Location based on a Lkt node.
         """
         return cls.from_sloc_range(node.unit, node.sloc_range)
 

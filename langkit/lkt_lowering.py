@@ -363,7 +363,6 @@ class WithLexerAnnotationSpec(AnnotationSpec):
 
         return lexer_decl
 
-# Annotation specs for grammar rules
 
 token_cls_map = {'text': WithText,
                  'trivia': WithTrivia,
