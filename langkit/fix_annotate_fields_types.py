@@ -1,4 +1,4 @@
-from lib2to3 import fixer_base
+from lib2to3.fixer_base import BaseFix
 from lib2to3.fixer_util import Attr, Call, KeywordArg, Name
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pytree import Node
@@ -17,7 +17,7 @@ def build_attr(prefix, suffix):
 # Semantic analysis of Python code is hard!
 
 
-class FixAnnotateFieldsTypes(fixer_base.BaseFix):
+class FixAnnotateFieldsTypes(BaseFix):
     """
     2to3 fixer that will annotate the types of fields that are not
     annotated already.
