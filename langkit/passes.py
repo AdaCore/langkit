@@ -2,9 +2,23 @@
 Helpers to manage compilation passes.
 """
 
-from langkit.compiled_types import CompiledTypeRepo
+from __future__ import annotations
+
+from typing import Callable, List, TYPE_CHECKING
+
+from langkit.compiled_types import ASTNodeType, CompiledTypeRepo
 from langkit.diagnostics import errors_checkpoint
+from langkit.emitter import Emitter
+from langkit.envs import EnvSpec
+from langkit.expressions import PropertyDef
+from langkit.lexer import Lexer
+from langkit.parsers import Grammar, Parser
 from langkit.utils import Colors, printcol
+
+
+# Do this only during typing to avoid circular dependencies
+if TYPE_CHECKING:
+    from langkit.compile_context import CompileCtx
 
 
 class PassManager:
@@ -12,25 +26,33 @@ class PassManager:
     Holder for compilation passes. Handles passes sequential execution.
     """
 
-    def __init__(self):
+    frozen: bool
+    """
+    If true, adding new passes is forbidden.
+    """
+
+    passes: List[AbstractPass]
+    """
+    List of passes to run.
+    """
+
+    def __init__(self) -> None:
         self.frozen = False
         self.passes = []
 
-    def add(self, *passes):
+    def add(self, *passes: AbstractPass) -> None:
         """
         Add the given passes to the execution pipeline.
 
-        :param list[AbstractPass] passes: Pass to append.
+        :param passes: Pass to append.
         """
         assert not self.frozen, ('Invalid attempt to add a pass after pipeline'
                                  ' execution')
         self.passes.extend(passes)
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         """
         Run through the execution pipeline.
-
-        :type context: langkit.compile_context.CompileCtx context
         """
         assert not self.frozen, 'Invalid attempt to run the pipeline twice'
         self.frozen = True
@@ -59,17 +81,22 @@ class AbstractPass:
     Subclasses are required only to override the "run" method.
     """
 
-    def __init__(self, name, disabled=False):
-        """
-        :param str name: Informative name for users to be used in logging.
-        :param bool disabled: If True, do not run this pass. This makes it
-            convenient to selectively disable passes in big PassManager.add
-            calls.
-        """
+    name: str
+    """
+    Informative name for users to be used in logging.
+    """
+
+    disabled: bool
+    """
+    If True, do not run this pass. This makes it convenient to selectively
+    disable passes in big PassManager.add calls.
+    """
+
+    def __init__(self, name: str, disabled: bool = False) -> None:
         self.name = name
         self.disabled = disabled
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         raise NotImplementedError()
 
 
@@ -80,11 +107,16 @@ class MajorStepPass(AbstractPass):
     This is useful to display global compilation progression to users.
     """
 
-    def __init__(self, message):
-        super().__init__(None)
+    message: str
+    """
+    Message to display.
+    """
+
+    def __init__(self, message: str) -> None:
+        super().__init__('')
         self.message = message
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         if context.verbosity.info:
             printcol('{}...'.format(self.message), Colors.OKBLUE)
 
@@ -94,19 +126,14 @@ class GlobalPass(AbstractPass):
     Concrete pass to run on the context itself.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
-        """
-        :param str name: See AbstractPass.
-
-        :param pass_fn: Function to be run when executing the pass.
-        :type (langkit.compile_context.CompileCtx) -> None
-
-        :param bool disabled: See AbstractPass.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[CompileCtx], None],
+                 disabled: bool = False) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         self.pass_fn(context)
 
 
@@ -115,20 +142,14 @@ class EmitterPass(AbstractPass):
     Concrete pass to run on the emitter (for code generation).
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
-        """
-        :param str name: See AbstractPass.
-
-        :param pass_fn: Function to be run when executing the pass.
-        :type (langkit.emitter.Emitter,
-               langkit.compile_context.CompileCtx) -> None
-
-        :param bool disabled: See AbstractPass.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[Emitter, CompileCtx], None],
+                 disabled: bool = False) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         self.pass_fn(context.emitter, context)
 
 
@@ -139,10 +160,10 @@ class EmbedIpythonPass(AbstractPass):  # no-code-coverage
     compilation and data structures for example.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Embed IPython")
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         from IPython import embed
         embed(header="Langkit debug prompt")
 
@@ -152,7 +173,10 @@ class LexerPass(AbstractPass):
     Concrete pass to run on the whole lexer.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[Lexer, CompileCtx], None],
+                 disabled: bool = False) -> None:
         """
         :param str name: See AbstractPass.
 
@@ -164,7 +188,7 @@ class LexerPass(AbstractPass):
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         self.pass_fn(context.lexer, context)
 
 
@@ -173,20 +197,14 @@ class GrammarPass(AbstractPass):
     Concrete pass to run on the whole grammar.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
-        """
-        :param str name: See AbstractPass.
-
-        :param pass_fn: Function to be run when executing the pass.
-        :type (langkit.parsers.Grammar,
-               langkit.compile_context.CompileCtx) -> None
-
-        :param bool disabled: See AbstractPass.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[Grammar, CompileCtx], None],
+                 disabled: bool = False) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         self.pass_fn(context.grammar, context)
 
 
@@ -195,22 +213,14 @@ class GrammarRulePass(AbstractPass):
     Concrete pass to run on each grammar rule.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
-        """
-        :param str name: See AbstractPass.
-
-        :param pass_fn: Function to be run when executing the pass. Called once
-            per grammar rule. This function must take the context and the rule
-            parser itself.
-        :type (langkit.compile_context.CompileCtx,
-               langkit.parsers.Parser) -> None
-
-        :param bool disabled: See AbstractPass.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[Parser], None],
+                 disabled: bool = False) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         # Sort grammar rules by name, so that the pass order is deterministic
         for name, rule in sorted(context.grammar.rules.items()):
             with rule.diagnostic_context:
@@ -222,26 +232,21 @@ class ASTNodePass(AbstractPass):
     Concrete pass to run on each ASTNodeType subclass.
     """
 
-    def __init__(self, name, pass_fn, disabled=False, auto_context=True):
-        """
-        :param str name: See AbstractPass.
+    auto_context: bool
+    """
+    If True, setup a diagnostic context for the current AST node.
+    """
 
-        :param pass_fn: Function to be run when executing the pass. Called once
-            per ASTNodeType subclass. This function must take the context and
-            the ASTnodeType subclass.
-        :type (langkit.compile_context.CompileCtx,
-               langkit.compile_context.ASTNodeType) -> None
-
-        :param bool disabled: See AbstractPass.
-
-        :param bool auto_context: If True, setup a diagnostic context for the
-            current AST node.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[CompileCtx, ASTNodeType], None],
+                 disabled: bool = False,
+                 auto_context: bool = True) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
         self.auto_context = auto_context
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         for astnode in context.astnode_types:
             if self.auto_context:
                 with astnode.diagnostic_context:
@@ -255,27 +260,22 @@ class EnvSpecPass(AbstractPass):
     Concrete pass to run on each EnvSpec instance.
     """
 
-    def __init__(self, name, pass_fn, disabled=False, iter_metaclass=False):
-        """
-        :param str name: See AbstractPass.
+    iter_metaclass: bool
+    """
+    If True, iterate on the AST nodes in CompiledTypeRepo.astnode_types.
+    Otherwise, iterate on the context's list of AST node types.
+    """
 
-        :param pass_fn: Function to be run when executing the pass. Called once
-            per EnvSpec instance. This function must take the EnvSpec instance
-            itself and the context.
-        :type (langkit.envs.EnvSpec,
-               langkit.compile_context.CompileCtx) -> None
-
-        :param bool disabled: See AbstractPass.
-
-        :param bool iter_metaclass: If True, iterate on the AST nodes in
-            CompiledTypeRepo.astnode_types. Otherwise, iterate on the
-            context's list of AST node types.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[EnvSpec, CompileCtx], None],
+                 disabled: bool = False,
+                 iter_metaclass: bool = False) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
         self.iter_metaclass = iter_metaclass
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         astnode_types = (CompiledTypeRepo.astnode_types
                          if self.iter_metaclass else
                          context.astnode_types)
@@ -291,22 +291,14 @@ class PropertyPass(AbstractPass):
     Concrete pass to run on each PropertyDef instance.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
-        """
-        :param str name: See AbstractPass.
-
-        :param pass_fn: Function to be run when executing the pass. Called once
-            per PropertyDef instance. This function must take the PropertyDef
-            instance and the context.
-        :type (langkit.expressions.base.PropertyDef,
-               langkit.compile_context.CompileCtx) -> None
-
-        :param bool disabled: See AbstractPass.
-        """
+    def __init__(self,
+                 name: str,
+                 pass_fn: Callable[[PropertyDef, CompileCtx], None],
+                 disabled: bool = False) -> None:
         super().__init__(name, disabled)
         self.pass_fn = pass_fn
 
-    def run(self, context):
+    def run(self, context: CompileCtx) -> None:
         for prop in context.all_properties(include_inherited=False):
             with prop.diagnostic_context:
                 self.pass_fn(prop, context)
