@@ -1784,8 +1784,8 @@ class CompileCtx:
         from langkit.lexer import Lexer
         from langkit.parsers import Grammar, Parser
         from langkit.passes import (
-            ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass,
-            MajorStepPass, PropertyPass, errors_checkpoint_pass
+            ASTNodePass, EnvSpecPass, GlobalPass, GrammarPass, GrammarRulePass,
+            LexerPass, MajorStepPass, PropertyPass, errors_checkpoint_pass
         )
 
         # RA22-015: in order to allow bootstrap, we need to import liblktlang
@@ -1795,16 +1795,6 @@ class CompileCtx:
                 return
             from langkit.lkt_lowering import lower_grammar_rules
             lower_grammar_rules(ctx)
-
-        def LexerPass(name, fn):
-            def internal(ctx):
-                return fn(self.lexer, ctx)
-            return GlobalPass(name, internal)
-
-        def GrammarPass(name, fn):
-            def internal(ctx):
-                return fn(self.grammar, ctx)
-            return GlobalPass(name, internal)
 
         return [
             MajorStepPass('LKT processing'),

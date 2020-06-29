@@ -147,6 +147,49 @@ class EmbedIpythonPass(AbstractPass):  # no-code-coverage
         embed(header="Langkit debug prompt")
 
 
+class LexerPass(AbstractPass):
+    """
+    Concrete pass to run on the whole lexer.
+    """
+
+    def __init__(self, name, pass_fn, disabled=False):
+        """
+        :param str name: See AbstractPass.
+
+        :param pass_fn: Function to be run when executing the pass.
+        :type (langkit.lexer.Lexer, langkit.compile_context.CompileCtx) -> None
+
+        :param bool disabled: See AbstractPass.
+        """
+        super().__init__(name, disabled)
+        self.pass_fn = pass_fn
+
+    def run(self, context):
+        self.pass_fn(context.lexer, context)
+
+
+class GrammarPass(AbstractPass):
+    """
+    Concrete pass to run on the whole grammar.
+    """
+
+    def __init__(self, name, pass_fn, disabled=False):
+        """
+        :param str name: See AbstractPass.
+
+        :param pass_fn: Function to be run when executing the pass.
+        :type (langkit.parsers.Grammar,
+               langkit.compile_context.CompileCtx) -> None
+
+        :param bool disabled: See AbstractPass.
+        """
+        super().__init__(name, disabled)
+        self.pass_fn = pass_fn
+
+    def run(self, context):
+        self.pass_fn(context.grammar, context)
+
+
 class GrammarRulePass(AbstractPass):
     """
     Concrete pass to run on each grammar rule.
