@@ -25,9 +25,10 @@ from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
-from langkit.diagnostics import (Context, Location, Severity, WarningSet,
-                                 check_source_language, context_stack,
-                                 print_error, print_error_from_sem_result)
+from langkit.diagnostics import (
+    Context, Location, Severity, WarningSet, check_source_language,
+    context_stack, print_error, print_error_from_sem_result
+)
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
@@ -1709,6 +1710,8 @@ class CompileCtx:
         Run checks on the lkt sources.
         """
         errors = False
+
+        # First check the absence of syntax errors in all loaded units
         for unit in self.lkt_units:
             if unit.diagnostics:
                 for diag in unit.diagnostics:
@@ -1717,11 +1720,11 @@ class CompileCtx:
                         diag.message,
                         Location.from_sloc_range(unit, diag.sloc_range)
                     )
-                # NOTE: for the moment let's not even try to analyze anything
-                # if we have syntax errors.
-                return
 
-            if self.lkt_semantic_checks:
+        # NOTE: for the moment let's not even try to analyze anything if we
+        # have syntax errors.
+        if not errors and self.lkt_semantic_checks:
+            for unit in self.lkt_units:
                 diags = cast(L.LangkitRoot, unit.root).p_check_legality
                 for d in diags:
                     errors = True
