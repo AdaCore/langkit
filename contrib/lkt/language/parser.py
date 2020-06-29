@@ -974,11 +974,13 @@ class GrammarDecl(BaseGrammarDecl):
     syn_name = Field(type=T.DefId)
     rules = Field(type=T.FullDecl.list)
 
-    lexer = Property(
-        Entity.full_decl.get_annotation('with_lexer')
-        .params.params.at(0).value.as_entity.check_referenced_decl,
-        public=True
-    )
+    @langkit_property(public=True)
+    def lexer():
+        """
+        Return the lexer that is associated to this grammar.
+        """
+        return (Entity.full_decl.get_annotation('with_lexer')
+                .params.params.at(0).value.as_entity.check_referenced_decl)
 
     env_spec = EnvSpec(
         add_to_env_kv(Entity.name, Self),
