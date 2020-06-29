@@ -1,0 +1,3 @@
+import lexer_example
+
+@with_lexer(foo_grammar) grammar foo_grammar {}
