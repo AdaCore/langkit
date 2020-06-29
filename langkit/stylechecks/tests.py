@@ -741,7 +741,7 @@ def create_testcase(tc):
     test.__name__ = tc.filename
     test.description = tc.filename
     return test
-create_testcase.__test__ = False
+setattr(create_testcase, '__test__', False)
 
 
 def test_generator():

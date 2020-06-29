@@ -15,6 +15,7 @@ import os
 import os.path
 import re
 import sys
+from typing import Pattern
 
 
 TERM_CODE_RE = re.compile('(\x1b\\[[^m]*m)')
@@ -407,10 +408,10 @@ class LanguageChecker:
     """Base class for language-specific checkers."""
 
     # String for single-line comments starters
-    comment_start = None
+    comment_start: str
 
     # Regular expression that matches package imports
-    with_re = None
+    with_re: Pattern
 
     def check(self, report, filename, content, parse):
         """
