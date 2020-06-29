@@ -1,7 +1,13 @@
-== annotated_grammar.lkt ==
-annotated_grammar.lkt:3:1: error: No annotation allowed
+== annotated_grammar_1.lkt ==
+annotated_grammar_1.lkt:3:1: error: Invalid annotation: foo
 2 | @foo grammar foo_grammar {}
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  | ^^^^                       
+
+
+== annotated_grammar_2.lkt ==
+annotated_grammar_2.lkt:3:1: error: Lexer expected, got <GrammarDecl "foo_grammar" annotated_grammar_2.lkt:3:26-3:48>
+2 | @with_lexer(foo_grammar) grammar foo_grammar {}
+  | ^^^^^^^^^^^^^^^^^^^^^^^^                       
 
 
 == basic.lkt ==

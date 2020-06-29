@@ -332,6 +332,33 @@ class TokenAnnotationSpec(AnnotationSpec):
         return (start_ignore_layout, end_ignore_layout)
 
 
+class WithLexerAnnotationSpec(AnnotationSpec):
+    """
+    Interpreter for @with_lexer annotations for grammar declarations.
+    """
+    def __init__(self) -> None:
+        super().__init__('with_lexer', unique=True, require_args=True)
+
+    def interpret(self,
+                  ctx: CompileCtx,
+                  args: List[L.Expr],
+                  kwargs: Dict[str, L.Expr]) -> L.LexerDecl:
+        check_source_language(not kwargs, 'No keyword argument allowed')
+        check_source_language(len(args) == 1, 'Exactly one argument expected')
+
+        lexer_ref = args[0]
+        if not isinstance(lexer_ref, L.RefId):
+            error('Invalid lexer reference')
+
+        # TODO: this will raise a PropertyError if semantic resolution fails.
+        # Resolving this lexer reference should be done in the check pass so
+        # that we never land here in that case.
+        lexer_decl = lexer_ref.p_check_referenced_decl
+        if not isinstance(lexer_decl, L.LexerDecl):
+            error('Lexer expected, got {}'.format(lexer_decl))
+
+        return lexer_decl
+
 # Annotation specs for grammar rules
 
 token_cls_map = {'text': WithText,
@@ -346,6 +373,12 @@ class ParsedAnnotations:
     """
 
     annotations: ClassVar[List[AnnotationSpec]]
+
+
+@dataclass
+class GrammarAnnotations(ParsedAnnotations):
+    with_lexer: L.LexerDecl
+    annotations = [WithLexerAnnotationSpec()]
 
 
 @dataclass
@@ -783,9 +816,8 @@ def create_grammar(ctx: CompileCtx,
     full_grammar = find_toplevel_decl(ctx, lkt_units, L.GrammarDecl, 'grammar')
     assert isinstance(full_grammar.f_decl, L.GrammarDecl)
 
-    # No annotation allowed for grammars
     with ctx.lkt_context(full_grammar):
-        check_no_annotations(full_grammar)
+        parse_annotations(ctx, GrammarAnnotations, full_grammar)
 
     # Get the list of grammar rules. This is where we check that we only have
     # grammar rules, that their names are unique, and that they have valid
