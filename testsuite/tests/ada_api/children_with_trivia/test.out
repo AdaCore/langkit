@@ -1,0 +1,14 @@
+<Decl main.txt:1:1-1:2>
+  Node: <Identifier main.txt:1:1-1:2>
+  Trivia: " "
+  Trivia: "# foo"
+  Trivia: "\x0a"
+  Node: <DeclErrorAbsent main.txt:1:2-1:2>
+
+<Decl main.txt:2:1-2:8>
+  Node: <Identifier main.txt:2:1-2:2>
+  Trivia: " "
+  Node: <DeclErrorPresent main.txt:2:3-2:8>
+
+main.adb: Done.
+Done

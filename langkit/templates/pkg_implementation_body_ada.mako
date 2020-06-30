@@ -2574,8 +2574,7 @@ package body ${ada_lib_name}.Implementation is
       function Filter_Children
         (Parent : ${T.root_node.name})
          return ${root_node_array.array_type_name};
-      --  Return an array for all children in Parent that are not null and that
-      --  aren't ghost nodes.
+      --  Return an array for all children in Parent that are not null
 
       --------------------
       -- Append_Trivias --
@@ -2606,9 +2605,7 @@ package body ${ada_lib_name}.Implementation is
          Next     : Integer := Result'First;
       begin
          for I in Children'Range loop
-            --  Get rid of null nodes and of nodes with no real existence in
-            --  the source code.
-            if Children (I) /= null and then not Is_Ghost (Children (I)) then
+            if Children (I) /= null then
                Result (Next) := Children (I);
                Next := Next + 1;
             end if;
@@ -2628,12 +2625,16 @@ package body ${ada_lib_name}.Implementation is
                          N_Children (First_Child).Token_Start_Index - 1);
       end if;
 
+      --  Append each node to Ret_Vec, and append trivia that follow after each
+      --  non-ghost nodes.
       for I in N_Children'Range loop
          Ret_Vec.Append (Bare_Child_Record'(Child, N_Children (I)));
-         Append_Trivias (N_Children (I).Token_End_Index,
-                         (if I = N_Children'Last
-                          then Node.Token_End_Index - 1
-                          else N_Children (I + 1).Token_Start_Index - 1));
+         if not Is_Ghost (N_Children (I)) then
+            Append_Trivias (N_Children (I).Token_End_Index,
+                            (if I = N_Children'Last
+                             then Node.Token_End_Index - 1
+                             else N_Children (I + 1).Token_Start_Index - 1));
+         end if;
       end loop;
 
       declare
