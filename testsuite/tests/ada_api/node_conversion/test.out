@@ -1,5 +1,5 @@
 Decls: <VarDeclList foo.txt:1:1-1:1>
-R: Constraint_Error: Libfoolang: invalid type conversion from Ref to VarDeclList
+R: Constraint_Error: Libfoolang: invalid type conversion from VarDeclList to Ref
 F: <VarDeclList foo.txt:1:1-1:1>
 Done.
 Done
