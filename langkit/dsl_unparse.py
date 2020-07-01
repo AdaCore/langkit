@@ -533,7 +533,7 @@ def var_name(var_expr, default="_"):
     return unparsed_name(ret)
 
 
-def is_a(expr, *names):
+def expr_is_a(expr, *names):
     return any(expr.__class__.__name__ == n for n in names)
 
 
@@ -543,7 +543,7 @@ def needs_parens(expr):
     return not (
         isinstance(expr, (FieldAccess, Literal, AbstractVariable, BigIntLiteral, EnvGet,
                           Map, Quantifier))
-        or is_a(expr, "as_entity", "as_bare_entity", "children",
+        or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
               "append_rebinding", "concat_rebindings", "env_node",
               "rebindings_new_env", "rebindings_old_env", "get_value",
@@ -858,7 +858,11 @@ def emit_expr(expr, **ctx):
             # expression in the new syntax, so we don't want to use the ?
             # syntax on it.
             if not isinstance(expr.then_expr, Match):
-                return "{}?{}".format(
+                # If the "then" expression also implies a "?", do not emit it
+                # twice.
+                fmt = '{}{}' if expr_is_a(expr.then_expr, 'at') else '{}?{}'
+
+                return fmt.format(
                     ee(expr.expr),
                     ee(expr.then_expr, then_underscore_var=expr.var_expr)
                 )
