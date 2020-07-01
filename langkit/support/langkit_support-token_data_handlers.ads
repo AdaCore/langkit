@@ -21,6 +21,10 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;
+
+with GNATCOLL.VFS;
+
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -125,6 +129,14 @@ package Langkit_Support.Token_Data_Handlers is
       Source_First : Positive;
       Source_Last  : Natural;
       --  Actual bounds in Source_Buffer for the source text
+
+      Filename : GNATCOLL.VFS.Virtual_File;
+      --  If the source buffer comes from a file, Filename contains the name of
+      --  that file. No_File otherwise.
+
+      Charset : Ada.Strings.Unbounded.Unbounded_String;
+      --  If the source buffer was decoded, charset that was used to do so.
+      --  Empty string otherwise.
 
       Tokens : Token_Vectors.Vector;
       --  Sequence of tokens in the same order as found in the source file

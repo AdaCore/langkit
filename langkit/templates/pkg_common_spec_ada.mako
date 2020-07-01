@@ -257,6 +257,16 @@ package ${ada_lib_name}.Common is
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
+   function Origin_Filename (Token : Token_Reference) return String;
+   --  Return the name of the file whose content was scanned to create Token.
+   --  Return an empty string if the source comes from a memory buffer instead
+   --  of a file.
+
+   function Origin_Charset (Token : Token_Reference) return String;
+   --  Return the charset used to decode the source that was scanned to create
+   --  Token. Return an empty string if the source was already decoded during
+   --  the scan.
+
    function Convert
      (TDH      : Token_Data_Handler;
       Token    : Token_Reference;

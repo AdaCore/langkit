@@ -3,6 +3,7 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNATCOLL.Iconv;
+with GNATCOLL.VFS; use GNATCOLL.VFS;
 
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
@@ -322,6 +323,24 @@ package body ${ada_lib_name}.Common is
    begin
       return Token_Data.Sloc_Range;
    end Sloc_Range;
+
+   ---------------------
+   -- Origin_Filename --
+   ---------------------
+
+   function Origin_Filename (Token : Token_Reference) return String is
+   begin
+      return +Token.TDH.Filename.Full_Name;
+   end Origin_Filename;
+
+   --------------------
+   -- Origin_Charset --
+   --------------------
+
+   function Origin_Charset (Token : Token_Reference) return String is
+   begin
+      return To_String (Token.TDH.Charset);
+   end Origin_Charset;
 
    -------------------
    -- Is_Equivalent --
