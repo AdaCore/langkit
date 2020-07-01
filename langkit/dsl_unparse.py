@@ -856,8 +856,8 @@ def emit_expr(expr, **ctx):
             assert expr.underscore_then
             # Match is like a function call in the Python DSL, but is a regular
             # expression in the new syntax, so we don't want to use the ?
-            # syntax on it.
-            if not isinstance(expr.then_expr, Match):
+            # syntax on it. Likewise for IsA.
+            if not isinstance(expr.then_expr, (Match, IsA)):
                 # If the "then" expression also implies a "?", do not emit it
                 # twice.
                 fmt = '{}{}' if expr_is_a(expr.then_expr, 'at') else '{}?{}'
