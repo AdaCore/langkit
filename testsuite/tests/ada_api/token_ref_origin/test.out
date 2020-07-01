@@ -1,0 +1,8 @@
+filename: ""
+charset: ascii
+
+filename: "foo.txt"
+charset: utf-8
+
+main.adb: Done.
+Done

@@ -19,6 +19,7 @@ with GNAT.Byte_Order_Mark;
 
 with GNATCOLL.Iconv;
 with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
+with GNATCOLL.VFS;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
@@ -535,6 +536,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
                   Close (File);
                   raise;
             end;
+            TDH.Filename := Input.Filename;
+            TDH.Charset := Input.Charset;
 
          when Bytes_Buffer =>
             declare
@@ -544,6 +547,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
                Extract_Tokens_From_Bytes_Buffer
                  (Bytes, To_String (Input.Charset), Input.Read_BOM, Tab_Stop,
                   With_Trivia, TDH, Diagnostics);
+               TDH.Filename := GNATCOLL.VFS.No_File;
+               TDH.Charset := Input.Charset;
             end;
 
          when Text_Buffer =>
@@ -560,6 +565,8 @@ package body ${ada_lib_name}.Lexer_Implementation is
                Extract_Tokens_From_Text_Buffer
                  (Decoded_Buffer, Source_First, Source_Last, Tab_Stop,
                   With_Trivia, TDH, Diagnostics);
+               TDH.Filename := GNATCOLL.VFS.No_File;
+               TDH.Charset := Null_Unbounded_String;
             end;
       end case;
    end Extract_Tokens;
