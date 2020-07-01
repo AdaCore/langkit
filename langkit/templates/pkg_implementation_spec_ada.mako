@@ -776,9 +776,9 @@ private package ${ada_lib_name}.Implementation is
 
    type Bare_Children_Array is array (Positive range <>) of Bare_Child_Record;
 
-   function Children_With_Trivia
+   function Children_And_Trivia
      (Node : ${T.root_node.name}) return Bare_Children_Array;
-   --  Implementation for Analysis.Children_With_Trivia
+   --  Implementation for Analysis.Children_And_Trivia
 
    % for astnode in no_builtins(ctx.astnode_types):
       ${astnode_types.private_decl(astnode)}

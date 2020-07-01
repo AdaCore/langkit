@@ -1860,7 +1860,7 @@ package body ${ada_lib_name}.Implementation is
       Children_Prefix : constant String := Line_Prefix & "|  ";
    begin
       Put_Line (Line_Prefix & Kind_Name (Node));
-      for C of Children_With_Trivia (Node) loop
+      for C of Children_And_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
                Put_Line (Children_Prefix & Debug_Text (C.Trivia));
@@ -2553,11 +2553,11 @@ package body ${ada_lib_name}.Implementation is
       return Index.Token;
    end Stored_Token;
 
-   --------------------------
-   -- Children_With_Trivia --
-   --------------------------
+   -------------------------
+   -- Children_And_Trivia --
+   -------------------------
 
-   function Children_With_Trivia
+   function Children_And_Trivia
      (Node : ${T.root_node.name}) return Bare_Children_Array
    is
       package Children_Vectors is new Ada.Containers.Vectors
@@ -2645,7 +2645,7 @@ package body ${ada_lib_name}.Implementation is
          end loop;
          return A;
       end;
-   end Children_With_Trivia;
+   end Children_And_Trivia;
 
    --------------
    -- Is_Ghost --

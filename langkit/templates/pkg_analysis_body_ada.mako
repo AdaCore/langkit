@@ -933,18 +933,18 @@ package body ${ada_lib_name}.Analysis is
       Assign_Names_To_Logic_Vars (Node.Internal.Node);
    end Assign_Names_To_Logic_Vars;
 
-   --------------------------
-   -- Children_With_Trivia --
-   --------------------------
+   -------------------------
+   -- Children_And_Trivia --
+   -------------------------
 
-   function Children_With_Trivia
+   function Children_And_Trivia
      (Node : ${root_entity.api_name}'Class) return Children_Array
    is
    begin
       Check_Safety_Net (Node.Safety_Net);
       declare
          Bare_Result : constant Bare_Children_Array :=
-            Children_With_Trivia (Unwrap_Node (Node));
+            Children_And_Trivia (Unwrap_Node (Node));
          Result      : Children_Array (Bare_Result'Range);
       begin
          for I in Bare_Result'Range loop
@@ -962,7 +962,7 @@ package body ${ada_lib_name}.Analysis is
          end loop;
          return Result;
       end;
-   end Children_With_Trivia;
+   end Children_And_Trivia;
 
    -----------------
    -- First_Token --

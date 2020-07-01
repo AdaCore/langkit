@@ -344,7 +344,7 @@ package ${ada_lib_name}.Analysis is
 
    type Children_Array is array (Positive range <>) of Child_Record;
 
-   function Children_With_Trivia
+   function Children_And_Trivia
      (Node : ${root_entity.api_name}'Class) return Children_Array;
    --  Return the children of this node interleaved with Trivia token nodes, so
    --  that:

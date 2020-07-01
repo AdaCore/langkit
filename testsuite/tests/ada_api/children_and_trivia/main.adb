@@ -14,7 +14,7 @@ begin
    for C of U.Root.Children loop
       Put_Line (C.Short_Image);
 
-      for CC of C.Children_With_Trivia loop
+      for CC of C.Children_And_Trivia loop
          if CC.Kind = Child then
             Put_Line ("  Node: " & CC.Node.Short_Image);
          else

@@ -1,5 +1,5 @@
 """
-Check that the Children_With_Trivia function works as expected.
+Check that the Children_And_Trivia function works as expected.
 """
 
 from langkit.dsl import ASTNode, Field
