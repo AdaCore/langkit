@@ -16,10 +16,10 @@ procedure Main is
    procedure Dump (Label : String; S : My_Struct) is
    begin
       Put_Line (Label & ":");
-      Put_Line ("Entity_Field = " & Entity_Field (S).Short_Image);
+      Put_Line ("Entity_Field = " & Entity_Field (S).Image);
       Put_Line ("Array_Field:");
       for Item of Array_Field (S) loop
-         Put_Line ("  " & Item.Short_Image);
+         Put_Line ("  " & Item.Image);
       end loop;
       Put_Line ("Bigint_Field = " & Bigint_Field (S).Image);
       New_Line;

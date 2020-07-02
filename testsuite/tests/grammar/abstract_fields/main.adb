@@ -15,8 +15,8 @@ begin
    end if;
 
    for D of U.Root.As_Decl_List loop
-      Put_Line (D.Short_Image & ".F_Name =");
-      Put_Line ("  (direct accessor) " & D.F_Name.Short_Image);
+      Put_Line (D.Image & ".F_Name =");
+      Put_Line ("  (direct accessor) " & D.F_Name.Image);
       declare
          I : constant Positive := Index (D.Kind, Decl_F_Name);
       begin
@@ -24,7 +24,7 @@ begin
             raise Program_Error;
          end if;
          Put_Line
-           ("  (introspection) " & D.Child (I).Short_Image
+           ("  (introspection) " & D.Child (I).Image
             & " [index=" & I'Image & "]");
       end;
    end loop;

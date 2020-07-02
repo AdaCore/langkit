@@ -274,8 +274,8 @@ module ${ocaml_api.node_name(astnode)} : sig
    * between the first and the last tokens of the given node.
    *)
 
-  val short_image : [< ${root_entity_type} ] -> string
-  ${ocaml_doc('langkit.node_short_image', 1)}
+  val image : [< ${root_entity_type} ] -> string
+  ${ocaml_doc('langkit.node_image', 1)}
 
   val sloc_range : [< ${root_entity_type} ] -> SlocRange.t
   ${ocaml_doc('langkit.node_sloc_range', 1)}

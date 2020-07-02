@@ -15,8 +15,8 @@ use ${ada_lib_name}.Implementation;
 private package ${ada_lib_name}.Debug is
 
    procedure PN (Node : ${T.root_node.name});
-   --  "Print Node".  Shortcut for Put_Line (Node.Short_Image). This is useful
-   --  because Short_Image takes an implicit accessibility level parameter,
+   --  "Print Node".  Shortcut for Put_Line (Node.Image). This is useful
+   --  because Image takes an implicit accessibility level parameter,
    --  which is not convenient in GDB.
 
    procedure PT (Node : ${T.root_node.name});

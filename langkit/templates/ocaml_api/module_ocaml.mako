@@ -535,7 +535,7 @@ module CFunctions = struct
   let node_kind = foreign ~from:c_lib "${capi.get_name('node_kind')}"
     (ptr ${ocaml_api.c_type(root_entity)} @-> raisable int)
 
-  let short_image = foreign ~from:c_lib "${capi.get_name('node_short_image')}"
+  let image = foreign ~from:c_lib "${capi.get_name('node_image')}"
     (ptr ${ocaml_api.c_type(root_entity)}
      @-> ptr Text.c_type
      @-> raisable void)
@@ -1016,9 +1016,9 @@ let ${ocaml_api.field_name(field)}
   let text node =
     Token.text_range (token_start node) (token_end node)
 
-  let short_image node =
+  let image node =
     let c_result_ptr = allocate_n Text.c_type ~count:1 in
-    CFunctions.short_image
+    CFunctions.image
       (addr (${ocaml_api.unwrap_value('node', root_entity, 'context node')}))
       c_result_ptr;
     !@ c_result_ptr

@@ -1167,11 +1167,11 @@ class ${root_astnode_name}(object):
         return result._wrap()
 
     @property
-    def short_image(self):
-        ${py_doc('langkit.node_short_image', 8)}
+    def image(self):
+        ${py_doc('langkit.node_image', 8)}
         c_node = self._unwrap(self)
         c_result = _text()
-        _node_short_image(ctypes.byref(c_node), ctypes.byref(c_result))
+        _node_image(ctypes.byref(c_node), ctypes.byref(c_result))
         return c_result._wrap()
 
     def lookup(self, sloc):
@@ -1378,7 +1378,7 @@ class ${root_astnode_name}(object):
         return helper(self)
 
     def __repr__(self):
-        return self.short_image
+        return self.image
 
     @property
     def entity_repr(self):
@@ -1755,8 +1755,8 @@ _node_is_synthetic = _import_func(
     '${capi.get_name("node_is_synthetic")}',
     [ctypes.POINTER(${c_entity})], ctypes.c_int
 )
-_node_short_image = _import_func(
-    '${capi.get_name("node_short_image")}',
+_node_image = _import_func(
+    '${capi.get_name("node_image")}',
     [ctypes.POINTER(${c_entity}), ctypes.POINTER(_text)], None
 )
 _node_text = _import_func(

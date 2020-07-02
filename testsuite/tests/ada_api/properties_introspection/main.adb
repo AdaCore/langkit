@@ -67,7 +67,7 @@ procedure Main is
               (Result, Ada.Directories.Simple_Name
                  (As_Analysis_Unit (Value).Get_Filename));
          when Node_Value =>
-            Append (Result, As_Node (Value).Short_Image);
+            Append (Result, As_Node (Value).Image);
 
          when Analysis_Unit_Kind_Value =>
             Append (Result, As_Analysis_Unit_Kind (Value)'Image);
@@ -88,7 +88,7 @@ procedure Main is
                      else
                         Append (Result, ASCII.LF);
                      end if;
-                     Append (Result, Indent & "* " & V.Short_Image);
+                     Append (Result, Indent & "* " & V.Image);
                   end loop;
                end if;
             end;

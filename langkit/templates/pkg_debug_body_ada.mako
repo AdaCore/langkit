@@ -21,8 +21,10 @@ package body ${ada_lib_name}.Debug is
    --------
 
    procedure PN (Node : ${T.root_node.name}) is
+      Ent : constant ${T.entity.name} :=
+        (Node => Node, Info => No_Entity_Info);
    begin
-      Put_Line (Image (Short_Text_Image (Node)));
+      Put_Line (Image (Ent));
    end PN;
 
    --------

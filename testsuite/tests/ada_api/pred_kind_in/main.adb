@@ -20,7 +20,7 @@ begin
          Find (U.Root, Kind_In (Foo_Decl'First, Foo_Decl'Last));
    begin
       for N of It.Consume loop
-         Put_Line (N.Short_Image);
+         Put_Line (N.Image);
       end loop;
    end;
 

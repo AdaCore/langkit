@@ -530,41 +530,15 @@ package body ${ada_lib_name}.Analysis is
       return Compare_Entity (L.Internal, R.Internal);
    end "=";
 
-   ----------------------
-   -- Short_Text_Image --
-   ----------------------
-
-   function Short_Text_Image
-     (Node : ${root_entity.api_name}'Class) return Text_Type is
-   begin
-      Check_Safety_Net (Node.Safety_Net);
-      return Short_Text_Image (Node.Internal.Node);
-   end Short_Text_Image;
-
-   -----------------
-   -- Short_Image --
-   -----------------
-
-   function Short_Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Node.Short_Text_Image));
-
-   ----------------
-   -- Text_Image --
-   ----------------
-
-   function Text_Image (Node : ${root_entity.api_name}'Class) return Text_Type
-   is
-   begin
-      Check_Safety_Net (Node.Safety_Net);
-      return Text_Image (Node.Internal);
-   end Text_Image;
-
    -----------
    -- Image --
    -----------
 
    function Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Node.Text_Image));
+   begin
+      Check_Safety_Net (Node.Safety_Net);
+      return Image (Node.Internal);
+   end Image;
 
    -----------------------
    -- Entity converters --
