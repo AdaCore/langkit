@@ -1833,8 +1833,7 @@ package body Langkit_Support.Lexical_Env is
 
       Sub_Prefix : constant String := Prefix & "  ";
 
-      function Short_Image
-        (N : Node_Type) return String
+      function Image (N : Node_Type) return String
       is (if N = No_Node then "<null>"
           else Image (Node_Text_Image (N, False)));
       --  Wrapper around Node_Text_Image to handle null nodes.
@@ -1845,7 +1844,7 @@ package body Langkit_Support.Lexical_Env is
       --  have Text_Type everywhere at some point.
 
       function Image (Node : Internal_Map_Node) return String is
-        (Short_Image (Node.Node));
+        (Image (Node.Node));
       --  Wrapper around Node_Text_Image to format a lexical env map node
 
       function Image is new Internal_Map_Node_Vectors.Image (Image);
@@ -1930,7 +1929,7 @@ package body Langkit_Support.Lexical_Env is
                      if Env /= Empty_Env then
                         Append (Result, Sub_Prefix & "Referenced: ");
                         if G.Dynamic then
-                           Append (Result, Short_Image (G.Node) & ": ");
+                           Append (Result, Image (G.Node) & ": ");
                         end if;
 
                         Append
