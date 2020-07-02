@@ -123,9 +123,11 @@
     ) -> ${field.type.mypy_type_hint}: ...
     % endfor
 
-    ## __iter__ refinement for more precise list element types
+    ## __iter__ and __getitem__ refinements for more precise list element types
     % if is_list:
     def __iter__(self) -> Iterator[${cls.element_type.mypy_type_hint}]: ...
+    def __getitem__(self,
+                    index: int) -> ${cls.element_type.mypy_type_hint}: ...
     % endif
 
     ## "pass" when needed to keep the class declaration syntax valid
