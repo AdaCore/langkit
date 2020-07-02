@@ -375,10 +375,10 @@ ${c_doc('langkit.node_is_synthetic')}
 extern int
 ${capi.get_name("node_is_synthetic")}(${entity_type} *node);
 
-${c_doc('langkit.node_short_image')}
+${c_doc('langkit.node_image')}
 extern void
-${capi.get_name("node_short_image")}(${entity_type} *node,
-                                     ${text_type} *result);
+${capi.get_name("node_image")}(${entity_type} *node,
+                               ${text_type} *result);
 
 ${c_doc('langkit.node_text')}
 extern void

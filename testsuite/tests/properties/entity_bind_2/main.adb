@@ -22,8 +22,7 @@ procedure Main is
    procedure Run (Arg1, Arg2 : Root_Node) is
       Success : Boolean;
    begin
-      Put_Line ("== " & Arg1.Short_Image
-                & ", " & Arg2.Short_Image & " ==");
+      Put_Line ("== " & Arg1.Image & ", " & Arg2.Image & " ==");
       Success := Lit.As_Literal.P_Solve_Eq (Arg1, Arg2);
       Put_Line ("   No exception (" & Success'Image & ")");
    exception

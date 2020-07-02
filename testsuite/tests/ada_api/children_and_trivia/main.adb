@@ -12,11 +12,11 @@ procedure Main is
                    & ASCII.LF & "b error # bar");
 begin
    for C of U.Root.Children loop
-      Put_Line (C.Short_Image);
+      Put_Line (C.Image);
 
       for CC of C.Children_And_Trivia loop
          if CC.Kind = Child then
-            Put_Line ("  Node: " & CC.Node.Short_Image);
+            Put_Line ("  Node: " & CC.Node.Image);
          else
             Put_Line
               ("  Trivia: " & Image (Text (CC.Trivia), With_Quotes => True));

@@ -505,7 +505,7 @@ base_langkit_docs = {
     'langkit.node_is_synthetic': """
         Return whether this node is synthetic.
     """,
-    'langkit.node_short_image': """
+    'langkit.node_image': """
         Return a representation of this node as a string.
     """,
     'langkit.entity_image': """

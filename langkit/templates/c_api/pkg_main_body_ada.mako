@@ -521,7 +521,7 @@ package body ${ada_lib_name}.Implementation.C is
          return 0;
    end;
 
-   procedure ${capi.get_name('node_short_image')}
+   procedure ${capi.get_name('node_image')}
      (Node : ${entity_type}_Ptr; Result : access ${text_type}) is
    begin
       Clear_Last_Exception;

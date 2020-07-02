@@ -70,7 +70,7 @@ begin
          end;
          Put_Line (Label & " = " & (if Error
                                     then "<no such field>"
-                                    else Result.Short_Image));
+                                    else Result.Image));
       end Test;
 
       U : constant Analysis_Unit := Create_Context.Get_From_Buffer

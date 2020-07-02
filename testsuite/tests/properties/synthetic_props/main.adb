@@ -17,7 +17,7 @@ begin
    begin
       Put_Line ("Root.Is_Synthetic = " & Boolean'Image (U.Root.Is_Synthetic));
 
-      Put_Line (N.Short_Image);
+      Put_Line (N.Image);
 
       Put_Line ("Is_Synthetic = " & Boolean'Image (N.Is_Synthetic));
 

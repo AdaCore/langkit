@@ -14,7 +14,7 @@ procedure Main is
    procedure Try_Node (N : Foo_Node; Label : String) is
    begin
       Put_Line (Label);
-      Put_Line (N.Short_Image);
+      Put_Line (N.Image);
       Put_Line ("   ... did not get the expected stale reference error");
    exception
       when Stale_Reference_Error =>

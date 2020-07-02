@@ -256,11 +256,11 @@ procedure Parse is
         (Node, Parent : ${root_entity.api_name}) is
       begin
          if Node.Parent /= Parent then
-            Put_Line ("Invalid parent for node " & Node.Short_Image);
+            Put_Line ("Invalid parent for node " & Node.Image);
          end if;
 
          if Set.Contains (Node) then
-            Put_Line ("Duplicate node" & Node.Short_Image);
+            Put_Line ("Duplicate node" & Node.Image);
          end if;
 
          Set.Insert (Node);

@@ -22,11 +22,11 @@ let root_exn u =
       Format.printf "@[<v>unexpected None node@ @]" ;
       exit 1
 
-let pp_image fmt node = Format.pp_print_string fmt (FooNode.short_image node)
+let pp_image fmt node = Format.pp_print_string fmt (FooNode.image node)
 
 let pp_image_opt fmt = function
   | Some node ->
-      Format.pp_print_string fmt (FooNode.short_image node)
+      Format.pp_print_string fmt (FooNode.image node)
   | None ->
       Format.pp_print_string fmt "None"
 
@@ -163,10 +163,10 @@ let test_node () =
     (Format.pp_print_list pp_image_opt)
     (FooNode.children_opt root) ;
   (* fold *)
-  let aux acc node = acc ^ "\n  " ^ FooNode.short_image node in
+  let aux acc node = acc ^ "\n  " ^ FooNode.image node in
   Format.printf "Fold fields: %s\n\n%!" (FooNode.fold_fields aux "" root) ;
   (* iter *)
-  let aux node = Format.printf "%s@ " (FooNode.short_image node) in
+  let aux node = Format.printf "%s@ " (FooNode.image node) in
   Format.printf "@[<v>@[<v 2>Iter fields:@ " ;
   FooNode.iter_fields aux root ;
   Format.printf "@]@ @]" ;
@@ -192,10 +192,10 @@ let test_node () =
   Format.printf "@[<v>@ @]" ;
   (* Test tree iterators *)
   (* fold *)
-  let aux acc node = acc ^ "\n  " ^ FooNode.short_image node in
+  let aux acc node = acc ^ "\n  " ^ FooNode.image node in
   Format.printf "Fold: %s\n\n%!" (FooNode.fold aux "" root) ;
   (* iter *)
-  let aux node = Format.printf "%s@ " (FooNode.short_image node) in
+  let aux node = Format.printf "%s@ " (FooNode.image node) in
   Format.printf "@[<v>@[<v 2>Iter:@ " ;
   FooNode.iter aux root ;
   Format.printf "@]@ @]" ;

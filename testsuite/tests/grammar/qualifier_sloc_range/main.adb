@@ -14,7 +14,7 @@ procedure Main is
    Node : constant Foo_Node := U.Root.Lookup ((1, 1));
    NH   : constant Node_Rewriting_Handle := Handle (Node);
 begin
-   Put_Line ("Unparsing " & Node.Short_Image & ":");
+   Put_Line ("Unparsing " & Node.Image & ":");
    Put_Line (Image (Unparse (NH)));
    Abort_Rewriting (RH);
    Put_Line ("main.adb: done");

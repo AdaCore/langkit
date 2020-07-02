@@ -40,7 +40,7 @@ procedure Main is
             Name : constant Id := Node.As_Var.F_Name;
             Decl : constant Foo_Node := Name.P_Resolve;
          begin
-            Put_Line (Node.Short_Image & " -> " & Decl.Short_Image);
+            Put_Line (Node.Image & " -> " & Decl.Image);
          end;
       end if;
       return Into;

@@ -418,12 +418,12 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('node_is_synthetic')}";
    ${ada_c_doc('langkit.node_is_synthetic', 3)}
 
-   procedure ${capi.get_name('node_short_image')}
+   procedure ${capi.get_name('node_image')}
      (Node : ${entity_type}_Ptr; Result : access ${text_type})
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name('node_short_image')}";
-   ${ada_c_doc('langkit.node_short_image', 3)}
+           External_name => "${capi.get_name('node_image')}";
+   ${ada_c_doc('langkit.node_image', 3)}
 
    procedure ${capi.get_name('node_text')}
      (Node : ${entity_type}_Ptr;
