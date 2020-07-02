@@ -21,9 +21,18 @@ All templates can use the "lang" parameter, which contains "ada", "c" or
 "python" depending on the binding for which we generate documentation.
 """
 
+from __future__ import annotations
+
 import textwrap
+from typing import (Any, Callable, Dict, List, Optional, Protocol, Set,
+                    TYPE_CHECKING, Tuple, Union, cast)
 
 from mako.template import Template
+
+
+if TYPE_CHECKING:
+    from langkit.compile_context import CompileCtx
+    from langkit.compiled_types import ASTNodeType, CompiledType, TypeRepo
 
 
 class DocDatabase:
@@ -31,26 +40,22 @@ class DocDatabase:
     Database for documentation entries.
     """
 
-    def __init__(self, dict):
+    def __init__(self, dict: Dict[str, str]) -> None:
         self._dict = dict
         """
         Documentation database.
-
-        :type: dict[str, str]
         """
 
-        self._used = set()
+        self._used: Set[str] = set()
         """
         Set of names for documentation database that were actually used.
-
-        :type: set[str]
         """
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> str:
         self._used.add(key)
         return self._dict[key]
 
-    def report_unused(self):
+    def report_unused(self) -> None:
         """
         Report all documentation entries that have not been used on the
         standard output. Either they should be used, or they should be removed.
@@ -63,14 +68,11 @@ class DocDatabase:
                 print('   ', k)
 
 
-def instantiate_templates(doc_dict):
+def instantiate_templates(doc_dict: Dict[str, str]) -> DocDatabase:
     """
     Turn a pure text documentation database into a Mako template one.
 
     :param doc_dict: Documentation database to convert.
-    :type doc_dict: dict[str, str]
-
-    :rtype: dict[str, mako.template.Template]
     """
     return DocDatabase({key: Template(val) for key, val in doc_dict.items()})
 
@@ -897,17 +899,16 @@ todo_markers = {
 }
 
 
-def split_paragraphs(text):
+def split_paragraphs(text: str) -> List[str]:
     """
     Split arbitrary text into paragraphs.
 
-    :param str text: Text to split. Paragraphs are separated by empty lines.
-    :rtype: [str]
+    :param text: Text to split. Paragraphs are separated by empty lines.
     """
-    paragraphs = []
-    current_paragraph = []
+    paragraphs: List[str] = []
+    current_paragraph: List[str] = []
 
-    def end_paragraph():
+    def end_paragraph() -> None:
         """Move the current paragraph (if any) to "paragraphs"."""
         if current_paragraph:
             paragraphs.append(
@@ -930,13 +931,13 @@ def split_paragraphs(text):
     return paragraphs
 
 
-def get_available_width(indent_level, width=None):
+def get_available_width(indent_level: int, width: Optional[int] = None) -> int:
     """
     Return the number of available columns on source code lines.
 
-    :param int indent_level: Identation level of the source code lines.
-    :param int|None width: Total available width on source code lines. By
-        default, use 79.
+    :param indent_level: Identation level of the source code lines.
+    :param width: Total available width on source code lines. By default, use
+        79.
     """
     if width is None:
         width = 79
@@ -946,7 +947,7 @@ def get_available_width(indent_level, width=None):
 text_wrapper = textwrap.TextWrapper(drop_whitespace=True)
 
 
-def wrap(paragraph, width):
+def wrap(paragraph: str, width: int) -> List[str]:
     result = textwrap.wrap(paragraph, width)
 
     # If this is a Sphinx admonition, preserve its formatting so that it's
@@ -961,14 +962,13 @@ def wrap(paragraph, width):
     return result
 
 
-def format_text(text, column, width=None):
+def format_text(text: str, column: int, width: Optional[int] = None) -> str:
     """
     Format some text as mere indented text.
 
-    :param str text: Text to format.
-    :param int column: Indentation level for the result.
-    :param int|None width: See get_available_width.
-    :rtype: str
+    :param text: Text to format.
+    :param column: Indentation level for the result.
+    :param width: See get_available_width.
     """
     lines = []
     for i, paragraph in enumerate(split_paragraphs(text)):
@@ -980,13 +980,12 @@ def format_text(text, column, width=None):
     return '\n'.join(lines)
 
 
-def format_ada(text, column):
+def format_ada(text: str, column: int) -> str:
     """
     Format some text as an Ada comment.
 
-    :param str text: Text to format.
-    :param int column: Indentation level for the result.
-    :rtype: str
+    :param text: Text to format.
+    :param column: Indentation level for the result.
     """
     available_width = get_available_width(column)
     lines = []
@@ -999,13 +998,12 @@ def format_ada(text, column):
     return '\n{}'.format(' ' * column).join(lines)
 
 
-def format_c(text, column):
+def format_c(text: str, column: int) -> str:
     """
     Format some text as a C multi-line comment.
 
-    :param str text: Text to format.
-    :param int column: Indentation level for the result.
-    :rtype str:
+    :param text: Text to format.
+    :param column: Indentation level for the result.
     """
     if not text.strip():
         return ''
@@ -1028,7 +1026,10 @@ def format_c(text, column):
     return '\n{}'.format(' ' * column).join(lines)
 
 
-def format_python(text, column, argtypes=[], rtype=None):
+def format_python(text: str,
+                  column: int,
+                  argtypes: List[Tuple[str, CompiledType]] = [],
+                  rtype: Optional[CompiledType] = None) -> str:
     """
     Format some text as Python docstring.
 
@@ -1044,7 +1045,7 @@ def format_python(text, column, argtypes=[], rtype=None):
     """
     from langkit.compile_context import get_context
 
-    def fmt_type(t):
+    def fmt_type(t: CompiledType) -> str:
         return get_context().python_api_settings.type_public_name(t)
 
     # Number of columns for the documentation text itself, per line
@@ -1087,13 +1088,12 @@ def format_python(text, column, argtypes=[], rtype=None):
     return '\n'.join(lines)
 
 
-def format_ocaml(text, column):
+def format_ocaml(text: str, column: int) -> str:
     """
     Format some text as a OCaml multi-line comment.
 
-    :param str text: Text to format.
-    :param int column: Indentation level for the result.
-    :rtype str:
+    :param text: Text to format.
+    :param column: Indentation level for the result.
     """
     if not text.strip():
         return ''
@@ -1110,33 +1110,46 @@ def format_ocaml(text, column):
     return '\n{}'.format('  ' * column).join(lines)
 
 
-def create_doc_printer(lang, formatter, get_node_name):
+class DocPrinter(Protocol):
+    def __call__(self,
+                 entity: Union[str, CompiledType],
+                 column: int = 0,
+                 lang: str = '',
+                 **kwargs: Any) -> str: ...
+
+
+class Formatter(Protocol):
+    def __call__(self,
+                 text: str,
+                 column: int,
+                 **kwargs: Any) -> str: ...
+
+
+def create_doc_printer(
+    lang: str,
+    formatter: Formatter,
+    get_node_name: Callable[[CompileCtx, ASTNodeType], str]
+) -> DocPrinter:
     """
     Return a function that prints documentation.
 
-    :param str lang: The default language for which we generate documentation.
-
+    :param lang: The default language for which we generate documentation.
     :param formatter: Function that formats text into source code
         documentation. See the ``format_*`` functions above.
-    :type formatter: (str, int) -> str
-
     :param get_node_name: Function to turn a node into the corresponding
         lang-specific name.
-    :type get_node_name: (langkit.compile_context.CompileCtx,
-                          langkit.compiled_types.ASTNodeType) -> str
-
-    :rtype: function
     """
 
-    def func(entity, column=0, lang=lang, **kwargs):
+    def func(entity:
+             Union[str, CompiledType],
+             column: int = 0,
+             lang: str = lang,
+             **kwargs: Any) -> str:
         """
-        :param str|compiled_types.CompiledType entity: Name for the entity to
-            document, or entity to document.
-        :param int column: Indentation level for the result.
-        :param str lang: Language for the documentation.
+        :param entity: Name for the entity to document, or entity to document.
+        :param column: Indentation level for the result.
+        :param lang: Language for the documentation.
         :param kwargs: Parameters to be passed to the specific formatter.
-
-        :rtype: str
         """
         from langkit.compile_context import get_context
         from langkit.compiled_types import T, resolve_type
@@ -1150,7 +1163,7 @@ def create_doc_printer(lang, formatter, get_node_name):
         else:
             return ''
 
-        def node_name(node):
+        def node_name(node: Union[CompiledType, TypeRepo.Defer]) -> str:
             return get_node_name(ctx, resolve_type(node))
 
         doc = doc_template.render(
@@ -1180,11 +1193,11 @@ def create_doc_printer(lang, formatter, get_node_name):
 #   * Arbitrary keyword arguments to pass to the documentation Mako templates.
 
 ada_doc = create_doc_printer(
-    'ada', format_ada,
+    'ada', cast(Formatter, format_ada),
     get_node_name=lambda ctx, node: node.entity.api_name
 )
 c_doc = create_doc_printer(
-    'c', format_c,
+    'c', cast(Formatter, format_c),
 
     # In the C header, there is only one node type, so use kind enumerators
     # instead.
@@ -1192,19 +1205,19 @@ c_doc = create_doc_printer(
                    ctx.c_api_settings.get_name(node.kwless_raw_name)),
 )
 py_doc = create_doc_printer(
-    'python', format_python,
+    'python', cast(Formatter, format_python),
     get_node_name=(lambda ctx, node:
                    ctx.python_api_settings.type_public_name(node))
 )
 ocaml_doc = create_doc_printer(
-    'ocaml', format_ocaml,
+    'ocaml', cast(Formatter, format_ocaml),
     get_node_name=(lambda ctx, node:
                    ctx.ocaml_api_settings
                    .type_public_name(node.entity))
 )
 
 
-def ada_c_doc(entity, column=0):
+def ada_c_doc(entity: Union[str, CompiledType], column: int = 0) -> str:
     """
     Shortcut to render documentation for a C entity with an Ada doc syntax.
 

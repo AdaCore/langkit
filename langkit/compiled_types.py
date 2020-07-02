@@ -10,7 +10,8 @@ from typing import Dict, List, Optional as Opt, Set
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import is_keyword
-from langkit.compile_context import CompileCtx, get_context
+from langkit.compile_context import (CompileCtx, get_context,
+                                     get_context_or_none)
 from langkit.diagnostics import (
     Context, Location, Severity, WarningSet, check_source_language,
     extract_library_location
@@ -2337,6 +2338,8 @@ class ASTNodeType(BaseStructType):
     Type for an AST node.
     """
 
+    kwless_raw_name: names.Name
+
     # If this is an enum onde, list of descriptions for its enum alternatives
     _alternatives: List[ASTNodeType]
 
@@ -3043,7 +3046,7 @@ class ASTNodeType(BaseStructType):
             dsl_name='{}.list'.format(self.dsl_name)
         )
 
-        ctx = get_context(True)
+        ctx = get_context_or_none()
         if ctx:
             ctx.list_types.add(result._element_type)
         else:

@@ -287,10 +287,10 @@ def check_source_language(predicate: bool,
         performed before we attempt to emit the generated library (for
         --check-only).
     """
-    from langkit.compile_context import get_context
+    from langkit.compile_context import get_context_or_none
 
     if not ok_for_codegen:
-        ctx = get_context(or_none=True)
+        ctx = get_context_or_none()
         assert ctx is None or ctx.emitter is None
 
     severity = assert_type(severity, Severity)
