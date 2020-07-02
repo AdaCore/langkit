@@ -1,6 +1,6 @@
 """
-Test that the "Debug_Text" function in the Ada API raises a Property_Error when
-called on a null node.
+Check that printing diagnostics (in particular quoting the source buffer) works
+fine when the source buffer is empty.
 """
 
 from langkit.dsl import ASTNode
