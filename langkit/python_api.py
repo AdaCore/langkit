@@ -1,7 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
+
+from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
-from langkit.compiled_types import T
+from langkit.compiled_types import ArrayType, CompiledType, T
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type
+
+
+if TYPE_CHECKING:
+    from langkit.compile_context import CompileCtx
 
 
 class PythonAPISettings(AbstractAPISettings):
@@ -9,32 +18,35 @@ class PythonAPISettings(AbstractAPISettings):
 
     name = 'python'
 
-    def __init__(self, ctx, c_api_settings):
+    def __init__(self, ctx: CompileCtx, c_api_settings: CAPISettings) -> None:
         self.context = ctx
         self.c_api_settings = c_api_settings
 
     @property
-    def module_name(self):
+    def module_name(self) -> str:
         return self.context.lib_name.lower
 
-    def wrap_value(self, value, type, from_field_access=False):
+    def wrap_value(self,
+                   value: str,
+                   type: CompiledType,
+                   from_field_access: bool = False) -> str:
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
         value.
 
-        :param str value: Expression yielding a low-level value.
-        :param ct.CompiledType type: Type corresponding to the "value"
-            expression.
-        :param bool from_field_access: True if "value" is a record field or
-            array item access (False by default). This is a special case
-            because of the way ctypes works.
-        :rtype: str
+        :param value: Expression yielding a low-level value.
+        :param type: Type corresponding to the "value" expression.
+        :param from_field_access: True if "value" is a record field or array
+            item access (False by default). This is a special case because of
+            the way ctypes works.
         """
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
             (T.AnalysisUnit, lambda _: 'AnalysisUnit._wrap({})'),
-            (ct.EnumType, lambda _: '{}._wrap({{}})'.format(type.py_helper)),
+            (ct.EnumType, lambda _: '{}._wrap({{}})'.format(
+                cast(ct.EnumType, type).py_helper
+            )),
             (ct.ASTNodeType, lambda _: '{}._wrap_bare_node({{}})'.format(
                 self.type_public_name(ct.T.root_node))),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
@@ -46,7 +58,8 @@ class PythonAPISettings(AbstractAPISettings):
             (T.Character, lambda _: '_py2to3.unicode_character({{}}{})'
                                     .format(value_suffix)),
             (ct.ArrayType, lambda _: '{}.wrap({{}}, {})'.format(
-                self.array_wrapper(type), from_field_access
+                self.array_wrapper(cast(ArrayType, type)),
+                from_field_access
             )),
             (ct.StructType, lambda _: '{}._wrap({{}})'.format(
                 self.type_public_name(type))),
@@ -56,7 +69,10 @@ class PythonAPISettings(AbstractAPISettings):
             ' (wrapping): {}'.format(type)
         )).format(value)
 
-    def unwrap_value(self, value, type, context):
+    def unwrap_value(self,
+                     value: str,
+                     type: CompiledType,
+                     context: str) -> str:
         """
         Given an expression for a high-level value and the associated type,
         return an other expression that yields the corresponding low-level
@@ -72,19 +88,19 @@ class PythonAPISettings(AbstractAPISettings):
         >>> c_holder_expr = pyapi.unwrap_value(py_value_expr, my_type, context)
         >>> c_value_expr = pyapi.extract_c_value(c_holder_expr, my_type)
 
-        :param str value: Expression yielding a high-level value.
-        :param ct.CompiledType type: Type corresponding to the "value"
-            expression.
-        :param str context: Expression to return a C value for the context.
-            This is required to unwrap some types of value.
-        :rtype: str
+        :param value: Expression yielding a high-level value.
+        :param type: Type corresponding to the "value" expression.
+        :param context: Expression to return a C value for the context.  This
+            is required to unwrap some types of value.
         """
         context_arg = (', {}'.format(context)
                        if type.conversion_requires_context else '')
         return dispatch_on_type(type, [
             (T.AnalysisUnit, lambda _: 'AnalysisUnit._unwrap({value})'),
             (ct.EnumType, lambda _:
-                '{}._unwrap({{value}})'.format(type.py_helper)),
+                '{}._unwrap({{value}})'.format(
+                    cast(ct.EnumType, type).py_helper
+                )),
             (ct.ASTNodeType, lambda _: '{value}._node_c_value'),
             (ct.EntityType, lambda _: '{}._unwrap({{value}})'.format(
                 self.type_public_name(ct.T.root_node))),
@@ -105,21 +121,19 @@ class PythonAPISettings(AbstractAPISettings):
             ' (unwrapping): {}'.format(type)
         )).format(value=value, context=context_arg)
 
-    def extract_c_value(self, value, type):
+    def extract_c_value(self, value: str, type: CompiledType) -> str:
         """
         See ``unwrap_value``.
         """
         return '{}.c_value'.format(value) if type.is_refcounted else value
 
-    def c_type(self, type):
+    def c_type(self, type: CompiledType) -> str:
         """
         Return the name of the type to use in the C API for ``type``.
 
-        :param CompiledType type: The type for which we want to get the C type
-            name.
-        :rtype: str
+        :param type: The type for which we want to get the C type name.
         """
-        def ctype_type(name):
+        def ctype_type(name: str) -> str:
             return 'ctypes.{}'.format(name)
 
         return dispatch_on_type(type, [
@@ -143,18 +157,17 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BigInt, lambda _: '_big_integer.c_type'),
         ])
 
-    def array_wrapper(self, array_type):
+    def array_wrapper(self, array_type: ArrayType) -> str:
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
                 array_type).py_converter
 
-    def type_public_name(self, type):
+    def type_public_name(self, type: CompiledType) -> str:
         """
         Python specific helper. Return the public API name for a given
         CompiledType instance.
 
-        :param CompiledType type: The type for which we want to get the name.
-        :rtype: str
+        :param type: The type for which we want to get the name.
         """
         return dispatch_on_type(type, [
             (T.Bool, lambda _: 'bool'),
