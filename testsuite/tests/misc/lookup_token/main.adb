@@ -1,6 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
@@ -23,7 +24,7 @@ procedure Main is
          begin
             Put_Line ("  " & Image (Sloc)
                       & " -> [" & Image (Sloc_Range (Data (Token))) & "] "
-                      & Debug_Text (Token));
+                      & Image (Text (Token)));
             if Line > 1 then
                if Previous_Tok = Token then
                   Put_Line ("    Same as previous token");
