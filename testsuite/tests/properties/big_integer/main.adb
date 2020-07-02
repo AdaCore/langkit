@@ -1,5 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis; use Libfoolang.Analysis;
 with Libfoolang.Common;   use Libfoolang.Common;
 
@@ -29,7 +31,7 @@ begin
          E  : constant Expr := D.F_Expr_Tree;
          BI : constant Big_Integer := E.P_Evaluate;
       begin
-         Put_Line (D.F_Name.Debug_Text & " evaluates to " & BI.Image);
+         Put_Line (Image (D.F_Name.Text) & " evaluates to " & BI.Image);
       end;
    end loop;
    Put_Line ("main.adb: Done.");

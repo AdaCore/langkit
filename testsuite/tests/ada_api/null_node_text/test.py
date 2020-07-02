@@ -1,5 +1,5 @@
 """
-Test that the "Debug_Text" function in the Ada API raises a Property_Error when
+Test that the "Text" function in the Ada API raises a Property_Error when
 called on a null node.
 """
 

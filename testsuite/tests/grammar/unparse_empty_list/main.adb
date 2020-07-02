@@ -1,5 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
 
@@ -26,7 +28,7 @@ begin
          raise Program_Error;
       end if;
    end;
-   Put_Line (U.Debug_Text);
+   Put_Line (Image (U.Text));
    New_Line;
 
    Put_Line ("main.adb: done.");

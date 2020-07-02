@@ -1863,7 +1863,7 @@ package body ${ada_lib_name}.Implementation is
       for C of Children_And_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
-               Put_Line (Children_Prefix & Debug_Text (C.Trivia));
+               Put_Line (Children_Prefix & Image (Text (C.Trivia)));
             when Child =>
                PP_Trivia (C.Node, Children_Prefix);
          end case;

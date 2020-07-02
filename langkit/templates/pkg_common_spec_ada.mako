@@ -224,14 +224,8 @@ package ${ada_lib_name}.Common is
    function Text (Token : Token_Reference) return Text_Type;
    --  Return the text of the token as ``Text_Type``
 
-   function Debug_Text (Token : Token_Reference) return String;
-   --  Return the text of the token as ``String``
-
    function Text (First, Last : Token_Reference) return Text_Type;
    ${ada_doc('langkit.token_range_text', 3)}
-
-   function Debug_Text (First, Last : Token_Reference) return String;
-   --  Like ``Text``, to get the source buffer slice as a string
 
    function Get_Symbol (Token : Token_Reference) return Symbol_Type;
    --  Assuming that ``Token`` refers to a token that contains a symbol, return

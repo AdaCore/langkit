@@ -303,9 +303,6 @@ package ${ada_lib_name}.Analysis is
    function Text (Unit : Analysis_Unit'Class) return Text_Type;
    ${ada_doc('langkit.unit_text', 3)}
 
-   function Debug_Text (Unit : Analysis_Unit'Class) return String;
-   --  Like ``Text``, to get the source buffer slice as a string
-
    function Lookup_Token
      (Unit : Analysis_Unit'Class; Sloc : Source_Location)
       return Token_Reference;
@@ -539,9 +536,6 @@ package ${ada_lib_name}.Analysis is
 
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type;
    ${ada_doc('langkit.node_text', 3)}
-
-   function Debug_Text (Node : ${root_entity.api_name}'Class) return String;
-   --  Like ``Text``, to get the source buffer slice as a string
 
    function Token_Range
      (Node : ${root_entity.api_name}'Class) return Token_Iterator;

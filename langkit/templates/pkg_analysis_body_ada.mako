@@ -433,15 +433,6 @@ package body ${ada_lib_name}.Analysis is
       return Implementation.Text (Unwrap_Unit (Unit));
    end Text;
 
-   ----------------
-   -- Debug_Text --
-   ----------------
-
-   function Debug_Text (Unit : Analysis_Unit'Class) return String is
-   begin
-      return Image (Unit.Text);
-   end Debug_Text;
-
    ------------------
    -- Lookup_Token --
    ------------------
@@ -806,15 +797,6 @@ package body ${ada_lib_name}.Analysis is
       Check_Safety_Net (Node.Safety_Net);
       return Implementation.Text (Node.Internal.Node);
    end Text;
-
-   ----------------
-   -- Debug_Text --
-   ----------------
-
-   function Debug_Text (Node : ${root_entity.api_name}'Class) return String is
-   begin
-      return Image (Node.Text);
-   end Debug_Text;
 
    -----------------
    -- Token_Range --
