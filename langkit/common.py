@@ -1,6 +1,6 @@
 from collections import defaultdict
 import itertools
-from typing import DefaultDict, Iterator
+from typing import DefaultDict, Iterator, Union
 
 from langkit import names
 
@@ -28,22 +28,23 @@ ada_keywords = set("""
 """.split())
 
 
-def string_repr(string):
+def string_repr(string: str) -> str:
     """
     Return a representation of string as a literal, usable in the generated
     code.
-    :param str string: The string to represent.
+
+    :param string: The string to represent.
     :return: A string literal representation of string.
     """
     return '"{0}"'.format(repr(string)[1:-1].replace('"', '""'))
 
 
-def comment_box(label, column=3):
+def comment_box(label: str, column: int = 3) -> str:
     """
     Return an Ada comment for the given label.
 
-    :param str label: Single-line label.
-    :rtype: str
+    :param label: Single-line label.
+    :param column: Indentation level.
     """
     return ('{line}\n'
             '{indent}-- {label} --\n'
@@ -52,12 +53,11 @@ def comment_box(label, column=3):
                                     label=label))
 
 
-def is_keyword(name):
+def is_keyword(name: Union[str, names.Name]) -> bool:
     """
     Returns wether `name` is an Ada keyword.
 
-    :param str|names.Name name: The name we want to test.
-    :rtype: bool
+    :param name: The name we want to test.
     """
 
     str_name = name.lower if isinstance(name, names.Name) else name
@@ -71,7 +71,7 @@ __next_ids: DefaultDict[str, Iterator[int]] = (
 )
 
 
-def gen_name(var_name):
+def gen_name(var_name: Union[str, names.Name]) -> names.Name:
     """
     Generates a unique name from var_name.
 
