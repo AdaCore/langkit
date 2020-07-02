@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import inspect
 from itertools import count
 import types
+from typing import Optional
 
 import funcy
 
@@ -141,7 +144,28 @@ class CollectionExpression(AbstractExpression):
         self.requires_index = False
         self.index_var = None
 
+    def initialize(self,
+                   expr: AbstractExpression,
+                   element_var: AbstractVariable,
+                   index_var: Optional[AbstractVariable] = None) -> None:
+        """
+        Initialize this expression using already expanded sub-expressions.
+
+        This is useful when building expressions with item sub-expressions
+        outside of our Python DSL.
+        """
+        self.expr = expr
+        self.element_var = element_var
+        self.requires_index = index_var is not None
+        self.index_var = index_var
+
     def do_prepare(self):
+        # When this expression does not come from our Python DSL (see the
+        # initialize method above), the sub-expression is ready to use: do not
+        # try to expand the function.
+        if self.expr is not None:
+            return
+
         argspec = inspect.getargspec(self.expr_fn)
 
         check_multiple([
@@ -472,6 +496,16 @@ class Map(CollectionExpression):
         self.do_concat = do_concat
         self.filter_expr = None
         self.take_while_expr = None
+
+    @classmethod
+    def create_expanded(cls,
+                        collection: AbstractExpression,
+                        expr: AbstractExpression,
+                        element_var: AbstractVariable,
+                        index_var: Optional[AbstractVariable]) -> Map:
+        result = cls(collection, None)
+        result.initialize(expr, element_var, index_var)
+        return result
 
     def do_prepare(self):
         super().do_prepare()

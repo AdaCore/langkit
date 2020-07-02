@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from dataclasses import dataclass
+import itertools
 import json
 import os.path
 from typing import (Any, ClassVar, Dict, List, Optional, Set, Tuple, Type,
@@ -1117,10 +1118,23 @@ class LktTypesLoader:
 
         root = lkt_units[0].root
 
-        # Pre-fetch the declaration of generic types to that resolve_type_decl
+        def get_field(decl: L.TraitDecl, name: str) -> L.Decl:
+            """
+            Return the (assumed existing and unique) declaration called
+            ``name`` nested in ``decl``.
+            """
+            decls = [fd.f_decl
+                     for fd in decl.f_decls
+                     if fd.f_decl.p_name == name]
+            assert len(decls) == 1, str(decls)
+            return decls[0]
+
+        # Pre-fetch the declaration of generic types so that resolve_type_decl
         # has an efficient access to them.
         self.array_gen_type = root.p_array_gen_type
         self.astlist_gen_type = root.p_astlist_gen_type
+        self.iterator_gen_trait = root.p_iterator_gen_trait
+        self.map_method = get_field(self.iterator_gen_trait, 'map')
 
         # Map Lkt nodes for the declarations of builtin types to the
         # corresponding CompiledType instances.
@@ -1330,11 +1344,38 @@ class LktTypesLoader:
         :param expr: Expression to lower.
         :param env: Variable to use when resolving references.
         """
+        # Counter to generate unique names
+        counter = itertools.count(0)
+
+        def var_for_lambda_arg(
+            arg: L.LambdaArgDecl,
+            prefix: str,
+            type: Optional[CompiledType] = None
+        ) -> AbstractVariable:
+            """
+            Create an AbstractVariable to translate a lambda argument.
+
+            This also registers this decl/variable association in ``env``.
+
+            :param prefix: Lower-case prefix for the name of the variable in
+                the generated code.
+            """
+            assert arg not in env
+            source_name = names.Name.from_lower(arg.f_syn_name.text)
+            result = AbstractVariable(
+                names.Name.from_lower('{}_{}'.format(prefix, next(counter))),
+                source_name=source_name,
+                type=type,
+            )
+            env[arg] = result
+            return result
+
         def lower(expr: L.Expr) -> AbstractExpression:
             """
             Do the actual expression lowering. Since all recursive calls use
             the same environment, this helper allows to skip passing it.
             """
+            result: AbstractExpression
 
             if isinstance(expr, L.ArrayLiteral):
                 elts = [lower(e) for e in expr.f_exprs]
@@ -1373,31 +1414,71 @@ class LktTypesLoader:
                     return E.Arithmetic(left, right, operator)
 
             elif isinstance(expr, L.CallExpr):
-                # Collect call positional and keyword arguments
-                args = []
-                kwargs = {}
-                for arg in expr.f_args:
-                    value = lower(arg.f_value)
-                    if arg.f_name:
-                        kwargs[arg.f_name.text] = value
-                    else:
-                        args.append(value)
-
                 # Depending on its name, a call can have different meanings
                 name_decl = expr.f_name.p_check_referenced_decl
+                call_expr = expr
+
+                def lower_args() -> Tuple[List[AbstractExpression],
+                                          Dict[str, AbstractExpression]]:
+                    """
+                    Collect call positional and keyword arguments.
+                    """
+                    args = []
+                    kwargs = {}
+                    for arg in call_expr.f_args:
+                        value = lower(arg.f_value)
+                        if arg.f_name:
+                            kwargs[arg.f_name.text] = value
+                        else:
+                            args.append(value)
+                    return args, kwargs
 
                 if isinstance(name_decl, L.StructDecl):
                     # If the name refers to a struct type, this expression
                     # create a struct value.
                     struct_type = self.resolve_type_decl(name_decl)
+                    args, kwargs = lower_args()
                     assert not args
                     return E.New(struct_type, **kwargs)
+
+                # TODO: change liblktlang so that we get an object similar to
+                # InstantiatedGenericType, and have an easy way to check it's
+                # the builtin map function.
+                elif (name_decl.unit, name_decl.sloc_range) == (
+                    self.map_method.unit, self.map_method.sloc_range
+                ):
+                    # Build variable for iteration variables from the lambda
+                    # expression arguments.
+                    assert len(call_expr.f_args) == 1
+                    lambda_expr = call_expr.f_args[0].f_value
+                    assert isinstance(lambda_expr, L.LambdaExpr)
+                    lambda_args = lambda_expr.f_params
+
+                    # We expect either one argument (for the collection
+                    # element) or two arguments (the collection element and the
+                    # iteration index).
+                    assert len(lambda_args) in (1, 2)
+                    element_var = var_for_lambda_arg(lambda_args[0], 'item')
+                    index_var = (
+                        var_for_lambda_arg(lambda_args[1], 'index', T.Int)
+                        if len(lambda_args) == 2
+                        else None
+                    )
+
+                    # Finally lower the expressions
+                    assert isinstance(call_expr.f_name, L.DotExpr)
+                    coll_expr = lower(call_expr.f_name.f_prefix)
+                    inner_expr = lower(lambda_expr.f_body)
+                    result = E.Map.create_expanded(coll_expr, inner_expr,
+                                                   element_var, index_var)
+                    return result
 
                 else:
                     # Otherwise, this call must be a method invocation
                     # invocation.
                     callee = lower(expr.f_name)
                     assert isinstance(callee, E.FieldAccess)
+                    args, kwargs = lower_args()
                     return callee(*args, **kwargs)
 
             elif isinstance(expr, L.CharLit):
