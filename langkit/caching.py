@@ -1,5 +1,6 @@
 import hashlib
 import json
+from typing import Dict
 
 
 class Cache:
@@ -10,16 +11,18 @@ class Cache:
     attempt to reduce the time to do this.
     """
 
-    def __init__(self, cache_file):
+    db: Dict[str, str]
+
+    def __init__(self, cache_file: str) -> None:
         """Load the cache from `cache_file`, or create a new cache if new.
 
-        :param str cache_file: Name of the file that contains cache data from
+        :param cache_file: Name of the file that contains cache data from
             another run.
         """
         self.cache_file = cache_file
         self._load()
 
-    def _load(self):
+    def _load(self) -> None:
         try:
             f = open(self.cache_file, 'r')
         except IOError:
@@ -28,7 +31,7 @@ class Cache:
             with f:
                 self.db = json.load(f)
 
-    def is_stale(self, key, content):
+    def is_stale(self, key: str, content: str) -> bool:
         """Return whether the `key` cache entry is staled.
 
         The first time this is called for some `key`, always return False. The
@@ -52,7 +55,7 @@ class Cache:
         self.db[key] = new_hash
         return stale
 
-    def save(self):
+    def save(self) -> None:
         """Save the content of the cache to a file."""
         with open(self.cache_file, 'w') as f:
             json.dump(self.db, f)
