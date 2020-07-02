@@ -17,7 +17,7 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import Any, Callable, Dict, List, cast
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, cast
 
 from funcy import lzip
 
@@ -33,7 +33,12 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
 
-compile_ctx = None
+if TYPE_CHECKING:
+    from langkit.ocaml_api import OCamlAPISettings
+    from langkit.python_api import PythonAPISettings
+
+
+compile_ctx: Optional[CompileCtx] = None
 
 try:
     import liblktlang as L
@@ -41,18 +46,20 @@ except ImportError:
     pass
 
 
-def get_context(or_none=False):
+def get_context_or_none() -> Optional[CompileCtx]:
+    return compile_ctx
+
+
+def get_context(or_none: bool = False) -> CompileCtx:
     """
     Return the current compilation context. Meant to be used by the rest of
     Langkit, in any code that has been called as part of the CompileCtx.emit
     primitive.
 
-    :param bool or_none: If True, return None when there is no context.
-        Otherwise, raise an assertion error when there is no context.
-
-    :rtype: CompileCtx
+    :param or_none: If True, return None when there is no context.  Otherwise,
+        raise an assertion error when there is no context.
     """
-    assert or_none or compile_ctx is not None, (
+    assert compile_ctx is not None, (
         'Get context has been called in a state in which the compile context'
         ' is not set'
     )
@@ -272,6 +279,10 @@ class GeneratedException:
 class CompileCtx:
     """State holder for native code emission."""
 
+    c_api_settings: CAPISettings
+    python_api_settings: PythonAPISettings
+    ocaml_api_settings: OCamlAPISettings
+
     def __init__(self, lang_name, lexer, grammar,
                  lib_name=None, short_name=None,
                  c_symbol_prefix=None,
@@ -420,9 +431,7 @@ class CompileCtx:
         self.types_from_lkt = types_from_lkt
         self.lkt_semantic_checks = lkt_semantic_checks or types_from_lkt
 
-        self.ocaml_api_settings = (
-            OCamlAPISettings(self, self.c_api_settings)
-        )
+        self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
         self.fns = set()
         """
