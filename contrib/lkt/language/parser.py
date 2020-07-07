@@ -324,8 +324,8 @@ class LKNode(ASTNode):
         # First, run a pre-analysis correctness check phase on self. This might
         # produce user diagnostics, as well as diagnostics exempting analysis
         # for some child nodes.
-        own_diagnostics = Var(Entity.check_correctness())
-        exemptions = Var(exempted_nodes.concat(own_diagnostics.filtermap(
+        pre_diagnostics = Var(Entity.check_correctness_pre())
+        exemptions = Var(exempted_nodes.concat(pre_diagnostics.filtermap(
             lambda d: d.node, lambda d: d.exempt_analysis
         )))
 
@@ -357,20 +357,31 @@ class LKNode(ASTNode):
 
         own_results = Var(Entity.check_semantic_impl())
 
+        post_diagnostics = Var(Entity.check_correctness_post())
+
         return TreeSemanticResult.new(
-            results=own_diagnostics.concat(aggregated_results)
-            .concat(own_results.results),
+            results=pre_diagnostics.concat(aggregated_results)
+            .concat(own_results.results)
+            .concat(post_diagnostics),
             has_error=Or(
                 children_have_errors, own_results.has_error,
-                own_diagnostics.length > 0
+                pre_diagnostics.length > 0
             )
         )
 
     @langkit_property(return_type=T.SemanticResult.array, memoized=True)
-    def check_correctness():
+    def check_correctness_post():
         """
-        Custom hook to implement legality checks for a given node. If no
-        errors, returns a null array.
+        Custom hook to implement legality checks for a given node that can
+        run after type resolution. If no errors, returns a null array.
+        """
+        return No(T.SemanticResult.array)
+
+    @langkit_property(return_type=T.SemanticResult.array, memoized=True)
+    def check_correctness_pre():
+        """
+        Custom hook to implement legality checks for a given node that need to
+        run *before* type resolution. If no errors, returns a null array.
 
         .. WARNING: This must *not* raise exceptions, so must make sure that
             any queried semantic results are queried in a safe fashion.
@@ -927,7 +938,7 @@ class LexerCaseRule(LKNode):
     # For the moment exempt resolution for children of LexerCaseRule, because
     # even though we want to name-res them eventually, it's not a priority, and
     # it might require a rethinking of this part of the DSL.
-    check_correctness = Property(Self.children.map(
+    check_correctness_pre = Property(Self.children.map(
         lambda c: SemanticResult.new(node=c, exempt_analysis=True)
     ))
 
@@ -2073,7 +2084,7 @@ class SimpleTypeRef(TypeRef):
         return Entity.type_name.check_referenced_decl.cast_or_raise(T.TypeDecl)
 
     @langkit_property(return_type=T.SemanticResult.array)
-    def check_correctness():
+    def check_correctness_pre():
         d = Var(Entity.type_name.referenced_decl)
         return d.result_ref.then(
             lambda d: d.cast(T.TypeDecl).then(
@@ -2217,7 +2228,7 @@ class CallExpr(Expr):
     args = Field(type=T.Param.list)
 
     @langkit_property(return_type=T.SemanticResult.array)
-    def check_correctness():
+    def check_correctness_pre():
 
         rd = Var(Try(Entity.name.referenced_decl,
                      SemanticResult.new(has_error=True)))
@@ -2668,7 +2679,7 @@ class LambdaExpr(Expr):
     ))
 
     @langkit_property(return_type=T.SemanticResult.array)
-    def check_correctness():
+    def check_correctness_pre():
         # Check that either all types have type annotations, or no type have
         # type annotations, to simplify our job later in terms of inference.
         typs = Var(Entity.params.map(
