@@ -1,0 +1,61 @@
+Resolving test.lkt
+==================
+Id   <RefId "Node" test.lkt:1:18-1:22>
+     references <ClassDecl "Node" __prelude:24:10-25:2>
+
+Id   <RefId "RootNode" test.lkt:2:19-2:27>
+     references <ClassDecl "RootNode" test.lkt:1:1-1:25>
+
+Id   <RefId "RootNode" test.lkt:4:5-4:13>
+     references <ClassDecl "RootNode" test.lkt:1:1-1:25>
+
+Id   <RefId "ChildNode" test.lkt:5:5-5:14>
+     references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
+
+Id   <RefId "a" test.lkt:5:17-5:18>
+     references <FieldDecl "a" test.lkt:4:1-4:13>
+
+Expr <RefId "a" test.lkt:5:17-5:18>
+     has type <ClassDecl "RootNode" test.lkt:1:1-1:25>
+
+Id   <RefId "ChildNode" test.lkt:5:22-5:31>
+     references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
+
+Expr <CastExpr test.lkt:5:17-5:32>
+     has type <ClassDecl "ChildNode" test.lkt:2:1-2:30>
+
+Id   <RefId "Int" test.lkt:6:14-6:17>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "a" test.lkt:6:20-6:21>
+     references <FieldDecl "a" test.lkt:4:1-4:13>
+
+Expr <RefId "a" test.lkt:6:20-6:21>
+     has type <ClassDecl "RootNode" test.lkt:1:1-1:25>
+
+Id   <RefId "ChildNode" test.lkt:6:25-6:34>
+     references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
+
+test.lkt:6:20: error: Mismatched types: expected `Int`, got `ChildNode`
+5 | @invalid c : Int = a.as[ChildNode]
+  |                    ^^^^^^^^^^^^^^^
+
+Id   <RefId "Int" test.lkt:7:14-7:17>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Id   <RefId "a" test.lkt:7:20-7:21>
+     references <FieldDecl "a" test.lkt:4:1-4:13>
+
+Expr <RefId "a" test.lkt:7:20-7:21>
+     has type <ClassDecl "RootNode" test.lkt:1:1-1:25>
+
+Id   <RefId "Int" test.lkt:7:25-7:28>
+     references <StructDecl "Int" __prelude:1:10-1:23>
+
+Expr <CastExpr test.lkt:7:20-7:29>
+     has type <StructDecl "Int" __prelude:1:10-1:23>
+
+test.lkt:7:20: error: Invalid cast: only up/down casting allowed
+6 | @invalid d : Int = a.as[Int]
+  |                    ^^^^^^^^^
+

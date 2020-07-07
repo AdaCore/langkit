@@ -1,0 +1,7 @@
+class RootNode : Node {}
+class ChildNode : RootNode {}
+
+a : RootNode
+b : ChildNode = a.as[ChildNode]
+@invalid c : Int = a.as[ChildNode]
+@invalid d : Int = a.as[Int]
