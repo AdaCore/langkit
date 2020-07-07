@@ -2162,6 +2162,23 @@ class CastExpr(Expr):
     excludes_null = Field(type=T.ExcludesNull)
     dest_type = Field(type=T.TypeRef)
 
+    expr_context_free_type = Property(Entity.dest_type.designated_type)
+
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_correctness_post():
+        expr_type = Var(Entity.expr.check_expr_type)
+        dest_type = Var(Entity.expr_context_free_type)
+        return If(
+            Or(expr_type.base_types.contains(dest_type),
+               dest_type.base_types.contains(expr_type)),
+
+            No(T.SemanticResult.array),
+
+            Entity.error(
+                S("Invalid cast: only up/down casting allowed")
+            ).singleton
+        )
+
 
 class Isa(Expr):
     """
