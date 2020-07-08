@@ -551,6 +551,12 @@ class ManageScript:
 
         :rtype: set[str]
         """
+        ext_dir = self.context.extensions_dir
+        if ext_dir is not None:
+            mains_dir = os.path.join(ext_dir, "mains")
+            if os.path.isdir(mains_dir):
+                return {mains_dir}
+
         return set()
 
     @property
