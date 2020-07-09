@@ -636,7 +636,7 @@ class Expr(LKNode):
             default_val=Entity.check_expr_type.type_scope
         )
 
-    @langkit_property(return_type=T.TypeDecl.entity, activate_tracing=True)
+    @langkit_property(return_type=T.TypeDecl.entity)
     def expected_type():
         return Entity.parent.match(
             lambda fun_decl=T.FunDecl: fun_decl.return_type.designated_type,
