@@ -303,6 +303,18 @@ package ${ada_lib_name}.Analysis is
    function Text (Unit : Analysis_Unit'Class) return Text_Type;
    ${ada_doc('langkit.unit_text', 3)}
 
+   function Text (Unit : Analysis_Unit'Class) return Text_Cst_Access;
+   --  Overload of Unit.Text that returns an access.
+   --
+   --  .. warning::
+   --
+   --      This is an unsafe function, that is exposed to allow efficient
+   --      access to the text buffer to Langkit_Support.Diagnostics.Output. We
+   --      plan to merge the functionality of
+   --      ``Langkit_Support.Diagnostics.Output.Text_Buffer`` that allows to
+   --      get a line of a source file into the analysis unit interface, which
+   --      will allow to get rid of this.
+
    function Lookup_Token
      (Unit : Analysis_Unit'Class; Sloc : Source_Location)
       return Token_Reference;
