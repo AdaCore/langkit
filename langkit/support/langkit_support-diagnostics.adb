@@ -21,8 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Langkit_Support.Text;   use Langkit_Support.Text;
-
 package body Langkit_Support.Diagnostics is
 
    ----------------------
@@ -36,7 +34,7 @@ package body Langkit_Support.Diagnostics is
          then ""
          else Image (Sloc) & ": ");
    begin
-      return Sloc_Prefix & Image (To_Wide_Wide_String (D.Message));
+      return Sloc_Prefix & Image (To_Text (D.Message));
    end To_Pretty_String;
 
    ------------
@@ -48,7 +46,7 @@ package body Langkit_Support.Diagnostics is
       Message    : Wide_Wide_String) return Diagnostic
    is
    begin
-      return (Sloc_Range, To_Unbounded_Wide_Wide_String (Message));
+      return (Sloc_Range, To_Unbounded_Text (Message));
    end Create;
 
    ------------
