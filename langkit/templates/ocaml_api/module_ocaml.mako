@@ -254,6 +254,19 @@ end
 
 % endfor
 
+let free = foreign ~from:c_lib 
+  "${capi.get_name('free')}" 
+  (ptr void @-> returning void) 
+
+(** Assuming char_ptr is a valid char*, convert it to a native Ocaml
+  * string and free the C pointer.
+  *)
+let unwrap_str char_ptr = 
+  let str = Ctypes.coerce (ptr char) string char_ptr in
+  free (Ctypes.coerce (ptr char) (ptr void) char_ptr); 
+  str
+
+
 let default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.camel}
 
 module Sloc = struct
@@ -382,9 +395,12 @@ module Token = struct
 
   let c_type = view c_struct ~read:wrap ~write:unwrap
 
-  let token_kind_name = foreign ~from:c_lib
+  let _token_kind_name = foreign ~from:c_lib
     "${capi.get_name('token_kind_name')}"
-    (int @-> raisable string)
+    (int @-> raisable (ptr char)) 
+
+  let token_kind_name kind = 
+    unwrap_str (_token_kind_name kind)
 
   let kind_name token = token_kind_name token.kind
 
@@ -679,6 +695,7 @@ and AnalysisUnit : sig
 
   val root : t -> ${root_entity_type} option
   val diagnostics : t -> Diagnostic.t list
+  val filename : t -> string
   val reparse : ?charset:string -> ?buffer:string -> t -> unit
   val first_token : t -> Token.t
   val last_token : t -> Token.t
@@ -712,6 +729,10 @@ end = struct
       !@ diag
     in
     List.init length f
+
+  let filename unit =
+    unwrap_str( AnalysisUnitStruct.unit_filename
+      (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)}))
 
   let reparse ?charset:(charset="") ?buffer ctx =
     match buffer with

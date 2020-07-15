@@ -120,6 +120,8 @@ module AnalysisUnitStruct : sig
 
   val unit_diagnostic : t -> int -> Diagnostic.t ptr -> int
 
+  val unit_filename : t -> char ptr
+
   val unit_reparse_from_file : t -> string -> int
 
   val unit_reparse_from_buffer :
@@ -148,6 +150,10 @@ end = struct
   let unit_diagnostic = foreign ~from:c_lib
     "${capi.get_name('unit_diagnostic')}"
     (c_type @-> int @-> ptr Diagnostic.c_type @-> raisable int)
+
+  let unit_filename = foreign ~from:c_lib
+    "${capi.get_name('unit_filename')}"
+    (c_type @-> raisable (ptr char))
 
   let unit_reparse_from_file = foreign ~from:c_lib
     "${capi.get_name('unit_reparse_from_file')}"

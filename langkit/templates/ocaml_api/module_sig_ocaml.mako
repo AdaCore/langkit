@@ -164,6 +164,9 @@ and AnalysisUnit : sig
    * Diagnostics for this unit.
    *)
 
+  val filename : t -> string
+  ${ocaml_doc('langkit.unit_filename', 1)}
+
   val reparse : ?charset:string -> ?buffer:string -> t -> unit
   ${ocaml_doc('langkit.unit_reparse_generic', 1)}
 

@@ -3,11 +3,16 @@ Cannot read unknown
 Expected '(', got Identifier
 =========================
 
+======UNIT_FILENAME=========
+Unit corresponding to file foo.txt
+=========================
+
 =======TOKEN FUNCTIONS=======
 With trivia:
   root text=
     "null example var (null example null) example null"
   first_token = "null"
+  first_token_kind_name = "Null_Tok"
   last_token = ""
   token_start = "null"
   token_end = "null"
@@ -18,6 +23,7 @@ Without trivia:
   root text=
     "null example var (null example null) example null"
   first_token = "null"
+  first_token_kind_name = "Null_Tok"
   last_token = ""
   token_start = "null"
   token_end = "null"
