@@ -41,6 +41,7 @@ let pp_token_info fmt with_trivia =
   print_exit_if_diags u ;
   let root = root_exn u in
   let first_token = AnalysisUnit.first_token u in
+  let first_token_kind_name = Token.kind_name first_token in
   let last_token = AnalysisUnit.last_token u in
   let token_start = FooNode.token_start root in
   let token_end = FooNode.token_end root in
@@ -48,10 +49,10 @@ let pp_token_info fmt with_trivia =
   let trivia_count = AnalysisUnit.trivia_count u in
   Format.fprintf fmt "@[<v>@[<v 2>root text=@ %S@]@ @]" (FooNode.text root) ;
   Format.fprintf fmt
-    "@[<v>first_token = %S@ last_token = %S@ token_start = %S@ token_end = \
-     %S@ token_count = %d@ trivia_count = %d@]"
-    first_token.text last_token.text token_start.text token_end.text
-    token_count trivia_count
+    "@[<v>first_token = %S@ first_token_kind_name = %S@ last_token = %S@ \
+     token_start = %S@ token_end = %S@ token_count = %d@ trivia_count = %d@]"
+    first_token.text first_token_kind_name last_token.text token_start.text
+    token_end.text token_count trivia_count
 
 let test_diagnostics () =
   (* Diagnostics *)
@@ -63,6 +64,14 @@ let test_diagnostics () =
   (* Parsing error *)
   let u = AnalysisContext.get_from_buffer ctx "foo.txt" "var identifier" in
   Format.printf "%a" pp_diags (AnalysisUnit.diagnostics u) ;
+  Format.printf "@[<v>=========================@ @ @]"
+
+let test_unit_filename () =
+  Format.printf "@[<v>======UNIT_FILENAME=========@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ctx "foo.txt" in
+  let filename = Filename.basename (AnalysisUnit.filename u) in
+  Format.printf "@[<v>Unit corresponding to file %s@ @]" filename ;
   Format.printf "@[<v>=========================@ @ @]"
 
 let test_token () =
@@ -431,6 +440,7 @@ let test_struct () =
 
 let () =
   test_diagnostics () ;
+  test_unit_filename () ;
   test_token () ;
   test_node () ;
   test_parent () ;
