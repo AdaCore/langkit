@@ -217,6 +217,34 @@ let test_node () =
     (FooNode.for_all aux root) ;
   Format.printf "@[<v>============================@ @ @]"
 
+let test_lookup_with_kind () =
+  Format.printf "@[<v>========== LOOKUP ==========@ @]" ;
+  let ctx = AnalysisContext.create () in
+  let u = AnalysisContext.get_from_file ~reparse:true ctx "foo.txt" in
+  print_exit_if_diags u ;
+  let root = root_exn u in
+  let lookup_1 : Sequence.t option =
+    FooNode.lookup_with_kind Sequence root {Sloc.line= 1; Sloc.column= 25}
+  in
+  ( match lookup_1 with
+  | Some node ->
+      Format.printf "@[<v>Lookup at loc 1:25 and kind `Sequence` found %a@ @]"
+        pp_image node
+  | _ ->
+      Format.printf
+        "@[<v>Lookup at loc 1:25 and kind `Sequence` returned None.@ @]" ) ;
+  let lookup_2 =
+    FooNode.lookup_with_kind Sequence root {Sloc.line= 2; Sloc.column= 25}
+  in
+  ( match lookup_2 with
+  | Some node ->
+      Format.printf "@[<v>Lookup at loc 2:25 and kind `Sequence` found %a@ @]"
+        pp_image node
+  | _ ->
+      Format.printf
+        "@[<v>Lookup at loc 2:25 and kind `Sequence` returned None.@ @]" ) ;
+  Format.printf "@[<v>============================@ @ @]"
+
 let test_parent () =
   Format.printf "@[<v>=======PARENT(S)=======@ @]" ;
   let ctx = AnalysisContext.create () in
@@ -443,6 +471,7 @@ let () =
   test_unit_filename () ;
   test_token () ;
   test_node () ;
+  test_lookup_with_kind () ;
   test_parent () ;
   test_siblings () ;
   test_array () ;

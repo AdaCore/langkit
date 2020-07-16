@@ -288,6 +288,11 @@ Iter:
 proposition (for all node n1. exists node n2. n1 = n2) is true
 ============================
 
+========== LOOKUP ==========
+Lookup at loc 1:25 and kind `Sequence` found <Sequence foo.txt:1:19-1:36>
+Lookup at loc 2:25 and kind `Sequence` returned None.
+============================
+
 =======PARENT(S)=======
 <Sequence foo.txt:1:1-1:50> parents:
   <Sequence foo.txt:1:1-1:50>
