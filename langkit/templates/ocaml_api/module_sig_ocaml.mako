@@ -362,6 +362,12 @@ module ${ocaml_api.node_name(astnode)} : sig
    * predicate is evaluated to true for all nodes.
    *)
 
+  val lookup_with_kind : 'a node -> [< ${root_entity_type}] -> Sloc.t -> 'a option
+  (**
+   * Given the kind of a node, a source location and a node, return the deepest node
+   * containing the source location and of the right kind. Returns None if there is no match.
+   *)
+
   val as_a : 'a node -> [< ${root_entity_type} ] -> 'a option
   (**
    * Given the kind of a node, try to cast the given node to this kind. Return
