@@ -396,17 +396,17 @@ let test_enum () =
   in
   let print c =
     Format.printf
-      "@[<v>@[color: %a;@ same_color: %a;@ same_color_dflt: %a@]@ @]"
-      pp_color c
-      pp_color (FooNode.p_same_color root c)
-      pp_color (FooNode.p_same_color_dflt root ~c:c)
+      "@[<v>@[color: %a;@ same_color: %a;@ same_color_dflt: %a@]@ @]" pp_color
+      c pp_color
+      (FooNode.p_same_color root c)
+      pp_color
+      (FooNode.p_same_color_dflt root ~c)
   in
   print Red ;
   print Green ;
   print Blue ;
-  Format.printf
-    "@[<v>@[same_color_dflt: %a@]@ @]"
-    pp_color (FooNode.p_same_color_dflt root) ;
+  Format.printf "@[<v>@[same_color_dflt: %a@]@ @]" pp_color
+    (FooNode.p_same_color_dflt root) ;
   Format.printf "@[<v>=================@ @ @]"
 
 let test_big_int () =
