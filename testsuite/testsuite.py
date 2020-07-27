@@ -12,6 +12,7 @@ import glob
 import os
 import shutil
 import subprocess
+import sys
 
 from e3.testsuite import Testsuite
 
@@ -220,4 +221,4 @@ class LangkitTestsuite(Testsuite):
 
 
 if __name__ == '__main__':
-    LangkitTestsuite().testsuite_main()
+    sys.exit(LangkitTestsuite().testsuite_main())
