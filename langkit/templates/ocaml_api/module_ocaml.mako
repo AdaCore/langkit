@@ -1134,7 +1134,8 @@ let ${ocaml_api.field_name(field)}
     let rec aux node = p node && for_all_fields aux node in
     aux (node :> ${root_entity_type})
 
-  let lookup_with_kind : type a. a node -> [< ${root_entity_type}] -> Sloc.t -> a option =
+  let lookup_with_kind :
+    type a. a node -> [< ${root_entity_type}] -> Sloc.t -> a option =
     fun node_type node sloc ->
       let lookup_res = lookup node sloc in
       let rec aux : a node -> [< ${root_entity_type}] -> a option =
