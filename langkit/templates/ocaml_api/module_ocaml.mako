@@ -254,16 +254,16 @@ end
 
 % endfor
 
-let free = foreign ~from:c_lib 
-  "${capi.get_name('free')}" 
-  (ptr void @-> returning void) 
+let free = foreign ~from:c_lib
+  "${capi.get_name('free')}"
+  (ptr void @-> returning void)
 
 (** Assuming char_ptr is a valid char*, convert it to a native Ocaml
   * string and free the C pointer.
   *)
-let unwrap_str char_ptr = 
+let unwrap_str char_ptr =
   let str = Ctypes.coerce (ptr char) string char_ptr in
-  free (Ctypes.coerce (ptr char) (ptr void) char_ptr); 
+  free (Ctypes.coerce (ptr char) (ptr void) char_ptr);
   str
 
 
@@ -397,9 +397,9 @@ module Token = struct
 
   let _token_kind_name = foreign ~from:c_lib
     "${capi.get_name('token_kind_name')}"
-    (int @-> raisable (ptr char)) 
+    (int @-> raisable (ptr char))
 
-  let token_kind_name kind = 
+  let token_kind_name kind =
     unwrap_str (_token_kind_name kind)
 
   let kind_name token = token_kind_name token.kind
@@ -1139,7 +1139,7 @@ let ${ocaml_api.field_name(field)}
     fun node_type node sloc ->
       let lookup_res = lookup node sloc in
       let rec aux : a node -> [< ${root_entity_type}] -> a option =
-        fun node_type node -> 
+        fun node_type node ->
         match node_type, node with
       %for astnode in ctx.astnode_types:
         | ${ocaml_api.node_name(astnode)}
