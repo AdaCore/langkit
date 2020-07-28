@@ -2585,8 +2585,9 @@ package body ${ada_lib_name}.Implementation is
          for I in First .. Last loop
             for D of Get_Trivias (TDH, I) loop
                Ret_Vec.Append
-                 ((Kind   => Trivia,
-                   Trivia => Wrap_Token_Reference (TDH'Access, (I, D))));
+                 (Bare_Child_Record'
+                    (Kind   => Trivia,
+                     Trivia => Wrap_Token_Reference (TDH'Access, (I, D))));
             end loop;
          end loop;
       end Append_Trivias;
