@@ -2,7 +2,6 @@
 Code emission for Langkit-generated libraries.
 """
 
-import ast
 from distutils.spawn import find_executable
 from io import StringIO
 import json
@@ -579,47 +578,17 @@ class Emitter:
         if not os.path.isdir(package_dir):
             os.mkdir(package_dir)
 
-        def strip_white_lines(code):
-            tree = ast.parse(code)
-            # Create an assoc of lines to a boolean flag indicating whether the
-            # line is in a multiline string literal or not.
-            lines = [[l, False] for l in code.splitlines()]
-
-            # Find all the strings in the AST
-            for s in (a for a in ast.walk(tree) if isinstance(a, ast.Str)):
-                end_line = s.lineno
-                start_line = end_line - len(s.s.splitlines()) + 1
-                for l in range(start_line + 1, end_line):
-                    lines[l - 1][1] = True
-
-            return '\n'.join(
-                l[0] for l in lines
-                if (not all(c.isspace() for c in l[0])) or l[1]
-            )
-
         def pretty_print(code):
             if not self.pretty_print:
                 return code
 
             try:
-                from yapf.yapflib.yapf_api import FormatCode  # type: ignore
-                return FormatCode(code)[0]
+                from black import FileMode, format_file_contents
+                return format_file_contents(code, fast=True, mode=FileMode())
             except ImportError:
                 check_source_language(
                     False,
-                    'Yapf not available, using autopep8 to pretty-print'
-                    ' Python code',
-                    severity=Severity.warning,
-                    ok_for_codegen=True
-                )
-
-            try:
-                from autopep8 import fix_code  # type: ignore
-                return fix_code(code)
-            except ImportError:
-                check_source_language(
-                    False,
-                    'autopep8 not available, cannot pretty-print Python code',
+                    'Black not available, not pretty-printing Python code',
                     severity=Severity.warning,
                     ok_for_codegen=True
                 )
@@ -633,7 +602,7 @@ class Emitter:
             # order to ease debugging.
             exc = None
             try:
-                pp_code = pretty_print(strip_white_lines(code))
+                pp_code = pretty_print(code)
             except SyntaxError:
                 pp_code = code
 
