@@ -15,6 +15,12 @@ with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Finalization;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+
+pragma Warnings (Off, "internal");
+with Ada.Strings.Wide_Wide_Unbounded.Aux;
+use Ada.Strings.Wide_Wide_Unbounded.Aux;
+pragma Warnings (On, "internal");
+
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
