@@ -118,6 +118,15 @@
      (Items : ${cls.array_type_name}) return ${cls.name};
    --  Create a new array from an existing collection of elements
 
+   ## For arrays of characters, also emit an unbounded string-based constructor
+   % if cls.element_type.is_character_type:
+      function ${cls.constructor_name}
+        (Items : Unbounded_Text_Type) return ${cls.name};
+      --  Create a new character array from an unbounded string. This is not
+      --  just for convenience: this function avoids using the secondary stack
+      --  to load the string itself, avoiding stack overflows for big strings.
+   % endif
+
    ## Helper getter generated for properties code. Used in CollectionGet's code
    function Get
      (T       : ${cls.name};
@@ -287,6 +296,21 @@
       return new ${cls.pointed}'
         (N => Items'Length, Ref_Count => 1, Items => Items);
    end;
+
+   % if cls.element_type.is_character_type:
+      function ${cls.constructor_name}
+        (Items : Unbounded_Text_Type) return ${cls.name}
+      is
+         Result : constant ${cls.name} :=
+            ${cls.constructor_name} (Length (Items));
+         S      : Big_Wide_Wide_String_Access;
+         L      : Natural;
+      begin
+         Get_Wide_Wide_String (Items, S, L);
+         Result.Items (1 .. L) := S.all (1 .. L);
+         return Result;
+      end;
+   % endif
 
    ----------------
    -- Equivalent --
