@@ -1,3 +1,3 @@
-test.py:14: error: Struct subclasses must derive from Struct only
+test.py:XXX: error: Struct subclasses must derive from Struct only
 
 Done

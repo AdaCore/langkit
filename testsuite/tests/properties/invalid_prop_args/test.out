@@ -1,3 +1,3 @@
-test.py:20: error: Derived and base properties don't have the same number of arguments, base has 1, derived has 0
+test.py:XXX: error: Derived and base properties don't have the same number of arguments, base has 1, derived has 0
 
 Done

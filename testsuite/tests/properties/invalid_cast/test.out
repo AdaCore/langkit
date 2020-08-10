@@ -2,9 +2,9 @@
 Code generation was successful
 
 == Invalid cast 1 ==
-test.py:26: error: One can only cast to an ASTNode subtype or to an entity
+test.py:XXX: error: One can only cast to an ASTNode subtype or to an entity
 
 == Invalid cast 2 ==
-test.py:41: error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
+test.py:XXX: error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
 
 Done

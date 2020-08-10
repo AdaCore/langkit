@@ -1,4 +1,4 @@
 == Invalid field ==
-test.py:25: error: Type AnalysisUnit has no 'foobar' field or property
+test.py:XXX: error: Type AnalysisUnit has no 'foobar' field or property
 
 Done

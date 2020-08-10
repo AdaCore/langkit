@@ -1,36 +1,36 @@
 == Missing NullNode ==
-test.py:50: error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
+test.py:XXX: error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
 
 == Missing Expression ==
-test.py:53: error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
+test.py:XXX: error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
 
 == Missing Compound ==
-test.py:57: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
+test.py:XXX: error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
 
 == Invalid type ==
-test.py:42: error: Invalid matching type: Bool
+test.py:XXX: error: Invalid matching type: Bool
 
 == Irrelevant AST node ==
-test.py:69: error: Cannot match FooNode (input type is BodyNode)
+test.py:XXX: error: Cannot match FooNode (input type is BodyNode)
 
 == Default case after full coverage ==
-test.py:75: warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
+test.py:XXX: warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (1) ==
-test.py:80: warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+test.py:XXX: warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (2) ==
-test.py:84: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+test.py:XXX: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (1) ==
-test.py:89: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+test.py:XXX: warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (2) ==
-test.py:95: warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+test.py:XXX: warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 Done

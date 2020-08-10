@@ -1,5 +1,5 @@
-test.py:23: warning: Unreachable property: all concrete subclasses override it
-test.py:26: warning: Unreachable property: all concrete subclasses override it
-test.py:34: warning: Unreachable property: all concrete subclasses override it
+test.py:XXX: warning: Unreachable property: all concrete subclasses override it
+test.py:XXX: warning: Unreachable property: all concrete subclasses override it
+test.py:XXX: warning: Unreachable property: all concrete subclasses override it
 Code generation was successful
 Done

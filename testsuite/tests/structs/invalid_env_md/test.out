@@ -1,13 +1,13 @@
 == not_a_struct ==
-test.py:37: error: The env_metadata decorator must be called on a Struct subclass (here, got: <class '__main__.not_a_struct.<locals>.Metadata'>)
+test.py:XXX: error: The env_metadata decorator must be called on a Struct subclass (here, got: <class '__main__.not_a_struct.<locals>.Metadata'>)
 
 == two_md ==
-test.py:49: error: Only one Struct subclass can be the env metadata
+test.py:XXX: error: Only one Struct subclass can be the env metadata
 
 == bad_name ==
-test.py:55: error: The environment metadata struct type must be called "Metadata" (here: BadName)
+test.py:XXX: error: The environment metadata struct type must be called "Metadata" (here: BadName)
 
 == bad_type ==
-test.py:62: error: Environment metadata fields can be only booleans or AST nodes
+test.py:XXX: error: Environment metadata fields can be only booleans or AST nodes
 
 Done

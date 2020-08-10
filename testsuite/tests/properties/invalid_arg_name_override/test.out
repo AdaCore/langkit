@@ -1,2 +1,2 @@
-test.py:15: error: Argument #1 does not have the same name here (b) as in base property (a)
+test.py:XXX: error: Argument #1 does not have the same name here (b) as in base property (a)
 Done

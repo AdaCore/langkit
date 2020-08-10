@@ -2,12 +2,12 @@
 Code generation was successful
 
 == Incorrect call code 1 ==
-test.py:29: error: Type BarNode has no 'non_exisisting_prop' field or property
+test.py:XXX: error: Type BarNode has no 'non_exisisting_prop' field or property
 
 == Incorrect call code 2 ==
-test.py:30: error: The last argument is unexpected
+test.py:XXX: error: The last argument is unexpected
 
 == Incorrect call code 3 ==
-test.py:31: error: Invalid "x" actual (#1) for BarNode.prop_2: expected Int but got FooNode
+test.py:XXX: error: Invalid "x" actual (#1) for BarNode.prop_2: expected Int but got FooNode
 
 Done

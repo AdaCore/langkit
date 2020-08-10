@@ -1,2 +1,2 @@
-test.py:22: error: Rule 'sec_rule' is already present in the grammar
+test.py:XXX: error: Rule 'sec_rule' is already present in the grammar
 Done

@@ -1,2 +1,2 @@
-test.py:15: error: Comparisons require the same type for both operands (got Int and BigInt)
+test.py:XXX: error: Comparisons require the same type for both operands (got Int and BigInt)
 Done

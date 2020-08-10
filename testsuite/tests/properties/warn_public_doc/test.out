@@ -1,4 +1,4 @@
-test.py:24: warning: This property is public but it lacks documentation
-test.py:30: warning: This property is public but it lacks documentation
+test.py:XXX: warning: This property is public but it lacks documentation
+test.py:XXX: warning: This property is public but it lacks documentation
 Code generation was successful
 Done

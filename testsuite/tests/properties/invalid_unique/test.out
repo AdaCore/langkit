@@ -1,5 +1,5 @@
 == Not an array ==
-test.py:22: error: Array expected but got Example instead
+test.py:XXX: error: Array expected but got Example instead
 == Not hashable array element ==
-test.py:22: error: Element type (here Token) must be hashable
+test.py:XXX: error: Element type (here Token) must be hashable
 Done

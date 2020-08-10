@@ -1,10 +1,10 @@
 == FooNode ==
-test.py:33: error: expected type MiddleNode, got FooNode instead (expected type comes from overridden base property in MiddleNode)
+test.py:XXX: error: expected type MiddleNode, got FooNode instead (expected type comes from overridden base property in MiddleNode)
 
 == MiddleNode ==
 Code generation was successful
 
 == NullNode ==
-test.py:33: error: expected type MiddleNode, got NullNode instead (expected type comes from overridden base property in MiddleNode)
+test.py:XXX: error: expected type MiddleNode, got NullNode instead (expected type comes from overridden base property in MiddleNode)
 
 Done

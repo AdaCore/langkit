@@ -1,5 +1,5 @@
-test.py:17: error: return type is LexicalEnv, which is forbidden in public API
-test.py:22: error: "env" argument is LexicalEnv, which is forbidden in public API
-test.py:26: error: "env" dynamic variable is LexicalEnv, which is forbidden in public API
+test.py:XXX: error: return type is LexicalEnv, which is forbidden in public API
+test.py:XXX: error: "env" argument is LexicalEnv, which is forbidden in public API
+test.py:XXX: error: "env" dynamic variable is LexicalEnv, which is forbidden in public API
 
 Done

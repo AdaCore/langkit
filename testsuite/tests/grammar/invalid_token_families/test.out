@@ -1,7 +1,7 @@
 == InvalidToken ==
-test.py:46: error: Invalid tokens: foobar
+test.py:XXX: error: Invalid tokens: foobar
 
 == PresentTwice ==
-test.py:54: error: Tokens must belong to one family exclusively: Number
+test.py:XXX: error: Tokens must belong to one family exclusively: Number
 
 Done

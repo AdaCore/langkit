@@ -1,14 +1,14 @@
 == Incorrect bind eq_prop 1 ==
-test.py:32: error: Equality property must return boolean
+test.py:XXX: error: Equality property must return boolean
 
 == Incorrect bind eq_prop 2 ==
-test.py:32: error: Equality property: expected 1 argument, got 0
+test.py:XXX: error: Equality property: expected 1 argument, got 0
 
 == Incorrect bind eq_prop 3 ==
-test.py:32: error: First arg of equality property should be an entity type
+test.py:XXX: error: First arg of equality property should be an entity type
 
 == Incorrect bind eq_prop 4 ==
-test.py:32: error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
+test.py:XXX: error: In Bind's eq_prop BazNode.prop4, some dynamic variables need to be bound: dyn_node
 
 == Correct bind eq_prop A ==
 Code generation was successful

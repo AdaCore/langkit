@@ -1,4 +1,4 @@
-test.py:12: error: return type is Example.array, an array of bare AST nodes, which is forbidden in public API
-test.py:13: error: return type is Example.array.array, an array of arrays, which is forbidden in public API
+test.py:XXX: error: return type is Example.array, an array of bare AST nodes, which is forbidden in public API
+test.py:XXX: error: return type is Example.array.array, an array of arrays, which is forbidden in public API
 
 Done

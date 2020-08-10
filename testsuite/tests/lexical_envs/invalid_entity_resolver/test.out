@@ -1,7 +1,7 @@
 == Bad return type ==
-test.py:41: error: Entity resolver properties must return entities (got FooNode.entity.array)
+test.py:XXX: error: Entity resolver properties must return entities (got FooNode.entity.array)
 == Has dynamic variable ==
-test.py:41: error: Entity resolver properties must have no dynamically bound variable
+test.py:XXX: error: Entity resolver properties must have no dynamically bound variable
 == Has arguments ==
-test.py:41: error: Entity resolver properties must have no argument
+test.py:XXX: error: Entity resolver properties must have no argument
 Done

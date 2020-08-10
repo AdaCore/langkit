@@ -2,6 +2,6 @@
 Code generation was successful
 
 == Incorrect No usage ==
-test.py:21: error: Invalid type for No expression: Int
+test.py:XXX: error: Invalid type for No expression: Int
 
 Done

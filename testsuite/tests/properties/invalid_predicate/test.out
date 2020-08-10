@@ -1,14 +1,14 @@
 == No logic var ==
-test.py:32: error: Predicate instantiation should have at least one logic variable expression
+test.py:XXX: error: Predicate instantiation should have at least one logic variable expression
 
 == One missing logic var ==
-test.py:32: error: Missing an actual for argument #1 (n)
+test.py:XXX: error: Missing an actual for argument #1 (n)
 
 == Bad argument type ==
-test.py:32: error: Argument #1 of predicate has type Bool, should be FooNode.entity
+test.py:XXX: error: Argument #1 of predicate has type Bool, should be FooNode.entity
 
 == Too many arguments ==
-test.py:32: error: Too many actuals: at most 2 expected, got 3
+test.py:XXX: error: Too many actuals: at most 2 expected, got 3
 
 == Ok (no default var) ==
 Code generation was successful

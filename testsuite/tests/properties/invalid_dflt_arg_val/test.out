@@ -1,40 +1,40 @@
 == Bad tuple ==
-test.py:22: error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
+test.py:XXX: error: Invalid type reference: (<class 'langkit.dsl.Bool'>,)
 
 == Bad expr ==
-test.py:22: error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
+test.py:XXX: error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
 
 == Bad type ==
-test.py:25: error: Expected type Bool, got Int
+test.py:XXX: error: Expected type Bool, got Int
 
 == Bad Self use ==
 <frozen importlib._bootstrap>:219: error: Self is not bound in this context
 
 == Bad dynamic variable use ==
-test.py:7: error: Dynamic variables cannot be bound in this context
+test.py:XXX: error: Dynamic variables cannot be bound in this context
 
 == Missing argument (1) ==
-test.py:39: error: Missing actual for argument a
+test.py:XXX: error: Missing actual for argument a
 
 == Missing argument (2) ==
-test.py:42: error: Missing actual for argument a
+test.py:XXX: error: Missing actual for argument a
 
 == Bad keyword argument ==
-test.py:25: error: Invalid "a" actual for Example.p: expected Bool but got Int
+test.py:XXX: error: Invalid "a" actual for Example.p: expected Bool but got Int
 
 == Too many arguments (1) ==
-test.py:50: error: The last argument is unexpected
+test.py:XXX: error: The last argument is unexpected
 
 == Too many arguments (2) ==
-test.py:53: error: The last argument is unexpected
+test.py:XXX: error: The last argument is unexpected
 
 == Too many arguments (3) ==
-test.py:56: error: Invalid keyword arguments: c
+test.py:XXX: error: Invalid keyword arguments: c
 
 == Too many arguments (4) ==
-test.py:59: error: The last 2 arguments are unexpected
+test.py:XXX: error: The last 2 arguments are unexpected
 
 == Non-literal argument ==
-test.py:22: error: Default value must be a compile-time known constant (got <Eq>)
+test.py:XXX: error: Default value must be a compile-time known constant (got <Eq>)
 
 Done

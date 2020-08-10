@@ -2,12 +2,12 @@
 Code generation was successful
 
 == Incorrect new 1 ==
-test.py:38: error: Values are missing for MyStruct fields: b
+test.py:XXX: error: Values are missing for MyStruct fields: b
 
 == Incorrect new 2 ==
-test.py:39: error: Wrong type for field B: expected Int, got FooNode
+test.py:XXX: error: Wrong type for field B: expected Int, got FooNode
 
 == Incorrect new 1 ==
-test.py:41: error: Extraneous fields for MyStruct: c
+test.py:XXX: error: Extraneous fields for MyStruct: c
 
 Done

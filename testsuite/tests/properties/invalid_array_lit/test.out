@@ -1,15 +1,15 @@
 == Empty: missing type ==
-test.py:21: error: Missing element type for empty array literal
+test.py:XXX: error: Missing element type for empty array literal
 
 == Empty: ok ==
-test.py:19: warning: This private property is unused
+test.py:XXX: warning: This private property is unused
 Code generation was successful
 
 == Single: ok ==
-test.py:19: warning: This private property is unused
+test.py:XXX: warning: This private property is unused
 Code generation was successful
 
 == Multiple: heterogeneous types ==
-test.py:21: error: In Array literal, expected element of type Bool, got Example
+test.py:XXX: error: In Array literal, expected element of type Bool, got Example
 
 Done

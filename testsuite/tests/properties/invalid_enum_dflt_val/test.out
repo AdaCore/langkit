@@ -1,9 +1,9 @@
 == too_many_defaults ==
-test.py:10: error: Only one default value is allowed
+test.py:XXX: error: Only one default value is allowed
 == invalid_base ==
-test.py:16: error: Enumeration types must derive from and only from Enum
+test.py:XXX: error: Enumeration types must derive from and only from Enum
 == invalid_field ==
-test.py:22: error: Enum subclass can only contain EnumValue instances (here, c is 12)
+test.py:XXX: error: Enum subclass can only contain EnumValue instances (here, c is 12)
 == enumval_aliasing ==
-test.py:32: error: EnumValue instances cannot be used in multiple Enum subclasses (here: a)
+test.py:XXX: error: EnumValue instances cannot be used in multiple Enum subclasses (here: a)
 Done

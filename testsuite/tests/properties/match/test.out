@@ -1,4 +1,4 @@
-test.py:46: warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
+test.py:XXX: warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
 main.py: Running...
 Atoms:
    <Lit main.txt:3:6-3:7>

@@ -4,7 +4,7 @@ Code generation was successful
   ConcreteNode.prop: no dynamic variable
 
 == abstract: default, concrete: with dynamic variables ==
-test.py:45: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+test.py:XXX: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 
 == abstract: default, concrete: no dynamic variable ==
 Code generation was successful
@@ -22,7 +22,7 @@ Code generation was successful
   ConcreteNode.prop: with dynamic variables
 
 == abstract: with dynamic variables, concrete: no dynamic variable ==
-test.py:45: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+test.py:XXX: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 
 == abstract: no dynamic variable, concrete: default ==
 Code generation was successful
@@ -30,7 +30,7 @@ Code generation was successful
   ConcreteNode.prop: no dynamic variable
 
 == abstract: no dynamic variable, concrete: with dynamic variables ==
-test.py:45: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
+test.py:XXX: error: Requested set of dynamically bound variables is not consistent with the property to override: AbstractNode.prop
 
 == abstract: no dynamic variable, concrete: no dynamic variable ==
 Code generation was successful

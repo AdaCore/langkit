@@ -1,10 +1,10 @@
 == .old_env: invalid input type ==
-test.py:26: error: Type FooNode has no 'old_env' field or property
+test.py:XXX: error: Type FooNode has no 'old_env' field or property
 
 == .new_env: invalid input type ==
-test.py:28: error: Type FooNode has no 'new_env' field or property
+test.py:XXX: error: Type FooNode has no 'new_env' field or property
 
 == .get_parent: invalid input type ==
-test.py:30: error: Type FooNode has no 'get_parent' field or property
+test.py:XXX: error: Type FooNode has no 'get_parent' field or property
 
 Done
