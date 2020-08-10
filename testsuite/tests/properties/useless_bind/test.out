@@ -1,4 +1,4 @@
-test.py:19: warning: Useless bind of dynamic var 'dyn_node'
-test.py:27: warning: Useless bind of dynamic var 'dyn_node'
+test.py:XXX: warning: Useless bind of dynamic var 'dyn_node'
+test.py:XXX: warning: Useless bind of dynamic var 'dyn_node'
 Code generation was successful
 Done

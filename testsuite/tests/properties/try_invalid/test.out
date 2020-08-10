@@ -1,7 +1,7 @@
 == Heterogeneous types ==
-test.py:23: error: Mismatching types in Try expression: Int and Bool
+test.py:XXX: error: Mismatching types in Try expression: Int and Bool
 
 == Not nullable type ==
-test.py:24: error: Try expression should have a default value provided, in cases where the type of the provided fallback expression (here AnalysisUnitKind) does not have a default null value.
+test.py:XXX: error: Try expression should have a default value provided, in cases where the type of the provided fallback expression (here AnalysisUnitKind) does not have a default null value.
 
 Done

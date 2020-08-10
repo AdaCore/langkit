@@ -1,4 +1,4 @@
-test.py:16: warning: Specified type is FooNode, but it could be more specific: Name
-test.py:20: warning: Specified type is FooNode, but it could be more specific: VarKeyword
+test.py:XXX: warning: Specified type is FooNode, but it could be more specific: Name
+test.py:XXX: warning: Specified type is FooNode, but it could be more specific: VarKeyword
 Code generation was successful
 Done

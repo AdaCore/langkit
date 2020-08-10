@@ -1,3 +1,3 @@
-test.py:11: error: Field env_spec is a <class 'langkit.envs.EnvSpec'>, but only instances of UserField subclasses are allowed in Struct subclasses
+test.py:XXX: error: Field env_spec is a <class 'langkit.envs.EnvSpec'>, but only instances of UserField subclasses are allowed in Struct subclasses
 
 Done

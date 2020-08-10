@@ -1,2 +1,2 @@
-test.py:15: error: AbstractNode is abstract and has no concrete subclass
+test.py:XXX: error: AbstractNode is abstract and has no concrete subclass
 Done

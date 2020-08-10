@@ -2,9 +2,9 @@
 Code generation was successful
 
 == Invalid - Bad type ==
-test.py:25: error: Token node expected, but got instead Bool
+test.py:XXX: error: Token node expected, but got instead Bool
 
 == Invalid - Non-token node ==
-test.py:25: error: Token node expected, but the input FooNode node is not a token node
+test.py:XXX: error: Token node expected, but the input FooNode node is not a token node
 
 Done

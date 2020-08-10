@@ -14,27 +14,27 @@ Code generation was successful
 Code generation was successful
 
 == Boolean <-> ASTNode ==
-test.py:24: error: Incompatible types for equality: Bool and FooNode
+test.py:XXX: error: Incompatible types for equality: Bool and FooNode
 
 == ASTNode <-> Boolean ==
-test.py:24: error: Incompatible types for equality: FooNode and Bool
+test.py:XXX: error: Incompatible types for equality: FooNode and Bool
 
 == ASTNode <-> Entity ==
-test.py:24: error: Incompatible types for equality: FooNode and FooNode.entity
+test.py:XXX: error: Incompatible types for equality: FooNode and FooNode.entity
 
 == Boolean <-> Entity ==
-test.py:24: error: Incompatible types for equality: Bool and FooNode.entity
+test.py:XXX: error: Incompatible types for equality: Bool and FooNode.entity
 
 == ASTNode <-> Boolean ==
-test.py:24: error: Incompatible types for equality: FooNode and Bool
+test.py:XXX: error: Incompatible types for equality: FooNode and Bool
 
 == Long <-> Boolean ==
-test.py:24: error: Incompatible types for equality: Int and Bool
+test.py:XXX: error: Incompatible types for equality: Int and Bool
 
 == ASTNode <-> ASTNode (never equal) ==
-test.py:24: error: Example and Lit values are never equal
+test.py:XXX: error: Example and Lit values are never equal
 
 == Entity <-> Entity (never equal) ==
-test.py:24: error: Example.entity and Lit.entity values are never equal
+test.py:XXX: error: Example.entity and Lit.entity values are never equal
 
 Done

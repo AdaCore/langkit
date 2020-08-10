@@ -1,2 +1,2 @@
-test.py:11: error: Underscore-prefixed field names are not allowed
+test.py:XXX: error: Underscore-prefixed field names are not allowed
 Done

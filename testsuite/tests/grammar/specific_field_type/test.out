@@ -1,3 +1,3 @@
-test.py:16: warning: Specified type is FooNode, but it could be more specific: Example
+test.py:XXX: warning: Specified type is FooNode, but it could be more specific: Example
 Code generation was successful
 Done

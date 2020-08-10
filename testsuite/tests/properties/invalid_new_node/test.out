@@ -1,10 +1,10 @@
 == Not memoized ==
-test.py:33: error: Node synthetization can only happen inside a memoized property
+test.py:XXX: error: Node synthetization can only happen inside a memoized property
 
 == List synthetization ==
-test.py:34: error: List node synthetization is not supported for now
+test.py:XXX: error: List node synthetization is not supported for now
 
 == Not synthetic ==
-test.py:27: error: Synthetized AST nodes must be annotated as synthetic
+test.py:XXX: error: Synthetized AST nodes must be annotated as synthetic
 
 Done

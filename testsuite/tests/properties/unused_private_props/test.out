@@ -1,4 +1,4 @@
-test.py:15: warning: This private property is unused
-test.py:27: warning: This private abstraction is unused
+test.py:XXX: warning: This private property is unused
+test.py:XXX: warning: This private abstraction is unused
 Code generation was successful
 Done

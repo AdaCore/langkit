@@ -1,4 +1,4 @@
-test.py:29: warning: Specified type is FooNode, but it could be more specific: FooNodeBaseList
+test.py:XXX: warning: Specified type is FooNode, but it could be more specific: FooNodeBaseList
 Code generation was successful
 == Doc for Holder.a_list_or_b_list ==
 This field can contain one of the following nodes:

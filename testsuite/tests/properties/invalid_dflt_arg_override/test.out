@@ -1,11 +1,11 @@
 == Missing default value ==
-test.py:24: error: Argument "a" must have the same default value as in base property (FooNode.prop)
+test.py:XXX: error: Argument "a" must have the same default value as in base property (FooNode.prop)
 
 == Extra default value ==
-test.py:24: error: Argument "a" cannot have a default value, to be consistent with its base property (FooNode.prop)
+test.py:XXX: error: Argument "a" cannot have a default value, to be consistent with its base property (FooNode.prop)
 
 == Wrong value ==
-test.py:24: error: Argument "a" does not have the same default value (<LiteralExpr False (Boolean)>) as in base property (<LiteralExpr True (Boolean)>)
+test.py:XXX: error: Argument "a" does not have the same default value (<LiteralExpr False (Boolean)>) as in base property (<LiteralExpr True (Boolean)>)
 
 == Correct ==
 Code generation was successful

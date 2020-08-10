@@ -1,12 +1,12 @@
 == Not overriden ==
-test.py:26: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Partly overriden ==
-test.py:47: error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
+test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: BaseExampleHolder.f
 
 == Abstract overriding abstract ==
-test.py:66: error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
-test.py:65: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
+test.py:XXX: error: ExampleHolder.f1 cannot override BaseExampleHolder.f1 unless the former is a concrete field and the latter is an abstract one
+test.py:XXX: error: This node is concrete, yet it has abstract fields that are not overriden: ExampleHolder.f1
 
 == Abstract overriding concrete ==
 abstract-overriding-concrete.lkt:4:29: error: Transform parser generates 1 values, but ExampleHolder has 0 fields
@@ -15,7 +15,7 @@ abstract-overriding-concrete.lkt:4:29: error: Transform parser generates 1 value
 
 
 == Inconsistent overriding type ==
-test.py:101: error: Type of overriding field (FooNode) does not match type of abstract field (Example)
+test.py:XXX: error: Type of overriding field (FooNode) does not match type of abstract field (Example)
 
 == Free-standing null field ==
 free-standing-null-field.lkt:4:29: error: Transform parser generates 1 values, but ExampleHolder has 0 fields

@@ -1,2 +1,2 @@
-test.py:10: error: FooNode has no 'does_not_exist' attribute
+test.py:XXX: error: FooNode has no 'does_not_exist' attribute
 Done

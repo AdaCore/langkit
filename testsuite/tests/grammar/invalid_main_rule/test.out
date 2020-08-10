@@ -1,2 +1,2 @@
-test.py:16: error: Invalid rule name specified for main rule: "main_rulezz". Did you mean "main_rule"?
+test.py:XXX: error: Invalid rule name specified for main rule: "main_rulezz". Did you mean "main_rule"?
 Done

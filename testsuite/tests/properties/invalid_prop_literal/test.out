@@ -3,6 +3,6 @@ Code generation was successful
 Valid case
 Code generation was successful
 Invalid case
-test.py:12: error: Invalid abstract expression: 12.9
+test.py:XXX: error: Invalid abstract expression: 12.9
 
 Done

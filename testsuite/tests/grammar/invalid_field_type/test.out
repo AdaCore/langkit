@@ -1,2 +1,2 @@
-test.py:20: error: AST node parse fields must all be AST node themselves. Here, field type is Token
+test.py:XXX: error: AST node parse fields must all be AST node themselves. Here, field type is Token
 Done

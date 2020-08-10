@@ -2,9 +2,9 @@
 Code generation was successful
 
 == Missing var value ==
-test.py:21: error: All Let expression function arguments must have default values
+test.py:XXX: error: All Let expression function arguments must have default values
 
 == Invalid args ==
-test.py:21: error: Invalid function for Let expression (*args and **kwargs not accepted)
+test.py:XXX: error: Invalid function for Let expression (*args and **kwargs not accepted)
 
 Done

@@ -1,2 +1,2 @@
-test.py:18: error: This property cannot be memoized because argument a (of type Token.array) is not hashable
+test.py:XXX: error: This property cannot be memoized because argument a (of type Token.array) is not hashable
 Done

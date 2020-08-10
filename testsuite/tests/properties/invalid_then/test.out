@@ -1,10 +1,10 @@
 == No argument ==
-test.py:21: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
+test.py:XXX: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
 
 == Two arguments ==
-test.py:21: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
+test.py:XXX: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
 
 == Default value ==
-test.py:21: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
+test.py:XXX: error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
 
 Done

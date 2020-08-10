@@ -2,18 +2,18 @@
 Code generation was successful
 
 == Incorrect property definition 1 ==
-test.py:22: error: Invalid function signature: no *args nor **kwargs allowed
+test.py:XXX: error: Invalid function signature: no *args nor **kwargs allowed
 
 == Incorrect property definition 2 ==
-test.py:22: error: All parameters must have an associated type as a default value
+test.py:XXX: error: All parameters must have an associated type as a default value
 
 == Incorrect property definition 3 ==
-test.py:22: error: Cannot define reserved arguments (node, bound_env)
+test.py:XXX: error: Cannot define reserved arguments (node, bound_env)
 
 == Incorrect property definition 4 ==
-test.py:22: error: Invalid type reference: ['Obviously wrong']
+test.py:XXX: error: Invalid type reference: ['Obviously wrong']
 
 == Incorrect property definition 5 ==
-test.py:22: error: Invalid type reference: <class 'langkit.diagnostics.Diagnostics'>
+test.py:XXX: error: Invalid type reference: <class 'langkit.diagnostics.Diagnostics'>
 
 Done

@@ -1,16 +1,16 @@
 == Missing args ==
-test.py:26: error: Missing Cond arguments
+test.py:XXX: error: Missing Cond arguments
 
 == Missing args ==
-test.py:27: error: Missing Cond arguments
+test.py:XXX: error: Missing Cond arguments
 
 == Missing last ==
-test.py:28: error: Missing last Cond argument
+test.py:XXX: error: Missing last Cond argument
 
 == Bad condition type ==
 <frozen importlib._bootstrap>:219: error: Condition in Cond expression should be Bool, got Example
 
 == Bad return type ==
-test.py:30: error: Mismatching types in Cond expression: Bool expected but got Example instead
+test.py:XXX: error: Mismatching types in Cond expression: Bool expected but got Example instead
 
 Done

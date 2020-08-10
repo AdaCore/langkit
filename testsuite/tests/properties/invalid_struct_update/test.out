@@ -1,10 +1,10 @@
 == Not a struct ==
-test.py:30: error: Struct expected, got BigInt
+test.py:XXX: error: Struct expected, got BigInt
 
 == Invalid field ==
-test.py:33: error: Invalid KV field: nosuchfield
+test.py:XXX: error: Invalid KV field: nosuchfield
 
 == Invalid type ==
-test.py:30: error: Wrong type for field key: expected Character.array, got BigInt
+test.py:XXX: error: Wrong type for field key: expected Character.array, got BigInt
 
 Done

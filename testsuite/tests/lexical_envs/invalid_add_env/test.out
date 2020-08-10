@@ -1,2 +1,2 @@
-test.py:12: error: There can be only one add_env action per EnvSpec
+test.py:XXX: error: There can be only one add_env action per EnvSpec
 Done

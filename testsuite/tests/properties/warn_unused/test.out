@@ -1,9 +1,9 @@
-test.py:22: warning: The following bindings are not used: ex_param
-test.py:22: warning: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
-test.py:26: warning: The following bindings are not used: block_var
-test.py:34: warning: The following bindings are not used: ex_list
-test.py:40: warning: The following bindings are not used: ex_item
-test.py:45: warning: The following bindings are not used: ex_items
-test.py:58: warning: The following bindings are not used: ex
+test.py:XXX: warning: The following bindings are not used: ex_param
+test.py:XXX: warning: The following bindings are used even though they are supposed to be ignored: ex_wrongly_used_param
+test.py:XXX: warning: The following bindings are not used: block_var
+test.py:XXX: warning: The following bindings are not used: ex_list
+test.py:XXX: warning: The following bindings are not used: ex_item
+test.py:XXX: warning: The following bindings are not used: ex_items
+test.py:XXX: warning: The following bindings are not used: ex
 Code generation was successful
 Done
