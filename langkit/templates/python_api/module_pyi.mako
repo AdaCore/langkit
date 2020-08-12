@@ -324,6 +324,7 @@ class App(object):
     parser: argparse.ArgumentParser
     args: argparse.Namespace
     u: AnalysisUnit
+    units: Dict[str, AnalysisUnit]
     ctx: AnalysisContext
 
     @property
