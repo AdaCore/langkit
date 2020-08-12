@@ -33,6 +33,10 @@ project Mains is
             --  profiling, for instance.
             for Default_Switches ("Ada") use ("-g", "-Ofast");
       end case;
+
+      --  A version of s-memory may be included for memory monitoring
+      --  with GNATCOLL.Memory: if so, it requires -gnatg.
+      for Switches ("s-memory.adb") use ("-g", "-O2", "-gnatpg");
    end Compiler;
 
 
