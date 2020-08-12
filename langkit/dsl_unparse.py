@@ -1578,7 +1578,7 @@ def unparse_nodes(ctx, f):
     """
     from langkit.diagnostics import check_source_language, Severity
     check_source_language(
-        predicate=lpl is not None,
+        predicate=libpythonlang_available,
         message="libpythonlang not found, comments cannot be unparsed",
         severity=Severity.warning,
         do_raise=False
