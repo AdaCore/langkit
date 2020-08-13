@@ -562,7 +562,8 @@ class AnalysisUnit(object):
                  '_node_cache')
 
     class TokenIterator(object):
-        """Iterator over the tokens in an analysis unit."""
+        ${py_doc('langkit.python.AnalysisUnit.TokenIterator', 8)}
+
         def __init__(self, first):
             self.first = first
 
@@ -689,9 +690,7 @@ class AnalysisUnit(object):
         _unit_dump_lexical_env(unit)
 
     def iter_tokens(self):
-        """
-        Return an iterator that yields all the tokens in this unit.
-        """
+        ${py_doc('langkit.python.AnalysisUnit.iter_tokens', 8)}
         return self.TokenIterator(self.first_token)
 
     @property
@@ -702,7 +701,7 @@ class AnalysisUnit(object):
 
     @property
     def diagnostics(self):
-        """Diagnostics for this unit."""
+        ${py_doc('langkit.python.AnalysisUnit.diagnostics', 8)}
         count = _unit_diagnostic_count(self._c_value)
         result = []
         diag = Diagnostic._c_type()
@@ -987,11 +986,7 @@ class Token(ctypes.Structure):
         return self._sloc_range._wrap()
 
     def __eq__(self, other):
-        """
-        Return whether the two tokens refer to the same token in the same unit.
-
-        Note that this does not actually compares the token data.
-        """
+        ${py_doc('langkit.python.Token.__eq__', 8)}
         return (isinstance(other, Token)
                 and self._identity_tuple == other._identity_tuple)
 
@@ -1006,10 +1001,8 @@ class Token(ctypes.Structure):
         )
 
     def __lt__(self, other):
-        """
-        Consider that None comes before all tokens. Then, sort by unit, token
-        index, and trivia index.
-        """
+        ${py_doc('langkit.python.Token.__lt__', 8)}
+
         # None always comes first
         if other is None:
             return False
@@ -1028,9 +1021,7 @@ class Token(ctypes.Structure):
         return not (self < other)
 
     def to_data(self):
-        """
-        Return a dict representation of this Token.
-        """
+        ${py_doc('langkit.python.Token.to_data', 8)}
         return {"kind": "Token", "token_kind": self.kind, "text": self.text}
 
     @property
@@ -1050,10 +1041,7 @@ class UnitProvider(object):
     ${py_doc('langkit.unit_provider_type', 4)}
 
     def __init__(self, c_value):
-        """
-        This constructor is an implementation detail, and is not meant to be
-        used directly.
-        """
+        ${py_doc('langkit.python.UnitProvider.__init__', 8)}
         self._c_value = c_value
 
     def __del__(self):
@@ -1184,35 +1172,22 @@ class ${root_astnode_name}(object):
         return ${root_astnode_name}._wrap(result)
 
     def __bool__(self):
-        """
-        Return always True so that checking a node against None can be done as
-        simply as::
-
-            if node:
-                ...
-        """
+        ${py_doc('langkit.python.root_node.__bool__', 8)}
         return True
     __nonzero__ = __bool__
 
     def __iter__(self):
-        """
-        Return an iterator on the children of this node.
-        """
+        ${py_doc('langkit.python.root_node.__iter__', 8)}
         for i in range(len(self)):
             yield self[i]
 
     def __len__(self):
-        """Return the number of ${root_astnode_name} children this node has."""
+        ${py_doc('langkit.python.root_node.__len__', 8)}
         node = self._unwrap(self)
         return _node_children_count(ctypes.byref(node))
 
     def __getitem__(self, key):
-        """
-        Return the Nth ${root_astnode_name} child this node has.
-
-        This handles negative indexes the same way Python lists do. Raise an
-        IndexError if "key" is out of range.
-        """
+        ${py_doc('langkit.python.root_node.__getitem__', 8)}
         if not isinstance(key, int):
             msg = ('${root_astnode_name} children are integer-indexed'
                    ' (got {})').format(type(key))
@@ -1235,13 +1210,7 @@ class ${root_astnode_name}(object):
             return result
 
     def iter_fields(self):
-        """
-        Iterate through all the fields this node contains.
-
-        Return an iterator that yields (name, value) couples for all abstract
-        fields in this node. If "self" is a list, field names will be
-        "item_{n}" with "n" being the index.
-        """
+        ${py_doc('langkit.python.root_node.iter_fields', 8)}
         if self.is_list_type:
             for i, value in enumerate(self):
                 yield ('item_{}'.format(i), value)
@@ -1250,9 +1219,7 @@ class ${root_astnode_name}(object):
                 yield (field_name, getattr(self, '{}'.format(field_name)))
 
     def dump_str(self):
-        """
-        Dump the sub-tree to a string in a human-readable format.
-        """
+        ${py_doc('langkit.python.root_node.dump_str', 8)}
         output = _py2to3.StringIO()
         self.dump(file=output)
         ret = output.getvalue()
@@ -1260,12 +1227,7 @@ class ${root_astnode_name}(object):
         return ret
 
     def dump(self, indent='', file=sys.stdout):
-        """
-        Dump the sub-tree in a human-readable format on the given file.
-
-        :param str indent: Prefix printed on each line during the dump.
-        :param file file: File in which the dump must occur.
-        """
+        ${py_doc('langkit.python.root_node.dump', 8)}
 
         def print_node(name, value):
             if isinstance(value, ${root_astnode_name}):
@@ -1290,55 +1252,18 @@ class ${root_astnode_name}(object):
                 print_node(name[2:], value)
 
     def findall(self, ast_type_or_pred, **kwargs):
-        """
-        Helper for finditer that will return all results as a list. See
-        finditer's documentation for more details.
-        """
+        ${py_doc('langkit.python.root_node.findall', 8)}
         return list(self.finditer(ast_type_or_pred, **kwargs))
 
     def find(self, ast_type_or_pred, **kwargs):
-        """
-        Helper for finditer that will return only the first result. See
-        finditer's documentation for more details.
-        """
+        ${py_doc('langkit.python.root_node.find', 8)}
         try:
             return next(self.finditer(ast_type_or_pred, **kwargs))
         except StopIteration:
             return None
 
-    @property
-    def parent_chain(self):
-        """
-        Return the parent chain of self. Self will be the first element,
-        followed by the first parent, then this parent's parent, etc.
-        """
-        def _parent_chain(node):
-            yield node
-            if node.parent is not None:
-                for p in _parent_chain(node.parent):
-                    yield p
-
-        return list(_parent_chain(self))
-
     def finditer(self, ast_type_or_pred, **kwargs):
-        """
-        Find every node corresponding to the passed predicates.
-
-        :param ast_type_or_pred: If supplied with a subclass of
-            ${root_astnode_name}, will constrain the resulting collection to
-            only the instances of this type or any subclass. If supplied with a
-            predicate, it will apply the predicate on every node and keep only
-            the ones for which it returns True. If supplied with a list of
-            subclasses of ${root_astnode_name}, it will match all instances of
-            any of them.
-        :type ast_type_or_pred:
-            type|((${root_astnode_name}) -> bool)|list[type]
-
-        :param kwargs: Allows the user to filter on attributes of the node. For
-            every key value association, if the node has an attribute of name
-            key that has the specified value, then the child is kept.
-        :type kwargs: dict[str, Any]
-        """
+        ${py_doc('langkit.python.root_node.finditer', 8)}
         # Create a "pred" function to use as the node filter during the
         # traversal.
         if isinstance(ast_type_or_pred, type):
@@ -1377,6 +1302,17 @@ class ${root_astnode_name}(object):
 
         return helper(self)
 
+    @property
+    def parent_chain(self):
+        ${py_doc('langkit.python.root_node.parent_chain', 8)}
+        def _parent_chain(node):
+            yield node
+            if node.parent is not None:
+                for p in _parent_chain(node.parent):
+                    yield p
+
+        return list(_parent_chain(self))
+
     def __repr__(self):
         return self.image
 
@@ -1389,9 +1325,7 @@ class ${root_astnode_name}(object):
 
     @property
     def tokens(self):
-        """
-        Return an iterator on the range of tokens that self encompasses.
-        """
+        ${py_doc('langkit.python.root_node.tokens', 8)}
         start = self.token_start
         end = self.token_end
         while not start == end:
@@ -1400,11 +1334,7 @@ class ${root_astnode_name}(object):
         yield end
 
     def to_data(self):
-        """
-        Return a nested python data-structure, constituted only of standard
-        data types (dicts, lists, strings, ints, etc), and representing the
-        portion of the AST corresponding to this node.
-        """
+        ${py_doc('langkit.python.root_node.to_data', 8)}
         if self.is_list_type:
             return [i.to_data() for i in self if i is not None]
         else:

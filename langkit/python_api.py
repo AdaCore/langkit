@@ -23,6 +23,14 @@ class PythonAPISettings(AbstractAPISettings):
         self.c_api_settings = c_api_settings
 
     @property
+    def root_astnode_name(self) -> str:
+        """
+        Shortcut for ``self.type_public_name(T.root_node)``. Useful in
+        templates.
+        """
+        return self.type_public_name(T.root_node)
+
+    @property
     def module_name(self) -> str:
         return self.context.lib_name.lower
 

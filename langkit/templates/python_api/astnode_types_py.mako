@@ -120,7 +120,8 @@
     % endif
     def ${field.api_name.lower}(
         ${', '.join(arg_list)}
-    ) -> ${field.type.mypy_type_hint}: ...
+    ) -> ${field.type.mypy_type_hint}:
+        ${py_doc(field, 8, or_pass=True)}
     % endfor
 
     ## __iter__ and __getitem__ refinements for more precise list element types
@@ -139,6 +140,7 @@
 
 <%def name="mypy_decl(cls)">
 class ${pyapi.type_public_name(cls)}(${pyapi.type_public_name(cls.base)}):
+    ${py_doc(cls, 4)}
 ${mypy_field_decls(cls)}
 
 </%def>
