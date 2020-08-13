@@ -882,6 +882,123 @@ base_langkit_docs = {
         placeholders with nodes in Arguments and parsed according to the given
         grammar Rule.
     """,
+
+    #
+    # Python-specific
+    #
+
+    'langkit.python.AnalysisUnit.TokenIterator': """
+        Iterator over the tokens in an analysis unit.
+    """,
+    'langkit.python.AnalysisUnit.iter_tokens': """
+        Iterator over the tokens in an analysis unit.
+    """,
+    'langkit.python.AnalysisUnit.diagnostics': """
+        Diagnostics for this unit.
+    """,
+    'langkit.python.Token.__eq__': """
+        Return whether the two tokens refer to the same token in the same unit.
+
+        Note that this does not actually compares the token data.
+    """,
+    'langkit.python.Token.__lt__': """
+        Consider that None comes before all tokens. Then, sort by unit, token
+        index, and trivia index.
+    """,
+    'langkit.python.Token.to_data': """
+        Return a dict representation of this Token.
+    """,
+    'langkit.python.UnitProvider.__init__': """
+        This constructor is an implementation detail, and is not meant to be
+        used directly.
+    """,
+    'langkit.python.root_node.__bool__': """
+        Return always True so that checking a node against None can be done as
+        simply as::
+
+            if node:
+                ...
+    """,
+    'langkit.python.root_node.__iter__': """
+        Return an iterator on the children of this node.
+    """,
+    'langkit.python.root_node.__len__': """
+        Return the number of ${pyapi.root_astnode_name} children this node has.
+    """,
+    'langkit.python.root_node.__getitem__': """
+        Return the Nth ${pyapi.root_astnode_name} child this node has.
+
+        This handles negative indexes the same way Python lists do. Raise an
+        IndexError if "key" is out of range.
+    """,
+    'langkit.python.root_node.iter_fields': """
+        Iterate through all the fields this node contains.
+
+        Return an iterator that yields (name, value) couples for all abstract
+        fields in this node. If "self" is a list, field names will be
+        "item_{n}" with "n" being the index.
+    """,
+    'langkit.python.root_node.dump_str': """
+        Dump the sub-tree to a string in a human-readable format.
+    """,
+    'langkit.python.root_node.dump': """
+        Dump the sub-tree in a human-readable format on the given file.
+
+        :param str indent: Prefix printed on each line during the dump.
+        :param file file: File in which the dump must occur.
+    """,
+    'langkit.python.root_node.findall': """
+        Helper for finditer that will return all results as a list. See
+        finditer's documentation for more details.
+    """,
+    'langkit.python.root_node.find': """
+        Helper for finditer that will return only the first result. See
+        finditer's documentation for more details.
+    """,
+    'langkit.python.root_node.finditer': """
+        Find every node corresponding to the passed predicates.
+
+        :param ast_type_or_pred: If supplied with a subclass of
+            ${pyapi.root_astnode_name}, will constrain the resulting collection
+            to only the instances of this type or any subclass. If supplied
+            with a predicate, it will apply the predicate on every node and
+            keep only the ones for which it returns True. If supplied with a
+            list of subclasses of ${pyapi.root_astnode_name}, it will match all
+            instances of any of them.
+        :type ast_type_or_pred:
+            type|((${pyapi.root_astnode_name}) -> bool)|list[type]
+
+        :param kwargs: Allows the user to filter on attributes of the node. For
+            every key value association, if the node has an attribute of name
+            key that has the specified value, then the child is kept.
+        :type kwargs: dict[str, Any]
+    """,
+    'langkit.python.root_node.parent_chain': """
+        Return the parent chain of self. Self will be the first element,
+        followed by the first parent, then this parent's parent, etc.
+    """,
+    'langkit.python.root_node.tokens': """
+        Return an iterator on the range of tokens that self encompasses.
+    """,
+    'langkit.python.root_node.to_data': """
+        Return a nested python data-structure, constituted only of standard
+        data types (dicts, lists, strings, ints, etc), and representing the
+        portion of the AST corresponding to this node.
+    """,
+    'langkit.python.root_node.to_json': """
+        Return a JSON representation of this node.
+    """,
+    'langkit.python.root_node.is_a': """
+        Shortcut for isinstance(self, types).
+        :rtype: bool
+    """,
+    'langkit.python.root_node.cast': """
+        Fluent interface style method. Return ``self``, raise an error if self
+        is not of type ``typ``.
+
+        :type typ: () -> T
+        :rtype: T
+    """,
 }
 
 
@@ -987,6 +1104,9 @@ def format_ada(text: str, column: int) -> str:
     :param text: Text to format.
     :param column: Indentation level for the result.
     """
+    if not text.strip():
+        return ''
+
     available_width = get_available_width(column)
     lines = []
     for i, paragraph in enumerate(split_paragraphs(text)):
@@ -1029,19 +1149,19 @@ def format_c(text: str, column: int) -> str:
 def format_python(text: str,
                   column: int,
                   argtypes: List[Tuple[str, CompiledType]] = [],
-                  rtype: Optional[CompiledType] = None) -> str:
+                  rtype: Optional[CompiledType] = None,
+                  or_pass: bool = False) -> str:
     """
     Format some text as Python docstring.
 
-    :param str text: Text to format.
-    :param int column: Indentation level for the result.
-    :param list[(str, langkit.compiled_types.CompiledType)]: List of argument
-        names and argument types, to be appended as ``:type:`` Sphinx
-        annotations.
-    :param None|langkit.compiled_types.CompiledType rtype: If non-None, append
-        to the formatted docstring a Sphinx-style ``:rtype:`` annotation, whose
-        type is the given ``rtype``.
-    :rtype: str
+    :param text: Text to format.
+    :param column: Indentation level for the result.
+    :param argtypes: List of argument names and argument types, to be appended
+        as ``:type:`` Sphinx annotations.
+    :param rtype: If non-None, append to the formatted docstring a Sphinx-style
+        ``:rtype:`` annotation, whose type is the given ``rtype``.
+    :param or_pass: Whether to emit the ``pass`` keyword when there is no text
+        to format.
     """
     from langkit.compile_context import get_context
 
@@ -1079,6 +1199,9 @@ def format_python(text: str,
     # Remove any trailing empty line
     if lines and not lines[-1]:
         lines.pop()
+
+    if not lines and or_pass:
+        return 'pass'
 
     # Append indentation and multi-line string delimiters
     lines = ['"""'] + [
@@ -1161,7 +1284,7 @@ def create_doc_printer(
         elif entity.doc:
             doc_template = Template(entity.doc)
         else:
-            return ''
+            doc_template = None
 
         def node_name(node: Union[CompiledType, TypeRepo.Defer]) -> str:
             return get_node_name(ctx, resolve_type(node))
@@ -1169,12 +1292,13 @@ def create_doc_printer(
         doc = doc_template.render(
             ctx=get_context(),
             capi=ctx.c_api_settings,
+            pyapi=ctx.python_api_settings,
             lang=lang,
             null=null_names[lang],
             TODO=todo_markers[lang],
             T=T,
             node_name=node_name
-        )
+        ) if doc_template else ''
         return formatter(doc, column, **kwargs)
 
     func.__name__ = '{}_doc'.format(lang)
