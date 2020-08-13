@@ -22,6 +22,14 @@ project Mains is
                          for main in main_programs))}
    );
 
+   package Builder is
+      ## Add a language-specific prefix to the name of the "parse" executable
+      ## for convenience, when multiple ones are available.
+      % if 'parse' in main_programs:
+         for Executable ("parse") use "${ctx.short_name_or_long.lower}_parse";
+      % endif
+   end Builder;
+
    package Compiler is
       case Build_Mode is
          when "dev" =>

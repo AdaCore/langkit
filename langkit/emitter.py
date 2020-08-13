@@ -677,7 +677,10 @@ class Emitter:
         """
         Emit sources for the Python playground script.
         """
-        playground_file = os.path.join(self.lib_root, 'bin', 'playground')
+        playground_file = os.path.join(
+            self.lib_root, 'bin',
+            '{}_playground'.format(ctx.short_name_or_long.lower)
+        )
         write_source_file(
             playground_file,
             ctx.render_template(
