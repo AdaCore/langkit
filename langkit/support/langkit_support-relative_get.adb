@@ -32,7 +32,7 @@ begin
    if Index < -L or else L <= Index then
       return False;
    elsif Index < 0 then
-      Item := Get (S, L - Index - 1);
+      Item := Get (S, L + Index);
    else
       Item := Get (S, Index);
    end if;
