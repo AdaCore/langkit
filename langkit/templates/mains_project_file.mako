@@ -39,7 +39,6 @@ project Mains is
       for Switches ("s-memory.adb") use ("-g", "-O2", "-gnatpg");
    end Compiler;
 
-
    package Binder is
       for Switches ("ada") use ("-E");
    end Binder;
