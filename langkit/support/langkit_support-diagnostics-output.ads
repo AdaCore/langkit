@@ -87,9 +87,10 @@ private
       Text_Ptr   : Text_Cst_Access;
       --  Internal pointer to the contents of the text buffer
 
-      Line_Spans : Offset_Vectors.Vector;
-      --  For each line of text in buffer, store the end line (or end of
-      --  buffer) character offset.
+      Line_Starts : Offset_Vectors.Vector;
+      --  For each line N, Line_Starts (N) contains the index of the first
+      --  character in Text_Ptr for that line. Note that we compute this vector
+      --  incrementally and on demand (see Get_Line in the body).
    end record;
 
 end Langkit_Support.Diagnostics.Output;
