@@ -25,16 +25,14 @@ with Ada.Strings.Wide_Wide_Fixed; use Ada.Strings.Wide_Wide_Fixed;
 with Ada.Text_IO;                 use Ada.Text_IO;
 with Ada.Wide_Wide_Text_IO;       use Ada.Wide_Wide_Text_IO;
 
-with GNATCOLL.Terminal;           use GNATCOLL.Terminal;
+with GNATCOLL.Terminal; use GNATCOLL.Terminal;
 
-with Langkit_Support.Images;      use Langkit_Support.Images;
+with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Diagnostics.Output is
 
    Term_Info   : Terminal_Info;
    Colors_Init : Boolean := False;
-
-   use Ada.Containers;
 
    procedure Print_Source_Listing
      (Sloc_Range  : Source_Location_Range;
@@ -63,50 +61,45 @@ package body Langkit_Support.Diagnostics.Output is
      (Self        : in out Text_Buffer;
       Line_Number : Positive) return Text_Type
    is
-      T      : Text_Type renames Self.Text_Ptr.all;
+      T : Text_Type renames Self.Text_Ptr.all;
 
-      Idx : Natural := 0;
-      --  Index of the currently processed line's newline char. It starts at 0
-      --  because we start the search for the next newline char from Idx + 1
-      --  in the call to `Index` below.
-
+      Idx : Natural := Self.Line_Starts.Last_Element;
+      --  Index in T of the newline character that ends the currently processed
+      --  line. The currently processed line is N in the loop below.
    begin
-      --  If there are line spans, then the start index is the index of the
-      --  last computed line span.
-      if Self.Line_Spans.Length > 0 then
-         Idx := Self.Line_Spans.Last_Element;
-      end if;
-
-      --  Compute every line span between the last computed line span and the
+      --  Complete Self.Line_Starts to have all starting characters until the
       --  queried one.
-      for I in Positive (Self.Line_Spans.Length + 1) .. Line_Number loop
+      for N in Self.Line_Starts.Last_Index .. Line_Number loop
 
-         --  Search the index of the next newline char, starting just after
-         --  the index of the previous newline char.
-         Idx := Index (T, Chars.LF & "", Idx + 1);
+         --  Search the index of the newline char that follows the current line
+         Idx := Index (T, Chars.LF & "", Idx);
 
-         --  If no next newline found, Index is still at its starting value of
-         --  0: Put the next index just after the end of the string, at the
-         --  (virtual) "$" EOF character.
+         --  Append the index of the first character of line N+1 to
+         --  Self.Line_Starts. This is the character at Idx+1.
+         --
+         --  For regular cases, this is Idx + 1. However if no next newline
+         --  found (we are on the last line, which can sometimes lack its
+         --  trailing LF character), emulate the presence of this trailing LF
+         --  (at T'Last+1), so consider that the next line would start at
+         --  T'Last+2.
          if Idx = 0 then
             Idx := T'Last + 1;
          end if;
-         Self.Line_Spans.Append (Idx);
+         Self.Line_Starts.Append (Idx + 1);
       end loop;
 
       --  Return slice from...
-      return  T
+      return T
         (
-          --  The character just after the found newline character to...
-          (if Line_Number = 1
-           then 0
-           else Self.Line_Spans (Line_Number - 1)) + 1
+          --  The first character in the requested line
+          Self.Line_Starts (Line_Number)
 
-         ..
+          ..
 
-         --  The character just before the next newline character
-         Self.Line_Spans (Line_Number) - 1);
-
+          --  The character before the LF that precedes the first character of
+          --  the next line.
+          Self.Line_Starts (Line_Number + 1) - 2
+        );
    end Get_Line;
 
    --------------------------
@@ -215,7 +208,11 @@ package body Langkit_Support.Diagnostics.Output is
 
    function Create (Text : Text_Cst_Access) return Text_Buffer is
    begin
-      return Text_Buffer'(Text_Ptr => Text, others => <>);
+      return Result : Text_Buffer :=
+         Text_Buffer'(Text_Ptr => Text, others => <>)
+      do
+         Result.Line_Starts.Append (Text.all'First);
+      end return;
    end Create;
 
 end Langkit_Support.Diagnostics.Output;
