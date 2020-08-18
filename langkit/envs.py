@@ -379,6 +379,15 @@ class EnvAction:
     :type: PropertyDef
     """
 
+    def __init__(self) -> None:
+        self.location = extract_library_location()
+
+    @property
+    def str_location(self) -> str:
+        return ('unknown location'
+                if self.location is None else
+                self.location.gnu_style_repr())
+
     def check(self) -> None:
         """
         Check that the env action is legal.
@@ -406,6 +415,7 @@ class AddEnv(EnvAction):
     def __init__(self,
                  no_parent: bool = False,
                  transitive_parent: bool = False) -> None:
+        super().__init__()
         self.no_parent = no_parent
         self.transitive_parent = transitive_parent
 
@@ -416,9 +426,11 @@ class AddEnv(EnvAction):
 
 
 class AddToEnv(EnvAction):
+
     def __init__(self,
                  mappings: AbstractExpression,
                  resolver: Optional[PropertyDef]) -> None:
+        super().__init__()
         self.mappings = mappings
         self.resolver = resolver
 
@@ -510,6 +522,8 @@ class RefEnvs(EnvAction):
         """
         assert resolver
         assert nodes_expr
+
+        super().__init__()
 
         self.resolver: PropertyDef = resolver
         self.nodes_expr = nodes_expr
