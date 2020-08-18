@@ -321,7 +321,11 @@
          for Mapping of Mappings.Items loop
          % endif
 
-         Add_To_Env (Self, Mapping, Initial_Env, Resolver);
+         Add_To_Env
+           (Self, Mapping, Initial_Env, Resolver,
+            DSL_Location => ${('""'
+                               if exprs.unsound else
+                               string_repr(exprs.str_location))});
          % if not is_array:
          Dec_Ref (Mapping.Dest_Env);
          % endif

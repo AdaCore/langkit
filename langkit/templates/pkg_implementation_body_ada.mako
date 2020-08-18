@@ -1145,12 +1145,16 @@ package body ${ada_lib_name}.Implementation is
 
    % if ctx.has_env_assoc:
       procedure Add_To_Env
-        (Self        : ${T.root_node.name};
-         Mapping     : ${T.env_assoc.name};
-         Initial_Env : Lexical_Env;
-         Resolver    : Entity_Resolver);
+        (Self         : ${T.root_node.name};
+         Mapping      : ${T.env_assoc.name};
+         Initial_Env  : Lexical_Env;
+         Resolver     : Entity_Resolver;
+         DSL_Location : String);
       --  Helper for Populate_Lexical_Env: add the key/element Mapping in the
       --  Env lexical environment using the given metadata (MD).
+      --
+      --  If the destination environment is foreign and DSL_Location is not
+      --  empty, raise a Property_Error.
    % endif
 
    % if ctx.has_ref_env:
@@ -1194,15 +1198,16 @@ package body ${ada_lib_name}.Implementation is
       ----------------
 
       procedure Add_To_Env
-        (Self        : ${T.root_node.name};
-         Mapping     : ${T.env_assoc.name};
-         Initial_Env : Lexical_Env;
-         Resolver    : Entity_Resolver)
+        (Self         : ${T.root_node.name};
+         Mapping      : ${T.env_assoc.name};
+         Initial_Env  : Lexical_Env;
+         Resolver     : Entity_Resolver;
+         DSL_Location : String)
       is
          Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
          MD         : ${T.env_md.name} renames Mapping.Metadata;
 
-         Dest_Env : Lexical_Env :=
+         Dest_Env : constant Lexical_Env :=
            (if Mapping.Dest_Env = Empty_Env
             then Initial_Env
             else Mapping.Dest_Env);
@@ -1243,6 +1248,18 @@ package body ${ada_lib_name}.Implementation is
             raise Property_Error with
                "Cannot add a synthetic node to a lexical env from another"
                & " analysis unit";
+         end if;
+
+         --  If requested, reject foreign destination environments. Note that
+         --  this detect only explicit destination environments: foreign
+         --  initial ones are already detected in SetInitialEnv actions.
+         if DSL_Location'Length > 0
+            and then Mapping.Dest_Env.Env.Node /= null
+            and then Mapping.Dest_Env.Env.Node.Unit /= Self.Unit
+         then
+            raise Property_Error with
+               "unsound foreign environment in AddToEnv (" & DSL_Location
+               & ")";
          end if;
 
          --  Add the element to the environment

@@ -106,7 +106,8 @@ def reference(nodes: AbstractExpression,
 
 
 def add_to_env(mappings: AbstractExpression,
-               resolver: Optional[PropertyDef] = None) -> AddToEnv:
+               resolver: Optional[PropertyDef] = None,
+               unsound: bool = False) -> AddToEnv:
     """
     Specify elements to add to the lexical environment.
 
@@ -115,19 +116,24 @@ def add_to_env(mappings: AbstractExpression,
         All values must belong to the same unit as the node that owns this
         EnvSpec. See langkit.expressions.envs.new_env_assoc for more precision
         on how to create an env assoc.
+
     :param resolver: Optional property that returns an AST node. If provided,
         the lexical environment lookup that will try to return the given
         mappings will first run this property on all nodes and return its
         result instead.
+
+    :param unsound: Whether ``dest_env`` is allowed to return foreign
+        environments.
     """
-    return AddToEnv(mappings, resolver)
+    return AddToEnv(mappings, resolver, unsound)
 
 
 def add_to_env_kv(key: AbstractExpression,
                   val: AbstractExpression,
                   dest_env: Optional[AbstractExpression] = None,
                   metadata: Optional[AbstractExpression] = None,
-                  resolver: Optional[PropertyDef] = None) -> AddToEnv:
+                  resolver: Optional[PropertyDef] = None,
+                  unsound: bool = False) -> AddToEnv:
     """
     Specify a single element to add to the lexical environment. See
     langkit.expressions.envs.new_env_assoc for more precision about the first
@@ -137,12 +143,16 @@ def add_to_env_kv(key: AbstractExpression,
         the lexical environment lookup that will try to return the given
         mappings will first run this property on all nodes and return its
         result instead.
+
+    :param unsound: Whether ``dest_env`` is allowed to return foreign
+        environments.
     """
     from langkit.expressions import new_env_assoc
 
     return add_to_env(
         mappings=new_env_assoc(key, val, dest_env, metadata),
-        resolver=resolver
+        resolver=resolver,
+        unsound=unsound,
     )
 
 
@@ -429,10 +439,12 @@ class AddToEnv(EnvAction):
 
     def __init__(self,
                  mappings: AbstractExpression,
-                 resolver: Optional[PropertyDef]) -> None:
+                 resolver: Optional[PropertyDef],
+                 unsound: bool) -> None:
         super().__init__()
         self.mappings = mappings
         self.resolver = resolver
+        self.unsound = unsound
 
         self.mappings_prop: PropertyDef
 
