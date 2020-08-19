@@ -163,7 +163,23 @@ class OCamlAPISettings(AbstractAPISettings):
         if len(super_type.concrete_subclasses) == len(concrete_precise_types):
             concrete_precise_types = [super_type]
 
-        return concrete_precise_types
+        # For determinism, sort the list of concrete precise types
+        return sorted(concrete_precise_types, key=lambda t: t.dsl_name)
+
+    def get_field_minimal_type(self, field: ct.Field) -> List[ct.CompiledType]:
+        """
+        Return a precice type for the given Field instance. While
+        get_field_type returns a concrete list of types, this function returns
+        the minimal set of concrete or abstract types.
+
+        :param field: The field for which we want a precice type.
+        """
+
+        minimal_precise_types = list(field.precise_types.minimal_matched_types)
+
+        # minimal_matched_types returns a set.
+        # For determinism, sort the list of types.
+        return sorted(minimal_precise_types, key=lambda t: t.dsl_name)
 
     def get_parse_fields(self, node: ct.ASTNodeType) -> List[ct.Field]:
         """
