@@ -76,7 +76,7 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        set_initial_env(Self.name.referenced_parent_scope),
+        set_initial_env(Self.name.referenced_parent_scope, unsound=True),
         add_to_env_kv(key=Self.name.referenced_name, val=Self),
         add_env()
     )

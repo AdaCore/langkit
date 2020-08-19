@@ -163,13 +163,17 @@ def handle_children() -> HandleChildren:
     return HandleChildren()
 
 
-def set_initial_env(env_expr: AbstractExpression) -> SetInitialEnv:
+def set_initial_env(env_expr: AbstractExpression,
+                    unsound: bool = False) -> SetInitialEnv:
     """
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
     the list of action.
+
+    :param unsound: Whether ``env_expr`` is allowed to return foreign
+        environments.
     """
-    return SetInitialEnv(env_expr)
+    return SetInitialEnv(env_expr, unsound)
 
 
 def do(expr: AbstractExpression) -> Do:
@@ -609,10 +613,15 @@ class HandleChildren(EnvAction):
 
 class ExprHolderAction(EnvAction):
     def __init__(self, env_expr: AbstractExpression) -> None:
+        super().__init__()
         self.env_expr = env_expr
 
 
 class SetInitialEnv(ExprHolderAction):
+
+    def __init__(self, env_expr: AbstractExpression, unsound: bool) -> None:
+        super().__init__(env_expr)
+        self.unsound = unsound
 
     def check(self) -> None:
         # Check is not normally called on this, so if it is called it means

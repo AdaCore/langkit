@@ -69,7 +69,7 @@ class Scope(FooNode):
         )
 
     env_spec = EnvSpec(
-        set_initial_env(Self.initial_env),
+        set_initial_env(Self.initial_env, unsound=True),
         add_to_env_kv(key=Self.name.suffix_symbol, val=Self),
         add_env(),
     )
