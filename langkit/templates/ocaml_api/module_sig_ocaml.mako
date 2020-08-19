@@ -434,7 +434,7 @@ module ${ocaml_api.node_name(astnode)} : sig
 
    % for field in ocaml_api.get_parse_fields(astnode):
       <%
-         precise_types = field.precise_types.minimal_matched_types
+         precise_types = ocaml_api.get_field_minimal_type(field)
 
          if len(precise_types) == 1:
             return_typ = ocaml_api.type_public_name(precise_types.pop())
