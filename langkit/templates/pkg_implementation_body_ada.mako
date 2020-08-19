@@ -1933,7 +1933,9 @@ package body ${ada_lib_name}.Implementation is
 
             Post_Env_Actions (Node, Initial_Env, Root_Env);
          exception
-            when Property_Error =>
+            when Exc : Property_Error =>
+               GNATCOLL.Traces.Trace
+                 (PLE_Errors_Trace, Ada.Exceptions.Exception_Message (Exc));
                return True;
          end;
 
