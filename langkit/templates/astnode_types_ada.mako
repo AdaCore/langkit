@@ -452,7 +452,16 @@
       % endfor
 
       % if cls.env_spec.initial_env:
-      Initial_Env := ${cls.env_spec.initial_env_expr};
+         Initial_Env := ${cls.env_spec.initial_env_expr};
+         % if not cls.env_spec.initial_env.unsound:
+            if Initial_Env.Env.Node /= null
+               and then Initial_Env.Env.Node.Unit /= Self.Unit
+            then
+               raise Property_Error with
+                  "unsound foreign environment in SetInitialEnv ("
+                  & "${cls.env_spec.initial_env.str_location}" & ")";
+            end if;
+         % endif
       % endif
       return Initial_Env;
    end ${env_getter};
