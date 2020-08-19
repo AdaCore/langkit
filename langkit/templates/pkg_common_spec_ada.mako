@@ -25,6 +25,10 @@ package ${ada_lib_name}.Common is
      GNATCOLL.Traces.Create
        ("${ctx.lib_name.upper}.MAIN_TRACE", GNATCOLL.Traces.From_Config);
 
+   PLE_Errors_Trace : constant GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("${ctx.lib_name.upper}.PLE_ERRORS", GNATCOLL.Traces.From_Config);
+
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
    --  Default charset to use when creating analysis contexts
 
