@@ -117,6 +117,8 @@ package Langkit_Support.Token_Data_Handlers is
    package Token_Index_Vectors is new Langkit_Support.Vectors
      (Element_Type => Token_Index);
 
+   package Index_Vectors is new Langkit_Support.Vectors (Positive);
+
    type Token_Data_Handler is record
       Source_Buffer : Text_Access;
       --  The whole source buffer. It belongs to this token data handler, and
@@ -161,6 +163,11 @@ package Langkit_Support.Token_Data_Handlers is
       --  the first token, and so on.
 
       Symbols : Symbol_Table;
+      --  Symbol table for this handler. Note that this can be shared accross
+      --  multiple Token_Data_Handlers.
+
+      Lines_Starts : Index_Vectors.Vector;
+      --  Table keeping count of line starts and line endings
    end record;
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
@@ -279,5 +286,9 @@ package Langkit_Support.Token_Data_Handlers is
    is (Image (Text (TDH, T)));
    --  Debug helper: return a human-readable representation of T, a token that
    --  belongs to TDH.
+
+   function Get_Line
+     (TDH : Token_Data_Handler; Line_Number : Positive) return Text_Type;
+   --  Get the source text of line at index ``Line_Number``
 
 end Langkit_Support.Token_Data_Handlers;

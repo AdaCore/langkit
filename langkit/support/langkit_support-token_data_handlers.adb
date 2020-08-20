@@ -21,11 +21,18 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Wide_Wide_Fixed; use Ada.Strings.Wide_Wide_Fixed;
+
 package body Langkit_Support.Token_Data_Handlers is
 
    function Internal_Get_Trivias
      (TDH   : Token_Data_Handler;
       Index : Token_Index) return Token_Index_Vectors.Elements_Array;
+
+   procedure Compute_Lines_Starts (TDH : in out Token_Data_Handler)
+     with Pre => TDH.Source_Buffer /= null;
+   --  Compute the table of lines starting indices, that will allow us to
+   --  go between offsets and line/columns.
 
    generic
       type Key_Type is private;
@@ -126,7 +133,8 @@ package body Langkit_Support.Token_Data_Handlers is
               Tokens            => <>,
               Symbols           => Symbols,
               Tokens_To_Trivias => <>,
-              Trivias           => <>);
+              Trivias           => <>,
+              Lines_Starts       => <>);
    end Initialize;
 
    -----------
@@ -143,11 +151,46 @@ package body Langkit_Support.Token_Data_Handlers is
       TDH.Source_Buffer := Source_Buffer;
       TDH.Source_First := Source_First;
       TDH.Source_Last := Source_Last;
+      TDH.Lines_Starts.Clear;
+
+      Compute_Lines_Starts (TDH);
 
       Clear (TDH.Tokens);
       Clear (TDH.Trivias);
       Clear (TDH.Tokens_To_Trivias);
    end Reset;
+
+   --------------------------
+   -- Compute_Lines_Starts --
+   --------------------------
+
+   procedure Compute_Lines_Starts (TDH : in out Token_Data_Handler) is
+      T : Text_Type renames TDH.Source_Buffer.all;
+
+      Idx : Natural := 0;
+      --  Index in T of the newline character that ends the currently processed
+      --  line.
+   begin
+      TDH.Lines_Starts.Append (1);
+      loop
+         --  Search the index of the newline char that follows the current line
+         Idx := Index (T, Chars.LF & "", Idx + 1);
+
+         --  Append the index of the first character of line N+1 to
+         --  Self.Line_Starts. This is the character at Idx+1.
+         --
+         --  For regular cases, this is Idx + 1. If no next newline found,
+         --  emulate the presence of this trailing LF (at T'Last+1) and return.
+         if Idx = 0 then
+            Idx := T'Last + 1;
+            TDH.Lines_Starts.Append (Idx + 1);
+            return;
+         end if;
+
+         TDH.Lines_Starts.Append (Idx + 1);
+      end loop;
+
+   end Compute_Lines_Starts;
 
    ----------
    -- Free --
@@ -156,9 +199,10 @@ package body Langkit_Support.Token_Data_Handlers is
    procedure Free (TDH : in out Token_Data_Handler) is
    begin
       Free (TDH.Source_Buffer);
-      Destroy (TDH.Tokens);
-      Destroy (TDH.Trivias);
-      Destroy (TDH.Tokens_To_Trivias);
+      TDH.Tokens.Destroy;
+      TDH.Trivias.Destroy;
+      TDH.Tokens_To_Trivias.Destroy;
+      TDH.Lines_Starts.Destroy;
       TDH.Symbols := No_Symbol_Table;
    end Free;
 
@@ -177,7 +221,8 @@ package body Langkit_Support.Token_Data_Handlers is
                  Tokens            => <>,
                  Symbols           => No_Symbol_Table,
                  Tokens_To_Trivias => <>,
-                 Trivias           => <>);
+                 Trivias           => <>,
+                 Lines_Starts      => <>);
    end Move;
 
    --------------------------
@@ -634,5 +679,26 @@ package body Langkit_Support.Token_Data_Handlers is
    begin
       return Internal_Get_Trivias (TDH, No_Token_Index);
    end Get_Leading_Trivias;
+
+   --------------
+   -- Get_Line --
+   --------------
+
+   function Get_Line
+     (TDH : Token_Data_Handler; Line_Number : Positive) return Text_Type is
+   begin
+      --  Return slice from...
+      return
+        TDH.Source_Buffer (
+         --  The first character in the requested line
+         TDH.Lines_Starts.Get (Line_Number)
+
+         ..
+
+         --  The character before the LF that precedes the first character of
+         --  the next line.
+           TDH.Lines_Starts.Get (Line_Number + 1) - 2
+        );
+   end Get_Line;
 
 end Langkit_Support.Token_Data_Handlers;

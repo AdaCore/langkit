@@ -97,4 +97,20 @@ package Langkit_Support.Text is
          Wide_Wide_Character'Val (Character'Pos (ASCII.ESC));
    end Chars;
 
+   ---------------------
+   -- Text_Buffer_Ifc --
+   ---------------------
+
+   type Text_Buffer_Ifc is abstract tagged null record;
+   --  Text buffer interface type. This interface defines a type that
+   --  encapsulates a text buffer, and can return a specific line of it.
+   --
+   --  NOTE??? T821-010: This should be an *interface*, but instead is an
+   --  abstract class, because of a bug in the generated equality operator.
+
+   function Get_Line
+     (Self : Text_Buffer_Ifc; Line_Number : Positive) return Text_Type
+      is abstract;
+   --  Return line at index ``Line_Number``
+
 end Langkit_Support.Text;

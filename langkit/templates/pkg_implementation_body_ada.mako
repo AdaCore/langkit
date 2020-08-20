@@ -1013,6 +1013,17 @@ package body ${ada_lib_name}.Implementation is
       Internal (${T.root_node.name} (Node));
    end Dump_Lexical_Env;
 
+   --------------
+   -- Get_Line --
+   --------------
+
+   function Get_Line
+     (Unit : Internal_Unit; Line_Number : Positive) return Text_Type
+   is
+   begin
+      return Get_Line (Unit.TDH, Line_Number);
+   end Get_Line;
+
    -----------
    -- Print --
    -----------

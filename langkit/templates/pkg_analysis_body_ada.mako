@@ -453,6 +453,17 @@ package body ${ada_lib_name}.Analysis is
       return Lookup_Token (Unwrap_Unit (Unit), Sloc);
    end Lookup_Token;
 
+   --------------
+   -- Get_Line --
+   --------------
+
+   function Get_Line
+     (Unit : Analysis_Unit; Line_Number : Positive) return Text_Type
+   is
+   begin
+      return Get_Line (Unwrap_Unit (Unit), Line_Number);
+   end Get_Line;
+
    ----------------------
    -- Dump_Lexical_Env --
    ----------------------
