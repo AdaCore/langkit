@@ -42,7 +42,7 @@ procedure Lkt_Toolbox is
    use Liblktlang;
 
    procedure Print_Semantic_Result
-     (S : Analysis.Semantic_Result; Buffer : in out Text_Buffer);
+     (S : Analysis.Semantic_Result; Unit : Analysis.Analysis_Unit);
    --  Print a semantic result
 
    ---------------------------
@@ -50,7 +50,7 @@ procedure Lkt_Toolbox is
    ---------------------------
 
    procedure Print_Semantic_Result
-     (S : Analysis.Semantic_Result; Buffer : in out Text_Buffer)
+     (S : Analysis.Semantic_Result; Unit : Analysis.Analysis_Unit)
    is
    begin
       if Analysis.Error_Message (S) /= "" then
@@ -60,7 +60,7 @@ procedure Lkt_Toolbox is
                To_Unbounded_Text (Analysis.Error_Message (S)));
          begin
             Print_Diagnostic
-              (Diag, Buffer,
+              (Diag, Unit,
                Simple_Name (Analysis.Node (S).Unit.Get_Filename));
          end;
       elsif
@@ -89,12 +89,11 @@ begin
          declare
             Unit : constant Analysis.Analysis_Unit
               := Ctx.Get_From_File (To_String (File_Name));
-            Buffer : Text_Buffer := Create (Unit.Text);
          begin
             if Unit.Diagnostics'Length > 0 then
                for Diagnostic of Unit.Diagnostics loop
                   Print_Diagnostic
-                    (Diagnostic, Buffer, Simple_Name (Unit.Get_Filename));
+                    (Diagnostic, Unit, Simple_Name (Unit.Get_Filename));
                end loop;
                return;
             end if;
@@ -104,7 +103,7 @@ begin
                  Unit.Root.P_Check_Semantic;
             begin
                for D of Analysis.Results (Diags) loop
-                  Print_Semantic_Result (D, Buffer);
+                  Print_Semantic_Result (D, Unit);
                end loop;
             end;
          end;

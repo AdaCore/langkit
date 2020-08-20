@@ -43,7 +43,7 @@ package ${ada_lib_name}.Analysis is
    type Analysis_Context is tagged private;
    ${ada_doc('langkit.analysis_context_type', 3)}
 
-   type Analysis_Unit is tagged private;
+   type Analysis_Unit is new Langkit_Support.Text.Text_Buffer_Ifc with private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
    No_Analysis_Context : constant Analysis_Context;
@@ -335,6 +335,10 @@ package ${ada_lib_name}.Analysis is
    procedure PP_Trivia (Unit : Analysis_Unit'Class);
    --  Debug helper: output a minimal AST with mixed trivias
 
+   overriding function Get_Line
+     (Unit : Analysis_Unit; Line_Number : Positive) return Text_Type;
+   --  Return the line of text at line number ``Line_Number``
+
    type Child_Record (Kind : Child_Or_Trivia := Child) is record
       case Kind is
          when Child =>
@@ -611,7 +615,7 @@ private
    overriding procedure Adjust (Context : in out Analysis_Context);
    overriding procedure Finalize (Context : in out Analysis_Context);
 
-   type Analysis_Unit is tagged record
+   type Analysis_Unit is new Langkit_Support.Text.Text_Buffer_Ifc with record
       Internal : Internal_Unit_Access;
 
       Context : Analysis_Context;

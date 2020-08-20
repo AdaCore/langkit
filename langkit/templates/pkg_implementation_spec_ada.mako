@@ -1310,6 +1310,10 @@ private package ${ada_lib_name}.Implementation is
    --  useful for visibility purposes, and is mainly meant to be used in the
    --  env hooks.
 
+   function Get_Line
+     (Unit : Internal_Unit; Line_Number : Positive) return Text_Type;
+   --  Return the line of text at line number ``Line_Number``
+
    function Is_Referenced_From
      (Self, Unit : Internal_Unit) return Boolean;
 

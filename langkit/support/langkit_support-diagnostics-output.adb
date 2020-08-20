@@ -21,7 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Wide_Wide_Fixed; use Ada.Strings.Wide_Wide_Fixed;
 with Ada.Text_IO;                 use Ada.Text_IO;
 with Ada.Wide_Wide_Text_IO;       use Ada.Wide_Wide_Text_IO;
 
@@ -36,7 +35,7 @@ package body Langkit_Support.Diagnostics.Output is
 
    procedure Print_Source_Listing
      (Sloc_Range  : Source_Location_Range;
-      Buffer      : in out Text_Buffer;
+      Buffer      : Text_Buffer_Ifc'Class;
       Lines_After : Natural := 0);
    --  Print a source listing
 
@@ -53,62 +52,13 @@ package body Langkit_Support.Diagnostics.Output is
       Set_Style (Term_Info, Reset_All);
    end Reset_Colors;
 
-   --------------
-   -- Get_Line --
-   --------------
-
-   function Get_Line
-     (Self        : in out Text_Buffer;
-      Line_Number : Positive) return Text_Type
-   is
-      T : Text_Type renames Self.Text_Ptr.all;
-
-      Idx : Natural := Self.Line_Starts.Last_Element;
-      --  Index in T of the newline character that ends the currently processed
-      --  line. The currently processed line is N in the loop below.
-   begin
-      --  Complete Self.Line_Starts to have all starting characters until the
-      --  queried one.
-      for N in Self.Line_Starts.Last_Index .. Line_Number loop
-
-         --  Search the index of the newline char that follows the current line
-         Idx := Index (T, Chars.LF & "", Idx);
-
-         --  Append the index of the first character of line N+1 to
-         --  Self.Line_Starts. This is the character at Idx+1.
-         --
-         --  For regular cases, this is Idx + 1. However if no next newline
-         --  found (we are on the last line, which can sometimes lack its
-         --  trailing LF character), emulate the presence of this trailing LF
-         --  (at T'Last+1), so consider that the next line would start at
-         --  T'Last+2.
-         if Idx = 0 then
-            Idx := T'Last + 1;
-         end if;
-         Self.Line_Starts.Append (Idx + 1);
-      end loop;
-
-      --  Return slice from...
-      return T
-        (
-          --  The first character in the requested line
-          Self.Line_Starts (Line_Number)
-
-          ..
-
-          --  The character before the LF that precedes the first character of
-          --  the next line.
-          Self.Line_Starts (Line_Number + 1) - 2
-        );
-   end Get_Line;
-
    --------------------------
    -- Print_Source_Listing --
    --------------------------
 
    procedure Print_Source_Listing
      (Sloc_Range  : Source_Location_Range;
-      Buffer      : in out Text_Buffer;
+      Buffer      : Text_Buffer_Ifc'Class;
       Lines_After : Natural := 0)
    is
       procedure Start_Line (Line_Nb : String := "");
@@ -160,7 +110,7 @@ package body Langkit_Support.Diagnostics.Output is
 
    procedure Print_Diagnostic
      (Self   : Diagnostic;
-      Buffer : in out Text_Buffer;
+      Buffer : Text_Buffer_Ifc'Class;
       Path   : String) is
    begin
       if not Colors_Init then
@@ -201,18 +151,5 @@ package body Langkit_Support.Diagnostics.Output is
       Print_Source_Listing (Self.Sloc_Range, Buffer);
       Ada.Text_IO.New_Line;
    end Print_Diagnostic;
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create (Text : Text_Cst_Access) return Text_Buffer is
-   begin
-      return Result : Text_Buffer :=
-         Text_Buffer'(Text_Ptr => Text, others => <>)
-      do
-         Result.Line_Starts.Append (Text.all'First);
-      end return;
-   end Create;
 
 end Langkit_Support.Diagnostics.Output;
