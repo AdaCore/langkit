@@ -231,14 +231,13 @@
    % if cls.env_spec:
 
       function ${cls.name}_Pre_Env_Actions
-        (Self                : ${cls.name};
-         Bound_Env, Root_Env : AST_Envs.Lexical_Env;
-         Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env;
+        (Self            : ${cls.name};
+         Bound_Env       : AST_Envs.Lexical_Env;
+         Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env;
 
       % if cls.env_spec.post_actions:
          procedure ${cls.name}_Post_Env_Actions
-           (Self                : ${cls.name};
-            Bound_Env, Root_Env : AST_Envs.Lexical_Env);
+           (Self : ${cls.name}; Bound_Env : AST_Envs.Lexical_Env);
       % endif
 
    % endif
@@ -385,7 +384,7 @@
 
       G := Simple_Env_Getter (Initial_Env);
       % if has_dyn_env:
-      if Initial_Env not in Root_Env | Empty_Env
+      if Initial_Env.Env.Node /= null
          and then Initial_Env.Env.Node.Unit /= Self.Unit
       then
          G := Dyn_Env_Getter (${env_getter}'Access, Self);
@@ -481,9 +480,9 @@
    % endif
 
    function ${cls.name}_Pre_Env_Actions
-     (Self                : ${cls.name};
-      Bound_Env, Root_Env : AST_Envs.Lexical_Env;
-      Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
+     (Self            : ${cls.name};
+      Bound_Env       : AST_Envs.Lexical_Env;
+      Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env
    is
       use AST_Envs;
 
@@ -516,8 +515,7 @@
 
    % if cls.env_spec.post_actions:
       procedure ${cls.name}_Post_Env_Actions
-        (Self                : ${cls.name};
-         Bound_Env, Root_Env : AST_Envs.Lexical_Env)
+        (Self : ${cls.name}; Bound_Env : AST_Envs.Lexical_Env)
       is
          use AST_Envs;
          Initial_Env : Lexical_Env := Bound_Env;

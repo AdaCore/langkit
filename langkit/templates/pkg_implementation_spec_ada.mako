@@ -643,9 +643,9 @@ private package ${ada_lib_name}.Implementation is
    --  Helper for parsers, to initialize a freshly allocated node
 
    function Pre_Env_Actions
-     (Self                : ${T.root_node.name};
-      Bound_Env, Root_Env : Lexical_Env;
-      Add_To_Env_Only     : Boolean := False) return Lexical_Env;
+     (Self            : ${T.root_node.name};
+      Bound_Env       : Lexical_Env;
+      Add_To_Env_Only : Boolean := False) return Lexical_Env;
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
@@ -654,8 +654,7 @@ private package ${ada_lib_name}.Implementation is
    --  Post_Env_Actions.
 
    procedure Post_Env_Actions
-     (Self                : ${T.root_node.name};
-      Bound_Env, Root_Env : Lexical_Env);
+     (Self : ${T.root_node.name}; Bound_Env : Lexical_Env);
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
