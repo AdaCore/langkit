@@ -47,7 +47,7 @@ package Langkit_Support.Token_Data_Handlers is
       --  this is either null or the symbolization of the token text.
       --
       --  For instance: null for keywords but actual text for identifiers.
-   end record;
+   end record with Pack;
    --  Holder for per-token data to be stored in the token data handler
 
    --  Trivias are tokens that are not to be taken into account during parsing,
@@ -58,7 +58,7 @@ package Langkit_Support.Token_Data_Handlers is
    type Trivia_Node is record
       T        : aliased Stored_Token_Data;
       Has_Next : Boolean;
-   end record;
+   end record with Pack;
    --  This defines a node in a trivia linked list
 
    package Token_Vectors is new Langkit_Support.Vectors
