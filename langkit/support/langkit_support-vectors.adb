@@ -150,6 +150,10 @@ package body Langkit_Support.Vectors is
      (Self : Vector; Index : Iteration_Index_Type) return Element_Type
    is
    begin
+      if Index > Self.Size then
+         raise Constraint_Error with "Out of bound access";
+      end if;
+
       if Small_Vector_Capacity = 0 then
          return Self.E (Index);
       else
@@ -222,9 +226,10 @@ package body Langkit_Support.Vectors is
 
    function Pop (Self : in out Vector) return Element_Type is
       Index : constant Index_Type := Last_Index (Self);
+      Res : constant Element_Type := Get (Self, Index);
    begin
       Self.Size := Self.Size - 1;
-      return Get (Self, Index);
+      return Res;
    end Pop;
 
    ---------
