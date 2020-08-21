@@ -642,19 +642,26 @@ private package ${ada_lib_name}.Implementation is
       Self_Env          : Lexical_Env := AST_Envs.Empty_Env);
    --  Helper for parsers, to initialize a freshly allocated node
 
-   function Pre_Env_Actions
+   type PLE_State is record
+      Current_Env : Lexical_Env;
+      --  Current environment when processing the node: initially inheritted
+      --  from the Current_Env of the parent node (or Root_Scope on the root
+      --  node), SetInitialEnv actions can change this.
+      --
+      --  Other environment actions such as AddEnv or AddToEnv can use this.
+   end record;
+   --  State of PLE on a specific node
+
+   procedure Pre_Env_Actions
      (Self            : ${T.root_node.name};
-      Bound_Env       : Lexical_Env;
-      Add_To_Env_Only : Boolean := False) return Lexical_Env;
+      State           : in out PLE_State;
+      Add_To_Env_Only : Boolean := False);
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
-   --
-   --  The return value is the initial environment to be passed to
-   --  Post_Env_Actions.
 
    procedure Post_Env_Actions
-     (Self : ${T.root_node.name}; Bound_Env : Lexical_Env);
+     (Self : ${T.root_node.name}; State : in out PLE_State);
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
