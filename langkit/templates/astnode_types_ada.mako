@@ -231,15 +231,15 @@
    % if cls.env_spec:
 
       % if cls.env_spec.pre_actions:
-         function ${cls.name}_Pre_Env_Actions
+         procedure ${cls.name}_Pre_Env_Actions
            (Self            : ${cls.name};
-            Bound_Env       : AST_Envs.Lexical_Env;
-            Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env;
+            State           : in out PLE_State;
+            Add_To_Env_Only : Boolean := False);
       % endif
 
       % if cls.env_spec.post_actions:
          procedure ${cls.name}_Post_Env_Actions
-           (Self : ${cls.name}; Bound_Env : AST_Envs.Lexical_Env);
+           (Self : ${cls.name}; State : in out PLE_State);
       % endif
 
    % endif
@@ -306,7 +306,7 @@
    %>
 
    <%def name="emit_set_initial_env(do_action)">
-      Initial_Env := ${env_getter}
+      State.Current_Env := ${env_getter}
         ((Node => Self, Info => ${T.entity_info.nullexpr}));
    </%def>
 
@@ -337,7 +337,7 @@
          % endif
 
          Add_To_Env
-           (Self, Mapping, Initial_Env, Resolver,
+           (Self, Mapping, State.Current_Env, Resolver,
             DSL_Location => ${('""'
                                if exprs.unsound else
                                string_repr(exprs.str_location))});
@@ -395,28 +395,34 @@
 
    <%def name="emit_add_env(add_env)">
       if Add_To_Env_Only then
-         return Initial_Env;
+         return;
       end if;
 
-      G := Simple_Env_Getter (Initial_Env);
-      % if has_dyn_env:
-      if Initial_Env.Env.Node /= null
-         and then Initial_Env.Env.Node.Unit /= Self.Unit
-      then
-         G := Dyn_Env_Getter (${env_getter}'Access, Self);
-      end if;
-      % endif
+      declare
+         G : Env_Getter :=
+            % if add_env.no_parent:
+               AST_Envs.No_Env_Getter
+            % else:
+               AST_Envs.Simple_Env_Getter (State.Current_Env)
+            % endif
+         ;
+      begin
+         % if has_dyn_env:
+            if State.Current_Env.Env.Node /= null
+               and then State.Current_Env.Env.Node.Unit /= Self.Unit
+            then
+               G := AST_Envs.Dyn_Env_Getter (${env_getter}'Access, Self);
+            end if;
+         % endif
 
-      Self.Self_Env := AST_Envs.Create_Lexical_Env
-        (Parent            => ${"No_Env_Getter" if add_env.no_parent else "G"},
-         Node              => Self,
-         Transitive_Parent => ${call_prop(add_env.transitive_parent_prop)},
-         Owner             => Self.Unit);
-
-      Initial_Env := Self.Self_Env;
-
-      Register_Destroyable (Self.Unit, Self.Self_Env.Env);
-
+         Self.Self_Env := AST_Envs.Create_Lexical_Env
+           (Parent            => G,
+            Node              => Self,
+            Transitive_Parent => ${call_prop(add_env.transitive_parent_prop)},
+            Owner             => Self.Unit);
+         State.Current_Env := Self.Self_Env;
+         Register_Destroyable (Self.Unit, Self.Self_Env.Env);
+      end;
    </%def>
 
    <%def name="emit_do(do_action)">
@@ -429,7 +435,6 @@
          % endif
       end;
    </%def>
-
 
    <%def name="emit_env_action(env_action)">
 
@@ -490,36 +495,23 @@
    ## Emit procedures for pre/post actions when needed
 
    % if cls.env_spec.pre_actions:
-      function ${cls.name}_Pre_Env_Actions
+      procedure ${cls.name}_Pre_Env_Actions
         (Self            : ${cls.name};
-         Bound_Env       : AST_Envs.Lexical_Env;
-         Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env
-      is
-         use AST_Envs;
-
-         Initial_Env  : Lexical_Env := Bound_Env;
-
-         % if cls.env_spec.adds_env:
-         G : Env_Getter;
-         % endif
+         State           : in out PLE_State;
+         Add_To_Env_Only : Boolean := False) is
       begin
          % for action in cls.env_spec.pre_actions:
             ${emit_env_action(action)}
          % endfor
-
-         return Initial_Env;
       end;
    % endif
 
    % if cls.env_spec.post_actions:
       procedure ${cls.name}_Post_Env_Actions
-        (Self : ${cls.name}; Bound_Env : AST_Envs.Lexical_Env)
-      is
-         use AST_Envs;
-         Initial_Env : Lexical_Env := Bound_Env;
+        (Self : ${cls.name}; State : in out PLE_State) is
       begin
          % for action in cls.env_spec.post_actions:
-         ${emit_env_action (action)}
+            ${emit_env_action (action)}
          % endfor
       end;
    % endif

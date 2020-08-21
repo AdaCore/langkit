@@ -1362,23 +1362,21 @@ package body ${ada_lib_name}.Implementation is
    -- Pre_Env_Actions --
    ---------------------
 
-   function Pre_Env_Actions
+   procedure Pre_Env_Actions
      (Self            : ${T.root_node.name};
-      Bound_Env       : AST_Envs.Lexical_Env;
-      Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env
-   is
+      State           : in out PLE_State;
+      Add_To_Env_Only : Boolean := False) is
    begin
 
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.pre_actions:
-            return ${n.name}_Pre_Env_Actions
-              (Self, Bound_Env, Add_To_Env_Only);
+            ${n.name}_Pre_Env_Actions (Self, State, Add_To_Env_Only);
          % else:
-            return Null_Lexical_Env;
+            null;
          % endif
       </%def>
-      <%def name="default()"> return Null_Lexical_Env; </%def>
+      <%def name="default()"> null; </%def>
       </%self:case_dispatch>
 
    end Pre_Env_Actions;
@@ -1388,12 +1386,12 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    procedure Post_Env_Actions
-     (Self : ${T.root_node.name}; Bound_Env : AST_Envs.Lexical_Env) is
+     (Self : ${T.root_node.name}; State : in out PLE_State) is
    begin
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.post_actions:
-            ${n.name}_Post_Env_Actions (Self, Bound_Env);
+            ${n.name}_Post_Env_Actions (Self, State);
          % else:
             null;
          % endif
@@ -1911,11 +1909,12 @@ package body ${ada_lib_name}.Implementation is
 
    function Populate_Lexical_Env (Node : ${T.root_node.name}) return Boolean is
 
-      Context : constant Internal_Context := Node.Unit.Context;
+      Context    : constant Internal_Context := Node.Unit.Context;
+      Root_State : constant PLE_State := (Current_Env => Context.Root_Scope);
 
       function Populate_Internal
-        (Node      : ${T.root_node.name};
-         Bound_Env : Lexical_Env) return Boolean;
+        (Node         : ${T.root_node.name};
+         Parent_State : PLE_State) return Boolean;
       --  Do the lexical env population on Node and recurse on its children
 
       -----------------------
@@ -1923,34 +1922,33 @@ package body ${ada_lib_name}.Implementation is
       -----------------------
 
       function Populate_Internal
-        (Node      : ${T.root_node.name};
-         Bound_Env : Lexical_Env) return Boolean
+        (Node         : ${T.root_node.name};
+         Parent_State : PLE_State) return Boolean
       is
-         Result      : Boolean := False;
-         Initial_Env : Lexical_Env;
+         Result : Boolean := False;
+         State  : PLE_State := Parent_State;
       begin
          if Node = null then
             return Result;
          end if;
 
-         --  By default (i.e. unless env actions add a new env),
-         --  the environment we store in Node is the current one.
-         Node.Self_Env := Bound_Env;
+         --  By default (i.e. unless env actions add a new env), the
+         --  environment we store in Node is the current one.
+         Node.Self_Env := State.Current_Env;
 
          begin
-            Initial_Env := Pre_Env_Actions (Node, Bound_Env);
-
-            if Initial_Env /= Null_Lexical_Env then
-               Node.Self_Env := Initial_Env;
+            Pre_Env_Actions (Node, State);
+            if State.Current_Env /= Null_Lexical_Env then
+               Node.Self_Env := State.Current_Env;
             end if;
 
             --  Call recursively on children
             for I in First_Child_Index (Node) .. Last_Child_Index (Node) loop
                Result := Populate_Internal
-                 (Child (Node, I), Node.Self_Env) or else Result;
+                 (Child (Node, I), State) or else Result;
             end loop;
 
-            Post_Env_Actions (Node, Initial_Env);
+            Post_Env_Actions (Node, State);
          exception
             when Exc : Property_Error =>
                GNATCOLL.Traces.Trace
@@ -2012,7 +2010,7 @@ package body ${ada_lib_name}.Implementation is
          end if;
       % endif
 
-      return Populate_Internal (Node, Context.Root_Scope);
+      return Populate_Internal (Node, Root_State);
    end Populate_Lexical_Env;
 
    ------------------------------
@@ -4100,10 +4098,10 @@ package body ${ada_lib_name}.Implementation is
       --  this unit contains so that they are relocated in our new lexical
       --  environments.
       declare
-         Env : constant Lexical_Env :=
-            Pre_Env_Actions (Node, Node.Self_Env, True);
+         State : PLE_State := (Current_Env => Node.Self_Env);
       begin
-         Post_Env_Actions (Node, Env);
+         Pre_Env_Actions (Node, State, Add_To_Env_Only => True);
+         Post_Env_Actions (Node, State);
       end;
    end Reroot_Foreign_Node;
 
