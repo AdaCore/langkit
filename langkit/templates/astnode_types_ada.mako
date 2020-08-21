@@ -449,6 +449,12 @@
    begin
       % if cls.env_spec.initial_env:
          Initial_Env := ${cls.env_spec.initial_env_expr};
+
+         if Initial_Env.Kind /= Primary then
+            raise Property_Error with
+               "Cannot set initial env to non-primary one";
+         end if;
+
          % if not cls.env_spec.initial_env.unsound:
             if Initial_Env.Env.Node /= null
                and then Initial_Env.Env.Node.Unit /= Self.Unit
