@@ -32,11 +32,7 @@ with Langkit_Support.Vectors;
 
 generic
 
-   type Precomputed_Symbol_Index is (<>);
-   with function Precomputed_Symbol
-     (Index : Precomputed_Symbol_Index) return Text_Type is <>;
-   with package Symbols is new Langkit_Support.Symbols
-      (Precomputed_Symbol_Index, Precomputed_Symbol);
+   with package Symbols is new Langkit_Support.Symbols (<>);
 
 package Langkit_Support.Token_Data_Handlers is
 

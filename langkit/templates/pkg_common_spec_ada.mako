@@ -61,8 +61,8 @@ package ${ada_lib_name}.Common is
    package Symbols is new Langkit_Support.Symbols
      (Precomputed_Symbol_Index, Precomputed_Symbol);
 
-   package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
-     (Precomputed_Symbol_Index, Precomputed_Symbol, Symbols);
+   package Token_Data_Handlers
+   is new Langkit_Support.Token_Data_Handlers (Symbols);
 
    use Symbols, Token_Data_Handlers;
 
