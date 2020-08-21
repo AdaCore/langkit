@@ -924,15 +924,6 @@ package body ${ada_lib_name}.Implementation is
    -- Text --
    ----------
 
-   function Text (Unit : Internal_Unit) return Text_Cst_Access is
-   begin
-      return Text_Cst_Access (Unit.TDH.Source_Buffer);
-   end Text;
-
-   ----------
-   -- Text --
-   ----------
-
    function Text (Unit : Internal_Unit) return Text_Type is
    begin
       return Text (First_Token (Unit), Last_Token (Unit));
