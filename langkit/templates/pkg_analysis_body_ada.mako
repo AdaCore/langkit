@@ -432,15 +432,6 @@ package body ${ada_lib_name}.Analysis is
       return Implementation.Text (Unwrap_Unit (Unit));
    end Text;
 
-   ----------
-   -- Text --
-   ----------
-
-   function Text (Unit : Analysis_Unit'Class) return Text_Cst_Access is
-   begin
-      return Implementation.Text (Unwrap_Unit (Unit));
-   end Text;
-
    ------------------
    -- Lookup_Token --
    ------------------

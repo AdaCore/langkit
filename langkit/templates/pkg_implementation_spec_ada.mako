@@ -1274,9 +1274,6 @@ private package ${ada_lib_name}.Implementation is
    function Text (Unit : Internal_Unit) return Text_Type;
    --  Implementation for Analysis.Text
 
-   function Text (Unit : Internal_Unit) return Text_Cst_Access;
-   --  Overload for Analysis.Text that returns an access
-
    function Lookup_Token
      (Unit : Internal_Unit; Sloc : Source_Location) return Token_Reference;
    --  Implementation for Analysis.Lookup_Token
