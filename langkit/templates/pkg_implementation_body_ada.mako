@@ -1370,9 +1370,13 @@ package body ${ada_lib_name}.Implementation is
    begin
 
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
-      <%def name="action(node)">
-         return ${node.name}_Pre_Env_Actions
-           (Self, Bound_Env, Add_To_Env_Only);
+      <%def name="action(n)">
+         % if n.env_spec.pre_actions:
+            return ${n.name}_Pre_Env_Actions
+              (Self, Bound_Env, Add_To_Env_Only);
+         % else:
+            return Null_Lexical_Env;
+         % endif
       </%def>
       <%def name="default()"> return Null_Lexical_Env; </%def>
       </%self:case_dispatch>
@@ -1389,9 +1393,9 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.post_actions:
-         ${n.name}_Post_Env_Actions (Self, Bound_Env);
+            ${n.name}_Post_Env_Actions (Self, Bound_Env);
          % else:
-         null;
+            null;
          % endif
       </%def>
       <%def name="default()"> null; </%def>

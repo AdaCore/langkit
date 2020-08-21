@@ -230,10 +230,12 @@
 
    % if cls.env_spec:
 
-      function ${cls.name}_Pre_Env_Actions
-        (Self            : ${cls.name};
-         Bound_Env       : AST_Envs.Lexical_Env;
-         Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env;
+      % if cls.env_spec.pre_actions:
+         function ${cls.name}_Pre_Env_Actions
+           (Self            : ${cls.name};
+            Bound_Env       : AST_Envs.Lexical_Env;
+            Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env;
+      % endif
 
       % if cls.env_spec.post_actions:
          procedure ${cls.name}_Post_Env_Actions
@@ -290,9 +292,23 @@
    ## Lexical Environments Handling ##
    ###################################
 
-   % if cls.env_spec:
+   % if cls.env_spec and cls.env_spec.actions:
 
-   <% call_prop = cls.env_spec._render_field_access %>
+   <%
+      call_prop = cls.env_spec._render_field_access
+
+      # Whether the initial env for this node is dynamic
+      has_dyn_env = cls.env_spec.initial_env is not None
+
+      # Name of the function to call in order to get the initial lexical env
+      # for this node. Useful only when the initial env is dynamic.
+      env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
+   %>
+
+   <%def name="emit_set_initial_env(do_action)">
+      Initial_Env := ${env_getter}
+        ((Node => Self, Info => ${T.entity_info.nullexpr}));
+   </%def>
 
    <%def name="emit_add_to_env(exprs)">
       ## If we have an add_to_env specification, generate code to add elements
@@ -422,21 +438,13 @@
    ## still the best way I found that did not imply making a lot of round trips
    ## between Mako and regular python.
 
-   ${{"AddEnv":     emit_add_env,
-      "AddToEnv":   emit_add_to_env,
-      "RefEnvs":    emit_ref_env,
-      "Do":         emit_do}[env_action.__class__.__name__](env_action)}
+   ${{
+      "SetInitialEnv": emit_set_initial_env,
+      "AddEnv":        emit_add_env,
+      "AddToEnv":      emit_add_to_env,
+      "RefEnvs":       emit_ref_env,
+      "Do":            emit_do}[env_action.__class__.__name__](env_action)}
    </%def>
-
-   <%
-   # Whether the initial env for this node is dynamic
-   has_dyn_env = (cls.env_spec.initial_env
-                  or cls.env_spec.pre_initial_env_actions)
-
-   # Name of the function to call in order to get the initial lexical env for
-   # this node. Useful only when the initial env is dynamic.
-   env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
-   %>
 
    % if has_dyn_env:
    ---------------------------
@@ -479,39 +487,29 @@
 
    % endif
 
-   function ${cls.name}_Pre_Env_Actions
-     (Self            : ${cls.name};
-      Bound_Env       : AST_Envs.Lexical_Env;
-      Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env
-   is
-      use AST_Envs;
+   ## Emit procedures for pre/post actions when needed
 
-      Initial_Env  : Lexical_Env := Bound_Env;
+   % if cls.env_spec.pre_actions:
+      function ${cls.name}_Pre_Env_Actions
+        (Self            : ${cls.name};
+         Bound_Env       : AST_Envs.Lexical_Env;
+         Add_To_Env_Only : Boolean := False) return AST_Envs.Lexical_Env
+      is
+         use AST_Envs;
 
-      % if cls.env_spec.adds_env:
-      G : Env_Getter;
-      % endif
-   begin
-      % for action in cls.env_spec.pre_initial_env_actions:
-         ${emit_env_action(action)}
-      % endfor
+         Initial_Env  : Lexical_Env := Bound_Env;
 
-      % if has_dyn_env:
-         Initial_Env := ${env_getter}
-           ((Node => Self, Info => ${T.entity_info.nullexpr}));
-      % endif
+         % if cls.env_spec.adds_env:
+         G : Env_Getter;
+         % endif
+      begin
+         % for action in cls.env_spec.pre_actions:
+            ${emit_env_action(action)}
+         % endfor
 
-      % for action in cls.env_spec.pre_actions:
-      ${emit_env_action(action)}
-      % endfor
-
-      return Initial_Env;
-   end;
-
-   ## If the node class adds an env, then the environement in which node is is
-   ## the parent env.
-
-   ## Emit Post_Env_Actions only if needed
+         return Initial_Env;
+      end;
+   % endif
 
    % if cls.env_spec.post_actions:
       procedure ${cls.name}_Post_Env_Actions

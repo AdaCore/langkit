@@ -22,7 +22,7 @@ from __future__ import annotations
 from enum import Enum
 from funcy import lsplit_by
 from itertools import count
-from typing import Dict, List, Optional, cast, overload
+from typing import Dict, List, Optional, Type, cast, overload
 
 from langkit import names
 from langkit.compile_context import CompileCtx, get_context
@@ -213,15 +213,6 @@ class EnvSpec:
         Initialized during the parsing of actions.
         """
 
-        self.initial_env_prop: Optional[PropertyDef] = None
-        """
-        Property that returns the initial environment that environment
-        actions will use. If left to None, just inherit the parent node's
-        ``children_env``.
-
-        Initialized when compiling this EnvSpec.
-        """
-
         # Analyze the given list of actions
         self._parse_actions(list(actions))
 
@@ -235,25 +226,40 @@ class EnvSpec:
         Analyze the given list of actions and extract pre/post actions, i.e.
         actions executed before and after handling children.
         """
+        def count(cls: Type[EnvAction]) -> int:
+            """
+            Return the number of ``cls`` instances in ``actions``.
+            """
+            return len([a for a in actions if isinstance(a, cls)])
+
         # If present, allow Do actions to come before SetInitialEnv
-        self.pre_initial_env_actions = []
+        first_actions = []
         if any(isinstance(a, SetInitialEnv) for a in actions):
             while actions and isinstance(actions[0], Do):
-                self.pre_initial_env_actions.append(actions.pop(0))
+                first_actions.append(actions.pop(0))
 
-        # After that, allow one call to SetInitialEnv
+        # After that, allow exactly one call to SetInitialEnv
         self.initial_env = None
         if actions and isinstance(actions[0], SetInitialEnv):
             self.initial_env = cast(SetInitialEnv, actions.pop(0))
-
-        pre, post = lsplit_by(
-            lambda a: not isinstance(a, HandleChildren), actions
+            first_actions.append(self.initial_env)
+        check_source_language(
+            count(SetInitialEnv) == 0,
+            "set_initial_env can only be preceded by do()"
         )
 
-        # Get rid of the HandleChildren delimiter action
+        check_source_language(
+            count(AddEnv) <= 1,
+            "There can be at most one call to add_env()"
+        )
+
+        # Separate actions that must occur before and after the handling of
+        # children. Get also rid of the HandleChildren delimiter action.
+        pre, post = lsplit_by(lambda a: not isinstance(a, HandleChildren),
+                              actions)
         post = post and post[1:]
 
-        self.pre_actions = pre
+        self.pre_actions = first_actions + pre
         self.post_actions = post
         self.actions = self.pre_actions + self.post_actions
 
@@ -316,16 +322,6 @@ class EnvSpec:
         Turn the various abstract expression attributes for this env spec into
         internal properties and add them to `astnode`.
         """
-
-        for action in self.pre_initial_env_actions:
-            action.create_internal_properties(self)
-
-        self.initial_env_prop = self.create_internal_property(
-            'Initial_Env',
-            None if self.initial_env is None else self.initial_env.env_expr,
-            T.LexicalEnv
-        )
-
         for action in self.actions:
             action.create_internal_properties(self)
 
@@ -383,8 +379,8 @@ class EnvSpec:
         """
         The initial environment expression.
         """
-        assert self.initial_env_prop
-        return self._render_field_access(self.initial_env_prop)
+        assert self.initial_env
+        return self._render_field_access(self.initial_env.initial_env_prop)
 
 
 class EnvAction:
@@ -630,13 +626,9 @@ class SetInitialEnv(ExprHolderAction):
         super().__init__(env_expr)
         self.unsound = unsound
 
-    def check(self) -> None:
-        # Check is not normally called on this, so if it is called it means
-        # that a SetInitialEnv instance has found its way into a regular action
-        # list.
-        check_source_language(
-            False,
-            "set_initial_env can only be preceded by do()"
+    def create_internal_properties(self, env_spec: EnvSpec) -> None:
+        self.initial_env_prop = env_spec.create_internal_property(
+            'Initial_Env', self.env_expr, T.LexicalEnv
         )
 
 
