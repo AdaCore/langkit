@@ -112,12 +112,17 @@
       Ref_Count : Integer;
       --  Reference count. The iterator is freed when this drops to zero
 
+      Safety_Net : Iterator_Safety_Net;
+      --  Safety net for the iterator. Used to check that values produced by
+      --  the iterator are still valid.
+
       Elements : ${cls.element_type.array.name};
       Index    : Positive;
    end record;
 
    Empty_${cls.iterator_type_name} : aliased ${cls.iterator_type_name} :=
      (Ref_Count => -1,
+      Safety_Net => No_Iterator_Safety_Net,
       Elements => ${cls.element_type.array.null_constant},
       Index => 1);
    ${cls.null_constant} : constant ${cls.name} :=
@@ -150,6 +155,8 @@
      (T       : ${cls.name};
       Element : out ${elt_type}) return Boolean is
    begin
+      Check_Safety_Net (T.Safety_Net);
+
       if T.Index > T.Elements.Items'Last then
          return False;
       else

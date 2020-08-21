@@ -573,6 +573,13 @@ base_langkit_docs = {
 
     Iterator objects are ref-counted, meaning they are automatically freed
     when no more references point to them.
+
+    Currently, iterators are invalidated as soon as any unit is reparsed.
+    This is to avoid having iterator return nodes that are stale because
+    the analysis unit has been reparsed since then and the nodes don't
+    exist anymore. Note that this only applies to iterators over types that
+    are or that contain said nodes. For example, an iterator over integers will
+    never be invalidated.
     """,
 
     'langkit.iterator_next': """

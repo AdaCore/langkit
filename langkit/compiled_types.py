@@ -3915,6 +3915,49 @@ class IteratorType(CompiledType):
     def exposed_types(self) -> List[CompiledType]:
         return [self.element_type]
 
+    def generate_safety_net(self,
+                            values_array: str,
+                            safety_net_name: str) -> str:
+        """
+        Generates the appropriate Ada code that will create the iterator safety
+        net from the given array of values.
+
+        .. note::
+            This can statically create an empty safety net when there is no
+            way to retrieve an analysis context from this iterator's element
+            type, which means the created iterator will never be stale. This
+            is not a problem because in that case it means it cannot hold any
+            stale reference itself.
+
+        :param values_array: Name of the variable that holds the array of
+            elements for which to generate an iterator.
+        :param safety_net_name: The name of the variable that will hold
+            this iterator's safety net in the generated code.
+        """
+        from langkit.utils import generate_analysis_context_accessor
+
+        try:
+            ctx_accessor = generate_analysis_context_accessor(
+                self.element_type.array, values_array
+            )
+
+            return f"""
+            function Find_Context return Internal_Context is
+            begin
+                {ctx_accessor}
+                return null;
+            end Find_Context;
+            Ctx : Internal_Context := Find_Context;
+            {safety_net_name} : Iterator_Safety_Net :=
+              (if Ctx /= null
+               then (Ctx, Ctx.Serial_Number, Ctx.Cache_Version)
+               else No_Iterator_Safety_Net);
+            """
+        except ValueError:
+            return f"""
+            {safety_net_name} : Iterator_Safety_Net := No_Iterator_Safety_Net;
+            """
+
 
 class EnumType(CompiledType):
     """

@@ -439,6 +439,20 @@ private package ${ada_lib_name}.Implementation is
    -- Iterator types --
    --------------------
 
+   type Iterator_Safety_Net is record
+      Context         : Internal_Context;
+      Context_Serial  : Version_Number;
+      Context_Version : Natural;
+      --  Analysis context, its serial number and version number at the time
+      --  this safety net was produced.
+   end record;
+
+   No_Iterator_Safety_Net : constant Iterator_Safety_Net := (null, 0, 0);
+
+   procedure Check_Safety_Net (Self : Iterator_Safety_Net);
+   --  Check that the given iterator safety net is still valid, raising a
+   --  Stale_Reference_Error if it is not.
+
    % for iterator_type in ctx.iterator_types:
    ${iterator_types.decl(iterator_type)}
    % endfor
@@ -811,7 +825,6 @@ private package ${ada_lib_name}.Implementation is
    procedure Assign_Names_To_Logic_Vars (Node : ${T.root_node.name});
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.
-
 
    -------------------------------
    -- Root AST node (internals) --

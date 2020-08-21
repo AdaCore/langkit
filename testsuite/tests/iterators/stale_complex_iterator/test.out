@@ -1,0 +1,6 @@
+main.py: Running...
+main.py: Iterating once: <TestStruct count=2 nodes=[None, <Example main.txt:1:1-1:8>]>
+main.py: Parsing new unit
+main.py: Iterating once more: <StaleReferenceError>
+main.py: Done.
+Done

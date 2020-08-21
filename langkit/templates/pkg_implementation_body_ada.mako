@@ -4700,6 +4700,26 @@ package body ${ada_lib_name}.Implementation is
    end Check_Safety_Net;
 
    ----------------------
+   -- Check_Safety_Net --
+   ----------------------
+
+   procedure Check_Safety_Net (Self : Iterator_Safety_Net) is
+   begin
+      if Self.Context = null then
+         return;
+      end if;
+
+      --  Check that Self's context has not been release (see the
+      --  Context_Pool). Then check that the context version is the same.
+      if Self.Context.Released
+         or else Self.Context.Serial_Number /= Self.Context_Serial
+         or else Self.Context.Cache_Version /= Self.Context_Version
+      then
+         raise Stale_Reference_Error;
+      end if;
+   end Check_Safety_Net;
+
+   ----------------------
    -- String_To_Symbol --
    ----------------------
 

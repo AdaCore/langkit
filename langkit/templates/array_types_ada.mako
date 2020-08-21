@@ -321,11 +321,14 @@
    -----------------
 
    function To_Iterator
-     (Self : ${cls.name}) return ${cls.element_type.iterator.name} is
+     (Self : ${cls.name}) return ${cls.element_type.iterator.name}
+   is
+      ${cls.element_type.iterator.generate_safety_net('Self', 'Safety_Net')}
    begin
       Inc_Ref (Self);
       return new ${cls.element_type.iterator.iterator_type_name}'
-        (Ref_Count => 1, Elements => Self, Index => 1);
+        (Ref_Count => 1, Safety_Net => Safety_Net,
+         Elements => Self, Index => 1);
    end To_Iterator;
 
    ----------------

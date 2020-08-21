@@ -1,4 +1,12 @@
+from __future__ import annotations
+
 import inspect
+
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from langkit.compiled_types import CompiledType
 
 
 def type_check_instance(cls):
@@ -349,3 +357,105 @@ def collapse_concrete_nodes(input_type, astnodes):
         remaining_nodes -= result[-1]
 
     return (result, remaining_nodes)
+
+
+def generate_analysis_context_accessor(type: CompiledType,
+                                       value: str,
+                                       loop_depth: int = 1) -> str:
+    """
+    Generates the appropriate Ada code that retrieves an analysis context
+    from a value of the given type.
+
+    .. note::
+        Raises a ValueError if there is no way to retrieve an analysis context
+        from a value of the given type.
+
+    .. note::
+        Even when successful, the generated code might return an null analysis
+        context at runtime, for example if the given value is null.
+
+    :param type: The type of value from which to retrieve an
+        analysis context.
+    :param value: The Ada name that holds the value of the given type.
+    :param loop_depth: The current loop nesting level. Used to generate
+        unique names for loop items.
+    """
+    from langkit import compiled_types as ct
+
+    def handle_node_type(_: ct.ASTNodeType) -> str:
+        """
+        Given a value of an ASTNode type, return the Ada code that can retrieve
+        its analysis context.
+        """
+        return f"""
+        if {value} /= null then
+            return {value}.Unit.Context;
+        end if;
+        """
+
+    def handle_entity(et: ct.EntityType) -> str:
+        """
+        Given a value of an Entity type, retrieve the analysis context by
+        recursing on its inner ASTNode.
+        """
+        return generate_analysis_context_accessor(
+            et.element_type, f'{value}.Node', loop_depth=loop_depth
+        )
+
+    def handle_struct(st: ct.StructType) -> str:
+        """
+        Given a value of an arbitrary struct type, try to find the analysis
+        context in each of its fields recursively.
+        """
+        ret = ""
+        for f in st.get_fields():
+            try:
+                ret += generate_analysis_context_accessor(
+                    f.type, f"{value}.{f.name.camel_with_underscores}",
+                    loop_depth=loop_depth
+                ) + "\n"
+            except ValueError:
+                pass
+
+        if ret:
+            return ret
+
+        raise ValueError(f'No analysis context reachable from fields of {st}')
+
+    def handle_array(at: ct.ArrayType) -> str:
+        """
+        Given a value of an arbitrary array type, find the analysis context
+        by looking in its components.
+        """
+        return f"""
+        if {value} /= null then
+           for Item_{loop_depth} of {value}.Items loop
+              {generate_analysis_context_accessor(
+                   at.element_type, 'Item_' + str(loop_depth),
+                   loop_depth=loop_depth + 1
+               )}
+           end loop;
+        end if;
+        """
+
+    def handle_iterator(it: ct.IteratorType) -> str:
+        """
+        Given a value of an arbitrary iterator type, find the analysis context
+        by recursively looking in its inner array.
+        """
+        return f"""
+        if {value} /= null then
+           {generate_analysis_context_accessor(
+                it.element_type.array, f'{value}.Elements',
+                loop_depth=loop_depth
+            )}
+        end if;
+        """
+
+    return dispatch_on_type(type, [
+        (ct.ASTNodeType, handle_node_type),
+        (ct.EntityType, handle_entity),
+        (ct.StructType, handle_struct),
+        (ct.ArrayType, handle_array),
+        (ct.IteratorType, handle_iterator)
+    ], exception=ValueError(f'No analysis context reachable from {type}'))
