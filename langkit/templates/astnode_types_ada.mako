@@ -447,10 +447,6 @@
 
       Initial_Env : Lexical_Env := Bound_Env;
    begin
-      % for action in cls.env_spec.pre_initial_env_actions:
-         ${emit_env_action(action)}
-      % endfor
-
       % if cls.env_spec.initial_env:
          Initial_Env := ${cls.env_spec.initial_env_expr};
          % if not cls.env_spec.initial_env.unsound:
@@ -481,6 +477,10 @@
       G : Env_Getter;
       % endif
    begin
+      % for action in cls.env_spec.pre_initial_env_actions:
+         ${emit_env_action(action)}
+      % endfor
+
       % if has_dyn_env:
          Initial_Env := ${env_getter}
            ((Node => Self, Info => ${T.entity_info.nullexpr}));
