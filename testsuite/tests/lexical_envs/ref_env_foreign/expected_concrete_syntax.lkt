@@ -1,0 +1,46 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(scope)
+    scope <- Scope(
+        "def" simple_identifier "{" list*(or(scope | ref_clause)) "}"
+    )
+    identifier <- or(
+        | ScopedId(identifier "." simple_identifier)
+        | simple_identifier
+    )
+    simple_identifier <- SimpleId(@identifier)
+    ref_clause <- RefClause("+" identifier)
+
+}
+
+@abstract class FooNode : Node {
+}
+
+@abstract class Id : FooNode {
+
+    @abstract fun resolve (base_env : LexicalEnv): FooNode
+}
+
+class ScopedId : Id {
+    @parse_field scope : Id
+    @parse_field name : SimpleId
+
+    fun resolve (base_env : LexicalEnv): FooNode =
+    node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node
+}
+
+class SimpleId : Id implements TokenNode {
+
+    fun resolve (base_env : LexicalEnv): FooNode =
+    base_env.get_first(node.symbol).node
+}
+
+class RefClause : FooNode {
+    @parse_field ref_id : Id
+}
+
+class Scope : FooNode {
+    @parse_field name : SimpleId
+    @parse_field content : ASTList[FooNode]
+}

@@ -77,7 +77,8 @@ def reference(nodes: AbstractExpression,
               dest_env: Optional[AbstractExpression] = None,
               cond: Optional[AbstractExpression] = None,
               category: Optional[str] = None,
-              shed_corresponding_rebindings: bool = False) -> RefEnvs:
+              shed_corresponding_rebindings: bool = False,
+              unsound: bool = False) -> RefEnvs:
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
@@ -99,10 +100,14 @@ def reference(nodes: AbstractExpression,
     :param shed_corresponding_rebindings: If True, when shedding rebindings
         during an env lookup, this referenced env will be followed to check,
         and eventually shed rebindings associated to the referenced env.
+
+    :param unsound: Whether ``dest_env`` is allowed to return foreign
+        environments.
     """
     return RefEnvs(through, nodes, kind, dest_env=dest_env, cond=cond,
                    category=category and category.lower(),
-                   shed_rebindings=shed_corresponding_rebindings)
+                   shed_rebindings=shed_corresponding_rebindings,
+                   unsound=unsound)
 
 
 def add_to_env(mappings: AbstractExpression,
@@ -515,7 +520,8 @@ class RefEnvs(EnvAction):
                  dest_env: Optional[AbstractExpression] = None,
                  cond: Optional[AbstractExpression] = None,
                  category: Optional[str] = None,
-                 shed_rebindings: bool = False) -> None:
+                 shed_rebindings: bool = False,
+                 unsound: bool = False) -> None:
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -548,6 +554,7 @@ class RefEnvs(EnvAction):
         self.cond = cond
         self.category = category and names.Name.from_lower(category)
         self.shed_rebindings = shed_rebindings
+        self.unsound = unsound
 
         self.nodes_property: Optional[PropertyDef] = None
         """

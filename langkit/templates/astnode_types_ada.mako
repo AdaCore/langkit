@@ -350,6 +350,16 @@
               ${(call_prop(ref_env.dest_env_prop)
                  if ref_env.dest_env_prop else "Self.Self_Env")};
          begin
+            % if ref_env.dest_env_prop and not ref_env.unsound:
+               if Env.Env.Node /= null
+                  and then Env.Env.Node.Unit /= Self.Unit
+               then
+                  raise Property_Error with
+                     "unsound foreign environment in RefEnvs ("
+                     & "${ref_env.str_location})";
+               end if;
+            % endif
+
             Ref_Env
               (Self,
                Env,
