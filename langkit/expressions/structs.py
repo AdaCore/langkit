@@ -60,7 +60,7 @@ class Cast(AbstractExpression):
             return {'expr': self.expr, 'type': self.static_type.name}
 
         def __repr__(self):
-            return '<Cast.Expr {}>'.format(self.static_type.name.camel)
+            return '<Cast.Expr {}>'.format(self.static_type.dsl_name)
 
         @property
         def dest_node(self):
