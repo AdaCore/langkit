@@ -226,11 +226,11 @@ class EnvSpec:
         Analyze the given list of actions and extract pre/post actions, i.e.
         actions executed before and after handling children.
         """
-        def count(cls: Type[EnvAction]) -> int:
+        def count(cls: Type[EnvAction], sequence: List[EnvAction]) -> int:
             """
-            Return the number of ``cls`` instances in ``actions``.
+            Return the number of ``cls`` instances in ``sequence``.
             """
-            return len([a for a in actions if isinstance(a, cls)])
+            return len([a for a in sequence if isinstance(a, cls)])
 
         # If present, allow Do actions to come before SetInitialEnv
         first_actions = []
@@ -244,12 +244,12 @@ class EnvSpec:
             self.initial_env = cast(SetInitialEnv, actions.pop(0))
             first_actions.append(self.initial_env)
         check_source_language(
-            count(SetInitialEnv) == 0,
+            count(SetInitialEnv, actions) == 0,
             "set_initial_env can only be preceded by do()"
         )
 
         check_source_language(
-            count(AddEnv) <= 1,
+            count(AddEnv, actions) <= 1,
             "There can be at most one call to add_env()"
         )
 
@@ -258,6 +258,11 @@ class EnvSpec:
         pre, post = lsplit_by(lambda a: not isinstance(a, HandleChildren),
                               actions)
         post = post and post[1:]
+
+        check_source_language(
+            count(AddEnv, post) == 0,
+            'add_env() must occur before processing children'
+        )
 
         self.pre_actions = first_actions + pre
         self.post_actions = post
