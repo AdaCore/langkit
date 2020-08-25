@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os.path
 import re
+from typing import Optional, TYPE_CHECKING
 
 import gdb
 import gdb.printing
@@ -8,6 +11,9 @@ from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
 from langkit.gdb.utils import adaify_name
 from langkit.utils import memoized
+
+if TYPE_CHECKING:
+    from langkit.gdb.context import Context
 
 
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
@@ -189,10 +195,46 @@ class ASTNodePrinter(BasePrinter):
         return '<{}>'.format(self.node_to_string())
 
 
+class RecordAccessMatcher:
+    """
+    Helper to match GDB values that follow the record/access pattern.
+    """
+
+    def __init__(self, record_type_name: str, access_type_name: Optional[str]):
+        self.record_type_name = record_type_name
+        self.access_type_name = access_type_name
+
+    def matches_record(self, value: gdb.Value, context: Context) -> bool:
+        """
+        Return whether ``value`` matches the record type.
+        """
+        return (value.type.code == gdb.TYPE_CODE_STRUCT
+                and value.type.name == context.implname(self.record_type_name))
+
+    def matches_access(self, value: gdb.Value, context: Context) -> bool:
+        """
+        Return whether ``value`` matches the access type.
+        """
+        assert self.access_type_name is not None
+        typ = value.type
+        if typ.code == gdb.TYPE_CODE_TYPEDEF:
+            return typ.name == context.implname(self.access_type_name)
+
+        return (
+            typ.code == gdb.TYPE_CODE_PTR
+            and typ.target().code == gdb.TYPE_CODE_STRUCT
+            and typ.target().name == context.implname(self.record_type_name)
+        )
+
+
 class LexicalEnv:
     """
     Wrapper for Lexical_Env/Lexical_Env_Access values.
     """
+
+    wrapper_matcher = RecordAccessMatcher('ast_envs__lexical_env', None)
+    internal_matcher = RecordAccessMatcher('ast_envs__lexical_env_type',
+                                           'ast_envs__lexical_env_access')
 
     def __init__(self, value, context):
         self.context = context
@@ -211,8 +253,7 @@ class LexicalEnv:
 
         :rtype: bool
         """
-        return (value.type.code == gdb.TYPE_CODE_STRUCT and
-                value.type.name == context.implname('ast_envs__lexical_env'))
+        return cls.wrapper_matcher.matches_record(value, context)
 
     @classmethod
     def matches_access(cls, value, context):
@@ -221,14 +262,7 @@ class LexicalEnv:
 
         :rtype: bool
         """
-        typ = value.type
-        if typ.code == gdb.TYPE_CODE_TYPEDEF:
-            return typ.name == context.implname('ast_envs__lexical_env_access')
-
-        return (typ.code == gdb.TYPE_CODE_PTR and
-                typ.target().code == gdb.TYPE_CODE_STRUCT and
-                (typ.target().name
-                 == context.implname('ast_envs__lexical_env_type')))
+        return cls.internal_matcher.matches_access(value, context)
 
     @property
     def _variant(self):
