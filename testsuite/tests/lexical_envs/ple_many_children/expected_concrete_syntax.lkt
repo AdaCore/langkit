@@ -1,7 +1,11 @@
-import lexer_example
+lexer foo_lexer {
+
+    example <- "e"
+    @trivia() whitespace <- " "
+}
 @with_lexer(foo_lexer)
 grammar foo_grammar {
-    @main_rule main_rule <- list*(Example("example"))
+    @main_rule main_rule <- list*(Example(@example))
 
 }
 
