@@ -454,7 +454,10 @@ private package ${ada_lib_name}.Implementation is
    --  Stale_Reference_Error if it is not.
 
    % for iterator_type in ctx.iterator_types:
+   % if not iterator_type.element_type.should_emit_array_type \
+        or iterator_type.is_used:
    ${iterator_types.decl(iterator_type)}
+   % endif
    % endfor
 
    ------------------------

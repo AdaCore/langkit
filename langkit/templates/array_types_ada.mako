@@ -145,11 +145,13 @@
    procedure Inc_Ref (T : ${cls.name});
    procedure Dec_Ref (T : in out ${cls.name});
 
-   function To_Iterator
-     (Self : ${cls.name}) return ${cls.element_type.iterator.name};
-   --  Return an iterator on values of this array
-
    function Equivalent (L, R : ${cls.name}) return Boolean;
+
+   % if cls.require_to_iterator_property:
+      function To_Iterator
+        (Self : ${cls.name}) return ${cls.element_type.iterator.name};
+      --  Return an iterator on values of this array
+   % endif
 
    % if ctx.properties_logging:
       function Trace_Image (A : ${cls.name}) return String;
@@ -316,21 +318,6 @@
       end;
    % endif
 
-   -----------------
-   -- To_Iterator --
-   -----------------
-
-   function To_Iterator
-     (Self : ${cls.name}) return ${cls.element_type.iterator.name}
-   is
-      ${cls.element_type.iterator.generate_safety_net('Self', 'Safety_Net')}
-   begin
-      Inc_Ref (Self);
-      return new ${cls.element_type.iterator.iterator_type_name}'
-        (Ref_Count => 1, Safety_Net => Safety_Net,
-         Elements => Self, Index => 1);
-   end To_Iterator;
-
    ----------------
    -- Equivalent --
    ----------------
@@ -355,6 +342,23 @@
 
       return True;
    end Equivalent;
+
+   % if cls.require_to_iterator_property:
+      -----------------
+      -- To_Iterator --
+      -----------------
+
+      function To_Iterator
+        (Self : ${cls.name}) return ${cls.element_type.iterator.name}
+      is
+         ${cls.element_type.iterator.generate_safety_net('Self', 'Safety_Net')}
+      begin
+         Inc_Ref (Self);
+         return new ${cls.element_type.iterator.iterator_type_name}'
+           (Ref_Count => 1, Safety_Net => Safety_Net,
+            Elements => Self, Index => 1);
+      end To_Iterator;
+   % endif
 
    % if ctx.properties_logging:
       -----------------

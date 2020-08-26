@@ -17,7 +17,9 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, cast
+from typing import (
+    Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING, cast
+)
 
 from funcy import lzip
 
@@ -35,6 +37,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 
 if TYPE_CHECKING:
     from langkit.compiled_types import StructType, UserField
+    from langkit.dsl import PropertyDef
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.python_api import PythonAPISettings
     from langkit import compiled_types as ct
@@ -1250,6 +1253,7 @@ class CompileCtx:
         """
         return any(prop.activate_tracing for prop in self.all_properties)
 
+    @memoized
     def properties_callgraphs(self):
         """
         Compute forwards and backwards properties callgraphs.
@@ -1314,6 +1318,66 @@ class CompileCtx:
                 traverse_expr(prop.constructed_expr)
 
         return (forwards, backwards)
+
+    def compute_reachability(
+            self,
+            forward_map: Dict[PropertyDef, Set[PropertyDef]]
+    ) -> Set[PropertyDef]:
+        """
+        Compute the set of properties that are transitively called (according
+        to the given forward map) by a public property, Predicate parsers in
+        the grammar or resolvers in env specs. Also assume that all internal
+        properties are reachable.
+        """
+        from langkit.expressions import resolve_property
+        from langkit.parsers import Predicate
+
+        reachable_set = set()
+
+        # First compute the set of properties called by Predicate parsers
+        called_by_grammar = set()
+
+        def visit_parser(parser):
+            if isinstance(parser, Predicate):
+                called_by_grammar.add(resolve_property(parser.property_ref))
+            for child in parser.children:
+                visit_parser(child)
+
+        for rule in self.grammar.rules.values():
+            visit_parser(rule)
+
+        # Consider all public and internal properties reachable
+        queue = {p for p in forward_map if p.is_public or p.is_internal}
+        queue.update(called_by_grammar)
+
+        # Don't forget to tag properties used as entity/env resolvers as
+        # reachable.
+        for astnode in self.astnode_types:
+            if astnode.env_spec:
+                queue.update(
+                    action.resolver for action in astnode.env_spec.actions
+                    if action.resolver
+                )
+
+        while queue:
+            prop = queue.pop()
+            reachable_set.add(prop)
+            queue.update(p for p in forward_map[prop]
+                         if p not in reachable_set)
+
+        return reachable_set
+
+    def compute_is_reachable_attr(self) -> None:
+        """
+        Pass that will compute the `is_reachable` attribute for every property.
+        Reachable properties are properties that transitively called by a
+        public property, Predicate parsers in the grammar or resolvers in env
+        specs. Also assume that all internal properties are reachable.
+        """
+        forward, _ = self.properties_callgraphs()
+        reachable_properties = self.compute_reachability(forward)
+        for prop in self.all_properties(include_inherited=False):
+            prop.set_is_reachable(prop in reachable_properties)
 
     def compute_uses_entity_info_attr(self):
         """
@@ -1419,8 +1483,6 @@ class CompileCtx:
         Check that all private properties are actually used: if one is not,
         it is useless, so emit a warning for it.
         """
-        from langkit.expressions import resolve_property
-        from langkit.parsers import Predicate
 
         forwards_strict, _ = self.properties_callgraphs()
 
@@ -1431,47 +1493,10 @@ class CompileCtx:
             root = prop.root_property
             forwards[root].update(c.root_property for c in called)
 
-        # Compute the set of properties that are transitively called by a
-        # public property or by Predicate parsers in the grammar. Assume that
-        # internal properties are used.
-
-        # First compute the set of properties called by Predicate parsers
-        called_by_grammar = set()
-
-        def visit_parser(parser):
-            if isinstance(parser, Predicate):
-                called_by_grammar.add(resolve_property(parser.property_ref))
-            for child in parser.children:
-                visit_parser(child)
-
-        for rule in self.grammar.rules.values():
-            visit_parser(rule)
-
         # The first is for strict analysis while the second one simplifies
         # properties to their root.
-        reachable_by_public_strict = set()
-        reachable_by_public = set()
-
-        def compute_reachable(reachable_set, forward_map):
-            queue = {p for p in forward_map if p.is_public or p.is_internal}
-            queue.update(called_by_grammar)
-
-            # Don't forget to tag properties used as entity/env resolvers as
-            # reachable.
-            for astnode in self.astnode_types:
-                if astnode.env_spec:
-                    queue.update(
-                        action.resolver for action in astnode.env_spec.actions
-                        if action.resolver
-                    )
-
-            while queue:
-                prop = queue.pop()
-                reachable_set.add(prop)
-                queue.update(p for p in forward_map[prop]
-                             if p not in reachable_set)
-        compute_reachable(reachable_by_public_strict, forwards_strict)
-        compute_reachable(reachable_by_public, forwards)
+        reachable_by_public_strict = self.compute_reachability(forwards_strict)
+        reachable_by_public = self.compute_reachability(forwards)
 
         # Get properties that were explicitly marked as "no-warning" by the
         # user.
@@ -1945,6 +1970,8 @@ class CompileCtx:
             GlobalPass('compute uses envs attribute',
                        CompileCtx.compute_uses_envs_attr),
             EnvSpecPass('check env specs', EnvSpec.check_spec),
+            GlobalPass('compute is reachable attribute',
+                       CompileCtx.compute_is_reachable_attr),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
             GlobalPass('warn on unreachable base properties',

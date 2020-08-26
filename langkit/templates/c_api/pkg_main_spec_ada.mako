@@ -700,7 +700,8 @@ private package ${ada_lib_name}.Implementation.C is
 
    % for iterator_type in ctx.iterator_types:
       % if iterator_type.element_type.is_entity_type and \
-            iterator_type.element_type != T.entity:
+            iterator_type.element_type != T.entity and \
+            iterator_type.is_used:
          function Convert is new Ada.Unchecked_Conversion
            (${iterator_type.name}, ${T.entity.iterator.name});
       % endif

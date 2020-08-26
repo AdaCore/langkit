@@ -3592,6 +3592,7 @@ class ArrayType(CompiledType):
         nothing)'.
         """
 
+        self._to_iterator_property: PropertyDef = None
         self._init_fields(self.builtin_properties())
 
     @property
@@ -3789,21 +3790,29 @@ class ArrayType(CompiledType):
         # early.
         return self.element_type == T.inner_env_assoc
 
+    def require_to_iterator_property(self) -> bool:
+        """
+        Return whether the `to_iterator` property of this array type should be
+        emitted during codegen. This will be true only if the property is ever
+        called from within the DSL, since the property is private.
+        """
+        return self._to_iterator_property.is_reachable
+
     def builtin_properties(self) -> List[Tuple[str, PropertyDef]]:
         """
         Return properties available for all array types.
         """
         from langkit.expressions import PropertyDef
 
-        builtins = [
-            ('to_iterator', PropertyDef(
-                expr=None, prefix=None, type=self.element_type.iterator,
-                public=False, external=True, uses_entity_info=False,
-                uses_envs=False, optional_entity_info=False,
-                warn_on_unused=False, dynamic_vars=[],
-                doc='Return an iterator on values of this array'
-            ))
-        ]
+        self._to_iterator_property = PropertyDef(
+            expr=None, prefix=None, type=self.element_type.iterator,
+            public=False, external=True, uses_entity_info=False,
+            uses_envs=False, optional_entity_info=False,
+            warn_on_unused=False, dynamic_vars=[],
+            doc='Return an iterator on values of this array'
+        )
+
+        builtins = [('to_iterator', self._to_iterator_property)]
 
         # TODO: this is a hack to work around the fact that it is possible for
         # some types to be created after the "compute_base_properties" pass,
@@ -3847,6 +3856,17 @@ class IteratorType(CompiledType):
         Name of the public iterator type.
         """
         return self.element_type.api_name + names.Name('Iterator')
+
+    @property
+    def is_used(self) -> bool:
+        """
+        Return whether this iterator type is actually used, and thus whether
+        it should be emitted during codegen or not. This will be true iff the
+        `to_iterator` property of the corresponding array type is ever used
+        from within the DSL, since iterator types cannot be constructed from
+        user APIs.
+        """
+        return self.element_type.array.require_to_iterator_property
 
     @property
     def py_converter(self) -> str:

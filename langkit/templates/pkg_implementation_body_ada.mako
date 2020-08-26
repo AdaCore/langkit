@@ -1156,7 +1156,10 @@ package body ${ada_lib_name}.Implementation is
    % endfor
 
    % for iterator_type in ctx.iterator_types:
+   % if not iterator_type.element_type.should_emit_array_type \
+        or iterator_type.is_used:
    ${iterator_types.body(iterator_type)}
+   % endif
    % endfor
 
    ---------
