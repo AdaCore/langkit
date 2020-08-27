@@ -15,7 +15,7 @@ with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with System;
+with System; use System;
 
 % if ctx.properties_logging:
    with GNATCOLL.Traces;

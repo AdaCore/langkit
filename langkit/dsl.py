@@ -1151,6 +1151,13 @@ class LogicVar(_BuiltinType):
     _name = names.Name('Logic_Var')
 
 
+class Address(_BuiltinType):
+    """
+    Opaque address type. Use to store data for extensions.
+    """
+    _name = names.Name('Address')
+
+
 class Int(_BuiltinType):
     """
     Simple integer type.

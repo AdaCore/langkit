@@ -4007,6 +4007,16 @@ def create_builtin_types():
     )
 
     CompiledType(
+        name='Address',
+        dsl_name='Address',
+        exposed=False,
+        is_ptr=False,
+        nullexpr='System.Null_Address',
+        external=True,
+        hashable=True,
+    )
+
+    CompiledType(
         'SourceLocationRange',
         exposed=True,
         is_ptr=False,
