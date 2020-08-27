@@ -1,9 +1,10 @@
 ## vim: filetype=makoada
 
 with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 
 --  Internal package: provide implementation helpers to switch between public

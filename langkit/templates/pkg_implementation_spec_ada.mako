@@ -26,17 +26,18 @@ with GNATCOLL.VFS; use GNATCOLL.VFS;
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Eq_Same;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Lexical_Env;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;       use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
 with ${ada_lib_name}.Common;  use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Symbols;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 
@@ -186,10 +187,7 @@ private package ${ada_lib_name}.Implementation is
    pragma Pack (Ref_Categories);
 
    package AST_Envs is new Langkit_Support.Lexical_Env
-     (Precomputed_Symbol_Index => Precomputed_Symbol_Index,
-      Precomputed_Symbol       => Precomputed_Symbol,
-      Symbols                  => Symbols,
-      Unit_T                   => Internal_Unit,
+     (Unit_T                   => Internal_Unit,
       No_Unit                  => No_Analysis_Unit,
       Get_Unit_Version         => Unit_Version,
       Get_Context_Version      => Context_Version,

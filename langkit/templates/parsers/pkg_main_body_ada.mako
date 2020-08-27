@@ -5,17 +5,19 @@ with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with ${ada_lib_name}.Common;             use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Symbols;
+use ${ada_lib_name}.Common.Precomputed_Symbols;
+
 with ${ada_lib_name}.Implementation;     use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Private_Converters; use ${ada_lib_name}.Private_Converters;
 
 <% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
 
 package body ${ada_lib_name}.Parsers is
-   use all type Symbols.Symbol_Type;
+   use all type Langkit_Support.Symbols.Symbol_Type;
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except

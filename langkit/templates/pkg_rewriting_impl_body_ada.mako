@@ -4,8 +4,10 @@ with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with System;
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;

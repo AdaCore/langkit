@@ -6,9 +6,12 @@
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+
 with ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Symbols;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
 

@@ -12,6 +12,8 @@ with GNATCOLL.Opt_Parse;
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Analysis;  use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;    use ${ada_lib_name}.Common;
@@ -190,8 +192,6 @@ procedure Parse is
    ------------------------
 
    procedure Print_Token_Stream (Unit : Analysis_Unit) is
-      use ${ada_lib_name}.Common.Token_Data_Handlers;
-
       Token : Token_Reference := First_Token (Unit);
       TD    : Token_Data_Type;
    begin

@@ -11,6 +11,10 @@ pragma Warnings (On, "is an internal GNAT unit");
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;
 
+pragma Warnings (Off, "referenced");
+with Langkit_Support.Symbols;
+pragma Warnings (On, "referenced");
+
 package body ${ada_lib_name}.Lexer is
 
    --------------------

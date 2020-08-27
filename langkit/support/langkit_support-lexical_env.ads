@@ -31,7 +31,7 @@ with System;
 with GNATCOLL.Traces;
 
 with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
-with Langkit_Support.Symbols;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Types;   use Langkit_Support.Types;
 with Langkit_Support.Vectors;
@@ -55,12 +55,6 @@ with Langkit_Support.Vectors;
 --  want to make the type private at some point (or not).
 
 generic
-
-   type Precomputed_Symbol_Index is (<>);
-   with function Precomputed_Symbol
-     (Index : Precomputed_Symbol_Index) return Text_Type is <>;
-   with package Symbols is new Langkit_Support.Symbols
-      (Precomputed_Symbol_Index, Precomputed_Symbol);
 
    type Unit_T is private;
    No_Unit : Unit_T;
@@ -119,7 +113,6 @@ package Langkit_Support.Lexical_Env is
    --  Remove container checks for standard containers
 
    use GNATCOLL;
-   use Symbols;
 
    Debug_Mode : constant Boolean := True;
 

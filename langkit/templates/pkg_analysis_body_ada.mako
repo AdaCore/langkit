@@ -30,8 +30,9 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+
 with ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Symbols;
 with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Public_Converters; use ${ada_lib_name}.Public_Converters;

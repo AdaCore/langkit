@@ -29,7 +29,7 @@ with System.Storage_Elements; use System.Storage_Elements;
 package body Langkit_Support.Symbols is
 
    procedure Deallocate is new Ada.Unchecked_Deallocation
-     (Symbol_Table_Record, Symbol_Table);
+     (Symbol_Table_Record'Class, Symbol_Table);
 
    -----------
    -- Image --
@@ -60,38 +60,8 @@ package body Langkit_Support.Symbols is
 
    function Create_Symbol_Table return Symbol_Table is
    begin
-      return Result : constant Symbol_Table := new Symbol_Table_Record do
-         for I in Precomputed_Symbol_Index'Range loop
-            Result.Precomputed (I) := Find (Result, Precomputed_Symbol (I));
-         end loop;
-      end return;
+      return new Symbol_Table_Record;
    end Create_Symbol_Table;
-
-   ------------------------
-   -- Precomputed_Symbol --
-   ------------------------
-
-   function Precomputed_Symbol
-     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Symbol_Type
-   is
-   begin
-      --  For languages that carry no precomputed symbols, Index can have no
-      --  value, so we have noisy but useless warning.
-      pragma Warnings (Off, "value not in range");
-      return Get_Symbol (ST, Precomputed_Symbol (ST, Index));
-      pragma Warnings (On, "value not in range");
-   end Precomputed_Symbol;
-
-   ------------------------
-   -- Precomputed_Symbol --
-   ------------------------
-
-   function Precomputed_Symbol
-     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Thin_Symbol
-   is
-   begin
-      return ST.Precomputed (Index);
-   end Precomputed_Symbol;
 
    ----------
    -- Find --

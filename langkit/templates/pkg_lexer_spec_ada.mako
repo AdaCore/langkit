@@ -6,8 +6,10 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNATCOLL.VFS;
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 
 --  This package provides types and primitives to split text streams into lists
 --  of tokens.

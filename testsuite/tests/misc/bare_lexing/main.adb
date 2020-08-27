@@ -3,10 +3,12 @@ with Ada.Text_IO;           use Ada.Text_IO;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 with Libfoolang.Common; use Libfoolang.Common;
-use Libfoolang.Common.Symbols;
-use Libfoolang.Common.Token_Data_Handlers;
 with Libfoolang.Lexer;  use Libfoolang.Lexer;
 
 procedure Main is

@@ -6,8 +6,13 @@ with GNATCOLL.GMP.Integers;
 with GNATCOLL.Traces;
 
 with Langkit_Support.Errors;
-with Langkit_Support.Symbols;
+
+with Langkit_Support.Symbols.Precomputed;
+use Langkit_Support.Symbols;
+
 with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 
 --  This package provides types and functions used in the whole ${ada_lib_name}
 --  package tree.
@@ -58,13 +63,13 @@ package ${ada_lib_name}.Common is
    function Precomputed_Symbol
      (Index : Precomputed_Symbol_Index) return Text_Type;
 
-   package Symbols is new Langkit_Support.Symbols
+   --  GNAT emits an incorrect value not in range in instantiation warning...
+   --  So deactivate them at the instantiation point.
+   pragma Warnings (Off, "value not in range");
+   package Precomputed_Symbols
+   is new Langkit_Support.Symbols.Precomputed
      (Precomputed_Symbol_Index, Precomputed_Symbol);
-
-   package Token_Data_Handlers
-   is new Langkit_Support.Token_Data_Handlers (Symbols);
-
-   use Symbols, Token_Data_Handlers;
+   pragma Warnings (On, "value not in range");
 
    -----------
    -- Nodes --

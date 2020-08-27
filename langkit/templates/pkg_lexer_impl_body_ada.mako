@@ -24,8 +24,11 @@ with GNATCOLL.VFS;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
+with Langkit_Support.Symbols;
+use Langkit_Support.Symbols;
+
 with ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Symbols;
+use ${ada_lib_name}.Common.Precomputed_Symbols;
 with ${ada_lib_name}.Lexer_State_Machine;
 use ${ada_lib_name}.Lexer_State_Machine;
 
@@ -711,7 +714,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
    function Force_Symbol
      (TDH : Token_Data_Handler;
-      T   : in out Stored_Token_Data) return Symbols.Symbol_Type is
+      T   : in out Stored_Token_Data) return Symbol_Type is
    begin
       if T.Symbol = No_Thin_Symbol then
          declare
