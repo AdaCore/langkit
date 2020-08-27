@@ -3,8 +3,10 @@
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 limited with ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_Implementation;
 use ${ada_lib_name}.Lexer_Implementation;

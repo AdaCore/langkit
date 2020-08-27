@@ -2,10 +2,12 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+
 with Support; use Support;
 
 procedure Main is
-   use Envs, Symbols;
+   use Envs;
 
    function "+" (S : String) return String_Access is (new String'(S));
 

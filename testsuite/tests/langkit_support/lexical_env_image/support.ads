@@ -42,19 +42,8 @@ package Support is
 
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
-   type Precomputed_Symbol_Index is new Integer range 1 .. 0;
-   function Precomputed_Symbol
-     (Dummy_Index : Precomputed_Symbol_Index) return Text_Type
-   is (raise Program_Error);
-
-   package Symbols is new Langkit_Support.Symbols
-     (Precomputed_Symbol_Index, Precomputed_Symbol);
-
    package Envs is new Langkit_Support.Lexical_Env
-     (Precomputed_Symbol_Index => Precomputed_Symbol_Index,
-      Precomputed_Symbol       => Precomputed_Symbol,
-      Symbols                  => Symbols,
-      Unit_T                   => Boolean,
+     (Unit_T                   => Boolean,
       Get_Unit_Version         => Get_Unit_Version,
       Get_Context_Version      => Get_Context_Version,
       No_Unit                  => False,

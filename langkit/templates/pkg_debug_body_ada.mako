@@ -51,7 +51,8 @@ package body ${ada_lib_name}.Debug is
             D : constant Stored_Token_Data := TDH.Tokens.Get (Index);
          begin
             Put (Token_Kind_Name (To_Token_Kind (D.Kind)));
-            Put (" " & Image (Common.Token_Data_Handlers.Text (TDH.all, D),
+            Put (" " & Image (Langkit_Support
+                              .Token_Data_Handlers.Text (TDH.all, D),
                               With_Quotes => True));
             Put_Line (" [" & Image (D.Sloc_Range) & "]");
          end;

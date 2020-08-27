@@ -47,6 +47,7 @@ library project Langkit_Support is
       "Langkit_Support.Relative_Get",
       "Langkit_Support.Slocs",
       "Langkit_Support.Symbols",
+      "Langkit_Support.Symbols.Precomputed",
       "Langkit_Support.Text",
       "Langkit_Support.Token_Data_Handlers",
       "Langkit_Support.Types",

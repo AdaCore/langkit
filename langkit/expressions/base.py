@@ -2509,7 +2509,8 @@ class SymbolLiteral(AbstractExpression):
             return assign_var(
                 self.result_var,
                 'Precomputed_Symbol'
-                ' (Self.Unit.Context.Symbols, {})'.format(
+                ' (Precomputed_Symbol_Table (Self.Unit.Context.Symbols)'
+                ', {})'.format(
                     get_context().symbol_literals[self.name]))
 
         @property

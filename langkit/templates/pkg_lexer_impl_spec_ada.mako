@@ -6,9 +6,12 @@ with System;
 with GNATCOLL.VFS;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 
 private package ${ada_lib_name}.Lexer_Implementation is
 
@@ -47,7 +50,7 @@ private package ${ada_lib_name}.Lexer_Implementation is
 
    function Get_Symbol
      (Token : Token_Or_Trivia_Index;
-      TDH   : Token_Data_Handler) return Symbols.Symbol_Type;
+      TDH   : Token_Data_Handler) return Symbol_Type;
    --  Assuming that ``Token`` refers to a token that contains a symbol, return
    --  the corresponding symbol.
 

@@ -83,6 +83,8 @@ ${exts.with_clauses(with_clauses + [
 
 package body ${ada_lib_name}.Implementation is
 
+   use ${ada_lib_name}.Common.Precomputed_Symbols;
+
    package Context_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
       Element_Type => Internal_Context);
@@ -231,7 +233,7 @@ package body ${ada_lib_name}.Implementation is
    -----------
 
    function Image (Self : Symbol_Type) return ${T.String.name} is
-      T      : constant Text_Type := Symbols.Image (Self);
+      T      : constant Text_Type := Image (Self);
       Result : constant ${T.String.name} :=
          ${T.String.constructor_name} (T'Length);
    begin
@@ -354,12 +356,13 @@ package body ${ada_lib_name}.Implementation is
    is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
-      Symbols        : constant Symbol_Table := Create_Symbol_Table;
+      Symbols        : constant Precomputed_Symbol_Table
+        := Create_Symbol_Table;
       Context        : Internal_Context;
    begin
       Context_Pool.Acquire (Context);
       Context.Ref_Count := 1;
-      Context.Symbols := Symbols;
+      Context.Symbols := Symbol_Table (Symbols);
       Context.Charset := To_Unbounded_String (Actual_Charset);
       Context.Tab_Stop := Tab_Stop;
       Context.With_Trivia := With_Trivia;

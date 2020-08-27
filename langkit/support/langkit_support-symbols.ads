@@ -31,28 +31,20 @@ with Langkit_Support.Vectors;
 
 --  Provide a symbol table for text (Text_Type) identifiers
 
-generic
-
-   type Precomputed_Symbol_Index is (<>);
-   --  Indexes for symbols to pre-compute in each symbol table
-
-   with function Precomputed_Symbol
-     (Index : Precomputed_Symbol_Index) return Text_Type is <>;
-   --  Return the symbol corresponding to the precomputed symbol Index
-
 package Langkit_Support.Symbols is
+
+   type Symbol_Table_Record is tagged private;
+   type Symbol_Table is access all Symbol_Table_Record'Class;
+   --  Represents a symbol table
+
+   No_Symbol_Table : constant Symbol_Table;
+   --  Value to use as a default for unallocated symbol tables
 
    type Symbol_Type is new Text_Cst_Access;
 
    function Image (S : Symbol_Type) return Text_Type;
    function Image
      (S : Symbol_Type; With_Quotes : Boolean := False) return String;
-
-   type Symbol_Table is private;
-   --  The actual symbol table type to use
-
-   No_Symbol_Table : constant Symbol_Table;
-   --  Value to use as a default for unallocated symbol tables
 
    type Thin_Symbol is private;
 
@@ -63,14 +55,6 @@ package Langkit_Support.Symbols is
 
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
-
-   function Precomputed_Symbol
-     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Thin_Symbol
-      with Inline;
-   function Precomputed_Symbol
-     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Symbol_Type
-      with Inline;
-   --  Return the precomputed symbol corresponding to Index
 
    function Find
      (ST     : Symbol_Table;
@@ -124,16 +108,10 @@ private
    package Symbol_Vectors
    is new Langkit_Support.Vectors (Symbol_Type);
 
-   type Precomputed_Symbol_Array is
-      array (Precomputed_Symbol_Index) of Thin_Symbol;
-
-   type Symbol_Table_Record is record
+   type Symbol_Table_Record is tagged record
       Symbols_Map : Maps.Map;
       Symbols     : Symbol_Vectors.Vector;
-      Precomputed : Precomputed_Symbol_Array;
    end record;
-
-   type Symbol_Table is access Symbol_Table_Record;
 
    No_Symbol_Table : constant Symbol_Table := null;
 

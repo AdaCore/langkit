@@ -13,7 +13,8 @@ begin
       T.Kind /= From_Token_Kind (${token_kind})
       % if parser.matches_symbol:
       or else T.Symbol /= Precomputed_Symbol
-        (Parser.TDH.Symbols, ${ctx.symbol_literals[parser.match_text]})
+        (Precomputed_Symbol_Table (Parser.TDH.Symbols),
+         ${ctx.symbol_literals[parser.match_text]})
       % endif
    then
        ## If the result is not the one we expect, set pos to error

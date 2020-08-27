@@ -22,8 +22,10 @@ with GNATCOLL.Refcount;
    private with Langkit_Support.Boxes;
 % endif
 
+with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
+
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
-use ${ada_lib_name}.Common.Token_Data_Handlers;
 private with ${ada_lib_name}.Implementation;
 private with ${ada_lib_name}.Debug;
 

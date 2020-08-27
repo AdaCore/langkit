@@ -4,24 +4,14 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with Langkit_Support.Diagnostics.Output;
 use Langkit_Support.Diagnostics.Output;
-with Langkit_Support.Symbols;
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
+use Langkit_Support.Token_Data_Handlers;
 
 procedure Main is
 
-   type Dummy_Enum is (Dummy);
-
-   function Precomputed_Symbol
-     (Index : Dummy_Enum) return Text_Type
-   is ("");
-
-   package Symbols is new Langkit_Support.Symbols (Dummy_Enum);
-   package My_TDH is new Langkit_Support.Token_Data_Handlers (Symbols);
-
-   use My_TDH;
-
-   Symbol_Table : Symbols.Symbol_Table := Symbols.Create_Symbol_Table;
+   Syms : Symbol_Table := Create_Symbol_Table;
 
    procedure Check (Label : String; Buffer : Text_Type);
 
@@ -39,7 +29,7 @@ procedure Main is
 
 
    begin
-      Initialize (TDH, Symbol_Table);
+      Initialize (TDH, Syms);
       Reset (TDH, B, Buffer'First, Buffer'Last);
 
       Put_Line ("== " & Label & " ==");
@@ -68,5 +58,5 @@ begin
    Check ("Buffer 3",
           "" & Chars.LF & Chars.LF & "Line 3" & Chars.LF & Chars.LF);
 
-   Symbols.Destroy (Symbol_Table);
+   Destroy (Syms);
 end Main;
