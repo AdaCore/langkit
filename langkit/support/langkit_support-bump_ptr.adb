@@ -135,18 +135,24 @@ package body Langkit_Support.Bump_Ptr is
 
    package body Alloc is
 
-      function To_Pointer is new Ada.Unchecked_Conversion
-        (System.Address, Element_Access);
+      -----------
+      -- Alloc --
+      -----------
+
+      function Alloc (Pool : Bump_Ptr_Pool) return System.Address is
+      begin
+         return
+           Allocate
+             (Pool,
+              Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size));
+      end Alloc;
 
       function Alloc (Pool : Bump_Ptr_Pool) return Element_Access is
       begin
          --  This function just queries the proper size of the Element_T type,
          --  and converts the return value to the proper access type.
 
-         return To_Pointer
-           (Allocate
-              (Pool,
-               Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size)));
+         return To_Pointer (Alloc (Pool));
       end Alloc;
 
    end Alloc;
@@ -219,16 +225,29 @@ package body Langkit_Support.Bump_Ptr is
 
    package body Array_Alloc is
 
+      -----------
+      -- Alloc --
+      -----------
+
       function Alloc
         (Pool : Bump_Ptr_Pool; Length : Natural) return Element_Array_Access
       is
-         Stride : constant Storage_Offset :=
-            Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size);
-         Size   : constant Storage_Offset := Stride * Storage_Offset (Length);
       begin
          return (if Length = 0
                  then Empty_Array_Access
-                 else To_Pointer (Allocate (Pool, Size)));
+                 else To_Pointer (Alloc (Pool, Length)));
+      end Alloc;
+
+      function Alloc
+        (Pool : Bump_Ptr_Pool; Length : Natural) return System.Address
+      is
+         Stride : constant Storage_Offset :=
+           Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size);
+         Size   : constant Storage_Offset := Stride * Storage_Offset (Length);
+      begin
+         return (if Length = 0
+                 then System.Null_Address
+                 else Allocate (Pool, Size));
       end Alloc;
 
    end Array_Alloc;

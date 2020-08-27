@@ -81,8 +81,15 @@ package Langkit_Support.Bump_Ptr is
       type Element_T is private;
       type Element_Access is access all Element_T;
    package Alloc is
-      function Alloc (Pool : Bump_Ptr_Pool) return Element_Access
+      function Alloc (Pool : Bump_Ptr_Pool) return System.Address
          with Inline;
+
+      function Alloc (Pool : Bump_Ptr_Pool) return Element_Access
+        with Inline;
+
+      function To_Pointer is new Ada.Unchecked_Conversion
+        (System.Address, Element_Access);
+
    end Alloc;
    --  This generic allocation package can be used to allocate an object of
    --  type Element_T.
@@ -122,16 +129,20 @@ package Langkit_Support.Bump_Ptr is
       --  point to a non-null junk address.
 
       function Alloc
+        (Pool : Bump_Ptr_Pool; Length : Natural) return System.Address
+         with Inline;
+
+      function Alloc
         (Pool : Bump_Ptr_Pool; Length : Natural) return Element_Array_Access
          with Inline;
       --  If Length is zero, return Empty_Array_Access. Otherwise, allocate an
       --  array that is large enough to contain Length elements and return
       --  an access to it.
 
-   private
-
       function To_Pointer is new Ada.Unchecked_Conversion
         (System.Address, Element_Array_Access);
+
+   private
 
       Empty_Array_Access : constant Element_Array_Access := To_Pointer
         (System.Null_Address + 1);
@@ -182,9 +193,9 @@ private
    subtype Page_Ptr is System.Address;
 
    Page_Size : constant := 2 ** 14;
-   --  This constant has been chosen heuristically to be the lowest value that
-   --  gives the best performance. Bigger values did not make any difference,
-   --  and that way we ensure that pools can stay small.
+   --  16kb. This constant has been chosen heuristically to be the lowest
+   --  value that gives the best performance. Bigger values did not make
+   --  any difference, and that way we ensure that pools can stay small.
 
    package Pages_Vector is new Langkit_Support.Vectors (Page_Ptr);
 
