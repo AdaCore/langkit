@@ -168,28 +168,6 @@
    % endif
 </%def>
 
-<%def name="node_fields(cls, emit_null=True)">
-   <%
-      fields = cls.get_fields(
-         include_inherited=False,
-         predicate=lambda f: (f.should_emit and
-                              not f.abstract and
-                              not f.null))
-      ext = ctx.ext('nodes', cls.raw_name, 'components')
-   %>
-   % if fields:
-      % for f in fields:
-         ${f.name} : aliased ${f.type.storage_type_name}
-            := ${f.type.storage_nullexpr};
-         ${ada_doc(f, 9)}
-      % endfor
-
-      ${exts.include_extension(ext)}
-   % elif emit_null:
-      null;
-   % endif
-</%def>
-
 <%def name="private_decl(cls)">
 
    <%
