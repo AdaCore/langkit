@@ -507,6 +507,8 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (Var : Logic_Var) return String;
    % endif
 
+   ${exts.include_extension(ctx.ext('analysis', 'implem_decls'))}
+
    -----------------------------------------------
    -- Structure types (incomplete declarations) --
    -----------------------------------------------
@@ -591,7 +593,7 @@ private package ${ada_lib_name}.Implementation is
                                     not f.abstract and
                                     not f.null)
             )
-            ext = ctx.ext('nodes', cls.raw_name, 'components')
+            ext = ctx.ext('nodes', cls.raw_name.lower, 'components')
 
             null_required = (or_null and
                              not is_generic_list and
@@ -1088,6 +1090,8 @@ private package ${ada_lib_name}.Implementation is
 
       Cache_Version : Natural := 0;
       --  See the eponym field in Analysis_Context_Type
+
+      ${exts.include_extension(ctx.ext('analysis', 'unit', 'components'))}
    end record;
 
    procedure Free is new Ada.Unchecked_Deallocation
