@@ -1089,6 +1089,7 @@ package body ${ada_lib_name}.Implementation is
       Free (Unit.AST_Mem_Pool);
       Destroy_Unit_Destroyables (Unit);
       Destroyable_Vectors.Destroy (Unit.Destroyables);
+      ${exts.include_extension(ctx.ext('analysis', 'unit', 'destroy'))}
       Free (Unit);
    end Destroy;
 
@@ -3515,10 +3516,11 @@ package body ${ada_lib_name}.Implementation is
             Foreign_Node_Entry_Vectors.Empty_Vector,
          Rebindings        => Env_Rebindings_Vectors.Empty_Vector,
          Cache_Version     => <>,
-         Unit_Version      => <>
+         Unit_Version      => <>,
          % if ctx.has_memoization:
-         , Memoization_Map => <>
+         Memoization_Map => <>,
          % endif
+         others => <>
       );
    begin
       Initialize (Unit.TDH, Context.Symbols,
