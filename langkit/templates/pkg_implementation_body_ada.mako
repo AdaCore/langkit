@@ -1662,8 +1662,8 @@ package body ${ada_lib_name}.Implementation is
 
       function Sloc (T : Token_Pos) return Source_Location is
         (if T.Anchor = T_Start
-         then Start_Sloc (Get (T.Pos).Sloc_Range)
-         else End_Sloc (Get (T.Pos).Sloc_Range));
+         then Sloc_Start (TDH, Get (T.Pos))
+         else Sloc_End (TDH, Get (T.Pos)));
 
    begin
       if Is_Synthetic (Node) then
@@ -2331,7 +2331,7 @@ package body ${ada_lib_name}.Implementation is
          return "<" & To_Text (Kind_Name (Self))
                 & " "
                 & To_Text
-                  (Ada.Directories.Simple_Name 
+                  (Ada.Directories.Simple_Name
                      (Get_Filename (Unit (Self))))
                 & ":" & To_Text (Image (Sloc_Range (Self))) & ">";
       </%def>
@@ -3521,7 +3521,8 @@ package body ${ada_lib_name}.Implementation is
          % endif
       );
    begin
-      Initialize (Unit.TDH, Context.Symbols);
+      Initialize (Unit.TDH, Context.Symbols,
+                  Context.Tab_Stop);
       return Unit;
    end Create_Special_Unit;
 
@@ -3820,7 +3821,8 @@ package body ${ada_lib_name}.Implementation is
       Result.AST_Root := null;
 
       Move (Saved_TDH, Unit_TDH.all);
-      Initialize (Unit_TDH.all, Saved_TDH.Symbols);
+      Initialize (Unit_TDH.all, Saved_TDH.Symbols,
+                  Unit.Context.Tab_Stop);
 
       --  This is where lexing occurs, so this is where we get most "setup"
       --  issues: missing input file, bad charset, etc. If we have such an
@@ -3831,7 +3833,7 @@ package body ${ada_lib_name}.Implementation is
       --  pointless exceptions which harm debugging.
 
       if Input.Kind = File
-         and then 
+         and then
          (Input.Filename.Is_Directory or else (not Input.Filename.Is_Readable))
       then
          declare

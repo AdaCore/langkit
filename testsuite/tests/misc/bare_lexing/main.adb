@@ -41,7 +41,7 @@ begin
       declare
          Token_Data : constant Stored_Token_Data := Data (Tok, TDH);
       begin
-         Put_Line (Image (Token_Data.Sloc_Range)
+         Put_Line (Image (Sloc_Range (TDH, Token_Data))
                    & " " & Token_Kind'Image (To_Token_Kind (Token_Data.Kind))
                    & ": " & Image (TDH, Token_Data));
       end;

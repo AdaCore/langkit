@@ -19,3 +19,17 @@
   Line 5: ""
   Constraint_Error: Out of bound access
 
+== Buffer 1 offset 3 ==
+1:3
+== Buffer 1 offset 7 ==
+1:7
+== Buffer 1 offset 8 ==
+2:1
+== Buffer 1 offset 9 ==
+2:2
+== Buffer 1 offset 19 ==
+3:5
+== Buffer 1 offset 21 ==
+3:7
+== Buffer 1 offset 250 ==
+  Constraint_Error: out of bound access

@@ -47,10 +47,6 @@ package Langkit_Support.Token_Data_Handlers is
       --  this is either null or the symbolization of the token text.
       --
       --  For instance: null for keywords but actual text for identifiers.
-
-      Sloc_Range : Source_Location_Range;
-      --  Source location range for this token. Note that the end bound is
-      --  exclusive.
    end record;
    --  Holder for per-token data to be stored in the token data handler
 
@@ -161,8 +157,15 @@ package Langkit_Support.Token_Data_Handlers is
       --  multiple Token_Data_Handlers.
 
       Lines_Starts : Index_Vectors.Vector;
-      --  Table keeping count of line starts and line endings
+      --  Table keeping count of line starts and line endings. The index of the
+      --  starting character for line N is at the Nth position in the vector.
+
+      Tab_Stop : Positive;
    end record;
+
+   Default_Tab_Stop : constant Positive := 8;
+   --  Value that will be used for the default tab stop if none is passed
+   --  during the initialization of a ``Token_Data_Handler``.
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
 
@@ -173,10 +176,15 @@ package Langkit_Support.Token_Data_Handlers is
       with Pre => Initialized (TDH);
    --  Return whether TDH was used to lex some input source
 
-   procedure Initialize (TDH : out Token_Data_Handler; Symbols : Symbol_Table)
+   procedure Initialize
+     (TDH      : out Token_Data_Handler;
+      Symbols  : Symbol_Table;
+      Tab_Stop : Positive := Default_Tab_Stop)
       with Pre  => Symbols /= No_Symbol_Table,
            Post => Initialized (TDH) and then not Has_Source_Buffer (TDH);
-   --  Create a token data handler that is associated with Symbols
+   --  Create a token data handler that is associated with the ``Symbols``
+   --  symbol table, and takes its value for the tabulation in the ``Tab_Stop``
+   --  access.
 
    procedure Reset
      (TDH           : in out Token_Data_Handler;
@@ -284,5 +292,33 @@ package Langkit_Support.Token_Data_Handlers is
    function Get_Line
      (TDH : Token_Data_Handler; Line_Number : Positive) return Text_Type;
    --  Get the source text of line at index ``Line_Number``
+
+   function Get_Sloc
+     (TDH : Token_Data_Handler; Index : Natural) return Source_Location;
+   --  Return the sloc for given ``Index`` in ``TDH``. If:
+   --
+   --  - ``Index`` is ``0``, return ``No_Source_Location``.
+   --
+   --  - ``Index`` is in range ``1 .. TDH.Source_Buffer'Last + 1``, return a
+   --    corresponding sloc (``TDH.Source_Buffer'Last + 1`` being the EOF
+   --    sloc).
+   --
+   --  - ``Index`` is bigger than ``TDH.Source_Buffer'Last + 1``: raise a
+   --    ``Constraint_Error``.
+
+   function Sloc_Start
+     (TDH   : Token_Data_Handler;
+      Token : Stored_Token_Data) return Source_Location;
+   --  Get the starting sloc for given ``Token`` in ``TDH``
+
+   function Sloc_End
+     (TDH   : Token_Data_Handler;
+      Token : Stored_Token_Data) return Source_Location;
+   --  Get the end sloc for given ``Token`` in ``TDH``
+
+   function Sloc_Range
+     (TDH   : Token_Data_Handler;
+      Token : Stored_Token_Data) return Source_Location_Range;
+   --  Get the sloc range for given ``Token`` in ``TDH``
 
 end Langkit_Support.Token_Data_Handlers;

@@ -41,7 +41,9 @@ package body Langkit_Support.Token_Data_Handlers is
       with package Element_Vectors is new Langkit_Support.Vectors (<>);
 
       with function Compare
-         (K : Key_Type; E_Index : Positive; E : Element_Vectors.Element_Type)
+        (K       : Key_Type;
+         E_Index : Positive;
+         E       : Element_Vectors.Element_Type)
           return Relative_Position is <>;
       --  Tell where K is with respect to E (E_Index is the index of E in the
       --  vector).
@@ -117,19 +119,22 @@ package body Langkit_Support.Token_Data_Handlers is
    -- Initialize --
    ----------------
 
-   procedure Initialize (TDH : out Token_Data_Handler; Symbols : Symbol_Table)
-   is
+   procedure Initialize
+     (TDH      : out Token_Data_Handler;
+      Symbols  : Symbol_Table;
+      Tab_Stop : Positive := Default_Tab_Stop) is
    begin
-      TDH := (Source_Buffer     => null,
-              Source_First      => <>,
-              Source_Last       => <>,
-              Filename          => <>,
-              Charset           => <>,
-              Tokens            => <>,
-              Symbols           => Symbols,
-              Tokens_To_Trivias => <>,
-              Trivias           => <>,
-              Lines_Starts       => <>);
+      TDH := (Source_Buffer      => null,
+              Source_First       => <>,
+              Source_Last        => <>,
+              Filename           => <>,
+              Charset            => <>,
+              Tokens             => <>,
+              Symbols            => Symbols,
+              Tokens_To_Trivias  => <>,
+              Trivias            => <>,
+              Lines_Starts       => <>,
+              Tab_Stop           => Tab_Stop);
    end Initialize;
 
    -----------
@@ -217,7 +222,8 @@ package body Langkit_Support.Token_Data_Handlers is
                  Symbols           => No_Symbol_Table,
                  Tokens_To_Trivias => <>,
                  Trivias           => <>,
-                 Lines_Starts      => <>);
+                 Lines_Starts      => <>,
+                 Tab_Stop          => <>);
    end Move;
 
    --------------------------
@@ -537,11 +543,12 @@ package body Langkit_Support.Token_Data_Handlers is
             declare
                Triv_Index     : constant Natural := Natural (Key_Trivia);
                Tok_Index      : constant Natural := Element_Index - 1;
-               Key_Start_Sloc : constant Source_Location := Start_Sloc
-                 (TDH.Trivias.Get (Triv_Index).T.Sloc_Range);
+               Key_Start_Sloc : constant Source_Location := Sloc_Start
+                 (TDH, TDH.Trivias.Get (Triv_Index).T);
             begin
                return Compare
-                 (TDH.Tokens.Get (Tok_Index).Sloc_Range, Key_Start_Sloc);
+                 (Sloc_Range (TDH, TDH.Tokens.Get (Tok_Index)),
+                  Key_Start_Sloc);
             end;
          end if;
 
@@ -582,13 +589,13 @@ package body Langkit_Support.Token_Data_Handlers is
         (Sloc        : Source_Location;
          Dummy_Index : Positive;
          Token       : Stored_Token_Data) return Relative_Position
-      is (Compare (Token.Sloc_Range, Sloc));
+      is (Compare (Sloc_Range (TDH, Token), Sloc));
 
       function Compare
         (Sloc        : Source_Location;
          Dummy_Index : Positive;
          Trivia      : Trivia_Node) return Relative_Position
-      is (Compare (Trivia.T.Sloc_Range, Sloc));
+      is (Compare (Sloc_Range (TDH, Trivia.T), Sloc));
 
       function Token_Floor is new Floor
         (Key_Type        => Source_Location,
@@ -617,7 +624,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
       declare
          function SS (Token : Stored_Token_Data) return Source_Location is
-           (Start_Sloc (Token.Sloc_Range));
+           (Sloc_Start (TDH, Token));
 
          Tok_Sloc  : constant Source_Location := SS (TDH.Tokens.Get (Token));
          Triv_Sloc : constant Source_Location :=
@@ -681,16 +688,121 @@ package body Langkit_Support.Token_Data_Handlers is
    begin
       --  Return slice from...
       return
-        TDH.Source_Buffer (
-         --  The first character in the requested line
-         TDH.Lines_Starts.Get (Line_Number)
+        TDH.Source_Buffer
+          (
+           --  The first character in the requested line
+           TDH.Lines_Starts.Get (Line_Number)
 
-         ..
+           ..
 
-         --  The character before the LF that precedes the first character of
-         --  the next line.
-           TDH.Lines_Starts.Get (Line_Number + 1) - 2
-        );
+           --  The character before the LF that precedes the first character of
+           --  the next line.
+             TDH.Lines_Starts.Get (Line_Number + 1) - 2
+          );
+
    end Get_Line;
+
+   --------------
+   -- Get_Sloc --
+   --------------
+
+   function Get_Sloc
+     (TDH : Token_Data_Handler; Index : Natural) return Source_Location
+   is
+      function Compare
+        (Sought      : Positive;
+         Dummy_Index : Positive;
+         Line_Start  : Positive) return Relative_Position
+      is
+        (if Sought > Line_Start then After
+         elsif Sought = Line_Start then Inside
+         else Before);
+
+      function Get_Line_Index is new Floor (Positive, Index_Vectors);
+      --  Return the index of the first character of Line `N` in a given
+      --  `TDH.Line_Starts` vector.
+
+      Column : Natural := 0;
+      --  0 based column number
+
+      Tab_Stop : Positive renames TDH.Tab_Stop;
+   begin
+      --  Allow 0 as an offset because it's a common value when the text buffer
+      --  is empty: in that case just return a null source location.
+      if Index = 0 then
+         return No_Source_Location;
+      end if;
+
+      declare
+         Line_Index  : constant Positive :=
+           Get_Line_Index (Index, TDH.Lines_Starts);
+         Line_Offset : constant Positive := TDH.Lines_Starts.Get (Line_Index);
+      begin
+         --  Allow a sloc pointing at the EOL char (hence the + 1)
+         if Index > TDH.Source_Buffer'Last + 1 then
+            raise Constraint_Error with "out of bound access";
+         end if;
+
+         --  Make horizontal tabulations move by stride of Tab_Stop columns, as
+         --  usually implemented in code editors.
+         for I in Line_Offset .. Natural'Min (Index, TDH.Source_Last) - 1 loop
+            if TDH.Source_Buffer (I) = Chars.HT then
+               Column := (Column + Tab_Stop) / Tab_Stop * Tab_Stop;
+            else
+               Column := Column + 1;
+            end if;
+         end loop;
+
+         return Source_Location'
+           (Line   => Line_Number (Line_Index),
+            Column =>
+              Column_Number
+                (Natural'Max (Column + 1, Index - Line_Offset + 1)));
+      end;
+   end Get_Sloc;
+
+   ----------------
+   -- Sloc_Start --
+   ----------------
+
+   function Sloc_Start
+     (TDH   : Token_Data_Handler;
+      Token : Stored_Token_Data) return Source_Location is
+   begin
+      return Get_Sloc (TDH, Token.Source_First);
+   end Sloc_Start;
+
+   --------------
+   -- Sloc_End --
+   --------------
+
+   function Sloc_End
+     (TDH   : Token_Data_Handler;
+      Token : Stored_Token_Data) return Source_Location is
+   begin
+      return Get_Sloc
+        (TDH,
+         (if Token.Source_Last < Token.Source_First
+          --  This is a special case for when the range is negative: in that
+          --  case we want to propagate that behavior to the sloc itself,
+          --  because negative ranges are used for tokens that have no
+          --  "width", and shouldn't be lookup-able, like the termination
+          --  token.
+          then Token.Source_Last
+          --  For regular cases, we want the sloc_end to be one column after
+          --  the end of the token.
+          else Token.Source_Last + 1));
+   end Sloc_End;
+
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range
+     (TDH   : Token_Data_Handler;
+      Token : Stored_Token_Data) return Source_Location_Range is
+   begin
+      return Make_Range (Sloc_Start (TDH, Token), Sloc_End (TDH, Token));
+   end Sloc_Range;
 
 end Langkit_Support.Token_Data_Handlers;

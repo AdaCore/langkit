@@ -54,7 +54,7 @@ package body ${ada_lib_name}.Debug is
             Put (" " & Image (Langkit_Support
                               .Token_Data_Handlers.Text (TDH.all, D),
                               With_Quotes => True));
-            Put_Line (" [" & Image (D.Sloc_Range) & "]");
+            Put_Line (" [" & Image (Sloc_Range (TDH.all, D)) & "]");
          end;
       end if;
    end PTok;

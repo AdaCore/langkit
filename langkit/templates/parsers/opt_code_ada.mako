@@ -51,7 +51,8 @@ if ${subparser.pos_var} = No_Token_Index then
         ## Emit a diagnostic informing the user that the sub parser has not
         ## succeeded.
         Append (Parser.Diagnostics,
-                Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
+                Sloc_Range (Parser.TDH.all,
+                            Get_Token (Parser.TDH.all, ${parser.start_pos})),
                 To_Text ("Missing '${subparser.error_repr}'"));
     % endif
 

@@ -376,7 +376,7 @@ package body ${ada_lib_name}.Common is
               Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
               Source_First  => Raw_Data.Source_First,
               Source_Last   => Raw_Data.Source_Last,
-              Sloc_Range    => Raw_Data.Sloc_Range);
+              Sloc_Range    => Sloc_Range (TDH, Raw_Data));
    end Convert;
 
    --------------------------

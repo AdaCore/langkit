@@ -11,7 +11,6 @@ use Langkit_Support.Token_Data_Handlers;
 
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
-with ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
 
