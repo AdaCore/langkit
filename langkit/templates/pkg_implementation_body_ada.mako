@@ -3478,7 +3478,8 @@ package body ${ada_lib_name}.Implementation is
       ;
    begin
       if Canon_Symbol.Success then
-         return Find (Context.Symbols, Canon_Symbol.Symbol);
+         return Get_Symbol
+           (Context.Symbols, Find (Context.Symbols, Canon_Symbol.Symbol));
       else
          raise Invalid_Symbol_Error with Image (Symbol, With_Quotes => True);
       end if;

@@ -78,8 +78,19 @@ package body Langkit_Support.Symbols is
       --  For languages that carry no precomputed symbols, Index can have no
       --  value, so we have noisy but useless warning.
       pragma Warnings (Off, "value not in range");
-      return ST.Precomputed (Index);
+      return Get_Symbol (ST, Precomputed_Symbol (ST, Index));
       pragma Warnings (On, "value not in range");
+   end Precomputed_Symbol;
+
+   ------------------------
+   -- Precomputed_Symbol --
+   ------------------------
+
+   function Precomputed_Symbol
+     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Thin_Symbol
+   is
+   begin
+      return ST.Precomputed (Index);
    end Precomputed_Symbol;
 
    ----------
@@ -90,12 +101,12 @@ package body Langkit_Support.Symbols is
      (ST     : Symbol_Table;
       T      : Text_Type;
       Create : Boolean := True)
-      return Symbol_Type
+      return Thin_Symbol
    is
-      use Sets;
+      use Maps;
 
       T_Acc  : Symbol_Type := T'Unrestricted_Access;
-      Result : constant Cursor := ST.Symbols.Find (T_Acc);
+      Result : constant Cursor := ST.Symbols_Map.Find (T_Acc);
    begin
       --  If we already have such a symbol, return the access we already
       --  internalized. Otherwise, give up if asked to.
@@ -103,14 +114,16 @@ package body Langkit_Support.Symbols is
       if Has_Element (Result) then
          return Element (Result);
       elsif not Create then
-         return null;
+         return No_Thin_Symbol;
       end if;
 
       --  At this point, we know we have to internalize a new symbol
 
       T_Acc := new Text_Type'(T);
-      ST.Symbols.Insert (T_Acc);
-      return T_Acc;
+      ST.Symbols.Append (T_Acc);
+
+      ST.Symbols_Map.Insert (T_Acc, Thin_Symbol (ST.Symbols.Last_Index));
+      return Thin_Symbol (ST.Symbols.Last_Index);
    end Find;
 
    -------------
@@ -118,24 +131,17 @@ package body Langkit_Support.Symbols is
    -------------
 
    procedure Destroy (ST : in out Symbol_Table) is
-      use Sets;
-      C : Cursor := ST.Symbols.First;
+      use Maps;
+      To_Free : Text_Access;
    begin
-      while Has_Element (C) loop
-         declare
-            --  We keep Symbol_Type to be a constant access everywhere for
-            --  simplification, but we know symbol tables are the only owners
-            --  of these, so stripping the "constant" attribute away here is
-            --  known to be safe.
+      ST.Symbols_Map.Clear;
 
-            function Convert is new Ada.Unchecked_Conversion
-              (Symbol_Type, Text_Access);
-            To_Free : Text_Access := Convert (Element (C));
-         begin
-            Next (C);
-            Free (To_Free);
-         end;
+      for El of ST.Symbols loop
+         To_Free := Text_Access'(El.all'Unrestricted_Access);
+         Free (To_Free);
       end loop;
+
+      ST.Symbols.Destroy;
       Deallocate (ST);
    end Destroy;
 
@@ -144,7 +150,6 @@ package body Langkit_Support.Symbols is
    ----------
 
    function Hash (ST : Symbol_Type) return Hash_Type is
-
    begin
       if ST = null then
          return Hash_Type (0);
@@ -152,5 +157,15 @@ package body Langkit_Support.Symbols is
          return Hash_Type'Mod (To_Integer (ST.all'Address));
       end if;
    end Hash;
+
+   ----------------
+   -- Get_Symbol --
+   ----------------
+
+   function Get_Symbol
+     (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type is
+   begin
+      return Self.Symbols.Get (Positive (TS));
+   end Get_Symbol;
 
 end Langkit_Support.Symbols;

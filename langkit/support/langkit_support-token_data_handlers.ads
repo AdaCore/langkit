@@ -48,7 +48,7 @@ package Langkit_Support.Token_Data_Handlers is
       Source_Last  : Natural;
       --  Bounds in the source buffer corresponding to this token
 
-      Symbol : Symbol_Type;
+      Symbol : Thin_Symbol;
       --  Depending on the token kind (according to the lexer specification),
       --  this is either null or the symbolization of the token text.
       --

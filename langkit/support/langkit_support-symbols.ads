@@ -22,11 +22,12 @@
 ------------------------------------------------------------------------------
 
 with Ada.Containers; use Ada.Containers;
-with Ada.Containers.Hashed_Sets;
+with Ada.Containers.Hashed_Maps;
 
 with GNAT.String_Hash;
 
 with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Vectors;
 
 --  Provide a symbol table for text (Text_Type) identifiers
 
@@ -53,9 +54,19 @@ package Langkit_Support.Symbols is
    No_Symbol_Table : constant Symbol_Table;
    --  Value to use as a default for unallocated symbol tables
 
+   type Thin_Symbol is private;
+
+   No_Thin_Symbol : constant Thin_Symbol;
+
+   function Get_Symbol
+     (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type;
+
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
 
+   function Precomputed_Symbol
+     (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Thin_Symbol
+      with Inline;
    function Precomputed_Symbol
      (ST : Symbol_Table; Index : Precomputed_Symbol_Index) return Symbol_Type
       with Inline;
@@ -64,13 +75,21 @@ package Langkit_Support.Symbols is
    function Find
      (ST     : Symbol_Table;
       T      : Text_Type;
-      Create : Boolean := True) return Symbol_Type with Inline;
+      Create : Boolean := True) return Thin_Symbol with Inline;
    --  Look for an entry for the T text in the ST symbol table. If there is
    --  such an entry, return it. Otherwise, create it and return it if Create
    --  is true. Elsewise, return null.
    --
    --  Non-null returned accesses are guaranteed to be the same for all equal
    --  Text_Type.
+
+   function Find
+     (ST     : Symbol_Table;
+      T      : Text_Type;
+      Create : Boolean := True) return Symbol_Type
+   is
+      (Get_Symbol (ST, Find (ST, T, Create))) with Inline;
+   --  Overload of ``Find`` which returns a ``Symbol`` directly
 
    procedure Destroy (ST : in out Symbol_Table);
    --  Deallocate a symbol table and all the text returned by the corresponding
@@ -83,6 +102,8 @@ package Langkit_Support.Symbols is
 
 private
 
+   type Thin_Symbol is mod 2 ** 32;
+
    function Hash is new GNAT.String_Hash.Hash
      (Char_Type => Wide_Wide_Character,
       Key_Type  => Text_Type,
@@ -93,22 +114,29 @@ private
 
    function Key_Equal (L, R : Symbol_Type) return Boolean is (L.all = R.all);
 
-   package Sets is new Ada.Containers.Hashed_Sets
-     (Element_Type        => Symbol_Type,
+   package Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type            => Symbol_Type,
+      Element_Type        => Thin_Symbol,
       Hash                => String_Hash,
-      Equivalent_Elements => Key_Equal,
+      Equivalent_Keys     => Key_Equal,
       "="                 => "=");
 
+   package Symbol_Vectors
+   is new Langkit_Support.Vectors (Symbol_Type);
+
    type Precomputed_Symbol_Array is
-      array (Precomputed_Symbol_Index) of Symbol_Type;
+      array (Precomputed_Symbol_Index) of Thin_Symbol;
 
    type Symbol_Table_Record is record
-      Symbols     : Sets.Set;
+      Symbols_Map : Maps.Map;
+      Symbols     : Symbol_Vectors.Vector;
       Precomputed : Precomputed_Symbol_Array;
    end record;
 
    type Symbol_Table is access Symbol_Table_Record;
 
    No_Symbol_Table : constant Symbol_Table := null;
+
+   No_Thin_Symbol  : constant Thin_Symbol := 0;
 
 end Langkit_Support.Symbols;

@@ -88,7 +88,7 @@ def test(args: Namespace, remaining_args: List[str]) -> None:
     """
     subprocess.check_call(
         [sys.executable, str(LANGKIT_ROOT / 'testsuite' / 'testsuite.py'),
-         '-Edtmp']
+         '-E']
         + remaining_args
     )
 
