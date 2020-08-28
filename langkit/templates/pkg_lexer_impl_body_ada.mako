@@ -313,8 +313,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                Append_Trivia ((Kind         => From_Token_Kind (Token_Id),
                                Source_First => Source_First,
                                Source_Last  => Source_Last,
-                               Symbol       => No_Thin_Symbol,
-                               Sloc_Range   => Sloc_Range));
+                               Symbol       => No_Thin_Symbol));
 
                if Token_Id = ${lexer.LexingFailure.ada_name} then
                   Append (Diagnostics, Sloc_Range, "Invalid token, ignored");
@@ -334,8 +333,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
            ((Kind         => From_Token_Kind (Token_Id),
              Source_First => Source_First,
              Source_Last  => Source_Last,
-             Symbol       => Symbol,
-             Sloc_Range   => Sloc_Range));
+             Symbol       => Symbol));
 
          ##  This whole section is only emitted if the user chose to track
          ##  indentation in the lexer. It has complex machinery to emit
@@ -350,8 +348,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                  ((Kind         => From_Token_Kind (${lexer.Dedent.ada_name}),
                    Source_First => TDH.Source_Last + 1,
                    Source_Last  => TDH.Source_Last,
-                   Symbol       => No_Thin_Symbol,
-                   Sloc_Range   => Sloc_Range));
+                   Symbol       => No_Thin_Symbol));
                Columns_Stack_Len := Columns_Stack_Len - 1;
             end loop;
          end if;
@@ -384,12 +381,9 @@ package body ${ada_lib_name}.Lexer_Implementation is
             declare
                T : Stored_Token_Data :=
                  (Kind         => <>,
-                  Source_First => Source_First + 1,
-                  Source_Last  => Source_First,
-                  Symbol       => No_Thin_Symbol,
-                  Sloc_Range   =>
-                    (Sloc_Range.Start_Line, Sloc_Range.Start_Line,
-                     Sloc_Range.Start_Column, Sloc_Range.Start_Column));
+                  Source_First => Source_First,
+                  Source_Last  => Source_First - 1,
+                  Symbol       => No_Thin_Symbol);
             begin
                if Sloc_Range.Start_Column < Get_Col then
                   --  Emit every necessary dedent token if the line is
@@ -429,8 +423,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
               ((Kind         => From_Token_Kind (Token_Id),
                 Source_First => Source_First,
                 Source_Last  => Source_Last,
-                Symbol       => Symbol,
-                Sloc_Range   => Sloc_Range));
+                Symbol       => Symbol));
          end if;
          % endif
 

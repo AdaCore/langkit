@@ -947,7 +947,7 @@ private package ${ada_lib_name}.Implementation is
       Charset : Unbounded_String;
       --  Default charset to use in analysis units
 
-      Tab_Stop : Positive;
+      Tab_Stop : aliased Positive;
       --  Tab stop for the lexer to correctly interpret ASCII.HT input
       --  characters.
 

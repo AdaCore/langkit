@@ -174,13 +174,13 @@ package body ${ada_lib_name}.Parsers is
          Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
       D : constant Diagnostic :=
         (if Parser.Last_Fail.Kind = Token_Fail then
-          Create (Last_Token.Sloc_Range, To_Text
+          Create (Sloc_Range (Parser.TDH.all, Last_Token), To_Text
             ("Expected "
              & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
              & ", got "
              & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)))
          else
-           Create (Last_Token.Sloc_Range,
+           Create (Sloc_Range (Parser.TDH.all, Last_Token),
                    To_Text (Parser.Last_Fail.Custom_Message.all)));
    begin
       Parser.Diagnostics.Append (D);
@@ -210,7 +210,7 @@ package body ${ada_lib_name}.Parsers is
             begin
                Append
                  (Parser.Diagnostics,
-                  First_Garbage_Token.Sloc_Range,
+                  Sloc_Range (Parser.TDH.all, First_Garbage_Token),
                   To_Text
                     ("End of input expected, got """
                      & Token_Kind_Name

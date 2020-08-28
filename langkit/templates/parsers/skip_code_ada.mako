@@ -21,7 +21,8 @@ ${parser.dest_node_parser.generate_code()}
 ${parser.dest_node_parser.res_var}.Token_End_Index := ${parser.start_pos};
 
 Append (Parser.Diagnostics,
-        Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
+        Sloc_Range (Parser.TDH.all,
+                    Get_Token (Parser.TDH.all, ${parser.start_pos})),
         To_Text ("Skipped token ")
         & Common.Text
             (Wrap_Token_Reference
