@@ -105,7 +105,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       % if lexer.track_indent:
       Prev_Id  : Token_Kind := ${termination};
       % endif
-      Symbol   : Symbol_Type;
+      Symbol   : Thin_Symbol;
 
       Current_Sloc : Source_Location := (1, 1);
       --  Source location before scanning the current token
@@ -256,7 +256,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
          % endif
 
          Token_Id := Token.Kind;
-         Symbol := null;
+         Symbol := No_Thin_Symbol;
 
          --  Initialize the first sloc for the token to come. For this, process
          --  the text that was ignored since the last token.
@@ -310,7 +310,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                Append_Trivia ((Kind         => From_Token_Kind (Token_Id),
                                Source_First => Source_First,
                                Source_Last  => Source_Last,
-                               Symbol       => null,
+                               Symbol       => No_Thin_Symbol,
                                Sloc_Range   => Sloc_Range));
 
                if Token_Id = ${lexer.LexingFailure.ada_name} then
@@ -347,7 +347,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                  ((Kind         => From_Token_Kind (${lexer.Dedent.ada_name}),
                    Source_First => TDH.Source_Last + 1,
                    Source_Last  => TDH.Source_Last,
-                   Symbol       => null,
+                   Symbol       => No_Thin_Symbol,
                    Sloc_Range   => Sloc_Range));
                Columns_Stack_Len := Columns_Stack_Len - 1;
             end loop;
@@ -383,7 +383,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                  (Kind         => <>,
                   Source_First => Source_First + 1,
                   Source_Last  => Source_First,
-                  Symbol       => null,
+                  Symbol       => No_Thin_Symbol,
                   Sloc_Range   =>
                     (Sloc_Range.Start_Line, Sloc_Range.Start_Line,
                      Sloc_Range.Start_Column, Sloc_Range.Start_Column));
@@ -713,7 +713,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (TDH : Token_Data_Handler;
       T   : in out Stored_Token_Data) return Symbols.Symbol_Type is
    begin
-      if T.Symbol = null then
+      if T.Symbol = No_Thin_Symbol then
          declare
             Text   : Text_Type renames
                TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
@@ -733,7 +733,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
             end if;
          end;
       end if;
-      return T.Symbol;
+      return Get_Symbol (TDH.Symbols, T.Symbol);
    end Force_Symbol;
 
 end ${ada_lib_name}.Lexer_Implementation;
