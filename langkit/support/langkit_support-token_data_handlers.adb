@@ -38,15 +38,10 @@ package body Langkit_Support.Token_Data_Handlers is
       type Key_Type is private;
       --  Type of the value used to sort vector elements
 
-      type Element_Type is private;
-      --  Type for vector elements
-
-      Small_Vector_Capacity : Natural := 0;
-      with package Element_Vectors is new Langkit_Support.Vectors
-        (Element_Type, Small_Vector_Capacity);
+      with package Element_Vectors is new Langkit_Support.Vectors (<>);
 
       with function Compare
-         (K : Key_Type; E_Index : Positive; E : Element_Type)
+         (K : Key_Type; E_Index : Positive; E : Element_Vectors.Element_Type)
           return Relative_Position is <>;
       --  Tell where K is with respect to E (E_Index is the index of E in the
       --  vector).
@@ -561,7 +556,6 @@ package body Langkit_Support.Token_Data_Handlers is
 
       function Token_Floor is new Floor
         (Key_Type        => Token_Index,
-         Element_Type    => Integer,
          Element_Vectors => Integer_Vectors);
 
    begin
@@ -598,11 +592,9 @@ package body Langkit_Support.Token_Data_Handlers is
 
       function Token_Floor is new Floor
         (Key_Type        => Source_Location,
-         Element_Type    => Stored_Token_Data,
          Element_Vectors => Token_Vectors);
       function Trivia_Floor is new Floor
         (Key_Type        => Source_Location,
-         Element_Type    => Trivia_Node,
          Element_Vectors => Trivia_Vectors);
 
       --  Look for a candidate token and a candidate trivia, then take the one
