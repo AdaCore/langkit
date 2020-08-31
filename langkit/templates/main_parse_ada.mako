@@ -2,7 +2,6 @@
 
 with Ada.Calendar;              use Ada.Calendar;
 with Ada.Containers.Hashed_Sets;
-with Ada.Containers.Vectors;
 with Ada.Strings;               use Ada.Strings;
 with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
 pragma Warnings (Off, "internal");
@@ -20,9 +19,6 @@ with ${ada_lib_name}.Unparsing; use ${ada_lib_name}.Unparsing;
 % endif
 
 procedure Parse is
-
-   package String_Vectors is new Ada.Containers.Vectors
-     (Natural, Unbounded_String);
 
    function Convert (Grammar_Rule_Name : String) return Grammar_Rule;
 
