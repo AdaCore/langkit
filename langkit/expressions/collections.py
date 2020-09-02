@@ -435,6 +435,7 @@ class Map(CollectionExpression):
                             if self.do_concat else
                             self.expr.type)
             self.static_type = element_type.array
+            self.static_type.require_vector()
 
             with iter_scope.parent.use():
                 super().__init__('Map_Result', abstract_expr=abstract_expr)
