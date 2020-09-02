@@ -325,13 +325,14 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
             ada_main = [ada_main]
 
         # Generate a project file to build the given Ada main and then run
-        # the program.
+        # the program. Do a static build to improve the debugging experience.
         with open('gen.gpr', 'w') as f:
             f.write(project_template.format(
                 main_sources=', '.join('"{}"'.format(m) for m in ada_main)
             ))
         run('gprbuild', '-Pgen', '-q', '-p',
-            '-XLIBRARY_TYPE=relocatable', '-XXMLADA_BUILD=relocatable')
+            '-XLIBRARY_TYPE=static',
+            '-XXMLADA_BUILD=static')
 
         for i, m in enumerate(ada_main):
             assert m.endswith('.adb')
