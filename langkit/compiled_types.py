@@ -3493,6 +3493,15 @@ class ArrayType(CompiledType):
         from such arrays.
         """
 
+        self._requires_vector = False
+        """
+        Whether we need to generate a Vector type for this array's element
+        type. Vectors are in $.Implementation's body, so generating them while
+        they are not needed triggers a "not referenced" warning on the package
+        instantiation (in addition to make GNAT compile the instantiation for
+        nothing)'.
+        """
+
     @property
     def name(self):
         return self.element_type.name + names.Name('Array_Access')
@@ -3673,6 +3682,13 @@ class ArrayType(CompiledType):
         # Array hash functions uses the element type's hash function, so
         # it has to be required.
         self.element_type.require_hash_function()
+
+    @property
+    def requires_vector(self):
+        return self._requires_vector
+
+    def require_vector(self):
+        self._requires_vector = True
 
 
 class EnumType(CompiledType):
