@@ -15,7 +15,6 @@ pragma Warnings (On, "is an internal GNAT unit");
 with Ada.Unchecked_Conversion;
 
 with GNATCOLL.Traces;
-with GNATCOLL.VFS; use GNATCOLL.VFS;
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Adalog.Abstract_Relation;
