@@ -815,6 +815,29 @@ private package ${ada_lib_name}.Implementation is
    package Foreign_Node_Entry_Vectors is new Langkit_Support.Vectors
      (Foreign_Node_Entry);
 
+   procedure Add_To_Env
+     (Self         : ${T.root_node.name};
+      Mapping      : ${T.env_assoc.name};
+      Initial_Env  : Lexical_Env;
+      Resolver     : Entity_Resolver;
+      DSL_Location : String);
+   --  Helper for Populate_Lexical_Env: add the key/element Mapping in the Env
+   --  lexical environment using the given metadata (MD).
+   --
+   --  If the destination environment is foreign and DSL_Location is not empty,
+   --  raise a Property_Error.
+
+   procedure Ref_Env
+     (Self                : ${T.root_node.name};
+      Dest_Env            : Lexical_Env;
+      Ref_Env_Nodes       : in out ${T.root_node.array.name};
+      Resolver            : Lexical_Env_Resolver;
+      Kind                : Ref_Kind;
+      Cats                : Ref_Categories;
+      Shed_Rebindings     : Boolean);
+   --  Add referenced environments to Self.Self_Env. Calling this takes an
+   --  ownership share for Ref_Env_Nodes.
+
    procedure Register_Destroyable
      (Unit : Internal_Unit; Node : ${T.root_node.name});
    --  Register Node to be destroyed when Unit is deallocated/reparsed

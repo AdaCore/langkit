@@ -1149,33 +1149,6 @@ package body ${ada_lib_name}.Implementation is
       ${memoization.body()}
    % endif
 
-   % if ctx.has_env_assoc:
-      procedure Add_To_Env
-        (Self         : ${T.root_node.name};
-         Mapping      : ${T.env_assoc.name};
-         Initial_Env  : Lexical_Env;
-         Resolver     : Entity_Resolver;
-         DSL_Location : String);
-      --  Helper for Populate_Lexical_Env: add the key/element Mapping in the
-      --  Env lexical environment using the given metadata (MD).
-      --
-      --  If the destination environment is foreign and DSL_Location is not
-      --  empty, raise a Property_Error.
-   % endif
-
-   % if ctx.has_ref_env:
-      procedure Ref_Env
-        (Self                : ${T.root_node.name};
-         Dest_Env            : Lexical_Env;
-         Ref_Env_Nodes       : in out ${T.root_node.array.name};
-         Resolver            : Lexical_Env_Resolver;
-         Kind                : Ref_Kind;
-         Cats                : Ref_Categories;
-         Shed_Rebindings     : Boolean);
-      --  Add referenced environments to Self.Self_Env. Calling this takes an
-      --  ownership share for Ref_Env_Nodes.
-   % endif
-
    -------------------
    -- Solve_Wrapper --
    -------------------
@@ -1198,134 +1171,127 @@ package body ${ada_lib_name}.Implementation is
       end;
    end Solve_Wrapper;
 
-   % if ctx.has_env_assoc:
-      ----------------
-      -- Add_To_Env --
-      ----------------
+   ----------------
+   -- Add_To_Env --
+   ----------------
 
-      procedure Add_To_Env
-        (Self         : ${T.root_node.name};
-         Mapping      : ${T.env_assoc.name};
-         Initial_Env  : Lexical_Env;
-         Resolver     : Entity_Resolver;
-         DSL_Location : String)
-      is
-         Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
-         MD         : ${T.env_md.name} renames Mapping.Metadata;
+   procedure Add_To_Env
+     (Self         : ${T.root_node.name};
+      Mapping      : ${T.env_assoc.name};
+      Initial_Env  : Lexical_Env;
+      Resolver     : Entity_Resolver;
+      DSL_Location : String)
+   is
+      Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
+      MD         : ${T.env_md.name} renames Mapping.Metadata;
 
-         Dest_Env : constant Lexical_Env :=
-           (if Mapping.Dest_Env = Empty_Env
-            then Initial_Env
-            else Mapping.Dest_Env);
-      begin
-         if Mapping = No_Env_Assoc then
-            return;
+      Dest_Env : constant Lexical_Env :=
+        (if Mapping.Dest_Env = Empty_Env
+         then Initial_Env
+         else Mapping.Dest_Env);
+   begin
+      if Mapping = No_Env_Assoc then
+         return;
+      end if;
+
+      if Mapping.Val.Unit /= Self.Unit then
+         raise Property_Error with "Cannot add_to_env an AST node that comes"
+                                   & " from another analysis unit";
+      end if;
+
+      <% astnode_fields = [f for f in T.env_md.get_fields()
+                           if f.type.is_ast_node] %>
+      % if astnode_fields:
+         --  Make sure metadata does not contain any foreign node
+         if ${(
+            ' or else '.join(
+                ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
+                    n='MD.{}'.format(f.name)
+                ) for f in astnode_fields]
+            )
+         )}
+         then
+            raise Property_Error
+               with "Cannot add metadata that contains foreign nodes";
          end if;
+      % endif
 
-         if Mapping.Val.Unit /= Self.Unit then
-            raise Property_Error with "Cannot add_to_env an AST node that"
-                                      & " comes from another analysis unit";
-         end if;
-
-         <% astnode_fields = [f for f in T.env_md.get_fields()
-                              if f.type.is_ast_node] %>
-         % if astnode_fields:
-            --  Make sure metadata does not contain any foreign node
-            if ${(
-               ' or else '.join(
-                   ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
-                       n='MD.{}'.format(f.name)
-                   ) for f in astnode_fields]
-               )
-            )}
-            then
-               raise Property_Error
-                  with "Cannot add metadata that contains foreign nodes";
-            end if;
-         % endif
-
-         if Dest_Env.Kind /= Primary then
-            raise Property_Error with
-               "Cannot add elements to a non-primary lexical env";
-         elsif (Dest_Env.Env.Node = null
+      if Dest_Env.Kind /= Primary then
+         raise Property_Error with
+            "Cannot add elements to a non-primary lexical env";
+      elsif (Dest_Env.Env.Node = null
              or else Dest_Env.Env.Node.Unit /= Self.Unit)
             and then Is_Synthetic (Mapping.Val)
-         then
-            raise Property_Error with
-               "Cannot add a synthetic node to a lexical env from another"
-               & " analysis unit";
+      then
+         raise Property_Error with
+            "Cannot add a synthetic node to a lexical env from another"
+            & " analysis unit";
+      end if;
+
+      --  If requested, reject foreign destination environments. Note that this
+      --  detects only explicit destination environments: foreign initial ones
+      --  are already detected in SetInitialEnv actions.
+      if DSL_Location'Length > 0
+         and then Mapping.Dest_Env.Env.Node /= null
+         and then Mapping.Dest_Env.Env.Node.Unit /= Self.Unit
+      then
+         raise Property_Error with
+            "unsound foreign environment in AddToEnv (" & DSL_Location & ")";
+      end if;
+
+      --  Add the element to the environment
+      Add (Self     => Dest_Env,
+           Key      => Mapping.Key,
+           Value    => Mapping.Val,
+           MD       => MD,
+           Resolver => Resolver);
+
+      --  If we're adding the element to an environment that belongs to a
+      --  different unit, then:
+      if Dest_Env /= Empty_Env
+         and then (Dest_Env = Root_Scope
+                   or else Dest_Env.Env.Node.Unit /= Self.Unit)
+      then
+         --  Add the environment, the key, and the value to the list of entries
+         --  contained in other units, so we can remove them when reparsing
+         --  Val's unit.
+         Mapping.Val.Unit.Exiled_Entries.Append
+           ((Dest_Env, Mapping.Key, Mapping.Val));
+
+         if Dest_Env /= Root_Scope then
+            --  Add Val to the list of foreign nodes that Dest_Env's unit
+            --  contains, so that when that unit is reparsed, we can call
+            --  Add_To_Env again on those nodes.
+            Dest_Env.Env.Node.Unit.Foreign_Nodes.Append
+              ((Mapping.Val, Self.Unit));
          end if;
+      end if;
+   end Add_To_Env;
 
-         --  If requested, reject foreign destination environments. Note that
-         --  this detect only explicit destination environments: foreign
-         --  initial ones are already detected in SetInitialEnv actions.
-         if DSL_Location'Length > 0
-            and then Mapping.Dest_Env.Env.Node /= null
-            and then Mapping.Dest_Env.Env.Node.Unit /= Self.Unit
-         then
-            raise Property_Error with
-               "unsound foreign environment in AddToEnv (" & DSL_Location
-               & ")";
-         end if;
+   -------------
+   -- Ref_Env --
+   -------------
 
-         --  Add the element to the environment
-         Add (Self     => Dest_Env,
-              Key      => Mapping.Key,
-              Value    => Mapping.Val,
-              MD       => MD,
-              Resolver => Resolver);
-
-         --  If we're adding the element to an environment that belongs to a
-         --  different unit, then:
-         if Dest_Env /= Empty_Env
-            and then (Dest_Env = Root_Scope
-                      or else Dest_Env.Env.Node.Unit /= Self.Unit)
-         then
-            --  Add the environment, the key, and the value to the list of
-            --  entries contained in other units, so we can remove them when
-            --  reparsing Val's unit.
-            Mapping.Val.Unit.Exiled_Entries.Append
-              ((Dest_Env, Mapping.Key, Mapping.Val));
-
-            if Dest_Env /= Root_Scope then
-               --  Add Val to the list of foreign nodes that Dest_Env's unit
-               --  contains, so that when that unit is reparsed, we can call
-               --  Add_To_Env again on those nodes.
-               Dest_Env.Env.Node.Unit.Foreign_Nodes.Append
-                 ((Mapping.Val, Self.Unit));
+   procedure Ref_Env
+     (Self                : ${T.root_node.name};
+      Dest_Env            : Lexical_Env;
+      Ref_Env_Nodes       : in out ${T.root_node.array.name};
+      Resolver            : Lexical_Env_Resolver;
+      Kind                : Ref_Kind;
+      Cats                : Ref_Categories;
+      Shed_Rebindings     : Boolean) is
+   begin
+      for N of Ref_Env_Nodes.Items loop
+         if N /= null then
+            if N.Unit /= Self.Unit then
+               raise Property_Error with
+                  "attempt to add a referenced environment to a foreign unit";
             end if;
+            Reference (Dest_Env, N, Resolver, Kind, Cats, Shed_Rebindings);
          end if;
-      end Add_To_Env;
-   % endif
-
-   % if ctx.has_ref_env:
-      -------------
-      -- Ref_Env --
-      -------------
-
-      procedure Ref_Env
-        (Self                : ${T.root_node.name};
-         Dest_Env            : Lexical_Env;
-         Ref_Env_Nodes       : in out ${T.root_node.array.name};
-         Resolver            : Lexical_Env_Resolver;
-         Kind                : Ref_Kind;
-         Cats                : Ref_Categories;
-         Shed_Rebindings     : Boolean)
-      is
-      begin
-         for N of Ref_Env_Nodes.Items loop
-            if N /= null then
-               if N.Unit /= Self.Unit then
-                  raise Property_Error with
-                     "attempt to add a referenced environment to a foreign"
-                     & " unit";
-               end if;
-               Reference (Dest_Env, N, Resolver, Kind, Cats, Shed_Rebindings);
-            end if;
-         end loop;
-         Dec_Ref (Ref_Env_Nodes);
-      end Ref_Env;
-   % endif
+      end loop;
+      Dec_Ref (Ref_Env_Nodes);
+   end Ref_Env;
 
    -------------
    -- Destroy --
