@@ -947,7 +947,7 @@ class CompileCtx:
         available for code generation.
         """
         from langkit.compiled_types import (CompiledTypeRepo, EnumType,
-                                            StructType, T)
+                                            StructType, T, resolve_type)
         from langkit.dsl import _StructMetaclass
         from langkit.expressions.base import construct_compile_time_known
 
@@ -1014,6 +1014,10 @@ class CompileCtx:
                  value_names=[self.grammar_rule_api_name(n)
                               for n in self.grammar.user_defined_rules],
                  is_builtin_type=True)
+
+        # Force the creation of the env assoc type, as required by the
+        # always-emitted PLE helpers.
+        _ = resolve_type(T.env_assoc)
 
         # Now that all types are known, construct default values for fields
         for st in CompiledTypeRepo.struct_types:
