@@ -1377,7 +1377,7 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.pre_actions:
-            ${n.name}_Pre_Env_Actions (Self, State, Add_To_Env_Only);
+            ${n.raw_name}_Pre_Env_Actions (Self, State, Add_To_Env_Only);
          % else:
             null;
          % endif
@@ -1397,7 +1397,7 @@ package body ${ada_lib_name}.Implementation is
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
          % if n.env_spec.post_actions:
-            ${n.name}_Post_Env_Actions (Self, State);
+            ${n.raw_name}_Post_Env_Actions (Self, State);
          % else:
             null;
          % endif

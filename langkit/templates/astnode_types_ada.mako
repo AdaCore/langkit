@@ -209,14 +209,14 @@
    % if cls.env_spec:
 
       % if cls.env_spec.pre_actions:
-         procedure ${cls.name}_Pre_Env_Actions
+         procedure ${cls.raw_name}_Pre_Env_Actions
            (Self            : ${cls.name};
             State           : in out PLE_State;
             Add_To_Env_Only : Boolean := False);
       % endif
 
       % if cls.env_spec.post_actions:
-         procedure ${cls.name}_Post_Env_Actions
+         procedure ${cls.raw_name}_Post_Env_Actions
            (Self : ${cls.name}; State : in out PLE_State);
       % endif
 
@@ -473,7 +473,7 @@
    ## Emit procedures for pre/post actions when needed
 
    % if cls.env_spec.pre_actions:
-      procedure ${cls.name}_Pre_Env_Actions
+      procedure ${cls.raw_name}_Pre_Env_Actions
         (Self            : ${cls.name};
          State           : in out PLE_State;
          Add_To_Env_Only : Boolean := False) is
@@ -485,7 +485,7 @@
    % endif
 
    % if cls.env_spec.post_actions:
-      procedure ${cls.name}_Post_Env_Actions
+      procedure ${cls.raw_name}_Post_Env_Actions
         (Self : ${cls.name}; State : in out PLE_State) is
       begin
          % for action in cls.env_spec.post_actions:
