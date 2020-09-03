@@ -80,6 +80,11 @@ package Langkit_Support.Vectors is
    procedure Concat (Self : in out Vector; Elements : Vector);
    --  Append every element of the Elements array in Self
 
+   procedure Reserve (Self : in out Vector; Capacity : Natural)
+     with Inline;
+   --  Make sure that Self has enough room to contain Capacity elements in
+   --  total.
+
    procedure Remove_At (Self : in out Vector; Index : Index_Type);
 
    function Get
@@ -212,10 +217,6 @@ private
       Capacity : Natural := Small_Vector_Capacity;
       SV       : Small_Array_Type;
    end record;
-
-   procedure Reserve (Self : in out Vector; Capacity : Natural)
-     with Inline;
-   --  Reserve Capacity elements
 
    Empty_Vector : constant Vector := (E => null, Size => 0, others => <>);
 
