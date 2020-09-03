@@ -147,7 +147,7 @@ class Cast(AbstractExpression):
                          abstract_expr=self)
 
     def __repr__(self):
-        return '<Cast to {}>'.format(resolve_type(self.dest_type).name.camel)
+        return '<Cast to {}>'.format(resolve_type(self.dest_type).dsl_name)
 
 
 @attr_expr("is_null")
@@ -995,7 +995,7 @@ class IsA(AbstractExpression):
 
     def __repr__(self):
         return '<IsA {}>'.format(', '.join(
-            resolve_type(n).name.camel
+            resolve_type(n).dsl_name
             for n in self.astnodes
         ))
 
