@@ -1,0 +1,278 @@
+lexer foo_lexer {
+
+    @trivia() whitespace <- p"[ \n\r\t]+"
+    package <- "package"
+    procedure <- "procedure"
+    task <- "task"
+    type <- "type"
+    body <- "body"
+    is_kw <- "is"
+    private_kw <- "private"
+    end_kw <- "end"
+    separate <- "separate"
+    ref <- "ref"
+    declare <- "declare"
+    begin <- "begin"
+    dot <- "."
+    semicolon <- ";"
+    l_par <- "("
+    r_par <- ")"
+    number <- p"[0-9]+"
+    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+    string <- p"\"[^\"]*\""
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(top_level_decl)
+    top_level_decl <- or(
+        | package_decl
+        | package_body
+        | subp_decl
+        | subp_body
+    )
+    decl_part <- DeclarativePart(decls)
+    decls <- list*(or(
+        | package_decl
+        | package_body
+        | subp_decl
+        | subp_body
+        | incomplete_type_decl
+        | type_decl
+        | ref
+    ))
+    package_decl <- PackageDecl(
+        "package"
+        name
+        "is"
+        PublicPart(decls)
+        ?pick("private" PrivatePart(decls)) "end" ";"
+    )
+    package_body <- PackageBody(
+        "package" "body" name "is" decl_part "end" ";"
+    )
+    subp_decl <- SubpDecl("procedure" name ";")
+    subp_body <- SubpBody(
+        "procedure"
+        name "is" SubpBodyDecls(decls) "begin" stmts "end" ";"
+    )
+    incomplete_type_decl <- IncompleteTypeDecl("type" identifier ";")
+    type_decl <- TypeDecl("type" identifier "is" "end" ";")
+    identifier <- Identifier(@identifier)
+    name <- or(DottedName(name "." identifier) | identifier)
+    stmts <- list*(or(declare_block | ref))
+    declare_block <- DeclareBlock(
+        "declare" DeclarativePart(decls) "begin" stmts "end" ";"
+    )
+    ref <- Ref("ref" name ";")
+
+}
+
+@abstract class FooNode : Node {
+
+    ## Return whether this node can define a named environment.
+    @memoized fun can_have_name (): Bool = if (
+        node is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls | PublicPart | PrivatePart
+    ) then (
+        # All nodes that can define a named environment are supposed to
+        # live in lists, so use Self.parent.parent to get the node that
+        # owns that list.
+        (node.parent is ASTList[FooNode]) and (
+            (node.parent.parent.is_null) or node.parent.parent.can_have_name()
+        )
+    ) else (false)
+
+    ## Assuming this node can define a named environment (see
+    ## ``can_have_name``), return its fully qualified namem.
+    fun full_name (): Array[Symbol] = node.name_parent().do(
+        (np) => np.full_name() & (
+            [node.self_name().as[Identifier].base_name()]
+        ), default_val=node.self_name().scope_name()
+    )
+
+    fun suffixed_full_name (suffix : Array[Symbol]): Array[Symbol] =
+    node.full_name().do((n) => n & suffix)
+
+    ## Assuming this node can define a named environment, return the syntactic
+    ## parent node that defines the parent scope for Self. If there is no such
+    ## node (because Self is in the root list), return null.
+    fun name_parent (): FooNode = if (
+        (
+            (
+                (
+                    (node.parent.is_null) or (not (node.parent is ASTList[FooNode]))
+                ) or (node.parent.parent.is_null)
+            ) or (
+                not (node.parent.parent is DeclarativePart)
+            )
+        ) or (node.parent.parent.parent.is_null)
+    ) then (null) else # All nodes that can define a named environment are supposed to
+    # live in lists (Self.parent is a list), so Self.parent.parent is
+    # supposed to be a declarative part, and finally Self.parent.parent
+    # gets the node that owns that declarative part.
+    {
+        val owner = node.parent.parent.parent;
+
+        if (
+            owner is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls | PublicPart | PrivatePart
+        ) then (
+            match owner {
+                case pp : PublicPart => pp.parent
+                case pp : PrivatePart => pp.parent
+                case n => n
+            }
+        ) else (null)
+    }
+
+    ## If this node can define a named environment (see ``can_have_name``),
+    ## return the name of its parent scope. Return an empty list otherwise.
+    @memoized fun decl_parent_scope_name (): Array[Symbol] =
+    if node.can_have_name() then (
+        node.name_parent().do(
+            (np) => np.full_name(), default_val=node.self_name().parent_scope_name()
+        )
+    ) else (null)
+
+    ## Assuming this node can define a named environment (see
+    ## ``can_have_name``), return its syntactic name.
+    @not_implemented fun self_name (): Name
+}
+
+class DeclarativePart : FooNode {
+    @parse_field decls : ASTList[FooNode]
+}
+
+class PrivatePart : DeclarativePart {
+}
+
+class PublicPart : DeclarativePart {
+}
+
+## Top-level list of declaration in a subprogam body.
+class SubpBodyDecls : DeclarativePart {
+}
+
+class DeclareBlock : FooNode {
+    @parse_field decls : DeclarativePart
+    @parse_field stmts : ASTList[FooNode]
+}
+
+class IncompleteTypeDecl : FooNode {
+    @parse_field name : Identifier
+}
+
+@abstract class Name : FooNode {
+
+    ## Innermost suffix for this name.
+    fun base_name (): Symbol = match node {
+        case id : Identifier => id.symbol
+        case dn : DottedName => dn.suffix.base_name()
+    }
+
+    ## Absolute name of the scope that this name defines, assuming that
+    ## ``prefix`` is the implicit prefix for that name.
+    fun scope_name (): Array[Symbol] = match node {
+        case id : Identifier => [id.symbol]
+        case dn : DottedName => dn.prefix.scope_name() & ([dn.suffix.symbol])
+    }
+
+    ## Absolute name of the scope that defines this name, assuming that
+    ## ``prefix`` is the implicit prefix for that name.
+    fun parent_scope_name (): Array[Symbol] = match node {
+        case _ : Identifier => null
+        case dn : DottedName => dn.prefix.scope_name()
+    }
+
+    ## Innermost scope for this name. The lookup starts from the given
+    ## environment.
+    fun scope (from_env : LexicalEnv): LexicalEnv =
+    node.resolve(from_env).children_env()
+
+    ## Return the scope that contains the declaration that this name defines.
+    fun parent_scope (from_env : LexicalEnv): LexicalEnv = match node {
+        case _ : Identifier => from_env
+        case dn : DottedName => dn.prefix.scope(from_env)
+    }
+
+    ## Return the list of declarations that define this name. The lookup
+    ## starts from the given environment.
+    fun resolve (from_env : LexicalEnv): FooNode =
+    node.parent_scope(from_env).get_first(node.base_name())
+}
+
+class DottedName : Name {
+    @parse_field prefix : Name
+    @parse_field suffix : Identifier
+}
+
+class Identifier : Name implements TokenNode {
+}
+
+class PackageBody : FooNode {
+    @parse_field name : Name
+    @parse_field decls : DeclarativePart
+
+    fun self_name (): Name = node.name
+
+    ## Assuming this PackageBody cannot define a named environment, return the
+    ## environment in which this declaration should be registered.
+    fun get_initial_env (): LexicalEnv = {
+        val pkg_decl = node.parent.children_env().get_first(node.name.base_name()).as[PackageDecl];
+
+        if (pkg_decl.private_part.is_null) then pkg_decl.children_env() else pkg_decl.private_part.children_env()
+    }
+
+    ## Return the PackageDecl node corresponding to this PackageBody.
+    @export fun decl_part (): PackageDecl = {
+        val env = node.parent.children_env();
+
+        node.name.resolve(env).as[PackageDecl]
+    }
+}
+
+class PackageDecl : FooNode {
+    @parse_field name : Name
+    @parse_field public_part : PublicPart
+    @parse_field private_part : PrivatePart
+
+    fun self_name (): Name = node.name
+
+    ## Return the names for the environment that this package creates.
+    fun new_env_names (): Array[Array[Symbol]] =
+    # Always register the "regular" name for this package
+    # If there is a private part, that's all we need. Otherwise, register
+    # this environment with the name of the private part as well, so that
+    # package bodies can assume there is always a private part.
+    if (node.full_name().length() = 0) then (null) else (
+        if (node.private_part.is_null) then (
+            [node.full_name(), node.full_name() & (["__privatepart"])]
+        ) else ([node.full_name()])
+    )
+
+    ## Return the PackageBody node corresponding to this PackageDecl.
+    @export fun body_part (): PackageBody =
+    node.private_part.do((pp) => pp, default_val=node).children_env().get_first("__nextpart").as[PackageBody]
+}
+
+class Ref : FooNode {
+    @parse_field name : Name
+
+    @export fun resolve (): FooNode = node.name.resolve(node.node_env())
+}
+
+class SubpBody : FooNode {
+    @parse_field name : Name
+    @parse_field decls : SubpBodyDecls
+    @parse_field stmts : ASTList[FooNode]
+
+    fun self_name (): Name = node.name
+}
+
+class SubpDecl : FooNode {
+    @parse_field name : Name
+
+    fun self_name (): Name = node.name
+}
+
+class TypeDecl : FooNode {
+    @parse_field name : Identifier
+}

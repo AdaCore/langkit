@@ -6,11 +6,13 @@ from typing import Optional, TYPE_CHECKING
 
 import gdb
 import gdb.printing
+from gnatdbg.strings import StringAccess
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
 from langkit.gdb.utils import adaify_name
 from langkit.utils import memoized
+
 
 if TYPE_CHECKING:
     from langkit.gdb.context import Context
@@ -331,6 +333,57 @@ class LexicalEnv:
 
         else:
             return '<LexicalEnv (corrupted)]'
+
+
+class EnvNamePrinter(BasePrinter):
+    """
+    Pretty-printer for env names.
+    """
+    name = 'EnvName'
+
+    matcher = RecordAccessMatcher('env_name_record', 'env_name')
+
+    @classmethod
+    def matches(cls, value, context):
+        return cls.matcher.matches_access(value, context)
+
+    def to_string(self):
+        if not self.value:
+            return 'null'
+
+        # Since GDB's Python API only exposes the low-level details of how Ada
+        # arrays are implemented, we need to do some pointer arithmetic in
+        # order to fetch the sequence of symbols that this EnvName contains::
+        #
+        #    $.Symbols (1 .. $.Size)
+
+        # Lookup the symbol type (array element)
+        symbol_type = gdb.lookup_type(
+            self.context.comname('symbols__symbol_type')
+        )
+        symbol_ptr = symbol_type.pointer()
+
+        # Fetch the size and the address of the first array element
+        size = int(self.value['size'])
+        symbols_addr = int(self.value['symbols'].address)
+
+        # We can now fetch individual symbols
+        result = []
+        for i in range(size):
+            sym_addr = symbols_addr + i * symbol_type.sizeof
+            sym = gdb.Value(sym_addr).cast(symbol_ptr).dereference()
+
+            # Fetch the text corresponding to the current symbol. Symbols are
+            # implemented as wide wide strings, so decode them using the UTF-32
+            # encoding (native endianity). Do not crash on
+            # uninitialized/corrupted symbol: try to be as helpful as possible.
+            try:
+                sym_text = StringAccess(sym).get_string(encoding='utf-32')
+            except gdb.error:
+                sym_text = '???'
+
+            result.append(sym_text)
+        return 'EnvName({})'.format('.'.join(result))
 
 
 class LexicalEnvPrinter(BasePrinter):

@@ -37,7 +37,8 @@ from langkit.expressions import (AbstractExpression, FieldAccess, PropertyDef,
 # Public API for env actions
 
 def add_env(no_parent: bool = False,
-            transitive_parent: bool = False) -> AddEnv:
+            transitive_parent: bool = False,
+            names: Optional[AbstractExpression] = None) -> AddEnv:
     """
     Add an environment linked to the current node. This env action must be
     called as a pre action. The only actions that can precede this one in pre
@@ -46,8 +47,12 @@ def add_env(no_parent: bool = False,
 
     :param no_parent: If passed, the new env will be created with no parent
         env.
+    :param transitive_parent: TODO.
+    :param names: Optional list of names for the created environment. If not
+        passed or if this is an empty array, the created environment is not
+        named.
     """
-    return AddEnv(no_parent, transitive_parent)
+    return AddEnv(no_parent, transitive_parent, names)
 
 
 class RefKind(Enum):
@@ -178,7 +183,28 @@ def set_initial_env(env_expr: AbstractExpression,
     :param unsound: Whether ``env_expr`` is allowed to return foreign
         environments.
     """
-    return SetInitialEnv(env_expr, unsound)
+    return SetInitialEnv(None, env_expr, unsound)
+
+
+def set_initial_env_by_name(
+    name_expr: AbstractExpression,
+    fallback_env_expr: AbstractExpression
+) -> SetInitialEnv:
+    """
+    Action that sets the initial env in which the rest of the environment
+    actions are evaluated. Except for Do() hooks, this action must be first in
+    the list of action (if present).
+
+    :param name_expr: Expression that returns an array of symbols (an env
+        name). If it evaluates to a non-empty array, look for the environment
+        that has this name (it will be updated every time another environment
+        related to this name takes precedence). If it evaluates to an empty
+        array, use ``fallback_env_expr`` to get the initial environment.
+    :param fallback_env_expr: Expression that returns the initial env if there
+        is no named env lookup. Note that except if it's the empty env or the
+        root scope, this environment must not be foreign to Self.
+    """
+    return SetInitialEnv(name_expr, fallback_env_expr)
 
 
 def do(expr: AbstractExpression) -> Do:
@@ -238,9 +264,14 @@ class EnvSpec:
             while actions and isinstance(actions[0], Do):
                 first_actions.append(actions.pop(0))
 
-        # After that, allow exactly one call to SetInitialEnv
+        # After that, allow at most one call to SetInitialEnv
         self.initial_env = None
         if actions and isinstance(actions[0], SetInitialEnv):
+            check_source_language(
+                isinstance(actions[0], SetInitialEnv),
+                'The initial environment must come first after the potential'
+                ' do()'
+            )
             self.initial_env = cast(SetInitialEnv, actions.pop(0))
             first_actions.append(self.initial_env)
         check_source_language(
@@ -380,12 +411,22 @@ class EnvSpec:
             ).render_expr()
 
     @property
+    def initial_env_name_expr(self) -> str:
+        """
+        The initial environment name expression.
+        """
+        assert self.initial_env
+        assert self.initial_env.name_expr
+        assert self.initial_env.name_prop
+        return self._render_field_access(self.initial_env.name_prop)
+
+    @property
     def initial_env_expr(self) -> str:
         """
         The initial environment expression.
         """
         assert self.initial_env
-        return self._render_field_access(self.initial_env.initial_env_prop)
+        return self._render_field_access(self.initial_env.fallback_env_prop)
 
 
 class EnvAction:
@@ -434,14 +475,19 @@ class EnvAction:
 class AddEnv(EnvAction):
     def __init__(self,
                  no_parent: bool = False,
-                 transitive_parent: bool = False) -> None:
+                 transitive_parent: bool = False,
+                 names: Optional[AbstractExpression] = None) -> None:
         super().__init__()
         self.no_parent = no_parent
         self.transitive_parent = transitive_parent
+        self.names = names
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.transitive_parent_prop = env_spec.create_internal_property(
             'Env_Trans_Parent', unsugar(self.transitive_parent), T.Bool
+        )
+        self.names_prop = env_spec.create_internal_property(
+            'Env_Names', self.names, T.Symbol.array.array
         )
 
 
@@ -619,26 +665,30 @@ class HandleChildren(EnvAction):
     pass
 
 
-class ExprHolderAction(EnvAction):
-    def __init__(self, env_expr: AbstractExpression) -> None:
+class SetInitialEnv(EnvAction):
+    def __init__(self,
+                 name_expr: Optional[AbstractExpression],
+                 fallback_env_expr: AbstractExpression,
+                 unsound: bool = False) -> None:
         super().__init__()
-        self.env_expr = env_expr
-
-
-class SetInitialEnv(ExprHolderAction):
-
-    def __init__(self, env_expr: AbstractExpression, unsound: bool) -> None:
-        super().__init__(env_expr)
+        self.name_expr = name_expr
+        self.fallback_env_expr = fallback_env_expr
         self.unsound = unsound
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        self.initial_env_prop = env_spec.create_internal_property(
-            'Initial_Env', self.env_expr, T.LexicalEnv
+        self.name_prop = env_spec.create_internal_property(
+            'Initial_Env_Name', self.name_expr, T.Symbol.array
+        )
+        self.fallback_env_prop = env_spec.create_internal_property(
+            'Initial_Env', self.fallback_env_expr, T.LexicalEnv
         )
 
 
-class Do(ExprHolderAction):
-    def create_internal_properties(self, env_spec: EnvSpec) -> None:
-        self.do_property = env_spec.create_internal_property(
-            'Env_Do', self.env_expr, None
+class Do(EnvAction):
+    def __init__(self, expr: AbstractExpression) -> None:
+        self.expr = expr
+
+    def create_internal_properties(self, spec: EnvSpec) -> None:
+        self.do_property = spec.create_internal_property(
+            'Env_Do', self.expr, None
         )

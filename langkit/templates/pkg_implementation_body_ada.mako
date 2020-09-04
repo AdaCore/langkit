@@ -689,6 +689,38 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Destroy (Context : in out Internal_Context) is
    begin
+      --  Destroy all named environment data structures
+      for Desc of Context.Named_Envs loop
+         for V of Desc.Foreign_Nodes loop
+            V.Destroy;
+         end loop;
+         Destroy (Desc);
+      end loop;
+      Context.Named_Envs.Clear;
+
+      --  Destroy env names themselves. Note that iterating on a hashed sets
+      --  needs to have set elements valid (as the traversal sometimes
+      --  recomputes their hash), so we need to free them after having cleared
+      --  the set.
+      declare
+         package Env_Name_Vectors is new Langkit_Support.Vectors (Env_Name);
+         Names : Env_Name_Vectors.Vector;
+      begin
+         Names.Reserve (Natural (Context.Env_Names.Length));
+         for N of Context.Env_Names loop
+            Names.Append (N);
+         end loop;
+         Context.Env_Names.Clear;
+         for N of Names loop
+            declare
+               Name : Env_Name := N;
+            begin
+               Destroy (Name);
+            end;
+         end loop;
+         Names.Destroy;
+      end;
+
       --  If we are asked to free this context, it means that no one else have
       --  references to its analysis units, so it's safe to destroy these.
       for Unit of Context.Units loop
@@ -1072,6 +1104,9 @@ package body ${ada_lib_name}.Implementation is
 
       Unit.Exiled_Entries.Destroy;
       Unit.Foreign_Nodes.Destroy;
+      Unit.Exiled_Entries_In_NED.Destroy;
+      Unit.Exiled_Envs.Destroy;
+      Unit.Named_Envs.Destroy;
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
       % if ctx.has_memoization:
@@ -1171,6 +1206,99 @@ package body ${ada_lib_name}.Implementation is
       end;
    end Solve_Wrapper;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Env : in out Lexical_Env_Access) is
+      Mutable_Env : Lexical_Env := (Env, 0, Env.Kind, No_Analysis_Unit, 0);
+   begin
+      Destroy (Mutable_Env);
+      Env := null;
+   end Destroy;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize
+     (Self              : ${T.root_node.name};
+      Kind              : ${T.node_kind};
+      Unit              : Internal_Unit;
+      Token_Start_Index : Token_Index;
+      Token_End_Index   : Token_Index;
+      Parent            : ${T.root_node.name} := null;
+      Self_Env          : Lexical_Env := AST_Envs.Empty_Env) is
+   begin
+      pragma Unreferenced (Kind);
+      Self.Parent := Parent;
+      Self.Unit := Unit;
+
+      Self.Token_Start_Index := Token_Start_Index;
+      Self.Token_End_Index := Token_End_Index;
+
+      Self.Self_Env := Self_Env;
+      Self.Last_Attempted_Child := -1;
+
+      ${astnode_types.init_user_fields(T.root_node, 'Self')}
+   end Initialize;
+
+   --------------------
+   -- Use_Direct_Env --
+   --------------------
+
+   procedure Use_Direct_Env (State : in out PLE_Node_State; Env : Lexical_Env)
+   is
+   begin
+      State.Current_Env := Env;
+      State.Current_NED := null;
+   end Use_Direct_Env;
+
+   -------------------
+   -- Use_Named_Env --
+   -------------------
+
+   procedure Use_Named_Env
+     (State   : in out PLE_Node_State;
+      Context : Internal_Context;
+      Name    : Env_Name) is
+   begin
+      State.Current_NED := Get_Named_Env_Descriptor (Context, Name);
+      State.Current_Env := State.Current_NED.Env_With_Precedence;
+   end Use_Named_Env;
+
+   ---------------------
+   -- Set_Initial_Env --
+   ---------------------
+
+   procedure Set_Initial_Env
+     (Self     : ${T.root_node.name};
+      State    : in out PLE_Node_State;
+      Name     : in out ${T.Symbol.array.name};
+      Resolver : Lexical_Env_Resolver) is
+   begin
+      --  An empty name is the way for the expression to say to fallback on the
+      --  direct initial environment computation.
+      if Name /= null and then Name.N > 0 then
+         declare
+            Ctx : constant Internal_Context := Self.Unit.Context;
+            N   : constant Env_Name := Create_Env_Name (Ctx, Name);
+         begin
+            Dec_Ref (Name);
+            Use_Named_Env (State, Ctx, N);
+         end;
+
+      else
+         --  The call to Resolver (which calls a property) can raise an
+         --  exception, so we must call Dec_Ref before to avoid a memory leak
+         --  in that case.
+         Dec_Ref (Name);
+         Use_Direct_Env
+           (State,
+            Resolver ((Node => Self, Info => ${T.entity_info.nullexpr})));
+      end if;
+   end Set_Initial_Env;
+
    ----------------
    -- Add_To_Env --
    ----------------
@@ -1178,7 +1306,7 @@ package body ${ada_lib_name}.Implementation is
    procedure Add_To_Env
      (Self         : ${T.root_node.name};
       Mapping      : ${T.env_assoc.name};
-      Initial_Env  : Lexical_Env;
+      State        : PLE_Node_State;
       Resolver     : Entity_Resolver;
       DSL_Location : String)
    is
@@ -1187,7 +1315,7 @@ package body ${ada_lib_name}.Implementation is
 
       Dest_Env : constant Lexical_Env :=
         (if Mapping.Dest_Env = Empty_Env
-         then Initial_Env
+         then State.Current_Env
          else Mapping.Dest_Env);
    begin
       if Mapping = No_Env_Assoc then
@@ -1239,18 +1367,44 @@ package body ${ada_lib_name}.Implementation is
             "unsound foreign environment in AddToEnv (" & DSL_Location & ")";
       end if;
 
-      --  Add the element to the environment
+      --  Add the element to the environment. Note that this does nothing if
+      --  Dest_Env is Empty_Env.
       Add (Self     => Dest_Env,
            Key      => Mapping.Key,
            Value    => Mapping.Val,
            MD       => MD,
            Resolver => Resolver);
 
-      --  If we're adding the element to an environment that belongs to a
-      --  different unit, then:
-      if Dest_Env /= Empty_Env
-         and then (Dest_Env = Root_Scope
-                   or else Dest_Env.Env.Node.Unit /= Self.Unit)
+      --  If we're adding the element to an environment by env name, we must
+      --  register this association in two places: in the target named env
+      --  entry, and in Mapping.Val's unit.
+      if State.Current_NED /= null and then Mapping.Dest_Env = Empty_Env then
+         declare
+            use NED_Assoc_Maps;
+
+            FN    : Map renames State.Current_NED.Foreign_Nodes;
+            Dummy : Boolean;
+            Cur   : Cursor;
+         begin
+            FN.Insert (Key      => Mapping.Key,
+                       New_Item => Internal_Map_Node_Vectors.Empty_Vector,
+                       Position => Cur,
+                       Inserted => Dummy);
+            declare
+               V : Internal_Map_Node_Vectors.Vector renames
+                  FN.Reference (Cur);
+            begin
+               V.Append ((Mapping.Val, MD, Resolver));
+            end;
+         end;
+         Mapping.Val.Unit.Exiled_Entries_In_NED.Append
+           ((State.Current_NED, Mapping.Key, Mapping.Val));
+
+      --  Otherwise, if we're adding the element to an environment that belongs
+      --  to a different unit, then:
+      elsif Dest_Env /= Empty_Env
+            and then (Dest_Env = Root_Scope
+                      or else Dest_Env.Env.Node.Unit /= Self.Unit)
       then
          --  Add the environment, the key, and the value to the list of entries
          --  contained in other units, so we can remove them when reparsing
@@ -1294,41 +1448,88 @@ package body ${ada_lib_name}.Implementation is
    end Ref_Env;
 
    -------------
-   -- Destroy --
+   -- Add_Env --
    -------------
 
-   procedure Destroy (Env : in out Lexical_Env_Access) is
-      Mutable_Env : Lexical_Env := (Env, 0, Env.Kind, No_Analysis_Unit, 0);
-   begin
-      Destroy (Mutable_Env);
-      Env := null;
-   end Destroy;
-
-   ----------------
-   -- Initialize --
-   ----------------
-
-   procedure Initialize
+   procedure Add_Env
      (Self              : ${T.root_node.name};
-      Kind              : ${T.node_kind};
-      Unit              : Internal_Unit;
-      Token_Start_Index : Token_Index;
-      Token_End_Index   : Token_Index;
-      Parent            : ${T.root_node.name} := null;
-      Self_Env          : Lexical_Env := AST_Envs.Empty_Env) is
+      State             : in out PLE_Node_State;
+      No_Parent         : Boolean;
+      Transitive_Parent : Boolean;
+      Resolver          : Lexical_Env_Resolver;
+      Names             : in out ${T.Symbol.array.array.name})
+   is
+      Parent_From_Name : constant Boolean := State.Current_NED /= null;
+      --  Does the parent environment comes from a named environment lookup?
+
+      Parent_Foreign : constant Boolean :=
+         State.Current_Env.Env.Node /= null
+         and then State.Current_Env.Env.Node.Unit /= Self.Unit;
+
+      --  Determine how to get the parent of this new environment:
+      --
+      --  (1) no parent if requested;
+      --  (2) the current environment as the static parent if it comes from a
+      --      named env lookup or if it is not foreign;
+      --  (3) a dynamic parent in all other cases (the current environment is
+      --      foreign and not fetched as a named environment.
+      Parent_Getter : constant Env_Getter :=
+        (if No_Parent
+         then AST_Envs.No_Env_Getter
+
+         elsif Parent_From_Name or else not Parent_Foreign
+         then AST_Envs.Simple_Env_Getter (State.Current_Env)
+
+         else AST_Envs.Dyn_Env_Getter (Resolver, Self));
    begin
-      pragma Unreferenced (Kind);
-      Self.Parent := Parent;
-      Self.Unit := Unit;
+      --  Create the environment itself
+      Self.Self_Env := AST_Envs.Create_Lexical_Env
+        (Parent            => Parent_Getter,
+         Node              => Self,
+         Transitive_Parent => Transitive_Parent,
+         Owner             => Self.Unit);
+      Register_Destroyable (Self.Unit, Self.Self_Env.Env);
 
-      Self.Token_Start_Index := Token_Start_Index;
-      Self.Token_End_Index := Token_End_Index;
+      --  If the parent of this new environment comes from a named environment
+      --  lookup, register this new environment so that its parent is updated
+      --  when the precence for this named environment changes.
+      if Parent_From_Name then
+         declare
+            NED : constant Named_Env_Descriptor_Access := State.Current_NED;
+         begin
+            Self.Unit.Exiled_Envs.Append ((NED, Self.Self_Env));
+            NED.Foreign_Envs.Insert (Self, Self.Self_Env);
+         end;
+      end if;
 
-      Self.Self_Env := Self_Env;
-      Self.Last_Attempted_Child := -1;
+      --  From now on, the current environment is Self.Self_Env, with a direct
+      --  access to it. It does not go through the env naming scheme, since
+      --  only this node and its children (i.e. non-foreign nodes) will access
+      --  it as a "current" environment during PLE.
+      Use_Direct_Env (State, Self.Self_Env);
 
-      ${astnode_types.init_user_fields(T.root_node, 'Self')}
-   end Initialize;
+      --  Register the environment we just created on all the requested names
+      if Names /= null then
+         declare
+            Context   : constant Internal_Context := Self.Unit.Context;
+            Env       : constant Lexical_Env := Self.Self_Env;
+            NENU      : NED_Maps.Map renames
+               State.Unit_State.Named_Envs_Needing_Update;
+            Env_Names : array (Names.Items'Range) of Env_Name;
+         begin
+            --  Turn symbols into env names and free the DSL array
+            for I in Env_Names'Range loop
+               Env_Names (I) := Create_Env_Name (Context, Names.Items (I));
+            end loop;
+            Dec_Ref (Names);
+
+            --  Do the registration
+            for N of Env_Names loop
+               Register_Named_Env (Context, N, Env, NENU);
+            end loop;
+         end;
+      end if;
+   end Add_Env;
 
    ---------------------
    -- Pre_Env_Actions --
@@ -1336,7 +1537,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Pre_Env_Actions
      (Self            : ${T.root_node.name};
-      State           : in out PLE_State;
+      State           : in out PLE_Node_State;
       Add_To_Env_Only : Boolean := False) is
    begin
 
@@ -1358,7 +1559,7 @@ package body ${ada_lib_name}.Implementation is
    ----------------------
 
    procedure Post_Env_Actions
-     (Self : ${T.root_node.name}; State : in out PLE_State) is
+     (Self : ${T.root_node.name}; State : in out PLE_Node_State) is
    begin
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
@@ -1882,12 +2083,22 @@ package body ${ada_lib_name}.Implementation is
    function Populate_Lexical_Env (Node : ${T.root_node.name}) return Boolean is
 
       Context    : constant Internal_Context := Node.Unit.Context;
-      Root_State : constant PLE_State := (Current_Env => Context.Root_Scope);
+      Unit_State : aliased PLE_Unit_State := (Named_Envs_Needing_Update => <>);
+      Root_State : constant PLE_Node_State :=
+        (Unit_State  => Unit_State'Unchecked_Access,
+         Current_Env => Context.Root_Scope,
+         Current_NED => null);
 
       function Populate_Internal
         (Node         : ${T.root_node.name};
-         Parent_State : PLE_State) return Boolean;
+         Parent_State : PLE_Node_State) return Boolean;
       --  Do the lexical env population on Node and recurse on its children
+
+      procedure Register_Foreign_Env
+        (Node : ${T.root_node.name}; State : PLE_Node_State);
+      --  Given a node and its PLE state, register Node.Self_Env as being
+      --  initialized through the named environment mechanism, if that's indeed
+      --  the case. Do nothing otherwise.
 
       -----------------------
       -- Populate_Internal --
@@ -1895,10 +2106,10 @@ package body ${ada_lib_name}.Implementation is
 
       function Populate_Internal
         (Node         : ${T.root_node.name};
-         Parent_State : PLE_State) return Boolean
+         Parent_State : PLE_Node_State) return Boolean
       is
          Result : Boolean := False;
-         State  : PLE_State := Parent_State;
+         State  : PLE_Node_State := Parent_State;
       begin
          if Node = null then
             return Result;
@@ -1908,10 +2119,15 @@ package body ${ada_lib_name}.Implementation is
          --  environment we store in Node is the current one.
          Node.Self_Env := State.Current_Env;
 
+         --  Run pre/post actions, and run PLE on children in between. Make
+         --  sure we register the potential foreign Node.Self_Env environment
+         --  at the end, even when an exception interrupts PLE to keep the
+         --  state consistent.
          begin
             Pre_Env_Actions (Node, State);
             if State.Current_Env /= Null_Lexical_Env then
                Node.Self_Env := State.Current_Env;
+               Register_Foreign_Env (Node, State);
             end if;
 
             --  Call recursively on children
@@ -1925,11 +2141,25 @@ package body ${ada_lib_name}.Implementation is
             when Exc : Property_Error =>
                GNATCOLL.Traces.Trace
                  (PLE_Errors_Trace, Ada.Exceptions.Exception_Message (Exc));
+               Register_Foreign_Env (Node, State);
                return True;
          end;
 
          return Result;
       end Populate_Internal;
+
+      --------------------------
+      -- Register_Foreign_Env --
+      --------------------------
+
+      procedure Register_Foreign_Env
+        (Node : ${T.root_node.name}; State : PLE_Node_State) is
+      begin
+         if State.Current_NED /= null then
+            State.Current_NED.Nodes_With_Foreign_Env.Insert (Node);
+            Node.Unit.Nodes_With_Foreign_Env.Insert (Node, State.Current_NED);
+         end if;
+      end Register_Foreign_Env;
 
    begin
       % if ctx.ple_unit_root:
@@ -1982,7 +2212,11 @@ package body ${ada_lib_name}.Implementation is
          end if;
       % endif
 
-      return Populate_Internal (Node, Root_State);
+      return Result : constant Boolean :=
+         Populate_Internal (Node, Root_State)
+      do
+         Update_Named_Envs (Unit_State.Named_Envs_Needing_Update);
+      end return;
    end Populate_Lexical_Env;
 
    ------------------------------
@@ -2079,6 +2313,217 @@ package body ${ada_lib_name}.Implementation is
    % endif
 
    ${struct_types.body_hash(T.entity)}
+
+   ------------------------
+   -- Named environments --
+   ------------------------
+
+   ---------
+   -- Add --
+   ---------
+
+   procedure Add
+     (Self : in out NED_Assoc_Maps.Map;
+      Key  : Symbol_Type;
+      Node : AST_Envs.Internal_Map_Node)
+   is
+      use NED_Assoc_Maps;
+
+      Pos   : Cursor;
+      Dummy : Boolean;
+   begin
+      --  Make sure there is a vector entry for Key
+      Self.Insert (Key, Internal_Map_Node_Vectors.Empty_Vector, Pos, Dummy);
+
+      --  Append Node to that vector
+      declare
+         V : Internal_Map_Node_Vectors.Vector renames Self.Reference (Pos);
+      begin
+         V.Append (Node);
+      end;
+   end Add;
+
+   ------------
+   -- Remove --
+   ------------
+
+   procedure Remove
+     (Self : in out NED_Assoc_Maps.Map;
+      Key  : Symbol_Type;
+      Node : ${T.root_node.name})
+   is
+      use NED_Assoc_Maps;
+
+      V : Internal_Map_Node_Vectors.Vector renames Self.Reference (Key);
+   begin
+      --  Remove the (assumed unique) entry in V whose node is Node. The order
+      --  of items in V is not significant, so we can use Pop for efficient
+      --  removal. Do the traversal in reverse order for correctness.
+      for I in reverse 1 .. V.Length loop
+         if V.Get_Access (I).Node = Node then
+            V.Pop (I);
+            exit;
+         end if;
+      end loop;
+   end Remove;
+
+   ---------------------
+   -- Create_Env_Name --
+   ---------------------
+
+   function Create_Env_Name
+     (Context : Internal_Context;
+      Symbols : ${T.Symbol.array.name}) return Env_Name
+   is
+      use Env_Name_Sets;
+
+      Pos      : Cursor;
+      Inserted : Boolean;
+
+      --  Create a valid env name (computing its hash)
+      Name : Env_Name := new Env_Name_Record'
+        (Size    => Symbols.N,
+         Symbols => Env_Name_Internal_Array (Symbols.Items),
+         Hash    => Initial_Hash);
+   begin
+      for S of Name.Symbols loop
+         Name.Hash := Combine (Name.Hash, Hash (S));
+      end loop;
+
+      --  Try to insert it to Context's set of env names. If already present
+      --  (not Inserted), discard it and return the existing one.
+      Context.Env_Names.Insert (Name, Pos, Inserted);
+      if not Inserted then
+         Destroy (Name);
+         Name := Element (Pos);
+      end if;
+
+      return Name;
+   end Create_Env_Name;
+
+   ------------------------------
+   -- Get_Named_Env_Descriptor --
+   ------------------------------
+
+   function Get_Named_Env_Descriptor
+     (Context : Internal_Context;
+      Name    : Env_Name) return Named_Env_Descriptor_Access
+   is
+      use NED_Maps;
+
+      --  Look for an existing entry for Name
+      Pos : constant Cursor := Context.Named_Envs.Find (Name);
+   begin
+      if Has_Element (Pos) then
+         return Element (Pos);
+      end if;
+
+      --  There is no such entry: create one
+      return Result : constant Named_Env_Descriptor_Access :=
+         new Named_Env_Descriptor'
+           (Name                   => Name,
+            Envs                   => <>,
+            Env_With_Precedence    => Empty_Env,
+            Foreign_Nodes          => <>,
+            Foreign_Envs           => <>,
+            Nodes_With_Foreign_Env => <>)
+      do
+         Context.Named_Envs.Insert (Name, Result);
+      end return;
+   end Get_Named_Env_Descriptor;
+
+   ------------------------
+   -- Register_Named_Env --
+   ------------------------
+
+   procedure Register_Named_Env
+     (Context                   : Internal_Context;
+      Name                      : Env_Name;
+      Env                       : Lexical_Env;
+      Named_Envs_Needing_Update : in out NED_Maps.Map)
+   is
+      NED_Access : constant Named_Env_Descriptor_Access :=
+         Get_Named_Env_Descriptor (Context, Name);
+      NED        : Named_Env_Descriptor renames NED_Access.all;
+      Node       : constant ${T.root_node.name} := Env.Env.Node;
+   begin
+      NED.Envs.Insert (Node, Env);
+      Node.Unit.Named_Envs.Append ((Name, Env));
+
+      --  If that insertion must change the env that has precedence, signal
+      --  that NED requires an update.
+
+      if NED.Envs.First_Element /= NED.Env_With_Precedence then
+         Named_Envs_Needing_Update.Include (Name, NED_Access);
+      end if;
+   end Register_Named_Env;
+
+   ----------------------
+   -- Update_Named_Env --
+   ----------------------
+
+   procedure Update_Named_Envs (Named_Envs : NED_Maps.Map) is
+   begin
+      for Cur in Named_Envs.Iterate loop
+         declare
+            NE      : Named_Env_Descriptor renames NED_Maps.Element (Cur).all;
+            New_Env : constant Lexical_Env :=
+              (if NE.Envs.Is_Empty
+               then Empty_Env
+               else NE.Envs.First_Element);
+         begin
+            --  If there was an environment with precedence, remove its foreign
+            --  nodes.
+            if NE.Env_With_Precedence /= Empty_Env then
+               for Cur in NE.Foreign_Nodes.Iterate loop
+                  declare
+                     Key   : constant ${T.Symbol.name} :=
+                        NED_Assoc_Maps.Key (Cur);
+                     Nodes : Internal_Map_Node_Vectors.Vector renames
+                        NE.Foreign_Nodes.Reference (Cur);
+                  begin
+                     for N of Nodes loop
+                        Remove (NE.Env_With_Precedence, Key, N.Node);
+                     end loop;
+                  end;
+               end loop;
+            end if;
+
+            --  Now, set the new environment that has precedence
+            NE.Env_With_Precedence := New_Env;
+
+            --  Add the foreign nodes to the new environment with precedence,
+            --  if any.
+            for Cur in NE.Foreign_Nodes.Iterate loop
+               declare
+                  Key   : constant ${T.Symbol.name} :=
+                     NED_Assoc_Maps.Key (Cur);
+                  Nodes : Internal_Map_Node_Vectors.Vector renames
+                     NE.Foreign_Nodes.Reference (Cur);
+               begin
+                  for N of Nodes loop
+                     Add (New_Env, Key, N.Node, N.MD, N.Resolver);
+                  end loop;
+               end;
+            end loop;
+
+            --  Set the parent environment of all foreign environments
+            for Cur in NE.Foreign_Envs.Iterate loop
+               declare
+                  Env : Lexical_Env_Type renames
+                     Sorted_Env_Maps.Element (Cur).Env.all;
+               begin
+                  Env.Parent := Simple_Env_Getter (New_Env);
+               end;
+            end loop;
+
+            --  Update nodes whose environment was the old env with precedence
+            for N of NE.Nodes_With_Foreign_Env loop
+               N.Self_Env := New_Env;
+            end loop;
+         end;
+      end loop;
+   end Update_Named_Envs;
 
    --------------------------
    -- Big integers wrapper --
@@ -3466,25 +3911,30 @@ package body ${ada_lib_name}.Implementation is
       Rule                : Grammar_Rule) return Internal_Unit
    is
       Unit : Internal_Unit := new Analysis_Unit_Type'
-        (Context           => Context,
-         AST_Root          => null,
-         Filename          => Normalized_Filename,
-         Charset           => To_Unbounded_String (Charset),
-         TDH               => <>,
-         Diagnostics       => <>,
-         Is_Env_Populated  => False,
-         Rule              => Rule,
-         AST_Mem_Pool      => No_Pool,
-         Destroyables      => Destroyable_Vectors.Empty_Vector,
-         Referenced_Units  => <>,
-         Exiled_Entries    => Exiled_Entry_Vectors.Empty_Vector,
-         Foreign_Nodes     =>
+        (Context                      => Context,
+         AST_Root                     => null,
+         Filename                     => Normalized_Filename,
+         Charset                      => To_Unbounded_String (Charset),
+         TDH                          => <>,
+         Diagnostics                  => <>,
+         Is_Env_Populated             => False,
+         Rule                         => Rule,
+         AST_Mem_Pool                 => No_Pool,
+         Destroyables                 => Destroyable_Vectors.Empty_Vector,
+         Referenced_Units             => <>,
+         Exiled_Entries               => Exiled_Entry_Vectors.Empty_Vector,
+         Foreign_Nodes                =>
             Foreign_Node_Entry_Vectors.Empty_Vector,
-         Rebindings        => Env_Rebindings_Vectors.Empty_Vector,
-         Cache_Version     => <>,
-         Unit_Version      => <>,
+         Exiled_Entries_In_NED        =>
+            Exiled_Entry_In_NED_Vectors.Empty_Vector,
+         Exiled_Envs                  => Exiled_Env_Vectors.Empty_Vector,
+         Named_Envs                   => Named_Env_Vectors.Empty_Vector,
+         Nodes_With_Foreign_Env       => <>,
+         Rebindings                   => Env_Rebindings_Vectors.Empty_Vector,
+         Cache_Version                => <>,
+         Unit_Version                 => <>,
          % if ctx.has_memoization:
-         Memoization_Map => <>,
+         Memoization_Map            => <>,
          % endif
          others => <>
       );
@@ -3871,10 +4321,20 @@ package body ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Reparsed : in out Reparsed_Unit) is
    begin
       --  Remove the `symbol -> AST node` associations for Unit's nodes in
-      --  foreign lexical environments. Do this before any deallocation because
-      --  lexical environments need the node ordering predicate to run
-      --  correctly in order to update their data structures.
+      --  foreign lexical environments.
       Remove_Exiled_Entries (Unit);
+
+      --  Remove the named envs that Unit created
+      declare
+         Named_Envs_Needing_Update : NED_Maps.Map;
+      begin
+         Remove_Named_Envs (Unit, Named_Envs_Needing_Update);
+         Update_Named_Envs (Named_Envs_Needing_Update);
+      end;
+
+      --  At this point, envs and nodes that don't belong to this unit no
+      --  longer reference this unit's envs and nodes. It is thus now safe to
+      --  deallocate this unit's obsolete data.
 
       --  Replace Unit's diagnostics by Reparsed's
       Unit.Diagnostics := Reparsed.Diagnostics;
@@ -4011,6 +4471,62 @@ package body ${ada_lib_name}.Implementation is
       Unit.Exiled_Entries.Clear;
    end Remove_Exiled_Entries;
 
+   -----------------------
+   -- Remove_Named_Envs --
+   -----------------------
+
+   procedure Remove_Named_Envs
+     (Unit                      : Internal_Unit;
+      Named_Envs_Needing_Update : in out NED_Maps.Map) is
+   begin
+      --  Remove nodes in this unit from the Named_Env_Descriptor.Foreign_Nodes
+      --  components in which they are registered.
+      for EE of Unit.Exiled_Entries_In_NED loop
+         Remove (EE.Named_Env.Foreign_Nodes, EE.Key, EE.Node);
+      end loop;
+      Unit.Exiled_Entries_In_NED.Clear;
+
+      --  Remove nodes in this unit from the
+      --  Named_Env_Descriptor.Nodes_With_Foreign_Env components in which they
+      --  are registered.
+      for Cur in Unit.Nodes_With_Foreign_Env.Iterate loop
+         declare
+            use Node_To_Named_Env_Maps;
+            Node : constant ${T.root_node.name} := Key (Cur);
+            NE   : constant Named_Env_Descriptor_Access := Element (Cur);
+         begin
+            NE.Nodes_With_Foreign_Env.Delete (Node);
+         end;
+      end loop;
+      Unit.Nodes_With_Foreign_Env.Clear;
+
+      --  Remove ends in this unit from the Named_Env_Descriptor.Foreign_Envs
+      --  components in which they are registered.
+      for EE of Unit.Exiled_Envs loop
+         EE.Named_Env.Foreign_Envs.Delete (EE.Env.Env.Node);
+      end loop;
+      Unit.Exiled_Envs.Clear;
+
+      --  Remove named envs that this unit created
+      for NE of Unit.Named_Envs loop
+         declare
+            NED_Access : constant Named_Env_Descriptor_Access :=
+               Unit.Context.Named_Envs.Element (NE.Name);
+            NED        : Named_Env_Descriptor renames NED_Access.all;
+         begin
+            NED.Envs.Delete (NE.Env.Env.Node);
+
+            --  If this named environment had precedence, we must schedule an
+            --  update for this name environment entry.
+            if NE.Env = NED.Env_With_Precedence then
+               Named_Envs_Needing_Update.Include (NE.Name, NED_Access);
+               NED.Env_With_Precedence := Empty_Env;
+            end if;
+         end;
+      end loop;
+      Unit.Named_Envs.Clear;
+   end Remove_Named_Envs;
+
    ---------------------------
    -- Extract_Foreign_Nodes --
    ---------------------------
@@ -4074,7 +4590,12 @@ package body ${ada_lib_name}.Implementation is
       --  this unit contains so that they are relocated in our new lexical
       --  environments.
       declare
-         State : PLE_State := (Current_Env => Node.Self_Env);
+         Unit_State : aliased PLE_Unit_State :=
+           (Named_Envs_Needing_Update => <>);
+         State      : PLE_Node_State :=
+           (Unit_State  => Unit_State'Unchecked_Access,
+            Current_Env => Node.Self_Env,
+            Current_NED => null);
       begin
          Pre_Env_Actions (Node, State, Add_To_Env_Only => True);
          Post_Env_Actions (Node, State);
