@@ -1015,9 +1015,11 @@ class CompileCtx:
                               for n in self.grammar.user_defined_rules],
                  is_builtin_type=True)
 
-        # Force the creation of the env assoc type, as required by the
+        # Force the creation of the env assoc type and the
+        # Symbol.array/Symbol.array.array types, as required by the
         # always-emitted PLE helpers.
-        _ = resolve_type(T.env_assoc)
+        for t in (T.env_assoc, T.Symbol.array, T.Symbol.array.array):
+            _ = resolve_type(t)
 
         # Now that all types are known, construct default values for fields
         for st in CompiledTypeRepo.struct_types:

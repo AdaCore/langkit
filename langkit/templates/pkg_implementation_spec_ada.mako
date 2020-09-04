@@ -8,9 +8,11 @@
 
 <% root_node_array = T.root_node.array %>
 
-with Ada.Containers;                  use Ada.Containers;
+with Ada.Containers;              use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
+with Ada.Containers.Hashed_Sets;
+with Ada.Containers.Ordered_Maps;
+with Ada.Strings.Unbounded;       use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
@@ -558,6 +560,252 @@ private package ${ada_lib_name}.Implementation is
    % endif
    % endfor
 
+   ------------------------
+   -- Named environments --
+   ------------------------
+
+   --  The goal of named environments is to provide a sound mechanism to
+   --  associate nodes and environments across analysis units: nodes whose
+   --  Self_Env comes from another unit ("foreign env"), environments whose
+   --  parent comes from another unit (also foreign env), or that contain
+   --  symbol/node mappings for nodes coming from other units ("foreign
+   --  nodes").
+   --
+   --  This mechanism comes with the following requirements:
+   --
+   --  * Ensure that, after unit reparsing, all cross-unit associations are
+   --    still valid. For instance, no node's Self_Env can refer to a lexical
+   --    environment that has been deallocated.
+   --
+   --  * Ensure that regardless of the sequence of unit parsing/reparsing that
+   --    led to a given set of units (considering only unit filename and source
+   --    buffer), the node/env graph (i.e. the result of PLE) is always the
+   --    same, i.e. make incremental PLE idempotent.
+   --
+   --  Note that even though the end goal for named envs is to replace the
+   --  previous mechanism (proved to be unsound, as violating the second
+   --  requirement), both still coexist during the transition period.
+   --
+   --  Here is how this mechanism works:
+   --
+   --  1. Environments can be assigned zero, one or several names (a name being
+   --     a non-empty sequence of symbol: see the Env_Name type below). Name(s)
+   --     assignment happens at environment construction.
+   --
+   --  2. As a consequence, multiple environments can be associated to a given
+   --     env name. Using a total and deterministic ordering predicate, only
+   --     one of them is said to have "precedence": looking up an environment
+   --     using that name will return this unique environment.
+   --
+   --  3. For a given env name, we keep track of all uses of the environment
+   --     that is looked up by its name: environment parent link, symbol/node
+   --     mapping addition, node's Self_Env assignment. This info is
+   --     tracked using the Named_Env_Descriptor record type below, often
+   --     abbreviated NED. Note that this tracking happens even when there is
+   --     no environment associated to the env name, as we need to do such
+   --     updates when an environment gets associated to that env name.
+   --
+   --  4. Unit reparsing can destroy existing environments and/or create new
+   --     ones. This means that, depending on their "ranking" using the
+   --     ordering predicate, environments can earn or lose precedence for a
+   --     given name.
+   --
+   --  5. When the precedence changes for a given name, we use the info
+   --     collected as per 3. to perform relocation: relevant environment
+   --     parent links are updated, symbol/node mappings are removed from the
+   --     env that lost precedence and added to the env that earned precedence,
+   --     etc.
+
+   --  Handling of environment names
+
+   type Env_Name_Record;
+   type Env_Name is access Env_Name_Record;
+   --  Name for an environment. Such names are non-empty sequences of symbols
+
+   type Env_Name_Internal_Array is array (Positive range <>) of Symbol_Type;
+   type Env_Name_Record (Size : Positive) is record
+      Symbols : Env_Name_Internal_Array (1 .. Size);
+
+      Hash : Hash_Type;
+      --  Precomputed hash for this name. No need to compute the hash more than
+      --  once.
+   end record;
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Env_Name_Record, Env_Name);
+   function Equivalent (Left, Right : Env_Name) return Boolean
+   is (Left.Symbols = Right.Symbols);
+   function Hash (Name : Env_Name) return Hash_Type is (Name.Hash);
+
+   package Env_Name_Sets is new Ada.Containers.Hashed_Sets
+     (Element_Type        => Env_Name,
+      Hash                => Hash,
+      Equivalent_Elements => Equivalent);
+   --  Internalization table for named symbols (see the Create_Env_Name
+   --  function below).
+
+   --  Tables to populate lexical entries in named envs
+
+   package NED_Assoc_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Internal_Map_Node_Vectors.Vector,
+      Hash            => Hash,
+      Equivalent_Keys => "=",
+      "="             => Internal_Map_Node_Vectors."=");
+   --  Symbol/lexical env entry mappings for a given named env descriptor.
+   --  Symbols are not unique in all mappings, so the lexical env entries are
+   --  stored in a vector.
+
+   procedure Add
+     (Self : in out NED_Assoc_Maps.Map;
+      Key  : Symbol_Type;
+      Node : AST_Envs.Internal_Map_Node);
+   --  Add a symbol/lexical env entry mapping in Self
+
+   procedure Remove
+     (Self : in out NED_Assoc_Maps.Map;
+      Key  : Symbol_Type;
+      Node : ${T.root_node.name});
+   --  Remove a symbol/lexical env entry mapping from Self
+
+   --  Global table for named environments
+
+   package Sorted_Env_Maps is new Ada.Containers.Ordered_Maps
+     (Key_Type     => ${T.root_node.name},
+      Element_Type => Lexical_Env);
+   --  List of lexical environments, sorted by owning node. This means that the
+   --  following must be true for all cursors in such maps::
+   --
+   --     Key (Cur) = Element (Cur).Env.Node
+
+   package Node_Sets is new Ada.Containers.Hashed_Sets
+     (Element_Type        => ${T.root_node.name},
+      Hash                => Hash,
+      Equivalent_Elements => "=");
+
+   type Named_Env_Descriptor is record
+      Name : Env_Name;
+      --  Name corresponding to this descriptor. Useful during debugging.
+
+      Envs : Sorted_Env_Maps.Map;
+      --  For each env name, we can have one or several environments
+      --  (concurrent definitions). Just like foreign nodes in lexical
+      --  environments, we keep them sorted by node to preserve determinism:
+      --  given a set of loaded units, we will always have the same set of
+      --  name:env associations sorted in the same order and thus always the
+      --  same results at lookup time.
+
+      Env_With_Precedence : Lexical_Env;
+      --  Named environment that has precedence for this name.
+      --
+      --  Most of the time, if Envs is empty, this is Empty_Env and otherwise,
+      --  shortcut to Envs.First_Element. However, when a change in Envs
+      --  invalidates Env_With_Precedence, we reset it to Empty_Env momentarily
+      --  during PLE as a way to tag the temprorary inconsistency. Later on, we
+      --  recompute it and perform the needed relocations.
+
+      Foreign_Nodes : NED_Assoc_Maps.Map;
+      --  This maps symbols to lists of env entries for all the foreign nodes
+      --  in Env_With_Precedence.
+      --
+      --  This set allows efficient relocation of env entries when
+      --  Env_With_Precedence changes.
+
+      Foreign_Envs : Sorted_Env_Maps.Map;
+      --  This maps the owning node to env mapping for all lexical environments
+      --  whose parent must be Env_With_Precedence. Envs are indexed by owning
+      --  node for quick lookup during updates.
+      --
+      --  This set allows efficient env parent link updates when
+      --  Env_With_Precedence changes.
+
+      Nodes_With_Foreign_Env : Node_Sets.Set;
+      --  Set of nodes whose env (Self_Env) must be Env_With_Precedence.
+      --
+      --  This set allows efficient Self_Env updates when Env_With_Precedence
+      --  changes.
+
+      --  Note that during the updating process of a reparsed unit
+      --  (Update_After_Reparse procedure), these data structures become
+      --  temporarily inconsistent: Env_With_Precedence can become Empty_Env
+      --  even though Envs is not empty.  This is fine, because when it does,
+      --  Update_After_Reparse keeps track of it as to be updated
+      --  (Named_Envs_Needing_Update map).
+   end record;
+   type Named_Env_Descriptor_Access is access Named_Env_Descriptor;
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Named_Env_Descriptor, Named_Env_Descriptor_Access);
+
+   package NED_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Env_Name,
+      Element_Type    => Named_Env_Descriptor_Access,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
+   --  Context-wide table that tracks for all env names the set of lexical envs
+   --  that define it.
+
+   type Exiled_Entry_In_NED is record
+      Named_Env : Named_Env_Descriptor_Access;
+      --  Named env descriptor in which Node is registered
+
+      Key : Symbol_Type;
+      --  Key in that Env's internal map that leads to the env descriptor that
+      --  contains Node.
+
+      Node : ${T.root_node.name};
+      --  Exiled node
+   end record;
+
+   package Exiled_Entry_In_NED_Vectors is new
+      Langkit_Support.Vectors (Exiled_Entry_In_NED);
+
+   type Exiled_Env is record
+      Named_Env : Named_Env_Descriptor_Access;
+      --  Named env descriptor in which Env is registered
+
+      Env : Lexical_Env;
+      --  Exiled environment
+   end record;
+
+   package Exiled_Env_Vectors is new Langkit_Support.Vectors (Exiled_Env);
+
+   type Named_Env_Pair is record
+      Name : Env_Name;
+      --  Name on the lexical environment
+
+      Env  : Lexical_Env;
+      --  Named lexical environment
+   end record;
+
+   package Named_Env_Vectors is new Langkit_Support.Vectors (Named_Env_Pair);
+
+   --  High-level primitives to handle the life cycle of named environment
+
+   function Create_Env_Name
+     (Context : Internal_Context;
+      Symbols : ${T.Symbol.array.name}) return Env_Name;
+   --  Internalize the given list of symbols into Context and return the
+   --  corresponding environment name.
+
+   function Get_Named_Env_Descriptor
+     (Context : Internal_Context;
+      Name    : Env_Name) return Named_Env_Descriptor_Access;
+   --  Return the named env descriptor in Context corresponding to Name. Create
+   --  it first, if needed.
+
+   procedure Register_Named_Env
+     (Context                   : Internal_Context;
+      Name                      : Env_Name;
+      Env                       : Lexical_Env;
+      Named_Envs_Needing_Update : in out NED_Maps.Map);
+   --  Register Name as the environment name for Env. If Env takes the
+   --  precedence for this name, add Name/its named env descriptor to
+   --  Named_Envs_Needing_Update.
+
+   procedure Update_Named_Envs (Named_Envs : NED_Maps.Map);
+   --  For each named environment in Named_Envs, update Env_With_Precedence and
+   --  do the necessary adjustments: relocate exiled entries, etc.
+
    -------------------------------
    -- Root AST node (internals) --
    -------------------------------
@@ -642,26 +890,109 @@ private package ${ada_lib_name}.Implementation is
       Self_Env          : Lexical_Env := AST_Envs.Empty_Env);
    --  Helper for parsers, to initialize a freshly allocated node
 
-   type PLE_State is record
+   type PLE_Unit_State is record
+      Named_Envs_Needing_Update : NED_Maps.Map;
+      --  Set of named env entries whose Env_With_Precedence needs to be
+      --  updated.
+   end record;
+   --  State of PLE on a specific unit
+
+   type PLE_Unit_State_Access is access all PLE_Unit_State;
+
+   type PLE_Node_State is record
+      Unit_State : PLE_Unit_State_Access;
+      --  State of PLE on the unit that owns this node
+
       Current_Env : Lexical_Env;
       --  Current environment when processing the node: initially inheritted
       --  from the Current_Env of the parent node (or Root_Scope on the root
       --  node), SetInitialEnv actions can change this.
       --
       --  Other environment actions such as AddEnv or AddToEnv can use this.
+
+      Current_NED : Named_Env_Descriptor_Access;
+      --  If the current environment was looked up by name, reference to the
+      --  named environment descriptor. Null otherwise.
    end record;
    --  State of PLE on a specific node
 
+   procedure Use_Direct_Env (State : in out PLE_Node_State; Env : Lexical_Env);
+   --  Change State so that the current environment is Env, and record that it
+   --  was *not* looked up by name.
+
+   procedure Use_Named_Env
+     (State   : in out PLE_Node_State;
+      Context : Internal_Context;
+      Name    : Env_Name);
+   --  Change State so that the current environment comes from the named
+   --  environment looked up with Name.
+
+   procedure Set_Initial_Env
+     (Self     : ${T.root_node.name};
+      State    : in out PLE_Node_State;
+      Name     : in out ${T.Symbol.array.name};
+      Resolver : Lexical_Env_Resolver);
+   --  Helper for Populate_Lexical_Env: fetch the initial environment for Self
+   --  and update State accordingly.
+   --
+   --  Name is for the requested named environment, or null if none is
+   --  requested. For PLE code previty, Set_Initial_Env takes care of freeing
+   --  Name before returning.
+   --
+   --  If Name is null or an empty array, use Resolver to fetch the initial
+   --  environment, or use the current environment if there is no resolver.
+
+   procedure Add_To_Env
+     (Self         : ${T.root_node.name};
+      Mapping      : ${T.env_assoc.name};
+      State        : PLE_Node_State;
+      Resolver     : Entity_Resolver;
+      DSL_Location : String);
+   --  Helper for Populate_Lexical_Env: insert Mapping in the current lexical
+   --  environment, with the given Resolver, if provided.
+   --
+   --  If the destination environment is foreign and DSL_Location is not empty,
+   --  raise a Property_Error.
+
+   procedure Ref_Env
+     (Self                : ${T.root_node.name};
+      Dest_Env            : Lexical_Env;
+      Ref_Env_Nodes       : in out ${T.root_node.array.name};
+      Resolver            : Lexical_Env_Resolver;
+      Kind                : Ref_Kind;
+      Cats                : Ref_Categories;
+      Shed_Rebindings     : Boolean);
+   --  Helper for Populate_Lexical_Env: add referenced environments to
+   --  Dest_Env. Calling this takes an ownership share for Ref_Env_Nodes.
+
+   procedure Add_Env
+     (Self              : ${T.root_node.name};
+      State             : in out PLE_Node_State;
+      No_Parent         : Boolean;
+      Transitive_Parent : Boolean;
+      Resolver          : Lexical_Env_Resolver;
+      Names             : in out ${T.Symbol.array.array.name});
+   --  Helper for Populate_Lexical_Env: create a new environment for Self, and
+   --  update State accordingly.
+   --
+   --  State/No_Parent/Resolver all participate to the computation of the
+   --  parent for this new environment. Transitive_Parent is directly forwarded
+   --  to the lexical environment constructor.
+   --
+   --  If Names is not null, this also registers the new environment as a named
+   --  env for all the given names. For PLE code brevity, Add_Env takes care of
+   --  freeing Names before returning.
+
    procedure Pre_Env_Actions
      (Self            : ${T.root_node.name};
-      State           : in out PLE_State;
+      State           : in out PLE_Node_State;
       Add_To_Env_Only : Boolean := False);
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
 
    procedure Post_Env_Actions
-     (Self : ${T.root_node.name}; State : in out PLE_State);
+     (Self : ${T.root_node.name}; State : in out PLE_Node_State);
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
@@ -815,29 +1146,6 @@ private package ${ada_lib_name}.Implementation is
    package Foreign_Node_Entry_Vectors is new Langkit_Support.Vectors
      (Foreign_Node_Entry);
 
-   procedure Add_To_Env
-     (Self         : ${T.root_node.name};
-      Mapping      : ${T.env_assoc.name};
-      Initial_Env  : Lexical_Env;
-      Resolver     : Entity_Resolver;
-      DSL_Location : String);
-   --  Helper for Populate_Lexical_Env: add the key/element Mapping in the Env
-   --  lexical environment using the given metadata (MD).
-   --
-   --  If the destination environment is foreign and DSL_Location is not empty,
-   --  raise a Property_Error.
-
-   procedure Ref_Env
-     (Self                : ${T.root_node.name};
-      Dest_Env            : Lexical_Env;
-      Ref_Env_Nodes       : in out ${T.root_node.array.name};
-      Resolver            : Lexical_Env_Resolver;
-      Kind                : Ref_Kind;
-      Cats                : Ref_Categories;
-      Shed_Rebindings     : Boolean);
-   --  Add referenced environments to Self.Self_Env. Calling this takes an
-   --  ownership share for Ref_Env_Nodes.
-
    procedure Register_Destroyable
      (Unit : Internal_Unit; Node : ${T.root_node.name});
    --  Register Node to be destroyed when Unit is deallocated/reparsed
@@ -983,6 +1291,12 @@ private package ${ada_lib_name}.Implementation is
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
 
+      Env_Names : Env_Name_Sets.Set;
+      --  Set of internalized environment names
+
+      Named_Envs : NED_Maps.Map;
+      --  Map env names to the corresponding named environment descriptors
+
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
 
@@ -1037,6 +1351,12 @@ private package ${ada_lib_name}.Implementation is
       --  Maximum number of recursive calls allowed
    end record;
 
+   package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type            => ${T.root_node.name},
+      Element_Type        => Named_Env_Descriptor_Access,
+      Hash                => Hash,
+      Equivalent_Keys     => "=");
+
    type Analysis_Unit_Type is limited record
       --  Start of ABI area. In order to perform fast checks from foreign
       --  languages, we maintain minimal ABI for analysis context: this allows
@@ -1070,11 +1390,6 @@ private package ${ada_lib_name}.Implementation is
       Diagnostics : Diagnostics_Vectors.Vector;
       --  The list of diagnostics produced for this analysis unit
 
-      Is_Env_Populated : Boolean;
-      --  Whether Populate_Lexical_Env was called on this unit. Used not to
-      --  populate multiple times the same unit and hence avoid infinite
-      --  populate recursions for circular dependencies.
-
       Rule : Grammar_Rule;
       --  The grammar rule used to parse this unit
 
@@ -1089,6 +1404,11 @@ private package ${ada_lib_name}.Implementation is
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
 
+      Is_Env_Populated : Boolean;
+      --  Whether Populate_Lexical_Env was called on this unit. Used not to
+      --  populate multiple times the same unit and hence avoid infinite
+      --  populate recursions for circular dependencies.
+
       Exiled_Entries : Exiled_Entry_Vectors.Vector;
       --  Lexical env population for this unit may have added AST nodes it owns
       --  to the lexical environments that belong to other units ("exiled"
@@ -1100,6 +1420,36 @@ private package ${ada_lib_name}.Implementation is
       --  This unit owns a set of lexical environments. This vector contains
       --  the list of AST nodes that were added to these environments and that
       --  come from other units.
+
+      Exiled_Entries_In_NED : Exiled_Entry_In_NED_Vectors.Vector;
+      --  Like Exiled_Entries, but for symbol/node associations exclusively
+      --  handled by the named environments mechanism.
+      --
+      --  This list allows efficient removal of these entries from
+      --  Named_Env_Descriptor.Foreign_Nodes components when unloading this
+      --  unit.
+
+      Exiled_Envs : Exiled_Env_Vectors.Vector;
+      --  List of lexical environments created in this unit and whose parent is
+      --  a named environment.
+      --
+      --  This list allows efficient removal for these envs from
+      --  Named_Env_Descriptor.Foreign_Envs components when unloading this
+      --  unit.
+
+      Named_Envs : Named_Env_Vectors.Vector;
+      --  List of named environment created in this unit.
+      --
+      --  This list allows efficient removal for these envs from the
+      --  Named_Env_Descriptor.Envs components when unloading this unit.
+
+      Nodes_With_Foreign_Env : Node_To_Named_Env_Maps.Map;
+      --  Mapping from a node to its Self_Env's named env descriptor, for each
+      --  node in this unit whose Self_Env is a named environment.
+      --
+      --  This mapping allows efficient removal for these nodes from the
+      --  Named_Env_Descriptor.Nodes_With_Foreign_Env components when unloading
+      --  this unit.
 
       Rebindings : aliased Env_Rebindings_Vectors.Vector;
       --  List of rebindings for which Old_Env and/or New_Env belong to this
@@ -1359,6 +1709,13 @@ private package ${ada_lib_name}.Implementation is
    --  lexical environments Unit does not own. Remove foreign node entries in
    --  foreign units that correspond to these exiled entries. Clear
    --  Unit.Exiled_Entries afterwards.
+
+   procedure Remove_Named_Envs
+     (Unit                      : Internal_Unit;
+      Named_Envs_Needing_Update : in out NED_Maps.Map);
+   --  Remove envs that belong to Unit from all relevant NEDs, and keep track
+   --  in Named_Env_Needing_Update of the env names whose env with precedence
+   --  must change because of this.
 
    procedure Extract_Foreign_Nodes
      (Unit          : Internal_Unit;

@@ -30,6 +30,7 @@ def setup(lib_name, astnode_names, astnode_kinds, prefix):
     for printer in [
         printers.AnalysisUnitPrinter,
         printers.ASTNodePrinter,
+        printers.EnvNamePrinter,
         printers.LexicalEnvPrinter,
         printers.EnvGetterPrinter,
         printers.ReferencedEnvPrinter,

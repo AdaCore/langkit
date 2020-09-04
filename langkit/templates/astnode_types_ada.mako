@@ -211,13 +211,13 @@
       % if cls.env_spec.pre_actions:
          procedure ${cls.raw_name}_Pre_Env_Actions
            (Self            : ${cls.name};
-            State           : in out PLE_State;
+            State           : in out PLE_Node_State;
             Add_To_Env_Only : Boolean := False);
       % endif
 
       % if cls.env_spec.post_actions:
          procedure ${cls.raw_name}_Post_Env_Actions
-           (Self : ${cls.name}; State : in out PLE_State);
+           (Self : ${cls.name}; State : in out PLE_Node_State);
       % endif
 
    % endif
@@ -283,9 +283,15 @@
       env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
    %>
 
-   <%def name="emit_set_initial_env(do_action)">
-      State.Current_Env := ${env_getter}
-        ((Node => Self, Info => ${T.entity_info.nullexpr}));
+   <%def name="emit_set_initial_env(sie)">
+      declare
+         Name_Result : ${T.Symbol.array.name} :=
+            ${(cls.env_spec.initial_env_name_expr
+               if sie.name_prop
+               else 'null')};
+      begin
+         Set_Initial_Env (Self, State, Name_Result, ${env_getter}'Access);
+      end;
    </%def>
 
    <%def name="emit_add_to_env(exprs)">
@@ -315,7 +321,7 @@
          % endif
 
          Add_To_Env
-           (Self, Mapping, State.Current_Env, Resolver,
+           (Self, Mapping, State, Resolver,
             DSL_Location => ${('""'
                                if exprs.unsound else
                                string_repr(exprs.str_location))});
@@ -377,29 +383,16 @@
       end if;
 
       declare
-         G : Env_Getter :=
-            % if add_env.no_parent:
-               AST_Envs.No_Env_Getter
-            % else:
-               AST_Envs.Simple_Env_Getter (State.Current_Env)
-            % endif
-         ;
+         No_Parent         : constant Boolean :=
+            ${'True' if add_env.no_parent else 'False'};
+         Transitive_Parent : constant Boolean :=
+            ${call_prop(add_env.transitive_parent_prop)};
+         Resolver          : constant Lexical_Env_Resolver :=
+            ${"{}'Access".format(env_getter) if has_dyn_env else 'null'};
+         Names             : ${T.Symbol.array.array.name} :=
+            ${call_prop(add_env.names_prop) if add_env.names_prop else 'null'};
       begin
-         % if has_dyn_env:
-            if State.Current_Env.Env.Node /= null
-               and then State.Current_Env.Env.Node.Unit /= Self.Unit
-            then
-               G := AST_Envs.Dyn_Env_Getter (${env_getter}'Access, Self);
-            end if;
-         % endif
-
-         Self.Self_Env := AST_Envs.Create_Lexical_Env
-           (Parent            => G,
-            Node              => Self,
-            Transitive_Parent => ${call_prop(add_env.transitive_parent_prop)},
-            Owner             => Self.Unit);
-         State.Current_Env := Self.Self_Env;
-         Register_Destroyable (Self.Unit, Self.Self_Env.Env);
+         Add_Env (Self, State, No_Parent, Transitive_Parent, Resolver, Names);
       end;
    </%def>
 
@@ -447,24 +440,23 @@
 
       Initial_Env : Lexical_Env := Bound_Env;
    begin
-      % if cls.env_spec.initial_env:
-         Initial_Env := ${cls.env_spec.initial_env_expr};
+      Initial_Env := ${cls.env_spec.initial_env_expr};
 
-         if Initial_Env.Kind /= Primary then
+      if Initial_Env.Kind /= Primary then
+         raise Property_Error with
+            "Cannot set initial env to non-primary one";
+      end if;
+
+      % if not cls.env_spec.initial_env.unsound:
+         if Initial_Env.Env.Node /= null
+            and then Initial_Env.Env.Node.Unit /= Self.Unit
+         then
             raise Property_Error with
-               "Cannot set initial env to non-primary one";
+               "unsound foreign environment in SetInitialEnv ("
+               & "${cls.env_spec.initial_env.str_location}" & ")";
          end if;
-
-         % if not cls.env_spec.initial_env.unsound:
-            if Initial_Env.Env.Node /= null
-               and then Initial_Env.Env.Node.Unit /= Self.Unit
-            then
-               raise Property_Error with
-                  "unsound foreign environment in SetInitialEnv ("
-                  & "${cls.env_spec.initial_env.str_location}" & ")";
-            end if;
-         % endif
       % endif
+
       return Initial_Env;
    end ${env_getter};
 
@@ -475,7 +467,7 @@
    % if cls.env_spec.pre_actions:
       procedure ${cls.raw_name}_Pre_Env_Actions
         (Self            : ${cls.name};
-         State           : in out PLE_State;
+         State           : in out PLE_Node_State;
          Add_To_Env_Only : Boolean := False) is
       begin
          % for action in cls.env_spec.pre_actions:
@@ -486,7 +478,7 @@
 
    % if cls.env_spec.post_actions:
       procedure ${cls.raw_name}_Post_Env_Actions
-        (Self : ${cls.name}; State : in out PLE_State) is
+        (Self : ${cls.name}; State : in out PLE_Node_State) is
       begin
          % for action in cls.env_spec.post_actions:
             ${emit_env_action (action)}

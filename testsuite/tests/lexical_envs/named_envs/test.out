@@ -1,0 +1,117 @@
+== spec, body ==
+
+foo.ads:1: package Foo is: P_Body_Part:
+  foo.adb:1: package body Foo is
+foo.ads:5: package Bar is: P_Body_Part:
+  <none>
+foo.ads:11: ref F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.ads:12: ref F2;: P_Resolve:
+  foo.ads:3: type F2 is end;
+foo.ads:13: ref Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.ads:14: ref Foo.F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.ads:15: ref Foo.Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.ads:16: ref Foo.No_Such;: P_Resolve:
+  <none>
+foo.ads:17: ref No_Such.F1;: P_Resolve:
+  <error: dereferencing a null access>
+foo.ads:22: package Bar is: P_Body_Part:
+  <none>
+
+foo.adb:1: package body Foo is: P_Decl_Part:
+  foo.ads:1: package Foo is
+foo.adb:2: ref F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.adb:3: ref F2;: P_Resolve:
+  foo.ads:3: type F2 is end;
+foo.adb:4: ref Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.adb:5: ref Foo.F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.adb:6: ref Foo.Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.adb:7: ref Foo.No_Such;: P_Resolve:
+  <none>
+foo.adb:8: ref No_Such.F1;: P_Resolve:
+  <error: dereferencing a null access>
+foo.adb:9: ref FP1;: P_Resolve:
+  foo.ads:19: type FP1 is end;
+foo.adb:10: ref Foo.FP1;: P_Resolve:
+  <none>
+foo.adb:12: package Qux is: P_Body_Part:
+  foo.adb:19: package body Qux is
+foo.adb:16: ref FQ1;: P_Resolve:
+  <none>
+foo.adb:17: ref Qux.FQ1;: P_Resolve:
+  foo.adb:13: type FQ1 is end;
+foo.adb:19: package body Qux is: P_Decl_Part:
+  foo.adb:12: package Qux is
+foo.adb:20: ref FQ1;: P_Resolve:
+  foo.adb:13: type FQ1 is end;
+foo.adb:24: package Bar.Child is: P_Body_Part:
+  <none>
+foo.adb:25: ref B1;: P_Resolve:
+  foo.ads:23: type B1;
+
+== body, spec ==
+
+foo.ads:1: package Foo is: P_Body_Part:
+  foo.adb:1: package body Foo is
+foo.ads:5: package Bar is: P_Body_Part:
+  <none>
+foo.ads:11: ref F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.ads:12: ref F2;: P_Resolve:
+  foo.ads:3: type F2 is end;
+foo.ads:13: ref Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.ads:14: ref Foo.F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.ads:15: ref Foo.Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.ads:16: ref Foo.No_Such;: P_Resolve:
+  <none>
+foo.ads:17: ref No_Such.F1;: P_Resolve:
+  <error: dereferencing a null access>
+foo.ads:22: package Bar is: P_Body_Part:
+  <none>
+
+foo.adb:1: package body Foo is: P_Decl_Part:
+  foo.ads:1: package Foo is
+foo.adb:2: ref F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.adb:3: ref F2;: P_Resolve:
+  foo.ads:3: type F2 is end;
+foo.adb:4: ref Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.adb:5: ref Foo.F1;: P_Resolve:
+  foo.ads:9: type F1 is end;
+foo.adb:6: ref Foo.Bar.FB1;: P_Resolve:
+  foo.ads:6: type FB1 is end;
+foo.adb:7: ref Foo.No_Such;: P_Resolve:
+  <none>
+foo.adb:8: ref No_Such.F1;: P_Resolve:
+  <error: dereferencing a null access>
+foo.adb:9: ref FP1;: P_Resolve:
+  foo.ads:19: type FP1 is end;
+foo.adb:10: ref Foo.FP1;: P_Resolve:
+  <none>
+foo.adb:12: package Qux is: P_Body_Part:
+  foo.adb:19: package body Qux is
+foo.adb:16: ref FQ1;: P_Resolve:
+  <none>
+foo.adb:17: ref Qux.FQ1;: P_Resolve:
+  foo.adb:13: type FQ1 is end;
+foo.adb:19: package body Qux is: P_Decl_Part:
+  foo.adb:12: package Qux is
+foo.adb:20: ref FQ1;: P_Resolve:
+  foo.adb:13: type FQ1 is end;
+foo.adb:24: package Bar.Child is: P_Body_Part:
+  <none>
+foo.adb:25: ref B1;: P_Resolve:
+  foo.ads:23: type B1;
+
+Done
