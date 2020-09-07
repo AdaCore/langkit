@@ -31,7 +31,6 @@ begin
                 Charset  => To_Unbounded_String ("ascii"),
                 Read_BOM => True,
                 Bytes    => To_Unbounded_String (Buffer)),
-      Tab_Stop    => 8,
       With_Trivia => True,
       TDH         => TDH,
       Diagnostics => Diagnostics);

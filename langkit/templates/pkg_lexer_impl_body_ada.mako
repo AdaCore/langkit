@@ -59,7 +59,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
-      Tab_Stop       : Positive;
       With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
       Diagnostics    : in out Diagnostics_Vectors.Vector);
@@ -68,7 +67,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
    procedure Extract_Tokens_From_Bytes_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
-      Tab_Stop        : Positive;
       With_Trivia     : Boolean;
       TDH             : in out Token_Data_Handler;
       Diagnostics     : in out Diagnostics_Vectors.Vector);
@@ -80,7 +78,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Input       : Text_Access;
       Input_First : Positive;
       Input_Last  : Natural;
-      Tab_Stop    : Positive;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
@@ -98,7 +95,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Input       : Text_Access;
       Input_First : Positive;
       Input_Last  : Natural;
-      Tab_Stop    : Positive;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
@@ -109,12 +105,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Prev_Id  : Token_Kind := ${termination};
       % endif
       Symbol   : Thin_Symbol;
-
-      Current_Sloc : Source_Location := (1, 1);
-      --  Source location before scanning the current token
-
-      Next_Sloc : Source_Location;
-      --  Source location after scanning the current token
 
       Last_Token_Last : Natural := Input'First - 1;
       --  Index in TDH.Source_Buffer for the last character of the previous
@@ -159,14 +149,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
       function Source_Last return Natural is (Token.Text_Last);
       --  Likewise, for the last character
 
-      function Sloc_Range return Source_Location_Range is
-        (Make_Range (Current_Sloc, Next_Sloc));
-      --  Create a sloc range value corresponding to Token
-
-      function Sloc_After
-        (Base_Sloc : Source_Location; Text : Text_Type) return Source_Location;
-      --  Return Base_Sloc updated as if Text was appended
-
       ------------------
       -- Append_Token --
       ------------------
@@ -206,41 +188,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
          Last_Token_Was_Trivia := True;
       end Append_Trivia;
 
-      ----------------
-      -- Sloc_After --
-      ----------------
-
-      function Sloc_After
-        (Base_Sloc : Source_Location; Text : Text_Type) return Source_Location
-      is
-      begin
-         return Result : Source_Location := Base_Sloc do
-            --  TODO: use the Unicode algorithm to account for grapheme
-            --  clusters.
-            for T of Text loop
-               case T is
-                  when Chars.LF =>
-                     Result := (Result.Line + 1, 1);
-
-                  when Chars.HT =>
-                     --  Make horizontal tabulations move by stride of 8
-                     --  columns, as usually implemented in code editors.
-                     declare
-                        Zero_Based : constant Natural :=
-                           Natural (Result.Column - 1);
-                        Aligned    : constant Natural :=
-                           (Zero_Based + Tab_Stop) / Tab_Stop * Tab_Stop;
-                     begin
-                        Result.Column := Column_Number (Aligned + 1);
-                     end;
-
-                  when others =>
-                     Result.Column := Result.Column + 1;
-               end case;
-            end loop;
-         end return;
-      end Sloc_After;
-
       State : Lexer_State;
 
    begin
@@ -260,25 +207,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
          Token_Id := Token.Kind;
          Symbol := No_Thin_Symbol;
-
-         --  Initialize the first sloc for the token to come. For this, process
-         --  the text that was ignored since the last token.
-         declare
-            Ignored_Text : Text_Type renames
-               TDH.Source_Buffer (Last_Token_Last + 1 .. Source_First - 1);
-         begin
-            Current_Sloc := Sloc_After (Current_Sloc, Ignored_Text);
-            Last_Token_Last := Source_Last;
-         end;
-
-         --  Then update Next_Sloc according to Token's text
-         if Token_Id /= ${termination} then
-            declare
-               Text : Text_Type renames Input (Source_First .. Source_Last);
-            begin
-               Next_Sloc := Sloc_After (Current_Sloc, Text);
-            end;
-         end if;
 
          case Token_Id is
 
@@ -301,8 +229,12 @@ package body ${ada_lib_name}.Lexer_Implementation is
                      if Symbol_Res.Success then
                         Symbol := Find (TDH.Symbols, Symbol_Res.Symbol);
                      else
-                        Append (Diagnostics, Sloc_Range,
-                                Symbol_Res.Error_Message);
+                        Append
+                          (Diagnostics,
+                           Make_Range
+                             (Get_Sloc (TDH, Token.Text_First),
+                              Get_Sloc (TDH, Token.Text_Last)),
+                           Symbol_Res.Error_Message);
                      end if;
                   end;
                end if;
@@ -316,7 +248,12 @@ package body ${ada_lib_name}.Lexer_Implementation is
                                Symbol       => No_Thin_Symbol));
 
                if Token_Id = ${lexer.LexingFailure.ada_name} then
-                  Append (Diagnostics, Sloc_Range, "Invalid token, ignored");
+                  Append
+                    (Diagnostics,
+                     Make_Range
+                       (Get_Sloc (TDH, Token.Text_First),
+                        Get_Sloc (TDH, Token.Text_Last)),
+                     "Invalid token, ignored");
                end if;
 
                goto Dont_Append;
@@ -384,23 +321,30 @@ package body ${ada_lib_name}.Lexer_Implementation is
                   Source_First => Source_First,
                   Source_Last  => Source_First - 1,
                   Symbol       => No_Thin_Symbol);
+
+               --  Compute the column number for the current line: In this case
+               --  we know that the previous token was a newline, so we can
+               --  just compute from the prev token's last position to the
+               --  current token start position.
+               Col : Column_Number
+                 := Column_Number (Source_First - Last_Token_Last);
             begin
-               if Sloc_Range.Start_Column < Get_Col then
+               if Col < Get_Col then
                   --  Emit every necessary dedent token if the line is
                   --  dedented, and pop values from the stack.
                   T.Kind := From_Token_Kind (${lexer.Dedent.ada_name});
-                  while Sloc_Range.Start_Column < Get_Col loop
+                  while Col < Get_Col loop
                      Append_Token (T);
                      Columns_Stack_Len := Columns_Stack_Len - 1;
                   end loop;
 
-               elsif Sloc_Range.Start_Column > Get_Col then
+               elsif Col > Get_Col then
                   --  Emit a single indent token, and put the new value on the
                   --  indent stack.
                   T.Kind := From_Token_Kind (${lexer.Indent.ada_name});
                   Append_Token (T);
                   Columns_Stack_Len := Columns_Stack_Len + 1;
-                  Columns_Stack (Columns_Stack_Len) := Sloc_Range.Start_Column;
+                  Columns_Stack (Columns_Stack_Len) := Col;
                end if;
             end;
 
@@ -427,10 +371,11 @@ package body ${ada_lib_name}.Lexer_Implementation is
          end if;
          % endif
 
+         Last_Token_Last := Source_Last;
+
       % if lexer.token_actions['WithTrivia']:
          <<Dont_Append>>
       % endif
-         Current_Sloc := Next_Sloc;
       end loop;
 
    end Process_All_Tokens;
@@ -446,7 +391,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Decoded_Buffer : Text_Access;
       Source_First   : Positive;
       Source_Last    : Natural;
-      Tab_Stop       : Positive;
       With_Trivia    : Boolean;
       TDH            : in out Token_Data_Handler;
       Diagnostics    : in out Diagnostics_Vectors.Vector) is
@@ -459,11 +403,11 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       if With_Trivia then
          Process_All_Tokens_With_Trivia
-           (Decoded_Buffer, Source_First, Source_Last, Tab_Stop, TDH,
+           (Decoded_Buffer, Source_First, Source_Last, TDH,
             Diagnostics);
       else
          Process_All_Tokens_No_Trivia
-           (Decoded_Buffer, Source_First, Source_Last, Tab_Stop, TDH,
+           (Decoded_Buffer, Source_First, Source_Last, TDH,
             Diagnostics);
       end if;
    end Extract_Tokens_From_Text_Buffer;
@@ -475,7 +419,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
    procedure Extract_Tokens_From_Bytes_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
-      Tab_Stop        : Positive;
       With_Trivia     : Boolean;
       TDH             : in out Token_Data_Handler;
       Diagnostics     : in out Diagnostics_Vectors.Vector)
@@ -487,7 +430,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First,
                      Source_Last);
       Extract_Tokens_From_Text_Buffer
-        (Decoded_Buffer, Source_First, Source_Last, Tab_Stop, With_Trivia, TDH,
+        (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
          Diagnostics);
    end Extract_Tokens_From_Bytes_Buffer;
 
@@ -497,7 +440,6 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
    procedure Extract_Tokens
      (Input       : Internal_Lexer_Input;
-      Tab_Stop    : Positive;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector) is
@@ -522,7 +464,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                        Address => Buffer_Addr;
             begin
                Extract_Tokens_From_Bytes_Buffer
-                 (Buffer, To_String (Input.Charset), Input.Read_BOM, Tab_Stop,
+                 (Buffer, To_String (Input.Charset), Input.Read_BOM,
                   With_Trivia, TDH, Diagnostics);
                Free (Region);
                Close (File);
@@ -541,7 +483,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                   with Import, Address => Input.Bytes;
             begin
                Extract_Tokens_From_Bytes_Buffer
-                 (Bytes, To_String (Input.Charset), Input.Read_BOM, Tab_Stop,
+                 (Bytes, To_String (Input.Charset), Input.Read_BOM,
                   With_Trivia, TDH, Diagnostics);
                TDH.Filename := GNATCOLL.VFS.No_File;
                TDH.Charset := Input.Charset;
@@ -559,7 +501,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
             begin
                Decoded_Buffer.all (Source_First .. Source_Last) := Text_View;
                Extract_Tokens_From_Text_Buffer
-                 (Decoded_Buffer, Source_First, Source_Last, Tab_Stop,
+                 (Decoded_Buffer, Source_First, Source_Last,
                   With_Trivia, TDH, Diagnostics);
                TDH.Filename := GNATCOLL.VFS.No_File;
                TDH.Charset := Null_Unbounded_String;

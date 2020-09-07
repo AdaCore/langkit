@@ -3854,7 +3854,7 @@ package body ${ada_lib_name}.Implementation is
          Actual_Input : Internal_Lexer_Input := Input;
       begin
          Init_Parser
-           (Actual_Input, Context.Tab_Stop, Context.With_Trivia, Unit,
+           (Actual_Input, Context.With_Trivia, Unit,
             Unit_TDH, Unit.Context.Parser);
       exception
          when Exc : Name_Error =>
