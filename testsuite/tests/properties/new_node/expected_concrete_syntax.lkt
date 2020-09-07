@@ -23,12 +23,21 @@ class LiteralSequence : FooNode {
     SynthNode(name=node.name, items=node.items)
 
     @export fun prop (): SynthNode = node.new_node().as_bare_entity
+
+    @lazy new_node2 : SynthNode2 = SynthNode2(name=node.name, items=node.items)
+
+    @export fun prop2 (): SynthNode2 = node.new_node2().as_bare_entity
 }
 
 class Name : FooNode implements TokenNode {
 }
 
 class SynthNode : FooNode {
+    @parse_field name : Name
+    @parse_field items : ASTList[Literal]
+}
+
+class SynthNode2 : FooNode {
     @parse_field name : Name
     @parse_field items : ASTList[Literal]
 }
