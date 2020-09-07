@@ -48,16 +48,12 @@ package ${ada_lib_name}.Lexer is
 
    procedure Extract_Tokens
      (Input       : Lexer_Input;
-      Tab_Stop    : Positive := ${ctx.default_tab_stop};
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
       with Pre  => Initialized (TDH) and then not Has_Source_Buffer (TDH),
            Post => Has_Source_Buffer (TDH);
    --  Extract tokens out of the given ``Input`` and store them into ``TDH``.
-   --
-   --  ``Tab_Stop`` is a positive number to describe the effect of tabulation
-   --  characters on the column number in source files.
    --
    --  Raise a ``Name_Error`` exception if this involves reading a file that
    --  can not be open. Raise an ``Unknown_Charset`` exception if the requested

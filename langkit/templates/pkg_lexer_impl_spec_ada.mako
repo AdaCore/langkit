@@ -42,7 +42,6 @@ private package ${ada_lib_name}.Lexer_Implementation is
 
    procedure Extract_Tokens
      (Input       : Internal_Lexer_Input;
-      Tab_Stop    : Positive;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);

@@ -23,7 +23,6 @@ package body ${ada_lib_name}.Lexer is
 
    procedure Extract_Tokens
      (Input       : Lexer_Input;
-      Tab_Stop    : Positive := ${ctx.default_tab_stop};
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
@@ -60,7 +59,7 @@ package body ${ada_lib_name}.Lexer is
             end;
       end case;
 
-      Extract_Tokens (Internal_Input, Tab_Stop, With_Trivia, TDH, Diagnostics);
+      Extract_Tokens (Internal_Input, With_Trivia, TDH, Diagnostics);
    end Extract_Tokens;
 
    ${exts.include_extension(ctx.ext('lexer', 'bodies'))}

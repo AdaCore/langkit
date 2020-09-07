@@ -151,7 +151,6 @@ package body ${ada_lib_name}.Parsers is
 
    procedure Init_Parser
      (Input       : Internal_Lexer_Input;
-      Tab_Stop    : Positive;
       With_Trivia : Boolean;
       Unit        : access Implementation.Analysis_Unit_Type;
       TDH         : Token_Data_Handler_Access;
@@ -159,7 +158,7 @@ package body ${ada_lib_name}.Parsers is
    begin
       Reset (Parser);
       Extract_Tokens
-        (Input, Tab_Stop, With_Trivia, TDH.all, Parser.Diagnostics);
+        (Input, With_Trivia, TDH.all, Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
    end Init_Parser;
