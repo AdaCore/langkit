@@ -806,6 +806,24 @@ package Langkit_Support.Lexical_Env is
    function Is_Stale (Self : Lexical_Env) return Boolean;
    --  Return whether Self points to a now defunct lexical env
 
+   function Is_Foreign (Self : Lexical_Env; Node : Node_Type) return Boolean
+   is (Self.Env.Node = No_Node
+       or else Node_Unit (Self.Env.Node) /= Node_Unit (Node))
+   with Pre => Self.Kind = Primary;
+   --  Return whether Node is a foreign node relative to Self (i.e. whether
+   --  they both belong to different units). This is true even for the empty
+   --  env and the root one, which are not tied to any unit.
+
+   function Is_Foreign_Not_Empty
+     (Self : Lexical_Env; Node : Node_Type) return Boolean
+   is (Self /= Empty_Env and then Is_Foreign (Self, Node));
+   --  Same as Is_Foreign, but return False for the empty env
+
+   function Is_Foreign_Strict
+     (Self : Lexical_Env; Node : Node_Type) return Boolean
+   is (Self.Env.Node /= No_Node and then Is_Foreign (Self, Node));
+   --  Same as Is_Foreign, but return False for the empty and root envs
+
    -------------------
    -- Debug helpers --
    -------------------

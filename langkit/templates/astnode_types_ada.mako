@@ -350,9 +350,10 @@
                  if ref_env.dest_env_prop else "Self.Self_Env")};
          begin
             % if ref_env.dest_env_prop and not ref_env.unsound:
-               if Env.Env.Node /= null
-                  and then Env.Env.Node.Unit /= Self.Unit
-               then
+               ## Adding a reference on a foreign environment is unsound, but
+               ## it's fine for the empty/root environments, as they don't
+               ## trigger relocations.
+               if Is_Foreign_Strict (Env, Self) then
                   raise Property_Error with
                      "unsound foreign environment in RefEnvs ("
                      & "${ref_env.str_location})";
@@ -448,9 +449,9 @@
       end if;
 
       % if not cls.env_spec.initial_env.unsound:
-         if Initial_Env.Env.Node /= null
-            and then Initial_Env.Env.Node.Unit /= Self.Unit
-         then
+         ## Having a parent environment that is foreign is unsound, except for
+         ## the empty/root environments, as no relocation is needed for them.
+         if Is_Foreign_Strict (Initial_Env, Self) then
             raise Property_Error with
                "unsound foreign environment in SetInitialEnv ("
                & "${cls.env_spec.initial_env.str_location}" & ")";
