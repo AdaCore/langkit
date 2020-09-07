@@ -12,5 +12,12 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
+print('== prop ==')
 u.root.p_prop.dump()
+print()
+
+print('== prop2 ==')
+u.root.p_prop2.dump()
+print()
+
 print('main.py: Done.')

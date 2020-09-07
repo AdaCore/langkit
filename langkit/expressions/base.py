@@ -4497,7 +4497,8 @@ def lazy_field(public: Opt[bool] = None,
 
     Unlike with memoized properties, the cache for the property result is not
     reset when an analysis unit is (re)parsed. This makes lazy fields better
-    suited to create synthetic nodes.
+    suited to create synthetic nodes. TODO: eventually we will forbit node
+    synthetization in memoized properties.
 
     See PropertyDef for details about the semantics of arguments.
     """

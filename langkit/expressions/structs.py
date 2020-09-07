@@ -204,9 +204,8 @@ class New(AbstractExpression):
     Create a structure value or a new AST node.
 
     `struct_type` must be the type of the value to create and `field_values`
-    must contain key/value associations for all fields this structure or AST
-    node contains. Note that creating AST nodes requires the embedding property
-    to be memoized.
+    must contain key/value associations for all fields this structure or node
+    contains.
 
     For instance, assuming the following ``Struct`` subclass::
 
@@ -215,6 +214,17 @@ class New(AbstractExpression):
             b = UserField(SomeNode)
 
         New(MyStruct, a=True, b=No(SomeNode))
+
+    When evaluating a property on node X, synthetizing a node Y does the
+    following assignments:
+
+    * Y's parents is X;
+    * Y's environment (``.node_env`` and ``.children_env``) is
+      ``X.children_env``.
+
+    Note that because of this last assignment, synthetizing a node triggers PLE
+    on the current analysis unit. In addition, synthetizing nodes is allowed
+    only in memoized properties or lazy fields.
     """
 
     class StructExpr(ComputingExpr):
@@ -354,10 +364,11 @@ class New(AbstractExpression):
                 not self.struct_type.is_list_type,
                 'List node synthetization is not supported for now'
             )
+            prop = PropertyDef.get()
             check_source_language(
-                PropertyDef.get().memoized,
-                'Node synthetization can only happen inside a memoized'
-                ' property'
+                prop.memoized or prop.lazy_field,
+                'Node synthetization can only happen inside memoized'
+                ' properties or lazy fields'
             )
 
         # Make sure the provided set of fields matches the one the struct

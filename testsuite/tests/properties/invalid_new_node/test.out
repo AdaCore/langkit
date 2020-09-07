@@ -1,5 +1,5 @@
 == Not memoized ==
-test.py:XXX: error: Node synthetization can only happen inside a memoized property
+test.py:XXX: error: Node synthetization can only happen inside memoized properties or lazy fields
 
 == List synthetization ==
 test.py:XXX: error: List node synthetization is not supported for now
