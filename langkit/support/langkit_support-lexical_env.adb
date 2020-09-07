@@ -99,12 +99,6 @@ package body Langkit_Support.Lexical_Env is
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
 
-   function Is_Foreign (Self : Lexical_Env; Node : Node_Type) return Boolean
-   is (Self.Env.Node = No_Node
-       or else Node_Unit (Self.Env.Node) /= Node_Unit (Node))
-   with Pre => Self.Kind = Primary;
-   --  Return whether Node is foreign node relative to Self
-
    ----------------
    -- Text_Image --
    ----------------

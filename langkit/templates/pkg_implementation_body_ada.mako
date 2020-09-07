@@ -1347,21 +1347,32 @@ package body ${ada_lib_name}.Implementation is
       if Dest_Env.Kind /= Primary then
          raise Property_Error with
             "Cannot add elements to a non-primary lexical env";
-      elsif (Dest_Env.Env.Node = null
-             or else Dest_Env.Env.Node.Unit /= Self.Unit)
-            and then Is_Synthetic (Mapping.Val)
+
+      elsif
+         --  Since lexical envs need to sort the foreign nodes they contain,
+         --  and that the total order on nodes is not defined for synthetic
+         --  nodes, it is not possible to add a synthetic node to a foreign
+         --  lexical environment.
+         --
+         --  This reasoning applies to environments that belong to foreign
+         --  units, but also to the root environment.
+         Is_Foreign (Dest_Env, Self) and then Is_Synthetic (Mapping.Val)
       then
          raise Property_Error with
             "Cannot add a synthetic node to a lexical env from another"
             & " analysis unit";
       end if;
 
-      --  If requested, reject foreign destination environments. Note that this
-      --  detects only explicit destination environments: foreign initial ones
-      --  are already detected in SetInitialEnv actions.
+      --  If requested, reject foreign destination environments.  Note that
+      --  this detects only explicit destination environments
+      --  (Mapping.Dest_Env): Set_Initial_Env already sanitizes initial
+      --  environments (State.Current_Env).
+      --
+      --  This is an attempt at identifying uses of the unsound relocation
+      --  mechanism (as opposed to named environments), so this applies to all
+      --  foreign environments (root scope included).
       if DSL_Location'Length > 0
-         and then Mapping.Dest_Env.Env.Node /= null
-         and then Mapping.Dest_Env.Env.Node.Unit /= Self.Unit
+         and then Is_Foreign_Strict (Mapping.Dest_Env, Self)
       then
          raise Property_Error with
             "unsound foreign environment in AddToEnv (" & DSL_Location & ")";
@@ -1401,10 +1412,8 @@ package body ${ada_lib_name}.Implementation is
            ((State.Current_NED, Mapping.Key, Mapping.Val));
 
       --  Otherwise, if we're adding the element to an environment that belongs
-      --  to a different unit, then:
-      elsif Dest_Env /= Empty_Env
-            and then (Dest_Env = Root_Scope
-                      or else Dest_Env.Env.Node.Unit /= Self.Unit)
+      --  to a different unit, or to the root scope, then:
+      elsif Dest_Env = Root_Scope or else Is_Foreign_Strict (Dest_Env, Self)
       then
          --  Add the environment, the key, and the value to the list of entries
          --  contained in other units, so we can remove them when reparsing
@@ -1463,14 +1472,14 @@ package body ${ada_lib_name}.Implementation is
       --  Does the parent environment comes from a named environment lookup?
 
       Parent_Foreign : constant Boolean :=
-         State.Current_Env.Env.Node /= null
-         and then State.Current_Env.Env.Node.Unit /= Self.Unit;
+         Is_Foreign_Strict (State.Current_Env, Self);
 
       --  Determine how to get the parent of this new environment:
       --
       --  (1) no parent if requested;
       --  (2) the current environment as the static parent if it comes from a
-      --      named env lookup or if it is not foreign;
+      --      named env lookup or if it is not foreign (or is the empty/root
+      --      environment);
       --  (3) a dynamic parent in all other cases (the current environment is
       --      foreign and not fetched as a named environment.
       Parent_Getter : constant Env_Getter :=
