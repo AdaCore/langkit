@@ -1,0 +1,7 @@
+main.adb: Running...
+Attempt 1... [LANGKIT.PROPERTIES] Example.my_field (<Example main.txt:1:1-1:8>):
+   [LANGKIT.PROPERTIES] Result:  42
+ 42
+Attempt 2...  42
+main.adb: Done.
+Done

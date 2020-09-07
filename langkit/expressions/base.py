@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
-from typing import Any, Dict, List, Optional as Opt
+from typing import Any, Dict, List, Optional as Opt, Set, Tuple
 
 from enum import Enum
 import funcy
@@ -13,7 +13,8 @@ from langkit import names
 from langkit.common import string_repr
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Argument, CompiledType, EnumValue, T,
-    TypeRepo, gdb_helper, get_context, no_compiled_type, resolve_type
+    TypeRepo, UserField, gdb_helper, get_context, no_compiled_type,
+    resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, WarningSet, check_multiple,
@@ -3079,9 +3080,9 @@ class PropertyDef(AbstractNodeData):
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
                  optional_entity_info=False, warn_on_unused=True,
-                 ignore_warn_on_node=None,
-                 call_non_memoizable_because=None,
-                 activate_tracing=False, dump_ir=False):
+                 ignore_warn_on_node=None, call_non_memoizable_because=None,
+                 activate_tracing=False, dump_ir=False,
+                 lazy_field: Opt[bool] = None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3190,6 +3191,10 @@ class PropertyDef(AbstractNodeData):
 
         :param bool dump_ir: If true, dump the tree of resolved expressions for
             this property.
+
+        :param lazy_field: Whether the goal of this property is to initialize a
+            lazy field. If None, inherit this status from the root property, or
+            default to False if this is the root property.
         """
 
         self.prefix = prefix
@@ -3235,7 +3240,7 @@ class PropertyDef(AbstractNodeData):
         Recursion guard for the construct pass.
         """
 
-        self.logic_predicates = []
+        self.logic_predicates: List[Tuple[CompiledType, str]] = []
         """
         The list of logic predicates to generate. First element of the tuple is
         a list of the args types, second is the unique identifier for this
@@ -3302,12 +3307,11 @@ class PropertyDef(AbstractNodeData):
                 self._dynamic_vars.append(dyn_var)
                 self._dynamic_vars_default_values.append(default)
 
-        self.overriding_properties = set()
+        self.overriding_properties: Set[PropertyDef] = set()
         """
         Set of properties that override "self".
 
         This is inferred during the "compute" pass.
-        :type: set[PropertyDef]|None
         """
 
         self.prop_decl = None
@@ -3351,7 +3355,7 @@ class PropertyDef(AbstractNodeData):
 
         self._call_non_memoizable_because = call_non_memoizable_because
 
-        self.dynvar_binding_stack = []
+        self.dynvar_binding_stack: List[DynamicVariable] = []
         """
         Stack of dynamic variable bindings. This is used to determine the set
         of dynamic variables to reset when recursing on the construction of
@@ -3373,6 +3377,20 @@ class PropertyDef(AbstractNodeData):
 
         self.activate_tracing = activate_tracing
         self.dump_ir = dump_ir
+        self._lazy_field = lazy_field
+
+        self.lazy_present_field: Opt[UserField] = None
+        """
+        If ``self`` is a lazy field, this is a boolean field that tracks
+        whether ``self`` was evaluated, and thus whether ``lazy_storage_field``
+        is initialized.
+        """
+
+        self.lazy_storage_field: Opt[UserField] = None
+        """
+        If ``self`` is a lazy field, this is the field that stores the result
+        of its evaluation.
+        """
 
     @property
     def has_debug_info(self):
@@ -3752,7 +3770,18 @@ class PropertyDef(AbstractNodeData):
                     )
                 )
 
-            # Likewise for dynamically bound variables
+            # Inherit the "lazy field" status, or check its consistency with
+            # the base property.
+            if self._lazy_field is None:
+                self._lazy_field = self.base_property.lazy_field
+            else:
+                check_source_language(
+                    self._lazy_field == self.base_property.lazy_field,
+                    "lazy fields cannot override properties, and conversely"
+                )
+
+            # Inherit dynamically bound variables, or check their consistency
+            # with the base property.
             self_dynvars = self._dynamic_vars
             self_dynvars_defaults = self._dynamic_vars_default_values
             base_dynvars = self.base_property.dynamic_vars
@@ -3858,9 +3887,10 @@ class PropertyDef(AbstractNodeData):
                     )
 
         else:
-            # By default, properties are private and they have no dynamically
-            # bound variable.
+            # By default, properties are private, are not lazy fields, and they
+            # have no dynamically bound variable.
             self._is_public = bool(self._is_public)
+            self._lazy_field = bool(self._lazy_field)
             if self._dynamic_vars is None:
                 self._dynamic_vars = []
                 self._dynamic_vars_default_values = []
@@ -3910,6 +3940,37 @@ class PropertyDef(AbstractNodeData):
                 ' ones'.format(self.qualname, args,
                                self.base_property.qualname, base_args)
             )
+
+        if self.lazy_field:
+            # Check several invariants for lazy fields. Some are impossible by
+            # construction (asserts), others are about checking what the user
+            # tried (check_source_language).
+            assert not self.external
+            assert not self.memoized
+            assert not self._dynamic_vars
+            check_source_language(not self.natural_arguments,
+                                  "Lazy fields cannot have arguments")
+
+            # If this is the root lazy field, create their storage fields: one
+            # boolean telling whether the lazy field was evaluated, and the
+            # field itself. For other lazy fields, just re-use the root's
+            # fields.
+            if self.base_property is None:
+                self.lazy_present_field = self.struct.add_internal_user_field(
+                    name=names.Name('LF_Present') + self.original_name,
+                    type=T.Bool,
+                    doc=f'Whether the {self.qualname} lazy field was'
+                        f' evaluated',
+                    default_value=Literal(True),
+                )
+                self.lazy_storage_field = self.struct.add_internal_user_field(
+                    name=names.Name('LF_Stg') + self.original_name,
+                    type=self.type,
+                    doc=f'Storage for the {self.qualname} lazy field',
+                )
+            else:
+                self.lazy_present_field = self.base_property.lazy_present_field
+                self.lazy_storage_field = self.base_property.lazy_storage_field
 
     @property
     def original_is_public(self):
@@ -4307,6 +4368,11 @@ class PropertyDef(AbstractNodeData):
             'This property is public but it lacks documentation'
         )
 
+    @property
+    def lazy_field(self) -> bool:
+        assert self._lazy_field is not None
+        return self._lazy_field
+
 
 def ExternalProperty(type=None, doc="", **kwargs):
     """
@@ -4317,7 +4383,8 @@ def ExternalProperty(type=None, doc="", **kwargs):
     :rtype: PropertyDef
     """
     return PropertyDef(expr=None, prefix=AbstractNodeData.PREFIX_PROPERTY,
-                       type=type, doc=doc, external=True, **kwargs)
+                       type=type, doc=doc, external=True, lazy_field=False,
+                       **kwargs)
 
 
 # noinspection PyPep8Naming
@@ -4333,7 +4400,8 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     """
     return PropertyDef(expr=None, prefix=AbstractNodeData.PREFIX_PROPERTY,
                        type=type, doc=doc, abstract=True,
-                       abstract_runtime_check=runtime_check, **kwargs)
+                       abstract_runtime_check=runtime_check, lazy_field=False,
+                       **kwargs)
 
 
 # noinspection PyPep8Naming
@@ -4361,7 +4429,8 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
         type=type, dynamic_vars=dynamic_vars, memoized=memoized,
         warn_on_unused=warn_on_unused, ignore_warn_on_node=ignore_warn_on_node,
         uses_entity_info=uses_entity_info,
-        call_non_memoizable_because=call_non_memoizable_because
+        call_non_memoizable_because=call_non_memoizable_because,
+        lazy_field=False,
     )
 
 
@@ -4406,7 +4475,55 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             ignore_warn_on_node=ignore_warn_on_node,
             call_non_memoizable_because=call_non_memoizable_because,
             activate_tracing=activate_tracing,
-            dump_ir=dump_ir
+            dump_ir=dump_ir,
+            lazy_field=False,
+        )
+    return decorator
+
+
+def lazy_field(public: Opt[bool] = None,
+               return_type: Opt[CompiledType] = None,
+               kind: AbstractKind = AbstractKind.concrete,
+               warn_on_unused: bool = True,
+               ignore_warn_on_node: Opt[bool] = None,
+               activate_tracing: bool = False,
+               dump_ir: bool = False):
+    """
+    Return a decorator to create a lazy field.
+
+    A lazy field is a node field that is initialized on demand, using a
+    property expression. The result of that property is stored in the node
+    itself, and re-used later on, whenever the field is used.
+
+    Unlike with memoized properties, the cache for the property result is not
+    reset when an analysis unit is (re)parsed. This makes lazy fields better
+    suited to create synthetic nodes.
+
+    See PropertyDef for details about the semantics of arguments.
+    """
+    def decorator(expr_fn):
+        return PropertyDef(
+            expr=expr_fn,
+            prefix=AbstractNodeData.PREFIX_FIELD,
+            public=public,
+            doc=expr_fn.__doc__,
+            abstract=kind in [AbstractKind.abstract,
+                              AbstractKind.abstract_runtime_check],
+            type=return_type,
+            abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
+            dynamic_vars=None,
+            memoized=False,
+            call_memoizable=True,
+            memoize_in_populate=False,
+            external=False,
+            uses_entity_info=None,
+            uses_envs=None,
+            warn_on_unused=warn_on_unused,
+            ignore_warn_on_node=ignore_warn_on_node,
+            call_non_memoizable_because=None,
+            activate_tracing=activate_tracing,
+            dump_ir=dump_ir,
+            lazy_field=True,
         )
     return decorator
 
