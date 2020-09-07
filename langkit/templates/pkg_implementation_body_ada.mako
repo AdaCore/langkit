@@ -2191,12 +2191,9 @@ package body ${ada_lib_name}.Implementation is
          --  Do nothing if its lexical envs have already been populated for
          --  this node.
          declare
-            <%
-               is_env_populated_field = (
-                  ctx.ple_unit_root.get_abstract_node_data_dict()
-                  [ctx.ple_unit_root.is_env_populated_indexing_name]
-               ).name
-            %>
+            <% is_env_populated_field = (
+               ctx.ple_unit_root.is_env_populated_field.name
+            ) %>
             PLE_Unit_Root : constant ${ctx.ple_unit_root.name} := Node;
          begin
             if PLE_Unit_Root.${is_env_populated_field} then

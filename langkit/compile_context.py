@@ -1083,7 +1083,7 @@ class CompileCtx:
 
         If so, add a "is_env_populated" field to it.
         """
-        from langkit.compiled_types import ASTNodeType, T, UserField
+        from langkit.compiled_types import T
 
         # Locate the PLE_unit root (if any), checking that we at most one such
         # node annotation.
@@ -1140,19 +1140,14 @@ class CompileCtx:
                                               ple_unit_root_list.dsl_name)
                     )
 
-        is_env_populated_flag = UserField(
-            type=T.Bool,
-            doc='Whether this PLE unit root was processed by'
-                ' Populate_Lexical_Env.',
-            public=False
+        self.ple_unit_root.is_env_populated_field = (
+            self.ple_unit_root.add_internal_user_field(
+                name=names.Name('Is_Env_Populated'),
+                type=T.Bool,
+                doc='Whether this PLE unit root was processed by'
+                    ' Populate_Lexical_Env.',
+            )
         )
-        is_env_populated_flag._name = is_env_populated_flag._original_name = (
-            ASTNodeType.is_env_populated_name
-        )
-        is_env_populated_flag._indexing_name = (
-            ASTNodeType.is_env_populated_indexing_name
-        )
-        self.ple_unit_root.add_field(is_env_populated_flag)
 
     def check_concrete_subclasses(self, astnode):
         """

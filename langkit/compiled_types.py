@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
-from typing import Dict, List, Optional as Opt, Set
+from typing import Dict, List, Optional as Opt, Set, TYPE_CHECKING
 
 from langkit import names
 from langkit.c_api import CAPIType
@@ -20,6 +20,10 @@ from langkit.utils import issubtype, memoized, not_implemented_error
 from langkit.utils.text import (append_paragraph, first_line_indentation,
                                 indent)
 from langkit.utils.types import TypeSet
+
+
+if TYPE_CHECKING:
+    from langkit.expressions import AbstractExpression
 
 
 def gdb_helper(*args):
@@ -2094,6 +2098,30 @@ class BaseStructType(CompiledType):
                 for f in self.get_abstract_node_data()
                 if is_required(f)}
 
+    def add_internal_user_field(
+        self,
+        name: names.Name,
+        type: CompiledType,
+        doc: Opt[str] = None,
+        default_value: Opt[AbstractExpression] = None
+    ) -> UserField:
+        """
+        Create an internal (not public) UserField for this struct type.
+
+        This method takes care of creating the UserField instance, registering
+        it as a field of ``self`` and then returns the instance.
+
+        See UserField's constructor for argument semantics.
+        """
+        result = UserField(type=type,
+                           doc=doc,
+                           public=False,
+                           default_value=default_value)
+        result._name = name
+        result._indexing_name = '[internal]{}'.format(name.lower)
+        self.add_field(result)
+        return result
+
 
 class StructType(BaseStructType):
     """
@@ -2346,12 +2374,6 @@ class ASTNodeType(BaseStructType):
     # If this is an enum node, mapping from alternative camel name to
     # ASTNodeType instance for the alternative.
     _alternatives_map: Dict[str, ASTNodeType]
-
-    # Various names for the "is_env_populated" field for PLE unit roots
-    is_env_populated_name = names.Name('Is_Env_Populated')
-    is_env_populated_indexing_name = (
-        '[internal]{}'.format(is_env_populated_name.lower)
-    )
 
     def __init__(self, name, location, doc, base, fields,
                  env_spec=None, element_type=None, annotations=None,
