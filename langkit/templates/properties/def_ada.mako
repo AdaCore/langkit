@@ -119,6 +119,18 @@ is
 begin
    ${gdb_property_body_start()}
 
+   ## If this is a lazy field, return it when it has already been evaluated
+   ## once.
+   % if property.lazy_field:
+      if Self.${property.lazy_present_field.name} then
+         Property_Result := Self.${property.lazy_storage_field.name};
+         % if property.type.is_refcounted:
+            Inc_Ref (Property_Result);
+         % endif
+         return Property_Result;
+      end if;
+   % endif
+
    ## Because they can be used this way in equation solving, properties must
    ## not crash when called on a null node.
    if Self /= null then
@@ -267,6 +279,15 @@ begin
 
       % if not property.memoize_in_populate:
       end if;
+      % endif
+
+   % elif property.lazy_field:
+      ## If this property is the initializer for a lazy field, track its result
+      ## in Self.
+      Self.${property.lazy_present_field.name} := True;
+      Self.${property.lazy_storage_field.name} := Property_Result;
+      % if property.type.is_refcounted:
+         Inc_Ref (Property_Result);
       % endif
    % endif
 

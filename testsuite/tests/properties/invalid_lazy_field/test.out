@@ -1,0 +1,10 @@
+== test1_inconsistent_base ==
+test.py:XXX: error: lazy fields cannot override properties, and conversely
+
+== test2_inconsistent_base ==
+test.py:XXX: error: lazy fields cannot override properties, and conversely
+
+== test3_with_args ==
+test.py:XXX: error: Lazy fields cannot have arguments
+
+Done

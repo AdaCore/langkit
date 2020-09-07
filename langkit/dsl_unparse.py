@@ -1094,6 +1094,8 @@ def emit_prop(prop, walker):
 
     if prop.memoized:
         quals += "@memoized "
+    elif prop.lazy_field:
+        quals += "@lazy "
 
     args = ", ".join("{} : {}{}".format(
         var_name(arg), type_name(arg.type),
@@ -1107,9 +1109,14 @@ def emit_prop(prop, walker):
     if doc:
         res += "$hl{}".format(emit_doc(doc))
 
-    res += "$hl{}fun {} ({}): {}".format(
-        quals, prop.original_name.lower, args, type_name(prop.type)
-    )
+    if prop.lazy_field:
+        res += "$hl{}{} : {}".format(
+            quals, prop.original_name.lower, type_name(prop.type)
+        )
+    else:
+        res += "$hl{}fun {} ({}): {}".format(
+            quals, prop.original_name.lower, args, type_name(prop.type)
+        )
 
     if prop_for_walker.expr:
         with walker.property(prop_for_walker):

@@ -2402,6 +2402,7 @@ class CompileCtx:
                         uses_entity_info=prop.uses_entity_info,
                         uses_envs=prop.uses_envs,
                         optional_entity_info=prop.optional_entity_info,
+                        lazy_field=prop.lazy_field,
                     )
                     static_props[0] = root_static
 
