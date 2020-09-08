@@ -324,6 +324,10 @@ class New(AbstractExpression):
             super().__init__(astnode, assocs, 'New_Node',
                              abstract_expr=abstract_expr)
 
+            # The synthetized node inherits Self.Self_Env, so PLE must happen
+            # before this property is run.
+            PropertyDef.get().set_uses_envs()
+
         def _render_pre(self):
             return (super()._render_fields()
                     + render('properties/new_astnode_ada', expr=self))
