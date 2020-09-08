@@ -2,6 +2,18 @@
 
 <% result = expr.result_var.name %>
 
+## Forbid node synthetization when Self.Self_Env is foreign, as in that case,
+## this new node would escape the relocation mechanism when that foreign env is
+## terminated.
+##
+## Note that we could, in principle, register this synthetized node so that the
+## relocation mechanism takes care of it, but this incurs extra complexity for
+## a use case that is not yet proven useful. So just forbid this situation.
+if Is_Foreign_Strict (Self.Self_Env, Self) then
+   raise Property_Error with
+      "synthetic nodes cannot have foreign lexical envs";
+end if;
+
 ${result} := new ${T.root_node.value_type_name}
   (${expr.static_type.ada_kind_name});
 Initialize
