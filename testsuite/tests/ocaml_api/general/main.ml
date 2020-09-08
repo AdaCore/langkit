@@ -400,9 +400,10 @@ let test_character () =
   print_exit_if_diags u ;
   let root = root_exn u in
   Format.printf
-    "@[<v>get_a: %S@ get_eacute: %S@ identity é: %S@ double a: %S@ @]"
+    "@[<v>get_a: %S@ get_eacute: %S@ identity %S: %S@ double a: %S@ @]"
     (FooNode.p_get_a root)
     (FooNode.p_get_eacute root)
+    "é"
     (FooNode.p_identity root "é")
     (FooNode.p_double root "a") ;
   Format.printf "@[<v>=======================@ @ @]"
