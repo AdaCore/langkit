@@ -381,7 +381,7 @@ ISO-8859-1 charset: "\"H\195\169llo w\195\182rld!\""
 =======CHARACTER=======
 get_a: "a"
 get_eacute: "\195\169"
-identity é: "\195\169"
+identity "\195\169": "\195\169"
 double a: "aa"
 =======================
 
