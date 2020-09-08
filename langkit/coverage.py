@@ -514,6 +514,7 @@ class GNATcov:
             'gnatcov', 'instrument',
             '--level', self.covlevel,
             '-P', emitter.main_project_file,
+            '--no-subprojects',
             '-X{}_COVINSTR=true'.format(emitter.lib_name_up)
         ])
 
@@ -590,6 +591,7 @@ class GNATcov:
         subprocess.check_call(
             ['gnatcov', 'coverage',
              '-P', os.path.join(instr_dir, 'to_cover.gpr'),
+             '--no-subprojects',
              '--level', self.covlevel,
              '--annotate', 'xml',
              '--output-dir', xml_dir,
