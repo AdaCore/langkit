@@ -1529,7 +1529,6 @@ ${array_types.decl(array_type)}
 % endfor
 
 ${iterator_types.base_decl()}
-${iterator_types.decl(T.entity.iterator)}
 % for iterator_type in ctx.iterator_types:
     % if iterator_type.exposed and iterator_type.emit_c_type:
 ${iterator_types.decl(iterator_type)}

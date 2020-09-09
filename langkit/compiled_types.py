@@ -3784,19 +3784,20 @@ class ArrayType(CompiledType):
         self._requires_vector = True
 
     @property
-    def has_early_decl(self) -> bool:
-        # The instantiation of the Langkit_Support.Lexical_Env generic packgaes
-        # depends on arrays of T.inner_env_assoc, so we need to declare it
-        # early.
-        return self.element_type == T.inner_env_assoc
-
-    def require_to_iterator_property(self) -> bool:
+    def requires_to_iterator_property(self) -> bool:
         """
         Return whether the `to_iterator` property of this array type should be
         emitted during codegen. This will be true only if the property is ever
         called from within the DSL, since the property is private.
         """
         return self._to_iterator_property.is_reachable
+
+    @property
+    def has_early_decl(self) -> bool:
+        # The instantiation of the Langkit_Support.Lexical_Env generic packgaes
+        # depends on arrays of T.inner_env_assoc, so we need to declare it
+        # early.
+        return self.element_type == T.inner_env_assoc
 
     def builtin_properties(self) -> List[Tuple[str, PropertyDef]]:
         """
@@ -3866,7 +3867,7 @@ class IteratorType(CompiledType):
         from within the DSL, since iterator types cannot be constructed from
         user APIs.
         """
-        return self.element_type.array.require_to_iterator_property
+        return self.element_type.array.requires_to_iterator_property
 
     @property
     def py_converter(self) -> str:
@@ -3934,6 +3935,12 @@ class IteratorType(CompiledType):
     @property
     def exposed_types(self) -> List[CompiledType]:
         return [self.element_type]
+
+    @property
+    def has_early_decl(self) -> bool:
+        # The iterator needs an early decl if its element type's array type
+        # needs an early decl.
+        return self.element_type.array.has_early_decl
 
     def generate_safety_net(self,
                             values_array: str,

@@ -473,11 +473,6 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('text_to_locale_string')}";
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
-   ${array_types.decl(T.root_node.array)}
-   ${array_types.decl(T.root_node.entity.array)}
-
-   ${iterator_types.decl(T.entity.iterator)}
-
    --------------------
    -- Unit providers --
    --------------------
@@ -532,9 +527,7 @@ private package ${ada_lib_name}.Implementation.C is
    --------------------
 
    % for iterator_type in ctx.iterator_types:
-       % if iterator_type.element_type != T.entity and \
-             iterator_type.exposed and \
-             iterator_type.emit_c_type:
+       % if iterator_type.exposed and iterator_type.emit_c_type:
            ${iterator_types.decl(iterator_type)}
        % endif
    % endfor

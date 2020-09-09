@@ -147,7 +147,7 @@
 
    function Equivalent (L, R : ${cls.name}) return Boolean;
 
-   % if cls.require_to_iterator_property:
+   % if cls.requires_to_iterator_property:
       function To_Iterator
         (Self : ${cls.name}) return ${cls.element_type.iterator.name};
       --  Return an iterator on values of this array
@@ -343,7 +343,7 @@
       return True;
    end Equivalent;
 
-   % if cls.require_to_iterator_property:
+   % if cls.requires_to_iterator_property:
       -----------------
       -- To_Iterator --
       -----------------

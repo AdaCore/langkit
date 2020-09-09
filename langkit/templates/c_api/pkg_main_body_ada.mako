@@ -1180,12 +1180,6 @@ package body ${ada_lib_name}.Implementation.C is
                        Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;
 
-   ${array_types.body(T.root_node.array)}
-
-   ${array_types.body(T.root_node.entity.array)}
-
-   ${iterator_types.body(T.entity.iterator)}
-
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------
@@ -1209,9 +1203,7 @@ package body ${ada_lib_name}.Implementation.C is
    % endfor
 
    % for iterator_type in ctx.iterator_types:
-       % if iterator_type.element_type != T.entity and \
-             iterator_type.exposed and \
-             iterator_type.emit_c_type:
+       % if iterator_type.exposed and iterator_type.emit_c_type:
            ${iterator_types.body(iterator_type)}
        % endif
    % endfor

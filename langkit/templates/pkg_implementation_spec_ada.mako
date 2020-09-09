@@ -134,6 +134,24 @@ private package ${ada_lib_name}.Implementation is
    ${ada_doc('langkit.node_is_synthetic', 3)}
 
    ---------------------------
+   -- Iterators safety nets --
+   ---------------------------
+
+   type Iterator_Safety_Net is record
+      Context         : Internal_Context;
+      Context_Serial  : Version_Number;
+      Context_Version : Natural;
+      --  Analysis context, its serial number and version number at the time
+      --  this safety net was produced.
+   end record;
+
+   No_Iterator_Safety_Net : constant Iterator_Safety_Net := (null, 0, 0);
+
+   procedure Check_Safety_Net (Self : Iterator_Safety_Net);
+   --  Check that the given iterator safety net is still valid, raising a
+   --  Stale_Reference_Error if it is not.
+
+   ---------------------------
    -- Environments handling --
    ---------------------------
 
@@ -154,7 +172,11 @@ private package ${ada_lib_name}.Implementation is
    is (Self.Metadata);
 
    ${array_types.incomplete_decl(T.inner_env_assoc.array)}
+   ${iterator_types.incomplete_decl(T.inner_env_assoc.iterator)}
+
    ${array_types.decl(T.inner_env_assoc.array)}
+   ${iterator_types.decl(T.inner_env_assoc.iterator)}
+
    function Inner_Env_Assoc_Get
      (Self  : ${T.inner_env_assoc.array.name};
       Index : Positive) return ${T.inner_env_assoc.name}
@@ -259,23 +281,6 @@ private package ${ada_lib_name}.Implementation is
       Transitive_Parent : Boolean) return Lexical_Env;
    --  Helper for properties code generation: wrapper around
    --  AST_Envs.Create_Dynamic_Lexical_Env.
-
-   ## Declare arrays of lexical environments here because we need them for the
-   ## Group operation below.
-   ${array_types.incomplete_decl(T.LexicalEnv.array)}
-   ${iterator_types.incomplete_decl(T.LexicalEnv.iterator)}
-   ${array_types.decl(T.LexicalEnv.array)}
-
-   ## See ASTNodeType.entity
-   ${array_types.incomplete_decl(T.root_node.entity.array)}
-   ${iterator_types.incomplete_decl(T.root_node.entity.iterator)}
-   ${array_types.decl(T.root_node.entity.array)}
-
-   ## Declare arrays of root nodes here since some primitives rely on it and
-   ## since the declarations require AST_Envs.
-   ${array_types.incomplete_decl(root_node_array)}
-   ${iterator_types.incomplete_decl(root_node_iterator)}
-   ${array_types.decl(root_node_array)}
 
    ## Generate Hash functions for "built-in types" if need be
    % if T.Bool.requires_hash_function:
@@ -407,7 +412,8 @@ private package ${ada_lib_name}.Implementation is
    ----------------------------------------------
 
    % for iterator_type in ctx.iterator_types:
-   % if iterator_type.element_type.should_emit_array_type:
+   % if not iterator_type.has_early_decl \
+        and iterator_type.is_used:
    ${iterator_types.incomplete_decl(iterator_type)}
    % endif
    % endfor
@@ -439,23 +445,9 @@ private package ${ada_lib_name}.Implementation is
    -- Iterator types --
    --------------------
 
-   type Iterator_Safety_Net is record
-      Context         : Internal_Context;
-      Context_Serial  : Version_Number;
-      Context_Version : Natural;
-      --  Analysis context, its serial number and version number at the time
-      --  this safety net was produced.
-   end record;
-
-   No_Iterator_Safety_Net : constant Iterator_Safety_Net := (null, 0, 0);
-
-   procedure Check_Safety_Net (Self : Iterator_Safety_Net);
-   --  Check that the given iterator safety net is still valid, raising a
-   --  Stale_Reference_Error if it is not.
-
    % for iterator_type in ctx.iterator_types:
-   % if not iterator_type.element_type.should_emit_array_type \
-        or iterator_type.is_used:
+   % if not iterator_type.has_early_decl \
+        and iterator_type.is_used:
    ${iterator_types.decl(iterator_type)}
    % endif
    % endfor
