@@ -21,8 +21,6 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Strings.Wide_Wide_Fixed; use Ada.Strings.Wide_Wide_Fixed;
-
 package body Langkit_Support.Token_Data_Handlers is
 
    function Internal_Get_Trivias
@@ -165,16 +163,43 @@ package body Langkit_Support.Token_Data_Handlers is
    --------------------------
 
    procedure Compute_Lines_Starts (TDH : in out Token_Data_Handler) is
-      T : Text_Type renames TDH.Source_Buffer.all;
+      T : Text_Type
+      renames TDH.Source_Buffer (TDH.Source_First .. TDH.Source_Last);
 
       Idx : Natural := 0;
       --  Index in T of the newline character that ends the currently processed
       --  line.
+
+      function Index
+        (Buffer    : Text_Type;
+         Char      : Wide_Wide_Character;
+         Start_Pos : Positive) return Natural;
+      --  Helper function. Return the index of the first occurence of ``Char``
+      --  in ``Buffer (Start_Pos .. End_Pos)``, or ``0`` if not found.
+
+      -----------
+      -- Index --
+      -----------
+
+      function Index
+        (Buffer    : Text_Type;
+         Char      : Wide_Wide_Character;
+         Start_Pos : Positive) return Natural
+      is
+      begin
+         for I in Start_Pos .. T'Last loop
+            if Buffer (I) = Char then
+               return I;
+            end if;
+         end loop;
+         return 0;
+      end Index;
+
    begin
       TDH.Lines_Starts.Append (1);
       loop
          --  Search the index of the newline char that follows the current line
-         Idx := Index (T, Chars.LF & "", Idx + 1);
+         Idx := Index (T, Chars.LF, Idx + 1);
 
          --  Append the index of the first character of line N+1 to
          --  Self.Line_Starts. This is the character at Idx+1.

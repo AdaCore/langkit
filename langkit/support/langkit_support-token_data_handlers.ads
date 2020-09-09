@@ -111,8 +111,11 @@ package Langkit_Support.Token_Data_Handlers is
 
    type Token_Data_Handler is record
       Source_Buffer : Text_Access;
-      --  The whole source buffer. It belongs to this token data handler, and
-      --  will be deallocated along with it.
+      --  The whole source buffer. It belongs to this token data handler,
+      --  and will be deallocated along with it. WARNING: this buffer might
+      --  actually be *larger* than the real source, which is why we have the
+      --  ``Source_First``/``Source_Last`` fields below. We allocate a bigger
+      --  buffer pessimistically so we don't have to have a growable buffer.
 
       Source_First : Positive;
       Source_Last  : Natural;
