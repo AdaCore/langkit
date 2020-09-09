@@ -44,7 +44,7 @@ package body Langkit_Support.Lexical_Env is
    --  Note that for now, this is only a global setting (not per env).
 
    function Is_Lookup_Cache_Valid (Env : Lexical_Env) return Boolean
-      with Pre => Env.Kind = Primary;
+      with Pre => Env.Kind = Static_Primary;
    --  Return whether Env's lookup cache is valid. This will check every
    --  Lookup_Cache_Valid flag up Env's parent chain.
 
@@ -54,13 +54,13 @@ package body Langkit_Support.Lexical_Env is
    is
      ((Env     => Env,
        Hash    => Hash (Env),
-       Kind    => (if Env = null then Primary else Env.Kind),
+       Kind    => (if Env = null then Static_Primary else Env.Kind),
        Owner   => Owner,
        Version => (if Owner /= No_Unit
                    then Get_Unit_Version (Owner) else 0)));
 
    function OK_For_Rebindings (Self : Lexical_Env) return Boolean is
-     (Self.Kind = Primary and then Env_Node (Self) /= No_Node);
+     (Self.Kind in Primary_Kind and then Env_Node (Self) /= No_Node);
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
@@ -430,7 +430,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
       return Wrap
         (new Lexical_Env_Type'
-           (Kind                     => Primary,
+           (Kind                     => Static_Primary,
             Parent                   => Parent,
             Transitive_Parent        => Transitive_Parent,
             Node                     => Node,
@@ -903,7 +903,9 @@ package body Langkit_Support.Lexical_Env is
                Metadata, Categories, Local_Results);
             return;
 
-         when Primary => null; --  Handled below to avoid extra nesting levels
+         when Primary_Kind =>
+            --  Handled below to avoid extra nesting levels
+            null;
       end case;
 
       --  At this point, we know that Self is a primary lexical environment
@@ -1197,7 +1199,7 @@ package body Langkit_Support.Lexical_Env is
       procedure Check_Valid (Env : Lexical_Env) is
       begin
          case Env.Kind is
-            when Primary =>
+            when Primary_Kind =>
                if Env.Env.Transitive_Parent then
                   raise Property_Error with
                      "Cannot create an orphan for an environment with a"
@@ -1348,7 +1350,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       case Self.Kind is
-         when Primary =>
+         when Primary_Kind =>
             --  Release the reference to the parent environment
             Dec_Ref (Self.Env.Parent);
 
@@ -1400,7 +1402,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Lexical_Env) is
    begin
-      if Self.Kind /= Primary then
+      if Self.Kind not in Primary_Kind then
          Self.Env.Ref_Count := Self.Env.Ref_Count + 1;
       end if;
    end Inc_Ref;
@@ -1411,7 +1413,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Lexical_Env) is
    begin
-      if Self.Kind = Primary then
+      if Self.Kind in Primary_Kind then
          return;
       end if;
 
@@ -1513,8 +1515,8 @@ package body Langkit_Support.Lexical_Env is
 
          --  Search for an environment that would be associated to this one and
          --  that is rebindable.
-         if First_Rebindable_Parent.Kind = Primary and then
-           First_Rebindable_Parent.Env.Rebindings_Assoc_Ref_Env /= -1
+         if First_Rebindable_Parent.Kind in Primary_Kind
+            and then First_Rebindable_Parent.Env.Rebindings_Assoc_Ref_Env /= -1
          then
             Assoc_Ref_Env := Get_Env
               (First_Rebindable_Parent.Env.Referenced_Envs.Get_Access
@@ -1648,7 +1650,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       case L.Kind is
-         when Primary =>
+         when Primary_Kind =>
             --  If we have two primary environments, don't go through
             --  structural comparison: we can use pointer equality as each
             --  instance has its own identity.
@@ -1735,7 +1737,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       case Env.Kind is
-         when Primary =>
+         when Static_Primary =>
             return Combine
               ((Base_Hash,
                 Hash (Env.Parent),
@@ -1868,7 +1870,7 @@ package body Langkit_Support.Lexical_Env is
          Append (Result, Env_Id & " = ");
       end if;
       Append (Result, "LexEnv(" & (case Self.Kind is
-                                   when Primary => "Primary",
+                                   when Static_Primary => "Static_Primary",
                                    when Orphaned => "Orphaned",
                                    when Grouped => "Grouped",
                                    when Rebound => "Rebound"));
@@ -1878,7 +1880,7 @@ package body Langkit_Support.Lexical_Env is
          Append (Result, "Empty");
       end if;
 
-      if Self.Kind = Primary then
+      if Self.Kind in Primary_Kind then
          if Parent_Env_Id'Length > 0 then
             New_Arg;
             Append (Result,
@@ -1910,7 +1912,7 @@ package body Langkit_Support.Lexical_Env is
       Append (Result, ":" & ASCII.LF);
 
       case Self.Kind is
-         when Primary =>
+         when Primary_Kind =>
             declare
                Refs : Referenced_Envs_Vectors.Vector
                   renames Self.Env.Referenced_Envs;
@@ -2061,7 +2063,7 @@ package body Langkit_Support.Lexical_Env is
    function Parent (Self : Lexical_Env) return Lexical_Env is
    begin
       case Self.Kind is
-         when Primary =>
+         when Primary_Kind =>
             declare
                Ret : constant Lexical_Env :=
                  Get_Env (Self.Env.Parent, No_Entity_Info);
@@ -2084,10 +2086,10 @@ package body Langkit_Support.Lexical_Env is
    function Env_Node (Self : Lexical_Env) return Node_Type is
    begin
       return (case Self.Kind is
-              when Primary  => Self.Env.Node,
-              when Orphaned => Env_Node (Self.Env.Orphaned_Env),
-              when Grouped  => No_Node,
-              when Rebound  => Env_Node (Self.Env.Rebound_Env));
+              when Primary_Kind => Self.Env.Node,
+              when Orphaned     => Env_Node (Self.Env.Orphaned_Env),
+              when Grouped      => No_Node,
+              when Rebound      => Env_Node (Self.Env.Rebound_Env));
    end Env_Node;
 
    --------------------------------
@@ -2155,7 +2157,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       case Self.Kind is
-         when Primary =>
+         when Primary_Kind =>
             if Self.Owner /= No_Unit then
                --  If there is an owner, check that the unit version has not
                --  been incremented since then.

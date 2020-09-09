@@ -174,13 +174,13 @@ package Langkit_Support.Lexical_Env is
    -- Lexical_Env Type --
    ----------------------
 
-   type Lexical_Env_Kind is (Primary, Orphaned, Grouped, Rebound);
+   type Lexical_Env_Kind is (Static_Primary, Orphaned, Grouped, Rebound);
    --  Kind of lexical environment. Tells how a lexical environment was
    --  created.
    --
-   --  Primary ones are all lexical environments that are not ref-counted.
-   --  These are created by lexical environment population plus the special
-   --  Empty_Env, and each context's root scope.
+   --  Static_Primary ones are not ref-counted. Except for the special
+   --  Empty_Env and each context's root scope, they are created by lexical
+   --  environment population.
    --
    --  Orphaned ones are copies whose parents have been stripped.
    --
@@ -188,6 +188,9 @@ package Langkit_Support.Lexical_Env is
    --  they were only one environment.
    --
    --  Rebound ones are copies annotated with environment rebindings.
+
+   subtype Primary_Kind is
+      Lexical_Env_Kind range Static_Primary ..  Static_Primary;
 
    type Lexical_Env_Type;
    --  Value type for lexical envs
@@ -219,7 +222,8 @@ package Langkit_Support.Lexical_Env is
    end record;
    --  Reference to a lexical environment. This is the type that shall be used.
 
-   Null_Lexical_Env : constant Lexical_Env := (null, 0, Primary, No_Unit, 0);
+   Null_Lexical_Env : constant Lexical_Env :=
+     (null, 0, Static_Primary, No_Unit, 0);
 
    type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
 
@@ -404,8 +408,8 @@ package Langkit_Support.Lexical_Env is
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env
-      with Post => Create_Lexical_Env'Result.Kind = Primary;
-   --  Create a new primary lexical env
+      with Post => Create_Lexical_Env'Result.Kind = Static_Primary;
+   --  Create a new static-primary lexical env
 
    procedure Add
      (Self     : Lexical_Env;
@@ -413,11 +417,11 @@ package Langkit_Support.Lexical_Env is
       Value    : Node_Type;
       MD       : Node_Metadata := Empty_Metadata;
       Resolver : Entity_Resolver := null)
-      with Pre => Self.Kind = Primary;
+      with Pre => Self.Kind = Static_Primary;
    --  Add Value to the list of values for the key Key, with the metadata MD
 
    procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
-      with Pre => Self.Kind = Primary;
+      with Pre => Self.Kind = Static_Primary;
    --  Remove Value from the list of values for the key Key
 
    procedure Reference
@@ -427,7 +431,7 @@ package Langkit_Support.Lexical_Env is
       Kind             : Ref_Kind := Normal;
       Categories       : Ref_Categories := All_Cats;
       Rebindings_Assoc : Boolean := False)
-      with Pre => Self.Kind = Primary;
+      with Pre => Self.Kind = Static_Primary;
    --  Add a dynamic reference from Self to the lexical environment computed
    --  calling Resolver on Referenced_From. This makes the content of this
    --  dynamic environment accessible when performing lookups on Self (see the
@@ -449,12 +453,12 @@ package Langkit_Support.Lexical_Env is
       Kind             : Ref_Kind := Normal;
       Categories       : Ref_Categories := All_Cats;
       Rebindings_Assoc : Boolean := False)
-      with Pre => Self.Kind = Primary;
+      with Pre => Self.Kind = Static_Primary;
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
 
    procedure Deactivate_Referenced_Envs (Self : Lexical_Env)
-      with Pre => Self.Kind = Primary;
+      with Pre => Self.Kind = Static_Primary;
    --  Invalidate caches in Self. This:
    --
    --    * invalidates the environment lookup cache;
@@ -463,7 +467,7 @@ package Langkit_Support.Lexical_Env is
    --    * deactivate referenced environments.
 
    procedure Recompute_Referenced_Envs (Self : Lexical_Env)
-      with Pre => Self.Kind = Primary;
+      with Pre => Self.Kind = Static_Primary;
    --  Recompute the referenced environments for this environment. In other
    --  words, re-resolve the R.Getter for all referenced environments R in
    --  Self.
@@ -473,7 +477,7 @@ package Langkit_Support.Lexical_Env is
    --  Self, but also referenced environments in Self's parents.
 
    procedure Reset_Caches (Self : Lexical_Env)
-     with Pre => Self.Kind = Primary;
+     with Pre => Self.Kind = Static_Primary;
    --- Reset the caches for this env
 
    type Lookup_Kind_Type is (Recursive, Flat, Minimal);
@@ -722,7 +726,7 @@ package Langkit_Support.Lexical_Env is
 
    type Lexical_Env_Type (Kind : Lexical_Env_Kind) is record
       case Kind is
-         when Primary =>
+         when Primary_Kind =>
             Parent : Env_Getter := No_Env_Getter;
             --  Parent environment for this env. Null by default.
 
@@ -731,14 +735,6 @@ package Langkit_Support.Lexical_Env is
 
             Node : Node_Type := No_Node;
             --  Node for which this environment was created
-
-            Referenced_Envs : Referenced_Envs_Vectors.Vector;
-            --  A list of environments referenced by this environment
-
-            Map : Internal_Map := null;
-            --  Map containing mappings from symbols to nodes for this env
-            --  instance. If the lexical env is refcounted, then it does not
-            --  own this env.
 
             Rebindings_Pool : Env_Rebindings_Pool := null;
             --  Cache for all parent-less env rebindings whose Old_Env is the
@@ -753,11 +749,19 @@ package Langkit_Support.Lexical_Env is
             --  Whether Cached_Results contains lookup results that can be
             --  currently reused (i.e. whether they are not stale).
 
+            Referenced_Envs : Referenced_Envs_Vectors.Vector;
+            --  A list of environments referenced by this environment
+
             Rebindings_Assoc_Ref_Env : Integer := -1;
             --  If present, index to the Referenced_Envs vector that points to
             --  an environment we want to look at when shedding rebindings. If
             --  the referenced env is not none, it will be considered in place
             --  of Self when shedding rebindings.
+
+            Map : Internal_Map := null;
+            --  Map containing mappings from symbols to nodes for this env
+            --  instance. If the lexical env is refcounted, then it does not
+            --  own this env.
 
          when others =>
             Ref_Count : Integer := 1;
@@ -765,7 +769,7 @@ package Langkit_Support.Lexical_Env is
             --  the env can be destroyed.
 
             case Kind is
-               when Primary =>
+               when Primary_Kind =>
                   null; --  Unreachable
 
                when Orphaned =>
@@ -809,7 +813,7 @@ package Langkit_Support.Lexical_Env is
    function Is_Foreign (Self : Lexical_Env; Node : Node_Type) return Boolean
    is (Self.Env.Node = No_Node
        or else Node_Unit (Self.Env.Node) /= Node_Unit (Node))
-   with Pre => Self.Kind = Primary;
+   with Pre => Self.Kind in Primary_Kind;
    --  Return whether Node is a foreign node relative to Self (i.e. whether
    --  they both belong to different units). This is true even for the empty
    --  env and the root one, which are not tied to any unit.
@@ -868,7 +872,7 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Kind                     => Primary,
+     (Kind                     => Static_Primary,
       Parent                   => No_Env_Getter,
       Transitive_Parent        => False,
       Node                     => No_Node,
@@ -884,7 +888,7 @@ private
    Empty_Env : constant Lexical_Env :=
      (Env     => Empty_Env_Record'Access,
       Hash    => 0,
-      Kind    => Primary,
+      Kind    => Static_Primary,
       Owner   => No_Unit,
       Version => 0);
 

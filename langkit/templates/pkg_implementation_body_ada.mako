@@ -1340,9 +1340,9 @@ package body ${ada_lib_name}.Implementation is
          end if;
       % endif
 
-      if Dest_Env.Kind /= Primary then
+      if Dest_Env.Kind /= Static_Primary then
          raise Property_Error with
-            "Cannot add elements to a non-primary lexical env";
+            "Cannot add elements to a lexical env that is not static-primary";
 
       elsif
          --  Since lexical envs need to sort the foreign nodes they contain,
@@ -3650,11 +3650,13 @@ package body ${ada_lib_name}.Implementation is
 
       function Trace_Image (Env : Lexical_Env) return String is
       begin
-         if Env.Kind = Primary then
-            return "<LexicalEnv for " & Trace_Image (Env.Env.Node) & ">";
-         else
+         case Env.Kind is
+         when Static_Primary =>
+            return "<LexicalEnv static-primary for "
+                   & Trace_Image (Env.Env.Node) & ">";
+         when others =>
             return "<LexicalEnv synthetic>";
-         end if;
+         end case;
       end Trace_Image;
 
       -----------------

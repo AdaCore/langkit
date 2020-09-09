@@ -440,9 +440,9 @@
    begin
       Initial_Env := ${cls.env_spec.initial_env_expr};
 
-      if Initial_Env.Kind /= Primary then
+      if Initial_Env.Kind /= Static_Primary then
          raise Property_Error with
-            "Cannot set initial env to non-primary one";
+            "Cannot set an env that is not static-primary as the initial env";
       end if;
 
       % if not cls.env_spec.initial_env.unsound:
