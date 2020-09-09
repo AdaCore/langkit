@@ -1,24 +1,24 @@
-LexEnv(Primary, Node=<Prim_A>):
+LexEnv(Static_Primary, Node=<Prim_A>):
     X: [<Item(X1)>, <Item(X2)>]
     Y: [<Item(Y1)>]
-LexEnv(Primary, Node=<Prim_B>):
+LexEnv(Static_Primary, Node=<Prim_B>):
     Y: [<Item(Y2)>]
 
 LexEnv(Orphaned):
-  Orphaned: LexEnv(Primary, Node=<Prim_B>):
+  Orphaned: LexEnv(Static_Primary, Node=<Prim_B>):
       Y: [<Item(Y2)>]
 LexEnv(Orphaned):
-  Orphaned: LexEnv(Primary, Node=<Prim_B>):
+  Orphaned: LexEnv(Static_Primary, Node=<Prim_B>):
       Y: [<Item(Y2)>]
 
 LexEnv(Grouped):
   Grouped: LexEnv(Orphaned):
-    Orphaned: LexEnv(Primary, Node=<Prim_B>):
+    Orphaned: LexEnv(Static_Primary, Node=<Prim_B>):
         Y: [<Item(Y2)>]
 
 LexEnv(Rebound):
   Rebindings: [<New_Env_1>, <New_Env_2>]
-  Rebound: LexEnv(Primary, Node=<Prim_B>):
+  Rebound: LexEnv(Static_Primary, Node=<Prim_B>):
       Y: [<Item(Y2)>]
 
 Done.
