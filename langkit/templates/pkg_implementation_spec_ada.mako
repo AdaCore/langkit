@@ -223,11 +223,6 @@ private package ${ada_lib_name}.Implementation is
    --  Equality function to use in the public API. It's like the regular one,
    --  but disregards metadata.
 
-   ## Declare arrays of root nodes early so thateehere since some primitives
-   ## rely on it and since the declarations require AST_Envs.
-   ${array_types.incomplete_decl(root_node_array)}
-   ${array_types.decl(root_node_array)}
-
    ## Generate Hash functions for "built-in types" if need be
    % if T.Bool.requires_hash_function:
       function Hash (B : Boolean) return Hash_Type;
@@ -299,163 +294,6 @@ private package ${ada_lib_name}.Implementation is
 
    function Kind_Name (Node : ${T.root_node.name}) return String;
    --  Return the concrete kind for Node
-
-   -------------------------------
-   -- Tree traversal operations --
-   -------------------------------
-
-   Kind_To_Node_Children_Count : constant array (${T.node_kind}) of Integer :=
-     (${', \n'.join(
-           '{} => {}'.format(
-              cls.ada_kind_name,
-              (len(cls.get_parse_fields(lambda f: not f.null))
-               if not cls.is_list_type else -1)
-           )
-           for cls in ctx.astnode_types if not cls.abstract)});
-   --  For each AST node kind, this array gives the number of AST node children
-   --  it has. For AST node lists, this is -1 as this number varies from one
-   --  list instance to another.
-
-   function First_Child_Index (Node : ${T.root_node.name}) return Natural;
-   --  Return the index of the first child Node has
-
-   function Last_Child_Index (Node : ${T.root_node.name}) return Natural;
-   --  Return the index of the last child Node has, or 0 if there is no child
-
-   function Children_Count (Node : ${T.root_node.name}) return Natural;
-   --  Return the number of children that Node has
-
-   procedure Get_Child
-     (Node            : ${T.root_node.name};
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${T.root_node.name});
-   --  Return the Index'th child of node, storing it into Result.
-   --
-   --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
-   --  such a child: if not (i.e. Index is out-of-bounds), the content
-   --  of Result is undefined.
-
-   function Child
-     (Node  : ${T.root_node.name};
-      Index : Positive) return ${T.root_node.name};
-   --  Return the Index'th child of Node, or null if Node has no such child
-
-   function Children
-     (Node : ${T.root_node.name}) return ${root_node_array.array_type_name};
-   --  Return an array containing all the children of Node.
-   --  This is an alternative to the Child/Children_Count pair, useful if you
-   --  want the convenience of Ada arrays, and you don't care about the small
-   --  performance hit of creating an array.
-
-   function Parents
-     (Node         : ${T.root_node.name};
-      Include_Self : Boolean := True)
-      return ${root_node_array.name};
-   --  Return the list of parents for this node. This node included in the list
-   --  iff Include_Self.
-
-   function Parent (Node : ${T.root_node.name}) return ${T.root_node.name};
-
-   function Fetch_Sibling
-     (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name};
-      Offset : Integer) return ${root_entity.name};
-   --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
-   --  child of the same parent, or No_Entity if there is no such sibling.
-
-   function Traverse
-     (Node  : ${T.root_node.name};
-      Visit : access function (Node : ${T.root_node.name}) return Visit_Status)
-      return Visit_Status;
-   --  Given the parent node for a subtree, traverse all syntactic nodes of
-   --  this tree, calling the given function on each node in prefix order (i.e.
-   --  top-down). The order of traversing subtrees follows the order of
-   --  declaration of the corresponding attributes in the grammar. The
-   --  traversal is controlled as follows by the result returned by Visit:
-   --
-   --     Into   The traversal continues normally with the syntactic
-   --            children of the node just processed.
-   --
-   --     Over   The children of the node just processed are skipped and
-   --            excluded from the traversal, but otherwise processing
-   --            continues elsewhere in the tree.
-   --
-   --     Stop   The entire traversal is immediately abandoned, and the
-   --            original call to Traverse returns Stop.
-
-   procedure Traverse
-     (Node  : ${T.root_node.name};
-      Visit : access function (Node : ${T.root_node.name})
-                               return Visit_Status);
-   --  This is the same as Traverse function except that no result is returned
-   --  i.e. the Traverse function is called and the result is simply discarded.
-
-   generic
-      type Data_Type is private;
-      Reset_After_Traversal : Boolean := False;
-   function Traverse_With_Data
-     (Node  : ${T.root_node.name};
-      Visit : access function (Node : ${T.root_node.name};
-                               Data : in out Data_Type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status;
-   --  This is the same as the first Traverse function except it accepts an
-   --  argument that is passed to all Visit calls.
-   --
-   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
-   --  Traverse_With_Data returns no matter what Visit does. Visit can change
-   --  it otherwise.
-
-   ----------------------------------------
-   -- Source location-related operations --
-   ----------------------------------------
-
-   function Sloc_Range
-     (Node : ${T.root_node.name}) return Source_Location_Range;
-   --  Return the source location range corresponding to the set of tokens from
-   --  which Node was parsed.
-
-   function Compare
-     (Node : ${T.root_node.name};
-      Sloc : Source_Location) return Relative_Position;
-   --  Compare Sloc to the sloc range of Node
-
-   function Lookup
-     (Node : ${T.root_node.name};
-      Sloc : Source_Location) return ${T.root_node.name};
-   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
-   --  it, or null if no such node was found.
-
-   function Compare
-     (Left, Right : ${T.root_node.name};
-      Relation    : Comparison_Relation) return Boolean;
-   --  If Left and Right don't belong to the same analysis units or if one of
-   --  them is null, raise a Property_Error. Otherwise, return the comparison
-   --  of their starting source location according to Relation.
-
-   -------------------
-   -- Debug helpers --
-   -------------------
-
-   procedure Print
-     (Node        : ${T.root_node.name};
-      Show_Slocs  : Boolean;
-      Line_Prefix : String := "");
-   --  Debug helper: print to standard output Node and all its children.
-   --  Line_Prefix is prepended to each output line.
-
-   procedure PP_Trivia
-     (Node        : ${T.root_node.name};
-      Line_Prefix : String := "");
-   --  Debug helper: print to standard output Node and all its children along
-   --  with the trivia associated to them. Line_Prefix is prepended to each
-   --  output line.
-
-   procedure Assign_Names_To_Logic_Vars (Node : ${T.root_node.name});
-   --  Debug helper: Assign names to every logical variable in the root node,
-   --  so that we can trace logical variables.
 
    ---------------------------
    -- Adalog instantiations --
@@ -778,6 +616,163 @@ private package ${ada_lib_name}.Implementation is
    procedure Update_Named_Envs (Named_Envs : NED_Maps.Map);
    --  For each named environment in Named_Envs, update Env_With_Precedence and
    --  do the necessary adjustments: relocate exiled entries, etc.
+
+   -------------------------------
+   -- Tree traversal operations --
+   -------------------------------
+
+   Kind_To_Node_Children_Count : constant array (${T.node_kind}) of Integer :=
+     (${', \n'.join(
+           '{} => {}'.format(
+              cls.ada_kind_name,
+              (len(cls.get_parse_fields(lambda f: not f.null))
+               if not cls.is_list_type else -1)
+           )
+           for cls in ctx.astnode_types if not cls.abstract)});
+   --  For each AST node kind, this array gives the number of AST node children
+   --  it has. For AST node lists, this is -1 as this number varies from one
+   --  list instance to another.
+
+   function First_Child_Index (Node : ${T.root_node.name}) return Natural;
+   --  Return the index of the first child Node has
+
+   function Last_Child_Index (Node : ${T.root_node.name}) return Natural;
+   --  Return the index of the last child Node has, or 0 if there is no child
+
+   function Children_Count (Node : ${T.root_node.name}) return Natural;
+   --  Return the number of children that Node has
+
+   procedure Get_Child
+     (Node            : ${T.root_node.name};
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${T.root_node.name});
+   --  Return the Index'th child of node, storing it into Result.
+   --
+   --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
+   --  such a child: if not (i.e. Index is out-of-bounds), the content
+   --  of Result is undefined.
+
+   function Child
+     (Node  : ${T.root_node.name};
+      Index : Positive) return ${T.root_node.name};
+   --  Return the Index'th child of Node, or null if Node has no such child
+
+   function Children
+     (Node : ${T.root_node.name}) return ${root_node_array.array_type_name};
+   --  Return an array containing all the children of Node.
+   --  This is an alternative to the Child/Children_Count pair, useful if you
+   --  want the convenience of Ada arrays, and you don't care about the small
+   --  performance hit of creating an array.
+
+   function Parents
+     (Node         : ${T.root_node.name};
+      Include_Self : Boolean := True)
+      return ${root_node_array.name};
+   --  Return the list of parents for this node. This node included in the list
+   --  iff Include_Self.
+
+   function Parent (Node : ${T.root_node.name}) return ${T.root_node.name};
+
+   function Fetch_Sibling
+     (Node   : ${T.root_node.name};
+      E_Info : ${T.entity_info.name};
+      Offset : Integer) return ${root_entity.name};
+   --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
+   --  child of the same parent, or No_Entity if there is no such sibling.
+
+   function Traverse
+     (Node  : ${T.root_node.name};
+      Visit : access function (Node : ${T.root_node.name}) return Visit_Status)
+      return Visit_Status;
+   --  Given the parent node for a subtree, traverse all syntactic nodes of
+   --  this tree, calling the given function on each node in prefix order (i.e.
+   --  top-down). The order of traversing subtrees follows the order of
+   --  declaration of the corresponding attributes in the grammar. The
+   --  traversal is controlled as follows by the result returned by Visit:
+   --
+   --     Into   The traversal continues normally with the syntactic
+   --            children of the node just processed.
+   --
+   --     Over   The children of the node just processed are skipped and
+   --            excluded from the traversal, but otherwise processing
+   --            continues elsewhere in the tree.
+   --
+   --     Stop   The entire traversal is immediately abandoned, and the
+   --            original call to Traverse returns Stop.
+
+   procedure Traverse
+     (Node  : ${T.root_node.name};
+      Visit : access function (Node : ${T.root_node.name})
+                               return Visit_Status);
+   --  This is the same as Traverse function except that no result is returned
+   --  i.e. the Traverse function is called and the result is simply discarded.
+
+   generic
+      type Data_Type is private;
+      Reset_After_Traversal : Boolean := False;
+   function Traverse_With_Data
+     (Node  : ${T.root_node.name};
+      Visit : access function (Node : ${T.root_node.name};
+                               Data : in out Data_Type)
+                               return Visit_Status;
+      Data  : in out Data_Type)
+      return Visit_Status;
+   --  This is the same as the first Traverse function except it accepts an
+   --  argument that is passed to all Visit calls.
+   --
+   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
+   --  Traverse_With_Data returns no matter what Visit does. Visit can change
+   --  it otherwise.
+
+   ----------------------------------------
+   -- Source location-related operations --
+   ----------------------------------------
+
+   function Sloc_Range
+     (Node : ${T.root_node.name}) return Source_Location_Range;
+   --  Return the source location range corresponding to the set of tokens from
+   --  which Node was parsed.
+
+   function Compare
+     (Node : ${T.root_node.name};
+      Sloc : Source_Location) return Relative_Position;
+   --  Compare Sloc to the sloc range of Node
+
+   function Lookup
+     (Node : ${T.root_node.name};
+      Sloc : Source_Location) return ${T.root_node.name};
+   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
+   --  it, or null if no such node was found.
+
+   function Compare
+     (Left, Right : ${T.root_node.name};
+      Relation    : Comparison_Relation) return Boolean;
+   --  If Left and Right don't belong to the same analysis units or if one of
+   --  them is null, raise a Property_Error. Otherwise, return the comparison
+   --  of their starting source location according to Relation.
+
+   -------------------
+   -- Debug helpers --
+   -------------------
+
+   procedure Print
+     (Node        : ${T.root_node.name};
+      Show_Slocs  : Boolean;
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output Node and all its children.
+   --  Line_Prefix is prepended to each output line.
+
+   procedure PP_Trivia
+     (Node        : ${T.root_node.name};
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output Node and all its children along
+   --  with the trivia associated to them. Line_Prefix is prepended to each
+   --  output line.
+
+   procedure Assign_Names_To_Logic_Vars (Node : ${T.root_node.name});
+   --  Debug helper: Assign names to every logical variable in the root node,
+   --  so that we can trace logical variables.
 
    -------------------------------
    -- Root AST node (internals) --
