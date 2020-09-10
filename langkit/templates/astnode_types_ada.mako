@@ -170,10 +170,7 @@
 
 <%def name="private_decl(cls)">
 
-   <%
-      base_name = cls.base.name
-      ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
-   %>
+   <% ext = ctx.ext('nodes', cls.raw_name, 'public_decls') %>
 
    ## Fields initialization helper
    % if cls.has_fields_initializer:
