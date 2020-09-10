@@ -1873,15 +1873,25 @@ class App(object):
         """
         return ""
 
-    def __init__(self):
+    def __init__(self, args=None):
         self.parser = argparse.ArgumentParser(description=self.description)
         self.parser.add_argument('files', nargs='+', help='Files')
         self.add_arguments()
-        self.args = self.parser.parse_args()
+
+        # Parse command line arguments
+        self.args = self.parser.parse_args(args)
+
         self.ctx = AnalysisContext(
             'utf-8', with_trivia=True,
             unit_provider=self.create_unit_provider()
         )
+
+        # Parse files
+        self.units = {}
+        for file_name in self.args.files:
+            self.u = self.ctx.get_from_file(file_name)
+            self.units[file_name] = self.u
+
 
     def add_arguments(self):
         """
@@ -1897,23 +1907,26 @@ class App(object):
         """
         return None
 
-    def process_files(self):
+    def main(self):
         """
-        Load units for all source files on the command-line in `self.units`.
-        Put the last one in `self.u`.
+        Default implementation for App.main: just iterates on every units and
+        call ``process_unit`` on it.
         """
-        self.units = {}
-        for file_name in self.args.files:
-            self.u = self.ctx.get_from_file(file_name)
-            self.units[file_name] = self.u
+        for u in sorted(self.units.values(), key=lambda u: u.filename):
+            self.process_unit(u)
+
+    def process_unit(self, unit):
+        """
+        Abstract method that processes one unit. Needs to be subclassed by
+        implementors.
+        """
+        raise NotImplementedError()
 
     @classmethod
-    def run(cls):
+    def run(cls, args=None):
         """
         Instantiate and run this application.
         """
-        instance = cls()
-        instance.process_files()
-        instance.main()
+        cls(args).main()
 
     ${exts.include_extension(ctx.ext('python_api/app_exts'))}
