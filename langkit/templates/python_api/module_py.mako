@@ -1521,8 +1521,6 @@ ${c_entity}._null_value = ${c_entity}()
 ${c_entity}._null_value.node = None
 
 ${array_types.base_decl()}
-${array_types.decl(T.root_node.array)}
-${array_types.decl(T.entity.array)}
 % for array_type in ctx.array_types:
     % if array_type.exposed and array_type.emit_c_type:
 ${array_types.decl(array_type)}

@@ -1179,10 +1179,6 @@ package body ${ada_lib_name}.Implementation.C is
                        Trivia => Token_Index (Token.Trivia_Index))));
    end Unwrap;
 
-   ${array_types.body(T.root_node.array)}
-
-   ${array_types.body(T.root_node.entity.array)}
-
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------
@@ -1200,9 +1196,7 @@ package body ${ada_lib_name}.Implementation.C is
    % endfor
 
    % for array_type in ctx.array_types:
-      % if array_type.element_type.should_emit_array_type and \
-            array_type.exposed and \
-            array_type.emit_c_type:
+      % if array_type.exposed and array_type.emit_c_type:
          ${array_types.body(array_type)}
       % endif
    % endfor

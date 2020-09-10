@@ -472,9 +472,6 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('text_to_locale_string')}";
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
-   ${array_types.decl(T.root_node.array)}
-   ${array_types.decl(T.root_node.entity.array)}
-
    --------------------
    -- Unit providers --
    --------------------
@@ -519,9 +516,7 @@ private package ${ada_lib_name}.Implementation.C is
    -----------------
 
    % for array_type in ctx.array_types:
-      % if array_type.element_type.should_emit_array_type and \
-            array_type.exposed and \
-            array_type.emit_c_type:
+      % if array_type.exposed and array_type.emit_c_type:
          ${array_types.decl(array_type)}
       % endif
    % endfor
