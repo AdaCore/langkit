@@ -529,16 +529,6 @@ private package ${ada_lib_name}.Implementation is
    % endif
    % endfor
 
-   ------------------------------
-   -- Root AST node properties --
-   ------------------------------
-
-   % for prop in T.root_node.get_properties(include_inherited=False):
-      % if not prop.user_external:
-         ${prop.prop_decl}
-      % endif
-   % endfor
-
    -----------------------------------------
    -- Structure types (full declarations) --
    -----------------------------------------
@@ -1117,7 +1107,7 @@ private package ${ada_lib_name}.Implementation is
      (Node : ${T.root_node.name}) return Bare_Children_Array;
    --  Implementation for Analysis.Children_And_Trivia
 
-   % for astnode in no_builtins(ctx.astnode_types):
+   % for astnode in ctx.astnode_types:
       ${astnode_types.private_decl(astnode)}
    % endfor
 
