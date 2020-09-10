@@ -7,8 +7,6 @@
             file="properties/public_wrappers_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
-<% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
-
 with Ada.Containers;
 private with Ada.Finalization;
 with Ada.Strings.Unbounded;
