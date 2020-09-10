@@ -2696,21 +2696,6 @@ class ASTNodeType(BaseStructType):
     def public_type(self):
         return self.entity
 
-    def is_builtin(self):
-        """
-        Some AST nodes are considered "built-in", which means that either no
-        code needs to be emitted for them, either special code will be emitted
-        on a special path, and we can omit them from regular code generation.
-
-        :rtype: bool
-        """
-        return self in (
-            # The root grammar class and the generic list types are emitted
-            # separately from the others.
-            CompiledTypeRepo.root_grammar_class,
-            CompiledTypeRepo.root_grammar_class.generic_list_type,
-        )
-
     def add_transform(self, parser):
         """
         Register ``parser`` as a Transform parser that creates this node.
