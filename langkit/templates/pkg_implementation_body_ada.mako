@@ -2313,13 +2313,6 @@ package body ${ada_lib_name}.Implementation is
       is (Hash_Type'Mod (Character_Type'Pos(I)));
    % endif
 
-   % if T.entity_info.requires_hash_function:
-      function Hash (Info : ${T.entity_info.name}) return Hash_Type is
-        (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
-   % endif
-
-   ${struct_types.body_hash(T.entity)}
-
    ------------------------
    -- Named environments --
    ------------------------
@@ -3286,8 +3279,6 @@ package body ${ada_lib_name}.Implementation is
 
    ## Env metadata's body
 
-   ${struct_types.body(T.env_md)}
-
    -------------
    -- Combine --
    -------------
@@ -3599,13 +3590,6 @@ package body ${ada_lib_name}.Implementation is
           Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
 
-   function ${root_entity.constructor_name}
-     (Node : ${T.root_node.name};
-      Info : ${T.entity_info.name}) return ${root_entity.name} is
-   begin
-      return (Node => Node, Info => Info);
-   end;
-
    -----------------
    -- Hash_Entity --
    -----------------
@@ -3684,30 +3668,6 @@ package body ${ada_lib_name}.Implementation is
       -- Trace_Image --
       -----------------
 
-      function Trace_Image (E : ${root_entity.name}) return String is
-      begin
-         if E.Node = null then
-            return "None";
-         else
-            return ("<|" & Trace_Image (E.Node, Decoration => False)
-                    & " " & Trace_Image (E.Info) & "|>");
-         end if;
-      end Trace_Image;
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
-      function Trace_Image (Info : ${T.entity_info.name}) return String is
-      begin
-         return ("(MD => " & Trace_Image (Info.MD)
-                 & ", Rebindings => " & Trace_Image (Info.Rebindings));
-      end Trace_Image;
-
-      -----------------
-      -- Trace_Image --
-      -----------------
-
       function Trace_Image (R : Env_Rebindings) return String is
       begin
          return Image (Text_Image (R));
@@ -3753,7 +3713,7 @@ package body ${ada_lib_name}.Implementation is
 
    % endif
 
-   % for struct_type in no_builtins(ctx.struct_types):
+   % for struct_type in ctx.struct_types:
    ${struct_types.body(struct_type)}
    % endfor
 

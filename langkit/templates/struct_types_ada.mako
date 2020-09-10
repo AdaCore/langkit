@@ -193,35 +193,36 @@
 </%def>
 
 <%def name="incomplete_decl(cls)">
-
-   type ${cls.name};
-   ${ada_doc(cls, 3)}
-
+   % if not cls.is_predeclared:
+      type ${cls.name};
+      ${ada_doc(cls, 3)}
+   % endif
 </%def>
 
 <%def name="decl(cls, incomplete_nullexpr=True)">
 
-   <%
-      fields = cls.get_fields(include_inherited=False)
-      ext = ctx.ext("nodes", cls.name, "components")
-      extensions = exts.include_extension(ext)
-   %>
+   % if not cls.is_predeclared:
+      <%
+         fields = cls.get_fields(include_inherited=False)
+         ext = ctx.ext("nodes", cls.name, "components")
+         extensions = exts.include_extension(ext)
+      %>
+      type ${cls.name} is record
 
-   type ${cls.name} is record
-
-      % if fields or extensions:
-         % for f in fields:
-            ${f.name} : aliased ${f.type.storage_type_name};
-            ${ada_doc(f, 12)}
-            ${extensions}
-         % endfor
-      % else:
-         null;
+         % if fields or extensions:
+            % for f in fields:
+               ${f.name} : aliased ${f.type.storage_type_name};
+               ${ada_doc(f, 12)}
+               ${extensions}
+            % endfor
+         % else:
+            null;
+         % endif
+      end record
+        with Convention => C;
+      % if incomplete_nullexpr:
+      ${cls.nullexpr} : constant ${cls.name};
       % endif
-   end record
-     with Convention => C;
-   % if incomplete_nullexpr:
-   ${cls.nullexpr} : constant ${cls.name};
    % endif
 
    % if cls.is_refcounted:
@@ -248,21 +249,23 @@
 </%def>
 
 <%def name="nullexpr_decl(cls)">
-   <%
-      fields = cls.get_fields(include_inherited=False)
-      ext = ctx.ext("nodes", cls.name, "components")
-      extensions = exts.include_extension(ext)
-   %>
+    % if not cls.is_predeclared:
+      <%
+         fields = cls.get_fields(include_inherited=False)
+         ext = ctx.ext("nodes", cls.name, "components")
+         extensions = exts.include_extension(ext)
+      %>
 
-   ${cls.nullexpr} : constant ${cls.name} :=
-   % if fields or extensions:
-   (
-         % for f in fields:
-            ${f.name} => ${f.type.nullexpr}${", " if not loop.last else ""}
-         % endfor
-   );
-   % else:
-   (null record);
+      ${cls.nullexpr} : constant ${cls.name} :=
+      % if fields or extensions:
+      (
+            % for f in fields:
+               ${f.name} => ${f.type.nullexpr}${", " if not loop.last else ""}
+            % endfor
+      );
+      % else:
+      (null record);
+      % endif
    % endif
 </%def>
 
