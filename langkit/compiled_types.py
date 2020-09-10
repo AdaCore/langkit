@@ -57,7 +57,6 @@ def template_extensions(ctx):
     root_entity = ctx.root_grammar_class.entity
 
     return {
-        'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
         'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
         'default_grammar_rule':  capi.get_name('default_grammar_rule'),
         'root_entity':           root_entity,
@@ -2177,21 +2176,35 @@ class StructType(BaseStructType):
     def is_refcounted(self):
         return any(f.type.is_refcounted for f in self._fields.values())
 
-    def is_builtin(self):
+    @property
+    def has_early_decl(self) -> bool:
         """
-        Some structs are considered "built-in", which means that either no code
-        needs to be emitted for them, either special code will be emitted on a
-        special path, and we can omit them from regular code generation.
+        Return whether declarations for this type in the internal Ada API
+        happen earlier than usual.
 
-        :rtype: bool
+        Some types (for instance the metadata struct) have special constraints
+        regarding code generation, so their type declaration must happen
+        earlier than if they were more regular types.
+        """
+        # The env metadata struct is emitted separately as it needs to
+        # be fully declared before the Langkit_Support.Lexical_Env generic
+        # package instantiation, while regular structs are declared after that
+        # instantiation.
+        return self == T.env_md
+
+    @property
+    def is_predeclared(self) -> bool:
+        """
+        Whether this struct type is to be considered as pre-declared in
+        templates for the internal Ada API.
+
+        Note that except for the type declaration itself ("type ... is") and
+        the "nullexpr" constant, declarations for this type must still be
+        emitted (Hash function, ...).
         """
         return self in (
-            # The env metadata struct is emitted separately from the others
-            T.env_md,
-
-            # Entity info and the root node's entity type are not emitted as
-            # regular types, because they come from the generic instantiation
-            # of Langkit_Support.Lexical_Env.
+            # It's the Langkit_Support.Lexical_Env generic package
+            # instantiation that declares entity info and entity structs.
             CompiledTypeRepo.root_grammar_class.entity_info(),
             CompiledTypeRepo.root_grammar_class.entity,
         )

@@ -215,10 +215,6 @@ private package ${ada_lib_name}.Implementation is
    ${root_entity.nullexpr} : constant ${root_entity.name} :=
      (null, ${T.entity_info.nullexpr});
 
-   function ${root_entity.constructor_name}
-     (Node : ${T.root_node.name};
-      Info : ${T.entity_info.name}) return ${root_entity.name};
-
    function Hash_Entity (Self : ${root_entity.name}) return Hash_Type;
    --  Hash function to use in the public API. It's like the regular one, but
    --  disregards metadata.
@@ -253,12 +249,6 @@ private package ${ada_lib_name}.Implementation is
    % if T.Character.requires_hash_function:
       function Hash (I : Character_Type) return Hash_Type;
    % endif
-
-   % if T.entity_info.requires_hash_function:
-      function Hash (Info : ${T.entity_info.name}) return Hash_Type;
-   % endif
-
-   ${struct_types.decl_hash(T.entity)}
 
    --------------------------
    -- Big integers wrapper --
@@ -501,8 +491,6 @@ private package ${ada_lib_name}.Implementation is
       function Trace_Image (I : Integer) return String;
       function Trace_Image (S : Symbol_Type) return String;
       function Trace_Image (Env : Lexical_Env) return String;
-      function Trace_Image (E : ${root_entity.name}) return String;
-      function Trace_Image (Info : ${T.entity_info.name}) return String;
       function Trace_Image (R : Env_Rebindings) return String;
       function Trace_Image (Unit : Internal_Unit) return String;
       function Trace_Image (Eq : Logic_Equation) return String;
@@ -515,8 +503,10 @@ private package ${ada_lib_name}.Implementation is
    -- Structure types (incomplete declarations) --
    -----------------------------------------------
 
-   % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.incomplete_decl(struct_type)}
+   % for struct_type in ctx.struct_types:
+      % if not struct_type.has_early_decl:
+         ${struct_types.incomplete_decl(struct_type)}
+      % endif
    % endfor
 
    -------------------------------------------
@@ -533,8 +523,10 @@ private package ${ada_lib_name}.Implementation is
    -- Structure types (full declarations) --
    -----------------------------------------
 
-   % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.decl(struct_type)}
+   % for struct_type in ctx.struct_types:
+      % if not struct_type.has_early_decl:
+         ${struct_types.decl(struct_type)}
+      % endif
    % endfor
 
    -----------------
@@ -1764,8 +1756,10 @@ private
    --  constants. This allows us to circumvent circularity problems between
    --  arrays and structs.
 
-   % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.nullexpr_decl(struct_type)}
+   % for struct_type in ctx.struct_types:
+      % if not struct_type.has_early_decl:
+         ${struct_types.nullexpr_decl(struct_type)}
+      % endif
    % endfor
 
 end ${ada_lib_name}.Implementation;
