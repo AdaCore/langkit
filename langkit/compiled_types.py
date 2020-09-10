@@ -3702,10 +3702,6 @@ class ArrayType(CompiledType):
     def require_vector(self):
         self._requires_vector = True
 
-    @property
-    def has_early_decl(self) -> bool:
-        return self.element_type == T.root_node
-
 
 class EnumType(CompiledType):
     """
