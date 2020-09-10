@@ -223,17 +223,8 @@ private package ${ada_lib_name}.Implementation is
    --  Equality function to use in the public API. It's like the regular one,
    --  but disregards metadata.
 
-   ## Declare arrays of lexical environments here because we need them for the
-   ## Group operation below.
-   ${array_types.incomplete_decl(T.LexicalEnv.array)}
-   ${array_types.decl(T.LexicalEnv.array)}
-
-   ## See ASTNodeType.entity
-   ${array_types.incomplete_decl(T.root_node.entity.array)}
-   ${array_types.decl(T.root_node.entity.array)}
-
-   ## Declare arrays of root nodes here since some primitives rely on it and
-   ## since the declarations require AST_Envs.
+   ## Declare arrays of root nodes early so thateehere since some primitives
+   ## rely on it and since the declarations require AST_Envs.
    ${array_types.incomplete_decl(root_node_array)}
    ${array_types.decl(root_node_array)}
 
@@ -514,9 +505,9 @@ private package ${ada_lib_name}.Implementation is
    -------------------------------------------
 
    % for array_type in ctx.array_types:
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.incomplete_decl(array_type)}
-   % endif
+      % if not array_type.has_early_decl:
+         ${array_types.incomplete_decl(array_type)}
+      % endif
    % endfor
 
    -----------------------------------------
@@ -537,9 +528,9 @@ private package ${ada_lib_name}.Implementation is
    --  can be done without copy.
 
    % for array_type in ctx.array_types:
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.decl(array_type)}
-   % endif
+      % if not array_type.has_early_decl:
+         ${array_types.decl(array_type)}
+      % endif
    % endfor
 
    ------------------------

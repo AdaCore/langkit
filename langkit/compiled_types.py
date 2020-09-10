@@ -574,13 +574,13 @@ class CompiledType:
 
     def __init__(self, name, location=None, doc='', is_ptr=True,
                  has_special_storage=False, is_list_type=False,
-                 is_entity_type=False, should_emit_array_type=True,
-                 exposed=False, c_type_name=None, external=False,
-                 null_allowed=False, is_ada_record=False, is_refcounted=False,
-                 nullexpr=None, py_nullexpr=None, element_type=None,
-                 hashable=False, has_equivalent_function=False,
-                 type_repo_name=None, api_name=None, dsl_name=None,
-                 introspection_prefix=None, conversion_requires_context=False):
+                 is_entity_type=False, exposed=False, c_type_name=None,
+                 external=False, null_allowed=False, is_ada_record=False,
+                 is_refcounted=False, nullexpr=None, py_nullexpr=None,
+                 element_type=None, hashable=False,
+                 has_equivalent_function=False, type_repo_name=None,
+                 api_name=None, dsl_name=None, introspection_prefix=None,
+                 conversion_requires_context=False):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -608,12 +608,6 @@ class CompiledType:
 
         :param bool is_entity_type: Whether this type represents an entity
             type.
-
-        :param bool should_emit_array_type: Whether declarations for this
-            compiled typed's array type are generated along with all regular
-            array types. It must be False for several special types (for
-            instance, the root AST node), for which the array type declarations
-            are hard-wired in the $.Analysis package.
 
         :param bool exposed: Whether the type should be exposed to the C and
             Python APIs. Note that all types are exposed anyway when the
@@ -683,7 +677,6 @@ class CompiledType:
         self.has_special_storage = has_special_storage
         self.is_list_type = is_list_type
         self.is_entity_type = is_entity_type
-        self.should_emit_array_type = should_emit_array_type
         self.c_type_name = c_type_name
         self.external = external
         self.exposed = exposed
@@ -1487,6 +1480,18 @@ class CompiledType:
         self._abstract_node_data_dict_cache[key] = result
         return result
 
+    @property
+    def has_early_decl(self) -> bool:
+        """
+        Return whether declarations for this type in the internal Ada API
+        happen earlier than usual.
+
+        Some types (for instance the metadata struct) have special constraints
+        regarding code generation, so their type declaration must happen
+        earlier than if they were more regular types.
+        """
+        return False
+
 
 class NoCompiledType(CompiledType):
     """
@@ -2178,14 +2183,6 @@ class StructType(BaseStructType):
 
     @property
     def has_early_decl(self) -> bool:
-        """
-        Return whether declarations for this type in the internal Ada API
-        happen earlier than usual.
-
-        Some types (for instance the metadata struct) have special constraints
-        regarding code generation, so their type declaration must happen
-        earlier than if they were more regular types.
-        """
         # The env metadata struct is emitted separately as it needs to
         # be fully declared before the Langkit_Support.Lexical_Env generic
         # package instantiation, while regular structs are declared after that
@@ -2304,11 +2301,6 @@ class EntityType(StructType):
             # _exposed), but we also rely on this flag to be set only for
             # entity types that are used in public properties.
             self.exposed = True
-
-            # LexicalEnv.get, which is bound in the AST.C generate package,
-            # returns arrays of root node entities, so the corresponding
-            # array type must be declared manually there.
-            self.should_emit_array_type = False
 
     @property
     def dsl_name(self):
@@ -2479,7 +2471,7 @@ class ASTNodeType(BaseStructType):
         super().__init__(
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
-            is_list_type=is_list, should_emit_array_type=not is_root,
+            is_list_type=is_list,
 
             # Even though bare node types are not exposed, we allow them in
             # public APIs and will (un)wrap them as entities automatically.
@@ -3710,6 +3702,10 @@ class ArrayType(CompiledType):
     def require_vector(self):
         self._requires_vector = True
 
+    @property
+    def has_early_decl(self) -> bool:
+        return self.element_type == T.root_node
+
 
 class EnumType(CompiledType):
     """
@@ -3877,7 +3873,6 @@ class AnalysisUnitType(CompiledType):
             'InternalUnit',
             exposed=True,
             nullexpr='null',
-            should_emit_array_type=True,
             null_allowed=True,
             hashable=True,
             c_type_name='analysis_unit',
@@ -3976,7 +3971,6 @@ def create_builtin_types():
     lex_env_type = CompiledType(
         'LexicalEnv',
         nullexpr='Empty_Env',
-        should_emit_array_type=False,
         null_allowed=True,
         is_ptr=False,
         is_refcounted=True,

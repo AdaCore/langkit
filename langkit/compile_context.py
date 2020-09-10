@@ -542,9 +542,7 @@ class CompileCtx:
         Sorted list of all ArrayType instances.
 
         For each ArrayType instance T, code emission for type definition will
-        automatically happen unless T.element_type.should_emit_array_type is
-        False. In this case, type definition should be hard-wired in code
-        generation.
+        automatically happen.
 
         :type: list[langkit.compiled_types.ArrayType]
         """

@@ -1163,12 +1163,8 @@ package body ${ada_lib_name}.Implementation is
          Convert (Destroy_Procedure'Address));
    end Register_Destroyable_Gen;
 
-   ${array_types.body(root_node_array)}
-
    % for array_type in ctx.array_types:
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.body(array_type)}
-   % endif
+      ${array_types.body(array_type)}
    % endfor
 
    ---------
@@ -1655,9 +1651,6 @@ package body ${ada_lib_name}.Implementation is
    begin
       return Node.Unit;
    end Unit;
-
-   ${array_types.body(T.LexicalEnv.array)}
-   ${array_types.body(T.root_node.entity.array)}
 
    function Lookup_Internal
      (Node : ${T.root_node.name};
