@@ -37,11 +37,11 @@ package body Langkit_Support.Lexical_Env is
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, False);
 
-   function Has_Lookup_Cache (Dummy : Lexical_Env) return Boolean
+   function Has_Lookup_Cache (Env : Lexical_Env) return Boolean
    is
-     (Activate_Lookup_Cache);
-   --  Whether lookup cache is enabled for the given lexical environment.
-   --  Note that for now, this is only a global setting (not per env).
+     (Env.Kind = Static_Primary and then Activate_Lookup_Cache);
+   --  Whether lookup cache is availab/eenabled for the given lexical
+   --  environment.
 
    function Is_Lookup_Cache_Valid (Env : Lexical_Env) return Boolean
       with Pre => Env.Kind = Static_Primary;
@@ -443,6 +443,31 @@ package body Langkit_Support.Lexical_Env is
          Owner => Owner);
    end Create_Lexical_Env;
 
+   --------------------------------
+   -- Create_Dynamic_Lexical_Env --
+   --------------------------------
+
+   function Create_Dynamic_Lexical_Env
+     (Parent            : Env_Getter;
+      Node              : Node_Type;
+      Transitive_Parent : Boolean := False;
+      Owner             : Unit_T;
+      Resolver          : Inner_Env_Assocs_Resolver) return Lexical_Env is
+   begin
+      if Parent /= No_Env_Getter then
+         Inc_Ref (Parent);
+      end if;
+      return Wrap
+        (new Lexical_Env_Type'
+           (Kind              => Dynamic_Primary,
+            Parent            => Parent,
+            Transitive_Parent => Transitive_Parent,
+            Node              => Node,
+            Rebindings_Pool   => null,
+            Resolver          => Resolver),
+         Owner => Owner);
+   end Create_Dynamic_Lexical_Env;
+
    ---------
    -- Add --
    ---------
@@ -684,44 +709,75 @@ package body Langkit_Support.Lexical_Env is
       function Get_Nodes
         (Env : Lexical_Env; From_Rebound : Boolean := False) return Boolean
       is
-         Map : constant Internal_Map := Env.Env.Map;
-         C   : Cursor := Internal_Envs.No_Element;
+         Map : Internal_Map;
+         C   : Cursor;
       begin
+         if Env.Kind = Static_Primary then
+            Map := Env.Env.Map;
+            C := Internal_Envs.No_Element;
 
-         if Env.Env.Map /= null then
+            if Env.Env.Map /= null then
 
-            --  If Key is null, we want to get every entity stored in the map
-            --  regardless of the symbol.
-            if Key = null then
-               Append_All_Nodes (Env, From_Rebound);
+               --  If Key is null, we want to get every entity stored in the
+               --  map regardless of the symbol.
+               if Key = null then
+                  Append_All_Nodes (Env, From_Rebound);
+                  return True;
+               end if;
+
+               --  Else, find the elements in the map corresponding to Key
+               C := Map.Find (Key);
+            end if;
+
+            if Has_Element (C) then
+               declare
+                  E : Internal_Map_Element renames Reference (Map.all, C);
+               begin
+                  --  First add nodes that belong to the same environment as
+                  --  Self.  Add them in reverse order, so that last inserted
+                  --  results are returned first.
+                  for I in reverse 1 .. E.Native_Nodes.Last_Index loop
+                     Append_Result
+                       (E.Native_Nodes.Get (I),
+                        Metadata, Current_Rebindings, From_Rebound);
+                  end loop;
+
+                  --  Then add foreign nodes: just iterate on the ordered map
+                  for Pos in E.Foreign_Nodes.Iterate loop
+                     Append_Result
+                       (Internal_Map_Node_Maps.Element (Pos),
+                        Metadata, Current_Rebindings, From_Rebound);
+                  end loop;
+               end;
                return True;
             end if;
 
-            --  Else, find the elements in the map corresponding to Key
-            C := Map.Find (Key);
-         end if;
-
-         if Has_Element (C) then
+         else
+            pragma Assert (Env.Kind = Dynamic_Primary);
             declare
-               E : Internal_Map_Element renames Reference (Map.all, C);
+               --  Query the dynamic list of associations for this env
+               Assocs : Inner_Env_Assoc_Array :=
+                  Env.Env.Resolver.all ((Env.Env.Node, No_Entity_Info));
+               A      : Inner_Env_Assoc;
+
             begin
-               --  First add nodes that belong to the same environment as Self.
-               --  Add them in reverse order, so that last inserted results are
-               --  returned first.
-               for I in reverse 1 .. E.Native_Nodes.Last_Index loop
-                  Append_Result
-                    (E.Native_Nodes.Get (I),
-                     Metadata, Current_Rebindings, From_Rebound);
+               for I in 1 .. Length (Assocs) loop
+                  --  For each individual assoc: add it if Key is null, or only
+                  --  assocs with matching symbols.
+                  A := Get (Assocs, I);
+                  if Key = null or else Key = Get_Key (A) then
+                     declare
+                        IMN : constant Internal_Map_Node :=
+                          (Get_Node (A), Get_Metadata (A), null);
+                     begin
+                        Append_Result
+                          (IMN, Metadata, Current_Rebindings, From_Rebound);
+                     end;
+                  end if;
                end loop;
 
-               --  Then add foreign nodes: just iterate on the ordered map
-               for Pos in E.Foreign_Nodes.Iterate loop
-                  Append_Result
-                    (Internal_Map_Node_Maps.Element (Pos),
-                     Metadata, Current_Rebindings, From_Rebound);
-               end loop;
+               Dec_Ref (Assocs);
             end;
-            return True;
          end if;
 
          return False;
@@ -981,15 +1037,17 @@ package body Langkit_Support.Lexical_Env is
 
          --  Phase 2: Get nodes in transitive and prioritary referenced envs
 
-         for I in Self.Env.Referenced_Envs.First_Index
-           .. Self.Env.Referenced_Envs.Last_Index
-         loop
-            if Self.Env.Referenced_Envs.Get_Access (I).Kind
-            in Transitive | Prioritary
-            then
-               Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
-            end if;
-         end loop;
+         if Self.Kind = Static_Primary then
+            for I in Self.Env.Referenced_Envs.First_Index
+              .. Self.Env.Referenced_Envs.Last_Index
+            loop
+               if Self.Env.Referenced_Envs.Get_Access (I).Kind
+               in Transitive | Prioritary
+               then
+                  Get_Refd_Nodes (Self.Env.Referenced_Envs.Get_Access (I).all);
+               end if;
+            end loop;
+         end if;
 
          --  Phase 3: Get nodes in parent envs
 
@@ -1019,7 +1077,7 @@ package body Langkit_Support.Lexical_Env is
 
          --  Phase 4: Get nodes in normal referenced envs
 
-         if Lookup_Kind = Recursive then
+         if Self.Kind = Static_Primary and then Lookup_Kind = Recursive then
             if Has_Trace then
                Traces.Trace
                  (Rec, "Recursing on non transitive referenced environments");
@@ -1354,30 +1412,32 @@ package body Langkit_Support.Lexical_Env is
             --  Release the reference to the parent environment
             Dec_Ref (Self.Env.Parent);
 
-            --  Release referenced environments
-            for Ref_Env of Self.Env.Referenced_Envs loop
-               declare
-                  Getter : Env_Getter := Ref_Env.Getter;
-               begin
-                  Dec_Ref (Getter);
-               end;
-            end loop;
-            Self.Env.Referenced_Envs.Destroy;
-
-            --  Release the internal map. Don't assume it was allocated, as
-            --  it's convenient for testing not to allocate it.
-            if Self.Env.Map /= null then
-               for Element of Self.Env.Map.all loop
-                  Internal_Map_Node_Vectors.Destroy (Element.Native_Nodes);
-               end loop;
-               Destroy (Self.Env.Map);
-            end if;
-
-            --  Release the lookup cache
-            Reset_Lookup_Cache (Self);
-
             --  Release the pool of rebindings
             Destroy (Self.Env.Rebindings_Pool);
+
+            if Self.Kind = Static_Primary then
+               --  Release referenced environments
+               for Ref_Env of Self.Env.Referenced_Envs loop
+                  declare
+                     Getter : Env_Getter := Ref_Env.Getter;
+                  begin
+                     Dec_Ref (Getter);
+                  end;
+               end loop;
+               Self.Env.Referenced_Envs.Destroy;
+
+               --  Release the internal map. Don't assume it was allocated, as
+               --  it's convenient for testing not to allocate it.
+               if Self.Env.Map /= null then
+                  for Element of Self.Env.Map.all loop
+                     Internal_Map_Node_Vectors.Destroy (Element.Native_Nodes);
+                  end loop;
+                  Destroy (Self.Env.Map);
+               end if;
+
+               --  Release the lookup cache
+               Reset_Lookup_Cache (Self);
+            end if;
 
          when Orphaned =>
             Dec_Ref (Self.Env.Orphaned_Env);
@@ -1746,6 +1806,13 @@ package body Langkit_Support.Lexical_Env is
                 Hash (Env.Referenced_Envs),
                 Hash (Env.Map)));
 
+         when Dynamic_Primary =>
+            return Combine
+              ((Base_Hash,
+                Hash (Env.Parent),
+                (if Env.Transitive_Parent then 1 else 0),
+                Node_Hash (Env.Node)));
+
          when Orphaned =>
             return Combine (Base_Hash, Hash (Env.Orphaned_Env));
 
@@ -1871,6 +1938,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
       Append (Result, "LexEnv(" & (case Self.Kind is
                                    when Static_Primary => "Static_Primary",
+                                   when Dynamic_Primary => "Dynamic_Primary",
                                    when Orphaned => "Orphaned",
                                    when Grouped => "Grouped",
                                    when Rebound => "Rebound"));
@@ -1912,7 +1980,7 @@ package body Langkit_Support.Lexical_Env is
       Append (Result, ":" & ASCII.LF);
 
       case Self.Kind is
-         when Primary_Kind =>
+         when Static_Primary =>
             declare
                Refs : Referenced_Envs_Vectors.Vector
                   renames Self.Env.Referenced_Envs;
@@ -1963,6 +2031,9 @@ package body Langkit_Support.Lexical_Env is
                   V.Destroy;
                end;
             end if;
+
+         when Dynamic_Primary =>
+            Append (Result, Sub_Prefix & "... dynamic");
 
          when Orphaned =>
             Append

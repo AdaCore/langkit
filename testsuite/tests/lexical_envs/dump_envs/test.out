@@ -1,22 +1,22 @@
 main.py: Running...
 == Before PLE ==
-@1 = LexEnv(Primary, Empty, Parent=null):
+@1 = LexEnv(Static_Primary, Empty, Parent=null):
     <empty>
 
 
 == After PLE ==
-$root = LexEnv(Primary, Parent=null):
+$root = LexEnv(Static_Primary, Parent=null):
     foo: [<Scope main.txt:2:9-8:10>]
 
-@1 = LexEnv(Primary, Parent=$root, Node=<Scope main.txt:2:9-8:10>):
+@1 = LexEnv(Static_Primary, Parent=$root, Node=<Scope main.txt:2:9-8:10>):
     bar: [<Scope main.txt:3:13-5:14>]
     baz: [<Scope main.txt:6:13-6:19>]
     qux: [<Decl main.txt:7:13-7:16>]
 
-@2 = LexEnv(Primary, Parent=@1, Node=<Scope main.txt:3:13-5:14>):
+@2 = LexEnv(Static_Primary, Parent=@1, Node=<Scope main.txt:3:13-5:14>):
     bar0: [<Decl main.txt:4:17-4:21>]
 
-@3 = LexEnv(Primary, Parent=@1, Node=<Scope main.txt:6:13-6:19>):
+@3 = LexEnv(Static_Primary, Parent=@1, Node=<Scope main.txt:6:13-6:19>):
     <empty>
 
 

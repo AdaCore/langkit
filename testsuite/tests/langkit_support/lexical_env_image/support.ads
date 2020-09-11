@@ -42,25 +42,43 @@ package Support is
 
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
+
+   type Inner_Env_Assoc is null record;
+   function Get_Key
+     (Self : Inner_Env_Assoc) return Langkit_Support.Symbols.Symbol_Type
+   is (null);
+   function Get_Node (Self : Inner_Env_Assoc) return String_Access is (null);
+   function Get_Metadata (Self : Inner_Env_Assoc) return Metadata
+   is (Default_MD);
+
+   type Inner_Env_Assoc_Array is null record;
+   function Length (Self : Inner_Env_Assoc_Array) return Natural is (0);
+   function Get
+     (Self : Inner_Env_Assoc_Array; Index : Positive) return Inner_ENv_Assoc
+   is (raise Program_Error);
+   procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is null;
+
    package Envs is new Langkit_Support.Lexical_Env
-     (Unit_T                   => Boolean,
-      Get_Unit_Version         => Get_Unit_Version,
-      Get_Context_Version      => Get_Context_Version,
-      No_Unit                  => False,
-      Node_Type                => String_Access,
-      Node_Metadata            => Metadata,
-      No_Node                  => new String'(""),
-      Empty_Metadata           => Default_MD,
-      Node_Hash                => Node_Hash,
-      Node_Unit                => Node_Unit,
-      Metadata_Hash            => Metadata_Hash,
-      Combine                  => Combine,
-      Can_Reach                => Can_Reach,
-      Is_Rebindable            => Is_Rebindable,
-      Node_Text_Image          => Node_Image,
-      Register_Rebinding       => Register_Rebinding,
-      Ref_Category             => Ref_Category,
-      Ref_Categories           => Ref_Categories);
+     (Unit_T                => Boolean,
+      Get_Unit_Version      => Get_Unit_Version,
+      Get_Context_Version   => Get_Context_Version,
+      No_Unit               => False,
+      Node_Type             => String_Access,
+      Node_Metadata         => Metadata,
+      No_Node               => new String'(""),
+      Empty_Metadata        => Default_MD,
+      Node_Hash             => Node_Hash,
+      Node_Unit             => Node_Unit,
+      Metadata_Hash         => Metadata_Hash,
+      Combine               => Combine,
+      Can_Reach             => Can_Reach,
+      Is_Rebindable         => Is_Rebindable,
+      Node_Text_Image       => Node_Image,
+      Register_Rebinding    => Register_Rebinding,
+      Ref_Category          => Ref_Category,
+      Ref_Categories        => Ref_Categories,
+      Inner_Env_Assoc       => Inner_Env_Assoc,
+      Inner_Env_Assoc_Array => Inner_Env_Assoc_Array);
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Envs.Env_Rebindings_Type, Envs.Env_Rebindings);

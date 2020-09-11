@@ -614,7 +614,7 @@ def emit_expr(expr, **ctx):
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef
+        PropertyDef, DynamicLexicalEnv
     )
 
     def is_a(*names):
@@ -1059,6 +1059,13 @@ def emit_expr(expr, **ctx):
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
         ])))
 
+    elif isinstance(expr, DynamicLexicalEnv):
+        return "DynamicLexicalEnv({})".format(", ".join(keep([
+            fqn(expr.resolver),
+            "transitive_parent={}".format(ee(expr.transitive_parent))
+            if not expr.transitive_parent else ''
+        ])))
+
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)
@@ -1234,11 +1241,9 @@ def emit_node_type(node_type):
     else:
         if node_type.is_entity_type:
             return ""
-        elif node_type == CompiledTypeRepo.entity_info:
-            return ""
-        elif node_type == CompiledTypeRepo.env_metadata:
-            return ""
-        elif node_type == T.env_assoc:
+        elif node_type in (CompiledTypeRepo.entity_info,
+                           CompiledTypeRepo.env_metadata,
+                           T.env_assoc, T.inner_env_assoc):
             return ""
 
     parse_fields = [

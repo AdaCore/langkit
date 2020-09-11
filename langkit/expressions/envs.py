@@ -3,8 +3,9 @@ from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BindableLiteralExpr, CallExpr,
-    ComputingExpr, GetSymbol, No, NullCheckExpr, NullExpr, PropertyDef, Self,
-    attr_call, auto_attr, construct, dsl_document
+    ComputingExpr, GetSymbol, Literal, No, NullCheckExpr, NullExpr,
+    PropertyDef, ResolvedExpression, Self, attr_call, auto_attr, construct,
+    dsl_document, resolve_property
 )
 from langkit.expressions.utils import assign_var
 
@@ -501,6 +502,79 @@ def as_bare_entity(self, node):
                          abstract_expr=self)
     ret.create_result_var('Ent')
     return ret
+
+
+@dsl_document
+class DynamicLexicalEnv(AbstractExpression):
+    """
+    Build a dynamic lexical environment.
+
+    Lookup through such environments uses the given property to determine the
+    list of (symbol, node) associations to be analyzed. This property must take
+    no argument and return an array of ``T.inner_env_assoc`` structs.
+
+    This is opposed to the environments created during PLE which, at the end of
+    the PLE stage, contain a static mapping of such assocations.  Note that
+    building such environments is only possible in lazy field initializers.
+    """
+
+    class Expr(CallExpr):
+        def __init__(self, resolver, transitive_parent, abstract_expr=None):
+            self.resolver = resolver
+            self.transitive_parent = transitive_parent
+
+            resolver_ref = "{}'Access".format(self.resolver.name)
+            super().__init__(
+                'Dyn_Env',
+                'Create_Dynamic_Lexical_Env',
+                T.LexicalEnv,
+                [construct(Self), resolver_ref, transitive_parent],
+                abstract_expr=abstract_expr,
+            )
+
+        @property
+        def subexprs(self):
+            return {'resolver': self.resolver,
+                    'transitive_parent': self.transitive_parent}
+
+        def __repr__(self):
+            return '<DynamicLexicalEnv.Expr>'
+
+    def __init__(self, resolver, transitive_parent=Literal(True)):
+        self.resolver = resolver
+        self.transitive_parent = transitive_parent
+        super().__init__()
+
+    def construct(self) -> ResolvedExpression:
+        # Make sure this expression is allowed in the current expression
+        # context.
+        current_prop = PropertyDef.get()
+        check_source_language(
+            current_prop.lazy_field,
+            "Dynamic lexical environment creation can only happen inside a"
+            " lazy field initializer"
+        )
+
+        # Sanitize the resolver: make sure we have a property reference, then
+        # make sure it has the expected signature.
+
+        resolver = resolve_property(self.resolver).root_property
+        resolver.require_untyped_wrapper()
+
+        expected_rtype = T.inner_env_assoc.array
+        check_source_language(
+            resolver.type.matches(expected_rtype),
+            '"resolver" must return an array of {} (got {})'
+            .format(expected_rtype.element_type.dsl_name,
+                    resolver.type.dsl_name)
+        )
+        check_source_language(not resolver.arguments,
+                              '"resolver" cannot accept arguments')
+
+        # Should this environment has a transitive parent?
+        transitive_parent = construct(self.transitive_parent, T.Bool)
+
+        return self.Expr(resolver, transitive_parent, abstract_expr=self)
 
 
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),

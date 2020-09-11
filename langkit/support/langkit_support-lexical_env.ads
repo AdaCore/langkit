@@ -97,6 +97,21 @@ generic
      (Node : Node_Type; Rebinding : System.Address);
    --  Register a rebinding to be destroyed when Node is destroyed
 
+   type Inner_Env_Assoc is private;
+   with function Get_Key
+     (Self : Inner_Env_Assoc) return Symbol_Type is <>;
+   with function Get_Node
+     (Self : Inner_Env_Assoc) return Node_Type is <>;
+   with function Get_Metadata
+     (Self : Inner_Env_Assoc) return Node_Metadata is <>;
+
+   type Inner_Env_Assoc_Array is private;
+   with function Length (Self : Inner_Env_Assoc_Array) return Natural is <>;
+   with function Get
+     (Self  : Inner_Env_Assoc_Array;
+      Index : Positive) return Inner_Env_Assoc is <>;
+   with procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is <>;
+
 package Langkit_Support.Lexical_Env is
 
    Activate_Lookup_Cache : Boolean := True;
@@ -174,13 +189,20 @@ package Langkit_Support.Lexical_Env is
    -- Lexical_Env Type --
    ----------------------
 
-   type Lexical_Env_Kind is (Static_Primary, Orphaned, Grouped, Rebound);
+   type Lexical_Env_Kind is
+     (Static_Primary, Dynamic_Primary, Orphaned, Grouped, Rebound);
    --  Kind of lexical environment. Tells how a lexical environment was
    --  created.
    --
    --  Static_Primary ones are not ref-counted. Except for the special
    --  Empty_Env and each context's root scope, they are created by lexical
    --  environment population.
+   --
+   --  Dynamic_Primary are not ref-counted neither. They are created on-demand
+   --  during semantic analysis, but their life cycle is tied to their owning
+   --  analysis unit, just like Static_Primary envs. They carry no map, but
+   --  instead use a property reference to dynamically compute environment
+   --  associations (an array of Inner_Env_Assoc).
    --
    --  Orphaned ones are copies whose parents have been stripped.
    --
@@ -190,7 +212,7 @@ package Langkit_Support.Lexical_Env is
    --  Rebound ones are copies annotated with environment rebindings.
 
    subtype Primary_Kind is
-      Lexical_Env_Kind range Static_Primary ..  Static_Primary;
+      Lexical_Env_Kind range Static_Primary ..  Dynamic_Primary;
 
    type Lexical_Env_Type;
    --  Value type for lexical envs
@@ -397,6 +419,9 @@ package Langkit_Support.Lexical_Env is
    --  must take a "reference" entity (e.g. a name) and return the referenced
    --  entity.
 
+   type Inner_Env_Assocs_Resolver is
+      access function (Self : Entity) return Inner_Env_Assoc_Array;
+
    Empty_Env : constant Lexical_Env;
    --  Empty_Env is a magical lexical environment that will always be empty. We
    --  allow users to call Add on it anyway as a convenience, but this is a
@@ -410,6 +435,16 @@ package Langkit_Support.Lexical_Env is
       Owner             : Unit_T) return Lexical_Env
       with Post => Create_Lexical_Env'Result.Kind = Static_Primary;
    --  Create a new static-primary lexical env
+
+   function Create_Dynamic_Lexical_Env
+     (Parent            : Env_Getter;
+      Node              : Node_Type;
+      Transitive_Parent : Boolean := False;
+      Owner             : Unit_T;
+      Resolver          : Inner_Env_Assocs_Resolver) return Lexical_Env
+      with Pre  => Node /= No_Node,
+           Post => Create_Dynamic_Lexical_Env'Result.Kind = Dynamic_Primary;
+   --  Create a new dynamic-primary lexical env
 
    procedure Add
      (Self     : Lexical_Env;
@@ -742,26 +777,35 @@ package Langkit_Support.Lexical_Env is
             --  is allocated only for primary lexical environments that are
             --  rebindable.
 
-            Lookup_Cache : Lookup_Cache_Maps.Map;
-            --  Cache for lexical environment lookups
+            case Kind is
+               when Static_Primary =>
+                  Lookup_Cache : Lookup_Cache_Maps.Map;
+                  --  Cache for lexical environment lookups
 
-            Lookup_Cache_Valid : Boolean := True;
-            --  Whether Cached_Results contains lookup results that can be
-            --  currently reused (i.e. whether they are not stale).
+                  Lookup_Cache_Valid : Boolean := True;
+                  --  Whether Cached_Results contains lookup results that can
+                  --  be currently reused (i.e. whether they are not stale).
 
-            Referenced_Envs : Referenced_Envs_Vectors.Vector;
-            --  A list of environments referenced by this environment
+                  Referenced_Envs : Referenced_Envs_Vectors.Vector;
+                  --  A list of environments referenced by this environment
 
-            Rebindings_Assoc_Ref_Env : Integer := -1;
-            --  If present, index to the Referenced_Envs vector that points to
-            --  an environment we want to look at when shedding rebindings. If
-            --  the referenced env is not none, it will be considered in place
-            --  of Self when shedding rebindings.
+                  Rebindings_Assoc_Ref_Env : Integer := -1;
+                  --  If present, index to the Referenced_Envs vector that
+                  --  points to an environment we want to look at when shedding
+                  --  rebindings. If the referenced env is not none, it will be
+                  --  considered in place of Self when shedding rebindings.
 
-            Map : Internal_Map := null;
-            --  Map containing mappings from symbols to nodes for this env
-            --  instance. If the lexical env is refcounted, then it does not
-            --  own this env.
+                  Map : Internal_Map := null;
+                  --  Map containing mappings from symbols to nodes for this
+                  --  env instance. If the lexical env is refcounted, then it
+                  --  does not own this env.
+               when Dynamic_Primary =>
+                  Resolver : Inner_Env_Assocs_Resolver;
+                  --  Callback to query environment associations
+
+               when others =>
+                  null; --  Unreachable
+            end case;
 
          when others =>
             Ref_Count : Integer := 1;

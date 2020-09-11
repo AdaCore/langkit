@@ -3603,6 +3603,39 @@ package body ${ada_lib_name}.Implementation is
               and then Left.Info.Rebindings = Right.Info.Rebindings);
    end Compare_Entity;
 
+   --------------------------------
+   -- Create_Dynamic_Lexical_Env --
+   --------------------------------
+
+   function Create_Dynamic_Lexical_Env
+     (Self              : ${T.root_node.name};
+      Resolver          : Inner_Env_Assocs_Resolver;
+      Transitive_Parent : Boolean) return Lexical_Env
+   is
+      Unit : constant Internal_Unit := Self.Unit;
+   begin
+      --  This restriction is necessary to avoid relocation issues when
+      --  Self.Self_Env is terminated.
+      if Is_Foreign_Strict (Self.Self_Env, Self) then
+         raise Property_Error with
+           ("cannot create a dynamic lexical env when Self.Self_Env is"
+            & " foreign");
+      end if;
+
+      return Result : constant Lexical_Env := Create_Dynamic_Lexical_Env
+        (Parent            => Simple_Env_Getter (Self.Self_Env),
+         Node              => Self,
+         Transitive_Parent => Transitive_Parent,
+         Owner             => Unit,
+         Resolver          => Resolver)
+      do
+         --  Since dynamic lexical environments can only be created in lazy
+         --  field initializers, it is fine to tie Result's lifetime to the
+         --  its owning unit's lifetime.
+         Register_Destroyable (Unit, Result.Env);
+      end return;
+   end Create_Dynamic_Lexical_Env;
+
    procedure Destroy_Synthetic_Node (Node : in out ${T.root_node.name});
    --  Helper for the Register_Destroyable above
 
