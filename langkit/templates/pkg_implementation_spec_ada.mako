@@ -136,6 +136,25 @@ private package ${ada_lib_name}.Implementation is
    ${struct_types.decl(T.env_md, incomplete_nullexpr=False)}
    ${struct_types.nullexpr_decl(T.env_md)}
 
+   ${struct_types.incomplete_decl(T.inner_env_assoc)}
+   ${struct_types.decl(T.inner_env_assoc, incomplete_nullexpr=False)}
+   ${struct_types.nullexpr_decl(T.inner_env_assoc)}
+   function Get_Key (Self : ${T.inner_env_assoc.name}) return Symbol_Type
+   is (Self.Key);
+   function Get_Node
+     (Self : ${T.inner_env_assoc.name}) return ${T.root_node.name}
+   is (Self.Val);
+   function Get_Metadata
+     (Self : ${T.inner_env_assoc.name}) return ${T.env_md.name}
+   is (Self.Metadata);
+
+   ${array_types.incomplete_decl(T.inner_env_assoc.array)}
+   ${array_types.decl(T.inner_env_assoc.array)}
+   function Inner_Env_Assoc_Get
+     (Self  : ${T.inner_env_assoc.array.name};
+      Index : Positive) return ${T.inner_env_assoc.name}
+   is (Self.Items (Index));
+
    function Combine
      (L, R : ${T.env_md.name}) return ${T.env_md.name};
    --  The combine function on environments metadata does a boolean Or on every
@@ -204,7 +223,10 @@ private package ${ada_lib_name}.Implementation is
       Node_Text_Image          => AST_Envs_Node_Text_Image,
       Register_Rebinding       => Register_Rebinding,
       Ref_Category             => Ref_Category,
-      Ref_Categories           => Ref_Categories);
+      Ref_Categories           => Ref_Categories,
+      Inner_Env_Assoc          => ${T.inner_env_assoc.name},
+      Inner_Env_Assoc_Array    => ${T.inner_env_assoc.array.name},
+      Get                      => Inner_Env_Assoc_Get);
 
    use AST_Envs;
    subtype Internal_Entity is AST_Envs.Entity;
@@ -222,6 +244,13 @@ private package ${ada_lib_name}.Implementation is
    function Compare_Entity (Left, Right : ${root_entity.name}) return Boolean;
    --  Equality function to use in the public API. It's like the regular one,
    --  but disregards metadata.
+
+   function Create_Dynamic_Lexical_Env
+     (Self              : ${T.root_node.name};
+      Resolver          : Inner_Env_Assocs_Resolver;
+      Transitive_Parent : Boolean) return Lexical_Env;
+   --  Helper for properties code generation: wrapper around
+   --  AST_Envs.Create_Dynamic_Lexical_Env.
 
    ## Generate Hash functions for "built-in types" if need be
    % if T.Bool.requires_hash_function:

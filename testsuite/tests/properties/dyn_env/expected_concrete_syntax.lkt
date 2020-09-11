@@ -1,0 +1,52 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(stmt)
+    stmt <- or(fun_decl | call_expr)
+    fun_decl <- FunDecl("def" id "(" list*(id) ")")
+    call_expr <- CallExpr(id "(" list*(expr) ")")
+    expr <- or(Literal(@number) | Ref(id))
+    id <- Identifier(@identifier)
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class CallExpr : FooNode {
+    @parse_field name : Identifier
+    @parse_field args : ASTList[Expr]
+
+    @lazy args_env : LexicalEnv = DynamicLexicalEnv(BareCallExpr.resolver)
+
+    fun resolver (): Array[InnerEnvAssoc] = {
+        val decl = node.node_env().get_first(node.name).as[FunDecl];
+
+        decl.args.map(
+            (a, i) => InnerEnvAssoc(
+                key=a.symbol, value=node.args?(i), metadata=null
+            )
+        )
+    }
+
+    @export fun get (name : Symbol): Expr =
+    node.args_env().get_first(name).as[Expr]
+}
+
+@abstract class Expr : FooNode {
+}
+
+class Literal : Expr implements TokenNode {
+}
+
+class Ref : Expr {
+    @parse_field name : Identifier
+}
+
+class FunDecl : FooNode {
+    @parse_field name : Identifier
+    @parse_field args : ASTList[Identifier]
+}
+
+class Identifier : FooNode implements TokenNode {
+}

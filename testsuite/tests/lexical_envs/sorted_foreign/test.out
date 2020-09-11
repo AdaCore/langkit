@@ -1,19 +1,19 @@
 main.py: Running...
 == Loading a.txt first ==
-$root = LexEnv(Primary, Parent=null):
+$root = LexEnv(Static_Primary, Parent=null):
     foo: [<Scope main.txt:1:1-1:16>]
 
-@1 = LexEnv(Primary, Parent=$root, Node=<Scope main.txt:1:1-1:16>):
+@1 = LexEnv(Static_Primary, Parent=$root, Node=<Scope main.txt:1:1-1:16>):
     bar: [<Scope a.txt:1:1-1:11>, <Scope a.txt:2:2-2:12>, <Scope b.txt:1:1-1:11>]
 
 
 <Ref main.txt:1:7-1:14> resolves to <Scope a.txt:1:1-1:11>
 
 == Loading b.txt first ==
-$root = LexEnv(Primary, Parent=null):
+$root = LexEnv(Static_Primary, Parent=null):
     foo: [<Scope main.txt:1:1-1:16>]
 
-@1 = LexEnv(Primary, Parent=$root, Node=<Scope main.txt:1:1-1:16>):
+@1 = LexEnv(Static_Primary, Parent=$root, Node=<Scope main.txt:1:1-1:16>):
     bar: [<Scope a.txt:1:1-1:11>, <Scope a.txt:2:2-2:12>, <Scope b.txt:1:1-1:11>]
 
 

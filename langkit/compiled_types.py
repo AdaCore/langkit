@@ -2183,11 +2183,11 @@ class StructType(BaseStructType):
 
     @property
     def has_early_decl(self) -> bool:
-        # The env metadata struct is emitted separately as it needs to
-        # be fully declared before the Langkit_Support.Lexical_Env generic
-        # package instantiation, while regular structs are declared after that
-        # instantiation.
-        return self == T.env_md
+        # The env metadata and inner env assoc structs are emitted separately
+        # as they need to be fully declared before the
+        # Langkit_Support.Lexical_Env generic package instantiation, while
+        # regular structs are declared after that instantiation.
+        return self in (T.env_md, T.inner_env_assoc)
 
     @property
     def is_predeclared(self) -> bool:
@@ -2201,7 +2201,8 @@ class StructType(BaseStructType):
         """
         return self in (
             # It's the Langkit_Support.Lexical_Env generic package
-            # instantiation that declares entity info and entity structs.
+            # instantiation that declares entity, entity info and inner env
+            # assoc structs.
             CompiledTypeRepo.root_grammar_class.entity_info(),
             CompiledTypeRepo.root_grammar_class.entity,
         )
@@ -3702,6 +3703,13 @@ class ArrayType(CompiledType):
     def require_vector(self):
         self._requires_vector = True
 
+    @property
+    def has_early_decl(self) -> bool:
+        # The instantiation of the Langkit_Support.Lexical_Env generic packgaes
+        # depends on arrays of T.inner_env_assoc, so we need to declare it
+        # early.
+        return self.element_type == T.inner_env_assoc
+
 
 class EnumType(CompiledType):
     """
@@ -4252,6 +4260,21 @@ class TypeRepo:
             [('key', UserField(type=T.Symbol)),
              ('val', UserField(type=self.defer_root_node)),
              ('dest_env', UserField(type=T.LexicalEnv)),
+             ('metadata', UserField(type=self.defer_env_md))]
+        )
+
+    @property  # type: ignore
+    @memoized
+    def inner_env_assoc(self) -> StructType:
+        """
+        Return the type to hold "inner environment associations".
+
+        This built-in type is involved in the dynamic primary envs mechanism.
+        """
+        return StructType(
+            names.Name('Inner_Env_Assoc'), None, None,
+            [('key', UserField(type=T.Symbol)),
+             ('val', UserField(type=self.defer_root_node)),
              ('metadata', UserField(type=self.defer_env_md))]
         )
 

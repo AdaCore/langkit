@@ -1015,8 +1015,9 @@ class CompileCtx:
 
         # Force the creation of the env assoc type and the
         # Symbol.array/Symbol.array.array types, as required by the
-        # always-emitted PLE helpers.
-        for t in (T.env_assoc, T.Symbol.array, T.Symbol.array.array):
+        # Lexical_Env instantiation and the always-emitted PLE helpers.
+        for t in (T.env_assoc, T.inner_env_assoc, T.inner_env_assoc.array,
+                  T.Symbol.array, T.Symbol.array.array):
             _ = resolve_type(t)
 
         # Now that all types are known, construct default values for fields
