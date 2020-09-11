@@ -24,15 +24,21 @@ All templates can use the "lang" parameter, which contains "ada", "c" or
 from __future__ import annotations
 
 import textwrap
-from typing import (Any, Callable, Dict, List, Optional, Protocol, Set,
-                    TYPE_CHECKING, Tuple, Union, cast)
+from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
+                    Tuple, Union, cast)
 
 from mako.template import Template
 
 
 if TYPE_CHECKING:
+    from typing import Protocol
     from langkit.compile_context import CompileCtx
     from langkit.compiled_types import ASTNodeType, CompiledType, TypeRepo
+else:
+    # We want to support Python 3.7, and typing.Protocol was introduced in
+    # Python 3.8. Our only use of this, as a base class, is to type-check the
+    # codebase using Mypy, so we can just use object at runtime.
+    Protocol = object
 
 
 class DocDatabase:
