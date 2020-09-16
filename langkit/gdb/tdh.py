@@ -1,4 +1,8 @@
+from bisect import bisect_right
+
 import gdb
+
+from langkit.utils import memoized
 
 
 class TDH:
@@ -47,6 +51,43 @@ class TDH:
                      self._vector_item(self.value['trivias'], trivia_no)['t'],
                      token_no, trivia_no)
 
+    @property  # type: ignore
+    @memoized
+    def _line_starts(self):
+        """
+        Return a python list corresponding to the Lines_Starts vectors in
+        token data handlers. Note that the index of the python list is 0-based
+        whereas the Ada counterpart is 1-based.
+        """
+        lines_starts = self.value['lines_starts']
+        elems = lines_starts['e'].dereference()
+        last = int(lines_starts['size'])
+        return [int(elems[i]) for i in range(1, last + 1)]
+
+    def get_sloc(self, char_index):
+        """
+        Return the Sloc (1-based line and column number) of the character at
+        the given 1-based character index.
+        """
+        # Get the line number in which this character lies
+        line = int(bisect_right(self._line_starts, char_index))
+
+        # Get the character index of the first character of the line
+        line_offset = int(self._line_starts[line - 1])
+
+        # Get the last character index of the buffer
+        source_last = int(self.value['source_last'])
+
+        # Compute the column number as being the given character index minus
+        # the character index of the first character of the line. Make sure
+        # the character index is not higher than the index of the last
+        # character of the buffer. Note that we don't support tab expansion
+        # here.
+        column = min(char_index, source_last) - line_offset + 1
+
+        # Return the Sloc with 1-based line and columber numbers
+        return Sloc(line, column)
+
 
 class Token:
     """
@@ -65,7 +106,12 @@ class Token:
 
     @property
     def sloc_range(self):
-        return SlocRange(self.value['sloc_range'])
+        first = int(self.value['source_first'])
+        last = int(self.value['source_last'])
+        return SlocRange(
+            self.tdh.get_sloc(first),
+            self.tdh.get_sloc(last if last < first else last + 1)
+        )
 
     @property
     def text(self):
@@ -105,11 +151,9 @@ class Sloc:
 
 
 class SlocRange:
-    def __init__(self, value):
-        self.start = Sloc(int(value['start_line']),
-                          int(value['start_column']))
-        self.end = Sloc(int(value['end_line']),
-                        int(value['end_column']))
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
 
     def __repr__(self):
         return '{}-{}'.format(self.start, self.end)
