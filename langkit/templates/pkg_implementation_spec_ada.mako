@@ -30,12 +30,13 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Eq_Same;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
-with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
-with Langkit_Support.Lexical_Env;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Lexical_Envs_Impl;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
-with Langkit_Support.Types;       use Langkit_Support.Types;
+with Langkit_Support.Types;        use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Parsers; use ${ada_lib_name}.Parsers;
@@ -189,17 +190,22 @@ private package ${ada_lib_name}.Implementation is
      (Node : ${T.root_node.name}) return ${T.root_node.name};
 
    function Hash (Node : ${T.root_node.name}) return Hash_Type;
-   function Node_Unit (Node : ${T.root_node.name}) return Internal_Unit;
+   function Node_Unit (Node : ${T.root_node.name}) return Generic_Unit_Ptr;
    function Named_Hash (Node : ${T.root_node.name}) return Hash_Type is
      (Hash (Node));
 
    No_Analysis_Unit : constant Internal_Unit := null;
 
-   function Unit_Version (Unit : Internal_Unit) return Version_Number;
+   function Convert_Unit is new Ada.Unchecked_Conversion
+     (Generic_Unit_Ptr, Internal_Unit);
+   function Convert_Unit is new Ada.Unchecked_Conversion
+     (Internal_Unit, Generic_Unit_Ptr);
+
+   function Unit_Version (Unit : Generic_Unit_Ptr) return Version_Number;
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.
 
-   function Context_Version (Unit : Internal_Unit) return Integer;
+   function Context_Version (Unit : Generic_Unit_Ptr) return Integer;
    --  Return the version of the analysis context associated with Unit
 
    type Ref_Category is
@@ -207,10 +213,8 @@ private package ${ada_lib_name}.Implementation is
    type Ref_Categories is array (Ref_Category) of Boolean;
    pragma Pack (Ref_Categories);
 
-   package AST_Envs is new Langkit_Support.Lexical_Env
-     (Unit_T                   => Internal_Unit,
-      No_Unit                  => No_Analysis_Unit,
-      Get_Unit_Version         => Unit_Version,
+   package AST_Envs is new Langkit_Support.Lexical_Envs_Impl
+     (Get_Unit_Version         => Unit_Version,
       Get_Context_Version      => Context_Version,
       Node_Type                => ${T.root_node.name},
       Node_Metadata            => ${T.env_md.name},
@@ -1056,6 +1060,14 @@ private package ${ada_lib_name}.Implementation is
    --------------------------------------
    -- Environments handling (internal) --
    --------------------------------------
+
+   function Create_Static_Lexical_Env
+     (Parent            : Env_Getter;
+      Node              : ${T.root_node.name};
+      Transitive_Parent : Boolean := False) return Lexical_Env;
+   --  Wrapper around AST_Envs.Create_Lexical_Env. Create the environment and,
+   --  if Node is not null, register the result for destruction in Node's
+   --  analysis unit.
 
    function Get (A : AST_Envs.Entity_Array; Index : Integer) return Entity;
    --  Simple getter that raises Property_Error on out-of-bound accesses.

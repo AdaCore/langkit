@@ -425,7 +425,7 @@
    -- Initial_Env_Getter_Fn --
    ---------------------------
 
-   function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
+   function ${env_getter} (E : Entity) return Lexical_Env is
       Self : constant ${cls.name} := E.Node;
 
       ## Define this constant so that the expressions below, which are expanded

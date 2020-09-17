@@ -6,10 +6,10 @@
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
-
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Implementation;
 use ${ada_lib_name}.Implementation;
@@ -30,7 +30,7 @@ private package ${ada_lib_name}.Debug is
    --  "Print Token". Print the data associated to the T token in the given
    --  token data handler.
 
-   procedure PEnv (Env : AST_Envs.Lexical_Env);
+   procedure PEnv (Env : Lexical_Env);
    --  "Print lexical Environment". Print the content of Env and all its parent
    --  chain.
 

@@ -127,11 +127,9 @@ package body Liblktlang.Implementation.Extensions is
      (Node : Bare_LK_Node;
       Vals : Internal_EnvKV_Array_Access) return Lexical_Env
    is
-     Ret : Lexical_Env;
+      Ret : constant Lexical_Env :=
+         Create_Static_Lexical_Env (No_Env_Getter, Node);
    begin
-      Ret := AST_Envs.Create_Lexical_Env
-        (No_Env_Getter, Node, Owner => Node.Unit);
-      Register_Destroyable (Node.Unit, Ret.Env);
 
       for El of Vals.Items loop
          AST_Envs.Add (Ret, El.Key, El.Value);

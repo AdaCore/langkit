@@ -3,10 +3,11 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
-with Langkit_Support.Lexical_Env;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Lexical_Envs_Impl;
 with Langkit_Support.Symbols;
-with Langkit_Support.Text;  use Langkit_Support.Text;
-with Langkit_Support.Types; use Langkit_Support.Types;
+with Langkit_Support.Text;         use Langkit_Support.Text;
+with Langkit_Support.Types;        use Langkit_Support.Types;
 
 package Support is
 
@@ -17,7 +18,8 @@ package Support is
    Default_MD : constant Metadata := (I => 0);
 
    function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
-   function Node_Unit (Dummy_C : Character) return Boolean is (True);
+   function Node_Unit (Dummy_C : Character) return Generic_Unit_Ptr
+   is (No_Generic_Unit);
    function Metadata_Hash (Dummy_MD : Metadata) return Hash_Type is (0);
    function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
    function Parent (Dummy_Node : Character) return Character is (' ');
@@ -32,8 +34,10 @@ package Support is
    procedure Register_Rebinding (Node : Character; Rebinding : System.Address)
    is null;
 
-   function Get_Unit_Version (Dummy : Boolean) return Version_Number is (0);
-   function Get_Context_Version (Dummy : Boolean) return Integer is (0);
+   function Get_Unit_Version (Dummy : Generic_Unit_Ptr) return Version_Number
+   is (0);
+   function Get_Context_Version (Dummy : Generic_Unit_Ptr) return Integer
+   is (0);
 
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
@@ -53,11 +57,9 @@ package Support is
    is (raise Program_Error);
    procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is null;
 
-   package Envs is new Langkit_Support.Lexical_Env
-     (Unit_T                => Boolean,
-      Get_Unit_Version      => Get_Unit_Version,
+   package Envs is new Langkit_Support.Lexical_Envs_Impl
+     (Get_Unit_Version      => Get_Unit_Version,
       Get_Context_Version   => Get_Context_Version,
-      No_Unit               => False,
       Node_Type             => Character,
       Node_Metadata         => Metadata,
       No_Node               => ' ',
@@ -75,6 +77,6 @@ package Support is
       Inner_Env_Assoc_Array => Inner_Env_Assoc_Array);
 
    procedure Destroy is new Ada.Unchecked_Deallocation
-     (Envs.Env_Rebindings_Type, Envs.Env_Rebindings);
+     (Env_Rebindings_Type, Env_Rebindings);
 
 end Support;

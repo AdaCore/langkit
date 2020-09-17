@@ -3,8 +3,9 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
-with Langkit_Support.Errors; use Langkit_Support.Errors;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Errors;       use Langkit_Support.Errors;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 
 with Support; use Support;
 use Support.Envs;
@@ -15,15 +16,15 @@ procedure Main is
    Key_B   : constant Symbol_Type := Find (Symbols, "B");
 
    Old_Env : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'O', Owner => True);
+     (No_Env_Getter, 'O', Owner => No_Generic_Unit);
    New_Env : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'N', Owner => True);
+     (No_Env_Getter, 'N', Owner => No_Generic_Unit);
    Rebindings : Env_Rebindings := Append (null, Old_Env, New_Env);
 
    Root     : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'R', Owner => True);
+     (No_Env_Getter, 'R', Owner => No_Generic_Unit);
    Child    : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (Root), 'C', Owner => True);
+     (Simple_Env_Getter (Root), 'C', Owner => No_Generic_Unit);
    Orphaned : Lexical_Env := Orphan (Child);
 begin
    Add (Root, Key_A, '1');
@@ -42,8 +43,8 @@ begin
    Put_Line (Get (Orphaned, Key_B));
 
    declare
-      Transitive_Child : Lexical_Env :=
-         Create_Lexical_Env (Simple_Env_Getter (Root), 'C', True, True);
+      Transitive_Child : Lexical_Env := Create_Lexical_Env
+        (Simple_Env_Getter (Root), 'C', True, No_Generic_Unit);
 
       Grouped    : Lexical_Env := Group ((Root, Child));
       Rebound_TC : Lexical_Env := Rebind_Env (Transitive_Child, Rebindings);

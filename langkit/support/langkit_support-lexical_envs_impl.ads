@@ -24,16 +24,16 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
+with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with System;
 
-with GNATCOLL.Traces;
-
-with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
-with Langkit_Support.Types;   use Langkit_Support.Types;
+with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
+with Langkit_Support.Text;         use Langkit_Support.Text;
+with Langkit_Support.Types;        use Langkit_Support.Types;
 with Langkit_Support.Vectors;
 
 --  This package implements a scoped lexical environment data structure that
@@ -56,12 +56,11 @@ with Langkit_Support.Vectors;
 
 generic
 
-   type Unit_T is private;
-   No_Unit : Unit_T;
-   with function Get_Unit_Version (Unit : Unit_T) return Version_Number;
+   with function Get_Unit_Version
+     (Unit : Generic_Unit_Ptr) return Version_Number;
    --  Used to retrieve the version number of the given Unit, for cache
    --  invalidation purposes.
-   with function Get_Context_Version (Unit : Unit_T) return Integer;
+   with function Get_Context_Version (Unit : Generic_Unit_Ptr) return Integer;
    --  Used to retrieve the version number of the context associated with the
    --  given Unit, for cache invalidation purposes.
 
@@ -76,7 +75,7 @@ generic
    type Ref_Category is (<>);
    type Ref_Categories is array (Ref_Category) of Boolean;
 
-   with function Node_Unit (Node : Node_Type) return Unit_T is <>;
+   with function Node_Unit (Node : Node_Type) return Generic_Unit_Ptr is <>;
    with function Node_Hash (Node : Node_Type) return Hash_Type;
    with function Metadata_Hash (Metadata : Node_Metadata) return Hash_Type;
 
@@ -112,9 +111,7 @@ generic
       Index : Positive) return Inner_Env_Assoc is <>;
    with procedure Dec_Ref (Self : in out Inner_Env_Assoc_Array) is <>;
 
-package Langkit_Support.Lexical_Env is
-
-   Activate_Lookup_Cache : Boolean := True;
+package Langkit_Support.Lexical_Envs_Impl is
 
    All_Cats : Ref_Categories := (others => True);
 
@@ -126,31 +123,6 @@ package Langkit_Support.Lexical_Env is
 
    pragma Suppress (Container_Checks);
    --  Remove container checks for standard containers
-
-   use GNATCOLL;
-
-   Debug_Mode : constant Boolean := True;
-
-   Me : constant Traces.Trace_Handle :=
-     Traces.Create ("LANGKIT.LEXICAL_ENV", Traces.From_Config);
-
-   Rec : constant Traces.Trace_Handle :=
-     Traces.Create ("LANGKIT.LEXICAL_ENV.RECURSIVE", Traces.From_Config);
-
-   Caches_Trace : constant Traces.Trace_Handle :=
-     Traces.Create ("LANGKIT.LEXICAL_ENV.CACHES", Traces.From_Config);
-
-   --  Traces to debug lexical envs. This trace is meant to be activated on
-   --  demand, when the client of lexical env wants more information about
-   --  this specific lookup.
-
-   function Has_Trace return Boolean
-   is (Debug_Mode and then Traces.Active (Me));
-
-   type Env_Rebindings_Type;
-   type Env_Rebindings is access all Env_Rebindings_Type;
-   --  Set of mappings from one lexical environment to another. This is used to
-   --  temporarily substitute lexical environment during symbol lookup.
 
    --------------
    -- Entities --
@@ -189,65 +161,10 @@ package Langkit_Support.Lexical_Env is
    -- Lexical_Env Type --
    ----------------------
 
-   type Lexical_Env_Kind is
-     (Static_Primary, Dynamic_Primary, Orphaned, Grouped, Rebound);
-   --  Kind of lexical environment. Tells how a lexical environment was
-   --  created.
-   --
-   --  Static_Primary ones are not ref-counted. Except for the special
-   --  Empty_Env and each context's root scope, they are created by lexical
-   --  environment population.
-   --
-   --  Dynamic_Primary are not ref-counted neither. They are created on-demand
-   --  during semantic analysis, but their life cycle is tied to their owning
-   --  analysis unit, just like Static_Primary envs. They carry no map, but
-   --  instead use a property reference to dynamically compute environment
-   --  associations (an array of Inner_Env_Assoc).
-   --
-   --  Orphaned ones are copies whose parents have been stripped.
-   --
-   --  Grouped ones are just a collection of environments glued together as if
-   --  they were only one environment.
-   --
-   --  Rebound ones are copies annotated with environment rebindings.
-
-   subtype Primary_Kind is
-      Lexical_Env_Kind range Static_Primary ..  Dynamic_Primary;
-
-   type Lexical_Env_Type;
+   type Lexical_Env_Record;
    --  Value type for lexical envs
 
-   type Lexical_Env_Access is access all Lexical_Env_Type;
-
-   type Lexical_Env is record
-      Env : Lexical_Env_Access;
-      --  Referenced lexical environment
-
-      Hash : Hash_Type;
-      --  Env's hash. We need to pre-compute it so that the value is available
-      --  even after Env is deallocated. This makes it possible to destroy a
-      --  hash table that contains references to deallocated environments.
-
-      Kind : Lexical_Env_Kind;
-      --  The kind of Env. When it is Primary, we can avoid calling Dec_Ref at
-      --  destruction time. This is useful because at analysis unit destruction
-      --  time, this may be a dangling access to an environment from another
-      --  unit.
-
-      Owner : Unit_T := No_Unit;
-      --  Unit that owns this lexical environment. Only Primary and Rebound
-      --  lexical env will have a non-null value for this field.
-
-      Version : Version_Number := 0;
-      --  Version of the unit when this reference was made. Used to determine
-      --  whether this reference is valid or not.
-   end record;
-   --  Reference to a lexical environment. This is the type that shall be used.
-
-   Null_Lexical_Env : constant Lexical_Env :=
-     (null, 0, Static_Primary, No_Unit, 0);
-
-   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
+   type Lexical_Env_Access is access all Lexical_Env_Record;
 
    type Lexical_Env_Resolver is access
      function (Ref : Entity) return Lexical_Env;
@@ -312,20 +229,6 @@ package Langkit_Support.Lexical_Env is
    -- Env_Rebindings --
    --------------------
 
-   package Env_Rebindings_Vectors is new Langkit_Support.Vectors
-     (Env_Rebindings);
-
-   type Env_Rebindings_Type is record
-      Parent           : Env_Rebindings;
-      Old_Env, New_Env : Lexical_Env;
-      Children         : Env_Rebindings_Vectors.Vector;
-   end record;
-   --  Tree of remappings from one lexical environment (Old_Env) to another
-   --  (New_Env). Note that both referenced environments must be primary and
-   --  env rebindings are supposed to be destroyed when one of their
-   --  dependencies (Parent, Old_Env or New_Env) is destroyed, so there is no
-   --  need for ref-counting primitives.
-
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;
    --  Return a new Env_Rebindings that combines rebindings from both L and R
 
@@ -348,9 +251,6 @@ package Langkit_Support.Lexical_Env is
       with Pre => OK_For_Rebindings (Old_Env)
                   and then OK_For_Rebindings (New_Env);
 
-   function Hash is new Hashes.Hash_Access
-     (Env_Rebindings_Type, Env_Rebindings);
-
    function Text_Image (Self : Env_Rebindings) return Text_Type;
 
    ----------------------------------
@@ -370,23 +270,6 @@ package Langkit_Support.Lexical_Env is
    -----------------------------
    -- Referenced environments --
    -----------------------------
-
-   type Ref_Kind is (Transitive, Prioritary, Normal);
-   --  Kind for a referenced env. Can be any of:
-   --
-   --  * Transitive: The reference is transitive, e.g. it will be explored in
-   --    every case (whether the lookup is recursive or not). It will be
-   --    explored *before* parent environments.
-   --
-   --  * Prioritary: The reference is non transitive, e.g. it will be
-   --    explored only if the lookup on the env is recursive. It will be
-   --    explored *before* parent environments.
-   --
-   --  * Normal: The reference is non transitive, e.g. it will be explored
-   --    only if the lookup on the env is recursive. It will be explored
-   --    *after* parent environments.
-
-   type Refd_Env_State is (Active, Inactive);
 
    type Referenced_Env is record
       Kind : Ref_Kind := Normal;
@@ -432,7 +315,7 @@ package Langkit_Support.Lexical_Env is
      (Parent            : Env_Getter;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
-      Owner             : Unit_T) return Lexical_Env
+      Owner             : Generic_Unit_Ptr) return Lexical_Env
       with Post => Create_Lexical_Env'Result.Kind = Static_Primary;
    --  Create a new static-primary lexical env
 
@@ -440,7 +323,7 @@ package Langkit_Support.Lexical_Env is
      (Parent            : Env_Getter;
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
-      Owner             : Unit_T;
+      Owner             : Generic_Unit_Ptr;
       Resolver          : Inner_Env_Assocs_Resolver) return Lexical_Env
       with Pre  => Node /= No_Node,
            Post => Create_Dynamic_Lexical_Env'Result.Kind = Dynamic_Primary;
@@ -514,8 +397,6 @@ package Langkit_Support.Lexical_Env is
    procedure Reset_Caches (Self : Lexical_Env)
      with Pre => Self.Kind = Static_Primary;
    --- Reset the caches for this env
-
-   type Lookup_Kind_Type is (Recursive, Flat, Minimal);
 
    function Get
      (Self        : Lexical_Env;
@@ -599,11 +480,9 @@ package Langkit_Support.Lexical_Env is
    --  Return a new entity info from E_Info, shedding env rebindings that are
    --  not in the parent chain for the env From_Env.
 
-   function Equivalent (L, R : Lexical_Env) return Boolean;
+   function Equivalent (Left, Right : Lexical_Env) return Boolean;
    --  Return whether L and R are equivalent lexical environments: same
    --  envs topology, same internal map, etc.
-
-   function Hash (Env : Lexical_Env) return Hash_Type is (Env.Hash);
 
    ---------------------------------------
    -- Lexical environment lookup caches --
@@ -742,24 +621,13 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
 
-   package Env_Rebindings_Pools is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Lexical_Env,
-      Element_Type    => Env_Rebindings,
-      Hash            => Hash,
-      Equivalent_Keys => "=",
-      "="             => "=");
-
-   type Env_Rebindings_Pool is access all Env_Rebindings_Pools.Map;
-   --  Pool of env rebindings to be stored in a Lexical_Env
-
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Env_Rebindings_Pools.Map, Env_Rebindings_Pool);
-
    type Lexical_Env_Array_Access is access all Lexical_Env_Array;
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Lexical_Env_Array, Lexical_Env_Array_Access);
 
-   type Lexical_Env_Type (Kind : Lexical_Env_Kind) is record
+   type Lexical_Env_Record (Kind : Lexical_Env_Kind) is
+      new Base_Lexical_Env_Record
+   with record
       case Kind is
          when Primary_Kind =>
             Parent : Env_Getter := No_Env_Getter;
@@ -845,7 +713,14 @@ package Langkit_Support.Lexical_Env is
 
    function Wrap
      (Env   : Lexical_Env_Access;
-      Owner : Unit_T := No_Unit) return Lexical_Env;
+      Owner : Generic_Unit_Ptr := No_Generic_Unit) return Lexical_Env;
+   function Wrap is new Ada.Unchecked_Conversion
+     (Lexical_Env_Access, Generic_Lexical_Env_Ptr);
+
+   function Unwrap is new Ada.Unchecked_Conversion
+     (Generic_Lexical_Env_Ptr, Lexical_Env_Access);
+   function Unwrap (Self : Lexical_Env) return Lexical_Env_Access
+   is (Unwrap (Self.Env));
 
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment. Must
@@ -855,8 +730,8 @@ package Langkit_Support.Lexical_Env is
    --  Return whether Self points to a now defunct lexical env
 
    function Is_Foreign (Self : Lexical_Env; Node : Node_Type) return Boolean
-   is (Self.Env.Node = No_Node
-       or else Node_Unit (Self.Env.Node) /= Node_Unit (Node))
+   is (Unwrap (Self).Node = No_Node
+       or else Node_Unit (Unwrap (Self).Node) /= Node_Unit (Node))
    with Pre => Self.Kind in Primary_Kind;
    --  Return whether Node is a foreign node relative to Self (i.e. whether
    --  they both belong to different units). This is true even for the empty
@@ -869,7 +744,7 @@ package Langkit_Support.Lexical_Env is
 
    function Is_Foreign_Strict
      (Self : Lexical_Env; Node : Node_Type) return Boolean
-   is (Self.Env.Node /= No_Node and then Is_Foreign (Self, Node));
+   is (Unwrap (Self).Node /= No_Node and then Is_Foreign (Self, Node));
    --  Same as Is_Foreign, but return False for the empty and root envs
 
    -------------------
@@ -899,7 +774,7 @@ package Langkit_Support.Lexical_Env is
    --
    --  Prefix is used to prefix each emitted line.
 
-   function Lexical_Env_Parent_Chain (Env : Lexical_Env) return String;
+   function Lexical_Env_Parent_Chain (Self : Lexical_Env) return String;
 
    procedure Dump_One_Lexical_Env
      (Self           : Lexical_Env;
@@ -908,14 +783,14 @@ package Langkit_Support.Lexical_Env is
       Dump_Addresses : Boolean := False;
       Dump_Content   : Boolean := True);
 
-   procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env);
+   procedure Dump_Lexical_Env_Parent_Chain (Self : Lexical_Env);
 
 private
 
    function Hash (Env : Lexical_Env_Access) return Hash_Type;
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
-   Empty_Env_Record : aliased Lexical_Env_Type :=
+   Empty_Env_Record : aliased Lexical_Env_Record :=
      (Kind                     => Static_Primary,
       Parent                   => No_Env_Getter,
       Transitive_Parent        => False,
@@ -933,7 +808,7 @@ private
      (Env     => Empty_Env_Record'Access,
       Hash    => 0,
       Kind    => Static_Primary,
-      Owner   => No_Unit,
+      Owner   => No_Generic_Unit,
       Version => 0);
 
-end Langkit_Support.Lexical_Env;
+end Langkit_Support.Lexical_Envs_Impl;

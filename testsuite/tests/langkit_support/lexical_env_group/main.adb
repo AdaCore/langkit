@@ -2,7 +2,8 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 
 with Support; use Support;
 use Support.Envs;
@@ -12,11 +13,11 @@ procedure Main is
    Key_X   : constant Symbol_Type := Find (Symbols, "X");
 
    A_Parent : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'P', Owner => True);
+     (No_Env_Getter, 'P', Owner => No_Generic_Unit);
    A        : Lexical_Env := Create_Lexical_Env
-     (Simple_Env_Getter (A_Parent), 'A', Owner => True);
+     (Simple_Env_Getter (A_Parent), 'A', Owner => No_Generic_Unit);
    B        : Lexical_Env := Create_Lexical_Env
-     (No_Env_Getter, 'B', Owner => True);
+     (No_Env_Getter, 'B', Owner => No_Generic_Unit);
 
    Grouped : Lexical_Env := Group ((A, B));
 begin

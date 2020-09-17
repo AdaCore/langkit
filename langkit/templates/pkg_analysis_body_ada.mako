@@ -29,7 +29,8 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Common;
 with ${ada_lib_name}.Private_Converters;
@@ -272,7 +273,7 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Disable_Lookup_Cache (Disable : Boolean := True) is
    begin
-      Implementation.AST_Envs.Activate_Lookup_Cache := not Disable;
+      Activate_Lookup_Cache := not Disable;
    end Disable_Lookup_Cache;
 
    --------------------------
@@ -470,7 +471,7 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Trigger_Envs_Debug (Is_Active : Boolean) is
    begin
-      GNATCOLL.Traces.Set_Active (AST_Envs.Me, Is_Active);
+      Langkit_Support.Lexical_Envs.Me.Set_Active (Is_Active);
    end Trigger_Envs_Debug;
 
    -----------
