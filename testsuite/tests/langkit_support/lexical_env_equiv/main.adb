@@ -1,22 +1,24 @@
 --  Test that the Equivalence function for lexical envs works properly
 
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
+
 with Support; use Support;
 
 procedure Main is
    use Envs;
 
-   Old_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+   Old_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Record'
      (Kind => Static_Primary, Node => 'O', others => <>));
-   New_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+   New_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Record'
      (Kind => Static_Primary, Node => 'N', others => <>));
-   Old_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
+   Old_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Record'
      (Kind => Static_Primary, Node => 'o', others => <>));
-   New_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
+   New_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Record'
      (Kind => Static_Primary, Node => 'n', others => <>));
 
-   Prim_A : Lexical_Env := Wrap (new Lexical_Env_Type'
+   Prim_A : Lexical_Env := Wrap (new Lexical_Env_Record'
      (Kind => Static_Primary, Node => 'A', others => <>));
-   Prim_B : Lexical_Env := Wrap (new Lexical_Env_Type'
+   Prim_B : Lexical_Env := Wrap (new Lexical_Env_Record'
      (Kind => Static_Primary, Node => 'B', others => <>));
 
    Orphaned_A1 : Lexical_Env := Orphan (Prim_A);

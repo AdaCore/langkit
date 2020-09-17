@@ -366,10 +366,9 @@ package body ${ada_lib_name}.Implementation is
       Context.Charset := To_Unbounded_String (Actual_Charset);
       Context.Tab_Stop := Tab_Stop;
       Context.With_Trivia := With_Trivia;
-      Context.Root_Scope := AST_Envs.Create_Lexical_Env
+      Context.Root_Scope := Create_Static_Lexical_Env
         (Parent => AST_Envs.No_Env_Getter,
-         Node   => null,
-         Owner  => No_Analysis_Unit);
+         Node   => null);
 
       Context.Unit_Provider := Unit_Provider;
 
@@ -985,17 +984,28 @@ package body ${ada_lib_name}.Implementation is
       Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
       State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
+      ----------------
+      -- Get_Parent --
+      ----------------
+
+      function Get_Parent (Env : Lexical_Env) return Lexical_Env is
+         E : constant Lexical_Env_Access := Unwrap (Env);
+      begin
+         return Get_Env (E.Parent, No_Entity_Info);
+      end Get_Parent;
+
       --------------------------
       -- Explore_Parent_Chain --
       --------------------------
 
       procedure Explore_Parent_Chain (Env : Lexical_Env) is
+         P : Lexical_Env;
       begin
          if Env /= Null_Lexical_Env then
+            P := Get_Parent (Env);
             Dump_One_Lexical_Env
-              (Env, Get_Env_Id (Env, State),
-               Get_Env_Id (Get_Env (Env.Env.Parent, No_Entity_Info), State));
-            Explore_Parent_Chain (Get_Env (Env.Env.Parent, No_Entity_Info));
+              (Env, Get_Env_Id (Env, State), Get_Env_Id (P, State));
+            Explore_Parent_Chain (P);
          end if;
       end Explore_Parent_Chain;
 
@@ -1017,7 +1027,7 @@ package body ${ada_lib_name}.Implementation is
          --  envs we have already seen or not.
          if not State.Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
-            Parent := Get_Env (Env.Env.Parent, No_Entity_Info);
+            Parent := Get_Parent (Env);
             Explore_Parent := not State.Env_Ids.Contains (Parent);
 
             Dump_One_Lexical_Env
@@ -1207,7 +1217,8 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    procedure Destroy (Env : in out Lexical_Env_Access) is
-      Mutable_Env : Lexical_Env := (Env, 0, Env.Kind, No_Analysis_Unit, 0);
+      Mutable_Env : Lexical_Env :=
+        (Wrap (Env), 0, Env.Kind, No_Generic_Unit, 0);
    begin
       Destroy (Mutable_Env);
       Env := null;
@@ -1421,7 +1432,7 @@ package body ${ada_lib_name}.Implementation is
             --  Add Val to the list of foreign nodes that Dest_Env's unit
             --  contains, so that when that unit is reparsed, we can call
             --  Add_To_Env again on those nodes.
-            Dest_Env.Env.Node.Unit.Foreign_Nodes.Append
+            Convert_Unit (Dest_Env.Owner).Foreign_Nodes.Append
               ((Mapping.Val, Self.Unit));
          end if;
       end if;
@@ -1488,12 +1499,10 @@ package body ${ada_lib_name}.Implementation is
          else AST_Envs.Dyn_Env_Getter (Resolver, Self));
    begin
       --  Create the environment itself
-      Self.Self_Env := AST_Envs.Create_Lexical_Env
+      Self.Self_Env := Create_Static_Lexical_Env
         (Parent            => Parent_Getter,
          Node              => Self,
-         Transitive_Parent => Transitive_Parent,
-         Owner             => Self.Unit);
-      Register_Destroyable (Self.Unit, Self.Self_Env.Env);
+         Transitive_Parent => Transitive_Parent);
 
       --  If the parent of this new environment comes from a named environment
       --  lookup, register this new environment so that its parent is updated
@@ -1628,19 +1637,21 @@ package body ${ada_lib_name}.Implementation is
    ---------------------
 
    function Is_Visible_From
-     (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean is
-      Referenced_Node : constant ${T.root_node.name} :=
-         Referenced_Env.Env.Node;
-      Base_Node       : constant ${T.root_node.name} := Base_Env.Env.Node;
+     (Referenced_Env, Base_Env : Lexical_Env) return Boolean
+   is
+      Referenced_Unit : constant Internal_Unit :=
+         Convert_Unit (Referenced_Env.Owner);
+      Base_Unit       : constant Internal_Unit :=
+         Convert_Unit (Base_Env.Owner);
    begin
-      if Referenced_Node = null then
+      if Referenced_Unit = null then
          raise Property_Error with
             "referenced environment does not belong to any analysis unit";
-      elsif Base_Node = null then
+      elsif Base_Unit = null then
          raise Property_Error with
             "base environment does not belong to any analysis unit";
       end if;
-      return Is_Referenced_From (Referenced_Node.Unit, Base_Node.Unit);
+      return Is_Referenced_From (Referenced_Unit, Base_Unit);
    end Is_Visible_From;
 
    ----------
@@ -2276,9 +2287,9 @@ package body ${ada_lib_name}.Implementation is
    -- Node_Unit --
    ---------------
 
-   function Node_Unit (Node : ${T.root_node.name}) return Internal_Unit is
+   function Node_Unit (Node : ${T.root_node.name}) return Generic_Unit_Ptr is
    begin
-      return Node.Unit;
+      return Convert_Unit (Node.Unit);
    end Node_Unit;
 
    ----------
@@ -2437,7 +2448,7 @@ package body ${ada_lib_name}.Implementation is
       NED_Access : constant Named_Env_Descriptor_Access :=
          Get_Named_Env_Descriptor (Context, Name);
       NED        : Named_Env_Descriptor renames NED_Access.all;
-      Node       : constant ${T.root_node.name} := Env.Env.Node;
+      Node       : constant ${T.root_node.name} := Env_Node (Env);
    begin
       NED.Envs.Insert (Node, Env);
       Node.Unit.Named_Envs.Append ((Name, Env));
@@ -2502,8 +2513,8 @@ package body ${ada_lib_name}.Implementation is
             --  Set the parent environment of all foreign environments
             for Cur in NE.Foreign_Envs.Iterate loop
                declare
-                  Env : Lexical_Env_Type renames
-                     Sorted_Env_Maps.Element (Cur).Env.all;
+                  Env : Lexical_Env_Record renames
+                     Unwrap (Sorted_Env_Maps.Element (Cur)).all;
                begin
                   Env.Parent := Simple_Env_Getter (New_Env);
                end;
@@ -2702,18 +2713,18 @@ package body ${ada_lib_name}.Implementation is
    -- Unit_Version --
    ------------------
 
-   function Unit_Version (Unit : Internal_Unit) return Version_Number is
+   function Unit_Version (Unit : Generic_Unit_Ptr) return Version_Number is
    begin
-      return Unit.Unit_Version;
+      return Convert_Unit (Unit).Unit_Version;
    end Unit_Version;
 
    ---------------------
    -- Context_Version --
    ---------------------
 
-   function Context_Version (Unit : Internal_Unit) return Integer is
+   function Context_Version (Unit : Generic_Unit_Ptr) return Integer is
    begin
-      return Unit.Context.Reparse_Cache_Version;
+      return Convert_Unit (Unit).Context.Reparse_Cache_Version;
    end Context_Version;
    ----------------------
    -- Short_Text_Image --
@@ -3301,6 +3312,27 @@ package body ${ada_lib_name}.Implementation is
       return Ret;
    end Combine;
 
+   -------------------------------
+   -- Create_Static_Lexical_Env --
+   -------------------------------
+
+   function Create_Static_Lexical_Env
+     (Parent            : Env_Getter;
+      Node              : ${T.root_node.name};
+      Transitive_Parent : Boolean := False) return Lexical_Env
+   is
+      Unit : constant Internal_Unit :=
+        (if Node = null then null else Node.Unit);
+   begin
+      return Result : Lexical_Env := Create_Lexical_Env
+        (Parent, Node, Transitive_Parent, Convert_Unit (Unit))
+      do
+         if Unit /= null then
+            Register_Destroyable (Unit, Unwrap (Result.Env));
+         end if;
+      end return;
+   end Create_Static_Lexical_Env;
+
    ---------
    -- Get --
    ---------
@@ -3338,7 +3370,7 @@ package body ${ada_lib_name}.Implementation is
    function Group
      (Envs   : ${T.LexicalEnv.array.name};
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnv.name}
-   is (Group (AST_Envs.Lexical_Env_Array (Envs.Items), Env_Md));
+   is (Group (Lexical_Env_Array (Envs.Items), Env_Md));
 
    % for astnode in ctx.astnode_types:
        ${astnode_types.body_decl(astnode)}
@@ -3378,13 +3410,12 @@ package body ${ada_lib_name}.Implementation is
          --------------------
 
          function Get_Parent_Env return Lexical_Env is
-            Parent : constant Lexical_Env :=
-               Get_Env (Node.Self_Env.Env.Parent, No_Entity_Info);
+            Parent : constant Lexical_Env := AST_Envs.Parent (Node.Self_Env);
          begin
             --  If Node is the root scope or the empty environment, Parent can
             --  be a wrapper around the null node. Turn this into the
             --  Empty_Env, as null envs are erroneous values in properties.
-            return (if Parent.Env = null
+            return (if Unwrap (Parent) = null
                     then Empty_Env
                     else Parent);
          end Get_Parent_Env;
@@ -3626,13 +3657,13 @@ package body ${ada_lib_name}.Implementation is
         (Parent            => Simple_Env_Getter (Self.Self_Env),
          Node              => Self,
          Transitive_Parent => Transitive_Parent,
-         Owner             => Unit,
+         Owner             => Convert_Unit (Unit),
          Resolver          => Resolver)
       do
          --  Since dynamic lexical environments can only be created in lazy
          --  field initializers, it is fine to tie Result's lifetime to the
          --  its owning unit's lifetime.
-         Register_Destroyable (Unit, Result.Env);
+         Register_Destroyable (Unit, Unwrap (Result));
       end return;
    end Create_Dynamic_Lexical_Env;
 
@@ -3686,7 +3717,7 @@ package body ${ada_lib_name}.Implementation is
          case Env.Kind is
          when Static_Primary =>
             return "<LexicalEnv static-primary for "
-                   & Trace_Image (Env.Env.Node) & ">";
+                   & Trace_Image (Env_Node (Env)) & ">";
          when others =>
             return "<LexicalEnv synthetic>";
          end case;
@@ -4024,7 +4055,7 @@ package body ${ada_lib_name}.Implementation is
      (Unit : Internal_Unit; Env : AST_Envs.Lexical_Env_Access)
    is
       procedure Helper is new Register_Destroyable_Gen
-        (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env_Access, Destroy);
+        (AST_Envs.Lexical_Env_Record, AST_Envs.Lexical_Env_Access, Destroy);
    begin
       Helper (Unit, Env);
    end Register_Destroyable;
@@ -4445,10 +4476,10 @@ package body ${ada_lib_name}.Implementation is
          --  Also strip foreign nodes information from "outer" units so that it
          --  does not contain stale information (i.e. dangling pointers to
          --  nodes that belong to the units in the queue).
-         if EE.Env.Owner /= No_Analysis_Unit then
+         if EE.Env.Owner /= No_Generic_Unit then
             declare
                Foreign_Nodes : Foreign_Node_Entry_Vectors.Vector renames
-                  EE.Env.Env.Node.Unit.Foreign_Nodes;
+                  Convert_Unit (EE.Env.Owner).Foreign_Nodes;
                Current       : Positive := Foreign_Nodes.First_Index;
             begin
                while Current <= Foreign_Nodes.Last_Index loop
@@ -4497,7 +4528,7 @@ package body ${ada_lib_name}.Implementation is
       --  Remove ends in this unit from the Named_Env_Descriptor.Foreign_Envs
       --  components in which they are registered.
       for EE of Unit.Exiled_Envs loop
-         EE.Named_Env.Foreign_Envs.Delete (EE.Env.Env.Node);
+         EE.Named_Env.Foreign_Envs.Delete (Env_Node (EE.Env));
       end loop;
       Unit.Exiled_Envs.Clear;
 
@@ -4508,7 +4539,7 @@ package body ${ada_lib_name}.Implementation is
                Unit.Context.Named_Envs.Element (NE.Name);
             NED        : Named_Env_Descriptor renames NED_Access.all;
          begin
-            NED.Envs.Delete (NE.Env.Env.Node);
+            NED.Envs.Delete (Env_Node (NE.Env));
 
             --  If this named environment had precedence, we must schedule an
             --  update for this name environment entry.
@@ -4639,8 +4670,8 @@ package body ${ada_lib_name}.Implementation is
          end loop;
          R.Children.Destroy;
 
-         Unregister (R, R.Old_Env.Env.Node.Unit.Rebindings);
-         Unregister (R, R.New_Env.Env.Node.Unit.Rebindings);
+         Unregister (R, Convert_Unit (R.Old_Env.Owner).Rebindings);
+         Unregister (R, Convert_Unit (R.New_Env.Owner).Rebindings);
 
          declare
             Var_R : Env_Rebindings := R;
@@ -4680,7 +4711,7 @@ package body ${ada_lib_name}.Implementation is
             --  registered it in its Old_Env. Otherwise, it is registered
             --  in its Parent's Children list.
             if R.Parent = null then
-               R.Old_Env.Env.Rebindings_Pool.Delete (R.New_Env);
+               Unwrap (R.Old_Env).Rebindings_Pool.Delete (R.New_Env);
             else
                Unregister (R, R.Parent.Children);
             end if;
