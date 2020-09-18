@@ -1020,9 +1020,8 @@ class CompileCtx:
             # always-emitted PLE helpers.
             T.env_assoc, T.inner_env_assoc, T.inner_env_assoc.array,
 
-            # Arrays of symbols (and arrays of these) are required to deal with
-            # environment names.
-            T.Symbol.array, T.Symbol.array.array,
+            # Arrays of symbols are required to deal with environment names
+            T.Symbol.array,
 
             # The String_To_Symbol helper obviously relies on the string type
             T.String

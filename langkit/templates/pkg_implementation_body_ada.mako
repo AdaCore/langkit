@@ -697,29 +697,6 @@ package body ${ada_lib_name}.Implementation is
       end loop;
       Context.Named_Envs.Clear;
 
-      --  Destroy env names themselves. Note that iterating on a hashed sets
-      --  needs to have set elements valid (as the traversal sometimes
-      --  recomputes their hash), so we need to free them after having cleared
-      --  the set.
-      declare
-         package Env_Name_Vectors is new Langkit_Support.Vectors (Env_Name);
-         Names : Env_Name_Vectors.Vector;
-      begin
-         Names.Reserve (Natural (Context.Env_Names.Length));
-         for N of Context.Env_Names loop
-            Names.Append (N);
-         end loop;
-         Context.Env_Names.Clear;
-         for N of Names loop
-            declare
-               Name : Env_Name := N;
-            begin
-               Destroy (Name);
-            end;
-         end loop;
-         Names.Destroy;
-      end;
-
       --  If we are asked to free this context, it means that no one else have
       --  references to its analysis units, so it's safe to destroy these.
       for Unit of Context.Units loop
@@ -1268,7 +1245,7 @@ package body ${ada_lib_name}.Implementation is
    procedure Use_Named_Env
      (State   : in out PLE_Node_State;
       Context : Internal_Context;
-      Name    : Env_Name) is
+      Name    : Symbol_Type) is
    begin
       State.Current_NED := Get_Named_Env_Descriptor (Context, Name);
       State.Current_Env := State.Current_NED.Env_With_Precedence;
@@ -1281,25 +1258,15 @@ package body ${ada_lib_name}.Implementation is
    procedure Set_Initial_Env
      (Self     : ${T.root_node.name};
       State    : in out PLE_Node_State;
-      Name     : in out ${T.Symbol.array.name};
+      Name     : Symbol_Type;
       Resolver : Lexical_Env_Resolver) is
    begin
       --  An empty name is the way for the expression to say to fallback on the
       --  direct initial environment computation.
-      if Name /= null and then Name.N > 0 then
-         declare
-            Ctx : constant Internal_Context := Self.Unit.Context;
-            N   : constant Env_Name := Create_Env_Name (Ctx, Name);
-         begin
-            Dec_Ref (Name);
-            Use_Named_Env (State, Ctx, N);
-         end;
+      if Name /= null then
+         Use_Named_Env (State, Self.Unit.Context, Name);
 
       else
-         --  The call to Resolver (which calls a property) can raise an
-         --  exception, so we must call Dec_Ref before to avoid a memory leak
-         --  in that case.
-         Dec_Ref (Name);
          Use_Direct_Env
            (State,
             Resolver ((Node => Self, Info => ${T.entity_info.nullexpr})));
@@ -1473,7 +1440,7 @@ package body ${ada_lib_name}.Implementation is
       No_Parent         : Boolean;
       Transitive_Parent : Boolean;
       Resolver          : Lexical_Env_Resolver;
-      Names             : in out ${T.Symbol.array.array.name})
+      Names             : in out ${T.Symbol.array.name})
    is
       Parent_From_Name : constant Boolean := State.Current_NED /= null;
       --  Does the parent environment comes from a named environment lookup?
@@ -1529,18 +1496,11 @@ package body ${ada_lib_name}.Implementation is
             Env       : constant Lexical_Env := Self.Self_Env;
             NENU      : NED_Maps.Map renames
                State.Unit_State.Named_Envs_Needing_Update;
-            Env_Names : array (Names.Items'Range) of Env_Name;
          begin
-            --  Turn symbols into env names and free the DSL array
-            for I in Env_Names'Range loop
-               Env_Names (I) := Create_Env_Name (Context, Names.Items (I));
-            end loop;
-            Dec_Ref (Names);
-
-            --  Do the registration
-            for N of Env_Names loop
+            for N of Names.Items loop
                Register_Named_Env (Context, N, Env, NENU);
             end loop;
+            Dec_Ref (Names);
          end;
       end if;
    end Add_Env;
@@ -2370,47 +2330,13 @@ package body ${ada_lib_name}.Implementation is
       end loop;
    end Remove;
 
-   ---------------------
-   -- Create_Env_Name --
-   ---------------------
-
-   function Create_Env_Name
-     (Context : Internal_Context;
-      Symbols : ${T.Symbol.array.name}) return Env_Name
-   is
-      use Env_Name_Sets;
-
-      Pos      : Cursor;
-      Inserted : Boolean;
-
-      --  Create a valid env name (computing its hash)
-      Name : Env_Name := new Env_Name_Record'
-        (Size    => Symbols.N,
-         Symbols => Env_Name_Internal_Array (Symbols.Items),
-         Hash    => Initial_Hash);
-   begin
-      for S of Name.Symbols loop
-         Name.Hash := Combine (Name.Hash, Hash (S));
-      end loop;
-
-      --  Try to insert it to Context's set of env names. If already present
-      --  (not Inserted), discard it and return the existing one.
-      Context.Env_Names.Insert (Name, Pos, Inserted);
-      if not Inserted then
-         Destroy (Name);
-         Name := Element (Pos);
-      end if;
-
-      return Name;
-   end Create_Env_Name;
-
    ------------------------------
    -- Get_Named_Env_Descriptor --
    ------------------------------
 
    function Get_Named_Env_Descriptor
      (Context : Internal_Context;
-      Name    : Env_Name) return Named_Env_Descriptor_Access
+      Name    : Symbol_Type) return Named_Env_Descriptor_Access
    is
       use NED_Maps;
 
@@ -2441,7 +2367,7 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Register_Named_Env
      (Context                   : Internal_Context;
-      Name                      : Env_Name;
+      Name                      : Symbol_Type;
       Env                       : Lexical_Env;
       Named_Envs_Needing_Update : in out NED_Maps.Map)
    is
