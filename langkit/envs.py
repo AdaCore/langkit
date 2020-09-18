@@ -48,9 +48,9 @@ def add_env(no_parent: bool = False,
     :param no_parent: If passed, the new env will be created with no parent
         env.
     :param transitive_parent: TODO.
-    :param names: Optional list of names for the created environment. If not
-        passed or if this is an empty array, the created environment is not
-        named.
+    :param names: Optional array of names (symbols) for the created
+        environment. If not passed or if this is an empty array, the created
+        environment is not named.
     """
     return AddEnv(no_parent, transitive_parent, names)
 
@@ -195,11 +195,11 @@ def set_initial_env_by_name(
     actions are evaluated. Except for Do() hooks, this action must be first in
     the list of action (if present).
 
-    :param name_expr: Expression that returns an array of symbols (an env
-        name). If it evaluates to a non-empty array, look for the environment
-        that has this name (it will be updated every time another environment
-        related to this name takes precedence). If it evaluates to an empty
-        array, use ``fallback_env_expr`` to get the initial environment.
+    :param name_expr: Expression that returns an env name (symbol). If it
+        evaluates to a non-null symbol, look for the environment that has this
+        name (it will be updated every time another environment related to this
+        name takes precedence). If it evaluates to a null symbol, use
+        ``fallback_env_expr`` to get the initial environment.
     :param fallback_env_expr: Expression that returns the initial env if there
         is no named env lookup. Note that except if it's the empty env or the
         root scope, this environment must not be foreign to Self.
@@ -487,7 +487,7 @@ class AddEnv(EnvAction):
             'Env_Trans_Parent', unsugar(self.transitive_parent), T.Bool
         )
         self.names_prop = env_spec.create_internal_property(
-            'Env_Names', self.names, T.Symbol.array.array
+            'Env_Names', self.names, T.Symbol.array
         )
 
 
@@ -677,7 +677,7 @@ class SetInitialEnv(EnvAction):
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.name_prop = env_spec.create_internal_property(
-            'Initial_Env_Name', self.name_expr, T.Symbol.array
+            'Initial_Env_Name', self.name_expr, T.Symbol
         )
         self.fallback_env_prop = env_spec.create_internal_property(
             'Initial_Env', self.fallback_env_expr, T.LexicalEnv

@@ -83,14 +83,14 @@ grammar foo_grammar {
 
     ## Assuming this node can define a named environment (see
     ## ``can_have_name``), return its fully qualified namem.
-    fun full_name (): Array[Symbol] = node.name_parent().do(
-        (np) => np.full_name() & (
-            [node.self_name().as[Identifier].base_name()]
+    fun full_name (): String = node.name_parent().do(
+        (np) => (np.full_name() & (".")) & (
+            node.self_name().as[Identifier].base_name()
         ), default_val=node.self_name().scope_name()
     )
 
-    fun suffixed_full_name (suffix : Array[Symbol]): Array[Symbol] =
-    node.full_name().do((n) => n & suffix)
+    fun suffixed_full_name (suffix : String): String =
+    node.full_name().do((n) => (n & (".")) & suffix)
 
     ## Assuming this node can define a named environment, return the syntactic
     ## parent node that defines the parent scope for Self. If there is no such
@@ -124,12 +124,12 @@ grammar foo_grammar {
     }
 
     ## If this node can define a named environment (see ``can_have_name``),
-    ## return the name of its parent scope. Return an empty list otherwise.
-    @memoized fun decl_parent_scope_name (): Array[Symbol] =
+    ## return the name of its parent scope. Return a null symbol otherwise.
+    @memoized fun decl_parent_scope_name (): Symbol =
     if node.can_have_name() then (
         node.name_parent().do(
             (np) => np.full_name(), default_val=node.self_name().parent_scope_name()
-        )
+        ).to_symbol
     ) else (null)
 
     ## Assuming this node can define a named environment (see
@@ -163,21 +163,21 @@ class IncompleteTypeDecl : FooNode {
 @abstract class Name : FooNode {
 
     ## Innermost suffix for this name.
-    fun base_name (): Symbol = match node {
-        case id : Identifier => id.symbol
+    fun base_name (): String = match node {
+        case id : Identifier => id.text()
         case dn : DottedName => dn.suffix.base_name()
     }
 
     ## Absolute name of the scope that this name defines, assuming that
     ## ``prefix`` is the implicit prefix for that name.
-    fun scope_name (): Array[Symbol] = match node {
-        case id : Identifier => [id.symbol]
-        case dn : DottedName => dn.prefix.scope_name() & ([dn.suffix.symbol])
+    fun scope_name (): String = match node {
+        case id : Identifier => id.text()
+        case dn : DottedName => (dn.prefix.scope_name() & (".")) & dn.suffix.text()
     }
 
     ## Absolute name of the scope that defines this name, assuming that
     ## ``prefix`` is the implicit prefix for that name.
-    fun parent_scope_name (): Array[Symbol] = match node {
+    fun parent_scope_name (): String = match node {
         case _ : Identifier => null
         case dn : DottedName => dn.prefix.scope_name()
     }
@@ -196,7 +196,7 @@ class IncompleteTypeDecl : FooNode {
     ## Return the list of declarations that define this name. The lookup
     ## starts from the given environment.
     fun resolve (from_env : LexicalEnv): FooNode =
-    node.parent_scope(from_env).get_first(node.base_name())
+    node.parent_scope(from_env).get_first(node.base_name().to_symbol)
 }
 
 class DottedName : Name {
@@ -216,7 +216,7 @@ class PackageBody : FooNode {
     ## Assuming this PackageBody cannot define a named environment, return the
     ## environment in which this declaration should be registered.
     fun get_initial_env (): LexicalEnv = {
-        val pkg_decl = node.parent.children_env().get_first(node.name.base_name()).as[PackageDecl];
+        val pkg_decl = node.parent.children_env().get_first(node.name.base_name().to_symbol).as[PackageDecl];
 
         if (pkg_decl.private_part.is_null) then pkg_decl.children_env() else pkg_decl.private_part.children_env()
     }
@@ -237,15 +237,15 @@ class PackageDecl : FooNode {
     fun self_name (): Name = node.name
 
     ## Return the names for the environment that this package creates.
-    fun new_env_names (): Array[Array[Symbol]] =
+    fun new_env_names (): Array[Symbol] =
     # Always register the "regular" name for this package
     # If there is a private part, that's all we need. Otherwise, register
     # this environment with the name of the private part as well, so that
     # package bodies can assume there is always a private part.
     if (node.full_name().length() = 0) then (null) else (
         if (node.private_part.is_null) then (
-            [node.full_name(), node.full_name() & (["__privatepart"])]
-        ) else ([node.full_name()])
+            [node.full_name(), node.full_name() & (".__privatepart")]
+        ) else ([node.full_name()]).map((s) => s.to_symbol)
     )
 
     ## Return the PackageBody node corresponding to this PackageDecl.

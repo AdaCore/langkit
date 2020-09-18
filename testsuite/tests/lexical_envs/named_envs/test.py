@@ -23,8 +23,8 @@ units loading.
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.envs import (EnvSpec, add_env, add_to_env_kv,
                           set_initial_env_by_name)
-from langkit.expressions import (AbstractKind, If, Let, No, Not, Self, Var,
-                                 langkit_property)
+from langkit.expressions import (AbstractKind, If, Let, No, Not, Self, String,
+                                 Var, langkit_property)
 
 from utils import build_and_run, unparse_all_script
 
@@ -58,22 +58,24 @@ class FooNode(ASTNode):
         """
         pass
 
-    @langkit_property(return_type=T.Symbol.array)
+    @langkit_property(return_type=T.String)
     def full_name():
         """
         Assuming this node can define a named environment (see
         ``can_have_name``), return its fully qualified namem.
         """
         return Self.name_parent.then(
-            lambda np: np.full_name.concat(
-                [Self.self_name.cast(T.Identifier).base_name]
+            lambda np: np.full_name.concat(String('.')).concat(
+                Self.self_name.cast(T.Identifier).base_name
             ),
             default_val=Self.self_name.scope_name,
         )
 
-    @langkit_property(return_type=T.Symbol.array)
-    def suffixed_full_name(suffix=T.Symbol.array):
-        return Self.full_name.then(lambda n: n.concat(suffix))
+    @langkit_property(return_type=T.String)
+    def suffixed_full_name(suffix=T.String):
+        return Self.full_name.then(
+            lambda n: n.concat(String('.')).concat(suffix)
+        )
 
     @langkit_property(return_type=T.FooNode)
     def name_parent():
@@ -111,11 +113,11 @@ class FooNode(ASTNode):
             )
         )
 
-    @langkit_property(return_type=T.Symbol.array, memoized=True)
+    @langkit_property(return_type=T.Symbol, memoized=True)
     def decl_parent_scope_name():
         """
         If this node can define a named environment (see ``can_have_name``),
-        return the name of its parent scope. Return an empty list otherwise.
+        return the name of its parent scope. Return a null symbol otherwise.
         """
         return If(
             Self.can_have_name,
@@ -123,46 +125,47 @@ class FooNode(ASTNode):
             Self.name_parent.then(
                 lambda np: np.full_name,
                 default_val=Self.self_name.parent_scope_name,
-            ),
+            ).to_symbol,
 
-            No(T.Symbol.array),
+            No(T.Symbol)
         )
 
 
 @abstract
 class Name(FooNode):
 
-    @langkit_property(return_type=T.Symbol)
+    @langkit_property(return_type=T.String)
     def base_name():
         """
         Innermost suffix for this name.
         """
         return Self.match(
-            lambda id=Identifier: id.symbol,
+            lambda id=Identifier: id.text,
             lambda dn=DottedName: dn.suffix.base_name
         )
 
-    @langkit_property(return_type=T.Symbol.array)
+    @langkit_property(return_type=T.String)
     def scope_name():
         """
         Absolute name of the scope that this name defines, assuming that
         ``prefix`` is the implicit prefix for that name.
         """
         return Self.match(
-            lambda id=Identifier: [id.symbol],
-            lambda dn=DottedName: dn.prefix.scope_name.concat(
-                [dn.suffix.symbol]
-            ),
+            lambda id=Identifier:
+            id.text,
+
+            lambda dn=DottedName:
+            dn.prefix.scope_name.concat(String('.')).concat(dn.suffix.text),
         )
 
-    @langkit_property(return_type=T.Symbol.array)
+    @langkit_property(return_type=T.String)
     def parent_scope_name():
         """
         Absolute name of the scope that defines this name, assuming that
         ``prefix`` is the implicit prefix for that name.
         """
         return Self.match(
-            lambda _=Identifier: No(T.Symbol.array),
+            lambda _=Identifier: No(T.String),
             lambda dn=DottedName: dn.prefix.scope_name,
         )
 
@@ -190,7 +193,7 @@ class Name(FooNode):
         Return the list of declarations that define this name. The lookup
         starts from the given environment.
         """
-        return Self.parent_scope(from_env).get_first(Self.base_name)
+        return Self.parent_scope(from_env).get_first(Self.base_name.to_symbol)
 
 
 class Identifier(Name):
@@ -217,8 +220,8 @@ class SubpBodyDecls(DeclarativePart):
         # this case is legal only when that (A) is the syntactic root.
         add_env(names=If(
             Self.parent.is_a(T.SubpBody) & Self.parent.parent.is_null,
-            [Self.parent.cast(T.SubpBody).name.scope_name],
-            No(T.Symbol.array.array),
+            [Self.parent.cast(T.SubpBody).name.scope_name.to_symbol],
+            No(T.Symbol.array),
         ))
     )
 
@@ -230,8 +233,11 @@ class PublicPart(DeclarativePart):
 class PrivatePart(DeclarativePart):
 
     env_spec = EnvSpec(
-        add_env(names=[Self.parent.suffixed_full_name(['__privatepart'])],
-                transitive_parent=True),
+        add_env(
+            names=[Self.parent.suffixed_full_name(String('__privatepart'))
+                   .to_symbol],
+            transitive_parent=True
+        ),
     )
 
 
@@ -244,7 +250,7 @@ class PackageDecl(FooNode):
     def self_name():
         return Self.name
 
-    @langkit_property(return_type=T.Symbol.array.array)
+    @langkit_property(return_type=T.Symbol.array)
     def new_env_names():
         """
         Return the names for the environment that this package creates.
@@ -257,19 +263,19 @@ class PackageDecl(FooNode):
         # package bodies can assume there is always a private part.
         return If(
             result.length == 0,
-            No(T.Symbol.array.array),
+            No(T.Symbol.array),
 
             If(
                 Self.private_part.is_null,
-                [result, result.concat(['__privatepart'])],
+                [result, result.concat(String('.__privatepart'))],
                 [result],
-            )
+            ).map(lambda s: s.to_symbol)
         )
 
     env_spec = EnvSpec(
         set_initial_env_by_name(Self.decl_parent_scope_name,
                                 Self.parent.children_env),
-        add_to_env_kv(Self.name.base_name, Self),
+        add_to_env_kv(Self.name.base_name.to_symbol, Self),
         add_env(names=Self.new_env_names)
     )
 
@@ -299,7 +305,7 @@ class PackageBody(FooNode):
         environment in which this declaration should be registered.
         """
         pkg_decl = Var(
-            Self.parent.children_env.get_first(Self.name.base_name)
+            Self.parent.children_env.get_first(Self.name.base_name.to_symbol)
             .cast(T.PackageDecl)
         )
         return If(
@@ -312,10 +318,12 @@ class PackageBody(FooNode):
         # The initial environment for package bodies is the private part of the
         # correspoding package specs (or the public part if there is no private
         # part).
-        set_initial_env_by_name(Self.suffixed_full_name(['__privatepart']),
-                                Self.get_initial_env),
+        set_initial_env_by_name(
+            Self.suffixed_full_name(String('__privatepart')).to_symbol,
+            Self.get_initial_env
+        ),
         add_to_env_kv('__nextpart', Self),
-        add_env(names=[Self.suffixed_full_name(['__body'])]),
+        add_env(names=[Self.suffixed_full_name(String('__body')).to_symbol]),
     )
 
     @langkit_property(return_type=T.PackageDecl.entity, public=True)
@@ -349,7 +357,7 @@ class SubpDecl(FooNode):
     env_spec = EnvSpec(
         set_initial_env_by_name(Self.decl_parent_scope_name,
                                 Self.parent.children_env),
-        add_to_env_kv(Self.name.base_name, Self),
+        add_to_env_kv(Self.name.base_name.to_symbol, Self),
     )
 
 

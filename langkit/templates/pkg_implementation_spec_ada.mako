@@ -432,9 +432,9 @@ private package ${ada_lib_name}.Implementation is
    --
    --  Here is how this mechanism works:
    --
-   --  1. Environments can be assigned zero, one or several names (a name being
-   --     a non-empty sequence of symbol: see the Env_Name type below). Name(s)
-   --     assignment happens at environment construction.
+   --  1. Environments can be assigned zero, one or several names (i.e. one or
+   --     several symbols). Name(s) assignment happens at environment
+   --     construction.
    --
    --  2. As a consequence, multiple environments can be associated to a given
    --     env name. Using a total and deterministic ordering predicate, only
@@ -459,34 +459,6 @@ private package ${ada_lib_name}.Implementation is
    --     parent links are updated, symbol/node mappings are removed from the
    --     env that lost precedence and added to the env that earned precedence,
    --     etc.
-
-   --  Handling of environment names
-
-   type Env_Name_Record;
-   type Env_Name is access Env_Name_Record;
-   --  Name for an environment. Such names are non-empty sequences of symbols
-
-   type Env_Name_Internal_Array is array (Positive range <>) of Symbol_Type;
-   type Env_Name_Record (Size : Positive) is record
-      Symbols : Env_Name_Internal_Array (1 .. Size);
-
-      Hash : Hash_Type;
-      --  Precomputed hash for this name. No need to compute the hash more than
-      --  once.
-   end record;
-
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Env_Name_Record, Env_Name);
-   function Equivalent (Left, Right : Env_Name) return Boolean
-   is (Left.Symbols = Right.Symbols);
-   function Hash (Name : Env_Name) return Hash_Type is (Name.Hash);
-
-   package Env_Name_Sets is new Ada.Containers.Hashed_Sets
-     (Element_Type        => Env_Name,
-      Hash                => Hash,
-      Equivalent_Elements => Equivalent);
-   --  Internalization table for named symbols (see the Create_Env_Name
-   --  function below).
 
    --  Tables to populate lexical entries in named envs
 
@@ -528,7 +500,7 @@ private package ${ada_lib_name}.Implementation is
       Equivalent_Elements => "=");
 
    type Named_Env_Descriptor is record
-      Name : Env_Name;
+      Name : Symbol_Type;
       --  Name corresponding to this descriptor. Useful during debugging.
 
       Envs : Sorted_Env_Maps.Map;
@@ -581,7 +553,7 @@ private package ${ada_lib_name}.Implementation is
      (Named_Env_Descriptor, Named_Env_Descriptor_Access);
 
    package NED_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Env_Name,
+     (Key_Type        => Symbol_Type,
       Element_Type    => Named_Env_Descriptor_Access,
       Hash            => Hash,
       Equivalent_Keys => "=");
@@ -614,7 +586,7 @@ private package ${ada_lib_name}.Implementation is
    package Exiled_Env_Vectors is new Langkit_Support.Vectors (Exiled_Env);
 
    type Named_Env_Pair is record
-      Name : Env_Name;
+      Name : Symbol_Type;
       --  Name on the lexical environment
 
       Env  : Lexical_Env;
@@ -625,21 +597,15 @@ private package ${ada_lib_name}.Implementation is
 
    --  High-level primitives to handle the life cycle of named environment
 
-   function Create_Env_Name
-     (Context : Internal_Context;
-      Symbols : ${T.Symbol.array.name}) return Env_Name;
-   --  Internalize the given list of symbols into Context and return the
-   --  corresponding environment name.
-
    function Get_Named_Env_Descriptor
      (Context : Internal_Context;
-      Name    : Env_Name) return Named_Env_Descriptor_Access;
+      Name    : Symbol_Type) return Named_Env_Descriptor_Access;
    --  Return the named env descriptor in Context corresponding to Name. Create
    --  it first, if needed.
 
    procedure Register_Named_Env
      (Context                   : Internal_Context;
-      Name                      : Env_Name;
+      Name                      : Symbol_Type;
       Env                       : Lexical_Env;
       Named_Envs_Needing_Update : in out NED_Maps.Map);
    --  Register Name as the environment name for Env. If Env takes the
@@ -924,21 +890,20 @@ private package ${ada_lib_name}.Implementation is
    procedure Use_Named_Env
      (State   : in out PLE_Node_State;
       Context : Internal_Context;
-      Name    : Env_Name);
+      Name    : Symbol_Type);
    --  Change State so that the current environment comes from the named
    --  environment looked up with Name.
 
    procedure Set_Initial_Env
      (Self     : ${T.root_node.name};
       State    : in out PLE_Node_State;
-      Name     : in out ${T.Symbol.array.name};
+      Name     : Symbol_Type;
       Resolver : Lexical_Env_Resolver);
    --  Helper for Populate_Lexical_Env: fetch the initial environment for Self
    --  and update State accordingly.
    --
    --  Name is for the requested named environment, or null if none is
-   --  requested. For PLE code previty, Set_Initial_Env takes care of freeing
-   --  Name before returning.
+   --  requested.
    --
    --  If Name is null or an empty array, use Resolver to fetch the initial
    --  environment, or use the current environment if there is no resolver.
@@ -972,7 +937,7 @@ private package ${ada_lib_name}.Implementation is
       No_Parent         : Boolean;
       Transitive_Parent : Boolean;
       Resolver          : Lexical_Env_Resolver;
-      Names             : in out ${T.Symbol.array.array.name});
+      Names             : in out ${T.Symbol.array.name});
    --  Helper for Populate_Lexical_Env: create a new environment for Self, and
    --  update State accordingly.
    --
@@ -1299,9 +1264,6 @@ private package ${ada_lib_name}.Implementation is
       Root_Scope : Lexical_Env;
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
-
-      Env_Names : Env_Name_Sets.Set;
-      --  Set of internalized environment names
 
       Named_Envs : NED_Maps.Map;
       --  Map env names to the corresponding named environment descriptors

@@ -282,7 +282,7 @@
 
    <%def name="emit_set_initial_env(sie)">
       declare
-         Name_Result : ${T.Symbol.array.name} :=
+         Name_Result : ${T.Symbol.name} :=
             ${(cls.env_spec.initial_env_name_expr
                if sie.name_prop
                else 'null')};
@@ -387,7 +387,7 @@
             ${call_prop(add_env.transitive_parent_prop)};
          Resolver          : constant Lexical_Env_Resolver :=
             ${"{}'Access".format(env_getter) if has_dyn_env else 'null'};
-         Names             : ${T.Symbol.array.array.name} :=
+         Names             : ${T.Symbol.array.name} :=
             ${call_prop(add_env.names_prop) if add_env.names_prop else 'null'};
       begin
          Add_Env (Self, State, No_Parent, Transitive_Parent, Resolver, Names);
