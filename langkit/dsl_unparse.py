@@ -1066,6 +1066,9 @@ def emit_expr(expr, **ctx):
             if not expr.transitive_parent else ''
         ])))
 
+    elif is_a("to_symbol"):
+        return "{}.to_symbol".format(ee(expr.expr_0))
+
     else:
         # raise NotImplementedError(type(expr))
         return repr(expr)

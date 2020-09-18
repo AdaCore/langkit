@@ -2492,6 +2492,17 @@ class GetSymbol(AbstractExpression):
         return '<GetSymbol>'
 
 
+@auto_attr
+def to_symbol(self, prefix):
+    """
+    Turn a string into the corresponding symbol.
+    """
+    prefix_expr = construct(prefix, T.String)
+    return CallExpr('Sym', 'String_To_Symbol', T.Symbol,
+                    ['Self.Unit.Context', prefix_expr],
+                    abstract_expr=self)
+
+
 class SymbolLiteral(AbstractExpression):
     """
     Abstract expression that returns a symbol from a string literal.

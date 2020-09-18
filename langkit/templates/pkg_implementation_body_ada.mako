@@ -3921,7 +3921,7 @@ package body ${ada_lib_name}.Implementation is
          return Get_Symbol
            (Context.Symbols, Find (Context.Symbols, Canon_Symbol.Symbol));
       else
-         raise Invalid_Symbol_Error with Image (Symbol, With_Quotes => True);
+         raise Invalid_Symbol_Error with Image (Canon_Symbol.Error_Message);
       end if;
    end Lookup_Symbol;
 
@@ -4761,6 +4761,21 @@ package body ${ada_lib_name}.Implementation is
          raise Stale_Reference_Error;
       end if;
    end Check_Safety_Net;
+
+   ----------------------
+   -- String_To_Symbol --
+   ----------------------
+
+   function String_To_Symbol
+     (Context : Internal_Context; S : ${T.String.name}) return Symbol_Type is
+   begin
+      return (if S.N > 0
+              then Lookup_Symbol (Context, S.Items)
+              else null);
+   exception
+      when Exc : Invalid_Symbol_Error =>
+         raise Property_Error with Ada.Exceptions.Exception_Message (Exc);
+   end String_To_Symbol;
 
 begin
    No_Big_Integer.Value.Set (0);
