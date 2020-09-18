@@ -1013,11 +1013,20 @@ class CompileCtx:
                               for n in self.grammar.user_defined_rules],
                  is_builtin_type=True)
 
-        # Force the creation of the env assoc type and the
-        # Symbol.array/Symbol.array.array types, as required by the
-        # Lexical_Env instantiation and the always-emitted PLE helpers.
-        for t in (T.env_assoc, T.inner_env_assoc, T.inner_env_assoc.array,
-                  T.Symbol.array, T.Symbol.array.array):
+        # Force the creation of several types, as they are used in templated
+        # code.
+        for t in (
+            # The env assoc types are required by Lexical_Env instantiation and
+            # always-emitted PLE helpers.
+            T.env_assoc, T.inner_env_assoc, T.inner_env_assoc.array,
+
+            # Arrays of symbols (and arrays of these) are required to deal with
+            # environment names.
+            T.Symbol.array, T.Symbol.array.array,
+
+            # The String_To_Symbol helper obviously relies on the string type
+            T.String
+        ):
             _ = resolve_type(t)
 
         # Now that all types are known, construct default values for fields

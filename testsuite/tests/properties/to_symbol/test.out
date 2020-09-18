@@ -1,0 +1,6 @@
+"Hello" = "HELLO": TRUE
+"Foo" = "Bar": FALSE
+"Foo.Bar" = "Foo.Bar": Property_Error: invalid symbol character: .
+
+main.adb: Done
+Done

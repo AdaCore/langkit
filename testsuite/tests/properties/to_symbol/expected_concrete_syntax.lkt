@@ -1,0 +1,15 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example("example")
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class Example : FooNode implements TokenNode {
+
+    @export fun compare_as_symbols (s1 : String, s2 : String): Bool =
+    s1.to_symbol = s2.to_symbol
+}
