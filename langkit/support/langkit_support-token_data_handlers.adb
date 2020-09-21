@@ -806,17 +806,7 @@ package body Langkit_Support.Token_Data_Handlers is
       Token : Stored_Token_Data) return Source_Location is
    begin
       return Get_Sloc
-        (TDH,
-         (if Token.Source_Last < Token.Source_First
-          --  This is a special case for when the range is negative: in that
-          --  case we want to propagate that behavior to the sloc itself,
-          --  because negative ranges are used for tokens that have no
-          --  "width", and shouldn't be lookup-able, like the termination
-          --  token.
-          then Token.Source_Last
-          --  For regular cases, we want the sloc_end to be one column after
-          --  the end of the token.
-          else Token.Source_Last + 1));
+        (TDH, Token.Source_Last + 1);
    end Sloc_End;
 
    ----------------

@@ -13,7 +13,7 @@ Tokens:
    <Token R_Par ')' at 1:11-1:12>
    <Token R_Par ')' at 1:12-1:13>
    <Token Whitespace ' ' at 1:13-1:14>
-   <Token Termination at 1:14-1:13>
+   <Token Termination at 1:14-1:14>
 
 Input source buffer:
    ' (a (b c d)) '
