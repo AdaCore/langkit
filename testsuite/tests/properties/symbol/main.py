@@ -12,11 +12,11 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-try:
-    result = u.root.p_prop(None)
-except libfoolang.PropertyError as exc:
-    result = '<{}: {}>'.format(type(exc).__name__, exc)
-
-print('p_prop(None) = {}'.format(result))
+for n in (None, u.root):
+    try:
+        result = libfoolang._py2to3.text_repr(u.root.p_prop(n))
+    except libfoolang.PropertyError as exc:
+        result = '<{}: {}>'.format(type(exc).__name__, exc)
+    print('p_prop({}) = {}'.format(n, result))
 
 print('main.py: Done.')

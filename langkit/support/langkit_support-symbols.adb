@@ -135,7 +135,11 @@ package body Langkit_Support.Symbols is
    function Get_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type is
    begin
-      return Self.Symbols.Get (Positive (TS));
+      if TS = No_Thin_Symbol then
+         return null;
+      else
+         return Self.Symbols.Get (Positive (TS));
+      end if;
    end Get_Symbol;
 
 end Langkit_Support.Symbols;
