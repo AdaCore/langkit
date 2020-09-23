@@ -1,4 +1,5 @@
 main.py: Running...
 p_prop(None) = <PropertyError: cannot get the symbol of a null node>
+p_prop(<Example main.txt:1:1-1:8>) = ''
 main.py: Done.
 Done
