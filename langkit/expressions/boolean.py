@@ -1,5 +1,4 @@
 from functools import reduce
-import funcy
 import inspect
 
 from langkit import names
@@ -571,7 +570,8 @@ class Cond(AbstractExpression):
 
         :rtype: list[(AbstractExpression, AbstractExpression)]
         """
-        return funcy.lpartition(2, self.args)
+        it = iter(self.args)
+        return list(zip(it, it))
 
     @property
     def else_expr(self):

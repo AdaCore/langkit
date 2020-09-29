@@ -9,9 +9,7 @@ from typing import (
     Sequence, Set, TYPE_CHECKING, Tuple, Union
 )
 
-
 from enum import Enum
-import funcy
 
 from langkit import names
 from langkit.common import ascii_repr, text_repr
@@ -1346,9 +1344,9 @@ class ResolvedExpression:
             if values is None:
                 return []
             elif isinstance(values, (list, tuple)):
-                return funcy.lmapcat(explore, values)
+                return sum(map(explore, values), start = [])
             elif isinstance(values, dict):
-                return funcy.lmapcat(explore, values.values())
+                return sum(map(explore, values.values()), start = [])
             elif filter(values):
                 return [values]
             else:
@@ -2827,7 +2825,7 @@ class Let(AbstractExpression):
             scope.add(var.local_var)
             var_exprs.append(var_expr)
 
-        vars = funcy.lmap(construct, self.vars)
+        vars = list(map(construct, self.vars))
 
         return Let.Expr(vars, var_exprs, construct(self.expr),
                         abstract_expr=self)
@@ -4374,9 +4372,12 @@ class PropertyDef(AbstractNodeData):
 
     @property
     def natural_arguments(self):
-        non_art, art = funcy.lsplit_by(lambda a: not a.is_artificial,
-                                       self.arguments)
-        assert all(a.is_artificial for a in art), (
+        first_art = next(filter(lambda i: self.arguments[i].is_artificial,
+                                self.arguments),
+                         default = len(self.arguments))
+        non_art = self.arguments[:first_art]
+        assert all(self.arguments[i].is_artificial
+                   for i in range(first_art+1, len(self.arguments))), (
             'All artificial arguments must come after all the other ones'
         )
         return non_art
@@ -5209,9 +5210,16 @@ class LocalVars:
 
         :rtype: list[LocalVars.Scope]
         """
-        def children(s):
-            return s.sub_scopes
-        return funcy.ltree_nodes(self.root_scope, children, children)
+        result = [self.root_scope]
+        processed_so_far = 0
+        while processed_so_far < len(result):
+            # Elements until index processed_so_far-1 are explored
+            # nodes. Remaining elements are unexplored nodes, either
+            # because they were in the initial list or because they
+            # have been added by a previous iteration.
+            result.extend(result[processed_so_far].sub_scopes)
+            processed_so_far += 1
+        return result
 
     def render(self):
         return "\n".join(lv.render() for lv in self.local_vars.values())

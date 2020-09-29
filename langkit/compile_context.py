@@ -21,8 +21,6 @@ from os import path
 from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
                     Tuple, Union, cast)
 
-from funcy import lzip
-
 from langkit import documentation, names, utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
@@ -2671,8 +2669,8 @@ class CompileCtx:
                 dispatch_types, remainder = collapse_concrete_nodes(
                     prop.struct, reversed([p.struct for p in static_props]))
                 assert not remainder
-                prop.dispatch_table = lzip(reversed(dispatch_types),
-                                           static_props)
+                prop.dispatch_table = list(zip(reversed(dispatch_types),
+                                               static_props))
                 # TODO: emit a warning for unreachable properties earlier in
                 # the compilation pipeline. Here we can see them with an empty
                 # set of types in the dispatch table.

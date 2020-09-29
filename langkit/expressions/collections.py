@@ -5,8 +5,6 @@ from itertools import count
 import types
 from typing import Callable, List, Optional, Union
 
-import funcy
-
 from langkit import names
 from langkit.compiled_types import CompiledType, get_context
 from langkit.diagnostics import (
@@ -354,7 +352,7 @@ class CollectionExpression(AbstractExpression):
 
         return self.ConstructCommonResult(
             collection_expr,
-            funcy.lzip(elt_vars, elt_var_inits),
+            list(zip(elt_vars, elt_var_inits)),
             construct(self.index_var) if self.index_var else None,
             inner_expr,
             inner_scope

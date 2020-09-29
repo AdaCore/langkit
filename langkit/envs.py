@@ -9,7 +9,6 @@ introduction to their usage.
 from __future__ import annotations
 
 from enum import Enum
-from funcy import lsplit_by
 from itertools import count
 from typing import ContextManager, Dict, List, Optional, Type, cast, overload
 
@@ -238,10 +237,10 @@ class EnvSpec:
 
         # Separate actions that must occur before and after the handling of
         # children. Get also rid of the HandleChildren delimiter action.
-        pre, post = lsplit_by(lambda a: not isinstance(a, HandleChildren),
-                              actions)
-        post = post and post[1:]
-
+        hc = next(filter(lambda i: isinstance(actions[i], HandleChildren),
+                         range(len(actions))),
+                  default = len(actions))
+        pre, post = actions[:hc], actions[hc+1:]
         check_source_language(
             count(AddEnv, post) == 0,
             'add_env() must occur before processing children'

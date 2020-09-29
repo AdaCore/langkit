@@ -8,8 +8,6 @@ from io import StringIO
 import itertools
 import sys
 
-import funcy
-
 from langkit.common import text_repr
 from langkit.compiled_types import get_context, resolve_type
 from langkit.diagnostics import WarningSet, check_source_language
@@ -789,8 +787,8 @@ class RegularNodeUnparser(NodeUnparser):
 
         :rtype: list[(FieldUnparser, TokenSequenceUnparser)]
         """
-        return funcy.lzip(self.field_unparsers,
-                          [TokenSequenceUnparser()] + self.inter_tokens)
+        return list(zip(self.field_unparsers,
+                        [TokenSequenceUnparser()] + self.inter_tokens))
 
     def _dump(self, stream):
         stream.write('Unparser for {}:\n'.format(self.node.dsl_name))

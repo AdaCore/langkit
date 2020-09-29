@@ -9,8 +9,6 @@ from os import path
 import subprocess
 from typing import Any, Callable, Dict, List, Optional, Set
 
-from funcy import keep
-
 from langkit.caching import Cache
 from langkit.compile_context import AdaSourceKind, CompileCtx, get_context
 from langkit.coverage import InstrumentationMetadata
@@ -217,7 +215,8 @@ class Emitter:
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
 
-        for dirpath in keep(self.context.template_lookup_extra_dirs):
+        for dirpath in self.context.template_lookup_extra_dirs:
+          if dirpath:
             add_template_dir(dirpath)
 
         self.no_property_checks = no_property_checks

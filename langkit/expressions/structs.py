@@ -4,8 +4,6 @@ import inspect
 from typing import (Any as _Any, ContextManager, Dict, List, Optional,
                     Sequence, Tuple)
 
-import funcy
-
 from langkit import names
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Field, resolve_type
@@ -806,10 +804,8 @@ class FieldAccess(AbstractExpression):
             call_debug_info = (isinstance(self.node_data, PropertyDef)
                                and not self.node_data.external)
 
-            sub_exprs = [self.receiver_expr] + funcy.lfilter(
-                lambda e: e is not None,
-                self.arguments
-            )
+            sub_exprs = (self.receiver_expr,
+                         *(e for e in self.arguments if e is not None))
             result = [e.render_pre() for e in sub_exprs]
 
             if call_debug_info:

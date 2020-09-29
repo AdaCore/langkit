@@ -25,15 +25,12 @@ from __future__ import annotations
 from collections import OrderedDict
 from contextlib import contextmanager
 import difflib
-from funcy import keep
 import inspect
 from itertools import count
 from typing import (
     Any, Callable, ContextManager, Dict, Iterator, List as _List, Optional,
     Sequence, Set, TYPE_CHECKING, Tuple, Type, Union
 )
-
-import funcy
 
 from langkit import names
 from langkit.common import gen_name
@@ -1547,7 +1544,7 @@ class List(Parser):
 
     @property
     def children(self) -> _List[Parser]:
-        return keep([self.parser, self.sep])
+        return filter(None, [self.parser, self.sep])
 
     def _eval_type(self) -> Optional[CompiledType]:
         with self.diagnostic_context:
@@ -2047,8 +2044,8 @@ class _Transform(Parser):
     def generate_code(self) -> str:
         subparsers: _List[Tuple[Parser, VarDef]]
         if isinstance(self.parser, _Row):
-            subparsers = funcy.lzip(self.parser.parsers,
-                                    self.parser.subresults)
+            subparsers = zip(self.parser.parsers,
+                             self.parser.subresults)
         else:
             subparsers = [(self.parser, self.parser.res_var)]
 

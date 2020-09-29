@@ -4,9 +4,6 @@ import json
 import sys
 from typing import Dict
 
-from funcy import keep, lmap
-
-from langkit.diagnostics import print_error, Location
 from langkit.passes import GlobalPass
 from langkit import names
 
@@ -1041,8 +1038,9 @@ def emit_expr(expr, **ctx):
               "rebindings_new_env", "rebindings_old_env"):
         # Field like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                lmap(ee, exprs[1:]), False)
+        it = map(ee, exprs)
+        return emit_method_call(next(it), type(expr).__name__,
+                                it, False)
 
     elif is_a("append_rebinding", "concat_rebindings", "env_node", "get_value",
               "solve", "is_referenced_from", "env_group", "length", "can_reach",
@@ -1050,8 +1048,9 @@ def emit_expr(expr, **ctx):
               "rebind_env"):
         # Method like expressions
         exprs = expr.sub_expressions
-        return emit_method_call(ee(exprs[0]), type(expr).__name__,
-                                lmap(ee, exprs[1:]))
+        it = map(ee, exprs)
+        return emit_method_call(next(it), type(expr).__name__,
+                                it)
 
     elif isinstance(expr, EnumLiteral):
         return expr.value.dsl_name
@@ -1210,16 +1209,15 @@ def emit_expr(expr, **ctx):
         ))
 
     elif isinstance(expr, Predicate):
-        return "%predicate({})".format(", ".join(keep([
+        return "%predicate({})".format(", ".join(
             fqn(expr.pred_property),
-            ee(expr.exprs[0]),
-        ] + [ee(e) for e in expr.exprs[1:]])))
+            *filter(None, map(ee, expr.exprs))))
 
     elif is_a("domain"):
         return "%domain({}, {})".format(ee(expr.expr_0), ee(expr.expr_1))
 
     elif isinstance(expr, Bind):
-        return "%eq({})".format(", ".join(keep([
+        return "%eq({})".format(", ".join(filter(None, [
             ee(expr.from_expr), ee(expr.to_expr),
             "conv_prop={}".format(fqn(expr.conv_prop)) if expr.conv_prop else ""
         ])))
@@ -1810,9 +1808,9 @@ def unparse_nodes(ctx, f):
                   for t in ctx.enum_types
                   if not t.is_builtin_type]
 
-    types = keep(emit_node_type(t)
-                 for t in ctx.astnode_types + ctx._struct_types
-                 if not t.is_builtin_type)
+    types = filter(None, (emit_node_type(t)
+                          for t in ctx.astnode_types + ctx._struct_types
+                          if not t.is_builtin_type))
 
     template = """
     % for t in enum_types:

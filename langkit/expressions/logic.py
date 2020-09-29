@@ -1,8 +1,6 @@
 from itertools import zip_longest
 from typing import Any as _Any, List, Optional, Tuple, Union
 
-import funcy
-
 from langkit import names
 from langkit.compiled_types import Argument, T, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language, error
@@ -625,9 +623,11 @@ class Predicate(AbstractExpression):
 
         # Separate logic variable expressions from extra argument expressions
         exprs = [construct(e) for e in self.exprs]
-        logic_var_exprs, closure_exprs = funcy.lsplit_by(
-            lambda e: e.type == T.LogicVar, exprs
-        )
+        first_extra = next(filter(lambda i: exprs[i].type == T.LogicVar,
+                                  range(len(exprs))),
+                           default = len(exprs))
+        logic_var_exprs, closure_exprs = exprs[:first_extra], exprs [first_extra:]
+
         check_source_language(
             len(logic_var_exprs) > 0, "Predicate instantiation should have at "
             "least one logic variable expression"

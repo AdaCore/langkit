@@ -19,7 +19,7 @@ setup(
     author_email='report@adacore.com',
     url='https://www.adacore.com',
     description='A Python framework to generate language parsers',
-    install_requires=['Mako', 'PyYAML', 'funcy', 'docutils', 'e3-core'],
+    install_requires=['Mako', 'PyYAML', 'docutils', 'e3-core'],
     packages=['langkit',
               'langkit.expressions',
               'langkit.gdb',
