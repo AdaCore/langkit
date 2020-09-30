@@ -5,7 +5,8 @@ from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
-from typing import Dict, List, Optional as Opt, Set, TYPE_CHECKING
+from typing import (Dict, List, Optional as Opt, Set, TYPE_CHECKING, Tuple,
+                    Union)
 
 from langkit import names
 from langkit.c_api import CAPIType
@@ -572,98 +573,110 @@ class CompiledType:
     Descriptor for a type in the generated code.
     """
 
-    def __init__(self, name, location=None, doc='', is_ptr=True,
-                 has_special_storage=False, is_list_type=False,
-                 is_entity_type=False, exposed=False, c_type_name=None,
-                 external=False, null_allowed=False, is_ada_record=False,
-                 is_refcounted=False, nullexpr=None, py_nullexpr=None,
-                 element_type=None, hashable=False,
-                 has_equivalent_function=False, type_repo_name=None,
-                 api_name=None, dsl_name=None, introspection_prefix=None,
-                 conversion_requires_context=False):
+    def __init__(self,
+                 name: Union[str, names.Name],
+                 location: Opt[Location] = None,
+                 doc: str = '',
+                 base: Opt[CompiledType] = None,
+                 is_ptr: bool = True,
+                 has_special_storage: bool = False,
+                 is_list_type: bool = False,
+                 is_entity_type: bool = False,
+                 exposed: bool = False,
+                 c_type_name: Opt[str] = None,
+                 external: bool = False,
+                 null_allowed: bool = False,
+                 is_ada_record: bool = False,
+                 is_refcounted: bool = False,
+                 nullexpr: Opt[str] = None,
+                 py_nullexpr: Opt[str] = None,
+                 element_type: Opt[CompiledType] = None,
+                 hashable: bool = False,
+                 has_equivalent_function: bool = False,
+                 type_repo_name: Opt[str] = None,
+                 api_name: Union[str, names.Name, None] = None,
+                 dsl_name: Opt[str] = None,
+                 introspection_prefix: Opt[str] = None,
+                 conversion_requires_context: bool = False) -> None:
         """
-        :param names.Name|str name: Type name. If a string, it must be
-            camel-case.
+        :param name: Type name. If a string, it must be camel-case.
 
-        :param langkit.diagnostics.Location|None location: Location of the
-            declaration of this compiled type, or None if this type does not
-            come from a language specficication.
+        :param location: Location of the declaration of this compiled type, or
+            None if this type does not come from a language specficication.
 
         :param str doc: User documentation for this type.
 
-        :param bool is_ptr: Whether this type is handled through pointers only
-            in the generated code.
+        :param base: If this type derives from another type T, this is T.
 
-        :param bool has_special_storage: Whether this type uses a special type
-            for storage in structs and AST nodes.  If this is true, the
-            following methods may be overriden:
+        :param is_ptr: Whether this type is handled through pointers only in
+            the generated code.
+
+        :param has_special_storage: Whether this type uses a special type for
+            storage in structs and AST nodes.  If this is true, the following
+            methods may be overriden:
 
               * storage_type_name;
               * storage_nullexpr;
               * extract_from_storage_expr;
               * convert_to_storage_expr.
 
-        :param bool is_list_type: Whether this type is an AST node that is a
-            list of AST nodes.
+        :param is_list_type: Whether this type is an AST node that is a list of
+            AST nodes.
 
-        :param bool is_entity_type: Whether this type represents an entity
-            type.
+        :param is_entity_type: Whether this type represents an entity type.
 
-        :param bool exposed: Whether the type should be exposed to the C and
-            Python APIs. Note that all types are exposed anyway when the
-            current context has the "library_all_fields_public" attribute set
-            to True.
+        :param exposed: Whether the type should be exposed to the C and Python
+            APIs. Note that all types are exposed anyway when the current
+            context has the "library_all_fields_public" attribute set to True.
 
-        :param str|None c_type_name: Name for the type as it will appear in the
-            C API. If left to None, `name` will be used instead.
+        :param c_type_name: Name for the type as it will appear in the C API.
+            If left to None, `name` will be used instead.
 
-        :param bool external: See CAPIType.__init__: this will be forwarded to
-            it.
+        :param external: See CAPIType.__init__: this will be forwarded to it.
 
-        :param bool null_allowed: Whether a client is allowed to create a null
-            value for this type. Note that a type might have a nullexpr and
-            still have null disallowed, because nullexpr might make sense for
+        :param null_allowed: Whether a client is allowed to create a null value
+            for this type. Note that a type might have a nullexpr and still
+            have null disallowed, because nullexpr might make sense for
             initialization purposes in the parsers, but not as a real null
             value.
 
-        :param bool is_ada_record: Whether the type used in the C API is
-            implemented as an Ada record. If so, we must pass them by reference
-            in for C API interface functions.
+        :param is_ada_record: Whether the type used in the C API is implemented
+            as an Ada record. If so, we must pass them by reference in for C
+            API interface functions.
 
-        :param bool is_refcounted: Return whether this type matters for the
+        :param is_refcounted: Return whether this type matters for the
             ref-counting mechanism. See the "is_refcounted" method.
 
-        :param str|None nullexpr: Null expression to use in Ada for this type.
-            See the "nullexpr" method.
+        :param nullexpr: Null expression to use in Ada for this type.  See the
+            "nullexpr" method.
 
-        :param str|None py_nullexpr: Null expression to use in Python for this
-            type. See the "py_nullexpr" method.
+        :param py_nullexpr: Null expression to use in Python for this type. See
+            the "py_nullexpr" method.
 
-        :param CompiledType|None element_type: If this is a collection type,
-            must be the corresponding element type. Must be None otherwise.
+        :param element_type: If this is a collection type, must be the
+            corresponding element type. Must be None otherwise.
 
-        :param bool hashable: Whether this type has a Hash primitive, so that
-            it can be used as a key in hashed maps/sets.
+        :param hashable: Whether this type has a Hash primitive, so that it can
+            be used as a key in hashed maps/sets.
 
-        :param bool has_equivalent_function: Whether testing equivalence for
-            two values of this type must go through an Equivalent function. If
-            not, code generation will use its "=" operator.
+        :param has_equivalent_function: Whether testing equivalence for two
+            values of this type must go through an Equivalent function. If not,
+            code generation will use its "=" operator.
 
-        :param str|None type_repo_name: Name to use for registration in
-            TypeRepo. The camel-case of "name" is used if left to None.
+        :param type_repo_name: Name to use for registration in TypeRepo. The
+            camel-case of "name" is used if left to None.
 
-        :param names.Name|str|None api_name: If not None, must be the name of
-            the type to use in the public Ada API. Strings are interpreted as
-            camel case.
+        :param api_name: If not None, must be the name of the type to use in
+            the public Ada API. Strings are interpreted as camel case.
 
-        :param str|None dsl_name: If provided, name used to represent this type
-            at the DSL level. Useful to format diagnostics.
+        :param dsl_name: If provided, name used to represent this type at the
+            DSL level. Useful to format diagnostics.
 
-        :param str|None introspection_prefix: If provided, override the default
-            value to return in the introspection_prefix property.
+        :param introspection_prefix: If provided, override the default value to
+            return in the introspection_prefix property.
 
-        :param bool conversion_requires_context: Whether converting this type
-            from public to internal values requires an analysis context.
+        :param conversion_requires_context: Whether converting this type from
+            public to internal values requires an analysis context.
         """
         if isinstance(name, str):
             name = names.Name.from_camel(name)
@@ -673,6 +686,7 @@ class CompiledType:
         self._name = name
         self.location = location
         self._doc = doc
+        self._base = base
         self.is_ptr = is_ptr
         self.has_special_storage = has_special_storage
         self.is_list_type = is_list_type
@@ -709,17 +723,47 @@ class CompiledType:
         public API.
         """
 
-        self._abstract_node_data_dict_cache = {}
+        self.derivations: Set[CompiledType] = set()
+        """
+        Set of types that derive from ``self``.
+        """
+
+        self._abstract_node_data_dict_cache: Dict[
+            Tuple[bool, AbstractNodeData],
+            Tuple[str, BaseField]
+        ] = {}
         """
         Cache for the get_abstract_node_data_dict class method.
-
-        :type: dict[(bool, AbstractNodeData), dict[str, BaseField]]
         """
 
-        self._fields = OrderedDict()
+        self._fields: Dict[str, BaseField] = OrderedDict()
         """
         List of AbstractNodeData fields for this type.
         """
+
+        # If "self" derives from another type, register it
+        if self._base is not None:
+            self._base.derivations.add(self)
+
+    @property
+    def base(self) -> Opt[CompiledType]:
+        """
+        Return the base of this type, or None if there is no derivation
+        involved.
+        """
+        return self._base
+
+    def get_inheritance_chain(self) -> List[CompiledType]:
+        """
+        Return the chain of types following the `base` link as a list.
+        Root-most types come first.
+        """
+        t: Opt[CompiledType] = self
+        result = []
+        while t is not None:
+            result.append(t)
+            t = t.base
+        return list(reversed(result))
 
     @property
     def mypy_type_hint(self) -> str:
@@ -2471,7 +2515,7 @@ class ASTNodeType(BaseStructType):
 
         super().__init__(
             name, location, doc,
-            is_ptr=True, null_allowed=True, is_ada_record=False,
+            base=base, is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list,
 
             # Even though bare node types are not exposed, we allow them in
@@ -2486,7 +2530,6 @@ class ASTNodeType(BaseStructType):
             dsl_name=dsl_name or self.raw_name.camel,
             introspection_prefix='Node'
         )
-        self._base = base
         self.is_root_node = is_root
         self.is_generic_list_type = is_generic_list_type
         self.is_root_list_type = is_root_list
@@ -2862,14 +2905,10 @@ class ASTNodeType(BaseStructType):
         ))[-1][0]
 
     @property
-    def base(self):
-        """
-        Return the base type of this AST node type. This is None for the root
-        one.
-
-        :rtype: ASTNodeType|None
-        """
-        return self._base
+    def base(self) -> Opt[ASTNodeType]:
+        result = super().base
+        assert result is None or isinstance(result, ASTNodeType)
+        return result
 
     @property  # type: ignore
     @memoized
@@ -3456,7 +3495,7 @@ class EnumNodeAlternative:
     corresponding ASTNodeType is instantiated only after that.
     """
 
-    location: Location
+    location: Opt[Location]
     """
     Location in the language spec where this alternative was created. This is
     the location of the enum node declaration itself for alternatives
