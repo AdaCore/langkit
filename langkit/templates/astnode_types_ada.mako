@@ -502,7 +502,7 @@
          self_parse_fields = filter_parse_fields(self_fields)
 
          # Fields that are only inherited
-         parent_fields = all_fields[:len(all_fields) - len(self_fields)]
+         parent_fields = [f for f in all_fields if f not in self_fields]
          parent_parse_fields = filter_parse_fields(parent_fields)
       %>
       procedure Initialize_Fields_For_${cls.kwless_raw_name}
