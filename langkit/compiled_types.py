@@ -1400,8 +1400,15 @@ class CompiledType:
         self._fields[field.indexing_name] = field
         field.struct = self
 
-        # Invalidate the field lookup cache
-        self._abstract_node_data_dict_cache = {}
+        # Invalidate the field lookup cache for this node and all derivations,
+        # as this new field can be looked up by derivations.
+
+        def reset_cache(t: CompiledType):
+            t._abstract_node_data_dict_cache = {}
+            for dt in t.derivations:
+                reset_cache(dt)
+
+        reset_cache(self)
 
     def get_user_fields(self, predicate=None, include_inherited=True):
         """
@@ -2874,20 +2881,6 @@ class ASTNodeType(BaseStructType):
                     ' {}'.format(field.type.dsl_name,
                                  common_inferred.dsl_name)
                 )
-
-    def get_inheritance_chain(self):
-        """
-        Return the chain of ASTNodeType instances following the `base` link as
-        a list.  Root-most classes come first.
-
-        :rtype: list[ASTNodeType]
-        """
-        node = self
-        result = []
-        while node is not None:
-            result.append(node)
-            node = node.base
-        return reversed(result)
 
     @staticmethod
     def common_ancestor(*nodes):
