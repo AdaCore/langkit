@@ -41,57 +41,94 @@ ${public_prototype(property)} is
       <%
          self_arg = property.self_arg_name
          context_expr = '{}.Internal.Node.Unit.Context'.format(self_arg)
+
+         def internal_arg_var(arg):
+            """
+            Name of the local variable that holds the internal value for the
+            given argument.
+            """
+            return 'Internal_Arg_{}'.format(arg.name)
+
+         refcounted_args = [arg for arg in property.arguments
+                            if arg.type.is_refcounted]
+
+         # If there is at least one argument (or the property result) whose
+         # internal type is ref-counted , we need to have provision to dec-ref
+         # corresponding values both on "regular" returns, and when an
+         # exception is raised during property execution.
+         needs_refcounting = refcounted_args or property.type.is_refcounted
       %>
+
+      ## Declare variables to hold arguments and the result encoded with
+      ## internal types.
+
+      % for arg in property.arguments:
+         ${internal_arg_var(arg)} : ${arg.type.name};
+      % endfor
+      Property_Result : ${property.type.name};
+
+      % if needs_refcounting:
+         procedure Free_Internal;
+         --  Dec-ref all internal arguments and the property result, when
+         --  applicable.
+
+         -------------------
+         -- Free_Internal --
+         -------------------
+
+         procedure Free_Internal is
+         begin
+            % for arg in refcounted_args:
+               Dec_Ref (${internal_arg_var(arg)});
+            % endfor
+            % if property.type.is_refcounted:
+               Dec_Ref (Property_Result);
+            % endif
+         end Free_Internal;
+      % endif
+
    begin
       Check_Safety_Net (${self_arg}.Safety_Net);
 
-      declare
-         ## Convert property arguments to internal types
-         % for arg in property.arguments:
-            Internal_Arg_${arg.name} :
-               ${'' if arg.type.is_refcounted else 'constant'} ${arg.type.name}
-               := ${arg.type.to_internal_expr(str(arg.name), context_expr)};
-         % endfor
+      ## Convert property arguments to internal types
+      % for arg in property.arguments:
+         ${internal_arg_var(arg)} :=
+            ${arg.type.to_internal_expr(str(arg.name), context_expr)};
+      % endfor
 
-         ## Call the property
-         <%
-            actuals = [
-               '{} ({}.Internal.Node)'.format(T.root_node.name, self_arg)
-            ] + ['Internal_Arg_{}'.format(arg.name)
-                 for arg in property.arguments]
-            if property.uses_entity_info:
-                actuals.append('E_Info => {}.Internal.Info'.format(self_arg))
-         %>
-         Property_Result
-            : ${'' if property.type.is_refcounted else 'constant'}
-              ${property.type.name}
-            := ${property.qual_impl_name}
-               ${'({})'.format(', '.join(actuals)) if actuals else ''};
-      begin
-         ## Compute the list of variables that need to be dec-ref'd before
-         ## returning.
-         <%
-            to_decref = ['Internal_Arg_{}'.format(arg.name)
-                         for arg in property.arguments
-                         if arg.type.is_refcounted]
-            if property.type.is_refcounted:
-               to_decref.append('Property_Result')
+      ## Call the property
+      <%
+         actuals = [
+            '{} ({}.Internal.Node)'.format(T.root_node.name, self_arg)
+         ] + [internal_arg_var(arg) for arg in property.arguments]
+         if property.uses_entity_info:
+             actuals.append('E_Info => {}.Internal.Info'.format(self_arg))
 
-            result_expr = property.type.to_public_expr('Property_Result')
-         %>
+         result_expr = property.type.to_public_expr('Property_Result')
+      %>
+      Property_Result :=
+         ${property.qual_impl_name}
+            ${'({})'.format(', '.join(actuals)) if actuals else ''};
 
-         ## Finally, return after the required dec-ref
-         % if to_decref:
-            return Result : constant ${property.public_type.api_name} :=
-               ${result_expr}
-            do
-               % for var in to_decref:
-                  Dec_Ref (${var});
-               % endfor
-            end return;
-         % else:
-            return ${result_expr};
-         % endif
-      end;
+      ## Return its result, after conversion to public types. Use a return
+      ## block to free resources if needed.
+      % if needs_refcounting:
+         return Result : constant ${property.public_type.api_name} :=
+            ${result_expr}
+         do
+            Free_Internal;
+         end return;
+      % else:
+         return ${result_expr};
+      % endif
+
+   ## Add a Property_Error exception handle to free resources when the property
+   ## fails.
+   % if needs_refcounting:
+      exception
+         when Property_Error =>
+            Free_Internal;
+            raise;
+   % endif
    end;
 </%def>
