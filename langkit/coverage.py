@@ -518,16 +518,18 @@ class GNATcov:
             '-X{}_COVINSTR=true'.format(emitter.lib_name_up)
         ])
 
+        project_instr_dir = '{}-gnatcov-instr'.format(emitter.lib_name_low)
+
         # At this point, instrumented sources are located in the object
         # directory, which depends on the build mode: relocate it somewhere
-        # else (i.e. rename to instr_dir) so that the same set of instrumented
-        # sources applies to all builds.
+        # else (i.e. rename to instr_src_dir) so that the same set of
+        # instrumented sources applies to all builds.
         lib_obj_dir = os.path.join(emitter.lib_root, 'obj',
                                    emitter.lib_name_low)
-        instr_src_dir = os.path.join(lib_obj_dir, 'gnatcov-instr')
+        instr_src_dir = os.path.join(lib_obj_dir, project_instr_dir)
         if os.path.exists(instr_src_dir):
             shutil.rmtree(instr_src_dir)
-        os.rename(os.path.join(lib_obj_dir, 'dev', 'gnatcov-instr'),
+        os.rename(os.path.join(lib_obj_dir, 'dev', project_instr_dir),
                   instr_src_dir)
 
         # "gnatcov instrument" instruments only Ada sources, so we need to

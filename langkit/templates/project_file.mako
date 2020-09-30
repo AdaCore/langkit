@@ -56,16 +56,16 @@ library project ${lib_name} is
    ##
    ## 2. We run "gnatcov instrument" with the $_COVINSTR scenario
    ##    variable set to true. "gnatcov instrument" generates instrumented
-   ##    sources in the "gnatcov-instr" subdirectory in the object directory.
+   ##    sources in the "$-gnatcov-instr" subdirectory in the object directory.
    ##
    ## 3. Langkit moves these instrumented sources to the
-   ##    ../../obj/$/gnatcov-instr directory so that the path of instrumented
+   ##    ../../obj/$/$-gnatcov-instr directory so that the path of instrumented
    ##    sources does not depend on scenario variables.
    ##
    ## 4. gprinstall and all other uses of the not-yet-installed project leave
    ##    the $_COVINSTR scenario variable to "false" (its default value) so
-   ##    that the source directory is ../../obj/$/gnatcov-instr (i.e. points to
-   ##    instrumented sources).
+   ##    that the source directory is ../../obj/$/$-gnatcov-instr (i.e. points
+   ##    to instrumented sources).
    ##
    ## This organization is indeed involved, but given gnatcov's requirements,
    ## no simple setup is possible, and this reduces the number of places that
@@ -76,7 +76,8 @@ library project ${lib_name} is
                   for d in source_dirs if d)});
 
    % if emitter.coverage:
-      Secondary_Source_Dirs := ("../../obj/${lib_name.lower()}/gnatcov-instr");
+      Secondary_Source_Dirs :=
+        ("../../obj/${lib_name.lower()}/${lib_name.lower()}-gnatcov-instr");
       For_Coverage_Instrumentation : Boolean := external
         ("${lib_name.upper()}_COVINSTR", "false");
       case For_Coverage_Instrumentation is
