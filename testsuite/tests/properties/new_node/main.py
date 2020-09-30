@@ -14,10 +14,10 @@ if u.diagnostics:
 
 print('== prop ==')
 u.root.p_prop.dump()
-print()
+print('')
 
 print('== prop2 ==')
 u.root.p_prop2.dump()
-print()
+print('')
 
 print('main.py: Done.')
