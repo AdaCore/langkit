@@ -541,6 +541,131 @@ package body ${ada_lib_name}.Introspection is
       end case;
    end Satisfies;
 
+   <% array_types = [t for t in ctx.array_types if t.exposed] %>
+
+   ------------------------------
+   -- Array_Element_Constraint --
+   ------------------------------
+
+   function Array_Element_Constraint
+     (Kind : Array_Value_Kind) return Value_Constraint is
+   begin
+      case Kind is
+         % for t in array_types:
+            <% elt_type = t.element_type %>
+            when ${t.introspection_kind} =>
+               % if elt_type.is_entity_type:
+                  <% node = elt_type.element_type %>
+                  return (Kind      => Node_Value,
+                          Node_Type => ${node.introspection_name});
+               % else:
+                  return (Kind => ${t.element_type.introspection_kind});
+               % endif
+         % endfor
+      end case;
+   end Array_Element_Constraint;
+
+   ------------------
+   -- Array_Length --
+   ------------------
+
+   function Array_Length (Self : Value_Type) return Natural is
+   begin
+      case Kind (Self) is
+         % for t in array_types:
+            when ${t.introspection_kind} =>
+               return Self.Value.Value.${t.introspection_kind}.all'Length;
+         % endfor
+
+         when others =>
+            return (raise Bad_Type_Error with "input value is not an array");
+      end case;
+   end Array_Length;
+
+   -------------------
+   -- Array_Element --
+   -------------------
+
+   function Array_Element
+     (Self : Value_Type; Index : Positive) return Value_Type is
+   begin
+      case Kind (Self) is
+         % for t in array_types:
+            when ${t.introspection_kind} =>
+               declare
+                  A : ${t.api_name} renames
+                     Self.Value.Value.${t.introspection_kind}.all;
+               begin
+                  if Index not in A'Range then
+                     raise Out_Of_Bounds_Error with "index of array bounds";
+                  end if;
+                  return Create_${t.element_type.introspection_prefix}
+                    (A (Index));
+               end;
+         % endfor
+
+         when others =>
+            return (raise Bad_Type_Error with "input value is not an array");
+      end case;
+   end Array_Element;
+
+   ------------------
+   -- Create_Array --
+   ------------------
+
+   function Create_Array
+     (Kind : Array_Value_Kind; Values : Value_Array) return Value_Type
+   is
+      Elt_Cons : constant Value_Constraint := Array_Element_Constraint (Kind);
+   begin
+      --  First check that all input values have the expected type
+
+      for I in Values'Range loop
+         if not Satisfies (Values (I), Elt_Cons) then
+            raise Bad_Type_Error with "invalid value at index " & I'Image;
+         end if;
+      end loop;
+
+      --  Then create the array to return
+
+      case Kind is
+         % for t in array_types:
+            <%
+               elt_type = t.element_type
+               converter = f'As_{elt_type.introspection_prefix}'
+            %>
+            when ${t.introspection_kind} =>
+               declare
+                  A : ${t.api_name} (1 .. Values'Length);
+               begin
+                  for I in Values'Range loop
+                     % if elt_type.is_big_integer_type:
+                        ## Since the public API type for big integers is
+                        ## limited, we need to call its special copy primitive.
+                        A (I).Set (${converter} (Values (I)));
+
+                     % elif elt_type.is_entity_type:
+                        ## If this is an array of node subclasses, we need to
+                        ## perform the corresponding downcast for array
+                        ## assignment.
+                        <% node = elt_type.element_type %>
+                        A (I) :=
+                           ${converter} (Values (I))
+                           % if not node.is_root_node:
+                              .As_${node.entity.api_name}
+                           % endif
+                        ;
+
+                     % else:
+                        A (I) := ${converter} (Values (I));
+                     % endif
+                  end loop;
+                  return Create_${t.introspection_prefix} (A);
+               end;
+         % endfor
+      end case;
+   end Create_Array;
+
    --------------------
    -- Node_Data_Name --
    --------------------

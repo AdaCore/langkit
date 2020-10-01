@@ -38,6 +38,8 @@ package Langkit_Support.Errors with Preelaborate is
    package Introspection is
       Invalid_Field              : exception;
       Node_Data_Evaluation_Error : exception;
+      Bad_Type_Error             : exception;
+      Out_Of_Bounds_Error        : exception;
    end Introspection;
 
    package Rewriting is
