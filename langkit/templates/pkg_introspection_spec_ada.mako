@@ -210,7 +210,6 @@ package ${ada_lib_name}.Introspection is
    function Fields (Id : Node_Type_Id) return Field_Reference_Array;
    --  Likewise, but taking a reference to a node type instead
 
-   % if ctx.sorted_properties:
    ----------------
    -- Properties --
    ----------------
@@ -257,8 +256,6 @@ package ${ada_lib_name}.Introspection is
 
    function Properties (Id : Node_Type_Id) return Property_Reference_Array;
    --  Likewise, but taking a reference to a node type instead
-
-   % endif
 
    ------------
    -- Tokens --
