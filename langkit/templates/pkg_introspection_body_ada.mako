@@ -676,8 +676,6 @@ package body ${ada_lib_name}.Introspection is
       return Impl.Fields (Id);
    end Fields;
 
-   % if ctx.sorted_properties:
-
    -------------------
    -- Property_Name --
    -------------------
@@ -859,8 +857,6 @@ package body ${ada_lib_name}.Introspection is
    begin
       return Impl.Properties (Id);
    end Properties;
-
-   % endif
 
    ---------------------
    -- Token_Node_Kind --
