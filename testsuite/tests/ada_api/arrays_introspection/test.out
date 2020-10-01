@@ -1,0 +1,26 @@
+Base array:
+Array of BigInt:
+*   300
+*   300
+*   300
+
+After back-and-forth conversions:
+Array of BigInt:
+*   300
+*   300
+*   300
+
+Calling Array_Length on a boolean...
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.BAD_TYPE_ERROR : input value is not an array
+
+Calling Array_Item on a boolean...
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.BAD_TYPE_ERROR : input value is not an array
+
+Calling Array_Item for out-of-bounds...
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.OUT_OF_BOUNDS_ERROR : index of array bounds
+
+Calling Create_Array with heterogeneous inputs...
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.BAD_TYPE_ERROR : invalid value at index  1
+
+Done.
+Done

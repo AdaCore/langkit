@@ -145,6 +145,35 @@ package ${ada_lib_name}.Introspection is
      (Value : Value_Type; Constraint : Value_Constraint) return Boolean;
    --  Return whether the given Value satisfy the given Constraint
 
+   ------------
+   -- Arrays --
+   ------------
+
+   function Array_Element_Constraint
+     (Kind : Array_Value_Kind) return Value_Constraint;
+   --  Return the constraint for elements of ``Kind`` arrays
+
+   function Array_Length (Self : Value_Type) return Natural;
+   --  Assuming that ``Self`` is an array (regardless of its element type),
+   --  return the number of elements it contains.
+   --
+   --  This raises a ``Bad_Type_Error`` if Value is not an array.
+
+   function Array_Element
+     (Self : Value_Type; Index : Positive) return Value_Type;
+   --  Assuming that ``Self`` is an array (regardless of its element type),
+   --  return the value at the given 1-based index.
+   --
+   --  This raises a ``Bad_Type_Error`` if ``Value`` is not an array, and an
+   --  ``Out_Of_Bounds_Error`` if ``Index`` is out of ``Value``'s bounds.
+
+   function Create_Array
+     (Kind : Array_Value_Kind; Values : Value_Array) return Value_Type;
+   --  Return an array of the given kind that contains the given values.
+   --
+   --  This raises a ``Bad_Type_Error`` if a value in ``Values`` does not have
+   --  the type that ``Kind`` implies.
+
    ---------------
    -- Node data --
    ---------------

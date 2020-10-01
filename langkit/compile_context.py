@@ -813,6 +813,8 @@ class CompileCtx:
             (None, 'invalid_input'),
             ('introspection', 'invalid_field'),
             ('introspection', 'node_data_evaluation_error'),
+            ('introspection', 'bad_type_error'),
+            ('introspection', 'out_of_bounds_error'),
             ('rewriting', 'template_format_error'),
             ('rewriting', 'template_args_error'),
             ('rewriting', 'template_instantiation_error')

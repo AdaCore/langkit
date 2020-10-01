@@ -361,6 +361,12 @@ package ${ada_lib_name}.Common is
       Any_Value_Kind range Boolean_Value ..  Any_Value_Kind'Last;
    --  Enumeration for all types used to interact with properties
 
+   <% array_types = [t for t in ctx.array_types if t.exposed] %>
+   subtype Array_Value_Kind is Value_Kind with Static_Predicate =>
+      Array_Value_Kind in ${' | '.join(t.introspection_kind
+                                       for t in array_types)};
+   --  Subrange for all array types
+
    type Value_Constraint (Kind : Value_Kind := Value_Kind'First) is record
       case Kind is
          when Node_Value =>

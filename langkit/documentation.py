@@ -248,6 +248,14 @@ base_langkit_docs = {
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)
         are improperly used to evaluate a node data (field or property).
     """,
+    'langkit.introspection.bad_type_error': """
+        Raised when introspection functions (``${ctx.lib_name}.Introspection``)
+        are given values with inconsistent types.
+    """,
+    'langkit.introspection.out_of_bounds_error': """
+        Raised when introspection functions (``${ctx.lib_name}.Introspection``)
+        are passed an out of bounds index.
+    """,
     'langkit.rewriting.template_format_error': """
         Exception raised when a template has an invalid syntax, such as badly
         formatted placeholders.
