@@ -476,7 +476,7 @@ package body ${ada_lib_name}.Iterators is
             begin
                Field_Index := Index (N.Kind, P.Field);
             exception
-               when Invalid_Field =>
+               when Bad_Type_Error =>
                   return False;
             end;
 

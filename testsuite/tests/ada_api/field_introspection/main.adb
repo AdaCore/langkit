@@ -65,7 +65,7 @@ begin
          begin
             Result := Eval_Field (Node, Field);
          exception
-            when Node_Data_Evaluation_Error =>
+            when Bad_Type_Error =>
                Error := True;
          end;
          Put_Line (Label & " = " & (if Error

@@ -240,17 +240,9 @@ base_langkit_docs = {
         Raised by lexing functions (``${ctx.lib_name}.Lexer``) when the input
         contains an invalid byte sequence.
     """,
-    'langkit.introspection.invalid_field': """
-        Raised when introspection functions
-        (``${ctx.lib_name}.Introspection``) are requested an invalid field.
-    """,
-    'langkit.introspection.node_data_evaluation_error': """
-        Raised when introspection functions (``${ctx.lib_name}.Introspection``)
-        are improperly used to evaluate a node data (field or property).
-    """,
     'langkit.introspection.bad_type_error': """
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)
-        are given values with inconsistent types.
+        are provided mismatching types/values.
     """,
     'langkit.introspection.out_of_bounds_error': """
         Raised when introspection functions (``${ctx.lib_name}.Introspection``)

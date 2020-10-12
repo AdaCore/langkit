@@ -98,7 +98,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
       Desc : Node_Type_Descriptor renames Node_Type_Descriptors (Id).all;
    begin
       if Desc.Is_Abstract then
-         raise Constraint_Error with "trying to get kind for abstract node";
+         raise Bad_Type_Error with "trying to get kind for abstract node";
       end if;
       return Desc.Kind;
    end Kind_For;
@@ -128,7 +128,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    function Base_Type (Id : Node_Type_Id) return Node_Type_Id is
    begin
       if Is_Root_Node (Id) then
-         raise Constraint_Error with "trying to get base type of root node";
+         raise Bad_Type_Error with "trying to get base type of root node";
       end if;
       return Node_Type_Descriptors (Id).Base_Type;
    end Base_Type;
@@ -286,8 +286,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
       ${ctx.generate_actions_for_hierarchy('Node', 'Kind', get_actions)}
 
       ## If we haven't matched the requested field on Node, report an error
-      return (raise Node_Data_Evaluation_Error
-              with "no such field on this node");
+      return (raise Bad_Type_Error with "no such field on this node");
    end Eval_Field;
 
    -----------
@@ -313,7 +312,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
                        ):
                        when ${enum_literal(f)} => ${f.index + 1},
                        % endfor
-                       when others => raise Constraint_Error);
+                       when others => raise Bad_Type_Error);
             % endfor
          end case;
 
@@ -341,7 +340,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
             # is passed.
             if astnode.is_generic_list_type:
                result.append(
-                  'raise Invalid_Field with "List AST nodes have no field";'
+                  'raise Bad_Type_Error with "List AST nodes have no field";'
                )
             elif astnode.is_list:
                pass
@@ -363,7 +362,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
       ${ctx.generate_actions_for_hierarchy(None, 'Kind', get_actions)}
 
       pragma Warnings (Off, "value not in range of type");
-      return (raise Invalid_Field with "Index is out of bounds");
+      return (raise Bad_Type_Error with "Index is out of bounds");
       pragma Warnings (On, "value not in range of type");
    end Field_Reference_From_Index;
 

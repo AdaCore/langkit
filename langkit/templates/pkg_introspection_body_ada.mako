@@ -697,7 +697,7 @@ package body ${ada_lib_name}.Introspection is
       case Node_Data is
          when Field_Reference =>
             if Arguments'Length > 0 then
-               raise Node_Data_Evaluation_Error with "fields take no argument";
+               raise Bad_Type_Error with "fields take no argument";
             end if;
             pragma Warnings (Off, "value not in range of type");
             return Create_Node (Eval_Field (Node, Node_Data));
@@ -874,7 +874,7 @@ package body ${ada_lib_name}.Introspection is
       --  First, check that arguments match the property signature
 
       if Arguments'Length /= Desc.Arity then
-         raise Node_Data_Evaluation_Error with "invalid number of arguments";
+         raise Bad_Type_Error with "invalid number of arguments";
       end if;
 
       for I in Desc.Argument_Types'Range loop
@@ -882,7 +882,7 @@ package body ${ada_lib_name}.Introspection is
             Arg : Value_Type renames Arguments (I - 1 + Arguments'First);
          begin
             if not Satisfies (Arg, Desc.Argument_Types (I)) then
-               raise Node_Data_Evaluation_Error with
+               raise Bad_Type_Error with
                   "invalid type for argument " & Desc.Argument_Names (I).all;
             end if;
          end;
@@ -959,7 +959,7 @@ package body ${ada_lib_name}.Introspection is
       ## If we haven't matched the requested field on Node, report an error,
       ## otherwise, return the property result.
       if Result = No_Value then
-         raise Node_Data_Evaluation_Error with "no such field on this node";
+         raise Bad_Type_Error with "no such field on this node";
       end if;
       return Result;
    end Eval_Property;
