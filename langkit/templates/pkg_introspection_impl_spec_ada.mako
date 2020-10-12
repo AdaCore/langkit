@@ -138,10 +138,10 @@ private package ${ada_lib_name}.Introspection_Implementation is
       Name : String (1 .. Name_Length);
       --  Lower-case name for this property
 
-      Return_Type : Value_Constraint;
+      Return_Type : Type_Constraint;
       --  Return type for this property
 
-      Argument_Types : Value_Constraint_Array (1 .. Arity);
+      Argument_Types : Type_Constraint_Array (1 .. Arity);
       --  Types of the arguments that this property takes
 
       Argument_Names : String_Array (1 .. Arity);
@@ -426,7 +426,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Implementation for Introspection.Node_Data_Name
 
    function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Value_Constraint;
+     (Node_Data : Node_Data_Reference) return Type_Constraint;
    --  Implementation for Introspection.Node_Data_Type
 
    function Lookup_Node_Data
@@ -478,11 +478,11 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Implementation for Introspection.Property_Name
 
    function Property_Return_Type
-     (Property : Property_Reference) return Value_Constraint;
+     (Property : Property_Reference) return Type_Constraint;
    --  Implementation for Introspection.Property_Type
 
    function Property_Argument_Types
-     (Property : Property_Reference) return Value_Constraint_Array;
+     (Property : Property_Reference) return Type_Constraint_Array;
    --  Implementation for Introspection.Property_Argument_Types
 
    function Property_Argument_Name
