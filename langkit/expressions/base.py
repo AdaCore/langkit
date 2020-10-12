@@ -3970,13 +3970,17 @@ class PropertyDef(AbstractNodeData):
                 self.lazy_present_field = self.struct.add_internal_user_field(
                     name=names.Name('LF_Present') + self.original_name,
                     type=T.Bool,
+                    default_value=Literal(True),
                     doc=f'Whether the {self.qualname} lazy field was'
                         f' evaluated',
-                    default_value=Literal(True),
                 )
+
+                # Access to the storage field is guarded by the "present flag"
+                # field, so it is fine to leave it uninitialized.
                 self.lazy_storage_field = self.struct.add_internal_user_field(
                     name=names.Name('LF_Stg') + self.original_name,
                     type=self.type,
+                    default_value=None,
                     doc=f'Storage for the {self.qualname} lazy field',
                 )
             else:

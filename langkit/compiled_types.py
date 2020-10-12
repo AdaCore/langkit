@@ -2157,8 +2157,8 @@ class BaseStructType(CompiledType):
         self,
         name: names.Name,
         type: CompiledType,
+        default_value: Opt[AbstractExpression],
         doc: Opt[str] = None,
-        default_value: Opt[AbstractExpression] = None
     ) -> UserField:
         """
         Create an internal (not public) UserField for this struct type.
@@ -2167,6 +2167,11 @@ class BaseStructType(CompiledType):
         it as a field of ``self`` and then returns the instance.
 
         See UserField's constructor for argument semantics.
+
+        Note that ``default_value`` is a mandatory argument that can be None as
+        we need to allow None values because None is the exception rather than
+        the rule: users cannot assign a value to these fields, and thus we need
+        most of the time to assign a default value to them.
         """
         result = UserField(type=type,
                            doc=doc,
