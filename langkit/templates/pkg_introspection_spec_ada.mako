@@ -45,7 +45,7 @@ package ${ada_lib_name}.Introspection is
    is (not Is_Abstract (Id));
 
    function Kind_For (Id : Node_Type_Id) return ${T.node_kind};
-   --  Return the node kind corresponding to Id. This raises a Constraint_Error
+   --  Return the node kind corresponding to Id. This raises a Bad_Type_Error
    --  if Id designates an abstract node.
 
    function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id;
@@ -55,7 +55,7 @@ package ${ada_lib_name}.Introspection is
    --  Return whether Id is a reference for the root node type
 
    function Base_Type (Id : Node_Type_Id) return Node_Type_Id;
-   --  If Id is the root node type, raise a Constaint_Error. Otherwise, return
+   --  If Id is the root node type, raise a Bad_Type_Error. Otherwise, return
    --  a reference to Id's base type.
 
    function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array;
@@ -194,8 +194,8 @@ package ${ada_lib_name}.Introspection is
    --  data evaluation raises a Property_Error, forward it. Otherwise, return
    --  its result.
    --
-   --  This raises a Node_Data_Evaluation_Error if Node has no such node data
-   --  or if the provided arguments are invalid for it.
+   --  This raises a Bad_Type_Error if Node has no such node data or if the
+   --  provided arguments are invalid for it.
 
    function Lookup_Node_Data
      (Id   : Node_Type_Id;
@@ -219,17 +219,20 @@ package ${ada_lib_name}.Introspection is
       Field : Field_Reference) return ${T.entity.api_name};
    --  Evaluate Field on the given Node. Return the corresponding Node.
    --
-   --  This raises a Node_Data_Evaluation_Error if Node has no such field.
+   --  This raises a Bad_Type_Error if Node has no such field.
 
    function Index
      (Kind : ${T.node_kind}; Field : Field_Reference) return Positive;
    --  Return the index in nodes to access the given ``Field`` considering the
    --  given ``Kind`` of node.
+   --
+   --  This raises an ``Bad_Type_Error`` exception if ``Kind`` nodes do not have
+   --  the given ``Field``.
 
    function Field_Reference_From_Index
      (Kind : ${T.node_kind}; Index : Positive) return Field_Reference;
    --  Return the field reference corresponding to the given ``Index`` in nodes
-   --  of the given ``Kind``. Raise an ``Invalid_Field`` exception if there is
+   --  of the given ``Kind``. Raise an ``Bad_Type_Error`` exception if there is
    --  no field corresponding to this index.
 
    function Fields (Kind : ${T.node_kind}) return Field_Reference_Array;
@@ -277,8 +280,8 @@ package ${ada_lib_name}.Introspection is
    --  property raises a Property_Error, forward it, otherwise return its
    --  result.
    --
-   --  This raises a Node_Data_Evaluation_Error if Node has no such property or
-   --  if the provided arguments are invalid for this property.
+   --  This raises a Bad_Type_Error if Node has no such property or if the
+   --  provided arguments are invalid for this property.
 
    function Properties (Kind : ${T.node_kind}) return Property_Reference_Array;
    --  Return the list of properties that nodes of the given ``Kind`` have

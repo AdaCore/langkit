@@ -223,7 +223,7 @@ begin
          begin
             Result := Eval_Property (Node, Property, (1 => Argument));
          exception
-            when Node_Data_Evaluation_Error =>
+            when Bad_Type_Error =>
                null;
          end;
 
