@@ -32,55 +32,55 @@ package ${ada_lib_name}.Introspection is
    ----------------
 
    function DSL_Name (Id : Node_Type_Id) return String;
-   --  Return the name corresponding to Id in the Langkit DSL
+   --  Return the name corresponding to ``Id`` in the Langkit DSL
 
    function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id;
    --  Look for the node type for which Name is in the Lankgit DSL. Return it
    --  if found, otherwise return None.
 
    function Is_Abstract (Id : Node_Type_Id) return Boolean;
-   --  Return whether Id designates an abstract node
+   --  Return whether ``Id`` designates an abstract node
 
    function Is_Concrete (Id : Node_Type_Id) return Boolean
    is (not Is_Abstract (Id));
 
    function Kind_For (Id : Node_Type_Id) return ${T.node_kind};
-   --  Return the node kind corresponding to Id. This raises a Bad_Type_Error
-   --  if Id designates an abstract node.
+   --  Return the node kind corresponding to ``Id``. This raises a
+   --  ``Bad_Type_Error`` if ``Id`` designates an abstract node.
 
    function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id;
-   --  Return the node type corresponding to the given node Kind
+   --  Return the node type corresponding to the given node ``Kind``
 
    function Is_Root_Node (Id : Node_Type_Id) return Boolean;
-   --  Return whether Id is a reference for the root node type
+   --  Return whether ``Id`` is a reference for the root node type
 
    function Base_Type (Id : Node_Type_Id) return Node_Type_Id;
-   --  If Id is the root node type, raise a Bad_Type_Error. Otherwise, return
-   --  a reference to Id's base type.
+   --  If Id is the root node type, raise a ``Bad_Type_Error``. Otherwise,
+   --  return a reference to ``Id``'s base type.
 
    function Derived_Types (Id : Node_Type_Id) return Node_Type_Id_Array;
-   --  Return type references for all direct derivations for Id
+   --  Return type references for all direct derivations for ``Id``
 
    function Is_Derived_From (Id, Parent : Node_Type_Id) return Boolean;
-   --  Return whether the type that Id represents is derives (directly or
-   --  indirectly) from the type that Parent represents.
+   --  Return whether the type that ``Id`` represents is derives (directly or
+   --  indirectly) from the type that ``Parent`` represents.
 
    ------------------------
    -- Polymorphic values --
    ------------------------
 
    type Any_Value_Type is private;
-   --  Polymorphic value to contain Kind values. This type has by-reference
+   --  Polymorphic value to contain ``Kind`` values. This type has by-reference
    --  semantics, so copying it is cheap.
 
    No_Value : constant Any_Value_Type;
-   --  Special Any_Value_Type to mean: no reference to a value
+   --  Special ``Any_Value_Type`` to mean: no reference to a value
 
    subtype Value_Type is Any_Value_Type
       with Dynamic_Predicate => Value_Type /= No_Value;
 
    function Kind (Self : Value_Type) return Value_Kind;
-   --  Return the kind of values that Value holds
+   --  Return the kind of values that ``Value`` holds
 
    --  Accessors and constructors for inner value
 
@@ -139,11 +139,11 @@ package ${ada_lib_name}.Introspection is
    type Any_Value_Array is array (Positive range <>) of Any_Value_Type;
 
    function DSL_Name (Constraint : Value_Constraint) return String;
-   --  Return the name corresponding to Constraint in the Langkit DSL
+   --  Return the name corresponding to ``Constraint`` in the Langkit DSL
 
    function Satisfies
      (Value : Value_Type; Constraint : Value_Constraint) return Boolean;
-   --  Return whether the given Value satisfy the given Constraint
+   --  Return whether the given ``Value`` satisfy the given ``Constraint``
 
    ------------
    -- Arrays --
@@ -179,29 +179,29 @@ package ${ada_lib_name}.Introspection is
    ---------------
 
    function Node_Data_Name (Node_Data : Node_Data_Reference) return String;
-   --  Return a lower-case name for Node_Data
+   --  Return a lower-case name for ``Node_Data``
 
    function Node_Data_Type
      (Node_Data : Node_Data_Reference) return Value_Constraint;
-   --  Return the constraint associated with Node_Data's type (or its return
-   --  type).
+   --  Return the constraint associated with ``Node_Data``'s type (or its
+   --  return type).
 
    function Eval_Node_Data
      (Node      : ${T.entity.api_name}'Class;
       Node_Data : Node_Data_Reference;
       Arguments : Value_Array) return Value_Type;
-   --  Evaluate Node_Data on the given Node and the given arguments. If node
-   --  data evaluation raises a Property_Error, forward it. Otherwise, return
-   --  its result.
+   --  Evaluate ``Node_Data on`` the given ``Node`` and the given
+   --  ``Arguments``. If the evaluation raises a ``Property_Error``, forward
+   --  it. Otherwise, return its result.
    --
-   --  This raises a Bad_Type_Error if Node has no such node data or if the
-   --  provided arguments are invalid for it.
+   --  This raises a ``Bad_Type_Error`` if ``Node`` has no such node data or if
+   --  the provided arguments are invalid for it.
 
    function Lookup_Node_Data
      (Id   : Node_Type_Id;
       Name : String) return Any_Node_Data_Reference;
-   --  Look for the node data corresponding to the given Name (lower-case
-   --  name) in the given node type reference (Id). Return it if found,
+   --  Look for the node data corresponding to the given ``Name`` (lower-case
+   --  name) in the given node type reference (``Id``). Return it if found,
    --  otherwise return None.
 
    -------------------
@@ -212,22 +212,24 @@ package ${ada_lib_name}.Introspection is
    --  Return a lower-case name for ``Field``
 
    function Field_Type (Field : Field_Reference) return Node_Type_Id;
-   --  Return a reference to the node type that covers what Field can contain
+   --  Return a reference to the node type that covers what ``Field`` can
+   --  contain.
 
    function Eval_Field
      (Node  : ${T.entity.api_name}'Class;
       Field : Field_Reference) return ${T.entity.api_name};
-   --  Evaluate Field on the given Node. Return the corresponding Node.
+   --  Evaluate ``Field`` on the given ``Node``. Return the corresponding
+   --  children ``Node``.
    --
-   --  This raises a Bad_Type_Error if Node has no such field.
+   --  This raises a Bad_Type_Error if ``Node`` has no such field.
 
    function Index
      (Kind : ${T.node_kind}; Field : Field_Reference) return Positive;
    --  Return the index in nodes to access the given ``Field`` considering the
    --  given ``Kind`` of node.
    --
-   --  This raises an ``Bad_Type_Error`` exception if ``Kind`` nodes do not have
-   --  the given ``Field``.
+   --  This raises an ``Bad_Type_Error`` exception if ``Kind`` nodes do not
+   --  have the given ``Field``.
 
    function Field_Reference_From_Index
      (Kind : ${T.node_kind}; Index : Positive) return Field_Reference;
@@ -251,37 +253,38 @@ package ${ada_lib_name}.Introspection is
 
    function Property_Return_Type
      (Property : Property_Reference) return Value_Constraint;
-   --  Return the type constraint for Property's return type
+   --  Return the type constraint for ``Property``'s return type
 
    function Property_Argument_Types
      (Property : Property_Reference) return Value_Constraint_Array
       with Post => Property_Argument_Types'Result'Length = 0
                    or else Property_Argument_Types'Result'First = 1;
-   --  Return the type constraints for Property's arguments
+   --  Return the type constraints for ``Property``'s arguments
 
    function Property_Argument_Name
      (Property : Property_Reference; Argument_Number : Positive) return String;
-   --  Return the lower-cased name for Property's argument whose index is
-   --  Argument_Number. This raises a Property_Error if Property has no such
-   --  argument.
+   --  Return the lower-cased name for ``Property``'s argument whose index is
+   --  ``Argument_Number``. This raises a ``Property_Error`` if ``Property``
+   --  has no such argument.
 
    function Property_Argument_Default_Value
      (Property        : Property_Reference;
       Argument_Number : Positive) return Any_Value_Type;
-   --  If the argument corresponding to Argument_Number of the given
-   --  Property has a default value, return it. Return No_Value otherwise.
-   --  This raises a Property_Error if Property has no such argument.
+   --  If the argument corresponding to ``Argument_Number`` of the given
+   --  ``Property`` has a default value, return it. Return ``No_Value``
+   --  otherwise.  This raises a ``Property_Error`` if Property has no such
+   --  argument.
 
    function Eval_Property
      (Node      : ${T.entity.api_name}'Class;
       Property  : Property_Reference;
       Arguments : Value_Array) return Value_Type;
-   --  Evaluate Property on the given Node and the given arguments. If the
-   --  property raises a Property_Error, forward it, otherwise return its
-   --  result.
+   --  Evaluate ``Property`` on the given ``Node`` and the given arguments. If
+   --  the property raises a ``Property_Error``, forward it, otherwise return
+   --  its result.
    --
-   --  This raises a Bad_Type_Error if Node has no such property or if the
-   --  provided arguments are invalid for this property.
+   --  This raises a ``Bad_Type_Error`` if ``Node`` has no such property or if
+   --  the provided arguments are invalid for this property.
 
    function Properties (Kind : ${T.node_kind}) return Property_Reference_Array;
    --  Return the list of properties that nodes of the given ``Kind`` have
@@ -307,10 +310,10 @@ private
    type Value_Record;
    type Value_Access is access all Value_Record;
 
-   --  In order to avoid Any_Value_Type to be tagged (which makes all its
+   --  In order to avoid ``Any_Value_Type`` to be tagged (which makes all its
    --  primitives dispatching, which has awful consequences, such as making
    --  some code patterns illegal, or making GNAT slow, wrap the access in a
-   --  dedicated controlled object and make Any_Value_Type contain this
+   --  dedicated controlled object and make ``Any_Value_Type`` contain this
    --  wrapper.
 
    type Value_Access_Wrapper is new Ada.Finalization.Controlled with record
