@@ -322,8 +322,8 @@ package ${ada_lib_name}.Common is
    -- Introspection --
    -------------------
 
-   --  Unlike ${T.node_kind}, the following enumeration contains entries for
-   --  abstract nodes.
+   --  Unlike ``${T.node_kind}``, the following enumeration contains entries
+   --  for abstract nodes.
 
    type Any_Node_Type_Id is (
       None, ${', '.join(n.introspection_simple_name

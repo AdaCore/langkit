@@ -131,7 +131,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
       --  Length of the proprety name
 
       Arity : Natural
-      --  Number of arguments this property takes (exclude the Self argument)
+      --  Number of arguments this property takes (exclude the ``Self``
+      --  argument).
    )
    is record
       Name : String (1 .. Name_Length);
@@ -147,8 +148,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
       --  Lower-case names for arguments that this property takes
 
       Argument_Default_Values : Internal_Value_Array (1 .. Arity);
-      --  Default values (if any, otherwise No_Internal_Value) for arguments
-      --  that this property takes.
+      --  Default values (if any, otherwise ``No_Internal_Value``) for
+      --  arguments that this property takes.
    end record;
 
    type Property_Descriptor_Access is access constant Property_Descriptor;
@@ -458,8 +459,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    function Fields
      (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
-   --  Return the list of fields associated to Id. If Concrete_Only is true,
-   --  collect only non-null and concrete fields. Otherwise, collect all
+   --  Return the list of fields associated to ``Id``. If ``Concrete_Only`` is
+   --  true, collect only non-null and concrete fields. Otherwise, collect all
    --  fields.
 
    function Fields (Kind : ${T.node_kind}) return Field_Reference_Array;
@@ -501,8 +502,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    procedure Check_Argument_Number
      (Desc : Property_Descriptor; Argument_Number : Positive);
-   --  Raise a Property_Error if Argument_Number is not valid for the property
-   --  that Desc describes. Do nothing otherwise.
+   --  Raise a ``Property_Error`` if ``Argument_Number`` is not valid for the
+   --  property that ``Desc`` describes. Do nothing otherwise.
 
    % endif
 
