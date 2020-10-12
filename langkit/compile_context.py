@@ -1091,6 +1091,7 @@ class CompileCtx:
         If so, add a "is_env_populated" field to it.
         """
         from langkit.compiled_types import T
+        from langkit.expressions import Literal
 
         # Locate the PLE_unit root (if any), checking that we at most one such
         # node annotation.
@@ -1151,6 +1152,7 @@ class CompileCtx:
             self.ple_unit_root.add_internal_user_field(
                 name=names.Name('Is_Env_Populated'),
                 type=T.Bool,
+                default_value=Literal(False),
                 doc='Whether this PLE unit root was processed by'
                     ' Populate_Lexical_Env.',
             )
