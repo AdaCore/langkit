@@ -2138,7 +2138,13 @@ class BaseStructType(CompiledType):
         :rtype: dict[str, Field]
         """
         def is_required(f):
-            if isinstance(f, BuiltinField):
+            if f._original_name is None:
+                # If this field does not have an original name, it does not
+                # come from sources (it's automatic/internal), and thus users
+                # are not supposed to access/set it.
+                return False
+
+            elif isinstance(f, BuiltinField):
                 # BuiltinFields are actually stored fields only for structure
                 # types (not for nodes).
                 return self.is_struct_type

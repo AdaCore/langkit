@@ -1,0 +1,21 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@example)
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class Example : FooNode {
+
+    @lazy new_node : SynthNode = SynthNode()
+
+    @export fun prop (): Int = node.new_node().lf()
+}
+
+class SynthNode : FooNode {
+
+    @lazy lf : Int = 42
+}
