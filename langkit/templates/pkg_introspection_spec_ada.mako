@@ -138,11 +138,11 @@ package ${ada_lib_name}.Introspection is
    type Value_Array is array (Positive range <>) of Value_Type;
    type Any_Value_Array is array (Positive range <>) of Any_Value_Type;
 
-   function DSL_Name (Constraint : Value_Constraint) return String;
+   function DSL_Name (Constraint : Type_Constraint) return String;
    --  Return the name corresponding to ``Constraint`` in the Langkit DSL
 
    function Satisfies
-     (Value : Value_Type; Constraint : Value_Constraint) return Boolean;
+     (Value : Value_Type; Constraint : Type_Constraint) return Boolean;
    --  Return whether the given ``Value`` satisfy the given ``Constraint``
 
    ------------
@@ -150,7 +150,7 @@ package ${ada_lib_name}.Introspection is
    ------------
 
    function Array_Element_Constraint
-     (Kind : Array_Value_Kind) return Value_Constraint;
+     (Kind : Array_Value_Kind) return Type_Constraint;
    --  Return the constraint for elements of ``Kind`` arrays
 
    function Array_Length (Self : Value_Type) return Natural;
@@ -182,7 +182,7 @@ package ${ada_lib_name}.Introspection is
    --  Return a lower-case name for ``Node_Data``
 
    function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Value_Constraint;
+     (Node_Data : Node_Data_Reference) return Type_Constraint;
    --  Return the constraint associated with ``Node_Data``'s type (or its
    --  return type).
 
@@ -252,11 +252,11 @@ package ${ada_lib_name}.Introspection is
    --  Return a lower-case name for ``Property``
 
    function Property_Return_Type
-     (Property : Property_Reference) return Value_Constraint;
+     (Property : Property_Reference) return Type_Constraint;
    --  Return the type constraint for ``Property``'s return type
 
    function Property_Argument_Types
-     (Property : Property_Reference) return Value_Constraint_Array
+     (Property : Property_Reference) return Type_Constraint_Array
       with Post => Property_Argument_Types'Result'Length = 0
                    or else Property_Argument_Types'Result'First = 1;
    --  Return the type constraints for ``Property``'s arguments

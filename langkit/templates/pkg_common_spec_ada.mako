@@ -367,7 +367,7 @@ package ${ada_lib_name}.Common is
                                        for t in array_types)};
    --  Subrange for all array types
 
-   type Value_Constraint (Kind : Value_Kind := Value_Kind'First) is record
+   type Type_Constraint (Kind : Value_Kind := Value_Kind'First) is record
       case Kind is
          when Node_Value =>
             Node_Type : Node_Type_Id;
@@ -377,10 +377,9 @@ package ${ada_lib_name}.Common is
             null;
       end case;
    end record;
-   --  Constraint for a polymorphic value
+   --  Type constraint for a polymorphic value
 
-   type Value_Constraint_Array is
-      array (Positive range <>) of Value_Constraint;
+   type Type_Constraint_Array is array (Positive range <>) of Type_Constraint;
 
    <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
 

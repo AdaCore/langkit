@@ -495,7 +495,7 @@ package body ${ada_lib_name}.Introspection is
    -- DSL_Name --
    --------------
 
-   function DSL_Name (Constraint : Value_Constraint) return String is
+   function DSL_Name (Constraint : Type_Constraint) return String is
    begin
       <% basic_types = [T.Bool, T.Int, T.BigInt, T.Character, T.Token,
                         T.Symbol, T.AnalysisUnit] %>
@@ -517,7 +517,7 @@ package body ${ada_lib_name}.Introspection is
    ---------------
 
    function Satisfies
-     (Value : Value_Type; Constraint : Value_Constraint) return Boolean is
+     (Value : Value_Type; Constraint : Type_Constraint) return Boolean is
    begin
       if Value.Value.Value.Kind /= Constraint.Kind then
          return False;
@@ -548,7 +548,7 @@ package body ${ada_lib_name}.Introspection is
    ------------------------------
 
    function Array_Element_Constraint
-     (Kind : Array_Value_Kind) return Value_Constraint is
+     (Kind : Array_Value_Kind) return Type_Constraint is
    begin
       case Kind is
          % for t in array_types:
@@ -616,7 +616,7 @@ package body ${ada_lib_name}.Introspection is
    function Create_Array
      (Kind : Array_Value_Kind; Values : Value_Array) return Value_Type
    is
-      Elt_Cons : constant Value_Constraint := Array_Element_Constraint (Kind);
+      Elt_Cons : constant Type_Constraint := Array_Element_Constraint (Kind);
    begin
       --  First check that all input values have the expected type
 
@@ -680,7 +680,7 @@ package body ${ada_lib_name}.Introspection is
    --------------------
 
    function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Value_Constraint is
+     (Node_Data : Node_Data_Reference) return Type_Constraint is
    begin
       return Impl.Node_Data_Type (Node_Data);
    end Node_Data_Type;
@@ -815,7 +815,7 @@ package body ${ada_lib_name}.Introspection is
    --------------------------
 
    function Property_Return_Type
-     (Property : Property_Reference) return Value_Constraint is
+     (Property : Property_Reference) return Type_Constraint is
    begin
       return Impl.Property_Return_Type (Property);
    end Property_Return_Type;
@@ -825,7 +825,7 @@ package body ${ada_lib_name}.Introspection is
    -----------------------------
 
    function Property_Argument_Types
-     (Property : Property_Reference) return Value_Constraint_Array is
+     (Property : Property_Reference) return Type_Constraint_Array is
    begin
       return Impl.Property_Argument_Types (Property);
    end Property_Argument_Types;

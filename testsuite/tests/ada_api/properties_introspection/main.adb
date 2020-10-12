@@ -138,7 +138,7 @@ begin
 
                Put_Line ("   arguments:");
                declare
-                  A_Types          : constant Value_Constraint_Array :=
+                  A_Types          : constant Type_Constraint_Array :=
                      Property_Argument_Types (P);
                   A_Default_Values : Any_Value_Array (A_Types'Range);
                begin
