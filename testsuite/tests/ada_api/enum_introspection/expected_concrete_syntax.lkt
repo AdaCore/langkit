@@ -1,0 +1,24 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- Example(@example)
+
+}
+
+enum E1 {
+    case a, b, c
+}
+
+enum E2 {
+    case x, y, z
+}
+
+@abstract class FooNode : Node {
+}
+
+class Example : FooNode {
+
+    @export fun id1 (e : E1): E1 = e
+
+    @export fun id2 (e : E2): E2 = e
+}

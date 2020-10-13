@@ -145,6 +145,41 @@ package ${ada_lib_name}.Introspection is
      (Value : Value_Type; Constraint : Type_Constraint) return Boolean;
    --  Return whether the given ``Value`` satisfy the given ``Constraint``
 
+   -----------
+   -- Enums --
+   -----------
+
+   type Any_Enum_Value_Index is new Natural;
+   subtype Enum_Value_Index is Any_Enum_Value_Index
+      range 0 ..  Any_Enum_Value_Index'Last;
+   --  Index of an enum value for a given enum type
+
+   No_Enum_Value_Index : constant Any_Enum_Value_Index := 0;
+
+   function Enum_Last_Value (Kind : Enum_Value_Kind) return Enum_Value_Index;
+   --  Return the index of the last enum value for the given ``Kind`` enum type
+
+   function Enum_Default_Value
+     (Kind : Enum_Value_Kind) return Any_Enum_Value_Index;
+   --  Return the index of the default enum value for the given ``Kind`` enum
+   --  type, or No_Enum_Value_Index if this type does not have a default value.
+
+   function Enum_Value_Name
+     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return String;
+   --  Return the name corresponding to the ``Index``th value for the ``Kind``
+   --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
+   --  for this enum type.
+
+   function Create_Enum
+     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return Value_Type;
+   --  Return the enum value corresponding to the given ``Index`` and ``Kind``
+   --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
+   --  for this enum type.
+
+   function Enum_Index (Value : Value_Type) return Enum_Value_Index;
+   --  Return the index for the given enum value, relative to its type. This
+   --  raises a ``Bad_Type_Error`` if ``Value`` is not an enum value.
+
    ------------
    -- Arrays --
    ------------

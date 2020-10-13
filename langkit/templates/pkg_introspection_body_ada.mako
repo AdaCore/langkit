@@ -541,6 +541,106 @@ package body ${ada_lib_name}.Introspection is
       end case;
    end Satisfies;
 
+   <% enum_types = [t for t in ctx.enum_types if t.exposed] %>
+
+   ---------------------
+   -- Enum_Last_Value --
+   ---------------------
+
+   function Enum_Last_Value (Kind : Enum_Value_Kind) return Enum_Value_Index is
+   begin
+      case Kind is
+         % for t in enum_types:
+            when ${t.introspection_kind} =>
+               return ${len(t.values)};
+         % endfor
+      end case;
+   end Enum_Last_Value;
+
+   ------------------------
+   -- Enum_Default_Value --
+   ------------------------
+
+   function Enum_Default_Value
+     (Kind : Enum_Value_Kind) return Any_Enum_Value_Index is
+   begin
+      case Kind is
+         % for t in enum_types:
+            when ${t.introspection_kind} =>
+               % if t.default_val_name is None:
+                  return No_Enum_Value_Index;
+               % else:
+                  return ${t.values_dict[t.default_val_name].index + 1};
+               % endif
+         % endfor
+      end case;
+   end Enum_Default_Value;
+
+   ---------------------
+   -- Enum_Value_Name --
+   ---------------------
+
+   function Enum_Value_Name
+     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return String is
+   begin
+      case Kind is
+         % for t in enum_types:
+            when ${t.introspection_kind} =>
+               case Index is
+                  % for i, v in enumerate(t.values, start=1):
+                     when ${i} =>
+                        return "${v.name.lower}";
+                  % endfor
+
+                  when others => null;
+               end case;
+         % endfor
+      end case;
+
+      return (raise Out_Of_Bounds_Error with "out of bounds enum value index");
+   end Enum_Value_Name;
+
+   -----------------
+   -- Create_Enum --
+   -----------------
+
+   function Create_Enum
+     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return Value_Type is
+   begin
+      case Kind is
+         % for t in enum_types:
+            when ${t.introspection_kind} =>
+               case Index is
+                  % for v in t.values:
+                     when ${v.index + 1} =>
+                        return Create_${t.api_name} (${v.ada_name});
+                  % endfor
+
+                  when others => null;
+               end case;
+         % endfor
+      end case;
+
+      return (raise Out_Of_Bounds_Error with "out of bounds enum value index");
+   end Create_Enum;
+
+   ----------------
+   -- Enum_Index --
+   ----------------
+
+   function Enum_Index (Value : Value_Type) return Enum_Value_Index is
+   begin
+      case Kind (Value) is
+         % for t in enum_types:
+            when ${t.introspection_kind} =>
+               return ${t.api_name}'Pos (As_${t.api_name} (Value)) + 1;
+         % endfor
+
+         when others =>
+            return (raise Bad_Type_Error with "not an enum value");
+      end case;
+   end Enum_Index;
+
    <% array_types = [t for t in ctx.array_types if t.exposed] %>
 
    ------------------------------
