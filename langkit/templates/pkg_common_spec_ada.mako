@@ -361,6 +361,12 @@ package ${ada_lib_name}.Common is
       Any_Value_Kind range Boolean_Value ..  Any_Value_Kind'Last;
    --  Enumeration for all types used to interact with properties
 
+   <% enum_types = [t for t in ctx.enum_types if t.exposed] %>
+   subtype Enum_Value_Kind is Value_Kind with Static_Predicate =>
+      Enum_Value_Kind in ${' | '.join(t.introspection_kind
+                                      for t in enum_types)};
+   --  Subrange for all enum types
+
    <% array_types = [t for t in ctx.array_types if t.exposed] %>
    subtype Array_Value_Kind is Value_Kind with Static_Predicate =>
       Array_Value_Kind in ${' | '.join(t.introspection_kind

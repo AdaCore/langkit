@@ -1,0 +1,25 @@
+== E1 ==
+
+Default value index: 0
+ 1: a
+ 2: b
+ 3: c
+
+== E2 ==
+
+Default value index: 2
+ 1: x
+ 2: y
+ 3: z
+
+Enum_Value_Name: out of bounds
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.OUT_OF_BOUNDS_ERROR : out of bounds enum value index
+
+Create_Enum: out of bounds
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.OUT_OF_BOUNDS_ERROR : out of bounds enum value index
+
+Enum_Index: bad type
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.BAD_TYPE_ERROR : not an enum value
+
+Done.
+Done
