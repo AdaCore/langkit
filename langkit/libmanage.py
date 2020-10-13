@@ -387,8 +387,14 @@ class ManageScript:
         :type subparser: argparse.ArgumentParser
         """
         subparser.add_argument(
-            '--no-pretty-print', '-P', action='store_true',
-            help='Do not try to pretty-print generated source code.'
+            '--pretty-print', '-p', action='store_true',
+            help='Pretty-print generated source code'
+        )
+        subparser.add_argument(
+            '--no-pretty-print', '-P',
+            dest='pretty_print', action='store_false',
+            help='Do not try to pretty-print generated source code (the'
+                 ' default).'
         )
         subparser.add_argument(
             '--annotate-fields-types', action='store_true',
@@ -776,7 +782,7 @@ class ManageScript:
             generate_astdoc=not args.no_astdoc,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
-            pretty_print=not args.no_pretty_print,
+            pretty_print=args.pretty_print,
             coverage=args.coverage,
             relative_project=args.relative_project,
             unparse_script=args.unparse_script
@@ -785,7 +791,7 @@ class ManageScript:
         if args.check_only:
             return
 
-        if not getattr(args, 'no_pretty_print', False):
+        if getattr(args, 'pretty_print', False):
             self.log_info(
                 "Pretty-printing sources for {}...".format(
                     self.lib_name.lower()
