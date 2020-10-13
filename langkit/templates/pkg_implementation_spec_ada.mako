@@ -1012,8 +1012,8 @@ private package ${ada_lib_name}.Implementation is
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based.
 
-   procedure Reset_Logic_Vars (Node : ${T.root_node.name});
-   --  Reset the logic variables attached to this node
+   procedure Free_User_Fields (Node : ${T.root_node.name});
+   --  Free resources associated to user fields in ``Node``
 
    procedure Set_Parents (Node, Parent : ${T.root_node.name});
    --  Set Node.Parent to Parent, and initialize recursively the parent of all

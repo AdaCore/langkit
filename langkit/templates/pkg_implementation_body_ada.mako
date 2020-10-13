@@ -1662,7 +1662,7 @@ package body ${ada_lib_name}.Implementation is
          return;
       end if;
 
-      Reset_Logic_Vars (Node);
+      Free_User_Fields (Node);
       for I in 1 .. Children_Count (Node) loop
          Destroy (Child (Node, I));
       end loop;
@@ -3719,8 +3719,7 @@ package body ${ada_lib_name}.Implementation is
       --  Don't call Node.Destroy, as Node's children may be gone already: they
       --  have their own destructor and there is no specified order for the
       --  call of these destructors.
-      Reset_Logic_Vars (Node);
-
+      Free_User_Fields (Node);
       Free (Node);
    end Destroy_Synthetic_Node;
 
@@ -3785,41 +3784,47 @@ package body ${ada_lib_name}.Implementation is
    end Children_Count;
 
    ----------------------
-   -- Reset_Logic_Vars --
+   -- Free_User_Fields --
    ----------------------
 
-   procedure Reset_Logic_Vars (Node : ${T.root_node.name}) is
+   procedure Free_User_Fields (Node : ${T.root_node.name}) is
 
-      procedure Reset (LV : in out Logic_Var_Record);
+      procedure Reset_Logic_Var (LV : in out Logic_Var_Record);
       --  Reset the LV logic variable, clearing the value it stores
 
-      -----------
-      -- Reset --
-      -----------
+      ---------------------
+      -- Reset_Logic_Var --
+      ---------------------
 
-      procedure Reset (LV : in out Logic_Var_Record) is
+      procedure Reset_Logic_Var (LV : in out Logic_Var_Record) is
       begin
-         --  TODO??? Fix Adalog so that Destroy resets the
-         --  value it stores.
+         --  TODO??? Fix Adalog so that Destroy resets the value it stores
          LV.Value := No_Entity;
          Eq_Node.Refs.Reset (LV);
          Eq_Node.Refs.Destroy (LV);
-      end Reset;
+      end Reset_Logic_Var;
 
       K : constant ${T.node_kind} := Node.Kind;
 
    begin
       <%
           def get_actions(astnode, node_expr):
-              return '\n'.join(
-                  'Reset ({}.{});'.format(node_expr, field.name)
-                  for field in astnode.get_user_fields(
-                      include_inherited=False)
-                  if field.type.is_logic_var_type
-              )
+              result = []
+              for field in astnode.get_user_fields(include_inherited=False):
+                  if field.type.is_refcounted:
+                      free_subp = 'Dec_Ref'
+                  elif field.type.is_logic_var_type:
+                      free_subp = 'Reset_Logic_Var'
+                  else:
+                      free_subp = None
+
+                  if free_subp:
+                      result.append(f'{free_subp} ({node_expr}.{field.name});')
+
+              return '\n'.join(result)
       %>
       ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
-   end Reset_Logic_Vars;
+   end Free_User_Fields;
 
    ----------------
    -- Token_Data --

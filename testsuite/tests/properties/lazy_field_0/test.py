@@ -13,9 +13,16 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
+
+    # Simple test (lazy field is an integer)
     @lazy_field(public=True, activate_tracing=True)
-    def my_field():
+    def my_field_1():
         return 42
+
+    # More complex testcase (lazy field is a ref-counted resources)
+    @lazy_field(public=True, activate_tracing=True)
+    def my_field_2():
+        return [1, 2]
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb')
