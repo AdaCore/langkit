@@ -300,8 +300,8 @@ begin
 
       procedure Test (Id : Node_Type_Id; Name : String) is
       begin
-         Put_Line ("Lookup_Node_Data (" & Id'Image & ", " & Name & ") = "
-                   & Lookup_Node_Data (Id, Name)'Image);
+         Put_Line ("Lookup_Member (" & Id'Image & ", " & Name & ") = "
+                   & Lookup_Member (Id, Name)'Image);
       end Test;
    begin
       Test (Foo_Node_Type_Id, "name");

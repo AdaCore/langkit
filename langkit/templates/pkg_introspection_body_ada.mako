@@ -766,58 +766,57 @@ package body ${ada_lib_name}.Introspection is
       end case;
    end Create_Array;
 
-   --------------------
-   -- Node_Data_Name --
-   --------------------
+   -----------------
+   -- Member_Name --
+   -----------------
 
-   function Node_Data_Name (Node_Data : Node_Data_Reference) return String is
+   function Member_Name (Member : Member_Reference) return String is
    begin
-      return Impl.Node_Data_Name (Node_Data);
-   end Node_Data_Name;
+      return Impl.Member_Name (Member);
+   end Member_Name;
 
-   --------------------
-   -- Node_Data_Type --
-   --------------------
+   -----------------
+   -- Member_Type --
+   -----------------
 
-   function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Type_Constraint is
+   function Member_Type (Member : Member_Reference) return Type_Constraint is
    begin
-      return Impl.Node_Data_Type (Node_Data);
-   end Node_Data_Type;
+      return Impl.Member_Type (Member);
+   end Member_Type;
 
-   --------------------
-   -- Eval_Node_Data --
-   --------------------
+   -----------------
+   -- Eval_Member --
+   -----------------
 
-   function Eval_Node_Data
+   function Eval_Member
      (Node      : ${T.entity.api_name}'Class;
-      Node_Data : Node_Data_Reference;
+      Member    : Member_Reference;
       Arguments : Value_Array) return Value_Type is
    begin
-      case Node_Data is
+      case Member is
          when Field_Reference =>
             if Arguments'Length > 0 then
                raise Bad_Type_Error with "fields take no argument";
             end if;
             pragma Warnings (Off, "value not in range of type");
-            return Create_Node (Eval_Field (Node, Node_Data));
+            return Create_Node (Eval_Field (Node, Member));
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
-            return Eval_Property (Node, Node_Data, Arguments);
+            return Eval_Property (Node, Member, Arguments);
       end case;
-   end Eval_Node_Data;
+   end Eval_Member;
 
-   ----------------------
-   -- Lookup_Node_Data --
-   ----------------------
+   -------------------
+   -- Lookup_Member --
+   -------------------
 
-   function Lookup_Node_Data
+   function Lookup_Member
      (Id   : Node_Type_Id;
-      Name : String) return Any_Node_Data_Reference is
+      Name : String) return Any_Member_Reference is
    begin
-      return Impl.Lookup_Node_Data (Id, Name);
-   end Lookup_Node_Data;
+      return Impl.Lookup_Member (Id, Name);
+   end Lookup_Member;
 
    ----------------
    -- Field_Name --
