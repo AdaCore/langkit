@@ -13,9 +13,9 @@ begin
       Put_Line (DSL_Name (Id) & " (" & Id'Image & ")");
 
       Put_Line ("   Fields (with abstract ones):");
-      for F of Fields (Id) loop
-         Put_Line ("   field " & Field_Name (F)
-                   & " (" & DSL_Name (Field_Type (F)) & ")");
+      for F of Syntax_Fields (Id) loop
+         Put_Line ("   field " & Syntax_Field_Name (F)
+                   & " (" & DSL_Name (Syntax_Field_Type (F)) & ")");
       end loop;
       New_Line;
 
@@ -24,17 +24,17 @@ begin
             Kind  : constant Foo_Node_Kind_Type := Kind_For (Id);
          begin
             Put_Line ("   Fields (only concrete ones):");
-            for F of Fields (Kind) loop
+            for F of Syntax_Fields (Kind) loop
                if Is_Concrete (Id) then
                   declare
                      I : constant Positive := Index (Kind, F);
                   begin
-                     Put_Line ("   " & Field_Name (F) & ":" & I'Image);
+                     Put_Line ("   " & Syntax_Field_Name (F) & ":" & I'Image);
 
-                     --  Make sure Field_Reference_From_Index is consistent
-                     --  with Index.
+                     --  Make sure Syntax_Field_Reference_From_Index is
+                     --  consistent with Index.
 
-                     if Field_Reference_From_Index (Kind, I) /= F then
+                     if Syntax_Field_Reference_From_Index (Kind, I) /= F then
                         raise Program_Error;
                      end if;
                   end;
@@ -46,24 +46,28 @@ begin
 
    end loop;
 
-   --  Test that Eval_Fields works as expected
+   --  Test that Eval_Syntax_Field works as expected
 
    declare
       procedure Test
-        (Label : String; Node : Foo_Node'Class; Field : Field_Reference);
+        (Label : String;
+         Node  : Foo_Node'Class;
+         Field : Syntax_Field_Reference);
 
       ----------
       -- Test --
       ----------
 
       procedure Test
-        (Label : String; Node : Foo_Node'Class; Field : Field_Reference)
+        (Label : String;
+         Node  : Foo_Node'Class;
+         Field : Syntax_Field_Reference)
       is
          Result : Foo_Node;
          Error  : Boolean := False;
       begin
          begin
-            Result := Eval_Field (Node, Field);
+            Result := Eval_Syntax_Field (Node, Field);
          exception
             when Bad_Type_Error =>
                Error := True;

@@ -174,7 +174,8 @@ package body ${ada_lib_name}.Iterators is
    ----------------
 
    function Child_With
-     (Field : Field_Reference; Predicate : ${pred_ref}) return ${pred_ref} is
+     (Field     : Syntax_Field_Reference;
+      Predicate : ${pred_ref}) return ${pred_ref} is
    begin
       % if ctx.sorted_parse_fields:
          return Result : ${pred_ref} do

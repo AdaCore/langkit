@@ -794,12 +794,12 @@ package body ${ada_lib_name}.Introspection is
       Arguments : Value_Array) return Value_Type is
    begin
       case Member is
-         when Field_Reference =>
+         when Syntax_Field_Reference =>
             if Arguments'Length > 0 then
                raise Bad_Type_Error with "fields take no argument";
             end if;
             pragma Warnings (Off, "value not in range of type");
-            return Create_Node (Eval_Field (Node, Member));
+            return Create_Node (Eval_Syntax_Field (Node, Member));
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
@@ -818,87 +818,90 @@ package body ${ada_lib_name}.Introspection is
       return Impl.Lookup_Member (Id, Name);
    end Lookup_Member;
 
-   ----------------
-   -- Field_Name --
-   ----------------
+   -----------------------
+   -- Syntax_Field_Name --
+   -----------------------
 
-   function Field_Name (Field : Field_Reference) return String is
+   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String is
    begin
       pragma Warnings (Off, "value not in range of type");
-      return Impl.Field_Name (Field);
+      return Impl.Syntax_Field_Name (Field);
       pragma Warnings (On, "value not in range of type");
-   end Field_Name;
+   end Syntax_Field_Name;
 
-   ----------------
-   -- Field_Type --
-   ----------------
+   -----------------------
+   -- Syntax_Field_Type --
+   -----------------------
 
-   function Field_Type (Field : Field_Reference) return Node_Type_Id is
+   function Syntax_Field_Type
+     (Field : Syntax_Field_Reference) return Node_Type_Id is
    begin
       pragma Warnings (Off, "value not in range of type");
-      return Impl.Field_Type (Field);
+      return Impl.Syntax_Field_Type (Field);
       pragma Warnings (On, "value not in range of type");
-   end Field_Type;
+   end Syntax_Field_Type;
 
-   ----------------
-   -- Eval_Field --
-   ----------------
+   -----------------------
+   -- Eval_Syntax_Field --
+   -----------------------
 
-   function Eval_Field
+   function Eval_Syntax_Field
      (Node  : ${T.entity.api_name}'Class;
-      Field : Field_Reference) return ${T.entity.api_name}
+      Field : Syntax_Field_Reference) return ${T.entity.api_name}
    is
       Ent : constant ${T.entity.name} := Unwrap_Entity (Node);
 
       pragma Warnings (Off, "value not in range of type");
       Result : constant ${T.root_node.name} :=
-         Impl.Eval_Field (Ent.Node, Field);
+         Impl.Eval_Syntax_Field (Ent.Node, Field);
       pragma Warnings (On, "value not in range of type");
    begin
       return Wrap_Node (Result, Ent.Info);
-   end Eval_Field;
+   end Eval_Syntax_Field;
 
    -----------
    -- Index --
    -----------
 
    function Index
-     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive is
+     (Kind : ${T.node_kind}; Field : Syntax_Field_Reference) return Positive is
    begin
       pragma Warnings (Off, "value not in range of type");
       return Impl.Index (Kind, Field);
       pragma Warnings (On, "value not in range of type");
    end Index;
 
-   --------------------------------
-   -- Field_Reference_From_Index --
-   --------------------------------
+   ---------------------------------------
+   -- Syntax_Field_Reference_From_Index --
+   ---------------------------------------
 
-   function Field_Reference_From_Index
-     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference is
+   function Syntax_Field_Reference_From_Index
+     (Kind : ${T.node_kind}; Index : Positive) return Syntax_Field_Reference is
    begin
       pragma Warnings (Off, "value not in range of type");
-      return Impl.Field_Reference_From_Index (Kind, Index);
+      return Impl.Syntax_Field_Reference_From_Index (Kind, Index);
       pragma Warnings (On, "value not in range of type");
-   end Field_Reference_From_Index;
+   end Syntax_Field_Reference_From_Index;
 
-   ------------
-   -- Fields --
-   ------------
+   -------------------
+   -- Syntax_Fields --
+   -------------------
 
-   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array is
+   function Syntax_Fields
+     (Kind : ${T.node_kind}) return Syntax_Field_Reference_Array is
    begin
-      return Impl.Fields (Kind);
-   end Fields;
+      return Impl.Syntax_Fields (Kind);
+   end Syntax_Fields;
 
-   ------------
-   -- Fields --
-   ------------
+   -------------------
+   -- Syntax_Fields --
+   -------------------
 
-   function Fields (Id : Node_Type_Id) return Field_Reference_Array is
+   function Syntax_Fields
+     (Id : Node_Type_Id) return Syntax_Field_Reference_Array is
    begin
-      return Impl.Fields (Id);
-   end Fields;
+      return Impl.Syntax_Fields (Id);
+   end Syntax_Fields;
 
    -------------------
    -- Property_Name --
