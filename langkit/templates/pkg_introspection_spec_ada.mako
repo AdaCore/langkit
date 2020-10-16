@@ -242,13 +242,6 @@ package ${ada_lib_name}.Introspection is
    -- Syntax fields (for nodes) --
    -------------------------------
 
-   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String;
-   --  Return a lower-case name for ``Field``
-
-   function Syntax_Field_Type (Field : Syntax_Field_Reference) return Node_Type_Id;
-   --  Return a reference to the node type that covers what ``Field`` can
-   --  contain.
-
    function Eval_Syntax_Field
      (Node  : ${T.entity.api_name}'Class;
       Field : Syntax_Field_Reference) return ${T.entity.api_name};
@@ -283,13 +276,6 @@ package ${ada_lib_name}.Introspection is
    ----------------------------
    -- Properties (for nodes) --
    ----------------------------
-
-   function Property_Name (Property : Property_Reference) return String;
-   --  Return a lower-case name for ``Property``
-
-   function Property_Return_Type
-     (Property : Property_Reference) return Type_Constraint;
-   --  Return the type constraint for ``Property``'s return type
 
    function Property_Argument_Types
      (Property : Property_Reference) return Type_Constraint_Array

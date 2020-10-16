@@ -132,9 +132,8 @@ begin
             Put_Line ("   <none>");
          else
             for P of Properties (Kind) loop
-               Put_Line ("   " & Property_Name (P));
-               Put_Line ("   return type: "
-                         & DSL_Name (Property_Return_Type (P)));
+               Put_Line ("   " & Member_Name (P));
+               Put_Line ("   return type: " & DSL_Name (Member_Type (P)));
 
                Put_Line ("   arguments:");
                declare

@@ -819,29 +819,6 @@ package body ${ada_lib_name}.Introspection is
    end Lookup_Member;
 
    -----------------------
-   -- Syntax_Field_Name --
-   -----------------------
-
-   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String is
-   begin
-      pragma Warnings (Off, "value not in range of type");
-      return Impl.Syntax_Field_Name (Field);
-      pragma Warnings (On, "value not in range of type");
-   end Syntax_Field_Name;
-
-   -----------------------
-   -- Syntax_Field_Type --
-   -----------------------
-
-   function Syntax_Field_Type
-     (Field : Syntax_Field_Reference) return Node_Type_Id is
-   begin
-      pragma Warnings (Off, "value not in range of type");
-      return Impl.Syntax_Field_Type (Field);
-      pragma Warnings (On, "value not in range of type");
-   end Syntax_Field_Type;
-
-   -----------------------
    -- Eval_Syntax_Field --
    -----------------------
 
@@ -902,25 +879,6 @@ package body ${ada_lib_name}.Introspection is
    begin
       return Impl.Syntax_Fields (Id);
    end Syntax_Fields;
-
-   -------------------
-   -- Property_Name --
-   -------------------
-
-   function Property_Name (Property : Property_Reference) return String is
-   begin
-      return Impl.Property_Name (Property);
-   end Property_Name;
-
-   --------------------------
-   -- Property_Return_Type --
-   --------------------------
-
-   function Property_Return_Type
-     (Property : Property_Reference) return Type_Constraint is
-   begin
-      return Impl.Property_Return_Type (Property);
-   end Property_Return_Type;
 
    -----------------------------
    -- Property_Argument_Types --
