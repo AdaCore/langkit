@@ -210,6 +210,27 @@ package ${ada_lib_name}.Introspection is
    --  the type that ``Kind`` implies.
 
    -------------
+   -- Structs --
+   -------------
+
+   function Struct_Fields
+     (Kind : Struct_Value_Kind) return Struct_Field_Reference_Array;
+   --  Return the list of fields for ``Kind`` structs
+
+   function Create_Struct
+     (Kind : Struct_Value_Kind; Values : Value_Array) return Value_Type;
+   --  Return a struct of the given kind and assign the given values to each
+   --  field.
+   --
+   --  ``Struct_Fields (Kind)`` describes what ``Values`` should be: both
+   --  arrays must have the same length and the type of each value in
+   --  ``Values`` must satisfy the corresponding field type.
+   --
+   --  This raises a ``Bad_Type_Error`` if ``Values`` does not have the
+   --  expected size or if the values it contains do not have the expected
+   --  type.
+
+   -------------
    -- Members --
    -------------
 
@@ -221,8 +242,30 @@ package ${ada_lib_name}.Introspection is
    --  type).
 
    function Eval_Member
-     (Node      : ${T.entity.api_name}'Class;
+     (Prefix    : Value_Type;
       Member    : Member_Reference;
+      Arguments : Value_Array) return Value_Type;
+   --  Evaluate ``Member`` on the given ``Prefix`` value and the given
+   --  ``Arguments`` and return the result of this evaluation.
+   --
+   --  This raises a ``Property_Error`` If ``Member`` is a node property and
+   --  that its execution raises a ``Property_Error``.
+   --
+   --  This raises a ``Bad_Type_Error`` if ``Prefix`` is not a struct and not a
+   --  node, if ``Prefix`` has no such member or if the provided arguments are
+   --  invalid for that member.
+
+   function Eval_Member
+     (Prefix : Value_Type; Field : Struct_Field_Reference) return Value_Type;
+   --  Evaluate ``Field`` on the given ``Prefix`` struct value and return the
+   --  result of this evaluation.
+   --
+   --  This raises a ``Bad_Type_Error`` if ``Prefix`` is not a struct or if
+   --  ``Prefix`` has no such field.
+
+   function Eval_Member
+     (Node      : ${T.entity.api_name}'Class;
+      Member    : Node_Member_Reference;
       Arguments : Value_Array) return Value_Type;
    --  Evaluate ``Member on`` the given ``Node`` and the given ``Arguments``.
    --  If the evaluation raises a ``Property_Error``, forward it. Otherwise,
@@ -230,6 +273,17 @@ package ${ada_lib_name}.Introspection is
    --
    --  This raises a ``Bad_Type_Error`` if ``Node`` has no such member or if
    --  the provided arguments are invalid for it.
+
+   function Lookup_Member
+     (Prefix : Value_Type;
+      Name   : String) return Any_Member_Reference;
+   --  Look for the member corresponding to the given ``Name`` (lower-case
+   --  name) in the given ``Prefix`` value. Return it if found, otherwise
+   --  return None.
+   --
+   --  This raises a ``Bad_Type_Error`` if ``Prefix`` is not a struct and not a
+   --  node, if ``Prefix`` is a null node, if ``Prefix`` has no such member or
+   --  if the provided arguments are invalid for that member.
 
    function Lookup_Member
      (Id   : Node_Type_Id;

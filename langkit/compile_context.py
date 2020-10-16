@@ -34,6 +34,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 
 
 if TYPE_CHECKING:
+    from langkit.compiled_types import StructType, UserField
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.python_api import PythonAPISettings
 
@@ -697,6 +698,21 @@ class CompileCtx:
         clauses required by extensions. See the `add_with_clause` method.
 
         :type: dict[(str, str), list[(str, bool, bool)]
+        """
+
+        self.sorted_public_structs: Optional[List[StructType]] = None
+        """
+        Sorted list of all public structs. Used to generate the introspection
+        API.
+
+        Note that this excludes the entity type: the fact that entities are
+        structs is an implementation detail, not exposed to public APIs.
+        """
+
+        self.sorted_struct_fields: Optional[List[UserField]] = None
+        """
+        Sorted list of all public fields for structs in
+        ``self.sorted_public_structs``. Used to generate the introspection API.
         """
 
         self.sorted_parse_fields = None
@@ -2343,6 +2359,16 @@ class CompileCtx:
                     expose(dv.type, True, f,
                            '"{}" dynamic variable'.format(dv.dsl_name),
                            [f.qualname])
+
+        # Compute the list of struct public and their fields, for
+        # introspection.
+
+        self.sorted_public_structs = [t for t in self.struct_types
+                                      if t.exposed and not t.is_entity_type]
+
+        self.sorted_struct_fields = []
+        for t in self.sorted_public_structs:
+            self.sorted_struct_fields.extend(t.get_fields())
 
     def lower_properties_dispatching(self):
         """

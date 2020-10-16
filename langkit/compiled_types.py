@@ -560,12 +560,23 @@ class AbstractNodeData:
         """
         from langkit.expressions import PropertyDef
 
-        assert isinstance(self, (Field, PropertyDef))
-        assert self.abstract or not self.overriding, (
-            'Trying to get introspection enumeration literal for overriding'
-            ' field {}'.format(self.qualname))
-        return (self.struct.entity.api_name +
-                self.api_name).camel_with_underscores
+        if isinstance(self, (Field, PropertyDef)):
+            assert isinstance(self.struct, ASTNodeType)
+            assert self.abstract or not self.overriding, (
+                f'Trying to get introspection enumeration literal for'
+                f' overriding field {self.qualname}'
+            )
+            prefix = self.struct.entity.api_name
+
+        else:
+            assert isinstance(self.struct, StructType)
+            assert isinstance(self, UserField)
+
+            # Struct fields have no suffixes. Artificially add one in the
+            # introspection API to avoid common name clashes.
+            prefix = self.struct.api_name + names.Name("F")
+
+        return (prefix + self.api_name).camel_with_underscores
 
 
 class CompiledType:

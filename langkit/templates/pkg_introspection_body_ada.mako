@@ -766,6 +766,91 @@ package body ${ada_lib_name}.Introspection is
       end case;
    end Create_Array;
 
+   -------------------
+   -- Struct_Fields --
+   -------------------
+
+   function Struct_Fields
+     (Kind : Struct_Value_Kind) return Struct_Field_Reference_Array is
+   begin
+      pragma Warnings (Off, "value not in range of type");
+      return Impl.Struct_Fields (Kind);
+      pragma Warnings (On, "value not in range of type");
+   end Struct_Fields;
+
+   -------------------
+   -- Create_Struct --
+   -------------------
+
+   function Create_Struct
+     (Kind : Struct_Value_Kind; Values : Value_Array) return Value_Type
+   is
+   begin
+      % if ctx.sorted_public_structs:
+         --  First check that input values have the expected format
+         declare
+            Fields : constant Struct_Field_Reference_Array :=
+               Struct_Fields (Kind);
+         begin
+            if Fields'Length /= Values'Length then
+               raise Bad_Type_Error with "unexpected number of values";
+            end if;
+
+            for I in Fields'Range loop
+               declare
+                  F : constant Struct_Field_Reference := Fields (I);
+                  T : constant Type_Constraint := Member_Type (F);
+                  V : Value_Type renames Values (I + Values'First - 1);
+               begin
+                  if not Satisfies (V, T) then
+                     raise Bad_Type_Error with
+                        "type mismatch for " & Member_Name (F);
+                  end if;
+               end;
+            end loop;
+         end;
+
+         --  Only then, use input values to create the struct
+         case Kind is
+         % for t in ctx.sorted_public_structs:
+            when ${t.introspection_kind} =>
+               <% fields = t.get_fields() %>
+               declare
+                  ## Extract $.Analysis values from the polymorphic input
+                  ## values, create the $.Analysis struct and then wrap it into
+                  ## the polymorphic result. The usual complications come with
+                  ## the handling of nodes and entities.
+                  % for i, f in enumerate(fields):
+                     <%
+                        value = f"Values (Values'First + {i})"
+                        ftype = f.type.entity if f.type.is_ast_node else f.type
+                        if ftype.is_entity_type:
+                           value = 'As_Node ({})'.format(value)
+                           if not ftype.element_type.is_root_node:
+                              value = f'{value}.As_{ftype.api_name}'
+                        else:
+                           value = 'As_{} ({})'.format(ftype.api_name,
+                                                       value)
+                     %>
+                     ## Add a "F_" prefix to helper locals to avoid name
+                     ## clashes (for instance, it's commot to have a struct
+                     ## field called "Values").
+                     F_${f.name} : constant ${ftype.api_name} := ${value};
+                  % endfor
+                  Result : constant ${t.api_name} :=
+                     Analysis.Create_${t.api_name}
+                       (${', '.join(f"F_{f.name}" for f in fields)});
+               begin
+                  return Introspection.Create_${t.api_name} (Result);
+               end;
+         % endfor
+         end case;
+
+      % else:
+         return (raise Program_Error);
+      % endif
+   end Create_Struct;
+
    -----------------
    -- Member_Name --
    -----------------
@@ -784,13 +869,90 @@ package body ${ada_lib_name}.Introspection is
       return Impl.Member_Type (Member);
    end Member_Type;
 
+   function Eval_Member
+     (Prefix    : Value_Type;
+      Member    : Member_Reference;
+      Arguments : Value_Array) return Value_Type
+   is
+      Prefix_Val : Value_Record renames Prefix.Value.Value.all;
+   begin
+      case Prefix_Val.Kind is
+      when Struct_Value_Kind =>
+         if Member not in Struct_Field_Reference then
+            return (raise Bad_Type_Error with "no such member");
+         elsif Arguments'Length /= 0 then
+            return (raise Bad_Type_Error
+                    with "struct fields take no argument");
+         else
+            pragma Warnings (Off, "value not in range of type");
+            return Eval_Member (Prefix, Member);
+            pragma Warnings (On, "value not in range of type");
+         end if;
+
+      when Node_Value =>
+         return Eval_Member (Prefix_Val.Node_Value, Member, Arguments);
+
+      when others =>
+         return (raise Bad_Type_Error with "invalid prefix type");
+      end case;
+   end Eval_Member;
+
+   -----------------
+   -- Eval_Member --
+   -----------------
+
+   function Eval_Member
+     (Prefix : Value_Type; Field : Struct_Field_Reference) return Value_Type
+   is
+      Prefix_Val : Value_Record renames Prefix.Value.Value.all;
+   begin
+      case Prefix_Val.Kind is
+
+      % for t in ctx.sorted_public_structs:
+         when ${t.introspection_kind} =>
+            case Field is
+            % for f in t.get_fields():
+               when ${f.introspection_enum_literal} =>
+                  declare
+                     ## Extract the $.Analysis struct value, do the actual
+                     ## field access and then wrap the result into a
+                     ## polymorphic value. The usual complications come with
+                     ## the handling of nodes and entities.
+                     <%
+                        struct_value = f"Prefix_Val.{t.introspection_kind}"
+                        field_value = f"Analysis.{f.name} ({struct_value})"
+                        ftype = f.type.entity if f.type.is_ast_node else f.type
+                        poly_constructor = (
+                           "Create_Node"
+                           if ftype.is_entity_type
+                           else f"Create_{ftype.api_name}"
+                        )
+                     %>
+                  begin
+                     return ${poly_constructor} (${field_value});
+                  end;
+            % endfor
+
+            when others => null;
+            end case;
+      % endfor
+
+      when others =>
+         return (raise Program_Error);
+      end case;
+
+      % if ctx.sorted_public_structs:
+         return (raise Bad_Type_Error with "no such member");
+      % endif
+   end Eval_Member;
+
    -----------------
    -- Eval_Member --
    -----------------
 
    function Eval_Member
      (Node      : ${T.entity.api_name}'Class;
-      Member    : Member_Reference;
+      Member    : Node_Member_Reference;
       Arguments : Value_Array) return Value_Type is
    begin
       case Member is
@@ -812,10 +974,37 @@ package body ${ada_lib_name}.Introspection is
    -------------------
 
    function Lookup_Member
+     (Prefix : Value_Type;
+      Name   : String) return Any_Member_Reference
+   is
+      Prefix_Val : Value_Record renames Prefix.Value.Value.all;
+   begin
+      case Prefix_Val.Kind is
+      when Struct_Value_Kind =>
+         pragma Warnings (Off, "value not in range of type");
+         return Impl.Lookup_Member_Struct (Prefix_Val.Kind, Name);
+         pragma Warnings (On, "value not in range of type");
+
+      when Node_Value =>
+         declare
+            Node : constant ${T.entity.api_name} := Prefix_Val.Node_Value;
+         begin
+            if Node.Is_Null then
+               raise Bad_Type_Error with "invalid null prefix node";
+            end if;
+            return Impl.Lookup_Member_Node (Impl.Id_For_Kind (Node.Kind), Name);
+         end;
+
+      when others =>
+         return (raise Bad_Type_Error with "invalid prefix type");
+      end case;
+   end Lookup_Member;
+
+   function Lookup_Member
      (Id   : Node_Type_Id;
       Name : String) return Any_Member_Reference is
    begin
-      return Impl.Lookup_Member (Id, Name);
+      return Impl.Lookup_Member_Node (Id, Name);
    end Lookup_Member;
 
    -----------------------
