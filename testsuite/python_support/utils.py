@@ -238,10 +238,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
         # First build the library. Forward all test.py's arguments to the
         # libmanage call so that manual testcase runs can pass "-g", for
-        # instance. Also avoid rebuilding Langkit_Support, as the testsuite
-        # already built one for us.
-        argv = sys.argv[1:] + ['--full-error-traces', '-vnone',
-                               '--no-langkit-support']
+        # instance.
+        argv = sys.argv[1:] + ['--full-error-traces', '-vnone']
 
         # Generate the public Ada API only when necessary (i.e. if we have
         # mains that do use this API). This reduces the time it takes to run
@@ -363,14 +361,3 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         run('./_build/default/{}.exe'.format(ocaml_main),
             valgrind=True,
             valgrind_suppressions=['ocaml'])
-
-
-def add_gpr_path(dirname):
-    """
-    Prepend the given directory name to the ``GPR_PROJECT_PATH`` environment
-    variable.
-    """
-    old_path = os.environ.get('GPR_PROJECT_PATH')
-    os.environ['GPR_PROJECT_PATH'] = (
-        '{}{}{}'.format(dirname, P.pathsep, old_path)
-        if old_path else dirname)

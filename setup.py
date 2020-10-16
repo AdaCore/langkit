@@ -30,6 +30,5 @@ setup(
         'coverage.css', 'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako'
     ]},
-    scripts=[os.path.join('scripts', 'create-project.py'),
-             os.path.join('scripts', 'build-langkit_support.py')]
+    scripts=[os.path.join('scripts', 'create-project.py')]
 )
