@@ -209,33 +209,32 @@ package ${ada_lib_name}.Introspection is
    --  This raises a ``Bad_Type_Error`` if a value in ``Values`` does not have
    --  the type that ``Kind`` implies.
 
-   ---------------
-   -- Node data --
-   ---------------
+   -------------
+   -- Members --
+   -------------
 
-   function Node_Data_Name (Node_Data : Node_Data_Reference) return String;
-   --  Return a lower-case name for ``Node_Data``
+   function Member_Name (Member : Member_Reference) return String;
+   --  Return a lower-case name for ``Member``
 
-   function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Type_Constraint;
-   --  Return the constraint associated with ``Node_Data``'s type (or its
-   --  return type).
+   function Member_Type (Member : Member_Reference) return Type_Constraint;
+   --  Return the constraint associated with ``Member``'s type (or its return
+   --  type).
 
-   function Eval_Node_Data
+   function Eval_Member
      (Node      : ${T.entity.api_name}'Class;
-      Node_Data : Node_Data_Reference;
+      Member    : Member_Reference;
       Arguments : Value_Array) return Value_Type;
-   --  Evaluate ``Node_Data on`` the given ``Node`` and the given
-   --  ``Arguments``. If the evaluation raises a ``Property_Error``, forward
-   --  it. Otherwise, return its result.
+   --  Evaluate ``Member on`` the given ``Node`` and the given ``Arguments``.
+   --  If the evaluation raises a ``Property_Error``, forward it. Otherwise,
+   --  return its result.
    --
-   --  This raises a ``Bad_Type_Error`` if ``Node`` has no such node data or if
+   --  This raises a ``Bad_Type_Error`` if ``Node`` has no such member or if
    --  the provided arguments are invalid for it.
 
-   function Lookup_Node_Data
+   function Lookup_Member
      (Id   : Node_Type_Id;
-      Name : String) return Any_Node_Data_Reference;
-   --  Look for the node data corresponding to the given ``Name`` (lower-case
+      Name : String) return Any_Member_Reference;
+   --  Look for the member corresponding to the given ``Name`` (lower-case
    --  name) in the given node type reference (``Id``). Return it if found,
    --  otherwise return None.
 

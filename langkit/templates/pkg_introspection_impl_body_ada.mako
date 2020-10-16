@@ -159,48 +159,47 @@ package body ${ada_lib_name}.Introspection_Implementation is
       return False;
    end Is_Derived_From;
 
-   --------------------
-   -- Node_Data_Name --
-   --------------------
+   -----------------
+   -- Member_Name --
+   -----------------
 
-   function Node_Data_Name (Node_Data : Node_Data_Reference) return String is
+   function Member_Name (Member : Member_Reference) return String is
    begin
-      case Node_Data is
+      case Member is
          when Field_Reference =>
             pragma Warnings (Off, "value not in range of type");
-            return Field_Name (Node_Data);
+            return Field_Name (Member);
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
-            return Property_Name (Node_Data);
+            return Property_Name (Member);
       end case;
-   end Node_Data_Name;
+   end Member_Name;
 
-   --------------------
-   -- Node_Data_Type --
-   --------------------
+   -----------------
+   -- Member_Type --
+   -----------------
 
-   function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Type_Constraint is
+   function Member_Type (Member : Member_Reference) return Type_Constraint is
    begin
-      case Node_Data is
+      case Member is
          when Field_Reference =>
             pragma Warnings (Off, "value not in range of type");
-            return (Kind => Node_Value, Node_Type => Field_Type (Node_Data));
+            return (Kind => Node_Value, Node_Type => Field_Type (Member));
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
-            return Property_Return_Type (Node_Data);
+            return Property_Return_Type (Member);
       end case;
-   end Node_Data_Type;
+   end Member_Type;
 
-   ----------------------
-   -- Lookup_Node_Data --
-   ----------------------
+   -------------------
+   -- Lookup_Member --
+   -------------------
 
-   function Lookup_Node_Data
+   function Lookup_Member
      (Id   : Node_Type_Id;
-      Name : String) return Any_Node_Data_Reference
+      Name : String) return Any_Member_Reference
    is
       Cursor : Any_Node_Type_Id := Id;
    begin
@@ -230,7 +229,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
          end;
       end loop;
       return None;
-   end Lookup_Node_Data;
+   end Lookup_Member;
 
    ----------------
    -- Field_Name --

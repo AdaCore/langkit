@@ -389,20 +389,21 @@ package ${ada_lib_name}.Common is
 
    <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
 
-   type Any_Node_Data_Reference is
+   type Any_Member_Reference is
       (None${''.join((', ' + f.introspection_enum_literal)
                       for f in all_abstract)});
-   subtype Node_Data_Reference is Any_Node_Data_Reference range
+   subtype Member_Reference is Any_Member_Reference range
       ${all_abstract[0].introspection_enum_literal}
       ..  ${all_abstract[-1].introspection_enum_literal};
-   --  Enumeration of all data attached to nodes (syntax fields and properties)
+   --  Enumeration of all data attached to structs/nodes (fields and
+   --  properties).
 
-   type Node_Data_Reference_Array is
-      array (Positive range <>) of Node_Data_Reference;
+   type Member_Reference_Array is
+      array (Positive range <>) of Member_Reference;
 
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
-   subtype Field_Reference is Node_Data_Reference range
+   subtype Field_Reference is Member_Reference range
       % if ctx.sorted_parse_fields:
          <%
             first = ctx.sorted_parse_fields[0]
@@ -421,7 +422,7 @@ package ${ada_lib_name}.Common is
 
    type Field_Reference_Array is array (Positive range <>) of Field_Reference;
 
-   subtype Property_Reference is Node_Data_Reference
+   subtype Property_Reference is Member_Reference
       range ${ctx.sorted_properties[0].introspection_enum_literal}
          .. ${ctx.sorted_properties[-1].introspection_enum_literal};
    --  Enumeration of all available node properties

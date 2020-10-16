@@ -872,11 +872,11 @@ P_Id_Node_Array:
 
 P_Eval: <no such property>
 
-Lookup_Node_Data (FOO_NODE_TYPE_ID, name) = NONE
-Lookup_Node_Data (FOO_NODE_TYPE_ID, parent) = FOO_NODE_PARENT
-Lookup_Node_Data (VAR_DECL_TYPE_ID, parent) = FOO_NODE_PARENT
-Lookup_Node_Data (VAR_DECL_TYPE_ID, name) = VAR_DECL_F_NAME
-Lookup_Node_Data (VAR_DECL_TYPE_ID, eval) = VAR_DECL_P_EVAL
+Lookup_Member (FOO_NODE_TYPE_ID, name) = NONE
+Lookup_Member (FOO_NODE_TYPE_ID, parent) = FOO_NODE_PARENT
+Lookup_Member (VAR_DECL_TYPE_ID, parent) = FOO_NODE_PARENT
+Lookup_Member (VAR_DECL_TYPE_ID, name) = VAR_DECL_F_NAME
+Lookup_Member (VAR_DECL_TYPE_ID, eval) = VAR_DECL_P_EVAL
 
 Done.
 Done

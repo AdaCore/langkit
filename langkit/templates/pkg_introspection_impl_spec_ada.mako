@@ -418,21 +418,20 @@ private package ${ada_lib_name}.Introspection_Implementation is
    function Is_Derived_From (Id, Parent : Node_Type_Id) return Boolean;
    --  Implementation for Introspection.Is_Derived_From
 
-   ---------------
-   -- Node data --
-   ---------------
+   ------------
+   -- Member --
+   ------------
 
-   function Node_Data_Name (Node_Data : Node_Data_Reference) return String;
-   --  Implementation for Introspection.Node_Data_Name
+   function Member_Name (Member : Member_Reference) return String;
+   --  Implementation for Introspection.Member_Name
 
-   function Node_Data_Type
-     (Node_Data : Node_Data_Reference) return Type_Constraint;
-   --  Implementation for Introspection.Node_Data_Type
+   function Member_Type (Member : Member_Reference) return Type_Constraint;
+   --  Implementation for Introspection.Member_Type
 
-   function Lookup_Node_Data
+   function Lookup_Member
      (Id   : Node_Type_Id;
-      Name : String) return Any_Node_Data_Reference;
-   --  Implementation for Introspection.Lookup_Node_Data
+      Name : String) return Any_Member_Reference;
+   --  Implementation for Introspection.Lookup_Member
 
    -------------------
    -- Syntax fields --
