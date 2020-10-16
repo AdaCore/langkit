@@ -20,7 +20,7 @@ begin
       declare
          I : constant Positive := Index (D.Kind, Decl_F_Name);
       begin
-         if Field_Reference_From_Index (D.Kind, I) /= Decl_F_Name then
+         if Syntax_Field_Reference_From_Index (D.Kind, I) /= Decl_F_Name then
             raise Program_Error;
          end if;
          Put_Line

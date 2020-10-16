@@ -403,7 +403,7 @@ package ${ada_lib_name}.Common is
 
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
-   subtype Field_Reference is Member_Reference range
+   subtype Syntax_Field_Reference is Member_Reference range
       % if ctx.sorted_parse_fields:
          <%
             first = ctx.sorted_parse_fields[0]
@@ -420,7 +420,8 @@ package ${ada_lib_name}.Common is
    ;
    --  Enumeration of all syntax fields for regular nodes
 
-   type Field_Reference_Array is array (Positive range <>) of Field_Reference;
+   type Syntax_Field_Reference_Array is
+      array (Positive range <>) of Syntax_Field_Reference;
 
    subtype Property_Reference is Member_Reference
       range ${ctx.sorted_properties[0].introspection_enum_literal}

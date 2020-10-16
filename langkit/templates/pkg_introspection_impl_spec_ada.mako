@@ -112,13 +112,13 @@ private package ${ada_lib_name}.Introspection_Implementation is
    % endfor
 
    Syntax_Field_Descriptors : constant
-      array (Field_Reference) of Syntax_Field_Descriptor_Access := (
+      array (Syntax_Field_Reference) of Syntax_Field_Descriptor_Access := (
       % if ctx.sorted_parse_fields:
          ${', '.join("{name} => Desc_For_{name}'Access"
                      .format(name=f.introspection_enum_literal)
                      for f in ctx.sorted_parse_fields)}
       % else:
-         Field_Reference => <>
+         Syntax_Field_Reference => <>
       % endif
    );
 
@@ -229,7 +229,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    ---------------------------
 
    type Node_Field_Descriptor (Is_Abstract_Or_Null : Boolean) is record
-      Field : Field_Reference;
+      Field : Syntax_Field_Reference;
       --  Reference to the field this describes
 
       --  Only non-null concrete fields are assigned an index
@@ -437,35 +437,39 @@ private package ${ada_lib_name}.Introspection_Implementation is
    -- Syntax fields --
    -------------------
 
-   function Field_Name (Field : Field_Reference) return String;
-   --  Implementation for Introspection.Field_Name
+   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String;
+   --  Implementation for Introspection.Syntax_Field_Name
 
-   function Field_Type (Field : Field_Reference) return Node_Type_Id;
-   --  Implementation for Introspection.Field_Type
+   function Syntax_Field_Type
+     (Field : Syntax_Field_Reference) return Node_Type_Id;
+   --  Implementation for Introspection.Syntax_Field_Type
 
-   function Eval_Field
+   function Eval_Syntax_Field
      (Node  : ${T.root_node.name};
-      Field : Field_Reference) return ${T.root_node.name};
+      Field : Syntax_Field_Reference) return ${T.root_node.name};
    --  Implementation for Introspection.Eval_Field
 
    function Index
-     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive;
+     (Kind : ${T.node_kind}; Field : Syntax_Field_Reference) return Positive;
    --  Implementation for Introspection.Index
 
-   function Field_Reference_From_Index
-     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference;
-   --  Implementation for Introspection.Field_Reference_From_Index
+   function Syntax_Field_Reference_From_Index
+     (Kind : ${T.node_kind}; Index : Positive) return Syntax_Field_Reference;
+   --  Implementation for Introspection.Syntax_Field_Reference_From_Index
 
-   function Fields
-     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array;
+   function Syntax_Fields
+     (Id            : Node_Type_Id;
+      Concrete_Only : Boolean) return Syntax_Field_Reference_Array;
    --  Return the list of fields associated to ``Id``. If ``Concrete_Only`` is
    --  true, collect only non-null and concrete fields. Otherwise, collect all
    --  fields.
 
-   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array;
+   function Syntax_Fields
+     (Kind : ${T.node_kind}) return Syntax_Field_Reference_Array;
    --  Implementation for Introspection.Fields
 
-   function Fields (Id : Node_Type_Id) return Field_Reference_Array;
+   function Syntax_Fields
+     (Id : Node_Type_Id) return Syntax_Field_Reference_Array;
    --  Implementation for Introspection.Fields
 
    % if ctx.sorted_properties:

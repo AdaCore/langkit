@@ -17,8 +17,8 @@ with ${ada_lib_name}.Common;   use ${ada_lib_name}.Common;
 --  .. code-block:: ada
 --
 --     declare
---        Field_Ref : constant Field_Reference :=
---           Field_Reference_From_Index (Node.Kind, 1);
+--        Field_Ref : constant Syntax_Field_Reference :=
+--           Syntax_Field_Reference_From_Index (Node.Kind, 1);
 --     begin
 --        Ada.Text_IO.Put_Line (Field_Name (Field_Ref));
 --     end;
@@ -238,49 +238,51 @@ package ${ada_lib_name}.Introspection is
    --  name) in the given node type reference (``Id``). Return it if found,
    --  otherwise return None.
 
-   -------------------
-   -- Syntax fields --
-   -------------------
+   -------------------------------
+   -- Syntax fields (for nodes) --
+   -------------------------------
 
-   function Field_Name (Field : Field_Reference) return String;
+   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String;
    --  Return a lower-case name for ``Field``
 
-   function Field_Type (Field : Field_Reference) return Node_Type_Id;
+   function Syntax_Field_Type (Field : Syntax_Field_Reference) return Node_Type_Id;
    --  Return a reference to the node type that covers what ``Field`` can
    --  contain.
 
-   function Eval_Field
+   function Eval_Syntax_Field
      (Node  : ${T.entity.api_name}'Class;
-      Field : Field_Reference) return ${T.entity.api_name};
+      Field : Syntax_Field_Reference) return ${T.entity.api_name};
    --  Evaluate ``Field`` on the given ``Node``. Return the corresponding
    --  children ``Node``.
    --
    --  This raises a Bad_Type_Error if ``Node`` has no such field.
 
    function Index
-     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive;
+     (Kind : ${T.node_kind}; Field : Syntax_Field_Reference) return Positive;
    --  Return the index in nodes to access the given ``Field`` considering the
    --  given ``Kind`` of node.
    --
    --  This raises an ``Bad_Type_Error`` exception if ``Kind`` nodes do not
    --  have the given ``Field``.
 
-   function Field_Reference_From_Index
-     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference;
+   function Syntax_Field_Reference_From_Index
+     (Kind : ${T.node_kind}; Index : Positive) return Syntax_Field_Reference;
    --  Return the field reference corresponding to the given ``Index`` in nodes
    --  of the given ``Kind``. Raise an ``Bad_Type_Error`` exception if there is
    --  no field corresponding to this index.
 
-   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array;
+   function Syntax_Fields
+     (Kind : ${T.node_kind}) return Syntax_Field_Reference_Array;
    --  Return the list of fields that nodes of the given ``Kind`` have. This
    --  returns an empty array for list nodes.
 
-   function Fields (Id : Node_Type_Id) return Field_Reference_Array;
+   function Syntax_Fields
+     (Id : Node_Type_Id) return Syntax_Field_Reference_Array;
    --  Likewise, but taking a reference to a node type instead
 
-   ----------------
-   -- Properties --
-   ----------------
+   ----------------------------
+   -- Properties (for nodes) --
+   ----------------------------
 
    function Property_Name (Property : Property_Reference) return String;
    --  Return a lower-case name for ``Property``

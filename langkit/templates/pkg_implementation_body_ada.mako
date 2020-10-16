@@ -2882,14 +2882,15 @@ package body ${ada_lib_name}.Implementation is
          --  This is for regular nodes: display each field
          declare
             use ${ada_lib_name}.Introspection_Implementation;
-            Field_List : constant Field_Reference_Array := Fields (K);
+            Field_List : constant Syntax_Field_Reference_Array :=
+               Syntax_Fields (K);
          begin
             for I in Field_List'Range loop
                declare
                   Child : constant ${T.root_node.name} :=
                      Implementation.Child (Node, I);
                begin
-                  Put (Attr_Prefix & Field_Name (Field_List (I)) & ":");
+                  Put (Attr_Prefix & Syntax_Field_Name (Field_List (I)) & ":");
                   if Child /= null then
                      New_Line;
                      Print (Child, Show_Slocs, Children_Prefix);

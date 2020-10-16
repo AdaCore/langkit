@@ -141,7 +141,8 @@ package ${ada_lib_name}.Iterators is
    --% belongs-to: ${pred_ref}
 
    function Child_With
-     (Field : Field_Reference; Predicate : ${pred_ref}) return ${pred_ref};
+     (Field     : Syntax_Field_Reference;
+      Predicate : ${pred_ref}) return ${pred_ref};
    --  Return a predicate that accepts only nodes which have a child
    --  corresponding to the given field reference and for which this child is
    --  accepted by the given predicate.
@@ -289,7 +290,7 @@ private
      (P : in out For_Some_Children_Predicate; N : ${node}) return Boolean;
 
    type Child_With_Predicate is new ${pred_iface} with record
-      Field     : Field_Reference;
+      Field     : Syntax_Field_Reference;
       Predicate : ${pred_ref};
    end record;
 

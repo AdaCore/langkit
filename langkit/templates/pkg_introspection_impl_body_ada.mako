@@ -166,9 +166,9 @@ package body ${ada_lib_name}.Introspection_Implementation is
    function Member_Name (Member : Member_Reference) return String is
    begin
       case Member is
-         when Field_Reference =>
+         when Syntax_Field_Reference =>
             pragma Warnings (Off, "value not in range of type");
-            return Field_Name (Member);
+            return Syntax_Field_Name (Member);
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
@@ -183,9 +183,10 @@ package body ${ada_lib_name}.Introspection_Implementation is
    function Member_Type (Member : Member_Reference) return Type_Constraint is
    begin
       case Member is
-         when Field_Reference =>
+         when Syntax_Field_Reference =>
             pragma Warnings (Off, "value not in range of type");
-            return (Kind => Node_Value, Node_Type => Field_Type (Member));
+            return (Kind      => Node_Value,
+                    Node_Type => Syntax_Field_Type (Member));
             pragma Warnings (On, "value not in range of type");
 
          when Property_Reference =>
@@ -213,7 +214,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
          begin
             for F of Node_Desc.Fields loop
                pragma Warnings (Off, "value not in range of type");
-               if Field_Name (F.Field) = Name then
+               if Syntax_Field_Name (F.Field) = Name then
                   return F.Field;
                end if;
                pragma Warnings (On, "value not in range of type");
@@ -231,35 +232,36 @@ package body ${ada_lib_name}.Introspection_Implementation is
       return None;
    end Lookup_Member;
 
-   ----------------
-   -- Field_Name --
-   ----------------
+   -----------------------
+   -- Syntax_Field_Name --
+   -----------------------
 
-   function Field_Name (Field : Field_Reference) return String is
+   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String is
    begin
       pragma Warnings (Off, "value not in range of subtype");
       return Syntax_Field_Descriptors (Field).Name;
       pragma Warnings (On, "value not in range of subtype");
-   end Field_Name;
+   end Syntax_Field_Name;
 
-   ----------------
-   -- Field_Type --
-   ----------------
+   -----------------------
+   -- Syntax_Field_Type --
+   -----------------------
 
-   function Field_Type (Field : Field_Reference) return Node_Type_Id is
+   function Syntax_Field_Type
+     (Field : Syntax_Field_Reference) return Node_Type_Id is
    begin
       pragma Warnings (Off, "value not in range of subtype");
       return Syntax_Field_Descriptors (Field).Field_Type;
       pragma Warnings (On, "value not in range of subtype");
-   end Field_Type;
+   end Syntax_Field_Type;
 
-   ----------------
-   -- Eval_Field --
-   ----------------
+   -----------------------
+   -- Eval_Syntax_Field --
+   -----------------------
 
-   function Eval_Field
+   function Eval_Syntax_Field
      (Node  : ${T.root_node.name};
-      Field : Field_Reference) return ${T.root_node.name}
+      Field : Syntax_Field_Reference) return ${T.root_node.name}
    is
       Kind : constant ${T.node_kind} := Node.Kind;
    begin
@@ -286,14 +288,14 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
       ## If we haven't matched the requested field on Node, report an error
       return (raise Bad_Type_Error with "no such field on this node");
-   end Eval_Field;
+   end Eval_Syntax_Field;
 
    -----------
    -- Index --
    -----------
 
    function Index
-     (Kind : ${T.node_kind}; Field : Field_Reference) return Positive is
+     (Kind : ${T.node_kind}; Field : Syntax_Field_Reference) return Positive is
    begin
       % if ctx.sorted_parse_fields:
          <%
@@ -320,12 +322,12 @@ package body ${ada_lib_name}.Introspection_Implementation is
       % endif
    end Index;
 
-   --------------------------------
-   -- Field_Reference_From_Index --
-   --------------------------------
+   ---------------------------------------
+   -- Syntax_Field_Reference_From_Index --
+   ---------------------------------------
 
-   function Field_Reference_From_Index
-     (Kind : ${T.node_kind}; Index : Positive) return Field_Reference is
+   function Syntax_Field_Reference_From_Index
+     (Kind : ${T.node_kind}; Index : Positive) return Syntax_Field_Reference is
    begin
       <%
          def get_actions(astnode, node_expr):
@@ -363,34 +365,37 @@ package body ${ada_lib_name}.Introspection_Implementation is
       pragma Warnings (Off, "value not in range of type");
       return (raise Bad_Type_Error with "Index is out of bounds");
       pragma Warnings (On, "value not in range of type");
-   end Field_Reference_From_Index;
+   end Syntax_Field_Reference_From_Index;
 
-   ------------
-   -- Fields --
-   ------------
+   -------------------
+   -- Syntax_Fields --
+   -------------------
 
-   function Fields (Kind : ${T.node_kind}) return Field_Reference_Array is
+   function Syntax_Fields
+     (Kind : ${T.node_kind}) return Syntax_Field_Reference_Array is
    begin
       % if ctx.sorted_parse_fields:
-         return Fields (Id_For_Kind (Kind), Concrete_Only => True);
+         return Syntax_Fields (Id_For_Kind (Kind), Concrete_Only => True);
       % else:
          ${return_program_error()}
       % endif
-   end Fields;
+   end Syntax_Fields;
 
-   ------------
-   -- Fields --
-   ------------
+   -------------------
+   -- Syntax_Fields --
+   -------------------
 
-   function Fields
-     (Id : Node_Type_Id; Concrete_Only : Boolean) return Field_Reference_Array
+   function Syntax_Fields
+     (Id            : Node_Type_Id;
+      Concrete_Only : Boolean) return Syntax_Field_Reference_Array
    is
       Cursor : Any_Node_Type_Id := Id;
 
-      Added_Fields : array (Field_Reference) of Boolean := (others => False);
+      Added_Fields : array (Syntax_Field_Reference) of Boolean :=
+        (others => False);
       --  Set of field references that were added to Result
 
-      Result : Field_Reference_Array (1 .. Added_Fields'Length);
+      Result : Syntax_Field_Reference_Array (1 .. Added_Fields'Length);
       --  Temporary to hold the result. We return Result (1 .. Last).
 
       Last : Natural := 0;
@@ -409,13 +414,14 @@ package body ${ada_lib_name}.Introspection_Implementation is
                   declare
                      Field_Desc : Node_Field_Descriptor renames
                         Node_Desc.Fields (Field_Index).all;
-                     Field      : Field_Reference renames Field_Desc.Field;
+                     Field      : Syntax_Field_Reference renames
+                        Field_Desc.Field;
                   begin
-                     --  Abstract fields share the same Field_Reference value
-                     --  with the corresponding concrete fields, so collect
-                     --  fields only once. We process fields in reverse order,
-                     --  so we know that concrete ones will be processed before
-                     --  the abstract fields they override.
+                     --  Abstract fields share the same Syntax_Field_Reference
+                     --  value with the corresponding concrete fields, so
+                     --  collect fields only once. We process fields in reverse
+                     --  order, so we know that concrete ones will be processed
+                     --  before the abstract fields they override.
                      if not (Concrete_Only
                              and then Field_Desc.Is_Abstract_Or_Null)
                         and then not Added_Fields (Field)
@@ -436,7 +442,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
          for I in 1 .. Last / 2 loop
             declare
                Other_I : constant Positive := Last - I + 1;
-               Swap    : constant Field_Reference := Result (I);
+               Swap    : constant Syntax_Field_Reference := Result (I);
             begin
                Result (I) := Result (Other_I);
                Result (Other_I) := Swap;
@@ -448,16 +454,17 @@ package body ${ada_lib_name}.Introspection_Implementation is
       % else:
          ${return_program_error()}
       % endif
-   end Fields;
+   end Syntax_Fields;
 
-   ------------
-   -- Fields --
-   ------------
+   -------------------
+   -- Syntax_Fields --
+   -------------------
 
-   function Fields (Id : Node_Type_Id) return Field_Reference_Array is
+   function Syntax_Fields
+     (Id : Node_Type_Id) return Syntax_Field_Reference_Array is
    begin
-      return Fields (Id, Concrete_Only => False);
-   end Fields;
+      return Syntax_Fields (Id, Concrete_Only => False);
+   end Syntax_Fields;
 
    % if ctx.sorted_properties:
 
