@@ -14,8 +14,8 @@ begin
 
       Put_Line ("   Fields (with abstract ones):");
       for F of Syntax_Fields (Id) loop
-         Put_Line ("   field " & Syntax_Field_Name (F)
-                   & " (" & DSL_Name (Syntax_Field_Type (F)) & ")");
+         Put_Line ("   field " & Member_Name (F)
+                   & " (" & DSL_Name (Member_Type (F)) & ")");
       end loop;
       New_Line;
 
@@ -29,7 +29,7 @@ begin
                   declare
                      I : constant Positive := Index (Kind, F);
                   begin
-                     Put_Line ("   " & Syntax_Field_Name (F) & ":" & I'Image);
+                     Put_Line ("   " & Member_Name (F) & ":" & I'Image);
 
                      --  Make sure Syntax_Field_Reference_From_Index is
                      --  consistent with Index.

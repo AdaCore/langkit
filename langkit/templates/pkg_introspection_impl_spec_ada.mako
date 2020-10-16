@@ -438,11 +438,11 @@ private package ${ada_lib_name}.Introspection_Implementation is
    -------------------
 
    function Syntax_Field_Name (Field : Syntax_Field_Reference) return String;
-   --  Implementation for Introspection.Syntax_Field_Name
+   --  Helper for Member_Name: take care of syntax fields
 
    function Syntax_Field_Type
      (Field : Syntax_Field_Reference) return Node_Type_Id;
-   --  Implementation for Introspection.Syntax_Field_Type
+   --  Helper for Member_Type: take care of syntax fields
 
    function Eval_Syntax_Field
      (Node  : ${T.root_node.name};
@@ -478,11 +478,11 @@ private package ${ada_lib_name}.Introspection_Implementation is
    ----------------
 
    function Property_Name (Property : Property_Reference) return String;
-   --  Implementation for Introspection.Property_Name
+   --  Helper for Member_Name: take care of properties
 
    function Property_Return_Type
      (Property : Property_Reference) return Type_Constraint;
-   --  Implementation for Introspection.Property_Type
+   --  Helper for Member_Type: take care of properties
 
    function Property_Argument_Types
      (Property : Property_Reference) return Type_Constraint_Array;
