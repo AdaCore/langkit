@@ -26,8 +26,8 @@ class Packager:
     ):
         """
         :param e3.env.Env env: Platform for the libraries to package.
-        :param langkit.libmanage.LibraryTypes library_types: Set of library
-            types the packages must cover.
+        :param langkit.utils.LibraryTypes library_types: Set of library types
+            the packages must cover.
         :param str gnat_prefix: Directory in which GNAT is installed.
         :param None|str gmp_prefix: Directory in which GMP is installed. By
             default, use ``gnat prefix``.

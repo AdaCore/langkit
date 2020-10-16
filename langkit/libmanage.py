@@ -19,9 +19,9 @@ from langkit.diagnostics import (
     Context, DiagnosticError, DiagnosticStyle, Diagnostics, Location,
     WarningSet, check_source_language, extract_library_location
 )
-from langkit.langkit_support import LangkitSupport
 from langkit.packaging import Packager
-from langkit.utils import Colors, Log, col, get_cpu_count, printcol
+from langkit.utils import (Colors, LibraryTypes, Log, col, format_setenv,
+                           get_cpu_count, printcol)
 
 
 class Directories:
@@ -73,49 +73,6 @@ class DisableWarningAction(argparse.Action):
         namespace.enabled_warnings.disable(values)
 
 
-class LibraryTypes:
-
-    types = {'static', 'static-pic', 'relocatable'}
-
-    def __init__(self, static=False, static_pic=False, relocatable=False):
-        self.static = static
-        self.static_pic = static_pic
-        self.relocatable = relocatable
-
-    def __str__(self):
-        return ','.join(
-            name for enabled, name in [(self.static, 'static'),
-                                       (self.static_pic, 'static-pic'),
-                                       (self.relocatable, 'relocatable')]
-            if enabled)
-
-    @classmethod
-    def parse(cls, arg):
-        """
-        Decode the value passed to the --library-types command-line argument.
-
-        :param str arg: Value to decode.
-        :rtype: LibraryTypes
-        """
-        library_types = arg.split(',')
-        library_type_set = set(library_types)
-
-        # Make sure that all requested library types are supported
-        unsupported = library_type_set - cls.types
-        if unsupported:
-            raise ValueError('Unsupported library types: {}'
-                             .format(', '.join(sorted(unsupported))))
-
-        # Make sure that the given list of library types contains no double
-        # entries.
-        if len(library_types) != len(library_type_set):
-            raise ValueError('Library types cannot be requested twice')
-
-        return cls(static='static' in library_type_set,
-                   static_pic='static-pic' in library_type_set,
-                   relocatable='relocatable' in library_type_set)
-
-
 class ManageScript:
 
     BUILD_MODES = ('dev', 'prod')
@@ -150,13 +107,7 @@ class ManageScript:
             help='Directory to use for generated source code and binaries. By'
                  ' default, use "build" in the current directory.'
         )
-        args_parser.add_argument(
-            '--library-types', default=LibraryTypes(relocatable=True),
-            type=LibraryTypes.parse,
-            help='Comma-separated list of library types to build (relocatable,'
-                 ' static-pic and static). By default, build only shared'
-                 ' libraries.'
-        )
+        LibraryTypes.add_option(args_parser)
         args_parser.add_argument(
             '--verbosity', '-v', nargs='?',
             type=Verbosity,
@@ -173,12 +124,6 @@ class ManageScript:
         args_parser.add_argument(
             '--trace', '-t', action='append', default=[],
             help='Activate given debug trace.'
-        )
-        args_parser.add_argument(
-            '--no-langkit-support', action='store_true',
-            help='Assuming that Langkit_Support is already built and'
-                 ' installed. This is useful to package the generated library'
-                 ' only.'
         )
         args_parser.add_argument(
             '--no-ada-api', action='store_true',
@@ -334,31 +279,6 @@ class ManageScript:
             'install-dir',
             help='Directory in which the library is installed.'
         )
-
-        ###############################################
-        # Generate, Build and Install Langkit_Support #
-        ###############################################
-
-        self.generate_lksp_parser = create_parser(
-            self.do_generate_langkit_support
-        )
-        self.build_lksp_parser = create_parser(
-            self.do_build_langkit_support
-        )
-        self.install_lksp_parser = create_parser(
-            self.do_install_langkit_support
-        )
-        self.install_lksp_parser.add_argument(
-            'install-dir',
-            help='Installation directory.'
-        )
-        self.install_lksp_parser.add_argument(
-            '--force', '-f', action='store_true',
-            help='Force installation, overwrite files.'
-        )
-
-        self.add_build_args(self.build_lksp_parser)
-        self.add_build_args(self.install_lksp_parser)
 
         # The create_context method will create the context and set it here
         # only right before executing commands.
@@ -751,12 +671,6 @@ class ManageScript:
 
         main_programs = ([] if self.no_ada_api else self.main_programs)
 
-        # If requested, generate the Langkit_Support project before emitting
-        # regular code, as instrumentation for code coverage (part of code
-        # emission) requires it.
-        if not args.check_only and not args.no_langkit_support:
-            self.do_generate_langkit_support(args)
-
         self.context.emit(
             lib_root=self.dirs.build_dir(),
             main_source_dirs=main_source_dirs,
@@ -1012,7 +926,6 @@ class ManageScript:
 
         obj_dirs = [
             self.dirs.build_dir('obj', self.lib_name.lower(), args.build_mode),
-            self.dirs.build_dir('obj', 'langkit_support', args.build_mode)
         ]
         self.gprbuild(args, self.lib_project, is_library=True,
                       obj_dirs=obj_dirs)
@@ -1057,12 +970,11 @@ class ManageScript:
         """
         lib_name = self.lib_name.lower()
 
-        # Install libraries
-        projects = ([] if args.no_langkit_support else
-                    ['langkit_support.gpr']) + [lib_name + '.gpr']
-        for prj in projects:
-            self.gprinstall(args, self.dirs.build_dir('lib', 'gnat', prj),
-                            True)
+        self.gprinstall(
+            args,
+            self.dirs.build_dir('lib', 'gnat', f'{lib_name}.gpr'),
+            True
+        )
 
         # Install programs if they are all required
         if not args.disable_all_mains:
@@ -1135,30 +1047,6 @@ class ManageScript:
             python_interpreter=args.with_python
         )
 
-    def lksp(self, args):
-        return LangkitSupport(args.build_dir)
-
-    def do_generate_langkit_support(self, args):
-        """
-        Generate the build tree and project file for Langkit_Support.
-        """
-        self.lksp(args).generate()
-
-    def do_build_langkit_support(self, args):
-        """
-        Build Langkit_Support.
-        """
-        lksp = self.lksp(args)
-        self.gprbuild(args, lksp.lksp_project_file,
-                      is_library=True,
-                      obj_dirs=[lksp.lksp_obj_dir(args.build_mode)])
-
-    def do_install_langkit_support(self, args):
-        """
-        Install Langkit_Support.
-        """
-        self.gprinstall(args, self.lksp(args).lksp_project_file, True)
-
     def do_help(self, args):
         """
         Print usage and exit.
@@ -1178,7 +1066,7 @@ class ManageScript:
                 'lib', lib_name, lib_type, build_mode
             )
 
-        libs = ['langkit_support']
+        libs = []
         if self.context:
             libs.append(self.lib_name.lower())
         for lib in libs:
@@ -1214,14 +1102,7 @@ class ManageScript:
             commands.
         """
         def add_path(name, path):
-            output_file.write(
-                '{name}={path}"{sep}${name}"; export {name}\n'.format(
-                    name=name, path=pipes.quote(path),
-                    # On Cygwin, PATH keeps the Unix syntax instead of using
-                    # the Window path separator.
-                    sep=':' if name == 'PATH' else os.path.pathsep,
-                )
-            )
+            output_file.write(format_setenv(name, path) + '\n')
         self.setup_environment(build_mode, add_path)
 
     def check_call(self, args, name, argv, env=None, abort_on_error=True):

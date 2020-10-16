@@ -123,7 +123,7 @@ class LangkitTestsuite(Testsuite):
         if not self.env.options.disable_tear_up_builds:
             self.env.langkit_support_project_file = os.path.join(
                 self.root_dir,
-                '..', 'langkit', 'support', 'langkit_support.gpr'
+                '..', 'support', 'langkit_support.gpr'
             )
             install_prefix = os.path.join(self.working_dir, 'install')
             if os.path.exists(install_prefix):

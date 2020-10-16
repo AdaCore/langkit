@@ -4,10 +4,15 @@ library for langkit, aggregating general python utilities that we could not
 find in the standard library.
 """
 
+from __future__ import annotations
+
+import argparse
 from contextlib import ExitStack, contextmanager
 from copy import copy
 import os
+import pipes
 import shutil
+from typing import List
 
 
 def copy_with(obj, **kwargs):
@@ -194,6 +199,90 @@ def get_cpu_count():
         return multiprocessing.cpu_count()
     except (ImportError, NotImplementedError):
         return 1
+
+
+def format_setenv(name: str, path: str) -> str:
+    """
+    Return a Bourne shell command to prepend ``path`` to the ``name``
+    environment variable.
+    """
+    quoted_path = pipes.quote(path)
+
+    # On Cygwin, PATH keeps the Unix syntax instead of using the Window path
+    # separator.
+    sep = ':' if name == 'PATH' else os.path.pathsep
+
+    return f'{name}={quoted_path}"{sep}${name}"; export {name}'
+
+
+class LibraryTypes:
+
+    types = {"static", "static-pic", "relocatable"}
+
+    def __init__(self,
+                 static: bool = False,
+                 static_pic: bool = False,
+                 relocatable: bool = False) -> None:
+        self.static = static
+        self.static_pic = static_pic
+        self.relocatable = relocatable
+
+    @classmethod
+    def add_option(cls, parser: argparse.ArgumentParser) -> None:
+        """
+        Add a --library-types=... option to ``parser``.
+        """
+        parser.add_argument(
+            "--library-types", default=cls(relocatable=True),
+            type=cls.parse,
+            help="Comma-separated list of library types to build (relocatable,"
+                 " static-pic and static). By default, build only shared"
+                 " libraries."
+        )
+
+    def __str__(self) -> str:
+        return ",".join(
+            name for enabled, name in [(self.static, "static"),
+                                       (self.static_pic, "static-pic"),
+                                       (self.relocatable, "relocatable")]
+            if enabled)
+
+    @property
+    def names(self) -> List[str]:
+        result = []
+        if self.relocatable:
+            result.append("relocatable")
+        if self.static_pic:
+            result.append("static-pic")
+        if self.static:
+            result.append("static")
+        return result
+
+    @classmethod
+    def parse(cls, arg: str) -> LibraryTypes:
+        """
+        Decode the value passed to the --library-types command-line argument.
+
+        :param str arg: Value to decode.
+        :rtype: LibraryTypes
+        """
+        library_types = arg.split(",")
+        library_type_set = set(library_types)
+
+        # Make sure that all requested library types are supported
+        unsupported = library_type_set - cls.types
+        if unsupported:
+            raise ValueError("Unsupported library types: {}"
+                             .format(", ".join(sorted(unsupported))))
+
+        # Make sure that the given list of library types contains no double
+        # entries.
+        if len(library_types) != len(library_type_set):
+            raise ValueError("Library types cannot be requested twice")
+
+        return cls(static="static" in library_type_set,
+                   static_pic="static-pic" in library_type_set,
+                   relocatable="relocatable" in library_type_set)
 
 
 # pyflakes off

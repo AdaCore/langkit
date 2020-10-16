@@ -1,18 +1,20 @@
-## vim: ft=makoada
-
 with "gnatcoll";
 with "gnatcoll_iconv";
 
 library project Langkit_Support is
 
    type Build_Mode_Type is ("dev", "prod");
-   Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
+   Build_Mode : Build_Mode_Type :=
+      external ("BUILD_MODE", external ("LANGKIT_SUPPORT_BUILD_MODE", "dev"));
 
    type Library_Kind_Type is ("static", "relocatable", "static-pic");
    Library_Kind_Param : Library_Kind_Type := external
      ("LIBRARY_TYPE", external ("LANGKIT_SUPPORT_LIBRARY_TYPE", "static"));
 
    for Languages use ("Ada");
+   for Source_Dirs use (".");
+   for Object_Dir use "obj/" & Build_Mode;
+
    for Library_Name use "langkit_support";
    for Library_Kind use Library_Kind_Param;
    for Library_Interface use
@@ -55,10 +57,7 @@ library project Langkit_Support is
       "Langkit_Support.Tree_Traversal_Iterator",
       "Langkit_Support.Vectors");
 
-   for Source_Dirs use (${string_repr(source_dir)});
-   for Library_Dir use
-      "../langkit_support/" & Library_Kind_Param & "/" & Build_Mode;
-   for Object_Dir use "../../obj/langkit_support/" & Build_Mode;
+   for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
 
    Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC");
 
