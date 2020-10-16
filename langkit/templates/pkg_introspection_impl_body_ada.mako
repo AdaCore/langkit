@@ -55,6 +55,74 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
    --  Now we can emit descriptor tables
 
+   ----------------------
+   -- Struct_Type_Desc --
+   ----------------------
+
+   function Struct_Type_Desc
+     (Kind : Struct_Value_Kind) return Struct_Type_Descriptor_Access
+   is
+   begin
+      % if ctx.sorted_public_structs:
+         case Kind is
+         % for t in ctx.sorted_public_structs:
+            when ${t.introspection_kind} =>
+               return Desc_For_${t.name}'Access;
+         % endfor
+         end case;
+
+      % else:
+         pragma Unreferenced (Kind);
+         return (raise Program_Error);
+      % endif
+   end Struct_Type_Desc;
+
+   -----------------------
+   -- Struct_Field_Name --
+   -----------------------
+
+   function Struct_Field_Name (Field : Struct_Field_Reference) return String is
+   begin
+      pragma Warnings (Off, "value not in range of subtype");
+      return Struct_Field_Descriptors (Field).Name;
+      pragma Warnings (On, "value not in range of subtype");
+   end Struct_Field_Name;
+
+   -----------------------
+   -- Struct_Field_Type --
+   -----------------------
+
+   function Struct_Field_Type
+     (Field : Struct_Field_Reference) return Type_Constraint is
+   begin
+      pragma Warnings (Off, "value not in range of subtype");
+      return Struct_Field_Descriptors (Field).Field_Type;
+      pragma Warnings (On, "value not in range of subtype");
+   end Struct_Field_Type;
+
+   -------------------
+   -- Struct_Fields --
+   -------------------
+
+   function Struct_Fields
+     (Kind : Struct_Value_Kind) return Struct_Field_Reference_Array
+   is
+   begin
+      % if ctx.sorted_public_structs:
+         declare
+            Desc : Struct_Type_Descriptor renames Struct_Type_Desc (Kind).all;
+         begin
+            return Result : Struct_Field_Reference_Array (Desc.Fields'Range) do
+               for I in Result'Range loop
+                  Result (I) := Desc.Fields (I).Reference;
+               end loop;
+            end return;
+         end;
+      % else:
+         return (raise Program_Error);
+      % endif
+   end Struct_Fields;
+
    --------------
    -- DSL_Name --
    --------------
@@ -166,6 +234,11 @@ package body ${ada_lib_name}.Introspection_Implementation is
    function Member_Name (Member : Member_Reference) return String is
    begin
       case Member is
+         when Struct_Field_Reference =>
+            pragma Warnings (Off, "value not in range of type");
+            return Struct_Field_Name (Member);
+            pragma Warnings (On, "value not in range of type");
+
          when Syntax_Field_Reference =>
             pragma Warnings (Off, "value not in range of type");
             return Syntax_Field_Name (Member);
@@ -183,6 +256,11 @@ package body ${ada_lib_name}.Introspection_Implementation is
    function Member_Type (Member : Member_Reference) return Type_Constraint is
    begin
       case Member is
+         when Struct_Field_Reference =>
+            pragma Warnings (Off, "value not in range of type");
+            return Struct_Field_Type (Member);
+            pragma Warnings (On, "value not in range of type");
+
          when Syntax_Field_Reference =>
             pragma Warnings (Off, "value not in range of type");
             return (Kind      => Node_Value,
@@ -194,11 +272,32 @@ package body ${ada_lib_name}.Introspection_Implementation is
       end case;
    end Member_Type;
 
-   -------------------
-   -- Lookup_Member --
-   -------------------
+   --------------------------
+   -- Lookup_Member_Struct --
+   --------------------------
 
-   function Lookup_Member
+   function Lookup_Member_Struct
+     (Kind : Struct_Value_Kind;
+      Name : String) return Any_Member_Reference
+   is
+      pragma Warnings (Off, "value not in range of type");
+      Desc : Struct_Type_Descriptor renames Struct_Type_Desc (Kind).all;
+      pragma Warnings (On, "value not in range of type");
+   begin
+      for F of Desc.Fields loop
+         if F.Name = Name then
+            return F.Reference;
+         end if;
+      end loop;
+
+      return None;
+   end Lookup_Member_Struct;
+
+   ------------------------
+   -- Lookup_Member_Node --
+   ------------------------
+
+   function Lookup_Member_Node
      (Id   : Node_Type_Id;
       Name : String) return Any_Member_Reference
    is
@@ -230,7 +329,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
          end;
       end loop;
       return None;
-   end Lookup_Member;
+   end Lookup_Member_Node;
 
    -----------------------
    -- Syntax_Field_Name --

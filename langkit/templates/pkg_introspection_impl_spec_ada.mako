@@ -87,6 +87,38 @@ private package ${ada_lib_name}.Introspection_Implementation is
    type String_Array is array (Positive range <>) of String_Access;
 
    ------------------------------
+   -- Struct field descriptors --
+   ------------------------------
+
+   type Struct_Field_Descriptor (Name_Length : Natural) is record
+      Reference : Struct_Field_Reference;
+      --  Enum value that designates this field
+
+      Field_Type : Type_Constraint;
+      --  Type for this field
+
+      Name : String (1 .. Name_Length);
+      --  Lower-case name for this field
+   end record;
+   --  General description of a struct field
+
+   type Struct_Field_Descriptor_Access is
+      access constant Struct_Field_Descriptor;
+   type Struct_Field_Descriptor_Array is
+      array (Positive range <>) of Struct_Field_Descriptor_Access;
+
+   -----------------------------
+   -- Struct type descriptors --
+   -----------------------------
+
+   type Struct_Type_Descriptor (Fields_Count : Natural) is record
+      Fields : Struct_Field_Descriptor_Array (1 .. Fields_Count);
+   end record;
+
+   type Struct_Type_Descriptor_Access is
+      access constant Struct_Type_Descriptor;
+
+   ------------------------------
    -- Syntax field descriptors --
    ------------------------------
 
@@ -289,6 +321,53 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    type Node_Type_Descriptor_Access is access constant Node_Type_Descriptor;
 
+   --  Descriptors for struct types and their fields
+
+   % for f in ctx.sorted_struct_fields:
+      <% name = f.original_name.lower %>
+      Desc_For_${f.introspection_enum_literal} : aliased constant
+         Struct_Field_Descriptor := (
+            Name_Length => ${len(name)},
+            Reference   => ${f.introspection_enum_literal},
+            Field_Type  => ${f.type.introspection_constraint},
+            Name        => "${name}"
+         );
+   % endfor
+
+   Struct_Field_Descriptors : constant
+      array (Struct_Field_Reference) of Struct_Field_Descriptor_Access := (
+      % if ctx.sorted_struct_fields:
+         ${
+            ', '.join(
+               f"{f.introspection_enum_literal}"
+               f" => Desc_For_{f.introspection_enum_literal}'Access"
+               for f in ctx.sorted_struct_fields
+            )
+         }
+      % else:
+         Struct_Field_Reference => <>
+      % endif
+   );
+
+   % for t in ctx.sorted_public_structs:
+      <% fields = t.get_fields() %>
+      Desc_For_${t.name} : aliased constant Struct_Type_Descriptor := (
+         Fields_Count => ${len(fields)},
+         Fields       => (
+            % if fields:
+               ${
+                  ', '.join(
+                     f"{i} => Desc_For_{f.introspection_enum_literal}'Access"
+                     for i, f in enumerate(fields, 1)
+                  )
+               }
+            % else:
+               1 .. 0 => <>
+            % endif
+         )
+      );
+   % endfor
+
    --  Descriptors for node types and their syntax fields
 
    % for n in ctx.astnode_types:
@@ -384,6 +463,25 @@ private package ${ada_lib_name}.Introspection_Implementation is
                   if not n.abstract)}
    );
 
+   ------------------
+   -- Struct types --
+   ------------------
+
+   function Struct_Type_Desc
+     (Kind : Struct_Value_Kind) return Struct_Type_Descriptor_Access;
+   --  Return the type descriptor corresponding to the given struct type
+
+   function Struct_Field_Name (Field : Struct_Field_Reference) return String;
+   --  Helper for Member_Name: take care of structs
+
+   function Struct_Field_Type
+     (Field : Struct_Field_Reference) return Type_Constraint;
+   --  Helper for Member_Type: take care of structs
+
+   function Struct_Fields
+     (Kind : Struct_Value_Kind) return Struct_Field_Reference_Array;
+   --  Implementation for Introspection.Struct_Fields
+
    ----------------
    -- Node types --
    ----------------
@@ -428,10 +526,15 @@ private package ${ada_lib_name}.Introspection_Implementation is
    function Member_Type (Member : Member_Reference) return Type_Constraint;
    --  Implementation for Introspection.Member_Type
 
-   function Lookup_Member
+   function Lookup_Member_Struct
+     (Kind : Struct_Value_Kind;
+      Name : String) return Any_Member_Reference;
+   --  Helper for Introspection.Lookup_Member: take care of struct types
+
+   function Lookup_Member_Node
      (Id   : Node_Type_Id;
       Name : String) return Any_Member_Reference;
-   --  Implementation for Introspection.Lookup_Member
+   --  Helper for Introspection.Lookup_Member: take care of nodes
 
    -------------------
    -- Syntax fields --

@@ -373,6 +373,19 @@ package ${ada_lib_name}.Common is
                                        for t in array_types)};
    --  Subrange for all array types
 
+   ## When there is no public struct type, generate a type that has no valid
+   ## value.
+   subtype Struct_Value_Kind is Value_Kind
+      % if ctx.sorted_public_structs:
+         with Static_Predicate =>
+         Struct_Value_Kind in ${' | '.join(t.introspection_kind
+                                           for t in ctx.sorted_public_structs)}
+      % else:
+         range Any_Value_Kind'Last .. Any_Value_Kind'First
+      % endif
+   ;
+   --  Subrange for all struct types
+
    type Type_Constraint (Kind : Value_Kind := Value_Kind'First) is record
       case Kind is
          when Node_Value =>
@@ -387,19 +400,50 @@ package ${ada_lib_name}.Common is
 
    type Type_Constraint_Array is array (Positive range <>) of Type_Constraint;
 
-   <% all_abstract = ctx.sorted_parse_fields + ctx.sorted_properties %>
+   <%
+      members = (
+         ctx.sorted_struct_fields
+         + ctx.sorted_parse_fields
+         + ctx.sorted_properties
+      )
+      node_members = ctx.sorted_parse_fields + ctx.sorted_properties
+   %>
 
    type Any_Member_Reference is
       (None${''.join((', ' + f.introspection_enum_literal)
-                      for f in all_abstract)});
+                      for f in members)});
    subtype Member_Reference is Any_Member_Reference range
-      ${all_abstract[0].introspection_enum_literal}
-      ..  ${all_abstract[-1].introspection_enum_literal};
+      ${members[0].introspection_enum_literal}
+      ..  ${members[-1].introspection_enum_literal};
    --  Enumeration of all data attached to structs/nodes (fields and
    --  properties).
 
+   subtype Node_Member_Reference is Member_Reference range
+      ${node_members[0].introspection_enum_literal}
+      ..  ${node_members[-1].introspection_enum_literal};
+   --  Subrange for members of nodes only
+
    type Member_Reference_Array is
       array (Positive range <>) of Member_Reference;
+
+   subtype Struct_Field_Reference is Member_Reference range
+      % if ctx.sorted_struct_fields:
+         <%
+            first = ctx.sorted_struct_fields[0]
+            last = ctx.sorted_struct_fields[-1]
+         %>
+      % else:
+         <%
+            first = members[-1]
+            last = members[0]
+         %>
+      % endif
+      ${first.introspection_enum_literal}
+      .. ${last.introspection_enum_literal}
+   ;
+
+   type Struct_Field_Reference_Array is
+      array (Positive range <>) of Struct_Field_Reference;
 
    ## In a lot of testcases, there is a single concrete node that has no
    ## field. For these, generate a type that has no valid value.
@@ -411,8 +455,8 @@ package ${ada_lib_name}.Common is
          %>
       % else:
          <%
-            first = all_abstract[-1]
-            last = all_abstract[0]
+            first = members[-1]
+            last = members[0]
          %>
       % endif
       ${first.introspection_enum_literal}
