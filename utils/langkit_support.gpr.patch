@@ -1,0 +1,16 @@
+--- langkit_support.gpr.old
++++ langkit_support.gpr
+@@ -53,10 +53,10 @@
+       "Langkit_Support.Tree_Traversal_Iterator",
+       "Langkit_Support.Vectors");
+ 
+-   for Source_Dirs use ("/tmp/langkit-21.0.0/langkit/support");
++   for Source_Dirs use ("src");
+    for Library_Dir use
+-      "../langkit_support/" & Library_Kind_Param & "/" & Build_Mode;
+-   for Object_Dir use "../../obj/langkit_support/" & Build_Mode;
++      "lib/" & Library_Kind_Param & "/" & Build_Mode;
++   for Object_Dir use "obj/" & Build_Mode;
+ 
+    Common_Ada_Cargs := ("-gnatwa", "-gnatyg", "-fPIC");
+ 
