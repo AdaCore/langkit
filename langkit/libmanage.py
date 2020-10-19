@@ -21,7 +21,7 @@ from langkit.diagnostics import (
 )
 from langkit.langkit_support import LangkitSupport
 from langkit.packaging import Packager
-from langkit.utils import Colors, Log, col, printcol
+from langkit.utils import Colors, Log, col, get_cpu_count, printcol
 
 
 class Directories:
@@ -71,17 +71,6 @@ class EnableWarningAction(argparse.Action):
 class DisableWarningAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
         namespace.enabled_warnings.disable(values)
-
-
-def get_cpu_count():
-    # The "multiprocessing" module is not available on GNATpython's
-    # distribution for PPC AIX and the "cpu_count" is not available on Windows:
-    # give up on default parallelism on these platforms.
-    try:
-        import multiprocessing
-        return multiprocessing.cpu_count()
-    except (ImportError, NotImplementedError):
-        return 1
 
 
 class LibraryTypes:
