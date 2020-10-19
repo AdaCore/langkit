@@ -9,6 +9,7 @@ import sys
 from typing import Callable, List
 
 from langkit.libmanage import ManageScript
+from langkit.utils import get_cpu_count
 
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
@@ -19,11 +20,14 @@ PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 def create_subparser(
     subparsers: _SubParsersAction,
     fn: Callable[..., None],
+    with_jobs: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
     Create a subparser with given ``fn`` as func. Extract doc and name from
     the function.
+
+    :param bool with_jobs: Whether to create the --jobs/-j option.
     """
     subparser = subparsers.add_parser(name=fn.__name__, help=fn.__doc__,
                                       add_help=not accept_unknown_args)
@@ -32,6 +36,12 @@ def create_subparser(
         "--build-mode", "-b", choices=ManageScript.BUILD_MODES, default="dev",
         help="Select a preset for build options."
     )
+    if with_jobs:
+        subparser.add_argument(
+            "--jobs", "-j", type=int, default=get_cpu_count(),
+            help="Number of parallel jobs to spawn in parallel (default: your"
+                 " number of cpu)."
+        )
 
     def wrapper(args: Namespace, rest: str):
         if len(rest) > 0:
@@ -83,6 +93,7 @@ def make(args: Namespace) -> None:
         "-Dgnu-full",
         "make", "-P",
         f"--build-mode={args.build_mode}",
+        f"-j{args.jobs}",
     ]
 
     m1 = subprocess.Popen(
@@ -111,7 +122,7 @@ if __name__ == '__main__':
     parser = ArgumentParser(description="Global manage script for langkit")
     subparsers = parser.add_subparsers()
 
-    create_subparser(subparsers, make)
+    create_subparser(subparsers, make, with_jobs=True)
     create_subparser(subparsers, setenv)
     create_subparser(subparsers, test, accept_unknown_args=True)
 

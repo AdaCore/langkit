@@ -185,6 +185,17 @@ def nested(*contexts):
         yield contexts
 
 
+def get_cpu_count():
+    # The "multiprocessing" module is not available on GNATpython's
+    # distribution for PPC AIX and the "cpu_count" is not available on Windows:
+    # give up on default parallelism on these platforms.
+    try:
+        import multiprocessing
+        return multiprocessing.cpu_count()
+    except (ImportError, NotImplementedError):
+        return 1
+
+
 # pyflakes off
 from langkit.utils.colors import *
 from langkit.utils.logging import *
