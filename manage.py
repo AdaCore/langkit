@@ -17,7 +17,7 @@ PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 def create_subparser(
     subparsers: _SubParsersAction,
     fn: Callable[..., None],
-    accept_unknown_args: bool = False
+    accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
     Create a subparser with given ``fn`` as func. Extract doc and name from
@@ -41,7 +41,8 @@ def create_subparser(
 
 def setenv(args: Namespace) -> None:
     """
-    Setenv for langkit.
+    Print shell commands to add Libpythonlang and Liblktlang to the
+    environment.
     """
     for cwd in (LKT_LIB_ROOT, PYTHON_LIB_ROOT):
         subprocess.check_call(
@@ -52,7 +53,7 @@ def setenv(args: Namespace) -> None:
 
 def make(args: Namespace) -> None:
     """
-    Make langkit.
+    Generate and build Libpythonlang and Liblktlang.
     """
 
     # We need to clean the build space of the langkit libraries we depend
@@ -84,7 +85,7 @@ def make(args: Namespace) -> None:
 
 def test(args: Namespace, remaining_args: List[str]) -> None:
     """
-    Run langkit's testsuite.
+    Run Langkit's testsuite.
     """
     subprocess.check_call(
         [sys.executable, str(LANGKIT_ROOT / 'testsuite' / 'testsuite.py'),
