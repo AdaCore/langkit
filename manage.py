@@ -8,6 +8,8 @@ import subprocess
 import sys
 from typing import Callable, List
 
+from langkit.libmanage import ManageScript
+
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
 LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
@@ -25,6 +27,11 @@ def create_subparser(
     """
     subparser = subparsers.add_parser(name=fn.__name__, help=fn.__doc__,
                                       add_help=not accept_unknown_args)
+
+    subparser.add_argument(
+        "--build-mode", "-b", choices=ManageScript.BUILD_MODES, default="dev",
+        help="Select a preset for build options."
+    )
 
     def wrapper(args: Namespace, rest: str):
         if len(rest) > 0:
@@ -46,7 +53,10 @@ def setenv(args: Namespace) -> None:
     """
     for cwd in (LKT_LIB_ROOT, PYTHON_LIB_ROOT):
         subprocess.check_call(
-            [sys.executable, "./manage.py", "setenv"],
+            [sys.executable,
+             "./manage.py",
+             f"--build-mode={args.build_mode}",
+             "setenv"],
             cwd=cwd
         )
 
@@ -68,15 +78,18 @@ def make(args: Namespace) -> None:
     shutil.rmtree(LKT_LIB_ROOT / 'build', ignore_errors=True)
     shutil.rmtree(PYTHON_LIB_ROOT / 'build', ignore_errors=True)
 
+    base_argv = [
+        sys.executable, "./manage.py",
+        "-Dgnu-full",
+        "make", "-P",
+        f"--build-mode={args.build_mode}",
+    ]
+
     m1 = subprocess.Popen(
-        [sys.executable, "./manage.py", "-Dgnu-full", "make", "-P",
-         "--disable-warning", "undocumented-nodes"],
+        base_argv + ["--disable-warning", "undocumented-nodes"],
         cwd=PYTHON_LIB_ROOT
     )
-    m2 = subprocess.Popen(
-        [sys.executable, "./manage.py", "-Dgnu-full", "make", "-P"],
-        cwd=LKT_LIB_ROOT
-    )
+    m2 = subprocess.Popen(base_argv, cwd=LKT_LIB_ROOT)
     m1.wait()
     m2.wait()
     assert m1.returncode == 0
