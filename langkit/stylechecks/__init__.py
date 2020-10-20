@@ -25,7 +25,7 @@ GREEN = '\x1b[32m'
 YELLOW = '\x1b[33m'
 
 punctuation_re = re.compile(' [!?:;]')
-sphinx_role_re = re.compile(':[a-z-]+:`')
+sphinx_role_re = re.compile(':[a-z-]+:([a-z-]+:)?`')
 
 accepted_chars = [chr(c) for c in range(0x20, 0x80)]
 
