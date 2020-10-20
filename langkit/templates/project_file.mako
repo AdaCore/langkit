@@ -20,8 +20,7 @@ with "langkit_support";
    extra_source_files = sorted(os_path.basename(p)
                                for p in ctx.additional_source_files)
 
-   source_dirs = ['../../include/{}'.format(lib_name.lower()),
-                  emitter.extensions_src_dir]
+   source_dirs = ["src", emitter.extensions_src_dir]
 %>
 
 library project ${lib_name} is
@@ -77,7 +76,7 @@ library project ${lib_name} is
 
    % if emitter.coverage:
       Secondary_Source_Dirs :=
-        ("../../obj/${lib_name.lower()}/${lib_name.lower()}-gnatcov-instr");
+        ("obj/${lib_name.lower()}/${lib_name.lower()}-gnatcov-instr");
       For_Coverage_Instrumentation : Boolean := external
         ("${lib_name.upper()}_COVINSTR", "false");
       case For_Coverage_Instrumentation is
@@ -106,9 +105,8 @@ library project ${lib_name} is
       for Interfaces use ${format_str_set(emitter.library_interfaces)};
    % endif
 
-   for Library_Dir use
-      "../${lib_name.lower()}/" & Library_Kind_Param & "/" & Build_Mode;
-   for Object_Dir use "../../obj/${lib_name.lower()}/" & Build_Mode;
+   for Library_Dir use "lib/" & Library_Kind_Param & "/" & Build_Mode;
+   for Object_Dir use "obj/" & Build_Mode;
 
    Target := ${lib_name}'Target;
 

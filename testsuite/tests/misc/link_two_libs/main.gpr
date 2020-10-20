@@ -1,5 +1,5 @@
-with "foo/build/lib/gnat/libfoolang.gpr";
-with "bar/build/lib/gnat/libbarlang.gpr";
+with "foo-build/libfoolang.gpr";
+with "bar-build/libbarlang.gpr";
 
 project Main is
    for Main use ("main.adb");

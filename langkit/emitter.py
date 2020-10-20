@@ -138,7 +138,7 @@ class Emitter:
 
         :param set[str] main_source_dirs: List of source directories to use in
             the project file for mains. Source directories must be relative to
-            the mains project file directory (i.e. $BUILD/src).
+            the mains project file directory (i.e. $BUILD/src-mains).
 
         :param set[str] main_programs: List of names for programs to build in
             addition to the generated library. To each X program, there must be
@@ -237,12 +237,18 @@ class Emitter:
         """
 
         # Paths for the various directories in which code is generated
-        self.include_path = path.join(self.lib_root, 'include')
-        self.src_path = path.join(self.lib_root, 'include', self.lib_name_low)
-        self.lib_path = path.join(self.lib_root, 'lib')
-        self.share_path = path.join(self.lib_root, 'share', self.lib_name_low)
-        self.python_path = path.join(self.lib_root, 'python')
-        self.ocaml_path = path.join(self.lib_root, 'ocaml')
+        self.src_dir = path.join(self.lib_root, "src")
+        self.src_mains_dir = path.join(self.lib_root, "src-mains")
+        self.scripts_dir = path.join(self.lib_root, "scripts")
+        self.share_dir = path.join(self.lib_root, "share", self.lib_name_low)
+        self.python_dir = path.join(self.lib_root, "python")
+        self.python_pkg_dir = path.join(
+            self.lib_root, "python", context.python_api_settings.module_name
+        )
+        self.ocaml_dir = path.join(self.lib_root, "ocaml")
+
+        self.lib_project = path.join(self.lib_root, f"{self.lib_name_low}.gpr")
+        self.mains_project = path.join(self.lib_root, "mains.gpr")
 
         self.dfa_code = None
         """
@@ -290,7 +296,7 @@ class Emitter:
             self.library_interfaces.add(self.gnatcov.buffer_list_file(self))
 
         self.main_project_file = os.path.join(
-            self.lib_path, 'gnat', '{}.gpr'.format(self.lib_name_low),
+            self.lib_root, f'{self.lib_name_low}.gpr'
         )
 
         self.unparse_script = unparse_script
@@ -330,24 +336,25 @@ class Emitter:
                 if self.relative_project else
                 destination)
 
-    def add_library_interface(self, filename, generated):
+    def add_library_interface(self, filename, generated, is_ada=True):
         assert not self._project_file_emitted
 
         filename = os.path.basename(filename)
 
-        # Register Ada source files in the appropriate instrumenattion metadata
-        # set.
-        source_set = (self.instr_md.generated_sources
-                      if generated else
-                      self.instr_md.additional_sources)
-        source_set.add(filename)
+        # Register Ada source files in the appropriate instrumentation metadata
+        # set for coverage reports.
+        if is_ada:
+            source_set = (self.instr_md.generated_sources
+                          if generated else
+                          self.instr_md.additional_sources)
+            source_set.add(filename)
 
-        # Add GNATcoverage's additional buffer units to the library interface.
-        # TODO: hopefully, we should not have to do this anymore after S916-064
-        # is addressed.
-        if self.coverage:
-            for f in self.gnatcov.buffer_files(filename):
-                self.library_interfaces.add(f)
+            # Add GNATcoverage's additional buffer units to the library
+            # interface.  TODO: hopefully, we should not have to do this
+            # anymore after S916-064 is addressed.
+            if self.coverage:
+                for f in self.gnatcov.buffer_files(filename):
+                    self.library_interfaces.add(f)
 
         self.library_interfaces.add(filename)
 
@@ -358,18 +365,19 @@ class Emitter:
         if not path.exists(self.lib_root):
             os.mkdir(self.lib_root)
 
-        for d in ['include',
-                  'include/{}'.format(self.lib_name_low),
-                  'share',
-                  'share/{}'.format(self.lib_name_low),
-                  'obj', 'src', 'bin',
-                  'lib', 'lib/gnat']:
-            p = path.join(self.lib_root, d)
-            if not path.exists(p):
-                os.mkdir(p)
+        for d in [
+            self.src_dir,
+            self.src_mains_dir,
+            self.scripts_dir,
+            os.path.join(self.lib_root, "obj"),
+            self.python_dir,
+            self.python_pkg_dir,
 
-        if not path.exists(self.python_path):
-            os.mkdir(self.python_path)
+            os.path.dirname(self.share_dir),
+            self.share_dir,
+        ]:
+            if not path.exists(d):
+                os.mkdir(d)
 
     def emit_lib_project_file(self, ctx):
         """
@@ -408,7 +416,7 @@ class Emitter:
         f = StringIO()
         astdoc.write_astdoc(ctx, f)
         f.seek(0)
-        write_source_file(os.path.join(self.share_path, 'ast-types.html'),
+        write_source_file(os.path.join(self.share_dir, 'ast-types.html'),
                           f.read())
 
     def generate_lexer_dfa(self, ctx):
@@ -417,7 +425,7 @@ class Emitter:
         """
         # Source file that contains the state machine implementation
         lexer_sm_body = ada_file_path(
-            self.src_path, ADA_BODY,
+            self.src_dir, ADA_BODY,
             [ctx.lib_name, names.Name('Lexer_State_Machine')])
 
         # Generate the lexer state machine iff the file is missing or its
@@ -519,7 +527,7 @@ class Emitter:
                 (not self.generate_unparser and u.unparser)
             ):
                 continue
-            self.write_ada_module(self.src_path, u.template_base_name,
+            self.write_ada_module(self.src_dir, u.template_base_name,
                                   u.qual_name, u.has_body, u.cached_body,
                                   in_library=True)
 
@@ -529,15 +537,14 @@ class Emitter:
         """
         with names.camel_with_underscores:
             write_ada_file(
-                path.join(self.lib_root, 'src'),
+                path.join(self.lib_root, 'src-mains'),
                 ADA_BODY, [names.Name('Parse')],
                 ctx.render_template('main_parse_ada'),
                 self.post_process_ada
             )
 
-        imain_project_file = os.path.join(self.lib_root, 'src', 'mains.gpr')
         write_source_file(
-            imain_project_file,
+            self.mains_project,
             ctx.render_template(
                 'mains_project_file',
                 lib_name=ctx.ada_api_settings.lib_name,
@@ -554,16 +561,22 @@ class Emitter:
             return ctx.render_template(template_name)
 
         with names.lower:
+            # TODO (TA20-017: gprinstall bug): generate the header in
+            # "src" and add it to the library interface (see disabled code
+            # below).
+            header_filename = '{}.h'.format(ctx.c_api_settings.lib_name)
             write_cpp_file(
-                path.join(
-                    self.include_path,
-                    '{}.h'.format(ctx.c_api_settings.lib_name)),
+                path.join(self.lib_root, header_filename),
                 render('c_api/header_c'),
                 self.post_process_cpp
             )
+            if False:
+                self.add_library_interface(
+                    header_filename, generated=True, is_ada=False
+                )
 
         self.write_ada_module(
-            self.src_path, 'c_api/pkg_main',
+            self.src_dir, 'c_api/pkg_main',
             [names.Name(n) for n in 'Implementation.C'.split('.')],
             in_library=True
         )
@@ -572,12 +585,6 @@ class Emitter:
         """
         Generate the Python binding module.
         """
-        package_dir = os.path.join(
-            self.python_path,
-            ctx.python_api_settings.module_name)
-        if not os.path.isdir(package_dir):
-            os.mkdir(package_dir)
-
         def pretty_print(code):
             if not self.pretty_print:
                 return code
@@ -612,25 +619,25 @@ class Emitter:
 
         # Emit the Python modules themselves
         render_python_template(
-            os.path.join(package_dir, '__init__.py'),
+            os.path.join(self.python_pkg_dir, '__init__.py'),
             'python_api/module_py',
             c_api=ctx.c_api_settings,
             pyapi=ctx.python_api_settings,
             module_name=ctx.python_api_settings.module_name
         )
         render_python_template(
-            os.path.join(package_dir, '_py2to3.py'),
+            os.path.join(self.python_pkg_dir, '_py2to3.py'),
             'python_api/py2to3_py'
         )
 
         # Emit stub files for Mypy (type hints)
         render_python_template(
-            os.path.join(package_dir, '__init__.pyi'),
+            os.path.join(self.python_pkg_dir, '__init__.pyi'),
             'python_api/module_pyi',
             pyapi=ctx.python_api_settings,
         )
         render_python_template(
-            os.path.join(package_dir, '_py2to3.pyi'),
+            os.path.join(self.python_pkg_dir, '_py2to3.pyi'),
             'python_api/py2to3_pyi'
         )
 
@@ -647,7 +654,7 @@ class Emitter:
         Emit sources for the Python playground script.
         """
         playground_file = os.path.join(
-            self.lib_root, 'bin',
+            self.scripts_dir,
             '{}_playground'.format(ctx.short_name_or_long.lower)
         )
         write_source_file(
@@ -666,7 +673,7 @@ class Emitter:
         """
         lib_name = ctx.ada_api_settings.lib_name.lower()
         gdbinit_path = os.path.join(self.lib_root, 'gdbinit.py')
-        gdb_c_path = os.path.join(self.src_path, '{}-gdb.c'.format(lib_name))
+        gdb_c_path = os.path.join(self.src_dir, '{}-gdb.c'.format(lib_name))
 
         # Always emit the ".gdbinit.py" GDB script
         write_source_file(
@@ -694,17 +701,14 @@ class Emitter:
     def emit_ocaml_api(self, ctx):
         """
         Generate binding for the external OCaml API.
-
-        :param str ocaml_path: The directory in which the OCaml module will
-            be generated.
         """
         if not ctx.ocaml_api_settings:
             return
 
         ctx.ocaml_api_settings.init_type_graph()
 
-        if not os.path.isdir(self.ocaml_path):
-            os.mkdir(self.ocaml_path)
+        if not os.path.isdir(self.ocaml_dir):
+            os.mkdir(self.ocaml_dir)
 
         with names.camel:
             ctx = get_context()
@@ -716,7 +720,7 @@ class Emitter:
 
             ocaml_filename = '{}.ml'.format(ctx.c_api_settings.lib_name)
             write_ocaml_file(
-                os.path.join(self.ocaml_path, ocaml_filename),
+                os.path.join(self.ocaml_dir, ocaml_filename),
                 code
             )
 
@@ -728,7 +732,7 @@ class Emitter:
 
             ocaml_filename = '{}.mli'.format(ctx.c_api_settings.lib_name)
             write_ocaml_file(
-                os.path.join(self.ocaml_path, ocaml_filename),
+                os.path.join(self.ocaml_dir, ocaml_filename),
                 code
             )
 
@@ -739,13 +743,13 @@ class Emitter:
                 ocaml_api=ctx.ocaml_api_settings
             )
 
-            write_source_file(os.path.join(self.ocaml_path, 'dune'), code)
-            write_source_file(os.path.join(self.ocaml_path, 'dune-project'),
+            write_source_file(os.path.join(self.ocaml_dir, 'dune'), code)
+            write_source_file(os.path.join(self.ocaml_dir, 'dune-project'),
                               '(lang dune 1.6)')
 
             # Write an empty opam file to install the lib with dune
             write_source_file(
-                os.path.join(self.ocaml_path,
+                os.path.join(self.ocaml_dir,
                              '{}.opam'.format(ctx.c_api_settings.lib_name)),
                 ''
             )

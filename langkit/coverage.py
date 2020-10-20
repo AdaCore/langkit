@@ -599,7 +599,7 @@ class GNATcov:
         for filename in emitter.context.additional_source_files:
             copy_to_dir(filename, src_dir)
         for pattern in ('*.adb', '*.ads'):
-            for filename in glob.glob(os.path.join(emitter.src_path, pattern)):
+            for filename in glob.glob(os.path.join(emitter.src_dir, pattern)):
                 copy_to_dir(filename, src_dir)
 
         # Also generate a dummy project file to give easy access to these

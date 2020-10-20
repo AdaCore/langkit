@@ -10,12 +10,11 @@ project Mains is
 
    for Languages use ("Ada");
 
-   <% all_source_dirs = source_dirs | {'.'} %>
+   <% all_source_dirs = source_dirs | {'src-mains'} %>
    for Source_Dirs use (
       ${', '.join(sorted(string_repr(sdir) for sdir in all_source_dirs))}
    );
-   for Exec_Dir use "../bin";
-   for Object_Dir use "../obj/mains";
+   for Object_Dir use "obj-mains";
 
    for Main use (
       ${', '.join(sorted(string_repr('{}.adb'.format(main))
