@@ -179,7 +179,6 @@ def check_text(report, filename, lang, first_line, text, is_comment):
     :param bool is_comment: True if "text" is a comment, False if it's a
         docstring.
     """
-
     lines = text.split('\n')
     chars = set(lines[0])
     if len(chars) == 1 and chars == set(lang.comment_start):
@@ -608,16 +607,8 @@ class PythonLang(LanguageChecker):
                             raw_docstring
                         )
 
-                        # Due to how as works, a string lineno is the line
-                        # number of its ending delimiter (plus one?). So adjust
-                        # it to be the lineno of the first meaningful content
-                        # in the string instead.
-                        lineno = (node_lineno(node) - 1 -
-                                  raw_docstring.count('\n') +
-                                  lineno_offset)
-
-                        check_text(report, filename, self, lineno, docstring,
-                                   False)
+                        check_text(report, filename, self, node_lineno(node),
+                                   docstring, False)
 
     def _check_imported_entities(self, report, import_node):
         last = None
