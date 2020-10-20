@@ -3,7 +3,6 @@ Code emission for Langkit-generated libraries.
 """
 
 from distutils.spawn import find_executable
-from io import StringIO
 import json
 import os
 from os import path
@@ -121,11 +120,10 @@ class Emitter:
     def __init__(self, context, lib_root, extensions_dir,
                  main_source_dirs=set(), main_programs=set(),
                  no_property_checks=False, generate_ada_api=True,
-                 generate_astdoc=True, generate_gdb_hook=True,
-                 pretty_print=False, post_process_ada=None,
-                 post_process_cpp=None, post_process_python=None,
-                 coverage=False, relative_project=False,
-                 unparse_script=None):
+                 generate_gdb_hook=True, pretty_print=False,
+                 post_process_ada=None, post_process_cpp=None,
+                 post_process_python=None, coverage=False,
+                 relative_project=False, unparse_script=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -151,9 +149,6 @@ class Emitter:
         :param bool generate_ada_api: If True, generate the public Ada API. If
             False and there is no main to generate, do not generate this Ada
             API.
-
-        :param bool generate_astdoc: Whether to generate the HTML documentation
-            for AST nodes, their fields and their properties.
 
         :param bool generate_gdb_hook: Whether to generate the
             ".debug_gdb_scripts" section. Good for debugging, but better to
@@ -200,7 +195,6 @@ class Emitter:
 
         self.no_property_checks = no_property_checks
         self.generate_ada_api = generate_ada_api or bool(main_programs)
-        self.generate_astdoc = generate_astdoc
         self.generate_gdb_hook = generate_gdb_hook
         self.generate_unparser = context.generate_unparser
         self.pretty_print = pretty_print
@@ -240,7 +234,6 @@ class Emitter:
         self.src_dir = path.join(self.lib_root, "src")
         self.src_mains_dir = path.join(self.lib_root, "src-mains")
         self.scripts_dir = path.join(self.lib_root, "scripts")
-        self.share_dir = path.join(self.lib_root, "share", self.lib_name_low)
         self.python_dir = path.join(self.lib_root, "python")
         self.python_pkg_dir = path.join(
             self.lib_root, "python", context.python_api_settings.module_name
@@ -372,9 +365,6 @@ class Emitter:
             os.path.join(self.lib_root, "obj"),
             self.python_dir,
             self.python_pkg_dir,
-
-            os.path.dirname(self.share_dir),
-            self.share_dir,
         ]:
             if not path.exists(d):
                 os.mkdir(d)
@@ -403,21 +393,6 @@ class Emitter:
             return
         self.gnatcov.instrument(self, os.path.join(self.lib_root, 'obj',
                                                    self.lib_name_low, 'instr'))
-
-    def emit_astdoc(self, ctx):
-        """
-        If requested, generate the HTML documentation for node types.
-        """
-        if not self.generate_astdoc:
-            return
-
-        from langkit import astdoc
-
-        f = StringIO()
-        astdoc.write_astdoc(ctx, f)
-        f.seek(0)
-        write_source_file(os.path.join(self.share_dir, 'ast-types.html'),
-                          f.read())
 
     def generate_lexer_dfa(self, ctx):
         """
