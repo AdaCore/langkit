@@ -659,12 +659,13 @@ class ManageScript:
             Colors.HEADER
         )
 
-        # Get source directories for the mains project file that are relative
-        # to the generated project file (i.e. $BUILD_DIR/src/mains.gpr).
+        # Get source directories for the mains project file. making them
+        # relative to the generated project file (which is
+        # $BUILD_DIR/mains.gpr).
         main_source_dirs = {
             os.path.relpath(
                 self.dirs.lang_source_dir(sdir),
-                self.dirs.build_dir('src')
+                os.path.dirname(self.mains_project)
             )
             for sdir in self.main_source_dirs
         }
@@ -701,13 +702,9 @@ class ManageScript:
                 ),
                 Colors.HEADER
             )
-            gnatpp(
-                self.dirs.build_dir('lib', 'gnat',
-                                    '{}.gpr'.format(self.lib_name.lower())),
-                self.dirs.build_dir('include', self.lib_name.lower(), '*.ad*')
-            )
-            gnatpp(self.dirs.build_dir('src', 'mains.gpr'),
-                   self.dirs.build_dir('src', '*.ad*'))
+            gnatpp(self.lib_project, self.dirs.build_dir('src', '*.ad*'))
+            gnatpp(self.mains_project,
+                   self.dirs.build_dir('src-mains', '*.ad*'))
 
         self.log_info("Generation complete!", Colors.OKGREEN)
 
@@ -904,14 +901,18 @@ class ManageScript:
             run('relocatable')
 
     @property
-    def lib_project(self):
+    def lib_project(self) -> str:
         """
         Path to the project file for the generated library.
-
-        :rtype: str
         """
-        return self.dirs.build_dir('lib', 'gnat',
-                                   '{}.gpr'.format(self.lib_name.lower()))
+        return self.dirs.build_dir('{}.gpr'.format(self.lib_name.lower()))
+
+    @property
+    def mains_project(self) -> str:
+        """
+        Path to the project file for the mains.
+        """
+        return self.dirs.build_dir('mains.gpr')
 
     def do_build(self, args):
         """
@@ -924,9 +925,7 @@ class ManageScript:
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
 
-        obj_dirs = [
-            self.dirs.build_dir('obj', self.lib_name.lower(), args.build_mode),
-        ]
+        obj_dirs = [self.dirs.build_dir('obj', args.build_mode)]
         self.gprbuild(args, self.lib_project, is_library=True,
                       obj_dirs=obj_dirs)
 
@@ -938,16 +937,8 @@ class ManageScript:
                      self.main_programs - disabled_mains)
             if mains:
                 self.log_info("Building the main programs...", Colors.HEADER)
-                self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'),
+                self.gprbuild(args, self.mains_project,
                               is_library=False, mains=mains)
-
-        # On Windows, shared libraries (DLL) are looked up in the PATH, just
-        # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
-        # don't bother and just copy these DLL next to binaries.
-        if os.name == 'nt':
-            for dll in glob.glob(self.dirs.build_dir('lib', '*.dll')):
-                shutil.copy(dll,
-                            self.dirs.build_dir('bin', path.basename(dll)))
 
         self.log_info("Compilation complete!", Colors.OKGREEN)
 
@@ -970,20 +961,36 @@ class ManageScript:
         """
         lib_name = self.lib_name.lower()
 
-        self.gprinstall(
-            args,
-            self.dirs.build_dir('lib', 'gnat', f'{lib_name}.gpr'),
-            True
-        )
+        self.gprinstall(args, self.lib_project, is_library=True)
 
         # Install programs if they are all required
         if not args.disable_all_mains:
-            self.gprinstall(args, self.dirs.build_dir('src', 'mains.gpr'),
-                            is_library=False)
+            self.gprinstall(args, self.mains_project, is_library=False)
+
+        # Install scripts into "bin"
+        scripts = glob.glob(self.dirs.build_dir("scripts", "*"))
+        install_dir = self.dirs.install_dir("bin")
+        if scripts:
+            if not os.path.exists(install_dir):
+                os.mkdir(install_dir)
+            for f in scripts:
+                shutil.copy2(
+                    f,
+                    os.path.join(install_dir, os.path.basename(f))
+                )
+
+        # Install the C header for the generated library in "include".
+        #
+        # TODO (TA20-017: gprinstall bug): remove this (see corresponing TODO
+        # in emitter.py.
+        header_filename = "{}.h".format(self.context.c_api_settings.lib_name)
+        shutil.copyfile(
+            self.dirs.build_dir(header_filename),
+            self.dirs.install_dir("include", header_filename)
+        )
 
         # Install the remaining miscellaneous files
         for fpath in [
-            os.path.join('include', lib_name + '.h'),
             os.path.join('share', lib_name, 'ast-types.html'),
             os.path.join('python', lib_name, '*.py'),
             os.path.join('python', 'setup.py'),
@@ -1058,27 +1065,30 @@ class ManageScript:
         self.args_parser.print_help()
 
     def setup_environment(self, build_mode, add_path):
-        add_path('PATH', self.dirs.build_dir('bin'))
-        add_path('C_INCLUDE_PATH', self.dirs.build_dir('include'))
+        P = self.dirs.build_dir
 
-        def lib_subdir(lib_name, lib_type):
-            return self.dirs.build_dir(
-                'lib', lib_name, lib_type, build_mode
-            )
+        # Make the project file available
+        add_path("GPR_PROJECT_PATH", P())
 
-        libs = []
-        if self.context:
-            libs.append(self.lib_name.lower())
-        for lib in libs:
-            add_path('LIBRARY_PATH', lib_subdir(lib, 'static'))
-            add_path('LD_LIBRARY_PATH', lib_subdir(lib, 'relocatable'))
-            add_path('DYLD_LIBRARY_PATH', lib_subdir(lib, 'relocatable'))
-            add_path('PATH', lib_subdir(lib, 'relocatable'))
+        # Make the scripts and mains available
+        add_path("PATH", P("scripts"))
+        add_path("PATH", P("obj-mains"))
 
-        add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
-        add_path('PYTHONPATH', self.dirs.build_dir('python'))
-        add_path('MYPYPATH', self.dirs.build_dir('python'))
-        add_path('PYTHONPATH', self.dirs.lang_source_dir('python_src'))
+        # Make the shared lib available, regardless of the operating system
+        shared_dir = P("lib", "relocatable", build_mode)
+        add_path("LD_LIBRARY_PATH", shared_dir)
+        add_path("DYLD_LIBRARY_PATH", shared_dir)
+        add_path("PATH", shared_dir)
+
+        # Make the Python bindings and the associated Mypy type hints available
+        add_path("PYTHONPATH", P("python"))
+        add_path("MYPYPATH", P("python"))
+
+        # Make the C header available.
+        #
+        # TODO (TA20-017: gprinstall bug): remove this (see corresponing TODO
+        # in emitter.py.
+        add_path("C_INCLUDE_PATH", P())
 
     def derived_env(self, build_mode):
         """
