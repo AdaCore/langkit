@@ -337,12 +337,6 @@ class ManageScript:
             help='Disable a warning.'
         )
         subparser.add_argument(
-            '--no-astdoc', '-D', dest='no_astdoc',
-            action='store_true',
-            help='Do not generate the HTML documentation for AST nodes, their'
-                 ' fields and their properties.'
-        )
-        subparser.add_argument(
             '--generate-unparser', action='store_true', default=False,
             help='Generate an unparser along with the parser for the grammar.'
                  ' Note that this machinery is intended only for languages'
@@ -683,7 +677,6 @@ class ManageScript:
             no_property_checks=args.no_property_checks,
             generate_ada_api=not args.no_ada_api,
             generate_unparser=args.generate_unparser,
-            generate_astdoc=not args.no_astdoc,
             generate_gdb_hook=not args.no_gdb_hook,
             plugin_passes=args.plugin_pass,
             pretty_print=args.pretty_print,
@@ -991,7 +984,6 @@ class ManageScript:
 
         # Install the remaining miscellaneous files
         for fpath in [
-            os.path.join('share', lib_name, 'ast-types.html'),
             os.path.join('python', lib_name, '*.py'),
             os.path.join('python', 'setup.py'),
             os.path.join('ocaml', lib_name + '.ml'),

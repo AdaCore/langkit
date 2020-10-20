@@ -2004,7 +2004,6 @@ class CompileCtx:
 
             MajorStepPass('Generate library sources'),
             EmitterPass('setup directories', Emitter.setup_directories),
-            EmitterPass('emit astdoc', Emitter.emit_astdoc),
             EmitterPass('generate lexer DFA', Emitter.generate_lexer_dfa),
             EmitterPass('emit Ada sources', Emitter.emit_ada_lib),
             EmitterPass('emit mains', Emitter.emit_mains),
