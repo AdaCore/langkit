@@ -16,6 +16,7 @@ from langkit.utils import LibraryTypes, format_setenv, get_cpu_count
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
 SUPPORT_ROOT = LANGKIT_ROOT / "support"
+SUPPORT_GPR = str(SUPPORT_ROOT / "langkit_support.gpr")
 LKT_LIB_ROOT = LANGKIT_ROOT / "contrib" / "lkt"
 PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 
@@ -97,7 +98,7 @@ def build_langkit_support(args: Namespace) -> None:
             os.remove(lexch)
         subprocess.check_call(
             ["gprbuild",
-             "-P", str(SUPPORT_ROOT / "langkit_support.gpr"),
+             "-P", SUPPORT_GPR,
              "-p", f"-j{args.jobs}",
              f"-XBUILD_MODE={args.build_mode}",
              f"-XLIBRARY_TYPE={library_type}"],
@@ -118,6 +119,23 @@ def setenv_langkit_support(args: Namespace) -> None:
     )
     print(format_setenv("PATH", dynamic_lib_dir))
     print(format_setenv("LD_LIBRARY_PATH", dynamic_lib_dir))
+
+
+def install_langkit_support(args: Namespace) -> None:
+    """
+    Install the Langkit_Support project.
+    """
+    for library_type in args.library_types.names:
+        subprocess.check_call(
+            ["gprinstall", "-P", SUPPORT_GPR, "-p",
+             f"-XBUILD_MODE={args.build_mode}",
+             f"-XLIBRARY_TYPE={library_type}",
+             f"--prefix={args.prefix}",
+             "--build-var=LIBRARY_TYPE",
+             "--build-var=LANGKIT_SUPPORT_LIBRARY_TYPE",
+             "--sources-subdir=include/langkit_support",
+             f"--build-name={library_type}"]
+        )
 
 
 def package_deps(args: Namespace) -> None:
@@ -212,9 +230,15 @@ if __name__ == '__main__':
     parser = ArgumentParser(description="Global manage script for langkit")
     subparsers = parser.add_subparsers()
 
-    create_subparser(subparsers, build_langkit_support, with_jobs=True,
+    create_subparser(subparsers, build_langkit_support,
+                     with_jobs=True,
                      with_gargs=True)
     create_subparser(subparsers, setenv_langkit_support)
+    install_lksp = create_subparser(subparsers, install_langkit_support)
+    install_lksp.add_argument(
+        "prefix",
+        help="Installation prefix"
+    )
 
     package_deps_parser = create_subparser(subparsers, package_deps)
     package_std_dyn_parser = create_subparser(subparsers, package_std_dyn)
