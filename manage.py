@@ -23,8 +23,10 @@ PYTHON_LIB_ROOT = LANGKIT_ROOT / "contrib" / "python"
 def create_subparser(
     subparsers: _SubParsersAction,
     fn: Callable[..., None],
+    *,
     with_jobs: bool = False,
     with_no_lksp: bool = False,
+    with_gargs: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
@@ -34,6 +36,7 @@ def create_subparser(
     :param bool with_jobs: Whether to create the --jobs/-j option.
     :param bool with_no_lksp: Whether to create the --no-langkit-support
         option.
+    :param bool with_gargs: Whether to create the --gargs option.
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace('_', '-'),
@@ -58,6 +61,11 @@ def create_subparser(
             help="Assume that Langkit_Support is already built and installed."
                  " We rebuild it by default, for the convenience of"
                  " developers."
+        )
+    if with_gargs:
+        subparser.add_argument(
+            '--gargs', action='append',
+            help='Options appended to GPRbuild invocations.'
         )
 
     def wrapper(args: Namespace, rest: str):
@@ -204,7 +212,8 @@ if __name__ == '__main__':
     parser = ArgumentParser(description="Global manage script for langkit")
     subparsers = parser.add_subparsers()
 
-    create_subparser(subparsers, build_langkit_support, with_jobs=True)
+    create_subparser(subparsers, build_langkit_support, with_jobs=True,
+                     with_gargs=True)
     create_subparser(subparsers, setenv_langkit_support)
 
     package_deps_parser = create_subparser(subparsers, package_deps)
@@ -216,7 +225,8 @@ if __name__ == '__main__':
 
     create_subparser(subparsers, make,
                      with_jobs=True,
-                     with_no_lksp=True)
+                     with_no_lksp=True,
+                     with_gargs=True)
     create_subparser(subparsers, setenv,
                      with_no_lksp=True)
 
