@@ -412,6 +412,12 @@ testcases = (
             :rtype: bool
             """
     ''', [(4, 0, 'Docstring sentences must end with periods')]),
+    Testcase('docstring_multi_19.py', '''
+        def foo():
+            """
+            Documenting some :ref:ada:`function <foo>`.
+            """
+    ''', []),
 
     #
     # "from __future__ testing
