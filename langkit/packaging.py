@@ -258,7 +258,7 @@ class Packager:
 
     def copy_shared_lib(self, pattern, dest):
         """
-        Copy the shaed library (or libraries) matched by "pattern" to the
+        Copy the shared library (or libraries) matched by "pattern" to the
         "dest" directory.
         """
         self.assert_with_relocatable()
