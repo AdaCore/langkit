@@ -28,6 +28,7 @@ def create_subparser(
     with_jobs: bool = False,
     with_no_lksp: bool = False,
     with_gargs: bool = False,
+    with_build_dir: bool = False,
     accept_unknown_args: bool = False,
 ) -> ArgumentParser:
     """
@@ -38,6 +39,7 @@ def create_subparser(
     :param bool with_no_lksp: Whether to create the --no-langkit-support
         option.
     :param bool with_gargs: Whether to create the --gargs option.
+    :param bool with_build_dir: Whether to create the --build-dir option.
     """
     subparser = subparsers.add_parser(
         name=fn.__name__.replace('_', '-'),
@@ -68,6 +70,12 @@ def create_subparser(
             '--gargs', action='append',
             help='Options appended to GPRbuild invocations.'
         )
+    if with_build_dir:
+        subparser.add_argument(
+            '--build-dir',
+            help='Use a non-default build directory. This allows out-of-tree'
+                 ' builds.'
+        )
 
     def wrapper(args: Namespace, rest: str):
         if len(rest) > 0:
@@ -86,37 +94,41 @@ def build_langkit_support(args: Namespace) -> None:
     """
     Build Langkit_Support.
     """
+    build_dir = PurePath(args.build_dir) if args.build_dir else SUPPORT_ROOT
+
+    base_argv = [
+        "gprbuild", "-P", SUPPORT_GPR, "-p",
+        f"-j{args.jobs}",
+        f"-XBUILD_MODE={args.build_mode}",
+    ]
+    if args.build_dir:
+        base_argv.extend([f"--relocate-build-tree={build_dir}"])
+
     # In order to avoid building the library once per library kind (static,
     # static-pic and relocatable), langkit_support.gpr uses the same object
     # directory for every library kind. This optimization is valid only if we
     # remove "*.lexch" files in the object directory between each call to
     # gprbuild.
-    lexch_pattern = str(SUPPORT_ROOT / "obj" / args.build_mode / "*.lexch")
+    lexch_pattern = str(build_dir / "obj" / args.build_mode / "*.lexch")
 
     for library_type in args.library_types.names:
         for lexch in glob.glob(lexch_pattern):
             os.remove(lexch)
-        subprocess.check_call(
-            ["gprbuild",
-             "-P", SUPPORT_GPR,
-             "-p", f"-j{args.jobs}",
-             f"-XBUILD_MODE={args.build_mode}",
-             f"-XLIBRARY_TYPE={library_type}"],
-        )
+        subprocess.check_call(base_argv + [f"-XLIBRARY_TYPE={library_type}"])
 
 
 def setenv_langkit_support(args: Namespace) -> None:
     """
     Setenv for Langkit_Support.
     """
+    build_dir = PurePath(args.build_dir) if args.build_dir else SUPPORT_ROOT
+
     # Make the "langkit_support.gpr" available to GPRbuild
     print(format_setenv("GPR_PROJECT_PATH", str(SUPPORT_ROOT)))
 
     # Make the shared library for Langkit_Support available to the dynamic
     # linker.
-    dynamic_lib_dir = str(
-        SUPPORT_ROOT / "lib" / "relocatable" / args.build_mode
-    )
+    dynamic_lib_dir = str(build_dir / "lib" / "relocatable" / args.build_mode)
     print(format_setenv("PATH", dynamic_lib_dir))
     print(format_setenv("LD_LIBRARY_PATH", dynamic_lib_dir))
 
@@ -125,17 +137,22 @@ def install_langkit_support(args: Namespace) -> None:
     """
     Install the Langkit_Support project.
     """
+    base_argv = [
+        "gprinstall", "-P", SUPPORT_GPR, "-p",
+        f"-XBUILD_MODE={args.build_mode}",
+        f"--prefix={args.prefix}",
+        "--build-var=LIBRARY_TYPE",
+        "--build-var=LANGKIT_SUPPORT_LIBRARY_TYPE",
+        "--sources-subdir=include/langkit_support"
+    ]
+    if args.build_dir:
+        base_argv.extend([f"--relocate-build-tree={args.build_dir}"])
+
     for library_type in args.library_types.names:
-        subprocess.check_call(
-            ["gprinstall", "-P", SUPPORT_GPR, "-p",
-             f"-XBUILD_MODE={args.build_mode}",
-             f"-XLIBRARY_TYPE={library_type}",
-             f"--prefix={args.prefix}",
-             "--build-var=LIBRARY_TYPE",
-             "--build-var=LANGKIT_SUPPORT_LIBRARY_TYPE",
-             "--sources-subdir=include/langkit_support",
-             f"--build-name={library_type}"]
-        )
+        subprocess.check_call(base_argv + [
+            f"-XLIBRARY_TYPE={library_type}",
+            f"--build-name={library_type}"
+        ])
 
 
 def package_deps(args: Namespace) -> None:
@@ -232,9 +249,11 @@ if __name__ == '__main__':
 
     create_subparser(subparsers, build_langkit_support,
                      with_jobs=True,
-                     with_gargs=True)
-    create_subparser(subparsers, setenv_langkit_support)
-    install_lksp = create_subparser(subparsers, install_langkit_support)
+                     with_gargs=True,
+                     with_build_dir=True)
+    create_subparser(subparsers, setenv_langkit_support, with_build_dir=True)
+    install_lksp = create_subparser(subparsers, install_langkit_support,
+                                    with_build_dir=True)
     install_lksp.add_argument(
         "prefix",
         help="Installation prefix"
@@ -250,9 +269,11 @@ if __name__ == '__main__':
     create_subparser(subparsers, make,
                      with_jobs=True,
                      with_no_lksp=True,
-                     with_gargs=True)
+                     with_gargs=True,
+                     with_build_dir=True)
     create_subparser(subparsers, setenv,
-                     with_no_lksp=True)
+                     with_no_lksp=True,
+                     with_build_dir=True)
 
     create_subparser(subparsers, test, accept_unknown_args=True)
 
