@@ -25,7 +25,6 @@ GREEN = '\x1b[32m'
 YELLOW = '\x1b[33m'
 
 punctuation_re = re.compile(' [!?:;]')
-sphinx_role_re = re.compile(':[a-z-]+:([a-z-]+:)?`')
 
 accepted_chars = [chr(c) for c in range(0x20, 0x80)]
 
@@ -295,12 +294,13 @@ def check_text(report, filename, lang, first_line, text, is_comment):
 
         report.set_context(filename, first_line + i - 1)
 
-        # Report extra space before double punctuation. The below regexp will
-        # also match Sphinx role markup (:foo:`bar`), which we must not report.
-        for subs in punctuation_re.finditer(line):
-            match = line[subs.start(0):].strip()
-            if not sphinx_role_re.match(match):
-                report.add('Extra space before double punctuation')
+        # Report extra space before double punctuation. As soon as there is a
+        # backquote on the line, disable this check, as this we must note
+        # report Sphinx inline markup (e.g. :ref:`foo`) and anything inside
+        # inline code (`A := 1`). Detecting extra spaces without false positive
+        # is not worth the effort.
+        if '`' not in line and punctuation_re.search(line):
+            report.add('Extra space before double punctuation')
 
         if line.endswith('::'):
             s.last_end = '::'

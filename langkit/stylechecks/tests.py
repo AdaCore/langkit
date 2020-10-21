@@ -388,13 +388,9 @@ testcases = (
             """
             Documenting some :ref:`function <foo>`.
 
-            And now some :ref:`code <foo>` :
-
-            .. code:: python
-
-                foo + bar(True)
+            Inline code: `A := 1`.
             """
-    ''', [(5, 0, 'Extra space before double punctuation')]),
+    ''', []),
     Testcase('docstring_multi_17.py', '''
         def foo():
             """
