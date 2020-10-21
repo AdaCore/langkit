@@ -30,9 +30,6 @@ class Directories:
 
     def __init__(self, lang_source_dir=None, build_dir=None, install_dir=None):
         self.root_lang_source_dir = lang_source_dir
-        self.root_langkit_source_dir = path.dirname(
-            path.abspath(__file__)
-        )
         self.root_build_dir = build_dir
         self.root_install_dir = install_dir
 
@@ -50,16 +47,6 @@ class Directories:
 
     def install_dir(self, *args):
         return path.join(self.root_install_dir, *args)
-
-    def langkit_source_dir(self, *args):
-        """
-        Build and return the path for ``args`` under the root source directory
-        for langkit.
-
-        :param list[str] args: The path components, same semantics as in
-            path.join.
-        """
-        return path.join(self.root_langkit_source_dir, *args)
 
 
 class EnableWarningAction(argparse.Action):
