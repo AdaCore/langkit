@@ -12,7 +12,9 @@ from copy import copy
 import os
 import pipes
 import shutil
-from typing import List
+from typing import Dict, List
+
+from funcy import keep
 
 
 def copy_with(obj, **kwargs):
@@ -199,6 +201,13 @@ def get_cpu_count():
         return multiprocessing.cpu_count()
     except (ImportError, NotImplementedError):
         return 1
+
+
+def add_to_path(env: Dict[str, str], name: str, item: str) -> None:
+    """
+    Add ``item`` to the ``name`` path environment variable in ``env``.
+    """
+    env[name] = os.path.pathsep.join(keep([item, env.get(name, '')]))
 
 
 def format_setenv(name: str, path: str) -> str:

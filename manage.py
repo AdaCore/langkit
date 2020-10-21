@@ -11,7 +11,8 @@ import sys
 from typing import Callable, List
 
 from langkit.packaging import Packager
-from langkit.utils import LibraryTypes, format_setenv, get_cpu_count
+from langkit.utils import (LibraryTypes, add_to_path, format_setenv,
+                           get_cpu_count)
 
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
@@ -197,8 +198,11 @@ def make(args: Namespace) -> None:
     Generate and build Libpythonlang and Liblktlang.
     """
 
+    # Unless specifically asked to ignore Langkit_Support, make sure it is
+    # built and available to build Libpythonlang and Liblktlang.
     if not args.no_langkit_support:
         build_langkit_support(args)
+        add_to_path(os.environ, "GPR_PROJECT_PATH", str(SUPPORT_ROOT))
 
     # We need to clean the build space of the langkit libraries we depend
     # upon before we run langkit again. Else, if we installed a newer version
