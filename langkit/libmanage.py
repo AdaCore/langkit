@@ -35,7 +35,7 @@ class Directories:
         self.root_install_dir = install_dir
 
     def set_build_dir(self, build_dir):
-        self.root_build_dir = path.abspath(build_dir)
+        self.root_build_dir = build_dir
 
     def set_install_dir(self, install_dir):
         self.root_install_dir = path.abspath(install_dir)
@@ -44,7 +44,9 @@ class Directories:
         return path.join(self.root_lang_source_dir, *args)
 
     def build_dir(self, *args):
-        return path.join(self.root_build_dir, *args)
+        return self.lang_source_dir(
+            self.root_lang_source_dir, self.root_build_dir, *args
+        )
 
     def install_dir(self, *args):
         return path.join(self.root_install_dir, *args)
