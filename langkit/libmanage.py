@@ -1,6 +1,5 @@
 import argparse
 from functools import reduce
-from funcy import keep
 import glob
 import inspect
 import json
@@ -20,8 +19,8 @@ from langkit.diagnostics import (
     WarningSet, check_source_language, extract_library_location
 )
 from langkit.packaging import Packager
-from langkit.utils import (Colors, LibraryTypes, Log, col, format_setenv,
-                           get_cpu_count, printcol)
+from langkit.utils import (Colors, LibraryTypes, Log, add_to_path, col,
+                           format_setenv, get_cpu_count, printcol)
 
 
 class Directories:
@@ -1088,11 +1087,10 @@ class ManageScript:
         setup_environment.
         """
         env = dict(os.environ)
-
-        def add_path(name, p):
-            env[name] = path.pathsep.join(keep([p, env.get(name, '')]))
-
-        self.setup_environment(build_mode, add_path)
+        self.setup_environment(
+            build_mode,
+            lambda name, p: add_to_path(env, name, p)
+        )
         return env
 
     def write_setenv(self, build_mode, output_file=sys.stdout):
