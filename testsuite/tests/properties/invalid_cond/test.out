@@ -8,7 +8,7 @@ test.py:XXX: error: Missing Cond arguments
 test.py:XXX: error: Missing last Cond argument
 
 == Bad condition type ==
-<frozen importlib._bootstrap>:219: error: Condition in Cond expression should be Bool, got Example
+test.py:XXX: error: Condition in Cond expression should be Bool, got Example
 
 == Bad return type ==
 test.py:XXX: error: Mismatching types in Cond expression: Bool expected but got Example instead
