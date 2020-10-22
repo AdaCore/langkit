@@ -62,12 +62,25 @@ class Diagnostics:
     @classmethod
     def is_langkit_dsl(cls, python_file: str) -> bool:
         """
-        Return wether `python_file` is langkit DSL.
+        Return whether ``python_file`` belongs to the user language spec.
         """
-        # We check that the path of the file is not in the list of blacklisted
-        # paths.
+        # If the path of the file is in the list of blacklisted paths, then
+        # it's definitely not part of the language spec.
         python_file = P.normpath(python_file)
-        return all(path not in python_file for path in cls.blacklisted_paths)
+        if any(path in python_file for path in cls.blacklisted_paths):
+            return False
+
+        # The "manage.py" script is supposed to define settings for the
+        # language spec, but is not the language spec itself.
+        if "manage.py" in python_file:
+            return False
+
+        # Reject Python internals, definitely not part of the language spec
+        # neither. For instance: "<frozen importlib._bootstrap>".
+        if python_file.startswith("<"):
+            return False
+
+        return True
 
     @classmethod
     def set_style(cls, style: DiagnosticStyle) -> None:
@@ -159,7 +172,7 @@ def extract_library_location(stack: Opt[List[Any]] = None) -> Opt[Location]:
     # Create Location instances for each stack frame
     locs = [Location(file=t[0], line=t[1])
             for t in stack
-            if Diagnostics.is_langkit_dsl(t[0]) and "manage.py" not in t[0]]
+            if Diagnostics.is_langkit_dsl(t[0])]
 
     return locs[-1] if locs else None
 

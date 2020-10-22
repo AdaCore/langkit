@@ -5,7 +5,7 @@ Code generation was successful
 Code generation was successful
 
 == Bind(entity, logic_var) ==
-<frozen importlib._bootstrap>:219: error: Expected type LogicVar, got ExampleNode.entity
+test.py:XXX: error: Expected type LogicVar, got ExampleNode.entity
 
 == Bind(logic_var, bool) ==
 test.py:XXX: error: Right operand must be either a logic variable or an entity, got Bool

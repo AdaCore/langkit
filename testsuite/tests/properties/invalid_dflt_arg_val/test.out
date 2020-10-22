@@ -8,7 +8,7 @@ test.py:XXX: error: Invalid abstract expression: <class 'langkit.dsl.Bool'>
 test.py:XXX: error: Expected type Bool, got Int
 
 == Bad Self use ==
-<frozen importlib._bootstrap>:219: error: Self is not bound in this context
+test.py:XXX: error: Self is not bound in this context
 
 == Bad dynamic variable use ==
 test.py:XXX: error: Dynamic variables cannot be bound in this context
