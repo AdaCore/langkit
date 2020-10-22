@@ -216,7 +216,7 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
     class Manage(ManageScript):
         def __init__(self, ctx):
             self._cached_context = ctx
-            super().__init__()
+            super().__init__(root_dir=os.getcwd())
 
         def create_context(self, args):
             return self._cached_context

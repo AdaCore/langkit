@@ -39,7 +39,6 @@ for lang in ('Foo', 'Bar'):
         # link.
         '--library-types=static',
 
-        '--build-dir={}-build'.format(lang.lower()),
         'make',
     )
 
