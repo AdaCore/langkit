@@ -3926,6 +3926,13 @@ class PropertyDef(AbstractNodeData):
                 self._uses_envs is not None,
                 'uses_envs is required for external properties'
             )
+        elif self.lazy_field:
+            # Initializers for lazy fields cannot use entity info (this would
+            # be a soundness issue). Users are not supposed to control this
+            # aspect, hence the assertion.
+            assert self._uses_entity_info is None
+            self._uses_entity_info = False
+
         else:
             check_source_language(
                 self._uses_entity_info in (None, False),

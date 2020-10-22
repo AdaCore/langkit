@@ -1,5 +1,5 @@
-from langkit.dsl import ASTNode, T
-from langkit.expressions import langkit_property, lazy_field
+from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
+from langkit.expressions import Entity, Self, langkit_property, lazy_field
 
 from utils import emit_and_print_errors
 
@@ -54,6 +54,42 @@ def test3_with_args():
         @lazy_field(public=True)
         def p(b=T.Bool):
             return b
+
+    class Number(FooNode):
+        pass
+
+
+def test4_entity_info():
+    class FooNode(ASTNode):
+        pass
+
+    @env_metadata
+    class Metadata(Struct):
+        flag = UserField(type=T.Bool)
+
+    class Example(FooNode):
+        @lazy_field(public=True)
+        def p():
+            return Entity.info.md.flag
+
+    class Number(FooNode):
+        pass
+
+
+def test5_entity_info():
+    @env_metadata
+    class Metadata(Struct):
+        flag = UserField(type=T.Bool)
+
+    class FooNode(ASTNode):
+        @langkit_property(return_type=T.Bool)
+        def flag_set():
+            return Entity.info.md.flag
+
+    class Example(FooNode):
+        @lazy_field(public=True)
+        def p():
+            return Self.flag_set
 
     class Number(FooNode):
         pass

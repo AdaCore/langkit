@@ -7,4 +7,10 @@ test.py:XXX: error: lazy fields cannot override properties, and conversely
 == test3_with_args ==
 test.py:XXX: error: Lazy fields cannot have arguments
 
+== test4_entity_info ==
+test.py:XXX: error: Cannot use entity info, as explicitly forbidden
+
+== test5_entity_info ==
+test.py:XXX: error: Call to FooNode.flag_set must be done on an entity
+
 Done
