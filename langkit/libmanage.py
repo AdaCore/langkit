@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import traceback
+from typing import Optional
 
 from langkit.compile_context import UnparseScript, Verbosity
 from langkit.diagnostics import (
@@ -68,12 +69,17 @@ class ManageScript:
     Whether warnings to build the generated library are enabled by default.
     """
 
-    def __init__(self):
+    def __init__(self, root_dir: Optional[str] = None) -> None:
+        """
+        :param root_dir: Root directory for the language specification. All
+            source file under that directory are considered to be part of the
+            language spec, and build trees are by default relative to it.
+
+            If left to None, take the directory that contains the Python file
+            that defined ``self``'s class.
+        """
         self.dirs = Directories(
-            # It is assumed that manage.py is at the root of the language
-            # definition source directory, if no source directory is explicitly
-            # passed.
-            lang_source_dir=path.dirname(
+            lang_source_dir=root_dir or path.dirname(
                 path.abspath(inspect.getfile(self.__class__))
             )
         )
