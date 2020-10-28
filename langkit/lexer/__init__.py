@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import count
 import re
+from typing import Dict
 
 from langkit.compile_context import get_context
 from langkit.diagnostics import (Context, check_source_language,
@@ -348,6 +349,8 @@ class LexerToken:
         :type: dict[TokenAction, TokenFamily]
         """
 
+        self.name_to_token: Dict[Name, TokenAction] = {}
+
         for c in inspect.getmro(self.__class__):
             self.add_tokens(c)
 
@@ -368,6 +371,7 @@ class LexerToken:
             assert fld_value.name in (None, name)
             fld_value.name = name
             dest_list.append(fld_value)
+            self.name_to_token[name] = fld_value
 
     def __iter__(self):
         return (fld for fld in self.tokens)
@@ -647,7 +651,11 @@ class Lexer:
         """
         Shortcut to get a TokenAction stored in self.tokens.
         """
-        return getattr(self.tokens, attr)
+        name = Name.from_camel(attr)
+        try:
+            return self.tokens.name_to_token[name]
+        except KeyError:
+            raise AttributeError(f"No such token: {attr}")
 
     def check_token_families(self, context):
         """
