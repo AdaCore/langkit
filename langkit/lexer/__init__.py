@@ -485,14 +485,14 @@ class Lexer:
     @property
     def signature(self):
         return ('Lexer',
-                self.track_indent,
-                self.prefix,
                 self.tokens.signature,
 
-                sorted(p.signature for p in self.patterns),
+                sorted((k, v) for (k, v, _) in self.patterns),
 
                 # Do not sort signatures for rules as their order matters
                 [r.signature for r in self.rules],
+
+                self.track_indent,
 
                 sorted((t1.name.camel,
                         sorted(t2.name.camel
