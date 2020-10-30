@@ -11,6 +11,7 @@ with "gnatcoll";
 with "gnatcoll_gmp";
 with "gnatcoll_iconv";
 with "langkit_support";
+${exts.include_extension(ctx.ext('withed_projects'))}
 
 % if emitter.coverage:
    with "gnatcov_rts_full";
