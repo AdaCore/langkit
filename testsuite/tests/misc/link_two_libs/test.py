@@ -33,13 +33,12 @@ for lang in ('Foo', 'Bar'):
     python(create_project_py, lang)
     python(
         manage_py,
+        'make',
         '-vnone',
 
         # To simplify this test (in particular environment setup), do a static
         # link.
         '--library-types=static',
-
-        'make',
     )
 
 # Build a program that uses both and run it

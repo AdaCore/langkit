@@ -78,7 +78,7 @@ def create_subparser(
                  ' builds.'
         )
 
-    def wrapper(args: Namespace, rest: str):
+    def wrapper(args: Namespace, rest: List[str]):
         if len(rest) > 0:
             print("ERROR - unhandled command line arguments: {}".format(
                 ", ".join(rest)
@@ -218,9 +218,9 @@ def make(args: Namespace) -> None:
 
     base_argv = [
         sys.executable, "./manage.py",
+        "make", "-P",
         "-Dgnu-full",
         f"--library-types={args.library_types}",
-        "make", "-P",
         f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
     ]
