@@ -18,6 +18,6 @@ create_project_py = os.path.join(langkit_root, 'scripts', 'create-project.py')
 manage_py = os.path.join('mylang', 'manage.py')
 
 python(create_project_py, 'Mylang')
-python(manage_py, '-vnone', 'make', '-P')
+python(manage_py, 'make', '-P', '-vnone')
 
 print('Done')

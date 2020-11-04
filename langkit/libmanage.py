@@ -12,7 +12,7 @@ import shutil
 import subprocess
 import sys
 import traceback
-from typing import Optional
+from typing import Callable, List, Optional, Union, cast
 
 from langkit.compile_context import UnparseScript, Verbosity
 from langkit.diagnostics import (
@@ -94,102 +94,20 @@ class ManageScript:
             description='General manager to handle actions relative to'
                         ' building/testing your language.'
         )
-        self.subparsers = subparsers = args_parser.add_subparsers()
-
-        args_parser.add_argument(
-            '--build-dir', default='build',
-            help='Directory to use for generated source code and binaries. By'
-                 ' default, use "build" in the current directory.'
-        )
-        LibraryTypes.add_option(args_parser)
-        args_parser.add_argument(
-            '--verbosity', '-v', nargs='?',
-            type=Verbosity,
-            choices=Verbosity.choices(),
-            default=Verbosity('info'),
-            const=Verbosity('debug'),
-            help='Verbosity level'
-        )
-        args_parser.add_argument(
-            '--full-error-traces', '-E', action='store_true', default=False,
-            help='Always show full error traces, whatever the verbosity level'
-                 ' (default: disabled).'
-        )
-        args_parser.add_argument(
-            '--trace', '-t', action='append', default=[],
-            help='Activate given debug trace.'
-        )
-        args_parser.add_argument(
-            '--no-ada-api', action='store_true',
-            help='Do not generate units to provide an Ada API, and disable the'
-                 ' generation of mains.'
-        )
-
-        # Don't enable this by default so that errors will not make automated
-        # tasks hang.
-        args_parser.add_argument(
-            '-g', '--debug', action='store_true',
-            help='In case of internal error or diagnostic error, run a'
-                 ' post-mortem PDB session.'
-        )
-        args_parser.add_argument(
-            '--profile', action='store_true',
-            help='Run cProfile and langkit, and generate a data file'
-                 ' "langkit.prof".'
-        )
-        args_parser.add_argument(
-            '--diagnostic-style', '-D', type=DiagnosticStyle,
-            default=DiagnosticStyle.default,
-            help='Style for error messages.'
-        )
-        args_parser.add_argument(
-            '--plugin-pass', action='append', default=[],
-            help='Fully qualified name to a Langkit plug-in pass constructor.'
-                 ' The function must return a Langkit pass, whose type derives'
-                 ' from langkit.passes.AbstractPass. It will be ran at the end'
-                 ' of the pass preexisting order.'
-        )
-
-        def create_parser(fn, needs_context=False):
-            """
-            Create a subparser from a function. Uses the name and the docstring
-            of the function to document the subparsers.
-
-            :param (ManageScript, Namespace) -> None fn: The function to use.
-            :param bool needs_context: Whether the executed function needs a
-                CompileCtx created beforehand or not.
-            :rtype: argparse.ArgumentParser
-            """
-            p = subparsers.add_parser(
-                # Take the name of the function without the do_ prefix and with
-                # dashes instead of underscores.
-                fn.__name__.replace('do_', '').replace('_', '-'),
-
-                # Take the first paragraph of the function's documentation as
-                # help.
-                help=fn.__doc__.split('\n\n')[0].strip()
-            )
-
-            def internal(*args, **kwargs):
-                if needs_context:
-                    self.set_context(*args, **kwargs)
-                fn(*args, **kwargs)
-
-            p.set_defaults(func=internal)
-            return p
+        self.subparsers = args_parser.add_subparsers()
 
         ########
         # Help #
         ########
 
-        self.help_parser = create_parser(self.do_help)
+        self.help_parser = self.add_subcommand(self.do_help)
 
         ############
         # Generate #
         ############
 
-        self.generate_parser = generate_parser = create_parser(
-            self.do_generate, True
+        self.generate_parser = generate_parser = self.add_subcommand(
+            self.do_generate, needs_context=True
         )
         self.add_generate_args(generate_parser)
 
@@ -197,14 +115,18 @@ class ManageScript:
         # Build #
         #########
 
-        self.build_parser = build_parser = create_parser(self.do_build, True)
+        self.build_parser = build_parser = self.add_subcommand(
+            self.do_build, needs_context=True
+        )
         self.add_build_args(build_parser)
 
         ########
         # Make #
         ########
 
-        self.make_parser = make_parser = create_parser(self.do_make, True)
+        self.make_parser = make_parser = self.add_subcommand(
+            self.do_make, needs_context=True
+        )
         self.add_generate_args(make_parser)
         self.add_build_args(make_parser)
 
@@ -212,13 +134,9 @@ class ManageScript:
         # Install #
         ###########
 
-        self.install_parser = install_parser = create_parser(self.do_install,
-                                                             True)
-        install_parser.add_argument(
-            'install-dir',
-            help='Installation directory.'
+        self.install_parser = install_parser = self.add_subcommand(
+            self.do_install, needs_context=True
         )
-
         self.add_build_mode_arg(install_parser)
         install_parser.add_argument(
             '--force', '-f', action='store_true',
@@ -228,13 +146,18 @@ class ManageScript:
             '--disable-all-mains', action='store_true',
             help='Do not install main program.'
         )
+        install_parser.add_argument(
+            'install-dir',
+            help='Installation directory.'
+        )
 
         ##########
         # Setenv #
         ##########
 
-        self.setenv_parser = create_parser(self.do_setenv, True)
-
+        self.setenv_parser = self.add_subcommand(
+            self.do_setenv, needs_context=True
+        )
         self.add_build_mode_arg(self.setenv_parser)
         self.setenv_parser.add_argument(
             '--json', '-J', action='store_true',
@@ -245,7 +168,9 @@ class ManageScript:
         # Create Python wheel #
         #######################
 
-        self.create_wheel_parser = create_parser(self.do_create_wheel, True)
+        self.create_wheel_parser = self.add_subcommand(
+            self.do_create_wheel, needs_context=True
+        )
         Packager.add_platform_options(self.create_wheel_parser)
         self.create_wheel_parser.add_argument(
             '--with-python',
@@ -282,6 +207,150 @@ class ManageScript:
         # from the command line.
         self.verbosity = None
         ":type: Verbosity"
+
+        self.add_extra_subcommands()
+
+    def add_extra_subcommands(self) -> None:
+        """
+        Subclasses may override this to create new subcommands for the manage
+        script, using the "add_subcommand" method.
+        """
+        pass
+
+    def add_subcommand(
+        self,
+        callback: Union[Callable[[argparse.Namespace], None],
+                        Callable[[argparse.Namespace, List[str]], None]],
+        *,
+        needs_context: bool = False,
+        accept_unknown_args: bool = False,
+    ) -> argparse.ArgumentParser:
+        """
+        Create a subcommand for the manage script.
+
+        :param callback: Function to call when executing the subcommand.
+
+            Its name is assumed to be "do_X" with "X" being the name of the
+            command, with underscores instead of dashes. For instance, if the
+            function name is "do_foo_bar", this creates a "foo-bar" subcommand.
+
+            The first of its docstring is used as the help message for the
+            subcommand.
+
+        :param needs_context: Whether ``callback`` needs a ``CompileCtx``
+            created beforehand.
+
+        :param accept_unknown_args: Whether the subcommand parser accepts
+            unknown arguments. If this is enabled, unknown arguments are passed
+            as a second argument to ``callback``.
+
+        :return: The argument parser for this new subcommand's arguments.
+        """
+        assert callback.__name__.startswith("do_")
+        name = callback.__name__[3:].replace("_", "-")
+
+        # Take the first paragraph of callback's docstring
+        assert callback.__doc__
+        help_message = callback.__doc__.split("\n\n")[0]
+
+        # Remove indentation and line breaks from it
+        help_message = " ".join(
+            line.strip()
+            for line in help_message.split("\n")
+            if line.strip()
+        )
+
+        # Create the arguments parser for the subcommand and add common
+        # arguments.
+        parser = self.subparsers.add_parser(name, help=help_message)
+        self.add_common_args(parser)
+
+        # If this subcommand requires a context, make sure we create the
+        # context before running callback.
+        def wrapper(parsed_args: argparse.Namespace,
+                    unknown_args: List[str]) -> None:
+            if needs_context:
+                self.set_context(parsed_args)
+            if accept_unknown_args:
+                cb_full = cast(
+                    Callable[[argparse.Namespace, List[str]], None],
+                    callback,
+                )
+                cb_full(parsed_args, unknown_args)
+            elif unknown_args:
+                print(
+                    f"{sys.argv[0]}: error: unrecognized arguments:"
+                    f" {' '.join(unknown_args)}",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            else:
+                cb_single = cast(
+                    Callable[[argparse.Namespace], None],
+                    callback
+                )
+                cb_single(parsed_args)
+        parser.set_defaults(func=wrapper)
+
+        return parser
+
+    def add_common_args(self, subparser: argparse.ArgumentParser) -> None:
+        """
+        Add command-line arguments common to all subcommands to ``subparser``.
+        """
+        subparser.add_argument(
+            '--build-dir', default='build',
+            help='Directory to use for generated source code and binaries. By'
+                 ' default, use "build" in the current directory.'
+        )
+        LibraryTypes.add_option(subparser)
+        subparser.add_argument(
+            '--verbosity', '-v', nargs='?',
+            type=Verbosity,
+            choices=Verbosity.choices(),
+            default=Verbosity('info'),
+            const=Verbosity('debug'),
+            help='Verbosity level'
+        )
+        subparser.add_argument(
+            '--full-error-traces', '-E', action='store_true', default=False,
+            help='Always show full error traces, whatever the verbosity level'
+                 ' (default: disabled).'
+        )
+        subparser.add_argument(
+            '--trace', '-t', action='append', default=[],
+            help='Activate given debug trace.'
+        )
+        subparser.add_argument(
+            '--no-ada-api', action='store_true',
+            help='Do not generate units to provide an Ada API, and disable the'
+                 ' generation of mains.'
+        )
+
+        # Don't enable this by default so that errors will not make automated
+        # tasks hang.
+        subparser.add_argument(
+            '-g', '--debug', action='store_true',
+            help='In case of internal error or diagnostic error, run a'
+                 ' post-mortem PDB session.'
+        )
+        subparser.add_argument(
+            '--profile', action='store_true',
+            help='Run cProfile and langkit, and generate a data file'
+                 ' "langkit.prof".'
+        )
+        subparser.add_argument(
+            '--diagnostic-style', '-D', type=DiagnosticStyle,
+            default=DiagnosticStyle.default,
+            help='Style for error messages.'
+        )
+        subparser.add_argument(
+            '--plugin-pass', action='append', default=[],
+            help='Fully qualified name to a Langkit plug-in pass constructor.'
+                 ' The function must return a Langkit pass, whose type derives'
+                 ' from langkit.passes.AbstractPass. It will be ran at the end'
+                 ' of the pass preexisting order.'
+        )
 
     def add_generate_args(self, subparser):
         """
@@ -496,7 +565,7 @@ class ManageScript:
         return self.context.ada_api_settings.lib_name
 
     def run(self, argv=None):
-        parsed_args = self.args_parser.parse_args(argv)
+        parsed_args, unknown_args = self.args_parser.parse_known_args(argv)
 
         for trace in parsed_args.trace:
             print("Trace {} is activated".format(trace))
@@ -548,7 +617,7 @@ class ManageScript:
 
         # noinspection PyBroadException
         try:
-            parsed_args.func(parsed_args)
+            parsed_args.func(parsed_args, unknown_args)
 
         except DiagnosticError:
             if parsed_args.debug:
