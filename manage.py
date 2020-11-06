@@ -149,11 +149,15 @@ def install_langkit_support(args: Namespace) -> None:
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={args.build_dir}"])
 
-    for library_type in args.library_types.names:
-        subprocess.check_call(base_argv + [
-            f"-XLIBRARY_TYPE={library_type}",
-            f"--build-name={library_type}"
-        ])
+    # Install the static libraries first, so that in the resulting project
+    # files, "static" is the default library type.
+    lib_types = args.library_types.names
+    for library_type in ("static", "static-pic", "relocatable"):
+        if library_type in lib_types:
+            subprocess.check_call(base_argv + [
+                f"-XLIBRARY_TYPE={library_type}",
+                f"--build-name={library_type}"
+            ])
 
 
 def package_deps(args: Namespace) -> None:
