@@ -55,6 +55,6 @@ class Example(FooNode):
         return before.concat(after)
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+build_and_run(lkt_file='expected_concrete_syntax.lkt', ada_main='main.adb',
               show_property_logging=True)
 print('Done')

@@ -85,12 +85,14 @@ function Find_Memoized_Value
 --  in Value and return True. Create such an entry and return False otherwise.
 
 procedure Add_Memoized_Value
-  (Unit       : Internal_Unit;
-   Handle     : in out Memoization_Handle;
-   Value      : Mmz_Value);
---  Insert the Handle.Key/Value entry in UNit.Memoization_Map (replacing the
---  previous entry, if present). If the key in Handle is stale (i.e. caches
---  were reset since it was created), recompute it using Create_Key.
+  (Unit   : Internal_Unit;
+   Handle : in out Memoization_Handle;
+   Value  : Mmz_Value;
+   Stored : out Boolean);
+--  Insert the Handle.Key/Value entry in Unit.Memoization_Map (replacing the
+--  previous entry, if present). Set Stored to whether the key/value entry was
+--  actually stored: it's not when Handle is stale, i.e. caches where reset
+--  since Handle was created).
 
 </%def>
 
@@ -302,19 +304,19 @@ end Find_Memoized_Value;
 ------------------------
 
 procedure Add_Memoized_Value
-  (Unit       : Internal_Unit;
-   Handle     : in out Memoization_Handle;
-   Value      : Mmz_Value) is
+  (Unit   : Internal_Unit;
+   Handle : in out Memoization_Handle;
+   Value  : Mmz_Value;
+   Stored : out Boolean) is
 begin
    --  If Handle was created using a memoization map that has been since then
    --  reset, do nothing: the result can be partly stale due to the event that
    --  triggered the memoization tables reset.
 
-   if Handle.Cache_Version < Unit.Cache_Version then
-      return;
+   Stored := Unit.Cache_Version <= Handle.Cache_Version;
+   if Stored then
+      Unit.Memoization_Map.Replace_Element (Handle.Cur, Value);
    end if;
-
-   Unit.Memoization_Map.Replace_Element (Handle.Cur, Value);
 end Add_Memoized_Value;
 
 </%def>

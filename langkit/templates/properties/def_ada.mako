@@ -85,6 +85,10 @@ is
       Mmz_Handle : Memoization_Handle;
       Mmz_Val    : Mmz_Value;
 
+      Mmz_Stored : Boolean;
+      --  Whether the memoization couple was actually stored. Used to determine
+      --  whether to inc-ref the memoized value.
+
       function Create_Mmz_Key return Mmz_Key;
       --  Create a memoization key for this property call and return it
 
@@ -272,9 +276,11 @@ begin
 
          Mmz_Val := (Kind => ${property.type.memoization_kind},
                      As_${property.type.name} => Property_Result);
-         Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val);
+         Add_Memoized_Value (Self.Unit, Mmz_Handle, Mmz_Val, Mmz_Stored);
          % if property.type.is_refcounted:
-            Inc_Ref (Property_Result);
+            if Mmz_Stored then
+               Inc_Ref (Property_Result);
+            end if;
          % endif
 
       % if not property.memoize_in_populate:
@@ -326,7 +332,10 @@ exception
             % endif
 
                Add_Memoized_Value
-                 (Self.Unit, Mmz_Handle, (Kind => Mmz_Property_Error));
+                 (Self.Unit,
+                  Mmz_Handle,
+                  (Kind => Mmz_Property_Error),
+                  Mmz_Stored);
 
             % if not property.memoize_in_populate:
             end if;
