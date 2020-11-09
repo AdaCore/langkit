@@ -1,4 +1,4 @@
-main.py: Running...
+main.adb: Running...
 [LANGKIT.PROPERTIES] Example.mmz_prop (<Example main.txt:1:1-1:8>):
    [LANGKIT.PROPERTIES] Example.unit_count (<Example main.txt:1:1-1:8>):
       [LANGKIT.PROPERTIES] Result:  1
@@ -7,7 +7,7 @@ main.py: Running...
    [LANGKIT.PROPERTIES] Example.unit_count (<Example main.txt:1:1-1:8>):
       [LANGKIT.PROPERTIES] Result:  2
    [LANGKIT.PROPERTIES] Result: [ 1,  2]
-root.p_mmz_prop() = [1, 2]
+root.p_mmz_prop = [ 1 2]
 [LANGKIT.PROPERTIES] Example.mmz_prop (<Example main.txt:1:1-1:8>):
    [LANGKIT.PROPERTIES] Example.unit_count (<Example main.txt:1:1-1:8>):
       [LANGKIT.PROPERTIES] Result:  2
@@ -16,9 +16,9 @@ root.p_mmz_prop() = [1, 2]
    [LANGKIT.PROPERTIES] Example.unit_count (<Example main.txt:1:1-1:8>):
       [LANGKIT.PROPERTIES] Result:  2
    [LANGKIT.PROPERTIES] Result: [ 2,  2]
-root.p_mmz_prop() = [2, 2]
+root.p_mmz_prop = [ 2 2]
 [LANGKIT.PROPERTIES] Example.mmz_prop (<Example main.txt:1:1-1:8>):
    [LANGKIT.PROPERTIES] Result: [ 2,  2]
-root.p_mmz_prop() = [2, 2]
-main.py: Done.
+root.p_mmz_prop = [ 2 2]
+main.adb: Done.
 Done
