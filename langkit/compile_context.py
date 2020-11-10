@@ -2007,6 +2007,7 @@ class CompileCtx:
         )
 
         from langkit.dsl_unparse import unparse_lang
+        from langkit.railroad_diagrams import emit_railroad_diagram
 
         return [
             MajorStepPass('Prepare code emission'),
@@ -2043,6 +2044,12 @@ class CompileCtx:
                         Emitter.emit_lib_project_file),
             EmitterPass('instrument for code coverage',
                         Emitter.instrument_for_coverage),
+
+            GrammarRulePass('emit railroad diagrams', emit_railroad_diagram)
+            .optional("""
+            Emit SVG railroad diagrams for grammar rules, in share/doc. Needs
+            the railroad-diagrams Python library.
+            """),
 
             GlobalPass('report unused documentation entries',
                        lambda ctx: ctx.documentations.report_unused(),
