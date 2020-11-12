@@ -14,8 +14,6 @@ import pipes
 import shutil
 from typing import Dict, List
 
-from funcy import keep
-
 
 def copy_with(obj, **kwargs):
     """
@@ -207,6 +205,10 @@ def add_to_path(env: Dict[str, str], name: str, item: str) -> None:
     """
     Add ``item`` to the ``name`` path environment variable in ``env``.
     """
+    # GDB helpers import this unit, but they do not necessarily have access to
+    # funcy, so use a local import.
+    from funcy import keep
+
     env[name] = os.path.pathsep.join(keep([item, env.get(name, '')]))
 
 
