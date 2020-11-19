@@ -391,8 +391,8 @@ class Emitter:
         """
         if not self.coverage:
             return
-        self.gnatcov.instrument(self, os.path.join(self.lib_root, 'obj',
-                                                   self.lib_name_low, 'instr'))
+        self.gnatcov.instrument(self,
+                                os.path.join(self.lib_root, 'obj', 'instr'))
 
     def generate_lexer_dfa(self, ctx):
         """

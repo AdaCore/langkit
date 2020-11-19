@@ -77,7 +77,7 @@ library project ${lib_name} is
 
    % if emitter.coverage:
       Secondary_Source_Dirs :=
-        ("obj/${lib_name.lower()}/${lib_name.lower()}-gnatcov-instr");
+        ("obj/${lib_name.lower()}-gnatcov-instr");
       For_Coverage_Instrumentation : Boolean := external
         ("${lib_name.upper()}_COVINSTR", "false");
       case For_Coverage_Instrumentation is
