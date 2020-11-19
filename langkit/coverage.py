@@ -563,19 +563,20 @@ class GNATcov:
             '-X{}_COVINSTR=true'.format(emitter.lib_name_up)
         ])
 
+        default_build_mode = 'dev'
         project_instr_dir = '{}-gnatcov-instr'.format(emitter.lib_name_low)
 
         # At this point, instrumented sources are located in the object
         # directory, which depends on the build mode: relocate it somewhere
         # else (i.e. rename to instr_src_dir) so that the same set of
         # instrumented sources applies to all builds.
-        lib_obj_dir = os.path.join(emitter.lib_root, 'obj',
-                                   emitter.lib_name_low)
-        instr_src_dir = os.path.join(lib_obj_dir, project_instr_dir)
+        lib_obj_dir = os.path.join(emitter.lib_root, 'obj', default_build_mode)
+        instr_src_dir = os.path.join(
+            emitter.lib_root, 'obj', project_instr_dir
+        )
         if os.path.exists(instr_src_dir):
             shutil.rmtree(instr_src_dir)
-        os.rename(os.path.join(lib_obj_dir, 'dev', project_instr_dir),
-                  instr_src_dir)
+        os.rename(os.path.join(lib_obj_dir, project_instr_dir), instr_src_dir)
 
         # "gnatcov instrument" instruments only Ada sources, so we need to
         # manually copy the C sources (if any).
@@ -588,7 +589,7 @@ class GNATcov:
         # Create a directory to gather all SID files
         sid_dir = os.path.join(instr_dir, 'sids')
         ensure_clean_dir(sid_dir)
-        for filename in glob.glob(os.path.join(lib_obj_dir, '*', '*.sid')):
+        for filename in glob.glob(os.path.join(lib_obj_dir, '*.sid')):
             copy_to_dir(filename, sid_dir)
 
         # Create a directory to gather all non-instrumented sources (generated
