@@ -27,16 +27,16 @@ from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
     Context, Location, Severity, WarningSet, check_source_language,
-    context_stack, print_error, print_error_from_sem_result
+    context_stack, error, print_error, print_error_from_sem_result
 )
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
 
-
 if TYPE_CHECKING:
     from langkit.compiled_types import StructType, UserField
     from langkit.ocaml_api import OCamlAPISettings
+    from langkit.passes import AbstractPass
     from langkit.python_api import PythonAPISettings
 
 
@@ -284,6 +284,16 @@ class CompileCtx:
     c_api_settings: CAPISettings
     python_api_settings: PythonAPISettings
     ocaml_api_settings: OCamlAPISettings
+
+    all_passes: List[AbstractPass]
+    """
+    List of all passes in the Langkit compilation pipeline.
+    """
+
+    check_only: bool
+    """
+    Whether this context is configured to only run checks on the language spec.
+    """
 
     def __init__(self, lang_name, lexer, grammar,
                  lib_name=None, short_name=None,
@@ -1637,11 +1647,13 @@ class CompileCtx:
         assert isinstance(result, AbstractPass)
         return result
 
-    def emit(self, lib_root, check_only=False, warnings=None,
-             report_unused_documentation_entries=False,
-             default_max_call_depth=1000, **kwargs):
+    def create_all_passes(self, lib_root, check_only=False, warnings=None,
+                          report_unused_documentation_entries=False,
+                          explicit_passes_triggers={},
+                          default_max_call_depth=1000, **kwargs):
         """
-        Compile the DSL and emit sources for the generated library.
+        Create all the passes necessary to the compilation of the DSL. This
+        should be called before ``emit``.
 
         :param str lib_root: Path of the directory in which the library should
             be generated.
@@ -1676,6 +1688,9 @@ class CompileCtx:
             allowed in property calls. This is used as a mitigation against
             infinite recursions.
 
+        :param explicit_passes_triggers: Dict of optional passes names to flags
+            (on/off) to trigger activation/deactivation of the passes.
+
         See langkit.emitter.Emitter's constructor for other supported keyword
         arguments.
         """
@@ -1692,6 +1707,7 @@ class CompileCtx:
         self.report_unused_documentation_entries = (
             report_unused_documentation_entries
         )
+        self.check_only = check_only
 
         if kwargs.get('coverage', False):
             self.gnatcov = GNATcov(self)
@@ -1703,23 +1719,34 @@ class CompileCtx:
         # Compute the list of passes to run:
 
         # First compile the DSL
-        all_passes = self.compilation_passes
+        self.all_passes = self.compilation_passes
 
         # Then, if requested, emit code for the generated library
-        if not check_only:
-            all_passes.append(
+        if not self.check_only:
+            self.all_passes.append(
                 self.prepare_code_emission_pass(lib_root, **kwargs))
 
-            all_passes.extend(self.code_emission_passes(annotate_fields_types))
+            self.all_passes.extend(self.code_emission_passes())
 
             # Run plugin passes at the end of the pipeline
-            all_passes.extend(plugin_passes)
+            self.all_passes.extend(plugin_passes)
 
-        # We can now run the pipeline
+        for p in self.all_passes:
+            if p.is_optional and p.name in explicit_passes_triggers.keys():
+                trig = explicit_passes_triggers.pop(p.name)
+                p.disabled = not(trig)
+
+        for n in explicit_passes_triggers.keys():
+            error(f"No optional pass with name {n}")
+
+    def emit(self):
+        """
+        Compile the DSL and emit sources for the generated library.
+        """
         with names.camel_with_underscores, global_context(self):
             try:
-                self.run_passes(all_passes)
-                if not check_only and self.emitter is not None:
+                self.run_passes(self.all_passes)
+                if not self.check_only and self.emitter is not None:
                     self.emitter.cache.save()
             finally:
                 self.emitter = None

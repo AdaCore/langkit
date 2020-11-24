@@ -141,6 +141,15 @@ class ManageScript:
         self.add_generate_args(make_parser)
         self.add_build_args(make_parser)
 
+        ########################
+        # List optional passes #
+        ########################
+
+        self.list_optional_passes_parser = self.add_subcommand(
+            self.do_list_optional_passes, needs_context=True
+        )
+        self.add_generate_args(self.list_optional_passes_parser)
+
         ###########
         # Install #
         ###########
@@ -357,6 +366,14 @@ class ManageScript:
                  ' The function must return a Langkit pass, whose type derives'
                  ' from langkit.passes.AbstractPass. It will be ran at the end'
                  ' of the pass preexisting order.'
+        )
+        subparser.add_argument(
+            '--pass-on', type=str, action='append', default=[],
+            help='Activate an optional pass by name.'
+        )
+        subparser.add_argument(
+            '--pass-off', type=str, action='append', default=[],
+            help='Deactivate an optional pass by name.'
         )
 
     def add_generate_args(self, subparser):
@@ -671,14 +688,11 @@ class ManageScript:
             "extensions"
         )
 
-    def do_generate(self, args):
+    def prepare_generation(self, args):
         """
-        Generate source code for the user language.
-
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        Prepare generation of the DSL code (initialize the compilation context
+        and user defined options).
         """
-
         # The call to "check_call" in gnatpp does a setenv, so we need a build
         # mode. Given that do_make (which already have a build mode) calls
         # do_generate, we must provide a dummy build mode iff there isn't
@@ -688,7 +702,52 @@ class ManageScript:
         if not getattr(args, 'build_mode', None):
             args.build_mode = self.BUILD_MODES[0]
 
-        def gnatpp(project_file, glob_pattern):
+        # Get source directories for the mains project file. making them
+        # relative to the generated project file (which is
+        # $BUILD_DIR/mains.gpr).
+        main_source_dirs = {
+            os.path.relpath(
+                self.dirs.lang_source_dir(sdir),
+                os.path.dirname(self.mains_project)
+            )
+            for sdir in self.main_source_dirs
+        }
+
+        main_programs = ([] if self.no_ada_api else self.main_programs)
+
+        explicit_passes_triggers = {p: True for p in args.pass_on}
+        explicit_passes_triggers.update({p: False for p in args.pass_off})
+
+        self.context.create_all_passes(
+            lib_root=self.dirs.build_dir(),
+            main_source_dirs=main_source_dirs,
+            main_programs=main_programs,
+            annotate_fields_types=args.annotate_fields_types,
+            check_only=args.check_only,
+            warnings=args.enabled_warnings,
+            report_unused_documentation_entries=args.report_unused_doc_entries,
+            no_property_checks=args.no_property_checks,
+            generate_ada_api=not args.no_ada_api,
+            generate_unparser=args.generate_unparser,
+            generate_gdb_hook=not args.no_gdb_hook,
+            plugin_passes=args.plugin_pass,
+            pretty_print=args.pretty_print,
+            coverage=args.coverage,
+            relative_project=args.relative_project,
+            unparse_script=args.unparse_script,
+            explicit_passes_triggers=explicit_passes_triggers
+        )
+
+    def do_generate(self, args):
+        """
+        Generate source code for the user language.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
+        self.prepare_generation(args)
+
+        def gnatpp(project_file: str, glob_pattern: str) -> None:
             """
             Helper function to pretty-print files from a GPR project.
             """
@@ -723,37 +782,7 @@ class ManageScript:
             Colors.HEADER
         )
 
-        # Get source directories for the mains project file. making them
-        # relative to the generated project file (which is
-        # $BUILD_DIR/mains.gpr).
-        main_source_dirs = {
-            os.path.relpath(
-                self.dirs.lang_source_dir(sdir),
-                os.path.dirname(self.mains_project)
-            )
-            for sdir in self.main_source_dirs
-        }
-
-        main_programs = ([] if self.no_ada_api else self.main_programs)
-
-        self.context.emit(
-            lib_root=self.dirs.build_dir(),
-            main_source_dirs=main_source_dirs,
-            main_programs=main_programs,
-            annotate_fields_types=args.annotate_fields_types,
-            check_only=args.check_only,
-            warnings=args.enabled_warnings,
-            report_unused_documentation_entries=args.report_unused_doc_entries,
-            no_property_checks=args.no_property_checks,
-            generate_ada_api=not args.no_ada_api,
-            generate_unparser=args.generate_unparser,
-            generate_gdb_hook=not args.no_gdb_hook,
-            plugin_passes=args.plugin_pass,
-            pretty_print=args.pretty_print,
-            coverage=args.coverage,
-            relative_project=args.relative_project,
-            unparse_script=args.unparse_script
-        )
+        self.context.emit()
 
         if args.check_only:
             return
@@ -1115,6 +1144,21 @@ class ManageScript:
             ),
             python_interpreter=args.with_python
         )
+
+    def do_list_optional_passes(self, args):
+        """
+        List optional passes and exit.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
+        self.prepare_generation(args)
+        printcol("Optional passes\n", Colors.CYAN)
+        for p in self.context.all_passes:
+            if p.is_optional:
+                printcol(p.name, Colors.YELLOW)
+                print(p.doc)
+                print()
 
     def do_help(self, args):
         """

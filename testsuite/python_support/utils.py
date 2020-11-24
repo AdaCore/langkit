@@ -109,10 +109,11 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
 def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
                           warning_set=default_warning_set,
                           generate_unparser=False, symbol_canonicalizer=None,
-                          unparse_script=None):
+                          unparse_script=None,
+                          explicit_passes_triggers={}):
     """
-    Compile and emit code for CTX. Return the compile context if this was
-    successful, None otherwise.
+    Compile and emit code the given set of arguments. Return the compile
+    context if this was successful, None otherwise.
 
     :param langkit.parsers.Grammar grammar_fn: The language grammar to use.
 
@@ -137,9 +138,13 @@ def emit_and_print_errors(grammar=None, lexer=None, lkt_file=None,
     try:
         ctx = prepare_context(grammar, lexer, lkt_file, warning_set,
                               symbol_canonicalizer=symbol_canonicalizer)
-        ctx.emit('build', generate_unparser=generate_unparser,
-                 unparse_script=(UnparseScript(unparse_script)
-                                 if unparse_script else None))
+        ctx.create_all_passes(
+            'build', generate_unparser=generate_unparser,
+            unparse_script=(UnparseScript(unparse_script)
+                            if unparse_script else None),
+            explicit_passes_triggers=explicit_passes_triggers
+        )
+        ctx.emit()
         # ... and tell about how it went
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
