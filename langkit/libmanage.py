@@ -57,12 +57,12 @@ class Directories:
 
 
 class EnableWarningAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string):
+    def __call__(self, parser, namespace, values, option_string=None):
         namespace.enabled_warnings.enable(values)
 
 
 class DisableWarningAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string):
+    def __call__(self, parser, namespace, values, option_string=None):
         namespace.enabled_warnings.disable(values)
 
 
