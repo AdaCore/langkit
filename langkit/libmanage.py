@@ -12,7 +12,7 @@ import shutil
 import subprocess
 import sys
 import traceback
-from typing import Callable, List, Optional, Union, cast
+from typing import Callable, List, Optional, TYPE_CHECKING, Union, cast
 
 from langkit.compile_context import UnparseScript, Verbosity
 from langkit.diagnostics import (
@@ -22,6 +22,10 @@ from langkit.diagnostics import (
 from langkit.packaging import Packager
 from langkit.utils import (Colors, LibraryTypes, Log, add_to_path, col,
                            format_setenv, get_cpu_count, printcol)
+
+
+if TYPE_CHECKING:
+    from langkit.compile_context import CompileCtx
 
 
 class Directories:
@@ -69,6 +73,13 @@ class ManageScript:
     ENABLE_BUILD_WARNINGS_DEFAULT = False
     """
     Whether warnings to build the generated library are enabled by default.
+    """
+
+    # The create_context method will create the context and set it
+    # only right before executing commands.
+    context: 'CompileCtx'
+    """
+    Langkit compilation context.
     """
 
     def __init__(self, root_dir: Optional[str] = None) -> None:
@@ -198,10 +209,6 @@ class ManageScript:
             'install-dir',
             help='Directory in which the library is installed.'
         )
-
-        # The create_context method will create the context and set it here
-        # only right before executing commands.
-        self.context = None
 
         # This will be set in the run method, when we have parsed arguments
         # from the command line.

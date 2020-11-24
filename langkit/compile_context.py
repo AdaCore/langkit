@@ -33,6 +33,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
 
 
+
 if TYPE_CHECKING:
     from langkit.compiled_types import StructType, UserField
     from langkit.ocaml_api import OCamlAPISettings
