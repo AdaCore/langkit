@@ -1665,11 +1665,6 @@ class CompileCtx:
         :param None|WarningSet warnings: If provided, white list of warnings to
             emit.
 
-        :param bool annotate_fields_types: If true, annotate the
-             type of fields in the grammar. This will actually modify the file
-             in which ASTNodeType instances are defined, and annotate empty
-             field definitions. False by default.
-
         :param bool generate_unparser: If true, generate a pretty printer for
             the given grammar. False by default.
 
@@ -1701,7 +1696,6 @@ class CompileCtx:
             self.warnings = warnings
 
         self.generate_unparser = kwargs.pop('generate_unparser', False)
-        annotate_fields_types = kwargs.pop('annotate_fields_types', False)
         self.default_max_call_depth = default_max_call_depth
 
         self.report_unused_documentation_entries = (
@@ -2000,7 +1994,7 @@ class CompileCtx:
                        self.unparsers.finalize),
         ]
 
-    def code_emission_passes(self, annotate_fields_types):
+    def code_emission_passes(self):
         """
         Return the list of passes to emit sources for the generated library.
         """
@@ -2026,8 +2020,12 @@ class CompileCtx:
             GrammarRulePass('render parsers code', Parser.render_parser),
             PropertyPass('render property', PropertyDef.render_property),
             GlobalPass('annotate fields types',
-                       CompileCtx.annotate_fields_types,
-                       disabled=not annotate_fields_types),
+                       CompileCtx.annotate_fields_types).optional(
+                """
+                Auto annotate the type of fields in your nodes definitions,
+                based on information derived from the grammar.
+                """
+            ),
             errors_checkpoint_pass,
 
             MajorStepPass('Generate library sources'),

@@ -722,7 +722,6 @@ class ManageScript:
             lib_root=self.dirs.build_dir(),
             main_source_dirs=main_source_dirs,
             main_programs=main_programs,
-            annotate_fields_types=args.annotate_fields_types,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
             report_unused_documentation_entries=args.report_unused_doc_entries,
