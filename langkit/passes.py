@@ -92,9 +92,31 @@ class AbstractPass:
     disable passes in big PassManager.add calls.
     """
 
+    is_optional: bool
+    """
+    If true, the pass can be activated/deactivated via the command line
+    arguments.
+    """
+
+    doc: str
+
     def __init__(self, name: str, disabled: bool = False) -> None:
         self.name = name
         self.disabled = disabled
+        self.is_optional = False
+
+    def optional(self, doc: str, disabled: bool = True) -> AbstractPass:
+        """
+        Expression chain method to make a pass optional. Make this pass
+        optional, with assorted doc, and return it, so that it's easy to use in
+        an expression context.
+        """
+        from langkit.documentation import format_text
+
+        self.is_optional = True
+        self.disabled = disabled
+        self.doc = format_text(doc, 4)
+        return self
 
     def run(self, context: CompileCtx) -> None:
         raise NotImplementedError()
