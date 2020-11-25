@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 from functools import reduce
 import glob
@@ -12,7 +14,10 @@ import shutil
 import subprocess
 import sys
 import traceback
-from typing import Callable, List, Optional, TYPE_CHECKING, Union, cast
+from typing import (
+    Any, Callable, Dict, List, Optional, Optional as Opt, Sequence,
+    Set, TYPE_CHECKING, Text, TextIO, Tuple, Type, Union, cast
+)
 
 from langkit.compile_context import UnparseScript, Verbosity
 from langkit.diagnostics import (
@@ -26,6 +31,7 @@ from langkit.utils import (Colors, LibraryTypes, Log, add_to_path, col,
 
 if TYPE_CHECKING:
     from langkit.compile_context import CompileCtx
+    from types import TracebackType
 
 
 class Directories:
@@ -33,36 +39,51 @@ class Directories:
     Helper class used to get various path in source/build/install trees.
     """
 
-    def __init__(self, lang_source_dir=None, build_dir=None, install_dir=None):
+    def __init__(self,
+                 lang_source_dir: str,
+                 build_dir: Opt[str] = None,
+                 install_dir: Opt[str] = None):
+
         self.root_lang_source_dir = lang_source_dir
         self.root_build_dir = build_dir
         self.root_install_dir = install_dir
 
-    def set_build_dir(self, build_dir):
+    def set_build_dir(self, build_dir: str) -> None:
         self.root_build_dir = build_dir
 
-    def set_install_dir(self, install_dir):
+    def set_install_dir(self, install_dir: str) -> None:
         self.root_install_dir = path.abspath(install_dir)
 
-    def lang_source_dir(self, *args):
+    def lang_source_dir(self, *args: str) -> str:
         return path.join(self.root_lang_source_dir, *args)
 
-    def build_dir(self, *args):
+    def build_dir(self, *args: str) -> str:
+        assert self.root_build_dir is not None
         return self.lang_source_dir(
             self.root_lang_source_dir, self.root_build_dir, *args
         )
 
-    def install_dir(self, *args):
+    def install_dir(self, *args: str) -> str:
+        assert self.root_install_dir is not None
         return path.join(self.root_install_dir, *args)
 
 
 class EnableWarningAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self,
+                 parser: argparse.ArgumentParser,
+                 namespace: argparse.Namespace,
+                 values: Union[Text, Sequence[Any], None],
+                 option_string: Opt[Text] = None) -> None:
         namespace.enabled_warnings.enable(values)
 
 
 class DisableWarningAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self,
+                 parser: argparse.ArgumentParser,
+                 namespace: argparse.Namespace,
+                 values: Union[Text, Sequence[Any], None],
+                 option_string: Opt[Text] = None) -> None:
+
         namespace.enabled_warnings.disable(values)
 
 
@@ -70,17 +91,30 @@ class ManageScript:
 
     BUILD_MODES = ('dev', 'prod')
 
+    build_mode: str
+    """
+    Build mode for the project.
+    """
+
     ENABLE_BUILD_WARNINGS_DEFAULT = False
     """
     Whether warnings to build the generated library are enabled by default.
     """
 
-    # The create_context method will create the context and set it
-    # only right before executing commands.
-    context: 'CompileCtx'
+    enable_build_warnings: bool
     """
-    Langkit compilation context.
+    Whether to enable build warnings.
     """
+
+    context: CompileCtx
+    """
+    Langkit compilation context. The create_context method will create the
+    context and set it only right before executing commands.
+    """
+
+    # This will be set in the "run" method, when we have parsed arguments
+    # from the command line.
+    verbosity: Verbosity
 
     def __init__(self, root_dir: Optional[str] = None) -> None:
         """
@@ -219,11 +253,6 @@ class ManageScript:
             help='Directory in which the library is installed.'
         )
 
-        # This will be set in the run method, when we have parsed arguments
-        # from the command line.
-        self.verbosity = None
-        ":type: Verbosity"
-
         self.add_extra_subcommands()
 
     def add_extra_subcommands(self) -> None:
@@ -310,7 +339,8 @@ class ManageScript:
 
         return parser
 
-    def add_common_args(self, subparser: argparse.ArgumentParser) -> None:
+    @staticmethod
+    def add_common_args(subparser: argparse.ArgumentParser) -> None:
         """
         Add command-line arguments common to all subcommands to ``subparser``.
         """
@@ -376,11 +406,10 @@ class ManageScript:
             help='Deactivate an optional pass by name.'
         )
 
-    def add_generate_args(self, subparser):
+    @staticmethod
+    def add_generate_args(subparser: argparse.ArgumentParser) -> None:
         """
         Add arguments to tune code generation to "subparser".
-
-        :type subparser: argparse.ArgumentParser
         """
         subparser.add_argument(
             '--pretty-print', '-p', action='store_true',
@@ -470,18 +499,16 @@ class ManageScript:
                  ' grammar (write the grammar definition).'
         )
 
-    def add_build_mode_arg(self, subparser):
+    def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
         subparser.add_argument(
             '--build-mode', '-b', choices=list(self.BUILD_MODES),
             default='dev',
             help='Selects a preset for build options.'
         )
 
-    def add_build_args(self, subparser):
+    def add_build_args(self, subparser: argparse.ArgumentParser) -> None:
         """
         Add arguments to tune code compilation to "subparser".
-
-        :type subparser: argparse.ArgumentParser
         """
         subparser.add_argument(
             '--jobs', '-j', type=int, default=get_cpu_count(),
@@ -526,26 +553,24 @@ class ManageScript:
             help='Do not build libraries with run path options'
         )
 
-    def create_context(self, args):
+    def create_context(self, args: argparse.Namespace) -> 'CompileCtx':
         """
         Return a Langkit context (langkit.compile_context.CompileContext
         instance).
 
         This must be overriden by subclasses.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         raise NotImplementedError()
 
     @property
-    def main_source_dirs(self):
+    def main_source_dirs(self) -> Set[str]:
         """
         Return a potentially empty set of source directories to use in the
         project file for mains. Source directories must be either absolute or
         relative to the language directory.
-
-        :rtype: set[str]
         """
         ext_dir = self.context.extensions_dir
         if ext_dir is not None:
@@ -556,22 +581,17 @@ class ManageScript:
         return set()
 
     @property
-    def main_programs(self):
+    def main_programs(self) -> Set[str]:
         """
         Return the list of main programs to build in addition to the generated
         library. Subclasses should override this to add more main programs.
-
-        :rtype: set[str]
         """
         return {'parse'}
 
-    def parse_mains_list(self, mains):
+    def parse_mains_list(self, mains: str) -> Set[str]:
         """
         Parse a comma-separated list of main programs. Raise a ValueError if
         one is not a supported main program.
-
-        :param str mains: String to parse.
-        :rtype: set[str]
         """
         if not mains:
             return set()
@@ -585,10 +605,10 @@ class ManageScript:
         return result
 
     @property
-    def lib_name(self):
+    def lib_name(self) -> str:
         return self.context.ada_api_settings.lib_name
 
-    def run(self, argv=None):
+    def run(self, argv: Opt[List[str]] = None) -> None:
         parsed_args, unknown_args = self.args_parser.parse_known_args(argv)
 
         for trace in parsed_args.trace:
@@ -607,6 +627,17 @@ class ManageScript:
         # Set the verbosity
         self.verbosity = parsed_args.verbosity
 
+        self.enable_build_warnings = getattr(
+            parsed_args, "enable_build_warnings", False
+        )
+
+        # If there is no build_mode (ie. we're not running a command that
+        # requires it), we still need one to call gnatpp, so set it to a dummy
+        # build mode.
+        self.build_mode = getattr(
+            parsed_args, "build_mode", self.BUILD_MODES[0]
+        )
+
         self.no_ada_api = parsed_args.no_ada_api
 
         # If asked to, setup the exception hook as a last-chance handler to
@@ -618,17 +649,18 @@ class ManageScript:
                 # noinspection PyPackageRequirements
                 from IPython.core import ultratb
             except ImportError:
-                ultratb = None  # To keep PyCharm happy...
 
-                def excepthook(type, value, tb):
-                    traceback.print_exception(type, value, tb)
+                def excepthook(typ: Type[BaseException],
+                               value: BaseException,
+                               tb: TracebackType) -> Any:
+                    traceback.print_exception(typ, value, tb)
                     pdb.post_mortem(tb)
+
                 sys.excepthook = excepthook
             else:
                 sys.excepthook = ultratb.FormattedTB(
                     mode='Verbose', color_scheme='Linux', call_pdb=1
                 )
-            del ultratb
 
         self.dirs.set_build_dir(parsed_args.build_dir)
         install_dir = getattr(parsed_args, 'install-dir', None)
@@ -660,9 +692,11 @@ class ManageScript:
             # points to the code that must be fixed. Otherwise, point to the
             # top-most stack frame that does not belong to Langkit.
             if e.args and e.args[0] == 'invalid syntax':
-                loc = Location(e.filename, e.lineno)
+                assert isinstance(e, SyntaxError)
+                loc = Location(cast(str, e.filename), cast(int, e.lineno))
             else:
-                loc = extract_library_location(traceback.extract_tb(tb))
+                loc = cast(Location,
+                           extract_library_location(traceback.extract_tb(tb)))
             with Context(loc):
                 check_source_language(False, str(e), do_raise=False)
 
@@ -680,7 +714,7 @@ class ManageScript:
                 ps = pstats.Stats(pr)
                 ps.dump_stats('langkit.prof')
 
-    def set_context(self, parsed_args):
+    def set_context(self, parsed_args: argparse.Namespace) -> None:
         self.context = self.create_context(parsed_args)
 
         # Set the extensions dir on the compile context
@@ -688,19 +722,11 @@ class ManageScript:
             "extensions"
         )
 
-    def prepare_generation(self, args):
+    def prepare_generation(self, args: argparse.Namespace) -> None:
         """
         Prepare generation of the DSL code (initialize the compilation context
         and user defined options).
         """
-        # The call to "check_call" in gnatpp does a setenv, so we need a build
-        # mode. Given that do_make (which already have a build mode) calls
-        # do_generate, we must provide a dummy build mode iff there isn't
-        # already a build mode. The setenv is required for gnatpp to see the
-        # project files, i.e. access to build artifacts is not requested, so we
-        # can provide a dummy build mode.
-        if not getattr(args, 'build_mode', None):
-            args.build_mode = self.BUILD_MODES[0]
 
         # Get source directories for the mains project file. making them
         # relative to the generated project file (which is
@@ -737,44 +763,44 @@ class ManageScript:
             explicit_passes_triggers=explicit_passes_triggers
         )
 
-    def do_generate(self, args):
+    def gnatpp(self, project_file: str, glob_pattern: str) -> None:
+        """
+        Helper function to pretty-print files from a GPR project.
+        """
+
+        # In general, don't abort if we can't find gnatpp or if gnatpp
+        # crashes: at worst sources will not be pretty-printed, which is
+        # not a big deal. `check_call` will emit warnings in this case.
+
+        if self.verbosity.debug:
+            self.check_call('Show pp path', ['which', 'gnatpp'],
+                            abort_on_error=False)
+            self.check_call('Show pp version',
+                            ['gnatpp', '--version'],
+                            abort_on_error=False)
+
+        argv = ['gnatpp', '-P{}'.format(project_file),
+                '--syntax-only',
+                '--eol=lf']
+
+        if self.verbosity.debug:
+            argv.append('-v')
+
+        self.check_call(
+            'Pretty-printing',
+            argv + self.gpr_scenario_vars('relocatable')
+            + glob.glob(glob_pattern),
+            abort_on_error=False
+        )
+
+    def do_generate(self, args: argparse.Namespace) -> None:
         """
         Generate source code for the user language.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         self.prepare_generation(args)
-
-        def gnatpp(project_file: str, glob_pattern: str) -> None:
-            """
-            Helper function to pretty-print files from a GPR project.
-            """
-
-            # In general, don't abort if we can't find gnatpp or if gnatpp
-            # crashes: at worst sources will not be pretty-printed, which is
-            # not a big deal. `check_call` will emit warnings in this case.
-
-            if self.verbosity.debug:
-                self.check_call(args, 'Show pp path', ['which', 'gnatpp'],
-                                abort_on_error=False)
-                self.check_call(args, 'Show pp version',
-                                ['gnatpp', '--version'],
-                                abort_on_error=False)
-
-            argv = ['gnatpp', '-P{}'.format(project_file),
-                    '--syntax-only',
-                    '--eol=lf']
-
-            if self.verbosity.debug:
-                argv.append('-v')
-
-            self.check_call(
-                args, 'Pretty-printing',
-                argv + self.gpr_scenario_vars(args, 'relocatable')
-                + glob.glob(glob_pattern),
-                abort_on_error=False
-            )
 
         self.log_info(
             "Generating source for {}...".format(self.lib_name.lower()),
@@ -793,22 +819,24 @@ class ManageScript:
                 ),
                 Colors.HEADER
             )
-            gnatpp(self.lib_project, self.dirs.build_dir('src', '*.ad*'))
-            gnatpp(self.mains_project,
-                   self.dirs.build_dir('src-mains', '*.ad*'))
+            self.gnatpp(self.lib_project, self.dirs.build_dir('src', '*.ad*'))
+            self.gnatpp(self.mains_project,
+                        self.dirs.build_dir('src-mains', '*.ad*'))
 
         self.log_info("Generation complete!", Colors.OKGREEN)
 
-    def what_to_build(self, args, is_library):
+    def what_to_build(self,
+                      args: argparse.Namespace,
+                      is_library: bool) -> Tuple[bool, bool, bool]:
         """
         Determine what kind of build to perform.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
 
-        :param bool is_library: If true, build all modes (depending on modes
-            enabled in `args`). Otherwise, use relocatable if allowed,
-            static-pic otherwise and static otherwise.
+        :param is_library: If true, build all modes (depending on modes enabled
+            in `args`). Otherwise, use relocatable if allowed, static-pic
+            otherwise and static otherwise.
 
         :return: Whether to build in 1) shared mode 2) static-pic mode 3)
             static mode. Only one is True when is_library is False.
@@ -832,55 +860,56 @@ class ManageScript:
                 build_static = True
         return (build_shared, build_static_pic, build_static)
 
-    def gpr_scenario_vars(self, args, library_type='relocatable'):
+    def gpr_scenario_vars(
+        self, library_type: str = 'relocatable'
+    ) -> List[str]:
         """
         Return the project scenario variables to pass to GPRbuild.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
-
-        :param str library_type: Library flavor to use. Must be "relocatable"
-            or "static".
+        :param library_type: Library flavor to use. Must be "relocatable" or
+            "static".
         """
-        result = ['-XBUILD_MODE={}'.format(args.build_mode),
+        result = ['-XBUILD_MODE={}'.format(self.build_mode),
                   '-XLIBRARY_TYPE={}'.format(library_type),
                   '-XGPR_BUILD={}'.format(library_type),
                   '-XXMLADA_BUILD={}'.format(library_type)]
 
-        enable_build_warnings = getattr(args, 'enable_build_warnings', False)
-        if enable_build_warnings:
+        if self.enable_build_warnings:
             result.append(
                 '-X{}_WARNINGS=true'.format(self.lib_name.upper())
             )
 
         return result
 
-    def gprbuild(self, args, project_file, is_library, mains=None,
-                 obj_dirs=[]):
+    def gprbuild(self,
+                 args: argparse.Namespace,
+                 project_file: str,
+                 is_library: bool,
+                 mains: Set[str] = set(),
+                 obj_dirs: List[str] = []) -> None:
         """
         Run GPRbuild on a project file.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
 
-        :param str project_file: Path to the project file to pass to GPRbuild.
+        :param project_file: Path to the project file to pass to GPRbuild.
 
-        :param bool is_library: See the "what_to_build" method.
+        :param is_library: See the "what_to_build" method.
 
-        :param list[str] obj_dirs: List of paths (relative to the project file
-            directory) to the object directory where gprbuild creates the
-            "*.lexch" files. We will remove all such files before each gprbuild
-            run.
+        :param obj_dirs: List of paths (relative to the project file directory)
+            to the object directory where gprbuild creates the "*.lexch" files.
+            We will remove all such files before each gprbuild run.
 
-            This allows us to workaround a GPRbuild bug (see SB18-035).
-            Library types share the same object directory, however GPRbuild
-            uses a file in the object directory (*.lexch) to know if the
-            library must be rebuilt. Not removing it will make it skip the
-            "static" build after the "static-pic" was built. So we remove it.
+            This allows us to workaround a GPRbuild bug (see SB18-035). Library
+            types share the same object directory, however GPRbuild uses a file
+            in the object directory (*.lexch) to know if the library must be
+            rebuilt. Not removing it will make it skip the "static" build after
+            the "static-pic" was built. So we remove it.
 
-        :param set[str]|None mains: If provided, list of main programs to
-            build. By default, GPRbuild builds them all, so this arguments
-            makes it possible to build only a subset of them.
+        :param mains: If provided, list of main programs to build. By default,
+            GPRbuild builds them all, so this arguments makes it possible to
+            build only a subset of them.
         """
         lexch_patterns = [os.path.join(os.path.dirname(project_file),
                                        obj_dir, '*.lexch')
@@ -907,7 +936,7 @@ class ManageScript:
         gargs = getattr(args, 'gargs') or []
         gargs = sum((shlex.split(args) for args in gargs), [])
 
-        def run(library_type):
+        def run(library_type: str) -> None:
             # Remove the "*.lexch" file
             for pattern in lexch_patterns:
                 files = glob.glob(pattern)
@@ -920,14 +949,14 @@ class ManageScript:
 
             argv = list(base_argv)
             argv.extend(
-                self.gpr_scenario_vars(args, library_type=library_type)
+                self.gpr_scenario_vars(library_type=library_type)
             )
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
                 argv.append('-gnatef')
             argv.extend(gargs)
-            self.check_call(args, 'Build', argv)
+            self.check_call('Build', argv)
 
         build_shared, build_static_pic, build_static = self.what_to_build(
             args, is_library)
@@ -938,14 +967,14 @@ class ManageScript:
         if build_static:
             run('static')
 
-    # noinspection PyIncorrectDocstring
-    def gprinstall(self, args, project_file, is_library):
+    def gprinstall(self,
+                   args: argparse.Namespace,
+                   project_file: str,
+                   is_library: bool) -> None:
         """
         Run GPRinstall on a project file.
 
         See gprbuild for arguments description.
-
-        :type args: argparse.Namespace
         """
         assert project_file.endswith('.gpr')
         project_name = os.path.basename(project_file)[:-4].upper()
@@ -974,11 +1003,11 @@ class ManageScript:
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
 
-        def run(library_type):
+        def run(library_type: str) -> None:
             argv = list(base_argv)
             argv.append('--build-name={}'.format(library_type))
-            argv.extend(self.gpr_scenario_vars(args, library_type))
-            self.check_call(args, 'Install', argv)
+            argv.extend(self.gpr_scenario_vars(library_type))
+            self.check_call('Install', argv)
 
         # Install the static libraries first, so that in the resulting project
         # files, "static" is the default library type.
@@ -1005,24 +1034,26 @@ class ManageScript:
         """
         return self.dirs.build_dir('mains.gpr')
 
-    def do_build(self, args):
+    def do_build(self, args: argparse.Namespace) -> None:
         """
         Build generated source code.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
 
         # Build the generated library itself
         self.log_info("Building the generated source code", Colors.HEADER)
 
-        obj_dirs = [self.dirs.build_dir('obj', args.build_mode)]
+        obj_dirs = [self.dirs.build_dir('obj', self.build_mode)]
         self.gprbuild(args, self.lib_project, is_library=True,
                       obj_dirs=obj_dirs)
 
         # Then build the main programs, if any
         if not self.no_ada_api:
-            disabled_mains = reduce(set.union, args.disable_mains, set())
+            disabled_mains: Set[str] = reduce(
+                set.union, args.disable_mains, set()
+            )
             mains = (set()
                      if args.disable_all_mains else
                      self.main_programs - disabled_mains)
@@ -1033,22 +1064,22 @@ class ManageScript:
 
         self.log_info("Compilation complete!", Colors.OKGREEN)
 
-    def do_make(self, args):
+    def do_make(self, args: argparse.Namespace) -> None:
         """
         Generate and build in one command.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         self.do_generate(args)
         self.do_build(args)
 
-    def do_install(self, args):
+    def do_install(self, args: argparse.Namespace) -> None:
         """
         Install programs and libraries.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         lib_name = self.lib_name.lower()
 
@@ -1099,19 +1130,19 @@ class ManageScript:
                     f, os.path.join(install_path, os.path.basename(f))
                 )
 
-    def do_setenv(self, args):
+    def do_setenv(self, args: argparse.Namespace) -> None:
         """
         Unless --json is passed, display Bourne shell commands that setup
         environment in order to make the generated library available.
         Otherwise, return a JSON document that describe this environment.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         if args.json:
-            result = {}
+            result: Dict[str, str] = {}
 
-            def add_json(name, path):
+            def add_json(name: str, path: str) -> None:
                 try:
                     result[name] = '{}{}{}'.format(
                         result[name], os.path.pathsep, path
@@ -1119,12 +1150,12 @@ class ManageScript:
                 except KeyError:
                     result[name] = path
 
-            self.setup_environment(args.build_mode, add_json)
+            self.setup_environment(add_json)
             print(json.dumps(result))
         else:
-            self.write_setenv(args.build_mode)
+            self.write_setenv()
 
-    def do_create_wheel(self, args):
+    def do_create_wheel(self, args: argparse.Namespace) -> None:
         """
         Create a standalone Python wheel for the Python bindings.
         """
@@ -1144,12 +1175,12 @@ class ManageScript:
             python_interpreter=args.with_python
         )
 
-    def do_list_optional_passes(self, args):
+    def do_list_optional_passes(self, args: argparse.Namespace) -> None:
         """
         List optional passes and exit.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         self.prepare_generation(args)
         printcol("Optional passes\n", Colors.CYAN)
@@ -1159,17 +1190,21 @@ class ManageScript:
                 print(p.doc)
                 print()
 
-    def do_help(self, args):
+    def do_help(self, args: argparse.Namespace) -> None:
         """
         Print usage and exit.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
+        :param args: The arguments parsed from the command line invocation of
+            manage.py.
         """
         del args  # Unused in this implementation
         self.args_parser.print_help()
 
-    def setup_environment(self, build_mode, add_path):
+    def setup_environment(
+        self,
+        add_path: Callable[[str, str], None]
+    ) -> None:
+
         P = self.dirs.build_dir
 
         # Make the project file available
@@ -1180,7 +1215,7 @@ class ManageScript:
         add_path("PATH", P("obj-mains"))
 
         # Make the shared lib available, regardless of the operating system
-        shared_dir = P("lib", "relocatable", build_mode)
+        shared_dir = P("lib", "relocatable", self.build_mode)
         add_path("LD_LIBRARY_PATH", shared_dir)
         add_path("DYLD_LIBRARY_PATH", shared_dir)
         add_path("PATH", shared_dir)
@@ -1195,31 +1230,34 @@ class ManageScript:
         # in emitter.py.
         add_path("C_INCLUDE_PATH", P())
 
-    def derived_env(self, build_mode):
+    def derived_env(self) -> Dict[str, str]:
         """
         Return a copy of the environment after an update using
         setup_environment.
         """
         env = dict(os.environ)
         self.setup_environment(
-            build_mode,
             lambda name, p: add_to_path(env, name, p)
         )
         return env
 
-    def write_setenv(self, build_mode, output_file=sys.stdout):
+    def write_setenv(self, output_file: TextIO = sys.stdout) -> None:
         """
         Display Bourne shell commands that setup environment in order to make
         the generated library available.
 
-        :param file output_file: File to which this should write the shell
-            commands.
+        :param output_file: File to which this should write the shell commands.
         """
-        def add_path(name, path):
+        def add_path(name: str, path: str) -> None:
             output_file.write(format_setenv(name, path) + '\n')
-        self.setup_environment(build_mode, add_path)
 
-    def check_call(self, args, name, argv, env=None, abort_on_error=True):
+        self.setup_environment(add_path)
+
+    def check_call(self,
+                   name: str,
+                   argv: List[str],
+                   env: Opt[Dict[str, str]] = None,
+                   abort_on_error: bool = True) -> bool:
         """
         Log and run a command with a derived environment.
 
@@ -1227,19 +1265,17 @@ class ManageScript:
         error message and, if `abort_on_error` is true, exit with an error
         status code.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
-        :param str name: Name of the process to run, use for error message
+        :param name: Name of the process to run, use for error message
             formatting only.
-        :param list[str] argv: Arguments for the command to run.
-        :param dict[str, str]|None env: Environment to use for the command to
-            run. If None, use self.derived_env().
-        :param bool abort_on_error: If the command stops with an error, exit
+        :param argv: Arguments for the command to run.
+        :param env: Environment to use for the command to run. If None, use
+            self.derived_env().
+        :param abort_on_error: If the command stops with an error, exit
             ourselves.
         """
-        self.log_exec(args, argv)
+        self.log_exec(argv)
         if env is None:
-            env = self.derived_env(args.build_mode)
+            env = self.derived_env()
         try:
             subprocess.check_call(argv, env=env)
         except (subprocess.CalledProcessError, OSError) as exc:
@@ -1260,27 +1296,25 @@ class ManageScript:
                 return False
         return True
 
-    def log_exec(self, args, argv):
+    def log_exec(self, argv: List[str]) -> None:
         """
         If verbosity level is debug, log a command we are about to execute.
 
-        :param argparse.Namespace args: The arguments parsed from the command
-            line invocation of manage.py.
-        :param list[str] argv: Arguments for the command to log.
+        :param argv: Arguments for the command to log.
         """
-        if args.verbosity.debug:
+        if self.verbosity.debug:
             printcol('Executing: {}'.format(
                 ' '.join(pipes.quote(arg) for arg in argv)
             ), Colors.CYAN)
 
-    def log_info(self, msg, color):
+    def log_info(self, msg: str, color: str) -> None:
         """
         If verbosity level is info, log a message with given color.
         """
         if self.verbosity.info:
             printcol(msg, color)
 
-    def log_debug(self, msg, color):
+    def log_debug(self, msg: str, color: str) -> None:
         """
         If verbosity level is debug, log a message with given color.
         """

@@ -55,15 +55,14 @@ def no_colors():
     Colors._enabled = old_val
 
 
-def col(msg, color):
+def col(msg: str, color: str) -> str:
     """
     Utility function that return a string colored with the proper escape
     sequences, for VT100 compatible terminals.
 
-    :param str msg: The message to print.
+    :param msg: The message to print.
     :param color: An escape sequence corresponding to the proper color. Pick
         one in the Colors class.
-    :rtype: str
     """
     if Colors._enabled:
         return "{0}{1}{2}".format(color, msg, Colors.ENDC)
@@ -71,14 +70,13 @@ def col(msg, color):
         return msg
 
 
-def printcol(msg, color):
+def printcol(msg: str, color: str) -> None:
     """
     Utility print function that will print `msg` in color `color`.
-    :param str msg: The message to print.
-    :param str color: The color escape sequence from the enum class
+    :param msg: The message to print.
+    :param color: The color escape sequence from the enum class
         Colors which represents the color to use.
     :return: The color-escaped string, resetting the color to blank at the end.
-    :rtype: str
     """
     print(col(msg, color))
 
