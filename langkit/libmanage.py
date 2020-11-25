@@ -461,10 +461,6 @@ class ManageScript:
                  ' affecting lexing.'
         )
         subparser.add_argument(
-            '--report-unused-doc-entries', action='store_true', default=False,
-            help='Emit warnings for unused documentation entries .'
-        )
-        subparser.add_argument(
             '--no-gdb-hook', action='store_true',
             help='Do not generate the ".debug_gdb_script" section. This'
                  ' section is used to automatically run Langkit GDB helpers'
@@ -750,7 +746,6 @@ class ManageScript:
             main_programs=main_programs,
             check_only=args.check_only,
             warnings=args.enabled_warnings,
-            report_unused_documentation_entries=args.report_unused_doc_entries,
             no_property_checks=args.no_property_checks,
             generate_ada_api=not args.no_ada_api,
             generate_unparser=args.generate_unparser,
