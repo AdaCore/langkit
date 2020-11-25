@@ -1648,7 +1648,6 @@ class CompileCtx:
         return result
 
     def create_all_passes(self, lib_root, check_only=False, warnings=None,
-                          report_unused_documentation_entries=False,
                           explicit_passes_triggers={},
                           default_max_call_depth=1000, **kwargs):
         """
@@ -1676,9 +1675,6 @@ class CompileCtx:
             argument and return an instance of a
             ``langkit.passes.AbstractPass`` subclass.
 
-        :param bool report_unused_documentation_entries: Whether to emit
-            warnings about unused documentation entries.
-
         :param int max_call_depth: Default maximum number of recursive calls
             allowed in property calls. This is used as a mitigation against
             infinite recursions.
@@ -1698,9 +1694,6 @@ class CompileCtx:
         self.generate_unparser = kwargs.pop('generate_unparser', False)
         self.default_max_call_depth = default_max_call_depth
 
-        self.report_unused_documentation_entries = (
-            report_unused_documentation_entries
-        )
         self.check_only = check_only
 
         if kwargs.get('coverage', False):
@@ -2052,8 +2045,14 @@ class CompileCtx:
             """),
 
             GlobalPass('report unused documentation entries',
-                       lambda ctx: ctx.documentations.report_unused(),
-                       disabled=not self.report_unused_documentation_entries),
+                       lambda ctx: ctx.documentations.report_unused())
+            .optional(
+                """
+                Report unused documentation entries. This is an internal pass
+                that is used by Langkit devs to maintain the langkit
+                documentation.
+                """
+            ),
 
             GlobalPass('RA22-015: Unparse language to concrete syntax',
                        unparse_lang),
