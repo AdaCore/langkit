@@ -299,9 +299,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
-        m.write_setenv(build_mode, f)
+        m.write_setenv(f)
 
-    env = m.derived_env(build_mode)
+    env = m.derived_env()
 
     def run(*argv, **kwargs):
         valgrind = kwargs.pop('valgrind', False)
