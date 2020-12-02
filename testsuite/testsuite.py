@@ -71,6 +71,12 @@ class LangkitTestsuite(Testsuite):
                  ' default).'
         )
 
+        parser.add_argument(
+            '--restricted-env', action='store_true',
+            help='Skip testcases that cannot run in a restricted environment'
+                 ' (need for non-standard Python packages).'
+        )
+
         #
         # Convenience options for developpers
         #
@@ -95,6 +101,9 @@ class LangkitTestsuite(Testsuite):
     def set_up(self):
         super().set_up()
         self.env.rewrite_baselines = self.env.options.rewrite
+        self.env.control_condition_env = {
+            'restricted_env': self.env.options.restricted_env,
+        }
 
         if self.env.options.coverage:
             # Create a directory that we'll use to:

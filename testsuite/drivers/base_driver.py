@@ -1,6 +1,7 @@
 import os
 import os.path
 
+from e3.testsuite.control import YAMLTestControlCreator
 from e3.testsuite.driver.classic import TestAbortWithError, TestSkip
 from e3.testsuite.driver.diff import DiffTestDriver, PatternSubstitute
 
@@ -11,6 +12,10 @@ class BaseDriver(DiffTestDriver):
     """
     Base class to provide common test driver helpers.
     """
+
+    @property
+    def test_control_creator(self):
+        return YAMLTestControlCreator(self.env.control_condition_env)
 
     def set_up(self):
         super().set_up()
