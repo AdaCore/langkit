@@ -1,1 +1,4 @@
 driver: python
+control:
+    - [SKIP, "restricted_env",
+       "Non-standard Python package required (railroad-diagram)"]
