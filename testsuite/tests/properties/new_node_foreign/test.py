@@ -42,5 +42,6 @@ class RegularBlock(FooNode):
         return T.SynthNode.new(id=Self.id)
 
 
-build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py')
+build_and_run(lkt_file='expected_concrete_syntax.lkt', py_script='main.py',
+              strict_sound_envs=True)
 print('Done')

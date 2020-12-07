@@ -173,7 +173,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   lkt_semantic_checks=False, ocaml_main=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
-                  show_property_logging=False, unparse_script=unparse_script):
+                  show_property_logging=False, unparse_script=unparse_script,
+                  strict_sound_envs: bool = False):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -215,6 +216,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         without need for any config file.
 
     :param None|str unparse_script: Script to unparse the language spec.
+
+    :param strict_sound_envs: Pass --strict-sound-envs to generation.
     """
     assert not types_from_lkt or lkt_file is not None
 
@@ -261,6 +264,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
             argv.append('--no-pretty-print')
         if generate_unparser:
             argv.append('--generate-unparser')
+        if strict_sound_envs:
+            argv.append('--strict-sound-envs')
 
         # For testsuite performance, do not generate mains unless told
         # otherwise.

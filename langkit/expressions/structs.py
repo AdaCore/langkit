@@ -3,7 +3,8 @@ import inspect
 import funcy
 
 from langkit import names
-from langkit.compiled_types import AbstractNodeData, Field, resolve_type
+from langkit.compiled_types import (AbstractNodeData, Field, get_context,
+                                    resolve_type)
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -326,7 +327,11 @@ class New(AbstractExpression):
 
             # The synthetized node inherits Self.Self_Env, so PLE must happen
             # before this property is run.
-            PropertyDef.get().set_uses_envs()
+            #
+            # TODO (TB19-017): Make this code unconditional once environment
+            # unsoundness is addressed.
+            if get_context().strict_sound_envs:
+                PropertyDef.get().set_uses_envs()
 
         def _render_pre(self):
             return (super()._render_fields()
