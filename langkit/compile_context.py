@@ -17,7 +17,8 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, cast
+from typing import (Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union,
+                    cast)
 
 from funcy import lzip
 
@@ -1647,43 +1648,52 @@ class CompileCtx:
         assert isinstance(result, AbstractPass)
         return result
 
-    def create_all_passes(self, lib_root, check_only=False, warnings=None,
-                          explicit_passes_triggers={},
-                          default_max_call_depth=1000, **kwargs):
+    def create_all_passes(
+        self,
+        lib_root: str,
+        check_only: bool = False,
+        warnings: Optional[WarningSet] = None,
+        generate_unparser: bool = False,
+        explicit_passes_triggers: Dict[str, bool] = {},
+        default_max_call_depth: int = 1000,
+        plugin_passes: List[Union[str, AbstractPass]] = [],
+        **kwargs
+    ) -> None:
         """
         Create all the passes necessary to the compilation of the DSL. This
         should be called before ``emit``.
 
-        :param str lib_root: Path of the directory in which the library should
-            be generated.
+        :param lib_root: Path of the directory in which the library should be
+            generated.
 
-        :param bool check_only: If true, only perform validity checks: stop
-             before code emission. This is useful for IDE hooks. False by
-             default.
+        :param check_only: If true, only perform validity checks: stop before
+            code emission. This is useful for IDE hooks. False by default.
 
-        :param None|WarningSet warnings: If provided, white list of warnings to
-            emit.
+        :param warnings: If provided, white list of warnings to emit.
 
-        :param bool generate_unparser: If true, generate a pretty printer for
-            the given grammar. False by default.
-
-        :param list[str] plugin_passes: List of passes to add as plugins to the
-            compilation pass manager. List item must be a name matching the
-            following pattern: ``MODULE.CALLABLE`` where ``MODULE`` is the name
-            of a module that can be imported, and ``CALLABLE`` is the name of a
-            callable inside the module to import. This callable must accept no
-            argument and return an instance of a
-            ``langkit.passes.AbstractPass`` subclass.
-
-        :param int max_call_depth: Default maximum number of recursive calls
-            allowed in property calls. This is used as a mitigation against
-            infinite recursions.
+        :param generate_unparser: If true, generate a pretty printer for the
+            given grammar. False by default.
 
         :param explicit_passes_triggers: Dict of optional passes names to flags
             (on/off) to trigger activation/deactivation of the passes.
 
-        See langkit.emitter.Emitter's constructor for other supported keyword
-        arguments.
+        :param plugin_passes: List of passes to add as plugins to the
+            compilation pass manager. List items must be either:
+
+            * An instance of a``AbstractPass`` subclass.
+
+            * A name matching the following pattern: ``MODULE.CALLABLE`` where
+              ``MODULE`` is the name of a module that can be imported, and
+              ``CALLABLE`` is the name of a callable inside the module to
+              import. This callable must accept no argument and return an
+              instance of a ``AbstractPass`` subclass.
+
+        :param max_call_depth: Default maximum number of recursive calls
+            allowed in property calls. This is used as a mitigation against
+            infinite recursions.
+
+        See ``langkit.emitter.Emitter``'s constructor for other supported
+        keyword arguments.
         """
 
         assert self.emitter is None
@@ -1691,7 +1701,7 @@ class CompileCtx:
         if warnings:
             self.warnings = warnings
 
-        self.generate_unparser = kwargs.pop('generate_unparser', False)
+        self.generate_unparser = generate_unparser
         self.default_max_call_depth = default_max_call_depth
 
         self.check_only = check_only
@@ -1700,8 +1710,8 @@ class CompileCtx:
             self.gnatcov = GNATcov(self)
 
         # Load plugin passes
-        plugin_passes = [self.load_plugin_pass(p)
-                         for p in kwargs.pop('plugin_passes', [])]
+        loaded_plugin_passes = [self.load_plugin_pass(p)
+                                for p in plugin_passes]
 
         # Compute the list of passes to run:
 
@@ -1716,7 +1726,7 @@ class CompileCtx:
             self.all_passes.extend(self.code_emission_passes())
 
             # Run plugin passes at the end of the pipeline
-            self.all_passes.extend(plugin_passes)
+            self.all_passes.extend(loaded_plugin_passes)
 
         for p in self.all_passes:
             if p.is_optional and p.name in explicit_passes_triggers.keys():
