@@ -1657,6 +1657,7 @@ class CompileCtx:
         explicit_passes_triggers: Dict[str, bool] = {},
         default_max_call_depth: int = 1000,
         plugin_passes: List[Union[str, AbstractPass]] = [],
+        strict_sound_envs: bool = False,
         **kwargs
     ) -> None:
         """
@@ -1692,6 +1693,9 @@ class CompileCtx:
             allowed in property calls. This is used as a mitigation against
             infinite recursions.
 
+        :param bool strict_sound_envs: Whether to enable the strict behavior
+            for sound environments.
+
         See ``langkit.emitter.Emitter``'s constructor for other supported
         keyword arguments.
         """
@@ -1703,6 +1707,7 @@ class CompileCtx:
 
         self.generate_unparser = generate_unparser
         self.default_max_call_depth = default_max_call_depth
+        self.strict_sound_envs = strict_sound_envs
 
         self.check_only = check_only
 
