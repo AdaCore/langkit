@@ -94,25 +94,44 @@ let raisable typ =
    - otherwise we fail
 *)
 
-module CamomileDefaultConfig = CamomileLibrary.DefaultConfig
-
-module CamomileShareConfig = struct
-  let (^/) = Filename.concat
-  let bin_dir = Filename.dirname Sys.executable_name
-  let share_dir = bin_dir ^/ Filename.parent_dir_name ^/ "share" ^/ "camomile"
-  let datadir    = share_dir ^/ "database"
-  let localedir  = share_dir ^/ "locales"
-  let charmapdir = share_dir ^/ "charmaps"
-  let unimapdir  = share_dir ^/ "mappings"
-end
-
 module type CamomileConfig = module type of CamomileLibrary.DefaultConfig
+
+module CamomileDefaultConfig : CamomileConfig = CamomileLibrary.DefaultConfig
+
+let ( ^/ ) = Filename.concat
+
+let build_camomile_config root_path = (module struct
+  let share_dir = root_path ^/ "share" ^/ "camomile"
+
+  let datadir = share_dir ^/ "database"
+
+  let localedir = share_dir ^/ "locales"
+
+  let charmapdir = share_dir ^/ "charmaps"
+
+  let unimapdir = share_dir ^/ "mappings"
+
+  end : CamomileConfig)
+
+module CamomileShareConfig =
+  (val build_camomile_config
+    (Filename.dirname Sys.executable_name ^/ Filename.parent_dir_name)
+    : CamomileConfig)
+
+(* In case we are building through an opam-installed env, find
+   Camomile's stdlib through the appropriate opam env variable *)
+module CamomileOpamConfig =
+  (val
+    let opam_dir = try Sys.getenv "OPAM_SWITCH_PREFIX" with _ -> "DUMMY" in
+    build_camomile_config opam_dir : CamomileConfig)
 
 let camomile_config =
   if Sys.file_exists CamomileDefaultConfig.datadir then
-    (module CamomileDefaultConfig : CamomileConfig)
+    (module CamomileDefaultConfig : CamomileConfig )
   else if Sys.file_exists CamomileShareConfig.datadir then
-    (module CamomileShareConfig: CamomileConfig)
+    (module CamomileShareConfig : CamomileConfig )
+  else if Sys.file_exists CamomileOpamConfig.datadir then
+    (module CamomileOpamConfig : CamomileConfig)
   else failwith "no camomile library found"
 
 module CamomileConfig = (val camomile_config)

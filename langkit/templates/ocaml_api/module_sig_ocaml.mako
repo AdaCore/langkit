@@ -40,6 +40,8 @@ end
 % endfor
 val default_grammar_rule : GrammarRule.t
 
+module Camomile : CamomileLibrary.Type
+
 module Sloc : sig
   ${ocaml_doc('langkit.sloc_type', 1)}
 
