@@ -1746,6 +1746,12 @@ private package ${ada_lib_name}.Implementation is
    --  Convert S into the corresponding symbol, raising a Property_Error if
    --  symbol canonicalization fails. If S is empty, just return null.
 
+   function Solve_Wrapper
+     (R            : Relation;
+      Context_Node : ${T.root_node.name}) return Boolean;
+   --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
+   --  strings in the equation if in debug mode.
+
 private
    --  We only have a private part to defer the initialization of struct
    --  constants. This allows us to circumvent circularity problems between
