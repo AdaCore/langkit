@@ -1459,7 +1459,8 @@ class CompileCtx:
         reachable_by_public = set()
 
         def compute_reachable(reachable_set, forward_map):
-            queue = {p for p in forward_map if p.is_public or p.is_internal}
+            queue = {p for p in forward_map
+                     if p.is_public or p.is_internal or not p.warn_on_unused}
             queue.update(called_by_grammar)
 
             # Don't forget to tag properties used as entity/env resolvers as
@@ -1479,25 +1480,19 @@ class CompileCtx:
         compute_reachable(reachable_by_public_strict, forwards_strict)
         compute_reachable(reachable_by_public, forwards)
 
-        # Get properties that were explicitly marked as "no-warning" by the
-        # user.
-        ignore_props = set(self.all_properties(lambda p: not p.warn_on_unused))
-
         # The unused private properties are the ones that are not part of this
         # set.
         unreachable_private_strict = (
             set(forwards_strict) - reachable_by_public_strict
         )
-        unreachable_private = (
-            (set(forwards) - reachable_by_public) - ignore_props
-        )
+        unreachable_private = set(forwards) - reachable_by_public
         assert all(p.is_private for p in unreachable_private_strict)
 
         # Now determine the set of unused abstraction: it's all root properties
         # that are unused in the strict analysis but used in the other one.
         unused_abstractions = {
             p.root_property for p in
-            (unreachable_private_strict - unreachable_private) - ignore_props
+            (unreachable_private_strict - unreachable_private)
         }
 
         def warn(unused_set, message):
