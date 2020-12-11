@@ -142,12 +142,6 @@ package body ${ada_lib_name}.Implementation is
    pragma Warnings (Off, "referenced");
    function Construct_Entity_Array
      (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
-
-   function Solve_Wrapper
-     (R            : Relation;
-      Context_Node : ${T.root_node.name}) return Boolean;
-   --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
-   --  strings in the equation if in debug mode.
    pragma Warnings (On, "referenced");
 
    procedure Destroy (Env : in out Lexical_Env_Access);
