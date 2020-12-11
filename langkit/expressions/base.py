@@ -3090,7 +3090,7 @@ class PropertyDef(AbstractNodeData):
                  dynamic_vars=None, memoized=False, call_memoizable=False,
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
-                 optional_entity_info=False, warn_on_unused=True,
+                 optional_entity_info=False, warn_on_unused=None,
                  ignore_warn_on_node=None, call_non_memoizable_because=None,
                  activate_tracing=False, dump_ir=False,
                  lazy_field: Opt[bool] = None):
@@ -3186,8 +3186,8 @@ class PropertyDef(AbstractNodeData):
             is passed, and 2) on entities, in which case the entity info from
             the prefix is passed.
 
-        :param bool warn_on_unused: Wether to warn on unused or not. Defaults
-            to True.
+        :param bool|None warn_on_unused: Wether to warn on unused or not.
+            Defaults to None, which means "unspecified by the user".
 
         :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
             warnings for this property. Defaults to None, which means inherit.
@@ -3361,7 +3361,7 @@ class PropertyDef(AbstractNodeData):
         self.optional_entity_info = optional_entity_info
 
         self._requires_untyped_wrapper = False
-        self.warn_on_unused = warn_on_unused
+        self._warn_on_unused = warn_on_unused
         self._ignore_warn_on_node = ignore_warn_on_node
 
         self._call_non_memoizable_because = call_non_memoizable_because
@@ -3449,6 +3449,19 @@ class PropertyDef(AbstractNodeData):
             self.base_property.property_set()
             if self.base_property else [self] + self.all_overriding_properties
         )
+
+    @property
+    def warn_on_unused(self):
+        if self._warn_on_unused is not None:
+            ret = self._warn_on_unused
+        # TODO: Accessing base_property here always returns None, but
+        # _base_property works ...
+        elif self._base_property is not None:
+            ret = self._base_property.warn_on_unused
+        else:
+            ret = True
+
+        return ret
 
     @property
     def overriding(self):
@@ -3593,7 +3606,7 @@ class PropertyDef(AbstractNodeData):
     @property
     def base_property(self):
         """
-        Retun the property that `self` overrides, if any.
+        Return the property that `self` overrides, if any.
 
         :rtype: PropertyDef|None
         """
@@ -4428,7 +4441,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
-             memoized=False, warn_on_unused=True, uses_entity_info=None,
+             memoized=False, warn_on_unused=None, uses_entity_info=None,
              ignore_warn_on_node=None, call_non_memoizable_because=None):
     """
     Public constructor for concrete properties. You can declare your properties
@@ -4466,7 +4479,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False,
                      call_memoizable=False, memoize_in_populate=False,
                      external=False, uses_entity_info=None, uses_envs=None,
-                     warn_on_unused=True, ignore_warn_on_node=None,
+                     warn_on_unused=None, ignore_warn_on_node=None,
                      call_non_memoizable_because=None,
                      activate_tracing=False, dump_ir=False):
     """
@@ -4506,7 +4519,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
 def lazy_field(public: Opt[bool] = None,
                return_type: Opt[CompiledType] = None,
                kind: AbstractKind = AbstractKind.concrete,
-               warn_on_unused: bool = True,
+               warn_on_unused: Opt[bool] = None,
                ignore_warn_on_node: Opt[bool] = None,
                activate_tracing: bool = False,
                dump_ir: bool = False):
