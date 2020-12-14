@@ -4,6 +4,9 @@ from langkit.libmanage import ManageScript
 
 
 class Manage(ManageScript):
+
+    ENABLE_BUILD_WARNINGS_DEFAULT = True
+
     def create_context(self, args):
         from langkit.compile_context import CompileCtx
 
