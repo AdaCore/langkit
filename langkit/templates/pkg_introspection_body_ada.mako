@@ -782,9 +782,11 @@ package body ${ada_lib_name}.Introspection is
    -- Create_Struct --
    -------------------
 
+   pragma Warnings (Off, "referenced");
    function Create_Struct
      (Kind : Struct_Value_Kind; Values : Value_Array) return Value_Type
    is
+      pragma Warnings (On, "referenced");
    begin
       % if ctx.sorted_public_structs:
          --  First check that input values have the expected format
@@ -901,9 +903,11 @@ package body ${ada_lib_name}.Introspection is
    -- Eval_Member --
    -----------------
 
+   pragma Warnings (Off, "referenced");
    function Eval_Member
      (Prefix : Value_Type; Field : Struct_Field_Reference) return Value_Type
    is
+      pragma Warnings (On, "referenced");
       Prefix_Val : Value_Record renames Prefix.Value.Value.all;
    begin
       case Prefix_Val.Kind is

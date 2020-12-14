@@ -104,9 +104,11 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Struct_Fields --
    -------------------
 
+   pragma Warnings (Off, "referenced");
    function Struct_Fields
      (Kind : Struct_Value_Kind) return Struct_Field_Reference_Array
    is
+      pragma Warnings (On, "referenced");
    begin
       % if ctx.sorted_public_structs:
          declare

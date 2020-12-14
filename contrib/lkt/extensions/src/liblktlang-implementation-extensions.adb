@@ -7,7 +7,7 @@ with Liblktlang.Public_Converters; use Liblktlang.Public_Converters;
 
 package body Liblktlang.Implementation.Extensions is
 
-   Prelude_Content : String :=
+   Prelude_Content : constant String :=
      "@builtin struct Int {}" & ASCII.LF &
      "@builtin struct BigInt {}" & ASCII.LF &
      "@builtin struct Symbol {}" & ASCII.LF &
@@ -22,7 +22,8 @@ package body Liblktlang.Implementation.Extensions is
      "    @builtin fun __call__(index : Int): T" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin generic[T] trait Iterator {" & ASCII.LF &
-     "    @builtin generic [U] fun map(map_fn: (T) -> U): Array[U]" & ASCII.LF &
+     "    @builtin generic [U] fun map(map_fn: (T) -> U): Array[U]"
+     & ASCII.LF &
      "    @builtin generic [U] fun filtermap" &
      "      (map_fn: (T) -> U, filter_fn: (T) -> Bool): Array[U]" & ASCII.LF &
      "}" & ASCII.LF &
@@ -49,12 +50,13 @@ package body Liblktlang.Implementation.Extensions is
    function Langkit_Root_P_Fetch_Prelude
      (Node : Bare_Langkit_Root) return Boolean
    is
-      Ctx     : Analysis_Context := Wrap_Context (Node.Unit.Context);
+      Ctx     : constant Analysis_Context := Wrap_Context (Node.Unit.Context);
       Prelude : Analysis_Unit;
    begin
       Prelude := Ctx.Get_From_File ("__prelude");
       if Prelude.Root = No_LK_Node then
-         Prelude := Ctx.Get_From_Buffer ("__prelude", "ascii", Prelude_Content);
+         Prelude := Ctx.Get_From_Buffer
+           ("__prelude", "ascii", Prelude_Content);
 
          --  Check if we have syntactic or semantic errors in the prelude. If
          --  we do, raise an assertion error.
@@ -67,7 +69,7 @@ package body Liblktlang.Implementation.Extensions is
          end if;
 
          declare
-            Errors : Semantic_Result_Array :=
+            Errors : constant Semantic_Result_Array :=
               Prelude.Root.As_Langkit_Root.P_Check_Legality;
          begin
             if Errors'Length > 0 then
