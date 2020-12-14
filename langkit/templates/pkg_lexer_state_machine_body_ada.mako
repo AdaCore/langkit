@@ -20,9 +20,11 @@ package body ${ada_lib_name}.Lexer_State_Machine is
    type Character_Range_Array is array (Positive range <>) of Character_Range;
    --  Sorted list of dijoint character ranges
 
+   pragma Warnings (Off, "referenced");
    function Contains
      (Char : Character_Type; Ranges : Character_Range_Array) return Boolean;
    --  Return whether Char is included in the given ranges
+   pragma Warnings (On, "referenced");
 
    ----------------
    -- Initialize --

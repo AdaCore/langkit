@@ -49,12 +49,14 @@ with ${ada_lib_name}.Private_Converters;
 use ${ada_lib_name}.Private_Converters;
 with ${ada_lib_name}.Introspection_Implementation;
 
+pragma Warnings (Off, "referenced");
 ${exts.with_clauses(with_clauses + [
    ((ctx.symbol_canonicalizer.unit_fqn, False, False)
     if ctx.symbol_canonicalizer else None),
    ((ctx.default_unit_provider.unit_fqn, False, False)
     if ctx.default_unit_provider else None)
 ])}
+pragma Warnings (On, "referenced");
 
 ## Generate a dispatching case statement for the root node class. It will keep
 ## all the node classes which pass the predicate 'pred'. The caller needs to
@@ -137,6 +139,7 @@ package body ${ada_lib_name}.Implementation is
       Destroy : Destroy_Procedure);
    --  Common underlying implementation for Register_Destroyable_Gen
 
+   pragma Warnings (Off, "referenced");
    function Construct_Entity_Array
      (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name};
 
@@ -145,6 +148,7 @@ package body ${ada_lib_name}.Implementation is
       Context_Node : ${T.root_node.name}) return Boolean;
    --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
    --  strings in the equation if in debug mode.
+   pragma Warnings (On, "referenced");
 
    procedure Destroy (Env : in out Lexical_Env_Access);
 
@@ -338,9 +342,11 @@ package body ${ada_lib_name}.Implementation is
       return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
    end Get_Env_Id;
 
+   pragma Warnings (Off, "referenced");
    function To_Lookup_Kind_Type (K : Lookup_Kind) return Lookup_Kind_Type
    is
      (Lookup_Kind_Type'Val (Lookup_Kind'Pos (K)));
+   pragma Warnings (On, "referenced");
 
    --------------------
    -- Create_Context --
@@ -1532,8 +1538,11 @@ package body ${ada_lib_name}.Implementation is
    -- Post_Env_Actions --
    ----------------------
 
+   pragma Warnings (Off, "referenced");
    procedure Post_Env_Actions
-     (Self : ${T.root_node.name}; State : in out PLE_Node_State) is
+     (Self : ${T.root_node.name}; State : in out PLE_Node_State)
+   is
+      pragma Warnings (On, "referenced");
    begin
       <%self:case_dispatch pred="${lambda n: n.env_spec}">
       <%def name="action(n)">
@@ -2209,7 +2218,10 @@ package body ${ada_lib_name}.Implementation is
    -- Is_Rebindable --
    -------------------
 
-   function Is_Rebindable (Node : ${T.root_node.name}) return Boolean is
+   pragma Warnings (Off, "referenced");
+   function Is_Rebindable (Node : ${T.root_node.name}) return Boolean
+   is
+      pragma Warnings (On, "referenced");
    begin
       <% rebindable_nodes = [n for n in ctx.astnode_types
                              if n.annotations.rebindable] %>
@@ -3330,7 +3342,9 @@ package body ${ada_lib_name}.Implementation is
       ------------------
 
       function Get_Base_Env return Lexical_Env is
+         pragma Warnings (Off, "referenced");
          function Get_Parent_Env return Lexical_Env;
+         pragma Warnings (On, "referenced");
 
          --------------------
          -- Get_Parent_Env --
@@ -3430,6 +3444,8 @@ package body ${ada_lib_name}.Implementation is
 
    procedure Assign_Names_To_Logic_Vars (Node : ${T.root_node.name}) is
 
+      pragma Warnings (Off, "referenced");
+
       procedure Assign
         (Node  : ${T.root_node.name};
          LV    : in out Logic_Var_Record;
@@ -3452,6 +3468,8 @@ package body ${ada_lib_name}.Implementation is
       end Assign;
 
       K : constant ${T.node_kind} := Node.Kind;
+
+      pragma Warnings (On, "referenced");
 
    begin
       <%

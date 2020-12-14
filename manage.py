@@ -227,6 +227,7 @@ def make(args: Namespace) -> None:
         f"--library-types={args.library_types}",
         f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
+        "--enable-build-warnings"
     ]
 
     m1 = subprocess.Popen(

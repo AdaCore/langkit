@@ -343,7 +343,9 @@
       -- Trace_Image --
       -----------------
 
+      pragma Warnings (Off, "referenced");
       function Trace_Image (R : ${cls.name}) return String is
+         pragma Warnings (On, "referenced");
       begin
          % if cls.is_entity_type:
             return Image (Entity'(Node => R.Node, Info => R.Info));
@@ -380,7 +382,9 @@
       -- Hash --
       ----------
 
+      pragma Warnings (Off, "referenced");
       function Hash (R : ${cls.name}) return Hash_Type is
+         pragma Warnings (On, "referenced");
       begin
          <%
             fields = cls.get_fields()

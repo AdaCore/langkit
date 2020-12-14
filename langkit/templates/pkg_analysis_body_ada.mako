@@ -27,10 +27,10 @@ with Langkit_Support.Adalog.Predicates;
 use Langkit_Support.Adalog.Predicates;
 with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
 
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
-with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Common;
 with ${ada_lib_name}.Private_Converters;

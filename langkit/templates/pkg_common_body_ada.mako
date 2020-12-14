@@ -72,8 +72,10 @@ package body ${ada_lib_name}.Common is
    -- Precomputed_Symbol --
    ------------------------
 
+   pragma Warnings (Off, "referenced");
    function Precomputed_Symbol
      (Index : Precomputed_Symbol_Index) return Text_Type is
+   pragma Warnings (On, "referenced");
    begin
       % if ctx.symbol_literals:
          declare
