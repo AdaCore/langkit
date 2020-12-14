@@ -5,6 +5,8 @@ from langkit.libmanage import ManageScript
 
 class Manage(ManageScript):
 
+    ENABLE_BUILD_WARNINGS_DEFAULT = True
+
     @property
     def main_programs(self):
         return super(Manage, self).main_programs | {'lkt_toolbox'}
