@@ -3619,7 +3619,7 @@ package body ${ada_lib_name}.Implementation is
       end if;
 
       return Result : constant Lexical_Env := Create_Dynamic_Lexical_Env
-        (Parent            => Simple_Env_Getter (Self.Self_Env),
+        (Parent            => No_Env_Getter,
          Node              => Self,
          Transitive_Parent => Transitive_Parent,
          Owner             => Convert_Unit (Unit),
