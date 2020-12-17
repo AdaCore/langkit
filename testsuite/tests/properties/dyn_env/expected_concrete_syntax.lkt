@@ -2,8 +2,10 @@ import lexer_example
 @with_lexer(foo_lexer)
 grammar foo_grammar {
     @main_rule main_rule <- list*(stmt)
-    stmt <- or(fun_decl | call_expr)
-    fun_decl <- FunDecl("def" id "(" list*(id) ")")
+    stmt <- or(cons_decl | fun_decl | call_expr)
+    cons_decl <- ConsDecl(id "=" expr)
+    fun_decl <- FunDecl("def" id "(" list*(argspec) ")")
+    argspec <- ArgSpec(id "=" expr)
     call_expr <- CallExpr(id "(" list*(expr) ")")
     expr <- or(Literal(@number) | Ref(id))
     id <- Identifier(@identifier)
@@ -13,27 +15,62 @@ grammar foo_grammar {
 @abstract class FooNode : Node {
 }
 
+class ArgSpec : FooNode {
+    @parse_field name : Identifier
+    @parse_field arg_expr : Expr
+}
+
 class CallExpr : FooNode {
     @parse_field name : Identifier
     @parse_field args : ASTList[Expr]
 
-    @lazy args_env : LexicalEnv = DynamicLexicalEnv(BareCallExpr.resolver)
+    @lazy args_env : LexicalEnv =
+    DynamicLexicalEnv(BareCallExpr.args_assocs_getter)
 
-    fun resolver (): Array[InnerEnvAssoc] = {
+    @lazy arg_exprs_env : LexicalEnv =
+    DynamicLexicalEnv(BareCallExpr.arg_exprs_assocs_getter, assoc_resolver=BareExpr.resolve)
+
+    ## For each argument, associate its name to the expression passed in this
+    ## call.
+    fun args_assocs_getter (): Array[InnerEnvAssoc] = {
         val decl = node.node_env().get_first(node.name).as[FunDecl];
 
         decl.args.map(
             (a, i) => InnerEnvAssoc(
-                key=a.symbol, value=node.args?(i), metadata=null
+                key=a.name.symbol, value=node.args?(i), metadata=null
             )
         )
     }
 
-    @export fun get (name : Symbol): Expr =
+    ## For each argument, associate its name to its default expression.
+    fun arg_exprs_assocs_getter (): Array[InnerEnvAssoc] = {
+        val decl = node.node_env().get_first(node.name).as[FunDecl];
+
+        decl.args.map(
+            (a) => InnerEnvAssoc(
+                key=a.name.symbol, value=a.arg_expr.node, metadata=null
+            )
+        )
+    }
+
+    @export fun get_arg (name : Symbol): Expr =
     node.args_env().get_first(name).as[Expr]
+
+    @export fun get_arg_expr (name : Symbol): Expr =
+    node.arg_exprs_env().get_first(name).as[Expr]
+}
+
+class ConsDecl : FooNode {
+    @parse_field name : Identifier
+    @parse_field cons_expr : Expr
 }
 
 @abstract class Expr : FooNode {
+
+    fun resolve (): Expr = match self {
+        case l : Literal => l
+        case r : Ref => self.node_env().get_first(r.name.symbol).as[ConsDecl].cons_expr.resolve()
+    }
 }
 
 class Literal : Expr implements TokenNode {
@@ -45,7 +82,7 @@ class Ref : Expr {
 
 class FunDecl : FooNode {
     @parse_field name : Identifier
-    @parse_field args : ASTList[Identifier]
+    @parse_field args : ASTList[ArgSpec]
 }
 
 class Identifier : FooNode implements TokenNode {

@@ -1061,9 +1061,11 @@ def emit_expr(expr, **ctx):
 
     elif isinstance(expr, DynamicLexicalEnv):
         return "DynamicLexicalEnv({})".format(", ".join(keep([
-            fqn(expr.resolver),
+            fqn(expr.assocs_getter),
+            f"assoc_resolver={fqn(expr.assoc_resolver)}"
+            if expr.assoc_resolver else '',
             "transitive_parent={}".format(ee(expr.transitive_parent))
-            if not expr.transitive_parent else ''
+            if not expr.transitive_parent else '',
         ])))
 
     elif is_a("to_symbol"):

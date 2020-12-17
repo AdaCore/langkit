@@ -324,7 +324,8 @@ package Langkit_Support.Lexical_Envs_Impl is
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr;
-      Resolver          : Inner_Env_Assocs_Resolver) return Lexical_Env
+      Assocs_Getter     : Inner_Env_Assocs_Resolver;
+      Assoc_Resolver    : Entity_Resolver := null) return Lexical_Env
       with Pre  => Node /= No_Node,
            Post => Create_Dynamic_Lexical_Env'Result.Kind = Dynamic_Primary;
    --  Create a new dynamic-primary lexical env
@@ -668,8 +669,11 @@ package Langkit_Support.Lexical_Envs_Impl is
                   --  env instance. If the lexical env is refcounted, then it
                   --  does not own this env.
                when Dynamic_Primary =>
-                  Resolver : Inner_Env_Assocs_Resolver;
+                  Assocs_Getter : Inner_Env_Assocs_Resolver;
                   --  Callback to query environment associations
+
+                  Assoc_Resolver : Entity_Resolver;
+                  --  Callback to resolve returned entities
 
                when others =>
                   null; --  Unreachable

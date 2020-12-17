@@ -1,3 +1,5 @@
+from typing import Optional
+
 from langkit import names
 from langkit.compiled_types import T, get_context
 from langkit.diagnostics import check_source_language
@@ -519,29 +521,43 @@ class DynamicLexicalEnv(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self, resolver, transitive_parent, abstract_expr=None):
-            self.resolver = resolver
+        def __init__(self,
+                     assocs_getter: PropertyDef,
+                     assoc_resolver: Optional[PropertyDef],
+                     transitive_parent: ResolvedExpression,
+                     abstract_expr: Optional[AbstractExpression] = None):
+            self.assocs_getter = assocs_getter
+            self.assoc_resolver = assoc_resolver
             self.transitive_parent = transitive_parent
 
-            resolver_ref = "{}'Access".format(self.resolver.name)
+            assocs_getter_ref = "{}'Access".format(self.assocs_getter.name)
+            assoc_resolver_ref = (
+                'null'
+                if self.assoc_resolver is None
+                else "{}'Access".format(self.assoc_resolver.name)
+            )
             super().__init__(
                 'Dyn_Env',
                 'Create_Dynamic_Lexical_Env',
                 T.LexicalEnv,
-                [construct(Self), resolver_ref, transitive_parent],
+                [construct(Self), assocs_getter_ref, assoc_resolver_ref,
+                 transitive_parent],
                 abstract_expr=abstract_expr,
             )
 
         @property
         def subexprs(self):
-            return {'resolver': self.resolver,
+            return {'assocs_getter': self.assocs_getter,
+                    'assoc_resolver': self.assoc_resolver,
                     'transitive_parent': self.transitive_parent}
 
         def __repr__(self):
             return '<DynamicLexicalEnv.Expr>'
 
-    def __init__(self, resolver, transitive_parent=Literal(True)):
-        self.resolver = resolver
+    def __init__(self, assocs_getter, assoc_resolver=None,
+                 transitive_parent=Literal(True)):
+        self.assocs_getter = assocs_getter
+        self.assoc_resolver = assoc_resolver
         self.transitive_parent = transitive_parent
         super().__init__()
 
@@ -555,26 +571,43 @@ class DynamicLexicalEnv(AbstractExpression):
             " lazy field initializer"
         )
 
-        # Sanitize the resolver: make sure we have a property reference, then
+        # Sanitize assocs_getter: make sure we have a property reference, then
         # make sure it has the expected signature.
 
-        resolver = resolve_property(self.resolver).root_property
-        resolver.require_untyped_wrapper()
+        assocs_getter = resolve_property(self.assocs_getter).root_property
+        assocs_getter.require_untyped_wrapper()
 
         expected_rtype = T.inner_env_assoc.array
         check_source_language(
-            resolver.type.matches(expected_rtype),
-            '"resolver" must return an array of {} (got {})'
+            assocs_getter.type.matches(expected_rtype),
+            '"assocs_getter" must return an array of {} (got {})'
             .format(expected_rtype.element_type.dsl_name,
-                    resolver.type.dsl_name)
+                    assocs_getter.type.dsl_name)
         )
-        check_source_language(not resolver.arguments,
-                              '"resolver" cannot accept arguments')
+        check_source_language(not assocs_getter.arguments,
+                              '"assocs_getter" cannot accept arguments')
+
+        # Likewise for assoc_resolver, is present
+        assoc_resolver = None
+        if self.assoc_resolver:
+            assoc_resolver = resolve_property(
+                self.assoc_resolver
+            ).root_property
+            assoc_resolver.require_untyped_wrapper()
+
+            check_source_language(
+                assoc_resolver.type.matches(T.entity),
+                '"assoc_resolver" must return a {} (got {})'
+                .format(T.entity.dsl_name, assoc_resolver.type.dsl_name)
+            )
+            check_source_language(not assoc_resolver.arguments,
+                                  '"assoc_resolver" cannot accept arguments')
 
         # Should this environment has a transitive parent?
         transitive_parent = construct(self.transitive_parent, T.Bool)
 
-        return self.Expr(resolver, transitive_parent, abstract_expr=self)
+        return self.Expr(assocs_getter, assoc_resolver, transitive_parent,
+                         abstract_expr=self)
 
 
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),

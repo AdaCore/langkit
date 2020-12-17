@@ -18,15 +18,15 @@ def test_not_in_lazy_field():
 
         @langkit_property(return_type=T.LexicalEnv)
         def args_env():
-            result = DynamicLexicalEnv(T.Example.resolver)
+            result = DynamicLexicalEnv(T.Example.assocs_getter)
             return result
 
         @langkit_property(return_type=T.inner_env_assoc.array)
-        def resolver():
+        def assocs_getter():
             return No(T.inner_env_assoc.array)
 
 
-def test_resolver_bad_args():
+def test_assocs_getter_bad_args():
 
     class FooNode(ASTNode):
         pass
@@ -35,16 +35,16 @@ def test_resolver_bad_args():
 
         @lazy_field(return_type=T.LexicalEnv)
         def args_env():
-            result = DynamicLexicalEnv(T.Example.resolver)
+            result = DynamicLexicalEnv(T.Example.assocs_getter)
             return result
 
         @langkit_property(return_type=T.inner_env_assoc.array)
-        def resolver(a=T.Bool):
+        def assocs_getter(a=T.Bool):
             ignore(a)
             return No(T.inner_env_assoc.array)
 
 
-def test_resolver_bad_rtype():
+def test_assocs_getter_bad_rtype():
 
     class FooNode(ASTNode):
         pass
@@ -53,11 +53,58 @@ def test_resolver_bad_rtype():
 
         @lazy_field(return_type=T.LexicalEnv)
         def args_env():
-            result = DynamicLexicalEnv(T.Example.resolver)
+            result = DynamicLexicalEnv(T.Example.assocs_getter)
             return result
 
         @langkit_property(return_type=T.Bool)
-        def resolver():
+        def assocs_getter():
+            return True
+
+
+def test_assoc_resolver_bad_args():
+
+    class FooNode(ASTNode):
+        pass
+
+    class Example(FooNode):
+
+        @lazy_field(return_type=T.LexicalEnv)
+        def args_env():
+            return DynamicLexicalEnv(
+                T.Example.assocs_getter,
+                T.Example.assoc_resolver,
+            )
+
+        @langkit_property(return_type=T.inner_env_assoc.array)
+        def assocs_getter():
+            return No(T.inner_env_assoc.array)
+
+        @langkit_property(return_type=T.FooNode.entity)
+        def assoc_resolver(a=T.Bool):
+            ignore(a)
+            return No(T.FooNode.entity)
+
+
+def test_assoc_resolver_bad_rtype():
+
+    class FooNode(ASTNode):
+        pass
+
+    class Example(FooNode):
+
+        @lazy_field(return_type=T.LexicalEnv)
+        def args_env():
+            return DynamicLexicalEnv(
+                T.Example.assocs_getter,
+                T.Example.assoc_resolver,
+            )
+
+        @langkit_property(return_type=T.inner_env_assoc.array)
+        def assocs_getter():
+            return No(T.inner_env_assoc.array)
+
+        @langkit_property(return_type=T.Bool)
+        def assoc_resolver():
             return True
 
 

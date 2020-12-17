@@ -1,21 +1,53 @@
-== <CallExpr main.txt:3:1-3:11> ==
-a: 1
-b: 2
-c: 3
-d: None
-e: None
-x: None
-y: None
-z: None
+== <CallExpr main.txt:5:1-5:11> ==
+a:
+  (arg):  1
+  (expr): 10
+b:
+  (arg):  2
+  (expr): 20
+c:
+  (arg):  3
+  (expr): 100
+d:
+  (arg):  None
+  (expr): None
+e:
+  (arg):  None
+  (expr): None
+x:
+  (arg):  None
+  (expr): None
+y:
+  (arg):  None
+  (expr): None
+z:
+  (arg):  None
+  (expr): None
 
-== <CallExpr main.txt:4:1-4:9> ==
-a: None
-b: None
-c: None
-d: None
-e: None
-x: x
-y: y
-z: None
+== <CallExpr main.txt:6:1-6:9> ==
+a:
+  (arg):  None
+  (expr): None
+b:
+  (arg):  None
+  (expr): None
+c:
+  (arg):  None
+  (expr): None
+d:
+  (arg):  None
+  (expr): None
+e:
+  (arg):  None
+  (expr): None
+x:
+  (arg):  x
+  (expr): 99
+y:
+  (arg):  y
+  (expr): 200
+z:
+  (arg):  None
+  (expr): None
 
 Done
