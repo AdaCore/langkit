@@ -18,6 +18,13 @@ is
          Shed_Rebindings (E.Info, Node_Env (E.Node));
       <% args.append('E_Info') %>
    % endif
+
+   Result : constant ${property.type.name} :=
+      ${property.name} (${', '.join(args)});
 begin
-   return ${property.name} (${', '.join(args)});
+   % if property.type.is_entity_type:
+      return (Node => Result.Node, Info => Result.Info);
+   % else:
+      return Result;
+   % endif
 end;
