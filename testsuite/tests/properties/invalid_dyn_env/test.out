@@ -1,10 +1,16 @@
+== test_assoc_resolver_bad_args ==
+test.py:XXX: error: "assoc_resolver" cannot accept arguments
+
+== test_assoc_resolver_bad_rtype ==
+test.py:XXX: error: "assoc_resolver" must return a FooNode.entity (got Bool)
+
+== test_assocs_getter_bad_args ==
+test.py:XXX: error: "assocs_getter" cannot accept arguments
+
+== test_assocs_getter_bad_rtype ==
+test.py:XXX: error: "assocs_getter" must return an array of InnerEnvAssoc (got Bool)
+
 == test_not_in_lazy_field ==
 test.py:XXX: error: Dynamic lexical environment creation can only happen inside a lazy field initializer
-
-== test_resolver_bad_args ==
-test.py:XXX: error: "resolver" cannot accept arguments
-
-== test_resolver_bad_rtype ==
-test.py:XXX: error: "resolver" must return an array of InnerEnvAssoc (got Bool)
 
 Done

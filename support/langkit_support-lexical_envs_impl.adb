@@ -447,7 +447,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Node              : Node_Type;
       Transitive_Parent : Boolean := False;
       Owner             : Generic_Unit_Ptr;
-      Resolver          : Inner_Env_Assocs_Resolver) return Lexical_Env is
+      Assocs_Getter     : Inner_Env_Assocs_Resolver;
+      Assoc_Resolver    : Entity_Resolver := null) return Lexical_Env is
    begin
       if Parent /= No_Env_Getter then
          Inc_Ref (Parent);
@@ -459,7 +460,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
             Transitive_Parent => Transitive_Parent,
             Node              => Node,
             Rebindings_Pool   => null,
-            Resolver          => Resolver),
+            Assocs_Getter     => Assocs_Getter,
+            Assoc_Resolver    => Assoc_Resolver),
          Owner => Owner);
    end Create_Dynamic_Lexical_Env;
 
@@ -757,7 +759,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
             declare
                --  Query the dynamic list of associations for this env
                Assocs : Inner_Env_Assoc_Array :=
-                  Env.Resolver.all ((Env.Node, No_Entity_Info));
+                  Env.Assocs_Getter.all ((Env.Node, No_Entity_Info));
                A      : Inner_Env_Assoc;
 
             begin
@@ -768,7 +770,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   if Key = null or else Key = Get_Key (A) then
                      declare
                         IMN : constant Internal_Map_Node :=
-                          (Get_Node (A), Get_Metadata (A), null);
+                          (Get_Node (A), Get_Metadata (A), Env.Assoc_Resolver);
                      begin
                         Append_Result
                           (IMN, Metadata, Current_Rebindings, From_Rebound);

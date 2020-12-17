@@ -10,8 +10,10 @@ procedure Main is
    U   : constant Analysis_Unit := Ctx.Get_From_Buffer
      (Filename => "main.txt",
       Buffer   =>
-         "def foo(a b c)" & ASCII.LF
-         & "def bar(x y)" & ASCII.LF
+         "cons1 = 100" & ASCII.LF
+         & "cons2 = 200" & ASCII.LF
+         & "def foo(a=10 b=20 c=cons1)" & ASCII.LF
+         & "def bar(x=99 y=cons2)" & ASCII.LF
          & "foo(1 2 3)" & ASCII.LF
          & "bar(x y)" & ASCII.LF);
 
@@ -35,8 +37,14 @@ begin
             declare
                Id : constant String := (1 => Id_Char);
             begin
-               E := C.P_Get (To_Unbounded_Text (To_Text (Id)));
-               Put_Line ("" & Id & ": "
+               Put_Line (Id & ":");
+
+               E := C.P_Get_Arg (To_Unbounded_Text (To_Text (Id)));
+               Put_Line ("  (arg):  "
+                         & (if E.Is_Null then "None" else Image (E.Text)));
+
+               E := C.P_Get_Arg_Expr (To_Unbounded_Text (To_Text (Id)));
+               Put_Line ("  (expr): "
                          & (if E.Is_Null then "None" else Image (E.Text)));
             end;
          end loop;

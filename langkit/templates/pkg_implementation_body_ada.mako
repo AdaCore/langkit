@@ -3585,7 +3585,8 @@ package body ${ada_lib_name}.Implementation is
 
    function Create_Dynamic_Lexical_Env
      (Self              : ${T.root_node.name};
-      Resolver          : Inner_Env_Assocs_Resolver;
+      Assocs_Getter     : Inner_Env_Assocs_Resolver;
+      Assoc_Resolver    : Entity_Resolver;
       Transitive_Parent : Boolean) return Lexical_Env
    is
       Unit : constant Internal_Unit := Self.Unit;
@@ -3603,7 +3604,8 @@ package body ${ada_lib_name}.Implementation is
          Node              => Self,
          Transitive_Parent => Transitive_Parent,
          Owner             => Convert_Unit (Unit),
-         Resolver          => Resolver)
+         Assocs_Getter     => Assocs_Getter,
+         Assoc_Resolver    => Assoc_Resolver)
       do
          --  Since dynamic lexical environments can only be created in lazy
          --  field initializers, it is fine to tie Result's lifetime to the
