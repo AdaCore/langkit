@@ -296,6 +296,21 @@
       ## to the lexical environment.
 
       declare
+         Dest_Env_Name : constant ${T.Symbol.name} :=
+            ${(call_prop(exprs.name_prop)
+               if exprs.name_prop
+               else 'null')};
+         % if exprs.fallback_env_expr:
+         Fallback_Env : constant Lexical_Env :=
+           (if Dest_Env_Name = null
+            then ${call_prop(exprs.fallback_env_prop)}
+            else Empty_Env);
+         % endif
+
+         Resolver      : constant Entity_Resolver :=
+            ${("{}'Access".format(exprs.resolver.name)
+               if exprs.resolver else 'null')};
+
          ## There are two modes: either the mappings expression returns an
          ## array, in which case we must process all its elements, either it's
          ## just one mapping.
@@ -308,17 +323,22 @@
          Mapping : ${exprs.mappings_prop.type.name} :=
             ${call_prop(exprs.mappings_prop)};
          % endif
-
-         Resolver : constant Entity_Resolver :=
-            ${("{}'Access".format(exprs.resolver.name)
-               if exprs.resolver else 'null')};
       begin
          % if is_array:
          for Mapping of Mappings.Items loop
          % endif
 
          Add_To_Env
-           (Self, Mapping, State, Resolver,
+           (Self,
+            State,
+            Mapping.Key,
+            Mapping.Val,
+            Mapping.Metadata,
+            Resolver,
+            Dest_Env_Name,
+            ${("Fallback_Env"
+               if exprs.fallback_env_expr
+               else "Mapping.Dest_Env")},
             DSL_Location => ${('""'
                                if exprs.unsound else
                                string_repr(exprs.str_location))});

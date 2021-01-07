@@ -69,9 +69,13 @@ grammar foo_grammar {
 
 @abstract class FooNode : Node {
 
+    ## Return whether this node is in the top-level decl list.
+    fun is_toplevel (): Bool =
+    (not (node.parent.is_null)) and (node.parent.parent.is_null)
+
     ## Return whether this node can define a named environment.
     @memoized fun can_have_name (): Bool = if (
-        node is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls | PublicPart | PrivatePart
+        node is PackageDecl | PackageBody | SubpDecl | SubpBody | SubpBodyDecls
     ) then (
         # All nodes that can define a named environment are supposed to
         # live in lists, so use Self.parent.parent to get the node that
@@ -213,13 +217,18 @@ class PackageBody : FooNode {
 
     fun self_name (): Name = node.name
 
-    ## Assuming this PackageBody cannot define a named environment, return the
-    ## environment in which this declaration should be registered.
-    fun get_initial_env (): LexicalEnv = {
-        val pkg_decl = node.parent.children_env().get_first(node.name.base_name().to_symbol).as[PackageDecl];
+    ## Assuming this PackageBody is not in the top-level list, return the
+    ## environment of its PackageDecl that it should reference.
+    fun body_decl_scope (): LexicalEnv = {
+        val pkg_decl = node.lookup_decl_part();
 
         if (pkg_decl.private_part.is_null) then pkg_decl.children_env() else pkg_decl.private_part.children_env()
     }
+
+    ## Assuming this PackageBody is not in the top-level list, return the
+    ## the corresponding package declaration.
+    fun lookup_decl_part (): PackageDecl =
+    node.parent.children_env().get_first(node.name.base_name().to_symbol).as[PackageDecl].node
 
     ## Return the PackageDecl node corresponding to this PackageBody.
     @export fun decl_part (): PackageDecl = {

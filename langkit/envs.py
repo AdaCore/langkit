@@ -135,7 +135,13 @@ def add_to_env(mappings: AbstractExpression,
     :param unsound: Whether ``dest_env`` is allowed to return foreign
         environments.
     """
-    return AddToEnv(mappings, resolver, unsound)
+    return AddToEnv(
+        mappings=mappings,
+        resolver=resolver,
+        name_expr=None,
+        fallback_env_expr=None,
+        unsound=unsound
+    )
 
 
 def add_to_env_kv(key: AbstractExpression,
@@ -163,6 +169,31 @@ def add_to_env_kv(key: AbstractExpression,
         mappings=new_env_assoc(key, val, dest_env, metadata),
         resolver=resolver,
         unsound=unsound,
+    )
+
+
+def add_to_env_by_name(key: AbstractExpression,
+                       val: AbstractExpression,
+                       name_expr: AbstractExpression,
+                       fallback_env_expr: AbstractExpression) -> AddToEnv:
+    """Add an entry to a potentially foreign lexical env.
+
+    The target lexical environment is:
+
+    * If ``name_expr`` returns a non-null env name, the environment that has
+      this name (according to precedence rules).
+
+    * Otherwise, the environment that the ``fallback_env_expr`` expression
+      returns. In that case, the environment cannot be foreign.
+    """
+    from langkit.expressions import new_env_assoc
+
+    return AddToEnv(
+        mappings=new_env_assoc(key, val),
+        resolver=None,
+        name_expr=name_expr,
+        fallback_env_expr=fallback_env_expr,
+        unsound=False,
     )
 
 
@@ -496,10 +527,14 @@ class AddToEnv(EnvAction):
     def __init__(self,
                  mappings: AbstractExpression,
                  resolver: Optional[PropertyDef],
+                 name_expr: Optional[AbstractExpression],
+                 fallback_env_expr: Optional[AbstractExpression],
                  unsound: bool) -> None:
         super().__init__()
         self.mappings = mappings
         self.resolver = resolver
+        self.name_expr = name_expr
+        self.fallback_env_expr = fallback_env_expr
         self.unsound = unsound
 
         self.mappings_prop: PropertyDef
@@ -507,6 +542,12 @@ class AddToEnv(EnvAction):
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.mappings_prop = env_spec.create_internal_property(
             'Env_Mappings', self.mappings, None
+        )
+        self.name_prop = env_spec.create_internal_property(
+            'Dest_Env_Name', self.name_expr, T.Symbol
+        )
+        self.fallback_env_prop = env_spec.create_internal_property(
+            'Fallback_Env', self.fallback_env_expr, T.LexicalEnv
         )
 
     def rewrite_property_refs(self,
