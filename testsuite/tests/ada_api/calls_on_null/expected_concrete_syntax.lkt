@@ -1,0 +1,21 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(decl)
+    decl <- Decl(id "=" id)
+    id <- Identifier(@identifier)
+
+}
+
+@abstract class FooNode : Node {
+
+    @export fun prop (): Bool = true
+}
+
+class Decl : FooNode {
+    @parse_field name : Identifier
+    @parse_field value : Identifier
+}
+
+class Identifier : FooNode implements TokenNode {
+}

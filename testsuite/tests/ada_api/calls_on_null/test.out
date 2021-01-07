@@ -1,0 +1,149 @@
+Context:Has_Unit
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Get_From_File
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Get_From_Buffer (String)
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Get_From_Buffer (Unbounded_String)
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Get_With_Error
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Unit_Provider
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Has_With_Trivia
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Discard_Errors_In_Populate_Lexical_Env
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Set_Logic_Resolution_Timeout
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Context:Has_Rewriting_Handle
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null context argument
+
+Unit:Context
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Reparse (None)
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Reparse (String)
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Populate_Lexical_Env
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Get_Filename
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Get_Charset
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Has_Diagnostics
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Diagnostics
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Format_GNU_Diagnostic
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Root
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:First_Token
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Last_Token
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Token_Count
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Trivia_Count
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Text
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Lookup_Token
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Get_Line
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Dump_Lexical_Env
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:Print
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Unit:PP_Trivia
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null unit argument
+
+Node:Is_Token_Node
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Is_Synthetic
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Kind
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Kind_Name
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+List:List_Child
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+List:List_First
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+List:List_Next
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+List:List_Has_Element
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+List:List_Element
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Field access
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Node:Property call
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null node argument
+
+Token_Reference:Get_Symbol
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Data
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Text
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Text (Single)
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Text (Range)
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Origin_Filename
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Origin_Charset
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+Token_Reference:Raw_Data
+LANGKIT_SUPPORT.ERRORS.PRECONDITION_FAILURE : null token argument
+
+main.adb: Done
+Done

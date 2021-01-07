@@ -88,6 +88,10 @@ ${public_prototype(property)} is
       % endif
 
    begin
+      if ${self_arg}.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (${self_arg}.Safety_Net);
 
       ## Convert property arguments to internal types

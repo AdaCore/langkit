@@ -216,6 +216,9 @@ package body ${ada_lib_name}.Common is
 
    function Get_Symbol (Token : Token_Reference) return Symbol_Type is
    begin
+      if Token.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
       return Get_Symbol (Token.Index, Token.TDH.all);
    end Get_Symbol;
 
@@ -225,6 +228,9 @@ package body ${ada_lib_name}.Common is
 
    function Data (Token : Token_Reference) return Token_Data_Type is
    begin
+      if Token.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
       return Convert (Token.TDH.all, Token, Raw_Data (Token));
    end Data;
 
@@ -235,6 +241,9 @@ package body ${ada_lib_name}.Common is
    function Text (Token : Token_Reference) return Text_Type is
       RD : constant Stored_Token_Data := Raw_Data (Token);
    begin
+      if Token.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
       return Token.TDH.Source_Buffer (RD.Source_First .. RD.Source_Last);
    end Text;
 
@@ -246,8 +255,12 @@ package body ${ada_lib_name}.Common is
       FD : constant Token_Data_Type := Data (First);
       LD : constant Token_Data_Type := Data (Last);
    begin
+      if First.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
       if First.TDH /= Last.TDH then
-         raise Constraint_Error;
+         raise Precondition_Failure with
+            "token arguments must belong to the same source";
       end if;
       return FD.Source_Buffer.all (FD.Source_First .. LD.Source_Last);
    end Text;
@@ -316,6 +329,9 @@ package body ${ada_lib_name}.Common is
 
    function Origin_Filename (Token : Token_Reference) return String is
    begin
+      if Token.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
       return +Token.TDH.Filename.Full_Name;
    end Origin_Filename;
 
@@ -325,6 +341,9 @@ package body ${ada_lib_name}.Common is
 
    function Origin_Charset (Token : Token_Reference) return String is
    begin
+      if Token.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
       return To_String (Token.TDH.Charset);
    end Origin_Charset;
 
@@ -357,9 +376,15 @@ package body ${ada_lib_name}.Common is
    --------------
 
    function Raw_Data (T : Token_Reference) return Stored_Token_Data is
-     (if T.Index.Trivia = No_Token_Index
-      then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Index.Token))
-      else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Index.Trivia)).T);
+   begin
+      if T.TDH = null then
+         raise Precondition_Failure with "null token argument";
+      end if;
+      return
+        (if T.Index.Trivia = No_Token_Index
+         then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Index.Token))
+         else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Index.Trivia)).T);
+   end Raw_Data;
 
    -------------
    -- Convert --
