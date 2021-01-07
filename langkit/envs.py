@@ -178,7 +178,7 @@ def set_initial_env(env_expr: AbstractExpression,
     """
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
-    the list of action.
+    the list of actions.
 
     :param unsound: Whether ``env_expr`` is allowed to return foreign
         environments.
@@ -193,7 +193,7 @@ def set_initial_env_by_name(
     """
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
-    the list of action (if present).
+    the list of actions (if present).
 
     :param name_expr: Expression that returns an env name (symbol). If it
         evaluates to a non-null symbol, look for the environment that has this
