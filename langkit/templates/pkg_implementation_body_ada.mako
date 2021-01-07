@@ -1284,25 +1284,32 @@ package body ${ada_lib_name}.Implementation is
    ----------------
 
    procedure Add_To_Env
-     (Self         : ${T.root_node.name};
-      Mapping      : ${T.env_assoc.name};
-      State        : PLE_Node_State;
-      Resolver     : Entity_Resolver;
-      DSL_Location : String)
+     (Self              : ${T.root_node.name};
+      State             : PLE_Node_State;
+      Key               : Symbol_Type;
+      Value             : ${T.root_node.name};
+      MD                : ${T.env_md.name};
+      Resolver          : Entity_Resolver;
+      Dest_Env_Name     : ${T.Symbol.name};
+      Dest_Env_Fallback : Lexical_Env;
+      DSL_Location      : String)
    is
-      Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
-      MD         : ${T.env_md.name} renames Mapping.Metadata;
+      Context    : constant Internal_Context := Self.Unit.Context;
+      Root_Scope : Lexical_Env renames Context.Root_Scope;
+      --  Shortcuts
 
-      Dest_Env : constant Lexical_Env :=
-        (if Mapping.Dest_Env = Empty_Env
-         then State.Current_Env
-         else Mapping.Dest_Env);
+      Dest_Env : Lexical_Env;
+      Dest_NED : Named_Env_Descriptor_Access;
+      --  Description for the destination environment
    begin
-      if Mapping = No_Env_Assoc then
+      --  Sanitize the content to add to the destination environment: Key,
+      --  Value and MD (Resolver is always correct).
+
+      if Key = null or else Value = null then
          return;
       end if;
 
-      if Mapping.Val.Unit /= Self.Unit then
+      if Value.Unit /= Self.Unit then
          raise Property_Error with "Cannot add_to_env an AST node that comes"
                                    & " from another analysis unit";
       end if;
@@ -1324,6 +1331,27 @@ package body ${ada_lib_name}.Implementation is
          end if;
       % endif
 
+      --  Then determine the destination environment
+
+      if Dest_Env_Name /= null then
+         --  There is an environment name: just lookup the corresponding
+         --  NED/env.
+         Dest_NED := Get_Named_Env_Descriptor (Context, Dest_Env_Name);
+         Dest_Env := Dest_NED.Env_With_Precedence;
+
+      elsif Dest_Env_Fallback /= Empty_Env then
+         --  There is an explicit destination environment
+         Dest_NED := null;
+         Dest_Env := Dest_Env_Fallback;
+
+      else
+         --  Just use the current environment
+         Dest_NED := State.Current_NED;
+         Dest_Env := State.Current_Env;
+      end if;
+
+      --  Sanitize it
+
       if Dest_Env.Kind /= Static_Primary then
          raise Property_Error with
             "Cannot add elements to a lexical env that is not static-primary";
@@ -1336,48 +1364,49 @@ package body ${ada_lib_name}.Implementation is
          --
          --  This reasoning applies to environments that belong to foreign
          --  units, but also to the root environment.
-         Is_Foreign (Dest_Env, Self) and then Is_Synthetic (Mapping.Val)
+         Is_Foreign (Dest_Env, Self) and then Is_Synthetic (Value)
       then
          raise Property_Error with
             "Cannot add a synthetic node to a lexical env from another"
             & " analysis unit";
-      end if;
 
-      --  If requested, reject foreign destination environments.  Note that
-      --  this detects only explicit destination environments
-      --  (Mapping.Dest_Env): Set_Initial_Env already sanitizes initial
-      --  environments (State.Current_Env).
-      --
-      --  This is an attempt at identifying uses of the unsound relocation
-      --  mechanism (as opposed to named environments), so this applies to all
-      --  foreign environments (root scope included).
-      if DSL_Location'Length > 0
-         and then Is_Foreign_Strict (Mapping.Dest_Env, Self)
+      elsif
+         --  If requested, reject foreign destination environments.
+         --
+         --  Note that this checks only explicit destination environments
+         --  (Dest_Env_Fallback): Set_Initial_Env already sanitized initial
+         --  environments (State.Current_Env). Also note that Dest_Env_Fallback
+         --  is Empty_Env (i.e. the fallback env expression is not evaluated)
+         --  if we had a non-null env name (no need to fallback if we use a
+         --  named environment).
+         --
+         --  This is an attempt at identifying uses of the unsound relocation
+         --  mechanism (as opposed to named environments), so this applies to
+         --  all foreign environments (root scope included).
+         DSL_Location'Length > 0
+         and then Is_Foreign_Strict (Dest_Env_Fallback, Self)
       then
          raise Property_Error with
             "unsound foreign environment in AddToEnv (" & DSL_Location & ")";
       end if;
 
-      --  Add the element to the environment. Note that this does nothing if
-      --  Dest_Env is Empty_Env.
-      Add (Self     => Dest_Env,
-           Key      => Mapping.Key,
-           Value    => Mapping.Val,
-           MD       => MD,
-           Resolver => Resolver);
+      --  Now that everything is sanitized, we can proceed with the actual
+      --  key/value pair addition. Note that this does nothing if Dest_Env
+      --  ended up empty.
+      Add (Dest_Env, Key, Value, MD, Resolver);
 
       --  If we're adding the element to an environment by env name, we must
       --  register this association in two places: in the target named env
-      --  entry, and in Mapping.Val's unit.
-      if State.Current_NED /= null and then Mapping.Dest_Env = Empty_Env then
+      --  entry, and in Value's unit.
+      if Dest_NED /= null then
          declare
             use NED_Assoc_Maps;
 
-            FN    : Map renames State.Current_NED.Foreign_Nodes;
+            FN    : Map renames Dest_NED.Foreign_Nodes;
             Dummy : Boolean;
             Cur   : Cursor;
          begin
-            FN.Insert (Key      => Mapping.Key,
+            FN.Insert (Key      => Key,
                        New_Item => Internal_Map_Node_Vectors.Empty_Vector,
                        Position => Cur,
                        Inserted => Dummy);
@@ -1385,11 +1414,10 @@ package body ${ada_lib_name}.Implementation is
                V : Internal_Map_Node_Vectors.Vector renames
                   FN.Reference (Cur);
             begin
-               V.Append ((Mapping.Val, MD, Resolver));
+               V.Append ((Value, MD, Resolver));
             end;
          end;
-         Mapping.Val.Unit.Exiled_Entries_In_NED.Append
-           ((State.Current_NED, Mapping.Key, Mapping.Val));
+         Value.Unit.Exiled_Entries_In_NED.Append ((Dest_NED, Key, Value));
 
       --  Otherwise, if we're adding the element to an environment that belongs
       --  to a different unit, or to the root scope, then:
@@ -1398,15 +1426,14 @@ package body ${ada_lib_name}.Implementation is
          --  Add the environment, the key, and the value to the list of entries
          --  contained in other units, so we can remove them when reparsing
          --  Val's unit.
-         Mapping.Val.Unit.Exiled_Entries.Append
-           ((Dest_Env, Mapping.Key, Mapping.Val));
+         Value.Unit.Exiled_Entries.Append ((Dest_Env, Key, Value));
 
          if Dest_Env /= Root_Scope then
             --  Add Val to the list of foreign nodes that Dest_Env's unit
             --  contains, so that when that unit is reparsed, we can call
             --  Add_To_Env again on those nodes.
             Convert_Unit (Dest_Env.Owner).Foreign_Nodes.Append
-              ((Mapping.Val, Self.Unit));
+              ((Value, Self.Unit));
          end if;
       end if;
    end Add_To_Env;

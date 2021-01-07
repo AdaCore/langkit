@@ -21,8 +21,10 @@ units loading.
 """
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import (EnvSpec, add_env, add_to_env_kv,
-                          set_initial_env_by_name)
+from langkit.envs import (
+    EnvSpec, RefKind, add_env, add_to_env_by_name, add_to_env_kv, reference,
+    set_initial_env_by_name,
+)
 from langkit.expressions import (AbstractKind, If, Let, No, Not, Self, String,
                                  Var, langkit_property)
 
@@ -31,6 +33,11 @@ from utils import build_and_run, unparse_all_script
 
 class FooNode(ASTNode):
 
+    @langkit_property(return_type=T.Bool)
+    def is_toplevel():
+        """Return whether this node is in the top-level decl list."""
+        return Not(Self.parent.is_null) & Self.parent.parent.is_null
+
     @langkit_property(return_type=T.Bool, memoized=True)
     def can_have_name():
         """
@@ -38,7 +45,7 @@ class FooNode(ASTNode):
         """
         return If(
             Self.is_a(PackageDecl, PackageBody, SubpDecl, SubpBody,
-                      SubpBodyDecls, PublicPart, PrivatePart),
+                      SubpBodyDecls),
 
             # All nodes that can define a named environment are supposed to
             # live in lists, so use Self.parent.parent to get the node that
@@ -273,8 +280,14 @@ class PackageDecl(FooNode):
         )
 
     env_spec = EnvSpec(
-        set_initial_env_by_name(Self.decl_parent_scope_name,
-                                Self.parent.children_env),
+        set_initial_env_by_name(
+            If(
+                Self.is_toplevel,
+                Self.decl_parent_scope_name,
+                No(T.Symbol),
+            ),
+            Self.parent.children_env
+        ),
         add_to_env_kv(Self.name.base_name.to_symbol, Self),
         add_env(names=Self.new_env_names)
     )
@@ -299,31 +312,59 @@ class PackageBody(FooNode):
         return Self.name
 
     @langkit_property(return_type=T.LexicalEnv)
-    def get_initial_env():
+    def body_decl_scope():
         """
-        Assuming this PackageBody cannot define a named environment, return the
-        environment in which this declaration should be registered.
+        Assuming this PackageBody is not in the top-level list, return the
+        environment of its PackageDecl that it should reference.
         """
-        pkg_decl = Var(
-            Self.parent.children_env.get_first(Self.name.base_name.to_symbol)
-            .cast(T.PackageDecl)
-        )
+        pkg_decl = Var(Self.lookup_decl_part)
         return If(
             pkg_decl.private_part.is_null,
             pkg_decl.children_env,
             pkg_decl.private_part.children_env
         )
 
+    @langkit_property(return_type=T.PackageDecl)
+    def lookup_decl_part():
+        """
+        Assuming this PackageBody is not in the top-level list, return the
+        the corresponding package declaration.
+        """
+        return (
+            Self.parent.children_env.get_first(Self.name.base_name.to_symbol)
+            .cast(T.PackageDecl).node
+        )
+
     env_spec = EnvSpec(
         # The initial environment for package bodies is the private part of the
-        # correspoding package specs (or the public part if there is no private
-        # part).
+        # corresponding package specs (or the public part if there is no
+        # private part).
         set_initial_env_by_name(
-            Self.suffixed_full_name(String('__privatepart')).to_symbol,
-            Self.get_initial_env
+            If(
+                Self.is_toplevel,
+                Self.suffixed_full_name(String('__privatepart')).to_symbol,
+                No(T.Symbol),
+            ),
+            Self.parent.children_env,
         ),
-        add_to_env_kv('__nextpart', Self),
+
+        add_to_env_by_name(
+            '__nextpart',
+            Self,
+            If(Self.can_have_name,
+               Self.suffixed_full_name(String('__privatepart')).to_symbol,
+               No(T.Symbol)),
+            Self.body_decl_scope,
+        ),
+
         add_env(names=[Self.suffixed_full_name(String('__body')).to_symbol]),
+
+        reference(
+            Self.cast(FooNode).singleton,
+            through=T.PackageBody.body_decl_scope,
+            cond=Not(Self.is_toplevel),
+            kind=RefKind.prioritary,
+        ),
     )
 
     @langkit_property(return_type=T.PackageDecl.entity, public=True)
