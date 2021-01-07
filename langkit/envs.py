@@ -174,25 +174,25 @@ def add_to_env_kv(key: AbstractExpression,
 
 def add_to_env_by_name(key: AbstractExpression,
                        val: AbstractExpression,
-                       name_expr: AbstractExpression,
-                       fallback_env_expr: AbstractExpression) -> AddToEnv:
+                       name: AbstractExpression,
+                       fallback_env: AbstractExpression) -> AddToEnv:
     """Add an entry to a potentially foreign lexical env.
 
     The target lexical environment is:
 
-    * If ``name_expr`` returns a non-null env name, the environment that has
-      this name (according to precedence rules).
+    * If ``name`` returns a non-null env name, the environment that has this
+      name (according to precedence rules).
 
-    * Otherwise, the environment that the ``fallback_env_expr`` expression
-      returns. In that case, the environment cannot be foreign.
+    * Otherwise, the environment that the ``fallback_env`` expression returns.
+      In that case, the environment cannot be foreign.
     """
     from langkit.expressions import new_env_assoc
 
     return AddToEnv(
         mappings=new_env_assoc(key, val),
         resolver=None,
-        name_expr=name_expr,
-        fallback_env_expr=fallback_env_expr,
+        name_expr=name,
+        fallback_env_expr=fallback_env,
         unsound=False,
     )
 
@@ -204,38 +204,35 @@ def handle_children() -> HandleChildren:
     return HandleChildren()
 
 
-def set_initial_env(env_expr: AbstractExpression,
+def set_initial_env(env: AbstractExpression,
                     unsound: bool = False) -> SetInitialEnv:
     """
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
     the list of actions.
 
-    :param unsound: Whether ``env_expr`` is allowed to return foreign
-        environments.
+    :param unsound: Whether ``env`` is allowed to return foreign environments.
     """
-    return SetInitialEnv(None, env_expr, unsound)
+    return SetInitialEnv(None, env, unsound)
 
 
-def set_initial_env_by_name(
-    name_expr: AbstractExpression,
-    fallback_env_expr: AbstractExpression
-) -> SetInitialEnv:
+def set_initial_env_by_name(name: AbstractExpression,
+                            fallback_env: AbstractExpression) -> SetInitialEnv:
     """
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
     the list of actions (if present).
 
-    :param name_expr: Expression that returns an env name (symbol). If it
-        evaluates to a non-null symbol, look for the environment that has this
-        name (it will be updated every time another environment related to this
-        name takes precedence). If it evaluates to a null symbol, use
-        ``fallback_env_expr`` to get the initial environment.
-    :param fallback_env_expr: Expression that returns the initial env if there
-        is no named env lookup. Note that except if it's the empty env or the
-        root scope, this environment must not be foreign to Self.
+    :param name: Expression that returns an env name (symbol). If it evaluates
+        to a non-null symbol, look for the environment that has this name (it
+        will be updated every time another environment related to this name
+        takes precedence). If it evaluates to a null symbol, use
+        ``fallback_env`` to get the initial environment.
+    :param fallback_env: Expression that returns the initial env if there is no
+        named env lookup. Note that except if it's the empty env or the root
+        scope, this environment must not be foreign to Self.
     """
-    return SetInitialEnv(name_expr, fallback_env_expr)
+    return SetInitialEnv(name, fallback_env)
 
 
 def do(expr: AbstractExpression) -> Do:
