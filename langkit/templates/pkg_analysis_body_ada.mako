@@ -114,6 +114,9 @@ package body ${ada_lib_name}.Analysis is
      (Context       : Analysis_Context'Class;
       Unit_Filename : String) return Boolean is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
       return Has_Unit (Unwrap_Context (Context), Unit_Filename);
    end Has_Unit;
 
@@ -128,6 +131,9 @@ package body ${ada_lib_name}.Analysis is
       Reparse  : Boolean := False;
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
       return Wrap_Unit
         (Get_From_File (Unwrap_Context (Context), Filename, Charset,
                         Reparse, Rule));
@@ -144,6 +150,9 @@ package body ${ada_lib_name}.Analysis is
       Buffer   : String;
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
       return Wrap_Unit
         (Get_From_Buffer (Unwrap_Context (Context), Filename, Charset,
                           Buffer, Rule));
@@ -163,6 +172,9 @@ package body ${ada_lib_name}.Analysis is
       Bytes       : Big_String_Access;
       Bytes_Count : Natural;
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
       Get_String (Buffer, Bytes, Bytes_Count);
       return Wrap_Unit
         (Get_From_Buffer (Unwrap_Context (Context), Filename, Charset,
@@ -180,10 +192,13 @@ package body ${ada_lib_name}.Analysis is
       Charset  : String := "";
       Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
    is
-      Result : constant Internal_Unit :=
-         Implementation.Get_With_Error (Unwrap_Context (Context), Filename,
-                                        Error, Charset, Rule);
+      Result : Internal_Unit;
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
+      Result := Implementation.Get_With_Error
+        (Unwrap_Context (Context), Filename, Error, Charset, Rule);
       return Wrap_Unit (Result);
    end Get_With_Error;
 
@@ -200,6 +215,9 @@ package body ${ada_lib_name}.Analysis is
       Charset : String := "";
       Reparse : Boolean := False) return Analysis_Unit is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
       return Wrap_Unit
         (Get_From_Provider (Unwrap_Context (Context), Name, Kind,
                             Charset, Reparse));
@@ -214,11 +232,15 @@ package body ${ada_lib_name}.Analysis is
    function Unit_Provider
      (Context : Analysis_Context'Class) return Unit_Provider_Reference
    is
-      Provider : constant Internal_Unit_Provider_Access :=
-         Unit_Provider (Unwrap_Context (Context));
+      Provider : Internal_Unit_Provider_Access;
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
+
       --  By design, Unit_Provider_Wrapper is supposed to be the only
       --  implementation of the Internal_Unit_Provider interface.
+      Provider := Unit_Provider (Unwrap_Context (Context));
       if Provider.all not in Unit_Provider_Wrapper'Class then
          raise Program_Error;
       end if;
@@ -243,6 +265,10 @@ package body ${ada_lib_name}.Analysis is
    function Has_With_Trivia (Context : Analysis_Context'Class) return Boolean
    is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
+
       return Has_With_Trivia (Unwrap_Context (Context));
    end Has_With_Trivia;
 
@@ -253,6 +279,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Discard_Errors_In_Populate_Lexical_Env
      (Context : Analysis_Context'Class; Discard : Boolean) is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
+
       Discard_Errors_In_Populate_Lexical_Env
         (Unwrap_Context (Context), Discard);
    end Discard_Errors_In_Populate_Lexical_Env;
@@ -264,6 +294,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Set_Logic_Resolution_Timeout
      (Context : Analysis_Context'Class; Timeout : Natural) is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
+
       Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
    end Set_Logic_Resolution_Timeout;
 
@@ -283,6 +317,10 @@ package body ${ada_lib_name}.Analysis is
    function Has_Rewriting_Handle
      (Context : Analysis_Context'Class) return Boolean is
    begin
+      if Context.Internal = null then
+         raise Precondition_Failure with "null context argument";
+      end if;
+
       return Has_Rewriting_Handle (Unwrap_Context (Context));
    end Has_Rewriting_Handle;
 
@@ -292,6 +330,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Context (Unit : Analysis_Unit'Class) return Analysis_Context is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Wrap_Context (Context (Unwrap_Unit (Unit)));
    end Context;
 
@@ -311,6 +353,10 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Reparse (Unit : Analysis_Unit'Class; Charset : String := "") is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       Reparse (Unwrap_Unit (Unit), Charset);
    end Reparse;
 
@@ -321,6 +367,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Reparse
      (Unit : Analysis_Unit'Class; Charset : String := ""; Buffer  : String) is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       Reparse (Unwrap_Unit (Unit), Charset, Buffer);
    end Reparse;
 
@@ -330,6 +380,10 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit'Class) is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       Populate_Lexical_Env (Unwrap_Unit (Unit));
    end Populate_Lexical_Env;
 
@@ -339,6 +393,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Get_Filename (Unit : Analysis_Unit'Class) return String is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Get_Filename (Unwrap_Unit (Unit));
    end Get_Filename;
 
@@ -348,6 +406,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Get_Charset (Unit : Analysis_Unit'Class) return String is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Get_Charset (Unwrap_Unit (Unit));
    end Get_Charset;
 
@@ -357,6 +419,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Has_Diagnostics (Unit : Analysis_Unit'Class) return Boolean is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Has_Diagnostics (Unwrap_Unit (Unit));
    end Has_Diagnostics;
 
@@ -367,6 +433,10 @@ package body ${ada_lib_name}.Analysis is
    function Diagnostics (Unit : Analysis_Unit'Class) return Diagnostics_Array
    is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Implementation.Diagnostics (Unwrap_Unit (Unit));
    end Diagnostics;
 
@@ -377,6 +447,10 @@ package body ${ada_lib_name}.Analysis is
    function Format_GNU_Diagnostic
      (Unit : Analysis_Unit'Class; D : Diagnostic) return String is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Format_GNU_Diagnostic (Unwrap_Unit (Unit), D);
    end Format_GNU_Diagnostic;
 
@@ -386,6 +460,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Root (Unit : Analysis_Unit'Class) return ${root_entity.api_name} is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Wrap_Node (Root (Unwrap_Unit (Unit)));
    end Root;
 
@@ -395,6 +473,10 @@ package body ${ada_lib_name}.Analysis is
 
    function First_Token (Unit : Analysis_Unit'Class) return Token_Reference is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return First_Token (Unwrap_Unit (Unit));
    end First_Token;
 
@@ -404,6 +486,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Last_Token (Unit : Analysis_Unit'Class) return Token_Reference is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Last_Token (Unwrap_Unit (Unit));
    end Last_Token;
 
@@ -413,6 +499,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Token_Count (Unit : Analysis_Unit'Class) return Natural is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Token_Count (Unwrap_Unit (Unit));
    end Token_Count;
 
@@ -422,6 +512,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Trivia_Count (Unit : Analysis_Unit'Class) return Natural is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Trivia_Count (Unwrap_Unit (Unit));
    end Trivia_Count;
 
@@ -431,6 +525,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Text (Unit : Analysis_Unit'Class) return Text_Type is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Implementation.Text (Unwrap_Unit (Unit));
    end Text;
 
@@ -442,6 +540,10 @@ package body ${ada_lib_name}.Analysis is
      (Unit : Analysis_Unit'Class; Sloc : Source_Location)
       return Token_Reference is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Lookup_Token (Unwrap_Unit (Unit), Sloc);
    end Lookup_Token;
 
@@ -450,9 +552,12 @@ package body ${ada_lib_name}.Analysis is
    --------------
 
    function Get_Line
-     (Unit : Analysis_Unit; Line_Number : Positive) return Text_Type
-   is
+     (Unit : Analysis_Unit; Line_Number : Positive) return Text_Type is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       return Get_Line (Unwrap_Unit (Unit), Line_Number);
    end Get_Line;
 
@@ -462,6 +567,10 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Dump_Lexical_Env (Unit : Analysis_Unit'Class) is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       Dump_Lexical_Env (Unwrap_Unit (Unit));
    end Dump_Lexical_Env;
 
@@ -481,6 +590,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Print (Unit : Analysis_Unit'Class; Show_Slocs : Boolean := True)
    is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       Print (Unwrap_Unit (Unit), Show_Slocs);
    end Print;
 
@@ -490,6 +603,10 @@ package body ${ada_lib_name}.Analysis is
 
    procedure PP_Trivia (Unit : Analysis_Unit'Class) is
    begin
+      if Unit.Internal = null then
+         raise Precondition_Failure with "null unit argument";
+      end if;
+
       PP_Trivia (Unwrap_Unit (Unit));
    end PP_Trivia;
 
@@ -507,6 +624,10 @@ package body ${ada_lib_name}.Analysis is
    function Is_Token_Node (Node : ${root_entity.api_name}'Class) return Boolean
    is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node.Safety_Net);
       return Is_Token_Node (Node.Internal.Node);
    end Is_Token_Node;
@@ -518,6 +639,10 @@ package body ${ada_lib_name}.Analysis is
    function Is_Synthetic (Node : ${root_entity.api_name}'Class) return Boolean
    is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node.Safety_Net);
       return Is_Synthetic (Node.Internal.Node);
    end Is_Synthetic;
@@ -610,6 +735,10 @@ package body ${ada_lib_name}.Analysis is
    function Kind (Node : ${root_entity.api_name}'Class) return ${T.node_kind}
    is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node.Safety_Net);
       return Node.Internal.Node.Kind;
    end Kind;
@@ -620,6 +749,10 @@ package body ${ada_lib_name}.Analysis is
 
    function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node.Safety_Net);
       return Kind_Name (Node.Internal.Node);
    end Kind_Name;
@@ -646,8 +779,13 @@ package body ${ada_lib_name}.Analysis is
          function List_Child
            (Node : ${e.api_name}'Class; Index : Positive) return ${rtype}
          is
-            Result : constant ${root_entity.api_name} := Node.Child (Index);
+            Result : ${root_entity.api_name};
          begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Result := Node.Child (Index);
             return Result.As_${rtype};
          end List_Child;
       % endif
@@ -655,33 +793,45 @@ package body ${ada_lib_name}.Analysis is
       % if e.element_type.is_root_list_type:
          <% rtype = e.element_type.element_type.entity.api_name %>
 
-         function ${e.api_name}_First (Node : ${e.api_name}) return Positive
-         is
-           pragma Unreferenced (Node);
+         function ${e.api_name}_First (Node : ${e.api_name}) return Positive is
          begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
             return 1;
          end;
 
          function ${e.api_name}_Next
-           (Node : ${e.api_name}; Cursor : Positive) return Positive
-         is
-           pragma Unreferenced (Node);
+           (Node : ${e.api_name}; Cursor : Positive) return Positive is
          begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
             return Cursor + 1;
          end;
 
          function ${e.api_name}_Has_Element
-           (Node : ${e.api_name}; Cursor : Positive) return Boolean
-         is
+           (Node : ${e.api_name}; Cursor : Positive) return Boolean is
          begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
             return Cursor in 1 .. Node.Children_Count;
          end;
 
          function ${e.api_name}_Element
            (Node : ${e.api_name}; Cursor : Positive) return ${rtype}'Class
          is
-            Child : constant ${root_entity.api_name} := Node.Child (Cursor);
+            Child : ${root_entity.api_name};
          begin
+            if Node.Internal.Node = null then
+               raise Precondition_Failure with "null node argument";
+            end if;
+
+            Child := Node.Child (Cursor);
             return ${rtype}'(Child.As_${rtype});
          end;
       % endif

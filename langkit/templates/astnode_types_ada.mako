@@ -144,6 +144,10 @@
    is
       Result : ${field.type.name};
    begin
+      if Node.Internal.Node = null then
+         raise Precondition_Failure with "null node argument";
+      end if;
+
       Check_Safety_Net (Node.Safety_Net);
       Result := Implementation.${field.name} (Node.Internal.Node);
       % if field.type.is_ast_node:
