@@ -2239,14 +2239,12 @@ package body ${ada_lib_name}.Implementation is
    -- Is_Rebindable --
    -------------------
 
-   pragma Warnings (Off, "referenced");
-   function Is_Rebindable (Node : ${T.root_node.name}) return Boolean
-   is
-      pragma Warnings (On, "referenced");
+   function Is_Rebindable (Node : ${T.root_node.name}) return Boolean is
    begin
       <% rebindable_nodes = [n for n in ctx.astnode_types
                              if n.annotations.rebindable] %>
       % if not rebindable_nodes:
+         pragma Unreferenced (Node);
          return True;
       % else:
          return Node.Kind in ${ctx.astnode_kind_set(rebindable_nodes)};
