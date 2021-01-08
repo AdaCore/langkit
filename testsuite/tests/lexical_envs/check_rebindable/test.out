@@ -1,0 +1,15 @@
+main.py: Running...
+== <Rebinder main.txt:2:5-2:24> ==
+Exception: Illegal lexical environment rebinding
+
+== <Rebinder main.txt:3:5-3:25> ==
+Exception: Illegal lexical environment rebinding
+
+== <Rebinder main.txt:4:5-4:25> ==
+<Rebinder main.txt:4:5-4:25>
+
+== <Rebinder main.txt:5:5-5:26> ==
+<Rebinder main.txt:5:5-5:26>
+
+main.py: Done.
+Done
