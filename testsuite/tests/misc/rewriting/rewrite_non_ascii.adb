@@ -44,10 +44,10 @@ begin
       Decl_List : constant Node_Rewriting_Handle :=
          Handle (Root (U));
       B_Def     : constant Node_Rewriting_Handle := Create_Def
-        (Handle     => RH,
-         Def_F_Name => Create_Token_Node (RH, Foo_Name, "b"),
-         Def_F_Args => No_Node_Rewriting_Handle,
-         Def_F_Expr => Create_Token_Node (RH, Foo_Literal, "1"));
+        (Handle => RH,
+         F_Name => Create_Token_Node (RH, Foo_Name, "b"),
+         F_Args => No_Node_Rewriting_Handle,
+         F_Expr => Create_Token_Node (RH, Foo_Literal, "1"));
    begin
       Append_Child (Decl_List, B_Def);
    end;

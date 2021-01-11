@@ -428,14 +428,17 @@ package body ${ada_lib_name}.Rewriting is
          function Create_${n.entity.api_name}
            (Handle : Rewriting_Handle
             % for f in n.get_parse_fields():
-               ; ${f.name} : Node_Rewriting_Handle
+               ; ${f.api_name} : Node_Rewriting_Handle
             % endfor
             ) return Node_Rewriting_Handle is
          begin
             return Wrap_Node_RH (Impl.Create_${n.entity.api_name}
                (Unwrap_RH (Handle),
-                ${', '.join('{} => Unwrap_Node_RH ({})'.format(f.name, f.name)
-                            for i, f in enumerate(n.get_parse_fields(), 1))}));
+                ${
+                   ', '.join(
+                     '{} => Unwrap_Node_RH ({})'.format(f.name, f.api_name)
+                     for i, f in enumerate(n.get_parse_fields(), 1)
+                )}));
          end;
 
       % endif

@@ -234,7 +234,7 @@ package ${ada_lib_name}.Rewriting is
          function Create_${n.entity.api_name}
            (Handle : Rewriting_Handle
             % for f in n.get_parse_fields():
-               ; ${f.name} : Node_Rewriting_Handle
+               ; ${f.api_name} : Node_Rewriting_Handle
             % endfor
             ) return Node_Rewriting_Handle;
 
