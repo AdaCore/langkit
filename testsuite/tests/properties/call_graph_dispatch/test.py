@@ -41,7 +41,9 @@ def find_path(from_property, to_property):
     """
     Look for a path in the properties call graph from one property to another.
     """
-    graph, _ = ctx.properties_callgraphs()
+    ctx.compute_properties_callgraphs()
+    graph = ctx.properties_forwards_callgraph
+
     visited = set()
 
     def helper(prop, path):
@@ -58,7 +60,7 @@ def find_path(from_property, to_property):
             return path
 
         # Otherwise, continue seaching to the properties that `prop` calls
-        for callee in graph[prop]:
+        for callee in graph:
             result = helper(callee, path)
             if result:
                 return result

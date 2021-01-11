@@ -17,8 +17,8 @@ from functools import reduce
 import importlib
 import os
 from os import path
-from typing import (Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union,
-                    cast)
+from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
+                    Union, cast)
 
 from funcy import lzip
 
@@ -36,6 +36,7 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 
 if TYPE_CHECKING:
     from langkit.compiled_types import StructType, UserField
+    from langkit.expressions import PropertyDef
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
     from langkit.python_api import PythonAPISettings
@@ -796,6 +797,20 @@ class CompileCtx:
         # Register builtin exception types
         self._register_builtin_exception_types()
 
+        self.properties_forwards_callgraph: \
+            Optional[Dict[PropertyDef, Set[PropertyDef]]] = None
+        """
+        Mapping from caller properties to sets of called properties. None when
+        not yet computed or invalidated.
+        """
+
+        self.properties_backwards_callgraph: \
+            Optional[Dict[PropertyDef, Set[PropertyDef]]] = None
+        """
+        Mapping from called properties to sets of caller properties. None when
+        not yet computed or invalidated.
+        """
+
     @contextmanager
     def lkt_context(self, lkt_node):
         """
@@ -1256,7 +1271,7 @@ class CompileCtx:
         """
         return any(prop.activate_tracing for prop in self.all_properties)
 
-    def properties_callgraphs(self):
+    def compute_properties_callgraphs(self) -> None:
         """
         Compute forwards and backwards properties callgraphs.
 
@@ -1282,9 +1297,6 @@ class CompileCtx:
             The given resolved expression, which comes from the given caller
             property is the expression that references the called property.
         :type forwards_converter: (ResolvedExpression, PropertyDef) -> T
-
-        :return: A tuple for 1) the forwards callgraph 2) the backwards one.
-        :rtype: (dict[PropertyDef, set[T]], dict[PropertyDef, set[T]])
         """
         from langkit.expressions import PropertyDef
 
@@ -1303,8 +1315,8 @@ class CompileCtx:
             for subexpr in expr.flat_subexprs():
                 traverse_expr(subexpr)
 
-        forwards = {}
-        backwards = {}
+        forwards: Dict[PropertyDef, Set[PropertyDef]] = {}
+        backwards: Dict[PropertyDef, Set[PropertyDef]] = {}
 
         for prop in self.all_properties(include_inherited=False):
             forwards.setdefault(prop, set())
@@ -1319,7 +1331,8 @@ class CompileCtx:
             elif prop.constructed_expr:
                 traverse_expr(prop.constructed_expr)
 
-        return (forwards, backwards)
+        self.properties_forwards_callgraph = forwards
+        self.properties_backwards_callgraph = backwards
 
     def compute_uses_entity_info_attr(self):
         """
@@ -1386,8 +1399,6 @@ class CompileCtx:
         This will determine if public properties need to automatically call
         Populate_Lexical_Env.
         """
-        _, backwards = self.properties_callgraphs()
-
         queue = sorted(self.all_properties(lambda p: p._uses_envs,
                                            include_inherited=False),
                        key=lambda p: p.qualname)
@@ -1395,7 +1406,7 @@ class CompileCtx:
         # Propagate the "uses envs" attribute in the backwards call graph
         while queue:
             prop = queue.pop(0)
-            for caller in backwards[prop]:
+            for caller in self.properties_backwards_callgraph[prop]:
                 if not caller._uses_envs:
                     caller.set_uses_envs()
                     queue.append(caller)
@@ -1428,7 +1439,7 @@ class CompileCtx:
         from langkit.expressions import resolve_property
         from langkit.parsers import Predicate
 
-        forwards_strict, _ = self.properties_callgraphs()
+        forwards_strict = self.properties_forwards_callgraph
 
         # Compute the callgraph with flattened subclassing information:
         # consider only root properties.
@@ -1954,6 +1965,8 @@ class CompileCtx:
                          PropertyDef.check_overriding_types),
             PropertyPass('check properties returning node types',
                          PropertyDef.check_returned_nodes),
+            GlobalPass('compute properties callgraphs',
+                       CompileCtx.compute_properties_callgraphs),
             GlobalPass('compute uses entity info attribute',
                        CompileCtx.compute_uses_entity_info_attr),
             GlobalPass('compute uses envs attribute',
@@ -1972,10 +1985,10 @@ class CompileCtx:
             ASTNodePass('expose public structs and arrays types in APIs',
                         CompileCtx.expose_public_api_types,
                         auto_context=False),
-            GlobalPass('lower properties dispatching',
-                       CompileCtx.lower_properties_dispatching),
             GlobalPass('check memoized properties',
                        CompileCtx.check_memoized),
+            GlobalPass('lower properties dispatching',
+                       CompileCtx.lower_properties_dispatching),
             GlobalPass('compute AST node constants',
                        CompileCtx.compute_astnode_constants),
             errors_checkpoint_pass,
@@ -2422,6 +2435,10 @@ class CompileCtx:
         from langkit.compiled_types import Argument
         from langkit.expressions import PropertyDef
 
+        # This pass rewrites properties, so it invalidates callgraphs
+        self.properties_forwards_callgraphs = None
+        self.properties_backwards_callgraphs = None
+
         redirected_props = {}
 
         # Iterate on AST nodes in hierarchical order, so that we meet root
@@ -2851,7 +2868,7 @@ class CompileCtx:
                     ', '.join(p.qualname for p in self.call_chain)
                 )
 
-        _, back_graph = self.properties_callgraphs()
+        back_graph = self.properties_backwards_callgraph
         annotations = {prop: Annotation() for prop in back_graph}
 
         # First check that properties can be memoized without considering
