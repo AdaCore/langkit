@@ -349,3 +349,10 @@ def collapse_concrete_nodes(input_type, astnodes):
         remaining_nodes -= result[-1]
 
     return (result, remaining_nodes)
+
+
+class Uninitialized:
+    """
+    Dummy class whose instances mean "this variable/field is not initialized".
+    """
+    pass
