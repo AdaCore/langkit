@@ -892,7 +892,7 @@ class CompiledType:
         return result + ')'
 
     @property
-    def name(self):
+    def name(self) -> names.Name:
         """
         Name of the type for general values in the Ada generated code.
 
@@ -1331,8 +1331,7 @@ class CompiledType:
 
         :rtype: ArrayType
         """
-        return ArrayType(name=self.name + names.Name('Array_Type'),
-                         element_type=self)
+        return ArrayType(self)
 
     @property
     def is_base_struct_type(self):
@@ -3545,13 +3544,15 @@ class ArrayType(CompiledType):
     Base class for array types.
     """
 
-    def __init__(self, name, element_type):
+    def __init__(self, element_type: CompiledType):
+        name = element_type.name + names.Name("Array_Type")
         self.null_constant = names.Name('No') + name
 
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
         super().__init__(
-            name=name, is_ptr=True,
+            name=name,
+            is_ptr=True,
             is_refcounted=True,
             nullexpr=self.null_constant.camel_with_underscores,
             element_type=element_type,
