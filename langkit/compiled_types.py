@@ -3654,8 +3654,10 @@ class ArrayType(CompiledType):
         return self.element_type.name + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
-        if (self.element_type.is_entity_type and
-                not self.element_type.emit_c_type):
+        if (
+            self.element_type.is_entity_type
+            and not self.element_type.emit_c_type
+        ):
             return T.entity.array.c_type(c_api_settings)
         else:
             return CAPIType(c_api_settings, self.api_name)
