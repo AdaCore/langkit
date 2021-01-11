@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
-from typing import Any, Dict, List, Optional as Opt, Set, Tuple
+from typing import Any, Dict, List, Optional as Opt, Set, Tuple, Union
 
 from enum import Enum
 import funcy
@@ -22,8 +22,8 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    assert_type, dispatch_on_type, inherited_property, memoized, nested,
-    not_implemented_error, self_memoized
+    Uninitialized, assert_type, dispatch_on_type, inherited_property, memoized,
+    nested, not_implemented_error, self_memoized
 )
 
 
@@ -3221,7 +3221,9 @@ class PropertyDef(AbstractNodeData):
         :type: bool
         """
 
-        self._base_property = 'not initialized'
+        self._base_property: Union[None, PropertyDef, Uninitialized] = (
+            Uninitialized()
+        )
 
         self.is_dispatcher = False
         """
