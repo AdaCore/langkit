@@ -898,9 +898,11 @@ class FieldAccess(AbstractExpression):
             abstract_expr=self
         )
 
-        # RA22-015: keep a reference to the constructed expr, so that we can
-        # introspect which field is accessed in dsl_unparse.
+        # RA22-015: keep a reference to the constructed expr and original
+        # accessed field (node data), so that we can introspect which field is
+        # accessed in dsl_unparse.
         self.constructed_expr = ret
+        self.constructed_node_data = to_get
         return ret
 
     def __call__(self, *args, **kwargs):
