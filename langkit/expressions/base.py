@@ -5057,15 +5057,25 @@ class CallExpr(BasicExpr):
     return a new ownership share to the caller.
     """
 
-    def __init__(self, result_var_name, name, type, exprs, abstract_expr=None):
+    def __init__(self,
+                 result_var_name: Opt[str],
+                 name: Union[names.Name, str],
+                 type: CompiledType,
+                 exprs: List[Union[str, ResolvedExpression]],
+                 shadow_args: List[Union[ResolvedExpression,
+                                         AbstractNodeData]] = [],
+                 abstract_expr: Opt[AbstractExpression] = None):
         """
-        :param None|str result_var_name: See ResolvedExpression's constructor.
-        :param names.Name|str name: The name of the procedure to call.
-        :param CompiledType type: The return type of the function call.
-        :param [ResolvedExpression] exprs: A list of expressions that
-            represents the arguments to the function call.
-        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
-            constructor.
+        :param result_var_name: See ResolvedExpression's constructor.
+        :param name: The name of the procedure to call.
+        :param type: The return type of the function call.
+        :param exprs: A list of expressions that represents the arguments to
+            the function call.
+        :param shadow_args: Arguments that do not contribute to code
+            generation, but still to be considered for their side effects in
+            various analysis (for instance, a property so that it is considered
+            called by this expression).
+        :param abstract_expr: See ResolvedExpression's constructor.
         """
         self.name = names.Name.get(name)
 
@@ -5074,6 +5084,8 @@ class CallExpr(BasicExpr):
             args=', '.join(['{}'] * len(exprs))
         )
 
+        self.shadow_args = list(shadow_args)
+
         super().__init__(result_var_name, template, type, exprs,
                          requires_incref=False, abstract_expr=abstract_expr)
 
@@ -5081,7 +5093,8 @@ class CallExpr(BasicExpr):
     def subexprs(self):
         return {'0-type': self.type,
                 '1-name': self.name,
-                '2-args': self.operands}
+                '2-args': self.operands,
+                '3-shadow-args': self.shadow_args}
 
     def __repr__(self):
         return '<CallExpr {}>'.format(self.name.camel_with_underscores)
