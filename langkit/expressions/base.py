@@ -4,7 +4,9 @@ from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
-from typing import Any, Dict, List, Optional as Opt, Set, Tuple, Union
+from typing import (Any, Callable, Dict, List, Optional as Opt, Set, Tuple,
+                    Union)
+
 
 from enum import Enum
 import funcy
@@ -3093,7 +3095,18 @@ class PropertyDef(AbstractNodeData):
                  optional_entity_info=False, warn_on_unused=None,
                  ignore_warn_on_node=None, call_non_memoizable_because=None,
                  activate_tracing=False, dump_ir=False,
-                 lazy_field: Opt[bool] = None):
+                 lazy_field: Opt[bool] = None,
+                 access_constructor: Opt[
+                     Callable[
+                         [
+                             ResolvedExpression,
+                             AbstractNodeData,
+                             List[Tuple[Argument, ResolvedExpression]],
+                             Opt[AbstractExpression],
+                         ],
+                         ResolvedExpression,
+                     ]
+                 ] = None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -3206,11 +3219,15 @@ class PropertyDef(AbstractNodeData):
         :param lazy_field: Whether the goal of this property is to initialize a
             lazy field. If None, inherit this status from the root property, or
             default to False if this is the root property.
+
+        :param access_constructor: See AbstractNodeData's constructor.
         """
 
         self.prefix = prefix
 
-        super().__init__(name=name, public=public)
+        super().__init__(name=name,
+                         public=public,
+                         access_constructor=access_constructor)
 
         self._original_is_public = None
         """
