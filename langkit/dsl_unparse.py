@@ -942,7 +942,7 @@ def emit_expr(expr, **ctx):
     elif isinstance(expr, FieldAccess):
         args = []
         has_any_commented_arg = False
-        is_property = isinstance(expr.constructed_expr.node_data, PropertyDef)
+        is_property = isinstance(expr.constructed_node_data, PropertyDef)
         if expr.arguments:
             with walker.method_call(expr.field):
                 field_coms = walker.emit_comments()
