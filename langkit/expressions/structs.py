@@ -886,17 +886,25 @@ class FieldAccess(AbstractExpression):
             for (key, actual), formal in zip(args, to_get.natural_arguments)
         ]
 
-        # Even though it is redundant with DynamicVariable.construct, check
-        # that the callee's dynamic variables are bound here so we can emit a
-        # helpful error message if that's not the case.
-        if isinstance(self.to_get, PropertyDef):
-            DynamicVariable.check_call_bindings(self.to_get,
-                                                'In call to {prop}')
+        # If this field overrides expression construction, delegate it to the
+        # corresponding callback.
+        if to_get.access_constructor:
+            ret = to_get.access_constructor(self.receiver_expr,
+                                            to_get,
+                                            arg_exprs,
+                                            self)
+        else:
+            # Even though it is redundant with DynamicVariable.construct, check
+            # that the callee's dynamic variables are bound here so we can emit
+            # a helpful error message if that's not the case.
+            if isinstance(self.to_get, PropertyDef):
+                DynamicVariable.check_call_bindings(self.to_get,
+                                                    'In call to {prop}')
 
-        ret = FieldAccess.Expr(
-            self.receiver_expr, to_get, arg_exprs, self.is_deref,
-            abstract_expr=self
-        )
+            ret = FieldAccess.Expr(
+                self.receiver_expr, to_get, arg_exprs, self.is_deref,
+                abstract_expr=self
+            )
 
         # RA22-015: keep a reference to the constructed expr and original
         # accessed field (node data), so that we can introspect which field is

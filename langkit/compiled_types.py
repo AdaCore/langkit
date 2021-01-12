@@ -5,8 +5,8 @@ from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
-from typing import (Dict, List, Optional as Opt, Sequence, Set, TYPE_CHECKING,
-                    Tuple, Union)
+from typing import (Callable, Dict, List, Optional as Opt, Sequence, Set,
+                    TYPE_CHECKING, Tuple, Union)
 
 from langkit import names
 from langkit.c_api import CAPIType
@@ -26,7 +26,7 @@ from langkit.utils.types import TypeSet
 if TYPE_CHECKING:
     from langkit.dsl import Annotations
     from langkit.envs import EnvSpec
-    from langkit.expressions import AbstractExpression
+    from langkit.expressions import AbstractExpression, ResolvedExpression
     from langkit.lexer import TokenAction
     from langkit.parsers import Parser, _Transform
     from langkit.unparsers import NodeUnparser
@@ -225,8 +225,22 @@ class AbstractNodeData:
 
     _abstract = False
 
-    def __init__(self, name=None, public=True, access_needs_incref=False,
-                 internal_name=None):
+    def __init__(self,
+                 name=None,
+                 public=True,
+                 access_needs_incref=False,
+                 internal_name=None,
+                 access_constructor: Opt[
+                     Callable[
+                         [
+                             ResolvedExpression,
+                             AbstractNodeData,
+                             List[Tuple[Argument, ResolvedExpression]],
+                             Opt[AbstractExpression],
+                         ],
+                         ResolvedExpression,
+                     ]
+                 ] = None):
         """
         :param names.Name|None name: Name for this field. Most of the time,
             this is initially unknown at field creation, so it is filled only
@@ -246,6 +260,11 @@ class AbstractNodeData:
 
         :param None|names.Name internal_name: If provided, override the default
             name to use in code generation for this node data.
+
+        :param access_constructor: Optional callback to create a resolved
+            expression that implements a DSL access to this field. If
+            provided, this overrides the default code generation of
+            ``FieldAccess``.
         """
         self._serial = next(self._counter)
         self._is_public = public
@@ -266,7 +285,7 @@ class AbstractNodeData:
         :type: StructType
         """
 
-        self.arguments = []
+        self.arguments: List[Argument] = []
         """
         Code generation-wise, all node data can be considered as functions
         which take at least a mandatory Self argument and return the
@@ -274,8 +293,6 @@ class AbstractNodeData:
 
         This is a list that describes all other arguments. Note that only
         Property instances accept other arguments.
-
-        :type: list[Argument]
         """
 
         self._uses_entity_info = False
@@ -284,6 +301,7 @@ class AbstractNodeData:
         self._access_needs_incref = access_needs_incref
         self.abstract_default_value = None
         self.default_value = None
+        self.access_constructor = access_constructor
 
     @property
     def abstract(self):
