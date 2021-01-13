@@ -3,9 +3,10 @@
 ## This template emits declarations that closely follow the ones in the module
 ## that this stub describes: please refer to module_py.mako for more details.
 
-<%namespace name="astnode_types" file="astnode_types_py.mako" />
-<%namespace name="exts"          file="/extensions.mako" />
-<%namespace name="struct_types"  file="struct_types_py.mako" />
+<%namespace name="astnode_types"  file="astnode_types_py.mako" />
+<%namespace name="iterator_types" file="iterator_types_py.mako" />
+<%namespace name="exts"           file="/extensions.mako" />
+<%namespace name="struct_types"   file="struct_types_py.mako" />
 
 import argparse
 import sys
@@ -400,6 +401,13 @@ ${astnode_types.mypy_decl(astnode)}
          not struct_type.is_entity_type and \
          not struct_type is T.env_md:
 ${struct_types.mypy_decl(struct_type)}
+    % endif
+% endfor
+
+
+% for iterator_type in ctx.iterator_types:
+    % if iterator_type.exposed and iterator_type.emit_c_type:
+${iterator_types.mypy_decl(iterator_type)}
     % endif
 % endfor
 
