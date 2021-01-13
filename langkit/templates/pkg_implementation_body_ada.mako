@@ -521,6 +521,11 @@ package body ${ada_lib_name}.Implementation is
          Read_BOM => False,
          Filename => <>);
    begin
+      if Reparse and then Has_Rewriting_Handle (Context) then
+         raise Precondition_Failure with
+            "cannot reparse during tree rewriting";
+      end if;
+
       return Get_Unit (Context, Filename, Charset, Reparse, Input, Rule);
    end Get_From_File;
 
@@ -542,6 +547,11 @@ package body ${ada_lib_name}.Implementation is
          Bytes       => Buffer'Address,
          Bytes_Count => Buffer'Length);
    begin
+      if Has_Rewriting_Handle (Context) then
+         raise Precondition_Failure with
+            "cannot parse from buffer during tree rewriting";
+      end if;
+
       return Get_Unit (Context, Filename, Charset, True, Input, Rule);
    end Get_From_Buffer;
 
@@ -589,6 +599,11 @@ package body ${ada_lib_name}.Implementation is
       Charset : String;
       Reparse : Boolean) return Internal_Unit is
    begin
+      if Reparse and then Has_Rewriting_Handle (Context) then
+         raise Precondition_Failure with
+            "cannot reparse during tree rewriting";
+      end if;
+
       return Context.Unit_Provider.Get_Unit
         (Context, Name, Kind, Charset, Reparse);
 

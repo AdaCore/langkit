@@ -168,8 +168,7 @@ package ${ada_lib_name}.Analysis is
       Filename : String;
       Charset  : String := "";
       Reparse  : Boolean := False;
-      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
-      with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
+      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_file', 3)}
 
    function Get_From_Buffer
@@ -177,8 +176,7 @@ package ${ada_lib_name}.Analysis is
       Filename : String;
       Charset  : String := "";
       Buffer   : String;
-      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
-      with Pre => not Has_Rewriting_Handle (Context);
+      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
    function Get_From_Buffer
@@ -186,8 +184,7 @@ package ${ada_lib_name}.Analysis is
       Filename : String;
       Charset  : String := "";
       Buffer   : Ada.Strings.Unbounded.Unbounded_String;
-      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit
-      with Pre => not Has_Rewriting_Handle (Context);
+      Rule     : Grammar_Rule := Default_Grammar_Rule) return Analysis_Unit;
    --  Likewise, but working on an unbounded string
 
    function Get_With_Error
@@ -207,8 +204,7 @@ package ${ada_lib_name}.Analysis is
       Name    : Text_Type;
       Kind    : Analysis_Unit_Kind;
       Charset : String := "";
-      Reparse : Boolean := False) return Analysis_Unit
-      with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
+      Reparse : Boolean := False) return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
    % endif

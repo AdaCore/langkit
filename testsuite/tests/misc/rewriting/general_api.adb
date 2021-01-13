@@ -1,3 +1,4 @@
+with Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
@@ -77,6 +78,53 @@ begin
    elsif Context (RH) /= Ctx then
       raise Program_Error;
    end if;
+
+   --  Test that analysis context getters that return units are properly
+   --  protected against invalid uses when there is an active rewriting
+   --  context.
+   declare
+      procedure Do_Get_From_File;
+      procedure Do_Get_From_File_Reparse;
+      procedure Do_Get_From_Buffer_Str;
+      procedure Do_Get_From_Buffer_Unb_Str;
+      procedure Do_Get_With_Error;
+
+      Dummy : Analysis_Unit;
+
+      procedure Do_Get_From_File is
+      begin
+         Dummy := Ctx.Get_From_File ("helper.txt");
+      end Do_Get_From_File;
+
+      procedure Do_Get_From_File_Reparse is
+      begin
+         Dummy := Ctx.Get_From_File ("helper.txt", Reparse => True);
+      end Do_Get_From_File_Reparse;
+
+      procedure Do_Get_From_Buffer_Str is
+      begin
+         Dummy := Ctx.Get_From_Buffer ("helper.txt", Buffer => "");
+      end Do_Get_From_Buffer_Str;
+
+      procedure Do_Get_From_Buffer_Unb_Str is
+      begin
+         Dummy := Ctx.Get_From_Buffer
+           ("helper.txt",
+            Buffer => Ada.Strings.Unbounded.Null_Unbounded_String);
+      end Do_Get_From_Buffer_Unb_Str;
+
+      procedure Do_Get_With_Error is
+      begin
+         Dummy := Ctx.Get_With_Error ("helper.txt", "error message");
+      end Do_Get_With_Error;
+   begin
+      Try ("Call Get_From_File (Reparse => False)", Do_Get_From_File'Access);
+      Try ("Call Get_From_File (Reparse => True)",
+           Do_Get_From_File_Reparse'Access);
+      Try ("Call Get_From_Buffer_Str", Do_Get_From_Buffer_Str'Access);
+      Try ("Call Get_From_Buffer_Unb_Str", Do_Get_From_Buffer_Unb_Str'Access);
+      Try ("Call Get_With_Error", Do_Get_With_Error'Access);
+   end;
 
    Put_Line ("Get a rewriting handle for the analysis unit");
    UH := Handle (U);
