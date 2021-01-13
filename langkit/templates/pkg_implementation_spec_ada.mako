@@ -1513,8 +1513,7 @@ private package ${ada_lib_name}.Implementation is
       Filename : String;
       Charset  : String;
       Reparse  : Boolean;
-      Rule     : Grammar_Rule) return Internal_Unit
-      with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
+      Rule     : Grammar_Rule) return Internal_Unit;
    --  Implementation for Analysis.Get_From_File
 
    function Get_From_Buffer
@@ -1522,8 +1521,7 @@ private package ${ada_lib_name}.Implementation is
       Filename : String;
       Charset  : String;
       Buffer   : String;
-      Rule     : Grammar_Rule) return Internal_Unit
-      with Pre => not Has_Rewriting_Handle (Context);
+      Rule     : Grammar_Rule) return Internal_Unit;
    --  Implementation for Analysis.Get_From_Buffer
 
    function Get_With_Error
@@ -1541,8 +1539,7 @@ private package ${ada_lib_name}.Implementation is
       Name    : Text_Type;
       Kind    : Analysis_Unit_Kind;
       Charset : String;
-      Reparse : Boolean) return Internal_Unit
-      with Pre => not Reparse or else not Has_Rewriting_Handle (Context);
+      Reparse : Boolean) return Internal_Unit;
    --  Implementation for Analysis.Get_From_Provider
 
    % endif
