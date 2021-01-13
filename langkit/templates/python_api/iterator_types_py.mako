@@ -90,3 +90,19 @@ class ${cls.api_name.camel}(_BaseIterator):
         '${cls.c_dec_ref(capi)}', [_c_type], None))
 
 </%def>
+
+<%def name="mypy_decl(cls)">
+
+class ${pyapi.type_public_name(cls)}(object):
+    ${py_doc(cls, 4)}
+
+    def __iter__(self) -> Iterator[${cls.element_type.mypy_type_hint}]: ...
+    def __next__(self) -> ${cls.element_type.mypy_type_hint}: ...
+
+    % for f in cls.get_fields():
+    @property
+    def ${f.name.lower}(self) -> ${f.type.mypy_type_hint}:
+        ${py_doc(f, 8, or_pass=True)}
+    % endfor
+
+</%def>
