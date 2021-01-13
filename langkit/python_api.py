@@ -133,6 +133,10 @@ class PythonAPISettings(AbstractAPISettings):
         """
         See ``unwrap_value``.
         """
+        # All ref-counted types are translated to fully native Python objects.
+        # For them, we need to create a wrapper that owns the C value during
+        # the call to a property. Such wrappers always have a "c_value"
+        # attribute to get the actual value to pass to C APIs.
         return '{}.c_value'.format(value) if type.is_refcounted else value
 
     def c_type(self, type: CompiledType) -> str:
