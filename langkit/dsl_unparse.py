@@ -1229,6 +1229,9 @@ def emit_node_type(node_type):
         if node_type.is_token_node:
             traits.append('TokenNode')
 
+        if node_type.is_error_node:
+            traits.append('ErrorNode')
+
         has_abstract_list = (
             '@has_abstract_list ' if node_type.has_abstract_list else ''
         )

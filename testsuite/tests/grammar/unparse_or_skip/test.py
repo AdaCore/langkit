@@ -26,7 +26,7 @@ class Number(FooNode):
 
 
 class ErrorDef(FooNode):
-    pass
+    error_node = True
 
 
 build_and_run(lkt_file='expected_concrete_syntax.lkt',

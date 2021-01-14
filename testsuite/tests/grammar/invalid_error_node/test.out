@@ -1,0 +1,22 @@
+== test_abstract ==
+test.py:XXX: error: Error nodes cannot be abstract
+
+== test_bad_type ==
+test.py:XXX: error: The "error_node" field, when present, must contain a boolean
+
+== test_derived_not_error ==
+test.py:XXX: error: "error_node" annotation inconsistent with inherited node
+
+== test_error_and_list ==
+test.py:XXX: error: Error nodes cannot also be lists
+
+== test_error_and_token ==
+test.py:XXX: error: Error nodes cannot also be token nodes
+
+== test_nonnull_field ==
+test.py:XXX: error: Only null fields allowed here
+
+== test_synthetic ==
+test.py:XXX: error: Error nodes cannot be synthetic
+
+Done

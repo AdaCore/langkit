@@ -192,6 +192,9 @@ package ${ada_lib_name}.Common is
    function Is_List_Node (Kind : ${T.node_kind}) return Boolean;
    --  Return whether Kind corresponds to a list node
 
+   function Is_Error_Node (Kind : ${T.node_kind}) return Boolean;
+   --  Return whether Kind corresponds to an error node
+
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the node traversal process. See the
    --  ``${ada_lib_name}.Analysis.Traverse`` function.

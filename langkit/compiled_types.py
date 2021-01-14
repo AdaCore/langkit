@@ -2476,6 +2476,7 @@ class ASTNodeType(BaseStructType):
         is_enum_node: bool = False,
         is_bool_node: bool = False,
         is_token_node: bool = False,
+        is_error_node: bool = False,
         dsl_name: Opt[str] = None
     ):
         """
@@ -2521,6 +2522,9 @@ class ASTNodeType(BaseStructType):
         :param is_token_node: Whether this node only materializes a parsed
             token. If so, grammars that produce such nodes must parse only one
             token (.token_start must be equal to .token_end).
+
+        :param is_error_node: Whether this node only materializes a parsing
+            error. If so, only Skip parsers can create this node.
 
         :param dsl_name: Name used to represent this type at the DSL level.
             Useful to format diagnostics.
@@ -2724,6 +2728,7 @@ class ASTNodeType(BaseStructType):
         self.is_enum_node = is_enum_node
         self.is_bool_node = is_bool_node
         self.is_token_node = is_token_node
+        self.is_error_node = is_error_node
 
         self.token_kind: Opt[TokenAction] = None
         """

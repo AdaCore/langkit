@@ -1734,8 +1734,9 @@ class LktTypesLoader:
                 )
 
         # This is a token node if either the TokenNode trait is implemented or
-        # if the base node is a token node itself.
+        # if the base node is a token node itself. Likewise for ErrorNode.
         is_token_node = get_trait(decl, "TokenNode") is not None
+        is_error_node = get_trait(decl, "ErrorNode") is not None
 
         # Lower fields. Regular nodes can hold all types of fields, but token
         # nodes and enum nodes can hold only user field and properties.
@@ -1770,6 +1771,7 @@ class LktTypesLoader:
             is_abstract=(not isinstance(annotations, NodeAnnotations)
                          or annotations.abstract),
             is_token_node=is_token_node,
+            is_error_node=is_error_node,
             has_abstract_list=annotations.has_abstract_list,
             is_enum_node=is_enum_node,
             is_bool_node=is_bool_node,

@@ -182,6 +182,11 @@ def reject_synthetic(node):
                           'Parsers cannot create synthetic nodes')
 
 
+def reject_error_node(node: ASTNodeType):
+    check_source_language(not node.is_error_node,
+                          'Only Skip parsers can create error nodes')
+
+
 class Grammar:
     """
     Holder for parsing rules.
@@ -1010,7 +1015,7 @@ class _Token(Parser):
 
 class Skip(Parser):
     """
-    This recovery parser will skip any token and produce a node from it,
+    This recovery parser will skip any token and produce an error node from it,
     generating an error along the way.
 
     Note that if you use that in any kind of List, this will wreck your parser
@@ -1019,15 +1024,12 @@ class Skip(Parser):
 
     def __init__(self, dest_node, location=None):
         """
-        :param CompiledType dest_node: The node type to create.
+        :param CompiledType dest_node: The error node to create.
         """
         Parser.__init__(self, location=location)
         self.dest_node = dest_node
-        self.dest_node_parser = (
-            _Transform(_Row(), dest_node)
-            if isinstance(dest_node, ASTNodeType)
-            else dest_node()
-        )
+        self.dest_node_parser = _Transform(_Row(), dest_node,
+                                           force_error_node=True)
 
     def __repr__(self):
         return 'Skip({})'.format(node_name(self.dest_node))
@@ -1038,7 +1040,10 @@ class Skip(Parser):
 
     def _eval_type(self):
         result = resolve_type(self.dest_node)
-        reject_synthetic(result)
+        check_source_language(
+            result.is_error_node,
+            'Skip parsers can only create error nodes'
+        )
         return result
 
     def generate_code(self):
@@ -1446,8 +1451,9 @@ class List(Parser):
                 # If a specific list class is to be used, check that...
                 result = resolve_type(self.list_cls)
 
-                # It is not synthetic
+                # It is not synthetic, nor an error node
                 reject_synthetic(result)
+                reject_error_node(result)
 
                 # It is a list node
                 check_source_language(
@@ -1612,6 +1618,7 @@ class Opt(Parser):
         else:
             result = resolve_type(self._booleanize)
             reject_synthetic(result)
+            reject_error_node(result)
             return result
 
     def _precise_types(self):
@@ -1800,10 +1807,13 @@ class _Transform(Parser):
     def __repr__(self):
         return "Transform({0}, {1})".format(self.parser, node_name(self.typ))
 
-    def __init__(self, parser, typ, location=None):
+    def __init__(self, parser, typ, force_error_node=False, location=None):
         """
         Create a _Transform parser wrapping `parser` and that instantiates AST
         nodes whose type is `typ`.
+
+        :param force_error_node: Whether "typ" is an error node, which is
+            forbidden for transform parsers from the language spec.
         """
         from langkit.dsl import ASTNode
 
@@ -1817,6 +1827,7 @@ class _Transform(Parser):
         self.parser = resolve(parser)
         self.parser.containing_transform = self
         self.typ = typ
+        self.force_error_node = force_error_node
 
         self.parse_fields = None
         """
@@ -1886,6 +1897,10 @@ class _Transform(Parser):
         result = resolve_type(self.typ)
         reject_abstract(result)
         reject_synthetic(result)
+        if self.force_error_node:
+            assert result.is_error_node
+        else:
+            reject_error_node(result)
 
         self.parse_fields = result.get_parse_fields(
             predicate=lambda f: not f.abstract and not f.null
@@ -1976,6 +1991,7 @@ class Null(Parser):
                   if self.has_parser else
                   resolve_type(self.type_or_parser))
         reject_synthetic(result)
+        reject_error_node(result)
         return result
 
     def _precise_types(self):
