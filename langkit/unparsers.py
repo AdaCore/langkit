@@ -223,6 +223,9 @@ class TokenSequenceUnparser(Unparser):
         self._serial_number = None
         self._var_name = None
 
+    def __repr__(self):
+        return f"<TokenSequenceUnparser for {self.tokens}>"
+
     def _dump(self, stream):
         if self.tokens:
             stream.write(' '.join(t.dumps() for t in self.tokens))
@@ -760,6 +763,15 @@ class RegularNodeUnparser(NodeUnparser):
         :type: TokenSequenceUnparser
         """
 
+    def __repr__(self):
+        return (
+            f"<RegularNodeUnparser for {self.node.dsl_name},"
+            f" pre_tokens={self.pre_tokens},"
+            f" field_unparsers={self.field_unparsers}, "
+            f" inter_tokens={self.inter_tokens}, "
+            f" post_tokens={self.post_tokens}>"
+        )
+
     @property
     def fields_unparser_var_name(self):
         """
@@ -857,6 +869,12 @@ class ListNodeUnparser(NodeUnparser):
         self.node = node
         self.separator = separator
 
+    def __repr__(self):
+        return (
+            f"<ListNodeUnparser for {self.node.dsl_name},"
+            f" separator={repr(self.separator)}>"
+        )
+
     def _dump(self, stream):
         stream.write('Unparser for {}:\n'.format(self.node.dsl_name))
         if self.separator:
@@ -888,6 +906,9 @@ class TokenNodeUnparser(NodeUnparser):
         :param ASTNodeType node: Parse node that this unparser handles.
         """
         self.node = node
+
+    def __repr__(self):
+        return f"<TokenNodeUnparser for {self.node.dsl_name}"
 
     def _dump(self, stream):
         stream.write('Unparser for {}\n'.format(self.node.dsl_name))
