@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import itertools
-from typing import List
+from typing import Any, Dict, List, Tuple, Type, Union
 
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, CompiledTypeRepo, EnumType, Field as _Field,
     StructType, T, UserField as _UserField, resolve_type
 )
 from langkit.diagnostics import (
-    Context, check_source_language, extract_library_location
+    Context, Location, check_source_language, extract_library_location
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
@@ -110,23 +110,27 @@ class BaseStruct(DSLType):
     """
 
     @classmethod
-    def collect_fields(cls, owning_type, location, dct, field_cls):
+    def collect_fields(
+        cls,
+        owning_type: str,
+        location: Location,
+        dct: Dict[str, Any],
+        field_cls: Union[Type[AbstractNodeData],
+                         Tuple[Type[AbstractNodeData], ...]],
+    ) -> List[Tuple[str, AbstractNodeData]]:
         """
         Metaclass helper. Excluding __special__ entries, make sure all entries
         in `dct` are instances of `field_cls` and return them as an annotated
         list: (name, field).
 
-        This ensure that all fields are associated to a legal name, and records
-        this name in the field instances.
+        This ensures that all fields are associated to a legal name, and
+        records this name in the field instances.
 
-        :param str owning_type: Name of the type for the type that will own the
+        :param owning_type: Name of the type for the type that will own the
             fields.  Used for diagnostic message formatting purposes.
-        :param langkit.diagnostic.Location: Location for the declaration of the
-            owning type.
-        :param dict[str, T] dct: Input class dictionnary.
-        :param AbstractNodeData|list(AbstractNodeData) field_cls:
-            AbstractNodeData subclass, or list of subclasses.
-        :rtype: list[(str, AbstractNodeData)]
+        :param location: Location for the declaration of the owning type.
+        :param dct: Input class dictionnary.
+        :param field_cls: AbstractNodeData subclass, or list of subclasses.
         """
         result = []
         for f_n, f_v in dct.items():
