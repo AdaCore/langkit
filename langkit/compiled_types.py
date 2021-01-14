@@ -5,8 +5,8 @@ from dataclasses import dataclass
 import difflib
 from itertools import count, takewhile
 import pipes
-from typing import (Dict, List, Optional as Opt, Set, TYPE_CHECKING, Tuple,
-                    Union)
+from typing import (Dict, List, Optional as Opt, Sequence, Set, TYPE_CHECKING,
+                    Tuple, Union)
 
 from langkit import names
 from langkit.c_api import CAPIType
@@ -24,7 +24,12 @@ from langkit.utils.types import TypeSet
 
 
 if TYPE_CHECKING:
+    from langkit.dsl import Annotations
+    from langkit.envs import EnvSpec
     from langkit.expressions import AbstractExpression
+    from langkit.lexer import TokenAction
+    from langkit.parsers import Parser, _Transform
+    from langkit.unparsers import NodeUnparser
 
 
 def gdb_helper(*args):
@@ -2454,60 +2459,70 @@ class ASTNodeType(BaseStructType):
     # ASTNodeType instance for the alternative.
     _alternatives_map: Dict[str, ASTNodeType]
 
-    def __init__(self, name, location, doc, base, fields,
-                 env_spec=None, element_type=None, annotations=None,
-                 is_generic_list_type=False, is_abstract=False,
-                 is_synthetic=False, has_abstract_list=False,
-                 is_enum_node=False, is_bool_node=False, is_token_node=False,
-                 dsl_name=None):
+    def __init__(
+        self,
+        name: names.Name,
+        location: Opt[Location],
+        doc: Opt[str],
+        base: Opt[ASTNodeType],
+        fields: Sequence[Tuple[Union[str, names.Name], AbstractNodeData]],
+        env_spec: Opt[EnvSpec] = None,
+        element_type: Opt[ASTNodeType] = None,
+        annotations: Opt[Annotations] = None,
+        is_generic_list_type: bool = False,
+        is_abstract: bool = False,
+        is_synthetic: bool = False,
+        has_abstract_list: bool = False,
+        is_enum_node: bool = False,
+        is_bool_node: bool = False,
+        is_token_node: bool = False,
+        dsl_name: Opt[str] = None
+    ):
         """
-        :param names.Name name: Name for this node.
+        :param name: Name for this node.
 
-        :param langkit.diagnostics.Location|None location: Location for the
-            declaration of this node, if any.
+        :param location: Location for the declaration of this node, if any.
 
-        :param str|None doc: User documentation for this node.
+        :param doc: User documentation for this node.
 
-        :param ASTNodeType|None base: ASTNodeType subclass corresponding to the
-            base class for this node. None when creating the root node.
+        :param base: ASTNodeType subclass corresponding to the base class for
+            this node. None when creating the root node.
 
-        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
-            field) for this node's fields. Inherited fields must not appear in
-            this list.
+        :param fields: List of (name, field) for this node's fields. Inherited
+            fields must not appear in this list.
 
-        :param langkit.envs.EnvSpec|None env_spec: Environment specification
-            for this node, if any.
+        :param env_spec: Environment specification for this node, if any.
 
-        :param ASTNodeType|None element_type: For root list types, this must be
-            the ASTNodeType subclass that this list contains. Must be left to
-            None in all other cases.
+        :param element_type: For root list types, this must be the ASTNodeType
+            subclass that this list contains. Must be left to None in all other
+            cases.
 
-        :param bool is_generic_list_type: Whether this subclass will
-            materialize the generic list type.
+        :param is_generic_list_type: Whether this subclass will materialize the
+            generic list type.
 
-        :param bool is_abstract: Whether this node is abstract. Note that this
-            can be changed later. This is forced to True for the generic list
-            type and for root list types whose element type has the
+        :param is_abstract: Whether this node is abstract. Note that this can
+            be changed later. This is forced to True for the generic list type
+            and for root list types whose element type has the
             `has_abstract_list` attribute set to True.
 
-        :param bool is_synthetic: Whether this node is synthetic. Note that
-            this can be changed later.
+        :param is_synthetic: Whether this node is synthetic. Note that this can
+            be changed later.
 
-        :param bool has_abstract_list: Whether the root list type for this node
-            must be abstract. Node that this can be changed later, until the
-            list type is actually created.
+        :param has_abstract_list: Whether the root list type for this node must
+            be abstract. Node that this can be changed later, until the list
+            type is actually created.
 
-        :param bool is_enum_node: Whether this node comes from the expansion of
-            an enum node.
+        :param is_enum_node: Whether this node comes from the expansion of an
+            enum node.
 
-        :param bool is_bool_node: Whether this node is a qualifier coming from
-            the expansion of an enum node.
+        :param is_bool_node: Whether this node is a qualifier coming from the
+            expansion of an enum node.
 
-        :param bool is_token_node: Whether this node only materializes a parsed
+        :param is_token_node: Whether this node only materializes a parsed
             token. If so, grammars that produce such nodes must parse only one
             token (.token_start must be equal to .token_end).
 
-        :param str dsl_name: Name used to represent this type at the DSL level.
+        :param dsl_name: Name used to represent this type at the DSL level.
             Useful to format diagnostics.
         """
         self.raw_name = name
@@ -2518,17 +2533,17 @@ class ASTNodeType(BaseStructType):
         name = names.Name('Bare') + self.kwless_raw_name
 
         is_root = base is None
-        is_root_list = not is_root and base.is_generic_list_type
-        is_list = not is_root and (is_root_list or base.is_list_type)
+        is_root_list = base is not None and base.is_generic_list_type
+        is_list = base is not None and (is_root_list or base.is_list_type)
 
-        self.null_constant = (
+        self.null_constant: names.Name = (
             names.Name('No') + name
-            if is_root else
+            if base is None else
             CompiledTypeRepo.root_grammar_class.null_constant
         )
 
         if is_root_list:
-            assert element_type.is_ast_node
+            assert element_type is not None and element_type.is_ast_node
 
             # TODO: at this point, we need to make sure thas
             # element_type.has_abstract_list in the future.
@@ -2537,9 +2552,12 @@ class ASTNodeType(BaseStructType):
         else:
             assert element_type is None
             if is_list:
+                assert base is not None
+                assert isinstance(base._element_type, ASTNodeType)
                 element_type = base._element_type
 
         if is_root_list:
+            assert element_type
             doc = doc or 'List of {}.'.format(element_type.dsl_name)
 
         super().__init__(
@@ -2560,7 +2578,7 @@ class ASTNodeType(BaseStructType):
             introspection_prefix='Node'
         )
         self.is_root_node = is_root
-        self.is_generic_list_type = is_generic_list_type
+        self.is_generic_list_type: bool = is_generic_list_type
         self.is_root_list_type = is_root_list
         self.is_list = is_list
 
@@ -2589,12 +2607,12 @@ class ASTNodeType(BaseStructType):
                 f._internal_name = self.name + f.name
 
         # Make sure that all user fields for nodes are private
-        for _, f in fields:
-            with f.diagnostic_context:
+        for _, f_v in fields:
+            with f_v.diagnostic_context:
                 check_source_language(
-                    not f.is_user_field or
-                    isinstance(f, BuiltinField) or
-                    f.is_private,
+                    not f_v.is_user_field or
+                    isinstance(f_v, BuiltinField) or
+                    f_v.is_private,
                     'UserField on nodes must be private'
                 )
 
@@ -2621,7 +2639,7 @@ class ASTNodeType(BaseStructType):
 
         from langkit.dsl import Annotations
         annotations = annotations or Annotations()
-        self.annotations = annotations
+        self.annotations: Annotations = annotations
         self.annotations.process_annotations(self, is_root)
 
         if env_spec:
@@ -2630,7 +2648,6 @@ class ASTNodeType(BaseStructType):
         self.env_spec = env_spec
         """
         EnvSpec instance corresponding to this node.
-        :type: langkit.compiled_types.EnvSpec|None
         """
 
         # List types are resolved by construction: we create list types to
@@ -2641,35 +2658,31 @@ class ASTNodeType(BaseStructType):
         # By default, ASTNodeType subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later. Likewise for synthetic
         # nodes and nodes whose root list type is abstract.
-        self.abstract = is_abstract or is_root or is_generic_list_type
+        self.abstract: bool = is_abstract or is_root or is_generic_list_type
         self.synthetic = is_synthetic
 
-        self.has_abstract_list = has_abstract_list
+        self.has_abstract_list: bool = has_abstract_list
         """
         Whether the automatically generated list type for this ASTNodeType (the
         "root list type") is abstract.
-        :type: bool
         """
 
         # Prepare the list of subclasses for this node type and, if applicable,
         # register it as a subclass of its base.
-        self.subclasses = []
+        self.subclasses: List[ASTNodeType] = []
         """
         List of subclasses. Overriden in the root grammar class and its
         children.
-
-        :type: list[ASTNodeType]
         """
 
-        if not is_root:
+        if base is not None:
             base.subclasses.append(self)
 
         # If this is the root grammar type, create the generic list type name
-        self.generic_list_type = None
+        self.generic_list_type: Opt[ASTNodeType] = None
         """
         Root grammar class subclass. It is abstract, generated automatically
         when the root grammar class is known. All root list types subclass it.
-        :type: ASTNodeType|None
         """
 
         if base is None:
@@ -2685,14 +2698,12 @@ class ASTNodeType(BaseStructType):
                 is_abstract=True
             )
 
-        self.transform_parsers = []
+        self.transform_parsers: List[_Transform] = []
         """
         List of Transform parsers that produce this node.
-
-        :type: list[langkit.parsers._Transform]
         """
 
-        self.list_element_parsers = [] if is_list else None
+        self.list_element_parsers: Opt[List[Parser]] = [] if is_list else None
         """
         For list nodes, list of parsers that produce list elements. None for
         all other nodes.
@@ -2700,25 +2711,21 @@ class ASTNodeType(BaseStructType):
         :type: list[langkit.parsers.Parser]
         """
 
-        self.precise_list_element_types = None
+        self.precise_list_element_types: Opt[TypeSet] = None
         """
         For list nodes, precise set of types that this list can contain.
-
-        :rtype: TypeSet
         """
 
-        self.unparser = None
+        self.unparser: Opt[NodeUnparser] = None
         """
         Unparser for this node. Computed during the NodesToParsers pass.
-
-        :type: langkit.unparsers.NodeUnparser
         """
 
         self.is_enum_node = is_enum_node
         self.is_bool_node = is_bool_node
         self.is_token_node = is_token_node
 
-        self.token_kind = None
+        self.token_kind: Opt[TokenAction] = None
         """
         If this is a token node and if unparser generation is enabled, this
         must reference the only token kind that this node can be associated to.
