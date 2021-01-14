@@ -473,8 +473,8 @@ class _ASTNodeMetaclass(type):
                 'The "token_node" field, when present, must contain a boolean'
             )
 
-            # If "token_node" allocation is left to None, inherit it (default
-            # is False).
+            # If the "token_node" annotation is left to None, inherit it
+            # (default is False).
             if is_token_node is None:
                 is_token_node = bool(base._is_token_node)
 
@@ -494,7 +494,7 @@ class _ASTNodeMetaclass(type):
             # Forbid inheriting from an enum node
             check_source_language(
                 not base._is_enum_node,
-                'Inheriting from an enum node is forbidden.'
+                'Inheriting from an enum node is forbidden'
             )
 
             # Determine if this is an enum node
@@ -518,8 +518,8 @@ class _ASTNodeMetaclass(type):
                         isinstance(alternatives, list) and all(
                             isinstance(alt, str) for alt in alternatives
                         ),
-                        'The "alternatives" field must contain a list of '
-                        'strings'
+                        'The "alternatives" field must contain a list of'
+                        ' strings'
                     )
 
                 alts = [_EnumNodeAlternative(names.Name.from_lower(alt))
