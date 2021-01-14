@@ -41,6 +41,8 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin trait TokenNode {" & ASCII.LF &
      "    @builtin @property fun symbol(): Symbol" & ASCII.LF &
      "}" & ASCII.LF &
+     "@builtin trait ErrorNode {" & ASCII.LF &
+     "}" & ASCII.LF &
      "";
 
    ----------------------------------

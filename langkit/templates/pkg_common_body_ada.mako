@@ -30,6 +30,11 @@ package body ${ada_lib_name}.Common is
    --  For each node kind, return whether it is a node that contains only a
    --  single token.
 
+   Is_Error_Node_Kind : constant array (${T.node_kind}) of Boolean :=
+     (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_error_node)
+                  for n in ctx.astnode_types if not n.abstract)});
+   --  For each node kind, return whether it is an error node
+
    function Wrap_Token_Reference
      (TDH   : Token_Data_Handler_Access;
       Index : Token_Or_Trivia_Index) return Token_Reference;
@@ -149,6 +154,15 @@ package body ${ada_lib_name}.Common is
    begin
       return Is_Token_Node_Kind (Kind);
    end Is_Token_Node;
+
+   -------------------
+   -- Is_Error_Node --
+   -------------------
+
+   function Is_Error_Node (Kind : ${T.node_kind}) return Boolean is
+   begin
+      return Is_Error_Node_Kind (Kind);
+   end Is_Error_Node;
 
    ------------------
    -- Is_List_Node --

@@ -117,6 +117,7 @@ class BaseStruct(DSLType):
         dct: Dict[str, Any],
         field_cls: Union[Type[AbstractNodeData],
                          Tuple[Type[AbstractNodeData], ...]],
+        only_null_fields: bool
     ) -> List[Tuple[str, AbstractNodeData]]:
         """
         Metaclass helper. Excluding __special__ entries, make sure all entries
@@ -131,6 +132,8 @@ class BaseStruct(DSLType):
         :param location: Location for the declaration of the owning type.
         :param dct: Input class dictionnary.
         :param field_cls: AbstractNodeData subclass, or list of subclasses.
+        :param only_null_fields: Whether syntax fields, if accepted, must be
+            null.
         """
         result = []
         for f_n, f_v in dct.items():
@@ -160,6 +163,9 @@ class BaseStruct(DSLType):
                     f_n.lower() == f_n,
                     'Field names must be lower-case'
                 )
+                if only_null_fields and isinstance(f_v, _Field):
+                    check_source_language(f_v.null,
+                                          'Only null fields allowed here')
             result.append((f_n, f_v))
 
         # Sort fields by creation time order so that users get fields in the
@@ -239,7 +245,9 @@ class _StructMetaclass(type):
                 'Struct subclasses must derive from Struct only',
             )
 
-        fields = Struct.collect_fields(name, location, dct, _UserField)
+        fields = Struct.collect_fields(
+            name, location, dct, _UserField, only_null_fields=False
+        )
         DSLType._import_base_type_info(name, location, dct)
         dct['_fields'] = fields
 
@@ -464,6 +472,7 @@ class _ASTNodeMetaclass(type):
         else:
             element_type = None
             allowed_field_types = AbstractNodeData
+        only_null_fields = False
 
         # Determine if this is a token node
         with node_ctx:
@@ -489,6 +498,35 @@ class _ASTNodeMetaclass(type):
                     ' node'
                 )
 
+        # Determine if this is an error node
+        with node_ctx:
+            is_error_node = dct.pop('error_node', None)
+            check_source_language(
+                is_error_node is None or isinstance(is_error_node, bool),
+                'The "error_node" field, when present, must contain a boolean'
+            )
+
+            # If the "error_node" annotation is left to None, inherit it
+            # (default is False).
+            if is_error_node is None:
+                is_error_node = bool(base._is_error_node)
+
+            if is_error_node:
+                check_source_language(not is_token_node,
+                                      'Error nodes cannot also be token nodes')
+                check_source_language(not is_list_type,
+                                      'Error nodes cannot also be lists')
+                allowed_field_types = (_Field, _UserField, PropertyDef)
+                only_null_fields = True
+
+            else:
+                # Make sure that all derivations of an error node are error
+                # nodes themselves.
+                check_source_language(
+                    not base._is_error_node,
+                    '"error_node" annotation inconsistent with inherited node'
+                )
+
         # Handle enum nodes
         with node_ctx:
             # Forbid inheriting from an enum node
@@ -505,6 +543,9 @@ class _ASTNodeMetaclass(type):
             )
 
             if is_enum_node:
+                check_source_language(not is_error_node,
+                                      'Error nodes cannot also be enum nodes')
+
                 qualifier = dct.pop('qualifier', False)
                 if qualifier:
                     alternatives = ['present', 'absent']
@@ -527,8 +568,9 @@ class _ASTNodeMetaclass(type):
 
                 allowed_field_types = (_UserField, PropertyDef)
 
-        fields = ASTNode.collect_fields(name, location, dct,
-                                        allowed_field_types)
+        fields = ASTNode.collect_fields(
+            name, location, dct, allowed_field_types, only_null_fields
+        )
 
         DSLType._import_base_type_info(name, location, dct)
 
@@ -539,6 +581,7 @@ class _ASTNodeMetaclass(type):
         dct['_base'] = base
         dct['_env_spec'] = env_spec
         dct['_is_token_node'] = is_token_node
+        dct['_is_error_node'] = is_error_node
         dct['_is_enum_node'] = is_enum_node
 
         # Make sure subclasses don't inherit the "list_type" cache from their
@@ -571,7 +614,8 @@ class _ASTNodeMetaclass(type):
 
                 is_enum_node=cls._is_enum_node,
                 is_bool_node=cls._is_enum_node and cls._qualifier,
-                is_token_node=cls._is_token_node
+                is_token_node=cls._is_token_node,
+                is_error_node=cls._is_error_node,
             )
 
         astnode_type.dsl_decl = cls
@@ -705,6 +749,12 @@ class ASTNode(BaseStruct, metaclass=_ASTNodeMetaclass):
     :type: bool
     """
 
+    _is_error_node = None
+    """
+    Whether this node only materializes syntax errors.
+    :type: bool
+    """
+
     _is_enum_node = None
     """
     Whether this node defines an enum node.
@@ -765,6 +815,11 @@ def abstract(cls):
     :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
     """
     _check_decorator_use(abstract, ASTNode, cls)
+    with cls._type.diagnostic_context:
+        check_source_language(
+            not cls._type.is_error_node,
+            "Error nodes cannot be abstract"
+        )
     cls._type.abstract = True
     return cls
 
@@ -776,6 +831,11 @@ def synthetic(cls):
     :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
     """
     _check_decorator_use(synthetic, ASTNode, cls)
+    with cls._type.diagnostic_context:
+        check_source_language(
+            not cls._type.is_error_node,
+            "Error nodes cannot be synthetic"
+        )
     cls._type.synthetic = True
     return cls
 
