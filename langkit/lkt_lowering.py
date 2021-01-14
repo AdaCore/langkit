@@ -956,6 +956,8 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
                 except KeyError:
                     error('Unknown node: {}'.format(node_name))
 
+        raise RuntimeError("unreachable code")
+
     def lower(
         rule: Union[L.GrammarExpr, L.GrammarExprList]
     ) -> Optional[Parser]:
@@ -1840,7 +1842,7 @@ class LktTypesLoader:
         for i, alt in enumerate(alt_descriptions):
             # Override the abstract "as_bool" property that all qualifier enum
             # nodes define.
-            fields = []
+            fields: List[Tuple[str, AbstractNodeData]] = []
             if qualifier:
                 is_present = i == 0
                 prop = Property(is_present)
