@@ -1,28 +1,27 @@
+import gdb
+
+from langkit.gdb.context import Context
+from langkit.gdb.debug_info import Property
+from langkit.gdb.state import Binding, ExpressionEvaluation
 from langkit.names import Name
 from langkit.utils import Colors, col
 
 
-def expr_repr(expr):
+def expr_repr(expr: ExpressionEvaluation) -> str:
     """
     Return a colored repr for an expression.
-
-    :type expr: langkit.gdb.state.ExpressionEvaluation
-    :rtype: str
     """
     return col(expr.expr_repr, Colors.CYAN)
 
 
-def name_repr(expr):
+def name_repr(expr: Binding) -> str:
     """
     Return a colored repr for a binding name.
-
-    :type expr: langkit.gdb.state.Binding
-    :rtype: str
     """
     return col(expr.dsl_name, Colors.GREEN)
 
 
-def prop_repr(prop):
+def prop_repr(prop: Property) -> str:
     """
     Return a colored repr for a property name.
 
@@ -38,13 +37,10 @@ def prop_repr(prop):
     return col(col(label, Colors.RED), Colors.BOLD)
 
 
-def adaify_name(context, name):
+def adaify_name(context: Context, name: str) -> str:
     """
     Turn a symbol name like a__b into an Ada-like name such as A.B.
     Also strip the $LIB_NAME.Analysis prefix, if present.
-
-    :type name: str
-    :rtype: str
     """
     pfx = context.analysis_prefix
     if name.startswith(pfx):
@@ -54,7 +50,7 @@ def adaify_name(context, name):
                     for c in chunks)
 
 
-def dereference_fat_array_ptr(fat_ptr):
+def dereference_fat_array_ptr(fat_ptr: gdb.Value) -> gdb.Value:
     """
     Dereference an array reference materialized as a fat pointer.
     """

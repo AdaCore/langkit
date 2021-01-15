@@ -1,11 +1,14 @@
 from collections import namedtuple
 from functools import partial
 from io import StringIO
+from typing import Callable, List, Optional
 
 import gdb
 
+from langkit.gdb.context import Context
 from langkit.gdb.control_flow import go_next, go_out, go_step_inside
-from langkit.gdb.debug_info import DSLLocation, ExprStart, Scope
+from langkit.gdb.debug_info import DSLLocation, ExprStart, Property, Scope
+from langkit.gdb.state import Binding
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors
 
@@ -15,8 +18,11 @@ class BaseCommand(gdb.Command):
     Factorize common code for our commands.
     """
 
-    def __init__(self, context, basename, command_class,
-                 completer_class=gdb.COMPLETE_NONE):
+    def __init__(self,
+                 context: Context,
+                 basename: str,
+                 command_class: int,
+                 completer_class: int = gdb.COMPLETE_NONE):
         kwargs = {'name': '{}{}'.format(context.prefix, basename),
                   'command_class': command_class}
         if completer_class is not None:
@@ -37,10 +43,10 @@ There is one optional argument: a variable name. If specified, this command
 only displays information for this variable.
 """
 
-    def __init__(self, context):
+    def __init__(self, context: Context):
         super().__init__(context, 'state', gdb.COMMAND_DATA)
 
-    def invoke(self, arg, from_tty):
+    def invoke(self, arg: str, from_tty: bool) -> None:
         args = arg.split()
         flags = set()
         var_name = None
@@ -76,8 +82,11 @@ class StatePrinter:
 
     ellipsis_limit = 80
 
-    def __init__(self, context, with_ellipsis=True, with_locs=False,
-                 var_name=None):
+    def __init__(self,
+                 context: Context,
+                 with_ellipsis: bool = True,
+                 with_locs: bool = False,
+                 var_name: Optional[str] = None):
         self.context = context
 
         self.frame = gdb.selected_frame()
@@ -88,7 +97,7 @@ class StatePrinter:
         self.var_name = var_name
         self.sio = StringIO()
 
-    def _render(self):
+    def _render(self) -> None:
         """
         Internal render method for the state printer.
         """
@@ -97,7 +106,7 @@ class StatePrinter:
         # this method.
         prn = partial(print, file=self.sio)
 
-        def print_binding(print_fn, b):
+        def print_binding(print_fn: Callable[[str], None], b: Binding) -> None:
             print_fn('{}{} = {}'.format(
                 name_repr(b),
                 self.loc_image(b.gen_name),
@@ -129,7 +138,7 @@ class StatePrinter:
         for scope_state in self.state.scopes:
             is_first = [True]
 
-            def print_info(strn):
+            def print_info(strn: str) -> None:
                 if is_first[0]:
                     prn('')
                     is_first[0] = False
@@ -154,14 +163,14 @@ class StatePrinter:
                 if last_started.dsl_sloc:
                     print_info('from {}'.format(last_started.dsl_sloc))
 
-    def run(self):
+    def run(self) -> None:
         """
         Output the state to stdout.
         """
         self._render()
         print(self.sio.getvalue())
 
-    def render(self):
+    def render(self) -> str:
         """
         Return the state as a string.
 
@@ -171,7 +180,7 @@ class StatePrinter:
             self._render()
         return self.sio.getvalue()
 
-    def loc_image(self, var_name):
+    def loc_image(self, var_name: str) -> str:
         """
         If `self.with_locs`, return the name of the Ada variable that holds the
         DSL value.
@@ -180,7 +189,7 @@ class StatePrinter:
         """
         return ' ({})'.format(var_name) if self.with_locs else ''
 
-    def value_image(self, var_name):
+    def value_image(self, var_name: str) -> str:
         """
         Return the image of the value contained in the `var_name` variable.
 
@@ -209,10 +218,10 @@ For instance::
     break MyNode.p_property if $match("<Node XXX>", self)
 """
 
-    def __init__(self, context):
-        super().__init__(context, 'break', gdb.COMMAND_BREAKPOINTS, None)
+    def __init__(self, context: Context):
+        super().__init__(context, 'break', gdb.COMMAND_BREAKPOINTS)
 
-    def complete(self, text, word):
+    def complete(self, text: str, word: str) -> List[str]:
         """
         Try to complete `word`.
 
@@ -230,7 +239,7 @@ For instance::
 
         return result
 
-    def invoke(self, arg, from_tty):
+    def invoke(self, arg: str, from_tty: bool) -> None:
         argv = arg.strip().split(None, 2)
 
         spec = None
@@ -256,14 +265,14 @@ For instance::
         bp = (self.break_on_dsl_sloc(spec)
               if ':' in spec else
               self.break_on_property(spec))
-        if cond:
+        if bp and cond:
             try:
                 bp.condition = cond
             except gdb.error as exc:
                 print(exc)
                 return
 
-    def break_on_property(self, qualname):
+    def break_on_property(self, qualname: str) -> Optional[gdb.Breakpoint]:
         """
         Try to put a breakpoint on a property whose qualified name is
         `qualname`. Display a message for the user if that is not possible.
@@ -275,50 +284,54 @@ For instance::
                 break
         else:
             print('No such property: {}'.format(qualname))
-            return
+            return None
 
         if prop.body_start is None:
             print('Cannot break on {}: it has no code'.format(prop.name))
-            return
+            return None
 
         # Break on the first line of the property's first inner scope so that
         # we skip the prologue (all variable declarations).
         return gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
                                              prop.body_start))
 
-    def break_on_dsl_sloc(self, dsl_sloc):
+    def break_on_dsl_sloc(self, dsl_sloc: str) -> Optional[gdb.Breakpoint]:
         """
         Try to put a breakpoint on code that maps to the given DSL source
         location. Display a message for the user if that is not possible.
         """
-        dsl_sloc = DSLLocation.parse(dsl_sloc)
+        sloc_spec = DSLLocation.parse(dsl_sloc)
+        if sloc_spec is None:
+            print('Nothing to match')
+            return None
 
         Match = namedtuple('Match', 'prop dsl_sloc line_no')
         matches = []
 
-        def process_scope(prop, scope):
+        def process_scope(prop: Property, scope: Scope) -> None:
+            assert isinstance(sloc_spec, DSLLocation)
             for e in scope.events:
                 if isinstance(e, Scope):
                     process_scope(prop, e)
                 elif (isinstance(e, ExprStart)
                       and e.dsl_sloc
-                      and e.dsl_sloc.matches(dsl_sloc)):
+                      and e.dsl_sloc.matches(sloc_spec)):
                     matches.append(Match(prop, e.dsl_sloc, e.line_no))
 
         for prop in self.context.debug_info.properties:
             process_scope(prop, prop)
 
         if not matches:
-            print('No match for {}'.format(dsl_sloc))
-            return
+            print('No match for {}'.format(sloc_spec))
+            return None
 
         elif len(matches) == 1:
             m,  = matches
 
         else:
-            print('Multiple matches for {}:'.format(dsl_sloc))
+            print('Multiple matches for {}:'.format(sloc_spec))
 
-            def idx_fmt(i):
+            def idx_fmt(i: int) -> str:
                 return '[{}] '.format(i)
 
             idx_width = len(idx_fmt(len(matches)))
@@ -333,25 +346,25 @@ For instance::
 
             print('Please chose one of the above locations [default=1]:')
             try:
-                choice = input('> ')
+                choice_str = input('> ')
             except EOFError:
                 print('Aborting: no breakpoint created')
-                return
+                return None
 
-            if not choice:
+            if not choice_str:
                 choice = 1
             else:
                 try:
-                    choice = int(choice)
+                    choice = int(choice_str)
                 except ValueError:
-                    print('Invalid index choice: {}'.format(choice))
-                    return
+                    print('Invalid index choice: {}'.format(choice_str))
+                    return None
 
                 if choice < 1 or choice > len(matches):
                     print('Choice must be in range {}-{}'.format(
                         1, len(matches)
                     ))
-                    return
+                    return None
 
             m = matches[choice]
 
@@ -363,10 +376,10 @@ For instance::
 class NextCommand(BaseCommand):
     """Continue execution until reaching another expression."""
 
-    def __init__(self, context):
+    def __init__(self, context: Context):
         super().__init__(context, 'next', gdb.COMMAND_RUNNING)
 
-    def invoke(self, arg, from_tty):
+    def invoke(self, arg: str, from_tty: bool) -> None:
         if arg:
             print('This command takes no argument')
         else:
@@ -378,10 +391,10 @@ class OutCommand(BaseCommand):
 sub-expression.
     """
 
-    def __init__(self, context):
+    def __init__(self, context: Context):
         super().__init__(context, 'out', gdb.COMMAND_RUNNING)
 
-    def invoke(self, arg, from_tty):
+    def invoke(self, arg: str, from_tty: bool) -> None:
         if arg:
             print('This command takes no argument')
         else:
@@ -393,10 +406,10 @@ class StepInsideCommand(BaseCommand):
 dispatch properties in order to land directly in the dispatched property.
     """
 
-    def __init__(self, context):
+    def __init__(self, context: Context):
         super().__init__(context, 'si', gdb.COMMAND_RUNNING)
 
-    def invoke(self, arg, from_tty):
+    def invoke(self, arg: str, from_tty: bool) -> None:
         if arg:
             print('This command takes no argument')
         else:

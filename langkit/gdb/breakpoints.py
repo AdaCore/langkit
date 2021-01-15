@@ -1,4 +1,8 @@
+from typing import List
+
 import gdb
+
+from langkit.gdb.context import Context
 
 
 class BreakpointGroup:
@@ -10,7 +14,7 @@ class BreakpointGroup:
     breakpoints.
     """
 
-    def __init__(self, context, line_nos):
+    def __init__(self, context: Context, line_nos: List[int]):
         self.context = context
         self.breakpoints = [_Breakpoint(context, l)
                             for l in line_nos]
@@ -19,7 +23,7 @@ class BreakpointGroup:
         gdb.events.stop.connect(self._event_callback)
         gdb.events.exited.connect(self._event_callback)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """
         Remove all our breakpoints and unregister our GDB event handlers.
         """
@@ -35,11 +39,11 @@ class _Breakpoint(gdb.Breakpoint):
     when hit.
     """
 
-    def __init__(self, context, line_no):
+    def __init__(self, context: Context, line_no: int):
         super().__init__(
             '{}:{}'.format(context.debug_info.filename, line_no),
             internal=True
         )
 
-    def stop(self):
+    def stop(self) -> bool:
         return True
