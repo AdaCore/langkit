@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os.path
 import re
-from typing import Optional, TYPE_CHECKING
+from typing import Dict, Iterable, Optional, TYPE_CHECKING, Tuple, Type, Union
 
 import gdb
 import gdb.printing
@@ -23,14 +23,14 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     Holder for all pretty printers.
     """
 
-    def __init__(self, context):
+    def __init__(self, context: Context):
         super().__init__(context.lib_name, [])
         self.context = context
 
-    def append(self, printer_cls):
+    def append(self, printer_cls: Type[BasePrinter]) -> None:
         self.subprinters.append(GDBSubprinter(printer_cls, self.context))
 
-    def __call__(self, value):
+    def __call__(self, value: gdb.Value) -> Optional[BasePrinter]:
         """
         If there is one enabled pretty-printer that matches `value`, return an
         instance of PrettyPrinter tied to this value. Return None otherwise.
@@ -44,16 +44,16 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
 class GDBSubprinter(gdb.printing.SubPrettyPrinter):
     """Holder for PrettyPrinter subclasses."""
 
-    def __init__(self, cls, context):
+    def __init__(self, cls: Type[BasePrinter], context: Context):
         super().__init__(cls.name)
         self.cls = cls
         self.context = context
 
-    def matches(self, value):
+    def matches(self, value: gdb.Value) -> bool:
         """Return whether this pretty-printer matches `value`, a GDB value."""
         return self.cls.matches(value, self.context)
 
-    def instantiate(self, value):
+    def instantiate(self, value: gdb.Value) -> BasePrinter:
         return self.cls(value, self.context)
 
 
@@ -72,18 +72,18 @@ class BasePrinter:
     Subclasses must override this attribute.
     """
 
-    def __init__(self, value, context):
+    def __init__(self, value: gdb.Value, context: Context):
         self.context = context
         self.value = value
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         """
         Return whether this pretty-printer matches `value`, a GDB value.
         """
         raise NotImplementedError()
 
-    def to_string(self):
+    def to_string(self) -> str:
         raise NotImplementedError()
 
 
@@ -95,7 +95,7 @@ class AnalysisUnitPrinter(BasePrinter):
     name = 'AnalysisUnit'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (
             value.type.code == gdb.TYPE_CODE_PTR
             and value.type.target().code == gdb.TYPE_CODE_STRUCT
@@ -103,7 +103,7 @@ class AnalysisUnitPrinter(BasePrinter):
                  context.implname('analysis_unit_type'))
         )
 
-    def to_string(self):
+    def to_string(self) -> str:
         if not self.value:
             return 'null'
 
@@ -121,7 +121,7 @@ class ASTNodePrinter(BasePrinter):
     name = 'ASTNode'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         t = value.type
         while t.code == gdb.TYPE_CODE_TYPEDEF:
             t = t.target()
@@ -130,7 +130,7 @@ class ASTNodePrinter(BasePrinter):
                 and t.target().name == context.node_record)
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         kind = int(self.value['kind'])
         try:
             node_name = self.context.astnode_kinds[kind]
@@ -140,11 +140,11 @@ class ASTNodePrinter(BasePrinter):
             return node_name.camel
 
     @property
-    def unit(self):
+    def unit(self) -> AnalysisUnit:
         return AnalysisUnit(self.value['unit'])
 
     @property
-    def synthetic(self):
+    def synthetic(self) -> bool:
         """
         Return whether this node is synthetic.
 
@@ -152,7 +152,7 @@ class ASTNodePrinter(BasePrinter):
         """
         return int(self.value['token_start_index']) == 0
 
-    def sloc(self, with_end=True):
+    def sloc(self, with_end: bool = True) -> str:
         """
         Return the source location for this node as a string.
 
@@ -177,7 +177,7 @@ class ASTNodePrinter(BasePrinter):
         )
 
     @property
-    def parent(self):
+    def parent(self) -> gdb.Value:
         """
         Return the parent node, or None if it's the root one.
 
@@ -185,7 +185,7 @@ class ASTNodePrinter(BasePrinter):
         """
         return self.value['parent']
 
-    def node_to_string(self):
+    def node_to_string(self) -> str:
         if not self.value:
             return 'null'
 
@@ -193,7 +193,7 @@ class ASTNodePrinter(BasePrinter):
                if self.synthetic else self.sloc())
         return '{} {}'.format(self.kind, loc)
 
-    def to_string(self):
+    def to_string(self) -> str:
         return '<{}>'.format(self.node_to_string())
 
 
@@ -202,7 +202,9 @@ class RecordAccessMatcher:
     Helper to match GDB values that follow the record/access pattern.
     """
 
-    def __init__(self, record_type_name: str, access_type_name: Optional[str]):
+    def __init__(self,
+                 record_type_name: str,
+                 access_type_name: Optional[str]) -> None:
         self.record_type_name = record_type_name
         self.access_type_name = access_type_name
 
@@ -238,7 +240,7 @@ class LexicalEnv:
     internal_matcher = RecordAccessMatcher('ast_envs__lexical_env_type',
                                            'ast_envs__lexical_env_access')
 
-    def __init__(self, value, context):
+    def __init__(self, value: gdb.Value, context: Context):
         self.context = context
 
         if self.matches_wrapper(value, context):
@@ -249,16 +251,14 @@ class LexicalEnv:
             raise ValueError('Invalid lexical env: {}'.format(self.value))
 
     @classmethod
-    def matches_wrapper(cls, value, context):
+    def matches_wrapper(cls, value: gdb.Value, context: Context) -> bool:
         """
         Return whether `value` is a Lexical_Env value.
-
-        :rtype: bool
         """
         return cls.wrapper_matcher.matches_record(value, context)
 
     @classmethod
-    def matches_access(cls, value, context):
+    def matches_access(cls, value: gdb.Value, context: Context) -> bool:
         """
         Return whether `value` is a Lexical_Env_Access value.
 
@@ -267,7 +267,7 @@ class LexicalEnv:
         return cls.internal_matcher.matches_access(value, context)
 
     @property
-    def _variant(self):
+    def _variant(self) -> gdb.Value:
         """
         Return the record variant that applies to this env getter.
         """
@@ -288,7 +288,7 @@ class LexicalEnv:
         return inner_union[field]
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         if not self.value:
             return 'primary'
         result = str(self.value['kind'])
@@ -299,14 +299,14 @@ class LexicalEnv:
         return chunks[-1]
 
     @property
-    def node(self):
+    def node(self) -> gdb.Value:
         return self._variant['node']
 
     @property
-    def ref_count(self):
+    def ref_count(self) -> gdb.Value:
         return self.value['ref_count']
 
-    def to_string(self):
+    def to_string(self) -> str:
         if not self.value:
             return 'null'
 
@@ -344,10 +344,10 @@ class EnvNamePrinter(BasePrinter):
     matcher = RecordAccessMatcher('env_name_record', 'env_name')
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return cls.matcher.matches_access(value, context)
 
-    def to_string(self):
+    def to_string(self) -> str:
         if not self.value:
             return 'null'
 
@@ -394,14 +394,14 @@ class LexicalEnvPrinter(BasePrinter):
     name = 'LexicalEnv'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return LexicalEnv.matches_wrapper(value, context)
 
     @property
-    def env(self):
+    def env(self) -> LexicalEnv:
         return LexicalEnv(self.value, self.context)
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         kind = self.env.kind
         if kind == 'primary':
             return ''
@@ -410,10 +410,10 @@ class LexicalEnvPrinter(BasePrinter):
         else:
             return 'map'
 
-    def to_string(self):
+    def to_string(self) -> str:
         return self.env.to_string()
 
-    def children(self):
+    def children(self) -> Iterable[Tuple[str, Union[str, gdb.Value]]]:
         env = self.env
         if env.kind == 'orphaned':
             yield ('key', 'orphaned')
@@ -448,7 +448,7 @@ class EnvGetterPrinter(BasePrinter):
     name = 'Env_Getter'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (
             value.type.code == gdb.TYPE_CODE_STRUCT
             and (
@@ -460,11 +460,11 @@ class EnvGetterPrinter(BasePrinter):
         )
 
     @property
-    def is_dynamic(self):
+    def is_dynamic(self) -> gdb.Value:
         return self.value['dynamic']
 
     @property
-    def _variant(self):
+    def _variant(self) -> gdb.Value:
         """
         Return the record variant that applies to this env getter.
         """
@@ -477,7 +477,7 @@ class EnvGetterPrinter(BasePrinter):
             return self.value['S']
 
     @property
-    def env(self):
+    def env(self) -> Optional[gdb.Value]:
         """
         If this env getter is static, return the env it references. Otherwise,
         return None.
@@ -485,7 +485,7 @@ class EnvGetterPrinter(BasePrinter):
         return self._variant['env'] if not self.is_dynamic else None
 
     @property
-    def node(self):
+    def node(self) -> Optional[gdb.Value]:
         """
         If this env getter is dynamic, return the node use to resolve the
         reference. Otherwise, return None.
@@ -493,7 +493,7 @@ class EnvGetterPrinter(BasePrinter):
         return self._variant['node'] if self.is_dynamic else None
 
     @property
-    def resolver(self):
+    def resolver(self) -> Optional[gdb.Value]:
         """
         If this env getter is dynamic, return the corresponding resolver.
         Otherwise, return None.
@@ -501,17 +501,16 @@ class EnvGetterPrinter(BasePrinter):
         return self._variant['resolver'] if self.is_dynamic else None
 
     @property
-    def resolver_name(self):
+    def resolver_name(self) -> Optional[str]:
         """
         If we can determine the name of the property for this resolver, return
         it. Return None otherwise.
         """
         m = re.match(r'0x[a-f0-9]+ <.*\.([a-z_]+)>', str(self.resolver))
-        if m:
-            return m.group(1)
+        return m.group(1) if m else None
 
     @property
-    def image(self):
+    def image(self) -> str:
         """
         Return a description of the env getter as a string.
         """
@@ -525,7 +524,7 @@ class EnvGetterPrinter(BasePrinter):
         else:
             return str(self.env)
 
-    def to_string(self):
+    def to_string(self) -> str:
         return 'EnvGetter ({})'.format(self.image)
 
 
@@ -537,7 +536,7 @@ class ReferencedEnvPrinter(BasePrinter):
     name = 'Referenced_Env'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (
             value.type.code == gdb.TYPE_CODE_STRUCT
             and (
@@ -548,7 +547,7 @@ class ReferencedEnvPrinter(BasePrinter):
             )
         )
 
-    def to_string(self):
+    def to_string(self) -> str:
         return EnvGetterPrinter(self.value['getter'], self.context).image
 
 
@@ -560,15 +559,15 @@ class EntityPrinter(BasePrinter):
     name = 'Entity'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (value.type.code == gdb.TYPE_CODE_STRUCT
                 and value.type.name in context.entity_struct_names)
 
     @property
-    def node(self):
+    def node(self) -> gdb.Value:
         return self.value['node']
 
-    def to_string(self):
+    def to_string(self) -> str:
         if not self.node:
             return 'null'
 
@@ -590,7 +589,7 @@ class RebindingsPrinter(BasePrinter):
     name = 'Rebindings'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (
             value.type.code == gdb.TYPE_CODE_PTR
             and value.type.target().code == gdb.TYPE_CODE_STRUCT
@@ -599,21 +598,21 @@ class RebindingsPrinter(BasePrinter):
         )
 
     @property
-    def is_null(self):
+    def is_null(self) -> bool:
         """
         Return whether this contains no rebinding.
         """
         return not self.value
 
     @property
-    def inner(self):
+    def inner(self) -> str:
         """
         Return the description of the rebindings list as a string.
         """
         if self.is_null:
             return 'null'
 
-        def rebinding_img(value):
+        def rebinding_img(value: gdb.Value) -> str:
             new_env = LexicalEnv(value['new_env'], self.context)
             return ASTNodePrinter(new_env.node,
                                   self.context).sloc(with_end=False)
@@ -628,7 +627,7 @@ class RebindingsPrinter(BasePrinter):
         return '[{}]'.format(', '.join(rebinding_img(r)
                                        for r in reversed(rebindings)))
 
-    def to_string(self):
+    def to_string(self) -> str:
         return "<Rebindings {}>".format(self.inner)
 
 
@@ -642,7 +641,9 @@ class ArrayPrettyPrinter(BasePrinter):
     typename_suffix = '_array_record'
 
     @classmethod
-    def element_typename(cls, struct_typename, context):
+    def element_typename(cls,
+                         struct_typename: str,
+                         context: Context) -> Optional[str]:
         """
         Given the name of the structure that implements this array, return the
         type name for the element that this array contains. Return None if this
@@ -654,13 +655,15 @@ class ArrayPrettyPrinter(BasePrinter):
         if (struct_typename.startswith(prefix)
                 and struct_typename.endswith(suffix)):
             return struct_typename[len(prefix):-len(suffix)]
+        else:
+            return None
 
     @property
-    def length(self):
+    def length(self) -> int:
         return int(self.value['n'])
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         if (value.type.code != gdb.TYPE_CODE_PTR
                 or value.type.target().code != gdb.TYPE_CODE_STRUCT):
             return False
@@ -669,18 +672,19 @@ class ArrayPrettyPrinter(BasePrinter):
         return bool(struct_typename and
                     cls.element_typename(struct_typename, context))
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return 'array'
 
-    def to_string(self):
+    def to_string(self) -> str:
+        elt_typename = self.element_typename(self.value.type.target().name,
+                                             self.context)
+        assert elt_typename is not None
         return '{} array of length {}'.format(
-            adaify_name(self.context,
-                        self.element_typename(self.value.type.target().name,
-                                              self.context)),
+            adaify_name(self.context, elt_typename),
             self.length
         )
 
-    def children(self):
+    def children(self) -> Iterable[Tuple[str, gdb.Value]]:
         if self.length <= 0:
             return
 
@@ -700,12 +704,12 @@ class LangkitVectorPrinter(BasePrinter):
 
     name = 'Langkit_Vectors'
 
-    def __init__(self, value, context):
+    def __init__(self, value: gdb.Value, context: Context):
         self.context = context
         self.value = value
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (value.type.code == gdb.TYPE_CODE_STRUCT
                 and value.type.name.endswith('__vector')
                 and (set(f.name for f in value.type.fields())
@@ -713,7 +717,7 @@ class LangkitVectorPrinter(BasePrinter):
 
     @property  # type: ignore
     @memoized
-    def fields(self):
+    def fields(self) -> Dict[str, gdb.Value]:
         """
         Return a mapping: (field name -> field value) for all fields in this
         vector record.
@@ -722,7 +726,7 @@ class LangkitVectorPrinter(BasePrinter):
                 for f in self.value.type.fields()}
 
     @property
-    def element_type(self):
+    def element_type(self) -> gdb.Type:
         """
         Return the type of elements this vector contains.
         """
@@ -741,7 +745,7 @@ class LangkitVectorPrinter(BasePrinter):
         return array_type.target().target()
 
     @property
-    def package(self):
+    def package(self) -> str:
         """
         Return the name of the instantiation package for this vector.
         """
@@ -751,19 +755,19 @@ class LangkitVectorPrinter(BasePrinter):
         return type_name[:-len(suffix)]
 
     @property
-    def length(self):
+    def length(self) -> int:
         return int(self.fields['size'])
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return 'array'
 
-    def to_string(self):
+    def to_string(self) -> str:
         return '{} vector of length {}'.format(
             adaify_name(self.context, self.element_type.name),
             self.length
         )
 
-    def children(self):
+    def children(self) -> Iterable[Tuple[str, gdb.Value]]:
         if self.length <= 0:
             return
 
@@ -796,11 +800,11 @@ class TokenReferencePrinter(BasePrinter):
     name = 'TokenReference'
 
     @classmethod
-    def matches(cls, value, context):
+    def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (value.type.code == gdb.TYPE_CODE_STRUCT
                 and value.type.name == context.comname('token_reference'))
 
-    def to_string(self):
+    def to_string(self) -> str:
         if not self.value['tdh']:
             return 'No_Token'
 

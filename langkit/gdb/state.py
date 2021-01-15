@@ -1,7 +1,19 @@
+from __future__ import annotations
+
 from collections import OrderedDict
+from enum import Enum
+from typing import List, Optional, TYPE_CHECKING, Tuple
 
 
-def analysis_line_no(context, frame):
+if TYPE_CHECKING:
+    import gdb
+
+    from langkit.gdb.context import Context
+    from langkit.gdb.debug_info import (DSLLocation, ExprDone, ExprStart,
+                                        Property, Scope)
+
+
+def analysis_line_no(context: Context, frame: gdb.Frame) -> Optional[int]:
     """
     If the given frame is in the $-implementation.adb file, return its
     currently executed line number. Return None otherwise.
@@ -29,83 +41,67 @@ class State:
     Holder for the execution state of a property.
     """
 
-    def __init__(self, frame, line_no, prop):
+    def __init__(self, frame: gdb.Frame, line_no: int, prop: Property):
         self.frame = frame
         """
-        :type: gdb.Frame
-
         The GDB frame from which this state was decoded.
         """
 
         self.property = prop
         """
-        :type: langkit.gdb.debug_info.Property
         The property currently running.
         """
 
-        self.scopes = []
+        self.scopes: List[ScopeState] = []
         """
-        :type: list[ScopeState]
-
         The stack of scope states describing the current execution state. The
         first item is the scope for the property itself. The following items
         are the nested scopes currently activated. The last item is the most
         nested scope.
         """
 
-        self.started_expressions = []
+        self.started_expressions: List[ExpressionEvaluation] = []
         """
-        :type: list[ExpressionEvaluation]
-
         Stack of expressions that are being evaluated.
         """
 
         self.line_no = line_no
         """
-        :type: int
-
         The line number in the generated source code where execution was when
         this state was decoded.
         """
 
     @property
-    def in_memoization_lookup(self):
+    def in_memoization_lookup(self) -> bool:
         """
         Return whether execution is inside a memoization handler, about to
         return a cached result.
-
-        :rtype: bool
         """
         from langkit.gdb.debug_info import MemoizationLookup
 
         innermost = self.innermost_scope
-        return innermost and isinstance(innermost.scope, MemoizationLookup)
+        return (innermost is not None
+                and isinstance(innermost.scope, MemoizationLookup))
 
     @property
-    def property_scope(self):
+    def property_scope(self) -> ScopeState:
         """
         Return the ScopeState associated to the running property.
-
-        :rtype: ScopeState
         """
         return self.scopes[0]
 
     @property
-    def innermost_scope(self):
+    def innermost_scope(self) -> ScopeState:
         """
         Return the ScopeState associated to the innermost activated scope.
-
-        :rtype: ScopeState
         """
         return self.scopes[-1]
 
-    def lookup_current_expr(self):
+    def lookup_current_expr(self) -> Tuple[Optional[ScopeState],
+                                           Optional[ExpressionEvaluation]]:
         """
         Return the innermost currently evaluating expression and its scope
         state. Return (None, None) if there is no evaluating expression.
-
-        :rtype: (None, None)|(langkit.gdb.state.ScopeState,
-                              langkit.gdb.state.ExpressionEvaluation)
         """
         for scope_state in reversed(self.scopes):
             for e in reversed(scope_state.expressions.values()):
@@ -113,27 +109,22 @@ class State:
                     return scope_state, e
         return (None, None)
 
-    def lookup_expr(self, expr_id):
+    def lookup_expr(self, expr_id: str) -> Optional[ExpressionEvaluation]:
         """
         Look for an expression evaluation matching the given ID.
-
-        :type expr_id: str
-        :rtype: None|ExpressionEvaluation
         """
         for scope in self.scopes:
             try:
                 return scope.expressions[expr_id]
             except KeyError:
                 pass
+        return None
 
     @classmethod
-    def decode(cls, context, frame):
+    def decode(cls, context: Context, frame: gdb.Frame) -> Optional[State]:
         """
         Decode the execution state from the given GDB frame. Return None if no
         property is running in this frame.
-
-        :type frame: gdb.Frame
-        :rtype: None|State
         """
         from langkit.gdb.debug_info import Event, PropertyCall, Scope
 
@@ -143,13 +134,15 @@ class State:
         prop = context.debug_info.lookup_property(line_no) if line_no else None
         if prop is None:
             return None
+        assert line_no is not None
 
         # Create the result, add the property root scope
         result = cls(frame, line_no, prop)
         root_scope_state = ScopeState(result, None, prop)
         result.scopes.append(root_scope_state)
 
-        def build_scope_state(scope_state):
+        def build_scope_state(scope_state: ScopeState) -> None:
+            assert line_no is not None
             for event in scope_state.scope.events:
 
                 if isinstance(event, Event):
@@ -180,53 +173,42 @@ class ScopeState:
     Holder for the execution state of a specific scope in a property.
     """
 
-    def __init__(self, state, parent, scope):
+    def __init__(self,
+                 state: State,
+                 parent: Optional[ScopeState],
+                 scope: Scope):
         self.state = state
-        """
-        :type: State
-        """
-
         self.parent = parent
-        """
-        :type: None|ScopeState
-        """
 
         self.scope = scope
         """
-        :type: langkit.gdb.debug_info.Scope
-
         The scope of interest.
         """
 
-        self.bindings = []
+        self.bindings: List[Binding] = []
         """
-        :type: list[Binding]
-
         Bindings that are live in this state.
         """
 
-        self.expressions = OrderedDict()
+        self.expressions: OrderedDict[str, ExpressionEvaluation] = (
+            OrderedDict()
+        )
         """
-        :type: dict[str, ExpressionEvaluation]
-
         Expressions that are currently being evaluated or that are evaluated in
         this state, indexed by unique ids.
         """
 
-        self.called_property = None
+        self.called_property: Optional[Property] = None
         """
         Property that is currently being called, if any.
-
-        :type: Property|None
         """
 
-    def sorted_expressions(self):
+    def sorted_expressions(self) -> Tuple[List[ExpressionEvaluation],
+                                          Optional[ExpressionEvaluation]]:
         """
         Return a tuple, whose first element is the list of already evaluated
         expressions in this scope, sorted by line of done, and second element
         is the currently evaluating expression.
-
-        :rtype: (list[ExpressionEvaluation], ExpressionEvaluation)
         """
 
         done_exprs = []
@@ -240,7 +222,10 @@ class ScopeState:
         # Sort expressions whose evaluation is completed by "done location"
         # so that users see them in the order they saw evaluation
         # happening.
-        done_exprs.sort(key=lambda e: e.done_at_line)
+        def key(e: ExpressionEvaluation) -> int:
+            assert e.done_at_line is not None
+            return e.done_at_line
+        done_exprs.sort(key=key)
 
         return done_exprs, last_started
 
@@ -251,18 +236,33 @@ class Binding:
     generated code.
     """
 
-    def __init__(self, dsl_name, gen_name):
+    def __init__(self, dsl_name: str, gen_name: str):
         self.dsl_name = dsl_name
         """
-        :type: str
         Name of the variable in the DSL.
         """
 
         self.gen_name = gen_name
         """
-        :type: str
         Name of the variable in the Ada generated code.
         """
+
+
+class EvalState(Enum):
+    """
+    Evaluation state for an expression.
+    """
+
+    started = 'started'
+    """
+    Evaluation has started but not yet completed.
+    """
+
+    done = 'done'
+    """
+    Evaluation has completed. The expression result is available for use in
+    the result variable, if there is one.
+    """
 
 
 class ExpressionEvaluation:
@@ -270,60 +270,48 @@ class ExpressionEvaluation:
     Describe the state of evaluation of an expression.
     """
 
-    STATE_START = 'start'
-    """
-    State of an expression whose evaluation has been started, but hasn't been
-    completed yet.
-    """
-
-    STATE_DONE = 'done'
-    """
-    State of an expression whose evaluation has been completed. Its result is
-    available for use in the result variable, if there is one.
-    """
-
-    def __init__(self, start_event):
+    def __init__(self, start_event: ExprStart):
         self.start_event = start_event
 
-        self.parent_expr = None
-        self.sub_exprs = []
+        self.parent_expr: Optional[ExpressionEvaluation] = None
+        self.sub_exprs: List[ExpressionEvaluation] = []
 
-        self.state = self.STATE_START
-        self.done_at_line = None
+        self.state: EvalState = EvalState.started
+        self.done_at_line: Optional[int] = None
 
     @property
-    def expr_id(self):
+    def expr_id(self) -> str:
         return self.start_event.expr_id
 
     @property
-    def expr_repr(self):
+    def expr_repr(self) -> str:
         return self.start_event.expr_repr
 
     @property
-    def result_var(self):
+    def result_var(self) -> str:
         return self.start_event.result_var
 
     @property
-    def dsl_sloc(self):
+    def dsl_sloc(self) -> Optional[DSLLocation]:
         return self.start_event.dsl_sloc
 
     @property
-    def done_event(self):
+    def done_event(self) -> ExprDone:
         return self.start_event.done_event
 
-    def set_done(self, line_no):
-        self.state = self.STATE_DONE
+    def set_done(self, line_no: int) -> None:
+        self.state = EvalState.done
         self.done_at_line = line_no
 
     @property
-    def is_started(self):
-        return self.state == self.STATE_START
+    def is_started(self) -> bool:
+        return self.state == EvalState.started
 
     @property
-    def is_done(self):
-        return self.state == self.STATE_DONE
+    def is_done(self) -> bool:
+        return self.state == EvalState.done
 
-    def append_sub_expr(self, expr):
+    def append_sub_expr(self, expr: ExpressionEvaluation) -> None:
         """
         Append `expr` to the list of sub-expressions for `self`. Also set
         `self` as the parent of `expr`.
@@ -332,18 +320,15 @@ class ExpressionEvaluation:
         self.sub_exprs.append(expr)
         expr.parent_expr = self
 
-    def read(self, frame):
+    def read(self, frame: gdb.Frame) -> gdb.Value:
         """
         Read the value of this expression in the given GDB frame.
 
         This is valid iff this expression is done.
-
-        :type frame: gdb.Frame
-        :rtype: gdb.Value
         """
         assert self.is_done
         return frame.read_var(self.result_var.lower())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<ExpressionEvaluation {}, {}>'.format(self.expr_id,
                                                       self.dsl_sloc)

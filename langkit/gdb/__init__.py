@@ -2,16 +2,15 @@
 GDB helpers to debug generated libraries.
 """
 
+from __future__ import annotations
+
+from typing import Optional, TYPE_CHECKING
+
 
 try:
     import gdb
 except ImportError:
     gdb = None
-
-
-setup_done = False
-gdb_printers = None
-global_context = None
 
 
 # Import actual GDB helpers only if running inside GDB
@@ -21,3 +20,11 @@ if gdb:
     from langkit.gdb.context import Context
     from langkit.gdb.setup import get_current_gdb_context, setup
     # pyflakes on
+
+if TYPE_CHECKING:
+    from langkit.gdb.printers import GDBPrettyPrinters
+
+
+setup_done: bool = False
+gdb_printers: Optional[GDBPrettyPrinters] = None
+global_context: Optional[Context] = None

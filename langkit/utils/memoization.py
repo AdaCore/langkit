@@ -1,5 +1,12 @@
+from __future__ import annotations
 
-def memoized(func, pre_cache_miss=None):
+from typing import Any, Callable, List, Optional, TypeVar, cast
+
+
+F = TypeVar('F', bound=Callable[..., Any])
+
+
+def memoized(func: F, pre_cache_miss: Optional[F] = None) -> F:
     """
     Decorator to memoize a function.
     This function must be passed only hashable arguments.
@@ -9,12 +16,14 @@ def memoized(func, pre_cache_miss=None):
         `func` is called. Can be used for example to prepare a value in the
         memoization cache to break infinite recursions.
     """
-    cache = {}
+    cache: dict = {}
 
-    if not getattr(memoized, "caches", None):
-        memoized.caches = []
+    all_caches: List[dict] = getattr(memoized, "caches", None)
+    if all_caches is None:
+        all_caches = []
+        setattr(memoized, "caches", all_caches)
 
-    memoized.caches.append(cache)
+    all_caches.append(cache)
 
     def wrapper(*args, **kwargs):
         key = (args, tuple(kwargs.items()))
@@ -28,7 +37,7 @@ def memoized(func, pre_cache_miss=None):
             cache[key] = result
         return result
 
-    return wrapper
+    return cast(F, wrapper)
 
 
 def memoized_with_default(default_value):

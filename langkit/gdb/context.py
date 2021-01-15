@@ -1,3 +1,5 @@
+from typing import Dict, List, Optional, Set
+
 import gdb
 
 from langkit.gdb.debug_info import DebugInfo
@@ -10,7 +12,11 @@ class Context:
     Holder for generated library-specific information.
     """
 
-    def __init__(self, lib_name, astnode_names, astnode_kinds, prefix):
+    def __init__(self,
+                 lib_name: str,
+                 astnode_names: List[str],
+                 astnode_kinds: Dict[int, str],
+                 prefix: str):
         """
         :param str lib_name: Lower-case name for the generated library.
 
@@ -38,7 +44,7 @@ class Context:
 
         self.reparse_debug_info()
 
-    def _entity_struct_names(self):
+    def _entity_struct_names(self) -> Set[str]:
         """
         Turn the set of AST node names into a set of encoded type names for the
         corresponding entity records.
@@ -52,7 +58,8 @@ class Context:
             '{}__implementation__ast_envs__entity'.format(self.lib_name),
         }
 
-    def decode_state(self, frame=None):
+    def decode_state(self,
+                     frame: Optional[gdb.Frame] = None) -> Optional[State]:
         """
         Shortcut for::
 
@@ -67,7 +74,7 @@ class Context:
         return State.decode(self, frame)
 
     @property
-    def analysis_prefix(self):
+    def analysis_prefix(self) -> str:
         """
         Return the prefix for symbols defined in the $.Implementation unit. For
         instance: "libfoolang__implementation__".
@@ -76,13 +83,13 @@ class Context:
         """
         return '{}__implementation__'.format(self.lib_name)
 
-    def reparse_debug_info(self):
+    def reparse_debug_info(self) -> None:
         """
         Reload debug information from the analysis source file.
         """
         self.debug_info = DebugInfo.parse_from_gdb(self)
 
-    def implname(self, suffix):
+    def implname(self, suffix: str) -> str:
         """
         Return the C-style symbol name to use for an Ada entity in the
         $.Implementation package.
@@ -92,7 +99,7 @@ class Context:
         """
         return '{}__implementation__{}'.format(self.lib_name, suffix)
 
-    def comname(self, suffix):
+    def comname(self, suffix: str) -> str:
         """
         Return the C-style symbol name to use for an Ada entity in the
         $.Common package.

@@ -403,6 +403,8 @@ class PropertyDSLCoverage:
         """
         for prop in self.debug_info.properties:
             for expr in prop.iter_events(filter=ExprStart):
+                assert isinstance(expr, ExprStart)
+
                 # Silently ignore sloc-less expressions, as we can do nothing
                 # with them. These are probably artificial expressions (i.e.
                 # created during compilation but not coming from sources)
@@ -418,6 +420,7 @@ class PropertyDSLCoverage:
 
                 # Map generated code linenos to DSL coverage data
                 line_range = expr.line_range
+                assert isinstance(line_range.last_line, int)
                 for lineno in range(line_range.first_line,
                                     line_range.last_line + 1):
                     self.gen_to_cov[lineno - 1].append(data)
