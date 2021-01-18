@@ -5,9 +5,9 @@ from typing import Callable, List, Optional
 
 import gdb
 
+from langkit.debug_info import DSLLocation, ExprStart, Property, Scope
 from langkit.gdb.context import Context
 from langkit.gdb.control_flow import go_next, go_out, go_step_inside
-from langkit.gdb.debug_info import DSLLocation, ExprStart, Property, Scope
 from langkit.gdb.state import Binding
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors

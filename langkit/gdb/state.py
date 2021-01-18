@@ -8,9 +8,9 @@ from typing import List, Optional, TYPE_CHECKING, Tuple
 if TYPE_CHECKING:
     import gdb
 
+    from langkit.debug_info import (DSLLocation, ExprDone, ExprStart, Property,
+                                    Scope)
     from langkit.gdb.context import Context
-    from langkit.gdb.debug_info import (DSLLocation, ExprDone, ExprStart,
-                                        Property, Scope)
 
 
 def analysis_line_no(context: Context, frame: gdb.Frame) -> Optional[int]:
@@ -77,7 +77,7 @@ class State:
         Return whether execution is inside a memoization handler, about to
         return a cached result.
         """
-        from langkit.gdb.debug_info import MemoizationLookup
+        from langkit.debug_info import MemoizationLookup
 
         innermost = self.innermost_scope
         return (innermost is not None
@@ -126,7 +126,7 @@ class State:
         Decode the execution state from the given GDB frame. Return None if no
         property is running in this frame.
         """
-        from langkit.gdb.debug_info import Event, PropertyCall, Scope
+        from langkit.debug_info import Event, PropertyCall, Scope
 
         line_no = analysis_line_no(context, frame)
 

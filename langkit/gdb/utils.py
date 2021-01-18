@@ -1,7 +1,7 @@
 import gdb
 
+from langkit.debug_info import Property
 from langkit.gdb.context import Context
-from langkit.gdb.debug_info import Property
 from langkit.gdb.state import Binding, ExpressionEvaluation
 from langkit.names import Name
 from langkit.utils import Colors, col

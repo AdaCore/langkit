@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Set
 
 import gdb
 
-from langkit.gdb.debug_info import DebugInfo
+from langkit.debug_info import DebugInfo
 from langkit.gdb.state import State
 from langkit.names import Name
 
