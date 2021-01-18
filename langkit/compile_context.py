@@ -1535,7 +1535,11 @@ class CompileCtx:
         }
 
         def warn(unused_set, message):
-            sorted_set = sorted((p.qualname, p) for p in unused_set)
+            sorted_set = sorted(
+                (p.qualname, p)
+                for p in unused_set
+                if not p.is_internal
+            )
             for _, p in sorted_set:
                 with p.diagnostic_context:
                     check_source_language(False, message,
