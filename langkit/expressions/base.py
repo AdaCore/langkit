@@ -3096,6 +3096,7 @@ class PropertyDef(AbstractNodeData):
                  ignore_warn_on_node=None, call_non_memoizable_because=None,
                  activate_tracing=False, dump_ir=False,
                  lazy_field: Opt[bool] = None,
+                 artificial: bool = False,
                  access_constructor: Opt[
                      Callable[
                          [
@@ -3201,6 +3202,10 @@ class PropertyDef(AbstractNodeData):
 
         :param bool|None warn_on_unused: Whether to warn on unused or not.
             Defaults to None, which means "unspecified by the user".
+
+        :param bool artificial: Whether this property is artificial: not
+            created in the language spec, but still visible for users (unlike
+            internal properties).
 
         :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
             warnings for this property. Defaults to None, which means inherit.
@@ -3364,14 +3369,17 @@ class PropertyDef(AbstractNodeData):
         self.memoize_in_populate = memoize_in_populate
 
         self.external = external
+        self.artificial = artificial
 
-        self.user_external = external and self.prefix is not None
+        self.user_external: bool = (
+            external
+            and self.prefix is not None
+            and not self.artificial
+        )
         """
         Whether this property is external and comes from the DSL. In that case,
         code generation expects its implementation to be in the
         $.Implementation.Extensions unit.
-
-        :type: bool
         """
 
         self._uses_entity_info = uses_entity_info
