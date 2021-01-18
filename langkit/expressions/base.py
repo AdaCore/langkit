@@ -3186,7 +3186,7 @@ class PropertyDef(AbstractNodeData):
             is passed, and 2) on entities, in which case the entity info from
             the prefix is passed.
 
-        :param bool|None warn_on_unused: Wether to warn on unused or not.
+        :param bool|None warn_on_unused: Whether to warn on unused or not.
             Defaults to None, which means "unspecified by the user".
 
         :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
