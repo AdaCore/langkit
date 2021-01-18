@@ -22,7 +22,7 @@ for n in u.root:
     try:
         print(n.p_rebind)
     except libfoolang.PropertyError as exc:
-        print("Exception:", exc)
+        print("Exception: {}".format(exc))
     print("")
 
 print("main.py: Done.")
