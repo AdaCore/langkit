@@ -10,13 +10,6 @@ import shlex
 from typing import (Callable, Dict, Iterable, List, Optional, TYPE_CHECKING,
                     Type, Union, cast)
 
-
-try:
-    import gdb
-except ImportError:
-    gdb = None
-
-
 from langkit.gdb.state import Binding, ExpressionEvaluation
 
 
@@ -64,6 +57,8 @@ class DebugInfo:
         Print error messages on standard output if anything goes wrong, but
         always return a DebugInfo instance anyway.
         """
+        import gdb
+
         result = cls(context)
 
         # Look for the "$-implementation.adb" file using some symbol that is

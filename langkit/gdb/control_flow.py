@@ -4,12 +4,12 @@ from typing import Iterable, List, Optional, cast
 
 import gdb
 
-from langkit.gdb.breakpoints import BreakpointGroup
-from langkit.gdb.context import Context
-from langkit.gdb.debug_info import (
+from langkit.debug_info import (
     BaseEvent, ExprDone, ExprStart, MemoizationReturn, Property, PropertyCall,
     Scope
 )
+from langkit.gdb.breakpoints import BreakpointGroup
+from langkit.gdb.context import Context
 from langkit.gdb.utils import expr_repr
 
 

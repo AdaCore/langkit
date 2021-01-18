@@ -13,7 +13,7 @@ import subprocess
 from typing import Dict, List, Optional, Set, TYPE_CHECKING
 import xml.etree.ElementTree as etree
 
-from langkit.gdb.debug_info import DebugInfo, ExprStart
+from langkit.debug_info import DebugInfo, ExprStart
 from langkit.template_utils import Renderer
 from langkit.utils import copy_to_dir, ensure_clean_dir
 
