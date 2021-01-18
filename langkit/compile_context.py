@@ -1367,9 +1367,10 @@ class CompileCtx:
         # * properties with "warn_on_unused" disabled;
         # * properties used as entity/env resolvers.
 
-        queue = {p
-                 for p in forward_map
-                 if p.is_public or p.is_internal or not p.warn_on_unused}
+        queue = {
+            p for p in forward_map
+            if p.is_public or p.is_internal or not p.warn_on_unused
+        }
         queue.update(called_by_grammar)
 
         for astnode in self.astnode_types:
@@ -1538,7 +1539,7 @@ class CompileCtx:
             sorted_set = sorted(
                 (p.qualname, p)
                 for p in unused_set
-                if not p.is_internal
+                if not p.is_internal and not p.artificial
             )
             for _, p in sorted_set:
                 with p.diagnostic_context:
