@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from contextlib import contextmanager
 import itertools
 import re
+from typing import (Any, Callable, Dict, Iterable, Iterator, List, Optional,
+                    Set, TYPE_CHECKING, Tuple, TypeVar)
 
 
 from langkit.diagnostics import check_source_language
@@ -9,36 +13,42 @@ from langkit.lexer.char_set import CharSet
 from langkit.lexer.unicode_data import unicode_categories_char_sets
 
 
+if TYPE_CHECKING:
+    from langkit.lexer import RuleAssoc
+
+
 rule_name_re = re.compile('[a-zA-Z][a-zA-Z0-9_]*')
 del unicode_categories_char_sets
 
 
-def _to_dot(starting_state, get_transitions, get_state_label):
+T = TypeVar("T")
+U = TypeVar("U")
+
+
+def _to_dot(starting_state: T,
+            get_transitions: Callable[[T], List[Tuple[U, T]]],
+            get_state_label: Callable[[T], Optional[str]]) -> str:
     """
     Helper to emit a dot(1) file representing a states graph.
 
     Return the content of a dot(1) file as a string.
 
-    :param T starting_state: Initial state for the graph.
+    :param starting_state: Initial state for the graph.
 
     :param get_transitions: Function that returns for a given state the list of
         transitions from it. Each transition is a couple: (transition label,
         next state).
-    :type get_transitions: (T) -> list[(U, T)]
 
     :param get_state_label: Function that returns an optional label for a
         state.
-    :type: get_state_label: (T) -> str|None
-
-    :rtype: str
     """
     id_generator = iter(itertools.count(0))
-    ids = {}
+    ids: Dict[T, int] = {}
 
-    nodes = []
-    edges = []
+    nodes: List[str] = []
+    edges: List[str] = []
 
-    def add_node(n):
+    def add_node(n: T) -> int:
         try:
             return ids[n]
         except KeyError:
@@ -63,29 +73,29 @@ def _to_dot(starting_state, get_transitions, get_state_label):
 
 
 class SequenceReader:
-    def __init__(self, sequence):
+    def __init__(self, sequence: str):
         self.sequence = sequence
         self.index = 0
 
-    def next_is(self, *items):
+    def next_is(self, *items: str) -> bool:
         return not self.eof and self.peek() in items
 
-    def peek(self):
+    def peek(self) -> str:
         assert not self.eof
         return self.sequence[self.index]
 
-    def read(self):
+    def read(self) -> str:
         assert not self.eof
         result = self.peek()
         self.index += 1
         return result
 
-    def go_back(self):
+    def go_back(self) -> None:
         assert self.index >= 0
         self.index -= 1
 
     @property
-    def eof(self):
+    def eof(self) -> bool:
         return self.index == len(self.sequence)
 
 
@@ -94,23 +104,24 @@ class RegexpCollection:
     class Parser:
         """Base class for regexp components."""
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             """
             Turn this parser into a NFA.
 
-            :param RegexpCollection regexps: Collection of named patterns that
-                `self` can reference.
-            :rtype: NFAState
+            :param regexps: Collection of named patterns that `self` can
+                reference.
             """
             raise NotImplementedError()
 
     class Sequence(Parser):
         """Consume input that sub-parsers can consume sequentially."""
 
-        def __init__(self, subparsers):
+        def __init__(self, subparsers: List[RegexpCollection.Parser]):
             self.subparsers = subparsers
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             # If this sequences matches only the empty input, just return a
             # single state.
             if not self.subparsers:
@@ -123,17 +134,18 @@ class RegexpCollection:
                 sub_nfas[i][1].add_transition(None, sub_nfas[i + 1][0])
             return (sub_nfas[0][0], sub_nfas[-1][1])
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return 'Seq({})'.format(', '.join(
                 repr(s) for s in self.subparsers))
 
     class Repeat(Parser):
         """Accept input running the sub-parser multiple times."""
 
-        def __init__(self, subparser):
+        def __init__(self, subparser: RegexpCollection.Parser):
             self.subparser = subparser
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             # Get the subparser NFA and connect its ends to match repetitions
             nfa = self.subparser.to_nfa(regexps)
             nfa[1].add_transition(None, nfa[0])
@@ -142,16 +154,17 @@ class RegexpCollection:
             # that the NFA accepts empty inputs.
             return (nfa[0], nfa[0])
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return 'Repeat({})'.format(self.subparser)
 
     class Or(Parser):
         """Accept input that at least one sub-parser accepts."""
 
-        def __init__(self, subparsers):
+        def __init__(self, subparsers: List[RegexpCollection.Parser]):
             self.subparsers = subparsers
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             starting = NFAState()
             ending = NFAState()
 
@@ -165,46 +178,49 @@ class RegexpCollection:
 
             return (starting, ending)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return 'Or({})'.format(', '.join(
                 repr(s) for s in self.subparsers))
 
     class Opt(Parser):
         """Accept input that the sub-parser accepts, or the empty input."""
 
-        def __init__(self, subparser):
+        def __init__(self, subparser: RegexpCollection.Parser):
             self.subparser = subparser
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             starting, ending = self.subparser.to_nfa(regexps)
             starting.add_transition(None, ending)
             return (starting, ending)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return 'Opt({})'.format(self.subparser)
 
     class Range(Parser):
         """Accept any character in the given set."""
 
-        def __init__(self, char_set):
+        def __init__(self, char_set: CharSet):
             self.char_set = char_set
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             starting = NFAState()
             ending = NFAState()
             starting.add_transition(self.char_set, ending)
             return (starting, ending)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return repr(self.char_set)
 
     class Defer(Parser):
         """Defer parsing to a named regexp."""
 
-        def __init__(self, name):
+        def __init__(self, name: str):
             self.name = name
 
-        def to_nfa(self, regexps):
+        def to_nfa(self,
+                   regexps: RegexpCollection) -> Tuple[NFAState, NFAState]:
             with regexps._visit_rule(self.name):
                 try:
                     parser = regexps.patterns[self.name]
@@ -213,7 +229,7 @@ class RegexpCollection:
                         False, 'unknown pattern: {}'.format(self.name))
                 return parser.to_nfa(regexps)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '@{}'.format(self.name)
 
     escape_chars = {
@@ -225,16 +241,13 @@ class RegexpCollection:
         '0': '\0',
     }
 
-    def __init__(self):
-        self.patterns = {}
-        self._visiting_patterns = set()
+    def __init__(self) -> None:
+        self.patterns: Dict[str, RegexpCollection.Parser] = {}
+        self._visiting_patterns: Set[str] = set()
 
-    def _parse(self, regexp):
+    def _parse(self, regexp: str) -> RegexpCollection.Parser:
         """
         Parse `regexp` as regular expression string.
-
-        :type str: regexp
-        :rtype: RegexpCollection.Parser
         """
         stream = SequenceReader(regexp)
         root = self._parse_or(stream, toplevel=True)
@@ -242,28 +255,27 @@ class RegexpCollection:
 
         return root
 
-    def add_pattern(self, name, regexp):
+    def add_pattern(self, name: str, regexp: str) -> None:
         """
         Add a named pattern to this collection.
 
-        :param str name: Name for the pattern.
-        :param str regexp: Regular expression string for the pattern.
+        :param name: Name for the pattern.
+        :param regexp: Regular expression string for the pattern.
         """
         # Register the parser for regexp
         assert name not in self.patterns
         self.patterns[name] = self._parse(regexp)
 
-    def nfa_for(self, regexp):
+    def nfa_for(self, regexp: str) -> Tuple[NFAState, NFAState]:
         """
         Parse the given regular expression string and return a NFA for it.
 
-        :param str regexp: Regular expression to parse.
-        :rtype: NFAState
+        :param regexp: Regular expression to parse.
         """
         return self._parse(regexp).to_nfa(self)
 
     @contextmanager
-    def _visit_rule(self, rule_name):
+    def _visit_rule(self, rule_name: str) -> Iterator[None]:
         """
         Context manager to report cycles in named pattern references.
 
@@ -272,7 +284,7 @@ class RegexpCollection:
         (recursively) is already trying to reference this named pattern (can
         occur only if there is a cycle, which is illegal).
 
-        :param str rule_name: Name of the referenced pattern.
+        :param rule_name: Name of the referenced pattern.
         """
         check_source_language(
             rule_name not in self._visiting_patterns,
@@ -282,13 +294,12 @@ class RegexpCollection:
         self._visiting_patterns.remove(rule_name)
 
     @classmethod
-    def _read_escape(cls, stream):
+    def _read_escape(cls, stream: SequenceReader) -> int:
         """
         Read an escaped character. Return the ordinal for the character that is
         meant.
 
-        :param file stream: Input regexp stream.
-        :rtype: int
+        :param stream: Input regexp stream.
         """
         assert stream.read() == '\\'
         check_source_language(not stream.eof, 'bogus escape')
@@ -315,15 +326,16 @@ class RegexpCollection:
         return ord(cls.escape_chars.get(char, char))
 
     @classmethod
-    def _parse_or(cls, stream, toplevel=False):
+    def _parse_or(cls,
+                  stream: SequenceReader,
+                  toplevel: bool = False) -> RegexpCollection.Parser:
         """
         Read a sequence of alternatives. Stop at EOF or at the first unmatched
         parenthesis.
 
-        :param file stream: Input regexp stream.
-        :param bool toplevel: If true, reject unmatched parentheses. Otherwise
+        :param stream: Input regexp stream.
+        :param toplevel: If true, reject unmatched parentheses. Otherwise
             accept them.
-        :rtype: RegexpCollection.Parser
         """
         subparsers = []
         while True:
@@ -338,13 +350,13 @@ class RegexpCollection:
         return cls.Or(subparsers)
 
     @classmethod
-    def _parse_sequence(cls, stream):
+    def _parse_sequence(cls,
+                        stream: SequenceReader) -> RegexpCollection.Parser:
         """
         Parse a sequence of regexps. Stop at the first unmatched parenthesis or
         at the first top-level pipe character.
 
-        :param file stream: Input regexp stream.
-        :rtype: RegexpCollection.Parser
+        :param stream: Input regexp stream.
         """
         subparsers = []
         while True:
@@ -372,13 +384,13 @@ class RegexpCollection:
                 check_source_language(stream.next_is('}'),
                                       'unbalanced bracket')
                 stream.read()
-                check_source_language(rule_name_re.match(name),
+                check_source_language(rule_name_re.match(name) is not None,
                                       'invalid rule name: {}'.format(name))
                 subparsers.append(cls.Defer(name))
 
             elif stream.next_is('*', '+', '?'):
                 # Repeat the previous sequence item
-                check_source_language(subparsers, 'nothing to repeat')
+                check_source_language(bool(subparsers), 'nothing to repeat')
                 check_source_language(
                     not isinstance(subparsers[-1], cls.Repeat),
                     'multiple repeat')
@@ -444,7 +456,7 @@ class RegexpCollection:
         return cls.Sequence(subparsers)
 
     @classmethod
-    def _parse_range(cls, stream):
+    def _parse_range(cls, stream: SequenceReader) -> RegexpCollection.Parser:
         """
         Parse a regular expression for a character range.
 
@@ -452,7 +464,7 @@ class RegexpCollection:
         :rtype: RegexpCollection.Parser
         """
         assert stream.read() == '['
-        ranges = []
+        ranges: List[Tuple[int, int]] = []
 
         # First, determine if this range must be negated
         negate = False
@@ -466,7 +478,8 @@ class RegexpCollection:
         in_range = False
         while not stream.eof and not stream.next_is(']'):
             if stream.next_is('-'):
-                check_source_language(ranges and not in_range, 'dangling dash')
+                check_source_language(bool(ranges and not in_range),
+                                      'dangling dash')
                 in_range = True
                 stream.read()
             else:
@@ -499,16 +512,16 @@ class NFAState:
     # Generator of unique IDs (integers) for NFAState instances
     _id_generator = itertools.count(0)
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._id = next(self._id_generator)
 
-        self.label = None
+        self.label: Any = None
         """
         Annotation for this node. If non-None, this annotation is propagated to
         the corresponding DFA states.
         """
 
-        self.transitions = []
+        self.transitions: List[Tuple[Optional[CharSet], NFAState]] = []
         """
         List of associations between character sets and other states.
 
@@ -518,36 +531,39 @@ class NFAState:
         :type: list[(None|CharSet, NFAState)]
         """
 
-    def __lt__(self, other):
+    def __lt__(self, other: NFAState) -> bool:
         assert isinstance(other, NFAState)
         return self._id < other._id
 
-    def add_transition(self, chars, next_state):
+    def add_transition(self,
+                       chars: Optional[CharSet],
+                       next_state: NFAState) -> None:
         """
         Add a transition from this state to another one.
 
-        :param None|CharSet chars: Specification of the input that allows to
-            transition from this state to the next one. A CharSet instance
-            indicates that one character in this set is required. None
-            indicates that the empty input allows to transition.
-        :param NFAState next_state: Destination state for this new transition.
+        :param chars: Specification of the input that allows to transition from
+            this state to the next one. A CharSet instance indicates that one
+            character in this set is required. None indicates that the empty
+            input allows to transition.
+        :param next_state: Destination state for this new transition.
         """
         assert chars is None or isinstance(chars, CharSet)
         assert isinstance(next_state, NFAState)
         self.transitions.append((chars, next_state))
 
     @staticmethod
-    def follow_spontaneous_transitions(states):
+    def follow_spontaneous_transitions(
+        states: Iterable[NFAState]
+    ) -> Set[NFAState]:
         """
         Return the set of states that can be reached from the given set of
         states following spontaneous transitions.
 
-        :param set[NFAState] states: List of starting states.
-        :rtype: set[NFAState]
+        :param states: List of starting states.
         """
-        result = set()
+        result: Set[NFAState] = set()
 
-        def process(state):
+        def process(state: NFAState) -> None:
             if state in result:
                 return
             result.add(state)
@@ -560,7 +576,9 @@ class NFAState:
         return result
 
     @staticmethod
-    def reachable_nonspontaneous_transitions(states):
+    def reachable_nonspontaneous_transitions(
+        states: Tuple[NFAState, ...]
+    ) -> List[Tuple[CharSet, NFAState]]:
         """
         Return the list of non-spontaneous transitions that can be reached from
         the given set of states.
@@ -569,10 +587,9 @@ class NFAState:
         one given state leads to a state that is also in ``states``, i.e. if
         ``follow_spontaneous_transitions(states) == states``.
 
-        :param set[NFAState] states: List of starting states.
-        :rtype: list[(CharSet, set[NFAState])]
+        :param states: List of starting states.
         """
-        result = []
+        result: List[Tuple[CharSet, NFAState]] = []
         for state in states:
             for chars, next_state in state.transitions:
                 if chars is None:
@@ -582,17 +599,17 @@ class NFAState:
         return result
 
     @staticmethod
-    def hashable_state_set(states):
+    def hashable_state_set(states: Set[NFAState]) -> Tuple[NFAState, ...]:
         """
         Return a value that can be used as a dict key/set element to represent
         a set of states.
-
-        :rtype: set[states]
         """
         return tuple(sorted(states))
 
     @staticmethod
-    def deterministic_transitions(states):
+    def deterministic_transitions(
+        states: Tuple[NFAState, ...]
+    ) -> Dict[Tuple[NFAState, ...], CharSet]:
         """
         Return the set of deterministic (non-spontaneous and disjoint)
         transitions that leave the "states" sub-graph.
@@ -604,13 +621,11 @@ class NFAState:
         deterministic transitions) to disjoint character sets (label for
         transitions).
 
-        :param list[NFAState] states: Set of states from which we compute
-            transitions.
-        :rtype: dict[tuple[NFAState], CharSet]
+        :param states: Set of states from which we compute transitions.
         """
         # First, collect for each reachable state the set of characters that
         # allow to reach that state.
-        transitions = {}
+        transitions: Dict[NFAState, CharSet] = {}
         for chars, next_state in NFAState.reachable_nonspontaneous_transitions(
             states
         ):
@@ -640,65 +655,72 @@ class NFAState:
         #    'z': Event(removing=S1),
         # }.
         class Event:
-            def __init__(self):
-                self.adding = set()
-                self.removing = set()
+            def __init__(self) -> None:
+                self.adding: Set[NFAState] = set()
+                self.removing: Set[NFAState] = set()
 
-        events = defaultdict(Event)
+        event_map: Dict[int, Event] = defaultdict(Event)
         for next_state, chars in transitions.items():
             for r in chars.ranges:
-                events[r[0]].adding.add(next_state)
-                events[r[1]].removing.add(next_state)
-        events = sorted(events.items())
+                event_map[r[0]].adding.add(next_state)
+                event_map[r[1]].removing.add(next_state)
+        events = sorted(event_map.items())
 
         # The final step is to compute the set of transitions for which
         # character sets are disjoint: just follow the stream of events.
 
-        result = defaultdict(CharSet)
+        result: Dict[Tuple[NFAState, ...], CharSet] = defaultdict(CharSet)
 
-        def add_transition(low, high, states):
-            if not states:
+        def add_transition(low: Optional[int],
+                           high: int,
+                           states: Iterable[NFAState]) -> None:
+            if states:
+                assert isinstance(low, int)
+            else:
                 return
-            states = NFAState.follow_spontaneous_transitions(states)
-            result[NFAState.hashable_state_set(states)].add_int_range(low,
-                                                                      high)
+            next_states = NFAState.follow_spontaneous_transitions(states)
+            result[NFAState.hashable_state_set(next_states)].add_int_range(
+                low, high
+            )
 
         # Set of states "active" for the current position in the events stream
-        states = set()
+        active_states: Set[NFAState] = set()
 
         # Character for the last event we processed
-        last_char = None
+        last_char: Optional[int] = None
 
         for char, event in events:
             assert event.adding or event.removing
 
             if event.adding:
-                add_transition(last_char, char - 1, states)
-                states = states.union(event.adding)
+                add_transition(last_char, char - 1, active_states)
+                active_states = active_states.union(event.adding)
                 last_char = char
 
             if event.removing:
-                add_transition(last_char, char, states)
-                states = states.difference(event.removing)
+                add_transition(last_char, char, active_states)
+                active_states = active_states.difference(event.removing)
                 last_char = char + 1
 
         return result
 
-    def to_dfa(self):
+    def to_dfa(self) -> DFAState:
         """
         Return the conversion of this NFA into a DFA.
 
         :rtype: DFAState
         """
-        result = None
+        result: Optional[DFAState] = None
 
         # Mapping from sets of NFAState nodes (see NFAState.hashable_state_set)
         # to the corresponding DFAState nodes.
-        dfa_states = {}
+        dfa_states: Dict[Tuple[NFAState, ...], DFAState] = {}
 
-        # List of tuple[NFAState], CharSet and tuple[NFAState] for the
+        # List of tuple[NFAState, CharSet and tuple[NFAState]] for the
         # transitions that constitute the DFA.
-        transitions = []
+        transitions: List[Tuple[Tuple[NFAState, ...],
+                                CharSet,
+                                Tuple[NFAState, ...]]] = []
 
         queue = {
             self.hashable_state_set(
@@ -708,7 +730,8 @@ class NFAState:
         while queue:
             states = queue.pop()
             if states in dfa_states:
-                return
+                # TODO: unreachable?
+                raise RuntimeError()
 
             new_node = DFAState(labels={s.label for s in states
                                         if s.label is not None})
@@ -730,11 +753,9 @@ class NFAState:
         assert result
         return result
 
-    def to_dot(self):
+    def to_dot(self) -> str:
         """
         Return a dot script representing this NFA.
-
-        :rtype: str
         """
         return _to_dot(self, lambda s: s.transitions, lambda s: s.label)
 
@@ -744,32 +765,28 @@ class DFAState:
     Single state in a deterministic state machine.
     """
 
-    def __init__(self, labels=None):
+    def __init__(self, labels: Optional[Set[Any]] = None):
         self.labels = labels or set()
         """
         Set of labels inheritted from the set of NFA states that this DFA state
         represents.
-
-        :type: set[T]
         """
 
-        self.transitions = []
+        self.transitions: List[Tuple[CharSet, DFAState]] = []
         """
         List of associations between character sets and other states.
 
         Because this is a DFA, character sets cannot overlap.
-
-        :type: list[(CharSet, NFAState)]
         """
 
-    def add_transition(self, chars, next_state):
+    def add_transition(self, chars: CharSet, next_state: DFAState) -> None:
         """
         Add a transition from this state to another one.
 
-        :param CharSet chars: Specification of the input that allows to
-            transition from this state to the next one. A CharSet instance
-            indicates that one character in this set is required.
-        :param DFAState next_state: Destination state for this new transition.
+        :param chars: Specification of the input that allows to transition from
+            this state to the next one. A CharSet instance indicates that one
+            character in this set is required.
+        :param next_state: Destination state for this new transition.
         """
         assert isinstance(chars, CharSet)
         assert isinstance(next_state, DFAState)
@@ -784,7 +801,7 @@ class DFAState:
 
         self.transitions.append((chars, next_state))
 
-    def to_dot(self):
+    def to_dot(self) -> str:
         """
         Return a dot script representing this DFA.
 
@@ -801,26 +818,24 @@ class DFACodeGenHolder:
     """
 
     class State:
-        def __init__(self, dfa_state, label, transitions, action):
+        def __init__(self,
+                     dfa_state: DFAState,
+                     label: str,
+                     transitions: List[Tuple[CharSet, DFAState]],
+                     action: Optional[RuleAssoc]):
             self.dfa_state = dfa_state
             """
             DFA state this represents.
-
-            :type: DFAState
             """
 
             self.label = label
             """
             Code label for this state.
-
-            :type: str
             """
 
             self.action = action
             """
             Action to execute when reaching this state.
-
-            :type: langkit.lexer.RuleAction
             """
 
             # Non-ASCII transitions (i.e. wide Unicode handling) generally
@@ -841,31 +856,33 @@ class DFACodeGenHolder:
 
             self._transitions = transitions
 
-            self.case_transitions = []
+            self.case_transitions: List[Tuple[CharSet, str]] = []
             """
             List of transitions to be lowered to a case statement. This maps
             maching characters to code labels for the next states.
-
-            :type: list[(CharSet, str)]
             """
 
-            self.table_transitions = []
+            self.table_transitions: List[Tuple[CharSet, str]] = []
             """
             List of transitions to be lowered to table-based character lookups.
-            This maps the name of the lookup table for character lookup to code
-            labels for the next states.
-
-            Note that right after the "compute_transitions" pass, the mapping
-            is from character set. These are replaced by table names later on.
-
-            :type: list[(str, str)]
+            This maps the character sets for the lookup table for character
+            lookup to code labels for the next states corresponding to these
+            characters.
             """
 
-        def compute_transitions(self, state_labels):
+            self.named_table_transitions: List[Tuple[str, str]] = []
+            """
+            List of table-based transitions. This contains the same data as
+            ``table_transitions``, but with table names (for generated code
+            entities) rather than abstract character sets.
+            """
+
+        def compute_transitions(self,
+                                state_labels: Dict[DFAState, str]) -> None:
             """
             Compute self.case_transitions and self.table_transitions.
 
-            :param dict[DFAState, str] state_labels: Labels for all DFA states.
+            :param state_labels: Labels for all DFA states.
             """
             for char_set, next_state in sorted(self._transitions):
                 label = state_labels[next_state]
@@ -882,11 +899,13 @@ class DFACodeGenHolder:
                     self.case_transitions.append((char_set, label))
 
         @property
-        def has_transitions(self):
-            return self.case_transitions or self.table_transitions
+        def has_transitions(self) -> bool:
+            return bool(self.case_transitions or self.table_transitions)
 
-    def __init__(self, dfa, get_action):
-        self.states = []
+    def __init__(self,
+                 dfa: DFAState,
+                 get_action: Callable[[Set[Any]], Optional[RuleAssoc]]):
+        self.states: List[DFACodeGenHolder.State] = []
         """
         :type: list[DFACodeGenHolder.State]
         """
@@ -899,20 +918,25 @@ class DFACodeGenHolder:
 
         queue = [dfa]
         while queue:
-            state = queue.pop(0)
-            if state in visited_states:
+            dfa_state = queue.pop(0)
+            if dfa_state in visited_states:
                 continue
-            visited_states.add(state)
+            visited_states.add(dfa_state)
 
             # Compute transition and queue unvisited nodes
-            transitions = sorted(state.transitions)
+            transitions = sorted(dfa_state.transitions)
             for char_set, next_state in transitions:
                 if next_state not in queue:
                     queue.append(next_state)
 
-            self.states.append(self.State(
-                state, 'State_{}'.format(len(self.states)), transitions,
-                get_action(state.labels)))
+            self.states.append(
+                self.State(
+                    dfa_state,
+                    f'State_{len(self.states)}',
+                    transitions,
+                    get_action(dfa_state.labels)
+                )
+            )
 
         # Generate labels for all the states we saw
         self.state_labels = {state.dfa_state: state.label
@@ -927,24 +951,19 @@ class DFACodeGenHolder:
         # Generate arrays for table-based character lookups.  At the same time,
         # replace character sets with these names in table-based transitions.
 
-        self.charset_to_tablename = {}
-        """
-        :type: dict[CharSet, str]
-        """
+        self.charset_to_tablename: Dict[CharSet, str] = {}
 
         for state in self.states:
-            new_transitions = []
-            for char_set, next_state in state.table_transitions:
+            for char_set, label in state.table_transitions:
                 try:
                     table_name = self.charset_to_tablename[char_set]
                 except KeyError:
                     table_name = 'Ranges_{}'.format(
                         len(self.charset_to_tablename))
                     self.charset_to_tablename[char_set] = table_name
-                new_transitions.append((table_name, next_state))
-            state.table_transitions = new_transitions
+                state.named_table_transitions.append((table_name, label))
 
-    def ada_table_decls(self, prefix):
+    def ada_table_decls(self, prefix: str) -> str:
         """
         Helper to generate the Ada declarations for character lookup tables.
         """
@@ -953,9 +972,9 @@ class DFACodeGenHolder:
             for char_set, table_name in self.charset_to_tablename.items()
         )
 
-        lines = []
+        lines: List[str] = []
         for table_name, char_set in tables:
-            ranges = []
+            ranges: List[str] = []
             for l, h in char_set.ranges:
                 if ranges:
                     ranges[-1] += ','
