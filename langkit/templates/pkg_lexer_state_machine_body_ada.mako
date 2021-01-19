@@ -184,9 +184,10 @@ ${emitter.dfa_code.ada_table_decls('   ')}
 
             when others =>
                ## If there are some, handle non-ASCII transitions
-               % if state.table_transitions:
+               % if state.named_table_transitions:
                if Input_Char > Character_Type'Val (127) then
-                  % for table_name, next_state in state.table_transitions:
+                  % for table_name, next_state \
+                        in state.named_table_transitions:
                      if Contains (Input_Char, ${table_name}) then
                         goto ${next_state};
                      end if;

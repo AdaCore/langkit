@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os.path
+from typing import Any, Dict, List, Optional, Tuple, Union
 import unicodedata
 
 
@@ -8,21 +11,14 @@ import unicodedata
 MAXUNICODE = 0x10FFFF
 
 
-def format_char(char):
-    """
-    :type char: int
-    :rtype: str
-    """
+def format_char(char: int) -> str:
     return ('\\U{:x}'.format(char)
             if char < ord(' ') or ord('~') < char else
             chr(char))
 
 
-def format_char_ranges(ranges):
-    """
-    :type ranges: list[None|int|(int, int)]
-    """
-    def format_interval(interval):
+def format_char_ranges(ranges: List[Optional[Tuple[int, int]]]) -> str:
+    def format_interval(interval: Optional[Tuple[int, int]]) -> str:
         if interval is None:
             return '...'
         else:
@@ -42,17 +38,13 @@ class CharSet:
     _repr_ellipsis = True
     """
     Whether __repr__ should put an ellipsis for characters beyond ASCII.
-
-    :type: bool
     """
 
-    def __init__(self, *items):
-        self.ranges = []
+    def __init__(self, *items: Union[str, Tuple[str, str]]):
+        self.ranges: List[Tuple[int, int]] = []
         """
         Sorted, disjoint and as merged as possible list of ranges for character
         ordinals in the set. Both bounds are included in the ranges.
-
-        :type: list[(int, int)]
         """
 
         for item in items:
@@ -65,18 +57,18 @@ class CharSet:
                 raise TypeError('Invalid CharSet item: {}'.format(repr(item)))
 
     @classmethod
-    def from_int(cls, item):
+    def from_int(cls, item: int) -> CharSet:
         return cls.from_int_ranges((item, item))
 
     @classmethod
-    def from_int_ranges(cls, *items):
+    def from_int_ranges(cls, *items: Tuple[int, int]) -> CharSet:
         result = cls()
         for l, h in items:
             result.add_int_range(l, h)
         return result
 
-    def __repr__(self):
-        ranges = []
+    def __repr__(self) -> str:
+        ranges: List[Optional[Tuple[int, int]]] = []
         for l, h in self.ranges:
             if not self._repr_ellipsis or (l <= 127 and h <= 127):
                 ranges.append((l, h))
@@ -85,36 +77,30 @@ class CharSet:
                 break
         return format_char_ranges(ranges)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(tuple(self.ranges))
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, CharSet) and self.ranges == other.ranges
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: CharSet) -> bool:
         assert isinstance(other, CharSet)
         return self.ranges < other.ranges
 
-    def __contains__(self, char):
+    def __contains__(self, char: str) -> bool:
         """
         Return whether a character is in this set.
-
-        :type char: str
-        :rtype: bool
         """
-        char = ord(char)
-        found, _ = self._lookup(char)
+        ochar = ord(char)
+        found, _ = self._lookup(ochar)
         return found
 
-    def __or__(self, other):
+    def __or__(self, other: CharSet) -> CharSet:
         """
         Return the union of two character sets.
-
-        :type other: CharSet
-        :rtype: CharSet
         """
         assert isinstance(other, CharSet)
         result = CharSet()
@@ -124,22 +110,20 @@ class CharSet:
         return result
 
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not self.ranges
 
     @property
-    def ada_ranges(self):
+    def ada_ranges(self) -> str:
         """
         Return an Ada code excerpt to check that a character belong to this
         set. This returns 'X' so that this check can be implemented the
         following way::
 
             if Char in X then
-
-        :rtype: str
         """
 
-        def format_char(char):
+        def format_char(char: int) -> str:
             return ("Character_Type'Val (16#{:0x}#)".format(char)
                     if char < ord(' ') or ord('~') < char else
                     "'{}'".format(chr(char)))
@@ -151,13 +135,13 @@ class CharSet:
         )
 
     @classmethod
-    def any_char(cls):
+    def any_char(cls) -> CharSet:
         result = cls()
         result.add_int_range(0, MAXUNICODE)
         return result
 
     @property
-    def negation(self):
+    def negation(self) -> CharSet:
         """
         Return a character set that contains everything that is not in
         ``self``.
@@ -182,17 +166,15 @@ class CharSet:
         return result
 
     @property
-    def split_ascii_subsets(self):
+    def split_ascii_subsets(self) -> Tuple[CharSet, CharSet]:
         """
         Return two character sets: one for the ASCII subset in self, and the
         other for the non-ASCII subset.
-
-        :rtype: (CharSet, CharSet)
         """
         ascii = CharSet()
         non_ascii = CharSet()
 
-        def add_range(char_set, l, h):
+        def add_range(char_set: CharSet, l: int, h: int) -> None:
             char_set.add_int_range(l, h)
 
         for l, h in self.ranges:
@@ -206,16 +188,13 @@ class CharSet:
 
         return (ascii, non_ascii)
 
-    def overlaps_with(self, other):
+    def overlaps_with(self, other: CharSet) -> bool:
         """
         Return whether this overlaps with ``other``.
-
-        :type other: CharSet
-        :rtype: bool
         """
         assert isinstance(other, CharSet)
 
-        def overlap(r1, r2):
+        def overlap(r1: Tuple[int, int], r2: Tuple[int, int]) -> bool:
             return r1[0] <= r2[1] and r1[1] >= r2[0]
 
         self_r = list(self.ranges)
@@ -232,7 +211,7 @@ class CharSet:
                 return True
         return False
 
-    def _lookup(self, char):
+    def _lookup(self, char: int) -> Tuple[bool, int]:
         """
         Look for the range that contains ``char``.
 
@@ -241,8 +220,6 @@ class CharSet:
         where ``index`` is the index of the range right after the position for
         ``char`` in the range list, plus 1, or 0 if it comes before the first
         range.
-
-        :rtype: (bool, int)
         """
         # Inclusive bounds for the potential index we are looking for
         low = 0
@@ -264,20 +241,15 @@ class CharSet:
 
         return (False, low)
 
-    def add(self, char):
+    def add(self, char: str) -> None:
         """
         Add a single character to this set.
-
-        :type char: str
         """
         self.add_range(char, char)
 
-    def add_int_range(self, low, high):
+    def add_int_range(self, low: int, high: int) -> None:
         """
         Add a range of characters to this set.
-
-        :type low: int
-        :type righ: int
         """
         assert low <= MAXUNICODE and high <= MAXUNICODE
 
@@ -327,24 +299,20 @@ class CharSet:
                 # we added, so there is nothing else to do.
                 break
 
-    def add_range(self, low, high):
+    def add_range(self, low: str, high: str) -> None:
         """
         Add a range of characters to this set.
-
-        :type low: str
-        :type righ: str
         """
         self.add_int_range(ord(low), ord(high))
 
     @staticmethod
-    def for_category(category):
+    def for_category(category: str) -> CharSet:
         """
         Return the character set corresponding to the given Unicode general
         category. Raise a KeyError if ``category`` is invalid.
 
-        :param str category: Name of the Unicode general category (see
+        :param category: Name of the Unicode general category (see
             unicodedata.category).
-        :rtype: CharSet
         """
         # The unicode_data module is auto-generated, so import is only when
         # required.
@@ -352,12 +320,12 @@ class CharSet:
         return unicode_categories_char_sets[category]
 
 
-def compute_unicode_categories_char_sets():
+def compute_unicode_categories_char_sets() -> None:
     # We assume here that the Python interpreter is built to use UCS-4 to
     # represent strings. It's fine because this code runs only to precompute
     # data that will be cached in source code, not on every script using
     # Langkit.
-    sets = {}
+    sets: Dict[str, CharSet] = {}
     for i in range(MAXUNICODE + 1):
         char = chr(i)
         cat = unicodedata.category(chr(i))
@@ -384,7 +352,7 @@ def compute_unicode_categories_char_sets():
 
     filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                             'unicode_data.py')
-    with open(filename, 'wb') as f:
+    with open(filename, 'w') as f:
         for l in lines:
             f.write(l)
             f.write('\n')

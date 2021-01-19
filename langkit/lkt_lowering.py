@@ -29,9 +29,11 @@ from langkit.expressions import (
     AbstractExpression, AbstractProperty, AbstractVariable, Property,
     PropertyDef
 )
-from langkit.lexer import (Action, Alt, Case, Ignore, Lexer, LexerToken,
-                           Literal, Matcher, NoCaseLit, Pattern, RuleAssoc,
-                           TokenFamily, WithSymbol, WithText, WithTrivia)
+from langkit.lexer import (
+    Action, Alt, Case, Ignore, Lexer, LexerToken, Literal, Matcher, NoCaseLit,
+    Pattern, RuleAssoc, TokenAction, TokenFamily, WithSymbol, WithText,
+    WithTrivia
+)
 import langkit.names as names
 from langkit.parsers import (Discard, DontSkip, Grammar, List as PList, Null,
                              Opt, Or, Parser, Pick, Predicate, Skip, _Row,
@@ -543,7 +545,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     Mapping from pattern names to the corresponding regular expression.
     """
 
-    token_family_sets: Dict[names.Name, Set[Action]] = {}
+    token_family_sets: Dict[names.Name, Set[TokenAction]] = {}
     """
     Mapping from token family names to the corresponding sets of tokens that
     belong to this family.
@@ -573,7 +575,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
     Lists of regular and pre lexing rules for this lexer.
     """
 
-    newline_after: List[Action] = []
+    newline_after: List[TokenAction] = []
     """
     List of tokens after which we must introduce a newline during unparsing.
     """
@@ -610,7 +612,7 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
     def process_token_rule(
         r: L.FullDecl,
-        token_set: Optional[Set[Action]] = None
+        token_set: Optional[Set[TokenAction]] = None
     ) -> None:
         """
         Process the full declaration of a GrammarRuleDecl node: create the
@@ -661,10 +663,11 @@ def create_lexer(ctx: CompileCtx, lkt_units: List[L.AnalysisUnit]) -> Lexer:
 
             token = token_cons(start_ignore_layout, end_ignore_layout)
             tokens[token_name] = token
-            if token_set is not None:
-                token_set.add(token)
-            if rule_annot.unparse_newline_after:
-                newline_after.append(token)
+            if isinstance(token, TokenAction):
+                if token_set is not None:
+                    token_set.add(token)
+                if rule_annot.unparse_newline_after:
+                    newline_after.append(token)
 
             # Lower the lexing rule, if present
             assert isinstance(r.f_decl, L.GrammarRuleDecl)
