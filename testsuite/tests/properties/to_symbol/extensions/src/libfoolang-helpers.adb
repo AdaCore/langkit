@@ -1,5 +1,3 @@
-with Ada.Wide_Wide_Characters.Handling; use Ada.Wide_Wide_Characters.Handling;
-
 package body Libfoolang.Helpers is
 
    -------------------------
