@@ -293,8 +293,7 @@ class RegexpCollection:
         yield
         self._visiting_patterns.remove(rule_name)
 
-    @classmethod
-    def _read_escape(cls, stream: SequenceReader) -> int:
+    def _read_escape(self, stream: SequenceReader) -> int:
         """
         Read an escaped character. Return the ordinal for the character that is
         meant.
@@ -323,10 +322,9 @@ class RegexpCollection:
                 codepoint = codepoint * 16 + digit
             return codepoint
 
-        return ord(cls.escape_chars.get(char, char))
+        return ord(self.escape_chars.get(char, char))
 
-    @classmethod
-    def _parse_or(cls,
+    def _parse_or(self,
                   stream: SequenceReader,
                   toplevel: bool = False) -> RegexpCollection.Parser:
         """
@@ -339,7 +337,7 @@ class RegexpCollection:
         """
         subparsers = []
         while True:
-            subparsers.append(cls._parse_sequence(stream))
+            subparsers.append(self._parse_sequence(stream))
             if stream.eof:
                 break
             elif stream.next_is(')'):
@@ -347,10 +345,9 @@ class RegexpCollection:
                 break
             else:
                 assert stream.read() == '|'
-        return cls.Or(subparsers)
+        return self.Or(subparsers)
 
-    @classmethod
-    def _parse_sequence(cls,
+    def _parse_sequence(self,
                         stream: SequenceReader) -> RegexpCollection.Parser:
         """
         Parse a sequence of regexps. Stop at the first unmatched parenthesis or
@@ -366,14 +363,14 @@ class RegexpCollection:
             elif stream.next_is('('):
                 # Nested group: recursively parse alternatives
                 stream.read()
-                subparsers.append(cls._parse_or(stream))
+                subparsers.append(self._parse_or(stream))
                 check_source_language(stream.next_is(')'),
                                       'unbalanced parenthesis')
                 stream.read()
 
             elif stream.next_is('['):
                 # Parse a range of characters
-                subparsers.append(cls._parse_range(stream))
+                subparsers.append(self._parse_range(stream))
 
             elif stream.next_is('{'):
                 # Parse a reference to a named pattern
@@ -386,18 +383,18 @@ class RegexpCollection:
                 stream.read()
                 check_source_language(rule_name_re.match(name) is not None,
                                       'invalid rule name: {}'.format(name))
-                subparsers.append(cls.Defer(name))
+                subparsers.append(self.Defer(name))
 
             elif stream.next_is('*', '+', '?'):
                 # Repeat the previous sequence item
                 check_source_language(bool(subparsers), 'nothing to repeat')
                 check_source_language(
-                    not isinstance(subparsers[-1], cls.Repeat),
+                    not isinstance(subparsers[-1], self.Repeat),
                     'multiple repeat')
                 wrapper = {
-                    '*': lambda p: cls.Repeat(p),
-                    '+': lambda p: cls.Sequence([p, cls.Repeat(p)]),
-                    '?': lambda p: cls.Opt(p)
+                    '*': lambda p: self.Repeat(p),
+                    '+': lambda p: self.Sequence([p, self.Repeat(p)]),
+                    '?': lambda p: self.Opt(p)
                 }[stream.read()]
                 subparsers[-1] = wrapper(subparsers[-1])
 
@@ -405,7 +402,7 @@ class RegexpCollection:
                 # Generally, "." designates any character *except* newlines. Do
                 # the same here.
                 stream.read()
-                subparsers.append(cls.Range(CharSet('\n').negation))
+                subparsers.append(self.Range(CharSet('\n').negation))
 
             elif stream.next_is('^', '$'):
                 check_source_language(
@@ -443,20 +440,22 @@ class RegexpCollection:
                             'invalid Unicode category: {}'.format(category))
                     if action == 'P':
                         char_set = char_set.negation
-                    subparsers.append(cls.Range(char_set))
+                    subparsers.append(self.Range(char_set))
 
                 else:
                     stream.go_back()
                     subparsers.append(
-                        cls.Range(CharSet.from_int(cls._read_escape(stream))))
+                        self.Range(
+                            CharSet.from_int(self._read_escape(stream))
+                        )
+                    )
 
             else:
-                subparsers.append(cls.Range(CharSet(stream.read())))
+                subparsers.append(self.Range(CharSet(stream.read())))
 
-        return cls.Sequence(subparsers)
+        return self.Sequence(subparsers)
 
-    @classmethod
-    def _parse_range(cls, stream: SequenceReader) -> RegexpCollection.Parser:
+    def _parse_range(self, stream: SequenceReader) -> RegexpCollection.Parser:
         """
         Parse a regular expression for a character range.
 
@@ -483,7 +482,7 @@ class RegexpCollection:
                 in_range = True
                 stream.read()
             else:
-                char = (cls._read_escape(stream)
+                char = (self._read_escape(stream)
                         if stream.next_is('\\') else ord(stream.read()))
                 if in_range:
                     low, high = ranges.pop()
@@ -501,7 +500,7 @@ class RegexpCollection:
         char_set = CharSet.from_int_ranges(*ranges)
         if negate:
             char_set = char_set.negation
-        return cls.Range(char_set)
+        return self.Range(char_set)
 
 
 class NFAState:
