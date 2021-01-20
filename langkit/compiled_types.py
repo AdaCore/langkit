@@ -243,7 +243,7 @@ class AbstractNodeData:
                          [
                              ResolvedExpression,
                              AbstractNodeData,
-                             List[Tuple[Argument, ResolvedExpression]],
+                             List[Opt[ResolvedExpression]],
                              Opt[AbstractExpression],
                          ],
                          ResolvedExpression,
