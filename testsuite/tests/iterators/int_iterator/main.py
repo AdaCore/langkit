@@ -20,7 +20,7 @@ for x in it:
 print("")
 
 print("Identity on a null iterator...")
-print("->", u.root.p_iterator_identity(None))
+print("-> {}".format(u.root.p_iterator_identity(None)))
 print("")
 
 print("Identity on a stale iterator...")
