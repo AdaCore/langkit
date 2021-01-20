@@ -22,7 +22,9 @@ with GNATCOLL.Refcount;
 % endif
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
+
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
@@ -233,9 +235,9 @@ package ${ada_lib_name}.Analysis is
      (Context : Analysis_Context'Class; Timeout : Natural);
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
-   procedure Disable_Lookup_Cache (Disable : Boolean := True);
-   --  Debug helper: if ``Disable`` is true, disable the use of caches in
-   --  lexical environment lookups. Otherwise, activate it.
+   procedure Set_Lookup_Cache_Mode (Mode : Lookup_Cache_Kind);
+   --  Set the lexical environments lookup cache mode according to ``Mode``.
+   --  Note: Mainly meant for debugging the default mode.
 
    function Has_Rewriting_Handle
      (Context : Analysis_Context'Class) return Boolean;
