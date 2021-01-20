@@ -877,12 +877,19 @@ def lower_grammar_rules(ctx: CompileCtx) -> None:
     """
     Translate syntactic L rules to Parser objects.
     """
+    lexer = ctx.lexer
+    assert lexer is not None
+
+    lexer_tokens = lexer.tokens
+    assert lexer_tokens is not None
+
     grammar = ctx.grammar
+    assert grammar is not None
 
     # Build a mapping for all tokens registered in the lexer. Use lower case
     # names, as this is what the concrete syntax is supposed to use.
-    tokens = {token.name.lower: token
-              for token in ctx.lexer.tokens.tokens}
+    tokens = {cast(names.Name, token.name).lower: token
+              for token in lexer_tokens.tokens}
 
     # Build a mapping for all nodes created in the DSL. We cannot use T (the
     # TypeRepo instance) as types are not processed yet.

@@ -18,7 +18,7 @@ import importlib
 import os
 from os import path
 from typing import (Any, Callable, Dict, List, Optional, Set, TYPE_CHECKING,
-                    Union, cast)
+                    Tuple, Union, cast)
 
 from funcy import lzip
 
@@ -35,10 +35,17 @@ from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
 
 
 if TYPE_CHECKING:
-    from langkit.compiled_types import IteratorType, StructType, UserField
+    from langkit.compiled_types import (
+        ASTNodeType, ArrayType, CompiledType, EntityType, EnumType, Field,
+        IteratorType, StructType, UserField,
+    )
+    from langkit.emitter import Emitter
     from langkit.expressions import PropertyDef
+    from langkit.lexer import Lexer
+    from langkit.lexer.regexp import NFAState
     from langkit.ocaml_api import OCamlAPISettings
     from langkit.passes import AbstractPass
+    from langkit.parsers import GeneratedParser, Grammar, Parser
     from langkit.python_api import PythonAPISettings
 
 
@@ -297,65 +304,65 @@ class CompileCtx:
     Whether this context is configured to only run checks on the language spec.
     """
 
-    def __init__(self, lang_name, lexer, grammar,
-                 lib_name=None, short_name=None,
-                 c_symbol_prefix=None,
-                 default_charset='utf-8',
-                 default_tab_stop=8,
-                 verbosity=Verbosity('none'),
-                 template_lookup_extra_dirs=None,
-                 default_unit_provider=None,
-                 case_insensitive=False,
-                 symbol_canonicalizer=None,
-                 documentations=None,
-                 show_property_logging=False,
-                 lkt_file=None,
-                 types_from_lkt=False,
-                 lkt_semantic_checks=False):
+    def __init__(self,
+                 lang_name: str,
+                 lexer: Optional[Lexer],
+                 grammar: Optional[Grammar],
+                 lib_name: Optional[str] = None,
+                 short_name: Optional[str] = None,
+                 c_symbol_prefix: Optional[str] = None,
+                 default_charset: str = 'utf-8',
+                 default_tab_stop: int = 8,
+                 verbosity: Verbosity = Verbosity('none'),
+                 template_lookup_extra_dirs: Optional[List[str]] = None,
+                 default_unit_provider: Optional[LibraryEntity] = None,
+                 case_insensitive: bool = False,
+                 symbol_canonicalizer: Optional[LibraryEntity] = None,
+                 documentations: Optional[Dict[str, str]] = None,
+                 show_property_logging: bool = False,
+                 lkt_file: Optional[str] = None,
+                 types_from_lkt: bool = False,
+                 lkt_semantic_checks: bool = False):
         """Create a new context for code emission.
 
-        :param str lang_name: string (mixed case and underscore: see
+        :param lang_name: string (mixed case and underscore: see
             langkit.names.Name) for the Name of the target language.
 
         :param lexer: A lexer for the target language.
-        :type lexer: langkit.lexer.Lexer
 
         :param grammar: A grammar for the target language. If left to None,
             fetch the grammar in the Lktlang source.
-        :type None|grammar: langkit.parsers.Grammar
 
         :param lib_name: If provided, must be a string (mixed case and
             underscore: see langkit.names.Name), otherwise set to
             "Lib<lang_name>lang". It is used for the filenames, package names,
             etc.  in the generated library.
-        :type lib_name: str or None
 
-        :param str|None short_name: If provided, must be a string (mixed case
-            and underscore: see langkit.names.Name). It will be used where
-            a short name for the library is requested, for instance for the
-            shortcut module name in the generated playground script.
+        :param short_name: If provided, must be a string (mixed case and
+            underscore: see langkit.names.Name). It will be used where a short
+            name for the library is requested, for instance for the shortcut
+            module name in the generated playground script.
 
         :param c_symbol_prefix: Valid C identifier used as a prefix for all
             top-level declarations in the generated C API.  If not provided,
             set to the name of the language in lower case.  Empty string stands
             for no prefix.
-        :type c_symbol_prefix: str or None
 
-        :param str default_charset: In the generated library, this will be the
+        :param default_charset: In the generated library, this will be the
             default charset to use to scan input source files.
 
-        :param int default_tab_stop: Tabulation stop to use as a default value
-            in the analysis context constructor.
+        :param default_tab_stop: Tabulation stop to use as a default value in
+            the analysis context constructor.
 
-        :param Verbosity verbosity: Amount of messages to display on standard
-            output. None by default.
+        :param verbosity: Amount of messages to display on standard output.
+            None by default.
 
-        :param [str]|None template_lookup_extra_dirs: A list of
-            extra directories to add to the directories used by mako for
-            template lookup. This is useful if you want to render custom
-            code as part of the compilation process.
+        :param template_lookup_extra_dirs: A list of extra directories to add
+            to the directories used by mako for template lookup. This is useful
+            if you want to render custom code as part of the compilation
+            process.
 
-        :param LibraryEntity|None default_unit_provider: If provided, define a
+        :param default_unit_provider: If provided, define a
             Langkit_Support.Unit_Files.Unit_Provider_Access object. This object
             will be used as the default unit provider during the creation of an
             analysis context.
@@ -363,9 +370,9 @@ class CompileCtx:
             If None, this disables altogether the unit provider mechanism in
             code generation.
 
-        :param LibraryEntity|None symbol_canonicalizer: If provided, define a
-            subprogram to call in order to canonicazie symbol identifiers. Such
-            a suprogram must have the following signature::
+        :param symbol_canonicalizer: If provided, define a subprogram to call
+            in order to canonicazie symbol identifiers. Such a suprogram must
+            have the following signature::
 
                 function Canonicalize
                   (Name : Text_Type) return Symbolization_Result;
@@ -376,28 +383,28 @@ class CompileCtx:
 
             This can be used, for instance, to implement case insensivity.
 
-        :param bool case_insensitive: Whether to process sources as consider as
-            case insensitive in the generated library. Note that this provides
-            a default symbol canonicalizer that takes care of case folding
+        :param case_insensitive: Whether to process sources as consider as case
+            insensitive in the generated library. Note that this provides a
+            default symbol canonicalizer that takes care of case folding
             symbols.
 
-        :param dict[str, str] documentations: If provided, supply templates to
-            document entities. These will be added to the documentations
-            available in code generation: see langkit.documentation.
+        :param documentations: If provided, supply templates to document
+            entities. These will be added to the documentations available in
+            code generation: see langkit.documentation.
 
-        :param bool show_property_logging: If true, any property that has been
+        :param show_property_logging: If true, any property that has been
             marked with tracing activated will be traced on stdout by default,
             without need for any config file.
 
-        :param None|str lkt_file: Optional name of the file to contain Lktlang
+        :param lkt_file: Optional name of the file to contain Lktlang
             definitions for this language.
 
-        :param bool types_from_lkt: When loading definitions from Lktlang
-            files, whether to load type definitions. This is not done by
-            default during the transition from our Python DSL to Lktlang.
+        :param types_from_lkt: When loading definitions from Lktlang files,
+            whether to load type definitions. This is not done by default
+            during the transition from our Python DSL to Lktlang.
 
-        :param bool lkt_semantic_checks: Whether to force Lkt semantic checks
-            (by default, enabled only if ``types_from_lkt`` is true).
+        :param lkt_semantic_checks: Whether to force Lkt semantic checks (by
+            default, enabled only if ``types_from_lkt`` is true).
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
@@ -453,158 +460,122 @@ class CompileCtx:
 
         self.ocaml_api_settings = OCamlAPISettings(self, self.c_api_settings)
 
-        self.fns = set()
+        self.fns: Set[Parser] = set()
         """
         Set of names (names.Name instances) for all generated parser
         functions. This is used to avoid generating these multiple times.
-
-        :type: set[parsers.Parser]
         """
 
-        self._enum_types = []
+        self._enum_types: List[EnumType] = []
         """
         List of all enumeration types.
-
-        :type: list[langkit.compiled_types.EnumType]
         """
 
-        self.astnode_types = []
+        self.astnode_types: List[ASTNodeType] = []
         """
         List for all ASTnodeType instances, sorted so that A is before B when A
         is a parent class for B. This sorting is important to output
         declarations in dependency order.
 
         This is computed right after field types inference.
-
-        :type: list[langkit.compiled_types.ASTNodeType]
         """
 
-        self.synthetic_nodes = None
+        self.synthetic_nodes: Optional[List[ASTNodeType]] = None
         """
         Sub-sequence of `self.astnode_types` for all nodes that are synthetic.
 
         This is computed right after `self.astnode_types`.
-
-        :type: list[langkit.compiled_types.ASTNodeType]
         """
 
-        self.node_kind_constants = {}
+        self.node_kind_constants: Dict[ASTNodeType, int] = {}
         """
         Mapping: ASTNodeType concrete (i.e. non abstract) instance -> int,
         associating specific constants to be used reliably in bindings.  This
         mapping is built at the beginning of code emission.
-
-        :type: dict[langkit.compiled_types.ASTNodeType, int]
         """
 
-        self.kind_constant_to_node = {}
+        self.kind_constant_to_node: Dict[int, ASTNodeType] = {}
         """
         Reverse mapping for `node_kind_constants`.
-
-        :type: dict[int, langkit.compiled_types.ASTNodeType]
         """
 
-        self._struct_types = None
+        self._struct_types: Optional[List[StructType]] = None
         """
         List of all plain struct types.
-
-        :type: list[langkit.compiled_types.StructType]
         """
 
-        self._entity_types = None
+        self._entity_types: Optional[List[EntityType]] = None
         """
         List of all entity types.
-
-        :type: list[langkit.compiled_types.EntityType]
         """
 
-        self.root_grammar_class = None
+        self.root_grammar_class: Optional[ASTNodeType] = None
         """
         The ASTNodeType instance that is the root class for every node used in
         the grammar.
-
-        :type: langkit.compiled_types.ASTNodeType
         """
 
-        self.generic_list_type = None
+        self.generic_list_type: Optional[ASTNodeType] = None
         """
         The root gammar class subclass that is the base class for all
         automatically generated root list types.
-
-        :type: langkit.compiled_types.ASTNodeType
         """
 
-        self.env_metadata = None
+        self.env_metadata: Optional[StructType] = None
         """
         The StructType instance that will be used as the lexical environment
         metadata type.
-
-        :type: langkit.compiled_types.StructType
         """
 
-        self.list_types = set()
+        self.list_types: Set[ASTNodeType] = set()
         """
         Set of all ASTNodeType instances for which we generate a corresponding
         list type.
-
-        :type: set[langkit.compiled_types.ASTNodeType]
         """
 
-        self.exception_types = {}
+        self.exception_types: Dict[str, GeneratedException] = {}
         """
         Mapping of all exception types. Keys are lower-case exception names.
-
-        :type: dict[str, GeneratedException]
         """
 
-        self._array_types = None
+        self._array_types: Optional[List[ArrayType]] = None
         """
         Sorted list of all ArrayType instances.
 
         For each ArrayType instance T, code emission for type definition will
         automatically happen.
-
-        :type: list[langkit.compiled_types.ArrayType]
         """
 
-        self._iterator_types: List[IteratorType] = None
+        self._iterator_types: Optional[List[IteratorType]] = None
         """
         List of all IteratorType instances.
         """
 
-        self._composite_types = None
+        self._composite_types: Optional[List[CompiledType]] = None
         """
         Dependency-sorted list of array and struct types.
-
-        :type: list[langkit.compiled_types.CompiledType]
         """
 
-        self.memoized_properties = set()
+        self.memoized_properties: Set[PropertyDef] = set()
         """
         Set of all PropertyDef instances that are memoized.
-
-        :type: set[langkit.expressions.base.PropertyDef]
         """
 
-        self.memoization_keys = set()
+        self.memoization_keys: Set[CompiledType] = set()
         """
         Set of all CompiledType instances that are used as key in the hashed
         maps used to implement properties memoization. All of them must be
         hashable.
-
-        :type: set[langkit.compiled_types.CompiledType]
         """
 
-        self.memoization_values = set()
+        self.memoization_values: Set[CompiledType] = set()
         """
         Set of all CompiledType instances that are used as value in the hashed
         maps used to implement properties memoization. Any type can fit, there
         is no restriction.
-
-        :type: set[langkit.compiled_types.CompiledType]
         """
 
-        self.symbol_literals = {}
+        self.symbol_literals: Dict[str, names.Name] = {}
         """
         Container for all symbol literals to be used in code generation.
 
@@ -621,11 +592,9 @@ class CompileCtx:
         inside this CompileCtx class. See the add_symbol_literal method to add
         symbols to this mapping. Note that this mapping will be empty until one
         calls the finalize_symbol_literals method.
-
-        :type: dict[str, names.Name]
         """
 
-        self._symbol_literals = set()
+        self._symbol_literals: Set[str] = set()
         """
         Temporary container for all symbol literal candidates. This is used
         during the collect "pass" for all symbols. When the set is finalized,
@@ -634,26 +603,17 @@ class CompileCtx:
 
         This two-pass mechanism is here to make sure we generate deterministic
         enumeration names.
-
-        :type: set[str]
         """
 
         #
         # Holders for the Ada generated code chunks
         #
 
-        self.generated_parsers = []
-        ":type: list[langkit.parsers.GeneratedParser]"
+        self.generated_parsers: List[GeneratedParser] = []
 
-        # Internal field for extensions directory
-        self._extensions_dir = None
-
-        self.env_metadata = None
+        self._extensions_dir: Optional[str] = None
         """
-        StructType instance used to annotate environment elements. Initialized
-        during the typing pass.
-
-        :type: langkit.compiled_types.StructType
+        Internal field for extensions directory.
         """
 
         self.has_env_assoc = False
@@ -671,23 +631,24 @@ class CompileCtx:
         Whether there is a RefEnvs action in environment specs.
         """
 
-        self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
+        self.template_lookup_extra_dirs: List[str] = (
+            template_lookup_extra_dirs or []
+        )
 
-        self.additional_source_files = []
+        self.additional_source_files: List[str] = []
         """
         List of path for file names to include in the generated library.
-
-        :type: list[str]
         """
 
-        self.logic_binders = set()
+        self.logic_binders: Set[Tuple[
+            Optional[PropertyDef],
+            Optional[PropertyDef]
+        ]] = set()
         """
         Set of tuple of properties for which we want to generate logic binders.
         For each binder, there are potentially two properties: the conversion
         property and the equality property. See langkit.expressions.logic.Bind
         for more information.
-
-        :type: set[(PropertyDef|None, PropertyDef|None)]
         """
 
         self.default_unit_provider = default_unit_provider
@@ -705,11 +666,9 @@ class CompileCtx:
         """
         Documentation database. Associate a Mako template for each entity to
         document in the generated library.
-
-        :type: dict[str, mako.template.Template]
         """
 
-        self.parsers_varcontext_stack = []
+        self.parsers_varcontext_stack: List[str] = []
         """
         Holder for the stack of variables contexts used in parsers code
         emission.
@@ -720,13 +679,14 @@ class CompileCtx:
         Set of warnings to emit.
         """
 
-        self.with_clauses = defaultdict(list)
+        self.with_clauses: Dict[
+            Tuple[str, str],
+            List[Tuple[str, bool, bool]]
+        ] = defaultdict(list)
         """
         Mapping that binds a list of additional WITH/USE clauses to generate
         for each source file in the generated library. Used to add WITH/USE
         clauses required by extensions. See the `add_with_clause` method.
-
-        :type: dict[(str, str), list[(str, bool, bool)]
         """
 
         self.sorted_public_structs: Optional[List[StructType]] = None
@@ -744,63 +704,51 @@ class CompileCtx:
         ``self.sorted_public_structs``. Used to generate the introspection API.
         """
 
-        self.sorted_parse_fields = None
+        self.sorted_parse_fields: Optional[Field] = None
         """
         Sorted list of all parsing fields, minus fields that override abstract
         ones. Used to generate the AST node introspection API.
-
-        :type: list[langkit.compiled_types.Field]
         """
 
-        self.sorted_properties = None
+        self.sorted_properties: Optional[List[PropertyDef]] = None
         """
         Sorted list of public properties. Used to generate the property
         introspection API.
-
-        :type: list[langkit.expressions.PropertyDef]
         """
 
-        self.ple_unit_root = None
+        self.ple_unit_root: Optional[ASTNodeType] = None
         """
         Node to be used as the PLE unit root, if any.
-
-        :type: ASTNodeType|None
         """
 
         # Optional callbacks to post-process the content of source files
-        self.post_process_ada = None
-        self.post_process_cpp = None
-        self.post_process_python = None
+        self.post_process_ada: Optional[Callable[[str], str]] = None
+        self.post_process_cpp: Optional[Callable[[str], str]] = None
+        self.post_process_python: Optional[Callable[[str], str]] = None
 
         self.ref_cats = {names.Name.from_lower('nocat')}
         """
         Set of all env lookup categories, used to optionally discriminate
         referenced envs during env lookup.
-
-        :type: set[names.Name]
         """
 
-        self.nfa_start = None
+        self.nfa_start: Optional[NFAState] = None
         """
         Intermediate representation for the lexer state machine (NFA).
-
-        :type: langkit.lexer.regexp.NFAState
         """
 
-        self.unparsers = Unparsers(self)
+        self.unparsers: Unparsers = Unparsers(self)
         """
         :type: langkit.unparsers.Unparsers
         """
 
-        self.emitter = None
+        self.emitter: Optional[Emitter] = None
         """
         During code emission, corresponding instance of Emitter. None the rest
         of the time.
-
-        :type: None|langkit.emitter.Emitter
         """
 
-        self.gnatcov = None
+        self.gnatcov: Optional[GNATcov] = None
         """
         During code emission, GNATcov instance if coverage is enabled. None
         otherwise.
@@ -1374,6 +1322,7 @@ class CompileCtx:
             for child in parser.children:
                 visit_parser(child)
 
+        assert self.grammar is not None
         for rule in self.grammar.rules.values():
             visit_parser(rule)
 

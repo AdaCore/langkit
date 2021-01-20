@@ -87,7 +87,9 @@ def emit_railroad_diagram(parser: Parser) -> None:
     )
 
     # Output the diagram to svg in $BUILD/railroad-diagrams/$RULENAME.svg
-    out_dir = pathlib.Path(get_context().emitter.lib_root, "railroad-diagrams")
+    emitter = get_context().emitter
+    assert emitter is not None
+    out_dir = pathlib.Path(emitter.lib_root, "railroad-diagrams")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     with (out_dir / f"{parser.name.lower()}.svg").open("w") as f:

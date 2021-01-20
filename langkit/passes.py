@@ -172,6 +172,7 @@ class EmitterPass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context: CompileCtx) -> None:
+        assert context.emitter is not None
         self.pass_fn(context.emitter, context)
 
 
@@ -211,6 +212,7 @@ class LexerPass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context: CompileCtx) -> None:
+        assert context.lexer is not None
         self.pass_fn(context.lexer, context)
 
 
@@ -227,6 +229,7 @@ class GrammarPass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context: CompileCtx) -> None:
+        assert context.grammar is not None
         self.pass_fn(context.grammar, context)
 
 
@@ -244,6 +247,7 @@ class GrammarRulePass(AbstractPass):
 
     def run(self, context: CompileCtx) -> None:
         # Sort grammar rules by name, so that the pass order is deterministic
+        assert context.grammar is not None
         for name, rule in sorted(context.grammar.rules.items()):
             with rule.diagnostic_context:
                 self.pass_fn(rule)
