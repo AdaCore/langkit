@@ -710,7 +710,7 @@ class Lexer:
         """
         assert context.nfa_start is None
 
-        regexps = RegexpCollection()
+        regexps = RegexpCollection(case_insensitive=context.case_insensitive)
 
         # Import patterns into regexps
         for name, pattern, loc in self.patterns:

@@ -241,7 +241,13 @@ class RegexpCollection:
         '0': '\0',
     }
 
-    def __init__(self) -> None:
+    def __init__(self, case_insensitive: bool = False) -> None:
+        """
+        :param case_insensitive: Whether to consider regexps as case
+            insensitive: "i" will match both "i" and "I", "[A-Z]" will match
+            "[a-zA-Z]", etc.
+        """
+        self.case_insensitive = case_insensitive
         self.patterns: Dict[str, RegexpCollection.Parser] = {}
         self._visiting_patterns: Set[str] = set()
 
@@ -293,6 +299,19 @@ class RegexpCollection:
         yield
         self._visiting_patterns.remove(rule_name)
 
+    def _char_set_for(self, codepoint: int) -> CharSet:
+        """
+        Return a CharSet instance for the given character.
+
+        Note that this takes into account case insensitivity, if it is enabled.
+        """
+        char = chr(codepoint)
+        return (
+            CharSet(char, char.lower(), char.upper())
+            if self.case_insensitive
+            else CharSet(char)
+        )
+
     def _read_escape(self, stream: SequenceReader) -> int:
         """
         Read an escaped character. Return the ordinal for the character that is
@@ -323,6 +342,15 @@ class RegexpCollection:
             return codepoint
 
         return ord(self.escape_chars.get(char, char))
+
+    def _parse_escape(self, stream: SequenceReader) -> CharSet:
+        """
+        Parse an escaped character. Return the corresponding CharSet.
+
+        :param stream: Input regexp stream.
+        """
+        codepoint = self._read_escape(stream)
+        return self._char_set_for(codepoint)
 
     def _parse_or(self,
                   stream: SequenceReader,
@@ -432,12 +460,28 @@ class RegexpCollection:
                         'incomplete Unicode category matcher')
                     stream.read()
 
-                    try:
-                        char_set = CharSet.for_category(category)
-                    except KeyError:
-                        check_source_language(
-                            False,
-                            'invalid Unicode category: {}'.format(category))
+                    # If case insensitivity is enabled, the presence of either
+                    # the Ll, Lu or Lt categories automatically enable the
+                    # presence of the others.
+                    #
+                    # This is because X.upper() can turn codepoints from Ll or
+                    # Lt into codepoints from Lu and X.lower() can turn
+                    # codepoints from Lu or Lt into codepoints from Ll.
+                    if category in ("Ll", "Lu", "Lt"):
+                        char_set = (
+                            CharSet.for_category("Ll")
+                            | CharSet.for_category("Lu")
+                            | CharSet.for_category("Lt")
+                        )
+                    else:
+                        try:
+                            char_set = CharSet.for_category(category)
+                        except KeyError:
+                            check_source_language(
+                                False,
+                                f'invalid Unicode category: {category}'
+                            )
+
                     if action == 'P':
                         char_set = char_set.negation
                     subparsers.append(self.Range(char_set))
@@ -445,13 +489,12 @@ class RegexpCollection:
                 else:
                     stream.go_back()
                     subparsers.append(
-                        self.Range(
-                            CharSet.from_int(self._read_escape(stream))
-                        )
+                        self.Range(self._parse_escape(stream))
                     )
 
             else:
-                subparsers.append(self.Range(CharSet(stream.read())))
+                char_set = self._char_set_for(ord(stream.read()))
+                subparsers.append(self.Range(char_set))
 
         return self.Sequence(subparsers)
 
@@ -482,14 +525,15 @@ class RegexpCollection:
                 in_range = True
                 stream.read()
             else:
-                char = (self._read_escape(stream)
-                        if stream.next_is('\\') else ord(stream.read()))
+                codepoint = (self._read_escape(stream)
+                             if stream.next_is('\\')
+                             else ord(stream.read()))
                 if in_range:
                     low, high = ranges.pop()
                     assert low == high
-                    ranges.append((low, char))
+                    ranges.append((low, codepoint))
                 else:
-                    ranges.append((char, char))
+                    ranges.append((codepoint, codepoint))
                 in_range = False
 
         check_source_language(not in_range, 'dangling dash')
@@ -497,7 +541,18 @@ class RegexpCollection:
                               'unbalanced square bracket')
         assert stream.read() == ']'
 
-        char_set = CharSet.from_int_ranges(*ranges)
+        # In case insensitivity is enabled, make sure both lowercase and
+        # uppercase variants of all characters in ranges are present.
+        if self.case_insensitive:
+            char_set = CharSet()
+            for low, high in ranges:
+                for codepoint in range(low, high + 1):
+                    char = chr(codepoint)
+                    for c in (char, char.lower(), char.upper()):
+                        char_set.add(c)
+        else:
+            char_set = CharSet.from_int_ranges(*ranges)
+
         if negate:
             char_set = char_set.negation
         return self.Range(char_set)

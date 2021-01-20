@@ -305,6 +305,7 @@ class CompileCtx:
                  verbosity=Verbosity('none'),
                  template_lookup_extra_dirs=None,
                  default_unit_provider=None,
+                 case_insensitive=False,
                  symbol_canonicalizer=None,
                  documentations=None,
                  show_property_logging=False,
@@ -374,6 +375,11 @@ class CompileCtx:
             canonical name.
 
             This can be used, for instance, to implement case insensivity.
+
+        :param bool case_insensitive: Whether to process sources as consider as
+            case insensitive in the generated library. Note that this provides
+            a default symbol canonicalizer that takes care of case folding
+            symbols.
 
         :param dict[str, str] documentations: If provided, supply templates to
             document entities. These will be added to the documentations
@@ -685,7 +691,12 @@ class CompileCtx:
         """
 
         self.default_unit_provider = default_unit_provider
+        self.case_insensitive = case_insensitive
         self.symbol_canonicalizer = symbol_canonicalizer
+        if self.symbol_canonicalizer is None and self.case_insensitive:
+            self.symbol_canonicalizer = LibraryEntity(
+                "Langkit_Support.Symbols", "Fold_Case"
+            )
 
         docs = dict(documentation.base_langkit_docs)
         if documentations:

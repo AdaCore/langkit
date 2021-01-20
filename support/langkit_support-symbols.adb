@@ -142,4 +142,19 @@ package body Langkit_Support.Symbols is
       end if;
    end Get_Symbol;
 
+   ---------------
+   -- Fold_Case --
+   ---------------
+
+   function Fold_Case (Name : Text_Type) return Symbolization_Result is
+   begin
+      return Result : Symbolization_Result
+        (Success => True, Size => Name'Length)
+      do
+         for I in 1 .. Result.Size loop
+            Result.Symbol (I) := To_Lower (Name (Name'First + I - 1));
+         end loop;
+      end return;
+   end Fold_Case;
+
 end Langkit_Support.Symbols;
