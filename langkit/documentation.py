@@ -46,7 +46,7 @@ class DocDatabase:
     Database for documentation entries.
     """
 
-    def __init__(self, dict: Dict[str, str]) -> None:
+    def __init__(self, dict: Dict[str, Template]) -> None:
         self._dict = dict
         """
         Documentation database.
@@ -57,7 +57,7 @@ class DocDatabase:
         Set of names for documentation database that were actually used.
         """
 
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> Template:
         self._used.add(key)
         return self._dict[key]
 
@@ -1338,6 +1338,7 @@ def create_doc_printer(
 
         ctx = get_context()
 
+        doc: Optional[Template]
         if isinstance(entity, str):
             doc_template = ctx.documentations[entity]
         elif entity.doc:
