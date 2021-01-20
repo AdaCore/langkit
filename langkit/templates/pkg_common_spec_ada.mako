@@ -283,28 +283,6 @@ package ${ada_lib_name}.Common is
    type Child_Or_Trivia is (Child, Trivia);
    --  Discriminator for the ``Child_Record`` type
 
-   type Symbolization_Result (Success : Boolean; Size : Natural) is record
-      case Success is
-         when True  =>
-            Symbol : Text_Type (1 .. Size);
-            --  Text for successfully symbolized identifiers
-
-         when False =>
-            Error_Message : Text_Type (1 .. Size);
-            --  Message describing why symbolization failed
-      end case;
-   end record;
-   --  Holder for results of the symbolization process, conditionned by whether
-   --  this process was successful.
-
-   function Create_Symbol (Name : Text_Type) return Symbolization_Result is
-     ((Success => True, Size => Name'Length, Symbol => Name));
-   --  Shortcut to create successful symbolization results
-
-   function Create_Error (Message : Text_Type) return Symbolization_Result is
-     ((Success => False, Size => Message'Length, Error_Message => Message));
-   --  Shortcut to create failed symbolization results
-
    function Raw_Data (T : Token_Reference) return Stored_Token_Data;
    --  Return the raw token data for ``T``
 

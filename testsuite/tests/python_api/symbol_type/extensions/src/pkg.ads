@@ -1,5 +1,5 @@
-with Langkit_Support.Text; use Langkit_Support.Text;
-with Libfoolang.Common;    use Libfoolang.Common;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
 package Pkg is
 
