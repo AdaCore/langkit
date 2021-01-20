@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import inspect
+from typing import Any as _Any, Dict, List, Optional, Sequence, Tuple
 
 import funcy
 
 from langkit import names
-from langkit.compiled_types import (AbstractNodeData, Field, get_context,
-                                    resolve_type)
+from langkit.compiled_types import (
+    ASTNodeType, AbstractNodeData, Field, get_context, resolve_type
+)
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -459,33 +463,34 @@ class FieldAccess(AbstractExpression):
     class Arguments:
         """
         Holder for arguments to pass to a property.
-
-        `args` is a list/tuple of AbstractExpression while `kwargs` is a
-        mapping of argument names (str) to AbstractExpression.
         """
 
         _traverse_in_prepare = True
 
-        def __init__(self, args, kwargs):
+        def __init__(self,
+                     args: Sequence[AbstractExpression],
+                     kwargs: Dict[str, AbstractExpression]):
             self.args = args
             self.kwargs = kwargs
 
-        def associate(self, prop):
+        def associate(self, node_data: AbstractNodeData) -> List[
+            Tuple[str, Optional[AbstractExpression]]
+        ]:
             """
             Try to associate passed arguments with each natural argument in the
-            `prop` property. If invalid count or invalid argument names are
-            detected, raise the appropriate user diagnostic.
+            `node_data` property. If invalid count or invalid argument names
+            are detected, raise the appropriate user diagnostic.
 
             On success, return a list with all actuals and arg keyword/position
             to pass in the same order as natural arguments in the spec. None
             values are left for arguments that must be passed default values.
-
-            :rtype: list[(T, AbstractExpression|None)]
             """
             args = list(enumerate(self.args, 1))
             kwargs = dict(self.kwargs)
-            result = []
-            for arg_spec in prop.natural_arguments:
+            result: List[Tuple[str, Optional[AbstractExpression]]] = []
+            for arg_spec in node_data.natural_arguments:
+                actual: Optional[Optional[AbstractExpression]]
+
                 # Look for a keyword argument corresponding to `arg_spec`
                 arg_name = arg_spec.name.lower
                 key = arg_spec.name.lower
@@ -535,33 +540,35 @@ class FieldAccess(AbstractExpression):
         """
         pretty_class_name = 'FieldAccess'
 
-        def __init__(self, receiver_expr, node_data, arguments,
-                     implicit_deref=False, unsafe=False, abstract_expr=None):
+        def __init__(self,
+                     receiver_expr: ResolvedExpression,
+                     node_data: AbstractNodeData,
+                     arguments: List[Optional[ResolvedExpression]],
+                     implicit_deref: bool = False,
+                     unsafe: bool = False,
+                     abstract_expr: Optional[AbstractExpression] = None):
             """
-            :param ResolvedExpression receiver_expr: The receiver of the field
-                access.
+            :param receiver_expr: The receiver of the field access.
 
-            :param langkit.compiled_types.AbstracNodeData node_data: The
-                accessed property or field.
+            :param node_data: The accessed property or field.
 
-            :param list[ResolvedExpression|None] arguments: If non-empty, this
-                field access will actually be a primitive call. Each item is a
-                ResolvedExpression for an actual to pass, or None for arguments
-                to let them have their default value. List list must have the
-                same size as `node_data.natural_arguments`.
+            :param arguments: If non-empty, this field access will actually be
+                a primitive call. Each item is a ResolvedExpression for an
+                actual to pass, or None for arguments to let them have their
+                default value. List list must have the same size as
+                `node_data.natural_arguments`.
 
-            :param bool implicit_deref: Whether the receiver is an entity,
-                and we want to access a field or property of the stored node.
-                In the case of an entity prefix for an AST node field, return
-                an entity with the same entity info.
+            :param implicit_deref: Whether the receiver is an entity, and we
+                want to access a field or property of the stored node.  In the
+                case of an entity prefix for an AST node field, return an
+                entity with the same entity info.
 
-            :param bool unsafe: If true, don't generate the null crheck before
-                doing the field access. This is used to avoid noisy and useless
-                null checks in generated code: these checks would fail only
-                because of a bug in the code generator.
+            :param unsafe: If true, don't generate the null crheck before doing
+                the field access. This is used to avoid noisy and useless null
+                checks in generated code: these checks would fail only because
+                of a bug in the code generator.
 
-            :param AbstractExpression|None abstract_expr: See
-                ResolvedExpression's constructor.
+            :param abstract_expr: See ResolvedExpression's constructor.
             """
             # When calling environment properties, the call itself happens are
             # outside a property. We cannot create a variable in this context,
@@ -589,7 +596,7 @@ class FieldAccess(AbstractExpression):
             self.original_node_data = node_data
 
             # If this is a property call, take the root property
-            if self.node_data.is_property:
+            if isinstance(self.node_data, PropertyDef):
                 self.node_data = self.node_data.root_property
 
             self.arguments = arguments
@@ -603,6 +610,7 @@ class FieldAccess(AbstractExpression):
 
             self.static_type = self.node_data.type
             if self.wrap_result_in_entity:
+                assert isinstance(self.static_type, ASTNodeType)
                 self.static_type = self.static_type.entity
 
             # Create a variable for all field accesses in properties. This is
@@ -614,18 +622,16 @@ class FieldAccess(AbstractExpression):
                 abstract_expr=abstract_expr,
             )
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return "<FieldAccessExpr {} {} {}>".format(
                 self.receiver_expr, self.node_data, self.type
             )
 
         @property
-        def wrap_result_in_entity(self):
+        def wrap_result_in_entity(self) -> bool:
             """
             Whether the result is an AST node that must be wrapped as an
             entity.
-
-            :rtype: bool
             """
             return (
                 self.implicit_deref
@@ -635,11 +641,9 @@ class FieldAccess(AbstractExpression):
 
         @property  # type: ignore
         @memoized
-        def prefix(self):
+        def prefix(self) -> str:
             """
             Compute the prefix expression, render it and return it.
-
-            :rtype: str
             """
             if self.simple_field_access:
                 prefix = self.receiver_expr.render()
@@ -650,12 +654,10 @@ class FieldAccess(AbstractExpression):
 
         @property  # type: ignore
         @memoized
-        def entity_info_expr(self):
+        def entity_info_expr(self) -> Optional[str]:
             """
             Return the value of the entity info parameter along, compute its
             value. Return None otherwise.
-
-            :rtype: str|None
             """
             # If the property that this field accesses requires entity info,
             # then the prefix is supposed to be an entity. There are only two
@@ -675,12 +677,10 @@ class FieldAccess(AbstractExpression):
             return '{}.Info'.format(self.prefix)
 
         @property
-        def field_access_expr(self):
+        def field_access_expr(self) -> str:
             """
             Return the code for the expression that evaluates the actual field
             access.
-
-            :rtype: str
             """
             prefix = self.prefix
             if self.implicit_deref:
@@ -756,15 +756,15 @@ class FieldAccess(AbstractExpression):
 
             return ret
 
-        def _render_pre(self):
+        def _render_pre(self) -> str:
             # As long as this method is called, this should not be a simple
             # field access and thus we should have a result variable.
             assert not self.simple_field_access and self.result_var
 
             # Emit debug helper directives to describe the call if the target
             # is a property we generated code for.
-            call_debug_info = (self.node_data.is_property and
-                               not self.node_data.external)
+            call_debug_info = (isinstance(self.node_data, PropertyDef)
+                               and not self.node_data.external)
 
             sub_exprs = [self.receiver_expr] + funcy.lfilter(
                 lambda e: e is not None,
@@ -789,27 +789,27 @@ class FieldAccess(AbstractExpression):
 
             return '\n'.join(result)
 
-        def _render_expr(self):
+        def _render_expr(self) -> str:
             return (self.result_var.name
                     if self.result_var else self.field_access_expr)
 
         @property
-        def subexprs(self):
+        def subexprs(self) -> dict:
             result = {'0-prefix': self.receiver_expr,
                       '1-field': self.original_node_data}
             if self.arguments:
                 result['2-args'] = self.arguments
             return result
 
-    def __init__(self, receiver, field, arguments=None):
+    def __init__(self,
+                 receiver: AbstractExpression,
+                 field: str,
+                 arguments: Optional[FieldAccess.Arguments] = None):
         """
-        :param AbstractExpression receiver: Expression on which the field
-            access was done.
-
-        :param str field: The name of the field that is accessed.
-
-        :param FieldAccess.Arguments arguments: Assuming field is a property
-            that takes arguments, these are passed to it.
+        :param receiver: Expression on which the field access was done.
+        :param field: The name of the field that is accessed.
+        :param arguments: Assuming field is a property that takes arguments,
+            these are passed to it.
         """
         super().__init__()
         self.receiver = receiver
@@ -817,25 +817,24 @@ class FieldAccess(AbstractExpression):
         self.arguments = arguments
         self.is_deref = False
 
+        self.to_get: AbstractNodeData
+
     @property
-    def diagnostic_context(self):
+    def diagnostic_context(self) -> Context:
         return Context(self.location)
 
-    def resolve_field(self):
+    def resolve_field(self) -> AbstractNodeData:
         """
         Resolve the field that should be accessed, by:
 
         - Constructing the receiver;
         - Getting its corresponding field.
-
-        :rtype: AbstractNodeData
         """
         self.receiver_expr = construct(self.receiver)
         pfx_type = self.receiver_expr.type
 
         self.to_get = pfx_type.get_abstract_node_data_dict().get(self.field,
                                                                  None)
-        ":type: AbstractNodeField"
 
         # If still not found, maybe the receiver is an entity, in which case we
         # want to do implicit dereference.
@@ -846,12 +845,10 @@ class FieldAccess(AbstractExpression):
 
         return self.to_get
 
-    def construct(self):
+    def construct(self) -> ResolvedExpression:
         """
         Constructs the resolved expression corresponding to this field access.
         It can be either a field access or a property call.
-
-        :rtype: FieldAccessExpr
         """
 
         to_get = self.resolve_field()
@@ -913,21 +910,18 @@ class FieldAccess(AbstractExpression):
         self.constructed_node_data = to_get
         return ret
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: _Any, **kwargs: _Any) -> FieldAccess:
         """
         Build a new FieldAccess instance passing the given arguments.
 
         :param args: List of arguments for the call.
-        :type args: list[AbstractExpression]
         :param kwargs: Mapping of arguments for the call.
-        :type kwargs: dict[str, AbstractExpression]
-        :rtype: FieldAccess
         """
         assert not self.arguments, 'Cannot call the result of a property'
         return FieldAccess(self.receiver, self.field,
                            self.Arguments(args, kwargs))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<FieldAccess .{}{}>".format(self.field,
                                             '(...)' if self.arguments else '')
 

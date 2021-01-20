@@ -962,12 +962,10 @@ class ResolvedExpression:
     variable and make it contain the resulting value.
     """
 
-    static_type = None
+    static_type: Opt[CompiledType] = None
     """
     If subclasses redefine this, then the type property will return this
     static type value.
-
-    :type: CompiledType
     """
 
     expr_count = iter(count(1))
@@ -3102,7 +3100,7 @@ class PropertyDef(AbstractNodeData):
                          [
                              ResolvedExpression,
                              AbstractNodeData,
-                             List[Tuple[Argument, ResolvedExpression]],
+                             List[Opt[ResolvedExpression]],
                              Opt[AbstractExpression],
                          ],
                          ResolvedExpression,

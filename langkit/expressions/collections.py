@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from itertools import count
 import types
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import funcy
 
@@ -13,7 +13,7 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractNodeData, AbstractVariable, Argument, CallExpr,
+    AbstractExpression, AbstractNodeData, AbstractVariable, CallExpr,
     ComputingExpr, FieldAccessExpr, NullCheckExpr, PropertyDef,
     ResolvedExpression, SequenceExpr, T, UncheckedCastExpr, attr_call,
     attr_expr, auto_attr, auto_attr_custom, construct, render, unsugar
@@ -929,7 +929,7 @@ class Concat(AbstractExpression):
 def make_to_iterator(
     prefix: ResolvedExpression,
     node_data: AbstractNodeData,
-    args: List[Tuple[Argument, ResolvedExpression]],
+    args: List[Optional[ResolvedExpression]],
     abstract_expr: Optional[AbstractExpression] = None
 ) -> ResolvedExpression:
     """
