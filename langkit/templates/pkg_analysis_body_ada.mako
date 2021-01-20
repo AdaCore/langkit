@@ -31,7 +31,6 @@ use Langkit_Support.Adalog.Pure_Relations;
 with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 pragma Warnings (On, "referenced");
 
-with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Types;        use Langkit_Support.Types;
 
 with ${ada_lib_name}.Common;
@@ -311,14 +310,14 @@ package body ${ada_lib_name}.Analysis is
       Set_Logic_Resolution_Timeout (Unwrap_Context (Context), Timeout);
    end Set_Logic_Resolution_Timeout;
 
-   --------------------------
-   -- Disable_Lookup_Cache --
-   --------------------------
+   ---------------------------
+   -- Set_Lookup_Cache_Mode --
+   ---------------------------
 
-   procedure Disable_Lookup_Cache (Disable : Boolean := True) is
+   procedure Set_Lookup_Cache_Mode (Mode : Lookup_Cache_Kind) is
    begin
-      Activate_Lookup_Cache := not Disable;
-   end Disable_Lookup_Cache;
+      Lookup_Cache_Mode := Mode;
+   end Set_Lookup_Cache_Mode;
 
    --------------------------
    -- Has_Rewriting_Handle --

@@ -35,7 +35,23 @@ with Langkit_Support.Vectors;
 
 package Langkit_Support.Lexical_Envs is
 
-   Activate_Lookup_Cache : Boolean := True;
+   type Lookup_Cache_Kind is (Disabled, Toplevel_Only, Full);
+
+   Lookup_Cache_Mode : Lookup_Cache_Kind := Full;
+   --  Lookup cache mode for the lexical envs.
+   --
+   --  ``Full`` means that every env.get request, including intermediate ones
+   --  happening as part of a user requested env.get, will be cached.
+   --
+   --  ``Toplevel_Only`` means that only top level requests, directly requested
+   --  by the user of the Lexical_Envs API, will be cached.
+   --
+   --  ``Disabled`` means no caching will happen.
+   --
+   --  This setting is for debugging: caching all requests is the normal mode
+   --  (maximum optimization), and the other modes reduce the amount of caching
+   --  done (less optimization, thus taking longer to run) to ease the
+   --  investigation of env caching bugs.
 
    Debug_Mode : constant Boolean := True;
 
@@ -141,7 +157,7 @@ package Langkit_Support.Lexical_Envs is
 
    function Has_Lookup_Cache (Self : Lexical_Env) return Boolean
    is
-     (Self.Kind = Static_Primary and then Activate_Lookup_Cache);
+     (Self.Kind = Static_Primary);
    --  Whether lookup cache is availab/eenabled for the given lexical
    --  environment.
 
