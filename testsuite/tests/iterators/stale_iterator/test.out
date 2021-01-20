@@ -1,7 +1,8 @@
 main.py: Running...
 main.py: Iterating once: <Example main.txt:1:1-1:8>
 main.py: Parsing new unit
-main.py: Iterating once more: <StaleReferenceError>
+main.py: Iterating once more:
+<StaleReferenceError>
 main.py: Done.
 main.adb: Running...
 main.adb: Iterating once: <Example main.txt:1:1-1:8>

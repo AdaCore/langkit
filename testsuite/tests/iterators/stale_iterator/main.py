@@ -20,7 +20,7 @@ print('main.py: Parsing new unit')
 u = ctx.get_from_buffer('main2.txt', b"""example""")
 
 try:
-    print('main.py: Iterating once more: ', end='')
+    print('main.py: Iterating once more:')
     print(next(itr))
 except libfoolang.StaleReferenceError:
     print('<StaleReferenceError>')
