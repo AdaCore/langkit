@@ -84,6 +84,32 @@ package Langkit_Support.Symbols is
    --  WARNING: It assumes that you don't mix symbols from different symbol
    --  tables, but doesn't verify it!
 
+   -----------------------------
+   -- Symbol canonicalization --
+   -----------------------------
+
+   type Symbolization_Result (Success : Boolean; Size : Natural) is record
+      case Success is
+         when True  =>
+            Symbol : Text_Type (1 .. Size);
+            --  Text for successfully symbolized identifiers
+
+         when False =>
+            Error_Message : Text_Type (1 .. Size);
+            --  Message describing why symbolization failed
+      end case;
+   end record;
+   --  Holder for results of the symbolization process, conditionned by whether
+   --  this process was successful.
+
+   function Create_Symbol (Name : Text_Type) return Symbolization_Result is
+     ((Success => True, Size => Name'Length, Symbol => Name));
+   --  Shortcut to create successful symbolization results
+
+   function Create_Error (Message : Text_Type) return Symbolization_Result is
+     ((Success => False, Size => Message'Length, Error_Message => Message));
+   --  Shortcut to create failed symbolization results
+
 private
 
    type Thin_Symbol is mod 2 ** 32;
