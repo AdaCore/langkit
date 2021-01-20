@@ -63,7 +63,8 @@ unparse_all_script = 'to:{},lexer,grammar,nodes'.format(unparse_destination)
 def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     warning_set=default_warning_set,
                     symbol_canonicalizer=None, show_property_logging=False,
-                    types_from_lkt=False, lkt_semantic_checks=False):
+                    types_from_lkt=False, lkt_semantic_checks=False,
+                    case_insensitive: bool = False):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -85,6 +86,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     :param bool show_property_logging: See CompileCtx.show_property_logging.
 
     :param bool types_from_lkt: See CompileCtx.types_from_lkt.
+
+    :param case_insensitive: See CompileCtx's constructor.
     """
 
     # Have a clean build directory
@@ -99,7 +102,8 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      show_property_logging=show_property_logging,
                      lkt_file=lkt_file,
                      types_from_lkt=types_from_lkt,
-                     lkt_semantic_checks=lkt_semantic_checks)
+                     lkt_semantic_checks=lkt_semantic_checks,
+                     case_insensitive=case_insensitive)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -174,7 +178,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
                   show_property_logging=False, unparse_script=unparse_script,
-                  strict_sound_envs: bool = False):
+                  strict_sound_envs: bool = False,
+                  case_insensitive: bool = False):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -218,6 +223,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
     :param None|str unparse_script: Script to unparse the language spec.
 
     :param strict_sound_envs: Pass --strict-sound-envs to generation.
+
+    :param case_insensitive: See CompileCtx's constructor.
     """
     assert not types_from_lkt or lkt_file is not None
 
@@ -236,7 +243,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                               symbol_canonicalizer=symbol_canonicalizer,
                               show_property_logging=show_property_logging,
                               types_from_lkt=types_from_lkt,
-                              lkt_semantic_checks=lkt_semantic_checks)
+                              lkt_semantic_checks=lkt_semantic_checks,
+                              case_insensitive=case_insensitive)
 
         m = Manage(ctx)
 

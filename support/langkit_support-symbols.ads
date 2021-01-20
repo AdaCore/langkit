@@ -110,6 +110,12 @@ package Langkit_Support.Symbols is
      ((Success => False, Size => Message'Length, Error_Message => Message));
    --  Shortcut to create failed symbolization results
 
+   function Fold_Case (Name : Text_Type) return Symbolization_Result;
+   --  Convert Name to lowercase (cannot fail).
+   --
+   --  This is the default symbol canonicalizer when case insensitivity is
+   --  enabled.
+
 private
 
    type Thin_Symbol is mod 2 ** 32;

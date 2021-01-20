@@ -53,7 +53,9 @@ with ${ada_lib_name}.Introspection_Implementation;
 pragma Warnings (Off, "referenced");
 ${exts.with_clauses(with_clauses + [
    ((ctx.symbol_canonicalizer.unit_fqn, False, False)
-    if ctx.symbol_canonicalizer else None),
+    if ctx.symbol_canonicalizer
+       and not ctx.symbol_canonicalizer.unit_fqn.startswith("Langkit_Support.")
+    else None),
    ((ctx.default_unit_provider.unit_fqn, False, False)
     if ctx.default_unit_provider else None)
 ])}
