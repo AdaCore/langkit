@@ -3430,6 +3430,12 @@ class PropertyDef(AbstractNodeData):
 
         self._is_reachable: Opt[bool] = None
 
+        self.called_by_super = False
+        """
+        Whether this specific property is the target of a Super() call.
+        Tracking this matters for unreachable base properties analysis.
+        """
+
     @property
     def has_debug_info(self):
         """
