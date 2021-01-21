@@ -539,10 +539,11 @@ def expr_is_a(expr, *names):
 
 def needs_parens(expr):
     from langkit.expressions import (FieldAccess, Literal, AbstractVariable,
-                                     BigIntLiteral, Map, Quantifier, EnvGet)
+                                     BigIntLiteral, Map, Quantifier, EnvGet,
+                                     Super)
     return not (
         isinstance(expr, (FieldAccess, Literal, AbstractVariable, BigIntLiteral, EnvGet,
-                          Map, Quantifier))
+                          Map, Quantifier, Super))
         or expr_is_a(expr, "as_entity", "as_bare_entity", "children",
               "env_parent", "rebindings_parent", "parents", "parent", "root",
               "append_rebinding", "concat_rebindings", "env_node",
@@ -614,7 +615,7 @@ def emit_expr(expr, **ctx):
         No, Cond, New, CollectionSingleton, Concat, EnumLiteral, EnvGet,
         ArrayLiteral, Arithmetic, PropertyError, CharacterLiteral, Predicate,
         StructUpdate, BigIntLiteral, RefCategories, Bind, Try, Block, Contains,
-        PropertyDef, DynamicLexicalEnv
+        PropertyDef, DynamicLexicalEnv, Super
     )
 
     def is_a(*names):
@@ -970,6 +971,14 @@ def emit_expr(expr, **ctx):
             as_multiline=has_any_commented_arg,
             force_parens=is_property
         )
+
+    elif isinstance(expr, Super):
+        args = []
+        for arg in expr.arguments.args:
+            args.append(ee(arg))
+        for kw, arg in expr.arguments.kwargs.items():
+            args.append("{}={}".format(kw, ee(arg)))
+        return "super({})".format(", ".join(args))
 
     elif isinstance(expr, Concat):
         return "{} & {}".format(ee_pexpr(expr.array_1), ee_pexpr(expr.array_2))

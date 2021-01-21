@@ -1,0 +1,13 @@
+== test_bad_args ==
+test.py:XXX: error: The last argument is unexpected
+
+== test_no_overridden ==
+test.py:XXX: error: There is no overridden property to call
+
+== test_overridden_abstract ==
+test.py:XXX: error: Cannot call abstract overridden property
+
+== test_overridden_abstract_runtime_check ==
+test.py:XXX: error: Cannot call abstract overridden property
+
+Done

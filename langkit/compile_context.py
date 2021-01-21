@@ -1567,9 +1567,11 @@ class CompileCtx:
 
     def warn_unreachable_base_properties(self):
         """
-        Emit a warning for properties that can never be executed because they
-        are defined on an abstract node and all concrete subclassed have it
-        overriden.
+        Emit a warning for properties that can never be executed because:
+
+        * they are defined on an abstract node;
+        * all concrete subclasses override it;
+        * they are not called through Super().
         """
         unreachable = []
 
@@ -1592,9 +1594,14 @@ class CompileCtx:
                 # Process properties in reverse hierarchical order to process
                 # leaf properties before parent ones.
                 for p in reversed(props):
+                    # Compute the set of concrete subclasses that can call "p"
                     reaching_p = set(p.struct.concrete_subclasses) & nodes
-                    if not reaching_p:
+
+                    # If this set is empty and this property isn't the target
+                    # of a Super() call, then it is unreachable.
+                    if not p.called_by_super and not reaching_p:
                         unreachable.append(p)
+
                     nodes = nodes - reaching_p
 
         unreachable.sort(key=lambda p: p.location)
@@ -2516,7 +2523,9 @@ class CompileCtx:
         other ones non-dispatching and private.
         """
         from langkit.compiled_types import Argument
-        from langkit.expressions import PropertyDef
+        from langkit.expressions import (
+            FieldAccess, PropertyDef, ResolvedExpression, Super,
+        )
 
         # This pass rewrites properties, so it invalidates callgraphs
         self.properties_forwards_callgraphs = None
@@ -2619,6 +2628,33 @@ class CompileCtx:
                     root_static.struct = prop.struct
                     root_static.location = prop.location
                     prop.is_artificial_dispatcher = True
+
+                    # Rewrite overriding properties so that Super() calls that
+                    # target the root property (which is now a dispatcher) are
+                    # redirected to "root_static" (the one that contains code
+                    # for the actual root property).
+
+                    def rewrite(expr: ResolvedExpression) -> None:
+                        """
+                        Rewrite Super() expressions in "expr", recursively.
+                        """
+                        if (
+                            isinstance(expr, FieldAccess.Expr)
+                            and isinstance(expr.abstract_expr, Super)
+                            and expr.node_data == prop
+                        ):
+                            expr.node_data = root_static
+
+                        for subexpr in expr.flat_subexprs(
+                            lambda e: isinstance(e, ResolvedExpression)
+                        ):
+                            rewrite(subexpr)
+
+                    # The root property cannot use Super(), so process all
+                    # other properties only.
+                    for p in static_props[1:]:
+                        if p.constructed_expr is not None:
+                            rewrite(p.constructed_expr)
 
                 else:
                     # If there is no runtime check for abstract properties, the

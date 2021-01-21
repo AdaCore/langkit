@@ -9,11 +9,11 @@ from langkit import names
 from langkit.compiled_types import (
     ASTNodeType, AbstractNodeData, Field, get_context, resolve_type
 )
-from langkit.diagnostics import Context, Severity, check_source_language
+from langkit.diagnostics import Context, Severity, check_source_language, error
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
-    ResolvedExpression, SavedExpr, T, attr_call, attr_expr, construct,
+    ResolvedExpression, SavedExpr, Self, T, attr_call, attr_expr, construct,
     construct_compile_time_known, dsl_document, gdb_end,
     gdb_property_call_start, render
 )
@@ -531,6 +531,31 @@ class FieldAccess(AbstractExpression):
             )
             return result
 
+        def construct(
+            self,
+            node_data: AbstractNodeData,
+        ) -> List[Optional[ResolvedExpression]]:
+            """
+            Associate passed arguments with each natural argument in the
+            ``node_data`` property, then construct each argument and return
+            their list.
+            """
+            exprs = self.associate(node_data)
+            assert len(exprs) == len(node_data.natural_arguments)
+
+            return [
+                None if actual is None else construct(
+                    actual, formal.type,
+                    custom_msg='Invalid "{}" actual{} for {}:'.format(
+                        formal.name.lower,
+                        ' (#{})'.format(key) if isinstance(key, int) else '',
+                        node_data.qualname,
+                    ) + ' expected {expected} but got {expr_type}'
+                )
+                for (key, actual), formal in zip(exprs,
+                                                 node_data.natural_arguments)
+            ]
+
     class Expr(ResolvedExpression):
         """
         Resolved expression that represents a field access in generated code.
@@ -544,6 +569,7 @@ class FieldAccess(AbstractExpression):
                      receiver_expr: ResolvedExpression,
                      node_data: AbstractNodeData,
                      arguments: List[Optional[ResolvedExpression]],
+                     actual_node_data: Optional[AbstractNodeData] = None,
                      implicit_deref: bool = False,
                      unsafe: bool = False,
                      abstract_expr: Optional[AbstractExpression] = None):
@@ -557,6 +583,10 @@ class FieldAccess(AbstractExpression):
                 actual to pass, or None for arguments to let them have their
                 default value. List list must have the same size as
                 `node_data.natural_arguments`.
+
+            :param actual_node_data: If not None, node data to access for code
+                generation. In that case, ``node_data`` is just there to keep
+                track of what was accessed at the DSL level.
 
             :param implicit_deref: Whether the receiver is an entity, and we
                 want to access a field or property of the stored node.  In the
@@ -590,14 +620,10 @@ class FieldAccess(AbstractExpression):
                 NullCheckExpr(receiver_expr, implicit_deref)
             )
 
-            self.node_data = node_data
-
             # Keep the original node data for debugging purposes
             self.original_node_data = node_data
 
-            # If this is a property call, take the root property
-            if isinstance(self.node_data, PropertyDef):
-                self.node_data = self.node_data.root_property
+            self.node_data = actual_node_data or node_data
 
             self.arguments = arguments
             if self.arguments is not None:
@@ -817,7 +843,7 @@ class FieldAccess(AbstractExpression):
         self.arguments = arguments
         self.is_deref = False
 
-        self.to_get: AbstractNodeData
+        self.node_data: AbstractNodeData
 
     @property
     def diagnostic_context(self) -> Context:
@@ -833,17 +859,58 @@ class FieldAccess(AbstractExpression):
         self.receiver_expr = construct(self.receiver)
         pfx_type = self.receiver_expr.type
 
-        self.to_get = pfx_type.get_abstract_node_data_dict().get(self.field,
-                                                                 None)
+        self.node_data = pfx_type.get_abstract_node_data_dict().get(self.field,
+                                                                    None)
 
         # If still not found, maybe the receiver is an entity, in which case we
         # want to do implicit dereference.
-        if not self.to_get and pfx_type.is_entity_type:
-            self.to_get = (pfx_type.element_type.get_abstract_node_data_dict()
-                           .get(self.field, None))
-            self.is_deref = bool(self.to_get)
+        if not self.node_data and pfx_type.is_entity_type:
+            self.node_data = (
+                pfx_type.element_type.get_abstract_node_data_dict()
+                .get(self.field, None)
+            )
+            self.is_deref = bool(self.node_data)
 
-        return self.to_get
+        return self.node_data
+
+    @staticmethod
+    def common_construct(
+        prefix: ResolvedExpression,
+        node_data: AbstractNodeData,
+        actual_node_data: AbstractNodeData,
+        arguments: FieldAccess.Arguments,
+        implicit_deref: bool = False,
+        abstract_expr: Optional[AbstractExpression] = None,
+    ) -> ResolvedExpression:
+        """
+        Create a resolved expression to access the given field, passing to it
+        the given arguments.
+        """
+        # Check that this property actually accepts these arguments and that
+        # they are correctly typed.
+        arg_exprs = arguments.construct(node_data)
+
+        # If this field overrides expression construction, delegate it to the
+        # corresponding callback.
+        if node_data.access_constructor:
+            return node_data.access_constructor(prefix, actual_node_data,
+                                                arg_exprs, abstract_expr)
+        else:
+            # Even though it is redundant with DynamicVariable.construct, check
+            # that the callee's dynamic variables are bound here so we can emit
+            # a helpful error message if that's not the case.
+            if isinstance(node_data, PropertyDef):
+                DynamicVariable.check_call_bindings(node_data,
+                                                    'In call to {prop}')
+
+            return FieldAccess.Expr(
+                receiver_expr=prefix,
+                node_data=node_data,
+                arguments=arg_exprs,
+                actual_node_data=actual_node_data,
+                implicit_deref=implicit_deref,
+                abstract_expr=abstract_expr,
+            )
 
     def construct(self) -> ResolvedExpression:
         """
@@ -851,64 +918,38 @@ class FieldAccess(AbstractExpression):
         It can be either a field access or a property call.
         """
 
-        to_get = self.resolve_field()
+        actual_node_data = node_data = self.resolve_field()
 
         # If still not found, we have a problem
         check_source_language(
-            to_get is not None, "Type {} has no '{}' field or property".format(
-                self.receiver_expr.type.dsl_name, self.field
-            )
+            node_data is not None,
+            f"Type {self.receiver_expr.type.dsl_name} has no '{self.field}'"
+            f" field or property"
         )
 
         check_source_language(
-            not to_get.is_internal,
-            '{} is for internal use only'.format(to_get.qualname)
+            not node_data.is_internal,
+            '{} is for internal use only'.format(node_data.qualname)
         )
 
-        # Check that this property actually accepts these arguments and that
-        # they are correctly typed.
-        input_args = self.arguments or FieldAccess.Arguments([], {})
-        args = input_args.associate(to_get)
-        assert len(args) == len(to_get.natural_arguments)
+        # If this is a property call, actually call the root property, as it
+        # will be turned into a dispatcher.
+        if isinstance(actual_node_data, PropertyDef):
+            actual_node_data = actual_node_data.root_property
 
-        arg_exprs = [
-            None if actual is None else construct(
-                actual, formal.type,
-                custom_msg='Invalid "{}" actual{} for {}:'.format(
-                    formal.name.lower,
-                    ' (#{})'.format(key) if isinstance(key, int) else '',
-                    to_get.qualname,
-                ) + ' expected {expected} but got {expr_type}'
-            )
-            for (key, actual), formal in zip(args, to_get.natural_arguments)
-        ]
-
-        # If this field overrides expression construction, delegate it to the
-        # corresponding callback.
-        if to_get.access_constructor:
-            ret = to_get.access_constructor(self.receiver_expr,
-                                            to_get,
-                                            arg_exprs,
-                                            self)
-        else:
-            # Even though it is redundant with DynamicVariable.construct, check
-            # that the callee's dynamic variables are bound here so we can emit
-            # a helpful error message if that's not the case.
-            if isinstance(self.to_get, PropertyDef):
-                DynamicVariable.check_call_bindings(self.to_get,
-                                                    'In call to {prop}')
-
-            ret = FieldAccess.Expr(
-                self.receiver_expr, to_get, arg_exprs, self.is_deref,
-                abstract_expr=self
-            )
+        args = self.arguments or FieldAccess.Arguments([], {})
+        result = self.common_construct(
+            self.receiver_expr, node_data, actual_node_data, args,
+            implicit_deref=self.is_deref,
+            abstract_expr=self,
+        )
 
         # RA22-015: keep a reference to the constructed expr and original
         # accessed field (node data), so that we can introspect which field is
         # accessed in dsl_unparse.
-        self.constructed_expr = ret
-        self.constructed_node_data = to_get
-        return ret
+        self.constructed_expr = result
+        self.constructed_node_data = node_data
+        return result
 
     def __call__(self, *args: _Any, **kwargs: _Any) -> FieldAccess:
         """
@@ -924,6 +965,43 @@ class FieldAccess(AbstractExpression):
     def __repr__(self) -> str:
         return "<FieldAccess .{}{}>".format(self.field,
                                             '(...)' if self.arguments else '')
+
+
+@dsl_document
+class Super(AbstractExpression):
+    """
+    Call the overriden property.
+
+    Note that this construct is valid only in an overriding property.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.arguments = FieldAccess.Arguments(args, kwargs)
+
+    def __repr__(self) -> str:
+        return f"<Super {self.arguments}>"
+
+    def construct(self) -> ResolvedExpression:
+        # This calls the property that the current one overrides: get it,
+        # making sure it exists and it is concrete.
+        prop = PropertyDef.get().base_property
+        if prop is None:
+            error("There is no overridden property to call")
+        check_source_language(
+            not prop.abstract,
+            "Cannot call abstract overridden property"
+        )
+        prop.called_by_super = True
+
+        prefix = construct(Self)
+        return FieldAccess.common_construct(
+            prefix=prefix,
+            node_data=prop,
+            actual_node_data=prop,
+            arguments=self.arguments,
+            abstract_expr=self
+        )
 
 
 @attr_call('is_a')
