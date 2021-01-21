@@ -4,8 +4,8 @@ from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
-from typing import (Any, Callable, Dict, List, Optional as Opt, Set, Tuple,
-                    Union)
+from typing import (Any as _Any, Callable, Dict, List, Optional as Opt, Set,
+                    Tuple, Union)
 
 
 from enum import Enum
@@ -473,8 +473,8 @@ class AbstractExpression(Frozable):
 
     # NOTE: not bothering to type this further, because hopefully we'll get rid
     # of AbstractExpressions pretty soon.
-    attrs_dict: Dict[Any, Any] = {}
-    constructors: List[Any] = []
+    attrs_dict: Dict[_Any, _Any] = {}
+    constructors: List[_Any] = []
 
     @property
     def diagnostic_context(self):
@@ -2750,7 +2750,7 @@ class Block(Let):
             ...
     """
 
-    blocks: List[Any] = []
+    blocks: List[_Any] = []
 
     @classmethod
     @contextmanager
