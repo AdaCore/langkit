@@ -90,6 +90,12 @@ generic
    with function Node_Text_Image
      (Node  : Node_Type; Short : Boolean := True) return Text_Type;
 
+   with function Acquire_Rebinding
+     (Node             : Node_Type;
+      Parent           : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings is <>;
+   --  Allocate if needed, initialize return a record to store env rebindings
+
    with procedure Register_Rebinding
      (Node : Node_Type; Rebinding : Env_Rebindings);
    --  Register a rebinding to be destroyed when Node is destroyed

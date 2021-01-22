@@ -332,11 +332,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       --  No luck? then create a new rebinding and register it where required
       declare
-         Result : constant Env_Rebindings := new Env_Rebindings_Type'
-           (Parent   => Self,
-            Old_Env  => Old_Env,
-            New_Env  => New_Env,
-            Children => Env_Rebindings_Vectors.Empty_Vector);
+         Result : constant Env_Rebindings := Acquire_Rebinding
+           (Env_Node (Old_Env), Self, Old_Env, New_Env);
       begin
          if Self /= null then
             Self.Children.Append (Result);

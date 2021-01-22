@@ -210,6 +210,16 @@ private package ${ada_lib_name}.Implementation is
 
    function Is_Rebindable (Node : ${T.root_node.name}) return Boolean;
 
+   function Acquire_Rebinding
+     (Node             : ${T.root_node.name};
+      Parent           : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings;
+   --  Initialize and return a fresh rebinding
+
+   procedure Release_Rebinding (Self : in out Env_Rebindings);
+   --  Mark the rebinding as unused, so that a future call to Acquire_Rebinding
+   --  can return it.
+
    procedure Register_Rebinding
      (Node : ${T.root_node.name}; Rebinding : Env_Rebindings);
    --  Register a rebinding to be destroyed when Node's analysis unit is
@@ -254,6 +264,7 @@ private package ${ada_lib_name}.Implementation is
       Metadata_Hash            => Hash,
       Combine                  => Combine,
       Node_Text_Image          => AST_Envs_Node_Text_Image,
+      Acquire_Rebinding        => Acquire_Rebinding,
       Register_Rebinding       => Register_Rebinding,
       Ref_Category             => Ref_Category,
       Ref_Categories           => Ref_Categories,
@@ -1383,6 +1394,15 @@ private package ${ada_lib_name}.Implementation is
 
       Max_Call_Depth : Natural := 0;
       --  Maximum number of recursive calls allowed
+
+      Available_Rebindings : Env_Rebindings_Vectors.Vector;
+      --  List of allocated-but-unused Env_Rebinding_Type records.
+      --
+      --  Each rebinding we allocate for an analysis context is deallocated
+      --  only when the whole context is released, so when this list is not
+      --  empty, we pick one of its element instead of allocating another
+      --  rebinding (see the Acquire_Rebindings and Release_Rebindings
+      --  subprograms).
    end record;
 
    package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps

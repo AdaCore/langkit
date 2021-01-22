@@ -402,6 +402,8 @@ package body ${ada_lib_name}.Implementation is
 
       Context.Max_Call_Depth := Max_Call_Depth;
 
+      Context.Available_Rebindings := Env_Rebindings_Vectors.Empty_Vector;
+
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
 
       return Context;
@@ -724,6 +726,21 @@ package body ${ada_lib_name}.Implementation is
       end loop;
       Context.Units := Units_Maps.Empty_Map;
       Context.Filenames := Virtual_File_Maps.Empty_Map;
+
+      declare
+         procedure Destroy is new Ada.Unchecked_Deallocation
+           (Env_Rebindings_Type, Env_Rebindings);
+
+         AR : Env_Rebindings_Vectors.Vector renames
+            Context.Available_Rebindings;
+         R  : Env_Rebindings;
+      begin
+         for I in AR.First_Index .. AR.Last_Index loop
+            R := AR.Get (I);
+            Destroy (R);
+         end loop;
+         AR.Destroy;
+      end;
 
       Destroy (Context.Templates_Unit);
       AST_Envs.Destroy (Context.Root_Scope);
@@ -2284,6 +2301,43 @@ package body ${ada_lib_name}.Implementation is
          return Node.Kind in ${ctx.astnode_kind_set(rebindable_nodes)};
       % endif
    end Is_Rebindable;
+
+   -----------------------
+   -- Acquire_Rebinding --
+   -----------------------
+
+   function Acquire_Rebinding
+     (Node             : ${T.root_node.name};
+      Parent           : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings
+   is
+      Result    : Env_Rebindings;
+      Available : Env_Rebindings_Vectors.Vector renames
+         Node.Unit.Context.Available_Rebindings;
+   begin
+      --  Use an existing and available Env_Rebindings_Type record for Node's
+      --  Context, otherwise allocate a new rebinding.
+      Result := (if Available.Is_Empty
+                then new Env_Rebindings_Type
+                else Available.Pop);
+
+      Result.Parent := Parent;
+      Result.Old_Env := Old_Env;
+      Result.New_Env := New_Env;
+      return Result;
+   end Acquire_Rebinding;
+
+   -----------------------
+   -- Release_Rebinding --
+   -----------------------
+
+   procedure Release_Rebinding (Self : in out Env_Rebindings) is
+      Available : Env_Rebindings_Vectors.Vector renames
+         Unwrap (Self.Old_Env).Node.Unit.Context.Available_Rebindings;
+   begin
+      Available.Append (Self);
+      Self := null;
+   end Release_Rebinding;
 
    ------------------------
    -- Register_Rebinding --
@@ -4647,10 +4701,7 @@ package body ${ada_lib_name}.Implementation is
    procedure Destroy_Rebindings
      (Rebindings : access Env_Rebindings_Vectors.Vector)
    is
-      procedure Destroy is new Ada.Unchecked_Deallocation
-        (Env_Rebindings_Type, Env_Rebindings);
-
-      procedure Recurse (R : Env_Rebindings);
+      procedure Recurse (R : in out Env_Rebindings);
       --  Destroy R's children and then destroy R. It is up to the caller to
       --  remove R from its parent's Children vector.
 
@@ -4663,21 +4714,21 @@ package body ${ada_lib_name}.Implementation is
       -- Recurse --
       -------------
 
-      procedure Recurse (R : Env_Rebindings) is
+      procedure Recurse (R : in out Env_Rebindings) is
       begin
          for C of R.Children loop
-            Recurse (C);
+            declare
+               C_Var : Env_Rebindings := C;
+            begin
+               Recurse (C_Var);
+            end;
          end loop;
          R.Children.Destroy;
 
          Unregister (R, Convert_Unit (R.Old_Env.Owner).Rebindings);
          Unregister (R, Convert_Unit (R.New_Env.Owner).Rebindings);
 
-         declare
-            Var_R : Env_Rebindings := R;
-         begin
-            Destroy (Var_R);
-         end;
+         Release_Rebinding (R);
       end Recurse;
 
       ----------------
@@ -4703,7 +4754,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       while Rebindings.Length > 0 loop
          declare
-            R : constant Env_Rebindings := Rebindings.Get (1);
+            R : Env_Rebindings := Rebindings.Get (1);
          begin
             --  Here, we basically undo what has been done in AST_Envs.Append
 

@@ -27,6 +27,11 @@ package Support is
      (Node : Character; Dummy_Short : Boolean := True) return Text_Type
    is (To_Text ("'" & Node & "'"));
 
+   function Acquire_Rebinding
+     (Dummy            : Character;
+      Parent           : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings
+   is (new Env_Rebindings_Type'(Parent, Old_Env, New_Env, Children => <>));
    procedure Register_Rebinding
      (Dummy_Node : Character; Dummy_Rebinding : Env_Rebindings) is null;
 
