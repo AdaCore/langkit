@@ -1406,10 +1406,10 @@ private package ${ada_lib_name}.Implementation is
    end record;
 
    package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type            => ${T.root_node.name},
-      Element_Type        => Named_Env_Descriptor_Access,
-      Hash                => Hash,
-      Equivalent_Keys     => "=");
+     (Key_Type        => ${T.root_node.name},
+      Element_Type    => Named_Env_Descriptor_Access,
+      Hash            => Hash,
+      Equivalent_Keys => "=");
 
    type Analysis_Unit_Type is limited record
       --  Start of ABI area. In order to perform fast checks from foreign
