@@ -636,6 +636,10 @@ private
          Safety_Net => Implementation.No_Node_Safety_Net);
    % endfor
 
+   procedure Check_Safety_Net (Self : ${T.root_node.entity.api_name}'Class);
+   --  Check that Self's node is still valid, raising a Stale_Reference_Error
+   --  if it is not.
+
    --------------------------------
    -- Token Iterator (internals) --
    --------------------------------

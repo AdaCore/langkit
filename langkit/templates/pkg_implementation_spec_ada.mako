@@ -1816,10 +1816,6 @@ private package ${ada_lib_name}.Implementation is
 
    No_Node_Safety_Net : constant Node_Safety_Net := (null, 0, null, 0);
 
-   procedure Check_Safety_Net (Self : Node_Safety_Net);
-   --  Check that Self's node is still valid, raising a Stale_Reference_Error
-   --  if it is not.
-
    function String_To_Symbol
      (Context : Internal_Context; S : ${T.String.name}) return Symbol_Type;
    --  Convert S into the corresponding symbol, raising a Property_Error if

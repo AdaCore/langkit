@@ -148,7 +148,7 @@
          raise Precondition_Failure with "null node argument";
       end if;
 
-      Check_Safety_Net (Node.Safety_Net);
+      Check_Safety_Net (Node);
       Result := Implementation.${field.name} (Node.Internal.Node);
       % if field.type.is_ast_node:
          return (Internal   => (Result, Node.Internal.Info),
