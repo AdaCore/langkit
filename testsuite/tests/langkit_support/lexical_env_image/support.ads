@@ -34,6 +34,11 @@ package Support is
      (Node : String_Access; Dummy_Short : Boolean := True) return Text_Type
    is (To_Text ("<" & Node.all & ">"));
 
+   function Acquire_Rebinding
+     (Dummy            : String_Access;
+      Parent           : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings
+   is (new Env_Rebindings_Type'(Parent, Old_Env, New_Env, Children => <>));
    procedure Register_Rebinding
      (Dummy_Node : String_Access; Dummy_Rebinding : Env_Rebindings) is null;
 
