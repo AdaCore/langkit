@@ -1,8 +1,6 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Unchecked_Deallocation;
 
-with System;
-
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
 with Langkit_Support.Symbols;
@@ -37,7 +35,7 @@ package Support is
    is (To_Text ("<" & Node.all & ">"));
 
    procedure Register_Rebinding
-     (Node : String_Access; Rebinding : System.Address) is null;
+     (Dummy_Node : String_Access; Dummy_Rebinding : Env_Rebindings) is null;
 
    function Get_Unit_Version (Dummy : Generic_Unit_Ptr) return Version_Number
    is (0);

@@ -347,8 +347,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
             O.Rebindings_Pool.Insert (New_Env, Result);
          end if;
 
-         Register_Rebinding (Env_Node (Old_Env), Result.all'Address);
-         Register_Rebinding (Env_Node (New_Env), Result.all'Address);
+         Register_Rebinding (Env_Node (Old_Env), Result);
+         Register_Rebinding (Env_Node (New_Env), Result);
          Check_Rebindings_Unicity (Result);
          return Result;
       end;

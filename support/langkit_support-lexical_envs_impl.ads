@@ -27,8 +27,6 @@ with Ada.Containers.Ordered_Maps;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with System;
-
 with Langkit_Support.Hashes;       use Langkit_Support.Hashes;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
@@ -93,7 +91,7 @@ generic
      (Node  : Node_Type; Short : Boolean := True) return Text_Type;
 
    with procedure Register_Rebinding
-     (Node : Node_Type; Rebinding : System.Address);
+     (Node : Node_Type; Rebinding : Env_Rebindings);
    --  Register a rebinding to be destroyed when Node is destroyed
 
    type Inner_Env_Assoc is private;
