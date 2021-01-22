@@ -2318,12 +2318,13 @@ package body ${ada_lib_name}.Implementation is
       --  Use an existing and available Env_Rebindings_Type record for Node's
       --  Context, otherwise allocate a new rebinding.
       Result := (if Available.Is_Empty
-                then new Env_Rebindings_Type
-                else Available.Pop);
+                 then new Env_Rebindings_Type
+                 else Available.Pop);
 
       Result.Parent := Parent;
       Result.Old_Env := Old_Env;
       Result.New_Env := New_Env;
+      Result.Children := Env_Rebindings_Vectors.Empty_Vector;
       return Result;
    end Acquire_Rebinding;
 
@@ -2335,6 +2336,7 @@ package body ${ada_lib_name}.Implementation is
       Available : Env_Rebindings_Vectors.Vector renames
          Unwrap (Self.Old_Env).Node.Unit.Context.Available_Rebindings;
    begin
+      Self.Children.Destroy;
       Available.Append (Self);
       Self := null;
    end Release_Rebinding;
@@ -4792,26 +4794,6 @@ package body ${ada_lib_name}.Implementation is
    begin
       Context.Rewriting_Handle := Handle;
    end Set_Rewriting_Handle;
-
-   ----------------------
-   -- Check_Safety_Net --
-   ----------------------
-
-   procedure Check_Safety_Net (Self : Node_Safety_Net) is
-   begin
-      if Self.Context = null then
-         return;
-      end if;
-
-      --  Check that Self's context has not been release (see the
-      --  Context_Pool). Then check that the unit version is the same.
-      if Self.Context.Released
-         or else Self.Context.Serial_Number /= Self.Context_Serial
-         or else Self.Unit.Unit_Version /= Self.Unit_Version
-      then
-         raise Stale_Reference_Error;
-      end if;
-   end Check_Safety_Net;
 
    -----------------------
    -- Create_Safety_Net --

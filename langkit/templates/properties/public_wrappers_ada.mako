@@ -92,7 +92,7 @@ ${public_prototype(property)} is
          raise Precondition_Failure with "null node argument";
       end if;
 
-      Check_Safety_Net (${self_arg}.Safety_Net);
+      Check_Safety_Net (${self_arg});
 
       ## Convert property arguments to internal types
       % for arg in property.arguments:
