@@ -2290,14 +2290,9 @@ package body ${ada_lib_name}.Implementation is
    ------------------------
 
    procedure Register_Rebinding
-     (Node : ${T.root_node.name}; Rebinding : System.Address)
-   is
-      pragma Warnings (Off, "possible aliasing problem for type");
-      function Convert is new Ada.Unchecked_Conversion
-        (System.Address, Env_Rebindings);
-      pragma Warnings (Off, "possible aliasing problem for type");
+     (Node : ${T.root_node.name}; Rebinding : Env_Rebindings) is
    begin
-      Node.Unit.Rebindings.Append (Convert (Rebinding));
+      Node.Unit.Rebindings.Append (Rebinding);
    end Register_Rebinding;
 
    --------------------

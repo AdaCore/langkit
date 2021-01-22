@@ -211,14 +211,9 @@ private package ${ada_lib_name}.Implementation is
    function Is_Rebindable (Node : ${T.root_node.name}) return Boolean;
 
    procedure Register_Rebinding
-     (Node : ${T.root_node.name}; Rebinding : System.Address);
+     (Node : ${T.root_node.name}; Rebinding : Env_Rebindings);
    --  Register a rebinding to be destroyed when Node's analysis unit is
    --  destroyed or reparsed.
-   --
-   --  TODO??? For now the rebinding must be represented as an untyped pointer
-   --  because we probably need some big refactoring to provide to
-   --  Langkit_Support.Lexical_Env a procedure that has visibility on both
-   --  Env_Rebindings and on the analysis unit record.
 
    function Element_Parent
      (Node : ${T.root_node.name}) return ${T.root_node.name};
