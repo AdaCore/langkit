@@ -1403,6 +1403,12 @@ private package ${ada_lib_name}.Implementation is
       --  empty, we pick one of its element instead of allocating another
       --  rebinding (see the Acquire_Rebindings and Release_Rebindings
       --  subprograms).
+      --
+      --  Thanks to this mechanism, we have a very simple way to implement
+      --  rebindings validity checking for nodes: once we have established that
+      --  the node reference is valid regarding its context, we know that the
+      --  rebindings pointer is valid, and thus we can just check the rebinding
+      --  version number.
    end record;
 
    package Node_To_Named_Env_Maps is new Ada.Containers.Hashed_Maps
@@ -1810,11 +1816,15 @@ private package ${ada_lib_name}.Implementation is
       Unit_Version : Version_Number;
       --  Analysis unit and unit version at the time this safety net was
       --  produced.
+
+      Rebindings_Version : Version_Number;
+      --  Version of the associated rebinding at the time this safety net was
+      --  procuded.
    end record;
    --  Information to embed in public APIs, used to check before accessing data
    --  that the said-data is still valid.
 
-   No_Node_Safety_Net : constant Node_Safety_Net := (null, 0, null, 0);
+   No_Node_Safety_Net : constant Node_Safety_Net := (null, 0, null, 0, 0);
 
    function String_To_Symbol
      (Context : Internal_Context; S : ${T.String.name}) return Symbol_Type;

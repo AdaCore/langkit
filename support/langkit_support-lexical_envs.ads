@@ -162,6 +162,11 @@ package Langkit_Support.Lexical_Envs is
      (Env_Rebindings);
 
    type Env_Rebindings_Type is record
+      Version : Version_Number;
+      --  Allocated Env_Rebindings_Type records can be used multiple times
+      --  for a given analysis context. Each time we re-use one, we bump its
+      --  version number, so that we can reject the use of stale references.
+
       Parent           : Env_Rebindings;
       Old_Env, New_Env : Lexical_Env;
       Children         : Env_Rebindings_Vectors.Vector;

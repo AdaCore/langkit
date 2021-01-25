@@ -637,8 +637,8 @@ private
    % endfor
 
    procedure Check_Safety_Net (Self : ${T.root_node.entity.api_name}'Class);
-   --  Check that Self's node is still valid, raising a Stale_Reference_Error
-   --  if it is not.
+   --  Check that Self's node and rebindings are still valid, raising a
+   --  Stale_Reference_Error if one is not.
 
    --------------------------------
    -- Token Iterator (internals) --

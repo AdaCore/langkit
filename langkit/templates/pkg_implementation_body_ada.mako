@@ -2318,7 +2318,7 @@ package body ${ada_lib_name}.Implementation is
       --  Use an existing and available Env_Rebindings_Type record for Node's
       --  Context, otherwise allocate a new rebinding.
       Result := (if Available.Is_Empty
-                 then new Env_Rebindings_Type
+                 then new Env_Rebindings_Type'(Version => 0, others => <>)
                  else Available.Pop);
 
       Result.Parent := Parent;
@@ -2336,6 +2336,10 @@ package body ${ada_lib_name}.Implementation is
       Available : Env_Rebindings_Vectors.Vector renames
          Unwrap (Self.Old_Env).Node.Unit.Context.Available_Rebindings;
    begin
+      --  Bumping the version number, to invalidate existing references to
+      --  Self.
+      Self.Version := Self.Version + 1;
+
       Self.Children.Destroy;
       Available.Append (Self);
       Self := null;

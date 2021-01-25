@@ -38,7 +38,7 @@ package Support is
      (Dummy            : String_Access;
       Parent           : Env_Rebindings;
       Old_Env, New_Env : Lexical_Env) return Env_Rebindings
-   is (new Env_Rebindings_Type'(Parent, Old_Env, New_Env, Children => <>));
+   is (new Env_Rebindings_Type'(0, Parent, Old_Env, New_Env, Children => <>));
    procedure Register_Rebinding
      (Dummy_Node : String_Access; Dummy_Rebinding : Env_Rebindings) is null;
 

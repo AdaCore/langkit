@@ -1226,19 +1226,27 @@ package body ${ada_lib_name}.Analysis is
    ----------------------
 
    procedure Check_Safety_Net (Self : ${T.root_node.entity.api_name}'Class) is
+      R  : Env_Rebindings renames Self.Internal.Info.Rebindings;
       SN : Node_Safety_Net renames Self.Safety_Net;
    begin
       if SN.Context = null then
          return;
       end if;
 
-      --  Check that SN's context has not been release (see the Context_Pool).
-      --  Then check that the unit version is the same.
-      if SN.Context.Released
+      --  Check that SN's context has not been released (see the Context_Pool)
+      if
+         SN.Context.Released
          or else SN.Context.Serial_Number /= SN.Context_Serial
-         or else SN.Unit.Unit_Version /= SN.Unit_Version
       then
-         raise Stale_Reference_Error;
+         raise Stale_Reference_Error with "context was released";
+
+      --  Then check that the unit version is the same
+      elsif SN.Unit.Unit_Version /= SN.Unit_Version then
+         raise Stale_Reference_Error with "unit was reparsed";
+
+      --  Then check that the R rebindings reference, if not-null, is not stale
+      elsif R /= null and then R.Version /= SN.Rebindings_Version then
+         raise Stale_Reference_Error with "related unit was reparsed";
       end if;
    end Check_Safety_Net;
 
@@ -1256,14 +1264,19 @@ package body ${ada_lib_name}.Analysis is
       end if;
 
       declare
-         Unit    : constant Internal_Unit := Node.Unit;
-         Context : constant Internal_Context := Unit.Context;
+         Unit               : constant Internal_Unit := Node.Unit;
+         Context            : constant Internal_Context := Unit.Context;
+         Rebindings_Version : constant Version_Number :=
+           (if Info.Rebindings = null
+            then 0
+            else Info.Rebindings.Version);
       begin
          return ((Internal   => (Node, Info),
-                  Safety_Net => (Context        => Context,
-                                 Context_Serial => Context.Serial_Number,
-                                 Unit           => Unit,
-                                 Unit_Version   => Unit.Unit_Version)));
+                  Safety_Net => (Context            => Context,
+                                 Context_Serial     => Context.Serial_Number,
+                                 Unit               => Unit,
+                                 Unit_Version       => Unit.Unit_Version,
+                                 Rebindings_Version => Rebindings_Version)));
       end;
    end;
 
