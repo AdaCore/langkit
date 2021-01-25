@@ -1,5 +1,6 @@
 """
-Check that uses of stale references to rebindings in the Ada API are rejected.
+Check that uses of stale references to rebindings in the Ada/Python APIs are
+rejected.
 """
 
 from langkit.dsl import ASTNode
@@ -32,5 +33,7 @@ class Example(FooNode):
     env_spec = EnvSpec(add_env())
 
 
-build_and_run(lkt_file="expected_concrete_syntax.lkt", ada_main="main.adb")
+build_and_run(lkt_file="expected_concrete_syntax.lkt",
+              py_script="main.py",
+              ada_main="main.adb")
 print('Done')

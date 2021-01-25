@@ -178,7 +178,7 @@ def _hashable_c_pointer(pointed_type=None):
     else:
         @property
         def _pointer_value(self):
-            return ctypes.addressof(self.contents)
+            return ctypes.cast(self, ctypes.c_void_p).value or 0
 
         _c_type = ctypes.POINTER(pointed_type)
         _c_type._pointer_value = _pointer_value
@@ -1059,7 +1059,7 @@ class ${root_astnode_name}(object):
     is_list_type = False
     __slots__ = ('_unprotected_c_value', '_node_c_value', '_metadata',
                  '_rebindings', '_unprotected_getitem_cache', '_unit',
-                 '_unit_version')
+                 '_unit_version', '_rebindings_version')
 
     ${astnode_types.subclass_decls(T.root_node)}
 
@@ -1090,13 +1090,23 @@ class ${root_astnode_name}(object):
         # valid.
         self._unit = self._fetch_unit(c_value)
         self._unit_version = self._unit._unit_version
+        self._rebindings_version = (
+            rebindings.contents.version if rebindings else None
+        )
 
     def _check_stale_reference(self):
         # We have a reference to the owning unit, so there is no need to
         # check that the unit and the context are still valid. Just check that
         # the unit has not been reparsed.
         if self._unit._unit_version != self._unit_version:
-            raise StaleReferenceError()
+            raise StaleReferenceError("unit was reparsed")
+
+        # Also check that the rebindings are still valid
+        if (
+            self._rebindings
+            and self._rebindings.contents.version != self._rebindings_version
+        ):
+            raise StaleReferenceError("related unit was reparsed")
 
     @property
     def _c_value(self):
@@ -1457,7 +1467,11 @@ ${astnode_types.decl(astnode)}
 % endfor
 
 
-_EnvRebindings_c_type = _hashable_c_pointer()
+class _EnvRebindingsType_c_type(ctypes.Structure):
+    _fields_ = [("version", ctypes.c_uint64)]
+
+
+_EnvRebindings_c_type = _hashable_c_pointer(_EnvRebindingsType_c_type)
 
 
 ${struct_types.base_decls()}

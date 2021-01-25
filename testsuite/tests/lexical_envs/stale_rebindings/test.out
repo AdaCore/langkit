@@ -1,3 +1,13 @@
+main.py: Starting...
+original:
+   <Example foo1.txt:1:1-1:8>
+After U3 reload:
+   <Example foo1.txt:1:1-1:8>
+After U2 reload:
+   got a StaleReferenceError: related unit was reparsed
+After U1 reload:
+   got a StaleReferenceError: unit was reparsed
+main.py: Done.
 main.adb: Starting...
 Original:
    <| Example foo1.txt:1:1-1:8 [foo2.txt:1:9] |>
