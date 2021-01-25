@@ -162,15 +162,23 @@ package Langkit_Support.Lexical_Envs is
      (Env_Rebindings);
 
    type Env_Rebindings_Type is record
+      --  Start of ABI area. In order to perform fast checks from foreign
+      --  languages, we maintain minimal ABI for env rebindings records: this
+      --  allows us in language bindings to directly peek in this record rather
+      --  than rely on (slow) calls to getters.
+
       Version : Version_Number;
       --  Allocated Env_Rebindings_Type records can be used multiple times
       --  for a given analysis context. Each time we re-use one, we bump its
       --  version number, so that we can reject the use of stale references.
 
+      --  End of ABI area
+
       Parent           : Env_Rebindings;
       Old_Env, New_Env : Lexical_Env;
       Children         : Env_Rebindings_Vectors.Vector;
-   end record;
+   end record
+      with Convention => C;
    --  Tree of remappings from one lexical environment (Old_Env) to another
    --  (New_Env). Note that both referenced environments must be primary and
    --  env rebindings are supposed to be destroyed when one of their
