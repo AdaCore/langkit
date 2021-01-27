@@ -1550,6 +1550,11 @@ _symbol_text = _import_func(
     [ctypes.POINTER(_symbol_type), ctypes.POINTER(_text)], None
 )
 
+_get_versions = _import_func(
+    '${capi.get_name("get_versions")}',
+    [ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_char_p)], None
+)
+
 # Analysis primitives
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
@@ -1820,6 +1825,18 @@ def _field_address(struct, field_name):
             break
     assert field_type is not None
     return struct_addr + field.offset
+
+def _extract_versions():
+    v_ptr = ctypes.c_char_p()
+    bd_ptr = ctypes.c_char_p()
+    _get_versions(ctypes.byref(v_ptr), ctypes.byref(bd_ptr))
+    version = _py2to3.bytes_to_text(v_ptr.value)
+    build_version = _py2to3.bytes_to_text(bd_ptr.value)
+    _free(v_ptr)
+    _free(bd_ptr)
+    return version, build_version
+
+version, build_date = _extract_versions()
 
 
 #

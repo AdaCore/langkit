@@ -441,6 +441,10 @@ ${c_doc('langkit.big_integer_decref')}
 extern void
 ${capi.get_name("big_integer_decref")}(${big_integer_type} bigint);
 
+${c_doc('langkit.get_versions')}
+extern void
+${capi.get_name("get_versions")}(char **version, char **build_date);
+
 /*
  * Kind-specific AST node primitives
  */
