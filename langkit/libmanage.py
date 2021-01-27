@@ -479,6 +479,12 @@ class ManageScript:
                  ' useful in order to get portable generated sources, for'
                  ' releases for instance.'
         )
+        subparser.add_argument(
+            "--version", help="Version number for the generated library",
+        )
+        subparser.add_argument(
+            "--build-date", help="Build date number for the generated library",
+        )
 
         # RA22-015: option to dump the results of the unparsing concrete syntax
         # to a file.
@@ -719,6 +725,12 @@ class ManageScript:
 
     def set_context(self, parsed_args: argparse.Namespace) -> None:
         self.context = self.create_context(parsed_args)
+
+        # Set version numbers from the command-line, if present
+        self.context.set_versions(
+            version=getattr(parsed_args, "version", None),
+            build_date=getattr(parsed_args, "build_date", None),
+        )
 
         # Set the extensions dir on the compile context
         self.context.extensions_dir = self.dirs.lang_source_dir(

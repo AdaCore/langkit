@@ -27,8 +27,9 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.coverage import GNATcov
 from langkit.diagnostics import (
-    Context, Location, Severity, WarningSet, check_source_language,
-    context_stack, error, print_error, print_error_from_sem_result
+    Context, DiagnosticError, Location, Severity, WarningSet,
+    check_source_language, context_stack, error, print_error,
+    print_error_from_sem_result
 )
 from langkit.utils import (TopologicalSortError, collapse_concrete_nodes,
                            memoized, memoized_with_default, topological_sort)
@@ -322,7 +323,9 @@ class CompileCtx:
                  show_property_logging: bool = False,
                  lkt_file: Optional[str] = None,
                  types_from_lkt: bool = False,
-                 lkt_semantic_checks: bool = False):
+                 lkt_semantic_checks: bool = False,
+                 version: Optional[str] = None,
+                 build_date: Optional[str] = None):
         """Create a new context for code emission.
 
         :param lang_name: string (mixed case and underscore: see
@@ -405,12 +408,21 @@ class CompileCtx:
 
         :param lkt_semantic_checks: Whether to force Lkt semantic checks (by
             default, enabled only if ``types_from_lkt`` is true).
+
+        :param str version: String for the version of the generated library.
+            This is "undefined" if left to None.
+
+        :param str build_date: String for the generated library build date
+            (where "build" includes source generation). This is "undefined" if
+            left to None.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings
         from langkit.unparsers import Unparsers
 
         self.lang_name = names.Name(lang_name)
+        self.version = version
+        self.build_date = build_date
 
         self.lib_name = (
             names.Name('Lib{}lang'.format(self.lang_name.lower))
@@ -774,6 +786,33 @@ class CompileCtx:
         Mapping from called properties to sets of caller properties. None when
         not yet computed or invalidated.
         """
+
+    def set_versions(self,
+                     version: Optional[str] = None,
+                     build_date: Optional[str] = None) -> None:
+        """
+        Set version numbers for the generated library. Left unchanged if None.
+        """
+        if version is not None:
+            if self.version is not None:
+                print(f"Got conflicting versions:"
+                      f" {repr(version)} and {repr(self.version)}")
+                raise DiagnosticError()
+            self.version = version
+        if build_date is not None:
+            if self.build_date is not None:
+                print(f"Got conflicting build dates:"
+                      f" {repr(build_date)} and {repr(self.build_date)}")
+                raise DiagnosticError()
+            self.build_date = build_date
+
+    @property
+    def actual_version(self) -> str:
+        return self.version or "undefined"
+
+    @property
+    def actual_build_date(self) -> str:
+        return self.build_date or "undefined"
 
     @contextmanager
     def lkt_context(self, lkt_node):
