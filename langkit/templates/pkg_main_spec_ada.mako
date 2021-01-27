@@ -7,10 +7,8 @@ with Langkit_Support.Text;
 
 package ${ada_lib_name} is
 
-   ## It is up to each Langkit user to update these constants to whatever
-   ## appropriate.
-   Version      : constant String := "dev";
-   Current_Year : constant String := "1";
+   Version    : constant String := ${string_repr(ctx.actual_version)};
+   Build_Date : constant String := ${string_repr(ctx.actual_build_date)};
 
    --  ${ada_lib_name}'s main entry point is the ${ada_lib_name}.Analysis
    --  package.
