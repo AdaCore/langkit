@@ -983,6 +983,18 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
+   procedure ${capi.get_name("get_versions")}
+     (Version, Build_Date : access chars_ptr)
+   is
+   begin
+      Clear_Last_Exception;
+      Version.all := New_String (${ada_lib_name}.Version);
+      Build_Date.all := New_String (${ada_lib_name}.Build_Date);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};

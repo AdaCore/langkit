@@ -573,6 +573,11 @@ base_langkit_docs = {
     'langkit.big_integer_decref': """
         Decrease the reference count for this big integer.
     """,
+    'langkit.get_versions': """
+        Allocate strings to represent the library version number and build date
+        and put them in Version/Build_Date. Callers are expected to call free()
+        on the returned string once done.
+    """,
 
     #
     # Iterators

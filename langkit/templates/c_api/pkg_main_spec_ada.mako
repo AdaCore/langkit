@@ -158,6 +158,12 @@ private package ${ada_lib_name}.Implementation.C is
            External_Name => "${capi.get_name('big_integer_decref')}";
    ${ada_c_doc('langkit.big_integer_decref', 3)}
 
+   procedure ${capi.get_name("get_versions")}
+     (Version, Build_Date : access chars_ptr)
+      with Export, Convention => C,
+           External_Name => "${capi.get_name('get_versions')}";
+   ${ada_c_doc('langkit.get_versions', 3)}
+
    --  Types for unit providers
 
    type ${unit_provider_type} is new System.Address;

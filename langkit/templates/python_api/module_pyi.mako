@@ -411,6 +411,9 @@ ${iterator_types.mypy_decl(iterator_type)}
     % endif
 % endfor
 
+version: str
+build_date: str
+
 
 ${exts.include_extension(ctx.ext('mypy_python'))}
 

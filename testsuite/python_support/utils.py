@@ -3,7 +3,7 @@ import os.path as P
 import shutil
 import subprocess
 import sys
-from typing import List
+from typing import List, Optional
 
 import langkit
 import langkit.compile_context
@@ -65,7 +65,9 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                     warning_set=default_warning_set,
                     symbol_canonicalizer=None, show_property_logging=False,
                     types_from_lkt=False, lkt_semantic_checks=False,
-                    case_insensitive: bool = False):
+                    case_insensitive: bool = False,
+                    version: Optional[str] = None,
+                    build_date: Optional[str] = None):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -89,6 +91,10 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
     :param bool types_from_lkt: See CompileCtx.types_from_lkt.
 
     :param case_insensitive: See CompileCtx's constructor.
+
+    :param version: See CompileCtx's constructor.
+
+    :param build_date: See CompileCtx's constructor.
     """
 
     # Have a clean build directory
@@ -104,7 +110,9 @@ def prepare_context(grammar=None, lexer=None, lkt_file=None,
                      lkt_file=lkt_file,
                      types_from_lkt=types_from_lkt,
                      lkt_semantic_checks=lkt_semantic_checks,
-                     case_insensitive=case_insensitive)
+                     case_insensitive=case_insensitive,
+                     version=version,
+                     build_date=build_date)
     ctx.warnings = warning_set
     ctx.pretty_print = pretty_print
 
@@ -181,6 +189,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   show_property_logging=False, unparse_script=unparse_script,
                   strict_sound_envs: bool = False,
                   case_insensitive: bool = False,
+                  version: str = "undefined",
+                  build_date: str = "undefined",
                   full_error_traces: bool = True,
                   additional_make_args: List[str] = []):
     """
@@ -229,6 +239,10 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param case_insensitive: See CompileCtx's constructor.
 
+    :param version: See CompileCtx's constructor.
+
+    :param build_date: See CompileCtx's constructor.
+
     :param full_error_traces: Whether to pass a --full-error-traces argument to
         "manage.py make".
 
@@ -253,7 +267,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                               show_property_logging=show_property_logging,
                               types_from_lkt=types_from_lkt,
                               lkt_semantic_checks=lkt_semantic_checks,
-                              case_insensitive=case_insensitive)
+                              case_insensitive=case_insensitive,
+                              version=version,
+                              build_date=build_date)
 
         m = Manage(ctx)
 

@@ -1,0 +1,21 @@
+== Conflict on version ==
+Got conflicting versions: 'something' and '<version-number>'
+Errors, exiting
+DiagnosticError: skipping...
+
+== Conflict on build date ==
+Got conflicting build dates: 'something' and '<build-date-number>'
+Errors, exiting
+DiagnosticError: skipping...
+
+== Build and run test programs ==
+main.py: Starting...
+version: <version-number>
+build date: <build-date-number>
+main.py: Done.
+main.adb: Starting...
+version: <version-number>
+build date: <build-date-number>
+main.adb: Done.
+
+Done
