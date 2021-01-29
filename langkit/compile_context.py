@@ -409,12 +409,12 @@ class CompileCtx:
         :param lkt_semantic_checks: Whether to force Lkt semantic checks (by
             default, enabled only if ``types_from_lkt`` is true).
 
-        :param str version: String for the version of the generated library.
-            This is "undefined" if left to None.
+        :param version: String for the version of the generated library.  This
+            is "undefined" if left to None.
 
-        :param str build_date: String for the generated library build date
-            (where "build" includes source generation). This is "undefined" if
-            left to None.
+        :param build_date: String for the generated library build date (where
+            "build" includes source generation). This is "undefined" if left to
+            None.
         """
         from langkit.python_api import PythonAPISettings
         from langkit.ocaml_api import OCamlAPISettings

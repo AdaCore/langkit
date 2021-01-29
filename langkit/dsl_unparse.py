@@ -98,7 +98,7 @@ class DSLWalker:
 
         unit = DSLWalker.ctx.get_from_file(loc.file)
 
-        class_def = unit.root.lookup(lpl.Sloc(loc.line, 1))
+        class_def = unit.root.lookup(lpl.Sloc(loc.line, 99))
 
         # If there is a decorator in place of the class def, go get the class
         # def in the tree.
