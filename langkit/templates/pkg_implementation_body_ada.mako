@@ -29,6 +29,8 @@ with System;
 
 with GNATCOLL.Traces;
 
+with GNAT.Traceback.Symbolic;
+
 with Langkit_Support.Hashes;  use Langkit_Support.Hashes;
 with Langkit_Support.Images;  use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
@@ -2166,8 +2168,16 @@ package body ${ada_lib_name}.Implementation is
             Post_Env_Actions (Node, State);
          exception
             when Exc : Property_Error =>
-               GNATCOLL.Traces.Trace
-                 (PLE_Errors_Trace, Ada.Exceptions.Exception_Message (Exc));
+               if PLE_Errors_Trace.Is_Active then
+                   GNATCOLL.Traces.Trace
+                     (PLE_Errors_Trace,
+                      "Exception raised during PLE "
+                      & Ada.Exceptions.Exception_Name (Exc) & " : "
+                      & Ada.Exceptions.Exception_Message (Exc));
+                   GNATCOLL.Traces.Trace
+                     (PLE_Errors_Trace,
+                      GNAT.Traceback.Symbolic.Symbolic_Traceback (Exc));
+               end if;
                Register_Foreign_Env (Node, State);
                return True;
          end;
