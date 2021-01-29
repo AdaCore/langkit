@@ -618,6 +618,11 @@ class ManageScript:
         return self.context.ada_api_settings.lib_name
 
     def run(self, argv: Opt[List[str]] = None) -> None:
+        return_code = self.run_no_exit(argv)
+        if return_code != 0:
+            sys.exit(return_code)
+
+    def run_no_exit(self, argv: Opt[List[str]] = None) -> int:
         parsed_args, unknown_args = self.args_parser.parse_known_args(argv)
 
         for trace in parsed_args.trace:
@@ -678,11 +683,12 @@ class ManageScript:
 
         if getattr(parsed_args, 'list_warnings', False):
             WarningSet.print_list()
-            return
+            return 0
 
         # noinspection PyBroadException
         try:
             parsed_args.func(parsed_args, unknown_args)
+            return 0
 
         except DiagnosticError:
             if parsed_args.debug:
@@ -690,7 +696,7 @@ class ManageScript:
             if parsed_args.verbosity.debug or parsed_args.full_error_traces:
                 traceback.print_exc()
             print(col('Errors, exiting', Colors.FAIL), file=sys.stderr)
-            sys.exit(1)
+            return 1
 
         except Exception as e:
             if parsed_args.debug:
@@ -715,7 +721,7 @@ class ManageScript:
                 traceback.print_exc()
 
             print(col('Internal error! Exiting', Colors.FAIL), file=sys.stderr)
-            sys.exit(1)
+            return 1
 
         finally:
             if parsed_args.profile:
