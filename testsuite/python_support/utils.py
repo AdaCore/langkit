@@ -3,6 +3,7 @@ import os.path as P
 import shutil
 import subprocess
 import sys
+from typing import List
 
 import langkit
 import langkit.compile_context
@@ -179,7 +180,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   symbol_canonicalizer=None, mains=False,
                   show_property_logging=False, unparse_script=unparse_script,
                   strict_sound_envs: bool = False,
-                  case_insensitive: bool = False):
+                  case_insensitive: bool = False,
+                  full_error_traces: bool = True,
+                  additional_make_args: List[str] = []):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -225,6 +228,12 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
     :param strict_sound_envs: Pass --strict-sound-envs to generation.
 
     :param case_insensitive: See CompileCtx's constructor.
+
+    :param full_error_traces: Whether to pass a --full-error-traces argument to
+        "manage.py make".
+
+    :param additional_make_args: Additional command-line arguments to pass to
+        "manage.py make".
     """
     assert not types_from_lkt or lkt_file is not None
 
@@ -255,7 +264,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         # First build the library. Forward all test.py's arguments to the
         # libmanage call so that manual testcase runs can pass "-g", for
         # instance.
-        argv = ['make'] + sys.argv[1:] + ['--full-error-traces', '-vnone']
+        argv = ['make'] + sys.argv[1:] + ['-vnone']
+        if full_error_traces:
+            argv.append("--full-error-traces")
 
         # Generate the public Ada API only when necessary (i.e. if we have
         # mains that do use this API). This reduces the time it takes to run
@@ -281,12 +292,16 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
             argv.append('--disable-all-mains')
 
         argv.extend(additional_args)
-        m.run(argv)
+        argv.extend(additional_make_args)
+        return_code = m.run_no_exit(argv)
 
         # Flush stdout and stderr, so that diagnostics appear deterministically
         # before the script/program output.
         sys.stdout.flush()
         sys.stderr.flush()
+
+        if return_code != 0:
+            raise DiagnosticError()
 
         return ctx, m
 
