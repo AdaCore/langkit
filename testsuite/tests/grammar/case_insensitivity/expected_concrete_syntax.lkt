@@ -1,0 +1,24 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule expr <- list*(Decl(
+        "def" Identifier(@identifier) "=" Number(@number)
+    ))
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class Decl : FooNode {
+    @parse_field name : Identifier
+    @parse_field value : Number
+}
+
+class Identifier : FooNode implements TokenNode {
+
+    @export fun matches (s : Symbol): Bool = s = node.symbol
+}
+
+class Number : FooNode implements TokenNode {
+}
