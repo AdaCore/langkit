@@ -3,27 +3,27 @@ FooNode (FOO_NODE_TYPE_ID)
 
 Decl (DECL_TYPE_ID)
    Fields (with abstract ones):
-   field name (Name)
-   field value (Expr)
+   field f_name (Name)
+   field f_value (Expr)
 
 FunDecl (FUN_DECL_TYPE_ID)
    Fields (with abstract ones):
-   field name (Name)
-   field value (Expr)
+   field f_name (Name)
+   field f_value (Expr)
 
    Fields (only concrete ones):
-   name: 1
+   f_name: 1
 
 VarDecl (VAR_DECL_TYPE_ID)
    Fields (with abstract ones):
-   field var_kw (VarKeyword)
-   field name (Name)
-   field value (Expr)
+   field f_var_kw (VarKeyword)
+   field f_name (Name)
+   field f_value (Expr)
 
    Fields (only concrete ones):
-   var_kw: 1
-   name: 2
-   value: 3
+   f_var_kw: 1
+   f_name: 2
+   f_value: 3
 
 Expr (EXPR_TYPE_ID)
    Fields (with abstract ones):
@@ -35,10 +35,10 @@ Number (NUMBER_TYPE_ID)
 
 Ref (REF_TYPE_ID)
    Fields (with abstract ones):
-   field name (Name)
+   field f_name (Name)
 
    Fields (only concrete ones):
-   name: 1
+   f_name: 1
 
 FooNodeBaseList (FOO_NODE_BASE_LIST_TYPE_ID)
    Fields (with abstract ones):

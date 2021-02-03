@@ -1,71 +1,71 @@
 Properties for FOO_ADDITION:
-   id_bool
+   p_id_bool
    return type: Bool
    arguments:
       id: Bool
 
 
-   id_int
+   p_id_int
    return type: Int
    arguments:
       id: Int
 
 
-   id_bigint
+   p_id_bigint
    return type: BigInt
    arguments:
       id: BigInt
 
 
-   id_char
+   p_id_char
    return type: Character
    arguments:
       id: Character
 
 
-   id_token
+   p_id_token
    return type: Token
    arguments:
       id: Token
 
 
-   id_sym
+   p_id_sym
    return type: Symbol
    arguments:
       id: Symbol
 
 
-   id_unit
+   p_id_unit
    return type: AnalysisUnit
    arguments:
       id: AnalysisUnit
 
 
-   id_root_node
+   p_id_root_node
    return type: FooNode
    arguments:
       id: FooNode
 
 
-   id_name
+   p_id_name
    return type: Name
    arguments:
       id: Name
 
 
-   id_unit_kind
+   p_id_unit_kind
    return type: AnalysisUnitKind
    arguments:
       id: AnalysisUnitKind
 
 
-   id_node_array
+   p_id_node_array
    return type: FooNode.entity.array
    arguments:
       id: FooNode.entity.array
 
 
-   id_bigint_array
+   p_id_bigint_array
    return type: BigInt.array
    arguments:
       id: BigInt.array
@@ -126,12 +126,12 @@ Properties for FOO_ADDITION:
    arguments:
       <none>
 
-   eval
+   p_eval
    return type: Int
    arguments:
       <none>
 
-   eval_plus
+   p_eval_plus
    return type: Int
    arguments:
       addend: Expr
@@ -139,73 +139,73 @@ Properties for FOO_ADDITION:
 
 
 Properties for FOO_NUMBER:
-   id_bool
+   p_id_bool
    return type: Bool
    arguments:
       id: Bool
 
 
-   id_int
+   p_id_int
    return type: Int
    arguments:
       id: Int
 
 
-   id_bigint
+   p_id_bigint
    return type: BigInt
    arguments:
       id: BigInt
 
 
-   id_char
+   p_id_char
    return type: Character
    arguments:
       id: Character
 
 
-   id_token
+   p_id_token
    return type: Token
    arguments:
       id: Token
 
 
-   id_sym
+   p_id_sym
    return type: Symbol
    arguments:
       id: Symbol
 
 
-   id_unit
+   p_id_unit
    return type: AnalysisUnit
    arguments:
       id: AnalysisUnit
 
 
-   id_root_node
+   p_id_root_node
    return type: FooNode
    arguments:
       id: FooNode
 
 
-   id_name
+   p_id_name
    return type: Name
    arguments:
       id: Name
 
 
-   id_unit_kind
+   p_id_unit_kind
    return type: AnalysisUnitKind
    arguments:
       id: AnalysisUnitKind
 
 
-   id_node_array
+   p_id_node_array
    return type: FooNode.entity.array
    arguments:
       id: FooNode.entity.array
 
 
-   id_bigint_array
+   p_id_bigint_array
    return type: BigInt.array
    arguments:
       id: BigInt.array
@@ -266,36 +266,36 @@ Properties for FOO_NUMBER:
    arguments:
       <none>
 
-   eval
+   p_eval
    return type: Int
    arguments:
       <none>
 
-   eval_plus
+   p_eval_plus
    return type: Int
    arguments:
       addend: Expr
 
 
-   id_dflt_bool
+   p_id_dflt_bool
    return type: Bool
    arguments:
       id: Bool := TRUE
 
 
-   id_dflt_int
+   p_id_dflt_int
    return type: Int
    arguments:
       id: Int :=  42
 
 
-   id_dflt_char
+   p_id_dflt_char
    return type: Character
    arguments:
       id: Character := [" 0"]
 
 
-   id_dflt_root_node
+   p_id_dflt_root_node
    return type: FooNode
    arguments:
       id: FooNode := None
@@ -303,73 +303,73 @@ Properties for FOO_NUMBER:
 
 
 Properties for FOO_REF:
-   id_bool
+   p_id_bool
    return type: Bool
    arguments:
       id: Bool
 
 
-   id_int
+   p_id_int
    return type: Int
    arguments:
       id: Int
 
 
-   id_bigint
+   p_id_bigint
    return type: BigInt
    arguments:
       id: BigInt
 
 
-   id_char
+   p_id_char
    return type: Character
    arguments:
       id: Character
 
 
-   id_token
+   p_id_token
    return type: Token
    arguments:
       id: Token
 
 
-   id_sym
+   p_id_sym
    return type: Symbol
    arguments:
       id: Symbol
 
 
-   id_unit
+   p_id_unit
    return type: AnalysisUnit
    arguments:
       id: AnalysisUnit
 
 
-   id_root_node
+   p_id_root_node
    return type: FooNode
    arguments:
       id: FooNode
 
 
-   id_name
+   p_id_name
    return type: Name
    arguments:
       id: Name
 
 
-   id_unit_kind
+   p_id_unit_kind
    return type: AnalysisUnitKind
    arguments:
       id: AnalysisUnitKind
 
 
-   id_node_array
+   p_id_node_array
    return type: FooNode.entity.array
    arguments:
       id: FooNode.entity.array
 
 
-   id_bigint_array
+   p_id_bigint_array
    return type: BigInt.array
    arguments:
       id: BigInt.array
@@ -430,91 +430,91 @@ Properties for FOO_REF:
    arguments:
       <none>
 
-   eval
+   p_eval
    return type: Int
    arguments:
       <none>
 
-   eval_plus
+   p_eval_plus
    return type: Int
    arguments:
       addend: Expr
 
 
-   referenced_var_decl
+   p_referenced_var_decl
    return type: VarDecl
    arguments:
       <none>
 
 
 Properties for FOO_VAR_DECL_LIST:
-   id_bool
+   p_id_bool
    return type: Bool
    arguments:
       id: Bool
 
 
-   id_int
+   p_id_int
    return type: Int
    arguments:
       id: Int
 
 
-   id_bigint
+   p_id_bigint
    return type: BigInt
    arguments:
       id: BigInt
 
 
-   id_char
+   p_id_char
    return type: Character
    arguments:
       id: Character
 
 
-   id_token
+   p_id_token
    return type: Token
    arguments:
       id: Token
 
 
-   id_sym
+   p_id_sym
    return type: Symbol
    arguments:
       id: Symbol
 
 
-   id_unit
+   p_id_unit
    return type: AnalysisUnit
    arguments:
       id: AnalysisUnit
 
 
-   id_root_node
+   p_id_root_node
    return type: FooNode
    arguments:
       id: FooNode
 
 
-   id_name
+   p_id_name
    return type: Name
    arguments:
       id: Name
 
 
-   id_unit_kind
+   p_id_unit_kind
    return type: AnalysisUnitKind
    arguments:
       id: AnalysisUnitKind
 
 
-   id_node_array
+   p_id_node_array
    return type: FooNode.entity.array
    arguments:
       id: FooNode.entity.array
 
 
-   id_bigint_array
+   p_id_bigint_array
    return type: BigInt.array
    arguments:
       id: BigInt.array
@@ -577,73 +577,73 @@ Properties for FOO_VAR_DECL_LIST:
 
 
 Properties for FOO_NAME:
-   id_bool
+   p_id_bool
    return type: Bool
    arguments:
       id: Bool
 
 
-   id_int
+   p_id_int
    return type: Int
    arguments:
       id: Int
 
 
-   id_bigint
+   p_id_bigint
    return type: BigInt
    arguments:
       id: BigInt
 
 
-   id_char
+   p_id_char
    return type: Character
    arguments:
       id: Character
 
 
-   id_token
+   p_id_token
    return type: Token
    arguments:
       id: Token
 
 
-   id_sym
+   p_id_sym
    return type: Symbol
    arguments:
       id: Symbol
 
 
-   id_unit
+   p_id_unit
    return type: AnalysisUnit
    arguments:
       id: AnalysisUnit
 
 
-   id_root_node
+   p_id_root_node
    return type: FooNode
    arguments:
       id: FooNode
 
 
-   id_name
+   p_id_name
    return type: Name
    arguments:
       id: Name
 
 
-   id_unit_kind
+   p_id_unit_kind
    return type: AnalysisUnitKind
    arguments:
       id: AnalysisUnitKind
 
 
-   id_node_array
+   p_id_node_array
    return type: FooNode.entity.array
    arguments:
       id: FooNode.entity.array
 
 
-   id_bigint_array
+   p_id_bigint_array
    return type: BigInt.array
    arguments:
       id: BigInt.array
@@ -706,73 +706,73 @@ Properties for FOO_NAME:
 
 
 Properties for FOO_VAR_DECL:
-   id_bool
+   p_id_bool
    return type: Bool
    arguments:
       id: Bool
 
 
-   id_int
+   p_id_int
    return type: Int
    arguments:
       id: Int
 
 
-   id_bigint
+   p_id_bigint
    return type: BigInt
    arguments:
       id: BigInt
 
 
-   id_char
+   p_id_char
    return type: Character
    arguments:
       id: Character
 
 
-   id_token
+   p_id_token
    return type: Token
    arguments:
       id: Token
 
 
-   id_sym
+   p_id_sym
    return type: Symbol
    arguments:
       id: Symbol
 
 
-   id_unit
+   p_id_unit
    return type: AnalysisUnit
    arguments:
       id: AnalysisUnit
 
 
-   id_root_node
+   p_id_root_node
    return type: FooNode
    arguments:
       id: FooNode
 
 
-   id_name
+   p_id_name
    return type: Name
    arguments:
       id: Name
 
 
-   id_unit_kind
+   p_id_unit_kind
    return type: AnalysisUnitKind
    arguments:
       id: AnalysisUnitKind
 
 
-   id_node_array
+   p_id_node_array
    return type: FooNode.entity.array
    arguments:
       id: FooNode.entity.array
 
 
-   id_bigint_array
+   p_id_bigint_array
    return type: BigInt.array
    arguments:
       id: BigInt.array
@@ -833,7 +833,7 @@ Properties for FOO_VAR_DECL:
    arguments:
       <none>
 
-   eval
+   p_eval
    return type: Int
    arguments:
       <none>
@@ -872,11 +872,11 @@ P_Id_Node_Array:
 
 P_Eval: <no such property>
 
-Lookup_Member (FOO_NODE_TYPE_ID, name) = NONE
+Lookup_Member (FOO_NODE_TYPE_ID, p_name) = NONE
 Lookup_Member (FOO_NODE_TYPE_ID, parent) = FOO_NODE_PARENT
 Lookup_Member (VAR_DECL_TYPE_ID, parent) = FOO_NODE_PARENT
-Lookup_Member (VAR_DECL_TYPE_ID, name) = VAR_DECL_F_NAME
-Lookup_Member (VAR_DECL_TYPE_ID, eval) = VAR_DECL_P_EVAL
+Lookup_Member (VAR_DECL_TYPE_ID, p_name) = NONE
+Lookup_Member (VAR_DECL_TYPE_ID, p_eval) = VAR_DECL_P_EVAL
 
 Done.
 Done

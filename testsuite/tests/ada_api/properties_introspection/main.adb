@@ -303,12 +303,12 @@ begin
                    & Lookup_Member (Id, Name)'Image);
       end Test;
    begin
-      Test (Foo_Node_Type_Id, "name");
+      Test (Foo_Node_Type_Id, "p_name");
       Test (Foo_Node_Type_Id, "parent");
 
       Test (Var_Decl_Type_Id, "parent");
-      Test (Var_Decl_Type_Id, "name");
-      Test (Var_Decl_Type_Id, "eval");
+      Test (Var_Decl_Type_Id, "p_name");
+      Test (Var_Decl_Type_Id, "p_eval");
       New_Line;
    end;
 
