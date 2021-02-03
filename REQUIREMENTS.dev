@@ -9,6 +9,6 @@ psutil==5.7.0
 sphinx-rtd-theme==0.4.3
 yapf==0.30.0
 pycodestyle
-mypy==0.780
+mypy==0.800
 flake8
 railroad-diagrams~=1.1.0
