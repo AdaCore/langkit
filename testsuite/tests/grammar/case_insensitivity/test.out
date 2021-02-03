@@ -1,0 +1,15 @@
+main.py: Running...
+== <Decl main.txt:1:1-1:12> ==
+p_matches(a) = True
+p_matches(A) = True
+p_matches(b) = False
+p_matches(B) = False
+
+== <Decl main.txt:2:1-2:13> ==
+p_matches(a) = False
+p_matches(A) = False
+p_matches(b) = True
+p_matches(B) = True
+
+main.py: Done.
+Done
