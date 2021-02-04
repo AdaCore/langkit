@@ -48,6 +48,8 @@ package Langkit_Support.Text is
    function To_Unbounded_Text (T : Text_Type) return Unbounded_Text_Type
       renames Ada.Strings.Wide_Wide_Unbounded.To_Unbounded_Wide_Wide_String;
 
+   function To_Unbounded_Text (S : String) return Unbounded_Text_Type;
+
    function Image
      (T : Text_Type; With_Quotes : Boolean := False)
       return String;

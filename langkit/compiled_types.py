@@ -4234,7 +4234,7 @@ class SymbolType(CompiledType):
         ])
 
     def to_public_expr(self, internal_expr):
-        return 'To_Unbounded_Text (Image ({}))'.format(internal_expr)
+        return "To_Unbounded_Text (Text_Type'(Image ({})))".format(internal_expr)
 
     def to_internal_expr(self, public_expr, context):
         return 'Lookup_Symbol ({}, To_Text ({}))'.format(context, public_expr)

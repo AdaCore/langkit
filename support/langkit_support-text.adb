@@ -65,6 +65,15 @@ package body Langkit_Support.Text is
       return Result;
    end To_Text;
 
+   -----------------------
+   -- To_Unbounded_Text --
+   -----------------------
+
+   function To_Unbounded_Text (S : String) return Unbounded_Text_Type is
+   begin
+      return To_Unbounded_Text (To_Text (S));
+   end To_Unbounded_Text;
+
    -----------
    -- Image --
    -----------
