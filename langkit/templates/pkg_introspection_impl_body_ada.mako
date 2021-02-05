@@ -81,10 +81,11 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Struct_Field_Name --
    -----------------------
 
-   function Struct_Field_Name (Field : Struct_Field_Reference) return String is
+   function Struct_Field_Name (Field : Struct_Field_Reference) return Text_Type
+   is
    begin
       pragma Warnings (Off, "value not in range of subtype");
-      return Struct_Field_Descriptors (Field).Name;
+      return To_Text (Struct_Field_Descriptors (Field).Name);
       pragma Warnings (On, "value not in range of subtype");
    end Struct_Field_Name;
 
@@ -129,20 +130,20 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- DSL_Name --
    --------------
 
-   function DSL_Name (Id : Node_Type_Id) return String is
+   function DSL_Name (Id : Node_Type_Id) return Text_Type is
    begin
-      return To_String (Node_Type_Descriptors (Id).DSL_Name);
+      return To_Text (To_String (Node_Type_Descriptors (Id).DSL_Name));
    end DSL_Name;
 
    ---------------------
    -- Lookup_DSL_Name --
    ---------------------
 
-   function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id is
+   function Lookup_DSL_Name (Name : Text_Type) return Any_Node_Type_Id is
       use Node_Type_Id_Maps;
 
       Position : constant Cursor :=
-         DSL_Name_To_Node_Type.Find (To_Unbounded_String (Name));
+         DSL_Name_To_Node_Type.Find (To_Unbounded_String (Image (Name)));
    begin
       if Has_Element (Position) then
          return Element (Position);
@@ -233,7 +234,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Member_Name --
    -----------------
 
-   function Member_Name (Member : Member_Reference) return String is
+   function Member_Name (Member : Member_Reference) return Text_Type is
    begin
       case Member is
          when Struct_Field_Reference =>
@@ -280,14 +281,14 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
    function Lookup_Member_Struct
      (Kind : Struct_Value_Kind;
-      Name : String) return Any_Member_Reference
+      Name : Text_Type) return Any_Member_Reference
    is
       pragma Warnings (Off, "value not in range of type");
       Desc : Struct_Type_Descriptor renames Struct_Type_Desc (Kind).all;
       pragma Warnings (On, "value not in range of type");
    begin
       for F of Desc.Fields loop
-         if F.Name = Name then
+         if To_Text (F.Name) = Name then
             return F.Reference;
          end if;
       end loop;
@@ -301,7 +302,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
    function Lookup_Member_Node
      (Id   : Node_Type_Id;
-      Name : String) return Any_Member_Reference
+      Name : Text_Type) return Any_Member_Reference
    is
       Cursor : Any_Node_Type_Id := Id;
    begin
@@ -337,10 +338,11 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Syntax_Field_Name --
    -----------------------
 
-   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String is
+   function Syntax_Field_Name (Field : Syntax_Field_Reference) return Text_Type
+   is
    begin
       pragma Warnings (Off, "value not in range of subtype");
-      return Syntax_Field_Descriptors (Field).Name;
+      return To_Text (Syntax_Field_Descriptors (Field).Name);
       pragma Warnings (On, "value not in range of subtype");
    end Syntax_Field_Name;
 
@@ -573,9 +575,9 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -- Property_Name --
    -------------------
 
-   function Property_Name (Property : Property_Reference) return String is
+   function Property_Name (Property : Property_Reference) return Text_Type is
    begin
-      return Property_Descriptors (Property).Name;
+      return To_Text (Property_Descriptors (Property).Name);
    end Property_Name;
 
    --------------------------
@@ -615,13 +617,14 @@ package body ${ada_lib_name}.Introspection_Implementation is
    ----------------------------
 
    function Property_Argument_Name
-     (Property : Property_Reference; Argument_Number : Positive) return String
+     (Property        : Property_Reference;
+      Argument_Number : Positive) return Text_Type
    is
       Desc : Property_Descriptor renames Property_Descriptors (Property).all;
    begin
       Check_Argument_Number (Desc, Argument_Number);
-      return Property_Descriptors (Property)
-             .Argument_Names (Argument_Number).all;
+      return To_Text
+        (Property_Descriptors (Property).Argument_Names (Argument_Number).all);
    end Property_Argument_Name;
 
    -------------------------------------
@@ -724,7 +727,6 @@ package body ${ada_lib_name}.Introspection_Implementation is
 
 begin
    for D in Node_Type_Descriptors'Range loop
-      DSL_Name_To_Node_Type.Insert
-        (Node_Type_Descriptors (D).DSL_Name, D);
+      DSL_Name_To_Node_Type.Insert (Node_Type_Descriptors (D).DSL_Name, D);
    end loop;
 end ${ada_lib_name}.Introspection_Implementation;

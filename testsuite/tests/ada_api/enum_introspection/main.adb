@@ -1,6 +1,8 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
 
@@ -29,13 +31,13 @@ procedure Main is
    procedure Check (ET : Enum_Value_Kind) is
       Dummy : Type_Constraint (ET);
    begin
-      Put_Line ("== " & DSL_Name (Dummy) & " ==");
+      Put_Line ("== " & Image (DSL_Name (Dummy)) & " ==");
       New_Line;
 
       Put_Line ("Default value index:" & Enum_Default_Value (ET)'Image);
 
       for I in 1 .. Enum_Last_Value (ET) loop
-         Put_Line (I'Image & ": " & Enum_Value_Name (ET, I));
+         Put_Line (I'Image & ": " & Image (Enum_Value_Name (ET, I)));
          if Enum_Index (Create_Enum (ET, I)) /= I then
             raise Program_Error;
          end if;
@@ -54,7 +56,7 @@ begin
 
    Put_Line ("Enum_Value_Name: out of bounds");
    begin
-      Put_Line (Enum_Value_Name (E1_Value, 4));
+      Put_Line (Image (Enum_Value_Name (E1_Value, 4)));
    exception
       when Exc : Out_Of_Bounds_Error =>
          Put_Line (Exc);

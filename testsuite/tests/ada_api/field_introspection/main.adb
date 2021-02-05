@@ -1,5 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
@@ -10,12 +12,12 @@ begin
    --  for this language.
 
    for Id in Node_Type_Id'Range loop
-      Put_Line (DSL_Name (Id) & " (" & Id'Image & ")");
+      Put_Line (Image (DSL_Name (Id)) & " (" & Id'Image & ")");
 
       Put_Line ("   Fields (with abstract ones):");
       for F of Syntax_Fields (Id) loop
-         Put_Line ("   field " & Member_Name (F)
-                   & " (" & DSL_Name (Member_Type (F)) & ")");
+         Put_Line ("   field " & Image (Member_Name (F))
+                   & " (" & Image (DSL_Name (Member_Type (F))) & ")");
       end loop;
       New_Line;
 
@@ -29,7 +31,8 @@ begin
                   declare
                      I : constant Positive := Index (Kind, F);
                   begin
-                     Put_Line ("   " & Member_Name (F) & ":" & I'Image);
+                     Put_Line
+                       ("   " & Image (Member_Name (F)) & ":" & I'Image);
 
                      --  Make sure Syntax_Field_Reference_From_Index is
                      --  consistent with Index.
