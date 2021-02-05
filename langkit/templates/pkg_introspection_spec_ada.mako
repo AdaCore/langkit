@@ -31,10 +31,10 @@ package ${ada_lib_name}.Introspection is
    -- Node types --
    ----------------
 
-   function DSL_Name (Id : Node_Type_Id) return String;
+   function DSL_Name (Id : Node_Type_Id) return Text_Type;
    --  Return the name corresponding to ``Id`` in the Langkit DSL
 
-   function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id;
+   function Lookup_DSL_Name (Name : Text_Type) return Any_Node_Type_Id;
    --  Look for the node type for which Name is in the Lankgit DSL. Return it
    --  if found, otherwise return None.
 
@@ -138,7 +138,7 @@ package ${ada_lib_name}.Introspection is
    type Value_Array is array (Positive range <>) of Value_Type;
    type Any_Value_Array is array (Positive range <>) of Any_Value_Type;
 
-   function DSL_Name (Constraint : Type_Constraint) return String;
+   function DSL_Name (Constraint : Type_Constraint) return Text_Type;
    --  Return the name corresponding to ``Constraint`` in the Langkit DSL
 
    function Satisfies
@@ -165,7 +165,7 @@ package ${ada_lib_name}.Introspection is
    --  type, or No_Enum_Value_Index if this type does not have a default value.
 
    function Enum_Value_Name
-     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return String;
+     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return Text_Type;
    --  Return the name corresponding to the ``Index``th value for the ``Kind``
    --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
    --  for this enum type.
@@ -234,7 +234,7 @@ package ${ada_lib_name}.Introspection is
    -- Members --
    -------------
 
-   function Member_Name (Member : Member_Reference) return String;
+   function Member_Name (Member : Member_Reference) return Text_Type;
    --  Return a lower-case name for ``Member``
 
    function Member_Type (Member : Member_Reference) return Type_Constraint;
@@ -276,7 +276,7 @@ package ${ada_lib_name}.Introspection is
 
    function Lookup_Member
      (Prefix : Value_Type;
-      Name   : String) return Any_Member_Reference;
+      Name   : Text_Type) return Any_Member_Reference;
    --  Look for the member corresponding to the given ``Name`` (lower-case
    --  name) in the given ``Prefix`` value. Return it if found, otherwise
    --  return None.
@@ -287,7 +287,7 @@ package ${ada_lib_name}.Introspection is
 
    function Lookup_Member
      (Id   : Node_Type_Id;
-      Name : String) return Any_Member_Reference;
+      Name : Text_Type) return Any_Member_Reference;
    --  Look for the member corresponding to the given ``Name`` (lower-case
    --  name) in the given node type reference (``Id``). Return it if found,
    --  otherwise return None.
@@ -338,7 +338,8 @@ package ${ada_lib_name}.Introspection is
    --  Return the type constraints for ``Property``'s arguments
 
    function Property_Argument_Name
-     (Property : Property_Reference; Argument_Number : Positive) return String;
+     (Property        : Property_Reference;
+      Argument_Number : Positive) return Text_Type;
    --  Return the lower-cased name for ``Property``'s argument whose index is
    --  ``Argument_Number``. This raises a ``Property_Error`` if ``Property``
    --  has no such argument.

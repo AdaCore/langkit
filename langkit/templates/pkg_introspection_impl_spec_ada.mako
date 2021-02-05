@@ -471,7 +471,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
      (Kind : Struct_Value_Kind) return Struct_Type_Descriptor_Access;
    --  Return the type descriptor corresponding to the given struct type
 
-   function Struct_Field_Name (Field : Struct_Field_Reference) return String;
+   function Struct_Field_Name
+     (Field : Struct_Field_Reference) return Text_Type;
    --  Helper for Member_Name: take care of structs
 
    function Struct_Field_Type
@@ -486,10 +487,10 @@ private package ${ada_lib_name}.Introspection_Implementation is
    -- Node types --
    ----------------
 
-   function DSL_Name (Id : Node_Type_Id) return String;
+   function DSL_Name (Id : Node_Type_Id) return Text_Type;
    --  Implementation for Introspection.DSL_Name
 
-   function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id;
+   function Lookup_DSL_Name (Name : Text_Type) return Any_Node_Type_Id;
    --  Implementation for Introspection.Lookup_DSL_Name
 
    function Is_Abstract (Id : Node_Type_Id) return Boolean;
@@ -520,7 +521,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    -- Member --
    ------------
 
-   function Member_Name (Member : Member_Reference) return String;
+   function Member_Name (Member : Member_Reference) return Text_Type;
    --  Implementation for Introspection.Member_Name
 
    function Member_Type (Member : Member_Reference) return Type_Constraint;
@@ -528,19 +529,20 @@ private package ${ada_lib_name}.Introspection_Implementation is
 
    function Lookup_Member_Struct
      (Kind : Struct_Value_Kind;
-      Name : String) return Any_Member_Reference;
+      Name : Text_Type) return Any_Member_Reference;
    --  Helper for Introspection.Lookup_Member: take care of struct types
 
    function Lookup_Member_Node
      (Id   : Node_Type_Id;
-      Name : String) return Any_Member_Reference;
+      Name : Text_Type) return Any_Member_Reference;
    --  Helper for Introspection.Lookup_Member: take care of nodes
 
    -------------------
    -- Syntax fields --
    -------------------
 
-   function Syntax_Field_Name (Field : Syntax_Field_Reference) return String;
+   function Syntax_Field_Name
+     (Field : Syntax_Field_Reference) return Text_Type;
    --  Helper for Member_Name: take care of syntax fields
 
    function Syntax_Field_Type
@@ -580,7 +582,7 @@ private package ${ada_lib_name}.Introspection_Implementation is
    -- Properties --
    ----------------
 
-   function Property_Name (Property : Property_Reference) return String;
+   function Property_Name (Property : Property_Reference) return Text_Type;
    --  Helper for Member_Name: take care of properties
 
    function Property_Return_Type
@@ -592,7 +594,8 @@ private package ${ada_lib_name}.Introspection_Implementation is
    --  Implementation for Introspection.Property_Argument_Types
 
    function Property_Argument_Name
-     (Property : Property_Reference; Argument_Number : Positive) return String;
+     (Property        : Property_Reference;
+      Argument_Number : Positive) return Text_Type;
    --  Implementation for Introspection.Property_Argument_Name
 
    function Property_Argument_Default_Value

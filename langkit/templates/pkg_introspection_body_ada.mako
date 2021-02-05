@@ -414,7 +414,7 @@ package body ${ada_lib_name}.Introspection is
    -- DSL_Name --
    --------------
 
-   function DSL_Name (Id : Node_Type_Id) return String is
+   function DSL_Name (Id : Node_Type_Id) return Text_Type is
    begin
       return Impl.DSL_Name (Id);
    end DSL_Name;
@@ -423,7 +423,7 @@ package body ${ada_lib_name}.Introspection is
    -- Lookup_DSL_Name --
    ---------------------
 
-   function Lookup_DSL_Name (Name : String) return Any_Node_Type_Id is
+   function Lookup_DSL_Name (Name : Text_Type) return Any_Node_Type_Id is
    begin
       return Impl.Lookup_DSL_Name (Name);
    end Lookup_DSL_Name;
@@ -495,7 +495,7 @@ package body ${ada_lib_name}.Introspection is
    -- DSL_Name --
    --------------
 
-   function DSL_Name (Constraint : Type_Constraint) return String is
+   function DSL_Name (Constraint : Type_Constraint) return Text_Type is
    begin
       <% basic_types = [T.Bool, T.Int, T.BigInt, T.Character, T.Token,
                         T.Symbol, T.AnalysisUnit] %>
@@ -581,7 +581,7 @@ package body ${ada_lib_name}.Introspection is
    ---------------------
 
    function Enum_Value_Name
-     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return String is
+     (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return Text_Type is
    begin
       case Kind is
          % for t in enum_types:
@@ -806,7 +806,7 @@ package body ${ada_lib_name}.Introspection is
                begin
                   if not Satisfies (V, T) then
                      raise Bad_Type_Error with
-                        "type mismatch for " & Member_Name (F);
+                        "type mismatch for " & Image (Member_Name (F));
                   end if;
                end;
             end loop;
@@ -857,7 +857,7 @@ package body ${ada_lib_name}.Introspection is
    -- Member_Name --
    -----------------
 
-   function Member_Name (Member : Member_Reference) return String is
+   function Member_Name (Member : Member_Reference) return Text_Type is
    begin
       return Impl.Member_Name (Member);
    end Member_Name;
@@ -979,7 +979,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Lookup_Member
      (Prefix : Value_Type;
-      Name   : String) return Any_Member_Reference
+      Name   : Text_Type) return Any_Member_Reference
    is
       Prefix_Val : Value_Record renames Prefix.Value.Value.all;
    begin
@@ -1006,7 +1006,7 @@ package body ${ada_lib_name}.Introspection is
 
    function Lookup_Member
      (Id   : Node_Type_Id;
-      Name : String) return Any_Member_Reference is
+      Name : Text_Type) return Any_Member_Reference is
    begin
       return Impl.Lookup_Member_Node (Id, Name);
    end Lookup_Member;
@@ -1088,8 +1088,8 @@ package body ${ada_lib_name}.Introspection is
    ----------------------------
 
    function Property_Argument_Name
-     (Property : Property_Reference; Argument_Number : Positive) return String
-   is
+     (Property        : Property_Reference;
+      Argument_Number : Positive) return Text_Type is
    begin
       return Impl.Property_Argument_Name (Property, Argument_Number);
    end Property_Argument_Name;

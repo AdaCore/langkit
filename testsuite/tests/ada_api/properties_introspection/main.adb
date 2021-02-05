@@ -132,8 +132,9 @@ begin
             Put_Line ("   <none>");
          else
             for P of Properties (Kind) loop
-               Put_Line ("   " & Member_Name (P));
-               Put_Line ("   return type: " & DSL_Name (Member_Type (P)));
+               Put_Line ("   " & Image (Member_Name (P)));
+               Put_Line ("   return type: "
+                         & Image (DSL_Name (Member_Type (P))));
 
                Put_Line ("   arguments:");
                declare
@@ -150,8 +151,8 @@ begin
                      Put_Line ("      <none>");
                   else
                      for I in A_Types'Range loop
-                        Put ("      " & Property_Argument_Name (P, I));
-                        Put (": " & DSL_Name (A_Types (I)));
+                        Put ("      " & Image (Property_Argument_Name (P, I)));
+                        Put (": " & Image (DSL_Name (A_Types (I))));
                         if A_Default_Values (I) /= No_Value then
                            Put (" := " & Image (A_Default_Values (I)));
                         end if;
@@ -173,7 +174,7 @@ begin
 
    begin
       declare
-         Dummy : constant String :=
+         Dummy : constant Text_Type :=
             Property_Argument_Name (Foo_Node_P_Id_Bool, 3);
       begin
          Put_Line ("ERROR: no exception...");
@@ -291,15 +292,15 @@ begin
    --  Test node data lookup by name
 
    declare
-      procedure Test (Id : Node_Type_Id; Name : String);
+      procedure Test (Id : Node_Type_Id; Name : Text_Type);
 
       ----------
       -- Test --
       ----------
 
-      procedure Test (Id : Node_Type_Id; Name : String) is
+      procedure Test (Id : Node_Type_Id; Name : Text_Type) is
       begin
-         Put_Line ("Lookup_Member (" & Id'Image & ", " & Name & ") = "
+         Put_Line ("Lookup_Member (" & Id'Image & ", " & Image (Name) & ") = "
                    & Lookup_Member (Id, Name)'Image);
       end Test;
    begin

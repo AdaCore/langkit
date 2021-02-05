@@ -3010,7 +3010,10 @@ package body ${ada_lib_name}.Implementation is
                   Child : constant ${T.root_node.name} :=
                      Implementation.Child (Node, I);
                begin
-                  Put (Attr_Prefix & Syntax_Field_Name (Field_List (I)) & ":");
+                  Put
+                    (Attr_Prefix
+                     & Image (Syntax_Field_Name (Field_List (I)))
+                     & ":");
                   if Child /= null then
                      New_Line;
                      Print (Child, Show_Slocs, Children_Prefix);

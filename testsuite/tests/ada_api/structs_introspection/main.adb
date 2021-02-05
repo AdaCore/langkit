@@ -1,6 +1,8 @@
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO;    use Ada.Text_IO;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
 
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
@@ -42,14 +44,15 @@ begin
       declare
          Dummy : Type_Constraint (Kind);
       begin
-         Put_Line ("  " & DSL_Name (Dummy));
+         Put_Line ("  " & Image (DSL_Name (Dummy)));
       end;
    end loop;
    New_Line;
 
    Put_Line ("Fields for Point:");
    for F of Struct_Fields (Point_Value) loop
-      Put_Line ("* " & Member_Name (F) & " : " & DSL_Name (Member_Type (F)));
+      Put_Line ("* " & Image (Member_Name (F))
+                & " : " & Image (DSL_Name (Member_Type (F))));
    end loop;
    New_Line;
 
@@ -65,7 +68,7 @@ begin
          declare
             F_Value : constant Value_Type := Eval_Member (Polym_Value, F);
          begin
-            Put_Line ("Polymorphic: " & Member_Name (F) & " = "
+            Put_Line ("Polymorphic: " & Image (Member_Name (F)) & " = "
                       & As_Big_Integer (F_Value).Image);
          end;
       end loop;

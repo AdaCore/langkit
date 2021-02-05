@@ -4,6 +4,8 @@ with Ada.Text_IO;           use Ada.Text_IO;
 
 with GNATCOLL.GMP.Integers; use GNATCOLL.GMP.Integers;
 
+with Langkit_Support.Text; use Langkit_Support.Text;
+
 with Libfoolang.Analysis;      use Libfoolang.Analysis;
 with Libfoolang.Common;        use Libfoolang.Common;
 with Libfoolang.Introspection; use Libfoolang.Introspection;
@@ -58,7 +60,8 @@ procedure Main is
          when Array_Value_Kind =>
             Append
               (Result,
-               "Array of " & DSL_Name (Array_Element_Constraint (Kind (Value)))
+               "Array of "
+               & Image (DSL_Name (Array_Element_Constraint (Kind (Value))))
                & ":" & ASCII.LF);
             declare
                N : constant Natural := Array_Length (Value);
