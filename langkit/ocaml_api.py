@@ -568,9 +568,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda t:
                 'string' if t.is_string_type else
                 '{} list'.format(self.type_public_name(type.element_type))),
-            (ct.IteratorType, lambda t: '{} iterator'.format(
-                self.type_public_name(type.element_type)
-            )),
+            (ct.IteratorType, lambda t: 'unit'),
             (ct.StructType, lambda _: "{}.t".format(type.api_name.camel)),
             (T.BigInt, lambda t: '{}.t'.format(self.module_name(t))),
             (T.EnvRebindings, lambda _: 'Rebindings.t'),

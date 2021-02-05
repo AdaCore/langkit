@@ -601,6 +601,7 @@ module CFunctions = struct
 
 % for astnode in ctx.astnode_types:
    % for field in astnode.fields_with_accessors():
+     % if not field.type.is_iterator_type:
   let ${field.accessor_basename.lower} = foreign ~from:c_lib
     "${capi.get_name(field.accessor_basename)}"
     (ptr ${ocaml_api.c_type(root_entity)}
@@ -614,6 +615,7 @@ module CFunctions = struct
       % endfor
     @-> ptr ${ocaml_api.c_type(field.public_type)}
     @-> raisable int)
+    % endif
 
    % endfor
 % endfor
@@ -963,6 +965,9 @@ let ${ocaml_api.field_name(field)}
          % endif
       % endfor
     =
+    % if field.type.is_iterator_type:
+      raise (Failure "iterators not implemented yet")
+    % else:
       let result_ptr =
         allocate_n ${ocaml_api.c_type(field.public_type)} ~count:1
       in
@@ -1019,6 +1024,7 @@ let ${ocaml_api.field_name(field)}
       ## check_for_null to true.
       ${ocaml_api.wrap_value('!@ result_ptr', field.public_type,
          '(context node)', check_for_null=True)}
+    % endif
 
    % endfor
 

@@ -38,6 +38,8 @@ enum Color {
 
     @export fun get_node (node_struct : FooNodeStruct): FooNode =
     node_struct.node
+
+    @export fun iter_int (): Iterator[Int] = [1, 2, 3].to_iterator()
 }
 
 class Example : FooNode {
