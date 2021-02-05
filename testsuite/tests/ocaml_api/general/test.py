@@ -72,6 +72,10 @@ class FooNode(ASTNode):
     def get_node(node_struct=FooNodeStruct):
         return node_struct.node
 
+    @langkit_property(public=True)
+    def iter_int():
+        return ArrayLiteral([1, 2, 3]).to_iterator
+
 
 class Sequence(FooNode.list):
     all_items = Property(Entity.map(lambda i: i), public=True)
