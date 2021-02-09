@@ -55,6 +55,10 @@ package Langkit_Support.Lexical_Envs is
 
    Debug_Mode : constant Boolean := True;
 
+   Min : constant GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.LEXICAL_ENV_MINIMAL", GNATCOLL.Traces.From_Config);
+
    Me : constant GNATCOLL.Traces.Trace_Handle :=
       GNATCOLL.Traces.Create
         ("LANGKIT.LEXICAL_ENV", GNATCOLL.Traces.From_Config);
