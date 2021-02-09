@@ -1181,7 +1181,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
    is
       FV : Entity_Vectors.Vector;
    begin
-
       if Has_Trace then
          Me.Trace
            ("===== In Env get, key=" & Image (Key)
@@ -1209,6 +1208,16 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
          if Has_Trace then
             Me.Trace ("Returning vector " & Entity_Vectors_Image (FV));
+         end if;
+
+         if Min.Active then
+            Min.Trace
+              ("Env.Get("
+               & (if Self.Kind = Static_Primary
+                  then Image
+                    (Node_Text_Image (Lexical_Env_Record (Self.Env.all).Node))
+                  else Env_Image (Self))
+               & ", " & Image (Key.all) & ") -> " & Entity_Vectors_Image (FV));
          end if;
 
          if Has_Trace then

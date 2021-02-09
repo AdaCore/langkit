@@ -2303,6 +2303,9 @@ package body ${ada_lib_name}.Implementation is
       Short : Boolean := True) return Text_Type is
    begin
       if Short then
+         if Node = null then
+            return "null";
+         end if;
          return To_Text (Basename (Node.Unit))
            & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))));
       else
