@@ -1371,12 +1371,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
       return (if Rebindings = null
               then Base_Env
               else Wrap (new Lexical_Env_Record'
-                           (Kind            => Rebound,
-                            Ref_Count       => <>,
-                            Rebound_Env     => Base_Env,
-                            Rebindings      => Rebindings,
-                            Context_Version =>
-                               Get_Context_Version (Base_Env.Owner)),
+                           (Kind               => Rebound,
+                            Ref_Count          => <>,
+                            Rebound_Env        => Base_Env,
+                            Rebindings         => Rebindings,
+                            Rebindings_Version => Rebindings.Version),
                          Owner => Base_Env.Owner));
    end Rebind_Env;
 
@@ -2265,18 +2264,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
             return (for some E of Env.Grouped_Envs.all => Is_Stale (E));
 
          when Rebound =>
-            if Self.Owner /= No_Generic_Unit then
-               --  If there is an owner, check that the version of the context
-               --  has not been incremented to make sure that the rebindings
-               --  stored in this env are still valid. This also ensures that
-               --  the rebound env is not stale, so we can early return instead
-               --  of recursively check its state.
-               return
-                  Get_Context_Version (Self.Owner) > Env.Context_Version;
-            end if;
-            --  If there is no owner, we only care about the fact that the
-            --  rebound_env is not stale.
-            return Is_Stale (Env.Rebound_Env);
+            --  This env is stale as soon as either the rebound env or the
+            --  rebindings are stale.
+            return Is_Stale (Env.Rebound_Env)
+                   or else Env.Rebindings.Version /= Env.Rebindings_Version;
       end case;
    end Is_Stale;
 

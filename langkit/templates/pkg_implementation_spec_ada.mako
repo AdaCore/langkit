@@ -244,9 +244,6 @@ private package ${ada_lib_name}.Implementation is
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.
 
-   function Context_Version (Unit : Generic_Unit_Ptr) return Integer;
-   --  Return the version of the analysis context associated with Unit
-
    type Ref_Category is
      (${", ".join(sorted(str(cat) for cat in ctx.ref_cats))});
    type Ref_Categories is array (Ref_Category) of Boolean;
@@ -254,7 +251,6 @@ private package ${ada_lib_name}.Implementation is
 
    package AST_Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version         => Unit_Version,
-      Get_Context_Version      => Context_Version,
       Node_Type                => ${T.root_node.name},
       Node_Metadata            => ${T.env_md.name},
       No_Node                  => null,

@@ -1,0 +1,24 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example("example"))
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class Example : FooNode implements TokenNode {
+
+    @export fun rebind (from_node : FooNode, to_node : FooNode): Array[FooNode] =
+    {
+        # Build non-null rebindings
+        val rbdng = null.append_rebinding(
+            from_node.children_env(), to_node.children_env()
+        );
+
+        # Call rebind_env on them (this is the important part, the rest is
+        # cosmetic).
+        null.rebind_env(rbdng).get("foo")
+    }
+}

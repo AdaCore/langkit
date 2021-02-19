@@ -2764,14 +2764,6 @@ package body ${ada_lib_name}.Implementation is
       return Convert_Unit (Unit).Unit_Version;
    end Unit_Version;
 
-   ---------------------
-   -- Context_Version --
-   ---------------------
-
-   function Context_Version (Unit : Generic_Unit_Ptr) return Integer is
-   begin
-      return Convert_Unit (Unit).Context.Reparse_Cache_Version;
-   end Context_Version;
    ----------------------
    -- Short_Text_Image --
    ----------------------
