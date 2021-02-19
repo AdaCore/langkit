@@ -44,8 +44,6 @@ package Support is
 
    function Get_Unit_Version (Dummy : Generic_Unit_Ptr) return Version_Number
    is (0);
-   function Get_Context_Version (Dummy : Generic_Unit_Ptr) return Integer
-   is (0);
 
    type Ref_Category is (No_Cat);
    type Ref_Categories is array (Ref_Category) of Boolean;
@@ -67,7 +65,6 @@ package Support is
 
    package Envs is new Langkit_Support.Lexical_Envs_Impl
      (Get_Unit_Version      => Get_Unit_Version,
-      Get_Context_Version   => Get_Context_Version,
       Node_Type             => String_Access,
       Node_Metadata         => Metadata,
       Empty_Metadata        => Default_MD,
