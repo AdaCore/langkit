@@ -485,7 +485,7 @@ module Token = struct
         token.trivia_index - 1
 
   let compare one other =
-    let open Pervasives in
+    let open Stdlib in
     let compare_token_data = compare one.token_data other.token_data in
     if compare_token_data = 0 then
       let compare_token_index = compare one.token_index other.token_index in
@@ -688,7 +688,7 @@ end = struct
          ocaml_api.struct_name(root_entity)), T.entity_info, None)}
 
   let compare e1 e2 =
-    let open Pervasives in
+    let open Stdlib in
     let compare_node =
       compare (getf e1 EntityStruct.node) (getf e2 EntityStruct.node)
     in
