@@ -13,18 +13,15 @@
    fun:caml_stat_alloc_noexc
    fun:caml_stat_alloc
    fun:ctypes_prep_callspec
-   fun:camlForeign__prep_callspec_*
    ...
 }
 {
    false positives with camlForeign
    Memcheck:Leak
    fun:malloc
-   fun:realloc
    fun:caml_stat_resize_noexc
    fun:caml_stat_resize
    fun:ctypes_add_argument
-   fun:camlForeign__add_argument_*
    ...
 }
 {
@@ -52,25 +49,12 @@
    fun:caml_gc_compaction
    ...
 }
-
 {
-   false positives with camlCtypes_ffi
+   false positives in caml startup code
    Memcheck:Leak
    fun:malloc
-   fun:caml_stat_alloc_noexc
-   fun:caml_stat_alloc
-   fun:ctypes_prep_callspec
-   fun:camlCtypes_ffi__prep_callspec_*
-   ...
-}
-{
-   false positives with camlCtypes_ffi
-   Memcheck:Leak
-   fun:malloc
-   fun:realloc
-   fun:caml_stat_resize_noexc
-   fun:caml_stat_resize
-   fun:ctypes_add_argument
-   fun:camlCtypes_ffi__add_argument_*
+   fun:caml_stat_alloc*
+   fun:caml_init_atom_table
+   fun:init_static
    ...
 }
