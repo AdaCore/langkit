@@ -29,29 +29,63 @@ with GNAT.String_Hash;
 with Langkit_Support.Text; use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
---  Provide a symbol table for text (Text_Type) identifiers
+--  This package provides a symbol table for text (Text_Type) identifiers. This
+--  is used in Langkit for the interning of symbols.
+--
+--  The main interest is to:
+--
+--  1. Use less memory by interning strings.
+--
+--  2. Be faster when using the symbol as map keys for example, because hashing
+--     is faster.
 
 package Langkit_Support.Symbols is
 
    type Symbol_Table_Record is tagged private;
+
    type Symbol_Table is access all Symbol_Table_Record'Class;
-   --  Represents a symbol table
+   --  Represents a symbol table. The symbol table is the holder of the memory
+   --  allocated for each symbol, and serves as a single access point if you
+   --  want to find back an existing symbol.
 
    No_Symbol_Table : constant Symbol_Table;
    --  Value to use as a default for unallocated symbol tables
 
    type Symbol_Type is new Text_Cst_Access;
+   --  Main symbol type.
+   --
+   --  WARNING: For usability reasons, we use the access to the string as a
+   --  symbol type. This is very convenient because you can access the text of
+   --  a symbol without a reference to the symbol table, but is also unsafe,
+   --  because if the symbol table has been freed, the symbol will be a
+   --  dangling pointer.
 
    function Image (S : Symbol_Type) return Text_Type;
+   --  Return the text associated to this symbol
+
    function Image
      (S : Symbol_Type; With_Quotes : Boolean := False) return String;
+   --  Return the text associated with this symbol, as a string
 
    type Thin_Symbol is private;
+   --  Thin symbol type. This type is a bit heavier to use than the main symbol
+   --  type, because you need a reference to the symbol table to get the text
+   --  of the symbol, but:
+   --
+   --  1. It consumes less memory (which is the primary reason it is used in
+   --     Langkit).
+   --
+   --  2. It is safer, as long as you never store ``Symbol_Type`` instances
+   --     returned by ``Get_Symbol`` you should be safe.
+   --
+   --  TODO: See if we can get rid of the intermediate operation that returns a
+   --  ``Symbol_Type``.
 
    No_Thin_Symbol : constant Thin_Symbol;
 
    function Get_Symbol
      (Self : Symbol_Table; TS : Thin_Symbol) return Symbol_Type;
+   --  Return the Symbol for this ``Thin_Symbol`` instance
 
    function Create_Symbol_Table return Symbol_Table;
    --  Allocate a new symbol table and return it
