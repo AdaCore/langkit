@@ -129,15 +129,6 @@ package body ${ada_lib_name}.Implementation is
 
    end Context_Pool;
 
-   generic
-      type T (<>) is limited private;
-      type T_Access is access all T;
-      with procedure Destroy (Object : in out T_Access);
-   procedure Register_Destroyable_Gen
-     (Unit : Internal_Unit; Object : T_Access);
-   --  Generic procedure to register an object so that it is automatically
-   --  destroyed when Unit is destroyed.
-
    procedure Register_Destroyable_Helper
      (Unit    : Internal_Unit;
       Object  : System.Address;

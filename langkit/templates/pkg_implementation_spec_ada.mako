@@ -1833,6 +1833,15 @@ private package ${ada_lib_name}.Implementation is
    --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
    --  strings in the equation if in debug mode.
 
+   generic
+      type T (<>) is limited private;
+      type T_Access is access all T;
+      with procedure Destroy (Object : in out T_Access);
+   procedure Register_Destroyable_Gen
+     (Unit : Internal_Unit; Object : T_Access);
+   --  Generic procedure to register an object so that it is automatically
+   --  destroyed when Unit is destroyed.
+
 private
    --  We only have a private part to defer the initialization of struct
    --  constants. This allows us to circumvent circularity problems between
