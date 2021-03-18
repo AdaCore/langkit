@@ -170,6 +170,10 @@ package body ${ada_lib_name}.Implementation is
    --  If E is known, return its unique Id from State. Otherwise, assign it a
    --  new unique Id and return it.
 
+   ----------------------------
+   -- Construct_Entity_Array --
+   ----------------------------
+
    function Construct_Entity_Array
      (V : AST_Envs.Entity_Vectors.Vector) return ${T.entity.array.name}
    is
