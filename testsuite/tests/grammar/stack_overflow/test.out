@@ -1,0 +1,11 @@
+main.py: Running...
+
+Parsing 499 nested parens...
+No diagnostic
+
+Parsing 500 nested parens...
+Diagnostics:
+   Error during parsing: stack overflow
+
+main.py: Done.
+Done

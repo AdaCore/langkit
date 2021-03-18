@@ -1,10 +1,12 @@
 ## vim: filetype=makoada
 
 with Ada.Containers.Vectors;
+with Ada.Exceptions;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
+with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
@@ -141,6 +143,11 @@ package body ${ada_lib_name}.Parsers is
    --  Release a parse list, putting it in Parsers' free list. Set List to
    --  null.
 
+   procedure Enter_Call (Parser : Parser_Type; Call_Depth : access Natural);
+   procedure Exit_Call (Parser : Parser_Type; Call_Depth : Natural);
+   --  Shortcuts to forward Parser's context to the eponym procedures in
+   --  the Implementation package.
+
    ---------------------
    -- Initialize_List --
    ---------------------
@@ -256,6 +263,14 @@ package body ${ada_lib_name}.Parsers is
       Process_Parsing_Error (Parser, Check_Complete);
       Set_Parents (Result, null);
       return Parsed_Node (Result);
+   exception
+      when Exc : Property_Error =>
+         Append
+           (Parser.Diagnostics,
+            No_Source_Location_Range,
+            To_Text ("Error during parsing: "
+                     & Ada.Exceptions.Exception_Message (Exc)));
+         return Parsed_Node (${T.root_node.nullexpr});
    end Parse;
 
    % for parser in ctx.generated_parsers:
@@ -350,5 +365,23 @@ package body ${ada_lib_name}.Parsers is
       Lists := List;
       List := null;
    end Release_Parse_List;
+
+   ----------------
+   -- Enter_Call --
+   ----------------
+
+   procedure Enter_Call (Parser : Parser_Type; Call_Depth : access Natural) is
+   begin
+      Enter_Call (Parser.Unit.Context, Call_Depth);
+   end Enter_Call;
+
+   ---------------
+   -- Exit_Call --
+   ---------------
+
+   procedure Exit_Call (Parser : Parser_Type; Call_Depth : Natural) is
+   begin
+      Exit_Call (Parser.Unit.Context, Call_Depth);
+   end Exit_Call;
 
 end ${ada_lib_name}.Parsers;
