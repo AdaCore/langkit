@@ -1382,8 +1382,12 @@ private package ${ada_lib_name}.Implementation is
       --  Context_Pool.
 
       Current_Call_Depth : Natural := 0;
-      --  Number of recursive property calls currently running. This counter is
-      --  used as a mitigation against infinite recursions.
+      --  Number of recursive calls currently running. This counter is
+      --  used as a mitigation against infinite recursions. The calls
+      --  considered here include:
+      --
+      --  * parsing functions;
+      --  * properties calls.
 
       Call_Depth_High_Water_Mark : Natural := 0;
       --  Maximum number of recursive calls seen in this context so far

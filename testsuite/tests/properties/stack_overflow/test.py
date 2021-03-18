@@ -1,5 +1,5 @@
 """
-Test that stack overflow migitations work as expected.
+Test that stack overflow migitations work as expected in property calls.
 """
 
 from langkit.dsl import ASTNode, Int
