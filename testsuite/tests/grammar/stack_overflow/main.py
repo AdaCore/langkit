@@ -19,7 +19,7 @@ def test(tree_depth):
     if u.diagnostics:
         print("Diagnostics:")
         for d in u.diagnostics:
-            print("  ", d)
+            print("   {}".format(d))
     else:
         print("No diagnostic")
     print("")
