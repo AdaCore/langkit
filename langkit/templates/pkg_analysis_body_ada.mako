@@ -88,6 +88,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Create_Context
      (Charset       : String := Default_Charset;
+      File_Reader   : File_Reader_Reference := No_File_Reader_Reference;
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
       With_Trivia   : Boolean := True;
       Tab_Stop      : Positive := ${ctx.default_tab_stop})
@@ -95,13 +96,16 @@ package body ${ada_lib_name}.Analysis is
    is
       use Unit_Provider_References;
 
+      FR     : Internal_File_Reader_Access :=
+         Wrap_Public_File_Reader (File_Reader);
       UP     : Internal_Unit_Provider_Access :=
          Wrap_Public_Provider (Unit_Provider);
       Result : Internal_Context := Create_Context
-        (Charset, UP, With_Trivia, Tab_Stop);
+        (Charset, FR, UP, With_Trivia, Tab_Stop);
    begin
-      --  Create_Context created an owneship for itself, so don't forget to
-      --  remove the share on UP.
+      --  Create_Context created ownership shares for itself, so don't forget
+      --  to remove the shares on FR and UP.
+      Dec_Ref (FR);
       Dec_Ref (UP);
 
       return Context : constant Analysis_Context := Wrap_Context (Result)

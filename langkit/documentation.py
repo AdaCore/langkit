@@ -280,6 +280,12 @@ base_langkit_docs = {
         When ``With_Trivia`` is true, the parsed analysis units will contain
         trivias.
 
+        If provided, ``File_Reader`` will be used to fetch the contents of
+        source files instead of the default, which is to just read it from the
+        filesystem and decode it using the regular charset rules. Note that if
+        provided, all parsing APIs that provide a buffer are forbidden, and any
+        use of the rewriting API with the returned context is rejected.
+
         If provided, ``Unit_Provider`` will be used to query the file name
         that corresponds to a unit reference during semantic analysis. If
         it is ``${null}``, the default one is used instead.
@@ -616,6 +622,33 @@ base_langkit_docs = {
 
         This raises a ``Stale_Reference_Error`` exception if the iterator is
         invalidated.
+    """,
+
+    #
+    # File readers
+    #
+
+    'langkit.file_reader_read': """
+        Read the content of the source at the given filename, decoding it using
+        the given charset and decoding the byte order mark if ``Read_BOM`` is
+        true.
+
+        If there is an error during this process, append an error message to
+        Diagnostics. In that case, Contents is considered uninitialized.
+
+        Otherwise, allocate a Text_Type buffer, fill it and initialize Contents
+        to refer to it.
+    """,
+    'langkit.file_reader_inc_ref': """
+        Create an ownership share for this file reader.
+    """,
+    'langkit.file_reader_dec_ref': """
+        Release an ownership share for this file reader. This destroys the file
+        reader if there are no shares left.
+
+        % if lang == 'ada':
+            Return whether there are no ownership shares left.
+        % endif
     """,
 
     #

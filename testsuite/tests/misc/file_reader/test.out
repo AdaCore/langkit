@@ -1,0 +1,38 @@
+main.adb: Starting...
+Parsing foo.txt
+===============
+
+My_File_Reader.Read:
+  Filename: foo.txt
+  Charset: utf-8
+  Read_BOM: True
+Success: "example\x0aexample"
+
+Parsing error.txt
+=================
+
+My_File_Reader.Read:
+  Filename: error.txt
+  Charset: some-charset
+  Read_BOM: False
+Errors:
+  error.txt:1:3: this is an error message
+
+Using buffer-based parsing APIs
+===============================
+
+Get_From_Buffer:
+Precondition_Failure: cannot parse from buffer with a file reader
+
+Reparse:
+Precondition_Failure: cannot parse from buffer with a file reader
+
+Using the rewriting API
+=======================
+
+Start_Rewriting:
+Precondition_Failure: tree rewriting forbidden with a file reader
+
+main.adb: Done.
+My_File_Reader.Do_Release
+Done

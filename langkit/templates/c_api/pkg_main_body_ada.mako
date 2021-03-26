@@ -104,6 +104,11 @@ package body ${ada_lib_name}.Implementation.C is
       begin
          return Create_Context
             (Charset       => C,
+
+             --  TODO??? Bind file readers in the C API. For now, this
+             --  abstraction is available only in the Ada API.
+             File_Reader   => null,
+
              Unit_Provider => Unwrap_Private_Provider (Unit_Provider),
              With_Trivia   => With_Trivia /= 0,
              Tab_Stop      => Natural (Tab_Stop));

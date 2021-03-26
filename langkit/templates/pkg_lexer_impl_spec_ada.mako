@@ -12,6 +12,7 @@ with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
+limited with ${ada_lib_name}.Implementation;
 
 private package ${ada_lib_name}.Lexer_Implementation is
 
@@ -43,6 +44,7 @@ private package ${ada_lib_name}.Lexer_Implementation is
    procedure Extract_Tokens
      (Input       : Internal_Lexer_Input;
       With_Trivia : Boolean;
+      File_Reader : access Implementation.Internal_File_Reader'Class;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
    --  Implementation for ${ada_lib_name}.Lexer.Extract_Tokens

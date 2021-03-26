@@ -21,10 +21,10 @@ with GNATCOLL.Refcount;
    private with Langkit_Support.Boxes;
 % endif
 
+with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
-
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Common; use ${ada_lib_name}.Common;
 private with ${ada_lib_name}.Implementation;
@@ -153,6 +153,7 @@ package ${ada_lib_name}.Analysis is
 
    function Create_Context
      (Charset       : String := Default_Charset;
+      File_Reader   : File_Reader_Reference := No_File_Reader_Reference;
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
       With_Trivia   : Boolean := True;
       Tab_Stop      : Positive := ${ctx.default_tab_stop})

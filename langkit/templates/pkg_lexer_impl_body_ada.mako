@@ -24,6 +24,7 @@ use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Common;
 use ${ada_lib_name}.Common.Precomputed_Symbols;
+with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
 with ${ada_lib_name}.Lexer_State_Machine;
 use ${ada_lib_name}.Lexer_State_Machine;
 
@@ -379,6 +380,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
    procedure Extract_Tokens
      (Input       : Internal_Lexer_Input;
       With_Trivia : Boolean;
+      File_Reader : access Implementation.Internal_File_Reader'Class;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
@@ -386,15 +388,26 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
       Contents : Decoded_File_Contents;
    begin
+      --  It should not be possible to end up here with anything else than a
+      --  file when there is a file reader, as it would mean that the file
+      --  reader will be by-passed.
+      pragma Assert (File_Reader = null or else Input.Kind = File);
+
       case Input.Kind is
          when File =>
             declare
                Filename : constant String := +Input.Filename.Full_Name.all;
                Charset  : constant String := To_String (Input.Charset);
             begin
-               --  Read the source file on the filesystem
-               Direct_Read
-                 (Filename, Charset, Input.Read_BOM, Contents, Diagnostics);
+               --  Use the file reader if there is one, otherwise just read the
+               --  source file on the filesystem.
+               if File_Reader = null then
+                  Direct_Read
+                    (Filename, Charset, Input.Read_BOM, Contents, Diagnostics);
+               else
+                  File_Reader.Read
+                    (Filename, Charset, Input.Read_BOM, Contents, Diagnostics);
+               end if;
             end;
 
             if Diagnostics.Is_Empty then

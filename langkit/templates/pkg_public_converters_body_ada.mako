@@ -2,7 +2,69 @@
 
 package body ${ada_lib_name}.Public_Converters is
 
+   type File_Reader_Wrapper_Access is access all File_Reader_Wrapper;
    type Unit_Provider_Wrapper_Access is access all Unit_Provider_Wrapper;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Self : in out File_Reader_Wrapper) is
+   begin
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref
+     (Self : in out File_Reader_Wrapper) return Boolean is
+   begin
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
+
+   ----------
+   -- Read --
+   ----------
+
+   overriding procedure Read
+     (Self        : File_Reader_Wrapper;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector) is
+   begin
+      Self.Internal.Get.Read
+        (Filename, Charset, Read_BOM, Contents, Diagnostics);
+   end Read;
+
+   -----------------------------
+   -- Wrap_Public_File_Reader --
+   -----------------------------
+
+   function Wrap_Public_File_Reader
+     (File_Reader : File_Reader_Reference) return Internal_File_Reader_Access
+   is
+      use type File_Reader_Reference;
+   begin
+      if File_Reader = No_File_Reader_Reference then
+         return null;
+      end if;
+
+      declare
+         Result : constant File_Reader_Wrapper_Access :=
+            new File_Reader_Wrapper'(Ref_Count => 1, Internal => File_Reader);
+      begin
+         return Internal_File_Reader_Access (Result);
+      end;
+   end Wrap_Public_File_Reader;
 
    -------------
    -- Inc_Ref --
