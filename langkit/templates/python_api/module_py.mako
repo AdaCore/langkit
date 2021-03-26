@@ -707,7 +707,8 @@ class AnalysisUnit(object):
         result = []
         diag = Diagnostic._c_type()
         for i in range(count):
-            assert _unit_diagnostic(self._c_value, i, ctypes.byref(diag))
+            success = _unit_diagnostic(self._c_value, i, ctypes.byref(diag))
+            assert success
             result.append(diag._wrap())
         return result
 
@@ -977,8 +978,9 @@ class Token(ctypes.Structure):
         cls._check_token(last)
         first._check_same_unit(last)
         result = _text()
-        assert _token_range_text(ctypes.byref(first), ctypes.byref(last),
-                                 ctypes.byref(result))
+        success = _token_range_text(ctypes.byref(first), ctypes.byref(last),
+                                    ctypes.byref(result))
+        assert success
         return result._wrap() or u''
 
     @property

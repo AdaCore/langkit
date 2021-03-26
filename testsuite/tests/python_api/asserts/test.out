@@ -1,0 +1,9 @@
+main.py: Running...
+Diagnostics:
+1:1-1:2: Expected 'example', got '{'
+
+Token range:
+'{example example'
+
+main.py: Done.
+Done
