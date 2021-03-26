@@ -1,5 +1,8 @@
 ## vim: filetype=makoada
 
+with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
+with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+
 with ${ada_lib_name}.Analysis;       use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Common;         use ${ada_lib_name}.Common;
 with ${ada_lib_name}.Implementation; use ${ada_lib_name}.Implementation;
@@ -40,6 +43,36 @@ private package ${ada_lib_name}.Public_Converters is
    type Entity_Unwrapper is access function
      (Entity : ${root_entity.api_name}'Class) return ${root_entity.name};
    Unwrap_Entity : Entity_Unwrapper;
+
+   -------------------------
+   -- File_Reader_Wrapper --
+   -------------------------
+
+   --  This wraps a file reader using the public API into the one that fits our
+   --  internal APIs.
+
+   type File_Reader_Wrapper is new Internal_File_Reader with record
+      Ref_Count : Natural;
+      Internal  : File_Reader_Reference;
+   end record;
+
+   overriding procedure Inc_Ref (Self : in out File_Reader_Wrapper);
+   overriding function Dec_Ref
+     (Self : in out File_Reader_Wrapper) return Boolean;
+
+   overriding procedure Read
+     (Self        : File_Reader_Wrapper;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
+   function Wrap_Public_File_Reader
+     (File_Reader : File_Reader_Reference) return Internal_File_Reader_Access;
+   --  Wrap a public file reader inside an internal one. If File_Reader is a
+   --  null reference, return null. Otherwise, this returns a new internal
+   --  file reader allocation, with a ref-count of 1.
 
    ---------------------------
    -- Unit_Provider_Wrapper --

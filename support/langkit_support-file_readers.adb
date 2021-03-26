@@ -191,4 +191,26 @@ package body Langkit_Support.File_Readers is
       Close (File);
    end Direct_Read;
 
+   ----------------
+   -- Do_Release --
+   ----------------
+
+   procedure Do_Release (Self : in out File_Reader_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   ----------------------------------
+   -- Create_File_Reader_Reference --
+   ----------------------------------
+
+   function Create_File_Reader_Reference
+     (File_Reader : File_Reader_Interface'Class) return File_Reader_Reference
+   is
+   begin
+      return Result : File_Reader_Reference do
+         Result.Set (File_Reader);
+      end return;
+   end Create_File_Reader_Reference;
+
 end Langkit_Support.File_Readers;

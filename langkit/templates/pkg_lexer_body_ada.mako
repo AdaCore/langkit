@@ -59,7 +59,12 @@ package body ${ada_lib_name}.Lexer is
             end;
       end case;
 
-      Extract_Tokens (Internal_Input, With_Trivia, TDH, Diagnostics);
+      Extract_Tokens
+        (Input       => Internal_Input,
+         With_Trivia => With_Trivia,
+         File_Reader => null,
+         TDH         => TDH,
+         Diagnostics => Diagnostics);
    end Extract_Tokens;
 
    ${exts.include_extension(ctx.ext('lexer', 'bodies'))}

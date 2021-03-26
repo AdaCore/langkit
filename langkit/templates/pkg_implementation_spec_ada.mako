@@ -32,12 +32,12 @@ with GNATCOLL.VFS; use GNATCOLL.VFS;
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Eq_Same;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-
 with Langkit_Support.Bump_Ptr;     use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
+with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Lexical_Envs; use Langkit_Support.Lexical_Envs;
 with Langkit_Support.Lexical_Envs_Impl;
+with Langkit_Support.Symbols;      use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handlers;
 use Langkit_Support.Token_Data_Handlers;
 with Langkit_Support.Types;        use Langkit_Support.Types;
@@ -1268,6 +1268,37 @@ private package ${ada_lib_name}.Implementation is
    --  Try to return a canonical filename. This is used to have an
    --  as-unique-as-possible analysis unit identifier.
 
+   ------------------------------------
+   -- File reader internal interface --
+   ------------------------------------
+
+   type Internal_File_Reader is limited interface;
+   type Internal_File_Reader_Access is access all Internal_File_Reader'Class;
+
+   procedure Inc_Ref (Self : in out Internal_File_Reader) is abstract;
+   ${ada_doc('langkit.file_reader_inc_ref', 3)}
+
+   function Dec_Ref (Self : in out Internal_File_Reader) return Boolean
+   is abstract;
+   ${ada_doc('langkit.file_reader_dec_ref', 3)}
+
+   procedure Read
+     (Self        : Internal_File_Reader;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector) is abstract;
+   ${ada_doc('langkit.file_reader_read', 3)}
+
+   procedure Dec_Ref (File_Reader : in out Internal_File_Reader_Access);
+   --  Call Dec_Ref on File_Reader.all and, if the ref-count reaches 0,
+   --  dealloacte it.
+
+   --------------------------------------
+   -- Unit provider internal interface --
+   --------------------------------------
+
    type Internal_Unit_Provider is limited interface;
    type Internal_Unit_Provider_Access is
       access all Internal_Unit_Provider'Class;
@@ -1337,6 +1368,9 @@ private package ${ada_lib_name}.Implementation is
 
       Named_Envs : NED_Maps.Map;
       --  Map env names to the corresponding named environment descriptors
+
+      File_Reader : Internal_File_Reader_Access;
+      --  Object to override the reading and decoding of source files
 
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
@@ -1554,6 +1588,7 @@ private package ${ada_lib_name}.Implementation is
 
    function Create_Context
      (Charset        : String;
+      File_Reader    : Internal_File_Reader_Access;
       Unit_Provider  : Internal_Unit_Provider_Access;
       With_Trivia    : Boolean;
       Tab_Stop       : Positive;

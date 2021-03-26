@@ -174,7 +174,8 @@ package body ${ada_lib_name}.Parsers is
    begin
       Reset (Parser);
       Extract_Tokens
-        (Input, With_Trivia, TDH.all, Parser.Diagnostics);
+        (Input, With_Trivia, Unit.Context.File_Reader, TDH.all,
+         Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
    end Init_Parser;

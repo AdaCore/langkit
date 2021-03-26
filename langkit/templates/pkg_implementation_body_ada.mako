@@ -300,6 +300,19 @@ package body ${ada_lib_name}.Implementation is
    -- Dec_Ref --
    -------------
 
+   procedure Dec_Ref (File_Reader : in out Internal_File_Reader_Access) is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (Internal_File_Reader'Class, Internal_File_Reader_Access);
+   begin
+      if File_Reader /= null and then File_Reader.all.Dec_Ref then
+         Destroy (File_Reader);
+      end if;
+   end Dec_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access) is
       procedure Destroy is new Ada.Unchecked_Deallocation
         (Internal_Unit_Provider'Class, Internal_Unit_Provider_Access);
@@ -347,9 +360,10 @@ package body ${ada_lib_name}.Implementation is
    --------------------
 
    function Create_Context
-     (Charset       : String;
-      Unit_Provider : Internal_Unit_Provider_Access;
-      With_Trivia   : Boolean;
+     (Charset        : String;
+      File_Reader    : Internal_File_Reader_Access;
+      Unit_Provider  : Internal_Unit_Provider_Access;
+      With_Trivia    : Boolean;
       Tab_Stop       : Positive;
       Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
       return Internal_Context
@@ -370,10 +384,16 @@ package body ${ada_lib_name}.Implementation is
         (Parent => AST_Envs.No_Env_Getter,
          Node   => null);
 
-      Context.Unit_Provider := Unit_Provider;
+      --  Create a new ownership share for File_Reader so that it lives at
+      --  least as long as this analysis context.
+      Context.File_Reader := File_Reader;
+      if Context.File_Reader /= null then
+         Context.File_Reader.Inc_Ref;
+      end if;
 
-      --  Create an ownership share for the unit provider so that it lives at
-      --  least as long as this analysis context lives.
+      --  Create a new ownership share for Unit_Provider so that it lives at
+      --  least as long as this analysis context.
+      Context.Unit_Provider := Unit_Provider;
       if Context.Unit_Provider /= null then
          Context.Unit_Provider.Inc_Ref;
       end if;
@@ -552,6 +572,10 @@ package body ${ada_lib_name}.Implementation is
       if Has_Rewriting_Handle (Context) then
          raise Precondition_Failure with
             "cannot parse from buffer during tree rewriting";
+
+      elsif Context.File_Reader /= null then
+         raise Precondition_Failure with
+            "cannot parse from buffer with a file reader";
       end if;
 
       return Get_Unit (Context, Filename, Charset, True, Input, Rule);
@@ -4315,7 +4339,8 @@ package body ${ada_lib_name}.Implementation is
       --  optimization is valid only when there is no file reader, which can
       --  work even when there is no real source file.
 
-      if Input.Kind = File
+      if Context.File_Reader = null
+         and then Input.Kind = File
          and then (Input.Filename.Is_Directory
                    or else (not Input.Filename.Is_Readable))
       then
