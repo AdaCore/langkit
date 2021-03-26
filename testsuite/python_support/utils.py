@@ -192,7 +192,8 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   version: str = "undefined",
                   build_date: str = "undefined",
                   full_error_traces: bool = True,
-                  additional_make_args: List[str] = []):
+                  additional_make_args: List[str] = [],
+                  python_args: Optional[List[str]] = None):
     """
     Compile and emit code for `ctx` and build the generated library. Then,
     execute the provided scripts/programs, if any.
@@ -248,6 +249,9 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
 
     :param additional_make_args: Additional command-line arguments to pass to
         "manage.py make".
+
+    :param python_args: Arguments to pass to the Python interpreter when
+        running a Python script.
     """
     assert not types_from_lkt or lkt_file is not None
 
@@ -362,8 +366,11 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         # library, we have to use the special Python interpreter the testsuite
         # provides us. See the corresponding code in
         # testuite_support/python_driver.py.
-        python_interpreter = os.environ['PYTHON_INTERPRETER']
-        run(python_interpreter, py_script)
+        args = [os.environ['PYTHON_INTERPRETER']]
+        if python_args:
+            args.extend(python_args)
+        args.append(py_script)
+        run(*args)
 
     if ada_main is not None:
         if isinstance(ada_main, str):
