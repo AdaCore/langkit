@@ -1137,7 +1137,14 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
             case Res_Val.State is
                when Computing =>
-                  return;
+                  --  When the cache state is "Computing", it means that we're
+                  --  doing a given env request inside the same env request.
+                  --  This is a thing that legitimately happens in some cases,
+                  --  and in this case you need to return the correct results,
+                  --  not using the cache mechanism at all. So we just bail out
+                  --  of the caching setup, and this will behave like a no
+                  --  cache request.
+                  null;
                when Computed =>
                   Local_Results.Concat (Res_Val.Elements);
                   return;
