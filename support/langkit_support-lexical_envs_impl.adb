@@ -34,6 +34,14 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Envs_Impl is
 
+   procedure Invalidate_Cache (Env : Lexical_Env_Access);
+
+   function Image (E : Entity) return String
+   is
+     (Image (Node_Text_Image (E.Node, False)));
+
+   function Entity_Vectors_Image is new Entity_Vectors.Image (Image);
+
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, False);
 
    function Is_Lookup_Cache_Valid (Self : Lexical_Env) return Boolean
@@ -488,9 +496,12 @@ package body Langkit_Support.Lexical_Envs_Impl is
          return;
       end if;
 
+      Me.Trace
+        ("ADDING VAL key=""" & Image (Key) & """, env=" & Env_Image (Self));
+
       --  Invalidate the cache, and make sure we have an entry in the internal
       --  map for the given key.
-      Env.Lookup_Cache_Valid := False;
+      Invalidate_Cache (Env);
       Map.Insert (Key, Empty_Internal_Map_Element, C, Dummy);
 
       declare
@@ -535,7 +546,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          end loop;
       end if;
 
-      Env.Lookup_Cache_Valid := False;
+      Invalidate_Cache (Env);
    end Remove;
 
    ---------------
@@ -559,6 +570,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
       if Self = Empty_Env then
          return;
       end if;
+
+      if Has_Trace then
+         Rec.Trace ("REFERENCE " & Env_Image (Self));
+      end if;
+
       Resolve (Refd_Env.Getter, No_Entity_Info);
       Refd_Env.State := Active;
 
@@ -573,7 +589,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          Env.Rebindings_Assoc_Ref_Env := Env.Referenced_Envs.Last_Index;
       end if;
 
-      Env.Lookup_Cache_Valid := False;
+      Invalidate_Cache (Env);
    end Reference;
 
    ---------------
@@ -591,6 +607,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Ref : constant Referenced_Env :=
         (Kind, Simple_Env_Getter (To_Reference), False, Active, Categories);
    begin
+      if Has_Trace then
+         Rec.Trace ("REFERENCE" & Env_Image (Self));
+      end if;
+
       if Self = Empty_Env then
          return;
       end if;
@@ -598,7 +618,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       if Rebindings_Assoc then
          Env.Rebindings_Assoc_Ref_Env := Env.Referenced_Envs.Last_Index;
       end if;
-      Env.Lookup_Cache_Valid := False;
+      Invalidate_Cache (Env);
    end Reference;
 
    ---------
@@ -620,6 +640,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
         (Lookup_Cache_Mode = Full
          or else (Lookup_Cache_Mode = Toplevel_Only and then Toplevel));
       --  Return whether to cache a particular request or not
+
+      function Log_Id return String is
+        ("env=" & Env_Image (Self) & ", key=" & Image (Key.all));
 
       Env : constant Lexical_Env_Access := Unwrap (Self);
 
@@ -808,7 +831,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
       begin
 
          if Has_Trace then
-            Me.Trace
+            Rec.Trace
               ("Found " & Image (Node_Text_Image (E.Node, False))
                & " from_rebound => " & From_Rebound'Img);
          end if;
@@ -931,9 +954,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       if Has_Trace then
          Rec.Trace
-           ("Get_Internal env="
-            & Lexical_Env_Image (Self, Dump_Content => False)
-            & " key = " & Image (Key)
+           ("GET_INTERNAL "
+            & Log_Id
             & " lookup kind = " & Lookup_Kind_Type'Image (Lookup_Kind));
       end if;
 
@@ -1003,8 +1025,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
             Res_Val := Element (Cached_Res_Cursor);
 
             if Has_Trace then
-               Rec.Trace
-                 ("Found a cache entry: "
+               Caches_Trace.Trace
+                 ("CACHE ENTRY " & Log_Id & ": "
                   & Lookup_Cache_Entry_State'Image (Res_Val.State));
             end if;
 
@@ -1186,7 +1208,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          end loop;
 
          if Has_Trace then
-            Me.Trace ("Returning vector with length " & FV.Length'Image);
+            Me.Trace ("Returning vector " & Entity_Vectors_Image (FV));
          end if;
 
          if Has_Trace then
@@ -1910,7 +1932,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Parent_Env_Id  : String := "";
       Dump_Addresses : Boolean := False;
       Dump_Content   : Boolean := True;
-      Prefix         : String := "") return String
+      Prefix         : String := "";
+      Short_Node     : Boolean := False) return String
    is
       Env : constant Lexical_Env_Access := Unwrap (Self);
 
@@ -1920,7 +1943,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       function Image (N : Node_Type) return String
       is (if N = No_Node then "<null>"
-          else Image (Node_Text_Image (N, False)));
+          else Image (Node_Text_Image (N, Short => Short_Node)));
       --  Wrapper around Node_Text_Image to handle null nodes.
       --
       --  TODO??? This is slightly hackish, because we're converting a wide
@@ -1982,7 +2005,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          if Env_Node (Self) /= No_Node then
             New_Arg;
             Append (Result, "Node="
-                    & Image (Node_Text_Image (Env_Node (Self), False)));
+                    & Image (Env_Node (Self)));
          end if;
       end if;
 
@@ -2197,7 +2220,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
          return;
       end if;
 
-      Env.Lookup_Cache_Valid := False;
+      Invalidate_Cache (Env);
 
       for I in Env.Referenced_Envs.First_Index
             .. Env.Referenced_Envs.Last_Index
@@ -2287,5 +2310,18 @@ package body Langkit_Support.Lexical_Envs_Impl is
                    or else Env.Rebindings.Version /= Env.Rebindings_Version;
       end case;
    end Is_Stale;
+
+   ----------------------
+   -- Invalidate_Cache --
+   ----------------------
+
+   procedure Invalidate_Cache (Env : Lexical_Env_Access) is
+   begin
+      if Has_Trace and then Env.Lookup_Cache_Valid = True then
+         Caches_Trace.Trace ("INVALIDATING CACHES " & Env_Image (Wrap (Env)));
+      end if;
+
+      Env.Lookup_Cache_Valid := False;
+   end Invalidate_Cache;
 
 end Langkit_Support.Lexical_Envs_Impl;

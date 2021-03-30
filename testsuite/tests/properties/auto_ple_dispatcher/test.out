@@ -1,4 +1,5 @@
 [LIBFOOLANG.MAIN_TRACE] Populating lexical envs for unit: foo.txt
+[LIBFOOLANG.MAIN_TRACE] Finished populating lexical envs for unit: foo.txt
 <Var foo.txt:2:5-2:16> -> <Var foo.txt:2:5-2:16>
 <Var foo.txt:5:13-5:34> -> <Var foo.txt:5:13-5:34>
 <Var foo.txt:8:5-8:16> -> <Var foo.txt:8:5-8:16>

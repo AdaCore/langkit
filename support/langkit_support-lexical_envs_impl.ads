@@ -761,7 +761,8 @@ package Langkit_Support.Lexical_Envs_Impl is
       Parent_Env_Id  : String := "";
       Dump_Addresses : Boolean := False;
       Dump_Content   : Boolean := True;
-      Prefix         : String := "") return String;
+      Prefix         : String := "";
+      Short_Node     : Boolean := False) return String;
    --  Return a textual representation of Self.
    --
    --  If provided, Env_Id and Parent_Env_Id are used to designate Self and its
@@ -777,6 +778,11 @@ package Langkit_Support.Lexical_Envs_Impl is
    --  single line.
    --
    --  Prefix is used to prefix each emitted line.
+
+   function Env_Image
+     (Self : Lexical_Env) return String
+   is
+      (Lexical_Env_Image (Self, Dump_Content => False, Short_Node => True));
 
    function Lexical_Env_Parent_Chain (Self : Lexical_Env) return String;
 

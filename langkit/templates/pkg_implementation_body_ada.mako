@@ -885,6 +885,9 @@ package body ${ada_lib_name}.Implementation is
          Saved_In_Populate_Lexical_Env;
 
       GNATCOLL.Traces.Decrease_Indent (Main_Trace);
+      GNATCOLL.Traces.Trace
+        (Main_Trace,
+         "Finished populating lexical envs for unit: " & Basename (Unit));
 
       Reset_Envs_Caches (Unit);
 
