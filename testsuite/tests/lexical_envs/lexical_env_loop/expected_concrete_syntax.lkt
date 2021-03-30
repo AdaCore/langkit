@@ -1,0 +1,58 @@
+lexer foo_lexer {
+
+    @trivia() whitespace <- p"[ \n\r\t]+"
+    @trivia() comment <- p"#(.?)+"
+    package <- "package"
+    use <- "use"
+    ref <- "ref"
+    l_brace <- "{"
+    r_brace <- "}"
+    var <- "var"
+    l_par <- "("
+    r_par <- ")"
+    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(decl)
+    name <- Name(@identifier)
+    package <- Package("package" name "{" list*(decl) "}")
+    var <- Var("var" name)
+    decl <- or(var | package | use_clause | ref)
+    use_clause <- UseClause("use" name)
+    ref <- Ref("ref" name)
+
+}
+
+@abstract class FooNode : Node {
+}
+
+@abstract class Decl : FooNode {
+}
+
+class Package : Decl {
+    @parse_field name : Name
+    @parse_field decls : ASTList[Decl]
+}
+
+class Ref : Decl {
+    @parse_field name : Name
+
+    @export fun entity (): FooNode = node.as_entity.name.get_ref()
+}
+
+class UseClause : Decl {
+    @parse_field name : Name
+}
+
+class Var : Decl {
+    @parse_field name : Name
+}
+
+class Name : FooNode implements TokenNode {
+
+    fun designated_env (): LexicalEnv =
+    node.node_env().get(node, from=node)?(0).children_env()
+
+    fun get_ref (): FooNode = node.node_env().get(node, from=node)?(0)
+}
