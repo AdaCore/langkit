@@ -166,7 +166,7 @@ package body Langkit_Support.Token_Data_Handlers is
       T : Text_Type
       renames TDH.Source_Buffer (TDH.Source_First .. TDH.Source_Last);
 
-      Idx : Natural := 0;
+      Idx : Natural := T'First - 1;
       --  Index in T of the newline character that ends the currently processed
       --  line.
 
