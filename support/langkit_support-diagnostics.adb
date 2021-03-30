@@ -55,7 +55,7 @@ package body Langkit_Support.Diagnostics is
 
    procedure Append
      (Diagnostics : in out Diagnostics_Vectors.Vector;
-      Sloc_Range  : Source_Location_Range;
+      Sloc_Range  : Source_Location_Range := No_Source_Location_Range;
       Message     : Wide_Wide_String)
    is
    begin
