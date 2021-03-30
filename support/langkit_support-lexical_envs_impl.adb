@@ -88,6 +88,43 @@ package body Langkit_Support.Lexical_Envs_Impl is
    --  identical New_Env in the set of rebindings. If there are, raise a
    --  property error.
 
+   procedure Get_Internal_Impl
+     (Self                    : Lexical_Env;
+      Key                     : Symbol_Type;
+      Lookup_Kind             : Lookup_Kind_Type := Recursive;
+      Rebindings              : Env_Rebindings := null;
+      Metadata                : Node_Metadata := Empty_Metadata;
+      Categories              : Ref_Categories;
+      Local_Results           : in out Lookup_Result_Vector;
+      Toplevel                : Boolean := True;
+      Recursive_Check_Reached : in out Boolean);
+   --  This is the real Env.Get implementation.
+   --
+   --  ``Toplevel`` is used to discriminate between the toplevel call and
+   --  further calls, for the ``Toplevel_Only`` cache mode.
+   --
+   --  ``Recursive_Check_Reached`` is an helper variable passed down to
+   --  recursive calls, to down propagate to parent calls when the recursion
+   --  protection is activated, i.e. when an lexical environment is visited a
+   --  second time in a recursive call. When this recursive check is reached,
+   --  all intermediate calls won't be cached because the origin of the request
+   --  has potentially changed the results. See the Ada example below::
+   --
+   --      package R is
+   --          package N is
+   --               type O is ...;
+   --               -- <- Original env request on "O" from here
+   --          end N;
+   --          --  <- When exploring parents, env_get will get here. The cache
+   --          --     is empty.
+   --          use N;
+   --          --  <-  When traversing the "use", since the request originates
+   --          --      from `N`, the recursion protection will stop it's
+   --          --      re-traversal
+   --          --  <- If we cache, we'll cache a wrong result for the request
+   --          --     `R_env.get("O")`, when the request starts from `R`'s env
+   --      end R;
+
    procedure Get_Internal
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
@@ -95,8 +132,17 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata;
       Categories    : Ref_Categories;
-      Local_Results : in out Lookup_Result_Vector;
-      Toplevel      : Boolean := True);
+      Local_Results : in out Lookup_Result_Vector);
+   --  This is the ``Get_Internal_Impl`` wrapper. It is used to forward default
+   --  values to some internal parameters used by ``Get_Internal_Impl``. We're
+   --  not using a nested function for ``Get_Internal_Impl`` because the level
+   --  of nesting is bad enough already.
+   --
+   --  ``Local_Results`` is the vector in which results will be accumulated by
+   --  the recursive calls.
+   --
+   --  TODO: It might be exactly the same to return Local_Result rather than
+   --  make it an in out param, now that we have a wrapper.
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env);
    --  Reset Self's lexical environment lookup cache
@@ -621,9 +667,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Invalidate_Cache (Env);
    end Reference;
 
-   ---------
-   -- Get --
-   ---------
+   ------------------
+   -- Get_Internal --
+   ------------------
 
    procedure Get_Internal
      (Self          : Lexical_Env;
@@ -632,8 +678,31 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Rebindings    : Env_Rebindings := null;
       Metadata      : Node_Metadata := Empty_Metadata;
       Categories    : Ref_Categories;
-      Local_Results : in out Lookup_Result_Vector;
-      Toplevel      : Boolean := True)
+      Local_Results : in out Lookup_Result_Vector)
+   is
+      Dummy : Boolean := False;
+   begin
+      Get_Internal_Impl
+        (Self, Key, Lookup_Kind, Rebindings,
+         Metadata, Categories, Local_Results,
+         Toplevel                => True,
+         Recursive_Check_Reached => Dummy);
+   end Get_Internal;
+
+   -----------------------
+   -- Get_Internal_Impl --
+   -----------------------
+
+   procedure Get_Internal_Impl
+     (Self                    : Lexical_Env;
+      Key                     : Symbol_Type;
+      Lookup_Kind             : Lookup_Kind_Type := Recursive;
+      Rebindings              : Env_Rebindings := null;
+      Metadata                : Node_Metadata := Empty_Metadata;
+      Categories              : Ref_Categories;
+      Local_Results           : in out Lookup_Result_Vector;
+      Toplevel                : Boolean := True;
+      Recursive_Check_Reached : in out Boolean)
    is
       function Do_Cache return Boolean
       is
@@ -673,6 +742,43 @@ package body Langkit_Support.Lexical_Envs_Impl is
         (Self : Lexical_Env; From_Rebound : Boolean := False) return Boolean;
       --  Lookup for matching nodes in Env's internal map and append them to
       --  Local_Results. Return whether we found some.
+
+      procedure Recurse
+        (Self                    : Lexical_Env;
+         Key                     : Symbol_Type;
+         Lookup_Kind             : Lookup_Kind_Type := Recursive;
+         Rebindings              : Env_Rebindings := null;
+         Metadata                : Node_Metadata := Empty_Metadata;
+         Categories              : Ref_Categories;
+         Local_Results           : in out Lookup_Result_Vector);
+      --  Helper procedure for all env lookup recursions, so that the Toplevel
+      --  argument is automatically passed to False for recursive calls, and
+      --  ``Recursive_Check_Reached`` is automatically passed down the call
+      --  chain.
+      --
+      --  NOTE: Every recursive call to ``Get_Internal_Impl`` should go through
+      --  this helper.
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse
+        (Self                    : Lexical_Env;
+         Key                     : Symbol_Type;
+         Lookup_Kind             : Lookup_Kind_Type := Recursive;
+         Rebindings              : Env_Rebindings := null;
+         Metadata                : Node_Metadata := Empty_Metadata;
+         Categories              : Ref_Categories;
+         Local_Results           : in out Lookup_Result_Vector)
+      is
+      begin
+         Get_Internal_Impl
+           (Self, Key, Lookup_Kind, Rebindings, Metadata,
+            Categories, Local_Results,
+            Toplevel                => False,
+            Recursive_Check_Reached => Recursive_Check_Reached);
+      end Recurse;
 
       ----------------------
       -- Append_All_Nodes --
@@ -869,6 +975,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
            or else Self.Being_Visited
            or else Self.State = Inactive
          then
+            --  We reached a loop in the env graph, propagate the information
+            --  back to callers.
+            Recursive_Check_Reached := True;
             return;
          end if;
 
@@ -893,20 +1002,19 @@ package body Langkit_Support.Lexical_Envs_Impl is
          declare
             Refd_Results : Lookup_Result_Vector;
          begin
-            Get_Internal
+            Recurse
               (Env, Key,
-               Lookup_Kind =>
+               Lookup_Kind   =>
                  (if Lookup_Kind = Recursive and then Self.Kind = Transitive
                   then Recursive
                   elsif Lookup_Kind = Minimal
                   then raise System.Assertions.Assert_Failure
-                  with "Should not happen"
+                       with "Should not happen"
                   else Flat),
-               Rebindings  => Shed_Rebindings (Env, Current_Rebindings),
-               Metadata    => Metadata,
-               Categories  => Categories,
-               Local_Results => Refd_Results,
-               Toplevel      => False);
+               Rebindings    => Shed_Rebindings (Env, Current_Rebindings),
+               Metadata      => Metadata,
+               Categories    => Categories,
+               Local_Results => Refd_Results);
 
             if Self.Getter.Dynamic then
                for Res of Refd_Results loop
@@ -961,10 +1069,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
 
       case Self.Kind is
          when Orphaned =>
-            Get_Internal
+            Recurse
               (Env.Orphaned_Env, Key, Flat, Rebindings, Metadata,
-               Categories, Local_Results,
-               Toplevel      => False);
+               Categories, Local_Results);
             return;
 
          when Grouped =>
@@ -975,9 +1082,8 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   Combine (Env.Default_MD, Metadata);
             begin
                for E of Env.Grouped_Envs.all loop
-                  Get_Internal (E, Key, Lookup_Kind, Rebindings, MD,
-                                Categories, Local_Results,
-                                Toplevel      => False);
+                  Recurse (E, Key, Lookup_Kind, Rebindings, MD,
+                           Categories, Local_Results);
                end loop;
             end;
             Rec.Decrease_Indent;
@@ -985,11 +1091,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
             return;
 
          when Rebound =>
-            Get_Internal
+            Recurse
               (Env.Rebound_Env, Key, Lookup_Kind,
                Combine (Env.Rebindings, Rebindings),
-               Metadata, Categories, Local_Results,
-               Toplevel      => False);
+               Metadata, Categories, Local_Results);
             return;
 
          when Primary_Kind =>
@@ -1100,11 +1205,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   Rec.Trace ("Recursing on parent environments");
                   Rec.Increase_Indent;
                end if;
-               Get_Internal
+
+               Recurse
                  (Parent_Env, Key, Lookup_Kind,
                   Parent_Rebindings,
-                  Metadata, Categories, Local_Results,
-                  Toplevel      => False);
+                  Metadata, Categories, Local_Results);
                if Has_Trace then
                   Rec.Decrease_Indent;
                end if;
@@ -1145,12 +1250,22 @@ package body Langkit_Support.Lexical_Envs_Impl is
         and then Lookup_Kind = Recursive
         and then Need_Cache
       then
-         Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
+
+         --  Only cache if there was no loop in the env graph (see comment on
+         --  ``Get_Internal_Impl``).
+
+         if Recursive_Check_Reached then
+            Env.Lookup_Cache.Include
+              (Res_Key, (None, Empty_Lookup_Result_Vector));
+         else
+            Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
+         end if;
+
          Outer_Results.Concat (Local_Results);
          Local_Results := Outer_Results;
       end if;
 
-   end Get_Internal;
+   end Get_Internal_Impl;
 
    function Get
      (Self        : Lexical_Env;

@@ -1,0 +1,17 @@
+package r {       #
+    package n {   #
+        var o     # <-----------------------------+ here
+                  #      and then goes            |
+    }             #                  |            |
+                  #                  |            |
+    package m {   #                  |            |
+        use n     #                  |            |
+        ref o     # First request from here, goes |
+    }             #                  |
+                  # <----here--------+
+                  #
+    use n         # It will go to "n" again here, but recursion protection will
+                  # be activated, so it won't find "o". In that case, we don't
+                  # want the empty result to be cached.
+    ref o         #
+}

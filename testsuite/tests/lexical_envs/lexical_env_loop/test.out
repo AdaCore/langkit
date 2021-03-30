@@ -1,0 +1,4 @@
+Ref <Ref bar.txt:9:9-9:14> references <Var bar.txt:3:9-3:14>
+Ref <Ref bar.txt:16:5-16:10> references <Var bar.txt:3:9-3:14>
+Done.
+Done

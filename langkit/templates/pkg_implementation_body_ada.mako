@@ -3685,9 +3685,9 @@ package body ${ada_lib_name}.Implementation is
          return True;
       end if;
 
-       return Compare
-         (Start_Sloc (Sloc_Range (El)),
-          Start_Sloc (Sloc_Range (From))) = After;
+      return Compare
+        (Start_Sloc (Sloc_Range (El)),
+         Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
 
    -----------------
