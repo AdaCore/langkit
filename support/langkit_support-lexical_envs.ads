@@ -53,8 +53,6 @@ package Langkit_Support.Lexical_Envs is
    --  done (less optimization, thus taking longer to run) to ease the
    --  investigation of env caching bugs.
 
-   Debug_Mode : constant Boolean := True;
-
    Min : constant GNATCOLL.Traces.Trace_Handle :=
      GNATCOLL.Traces.Create
        ("LANGKIT.LEXICAL_ENV_MINIMAL", GNATCOLL.Traces.From_Config);
@@ -75,7 +73,7 @@ package Langkit_Support.Lexical_Envs is
    --  demand, when the client of lexical env wants more information about
    --  this specific lookup.
 
-   function Has_Trace return Boolean is (Debug_Mode and then Me.Active);
+   function Has_Trace return Boolean is (Me.Active);
 
    -----------------
    -- Lexical_Env --
