@@ -164,7 +164,31 @@ private package ${ada_lib_name}.Implementation.C is
            External_Name => "${capi.get_name('get_versions')}";
    ${ada_c_doc('langkit.get_versions', 3)}
 
-   --  Types for unit providers
+   ------------------
+   -- File readers --
+   ------------------
+
+   type ${file_reader_type} is new System.Address;
+   ${ada_c_doc('langkit.file_reader_type', 3)}
+
+   type ${file_reader_destroy_type} is access procedure
+     (Data : System.Address)
+      with Convention => C;
+   ${ada_c_doc('langkit.file_reader_destroy_type', 3)}
+
+   type ${file_reader_read_type} is access procedure
+     (Data       : System.Address;
+      Filename   : chars_ptr;
+      Charset    : chars_ptr;
+      Read_BOM   : int;
+      Buffer     : access ${text_type};
+      Diagnostic : access ${diagnostic_type})
+      with Convention => C;
+   ${ada_c_doc('langkit.file_reader_read_type', 3)}
+
+   --------------------
+   -- Unit providers --
+   --------------------
 
    type ${unit_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_provider_type', 3)}
@@ -197,6 +221,7 @@ private package ${ada_lib_name}.Implementation.C is
 
    function ${capi.get_name("create_analysis_context")}
      (Charset       : chars_ptr;
+      File_Reader   : ${file_reader_type};
       Unit_Provider : ${unit_provider_type};
       With_Trivia   : int;
       Tab_Stop      : int) return ${analysis_context_type}
@@ -479,6 +504,31 @@ private package ${ada_lib_name}.Implementation.C is
            External_name => "${capi.get_name('text_to_locale_string')}";
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
+   ------------------
+   -- File readers --
+   ------------------
+
+   function ${capi.get_name('create_file_reader')}
+     (Data         : System.Address;
+      Destroy_Func : ${file_reader_destroy_type};
+      Read_Func    : ${file_reader_read_type}) return ${file_reader_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('create_file_reader')}";
+   ${ada_c_doc('langkit.create_file_reader', 3)}
+
+   procedure ${capi.get_name('dec_ref_file_reader')}
+     (File_Reader : ${file_reader_type})
+      with Export        => True,
+           Convention    => C,
+           External_name =>
+              "${capi.get_name('dec_ref_file_reader')}";
+   ${ada_c_doc('langkit.file_reader_dec_ref', 3)}
+
+   ${exts.include_extension(
+      ctx.ext('analysis', 'c_api', 'file_readers', 'spec')
+   )}
+
    --------------------
    -- Unit providers --
    --------------------
@@ -678,6 +728,11 @@ private package ${ada_lib_name}.Implementation.C is
 
    function Wrap (Token : Token_Reference) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Reference;
+
+   function Wrap_Private_File_Reader is new Ada.Unchecked_Conversion
+     (Internal_File_Reader_Access, ${file_reader_type});
+   function Unwrap_Private_File_Reader is new Ada.Unchecked_Conversion
+     (${file_reader_type}, Internal_File_Reader_Access);
 
    function Wrap_Private_Provider is new Ada.Unchecked_Conversion
      (Internal_Unit_Provider_Access, ${unit_provider_type});

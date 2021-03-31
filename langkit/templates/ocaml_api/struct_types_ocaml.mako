@@ -245,7 +245,8 @@ module AnalysisContextStruct : sig
 
   val c_type : t typ
 
-  val create_analysis_context : string -> unit ptr -> bool -> int -> t
+  val create_analysis_context :
+    string -> unit ptr -> unit ptr -> bool -> int -> t
 
   val get_analysis_unit_from_file :
     t -> string -> string -> bool -> GrammarRule.t -> AnalysisUnitStruct.t
@@ -284,7 +285,8 @@ end = struct
 
   let create_analysis_context =
     foreign ~from:c_lib "${capi.get_name('create_analysis_context')}"
-      (string @-> UnitProvider.c_type @-> bool @-> int @-> raisable c_type)
+      (string @-> ptr void @-> UnitProvider.c_type @-> bool @-> int
+      @-> raisable c_type)
 
   let get_analysis_unit_from_file =
     foreign ~from:c_lib "${capi.get_name('get_analysis_unit_from_file')}"

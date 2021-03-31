@@ -837,6 +837,7 @@ end = struct
     let c_context =
        AnalysisContextStruct.create_analysis_context
          charset
+         Ctypes.null (* TODO: bind the file readers API to OCaml*)
          (!@unit_provider)
          with_trivia
          tab_stop

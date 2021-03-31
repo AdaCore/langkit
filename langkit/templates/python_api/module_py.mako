@@ -386,6 +386,7 @@ class ${enum_type.py_helper}(_Enum):
 default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.lower}
 
 
+_file_reader = _hashable_c_pointer()
 _unit_provider = _hashable_c_pointer()
 
 
@@ -444,6 +445,7 @@ class AnalysisContext(object):
 
     def __init__(self,
                  charset=None,
+                 file_reader=None,
                  unit_provider=None,
                  with_trivia=True,
                  tab_stop=${ctx.default_tab_stop},
@@ -459,9 +461,11 @@ class AnalysisContext(object):
             if not isinstance(tab_stop, int) or tab_stop < 1:
                 raise ValueError(
                     'Invalid tab_stop (positive integer expected)')
+            c_file_reader = file_reader._c_value if file_reader else None
             c_unit_provider = unit_provider._c_value if unit_provider else None
-            self._c_value = _create_analysis_context(charset, c_unit_provider,
-                                                     with_trivia, tab_stop)
+            self._c_value = _create_analysis_context(
+                charset, c_file_reader, c_unit_provider, with_trivia, tab_stop
+            )
         else:
             self._c_value = _context_incref(_c_value)
         assert self._c_value not in self._context_cache
@@ -1038,6 +1042,23 @@ class Token(ctypes.Structure):
         return (self._token_data, self._token_index, self._trivia_index)
 
 
+## TODO: if needed one day, also bind create_file_provider to allow Python
+## users to implement their own file readers.
+class FileReader(object):
+    ${py_doc('langkit.file_reader_type', 4)}
+
+    def __init__(self, c_value):
+        ${py_doc('langkit.python.FileReader.__init__', 8)}
+        self._c_value = c_value
+
+    def __del__(self):
+        _dec_ref_file_reader(self._c_value)
+
+${exts.include_extension(
+   ctx.ext('python_api', 'file_readers', 'methods')
+)}
+
+
 ## TODO: if this is needed some day, also bind create_unit_provider to allow
 ## Python users to create their own unit providers.
 class UnitProvider(object):
@@ -1575,6 +1596,7 @@ _get_versions = _import_func(
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
     [ctypes.c_char_p, # charset
+     _file_reader,    # file_reader
      _unit_provider,  # unit_provider
      ctypes.c_int,    # with_trivia
      ctypes.c_int],   # tab_stop
@@ -1758,6 +1780,15 @@ _${field.accessor_basename.lower} = _import_func(
 )
     % endfor
 % endfor
+
+# File readers
+_dec_ref_file_reader = _import_func(
+    '${capi.get_name("dec_ref_file_reader")}',
+    [_file_reader], None
+)
+${exts.include_extension(
+   ctx.ext('python_api', 'file_readers', 'low_level_bindings')
+)}
 
 # Unit providers
 _dec_ref_unit_provider = _import_func(

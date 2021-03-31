@@ -1,0 +1,5 @@
+## vim: ft=makopython
+
+_create_my_file_reader = _import_func(
+    "foo_create_my_file_reader", [], _file_reader
+)

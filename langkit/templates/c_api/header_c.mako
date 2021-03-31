@@ -184,6 +184,26 @@ ${iterator_types.incomplete_decl(T.entity.iterator)}
 % endfor
 
 /*
+ * Types for file readers
+ */
+
+${c_doc('langkit.file_reader_type')}
+typedef void *${file_reader_type};
+
+${c_doc('langkit.file_reader_destroy_type')}
+typedef void (*${file_reader_destroy_type})(void *data);
+
+${c_doc('langkit.file_reader_read_type')}
+typedef void (*${file_reader_read_type})(
+   void *data,
+   const char *filename,
+   const char *charset,
+   int read_bom,
+   ${text_type} *buffer,
+   ${diagnostic_type} *diagnostic
+);
+
+/*
  * Types for unit providers
  */
 
@@ -233,6 +253,7 @@ ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(
    const char *charset,
+   ${file_reader_type} file_reader,
    ${unit_provider_type} unit_provider,
    int with_trivia,
    int tab_stop
@@ -459,6 +480,26 @@ ${capi.get_name("get_versions")}(char **version, char **build_date);
         ${astnode_types.accessor_decl(field)}
     % endfor
 % endfor
+
+/*
+ * File readers
+ */
+
+${c_doc('langkit.create_file_reader')}
+extern ${file_reader_type}
+${capi.get_name('create_file_reader')}(
+   void *data,
+   ${file_reader_destroy_type} destroy_func,
+   ${file_reader_read_type} read_func
+);
+
+${c_doc('langkit.file_reader_dec_ref')}
+extern void
+${capi.get_name('dec_ref_file_reader')}(${file_reader_type} self);
+
+${exts.include_extension(
+   ctx.ext('analysis', 'c_api', 'file_readers', 'header')
+)}
 
 /*
  * Unit providers

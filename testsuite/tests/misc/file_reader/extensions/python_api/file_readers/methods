@@ -1,0 +1,6 @@
+## vim: ft=makopython
+
+    @classmethod
+    def my_file_reader(cls):
+        c_value = _create_my_file_reader()
+        return cls(c_value)

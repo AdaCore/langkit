@@ -32,6 +32,37 @@ package body ${ada_lib_name}.Implementation.C is
    --  Avoid hiding from $.Lexer
    subtype Token_Data_Type is Common.Token_Data_Type;
 
+   ------------------
+   -- File readers --
+   ------------------
+
+   type C_File_Reader is limited new
+      Ada.Finalization.Limited_Controlled
+      and Internal_File_Reader
+   with record
+      Ref_Count    : Natural;
+      Data         : System.Address;
+      Destroy_Func : ${file_reader_destroy_type};
+      Read_Func    : ${file_reader_read_type};
+   end record;
+
+   type C_File_Reader_Access is access all C_File_Reader;
+
+   overriding procedure Finalize (Self : in out C_File_Reader);
+   overriding procedure Inc_Ref (Self : in out C_File_Reader);
+   overriding function Dec_Ref (Self : in out C_File_Reader) return Boolean;
+   overriding procedure Read
+     (Self        : C_File_Reader;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
+
+   --------------------
+   -- Unit providers --
+   --------------------
+
    type C_Unit_Provider is limited new
       Ada.Finalization.Limited_Controlled
       and Internal_Unit_Provider
@@ -90,6 +121,7 @@ package body ${ada_lib_name}.Implementation.C is
 
    function ${capi.get_name("create_analysis_context")}
      (Charset       : chars_ptr;
+      File_Reader   : ${file_reader_type};
       Unit_Provider : ${unit_provider_type};
       With_Trivia   : int;
       Tab_Stop      : int) return ${analysis_context_type} is
@@ -104,11 +136,7 @@ package body ${ada_lib_name}.Implementation.C is
       begin
          return Create_Context
             (Charset       => C,
-
-             --  TODO??? Bind file readers in the C API. For now, this
-             --  abstraction is available only in the Ada API.
-             File_Reader   => null,
-
+             File_Reader   => Unwrap_Private_File_Reader (File_Reader),
              Unit_Provider => Unwrap_Private_Provider (Unit_Provider),
              With_Trivia   => With_Trivia /= 0,
              Tab_Stop      => Natural (Tab_Stop));
@@ -1039,6 +1067,140 @@ package body ${ada_lib_name}.Implementation.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
    end;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out C_File_Reader) is
+   begin
+      Self.Destroy_Func (Self.Data);
+   end Finalize;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Self : in out C_File_Reader) is
+   begin
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref (Self : in out C_File_Reader) return Boolean is
+   begin
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
+
+   ----------
+   -- Read --
+   ----------
+
+   overriding procedure Read
+     (Self        : C_File_Reader;
+      Filename    : String;
+      Charset     : String;
+      Read_BOM    : Boolean;
+      Contents    : out Decoded_File_Contents;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      C_Filename : chars_ptr := New_String (Filename);
+      C_Charset  : chars_ptr := New_String (Charset);
+      C_Read_BOM : constant int := (if Read_BOM then 1 else 0);
+
+      C_Contents   : aliased ${text_type};
+      C_Diagnostic : aliased ${diagnostic_type} :=
+        (Sloc_Range => <>,
+         Message    => (Chars        => Null_Address,
+                        Length       => 0,
+                        Is_Allocated => 0));
+   begin
+      Self.Read_Func.all
+        (Self.Data, C_Filename, C_Charset, C_Read_BOM, C_Contents'Access,
+         C_Diagnostic'Access);
+
+      if C_Diagnostic.Message.Chars = Null_Address then
+
+         --  If there is a diagonstic (an error), there is no content to return
+
+         declare
+            Message : Text_Type (1 .. Natural (C_Diagnostic.Message.Length))
+               with Import,
+                    Convention => Ada,
+                    Address    => C_Diagnostic.Message.Chars;
+         begin
+            Append (Diagnostics,
+                    Unwrap (C_Diagnostic.Sloc_Range),
+                    Message);
+         end;
+
+      else
+         --  Otherwise, create a copy of the buffer
+
+         declare
+            Buffer : Text_Type (1 .. Natural (C_Contents.Length))
+               with Import, Convention => Ada, Address => C_Contents.Chars;
+         begin
+            Contents.Buffer := new Text_Type (Buffer'Range);
+            Contents.First := Buffer'First;
+            Contents.Last := Buffer'Last;
+            Contents.Buffer.all := Buffer;
+         end;
+      end if;
+
+      Free (C_Filename);
+      Free (C_Charset);
+   end Read;
+
+   function ${capi.get_name('create_file_reader')}
+     (Data         : System.Address;
+      Destroy_Func : ${file_reader_destroy_type};
+      Read_Func    : ${file_reader_read_type}) return ${file_reader_type}
+   is
+   begin
+      Clear_Last_Exception;
+      declare
+         Result : constant C_File_Reader_Access := new C_File_Reader'
+           (Ada.Finalization.Limited_Controlled with
+            Ref_Count    => 1,
+            Data         => Data,
+            Destroy_Func => Destroy_Func,
+            Read_Func    => Read_Func);
+      begin
+         return Wrap_Private_File_Reader (Internal_File_Reader_Access (Result));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${file_reader_type} (System.Null_Address);
+   end;
+
+   procedure ${capi.get_name('dec_ref_file_reader')}
+     (File_Reader : ${file_reader_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         P : Internal_File_Reader_Access :=
+            Unwrap_Private_File_Reader (File_Reader);
+      begin
+         Dec_Ref (P);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   ${exts.include_extension(
+      ctx.ext('analysis', 'c_api', 'file_readers', 'body')
+   )}
 
    --------------
    -- Finalize --
