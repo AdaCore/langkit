@@ -765,6 +765,7 @@ package body ${ada_lib_name}.Implementation is
       AST_Envs.Destroy (Context.Root_Scope);
       Destroy (Context.Symbols);
       Destroy (Context.Parser);
+      Dec_Ref (Context.File_Reader);
       Dec_Ref (Context.Unit_Provider);
       Context_Pool.Release (Context);
    end Destroy;

@@ -627,7 +627,25 @@ base_langkit_docs = {
     #
     # File readers
     #
+    'langkit.file_reader_type': """
+        Interface to override how source files are fetched and decoded.
+    """,
+    'langkit.create_file_reader': """
+        Create a file reader. When done with it, the result must be passed to
+        ``${capi.get_name('dec_ref_file_reader')}``.
 
+        Pass as ``data`` a pointer to hold your private data: it will be passed
+        to all callbacks below.
+
+        ``destroy`` is a callback that is called by
+        ``${capi.get_name('dec_ref_file_reader')}`` to leave a chance to free
+        resources that ``data`` may hold.
+
+        ``read`` is a callback. For a given filename/charset and whether to
+        read the BOM (Byte Order Mark), it tries to fetch the contents of the
+        source file, returned in ``Contents``. If there is an error, it must
+        return it in ``Diagnostic`` instead.
+    """,
     'langkit.file_reader_read': """
         Read the content of the source at the given filename, decoding it using
         the given charset and decoding the byte order mark if ``Read_BOM`` is
@@ -649,6 +667,14 @@ base_langkit_docs = {
         % if lang == 'ada':
             Return whether there are no ownership shares left.
         % endif
+    """,
+    'langkit.file_reader_destroy_type': """
+        Callback type for functions that are called when destroying a file
+        reader.
+    """,
+    'langkit.file_reader_read_type': """
+        Callback type for functions that are called to fetch the decoded source
+        buffer for a requested filename.
     """,
 
     #
@@ -1004,6 +1030,10 @@ base_langkit_docs = {
     """,
     'langkit.python.Token.to_data': """
         Return a dict representation of this Token.
+    """,
+    'langkit.python.FileReader.__init__': """
+        This constructor is an implementation detail, and is not meant to be
+        used directly.
     """,
     'langkit.python.UnitProvider.__init__': """
         This constructor is an implementation detail, and is not meant to be

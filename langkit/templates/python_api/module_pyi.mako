@@ -47,6 +47,7 @@ class AnalysisContext(object):
 
     def __init__(self,
                  charset: Opt[str] = None,
+                 file_reader: Opt[FileReader] = None,
                  unit_provider: Opt[UnitProvider] = None,
                  with_trivia: bool = True,
                  tab_stop: int = ${ctx.default_tab_stop},
@@ -258,6 +259,17 @@ class Token(object):
 
     def to_data(self) -> dict:
         ${py_doc('langkit.python.Token.to_data', 8, or_pass=True)}
+
+
+class FileReader(object):
+    ${py_doc('langkit.file_reader_type', 4)}
+
+    def __init__(self, c_value: Any) -> None:
+        ${py_doc('langkit.python.FileReader.__init__', 8)}
+
+${exts.include_extension(
+   ctx.ext('python_api', 'file_readers', 'mypy_methods')
+)}
 
 
 class UnitProvider(object):
