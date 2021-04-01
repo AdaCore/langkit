@@ -13,16 +13,11 @@
 
 with Ada.Unchecked_Conversion;
 
-with System;
-
-with GNAT.Byte_Order_Mark;
-
-with GNATCOLL.Iconv;
-with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
 with GNATCOLL.VFS;
 
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
-with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
+with Langkit_Support.Slocs;        use Langkit_Support.Slocs;
+with Langkit_Support.Text;         use Langkit_Support.Text;
 
 with Langkit_Support.Symbols;
 use Langkit_Support.Symbols;
@@ -40,44 +35,17 @@ package body ${ada_lib_name}.Lexer_Implementation is
 
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
-   procedure Decode_Buffer
-     (Buffer, Charset : String;
-      Read_BOM        : Boolean;
-      Decoded_Buffer  : out Text_Access;
-      Source_First    : out Positive;
-      Source_Last     : out Natural);
-   --  Allocate a Text_Type buffer, set it to Decoded_Buffer, decode Buffer
-   --  into it using Charset and Source_First/Source_Last to the actual slice
-   --  in Decoded_Buffer that hold the input source text. It is up to the
-   --  caller to deallocate Decoded_Buffer when done with it.
-   --
-   --  Raise an Unknown_Charset exception if Charset is... unknown. Raise
-   --  Invalid_Input if Buffer contains invalid byte sequences according to
-   --  Charset.
-
    procedure Extract_Tokens_From_Text_Buffer
-     (Decoded_Buffer : Text_Access;
-      Source_First   : Positive;
-      Source_Last    : Natural;
-      With_Trivia    : Boolean;
-      TDH            : in out Token_Data_Handler;
-      Diagnostics    : in out Diagnostics_Vectors.Vector);
+     (Contents    : Decoded_File_Contents;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
    --  Helper for the Extract_Tokens procedure
-
-   procedure Extract_Tokens_From_Bytes_Buffer
-     (Buffer, Charset : String;
-      Read_BOM        : Boolean;
-      With_Trivia     : Boolean;
-      TDH             : in out Token_Data_Handler;
-      Diagnostics     : in out Diagnostics_Vectors.Vector);
-   --  Helper for the Extract_Token procedure
 
    generic
       With_Trivia : Boolean;
    procedure Process_All_Tokens
-     (Input       : Text_Access;
-      Input_First : Positive;
-      Input_Last  : Natural;
+     (Contents    : Decoded_File_Contents;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector);
 
@@ -92,9 +60,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
    ------------------------
 
    procedure Process_All_Tokens
-     (Input       : Text_Access;
-      Input_First : Positive;
-      Input_Last  : Natural;
+     (Contents    : Decoded_File_Contents;
       TDH         : in out Token_Data_Handler;
       Diagnostics : in out Diagnostics_Vectors.Vector)
    is
@@ -106,7 +72,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       % endif
       Symbol   : Thin_Symbol;
 
-      Last_Token_Last : Natural := Input'First - 1;
+      Last_Token_Last : Natural := Contents.Buffer'First - 1;
       --  Index in TDH.Source_Buffer for the last character of the previous
       --  token. Used to process chunks of ignored text.
 
@@ -191,7 +157,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
       State : Lexer_State;
 
    begin
-      Initialize (State, Input, Input_First, Input_Last);
+      Initialize (State, Contents.Buffer, Contents.First, Contents.Last);
       Token := Last_Token (State);
 
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
@@ -217,7 +183,7 @@ package body ${ada_lib_name}.Lexer_Implementation is
                if TDH.Symbols /= No_Symbol_Table then
                   declare
                      Bounded_Text : Text_Type renames
-                        Input (Token.Text_First .. Token.Text_Last);
+                        Contents.Buffer (Token.Text_First .. Token.Text_Last);
 
                      Symbol_Res : constant Symbolization_Result :=
                         % if ctx.symbol_canonicalizer:
@@ -383,56 +349,28 @@ package body ${ada_lib_name}.Lexer_Implementation is
    procedure Process_All_Tokens_With_Trivia is new Process_All_Tokens (True);
    procedure Process_All_Tokens_No_Trivia is new Process_All_Tokens (False);
 
-   ----------------------------
-   -- Lex_From_Buffer_Helper --
-   ----------------------------
+   -------------------------------------
+   -- Extract_Tokens_From_Text_Buffer --
+   -------------------------------------
 
    procedure Extract_Tokens_From_Text_Buffer
-     (Decoded_Buffer : Text_Access;
-      Source_First   : Positive;
-      Source_Last    : Natural;
-      With_Trivia    : Boolean;
-      TDH            : in out Token_Data_Handler;
-      Diagnostics    : in out Diagnostics_Vectors.Vector) is
+     (Contents    : Decoded_File_Contents;
+      With_Trivia : Boolean;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector) is
    begin
-
       --  In the case we are reparsing an analysis unit, we want to get rid of
       --  the tokens from the old one.
 
-      Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
+      Reset
+        (TDH, Contents.Buffer, Contents.First, Contents.Last);
 
       if With_Trivia then
-         Process_All_Tokens_With_Trivia
-           (Decoded_Buffer, Source_First, Source_Last, TDH,
-            Diagnostics);
+         Process_All_Tokens_With_Trivia (Contents, TDH, Diagnostics);
       else
-         Process_All_Tokens_No_Trivia
-           (Decoded_Buffer, Source_First, Source_Last, TDH,
-            Diagnostics);
+         Process_All_Tokens_No_Trivia (Contents, TDH, Diagnostics);
       end if;
    end Extract_Tokens_From_Text_Buffer;
-
-   --------------------------------------
-   -- Extract_Tokens_From_Bytes_Buffer --
-   --------------------------------------
-
-   procedure Extract_Tokens_From_Bytes_Buffer
-     (Buffer, Charset : String;
-      Read_BOM        : Boolean;
-      With_Trivia     : Boolean;
-      TDH             : in out Token_Data_Handler;
-      Diagnostics     : in out Diagnostics_Vectors.Vector)
-   is
-      Decoded_Buffer : Text_Access;
-      Source_First   : Positive;
-      Source_Last    : Natural;
-   begin
-      Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First,
-                     Source_Last);
-      Extract_Tokens_From_Text_Buffer
-        (Decoded_Buffer, Source_First, Source_Last, With_Trivia, TDH,
-         Diagnostics);
-   end Extract_Tokens_From_Bytes_Buffer;
 
    --------------------
    -- Extract_Tokens --
@@ -442,186 +380,63 @@ package body ${ada_lib_name}.Lexer_Implementation is
      (Input       : Internal_Lexer_Input;
       With_Trivia : Boolean;
       TDH         : in out Token_Data_Handler;
-      Diagnostics : in out Diagnostics_Vectors.Vector) is
+      Diagnostics : in out Diagnostics_Vectors.Vector)
+   is
+      use type GNATCOLL.VFS.Filesystem_String;
+
+      Contents : Decoded_File_Contents;
    begin
       case Input.Kind is
          when File =>
             declare
-               use GNATCOLL.VFS;
-
-               --  The following call to Open_Read may fail with a Name_Error
-               --  exception: just let it propagate to the caller as there is
-               --  no resource to release yet here.
-
-               File : Mapped_File := Open_Read (+Input.Filename.Full_Name.all);
-
-               Region      : Mapped_Region := Read (File);
-               Buffer_Addr : constant System.Address :=
-                  Data (Region).all'Address;
-
-               Buffer : String (1 .. Last (Region))
-                  with Import  => True,
-                       Address => Buffer_Addr;
+               Filename : constant String := +Input.Filename.Full_Name.all;
+               Charset  : constant String := To_String (Input.Charset);
             begin
-               Extract_Tokens_From_Bytes_Buffer
-                 (Buffer, To_String (Input.Charset), Input.Read_BOM,
-                  With_Trivia, TDH, Diagnostics);
-               Free (Region);
-               Close (File);
-            exception
-               when Unknown_Charset | Invalid_Input =>
-                  Free (Region);
-                  Close (File);
-                  raise;
+               --  Read the source file on the filesystem
+               Direct_Read
+                 (Filename, Charset, Input.Read_BOM, Contents, Diagnostics);
             end;
-            TDH.Filename := Input.Filename;
-            TDH.Charset := Input.Charset;
+
+            if Diagnostics.Is_Empty then
+               Extract_Tokens_From_Text_Buffer
+                 (Contents, With_Trivia, TDH, Diagnostics);
+               TDH.Filename := Input.Filename;
+               TDH.Charset := Input.Charset;
+            end if;
 
          when Bytes_Buffer =>
             declare
                Bytes : String (1 .. Input.Bytes_Count)
                   with Import, Address => Input.Bytes;
             begin
-               Extract_Tokens_From_Bytes_Buffer
-                 (Bytes, To_String (Input.Charset), Input.Read_BOM,
-                  With_Trivia, TDH, Diagnostics);
+               Decode_Buffer
+                 (Bytes, To_String (Input.Charset), Input.Read_BOM, Contents,
+                  Diagnostics);
+            end;
+            if Diagnostics.Is_Empty then
+               Extract_Tokens_From_Text_Buffer
+                 (Contents, With_Trivia, TDH, Diagnostics);
                TDH.Filename := GNATCOLL.VFS.No_File;
                TDH.Charset := Input.Charset;
-            end;
+            end if;
 
          when Text_Buffer =>
-            declare
-               Decoded_Buffer : Text_Access := new Text_Type
-                 (1 .. Input.Text_Count);
-               Source_First  : constant Positive := Decoded_Buffer'First;
-               Source_Last   : constant Positive := Decoded_Buffer'Last;
+            Contents.Buffer := new Text_Type (1 .. Input.Text_Count);
+            Contents.First := Contents.Buffer'First;
+            Contents.Last := Contents.Buffer'Last;
 
+            declare
                Text_View : Text_Type (1 .. Input.Text_Count)
                   with Import, Address => Input.Text;
             begin
-               Decoded_Buffer.all (Source_First .. Source_Last) := Text_View;
+               Contents.Buffer.all := Text_View;
                Extract_Tokens_From_Text_Buffer
-                 (Decoded_Buffer, Source_First, Source_Last,
-                  With_Trivia, TDH, Diagnostics);
+                 (Contents, With_Trivia, TDH, Diagnostics);
                TDH.Filename := GNATCOLL.VFS.No_File;
                TDH.Charset := Null_Unbounded_String;
             end;
       end case;
    end Extract_Tokens;
-
-   -------------------
-   -- Decode_Buffer --
-   -------------------
-
-   procedure Decode_Buffer
-     (Buffer, Charset : String;
-      Read_BOM        : Boolean;
-      Decoded_Buffer  : out Text_Access;
-      Source_First    : out Positive;
-      Source_Last     : out Natural)
-   is
-      use GNAT.Byte_Order_Mark;
-      use GNATCOLL.Iconv;
-
-      --  In the worst case, we have one character per input byte, so the
-      --  following is supposed to be big enough.
-
-      Result : Text_Access :=
-         new Text_Type (1 .. Buffer'Length);
-      State  : Iconv_T;
-      Status : Iconv_Result;
-      BOM    : BOM_Kind := Unknown;
-
-      Input_Index, Output_Index : Positive;
-
-      First_Output_Index : constant Positive := Result'First;
-      --  Index of the first byte in Result at which Iconv must decode Buffer
-
-      Output : Byte_Sequence (1 .. 4 * Buffer'Size);
-      for Output'Address use Result.all'Address;
-      --  Iconv works on mere strings, so this is a kind of a view conversion
-
-   begin
-      Decoded_Buffer := Result;
-      Source_First := Result'First;
-
-      --  If we have a byte order mark, it overrides the requested Charset
-
-      Input_Index := Buffer'First;
-      if Read_BOM then
-         declare
-            Len : Natural;
-         begin
-            GNAT.Byte_Order_Mark.Read_BOM (Buffer, Len, BOM);
-            Input_Index := Input_Index + Len;
-         end;
-      end if;
-
-      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
-      --  them here.
-
-      if Input_Index > Buffer'Last then
-         Source_Last := Source_First - 1;
-         return;
-      end if;
-
-      --  Create the Iconv converter. We will notice unknown charsets here
-
-      declare
-         BOM_Kind_To_Charset : constant
-            array (UTF8_All .. UTF32_BE) of String_Access :=
-           (UTF8_All => UTF8'Unrestricted_Access,
-            UTF16_LE => UTF16LE'Unrestricted_Access,
-            UTF16_BE => UTF16BE'Unrestricted_Access,
-            UTF32_LE => UTF32LE'Unrestricted_Access,
-            UTF32_BE => UTF32BE'Unrestricted_Access);
-
-         Actual_Charset : constant String :=
-           (if BOM in UTF8_All .. UTF32_BE
-            then BOM_Kind_To_Charset (BOM).all
-            else Charset);
-      begin
-         State := Iconv_Open (Text_Charset, Actual_Charset);
-      exception
-         when Unsupported_Conversion =>
-            Free (Result);
-            raise Unknown_Charset;
-      end;
-
-      --  Perform the conversion itself
-
-      Output_Index := First_Output_Index;
-      Iconv (State,
-             Buffer, Input_Index,
-             Output (Output_Index .. Output'Last), Output_Index,
-             Status);
-      Source_Last := (Output_Index - 1 - Output'First) / 4 + Result'First;
-
-      --  Raise an error if the input was invalid
-
-      case Status is
-         when Invalid_Multibyte_Sequence | Incomplete_Multibyte_Sequence =>
-            --  TODO??? It may be more helpful to actually perform lexing on an
-            --  incomplete buffer. The user would get both a diagnostic for the
-            --  charset error and a best-effort list of tokens.
-
-            Free (Result);
-            Iconv_Close (State);
-            raise Invalid_Input;
-
-         when Full_Buffer =>
-
-            --  This is not supposed to happen: we allocated Result to be big
-            --  enough in all cases.
-
-            raise Program_Error;
-
-         when Success =>
-            null;
-      end case;
-
-      Iconv_Close (State);
-   end Decode_Buffer;
 
    ----------------
    -- Get_Symbol --

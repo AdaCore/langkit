@@ -4285,9 +4285,6 @@ package body ${ada_lib_name}.Implementation is
       --  Move token data from Unit to Result and restore data in Saved_TDH to
       --  Unit.
 
-      procedure Add_Diagnostic (Message : String);
-      --  Helper to add a sloc-less diagnostic to Unit
-
       ----------------
       -- Rotate_TDH --
       ----------------
@@ -4297,16 +4294,6 @@ package body ${ada_lib_name}.Implementation is
          Move (Result.TDH, Unit_TDH.all);
          Move (Unit_TDH.all, Saved_TDH);
       end Rotate_TDH;
-
-      --------------------
-      -- Add_Diagnostic --
-      --------------------
-
-      procedure Add_Diagnostic (Message : String) is
-      begin
-         Append (Result.Diagnostics, No_Source_Location_Range,
-                 To_Text (Message));
-      end Add_Diagnostic;
 
    begin
       GNATCOLL.Traces.Trace (Main_Trace, "Parsing unit " & Basename (Unit));
@@ -4323,69 +4310,47 @@ package body ${ada_lib_name}.Implementation is
       --
       --  As it is quite common, first check if the file is readable: if not,
       --  don't bother opening it and directly emit a diagnostic. This avoid
-      --  pointless exceptions which harm debugging.
+      --  pointless exceptions which harm debugging. Note that this
+      --  optimization is valid only when there is no file reader, which can
+      --  work even when there is no real source file.
 
       if Input.Kind = File
-         and then
-         (Input.Filename.Is_Directory or else (not Input.Filename.Is_Readable))
+         and then (Input.Filename.Is_Directory
+                   or else (not Input.Filename.Is_Readable))
       then
          declare
             Name : constant String := Basename (Unit);
          begin
             GNATCOLL.Traces.Trace
               (Main_Trace, "WARNING: File is not readable: " & Name);
-            Add_Diagnostic ("Cannot read " & Name);
+            Append
+              (Result.Diagnostics,
+               No_Source_Location_Range,
+               "Cannot read " & To_Text (Name));
             Rotate_TDH;
             return;
          end;
       end if;
 
-      declare
-         use Ada.Exceptions;
-         Actual_Input : Internal_Lexer_Input := Input;
-      begin
-         Init_Parser
-           (Actual_Input, Context.With_Trivia, Unit,
-            Unit_TDH, Unit.Context.Parser);
-      exception
-         when Exc : Name_Error =>
-            --  This happens when we cannot open the source file for lexing:
-            --  return a unit anyway with diagnostics indicating what happens.
+      --  Initialize the parser, which fetches the source buffer and extract
+      --  all tokens.
 
-            GNATCOLL.Traces.Trace
-              (Main_Trace,
-               "WARNING: Could not open file " & Basename (Unit));
+      Init_Parser
+        (Input, Context.With_Trivia, Unit, Unit_TDH, Unit.Context.Parser);
 
-            Add_Diagnostic (Exception_Message (Exc));
-            Rotate_TDH;
-            return;
+      --  If we could run the lexer, run the parser and get the root node
 
-         when Unknown_Charset =>
-            Add_Diagnostic
-              ("Unknown charset """ & To_String (Unit.Charset) & """");
-            Rotate_TDH;
-            return;
+      if Unit_TDH.Source_Buffer /= null then
+         Result.AST_Mem_Pool := Create;
+         Unit.Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
+         Result.AST_Root := ${T.root_node.name}
+           (Parse (Unit.Context.Parser, Rule => Unit.Rule));
+      end if;
 
-         when Invalid_Input =>
-            --  TODO??? Tell where (as a source location) we failed to decode
-            --  the input.
-            Add_Diagnostic
-              ("Could not decode source as """ & To_String (Unit.Charset)
-               & """");
-            Rotate_TDH;
-            return;
-      end;
+      --  Forward token data and diagnostics to the returned unit
 
-      --  We have correctly setup a parser! Now let's parse and return what we
-      --  get.
-
-      Result.AST_Mem_Pool := Create;
-      Unit.Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
-
-      Result.AST_Root := ${T.root_node.name}
-        (Parse (Unit.Context.Parser, Rule => Unit.Rule));
-      Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
       Rotate_TDH;
+      Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
    end Do_Parsing;
 
    --------------------------
