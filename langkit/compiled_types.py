@@ -3381,8 +3381,11 @@ class ASTNodeType(BaseStructType):
                     ' a reference to the parent.'
             )),
 
-            # The following builtin fields are implemented as a property, so
-            # there is no need for an additional inc-ref.
+            # The following builtin fields are implemented as properties, so
+            # they follow the ref-counting protocol (function calls return a
+            # new ownership share). So unlike access to regular fields, they
+            # don't need an additional inc-ref (AbstractNodeData's
+            # access_needs_incref constructor argument).
             ('parents', PropertyDef(
                 expr=None, prefix=None, type=T.entity.array, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
