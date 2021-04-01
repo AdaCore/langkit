@@ -72,8 +72,7 @@ private package ${ada_lib_name}.Public_Converters is
    function Wrap_Public_Provider
      (Provider : Unit_Provider_Reference) return Internal_Unit_Provider_Access;
    --  Wrap a public unit provider inside an internal one. If Provider is a
-   --  null reference, return null. Otherwise, the result is dynamically
-   --  allocated and the caller must free it when done with it (see the
-   --  relevant Implementation.Destroy overload).
+   --  null reference, return null. Otherwise, this returns a new internal
+   --  provider allocation, with a ref-count of 1.
 
 end ${ada_lib_name}.Public_Converters;
