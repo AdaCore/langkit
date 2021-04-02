@@ -722,11 +722,11 @@ private package ${ada_lib_name}.Implementation is
    --  performance hit of creating an array.
 
    function Parents
-     (Node         : ${T.root_node.name};
-      Include_Self : Boolean := True)
+     (Node      : ${T.root_node.name};
+      With_Self : Boolean := True)
       return ${root_node_array.name};
-   --  Return the list of parents for this node. This node included in the list
-   --  iff Include_Self.
+   --  Return an array that contains the lexical parents, this node included
+   --  iff ``with_self`` is True. Nearer parents are first in the list.
 
    function Parent (Node : ${T.root_node.name}) return ${T.root_node.name};
 

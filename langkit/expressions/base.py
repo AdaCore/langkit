@@ -4,8 +4,10 @@ from contextlib import contextmanager
 from functools import partial
 import inspect
 from itertools import count
-from typing import (Any as _Any, Callable, Dict, List, Optional as Opt, Set,
-                    Tuple, Union)
+from typing import (
+    Any as _Any, Callable, Dict, List, Optional as Opt, Sequence, Set, Tuple,
+    Union
+)
 
 
 from enum import Enum
@@ -5090,7 +5092,7 @@ class CallExpr(BasicExpr):
                  result_var_name: Opt[str],
                  name: Union[names.Name, str],
                  type: CompiledType,
-                 exprs: List[Union[str, ResolvedExpression]],
+                 exprs: Sequence[Union[str, ResolvedExpression]],
                  shadow_args: List[Union[ResolvedExpression,
                                          AbstractNodeData]] = [],
                  abstract_expr: Opt[AbstractExpression] = None):
