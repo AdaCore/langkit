@@ -2823,13 +2823,13 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Parents
-     (Node         : ${T.root_node.name};
-      Include_Self : Boolean := True)
+     (Node      : ${T.root_node.name};
+      With_Self : Boolean := True)
       return ${root_node_array.name}
    is
       Count : Natural := 0;
       Start : ${T.root_node.name} :=
-        (if Include_Self then Node else Node.Parent);
+        (if With_Self then Node else Node.Parent);
       Cur   : ${T.root_node.name} := Start;
    begin
       while Cur /= null loop
@@ -3499,11 +3499,12 @@ package body ${ada_lib_name}.Implementation is
    -------------
 
    function Parents
-     (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name} := ${T.entity_info.nullexpr})
+     (Node      : ${T.root_node.name};
+      With_Self : Boolean := True;
+      E_Info    : ${T.entity_info.name} := ${T.entity_info.nullexpr})
       return ${root_entity.array.name}
    is
-      Bare_Parents : ${root_node_array.name} := Parents (Node);
+      Bare_Parents : ${root_node_array.name} := Parents (Node, With_Self);
       Result       : ${root_entity.array.name} :=
          ${root_entity.array.constructor_name} (Bare_Parents.N);
    begin

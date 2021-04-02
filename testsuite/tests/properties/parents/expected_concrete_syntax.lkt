@@ -1,0 +1,23 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example(@example))
+
+}
+
+@abstract class FooNode : Node {
+
+    @export fun node_parents (): Array[FooNode] =
+    node.parents().map((n) => n.as_bare_entity)
+
+    @export fun node_parents_without_self (): Array[FooNode] =
+    node.parents(with_self=false).map((n) => n.as_bare_entity)
+
+    @export fun entity_parents (): Array[FooNode] = self.parents()
+
+    @export fun entity_parents_without_self (): Array[FooNode] =
+    self.parents(with_self=false)
+}
+
+class Example : FooNode implements TokenNode {
+}

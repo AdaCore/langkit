@@ -80,32 +80,37 @@ def parent(self, node):
     )
 
 
-@auto_attr
-def parents(self, node):
+def parents_access_constructor(
+    prefix: ResolvedExpression,
+    node_data: AbstractNodeData,
+    args: List[Optional[ResolvedExpression]],
+    abstract_expr: Optional[AbstractExpression] = None
+) -> ResolvedExpression:
     """
-    Return an array that contains the lexical parents (this node included).
-    Nearer parents are first in the list.
-
-    This works on both bare nodes and entities.
+    Return an access to the "fields" parents, whether called on a node or an
+    entity.
 
     .. todo::
 
         Implement rebindings shedding.
     """
-    node_expr = construct(node)
-    check_source_language(
-        node_expr.type.is_ast_node or node_expr.type.is_entity_type,
-        'Invalid prefix for "parents": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.dsl_name)
+    # We expect exactly one argument: with_self. If not provided, use the
+    # default value.
+    with_self, = args
+    with_self = (
+        with_self
+        or construct(node_data.natural_arguments[0].abstract_default_value)
     )
 
+    cons_args = [with_self]
+
     return build_field_access(
-        node_expr, 'parents', [],
+        prefix, 'parents', cons_args,
         lambda: CallExpr(
             'Node_Parents', 'Parents', T.root_node.array,
-            [node_expr], abstract_expr=self,
+            [prefix] + cons_args, abstract_expr=abstract_expr,
         ),
-        abstract_expr=self,
+        abstract_expr=abstract_expr,
     )
 
 

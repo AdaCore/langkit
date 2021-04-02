@@ -79,7 +79,8 @@ Properties for FOO_ADDITION:
    parents
    return type: FooNode.entity.array
    arguments:
-      <none>
+      with_self: Bool := TRUE
+
 
    children
    return type: FooNode.entity.array
@@ -219,7 +220,8 @@ Properties for FOO_NUMBER:
    parents
    return type: FooNode.entity.array
    arguments:
-      <none>
+      with_self: Bool := TRUE
+
 
    children
    return type: FooNode.entity.array
@@ -383,7 +385,8 @@ Properties for FOO_REF:
    parents
    return type: FooNode.entity.array
    arguments:
-      <none>
+      with_self: Bool := TRUE
+
 
    children
    return type: FooNode.entity.array
@@ -528,7 +531,8 @@ Properties for FOO_VAR_DECL_LIST:
    parents
    return type: FooNode.entity.array
    arguments:
-      <none>
+      with_self: Bool := TRUE
+
 
    children
    return type: FooNode.entity.array
@@ -657,7 +661,8 @@ Properties for FOO_NAME:
    parents
    return type: FooNode.entity.array
    arguments:
-      <none>
+      with_self: Bool := TRUE
+
 
    children
    return type: FooNode.entity.array
@@ -786,7 +791,8 @@ Properties for FOO_VAR_DECL:
    parents
    return type: FooNode.entity.array
    arguments:
-      <none>
+      with_self: Bool := TRUE
+
 
    children
    return type: FooNode.entity.array
