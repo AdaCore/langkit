@@ -14,7 +14,6 @@ notably to define properties on AST nodes.
 # pyflakes off
 from langkit.expressions.base import *
 
-from langkit.expressions.analysis_units import *
 from langkit.expressions.astnodes import *
 from langkit.expressions.boolean import *
 from langkit.expressions.collections import *
