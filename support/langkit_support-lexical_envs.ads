@@ -53,25 +53,37 @@ package Langkit_Support.Lexical_Envs is
    --  done (less optimization, thus taking longer to run) to ease the
    --  investigation of env caching bugs.
 
-   Min : constant GNATCOLL.Traces.Trace_Handle :=
-     GNATCOLL.Traces.Create
-       ("LANGKIT.LEXICAL_ENV_MINIMAL", GNATCOLL.Traces.From_Config);
+   -------------
+   --  Traces --
+   -------------
+
+   --  Traces to debug lexical envs. Those traces are meant to be activated on
+   --  demand, when the client of lexical env wants more information about
+   --  this specific lookup.
 
    Me : constant GNATCOLL.Traces.Trace_Handle :=
       GNATCOLL.Traces.Create
         ("LANGKIT.LEXICAL_ENV", GNATCOLL.Traces.From_Config);
+   --  This is the main trace for lexical environments, providing a basic level
+   --  of logging for env.get requests.
 
    Rec : constant GNATCOLL.Traces.Trace_Handle :=
       GNATCOLL.Traces.Create
         ("LANGKIT.LEXICAL_ENV.RECURSIVE", GNATCOLL.Traces.From_Config);
+   --  This is the recursive trace, providing info about recursive internal
+   --  calls to env.get.
 
    Caches_Trace : constant GNATCOLL.Traces.Trace_Handle :=
       GNATCOLL.Traces.Create
         ("LANGKIT.LEXICAL_ENV.CACHES", GNATCOLL.Traces.From_Config);
+   --  This a trace to show caching information
 
-   --  Traces to debug lexical envs. This trace is meant to be activated on
-   --  demand, when the client of lexical env wants more information about
-   --  this specific lookup.
+   Min : constant GNATCOLL.Traces.Trace_Handle :=
+     GNATCOLL.Traces.Create
+       ("LANGKIT.LEXICAL_ENV_MINIMAL", GNATCOLL.Traces.From_Config);
+   --  This is a trace independent from the three last traces, that you can
+   --  activate separately, and that will provide you the most basic level of
+   --  logging for toplevel env.get requests.
 
    function Has_Trace return Boolean is (Me.Active);
 
