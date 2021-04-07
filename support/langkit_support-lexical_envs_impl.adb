@@ -706,8 +706,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
    is
       function Do_Cache return Boolean
       is
-        (Lookup_Cache_Mode = Full
-         or else (Lookup_Cache_Mode = Toplevel_Only and then Toplevel));
+        (Has_Lookup_Cache (Self)
+         and then
+           (Lookup_Cache_Mode = Full
+            or else (Lookup_Cache_Mode = Toplevel_Only and then Toplevel)));
       --  Return whether to cache a particular request or not
 
       function Log_Id return String is
@@ -1105,7 +1107,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
       --  At this point, we know that Self is a primary lexical environment
 
       if Do_Cache
-        and then Has_Lookup_Cache (Self)
         and then Lookup_Kind = Recursive
       then
 
@@ -1253,7 +1254,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
       Dec_Ref (Extracted);
 
       if Do_Cache
-        and then Has_Lookup_Cache (Self)
         and then Lookup_Kind = Recursive
         and then Need_Cache
       then
