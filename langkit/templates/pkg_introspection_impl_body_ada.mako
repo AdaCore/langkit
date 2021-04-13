@@ -174,6 +174,44 @@ package body ${ada_lib_name}.Introspection_Implementation is
       return Desc.Kind;
    end Kind_For;
 
+   --------------------
+   -- First_Kind_For --
+   --------------------
+
+   function First_Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
+      Cur : Node_Type_Id := Id;
+   begin
+      loop
+         declare
+            Desc : Node_Type_Descriptor renames
+               Node_Type_Descriptors (Cur).all;
+         begin
+            exit when not Desc.Is_Abstract;
+            Cur := Desc.Derivations (Desc.Derivations'First);
+         end;
+      end loop;
+      return Kind_For (Cur);
+   end First_Kind_For;
+
+   -------------------
+   -- Last_Kind_For --
+   -------------------
+
+   function Last_Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
+      Cur : Node_Type_Id := Id;
+   begin
+      loop
+         declare
+            Desc : Node_Type_Descriptor renames
+               Node_Type_Descriptors (Cur).all;
+         begin
+            exit when not Desc.Is_Abstract;
+            Cur := Desc.Derivations (Desc.Derivations'Last);
+         end;
+      end loop;
+      return Kind_For (Cur);
+   end Last_Kind_For;
+
    -----------------
    -- Id_For_Kind --
    -----------------
