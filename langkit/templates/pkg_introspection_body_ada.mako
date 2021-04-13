@@ -446,6 +446,24 @@ package body ${ada_lib_name}.Introspection is
       return Impl.Kind_For (Id);
    end Kind_For;
 
+   --------------------
+   -- First_Kind_For --
+   --------------------
+
+   function First_Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
+   begin
+      return Impl.First_Kind_For (Id);
+   end First_Kind_For;
+
+   -------------------
+   -- Last_Kind_For --
+   -------------------
+
+   function Last_Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
+   begin
+      return Impl.Last_Kind_For (Id);
+   end Last_Kind_For;
+
    -----------------
    -- Id_For_Kind --
    -----------------

@@ -44,6 +44,8 @@ begin
       if Is_Concrete (Id) then
          Put_Line ("  kind = " & Kind_For (Id)'Image);
       end if;
+      Put_Line ("  first kind = " & First_Kind_For (Id)'Image);
+      Put_Line ("  last kind = " & Last_Kind_For (Id)'Image);
 
       Put_Line ("  derivations:");
       declare

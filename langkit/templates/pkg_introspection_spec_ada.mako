@@ -48,6 +48,11 @@ package ${ada_lib_name}.Introspection is
    --  Return the node kind corresponding to ``Id``. This raises a
    --  ``Bad_Type_Error`` if ``Id`` designates an abstract node.
 
+   function First_Kind_For (Id : Node_Type_Id) return ${T.node_kind};
+   function Last_Kind_For (Id : Node_Type_Id) return ${T.node_kind};
+   --  Return the node kinds corresponding to respectively the first and
+   --  last concrete nodes that derive from ``Id`` (included).
+
    function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id;
    --  Return the node type corresponding to the given node ``Kind``
 

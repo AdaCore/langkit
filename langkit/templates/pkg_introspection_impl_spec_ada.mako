@@ -502,6 +502,12 @@ private package ${ada_lib_name}.Introspection_Implementation is
    function Kind_For (Id : Node_Type_Id) return ${T.node_kind};
    --  Implementation for Introspection.Kind_For
 
+   function First_Kind_For (Id : Node_Type_Id) return ${T.node_kind};
+   --  Implementation for Introspection.First_Kind_For
+
+   function Last_Kind_For (Id : Node_Type_Id) return ${T.node_kind};
+   --  Implementation for Introspection.Last_Kind_For
+
    function Id_For_Kind (Kind : ${T.node_kind}) return Node_Type_Id;
    --  Implementation for Introspection.Id_For_Kind
 
