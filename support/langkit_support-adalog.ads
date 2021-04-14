@@ -31,4 +31,6 @@ package Langkit_Support.Adalog with Pure is
    --  Exception raised when the resolution of a complex relation exceeded the
    --  number of steps allowed.
 
+   Default_Timeout_Ticks_Number : constant := 200_000;
+
 end Langkit_Support.Adalog;
