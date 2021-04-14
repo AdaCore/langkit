@@ -1,0 +1,14 @@
+"0:0" -> 0:0
+"123:456" -> 123:456
+"" -> error: invalid source location
+"1" -> error: invalid source location
+":1" -> error: invalid line number: ""
+"-1:2" -> error: invalid line number: "-1"
+"a:2" -> error: invalid line number: "a"
+"1:2-3:4" -> 1:2-3:4
+"1:2-3:" -> error: invalid column number: ""
+":2-3:4" -> error: invalid line number: ""
+"1:-3:4" -> error: invalid column number: ""
+"1:2-:4" -> error: invalid line number: ""
+"1:2-3:" -> error: invalid column number: ""
+"1:2-3:-1" -> error: invalid column number: "-1"
