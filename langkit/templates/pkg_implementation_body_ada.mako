@@ -407,7 +407,8 @@ package body ${ada_lib_name}.Implementation is
       Initialize (Context.Parser);
 
       Context.Discard_Errors_In_Populate_Lexical_Env := True;
-      Context.Logic_Resolution_Timeout := 100_000;
+      Context.Logic_Resolution_Timeout :=
+        Langkit_Support.Adalog.Default_Timeout_Ticks_Number;
       Context.In_Populate_Lexical_Env := False;
       Context.Cache_Version := 0;
       Context.Reparse_Cache_Version := 0;
