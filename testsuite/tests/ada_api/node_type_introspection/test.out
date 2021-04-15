@@ -1,11 +1,11 @@
 FooNode (FOO_NODE_TYPE_ID)
   abstract
   is root node
-  first kind = FOO_VAR_DECL_LIST
+  first kind = FOO_ADDITION
   last kind = FOO_VAR_DECL
   derivations:
-    FooNodeBaseList
     Expr
+    FooNodeBaseList
     Name
     Null
     VarDecl
@@ -76,11 +76,11 @@ Name (NAME_TYPE_ID)
 Null (NULL_NODE_TYPE_ID)
   abstract
   base = FooNode
-  first kind = FOO_NULL_PRESENT
-  last kind = FOO_NULL_ABSENT
+  first kind = FOO_NULL_ABSENT
+  last kind = FOO_NULL_PRESENT
   derivations:
-    Null.Present
     Null.Absent
+    Null.Present
 
 Null.Absent (NULL_ABSENT_TYPE_ID)
   concrete
