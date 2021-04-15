@@ -2744,7 +2744,8 @@ class ASTNodeType(BaseStructType):
         self.subclasses: List[ASTNodeType] = []
         """
         List of subclasses. Overriden in the root grammar class and its
-        children.
+        children. This list is completed as ASTNodeType instances are created,
+        and sorted in the "compute_types" compilation pass.
         """
 
         if base is not None:

@@ -1038,7 +1038,14 @@ class CompileCtx:
         # alphabetical order so that generated declarations are kept in a
         # relatively stable order. This is really useful for debugging
         # purposes.
-        self.astnode_types.sort(key=lambda n: n.hierarchical_name)
+        def node_sorting_key(n: ASTNodeType) -> str:
+            return n.hierarchical_name
+
+        self.astnode_types.sort(key=node_sorting_key)
+
+        # Also sort ASTNodeType.subclasses lists
+        for n in self.astnode_types:
+            n.subclasses.sort(key=node_sorting_key)
 
         self.synthetic_nodes = [n for n in self.astnode_types
                                 if n.synthetic]
