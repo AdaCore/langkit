@@ -3430,13 +3430,19 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.entity, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
                 warn_on_unused=False,
-                doc="Return the node's previous sibling, if there is one."
+                doc="""
+                Return the node's previous sibling, or null if there is no such
+                sibling.
+                """
             )),
             ('next_sibling', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
                 warn_on_unused=False,
-                doc="Return the node's next sibling, if there is one."
+                doc="""
+                Return the node's next sibling, or null if there is no such
+                sibling.
+                """
             )),
             ('unit', PropertyDef(
                 expr=None, prefix=None, type=T.AnalysisUnit, public=True,
