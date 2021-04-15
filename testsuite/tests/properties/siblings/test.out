@@ -1,4 +1,6 @@
 main.py: Running...
+  None <= Root => None
+
 == A ==
   None <= a => None
 

@@ -24,6 +24,14 @@ def repr_node(n):
     return n.f_id.text if n else 'None'
 
 
+print('  {} <= {} => {}'.format(
+    repr_node(u.root.previous_sibling),
+    repr_node(u.root),
+    repr_node(u.root.next_sibling),
+))
+print('')
+
+
 for l in u.root.f_nodes:
     print('== {} =='.format(repr_node(l)))
     for child in l.f_nodes:
