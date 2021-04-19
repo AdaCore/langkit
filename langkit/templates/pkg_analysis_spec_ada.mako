@@ -103,11 +103,11 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.node_is_synthetic', 3)}
 
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
-   --  Return whether L and R designate the same entity
+   --  Return whether ``L`` and ``R`` designate the same node
 
    function Image (Node : ${root_entity.api_name}'Class) return String;
-   --  Return a short string describing Node, or "None" if Node.Is_Null is
-   --  true.
+   --  Return a short string describing ``Node``, or None" if ``Node.Is_Null``
+   --  is true.
 
    --------------------
    -- Unit providers --
@@ -470,15 +470,16 @@ package ${ada_lib_name}.Analysis is
 
    function Children_Count
      (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the number of children Node has
+   --  Return the number of children ``Node`` has
 
    function First_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the index of the first child Node has
+   --  Return the index of the first child ``Node` has
 
    function Last_Child_Index
      (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the index of the last child Node has, or 0 if there is no child
+   --  Return the index of the last child ``Node`` has, or 0 if there is no
+   --  child.
 
    pragma Warnings (Off, "defined after private extension");
    procedure Get_Child
@@ -486,17 +487,18 @@ package ${ada_lib_name}.Analysis is
       Index           : Positive;
       Index_In_Bounds : out Boolean;
       Result          : out ${root_entity.api_name});
-   --  Return the Index'th child of node, storing it into Result.
+   --  Return the ``Index``'th child of node, storing it into ``Result``.
    --
-   --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
-   --  such a child: if not (i.e. Index is out-of-bounds), the content
-   --  of Result is undefined.
+   --  Child indexing is 1-based. Store in ``Index_In_Bounds`` whether ``Node``
+   --  had such a child: if not (i.e. ``Index`` is out-of-bounds), the content
+   --  of ``Result`` is undefined.
 
    function Child
      (Node  : ${root_entity.api_name}'Class;
       Index : Positive)
       return ${root_entity.api_name};
-   --  Return the Index'th child of Node, or null if Node has no such child
+   --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has no
+   --  such child.
    pragma Warnings (On, "defined after private extension");
 
    function Traverse
@@ -504,28 +506,30 @@ package ${ada_lib_name}.Analysis is
       Visit : access function (Node : ${root_entity.api_name}'Class)
                                return Visit_Status)
      return Visit_Status;
-   --  Given the parent node for a subtree, traverse all syntactic nodes of
-   --  this tree, calling the given function on each node in prefix order (i.e.
-   --  top-down). The order of traversing subtrees follows the order of
-   --  declaration of the corresponding attributes in the grammar. The
-   --  traversal is controlled as follows by the result returned by Visit:
+   --  Call ``Visit`` on ``Node`` and all its children, transitively. Calls
+   --  happen in prefix order (i.e. top-down and left first). The traversal is
+   --  controlled as follows by the result returned by Visit:
    --
-   --     Into   The traversal continues normally with the syntactic
-   --            children of the node just processed.
+   --  ``Into``
+   --     The traversal continues normally with the syntactic children of the
+   --     node just processed.
    --
-   --     Over   The children of the node just processed are skipped and
-   --            excluded from the traversal, but otherwise processing
-   --            continues elsewhere in the tree.
+   --  ``Over``
+   --     The children of the node just processed are skipped and excluded from
+   --     the traversal, but otherwise processing continues elsewhere in the
+   --     tree.
    --
-   --     Stop   The entire traversal is immediately abandoned, and the
-   --            original call to Traverse returns Stop.
+   --  ``Stop``
+   --     The entire traversal is immediately abandoned, and the original call
+   --     to ``Traverse`` returns ``Stop``.
 
    procedure Traverse
      (Node  : ${root_entity.api_name}'Class;
       Visit : access function (Node : ${root_entity.api_name}'Class)
                                return Visit_Status);
-   --  This is the same as Traverse function except that no result is returned
-   --  i.e. the Traverse function is called and the result is simply discarded.
+   --  This is the same as ``Traverse`` function except that no result is
+   --  returned i.e. the ``Traverse`` function is called and the result is
+   --  simply discarded.
 
    ----------------------------------------
    -- Source location-related operations --
