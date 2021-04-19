@@ -107,7 +107,7 @@ package body ${ada_lib_name}.Implementation is
          with Post => Context /= null;
       --  If a context is free for reuse, increment its serial number and
       --  return it. Otherwise, allocate a new one. In any case, this does not
-      --  initialize it, except for the Serial_Number and Released fields.
+      --  initialize it, except for the Serial_Number field.
 
       procedure Release (Context : in out Internal_Context)
          with Pre  => Context /= null,
@@ -256,10 +256,8 @@ package body ${ada_lib_name}.Implementation is
             Context.Serial_Number := 1;
          else
             Context := Available.Last_Element;
-            Context.Serial_Number := Context.Serial_Number + 1;
             Available.Delete_Last;
          end if;
-         Context.Released := False;
       end Acquire;
 
       -------------
@@ -269,7 +267,7 @@ package body ${ada_lib_name}.Implementation is
       procedure Release (Context : in out Internal_Context) is
       begin
          Available.Append (Context);
-         Context.Released := True;
+         Context.Serial_Number := Context.Serial_Number + 1;
          Context := null;
       end Release;
 
@@ -4819,10 +4817,8 @@ package body ${ada_lib_name}.Implementation is
          return;
       end if;
 
-      --  Check that Self's context has not been release (see the
-      --  Context_Pool). Then check that the context version is the same.
-      if Self.Context.Released
-         or else Self.Context.Serial_Number /= Self.Context_Serial
+      --  Check that the context is still the same (not released nor reused)
+      if Self.Context.Serial_Number /= Self.Context_Serial
          or else Self.Context.Cache_Version /= Self.Context_Version
       then
          raise Stale_Reference_Error;

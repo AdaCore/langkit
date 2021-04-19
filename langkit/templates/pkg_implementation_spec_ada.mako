@@ -1335,7 +1335,7 @@ private package ${ada_lib_name}.Implementation is
 
       Serial_Number : Version_Number;
       --  Serial number that is incremented each time this context allocation
-      --  is re-used.
+      --  is released.
 
       --  End of ABI area
 
@@ -1410,10 +1410,6 @@ private package ${ada_lib_name}.Implementation is
       Templates_Unit : Internal_Unit := No_Analysis_Unit;
       --  Special analysis unit used only as a containing unit to parse
       --  templates in the context of tree rewriting.
-
-      Released : Boolean;
-      --  Whether this context has been released and thus is available in
-      --  Context_Pool.
 
       Current_Call_Depth : Natural := 0;
       --  Number of recursive calls currently running. This counter is

@@ -1248,10 +1248,7 @@ package body ${ada_lib_name}.Analysis is
       end if;
 
       --  Check that SN's context has not been released (see the Context_Pool)
-      if
-         SN.Context.Released
-         or else SN.Context.Serial_Number /= SN.Context_Serial
-      then
+      if SN.Context.Serial_Number /= SN.Context_Serial then
          raise Stale_Reference_Error with "context was released";
 
       --  Then check that the unit version is the same
