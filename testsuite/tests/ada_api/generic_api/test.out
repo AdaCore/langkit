@@ -1,0 +1,56 @@
+main.adb: Starting...
+
+Language name: Foo
+
+Grammar rules:
+  Main_Rule (default)
+  Var_Decl
+  Expr
+  Atom
+  Number
+  Ref
+  Name
+
+Use of null context:
+Got a Precondition_Failure exception: null context
+
+Use of null unit:
+Got a Precondition_Failure exception: null unit
+
+Use of null node:
+Got a Precondition_Failure exception: null node
+
+Parsing example.txt...
+Has example.txt? -> TRUE
+Has foo.txt? -> FALSE
+Line 2:
+  "var b = 1 + a;"
+Traversing its parsing tree...
+<VarDeclList example.txt:1:1-2:15>
+<VarDecl example.txt:1:1-1:11>
+<Name example.txt:1:5-1:6>
+<Number example.txt:1:9-1:10>
+<VarDecl example.txt:2:1-2:15>
+<Name example.txt:2:5-2:6>
+<Addition example.txt:2:9-2:14>
+<Number example.txt:2:9-2:10>
+<Ref example.txt:2:13-2:14>
+<Name example.txt:2:13-2:14>
+
+Testing various node operations:
+Root.Is_Null -> FALSE
+Root.Next_Sibling.Image -> None
+Root.Next_Sibling.Is_Null -> TRUE
+Root.Child (2).Image -> <VarDecl example.txt:2:1-2:15>
+Root.Child (2).Previous_Sibling.Image -> <VarDecl example.txt:1:1-1:11>
+[...].Previous_Sibling = [...] -> TRUE
+[...].Previous_Sibling = [...].Previous_Sibling.Next_Sibling -> FALSE
+Root.Children:
+  -> <VarDecl example.txt:1:1-1:11>
+  -> <VarDecl example.txt:2:1-2:15>
+
+Use of stale node reference:
+Got a Stale_Reference_Error exception: unit was reparsed
+
+main.adb: Done
+Done
