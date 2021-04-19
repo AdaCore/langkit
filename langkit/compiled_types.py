@@ -3382,9 +3382,8 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.entity, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
                 warn_on_unused=False,
-                doc='Return the lexical parent for this node. Return null for'
-                    ' the root AST node or for AST nodes for which no one has'
-                    ' a reference to the parent.'
+                doc='Return the syntactic parent for this node. Return null'
+                    ' for the root node.'
             )),
 
             # The following builtin fields are implemented as properties, so
