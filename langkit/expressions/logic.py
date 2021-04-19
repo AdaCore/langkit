@@ -705,7 +705,6 @@ class ResetLogicVar(ResolvedExpression):
             '{pre}',
             '{var}.Value := No_Entity;',
             'Eq_Node.Refs.Reset ({var}.all);',
-            'Eq_Node.Refs.Destroy ({var}.all);',
         ]).format(pre=self.logic_var_expr.render_pre(),
                   var=self.logic_var_expr.render_expr())
 

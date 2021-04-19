@@ -33,6 +33,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
    procedure Reset (Self : in out Var) is
    begin
+      Dec_Ref (Self.Value);
       Self.Reset := True;
    end Reset;
 
