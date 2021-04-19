@@ -732,10 +732,13 @@ private package ${ada_lib_name}.Implementation is
 
    function Fetch_Sibling
      (Node   : ${T.root_node.name};
+      Offset : Integer) return ${T.root_node.name};
+   function Fetch_Sibling
+     (Node   : ${T.root_node.name};
       E_Info : ${T.entity_info.name};
       Offset : Integer) return ${root_entity.name};
    --  Assuming Node is the Nth child of its parent, return the (N + Offset)'th
-   --  child of the same parent, or No_Entity if there is no such sibling.
+   --  child of the same parent, or null/No_Entity if there is no such sibling.
 
    function Traverse
      (Node  : ${T.root_node.name};

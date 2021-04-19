@@ -3305,13 +3305,12 @@ package body ${ada_lib_name}.Implementation is
 
    function Fetch_Sibling
      (Node   : ${T.root_node.name};
-      E_Info : ${T.entity_info.name};
-      Offset : Integer) return ${root_entity.name} is
+      Offset : Integer) return ${T.root_node.name} is
    begin
       --  Root nodes have no sibling: handle them now to avoid invalid requests
       --  in the code below.
       if Node.Parent = null then
-         return No_Entity;
+         return null;
       end if;
 
       declare
@@ -3320,16 +3319,31 @@ package body ${ada_lib_name}.Implementation is
          --  index.
 
          Sibling_Index : constant Integer := Node_Index + Offset;
-
-         Sibling : constant ${T.root_node.name} :=
-           (if Sibling_Index >= 1
-            then Child (Node.Parent, Sibling_Index)
-            else null);
-         --  Child returns null for out-of-bound indexes
       begin
-         --  Don't forget to clear entity info if the result is null
-         return (if Sibling = null then No_Entity else (Sibling, E_Info));
+         --  Child returns null for out-of-bound indexes
+
+         return (if Sibling_Index >= 1
+                 then Child (Node.Parent, Sibling_Index)
+                 else null);
       end;
+   end Fetch_Sibling;
+
+   -------------------
+   -- Fetch_Sibling --
+   -------------------
+
+   function Fetch_Sibling
+     (Node   : ${T.root_node.name};
+      E_Info : ${T.entity_info.name};
+      Offset : Integer) return ${root_entity.name}
+   is
+      Sibling : constant ${T.root_node.name} := Fetch_Sibling (Node, Offset);
+   begin
+      --  Don't forget to clear entity info if the result is nul
+
+      return (if Sibling = null
+              then No_Entity
+              else (Sibling, E_Info));
    end Fetch_Sibling;
 
    ----------------------
