@@ -1,0 +1,38 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(var_decl)
+    var_decl <- VarDecl("var" name "=" expr ";")
+    expr <- or(Addition(expr "+" expr) | atom)
+    atom <- or(number | ref)
+    number <- Number(@number)
+    ref <- Ref(name)
+    name <- Name(@identifier)
+
+}
+
+@abstract class FooNode : Node {
+}
+
+@abstract class Expr : FooNode {
+}
+
+class Addition : Expr {
+    @parse_field lhs : Expr
+    @parse_field rhs : Expr
+}
+
+class Number : Expr implements TokenNode {
+}
+
+class Ref : Expr {
+    @parse_field name : Name
+}
+
+class Name : FooNode implements TokenNode {
+}
+
+class VarDecl : FooNode {
+    @parse_field name : Name
+    @parse_field value : Expr
+}

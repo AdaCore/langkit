@@ -65,6 +65,7 @@ def template_extensions(ctx):
     root_entity = ctx.root_grammar_class.entity
 
     return {
+        'names':                 names,
         'grammar_rule_type':     T.GrammarRule.c_type(capi).name,
         'default_grammar_rule':  capi.get_name('default_grammar_rule'),
         'root_entity':           root_entity,

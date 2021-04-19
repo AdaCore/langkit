@@ -496,6 +496,8 @@ class Emitter:
                  has_body=True, cached_body=self.dfa_code is None),
             # Unit for debug helpers
             Unit('pkg_debug', 'Debug'),
+            # Unit for the Ada generic Langkit API
+            Unit('pkg_generic_api', 'Generic_API', ada_api=True),
         ]:
             if (
                 (not self.generate_ada_api and u.ada_api) or
