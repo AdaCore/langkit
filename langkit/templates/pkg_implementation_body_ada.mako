@@ -1774,7 +1774,7 @@ package body ${ada_lib_name}.Implementation is
       Index_In_Bounds : Boolean;
    begin
       Get_Child (Node, Index, Index_In_Bounds, Result);
-      return (if Index_In_Bounds then Result else null);
+      return Result;
    end Child;
 
    --------------

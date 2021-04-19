@@ -490,8 +490,8 @@ package ${ada_lib_name}.Analysis is
    --  Return the ``Index``'th child of node, storing it into ``Result``.
    --
    --  Child indexing is 1-based. Store in ``Index_In_Bounds`` whether ``Node``
-   --  had such a child: if not (i.e. ``Index`` is out-of-bounds), the content
-   --  of ``Result`` is undefined.
+   --  had such a child: if not (i.e. ``Index`` is out-of-bounds), set
+   --  ``Result`` to a null node.
 
    function Child
      (Node  : ${root_entity.api_name}'Class;

@@ -706,8 +706,8 @@ private package ${ada_lib_name}.Implementation is
    --  Return the Index'th child of node, storing it into Result.
    --
    --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
-   --  such a child: if not (i.e. Index is out-of-bounds), the content
-   --  of Result is undefined.
+   --  such a child: if not (i.e. ``Index`` is out-of-bounds), set ``Result``
+   --  to a null node.
 
    function Child
      (Node  : ${T.root_node.name};
