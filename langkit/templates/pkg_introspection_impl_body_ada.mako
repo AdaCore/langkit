@@ -179,6 +179,16 @@ package body ${ada_lib_name}.Introspection_Implementation is
    --------------------
 
    function First_Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
+
+      --  Look for the leftmost leaf derivation of an abstract node. Langkit
+      --  disallows abstract nodes with no concrete derivation, so each time we
+      --  see an an abstract node, we know there are concrete derivations down
+      --  the tree.
+      --
+      --  Note that we have to stop at the first concrete node we see because
+      --  of the way we sort kinds: the kind of concrete root comes before the
+      --  kinds of all its derivations.
+
       Cur : Node_Type_Id := Id;
    begin
       loop
@@ -186,7 +196,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
             Desc : Node_Type_Descriptor renames
                Node_Type_Descriptors (Cur).all;
          begin
-            exit when not Desc.Is_Abstract;
+            exit when not Desc.Is_Abstract or else Desc.Derivations'Length = 0;
             Cur := Desc.Derivations (Desc.Derivations'First);
          end;
       end loop;
@@ -198,6 +208,11 @@ package body ${ada_lib_name}.Introspection_Implementation is
    -------------------
 
    function Last_Kind_For (Id : Node_Type_Id) return ${T.node_kind} is
+
+      --  Look for the rightmost leaf derivation. Langkit disallows abstract
+      --  nodes with no concrete derivation, so we know that the result is
+      --  concrete.
+
       Cur : Node_Type_Id := Id;
    begin
       loop
@@ -205,7 +220,7 @@ package body ${ada_lib_name}.Introspection_Implementation is
             Desc : Node_Type_Descriptor renames
                Node_Type_Descriptors (Cur).all;
          begin
-            exit when not Desc.Is_Abstract;
+            exit when Desc.Derivations'Length = 0;
             Cur := Desc.Derivations (Desc.Derivations'Last);
          end;
       end loop;

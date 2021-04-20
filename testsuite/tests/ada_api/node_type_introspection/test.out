@@ -14,7 +14,7 @@ Expr (EXPR_TYPE_ID)
   abstract
   base = FooNode
   first kind = FOO_ADDITION
-  last kind = FOO_REF
+  last kind = FOO_ERROR_REF
   derivations:
     Addition
     Number
@@ -43,7 +43,16 @@ Ref (REF_TYPE_ID)
   base = Expr
   kind = FOO_REF
   first kind = FOO_REF
-  last kind = FOO_REF
+  last kind = FOO_ERROR_REF
+  derivations:
+    ErrorRef
+
+ErrorRef (ERROR_REF_TYPE_ID)
+  concrete
+  base = Ref
+  kind = FOO_ERROR_REF
+  first kind = FOO_ERROR_REF
+  last kind = FOO_ERROR_REF
   derivations:
     <none>
 
