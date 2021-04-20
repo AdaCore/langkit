@@ -31,6 +31,10 @@ class Ref(Expr):
     name = Field()
 
 
+class ErrorRef(Ref):
+    pass
+
+
 class Addition(Expr):
     lhs = Field()
     rhs = Field()
