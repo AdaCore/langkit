@@ -27,7 +27,7 @@
 --  Note that it is experimental at this stage, and thus not officially
 --  supported.
 
-limited private with Langkit_Support.Internal;
+limited private with Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Names; use Langkit_Support.Names;
 
 package Langkit_Support.Generic_API is
@@ -69,7 +69,7 @@ package Langkit_Support.Generic_API is
 private
 
    type Language_Id is
-     access constant Langkit_Support.Internal.Language_Descriptor;
+     access constant Langkit_Support.Internal.Descriptor.Language_Descriptor;
 
    procedure Check_Grammar_Rule (Id : Language_Id; Rule : Grammar_Rule_Index);
    --  If Rule is not a valid grammar rule for Id, raise a

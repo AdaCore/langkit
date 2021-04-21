@@ -4,7 +4,8 @@ private with Ada.Unchecked_Conversion;
 
 private with Langkit_Support.File_Readers;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
-private with Langkit_Support.Internal;
+private with Langkit_Support.Internal.Analysis;
+private with Langkit_Support.Internal.Descriptor;
 private with Langkit_Support.Text;
 private with Langkit_Support.Types;
 
@@ -19,6 +20,8 @@ private
 
    use Langkit_Support.File_Readers;
    use Langkit_Support.Internal;
+   use Langkit_Support.Internal.Analysis;
+   use Langkit_Support.Internal.Descriptor;
    use Langkit_Support.Text;
    use Langkit_Support.Types;
 

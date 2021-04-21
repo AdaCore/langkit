@@ -23,12 +23,14 @@
 
 with Langkit_Support.Errors;   use Langkit_Support.Errors;
 with Langkit_Support.Internal; use Langkit_Support.Internal;
+with Langkit_Support.Internal.Descriptor;
+use Langkit_Support.Internal.Descriptor;
 
---  Even though we don't directly use entities from the Internal package, we
---  still need to import it to get visibility over the Language_Descriptor
---  type (and access its components).
+--  Even though we don't directly use entities from the Internal.Descriptor
+--  package, we still need to import it to get visibility over the
+--  Language_Descriptor type (and access its components).
 
-pragma Unreferenced (Langkit_Support.Internal);
+pragma Unreferenced (Langkit_Support.Internal.Descriptor);
 
 package body Langkit_Support.Generic_API is
 
