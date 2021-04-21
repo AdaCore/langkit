@@ -41,12 +41,12 @@ package Langkit_Support.Internal is
 
    type Language_Descriptor;
    type Language_Descriptor_Access is access constant Language_Descriptor;
-   type String_Access is not null access constant String;
+   type Text_Access is not null access constant Text_Type;
 
    --  Descriptors for grammar rules
 
    type Grammar_Rule_Name_Array is
-     array (Grammar_Rule_Index range <>) of String_Access;
+     array (Grammar_Rule_Index range <>) of Text_Access;
    type Grammar_Rule_Name_Array_Access is
      not null access constant Grammar_Rule_Name_Array;
 
@@ -164,7 +164,7 @@ package Langkit_Support.Internal is
      (Entity : Internal_Entity) return String;
 
    type Language_Descriptor is limited record
-      Language_Name : String_Access;
+      Language_Name : Text_Access;
       --  Name of the language that is analyzed (in camel-with-underscores
       --  casing).
 

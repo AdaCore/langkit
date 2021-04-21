@@ -4,7 +4,7 @@ import sys
 import mako.exceptions
 from mako.lookup import TemplateLookup
 
-from langkit.common import ascii_repr
+from langkit.common import ascii_repr, text_repr
 from langkit.diagnostics import DiagnosticError
 from langkit.names import Name
 
@@ -16,6 +16,7 @@ class Renderer:
         self.env.update(kwargs)
         self.env.update({
             'ascii_repr': ascii_repr,
+            'text_repr': text_repr,
             'Name': Name,
         })
 

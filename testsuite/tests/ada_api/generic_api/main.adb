@@ -5,6 +5,7 @@ with Langkit_Support.Errors;      use Langkit_Support.Errors;
 with Langkit_Support.Generic_API; use Langkit_Support.Generic_API;
 with Langkit_Support.Generic_API.Analysis;
 use Langkit_Support.Generic_API.Analysis;
+with Langkit_Support.Names;       use Langkit_Support.Names;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
 with Libfoolang.Generic_API;
@@ -19,12 +20,15 @@ begin
    Put_Line ("main.adb: Starting...");
    New_Line;
 
-   Put_Line ("Language name: " & Language_Name (Id));
+   Put_Line
+     ("Language name: "
+      & Image (Format_Name (Language_Name (Id), Camel_With_Underscores)));
    New_Line;
 
    Put_Line ("Grammar rules:");
    for I in 1 .. Last_Grammar_Rule (Id) loop
-      Put ("  " & Grammar_Rule_Name (Id, I));
+      Put ("  " & Image (Format_Name (Grammar_Rule_Name (Id, I),
+                                      Camel_With_Underscores)));
       if I = Default_Grammar_Rule (Id) then
          Put_Line (" (default)");
       else
