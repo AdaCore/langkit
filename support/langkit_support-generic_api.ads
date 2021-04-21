@@ -28,13 +28,14 @@
 --  supported.
 
 limited private with Langkit_Support.Internal;
+with Langkit_Support.Names; use Langkit_Support.Names;
 
 package Langkit_Support.Generic_API is
 
    type Language_Id is private;
    --  Unique identifier for a Langkit-generated library
 
-   function Language_Name (Id : Language_Id) return String;
+   function Language_Name (Id : Language_Id) return Name_Type;
    --  Return the name of the language that the library corresponding to ``Id``
    --  analyzes.
 
@@ -60,10 +61,10 @@ package Langkit_Support.Generic_API is
    --  Return the default grammar rule for the given language
 
    function Grammar_Rule_Name
-     (Id : Language_Id; Rule : Grammar_Rule_Index) return String;
-   --  Return the camel-with-underscores name for the given grammar rule
-   --  according to the given language. Raise a ``Precondition_Failure``
-   --  exception if ``Rule`` is not a valid grammar rule for that language.
+     (Id : Language_Id; Rule : Grammar_Rule_Index) return Name_Type;
+   --  Return the name for the given grammar rule according to the given
+   --  language. Raise a ``Precondition_Failure`` exception if ``Rule`` is not
+   --  a valid grammar rule for that language.
 
 private
 

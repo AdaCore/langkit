@@ -36,9 +36,9 @@ package body Langkit_Support.Generic_API is
    -- Language_Name --
    -------------------
 
-   function Language_Name (Id : Language_Id) return String is
+   function Language_Name (Id : Language_Id) return Name_Type is
    begin
-      return Id.Language_Name.all;
+      return Create_Name (Id.Language_Name.all);
    end Language_Name;
 
    -----------------------
@@ -65,10 +65,10 @@ package body Langkit_Support.Generic_API is
    -----------------------
 
    function Grammar_Rule_Name
-     (Id : Language_Id; Rule : Grammar_Rule_Index) return String is
+     (Id : Language_Id; Rule : Grammar_Rule_Index) return Name_Type is
    begin
       Check_Grammar_Rule (Id, Rule);
-      return Id.Grammar_Rule_Names (Rule).all;
+      return Create_Name (Id.Grammar_Rule_Names (Rule).all);
    end Grammar_Rule_Name;
 
    ------------------------
