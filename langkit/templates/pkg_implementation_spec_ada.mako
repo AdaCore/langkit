@@ -1896,6 +1896,11 @@ private package ${ada_lib_name}.Implementation is
    --  Generic procedure to register an object so that it is automatically
    --  destroyed when Unit is destroyed.
 
+   function New_Unit_String
+     (Unit : Internal_Unit; Str : String) return String_Access;
+   --  This function allocates a string whose lifetime will be associated with
+   --  ``Unit``.
+
 private
    --  We only have a private part to defer the initialization of struct
    --  constants. This allows us to circumvent circularity problems between
