@@ -33,7 +33,8 @@
 private with Ada.Finalization;
 
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
-with Langkit_Support.Internal;     use Langkit_Support.Internal;
+private with Langkit_Support.Internal.Analysis;
+private with Langkit_Support.Internal.Descriptor;
 with Langkit_Support.Text;         use Langkit_Support.Text;
 
 package Langkit_Support.Generic_API.Analysis is
@@ -228,6 +229,9 @@ package Langkit_Support.Generic_API.Analysis is
    --  TODO??? Bind all other node primitives
 
 private
+
+   use Langkit_Support.Internal.Analysis;
+   use Langkit_Support.Internal.Descriptor;
 
    type Lk_Context is new Ada.Finalization.Controlled with record
       Desc     : Language_Descriptor_Access;
