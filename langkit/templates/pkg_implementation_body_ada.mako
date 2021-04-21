@@ -15,6 +15,7 @@ with Ada.Containers.Vectors;
 with Ada.Directories;
 with Ada.Exceptions;
 with Ada.Finalization;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
 pragma Warnings (Off, "internal");
@@ -3610,6 +3611,21 @@ package body ${ada_lib_name}.Implementation is
       return Result;
    end Children;
 
+   ---------------------
+   -- New_Unit_String --
+   ---------------------
+
+   function New_Unit_String
+     (Unit : Internal_Unit; Str : String) return String_Access
+   is
+      procedure Register_Destroyable_String is new Register_Destroyable_Gen
+        (String, String_Access, Free);
+   begin
+      return Ret : String_Access := new String'(Str) do
+         Register_Destroyable_String (Unit, Ret);
+      end return;
+   end New_Unit_String;
+
    --------------------------------
    -- Assign_Names_To_Logic_Vars --
    --------------------------------
@@ -3635,8 +3651,9 @@ package body ${ada_lib_name}.Implementation is
          LV    : in out Logic_Var_Record;
          Field : String) is
       begin
-         LV.Dbg_Name := new String'
-           (Image (Short_Text_Image (Node)) & "." & Field);
+         LV.Dbg_Name :=
+           New_Unit_String
+             (Node.Unit, Image (Short_Text_Image (Node)) & "." & Field);
       end Assign;
 
       K : constant ${T.node_kind} := Node.Kind;
@@ -3991,7 +4008,6 @@ package body ${ada_lib_name}.Implementation is
 
       procedure Reset_Logic_Var (LV : in out Logic_Var_Record) is
       begin
-         --  TODO??? Fix Adalog so that Destroy resets the value it stores
          LV.Value := No_Entity;
          Eq_Node.Refs.Reset (LV);
          Eq_Node.Refs.Destroy (LV);

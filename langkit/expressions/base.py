@@ -5310,5 +5310,5 @@ def sloc_info_arg(loc):
     :param Location loc:
     """
     return ('(if Langkit_Support.Adalog.Debug.Debug'
-            ' then new String\'("{}")'
+            ' then New_Unit_String (Node.Unit, "{}")'
             ' else null)'.format(loc.gnu_style_repr()))
