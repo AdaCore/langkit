@@ -1083,9 +1083,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
          Self.Being_Visited := True;
 
          --  Get the env for the referenced env getter. Pass the metadata and
-         --  current_rebindings, if relevant.
+         --  the relevant rebindings.
          Env := Get_Env
-           (Self.Getter, Entity_Info'(Metadata, Current_Rebindings, False));
+           (Self.Getter, Entity_Info'(Metadata, Rebindings, False));
 
          --  TODO: Do not create a temp vector here, rather keep track of prior
          --  size, and only modify appended elements if the getter is dynamic.
@@ -1101,7 +1101,17 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   then raise System.Assertions.Assert_Failure
                        with "Should not happen"
                   else Flat),
-               Rebindings    => Shed_Rebindings (Env, Current_Rebindings),
+
+               --  We do not force the propagation of rebindings here:
+               --  the call to ``Get_Env`` above also receives them, and
+               --  therefore can decide itself how they should be propagated
+               --  by returning a Rebound_Env. If it doesn't return a
+               --  Rebound_Env, we propagate them normally.
+               Rebindings    =>
+                 (if Env.Kind in Rebound
+                  then null
+                  else Shed_Rebindings (Env, Current_Rebindings)),
+
                Metadata      => Metadata,
                Categories    => Categories,
                Local_Results => Refd_Results);
