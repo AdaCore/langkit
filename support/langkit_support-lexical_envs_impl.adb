@@ -1013,7 +1013,10 @@ package body Langkit_Support.Lexical_Envs_Impl is
                   then raise System.Assertions.Assert_Failure
                        with "Should not happen"
                   else Flat),
-               Rebindings    => Shed_Rebindings (Env, Current_Rebindings),
+               Rebindings    =>
+                 (if Env.Kind in Rebound
+                  then null
+                  else Shed_Rebindings (Env, Current_Rebindings)),
                Metadata      => Metadata,
                Categories    => Categories,
                Local_Results => Refd_Results);
@@ -1235,15 +1238,24 @@ package body Langkit_Support.Lexical_Envs_Impl is
                Rec.Increase_Indent;
             end if;
 
-            for I in Env.Referenced_Envs.First_Index
-                  .. Env.Referenced_Envs.Last_Index
-            loop
-               if Env.Referenced_Envs.Get_Access (I).Kind
-               not in Transitive | Prioritary
-               then
-                  Get_Refd_Nodes (Env.Referenced_Envs.Get_Access (I).all);
-               end if;
-            end loop;
+            declare
+               Tmp : Env_Rebindings;
+            begin
+               Tmp := Current_Rebindings;
+               Current_Rebindings := Rebindings;
+
+               for I in Env.Referenced_Envs.First_Index
+                     .. Env.Referenced_Envs.Last_Index
+               loop
+                  if Env.Referenced_Envs.Get_Access (I).Kind
+                  not in Transitive | Prioritary
+                  then
+                     Get_Refd_Nodes (Env.Referenced_Envs.Get_Access (I).all);
+                  end if;
+               end loop;
+
+               Current_Rebindings := Tmp;
+            end;
 
             if Has_Trace then
                Rec.Decrease_Indent;
