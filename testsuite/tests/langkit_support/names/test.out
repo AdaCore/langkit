@@ -1,0 +1,101 @@
+Checking "" in CAMEL_WITH_UNDERSCORES
+  Invalid name
+Checking "_" in CAMEL_WITH_UNDERSCORES
+  Invalid name
+Checking "" in CAMEL
+  Invalid name
+Checking "_" in CAMEL
+  Invalid name
+Checking "" in LOWER
+  Invalid name
+Checking "_" in LOWER
+  Invalid name
+Checking "" in UPPER
+  Invalid name
+Checking "_" in UPPER
+  Invalid name
+
+Checking "a" in CAMEL_WITH_UNDERSCORES
+  Invalid name
+Checking "A_" in CAMEL_WITH_UNDERSCORES
+  Invalid name
+Checking "_A" in CAMEL_WITH_UNDERSCORES
+  Invalid name
+Checking "A" in CAMEL_WITH_UNDERSCORES
+  CAMEL_WITH_UNDERSCORES: A
+  CAMEL: A
+  LOWER: a
+  UPPER: A
+Checking "ABC" in CAMEL_WITH_UNDERSCORES
+  CAMEL_WITH_UNDERSCORES: ABC
+  CAMEL: ABC
+  LOWER: abc
+  UPPER: ABC
+Checking "A_BC" in CAMEL_WITH_UNDERSCORES
+  CAMEL_WITH_UNDERSCORES: A_BC
+  CAMEL: ABC
+  LOWER: a_bc
+  UPPER: A_BC
+Checking "A_Bc" in CAMEL_WITH_UNDERSCORES
+  CAMEL_WITH_UNDERSCORES: A_Bc
+  CAMEL: ABc
+  LOWER: a_bc
+  UPPER: A_BC
+Checking "A_cB" in CAMEL_WITH_UNDERSCORES
+  Invalid name
+
+Checking "a" in CAMEL
+  Invalid name
+Checking "ABc" in CAMEL
+  CAMEL_WITH_UNDERSCORES: A_Bc
+  CAMEL: ABc
+  LOWER: a_bc
+  UPPER: A_BC
+Checking "AbcDEf" in CAMEL
+  CAMEL_WITH_UNDERSCORES: Abc_D_Ef
+  CAMEL: AbcDEf
+  LOWER: abc_d_ef
+  UPPER: ABC_D_EF
+
+Checking "A" in LOWER
+  Invalid name
+Checking "ab_Cde" in LOWER
+  Invalid name
+Checking "a" in LOWER
+  CAMEL_WITH_UNDERSCORES: A
+  CAMEL: A
+  LOWER: a
+  UPPER: A
+Checking "a_b_c" in LOWER
+  CAMEL_WITH_UNDERSCORES: A_B_C
+  CAMEL: ABC
+  LOWER: a_b_c
+  UPPER: A_B_C
+Checking "ab_c_de" in LOWER
+  CAMEL_WITH_UNDERSCORES: Ab_C_De
+  CAMEL: AbCDe
+  LOWER: ab_c_de
+  UPPER: AB_C_DE
+
+Checking "a" in UPPER
+  Invalid name
+Checking "ABc" in UPPER
+  Invalid name
+Checking "A" in UPPER
+  CAMEL_WITH_UNDERSCORES: A
+  CAMEL: A
+  LOWER: a
+  UPPER: A
+Checking "A_B_C" in UPPER
+  CAMEL_WITH_UNDERSCORES: A_B_C
+  CAMEL: ABC
+  LOWER: a_b_c
+  UPPER: A_B_C
+Checking "AB_C_DE" in UPPER
+  CAMEL_WITH_UNDERSCORES: Ab_C_De
+  CAMEL: AbCDe
+  LOWER: ab_c_de
+  UPPER: AB_C_DE
+
+Calling Format_Name with uninitialized name...
+  Got the expected Invalid_Name_Error exception
