@@ -1264,12 +1264,18 @@ package body Langkit_Support.Lexical_Envs_Impl is
          if Recursive_Check_Reached then
             Env.Lookup_Cache.Include
               (Res_Key, (None, Empty_Lookup_Result_Vector));
+
+            Outer_Results.Concat (Local_Results);
+            --  We won't keep the local results in the cache, so destroy them.
+            Local_Results.Destroy;
+            Local_Results := Outer_Results;
+
          else
             Env.Lookup_Cache.Include (Res_Key, (Computed, Local_Results));
+            Outer_Results.Concat (Local_Results);
+            Local_Results := Outer_Results;
          end if;
 
-         Outer_Results.Concat (Local_Results);
-         Local_Results := Outer_Results;
       end if;
 
    end Get_Internal_Impl;
