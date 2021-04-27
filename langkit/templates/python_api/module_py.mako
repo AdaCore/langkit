@@ -1945,7 +1945,7 @@ class App(object):
 
     def __init__(self, args=None):
         self.parser = argparse.ArgumentParser(description=self.description)
-        self.parser.add_argument('files', nargs='+', help='Files')
+        self.parser.add_argument('files', nargs='*', help='Files')
         self.add_arguments()
 
         # Parse command line arguments
