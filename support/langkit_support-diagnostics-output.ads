@@ -41,12 +41,31 @@
 --      Eventually, this should be exposed to generated library users in some
 --      fashion.
 
+with Ada.Wide_Wide_Text_IO;
+with GNATCOLL.Terminal; use GNATCOLL.Terminal;
+
 package Langkit_Support.Diagnostics.Output is
 
+   package WWIO renames Ada.Wide_Wide_Text_IO;
+
+   type Diagnostic_Style is record
+      Label : Unbounded_Text_Type;
+      --  Label for the diagnostic
+      Color : ANSI_Color;
+      --  Color for the diagnostic
+   end record;
+   --  Style for a diagnostic
+
+   Default_Diagnostic_Style : constant Diagnostic_Style :=
+     (To_Unbounded_Text ("error"), Red);
+   --  Default style
+
    procedure Print_Diagnostic
-     (Self   : Diagnostic;
-      Buffer : Text_Buffer_Ifc'Class;
-      Path   : String);
+     (Self        : Diagnostic;
+      Buffer      : Text_Buffer_Ifc'Class;
+      Path        : String;
+      Style       : Diagnostic_Style := Default_Diagnostic_Style;
+      Output_File : WWIO.File_Type := WWIO.Standard_Output);
    --  Pretty-print given diagnostic. Outputs the diagnostic on stdout
    --  in a form that is developper friendly when used in a command line
    --  application.
@@ -60,6 +79,13 @@ package Langkit_Support.Diagnostics.Output is
    --      foo.bar:1:9: Incorrect call to `Foolize`
    --      1 | Foo.Bar.Foolize
    --                  ^^^^^^^
+   --
+   --  ``Output_File`` is set by default to ``Standard_Output``, you can use
+   --  ``Standard_Error`` alternatively.
+   --
+   --  You can also customize the style, which allows you to change the label
+   --  of the diagnostic (by default it's "error"), and the color of the
+   --  message (red by default).
    --
    --  TODO: All the information necessary to print a diagnostic should
    --  eventually be self contained.

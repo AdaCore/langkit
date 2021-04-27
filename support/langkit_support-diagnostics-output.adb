@@ -21,10 +21,7 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Text_IO;                 use Ada.Text_IO;
 with Ada.Wide_Wide_Text_IO;       use Ada.Wide_Wide_Text_IO;
-
-with GNATCOLL.Terminal; use GNATCOLL.Terminal;
 
 with Langkit_Support.Images; use Langkit_Support.Images;
 
@@ -34,9 +31,11 @@ package body Langkit_Support.Diagnostics.Output is
    Colors_Init : Boolean := False;
 
    procedure Print_Source_Listing
-     (Sloc_Range  : Source_Location_Range;
-      Buffer      : Text_Buffer_Ifc'Class;
-      Lines_After : Natural := 0);
+     (Sloc_Range      : Source_Location_Range;
+      Buffer          : Text_Buffer_Ifc'Class;
+      Lines_After     : Natural := 0;
+      Output_File     : WWIO.File_Type := WWIO.Standard_Output;
+      Caretting_Color : ANSI_Color);
    --  Print a source listing
 
    procedure Reset_Colors;
@@ -57,9 +56,11 @@ package body Langkit_Support.Diagnostics.Output is
    --------------------------
 
    procedure Print_Source_Listing
-     (Sloc_Range  : Source_Location_Range;
-      Buffer      : Text_Buffer_Ifc'Class;
-      Lines_After : Natural := 0)
+     (Sloc_Range      : Source_Location_Range;
+      Buffer          : Text_Buffer_Ifc'Class;
+      Lines_After     : Natural := 0;
+      Output_File     : WWIO.File_Type := WWIO.Standard_Output;
+      Caretting_Color : ANSI_Color)
    is
       procedure Start_Line (Line_Nb : String := "");
 
@@ -78,25 +79,25 @@ package body Langkit_Support.Diagnostics.Output is
       begin
          Set_Style (Term_Info, Bright);
          Set_Color (Term_Info, Foreground => Blue);
-         Put (Line_Nb);
-         Ada.Text_IO.Put ((1 .. Line_Nb_Width - Line_Nb'Length => ' '));
-         Ada.Text_IO.Put (" | ");
+         Put (Output_File, To_Text (Line_Nb));
+         Put (Output_File, (1 .. Line_Nb_Width - Line_Nb'Length => ' '));
+         Put (Output_File, " | ");
          Reset_Colors;
       end Start_Line;
    begin
       --  Append the line containing the sloc
       Start_Line (Stripped_Image (Line_Nb));
-      Put_Line (Get_Line (Buffer, Line_Nb));
+      Put_Line (Output_File, Get_Line (Buffer, Line_Nb));
 
       --  Append the line caretting the sloc in the line above
       Start_Line ("");
       Set_Style (Term_Info, Bright);
-      Set_Color (Term_Info, Foreground => Red);
+      Set_Color (Term_Info, Foreground => Caretting_Color);
       declare
          Caret_Line : Text_Type (1 .. End_Offset) := (others => ' ');
       begin
          Caret_Line (Start_Offset .. End_Offset - 1) := (others => '^');
-         Put_Line (Caret_Line);
+         Put_Line (Output_File, Caret_Line);
       end;
       Reset_Colors;
 
@@ -109,9 +110,12 @@ package body Langkit_Support.Diagnostics.Output is
    ----------------------
 
    procedure Print_Diagnostic
-     (Self   : Diagnostic;
-      Buffer : Text_Buffer_Ifc'Class;
-      Path   : String) is
+     (Self        : Diagnostic;
+      Buffer      : Text_Buffer_Ifc'Class;
+      Path        : String;
+      Style       : Diagnostic_Style := Default_Diagnostic_Style;
+      Output_File : WWIO.File_Type := WWIO.Standard_Output)
+   is
    begin
       if not Colors_Init then
          Init_For_Stdout (Term_Info);
@@ -120,11 +124,15 @@ package body Langkit_Support.Diagnostics.Output is
 
       --  Put `file_name.ext:line:col: error:`
       Set_Style (Term_Info, Bright);
-      Put (Path & ":"
-           & Stripped_Image (Integer (Self.Sloc_Range.Start_Line)) & ":"
-           & Stripped_Image (Integer (Self.Sloc_Range.Start_Column)) & ":");
-      Set_Color (Term_Info, Foreground => Red);
-      Ada.Text_IO.Put (" error: ");
+      Put (Output_File,
+           To_Text
+             (Path & ":"
+              & Stripped_Image (Integer (Self.Sloc_Range.Start_Line)) & ":"
+              & Stripped_Image
+                (Integer (Self.Sloc_Range.Start_Column)) & ":"));
+
+      Set_Color (Term_Info, Foreground => Style.Color);
+      Put (Output_File, " " & To_Text (Style.Label) & ": ");
       Reset_Colors;
 
       --  Put the error message
@@ -147,9 +155,11 @@ package body Langkit_Support.Diagnostics.Output is
             Put (C);
          end loop;
       end;
-      Ada.Text_IO.New_Line;
-      Print_Source_Listing (Self.Sloc_Range, Buffer);
-      Ada.Text_IO.New_Line;
+      New_Line (Output_File);
+      Print_Source_Listing (Self.Sloc_Range, Buffer,
+                            Output_File     => Output_File,
+                            Caretting_Color => Style.Color);
+      New_Line (Output_File);
    end Print_Diagnostic;
 
 end Langkit_Support.Diagnostics.Output;
