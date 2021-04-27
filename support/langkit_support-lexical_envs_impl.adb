@@ -1352,9 +1352,9 @@ package body Langkit_Support.Lexical_Envs_Impl is
       end;
    end Get;
 
-   ---------
-   -- Get --
-   ---------
+   ---------------
+   -- Get_First --
+   ---------------
 
    function Get_First
      (Self        : Lexical_Env;
