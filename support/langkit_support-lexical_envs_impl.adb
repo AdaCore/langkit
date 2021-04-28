@@ -570,29 +570,34 @@ package body Langkit_Support.Lexical_Envs_Impl is
    procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
    is
       Env : constant Lexical_Env_Access := Unwrap (Self);
-      Ref : constant Internal_Envs.Reference_Type := Env.Map.Reference (Key);
-      V   : Internal_Map_Node_Vectors.Vector renames Ref.Native_Nodes;
    begin
       if Self = Empty_Env then
          return;
       end if;
 
-      if Is_Foreign (Self, Value) then
-         Ref.Foreign_Nodes.Delete (Value);
-      else
-         --  Get rid of the element. Do this in reverse order so that removing
-         --  one element does not make us "step over" the next item. Also don't
-         --  do this in place (using V.Pop) as we need to preserve the order of
-         --  elements.
-         for I in reverse 1 .. V.Length loop
-            if V.Get (I).Node = Value then
-               V.Remove_At (I);
-               exit;
-            end if;
-         end loop;
-      end if;
+      declare
+         Ref : constant Internal_Envs.Reference_Type :=
+           Env.Map.Reference (Key);
+         V   : Internal_Map_Node_Vectors.Vector renames Ref.Native_Nodes;
+      begin
+         if Is_Foreign (Self, Value) then
+            Ref.Foreign_Nodes.Delete (Value);
+         else
+            --  Get rid of the element. Do this in reverse order so that
+            --  removing one element does not make us "step over" the next
+            --  item. Also don't do this in place (using V.Pop) as we need to
+            --  preserve the order of elements.
 
-      Invalidate_Cache (Env);
+            for I in reverse 1 .. V.Length loop
+               if V.Get (I).Node = Value then
+                  V.Remove_At (I);
+                  exit;
+               end if;
+            end loop;
+         end if;
+
+         Invalidate_Cache (Env);
+      end;
    end Remove;
 
    ---------------
