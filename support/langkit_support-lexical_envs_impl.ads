@@ -342,7 +342,8 @@ package Langkit_Support.Lexical_Envs_Impl is
 
    procedure Remove (Self : Lexical_Env; Key : Symbol_Type; Value : Node_Type)
       with Pre => Self.Kind = Static_Primary;
-   --  Remove Value from the list of values for the key Key
+   --  Remove Value from the list of values for the key Key. This does nothing
+   --  if Self is the empty environment.
 
    procedure Reference
      (Self             : Lexical_Env;
