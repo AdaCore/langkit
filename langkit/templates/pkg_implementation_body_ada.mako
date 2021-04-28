@@ -4574,9 +4574,11 @@ package body ${ada_lib_name}.Implementation is
       Named_Envs_Needing_Update : in out NED_Maps.Map) is
    begin
       --  Remove nodes in this unit from the Named_Env_Descriptor.Foreign_Nodes
-      --  components in which they are registered.
+      --  components in which they are registered and from the foreign
+      --  environments themselves.
       for EE of Unit.Exiled_Entries_In_NED loop
          Remove (EE.Named_Env.Foreign_Nodes, EE.Key, EE.Node);
+         Remove (EE.Named_Env.Env_With_Precedence, EE.Key, EE.Node);
       end loop;
       Unit.Exiled_Entries_In_NED.Clear;
 
