@@ -246,6 +246,28 @@ class DSLWalker:
 
         return self._with_current_node(call_node)
 
+    def first_method_call(self, dispatch_table):
+        """
+        Given a dictionnary of method name to handling function, moves the
+        cursor to the first method call matching one of the names defined in
+        the dictionnary and calls its associated handling function.
+        """
+        def matches(n):
+            if n.is_a(lpl.CallExpr):
+                if n.f_prefix.is_a(lpl.DottedName):
+                    return n.f_prefix.f_suffix.text in dispatch_table
+            return False
+
+        call_node = (
+            self.current_node
+            if matches(self.current_node)
+            else self.current_node.find(matches)
+        )
+
+        if call_node is not None:
+            with self._with_current_node(call_node):
+                return dispatch_table[call_node.f_prefix.f_suffix.text]()
+
     def boolean_binop(self, kind):
         """
         Moves the cursor to the next occurrence of a boolean binop of the
@@ -623,7 +645,6 @@ def emit_expr(expr, **ctx):
 
 
     then_underscore_var = ctx.get('then_underscore_var')
-    overload_coll_name = ctx.get('overload_coll_name')
     walker = ctx.get('walker')
 
     def emit_lambda(expr, vars):
@@ -718,22 +739,69 @@ def emit_expr(expr, **ctx):
         vars = [expr.element_var]
         if expr.requires_index:
             vars.append(expr.index_var)
-        if op_name in ["map", "mapcat"]:
-            args.append(emit_lambda(expr.expr, vars))
-        elif op_name == "filter":
-            args.append(emit_lambda(expr.filter_expr, vars))
-        elif op_name == "filter_map":
-            args.append(emit_lambda(expr.expr, vars))
-            args.append(emit_lambda(expr.filter_expr, vars))
-            op_name = "filtermap"
-        elif op_name == "take_while":
-            args.append(emit_lambda(expr.take_while_expr, vars))
 
-        if overload_coll_name:
-            op_name = overload_coll_name
-            del ctx['overload_coll_name']
+        coll = None
 
-        coll = ee(expr.collection)
+        def emit_self():
+            nonlocal coll
+            with walker.self_arg():
+                coll = ee(expr.collection)
+
+        def handle_map():
+            emit_self()
+            with walker.arg(0):
+                args.append(emit_lambda(expr.expr, vars))
+
+        def handle_filter():
+            emit_self()
+            with walker.arg(0):
+                args.append(emit_lambda(expr.filter_expr, vars))
+
+        def handle_filtermap():
+            emit_self()
+            with walker.arg(0):
+                args.append(emit_lambda(expr.expr, vars))
+            with walker.arg(walker.arg_count() - 1):
+                args.append(emit_lambda(expr.filter_expr, vars))
+
+        def handle_keep():
+            emit_self()
+            with walker.arg(0):
+                args.append(emit_lambda(expr.expr, vars))
+                args.append(emit_lambda(expr.filter_expr, vars))
+
+        def handle_take_while():
+            emit_self()
+            with walker.arg(0):
+                args.append(emit_lambda(expr.take_while_expr, vars))
+
+        def set_op_name_and_then(name, fun):
+            def do():
+                nonlocal op_name
+                op_name = name
+                return fun()
+            return do
+
+        raw_dispatch_table = {
+            'map':        handle_map,
+            'mapcat':     handle_map,
+            'logic_all':  handle_map,
+            'logic_any':  handle_map,
+            'find':       handle_filter,
+            'filter':     handle_filter,
+            'filtermap':  handle_filtermap,
+            'take_while': handle_take_while
+        }
+
+        dispatch_table = {
+            k: set_op_name_and_then(k, v)
+            for k, v in raw_dispatch_table.items()
+        }
+        dispatch_table['keep'] = set_op_name_and_then(
+            'filtermap', handle_keep
+        )
+
+        walker.first_method_call(dispatch_table)
 
         return emit_method_call(coll, op_name, args)
 
@@ -799,10 +867,10 @@ def emit_expr(expr, **ctx):
         )
 
     elif isinstance(expr, All):
-        return ee(expr.equation_array, overload_coll_name="logic_all")
+        return ee(expr.equation_array)
 
     elif isinstance(expr, Any):
-        return ee(expr.equation_array, overload_coll_name="logic_any")
+        return ee(expr.equation_array)
 
     elif isinstance(expr, Match):
         with walker.method_call("match"):
@@ -853,6 +921,17 @@ def emit_expr(expr, **ctx):
         return "not {}".format(emit_paren_expr(expr.expr, **ctx))
 
     elif isinstance(expr, Then):
+        def emit_final_call(self_expr, param_name, then_expr, default_expr):
+            return emit_method_call(
+                self_expr,
+                "do",
+                keep([
+                    "({}) => {}".format(param_name, then_expr),
+                    "default_val={}".format(default_expr)
+                    if default_expr else None
+                ])
+            )
+
         if expr.var_expr.source_name is None:
             assert expr.underscore_then
             # Match is like a function call in the Python DSL, but is a regular
@@ -867,16 +946,47 @@ def emit_expr(expr, **ctx):
                     ee(expr.expr),
                     ee(expr.then_expr, then_underscore_var=expr.var_expr)
                 )
+            else:
+                return emit_final_call(
+                    ee_pexpr(expr.expr),
+                    var_name(expr.var_expr),
+                    ee(expr.then_expr),
+                    ee_pexpr(expr.default_val)
+                    if expr.default_val else None
+                )
 
-        return emit_method_call(
-            ee_pexpr(expr.expr),
-            "do",
-            keep([
-                "({}) => {}".format(var_name(expr.var_expr), ee(expr.then_expr)),
-                "default_val={}".format(ee_pexpr(expr.default_val))
-                if expr.default_val else None
-            ])
-        )
+        def handle_then_call():
+            with walker.self_arg():
+                self_expr = ee_pexpr(expr.expr)
+
+            with walker.arg(0):
+                then_expr = ee(expr.then_expr)
+
+            if expr.default_val is not None:
+                with walker.arg(1):
+                    default_expr = ee_pexpr(expr.default_val)
+            else:
+                default_expr = None
+
+            return emit_final_call(
+                self_expr, var_name(expr.var_expr), then_expr, default_expr
+            )
+
+        def handle_or_call():
+            with walker.self_arg():
+                self_expr = ee_pexpr(expr.expr)
+
+            with walker.arg(0):
+                fallback_expr = ee_pexpr(expr.default_val)
+
+            return emit_final_call(
+                self_expr, "e", "e", fallback_expr
+            )
+
+        return walker.first_method_call({
+            'then': handle_then_call,
+            '_or': handle_or_call
+        })
 
     elif isinstance(expr, OrderingTest):
         return "{} {} {}".format(
@@ -933,7 +1043,7 @@ def emit_expr(expr, **ctx):
         # Recognize find
         if (isinstance(expr.expr_0, Map) and expr.expr_0.kind == 'filter' and
                 ee(expr.expr_1) == "0"):
-            return ee(expr.expr_0, overload_coll_name="find")
+            return ee(expr.expr_0)
 
         return "{}?({})".format(ee(expr.expr_0), ee(expr.expr_1))
 
@@ -981,7 +1091,14 @@ def emit_expr(expr, **ctx):
         return "super({})".format(", ".join(args))
 
     elif isinstance(expr, Concat):
-        return "{} & {}".format(ee_pexpr(expr.array_1), ee_pexpr(expr.array_2))
+        result = ""
+        with walker.method_call("concat"):
+            with walker.self_arg():
+                result += ee_pexpr(expr.array_1)
+            result += " & "
+            with walker.arg(0):
+                result += ee_pexpr(expr.array_2)
+        return result
 
     elif isinstance(expr, EntityVariable):
         return "self"
