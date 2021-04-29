@@ -49,6 +49,8 @@ begin
    Check_Sloc ("a:2");
 
    Check_Sloc_Range ("1:2-3:4");
+   Check_Sloc_Range ("");
+   Check_Sloc_Range ("1:2");
    Check_Sloc_Range ("1:2-3:");
    Check_Sloc_Range (":2-3:4");
    Check_Sloc_Range ("1:-3:4");
