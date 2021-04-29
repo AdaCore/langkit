@@ -9,7 +9,6 @@ import os
 from os import path
 import pdb
 import pipes
-import shlex
 import shutil
 import subprocess
 import sys
@@ -25,8 +24,10 @@ from langkit.diagnostics import (
     WarningSet, check_source_language, extract_library_location
 )
 from langkit.packaging import Packager
-from langkit.utils import (Colors, LibraryTypes, Log, add_to_path, col,
-                           format_setenv, get_cpu_count, printcol)
+from langkit.utils import (
+    Colors, LibraryTypes, Log, add_to_path, col, format_setenv, get_cpu_count,
+    parse_cmdline_args, printcol
+)
 
 
 if TYPE_CHECKING:
@@ -951,11 +952,7 @@ class ManageScript:
         elif args.verbosity == Verbosity('debug'):
             base_argv.append('-vl')
 
-        # Depending on where this is invoked, the "--gargs" option may not be
-        # set. Don't call shlex.split with an empty input, otherwise it will
-        # try to read something from stdin...
-        gargs = getattr(args, 'gargs') or []
-        gargs = sum((shlex.split(args) for args in gargs), [])
+        gargs = parse_cmdline_args(getattr(args, 'gargs'))
 
         def run(library_type: str) -> None:
             # Remove the "*.lexch" file

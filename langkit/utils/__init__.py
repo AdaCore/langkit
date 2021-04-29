@@ -11,8 +11,9 @@ from contextlib import ExitStack, contextmanager
 from copy import copy
 import os
 import pipes
+import shlex
 import shutil
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 def copy_with(obj, **kwargs):
@@ -294,6 +295,23 @@ class LibraryTypes:
         return cls(static="static" in library_type_set,
                    static_pic="static-pic" in library_type_set,
                    relocatable="relocatable" in library_type_set)
+
+
+def parse_cmdline_args(args: Optional[List[str]]) -> List[str]:
+    """
+    Considering a list of shell-formatted argument lists, return the
+    corresponding flattened list of single arguments.
+
+    For instance::
+
+        >>> parse_args(["foo bar", "'hello world'"])
+        ["foo", "bar", "hello world"]
+
+    If passed ``None``, just return an empty list.
+    """
+    return (sum((shlex.split(a) for a in args), [])
+            if args
+            else [])
 
 
 # pyflakes off

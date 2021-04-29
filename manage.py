@@ -12,7 +12,7 @@ from typing import Callable, List
 
 from langkit.packaging import Packager
 from langkit.utils import (LibraryTypes, add_to_path, format_setenv,
-                           get_cpu_count)
+                           get_cpu_count, parse_cmdline_args)
 
 
 LANGKIT_ROOT = PurePath(P.dirname(P.realpath(__file__)))
@@ -104,6 +104,7 @@ def build_langkit_support(args: Namespace) -> None:
     ]
     if args.build_dir:
         base_argv.extend([f"--relocate-build-tree={build_dir}"])
+    base_argv.extend(parse_cmdline_args(args.gargs))
 
     # In order to avoid building the library once per library kind (static,
     # static-pic and relocatable), langkit_support.gpr uses the same object
@@ -228,6 +229,10 @@ def make(args: Namespace) -> None:
         f"--build-mode={args.build_mode}",
         f"-j{args.jobs}",
     ]
+
+    # Forward gargs to each manage.py script
+    for gargs in args.gargs or []:
+        base_argv.append(f"--gargs={gargs}")
 
     m1 = subprocess.Popen(
         base_argv + ["--disable-warning", "undocumented-nodes"],
