@@ -30,6 +30,10 @@ procedure Main is
       New_Line;
    end Put_Title;
 
+   -----------
+   -- Parse --
+   -----------
+
    procedure Parse (Filename, Charset : String) is
    begin
       U := Ctx.Get_From_File (Filename, Charset);
@@ -47,6 +51,7 @@ begin
    Put_Line ("main.adb: Starting...");
 
    --  Create a context with our file reader
+
    declare
       FR : constant File_Reader_Reference :=
         Create_File_Reader_Reference (My_File_Reader'(null record));
@@ -55,6 +60,7 @@ begin
    end;
 
    --  Check the file reader is used appropriately when reading files
+
    Put_Title ("Parsing foo.txt");
    Parse ("foo.txt", "");
    New_Line;
