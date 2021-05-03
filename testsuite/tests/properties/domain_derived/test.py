@@ -5,7 +5,7 @@ valid and correctly running code.
 
 from langkit.dsl import ASTNode, Field, T, UserField
 from langkit.envs import EnvSpec, add_to_env_kv
-from langkit.expressions import Self, langkit_property
+from langkit.expressions import Self, Var, langkit_property
 
 from utils import build_and_run
 
@@ -29,8 +29,9 @@ class Name(FooNode):
 
     @langkit_property(public=True)
     def resolve():
-        candidates = (Self.node_env.get(Self)
-                      .map(lambda d: d.cast(T.Definition)))
+        candidates = Var(
+            Self.node_env.get(Self).map(lambda d: d.cast(T.Definition))
+        )
         return Self.ref_var.domain(candidates).solve
 
     @langkit_property(public=True)
