@@ -36,6 +36,7 @@ procedure Main is
 
    procedure Parse (Filename, Charset : String) is
    begin
+      Put_Title ("Parsing " & Filename);
       U := Ctx.Get_From_File (Filename, Charset);
       if U.Has_Diagnostics then
          Put_Line ("Errors:");
@@ -45,6 +46,7 @@ procedure Main is
       else
          Put_Line ("Success: " & Image (U.Text, With_Quotes => True));
       end if;
+      New_Line;
    end Parse;
 
 begin
@@ -59,15 +61,15 @@ begin
       Ctx := Create_Context (File_Reader => FR);
    end;
 
-   --  Check the file reader is used appropriately when reading files
+   --  Check the file reader is used appropriately when reading files, and that
+   --  common errors are properly reported.
 
-   Put_Title ("Parsing foo.txt");
    Parse ("foo.txt", "");
-   New_Line;
-
-   Put_Title ("Parsing error.txt");
    Parse ("error.txt", "some-charset");
-   New_Line;
+   Parse ("direct-ok.txt", "ascii");
+   Parse ("direct-no-such-file.txt", "ascii");
+   Parse ("direct-bad-charset.txt", "some-charset");
+   Parse ("direct-decoding-error.txt", "ascii");
 
    --  Check that the use of parsing APIs with buffers is rejected
 

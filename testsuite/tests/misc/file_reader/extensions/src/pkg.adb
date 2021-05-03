@@ -28,6 +28,11 @@ package body Pkg is
          Append (Diagnostics,
                  Sloc_Range => (1, 2, 3, 4),
                  Message    => "this is an error message");
+
+      elsif Fn'Length > 7 and then Fn (Fn'First .. Fn'First + 6) = "direct-"
+      then
+         Direct_Read (Fn, Charset, Read_BOM, Contents, Diagnostics);
+
       else
          --  Make sure the explicit bounds are used, and not the buffer's
          --  internal ones: add garbage content before and after the actual
