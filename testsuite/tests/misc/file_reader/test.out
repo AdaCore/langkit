@@ -49,6 +49,45 @@ My_File_Reader.Read:
 Errors:
   error.txt:1:3: this is an error message
 
+Parsing direct-ok.txt
+=====================
+
+My_File_Reader.Read:
+  Filename: direct-ok.txt
+  Charset: ascii
+  Read_BOM: False
+Success: "example # This is an actual file\x0a"
+
+Parsing direct-no-such-file.txt
+===============================
+
+My_File_Reader.Read:
+  Filename: direct-no-such-file.txt
+  Charset: ascii
+  Read_BOM: False
+Errors:
+  direct-no-such-file.txt: Cannot open direct-no-such-file.txt
+
+Parsing direct-bad-charset.txt
+==============================
+
+My_File_Reader.Read:
+  Filename: direct-bad-charset.txt
+  Charset: some-charset
+  Read_BOM: False
+Errors:
+  direct-bad-charset.txt: Unknown charset "some-charset"
+
+Parsing direct-decoding-error.txt
+=================================
+
+My_File_Reader.Read:
+  Filename: direct-decoding-error.txt
+  Charset: ascii
+  Read_BOM: False
+Errors:
+  direct-decoding-error.txt: Could not decode source as "ascii"
+
 Using buffer-based parsing APIs
 ===============================
 

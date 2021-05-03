@@ -175,6 +175,7 @@ package body Langkit_Support.File_Readers is
             Append
               (Diagnostics,
                Message => To_Text (Ada.Exceptions.Exception_Message (Exc)));
+            return;
       end;
 
       Region := Read (File);
