@@ -16,9 +16,7 @@ def print_title(label):
     print("")
 
 
-def parse(filename, charset):
-    sys.stdout.flush()
-    u = ctx.get_from_file(filename, charset)
+def dump(u):
     if u.diagnostics:
         print("Errors:")
         for d in u.diagnostics:
@@ -27,12 +25,23 @@ def parse(filename, charset):
         print("Success: {}".format(libfoolang._py2to3.text_repr(u.text)))
 
 
+def parse(filename, charset):
+    sys.stdout.flush()
+    u = ctx.get_from_file(filename, charset)
+    dump(u)
+
+
 print_title("Parsing foo.txt")
 parse("foo.txt", "")
 print("")
 
 print_title("Parsing error.txt")
 parse("error.txt", "some-charset")
+print("")
+
+print_title("Parsing the internal unit")
+u = ctx.get_internal_unit
+dump(u)
 print("")
 
 print_title("Using buffer-based parsing APIs")

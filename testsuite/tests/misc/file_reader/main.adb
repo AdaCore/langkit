@@ -6,15 +6,17 @@ with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 with Langkit_Support.Text;         use Langkit_Support.Text;
 
 with Libfoolang.Analysis;  use Libfoolang.Analysis;
+with Libfoolang.Pkg;       use Libfoolang.Pkg;
 with Libfoolang.Rewriting; use Libfoolang.Rewriting;
-
-with Pkg; use Pkg;
 
 procedure Main is
    Ctx : Analysis_Context;
    U   : Analysis_Unit;
 
    procedure Put_Title (Label : String);
+
+   procedure Dump (Unit : Analysis_Unit);
+   --  Print Unit's diagnostics or its text buffer (if there is no diagnostic)
 
    procedure Parse (Filename, Charset : String);
    --  Helper to parse a unit and print its diagnostic/its text buffer
@@ -30,6 +32,23 @@ procedure Main is
       New_Line;
    end Put_Title;
 
+   ----------
+   -- Dump --
+   ----------
+
+   procedure Dump (Unit : Analysis_Unit) is
+   begin
+      if Unit.Has_Diagnostics then
+         Put_Line ("Errors:");
+         for D of Unit.Diagnostics loop
+            Put_Line ("  " & Unit.Format_GNU_Diagnostic (D));
+         end loop;
+      else
+         Put_Line ("Success: " & Image (Unit.Text, With_Quotes => True));
+      end if;
+      New_Line;
+   end Dump;
+
    -----------
    -- Parse --
    -----------
@@ -37,16 +56,7 @@ procedure Main is
    procedure Parse (Filename, Charset : String) is
    begin
       Put_Title ("Parsing " & Filename);
-      U := Ctx.Get_From_File (Filename, Charset);
-      if U.Has_Diagnostics then
-         Put_Line ("Errors:");
-         for D of U.Diagnostics loop
-            Put_Line ("  " & U.Format_GNU_Diagnostic (D));
-         end loop;
-      else
-         Put_Line ("Success: " & Image (U.Text, With_Quotes => True));
-      end if;
-      New_Line;
+      Dump (Ctx.Get_From_File (Filename, Charset));
    end Parse;
 
 begin
@@ -71,9 +81,19 @@ begin
    Parse ("direct-bad-charset.txt", "some-charset");
    Parse ("direct-decoding-error.txt", "ascii");
 
+   --  Check that we can load the internal unit, which is supposed to bypass
+   --  the file reader, to read from a memory buffer.
+
+   Put_Title ("Parsing the internal unit");
+   Dump (Get_Internal_Unit (Ctx));
+
    --  Check that the use of parsing APIs with buffers is rejected
 
    Put_Title ("Using buffer-based parsing APIs");
+
+   Put_Line ("First, create the from_buffer.txt unit...");
+   U := Ctx.Get_From_File ("from_buffer.txt");
+   New_Line;
 
    Put_Line ("Get_From_Buffer:");
    begin

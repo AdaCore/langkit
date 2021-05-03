@@ -452,7 +452,8 @@ package body ${ada_lib_name}.Implementation is
       Filename, Charset : String;
       Reparse           : Boolean;
       Input             : Internal_Lexer_Input;
-      Rule              : Grammar_Rule) return Internal_Unit
+      Rule              : Grammar_Rule;
+      Is_Internal       : Boolean := False) return Internal_Unit
    is
       use Units_Maps;
 
@@ -497,7 +498,13 @@ package body ${ada_lib_name}.Implementation is
          then Create_Unit (Context, Normalized_Filename,
                            To_String (Actual_Charset), Rule)
          else Element (Cur));
-      Unit.Charset := Actual_Charset;
+
+      --  If an internal unit is requested, set the corresponding flag.
+      --  Otherwise, make sure that the unit we return isn't internal.
+
+      if Is_Internal then
+         Unit.Is_Internal := True;
+      end if;
 
       --  (Re)parse it if needed
 
@@ -508,6 +515,11 @@ package body ${ada_lib_name}.Implementation is
             Do_Parsing (Unit, Refined_Input, Reparsed);
             Update_After_Reparse (Unit, Reparsed);
          end;
+
+         --  Now that we have removed reparsed the unit, update its current
+         --  charset.
+
+         Unit.Charset := Actual_Charset;
       end if;
 
       return Unit;
@@ -4039,6 +4051,7 @@ package body ${ada_lib_name}.Implementation is
    is
       Unit : Internal_Unit := new Analysis_Unit_Type'
         (Context                      => Context,
+         Is_Internal                  => False,
          AST_Root                     => null,
          Filename                     => Normalized_Filename,
          Charset                      => To_Unbounded_String (Charset),

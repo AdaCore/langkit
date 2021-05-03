@@ -18,6 +18,11 @@ My_File_Reader.Read:
 Errors:
   1:3-2:4: this is an error message
 
+Parsing the internal unit
+=========================
+
+Success: 'example # internal'
+
 Using buffer-based parsing APIs
 ===============================
 
@@ -88,8 +93,19 @@ My_File_Reader.Read:
 Errors:
   direct-decoding-error.txt: Could not decode source as "ascii"
 
+Parsing the internal unit
+=========================
+
+Success: "example # internal"
+
 Using buffer-based parsing APIs
 ===============================
+
+First, create the from_buffer.txt unit...
+My_File_Reader.Read:
+  Filename: from_buffer.txt
+  Charset: utf-8
+  Read_BOM: True
 
 Get_From_Buffer:
 Precondition_Failure: cannot parse from buffer with a file reader

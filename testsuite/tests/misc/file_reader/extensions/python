@@ -1,0 +1,14 @@
+## vim: ft=makopython
+
+_get_internal_unit = _import_func(
+   'foo_get_internal_unit',
+   [AnalysisContext._c_type], AnalysisUnit._c_type
+)
+
+
+def _get_internal_unit_method(self):
+    c_value = _get_internal_unit(self._c_value)
+    return AnalysisUnit._wrap(c_value)
+
+
+AnalysisContext.get_internal_unit = property(_get_internal_unit_method)

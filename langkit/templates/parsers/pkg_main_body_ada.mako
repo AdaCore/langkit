@@ -170,12 +170,19 @@ package body ${ada_lib_name}.Parsers is
       With_Trivia : Boolean;
       Unit        : access Implementation.Analysis_Unit_Type;
       TDH         : Token_Data_Handler_Access;
-      Parser      : in out Parser_Type) is
+      Parser      : in out Parser_Type)
+   is
+      --  Never try to use file readers for internal units: these are generally
+      --  not actual source files, and file readers, which are external users
+      --  of the generated library, have no reason to be aware of them.
+
+      FR : constant Internal_File_Reader_Access :=
+        (if Unit.Is_Internal
+         then null
+         else Unit.Context.File_Reader);
    begin
       Reset (Parser);
-      Extract_Tokens
-        (Input, With_Trivia, Unit.Context.File_Reader, TDH.all,
-         Parser.Diagnostics);
+      Extract_Tokens (Input, With_Trivia, FR, TDH.all, Parser.Diagnostics);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
    end Init_Parser;
