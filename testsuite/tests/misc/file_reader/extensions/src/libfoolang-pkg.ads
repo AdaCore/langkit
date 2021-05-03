@@ -1,7 +1,9 @@
 with Langkit_Support.Diagnostics;  use Langkit_Support.Diagnostics;
 with Langkit_Support.File_Readers; use Langkit_Support.File_Readers;
 
-package Pkg is
+with Libfoolang.Analysis; use Libfoolang.Analysis;
+
+package Libfoolang.Pkg is
 
    type My_File_Reader is new File_Reader_Interface with null record;
 
@@ -15,4 +17,7 @@ package Pkg is
 
    overriding procedure Release (Self : in out My_File_Reader);
 
-end Pkg;
+   function Get_Internal_Unit
+     (Context : Analysis_Context) return Analysis_Unit;
+
+end Libfoolang.Pkg;

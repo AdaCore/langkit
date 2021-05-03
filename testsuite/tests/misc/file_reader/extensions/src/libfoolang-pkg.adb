@@ -1,9 +1,17 @@
-with Ada.Directories; use Ada.Directories;
-with Ada.Text_IO;     use Ada.Text_IO;
+with Ada.Directories;       use Ada.Directories;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO;           use Ada.Text_IO;
 
 with Langkit_Support.Text; use Langkit_Support.Text;
 
-package body Pkg is
+with Libfoolang.Common;            use Libfoolang.Common;
+with Libfoolang.Implementation;    use Libfoolang.Implementation;
+with Libfoolang.Public_Converters; use Libfoolang.Public_Converters;
+
+package body Libfoolang.Pkg is
+
+   Internal_Unit_Source : aliased constant String :=
+     "example # internal";
 
    ----------
    -- Read --
@@ -54,4 +62,27 @@ package body Pkg is
       Put_Line ("My_File_Reader.Do_Release");
    end Release;
 
-end Pkg;
+   -----------------------
+   -- Get_Internal_Unit --
+   -----------------------
+
+   function Get_Internal_Unit (Context : Analysis_Context) return Analysis_Unit
+   is
+      Ctx    : constant Internal_Context := Unwrap_Context (Context);
+      Result : constant Internal_Unit := Get_Unit
+        (Context     => Ctx,
+         Filename    => "__internal_unit",
+         Charset     => "ascii",
+         Reparse     => False,
+         Input       => (Kind        => Bytes_Buffer,
+                         Charset     => To_Unbounded_String ("ascii"),
+                         Read_BOM    => False,
+                         Bytes       => Internal_Unit_Source'Address,
+                         Bytes_Count => Internal_Unit_Source'Length),
+         Rule        => Default_Grammar_Rule,
+         Is_Internal => True);
+   begin
+      return Wrap_Unit (Result);
+   end Get_Internal_Unit;
+
+end Libfoolang.Pkg;

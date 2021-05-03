@@ -1465,6 +1465,13 @@ private package ${ada_lib_name}.Implementation is
       Context : Internal_Context;
       --  The owning context for this analysis unit
 
+      Is_Internal : Boolean;
+      --  Whether this unit is internal.
+      --
+      --  The use of file readers for parsing is disabled for internal units,
+      --  which allows in-memory parsing for them even when a file reader is
+      --  active.
+
       AST_Root : ${T.root_node.name};
 
       Filename : GNATCOLL.VFS.Virtual_File;
@@ -1608,9 +1615,13 @@ private package ${ada_lib_name}.Implementation is
       Filename, Charset : String;
       Reparse           : Boolean;
       Input             : Internal_Lexer_Input;
-      Rule              : Grammar_Rule) return Internal_Unit;
+      Rule              : Grammar_Rule;
+      Is_Internal       : Boolean := False) return Internal_Unit;
    --  Helper for Get_From_File and Get_From_Buffer. Return the resulting
    --  analysis unit.
+   --
+   --  If ``Is_Internal`` is True, allow parsing from buffer even if
+   --  ``Context`` has a file reader.
 
    function Has_Unit
      (Context : Internal_Context; Unit_Filename : String) return Boolean;
