@@ -1613,8 +1613,7 @@ private package ${ada_lib_name}.Implementation is
    --  analysis unit.
 
    function Has_Unit
-     (Context       : Internal_Context;
-      Unit_Filename : String) return Boolean;
+     (Context : Internal_Context; Unit_Filename : String) return Boolean;
    --  Implementation for Analysis.Has_Unit
 
    function Get_From_File

@@ -518,8 +518,7 @@ package body ${ada_lib_name}.Implementation is
    --------------
 
    function Has_Unit
-     (Context       : Internal_Context;
-      Unit_Filename : String) return Boolean is
+     (Context : Internal_Context; Unit_Filename : String) return Boolean is
    begin
       return Context.Units.Contains
         (Normalized_Unit_Filename (Context, Unit_Filename));
