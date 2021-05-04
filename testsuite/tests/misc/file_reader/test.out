@@ -23,6 +23,11 @@ Parsing the internal unit
 
 Success: 'example # internal'
 
+Reparsing the internal unit
+===========================
+
+PreconditionFailure: cannot reparse an internal unit
+
 Using buffer-based parsing APIs
 ===============================
 
@@ -97,6 +102,11 @@ Parsing the internal unit
 =========================
 
 Success: "example # internal"
+
+Reparsing the internal unit
+===========================
+
+Precondition_Failure: cannot reparse an internal unit
 
 Using buffer-based parsing APIs
 ===============================

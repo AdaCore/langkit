@@ -509,6 +509,16 @@ package body ${ada_lib_name}.Implementation is
       --  (Re)parse it if needed
 
       if Created or else Reparse then
+
+         --  It is illegal to reparse an internal unit for public API users.
+         --  Since public APIs do not allow to pass True to Is_Internal, we can
+         --  check here that only the implementation can ask to reparse an
+         --  internal unit.
+
+         if Unit.Is_Internal and then not Is_Internal then
+            raise Precondition_Failure with "cannot reparse an internal unit";
+         end if;
+
          declare
             Reparsed : Reparsed_Unit;
          begin
