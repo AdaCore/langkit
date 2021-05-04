@@ -17,6 +17,8 @@ package Libfoolang.Pkg is
 
    overriding procedure Release (Self : in out My_File_Reader);
 
+   Internal_Unit_Name : constant String := "__internal_unit";
+
    function Get_Internal_Unit
      (Context : Analysis_Context) return Analysis_Unit;
 

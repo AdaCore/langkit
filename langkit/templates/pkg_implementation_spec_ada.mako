@@ -1471,6 +1471,11 @@ private package ${ada_lib_name}.Implementation is
       --  The use of file readers for parsing is disabled for internal units,
       --  which allows in-memory parsing for them even when a file reader is
       --  active.
+      --
+      --  It is illegal for users of public APIs to reparse an internal unit.
+      --  Setting this flag allows generated libraries to create internal units
+      --  to implement language internals and forbid library users to mess with
+      --  this unit.
 
       AST_Root : ${T.root_node.name};
 
@@ -1621,7 +1626,8 @@ private package ${ada_lib_name}.Implementation is
    --  analysis unit.
    --
    --  If ``Is_Internal`` is True, allow parsing from buffer even if
-   --  ``Context`` has a file reader.
+   --  ``Context`` has a file reader, and forbid later calls to
+   --  Get_From_File/Get_From_Buffer/Reparse on the returned unit.
 
    function Has_Unit
      (Context : Internal_Context; Unit_Filename : String) return Boolean;

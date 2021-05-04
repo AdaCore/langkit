@@ -71,7 +71,7 @@ package body Libfoolang.Pkg is
       Ctx    : constant Internal_Context := Unwrap_Context (Context);
       Result : constant Internal_Unit := Get_Unit
         (Context     => Ctx,
-         Filename    => "__internal_unit",
+         Filename    => Internal_Unit_Name,
          Charset     => "ascii",
          Reparse     => False,
          Input       => (Kind        => Bytes_Buffer,

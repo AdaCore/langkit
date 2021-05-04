@@ -85,7 +85,24 @@ begin
    --  the file reader, to read from a memory buffer.
 
    Put_Title ("Parsing the internal unit");
-   Dump (Get_Internal_Unit (Ctx));
+   U := Get_Internal_Unit (Ctx);
+   Dump (U);
+
+   --  Check that we can fetch the internal unit with Get_From_File in
+   --  non-reparsing mode only.
+
+   if U /= Ctx.Get_From_File (Internal_Unit_Name) then
+      raise Program_Error;
+   end if;
+
+   Put_Title ("Reparsing the internal unit");
+   begin
+      U := Ctx.Get_From_File (Internal_Unit_Name, Reparse => True);
+   exception
+      when Exc : Precondition_Failure =>
+         Put_Line ("Precondition_Failure: " & Exception_Message (Exc));
+   end;
+   New_Line;
 
    --  Check that the use of parsing APIs with buffers is rejected
 

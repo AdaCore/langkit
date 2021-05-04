@@ -44,6 +44,15 @@ u = ctx.get_internal_unit
 dump(u)
 print("")
 
+assert u == ctx.get_from_file("__internal_unit")
+
+print_title("Reparsing the internal unit")
+try:
+    ctx.get_from_file("__internal_unit", reparse=True)
+except libfoolang.PreconditionFailure as exc:
+    print("PreconditionFailure: {}".format(exc))
+print("")
+
 print_title("Using buffer-based parsing APIs")
 print(".get_from_buffer:")
 try:
