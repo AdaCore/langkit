@@ -362,7 +362,16 @@ base_langkit_docs = {
     'langkit.get_unit_from_provider': """
         Create a new analysis unit for ``Name``/``Kind`` or return the existing
         one if any. If ``Reparse`` is true and the analysis unit already
-        exists, reparse it from ``Filename``.
+        exists, reparse it from the on-disk source file.
+
+        The ``Name`` and ``Kind`` arguments are forwarded directly to query the
+        context's unit provider and get the filename for the returned unit.
+        % if lang == 'python':
+            ``Name`` must be a string, while ``Kind`` must be an
+            ``AnalysisUnitKind`` enumeration value.
+        % endif
+        See the documentation of the relevant unit provider for their exact
+        semantics.
 
         Use ``Charset`` in order to decode the source. If ``Charset`` is empty
         then use the context's default charset.
@@ -692,6 +701,9 @@ base_langkit_docs = {
 
         This is used to make the semantic analysis able to switch from one
         analysis units to another.
+
+        See the documentation of each unit provider for the exact semantics of
+        the unit name/kind information.
     """,
     'langkit.unit_provider_get_unit_filename': """
         Return the filename corresponding to the given unit name/unit kind.
