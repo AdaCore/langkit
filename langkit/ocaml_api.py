@@ -700,19 +700,6 @@ class OCamlAPISettings(AbstractAPISettings):
 
         return topo
 
-    def escape_ocaml_keyword(self, string: str) -> str:
-        """
-        Return a replacement for the given string if the string is an OCaml
-        keyword that cannot appear as an identifier.
-
-        :param string: The string we want to replace if necessary.
-        """
-        replacement = {
-            "val": "value",
-            "constraint": "constr"
-        }
-        return replacement.get(string, string)
-
     def field_name(self, field: ct.Field) -> str:
         """
         Given a Field instance, return the name of the field to be used for an
@@ -720,4 +707,7 @@ class OCamlAPISettings(AbstractAPISettings):
 
         :param field: The field for which we want it's name.
         """
-        return self.escape_ocaml_keyword(field.api_name.lower)
+        name = field.api_name.lower
+
+        # Add _ to the name if it is an ocaml keyword
+        return "{}_".format(name) if name in ocaml_keywords else name
