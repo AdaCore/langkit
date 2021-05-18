@@ -688,6 +688,12 @@ class Emitter:
             os.mkdir(self.ocaml_dir)
 
         with names.camel:
+            # Write an empty ocamlformat file so we can call ocamlformat
+            write_source_file(
+                os.path.join(self.ocaml_dir, '.ocamlformat'),
+                ''
+            )
+
             ctx = get_context()
             code = ctx.render_template(
                 "ocaml_api/module_ocaml",
