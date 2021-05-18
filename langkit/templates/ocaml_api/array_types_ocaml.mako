@@ -39,13 +39,13 @@ end
    % endif
 
    % if ocaml_api.wrap_requires_context(cls):
-  val wrap : AnalysisContext.t -> ${ocaml_api.c_value_type(cls)} -> t
+  val wrap : analysis_context -> ${ocaml_api.c_value_type(cls)} -> t
    % else:
   val wrap : ${ocaml_api.c_value_type(cls)} -> t
    % endif
 
    % if cls.conversion_requires_context:
-  val unwrap : AnalysisContext.t -> t -> ${ocaml_api.c_value_type(cls)}
+  val unwrap : analysis_context -> t -> ${ocaml_api.c_value_type(cls)}
    % else:
   val unwrap : t -> ${ocaml_api.c_value_type(cls)}
    % endif
@@ -59,7 +59,7 @@ end
    % endif
 
    % if ocaml_api.wrap_requires_context(cls):
-  let wrap context c_value_ptr =
+  let wrap (context : analysis_context) c_value_ptr =
    % else:
   let wrap c_value_ptr =
    % endif
@@ -95,7 +95,7 @@ end
     result
 
    % if cls.conversion_requires_context:
-  let unwrap context value =
+  let unwrap (context : analysis_context) value =
    % else:
   let unwrap value =
    % endif
@@ -109,7 +109,7 @@ end
    % endif
     let items = result |-> ${ocaml_api.struct_name(cls)}.items in
    % if cls.conversion_requires_context:
-    let c_context = context.AnalysisContext.c_value in
+    let c_context = context.c_value in
    % endif
    % if cls.is_string_type:
     let i = ref 0 in

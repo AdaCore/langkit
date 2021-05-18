@@ -622,66 +622,79 @@ module CFunctions = struct
 
 end
 
-module rec ${ocaml_api.module_name(T.root_node)} : sig
-  ${astnode_types.ast_type(T.root_node)}
+type analysis_context = {
+  c_value : AnalysisContextStruct.t;
+  unit_provider : UnitProvider.t
+}
 
-  val wrap :
-    AnalysisContext.t
-    -> ${ocaml_api.c_value_type(root_entity)}
-    -> ${ocaml_api.type_public_name(T.root_node, T.root_node)}
+and ${ocaml_api.type_public_name(T.AnalysisUnit)} = {
+  c_value : AnalysisUnitStruct.t;
+  context : analysis_context
+}
 
-  val unwrap : [< t ] -> ${ocaml_api.c_value_type(root_entity)}
+and entity = ${ocaml_api.c_value_type(root_entity)}
 
-end = struct
-  ${astnode_types.ast_type(T.root_node)}
+${struct_types.ocaml_fields(T.entity_info, rec=True)}
 
-  let wrap context c_value =
-    (* Top level wrap function that dispatch to wrap function of concrete types
-      depending on the node kind *)
-    if is_null (getf c_value ${ocaml_api.struct_name(root_entity)}.node) then
-      raise SyntaxError
-    else
-      let kind = CFunctions.node_kind (addr c_value) in
-      match kind with
-% for subclass in ctx.astnode_types:
-   % if not subclass.abstract:
-      | ${ctx.node_kind_constants[subclass]} ->
-          (${ocaml_api.wrap_value('c_value', subclass.entity, 'context')}
-           :> ${ocaml_api.type_public_name(T.root_node, T.root_node)})
-   % endif
+${struct_types.ocaml_fields(T.env_md, rec=True)}
+
+% for astnode in ctx.astnode_types:
+  ${astnode_types.sig(astnode)}
 % endfor
-      | _ -> assert false
 
-  let unwrap value =
-    (* This is the unique unwrap function that can be called for any node. *)
-    match (value :> ${root_entity_type}) with
+
+let rec ${ocaml_api.unwrap_function_name(T.root_node)} value =
+  (* This is the unique unwrap function that can be called for any node. *)
+  match (value :> ${root_entity_type}) with
 % for subclass in ctx.astnode_types:
    % if not subclass.abstract:
-    | ${ocaml_api.polymorphic_variant_name(subclass)} fields -> fields.c_value
+  | ${ocaml_api.polymorphic_variant_name(subclass)} fields -> fields.c_value
    % endif
 % endfor
 
-end
+${struct_types.unwrap_struct(T.entity_info, rec=True)}
+
+${struct_types.unwrap_struct(T.env_md, rec=True)}
+
+and ${ocaml_api.unwrap_function_name(T.AnalysisUnit)}
+  (unit : ${ocaml_api.type_public_name(T.AnalysisUnit)}) = unit.c_value
+
+let rec ${ocaml_api.wrap_function_name(T.root_node)} context c_value =
+  (* Top level wrap function that dispatch to wrap function of concrete types
+     depending on the node kind *)
+  if is_null (getf c_value ${ocaml_api.struct_name(root_entity)}.node) then
+    raise SyntaxError
+  else
+    let kind = CFunctions.node_kind (addr c_value) in
+    match kind with
+% for subclass in ctx.astnode_types:
+   % if not subclass.abstract:
+    | ${ctx.node_kind_constants[subclass]} ->
+        (${ocaml_api.wrap_value('c_value', subclass.entity, 'context')}
+         :> ${ocaml_api.type_public_name(T.root_node, T.root_node)})
+   % endif
+% endfor
+    | _ -> assert false
 
 % for astnode in ctx.astnode_types:
    % if astnode != T.root_node:
       ## root node is defined separately
-      ${astnode_types.decl_type(astnode)}
+      ${astnode_types.struct(astnode)}
    % endif
 % endfor
 
-and Entity : sig
-  type t = ${ocaml_api.c_value_type(root_entity)}
+${struct_types.wrap_struct(T.entity_info, rec=True)}
 
-  val info : t -> ${ocaml_api.type_public_name(T.entity_info)}
+${struct_types.wrap_struct(T.env_md, rec=True)}
 
-  val equal : t -> t -> bool
+and ${ocaml_api.wrap_function_name(T.AnalysisUnit)} context c_value
+   : ${ocaml_api.type_public_name(T.AnalysisUnit)} = {
+ c_value=c_value;
+ context=context;
+}
 
-  val compare : t -> t -> int
-
-  val hash : t -> int
-end = struct
-  type t = ${ocaml_api.c_value_type(root_entity)}
+module Entity = struct
+  type t = entity
 
   let info value =
     ${ocaml_api.wrap_value("getf value {}.info".format(
@@ -708,40 +721,18 @@ end = struct
       , getf (getf e EntityStruct.info) EntityInfoStruct.rebindings )
 end
 
-and AnalysisUnit : sig
-  type t = {
-    c_value : AnalysisUnitStruct.t;
-    context : AnalysisContext.t
-  }
+module AnalysisUnit = struct
+  type t = ${ocaml_api.type_public_name(T.AnalysisUnit)}
 
-  val root : t -> ${root_entity_type} option
-  val diagnostics : t -> Diagnostic.t list
-  val filename : t -> string
-  val reparse : ?charset:string -> ?buffer:string -> t -> unit
-  val first_token : t -> Token.t
-  val last_token : t -> Token.t
-  val token_count : t -> int
-  val trivia_count : t -> int
-
-  ${token_iterator.sig("t")}
-
-  val wrap : AnalysisContext.t -> AnalysisUnitStruct.t -> t
-  val unwrap : t -> AnalysisUnitStruct.t
-end = struct
-  type t = {
-    c_value : AnalysisUnitStruct.t;
-    context : AnalysisContext.t
-  }
-
-  let root analysis_unit =
+  let root (unit : t) =
     let c_value = make ${ocaml_api.c_type(root_entity)} in
     AnalysisUnitStruct.unit_root
-      (${ocaml_api.unwrap_value("analysis_unit", T.AnalysisUnit, None)})
+      (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)})
       (addr c_value);
-    ${ocaml_api.wrap_value('c_value', root_entity, "analysis_unit.context",
+    ${ocaml_api.wrap_value('c_value', root_entity, "unit.context",
          check_for_null=True)}
 
-  let diagnostics unit =
+  let diagnostics (unit : t) =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
     let length = AnalysisUnitStruct.unit_diagnostic_count c_unit in
     let f i =
@@ -751,81 +742,44 @@ end = struct
     in
     List.init length f
 
-  let filename unit =
+  let filename (unit : t) =
     unwrap_str( AnalysisUnitStruct.unit_filename
       (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)}))
 
-  let reparse ?charset:(charset="") ?buffer ctx =
+  let reparse ?charset:(charset="") ?buffer (unit : t) =
     match buffer with
     | None ->
         ignore
-          (AnalysisUnitStruct.unit_reparse_from_file ctx.c_value charset)
+          (AnalysisUnitStruct.unit_reparse_from_file unit.c_value charset)
     | Some buffer ->
-        ignore (AnalysisUnitStruct.unit_reparse_from_buffer ctx.c_value
+        ignore (AnalysisUnitStruct.unit_reparse_from_buffer unit.c_value
           charset buffer (Unsigned.Size_t.of_int (String.length buffer)))
 
-  let first_token unit =
+  let first_token (unit : t) =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
     let result_ptr = allocate_n Token.c_type ~count:1 in
     AnalysisUnitStruct.unit_first_token c_unit result_ptr ;
     !@ result_ptr
 
-  let last_token unit =
+  let last_token (unit : t) =
     let c_unit = ${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)} in
     let result_ptr = allocate_n Token.c_type ~count:1 in
     AnalysisUnitStruct.unit_last_token c_unit result_ptr ;
     !@ result_ptr
 
-  let token_count unit =
+  let token_count (unit : t) =
     AnalysisUnitStruct.unit_token_count
       (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)})
 
-  let trivia_count unit =
+  let trivia_count (unit : t) =
     AnalysisUnitStruct.unit_trivia_count
       (${ocaml_api.unwrap_value("unit", T.AnalysisUnit, None)})
 
   ${token_iterator.struct("first_token", "last_token")}
-
-  let wrap context c_value = {
-    c_value=c_value;
-    context=context;
-  }
-
-  let unwrap {c_value} = c_value
 end
 
-and AnalysisContext : sig
-  type t = {
-    c_value : AnalysisContextStruct.t;
-    unit_provider : UnitProvider.t }
-
-  val create :
-    ?charset:string
-    -> ?with_trivia:bool
-    -> ?tab_stop:int
-    -> ?unit_provider:UnitProvider.t
-    -> unit
-    -> t
-
-  val get_from_file :
-    ?charset:string
-    -> ?reparse:bool
-    -> ?grammar_rule:GrammarRule.t
-    -> t
-    -> string
-    -> AnalysisUnit.t
-
-  val get_from_buffer :
-    ?charset:string
-    -> ?grammar_rule:GrammarRule.t
-    -> t
-    -> string
-    -> string
-    -> AnalysisUnit.t
-end = struct
-  type t = {
-    c_value : AnalysisContextStruct.t;
-    unit_provider : UnitProvider.t }
+module AnalysisContext = struct
+  type t = analysis_context
 
   let create
     ?charset:(charset="")
@@ -849,7 +803,7 @@ end = struct
     ?charset:(charset="")
     ?reparse:(reparse=false)
     ?grammar_rule:(grammar_rule=default_grammar_rule)
-    ctx
+    (ctx : t)
     filename : AnalysisUnit.t =
 
     ${ocaml_api.wrap_value(
@@ -859,7 +813,7 @@ end = struct
   let get_from_buffer
     ?charset:(charset="")
     ?grammar_rule:(grammar_rule=default_grammar_rule)
-    ctx
+    (ctx : t)
     filename
     buffer : AnalysisUnit.t =
 
@@ -869,10 +823,6 @@ end = struct
       + " (Unsigned.Size_t.of_int (String.length buffer)) grammar_rule"
       , T.AnalysisUnit, "ctx")}
 end
-
-${struct_types.decl_wrapper(T.entity_info, rec=True)}
-
-${struct_types.decl_wrapper(T.env_md, rec=True)}
 
 % for typ in ocaml_api.ordered_types():
    % if typ not in [T.AnalysisUnit, ocaml_api.AnalysisContext, T.Symbol,\

@@ -17,49 +17,53 @@ end
    % endif
 </%def>
 
-<%def name="ocaml_fields(cls)">
-  type t = {
-   % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
+<%def name="ocaml_fields(cls, rec=False)">
+   % if not ocaml_api.is_empty_type(cls):
+  ${("and" if rec else "type")} ${ocaml_api.type_public_name(cls, cls)} = {
+      % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
       ${ocaml_api.field_name(f)} :
-      % if f.type.is_ast_node:
+         % if f.type.is_ast_node:
          ${ocaml_api.c_value_type(f.type, cls)};
-      % elif f.type.is_entity_type:
+         % elif f.type.is_entity_type:
          ## If the type is an entity type, we want an optional type instead.
          ## This is because we have no way to know if the node will be null
          ## or not.
          ${ocaml_api.type_public_name(f.type, cls)} option;
-      % else:
+         % else:
          ${ocaml_api.type_public_name(f.type, cls)};
-      % endif
-   % endfor
+         % endif
+      % endfor
   }
+   % endif
 </%def>
 
 <%def name="sig_wrapper(cls)">
   ${ocaml_fields(cls)}
 
    % if ocaml_api.wrap_requires_context(cls):
-  val wrap : AnalysisContext.t -> ${ocaml_api.c_value_type(cls)} -> t
+  val wrap : analysis_context -> ${ocaml_api.c_value_type(cls)} -> t
    % else:
   val wrap : ${ocaml_api.c_value_type(cls)} -> t
    % endif
 
    % if cls.conversion_requires_context:
-  val unwrap : AnalysisContext.t -> t -> ${ocaml_api.c_value_type(cls)}
+  val unwrap : analysis_context -> t -> ${ocaml_api.c_value_type(cls)}
    % else:
   val unwrap : t -> ${ocaml_api.c_value_type(cls)}
    % endif
 
 </%def>
 
-<%def name="struct_wrapper(cls)">
-  ${ocaml_fields(cls)}
-
-   % if ocaml_api.wrap_requires_context(cls):
-  let wrap context c_value = {
-   % else:
-  let wrap c_value = {
-   % endif
+<%def name="wrap_struct(cls, rec=False)">
+   <%
+      let = "and" if rec else "let"
+   %>
+   % if not ocaml_api.is_empty_type(cls):
+      % if ocaml_api.wrap_requires_context(cls):
+  ${let} ${ocaml_api.wrap_function_name(cls, cls)} context c_value = {
+      % else:
+  ${let} ${ocaml_api.wrap_function_name(cls, cls)} c_value = {
+      % endif
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
     ${ocaml_api.field_name(f)} = ${ocaml_api.wrap_value(
       '(getf c_value {}.{})'.format(ocaml_api.struct_name(cls),
@@ -67,12 +71,20 @@ end
       f.type, 'context', check_for_null=True)};
       % endfor
   }
+  % endif
+</%def>
 
-   % if cls.conversion_requires_context:
-  let unwrap context value =
-   % else:
-  let unwrap value =
-   % endif
+<%def name="unwrap_struct(cls, rec=False)">
+   <%
+      let = "and" if rec else "let"
+   %>
+
+   % if not ocaml_api.is_empty_type(cls):
+      % if cls.conversion_requires_context:
+  ${let} ${ocaml_api.unwrap_function_name(cls, cls)} context value =
+      % else:
+  ${let} ${ocaml_api.unwrap_function_name(cls, cls)} value =
+      % endif
     let c_value = make ${ocaml_api.c_type(cls)} in
       % for f in cls.get_fields(lambda t: not ocaml_api.is_empty_type(t.type)):
     setf c_value
@@ -81,16 +93,21 @@ end
                                 f.type, 'context', check_for_none=True)});
       % endfor
     c_value
+   % endif
 
 </%def>
 
-<%def name="decl_wrapper(cls, rec=False)">
+<%def name="struct_wrapper(cls)">
+  ${ocaml_fields(cls)}
+
+  ${wrap_struct(cls)}
+
+  ${unwrap_struct(cls)}
+</%def>
+
+<%def name="decl_wrapper(cls)">
    % if not ocaml_api.is_empty_type(cls):
-      % if rec:
-and ${ocaml_api.module_name(cls)} : sig
-      % else:
 module ${ocaml_api.module_name(cls)} : sig
-      % endif
    ${sig_wrapper(cls)}
 end = struct
    ${struct_wrapper(cls)}
@@ -100,7 +117,7 @@ end
 
 <%def name="public_sig(cls)">
    % if not ocaml_api.is_empty_type(cls):
-and ${ocaml_api.module_name(cls)} : sig
+module ${ocaml_api.module_name(cls)} : sig
   ${ocaml_doc(cls, 1)}
 
   ${ocaml_fields(cls)}
