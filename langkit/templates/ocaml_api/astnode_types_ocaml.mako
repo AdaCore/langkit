@@ -6,7 +6,7 @@
          %>
          % if len(precise_types) == 1:
     ${ocaml_api.field_name(field)}: ${ocaml_api.type_public_name(
-                                         precise_types[0], astnode)}
+                                         precise_types[0])}
             % if field.is_optional:
     option
             % endif
@@ -15,7 +15,7 @@
     ${ocaml_api.field_name(field)}: [
             % for tpe in precise_types:
       | ${ocaml_api.polymorphic_variant_name(tpe)}
-          of ${ocaml_api.fields_name(tpe, astnode)}
+          of ${ocaml_api.fields_name(tpe)}
             % endfor
     ]
             % if field.is_optional:
@@ -27,12 +27,12 @@
       % if astnode.is_list:
     list : ${ocaml_api.type_public_name(astnode.element_type)} list Lazy.t;
       % endif
-    c_value : Entity.t;
-    context : AnalysisContext.t
+    c_value : entity;
+    context : analysis_context
   }
 </%def>
 
-<%def name="ast_type(astnode)">
+<%def name="sig(astnode)">
    ## Keep direct subclass type information, at least as a comment.
    ## Do not print it, if it's redundant with the concrete_subclasses.
    <%
@@ -46,31 +46,21 @@
       % endfor
     *)
    % endif
-  type t = [
+  and ${ocaml_api.type_public_name(astnode)} = [
    % for subclass in astnode.concrete_subclasses:
     | ${ocaml_api.polymorphic_variant_name(subclass)}
-        of ${ocaml_api.fields_name(subclass, astnode)}
+        of ${ocaml_api.fields_name(subclass)}
    % endfor
   ]
    % if not astnode.abstract:
-  and fields = ${field_type(astnode)}
+  and ${ocaml_api.fields_name(astnode)} = ${field_type(astnode)}
    % endif
 </%def>
 
-<%def name='sig(astnode)'>
-  ${ast_type(astnode)}
-
-  val wrap :
-    AnalysisContext.t
-    -> ${ocaml_api.c_value_type(root_entity)}
-    -> ${ocaml_api.type_public_name(astnode, astnode)}
-</%def>
-
 <%def name='struct(astnode)'>
-  ${ast_type(astnode)}
 
    % if astnode.abstract:
-  let wrap context c_value =
+  and ${ocaml_api.wrap_function_name(astnode)} context c_value =
     (* This is an abstract node, call the root wrap function and filter to get
      the desired type *)
     match ${ocaml_api.wrap_value('c_value', root_entity, "context")} with
@@ -83,7 +73,8 @@
           assert false
    % else:
 
-  let wrap context c_value =
+  and ${ocaml_api.wrap_function_name(astnode)} context c_value
+   : ${ocaml_api.type_public_name(astnode)} =
       % for field in ocaml_api.get_parse_fields(astnode):
     let ${ocaml_api.field_name(field)} () =
       let field_c_value = make ${ocaml_api.c_type(field.public_type)} in
@@ -150,17 +141,5 @@
         c_value = c_value;
         context = context
       }
-   % endif
-</%def>
-
-<%def name='decl_type(astnode)'>
-   % if not ocaml_api.is_empty_type(astnode):
-      ## We don't generate the module if the type does not have any concrete
-      ## subclass since it will cause an empty type.
-and ${ocaml_api.module_name(astnode)} : sig
-   ${sig(astnode)}
-end = struct
-   ${struct(astnode)}
-end
    % endif
 </%def>

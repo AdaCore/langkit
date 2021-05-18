@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Callable, Dict, List, Optional, TYPE_CHECKING, Union
 
 from langkit.c_api import CAPISettings
 import langkit.compiled_types as ct
@@ -12,6 +12,17 @@ from langkit.utils import dispatch_on_type
 
 if TYPE_CHECKING:
     from langkit.compile_context import CompileCtx
+
+# names that are not really keywords but that we still don't want to generate
+inconvenient_names = ["ref"]
+
+# list found here: https://ocaml.org/manual/lex.html
+ocaml_keywords = set("""and as assert asr begin class constraint do done downto
+    else end exception external false for fun function functor if in include
+    inherit initializer land lazy let lor lsl lsr lxor match method mod module
+    mutable new nonrec object of open or private rec sig struct then to true
+    try type val virtual when while with
+""".split() + inconvenient_names)
 
 
 class DummyAnalysisContextType:
@@ -125,19 +136,14 @@ class OCamlAPISettings(AbstractAPISettings):
         """
         return "`{}".format(type.entity.api_name.camel)
 
-    def fields_name(self,
-                    for_module: ct.ASTNodeType,
-                    from_module: Optional[ct.ASTNodeType] = None) -> str:
+    def fields_name(self, type: ct.ASTNodeType) -> str:
         """
         Return a string representing the name of the OCaml type for the
         fields of a node.
 
-        :param for_module: The field comes from this module.
-        :param from_module: The field is accessed inside this module.
+        :param type: Ast node type from which the field comes.
         """
-        return ('fields'
-                if for_module == from_module
-                else "{}.{}".format(self.module_name(for_module), 'fields'))
+        return '{}_fields'.format(type.kwless_raw_name.lower)
 
     def get_field_type(self, field: ct.Field) -> List[ct.CompiledType]:
         """
@@ -227,7 +233,7 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Symbol, lambda t: self.module_name(t)),
             (ct.ASTNodeType, lambda t: self.module_name(t.entity)),
             (ct.EntityType, lambda _: 'EntityStruct'),
-            (T.AnalysisUnit, lambda t: '{}Struct'.format(self.module_name(t))),
+            (T.AnalysisUnit, lambda t: '{}Struct'.format(t.api_name.camel)),
             (ct.ArrayType, lambda t: '{}Struct'.format(self.array_wrapper(t))),
             (ct.IteratorType, lambda t: '{}Struct'.format(
                 self.iterator_wrapper(t)
@@ -259,9 +265,6 @@ class OCamlAPISettings(AbstractAPISettings):
             (T.Token, lambda _: 'Token'),
             (T.Symbol, lambda _: 'Symbol'),
             (T.Character, lambda _: 'Character'),
-            (ct.ASTNodeType, lambda t: self.module_name(t.entity)),
-            (ct.EntityType, lambda t: '{}Type'.format(self.node_name(t))),
-            (T.AnalysisUnit, lambda t: t.api_name.camel),
             (ct.ArrayType, lambda t: t.api_name.camel),
             (ct.IteratorType, lambda t: t.api_name.camel),
             (ct.StructType, lambda t: t.api_name.camel),
@@ -328,6 +331,71 @@ class OCamlAPISettings(AbstractAPISettings):
             ' (has_ctype_view): {}'.format(type)
         ))
 
+    def convert_function_name(
+        self,
+        type: ct.CompiledType,
+        convert: str,
+        convert_ast_node: Callable[[ct.ASTNodeType], str],
+        from_module: Optional[ct.ASTNodeType] = None
+    ) -> str:
+        """
+        Return the wrap/unwrap function name used to wrap/unwrap the given
+        type. The wrap or unwrap is selected with the given convert string.
+        Call the given convert function on an ASTNodeType.
+
+        :param type: The type for which we want the conversion function.
+        :param convert: Conversion function name, either wrap, or unwrap.
+        :param convert_ast_node: Function called to get the name of the
+            conversion function to use for an ASTNodeType.
+        :param from_module: The module from which we want to get the name of
+            the conversion function. This is useful because if the module is
+            the same as the type, then we don't want to prefix it with the
+            module name.
+        """
+
+        def from_module_name(type: ct.CompiledType) -> str:
+            if from_module == type:
+                return convert
+            else:
+                return "{}.{}".format(self.module_name(type), convert)
+
+        def plain_name(type: ct.CompiledType) -> str:
+            return "{}_{}".format(convert, type.api_name.lower)
+
+        return dispatch_on_type(type, [
+            (ct.ASTNodeType, lambda t: convert_ast_node(t)),
+            (ct.EntityType, lambda t: self.convert_function_name(
+                t.astnode, convert, convert_ast_node, from_module
+            )),
+            (T.AnalysisUnit, lambda t: plain_name(t)),
+            (T.entity_info, lambda t: plain_name(t)),
+            (T.env_md, lambda t: plain_name(t)),
+            (ct.CompiledType, lambda t: from_module_name(t))
+        ])
+
+    def wrap_function_name(
+        self,
+        type: ct.CompiledType,
+        from_module: Optional[ct.ASTNodeType] = None
+    ) -> str:
+        def convert_ast_node(type: ct.ASTNodeType) -> str:
+            return "wrap_{}".format(type.kwless_raw_name.lower)
+
+        return self.convert_function_name(
+            type, "wrap", convert_ast_node, from_module)
+
+    def unwrap_function_name(
+        self,
+        type: ct.CompiledType,
+        from_module: Optional[ct.ASTNodeType] = None
+    ) -> str:
+        def convert_ast_node(type: ct.ASTNodeType) -> str:
+            # We need only one unwrap function for the entire hierarchy
+            return "unwrap_{}".format(T.root_node.kwless_raw_name.lower)
+
+        return self.convert_function_name(
+            type, "unwrap", convert_ast_node, from_module)
+
     def wrap_value(self,
                    value: str,
                    type: ct.CompiledType,
@@ -346,14 +414,14 @@ class OCamlAPISettings(AbstractAPISettings):
             types.
         """
 
-        def from_module(typ: ct.CompiledType, value: str) -> str:
+        def from_function(typ: ct.CompiledType, value: str) -> str:
             context_arg = (
                 '{} '.format(context)
                 if self.wrap_requires_context(typ) else ''
             )
 
-            return "{}.wrap {}({})".format(
-                self.module_name(typ),
+            return "{} {}({})".format(
+                self.wrap_function_name(typ),
                 context_arg,
                 value
             )
@@ -361,7 +429,7 @@ class OCamlAPISettings(AbstractAPISettings):
         wrapped_result = (
             value
             if self.has_ctype_view(type)
-            else from_module(type, value)
+            else from_function(type, value)
         )
 
         if check_for_null and type.is_entity_type:
@@ -387,32 +455,28 @@ class OCamlAPISettings(AbstractAPISettings):
             evaluated to an empty struct. We check for None only for entity
             types.
         """
-        def from_module(typ: ct.CompiledType, value: str) -> str:
+        def from_function(typ: ct.CompiledType, value: str) -> str:
             context_arg = (
                 '{} '.format(context)
                 if type.conversion_requires_context
                 else ''
             )
 
-            return "{}.unwrap {}({})".format(
-                self.module_name(typ),
+            return "{} {}({})".format(
+                self.unwrap_function_name(typ),
                 context_arg,
                 value
             )
 
-        if type.is_entity_type:
-            # For entity type, the unwrap function is inside the root node
-            if check_for_none:
-                return ('match {} with'
-                        ' Some n -> {}'
-                        ' | None -> make EntityStruct.c_type'
-                        .format(value, from_module(T.root_node, 'n')))
-            else:
-                return from_module(T.root_node, value)
+        if type.is_entity_type and check_for_none:
+            return ('match {} with'
+                    ' Some n -> {}'
+                    ' | None -> make EntityStruct.c_type'
+                    .format(value, from_function(type, 'n')))
         elif self.has_ctype_view(type):
             return value
         else:
-            return from_module(type, value)
+            return from_function(type, value)
 
     def is_struct(self,
                   type: ct.CompiledType,
@@ -552,25 +616,36 @@ class OCamlAPISettings(AbstractAPISettings):
         :param type: The type for which we want to get the name.
         :param from_module: Module from which we want to access the name.
         """
-        if from_module == type:
-            return "t"
+        def from_module_name(type: ct.CompiledType) -> str:
+            if from_module == type:
+                return "t"
+            else:
+                return "{}.t".format(self.module_name(type))
+
+        def entity_type_name(type: ct.EntityType) -> str:
+            name = type.astnode.kwless_raw_name.lower
+
+            # Add _node to the name if it is an existing ocaml keyword
+            return name + "_node" if name in ocaml_keywords else name
 
         return dispatch_on_type(type, [
             (T.Bool, lambda _: 'bool'),
             (T.Int, lambda _: 'int'),
             (T.Character, lambda _: 'string'),
-            (T.Token, lambda t: '{}.t'.format(self.module_name(t))),
+            (T.Token, lambda t: from_module_name(t)),
             (T.Symbol, lambda _: 'string'),
-            (ct.EnumType, lambda t: '{}.t'.format(self.module_name(t))),
+            (ct.EnumType, lambda t: from_module_name(t)),
             (ct.ASTNodeType, lambda t: self.type_public_name(t.entity)),
-            (ct.EntityType, lambda t: "{}.t".format(self.module_name(t))),
-            (T.AnalysisUnit, lambda t: "{}.t".format(t.api_name)),
+            (ct.EntityType, lambda t: entity_type_name(t)),
+            (T.AnalysisUnit, lambda t: t.api_name.lower),
+            (T.entity_info, lambda t: t.api_name.lower),
+            (T.env_md, lambda t: t.api_name.lower),
             (ct.ArrayType, lambda t:
                 'string' if t.is_string_type else
                 '{} list'.format(self.type_public_name(type.element_type))),
             (ct.IteratorType, lambda t: 'unit'),
-            (ct.StructType, lambda _: "{}.t".format(type.api_name.camel)),
-            (T.BigInt, lambda t: '{}.t'.format(self.module_name(t))),
+            (ct.StructType, lambda t: from_module_name(t)),
+            (T.BigInt, lambda t: from_module_name(t)),
             (T.EnvRebindings, lambda _: 'Rebindings.t'),
         ])
 

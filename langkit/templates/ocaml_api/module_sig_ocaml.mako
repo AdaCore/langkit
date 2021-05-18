@@ -139,24 +139,30 @@ module UnitProvider : sig
   )}
 end
 
-module rec Entity : sig
-  type t
+type analysis_context
 
-  val info : t -> ${ocaml_api.type_public_name(T.entity_info)}
-end
+and ${ocaml_api.type_public_name(T.AnalysisUnit)}
+
+and entity
+
+${struct_types.ocaml_fields(T.entity_info, rec=True)}
+
+${struct_types.ocaml_fields(T.env_md, rec=True)}
 
 % for astnode in ctx.astnode_types:
-and ${ocaml_api.module_name(astnode)} : sig
-
-  ${astnode_types.ast_type(astnode)}
-
-end
+  ${astnode_types.sig(astnode)}
 % endfor
 
-and AnalysisUnit : sig
+module Entity : sig
+  type t = entity
+
+  val info : t -> entity_info
+end
+
+module AnalysisUnit : sig
   ${ocaml_doc('langkit.analysis_unit_type', 1)}
 
-  type t
+  type t = analysis_unit
 
   val root : t -> ${root_entity_type} option
   ${ocaml_doc('langkit.unit_root', 1)}
@@ -187,10 +193,10 @@ and AnalysisUnit : sig
   ${token_iterator.sig("t")}
 end
 
-and AnalysisContext : sig
+module AnalysisContext : sig
   ${ocaml_doc('langkit.analysis_context_type', 1)}
 
-  type t
+  type t = analysis_context
 
   val create :
     ?charset:string
@@ -221,13 +227,12 @@ and AnalysisContext : sig
 end
 
 % for struct_type in ctx.struct_types:
-   % if not struct_type.is_entity_type:
-      % if struct_type is T.entity_info:
-   ${struct_types.public_sig(struct_type)}
-      % elif struct_type is T.env_md:
-   ${struct_types.public_sig(struct_type)}
-      % elif struct_type.exposed:
-   ${struct_types.public_sig(struct_type)}
+   % if struct_type not in [T.AnalysisUnit, ocaml_api.AnalysisContext,\
+                            T.Symbol, T.entity_info, T.env_md]:
+      % if not struct_type.is_entity_type:
+         % if struct_type.exposed:
+${struct_types.public_sig(struct_type)}
+         % endif
       % endif
    % endif
 % endfor
