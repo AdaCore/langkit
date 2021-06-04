@@ -4426,7 +4426,7 @@ package body ${ada_lib_name}.Implementation is
       --  Forward token data and diagnostics to the returned unit
 
       Rotate_TDH;
-      Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
+      Result.Diagnostics.Append_Vector (Unit.Context.Parser.Diagnostics);
    end Do_Parsing;
 
    --------------------------
