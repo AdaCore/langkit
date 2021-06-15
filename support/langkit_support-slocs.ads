@@ -101,7 +101,7 @@ package Langkit_Support.Slocs is
    --  All functions below assume that the textual representation of
    --  Source_Location values have the form "L:C" (L being the line number, C
    --  the column number) and Source_Location_Range have the form
-   --  "L1:C1-L2-C2" (L1 and C1 are numbers for the start sloc, L2 and C2 are
+   --  "L1:C1-L2:C2" (L1 and C1 are numbers for the start sloc, L2 and C2 are
    --  the numbers for the end sloc).
 
    function Image (Sloc : Source_Location) return String is
