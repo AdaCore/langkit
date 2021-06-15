@@ -4442,7 +4442,13 @@ package body ${ada_lib_name}.Implementation is
       --  Forward token data and diagnostics to the returned unit
 
       Rotate_TDH;
-      Result.Diagnostics.Append_Vector (Unit.Context.Parser.Diagnostics);
+
+      --  TODO we use a for loop rt. than the new ``Append_Vector`` here for
+      --  compatibility with old compilers, but someday we'll be able to get
+      --  rid of it.
+      for Diag of Unit.Context.Parser.Diagnostics loop
+         Result.Diagnostics.Append (Diag);
+      end loop;
    end Do_Parsing;
 
    --------------------------
