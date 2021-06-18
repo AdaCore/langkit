@@ -236,9 +236,9 @@ class LexicalEnv:
     Wrapper for Lexical_Env/Lexical_Env_Access values.
     """
 
-    wrapper_matcher = RecordAccessMatcher('ast_envs__lexical_env', None)
-    internal_matcher = RecordAccessMatcher('ast_envs__lexical_env_type',
-                                           'ast_envs__lexical_env_access')
+    wrapper_matcher = RecordAccessMatcher('ast_envs.lexical_env', None)
+    internal_matcher = RecordAccessMatcher('ast_envs.lexical_env_type',
+                                           'ast_envs.lexical_env_access')
 
     def __init__(self, value: gdb.Value, context: Context):
         self.context = context
@@ -312,7 +312,7 @@ class LexicalEnv:
 
         if self.kind == 'primary':
             empty_env = gdb.lookup_global_symbol(
-                self.context.implname('ast_envs__empty_env_record')
+                self.context.implname('ast_envs.empty_env_record')
             )
 
             if self.value == empty_env.value().address:
@@ -359,7 +359,7 @@ class EnvNamePrinter(BasePrinter):
 
         # Lookup the symbol type (array element)
         symbol_type = gdb.lookup_type(
-            self.context.comname('symbols__symbol_type')
+            self.context.comname('symbols.symbol_type')
         )
         symbol_ptr = symbol_type.pointer()
 
@@ -453,7 +453,7 @@ class EnvGetterPrinter(BasePrinter):
             value.type.code == gdb.TYPE_CODE_STRUCT
             and (
                 value.type.name
-                == '{}__analysis__ast_envs__env_getter'.format(
+                == '{}.analysis.ast_envs.env_getter'.format(
                     context.lib_name
                 )
             )
@@ -541,7 +541,7 @@ class ReferencedEnvPrinter(BasePrinter):
             value.type.code == gdb.TYPE_CODE_STRUCT
             and (
                 value.type.name
-                == '{}__analysis__ast_envs__referenced_env'.format(
+                == '{}.analysis.ast_envs.referenced_env'.format(
                     context.lib_name
                 )
             )
@@ -594,7 +594,7 @@ class RebindingsPrinter(BasePrinter):
             value.type.code == gdb.TYPE_CODE_PTR
             and value.type.target().code == gdb.TYPE_CODE_STRUCT
             and (value.type.target().name
-                 == context.implname('ast_envs__env_rebindings_type'))
+                 == context.implname('ast_envs.env_rebindings_type'))
         )
 
     @property
@@ -711,7 +711,7 @@ class LangkitVectorPrinter(BasePrinter):
     @classmethod
     def matches(cls, value: gdb.Value, context: Context) -> bool:
         return (value.type.code == gdb.TYPE_CODE_STRUCT
-                and value.type.name.endswith('__vector')
+                and value.type.name.endswith('.vector')
                 and (set(f.name for f in value.type.fields())
                      == {'_tag', 'e', 'size', 'capacity', 'sv'}))
 
@@ -734,13 +734,13 @@ class LangkitVectorPrinter(BasePrinter):
 
         # Peel the typedef and then the access type
         assert (array_access_type.code == gdb.TYPE_CODE_TYPEDEF
-                and array_access_type.name.endswith('__elements_array_access')
+                and array_access_type.name.endswith('.elements_array_access')
                 and array_access_type.target().code == gdb.TYPE_CODE_PTR)
         array_type = array_access_type.target().target()
 
         # Peel the typedef and then the array type
         assert (array_type.code == gdb.TYPE_CODE_TYPEDEF
-                and array_type.name.endswith('__internal_elements_array')
+                and array_type.name.endswith('.internal_elements_array')
                 and array_type.target().code == gdb.TYPE_CODE_ARRAY)
         return array_type.target().target()
 
@@ -750,7 +750,7 @@ class LangkitVectorPrinter(BasePrinter):
         Return the name of the instantiation package for this vector.
         """
         type_name = self.value.type.name
-        suffix = '__vector'
+        suffix = '.vector'
         assert type_name.endswith(suffix)
         return type_name[:-len(suffix)]
 
@@ -771,7 +771,7 @@ class LangkitVectorPrinter(BasePrinter):
         if self.length <= 0:
             return
 
-        symbol_name = '{}__small_vector_capacity'.format(self.package)
+        symbol_name = '{}.small_vector_capacity'.format(self.package)
         symbol = gdb.lookup_global_symbol(symbol_name)
         small_vector_capacity = int(symbol.value())
 

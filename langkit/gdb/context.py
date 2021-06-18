@@ -34,7 +34,7 @@ class Context:
                               for kind, name in astnode_kinds.items()}
         self.prefix = prefix
 
-        self.node_record = ('{}__implementation__root_node_record'
+        self.node_record = ('{}.implementation.root_node_record'
                             .format(self.lib_name))
         """
         Name of the record type used to represent node data.
@@ -50,12 +50,12 @@ class Context:
         corresponding entity records.
         """
         return {
-            '{}__implementation__internal_entity_{}'
+            '{}.implementation.internal_entity_{}'
             .format(self.lib_name, name.lower)
             for name in self.astnode_names
         } | {
-            '{}__implementation__internal_entity'.format(self.lib_name),
-            '{}__implementation__ast_envs__entity'.format(self.lib_name),
+            '{}.implementation.internal_entity'.format(self.lib_name),
+            '{}.implementation.ast_envs.entity'.format(self.lib_name),
         }
 
     def decode_state(self,
@@ -77,11 +77,11 @@ class Context:
     def analysis_prefix(self) -> str:
         """
         Return the prefix for symbols defined in the $.Implementation unit. For
-        instance: "libfoolang__implementation__".
+        instance: "libfoolang.implementation.".
 
         :rtype: str
         """
-        return '{}__implementation__'.format(self.lib_name)
+        return '{}.implementation.'.format(self.lib_name)
 
     def reparse_debug_info(self) -> None:
         """
@@ -97,7 +97,7 @@ class Context:
         :param str suffix: Name suffix. For instance: "my_type_name".
         :rtype: str
         """
-        return '{}__implementation__{}'.format(self.lib_name, suffix)
+        return '{}.implementation.{}'.format(self.lib_name, suffix)
 
     def comname(self, suffix: str) -> str:
         """
@@ -107,4 +107,4 @@ class Context:
         :param str suffix: Name suffix. For instance: "my_type_name".
         :rtype: str
         """
-        return '{}__common__{}'.format(self.lib_name, suffix)
+        return '{}.common.{}'.format(self.lib_name, suffix)
