@@ -1271,7 +1271,7 @@ package body Langkit_Support.Lexical_Envs_Impl is
               (Res_Key, (None, Empty_Lookup_Result_Vector));
 
             Outer_Results.Concat (Local_Results);
-            --  We won't keep the local results in the cache, so destroy them.
+            --  We won't keep the local results in the cache, so destroy them
             Local_Results.Destroy;
             Local_Results := Outer_Results;
 
