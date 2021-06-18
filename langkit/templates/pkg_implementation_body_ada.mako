@@ -4210,7 +4210,7 @@ package body ${ada_lib_name}.Implementation is
    begin
       --  Increase Context's version number. If we are about to overflow, reset
       --  all version numbers from analysis units.
-      if Context.Cache_Version = Natural'Last then
+      if Context.Cache_Version = Version_Number'Last then
          Context.Cache_Version := 1;
          for Unit of Context.Units loop
             Unit.Cache_Version := 0;
@@ -4307,7 +4307,7 @@ package body ${ada_lib_name}.Implementation is
    ------------------
 
    procedure Reset_Caches (Unit : Internal_Unit) is
-      Cache_Version : constant Natural := Unit.Cache_Version;
+      Cache_Version : constant Version_Number := Unit.Cache_Version;
    begin
       if Cache_Version < Unit.Context.Reparse_Cache_Version then
          Unit.Cache_Version := Unit.Context.Reparse_Cache_Version;

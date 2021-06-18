@@ -66,7 +66,7 @@ type Memoization_Handle is record
    --  If the unit memoization table has an entry for Key, this holds a cursor
    --  to it.
 
-   Cache_Version : Natural := 0;
+   Cache_Version : Version_Number := 0;
    --  Version of the unit memoization table at the time Key/Cur were created.
    --  When using this record, if the version has changed, both Key and Cur are
    --  invalid and must be recomputed.
