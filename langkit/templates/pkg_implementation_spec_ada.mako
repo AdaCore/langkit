@@ -140,7 +140,7 @@ private package ${ada_lib_name}.Implementation is
    type Iterator_Safety_Net is record
       Context         : Internal_Context;
       Context_Serial  : Version_Number;
-      Context_Version : Natural;
+      Context_Version : Version_Number;
       --  Analysis context, its serial number and version number at the time
       --  this safety net was produced.
    end record;
@@ -1396,12 +1396,12 @@ private package ${ada_lib_name}.Implementation is
       --  interrupting the resolution because of timeout. See the
       --  Set_Logic_Resolution_Timeout procedure.
 
-      Cache_Version : Natural;
+      Cache_Version : Version_Number;
       --  Version number used to invalidate memoization caches in a lazy
       --  fashion. If an analysis unit's version number is strictly inferior to
       --  this, its memoization map should be cleared.
 
-      Reparse_Cache_Version : Natural;
+      Reparse_Cache_Version : Version_Number;
       --  Version number used to invalidate referenced envs caches. It is
       --  incremented only when a unit is reparsed in the context.
 
@@ -1566,7 +1566,7 @@ private package ${ada_lib_name}.Implementation is
          --  Mapping of arguments tuple to property result for memoization
       % endif
 
-      Cache_Version : Natural := 0;
+      Cache_Version : Version_Number := 0;
       --  See the eponym field in Analysis_Context_Type
 
       ${exts.include_extension(ctx.ext('analysis', 'unit', 'components'))}
