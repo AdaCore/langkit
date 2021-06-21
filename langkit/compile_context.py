@@ -247,20 +247,23 @@ class GeneratedException:
     Describe an exception in generated libraries.
     """
 
-    def __init__(self, doc_section, package, name):
+    def __init__(self,
+                 doc_section: str,
+                 package: List[names.Name],
+                 name: names.Name):
         """
-        :param str doc_section: Section in the documentation where this
-            exception occurs.
-        :param list[names.Name] package: Ada package in which this exception is
-            originally defined.
-        :param names.Name name: Name for this exception.
+        :param doc_section: Section in the documentation where this exception
+            occurs.
+        :param package: Ada package in which this exception is originally
+            defined.
+        :param name: Name for this exception.
         """
         self.doc_section = doc_section
         self.package = package
         self.name = name
 
     @property
-    def doc_entity(self):
+    def doc_entity(self) -> str:
         """
         Name of the documentation entry for this exception.
 
@@ -269,7 +272,7 @@ class GeneratedException:
         return '{}.{}'.format(self.doc_section, self.name.lower)
 
     @property
-    def qualname(self):
+    def qualname(self) -> str:
         """
         Fully qualified name to the exception declaration (in Ada).
 
@@ -279,7 +282,7 @@ class GeneratedException:
                               self.name)
 
     @property
-    def kind_name(self):
+    def kind_name(self) -> names.Name:
         """
         Return the enumeration name corresponding to an exception.
 
