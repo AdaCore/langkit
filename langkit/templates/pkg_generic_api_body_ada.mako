@@ -66,6 +66,7 @@ package body ${ada_lib_name}.Generic_API is
         Implementation.Create_Context
           (Charset        => Charset,
            File_Reader    => FR,
+           Event_Handler  => null,
            Unit_Provider  => null,
            With_Trivia    => With_Trivia,
            Tab_Stop       => Actual_Tab_Stop,

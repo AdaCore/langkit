@@ -1,0 +1,14 @@
+main.adb: Starting...
+In Event_Handler.Unit_Parsed_Callback
+Success: "example # This is an actual file\x0a"
+
+Out of Event_Handler.Unit_Parsed_Callback
+In Event_Handler.Unit_Parsed_Callback
+Success: "example # This is an actual file\x0a"
+
+Out of Event_Handler.Unit_Parsed_Callback
+In Event_Handler.Unit_Requested_Callback
+Name: pouet, From: direct-ok.txt, Found: TRUE
+main.adb: Done.
+In Event_Handler.Release
+Done

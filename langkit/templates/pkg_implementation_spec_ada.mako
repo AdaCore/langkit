@@ -1336,6 +1336,41 @@ private package ${ada_lib_name}.Implementation is
 
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access);
 
+   --------------------------------------
+   -- Event handler internal interface --
+   --------------------------------------
+
+   type Internal_Event_Handler is limited interface;
+   type Internal_Event_Handler_Access is
+      access all Internal_Event_Handler'Class;
+
+   procedure Inc_Ref (Self : in out Internal_Event_Handler) is abstract;
+   ${ada_doc('langkit.event_handler_inc_ref', 3)}
+
+   function Dec_Ref (Self : in out Internal_Event_Handler) return Boolean
+   is abstract;
+   ${ada_doc('langkit.event_handler_dec_ref', 3)}
+
+   procedure Unit_Requested_Callback
+     (Self               : Internal_Event_Handler;
+      Context            : Internal_Context;
+      Name               : Text_Type;
+      From               : Internal_Unit;
+      Found              : Boolean;
+      Is_Not_Found_Error : Boolean) is null;
+
+   procedure Unit_Parsed_Callback
+     (Self : Internal_Event_Handler;
+      Context  : Internal_Context;
+      Unit     : Internal_Unit;
+      Reparsed : Boolean) is null;
+
+   procedure Dec_Ref (Self : in out Internal_Event_Handler_Access);
+
+   ---------------------------------
+   -- Analysis context definition --
+   ---------------------------------
+
    type Analysis_Context_Type is limited record
       --  Start of ABI area. In order to perform fast checks from foreign
       --  languages, we maintain minimal ABI for analysis context: this allows
@@ -1380,6 +1415,9 @@ private package ${ada_lib_name}.Implementation is
 
       File_Reader : Internal_File_Reader_Access;
       --  Object to override the reading and decoding of source files
+
+      Event_Handler : Internal_Event_Handler_Access;
+      --  Object to provide event callbacks
 
       Unit_Provider : Internal_Unit_Provider_Access;
       --  Object to translate unit names to file names
@@ -1607,6 +1645,7 @@ private package ${ada_lib_name}.Implementation is
      (Charset        : String;
       File_Reader    : Internal_File_Reader_Access;
       Unit_Provider  : Internal_Unit_Provider_Access;
+      Event_Handler  : Internal_Event_Handler_Access;
       With_Trivia    : Boolean;
       Tab_Stop       : Positive;
       Max_Call_Depth : Natural := ${ctx.default_max_call_depth})

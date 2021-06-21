@@ -109,6 +109,63 @@ package ${ada_lib_name}.Analysis is
    --  Return a short string describing ``Node``, or None" if ``Node.Is_Null``
    --  is true.
 
+   -------------------
+   -- Event handler --
+   -------------------
+
+   type Event_Handler_Interface is interface;
+   ${ada_doc('langkit.event_handler_type')}
+
+   procedure Unit_Requested_Callback
+     (Self               : Event_Handler_Interface;
+      Context            : Analysis_Context'Class;
+      Name               : Text_Type;
+      From               : Analysis_Unit'Class;
+      Found              : Boolean;
+      Is_Not_Found_Error : Boolean) is null;
+   --  Callback that will be called when a unit is requested from the context
+   --  ``Context``.
+   --
+   --  ``Name`` is the name of the requested unit.
+   --
+   --  ``From`` is the unit from which the unit was requested.
+   --
+   --  ``Found`` indicates whether the requested unit was found or not.
+   --
+   --  ``Is_Not_Found_Error`` indicates whether the fact that the unit was not
+   --  found is an error or not.
+
+   procedure Unit_Parsed_Callback
+     (Self     : Event_Handler_Interface;
+      Context  : Analysis_Context'Class;
+      Unit     : Analysis_Unit'Class;
+      Reparsed : Boolean) is null;
+   --  Callback that will be called when any unit is parsed from the context
+   --  ``Context``.
+   --
+   --  ``Unit`` is the resulting unit.
+   --
+   --  ``Reparsed`` indicates whether the unit was reparsed, or whether it was
+   --  the first parse.
+
+   procedure Release (Self : in out Event_Handler_Interface) is abstract;
+   --  Actions to perform when releasing resources associated to Self
+
+   procedure Do_Release (Self : in out Event_Handler_Interface'Class);
+   --  Helper for the instantiation below
+
+   package Event_Handler_References is new GNATCOLL.Refcount.Shared_Pointers
+     (Event_Handler_Interface'Class, Do_Release);
+
+   subtype Event_Handler_Reference is Event_Handler_References.Ref;
+   No_Event_Handler_Ref : Event_Handler_Reference renames
+      Event_Handler_References.Null_Ref;
+
+   function Create_Event_Handler_Reference
+     (Handler : Event_Handler_Interface'Class) return Event_Handler_Reference;
+   --  Simple wrapper around the GNATCOLL.Refcount API to create event handler
+   --  references.
+
    --------------------
    -- Unit providers --
    --------------------
@@ -157,6 +214,7 @@ package ${ada_lib_name}.Analysis is
      (Charset       : String := Default_Charset;
       File_Reader   : File_Reader_Reference := No_File_Reader_Reference;
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
+      Event_Handler : Event_Handler_Reference := No_Event_Handler_Ref;
       With_Trivia   : Boolean := True;
       Tab_Stop      : Positive := ${ctx.default_tab_stop})
       return Analysis_Context;

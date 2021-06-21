@@ -1,0 +1,14 @@
+import lexer_example
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list+(Example("example"))
+
+}
+
+@abstract class FooNode : Node {
+
+    @export @abstract fun get_unit (name : Symbol): AnalysisUnit
+}
+
+class Example : FooNode implements TokenNode {
+}

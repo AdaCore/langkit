@@ -184,6 +184,34 @@ ${iterator_types.incomplete_decl(T.entity.iterator)}
 % endfor
 
 /*
+ * Types for event handler
+ */
+
+${c_doc('langkit.event_handler_type')}
+typedef void *${event_handler_type};
+
+${c_doc('langkit.event_handler_unit_requested_type')}
+typedef void (*${event_handler_unit_requested_type})(
+   void *data,
+   ${analysis_context_type} context,
+   ${text_type} *name,
+   ${analysis_unit_type} from,
+   ${bool_type} found,
+   ${bool_type} is_not_found_error
+);
+
+${c_doc('langkit.event_handler_destroy_type')}
+typedef void (*${event_handler_destroy_type})(void *data);
+
+${c_doc('langkit.event_handler_unit_parsed_type')}
+typedef void (*${event_handler_unit_parsed_type})(
+   void *data,
+   ${analysis_context_type} context,
+   ${analysis_unit_type} unit,
+   ${bool_type} reparsed
+);
+
+/*
  * Types for file readers
  */
 
@@ -255,6 +283,7 @@ ${capi.get_name("create_analysis_context")}(
    const char *charset,
    ${file_reader_type} file_reader,
    ${unit_provider_type} unit_provider,
+   ${event_handler_type} event_handler,
    int with_trivia,
    int tab_stop
 );
@@ -480,6 +509,23 @@ ${capi.get_name("get_versions")}(char **version, char **build_date);
         ${astnode_types.accessor_decl(field)}
     % endfor
 % endfor
+
+/*
+ * Event handlers
+ */
+
+${c_doc('langkit.create_event_handler')}
+extern ${event_handler_type}
+${capi.get_name('create_event_handler')}(
+   void *data,
+   ${event_handler_destroy_type} destroy_func,
+   ${event_handler_unit_requested_type} unit_requested_func,
+   ${event_handler_unit_parsed_type} unit_parsed_func
+);
+
+${c_doc('langkit.event_handler_dec_ref')}
+extern void
+${capi.get_name('dec_ref_event_handler')}(${event_handler_type} self);
 
 /*
  * File readers

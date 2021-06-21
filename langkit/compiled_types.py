@@ -84,11 +84,21 @@ def template_extensions(ctx):
         'symbol_type':           T.Symbol.c_type(capi).name,
         'env_rebindings_type':   T.EnvRebindings.c_type(capi).name,
         'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
+
+        'event_handler_type':   CAPIType(capi, 'event_handler').name,
+        'event_handler_destroy_type':
+            CAPIType(capi, 'event_handler_destroy_callback').name,
+        'event_handler_unit_requested_type':
+            CAPIType(capi, 'event_handler_unit_requested_callback').name,
+        'event_handler_unit_parsed_type':
+            CAPIType(capi, 'event_handler_unit_parsed_callback').name,
+
         'file_reader_type':      CAPIType(capi, 'file_reader').name,
         'file_reader_destroy_type':
             CAPIType(capi, 'file_reader_destroy_callback').name,
         'file_reader_read_type':
             CAPIType(capi, 'file_reader_read_callback').name,
+
         'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
         'unit_provider_destroy_type':
             CAPIType(capi, 'unit_provider_destroy_callback').name,

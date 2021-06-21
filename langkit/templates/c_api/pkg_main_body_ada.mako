@@ -32,6 +32,39 @@ package body ${ada_lib_name}.Implementation.C is
    --  Avoid hiding from $.Lexer
    subtype Token_Data_Type is Common.Token_Data_Type;
 
+   --------------------
+   -- Event handlers --
+   --------------------
+
+   type C_Event_Handler is limited new
+      Ada.Finalization.Limited_Controlled
+      and Internal_Event_Handler
+   with record
+      Ref_Count           : Natural;
+      Data                : System.Address;
+      Destroy_Func        : ${event_handler_destroy_type};
+      Unit_Requested_Func : ${event_handler_unit_requested_type};
+      Unit_Parsed_Func    : ${event_handler_unit_parsed_type};
+   end record;
+
+   overriding procedure Finalize (Self : in out C_Event_Handler);
+   overriding procedure Inc_Ref (Self : in out C_Event_Handler);
+   overriding function Dec_Ref (Self : in out C_Event_Handler) return Boolean;
+
+   overriding procedure Unit_Requested_Callback
+     (Self               : C_Event_Handler;
+      Context            : Internal_Context;
+      Name               : Text_Type;
+      From               : Internal_Unit;
+      Found              : Boolean;
+      Is_Not_Found_Error : Boolean);
+
+   overriding procedure Unit_Parsed_Callback
+     (Self     : C_Event_Handler;
+      Context  : Internal_Context;
+      Unit     : Internal_Unit;
+      Reparsed : Boolean);
+
    ------------------
    -- File readers --
    ------------------
@@ -123,6 +156,7 @@ package body ${ada_lib_name}.Implementation.C is
      (Charset       : chars_ptr;
       File_Reader   : ${file_reader_type};
       Unit_Provider : ${unit_provider_type};
+      Event_Handler : ${event_handler_type};
       With_Trivia   : int;
       Tab_Stop      : int) return ${analysis_context_type} is
    begin
@@ -138,6 +172,7 @@ package body ${ada_lib_name}.Implementation.C is
             (Charset       => C,
              File_Reader   => Unwrap_Private_File_Reader (File_Reader),
              Unit_Provider => Unwrap_Private_Provider (Unit_Provider),
+             Event_Handler => Unwrap_Private_Event_Handler (Event_Handler),
              With_Trivia   => With_Trivia /= 0,
              Tab_Stop      => Natural (Tab_Stop));
       end;
@@ -1068,6 +1103,47 @@ package body ${ada_lib_name}.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
+   function ${capi.get_name('create_event_handler')}
+     (Data                : System.Address;
+      Destroy_Func        : ${event_handler_destroy_type};
+      Unit_Requested_Func : ${event_handler_unit_requested_type};
+      Unit_Parsed_Func    : ${event_handler_unit_parsed_type})
+      return ${event_handler_type} is
+   begin
+      Clear_Last_Exception;
+      declare
+         Result : constant Internal_Event_Handler_Access :=
+           new C_Event_Handler'
+             (Ada.Finalization.Limited_Controlled with
+              Ref_Count           => 1,
+              Data                => Data,
+              Destroy_Func        => Destroy_Func,
+              Unit_Requested_Func => Unit_Requested_Func,
+              Unit_Parsed_Func    => Unit_Parsed_Func);
+      begin
+         return Wrap_Private_Event_Handler (Result);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${event_handler_type} (System.Null_Address);
+   end;
+
+   procedure ${capi.get_name('dec_ref_event_handler')}
+     (Handler : ${event_handler_type}) is
+   begin
+      Clear_Last_Exception;
+      declare
+         P : Internal_Event_Handler_Access :=
+            Unwrap_Private_Event_Handler (Handler);
+      begin
+         Dec_Ref (P);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    --------------
    -- Finalize --
    --------------
@@ -1129,7 +1205,7 @@ package body ${ada_lib_name}.Implementation.C is
 
       if C_Diagnostic.Message.Chars = Null_Address then
 
-         --  If there is a diagonstic (an error), there is no content to return
+         --  If there is a diagnostic (an error), there is no content to return
 
          declare
             Message : Text_Type (1 .. Natural (C_Diagnostic.Message.Length))
@@ -1201,6 +1277,78 @@ package body ${ada_lib_name}.Implementation.C is
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'file_readers', 'body')
    )}
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Self : in out C_Event_Handler) is
+   begin
+      Self.Destroy_Func (Self.Data);
+   end Finalize;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Self : in out C_Event_Handler) is
+   begin
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref (Self : in out C_Event_Handler) return Boolean
+   is
+   begin
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
+
+   -----------------------------
+   -- Unit_Requested_Callback --
+   -----------------------------
+
+   overriding procedure Unit_Requested_Callback
+     (Self               : C_Event_Handler;
+      Context            : Internal_Context;
+      Name               : Text_Type;
+      From               : Internal_Unit;
+      Found              : Boolean;
+      Is_Not_Found_Error : Boolean)
+   is
+      Name_Access : constant Text_Cst_Access
+        := Name'Unrestricted_Access;
+   begin
+      Self.Unit_Requested_Func
+        (Self.Data,
+         Context,
+         Wrap (Name_Access),
+         From,
+         (if Found then 1 else 0),
+         (if Is_Not_Found_Error then 1 else 0));
+   end Unit_Requested_Callback;
+
+   --------------------------
+   -- Unit_Parsed_Callback --
+   --------------------------
+
+   overriding procedure Unit_Parsed_Callback
+     (Self     : C_Event_Handler;
+      Context  : Internal_Context;
+      Unit     : Internal_Unit;
+      Reparsed : Boolean)
+   is
+   begin
+      Self.Unit_Parsed_Func
+        (Self.Data, Context, Unit, (if Reparsed then 1 else 0));
+   end Unit_Parsed_Callback;
 
    --------------
    -- Finalize --

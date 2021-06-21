@@ -108,4 +108,37 @@ private package ${ada_lib_name}.Public_Converters is
    --  null reference, return null. Otherwise, this returns a new internal
    --  provider allocation, with a ref-count of 1.
 
+   ---------------------------
+   -- Event_Handler_Wrapper --
+   ---------------------------
+
+   type Event_Handler_Wrapper is new Internal_Event_Handler with record
+      Ref_Count : Natural;
+      Internal  : Event_Handler_Reference;
+   end record;
+
+   overriding procedure Unit_Requested_Callback
+     (Self               : Event_Handler_Wrapper;
+      Context            : Internal_Context;
+      Name               : Text_Type;
+      From               : Internal_Unit;
+      Found              : Boolean;
+      Is_Not_Found_Error : Boolean);
+
+   overriding procedure Unit_Parsed_Callback
+     (Self     : Event_Handler_Wrapper;
+      Context  : Internal_Context;
+      Unit     : Internal_Unit;
+      Reparsed : Boolean);
+
+   function Wrap_Public_Event_Handler
+     (Self : Event_Handler_Reference) return Internal_Event_Handler_Access;
+   --  Wrap a public event inside an internal one. If Self is a
+   --  null reference, return null. Otherwise, this returns a new internal
+   --  handler allocation, with a ref-count of 1.
+
+   overriding procedure Inc_Ref (Self : in out Event_Handler_Wrapper);
+   overriding function Dec_Ref
+     (Self : in out Event_Handler_Wrapper) return Boolean;
+
 end ${ada_lib_name}.Public_Converters;

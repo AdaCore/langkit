@@ -530,7 +530,7 @@ def errors_checkpoint() -> None:
 @lru_cache()
 def splitted_text(unit: L.AnalysisUnit) -> List[str]:
     """
-    Memoized function to get the splitted text of an unit. Used to not have to
+    Memoized function to get the splitted text of a unit. Used to not have to
     compute this every time.
     """
     return unit.text.splitlines()
