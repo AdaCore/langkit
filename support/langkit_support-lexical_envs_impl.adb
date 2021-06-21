@@ -251,15 +251,91 @@ package body Langkit_Support.Lexical_Envs_Impl is
    is
       Cache_Enabled : constant Boolean := Info = No_Entity_Info;
       --  The cache (Self.Env) can be used only if No_Entity_Info is passed
+
+      --  Note: in this whole function, we take special care for empty
+      --  environments: while these are represented using the ``Empty_Env``
+      --  constant through the whole codebase, here rules are sligtly twisted
+      --  for performance and appropriate cache invalidation (see documentation
+      --  for the ``Env_Getter.Env`` field).
+      --
+      --  The bottom line is: cached empty environments differ from the
+      --  ``Empty_Env`` constant: the ``Version`` component is not 0 and is
+      --  used to determine if the cached empty environment is stale (see
+      --  ``Is_Stale``), and we must not returned these "twisted" empty
+      --  environments to ``Get_Env``'s caller, but rather return the
+      --  ``Empty_Env`` constant instead (the version hack shall not go to the
+      --  outside world).
+
+      function Is_Stale (Env : Lexical_Env) return Boolean
+      with Pre => Self.Dynamic;
+      --  Return whether the ``Env`` cached environment refers to an obsolete.
+      --  ``Node`` is the node used to compute it.
+
+      --------------
+      -- Is_Stale --
+      --------------
+
+      function Is_Stale (Env : Lexical_Env) return Boolean
+      is
+         E : constant Lexical_Env_Access := Unwrap (Env);
+         L   : Lexical_Env;
+      begin
+         --  Take care of the special case of empty environments, which may
+         --  differ from ``Empty_Env`` in ``Env.Version`` (see above).
+         if Env.Env = Empty_Env.Env then
+            return Env.Version < Get_Context_Version (Self.Node);
+         end if;
+
+         case Env.Kind is
+            when Primary_Kind =>
+               if Env.Owner /= No_Generic_Unit then
+                  --  If there is an owner, check that the unit version has not
+                  --  been incremented since then.
+                  return Get_Unit_Version (Env.Owner) > Env.Version;
+               end if;
+
+               for I in E.Referenced_Envs.First_Index
+                     .. E.Referenced_Envs.Last_Index
+               loop
+                  L := Get_Env
+                    (E.Referenced_Envs.Get_Access (I).Getter, No_Entity_Info);
+                  if Is_Stale (L) then
+                     return True;
+                  end if;
+                  Dec_Ref (L);
+               end loop;
+               return False;
+
+            when Orphaned =>
+               pragma Assert (Env.Owner = No_Generic_Unit);
+               return Is_Stale (E.Orphaned_Env);
+
+            when Grouped =>
+               pragma Assert (Env.Owner = No_Generic_Unit);
+               return (for some GE of E.Grouped_Envs.all => Is_Stale (GE));
+
+            when Rebound =>
+               --  This env is stale as soon as either the rebound env or the
+               --  rebindings are stale.
+               return Is_Stale (E.Rebound_Env)
+                      or else E.Rebindings.Version /= E.Rebindings_Version;
+         end case;
+      end Is_Stale;
+
    begin
       if Self.Dynamic then
          --  Resolve the dynamic lexical env getter. For this, use the cache if
          --  possible.
          if Cache_Enabled and then Self.Env /= Null_Lexical_Env then
 
-            --  If it is not stale, return it
+            --  If it is not stale, return it. Make sure to return genuine
+            --  ``Empty_Env`` copies for empty environments.
             if not Is_Stale (Self.Env) then
-               Inc_Ref (Self.Env);
+               if Self.Env.Env = Empty_Env.Env then
+                  Self.Env := Empty_Env;
+               else
+                  Inc_Ref (Self.Env);
+               end if;
                return Self.Env;
             end if;
 
@@ -286,6 +362,13 @@ package body Langkit_Support.Lexical_Envs_Impl is
                --  cache: the call to Inc_Ref below will create a new one for
                --  the returned value.
                Self.Env := Result;
+
+               --  Don't forget to record the context version for caches in the
+               --  case of Empty_Env (see Env_Getter.Env and the cache hit code
+               --  above).
+               if Self.Env.Env = Empty_Env.Env then
+                  Self.Env.Version := Get_Context_Version (Self.Node);
+               end if;
             else
                return Result;
             end if;
@@ -2401,57 +2484,6 @@ package body Langkit_Support.Lexical_Envs_Impl is
    begin
       Unwrap (Self).Lookup_Cache_Valid := False;
    end Reset_Caches;
-
-   --------------
-   -- Is_Stale --
-   --------------
-
-   function Is_Stale (Self : Lexical_Env) return Boolean is
-      Env : constant Lexical_Env_Access := Unwrap (Self);
-      L   : Lexical_Env;
-   begin
-      if Self = Empty_Env then
-         --  Empty_Env is always stale, because since it is not linked to any
-         --  unit, we have no way to know if it is stale or not. TODO: Maybe we
-         --  should forbid its use in referenced envs.
-         return True;
-      end if;
-
-      case Self.Kind is
-         when Primary_Kind =>
-            if Self.Owner /= No_Generic_Unit then
-               --  If there is an owner, check that the unit version has not
-               --  been incremented since then.
-               return Get_Unit_Version (Self.Owner) > Self.Version;
-            end if;
-
-            for I in Env.Referenced_Envs.First_Index
-                  .. Env.Referenced_Envs.Last_Index
-            loop
-               L := Get_Env
-                 (Env.Referenced_Envs.Get_Access (I).Getter, No_Entity_Info);
-               if Is_Stale (L) then
-                  return True;
-               end if;
-               Dec_Ref (L);
-            end loop;
-            return False;
-
-         when Orphaned =>
-            pragma Assert (Self.Owner = No_Generic_Unit);
-            return Is_Stale (Env.Orphaned_Env);
-
-         when Grouped =>
-            pragma Assert (Self.Owner = No_Generic_Unit);
-            return (for some E of Env.Grouped_Envs.all => Is_Stale (E));
-
-         when Rebound =>
-            --  This env is stale as soon as either the rebound env or the
-            --  rebindings are stale.
-            return Is_Stale (Env.Rebound_Env)
-                   or else Env.Rebindings.Version /= Env.Rebindings_Version;
-      end case;
-   end Is_Stale;
 
    ----------------------
    -- Invalidate_Cache --

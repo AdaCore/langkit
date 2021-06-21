@@ -244,6 +244,12 @@ private package ${ada_lib_name}.Implementation is
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.
 
+   function Get_Context_Version
+     (Node : ${T.root_node.name}) return Version_Number;
+   --  Assuming that Node is not null, return the version number for Node's
+   --  context, which is incremented every time a unit in this context is
+   --  parsed.
+
    type Ref_Category is
      (${", ".join(sorted(str(cat) for cat in ctx.ref_cats))});
    type Ref_Categories is array (Ref_Category) of Boolean;

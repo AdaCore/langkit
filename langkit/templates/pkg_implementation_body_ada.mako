@@ -2811,6 +2811,16 @@ package body ${ada_lib_name}.Implementation is
       return Convert_Unit (Unit).Unit_Version;
    end Unit_Version;
 
+   -------------------------
+   -- Get_Context_Version --
+   -------------------------
+
+   function Get_Context_Version
+     (Node : ${T.root_node.name}) return Version_Number is
+   begin
+      return Node.Unit.Context.Cache_Version;
+   end Get_Context_Version;
+
    ----------------------
    -- Short_Text_Image --
    ----------------------

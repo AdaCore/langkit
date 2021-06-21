@@ -97,6 +97,11 @@ generic
      (Node : Node_Type; Rebinding : Env_Rebindings);
    --  Register a rebinding to be destroyed when Node is destroyed
 
+   with function Get_Context_Version
+     (Node : Node_Type) return Version_Number is <>;
+   --  Return the current version number of caches corresponding to Node's
+   --  context, for cache invalidation purposes.
+
    type Inner_Env_Assoc is private;
    with function Get_Key
      (Self : Inner_Env_Assoc) return Symbol_Type is <>;
@@ -181,6 +186,20 @@ package Langkit_Support.Lexical_Envs_Impl is
       --  only when No_Entity_Info is used for the resolution. We consider that
       --  this cache contains a valid entry when Env is not Null_Lexical_Env
       --  and that it is not stale.
+      --
+      --  Note that we process Empty_Env in a very specific way here: resolvers
+      --  often return Empty_Env when they fail to compute the result, for
+      --  instance because of a missing unit. When that unit is parsed, we want
+      --  to invalidate the cache (the Env component) so that the resolver has
+      --  another chance to fetch the result from that new unit.
+      --
+      --  To achieve this, when putting Empty_Env in the cache, we set
+      --  Env.Version to the version of the owning context, and when trying to
+      --  use the cache, we check that the version is still the same.
+      --
+      --  We do not have this problem with other envs thanks to their own unit
+      --  version number (Empty_Env is a global singleton, so it does not has a
+      --  owning unit nor an owning context).
 
       case Dynamic is
          when True =>
@@ -730,9 +749,6 @@ package Langkit_Support.Lexical_Envs_Impl is
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment. Must
    --  not be used directly for ref-counted envs.
-
-   function Is_Stale (Self : Lexical_Env) return Boolean;
-   --  Return whether Self points to a now defunct lexical env
 
    function Is_Foreign (Self : Lexical_Env; Node : Node_Type) return Boolean
    is (Unwrap (Self).Node = No_Node

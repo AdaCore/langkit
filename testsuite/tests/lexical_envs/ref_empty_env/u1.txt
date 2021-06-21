@@ -1,0 +1,30 @@
+u1 {
+    open u2_a
+    open u2_b
+    open u2_c
+    open u2_d
+    open u2_e
+    open u2_f
+    open u2_g
+    open u2_h
+    open u2_i
+    open u2_j
+    open u2_k
+    open u2_l
+    open u2_m
+    open u2_n
+    open u2_o
+    open u2_p
+    open u2_q
+    open u2_r
+    open u2_s
+    open u2_t
+    open u2_u
+    open u2_v
+    open u2_w
+    open u2_x
+    open u2_y
+    open u2_z
+
+    ref foo
+}

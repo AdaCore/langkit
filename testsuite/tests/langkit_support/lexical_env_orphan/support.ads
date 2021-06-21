@@ -12,6 +12,9 @@ package Support is
    type Metadata is null record;
    Default_MD : constant Metadata := (null record);
 
+   function Get_Context_Version (Dummy_C : Character) return Version_Number
+   is (0);
+
    function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
    function Node_Unit (Dummy_C : Character) return Generic_Unit_Ptr
    is (No_Generic_Unit);

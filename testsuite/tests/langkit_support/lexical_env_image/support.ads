@@ -19,6 +19,9 @@ package Support is
 
    Default_MD : constant Metadata := (I => 0);
 
+   function Get_Context_Version (Dummy_S : String_Access) return Version_Number
+   is (0);
+
    function Node_Hash (Dummy_S : String_Access) return Hash_Type is (0);
    function Node_Unit (Dummy_C : String_Access) return Generic_Unit_Ptr
    is (No_Generic_Unit);
