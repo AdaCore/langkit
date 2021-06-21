@@ -14,6 +14,9 @@ package Support is
 
    Property_Error: exception;
 
+   function Get_Context_Version (Dummy_C : Character) return Version_Number
+   is (0);
+
    function Node_Hash (Dummy_C : Character) return Hash_Type is (0);
    function Node_Unit (Dummy_C : Character) return Generic_Unit_Ptr
    is (No_Generic_Unit);

@@ -1,0 +1,60 @@
+lexer foo_lexer {
+
+    @trivia() whitespace <- p"[ \n\r\t]+"
+    def <- "def"
+    ref <- "ref"
+    open <- "open"
+    left_curly_bracket <- "{"
+    right_curly_bracket <- "}"
+    @symbol() identifier <- p"[a-zA-Z_][a-zA-Z0-9_]*"
+}
+@with_lexer(foo_lexer)
+grammar foo_grammar {
+    @main_rule main_rule <- list*(block)
+    id <- Identifier(@identifier)
+    block <- Block(id "{" list*(item) "}")
+    item <- or(
+        | Decl("def" id)
+        | Open("open" id)
+        | Ref("ref" id)
+    )
+
+}
+
+@abstract class FooNode : Node {
+}
+
+class Block : FooNode {
+    @parse_field name : Identifier
+    @parse_field items : ASTList[Item]
+}
+
+class Identifier : FooNode implements TokenNode {
+
+    fun resolve (): FooNode = node.children_env().get(node.symbol)?(0)
+}
+
+@abstract class Item : FooNode {
+}
+
+class Decl : Item {
+    @parse_field name : Identifier
+}
+
+class Open : Item {
+    @parse_field name : Identifier
+
+    fun resolve (): LexicalEnv = {
+        val n = node.name.resolve();
+
+        n.do(
+            (n) => n.children_env(), default_val=(null)
+        )
+    }
+}
+
+class Ref : Item {
+    @parse_field name : Identifier
+
+    @export fun resolve (): FooNode = node.name.resolve()
+}
