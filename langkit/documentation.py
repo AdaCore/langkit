@@ -687,6 +687,69 @@ base_langkit_docs = {
     """,
 
     #
+    # Event handlers
+    #
+    'langkit.create_event_handler': """
+        Create an event handler. When done with it, the result must be passed
+        to ``${capi.get_name('dec_ref_event_handler')}``.
+
+        Pass as ``data`` a pointer to hold your private data: it will be passed
+        to all callbacks below.
+
+        ``destroy`` is a callback that is called by
+        ``${capi.get_name('dec_ref_event_handler')}`` to leave a chance to
+        free resources that ``data`` may hold.
+
+        ``unit_requested`` is a callback that will be called when a unit is
+        requested.
+
+        ``unit_parsed`` is a callback that will be called when a unit is
+        parsed.
+    """,
+    'langkit.event_handler_type': """
+        Interface to handle events sent by the analysis context.
+    """,
+    'langkit.event_handler_unit_requested_type': """
+        Callback type for functions that are called when a unit is requested.
+
+        ``name`` is the name of the requested unit.
+
+        ``from`` is the unit from which the unit was requested.
+
+        ``found`` indicates whether the requested unit was found or not.
+
+        ``is_not_found_error`` indicates whether the fact that the unit was not
+        found is an error or not.
+
+        .. warning:: The interface of this callback is probably subject to
+        change, so should be treated as experimental.
+    """,
+    'langkit.event_handler_unit_parsed_type': """
+        Callback type for functions that are called when a unit is parsed.
+
+        ``unit`` is the resulting unit.
+
+        ``reparsed`` indicates whether the unit was reparsed, or whether it was
+        the first parse.
+    """,
+    'langkit.event_handler_destroy_type': """
+        Callback type for functions that are called when destroying an event
+        handler.
+    """,
+    'langkit.event_handler_inc_ref': """
+        Create an ownership share for this event handler.
+    """,
+    'langkit.event_handler_dec_ref': """
+        Release an ownership share for this event handler. This destroys the
+        event handler if there are no shares left.
+
+        % if lang == 'ada':
+            Return whether there are no ownership shares left.
+        % endif
+    """,
+
+
+    #
     # Unit providers
     #
 

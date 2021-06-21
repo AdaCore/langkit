@@ -312,6 +312,19 @@ package body ${ada_lib_name}.Implementation is
    -- Dec_Ref --
    -------------
 
+   procedure Dec_Ref (Self : in out Internal_Event_Handler_Access) is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (Internal_Event_Handler'Class, Internal_Event_Handler_Access);
+   begin
+      if Self /= null and then Self.all.Dec_Ref then
+         Destroy (Self);
+      end if;
+   end Dec_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
    procedure Dec_Ref (Provider : in out Internal_Unit_Provider_Access) is
       procedure Destroy is new Ada.Unchecked_Deallocation
         (Internal_Unit_Provider'Class, Internal_Unit_Provider_Access);
@@ -362,6 +375,7 @@ package body ${ada_lib_name}.Implementation is
      (Charset        : String;
       File_Reader    : Internal_File_Reader_Access;
       Unit_Provider  : Internal_Unit_Provider_Access;
+      Event_Handler  : Internal_Event_Handler_Access;
       With_Trivia    : Boolean;
       Tab_Stop       : Positive;
       Max_Call_Depth : Natural := ${ctx.default_max_call_depth})
@@ -382,6 +396,13 @@ package body ${ada_lib_name}.Implementation is
       Context.Root_Scope := Create_Static_Lexical_Env
         (Parent => AST_Envs.No_Env_Getter,
          Node   => null);
+
+      --  Create a new ownership share for Event_Handler so that it lives at
+      --  least as long as this analysis context.
+      Context.Event_Handler := Event_Handler;
+      if Context.Event_Handler /= null then
+         Context.Event_Handler.Inc_Ref;
+      end if;
 
       --  Create a new ownership share for File_Reader so that it lives at
       --  least as long as this analysis context.
@@ -531,6 +552,10 @@ package body ${ada_lib_name}.Implementation is
          --  charset.
 
          Unit.Charset := Actual_Charset;
+      end if;
+
+      if Context.Event_Handler /= null then
+         Context.Event_Handler.Unit_Parsed_Callback (Context, Unit, Reparse);
       end if;
 
       return Unit;

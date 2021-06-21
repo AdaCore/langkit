@@ -187,6 +187,36 @@ private package ${ada_lib_name}.Implementation.C is
    ${ada_c_doc('langkit.file_reader_read_type', 3)}
 
    --------------------
+   -- Event handlers --
+   --------------------
+
+   type ${event_handler_type} is new System.Address;
+   ${ada_c_doc('langkit.event_handler_type', 3)}
+
+   type ${event_handler_unit_requested_type} is access procedure
+     (Data               : System.Address;
+      Context            : ${analysis_context_type};
+      Name               : ${text_type};
+      From               : ${analysis_unit_type};
+      Found              : ${bool_type};
+      Is_Not_Found_Error : ${bool_type})
+      with Convention => C;
+   ${ada_c_doc('langkit.event_handler_unit_requested_type', 3)}
+
+   type ${event_handler_unit_parsed_type} is access procedure
+     (Data     : System.Address;
+      Context  : ${analysis_context_type};
+      Unit     : ${analysis_unit_type};
+      Reparsed : ${bool_type})
+      with Convention => C;
+   ${ada_c_doc('langkit.event_handler_unit_parsed_type', 3)}
+
+   type ${event_handler_destroy_type} is access procedure
+     (Data : System.Address)
+      with Convention => C;
+   ${ada_c_doc('langkit.event_handler_destroy_type', 3)}
+
+   --------------------
    -- Unit providers --
    --------------------
 
@@ -223,6 +253,7 @@ private package ${ada_lib_name}.Implementation.C is
      (Charset       : chars_ptr;
       File_Reader   : ${file_reader_type};
       Unit_Provider : ${unit_provider_type};
+      Event_Handler : ${event_handler_type};
       With_Trivia   : int;
       Tab_Stop      : int) return ${analysis_context_type}
       with Export        => True,
@@ -530,6 +561,33 @@ private package ${ada_lib_name}.Implementation.C is
    )}
 
    --------------------
+   -- Event handlers --
+   --------------------
+
+   function ${capi.get_name('create_event_handler')}
+     (Data                : System.Address;
+      Destroy_Func        : ${event_handler_destroy_type};
+      Unit_Requested_Func : ${event_handler_unit_requested_type};
+      Unit_Parsed_Func    : ${event_handler_unit_parsed_type})
+      return ${event_handler_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('create_event_handler')}";
+   ${ada_c_doc('langkit.create_event_handler', 3)}
+
+   procedure ${capi.get_name('dec_ref_event_handler')}
+     (Handler : ${event_handler_type})
+      with Export        => True,
+           Convention    => C,
+           External_name =>
+              "${capi.get_name('dec_ref_event_handler')}";
+   ${ada_c_doc('langkit.event_handler_dec_ref', 3)}
+
+   ${exts.include_extension(
+      ctx.ext('analysis', 'c_api', 'event_handlers', 'spec')
+   )}
+
+   --------------------
    -- Unit providers --
    --------------------
 
@@ -733,6 +791,11 @@ private package ${ada_lib_name}.Implementation.C is
      (Internal_File_Reader_Access, ${file_reader_type});
    function Unwrap_Private_File_Reader is new Ada.Unchecked_Conversion
      (${file_reader_type}, Internal_File_Reader_Access);
+
+   function Wrap_Private_Event_Handler is new Ada.Unchecked_Conversion
+     (Internal_Event_Handler_Access, ${event_handler_type});
+   function Unwrap_Private_Event_Handler is new Ada.Unchecked_Conversion
+     (${event_handler_type}, Internal_Event_Handler_Access);
 
    function Wrap_Private_Provider is new Ada.Unchecked_Conversion
      (Internal_Unit_Provider_Access, ${unit_provider_type});

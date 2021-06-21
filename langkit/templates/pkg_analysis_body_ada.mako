@@ -63,6 +63,15 @@ package body ${ada_lib_name}.Analysis is
    -- Do_Release --
    ----------------
 
+   procedure Do_Release (Self : in out Event_Handler_Interface'Class) is
+   begin
+      Self.Release;
+   end Do_Release;
+
+   ----------------
+   -- Do_Release --
+   ----------------
+
    procedure Do_Release (Provider : in out Unit_Provider_Interface'Class) is
    begin
       Provider.Release;
@@ -81,6 +90,19 @@ package body ${ada_lib_name}.Analysis is
       end return;
    end Create_Unit_Provider_Reference;
 
+   ------------------------------------
+   -- Create_Event_Handler_Reference --
+   ------------------------------------
+
+   function Create_Event_Handler_Reference
+     (Handler : Event_Handler_Interface'Class) return Event_Handler_Reference
+   is
+   begin
+      return Result : Event_Handler_Reference do
+         Result.Set (Handler);
+      end return;
+   end Create_Event_Handler_Reference;
+
    --------------------
    -- Create_Context --
    --------------------
@@ -89,6 +111,7 @@ package body ${ada_lib_name}.Analysis is
      (Charset       : String := Default_Charset;
       File_Reader   : File_Reader_Reference := No_File_Reader_Reference;
       Unit_Provider : Unit_Provider_Reference := No_Unit_Provider_Reference;
+      Event_Handler : Event_Handler_Reference := No_Event_Handler_Ref;
       With_Trivia   : Boolean := True;
       Tab_Stop      : Positive := ${ctx.default_tab_stop})
       return Analysis_Context
@@ -99,13 +122,16 @@ package body ${ada_lib_name}.Analysis is
          Wrap_Public_File_Reader (File_Reader);
       UP     : Internal_Unit_Provider_Access :=
          Wrap_Public_Provider (Unit_Provider);
+      EH     : Internal_Event_Handler_Access :=
+         Wrap_Public_Event_Handler (Event_Handler);
       Result : Internal_Context := Create_Context
-        (Charset, FR, UP, With_Trivia, Tab_Stop);
+        (Charset, FR, UP, EH, With_Trivia, Tab_Stop);
    begin
       --  Create_Context created ownership shares for itself, so don't forget
       --  to remove the shares on FR and UP.
       Dec_Ref (FR);
       Dec_Ref (UP);
+      Dec_Ref (EH);
 
       return Context : constant Analysis_Context := Wrap_Context (Result)
       do

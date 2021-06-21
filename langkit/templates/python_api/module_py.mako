@@ -388,6 +388,7 @@ default_grammar_rule = GrammarRule.${ctx.main_rule_api_name.lower}
 
 _file_reader = _hashable_c_pointer()
 _unit_provider = _hashable_c_pointer()
+_event_handler = _hashable_c_pointer()
 
 
 def _canonicalize_buffer(buffer, charset):
@@ -464,7 +465,12 @@ class AnalysisContext(object):
             c_file_reader = file_reader._c_value if file_reader else None
             c_unit_provider = unit_provider._c_value if unit_provider else None
             self._c_value = _create_analysis_context(
-                charset, c_file_reader, c_unit_provider, with_trivia, tab_stop
+                charset,
+                c_file_reader,
+                c_unit_provider,
+                None, # TODO: bind the event handler API to Python
+                with_trivia,
+                tab_stop
             )
         else:
             self._c_value = _context_incref(_c_value)
@@ -1598,6 +1604,7 @@ _create_analysis_context = _import_func(
     [ctypes.c_char_p, # charset
      _file_reader,    # file_reader
      _unit_provider,  # unit_provider
+     _event_handler,  # event_handler
      ctypes.c_int,    # with_trivia
      ctypes.c_int],   # tab_stop
     AnalysisContext._c_type

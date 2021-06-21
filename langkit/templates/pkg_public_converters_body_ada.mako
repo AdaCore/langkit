@@ -118,6 +118,41 @@ package body ${ada_lib_name}.Public_Converters is
         (Ctx, Name, Kind, Charset, Reparse));
    end Get_Unit;
 
+   -----------------------------
+   -- Unit_Requested_Callback --
+   -----------------------------
+
+   overriding procedure Unit_Requested_Callback
+     (Self               : Event_Handler_Wrapper;
+      Context            : Internal_Context;
+      Name               : Text_Type;
+      From               : Internal_Unit;
+      Found              : Boolean;
+      Is_Not_Found_Error : Boolean)
+   is
+      Ctx  : constant Analysis_Context := Wrap_Context (Context);
+      Frm : constant Analysis_Unit := Wrap_Unit (From);
+   begin
+      Self.Internal.Get.Unit_Requested_Callback
+        (Ctx, Name, Frm, Found, Is_Not_Found_Error);
+   end Unit_Requested_Callback;
+
+   --------------------------
+   -- Unit_Parsed_Callback --
+   --------------------------
+
+   overriding procedure Unit_Parsed_Callback
+     (Self     : Event_Handler_Wrapper;
+      Context  : Internal_Context;
+      Unit     : Internal_Unit;
+      Reparsed : Boolean)
+   is
+      Ctx : constant Analysis_Context := Wrap_Context (Context);
+      Unt : constant Analysis_Unit := Wrap_Unit (Unit);
+   begin
+      Self.Internal.Get.Unit_Parsed_Callback (Ctx, Unt, Reparsed);
+   end Unit_Parsed_Callback;
+
    --------------------------
    -- Wrap_Public_Provider --
    --------------------------
@@ -138,5 +173,51 @@ package body ${ada_lib_name}.Public_Converters is
          return Internal_Unit_Provider_Access (Result);
       end;
    end Wrap_Public_Provider;
+
+   -------------------------------
+   -- Wrap_Public_Event_Handler --
+   -------------------------------
+
+   function Wrap_Public_Event_Handler
+     (Self : Event_Handler_Reference) return Internal_Event_Handler_Access
+   is
+      use type Event_Handler_Reference;
+   begin
+      if Self = No_Event_Handler_Ref then
+         return null;
+      end if;
+
+      declare
+         Result : constant Internal_Event_Handler_Access :=
+            new Event_Handler_Wrapper'(Ref_Count => 1, Internal => Self);
+      begin
+         return Result;
+      end;
+   end Wrap_Public_Event_Handler;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   overriding procedure Inc_Ref (Self : in out Event_Handler_Wrapper) is
+   begin
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   overriding function Dec_Ref
+     (Self : in out Event_Handler_Wrapper) return Boolean is
+   begin
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count = 0 then
+         return True;
+      else
+         return False;
+      end if;
+   end Dec_Ref;
+
 
 end ${ada_lib_name}.Public_Converters;
