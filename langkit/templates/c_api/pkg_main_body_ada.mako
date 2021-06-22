@@ -751,7 +751,7 @@ package body ${ada_lib_name}.Implementation.C is
          Id : constant Exception_Id := Exception_Identity (Exc);
       begin
          % for i, e in enumerate(ctx.sorted_exception_types):
-         ${'elsif' if i > 0 else 'if'} Id = ${e.name}'Identity then
+         ${'elsif' if i > 0 else 'if'} Id = ${e.qualname}'Identity then
             Last_Exception.Kind := ${e.kind_name};
             Last_Exception.Information :=
                New_String (Exception_Message (Exc));

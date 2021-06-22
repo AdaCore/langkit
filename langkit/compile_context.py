@@ -250,17 +250,21 @@ class GeneratedException:
     def __init__(self,
                  doc_section: str,
                  package: List[names.Name],
-                 name: names.Name):
+                 name: names.Name,
+                 generate_renaming: bool = True):
         """
         :param doc_section: Section in the documentation where this exception
             occurs.
         :param package: Ada package in which this exception is originally
             defined.
         :param name: Name for this exception.
+        :param generate_renaming: Whether to generate a renaming for this
+            exception in the $.Common generated package.
         """
         self.doc_section = doc_section
         self.package = package
         self.name = name
+        self.generate_renaming = generate_renaming
 
     @property
     def doc_entity(self) -> str:
@@ -847,6 +851,40 @@ class CompileCtx:
         """
         return '\n'.join(l.text for l in full_decl.f_doc)
 
+    def register_exception_type(self,
+                                package: List[names.Name],
+                                name: names.Name,
+                                doc_section: str,
+                                is_builtin: bool = False):
+        """
+        Register an Ada exception that generated bindings may have to translate
+        across the language boundaries.
+
+        :param package: Ada package in which this exception is defined.
+        :param name: Name of this exception.
+        :param doc_section: Name of the section where to document this
+            exception.
+        :param is_builtin: Whether this is a Langkit built-in exception.
+        """
+        exception_name = name.lower
+        assert exception_name not in self.exception_types
+
+        # Generate in $.Common a renaming for all builtin exceptions. Also,
+        # precisely because they are not renamed in $.Common, we must WITH the
+        # defining package in $.Implementation.C so that the C API can handle
+        # these exceptions.
+        generate_renaming = is_builtin
+        if not is_builtin:
+            self.add_with_clause(
+                "Implementation.C",
+                ADA_BODY,
+                ".".join(n.camel_with_underscores for n in package)
+            )
+
+        self.exception_types[exception_name] = GeneratedException(
+            doc_section, package, name, generate_renaming
+        )
+
     def _register_builtin_exception_types(self):
         """
         Register exception types for all builtin exceptions.
@@ -873,13 +911,22 @@ class CompileCtx:
                 doc_section = '{}.{}'.format(doc_section, namespace)
                 package.append(names.Name.from_lower(namespace))
 
-            assert exception_name not in self.exception_types
-            self.exception_types[exception_name] = GeneratedException(
-                doc_section, package, names.Name.from_lower(exception_name)
+            self.register_exception_type(
+                package,
+                names.Name.from_lower(exception_name),
+                doc_section,
+                is_builtin=True
             )
 
+        # Make original exception declarations available to exceptions handlers
+        # in the C API.
+        self.add_with_clause(
+            "Implementation.C", ADA_BODY, "Langkit_Support.Errors"
+        )
+
     @property
-    def exceptions_by_section(self):
+    def exceptions_by_section(self) -> List[Tuple[Optional[str],
+                                                  List[GeneratedException]]]:
         """
         Return exceptions grouped by "section".
 
@@ -887,11 +934,15 @@ class CompileCtx:
         'langkit.EXCEPTION_NAME' and SECTION for
         'langkit.SECTION.EXCEPTION_NAME'.
 
-        :rtype: list[(None|str, list[str, names.Name])]
+        Note that this skips exceptions for which we don't generate a renaming
+        in the generated $.Common spec.
         """
         sections = defaultdict(list)
 
         for e in self.sorted_exception_types:
+            if not e.generate_renaming:
+                continue
+
             # Remove the 'langkit.' prefix
             no_prefix = e.doc_entity.split('.', 1)[1]
 
@@ -945,13 +996,11 @@ class CompileCtx:
         return sorted(type_set, key=lambda cls: cls.name)
 
     @property
-    def sorted_exception_types(self):
+    def sorted_exception_types(self) -> List[GeneratedException]:
         """
         Turn "exception_types" into a sorted list.
 
         This is required during code generation to preserve a stable output.
-
-        :rtype: list[(str, names.Name)]
         """
         return sorted(self.exception_types.values(),
                       key=lambda e: e.doc_entity)
