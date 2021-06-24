@@ -12,8 +12,14 @@ Default value index: 2
  2: y
  3: z
 
-Enum_Value_Name: out of bounds
+Enum_Value_Name: out of bounds ( 0)
 Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.OUT_OF_BOUNDS_ERROR : out of bounds enum value index
+
+Enum_Value_Name: out of bounds ( 4)
+Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.OUT_OF_BOUNDS_ERROR : out of bounds enum value index
+
+Lookup_Enum_Value: no such value
+-> 0
 
 Create_Enum: out of bounds
 Error: LANGKIT_SUPPORT.ERRORS.INTROSPECTION.OUT_OF_BOUNDS_ERROR : out of bounds enum value index

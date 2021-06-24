@@ -618,6 +618,32 @@ package body ${ada_lib_name}.Introspection is
       return (raise Out_Of_Bounds_Error with "out of bounds enum value index");
    end Enum_Value_Name;
 
+   -----------------------
+   -- Lookup_Enum_Value --
+   -----------------------
+
+   function Lookup_Enum_Value
+     (Kind : Enum_Value_Kind; Name : Text_Type) return Any_Enum_Value_Index is
+   begin
+      case Kind is
+         % for t in enum_types:
+            when ${t.introspection_kind} =>
+               if
+               % for i, v in enumerate(t.values, start=1):
+                  % if i > 1:
+                     elsif
+                  % endif
+                     Name = "${v.name.lower}"
+                  then
+                     return ${i};
+               % endfor
+               end if;
+         % endfor
+      end case;
+
+      return No_Enum_Value_Index;
+   end Lookup_Enum_Value;
+
    -----------------
    -- Create_Enum --
    -----------------
