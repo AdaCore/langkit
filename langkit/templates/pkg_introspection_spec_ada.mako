@@ -175,6 +175,12 @@ package ${ada_lib_name}.Introspection is
    --  enum type. This raises a ``Out_Of_Bounds_Error`` if ``Index`` is too big
    --  for this enum type.
 
+   function Lookup_Enum_Value
+     (Kind : Enum_Value_Kind; Name : Text_Type) return Any_Enum_Value_Index;
+   --  Return the index for the enumeration value in the ``Kind`` enum type
+   --  whose name is ``Name``. Return ``No_Enum_Value_Index`` if no value in
+   --  that enum type has such a name.
+
    function Create_Enum
      (Kind : Enum_Value_Kind; Index : Enum_Value_Index) return Value_Type;
    --  Return the enum value corresponding to the given ``Index`` and ``Kind``

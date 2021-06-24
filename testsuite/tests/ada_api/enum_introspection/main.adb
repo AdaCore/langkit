@@ -41,6 +41,9 @@ procedure Main is
          if Enum_Index (Create_Enum (ET, I)) /= I then
             raise Program_Error;
          end if;
+         if Lookup_Enum_Value (ET, Enum_Value_Name (ET, I)) /= I then
+            raise Program_Error;
+         end if;
       end loop;
 
       New_Line;
@@ -54,13 +57,24 @@ begin
 
    --  Now check error cases
 
-   Put_Line ("Enum_Value_Name: out of bounds");
+   declare
+      subtype Values is Any_Enum_Value_Index
+      with Static_Predicate => Values in 0 | 4;
    begin
-      Put_Line (Image (Enum_Value_Name (E1_Value, 4)));
-   exception
-      when Exc : Out_Of_Bounds_Error =>
-         Put_Line (Exc);
+      for I in Values loop
+         Put_Line ("Enum_Value_Name: out of bounds (" & I'Image & ")");
+         begin
+            Put_Line (Image (Enum_Value_Name (E1_Value, I)));
+         exception
+            when Exc : Out_Of_Bounds_Error =>
+               Put_Line (Exc);
+         end;
+         New_Line;
+      end loop;
    end;
+
+   Put_Line ("Lookup_Enum_Value: no such value");
+   Put_Line ("->" & Lookup_Enum_Value (E1_Value, "foo")'Image);
    New_Line;
 
    Put_Line ("Create_Enum: out of bounds");
