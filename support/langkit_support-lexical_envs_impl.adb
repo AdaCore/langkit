@@ -332,11 +332,11 @@ package body Langkit_Support.Lexical_Envs_Impl is
             --  ``Empty_Env`` copies for empty environments.
             if not Is_Stale (Self.Env) then
                if Self.Env.Env = Empty_Env.Env then
-                  Self.Env := Empty_Env;
+                  return Empty_Env;
                else
                   Inc_Ref (Self.Env);
+                  return Self.Env;
                end if;
-               return Self.Env;
             end if;
 
             --  If it is stale, release and clear it
