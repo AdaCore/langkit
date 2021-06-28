@@ -15,8 +15,8 @@ def load(fn):
 
 
 def check():
-    n = u1.root.find(libfoolang.Ref)
-    print("  {} -> {}".format(n, n.p_resolve))
+    for n in u1.root.findall(libfoolang.Ref):
+        print("  {} -> {}".format(n, n.p_resolve))
 
 
 print("After loading u1.txt")
