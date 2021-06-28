@@ -27,4 +27,5 @@ u1 {
     open u2_z
 
     ref foo
+    ref foo
 }

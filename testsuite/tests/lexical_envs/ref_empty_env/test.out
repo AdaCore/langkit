@@ -1,7 +1,9 @@
 main.py: Running...
 After loading u1.txt
   <Ref u1.txt:29:5-29:12> -> None
+  <Ref u1.txt:30:5-30:12> -> None
 After loading u2.txt
   <Ref u1.txt:29:5-29:12> -> <Decl u2.txt:26:8-26:15>
+  <Ref u1.txt:30:5-30:12> -> <Decl u2.txt:26:8-26:15>
 main.py: Done.
 Done
