@@ -703,6 +703,10 @@ base_langkit_docs = {
         ``unit_requested`` is a callback that will be called when a unit is
         requested.
 
+        .. warning:: Please note that the unit requested callback can be called
+        *many* times for the same unit, so in all likeliness, those events
+        should be filtered if they're used to forward diagnostics to the user.
+
         ``unit_parsed`` is a callback that will be called when a unit is
         parsed.
     """,
