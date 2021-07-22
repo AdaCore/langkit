@@ -21,8 +21,10 @@
 -- <http://www.gnu.org/licenses/>.                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Containers;
 with Ada.Strings.UTF_Encoding;
-with Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Strings.Wide_Wide_Hash;
+with Ada.Strings.Wide_Wide_Unbounded.Wide_Wide_Hash;
 with Ada.Unchecked_Deallocation;
 
 package Langkit_Support.Text is
@@ -34,6 +36,18 @@ package Langkit_Support.Text is
    --  All our strings are encoded in UTF-32 (native endinannness). This type,
    --  which is not a subtype of String, makes it obvious when conversions are
    --  needed.
+
+   function Hash (Self : Unbounded_Text_Type) return Ada.Containers.Hash_Type
+   renames Ada.Strings.Wide_Wide_Unbounded.Wide_Wide_Hash;
+   --  Shortcut for the unbounded text type hash function
+
+   function Hash (Self : Text_Type) return Ada.Containers.Hash_Type
+   renames Ada.Strings.Wide_Wide_Hash;
+   --  Shortcut for the text type hash function
+
+   function "=" (L, R : Unbounded_Text_Type) return Boolean
+   renames Ada.Strings.Wide_Wide_Unbounded."=";
+   --  Shortcut for the unbounded text type equality operator
 
    function Text_Charset return String;
    --  Return the name of the charset used to encode Text_Type values
