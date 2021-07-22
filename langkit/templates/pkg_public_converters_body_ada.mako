@@ -123,7 +123,7 @@ package body ${ada_lib_name}.Public_Converters is
    -----------------------------
 
    overriding procedure Unit_Requested_Callback
-     (Self               : Event_Handler_Wrapper;
+     (Self               : in out Event_Handler_Wrapper;
       Context            : Internal_Context;
       Name               : Text_Type;
       From               : Internal_Unit;
@@ -142,7 +142,7 @@ package body ${ada_lib_name}.Public_Converters is
    --------------------------
 
    overriding procedure Unit_Parsed_Callback
-     (Self     : Event_Handler_Wrapper;
+     (Self     : in out Event_Handler_Wrapper;
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean)
