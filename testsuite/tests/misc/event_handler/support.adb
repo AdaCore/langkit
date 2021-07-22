@@ -8,7 +8,7 @@ package body Support is
    -----------------------------
 
    overriding procedure Unit_Requested_Callback
-     (Self               : Event_Handler;
+     (Self               : in out Event_Handler;
       Context            : Analysis_Context'Class;
       Name               : Text_Type;
       From               : Analysis_Unit'Class;
@@ -27,7 +27,7 @@ package body Support is
    --------------------------
 
    overriding procedure Unit_Parsed_Callback
-     (Self     : Event_Handler;
+     (Self     : in out Event_Handler;
       Context  : Analysis_Context'Class;
       Unit     : Analysis_Unit'Class;
       Reparsed : Boolean)

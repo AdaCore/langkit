@@ -1352,7 +1352,7 @@ private package ${ada_lib_name}.Implementation is
    ${ada_doc('langkit.event_handler_dec_ref', 3)}
 
    procedure Unit_Requested_Callback
-     (Self               : Internal_Event_Handler;
+     (Self               : in out Internal_Event_Handler;
       Context            : Internal_Context;
       Name               : Text_Type;
       From               : Internal_Unit;
@@ -1360,7 +1360,7 @@ private package ${ada_lib_name}.Implementation is
       Is_Not_Found_Error : Boolean) is null;
 
    procedure Unit_Parsed_Callback
-     (Self : Internal_Event_Handler;
+     (Self     : in out Internal_Event_Handler;
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean) is null;

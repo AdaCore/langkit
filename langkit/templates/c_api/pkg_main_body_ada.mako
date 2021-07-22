@@ -52,7 +52,7 @@ package body ${ada_lib_name}.Implementation.C is
    overriding function Dec_Ref (Self : in out C_Event_Handler) return Boolean;
 
    overriding procedure Unit_Requested_Callback
-     (Self               : C_Event_Handler;
+     (Self               : in out C_Event_Handler;
       Context            : Internal_Context;
       Name               : Text_Type;
       From               : Internal_Unit;
@@ -60,7 +60,7 @@ package body ${ada_lib_name}.Implementation.C is
       Is_Not_Found_Error : Boolean);
 
    overriding procedure Unit_Parsed_Callback
-     (Self     : C_Event_Handler;
+     (Self     : in out C_Event_Handler;
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean);
@@ -1316,7 +1316,7 @@ package body ${ada_lib_name}.Implementation.C is
    -----------------------------
 
    overriding procedure Unit_Requested_Callback
-     (Self               : C_Event_Handler;
+     (Self               : in out C_Event_Handler;
       Context            : Internal_Context;
       Name               : Text_Type;
       From               : Internal_Unit;
@@ -1340,7 +1340,7 @@ package body ${ada_lib_name}.Implementation.C is
    --------------------------
 
    overriding procedure Unit_Parsed_Callback
-     (Self     : C_Event_Handler;
+     (Self     : in out C_Event_Handler;
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean)

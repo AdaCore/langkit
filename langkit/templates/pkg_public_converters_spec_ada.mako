@@ -118,7 +118,7 @@ private package ${ada_lib_name}.Public_Converters is
    end record;
 
    overriding procedure Unit_Requested_Callback
-     (Self               : Event_Handler_Wrapper;
+     (Self               : in out Event_Handler_Wrapper;
       Context            : Internal_Context;
       Name               : Text_Type;
       From               : Internal_Unit;
@@ -126,7 +126,7 @@ private package ${ada_lib_name}.Public_Converters is
       Is_Not_Found_Error : Boolean);
 
    overriding procedure Unit_Parsed_Callback
-     (Self     : Event_Handler_Wrapper;
+     (Self     : in out Event_Handler_Wrapper;
       Context  : Internal_Context;
       Unit     : Internal_Unit;
       Reparsed : Boolean);

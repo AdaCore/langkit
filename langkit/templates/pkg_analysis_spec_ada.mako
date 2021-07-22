@@ -117,7 +117,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.event_handler_type')}
 
    procedure Unit_Requested_Callback
-     (Self               : Event_Handler_Interface;
+     (Self               : in out Event_Handler_Interface;
       Context            : Analysis_Context'Class;
       Name               : Text_Type;
       From               : Analysis_Unit'Class;
@@ -136,7 +136,7 @@ package ${ada_lib_name}.Analysis is
    --  found is an error or not.
 
    procedure Unit_Parsed_Callback
-     (Self     : Event_Handler_Interface;
+     (Self     : in out Event_Handler_Interface;
       Context  : Analysis_Context'Class;
       Unit     : Analysis_Unit'Class;
       Reparsed : Boolean) is null;
