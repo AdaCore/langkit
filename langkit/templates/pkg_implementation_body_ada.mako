@@ -813,6 +813,7 @@ package body ${ada_lib_name}.Implementation is
       Destroy (Context.Parser);
       Dec_Ref (Context.File_Reader);
       Dec_Ref (Context.Unit_Provider);
+      Dec_Ref (Context.Event_Handler);
       Context_Pool.Release (Context);
    end Destroy;
 
