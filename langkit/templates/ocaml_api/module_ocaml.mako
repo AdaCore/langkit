@@ -791,9 +791,9 @@ module AnalysisContext = struct
     let c_context =
        AnalysisContextStruct.create_analysis_context
          charset
-         Ctypes.null (* TODO: bind the file readers API to OCaml*)
+         Ctypes.null (* TODO: bind the file readers API to OCaml *)
          (!@unit_provider)
-         Ctypes.null (* TODO: bind the event handlers API to OCaml*)
+         Ctypes.null (* TODO: bind the event handlers API to OCaml *)
          with_trivia
          tab_stop
     in
