@@ -122,8 +122,8 @@ class Emitter:
                  no_property_checks=False, generate_ada_api=True,
                  generate_gdb_hook=True, pretty_print=False,
                  post_process_ada=None, post_process_cpp=None,
-                 post_process_python=None, coverage=False,
-                 relative_project=False, unparse_script=None):
+                 post_process_python=None, post_process_ocaml=None,
+                 coverage=False, relative_project=False, unparse_script=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -168,6 +168,10 @@ class Emitter:
             Python source code.
         :type post_process_python: None|(str) -> str
 
+        :param post_process_ocaml: Optional post-processing for generated
+            OCaml source code.
+        :type post_process_ocaml: None|(str) -> str
+
         :param bool coverage: Instrument the generated library to compute its
             code coverage. This requires GNATcoverage.
 
@@ -201,6 +205,7 @@ class Emitter:
         self.post_process_ada = post_process_ada
         self.post_process_cpp = post_process_cpp
         self.post_process_python = post_process_python
+        self.post_process_ocaml = post_process_ocaml
         self.coverage = coverage
         self.gnatcov = context.gnatcov
         self.relative_project = relative_project
@@ -704,7 +709,8 @@ class Emitter:
             ocaml_filename = '{}.ml'.format(ctx.c_api_settings.lib_name)
             write_ocaml_file(
                 os.path.join(self.ocaml_dir, ocaml_filename),
-                code
+                code,
+                self.post_process_ocaml,
             )
 
             code = ctx.render_template(
@@ -716,7 +722,8 @@ class Emitter:
             ocaml_filename = '{}.mli'.format(ctx.c_api_settings.lib_name)
             write_ocaml_file(
                 os.path.join(self.ocaml_dir, ocaml_filename),
-                code
+                code,
+                self.post_process_ocaml,
             )
 
             # Emit dune file to easily compile and install bindings

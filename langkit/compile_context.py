@@ -744,6 +744,7 @@ class CompileCtx:
         self.post_process_ada: Optional[Callable[[str], str]] = None
         self.post_process_cpp: Optional[Callable[[str], str]] = None
         self.post_process_python: Optional[Callable[[str], str]] = None
+        self.post_process_ocaml: Optional[Callable[[str], str]] = None
 
         self.ref_cats = {names.Name.from_lower('nocat')}
         """
@@ -1948,6 +1949,7 @@ class CompileCtx:
                 post_process_ada=self.post_process_ada,
                 post_process_cpp=self.post_process_cpp,
                 post_process_python=self.post_process_python,
+                post_process_ocaml=self.post_process_ocaml,
                 **kwargs
             )
 
