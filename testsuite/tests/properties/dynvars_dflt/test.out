@@ -2,5 +2,6 @@ main.py: Running...
 u.root.p_prop(False) = False
 u.root.p_prop(True) = True
 u.root.p_prop() = True
+u.root.p_prop2() = True
 main.py: Done.
 Done

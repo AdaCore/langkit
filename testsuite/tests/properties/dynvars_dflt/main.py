@@ -15,5 +15,6 @@ if u.diagnostics:
 print('u.root.p_prop(False) = {}'.format(u.root.p_prop(False)))
 print('u.root.p_prop(True) = {}'.format(u.root.p_prop(True)))
 print('u.root.p_prop() = {}'.format(u.root.p_prop()))
+print('u.root.p_prop2() = {}'.format(u.root.p_prop2))
 
 print('main.py: Done.')
