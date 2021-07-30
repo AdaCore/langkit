@@ -1941,7 +1941,15 @@ class CompileCtx:
         from langkit.passes import GlobalPass
 
         def pass_fn(ctx):
-            ctx.emitter = Emitter(self, lib_root, ctx.extensions_dir, **kwargs)
+            ctx.emitter = Emitter(
+                self,
+                lib_root,
+                ctx.extensions_dir,
+                post_process_ada=self.post_process_ada,
+                post_process_cpp=self.post_process_cpp,
+                post_process_python=self.post_process_python,
+                **kwargs
+            )
 
         return GlobalPass('prepare code emission', pass_fn)
 
