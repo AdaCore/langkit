@@ -631,8 +631,25 @@ class FieldAccess(AbstractExpression):
                         len(self.node_data.natural_arguments))
 
             if isinstance(self.node_data, PropertyDef):
-                self.dynamic_vars = [construct(dynvar)
-                                     for dynvar in self.node_data.dynamic_vars]
+                prop = self.node_data
+
+                def actual(dynvar):
+                    """Return the value to pass for the given dynamic var."""
+                    if dynvar.is_bound:
+                        # If the variable is bound, just pass the binding value
+                        return construct(dynvar)
+
+                    else:
+                        # Otherwise, pass the default value. Thanks to previous
+                        # checks (DynamicVariable.check_call_bindings), we know
+                        # it is never null.
+                        value = prop.dynamic_var_default_value(dynvar)
+                        assert value is not None
+                        return construct(value)
+
+                self.dynamic_vars = [
+                    actual(dynvar) for dynvar in self.node_data.dynamic_vars
+                ]
 
             self.static_type = self.node_data.type
             if self.wrap_result_in_entity:

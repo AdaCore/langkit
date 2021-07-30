@@ -2251,9 +2251,11 @@ class DynamicVariable(AbstractVariable):
     @staticmethod
     def check_call_bindings(prop, context_msg):
         """
-        Emit an error diagnostic if there is at least one dynamic variable in
-        `prop` that is not currently bound. `context_msg` is used to format the
-        error message.
+        Ensure all need dynamic vars are bound for a call to ``prop``.
+
+        This emits an error diagnostic if there is at least one dynamic
+        variable in ``prop`` that is not currently bound *and* that has no
+        default value.
 
         :param PropertyDef prop: Property "to call".
         :param str context_msg: String to describe how this property is used.
@@ -2264,7 +2266,10 @@ class DynamicVariable(AbstractVariable):
         """
         unbound_dynvars = [
             dynvar for dynvar in prop.dynamic_vars
-            if not dynvar.is_bound
+            if (
+                not dynvar.is_bound
+                and prop.dynamic_var_default_value(dynvar) is None
+            )
         ]
         check_source_language(
             not unbound_dynvars,
@@ -3676,14 +3681,28 @@ class PropertyDef(AbstractNodeData):
         self.overriding_properties = set()
 
     @property
-    def dynamic_vars(self):
+    def dynamic_vars(self) -> List[DynamicVariable]:
         """
         Return the list of dynamically bound variables for this property.
-
-        :rtype: list[DynamicVariable]
         """
         assert self._dynamic_vars is not None
         return self._dynamic_vars
+
+    def dynamic_var_default_value(
+        self,
+        dyn_var: DynamicVariable
+    ) -> Opt[AbstractExpression]:
+        """
+        Return the default value associated to a dynamic variable in this prop.
+
+        This returns None if this property associates no default value to the
+        given dynamic variable, and this raises a ``KeyError`` exception if
+        ``dyn_var`` is not a dynamic variable for this property.
+        """
+        for i, dv in enumerate(self.dynamic_vars):
+            if dv is dyn_var:
+                return self._dynamic_vars_default_values[i]
+        raise KeyError("no such dynamic variable for this property")
 
     def prepare_abstract_expression(self, context):
         """
