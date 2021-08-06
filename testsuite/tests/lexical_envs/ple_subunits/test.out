@@ -1,3 +1,0 @@
-<Var main.txt:2:4-2:13> -> <Var main.txt:6:4-6:15>
-<Var main.txt:6:4-6:15> -> <Var main.txt:2:4-2:13>
-Done

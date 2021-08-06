@@ -310,8 +310,7 @@ inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 class Annotations:
     def __init__(self, repr_name=None, generic_list_type=None,
                  warn_on_node=None, rebindable=False,
-                 custom_short_image=False, snaps=False,
-                 ple_unit_root=False):
+                 custom_short_image=False, snaps=False):
         """
         Constructor for a node's annotations.
 
@@ -331,11 +330,6 @@ class Annotations:
             not. Snapping designates the behavior where the start SLOC will be
             anchored to the previous token's end SLOC rather than the node's
             first token start SLOC, and conversely for the end SLOC.
-        :param bool ple_unit_root: Tag this node as the root for sub-analysis
-            units. At most one node can be tagged this way, which implies that
-            other nodes cannot derive from it. In the grammar, PLE unit roots
-            can only appear as a child of a list node, which must be the root
-            node.
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
@@ -343,7 +337,6 @@ class Annotations:
         self._rebindable = rebindable
         self.custom_short_image = custom_short_image
         self._snaps = snaps
-        self.ple_unit_root = ple_unit_root
 
     @inherited_annotation
     def warn_on_node(self):
