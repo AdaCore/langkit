@@ -82,8 +82,7 @@ def reference(nodes: AbstractExpression,
               dest_env: Optional[AbstractExpression] = None,
               cond: Optional[AbstractExpression] = None,
               category: Optional[str] = None,
-              shed_corresponding_rebindings: bool = False,
-              unsound: bool = False) -> RefEnvs:
+              shed_corresponding_rebindings: bool = False) -> RefEnvs:
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
@@ -105,19 +104,14 @@ def reference(nodes: AbstractExpression,
     :param shed_corresponding_rebindings: If True, when shedding rebindings
         during an env lookup, this referenced env will be followed to check,
         and eventually shed rebindings associated to the referenced env.
-
-    :param unsound: Whether ``dest_env`` is allowed to return foreign
-        environments.
     """
     return RefEnvs(through, nodes, kind, dest_env=dest_env, cond=cond,
                    category=category and category.lower(),
-                   shed_rebindings=shed_corresponding_rebindings,
-                   unsound=unsound)
+                   shed_rebindings=shed_corresponding_rebindings)
 
 
 def add_to_env(mappings: AbstractExpression,
-               resolver: Optional[PropertyDef] = None,
-               unsound: bool = False) -> AddToEnv:
+               resolver: Optional[PropertyDef] = None) -> AddToEnv:
     """
     Specify elements to add to the lexical environment.
 
@@ -131,16 +125,12 @@ def add_to_env(mappings: AbstractExpression,
         the lexical environment lookup that will try to return the given
         mappings will first run this property on all nodes and return its
         result instead.
-
-    :param unsound: Whether ``dest_env`` is allowed to return foreign
-        environments.
     """
     return AddToEnv(
         mappings=mappings,
         resolver=resolver,
         name_expr=None,
-        fallback_env_expr=None,
-        unsound=unsound
+        fallback_env_expr=None
     )
 
 
@@ -148,8 +138,7 @@ def add_to_env_kv(key: AbstractExpression,
                   val: AbstractExpression,
                   dest_env: Optional[AbstractExpression] = None,
                   metadata: Optional[AbstractExpression] = None,
-                  resolver: Optional[PropertyDef] = None,
-                  unsound: bool = False) -> AddToEnv:
+                  resolver: Optional[PropertyDef] = None) -> AddToEnv:
     """
     Specify a single element to add to the lexical environment. See
     langkit.expressions.envs.new_env_assoc for more precision about the first
@@ -159,16 +148,12 @@ def add_to_env_kv(key: AbstractExpression,
         the lexical environment lookup that will try to return the given
         mappings will first run this property on all nodes and return its
         result instead.
-
-    :param unsound: Whether ``dest_env`` is allowed to return foreign
-        environments.
     """
     from langkit.expressions import new_env_assoc
 
     return add_to_env(
         mappings=new_env_assoc(key, val, dest_env, metadata),
-        resolver=resolver,
-        unsound=unsound,
+        resolver=resolver
     )
 
 
@@ -193,7 +178,6 @@ def add_to_env_by_name(key: AbstractExpression,
         resolver=None,
         name_expr=name,
         fallback_env_expr=fallback_env,
-        unsound=False,
     )
 
 
@@ -204,16 +188,13 @@ def handle_children() -> HandleChildren:
     return HandleChildren()
 
 
-def set_initial_env(env: AbstractExpression,
-                    unsound: bool = False) -> SetInitialEnv:
+def set_initial_env(env: AbstractExpression) -> SetInitialEnv:
     """
     Action that sets the initial env in which the rest of the environment
     actions are evaluated. Except for Do() hooks, this action must be first in
     the list of actions.
-
-    :param unsound: Whether ``env`` is allowed to return foreign environments.
     """
-    return SetInitialEnv(None, env, unsound)
+    return SetInitialEnv(None, env)
 
 
 def set_initial_env_by_name(name: AbstractExpression,
@@ -525,14 +506,12 @@ class AddToEnv(EnvAction):
                  mappings: AbstractExpression,
                  resolver: Optional[PropertyDef],
                  name_expr: Optional[AbstractExpression],
-                 fallback_env_expr: Optional[AbstractExpression],
-                 unsound: bool) -> None:
+                 fallback_env_expr: Optional[AbstractExpression]) -> None:
         super().__init__()
         self.mappings = mappings
         self.resolver = resolver
         self.name_expr = name_expr
         self.fallback_env_expr = fallback_env_expr
-        self.unsound = unsound
 
         self.mappings_prop: PropertyDef
 
@@ -605,8 +584,7 @@ class RefEnvs(EnvAction):
                  dest_env: Optional[AbstractExpression] = None,
                  cond: Optional[AbstractExpression] = None,
                  category: Optional[str] = None,
-                 shed_rebindings: bool = False,
-                 unsound: bool = False) -> None:
+                 shed_rebindings: bool = False) -> None:
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -639,7 +617,6 @@ class RefEnvs(EnvAction):
         self.cond = cond
         self.category = category and names.Name.from_lower(category)
         self.shed_rebindings = shed_rebindings
-        self.unsound = unsound
 
         self.nodes_property: Optional[PropertyDef] = None
         """
@@ -706,12 +683,10 @@ class HandleChildren(EnvAction):
 class SetInitialEnv(EnvAction):
     def __init__(self,
                  name_expr: Optional[AbstractExpression],
-                 fallback_env_expr: AbstractExpression,
-                 unsound: bool = False) -> None:
+                 fallback_env_expr: AbstractExpression) -> None:
         super().__init__()
         self.name_expr = name_expr
         self.fallback_env_expr = fallback_env_expr
-        self.unsound = unsound
 
     def create_internal_properties(self, env_spec: EnvSpec) -> None:
         self.name_prop = env_spec.create_internal_property(

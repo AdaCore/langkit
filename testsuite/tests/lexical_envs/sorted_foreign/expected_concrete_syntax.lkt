@@ -14,11 +14,19 @@ grammar foo_grammar {
 
 @abstract class Name : FooNode {
 
+    fun scope_fqn (): String = match node {
+        case dn : DottedName => dn.prefix.fqn()
+        case _ : Identifier => null
+    }
+
+    fun fqn (): String = match node {
+        case dn : DottedName => dn.prefix.fqn() & ((".") & dn.suffix.fqn())
+        case id : Identifier => id.text()
+    }
+
     @abstract fun referenced_name (): Symbol
 
     @abstract fun referenced_scope (): LexicalEnv
-
-    @abstract fun referenced_parent_scope (): LexicalEnv
 }
 
 class DottedName : Name {

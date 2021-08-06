@@ -343,9 +343,7 @@
             ${("Fallback_Env"
                if exprs.fallback_env_expr
                else "Mapping.Dest_Env")},
-            DSL_Location => ${('""'
-                               if exprs.unsound else
-                               string_repr(exprs.str_location))});
+            DSL_Location => ${string_repr(exprs.str_location)});
          % if not is_array:
          Dec_Ref (Mapping.Dest_Env);
          % endif
@@ -370,7 +368,7 @@
               ${(call_prop(ref_env.dest_env_prop)
                  if ref_env.dest_env_prop else "Self.Self_Env")};
          begin
-            % if ref_env.dest_env_prop and not ref_env.unsound:
+            % if ref_env.dest_env_prop:
                ## Adding a reference on a foreign environment is unsound, but
                ## it's fine for the empty/root environments, as they don't
                ## trigger relocations.
@@ -469,15 +467,13 @@
             "Cannot set an env that is not static-primary as the initial env";
       end if;
 
-      % if not cls.env_spec.initial_env.unsound:
-         ## Having a parent environment that is foreign is unsound, except for
-         ## the empty/root environments, as no relocation is needed for them.
-         if Is_Foreign_Strict (Initial_Env, Self) then
-            raise Property_Error with
-               "unsound foreign environment in SetInitialEnv ("
-               & "${cls.env_spec.initial_env.str_location}" & ")";
-         end if;
-      % endif
+      ## Having a parent environment that is foreign is unsound, except for the
+      ## empty/root environments, as no relocation is needed for them.
+      if Is_Foreign_Strict (Initial_Env, Self) then
+         raise Property_Error with
+            "unsound foreign environment in SetInitialEnv ("
+            & "${cls.env_spec.initial_env.str_location}" & ")";
+      end if;
 
       return Initial_Env;
    end ${env_getter};
