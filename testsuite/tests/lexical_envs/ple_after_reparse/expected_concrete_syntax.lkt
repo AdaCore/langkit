@@ -3,7 +3,7 @@ import lexer_example
 grammar foo_grammar {
     deps <- list*(pick(Dep(pick("+" name)) ";"))
     defs <- list*(pick(or(scope | var) ";"))
-    @main_rule scope <- Scope(name "{" deps defs "}")
+    @main_rule scope <- list+(Scope(name "{" deps defs "}"))
     var <- Var(id "=" name)
     id <- Id(@identifier)
     name <- or(Prefix(name "." id) | id)
@@ -27,6 +27,16 @@ class Dep : FooNode {
 
     @export fun referenced_unit (): AnalysisUnit =
     node.referenced_unit_or_error(false)
+
+    fun scope_fqn (): String = match node {
+        case p : Prefix => p.prefix.fqn()
+        case _ : Id => null
+    }
+
+    fun fqn (): String = match node {
+        case p : Prefix => p.prefix.fqn() & ((".") & p.suffix.fqn())
+        case i : Id => i.text()
+    }
 }
 
 class Id : Name implements TokenNode {
@@ -50,11 +60,6 @@ class Scope : FooNode {
     @parse_field name : Name
     @parse_field deps : ASTList[Dep]
     @parse_field defs : ASTList[FooNode]
-
-    fun initial_env (): LexicalEnv = match node.name {
-        case p : Prefix => p.prefix.referenced_unit().root.children_env()
-        case _ => node.children_env()
-    }
 }
 
 class Var : FooNode {

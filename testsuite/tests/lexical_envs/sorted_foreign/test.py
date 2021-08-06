@@ -5,8 +5,9 @@ envs were populated by cross units.
 """
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_env, add_to_env_kv, set_initial_env
-from langkit.expressions import (AbstractKind, EmptyEnv, Self, Var,
+from langkit.envs import (EnvSpec, add_env, add_to_env_kv,
+                          set_initial_env_by_name)
+from langkit.expressions import (AbstractKind, EmptyEnv, No, Self, String, Var,
                                  langkit_property)
 
 from utils import build_and_run
@@ -19,16 +20,28 @@ class FooNode(ASTNode):
 @abstract
 class Name(FooNode):
 
+    @langkit_property(return_type=T.String)
+    def scope_fqn():
+        return Self.match(
+            lambda dn=T.DottedName: dn.prefix.fqn,
+            lambda _=T.Identifier: No(T.String),
+        )
+
+    @langkit_property(return_type=T.String)
+    def fqn():
+        return Self.match(
+            lambda dn=T.DottedName:
+                dn.prefix.fqn.concat(String(".").concat(dn.suffix.fqn)),
+            lambda id=T.Identifier:
+                id.text
+        )
+
     @langkit_property(return_type=T.Symbol, kind=AbstractKind.abstract)
     def referenced_name():
         pass
 
     @langkit_property(return_type=T.LexicalEnv, kind=AbstractKind.abstract)
     def referenced_scope():
-        pass
-
-    @langkit_property(return_type=T.LexicalEnv, kind=AbstractKind.abstract)
-    def referenced_parent_scope():
         pass
 
 
@@ -76,9 +89,12 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        set_initial_env(Self.name.referenced_parent_scope, unsound=True),
+        set_initial_env_by_name(
+            Self.name.scope_fqn.then(lambda s: s.to_symbol, No(T.Symbol)),
+            Self.parent.children_env,
+        ),
         add_to_env_kv(key=Self.name.referenced_name, val=Self),
-        add_env()
+        add_env(names=[Self.name.fqn.to_symbol])
     )
 
 

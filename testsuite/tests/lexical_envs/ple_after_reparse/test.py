@@ -4,8 +4,12 @@ that 2) semantic analysis still works after that.
 """
 
 from langkit.dsl import ASTNode, Field, T, abstract
-from langkit.envs import EnvSpec, add_env, add_to_env_kv, do, set_initial_env
-from langkit.expressions import AbstractProperty, Self, langkit_property
+from langkit.envs import (
+    EnvSpec, add_env, add_to_env_kv, do, set_initial_env_by_name
+)
+from langkit.expressions import (
+    AbstractProperty, No, Self, String, langkit_property
+)
 
 from utils import build_and_run
 
@@ -27,6 +31,22 @@ class Name(FooNode):
     @langkit_property(public=True, return_type=T.AnalysisUnit)
     def referenced_unit():
         return Self.referenced_unit_or_error(False)
+
+    @langkit_property(return_type=T.String)
+    def scope_fqn():
+        return Self.match(
+            lambda p=T.Prefix: p.prefix.fqn,
+            lambda _=T.Id: No(T.String),
+        )
+
+    @langkit_property(return_type=T.String)
+    def fqn():
+        return Self.match(
+            lambda p=T.Prefix:
+                p.prefix.fqn.concat(String(".").concat(p.suffix.fqn)),
+            lambda i=T.Id:
+                i.text
+        )
 
 
 class Id(Name):
@@ -59,19 +79,13 @@ class Scope(FooNode):
     deps = Field()
     defs = Field()
 
-    @langkit_property()
-    def initial_env():
-        return Self.name.match(
-            lambda p=T.Prefix:
-                p.prefix.referenced_unit.root.children_env,
-            lambda _:
-                Self.children_env,
-        )
-
     env_spec = EnvSpec(
-        set_initial_env(Self.initial_env, unsound=True),
+        set_initial_env_by_name(
+            Self.name.scope_fqn.then(lambda s: s.to_symbol, No(T.Symbol)),
+            Self.parent.children_env,
+        ),
         add_to_env_kv(key=Self.name.suffix_symbol, val=Self),
-        add_env(),
+        add_env(names=[Self.name.fqn.to_symbol]),
     )
 
 

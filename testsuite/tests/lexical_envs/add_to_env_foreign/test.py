@@ -97,7 +97,6 @@ class ForeignDecl(FooNode):
                 lambda scoped=T.ScopedId:
                     scoped.resolve(Self.node_env).children_env,
             ),
-            unsound=True,
         )
     )
 
