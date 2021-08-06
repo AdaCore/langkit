@@ -502,13 +502,6 @@ class ManageScript:
                  ' grammar (write the grammar definition).'
         )
 
-        # TODO (TB19-017): Remove this option once environment unsoundness is
-        # addressed.
-        subparser.add_argument(
-            '--strict-sound-envs', action='store_true',
-            help='Enable strict behavior for sound environments'
-        )
-
     def add_build_mode_arg(self, subparser: argparse.ArgumentParser) -> None:
         subparser.add_argument(
             '--build-mode', '-b', choices=list(self.BUILD_MODES),
@@ -782,7 +775,6 @@ class ManageScript:
             relative_project=args.relative_project,
             unparse_script=args.unparse_script,
             explicit_passes_triggers=explicit_passes_triggers,
-            strict_sound_envs=args.strict_sound_envs,
         )
 
     def gnatpp(self, project_file: str, glob_pattern: str) -> None:
