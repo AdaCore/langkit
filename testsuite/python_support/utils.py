@@ -187,7 +187,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
                   warning_set=default_warning_set, generate_unparser=False,
                   symbol_canonicalizer=None, mains=False,
                   show_property_logging=False, unparse_script=unparse_script,
-                  strict_sound_envs: bool = False,
                   case_insensitive: bool = False,
                   version: str = "undefined",
                   build_date: str = "undefined",
@@ -235,8 +234,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
         without need for any config file.
 
     :param None|str unparse_script: Script to unparse the language spec.
-
-    :param strict_sound_envs: Pass --strict-sound-envs to generation.
 
     :param case_insensitive: See CompileCtx's constructor.
 
@@ -303,8 +300,6 @@ def build_and_run(grammar=None, py_script=None, ada_main=None, lexer=None,
             argv.append('--no-pretty-print')
         if generate_unparser:
             argv.append('--generate-unparser')
-        if strict_sound_envs:
-            argv.append('--strict-sound-envs')
 
         # For testsuite performance, do not generate mains unless told
         # otherwise.
