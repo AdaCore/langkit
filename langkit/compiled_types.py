@@ -3415,8 +3415,15 @@ class ASTNodeType(BaseStructType):
                 expr=None, prefix=None, type=T.entity.array, public=True,
                 external=True, uses_entity_info=True, uses_envs=False,
                 warn_on_unused=False,
-                doc='Return an array that contains the direct lexical'
-                    ' children.'
+                doc="""
+                Return an array that contains the direct lexical
+                children.
+
+                % if lang == 'ada':
+                .. warning:: This constructs a whole array, and as such is much
+                    less efficient than calling the :ada:ref:`Child` built-in.
+                % endif
+                """
             )),
             ('token_start', PropertyDef(
                 expr=None, prefix=None, type=T.Token,
