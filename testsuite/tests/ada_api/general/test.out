@@ -1,0 +1,53 @@
+Testing first/last child methods
+================================
+
+<DeclList main.txt:1:1-2:8>
+First child index =  1
+Last child index =  2
+First child = <Decl main.txt:1:1-1:2>
+Last child = <Decl main.txt:1:1-1:2>
+
+<Decl main.txt:1:1-1:2>
+First child index =  1
+Last child index =  2
+First child = <Identifier main.txt:1:1-1:2>
+Last child = <Identifier main.txt:1:1-1:2>
+
+<Identifier main.txt:1:1-1:2>
+First child index =  1
+Last child index =  0
+First child = None
+Last child = None
+
+<DeclErrorAbsent main.txt:1:2-1:2>
+First child index =  1
+Last child index =  0
+First child = None
+Last child = None
+
+<Decl main.txt:2:1-2:8>
+First child index =  1
+Last child index =  2
+First child = <Identifier main.txt:2:1-2:2>
+Last child = <Identifier main.txt:2:1-2:2>
+
+<Identifier main.txt:2:1-2:2>
+First child index =  1
+Last child index =  0
+First child = None
+Last child = None
+
+<DeclErrorPresent main.txt:2:3-2:8>
+First child index =  1
+Last child index =  0
+First child = None
+Last child = None
+
+<DeclList main.txt:1:1-1:1>
+First child index =  1
+Last child index =  0
+First child = None
+Last child = None
+
+main.adb: Done.
+Done

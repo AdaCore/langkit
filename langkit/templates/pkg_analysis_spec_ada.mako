@@ -557,6 +557,16 @@ package ${ada_lib_name}.Analysis is
       return ${root_entity.api_name};
    --  Return the ``Index``'th child of ``Node``, or null if ``Node`` has no
    --  such child.
+
+   function First_Child
+     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
+   --  Return the first child ``Node` has, or ``No_${root_entity.api_name}`` if
+   --  there is none.
+
+   function Last_Child
+     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
+   --  Return the last child ``Node`` has, or ``No_${root_entity.api_name}`` if
+   --  there is none.
    pragma Warnings (On, "defined after private extension");
 
    function Traverse
