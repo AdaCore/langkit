@@ -937,6 +937,30 @@ package body ${ada_lib_name}.Analysis is
       return Last_Child_Index (Node.Internal.Node);
    end Last_Child_Index;
 
+   -----------------
+   -- First_Child --
+   -----------------
+
+   function First_Child
+     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name} is
+   begin
+      Check_Safety_Net (Node);
+
+      return Node.Child (First_Child_Index (Node.Internal.Node));
+   end First_Child;
+
+   ----------------
+   -- Last_Child --
+   ----------------
+
+   function Last_Child
+     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name} is
+   begin
+      Check_Safety_Net (Node);
+
+      return Node.Child (Last_Child_Index (Node.Internal.Node));
+   end Last_Child;
+
    ---------------
    -- Get_Child --
    ---------------
