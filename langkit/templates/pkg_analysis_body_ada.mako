@@ -697,6 +697,17 @@ package body ${ada_lib_name}.Analysis is
    -- "=" --
    ---------
 
+   function "=" (L, R : ${root_entity.api_name}) return Boolean is
+   begin
+      Check_Safety_Net (L);
+      Check_Safety_Net (R);
+      return Compare_Entity (L.Internal, R.Internal);
+   end "=";
+
+   ---------
+   -- "=" --
+   ---------
+
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean is
    begin
       Check_Safety_Net (L);

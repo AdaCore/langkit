@@ -49,5 +49,9 @@ Last child index =  0
 First child = None
 Last child = None
 
+Testing generic container instantiation's node equality
+=======================================================
+
+Element already in set
 main.adb: Done.
 Done

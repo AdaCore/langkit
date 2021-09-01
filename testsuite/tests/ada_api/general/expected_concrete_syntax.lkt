@@ -8,6 +8,14 @@ grammar foo_grammar {
 }
 
 @abstract class FooNode : Node {
+
+    ## Return an entity for Self with some metadata set. Used to check
+    ## equality in the Ada API (see main.adb).
+    @export fun set_dummy (): FooNode = FooNode(
+        node=self.node, info=EntityInfo(
+            md=Metadata(dummy=true), rebindings=self.info.rebindings, from_rebound=self.info.from_rebound
+        )
+    )
 }
 
 class Decl : FooNode {

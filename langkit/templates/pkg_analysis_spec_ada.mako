@@ -66,7 +66,13 @@ package ${ada_lib_name}.Analysis is
       % if e.is_root_type:
       type ${e.api_name} is tagged private;
       ${ada_doc('langkit.node_type', 6)}
-      --
+
+      function "=" (L, R : ${root_entity.api_name}) return Boolean;
+      --  Return whether ``L`` and ``R`` designate the same node.
+
+      function Hash
+        (Node : ${root_entity.api_name}) return Ada.Containers.Hash_Type;
+      --  Generic hash function, to be used for nodes as keys in hash tables
       % else:
       type ${e.api_name} is new ${e.base.api_name} with private
       % if e.element_type.is_root_list_type:
@@ -103,7 +109,9 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.node_is_synthetic', 3)}
 
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
-   --  Return whether ``L`` and ``R`` designate the same node
+   --  Return whether ``L`` and ``R`` designate the same node. We have a
+   --  classwide equality to be able to compare nodes from the same type
+   --  hierarchy but with different types.
 
    function Image (Node : ${root_entity.api_name}'Class) return String;
    --  Return a short string describing ``Node``, or None" if ``Node.Is_Null``
@@ -669,10 +677,6 @@ package ${ada_lib_name}.Analysis is
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
       --% no-document: True
    % endfor
-
-   function Hash
-     (Node : ${root_entity.api_name}) return Ada.Containers.Hash_Type;
-   --  Generic hash function, to be used for nodes as keys in hash tables
    pragma Warnings (On, "defined after private extension");
 
 private
