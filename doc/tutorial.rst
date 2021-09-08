@@ -48,7 +48,7 @@ directory and run:
 
 .. code-block:: text
 
-    $ create-project.py Kaleidoscope
+    $ scripts/create-project.py Kaleidoscope
 
 This will create a ``kaleidoscope`` directory, a dummy language specification
 (lexer and parser) as well as a ``manage.py`` script that will help you to
@@ -67,13 +67,14 @@ And check that this skeleton already builds:
 This should generate and then build the analysis library in the ``build`` local
 directory. Check in particular:
 
-* ``build/include`` and ``build/lib``, which contain the Ada sources, C header
+* ``build/src`` and ``build/lib``, which contain the Ada sources, C header
   files and static/shared libraries for the generated library;
 
-* ``build/bin``, which contains a ``parse`` binary, useful to easily run the
-  lexer/parser from the command line; note that it is statically linked with
-  the generated library to ease debugging and testing (you don't have to add
-  ``build/lib`` directory to your ``LD_LIBRARY_PATH``);
+* ``build/obj-mains``, which contains a ``libkaleidoscopelang_parse``
+  binary, useful to easily run the lexer/parser from the command line;
+  note that it is statically linked with the generated library to ease
+  debugging and testing (you don't have to add ``build/lib`` directory
+  to your ``LD_LIBRARY_PATH``);
 
 * ``build/python``, which contains the Python binding for the generated
   library.
@@ -96,7 +97,7 @@ binary:
 
 .. code-block:: text
 
-    $ build/bin/parse
+    $ ./build/obj-mains/libkaleidoscopelang_parse
     Parsing failed:
     <input>:1:1: Expected 'example', got Termination
     <null node>
@@ -107,7 +108,7 @@ allows exactly one "example" keyword:
 
 .. code-block:: text
 
-    $ build/bin/parse example
+    $ ./build/obj-mains/libkaleidoscopelang_parse example
     ExampleNode[1:1-1:8]
 
 Here, we have an ``ExampleNode`` which spans from line 1, column 1 to line 1,
@@ -133,8 +134,8 @@ This module contains three blocks:
 * a ``Token`` class definition, used to define both the set of token kinds that
   the lexer will produce and what to do with them (more on that below);
 
-* the instantiation of a lexer in ``kaleidoscope_lexer`` and adding two lexing
-  rules for it (more on that farther below).
+* the instantiation of a lexer in ``kaleidoscope_lexer`` and adding one lexing
+  rule for it (more on that farther below).
 
 So let's first talk about token kinds. The tokens most lexers yield have a kind
 that determines what kind of word they represent: is it an identifier? an
@@ -206,6 +207,7 @@ actually yield Tokens. This is done using our lexer's ``add_rules`` method:
         (Pattern(r"[ \t\r\n]+"),                        Ignore()),
         (Pattern(r"#.*"),                               Ignore()),
 
+        (Literal("example"),                            Token.Example),
         (Literal("def"),                                Token.Def),
         (Literal("extern"),                             Token.Extern),
         (Pattern(r"[a-zA-Z][a-zA-Z0-9]*"),              Token.Identifier),
@@ -232,11 +234,14 @@ right you have what should be done with it:
 * The second one discards comments (everything starting with ``#`` until the
   end of the line).
 
-* The two ``Literal`` matchers hit on the corresponding keywords and associate
+* The three ``Literal`` matchers hit on the corresponding keywords and associate
   the corresponding token kinds.
 
-* The two last ``Pattern`` will respectively match identifiers and numbers, and
+* The two next ``Pattern`` will respectively match identifiers and numbers, and
   emit the corresponding token kinds.
+
+* Then, the eight last ``Literal`` matchers act as the firsts
+  ``Literal`` ones and match language ponctuation and operators.
 
 Only exact input strings trigger ``Literal`` matchers while the input is
 matched against a regular expression with ``Pattern`` matchers. Note that the
@@ -259,7 +264,7 @@ rejected by the lexer:
 
 .. code-block:: text
 
-    $ build/bin/parse def
+    $ ./build/obj-mains/libkaleidoscopelang_parse def
     Parsing failed:
     <input>:1:1: Invalid token, ignored
     <input>:1:2: Invalid token, ignored
@@ -282,7 +287,7 @@ Let's check with numbers:
 
 .. code-block:: text
 
-    $ build/bin/parse 0
+    $ ./build/obj-mains/libkaleidoscopelang_parse 0
     Parsing failed:
     <input>:1:1: Expected 'example', got Number
     <null node>
@@ -337,8 +342,8 @@ Take your code editor, open ``language/parser.py`` and replace the
         callee = Field()
         args = Field()
 
-As usual, new code comes with its new dependencies: also complete the
-``langkit.dsl`` import statement with ``abstract`` and ``Field``.
+As usual, new code comes with its new dependencies: complete the
+``langkit.dsl`` import statement with ``Field``.
 
 Each class definition is a way to declare how a particular AST node will look.
 Think of it as a kind of structure: here the ``Function`` AST node has two
@@ -563,15 +568,17 @@ language! If you have dealt with Yacc-like grammars before, I'm sure you'll
 find this quite concise, especially considering that it covers both parsing and
 AST building.
 
-Let's check with basic examples if the parser works as expected. First, we have
-to launch another build and then run ``parse`` on some code:
+Don't forget to import ``List``, ``Pick``, and ``Or`` from
+``langkit.parsers``, then let's check with basic examples if the
+parser works as expected. First, we have to launch another build and
+then run ``libkaleidoscopelang_parse`` on some code:
 
 .. code-block:: text
 
     $ ./manage.py make
     [... snipped...]
 
-    $ build/bin/parse 'extern foo(a); def bar(a, b) a * foo(a + 1);'
+    $ ./build/obj-mains/libkaleidoscopelang_parse 'extern foo(a); def bar(a, b) a * foo(a + 1);'
     KaleidoscopeNodeList[1:1-1:45]
     |  ExternDecl[1:1-1:14]
     |  |proto:
@@ -619,7 +626,7 @@ with it:
 
 .. code-block:: text
 
-    $ build/bin/parse -r expr '1 + 2'
+    $ ./build/obj-mains/libkaleidoscopelang_parse -r expr '1 + 2'
     BinaryExpr[1:1-1:6]
     |lhs:
     |  Number[1:1-1:2]: 1
@@ -644,17 +651,19 @@ code?
 Kaleidoscope interpreter
 ------------------------
 
-At the moment, the generated library uses the Ada programming language and its
-API isn't stable yet. However, it also exposes a C API and a Python one on the
-top of it. Let's use the Python API for now as it's more concise, handier and
-likely more stable. Besides, using the Python API makes it really easy to
-experiment since you have an interactive interpreter. So, considering you
-successfully built the library with the Kaleidoscope parser and lexer, make
-sure the ``build/lib/langkit_support.relocatable`` and the
+At the moment, the generated library uses the Ada programming language
+and its API isn't stable yet. However, it also exposes a C API and a
+Python one on the top of it. Let's use the Python API for now as it's
+more concise, handier and likely more stable. Besides, using the
+Python API makes it really easy to experiment since you have an
+interactive interpreter. So, considering you successfully built the
+library with the Kaleidoscope parser and lexer, make sure the
+``build/lib/relocatable/dev/libkaleidoscopelang`` and the
 ``build/lib/libkaleidoscopelang.relocatable`` directories is in your
-``LD_LIBRARY_PATH`` (on most Unix, ``DYLD_FALLBACK_LIBRARY_PATH`` on Darwin,
-adapt for Windows) and that the ``build/python/libkaleidoscopelang.py`` is
-reachable from Python (add ``build/python`` in your ``PYTHONPATH`` environment
+``LD_LIBRARY_PATH`` (on most Unix, ``DYLD_FALLBACK_LIBRARY_PATH`` on
+Darwin, adapt for Windows) and that the
+``build/python/libkaleidoscopelang/__init__.py`` is reachable from
+Python (add ``build/python`` in your ``PYTHONPATH`` environment
 variable).
 
 Alright, so the first thing to do with the Python API is to import the
@@ -688,7 +697,7 @@ can then browse the AST nodes programmatically:
 .. code-block:: python
 
     # Get the root AST node.
-    print unit_2.root
+    print (unit_2.root)
     # <KaleidoscopeNodeList 1:1-1:21>
 
     unit_2.root.dump()
@@ -701,14 +710,14 @@ can then browse the AST nodes programmatically:
     # |  |  |  Identifier 1:5-1:8: foo
     # ...
 
-    print unit_2.root[0]
+    print (unit_2.root[0])
     # <FunctionNode 1:1-1:20>
 
-    print list(unit_2.root[0].iter_fields())
+    print (list(unit_2.root[0].iter_fields()))
     # [(u'f_proto', <Prototype 1:5-1:14>),
     #  (u'f_body', <BinaryExpr 1:15-1:20>)]
 
-    print list(unit_2.root[0].f_body)
+    print (list(unit_2.root[0].f_body))
     # [<Identifier 1:15-1:16>,
     #  <OperatorPlus 1:17-1:18>,
     #  <Identifier 1:19-1:20>]
@@ -757,14 +766,14 @@ Our top-level code looks like this:
     def print_error(filename, sloc_range, message):
         line = sloc_range.start.line
         column = sloc_range.start.column
-        print >> sys.stderr, 'In {}, line {}:'.format(filename, line)
+        print ('In {}, line {}:'.format(filename, line), file=sys.stderr)
         with open(filename) as f:
             # Get the corresponding line in the source file and display it
             for _ in range(sloc_range.start.line - 1):
                 f.readline()
-            print >> sys.stderr, '  {}'.format(f.readline().rstrip())
-            print >> sys.stderr, '  {}^'.format(' ' * (column - 1))
-        print >> sys.stderr, 'Error: {}'.format(message)
+            print ('  {}'.format(f.readline().rstrip()), file=sys.stderr)
+            print ('  {}^'.format(' ' * (column - 1)), file=sys.stderr)
+        print ('Error: {}'.format(message), file=sys.stderr)
 
 
     def execute(filename):
@@ -806,7 +815,7 @@ important bits in ``Interpreter``:
                 )
 
             elif isinstance(node, lkl.Expr):
-                print self.evaluate(node)
+                print (self.evaluate(node))
 
             else:
                 # There should be no other kind of node at top-level
@@ -947,6 +956,9 @@ Congratulations, you wrote an interpreter with Langkit! Enhancing the lexer,
 the parser and the interpreter to handle fancy language constructs such as
 conditionals, more data types or variables is left as an exercise for the
 readers! ;-)
+
+See also ``kalint.py`` file if you need any hint on how to correctly
+assemble all the piece of code given above.
 
 .. todo::
 
