@@ -374,9 +374,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
    is
    begin
       if Id (Logic_Var) = 0 then
-         if Verbose_Trace.Active then
+
+         if Verbose_Trace.Is_Active then
             Verbose_Trace.Trace ("No id for logic var " & Image (Logic_Var));
          end if;
+
          Ctx.Vars.Append (Logic_Var);
          Ctx.Sort_Ctx.Using_Atoms.Append (Atom_Lists.Create);
          Set_Id (Logic_Var, Ctx.Vars.Last_Index);
@@ -395,8 +397,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
       begin
          if Var.Exists then
             Dummy := Get_Id (Ctx, Var.Logic_Var);
-            Verbose_Trace.Trace ("Assigning Id " & Dummy'Image
-                                 & " to var " & Image (Var.Logic_Var));
+
+            if Verbose_Trace.Is_Active then
+               Verbose_Trace.Trace ("Assigning Id " & Dummy'Image
+                                    & " to var " & Image (Var.Logic_Var));
+            end if;
+
          end if;
       end Assign_Id;
    begin
@@ -654,8 +660,12 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
          for I in Appended'Range loop
             if not Appended (I) then
                Error := True;
-               Solv_Trace.Trace
-                 ("Orphan relation: " & Image (Atoms.Get (I)));
+
+               if Solv_Trace.Is_Active then
+                  Solv_Trace.Trace
+                    ("Orphan relation: " & Image (Atoms.Get (I)));
+               end if;
+
                return Atomic_Relation_Vectors.Empty_Array;
             end if;
          end loop;
@@ -716,13 +726,19 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
             --  every relation in order. Abort if one doesn't solve.
             for Atom of Sorted_Atoms loop
                if not Solve_Atomic (Atom) then
-                  Solv_Trace.Trace ("Failed on " & Image (Atom));
+
+                  if Solv_Trace.Is_Active then
+                     Solv_Trace.Trace ("Failed on " & Image (Atom));
+                  end if;
+
                   return Cleanup (True);
                end if;
             end loop;
 
-            Sol_Trace.Trace ("Valid solution");
-            Sol_Trace.Trace (Image (Sorted_Atoms));
+            if Sol_Trace.Is_Active then
+               Sol_Trace.Trace ("Valid solution");
+               Sol_Trace.Trace (Image (Sorted_Atoms));
+            end if;
 
             --  Call the user defined callback and return
             return Cleanup (Ctx.Cb (Var_Array (Ctx.Vars.To_Array)));
@@ -746,6 +762,7 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                  ("Unaliasing "
                   & Image (Ctx.Aliases.Get_Access (I).Unify_From));
             end if;
+
             Unalias (Ctx.Aliases.Get_Access (I).Unify_From);
          end loop;
          Ctx.Aliases.Cut (Initial_Aliases_Length);
@@ -800,8 +817,11 @@ package body Langkit_Support.Adalog.Symbolic_Solver is
                   Id := Get_Id (Ctx, V.Logic_Var);
                   Reserve (Vars_To_Atoms, Id);
 
-                  Solv_Trace.Trace
-                    ("== Appending " & Image (Atom) & " to Vars_To_Atoms");
+                  if Solv_Trace.Is_Active then
+                     Solv_Trace.Trace
+                       ("== Appending " & Image (Atom) & " to Vars_To_Atoms");
+                  end if;
+
                   Vars_To_Atoms.Get_Access (Id).all
                     := Atom & Vars_To_Atoms.Get (Id);
                when others => null;

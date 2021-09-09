@@ -265,7 +265,8 @@
       % for i, arg_type in enumerate(refcounted_args_types):
       Dec_Ref (Self.Field_${i});
       % endfor
-   end Free;
+      null;
+   end Destroy;
    % endif
 
    % endfor

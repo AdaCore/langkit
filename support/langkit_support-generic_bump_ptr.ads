@@ -134,10 +134,9 @@ package Langkit_Support.Generic_Bump_Ptr is
       --  array that is large enough to contain Length elements and return
       --  an access to it.
 
-   private
-
       function To_Pointer is new Ada.Unchecked_Conversion
         (System.Address, Element_Array_Access);
+   private
 
       Empty_Array_Access : constant Element_Array_Access := To_Pointer
         (System.Null_Address + 1);

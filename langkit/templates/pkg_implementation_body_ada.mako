@@ -81,6 +81,9 @@ pragma Warnings (On, "referenced");
 package body ${ada_lib_name}.Implementation is
 
    use ${ada_lib_name}.Common.Precomputed_Symbols;
+   pragma Warnings (Off, "has no effect");
+   use Solver;
+   pragma Warnings (On, "has no effect");
 
    package Context_Vectors is new Ada.Containers.Vectors
      (Index_Type   => Positive,
@@ -3644,8 +3647,9 @@ package body ${ada_lib_name}.Implementation is
       <%
           def get_actions(astnode, node_expr):
               return '\n'.join(
-                  'Assign ({node}, {node}.{field}, "{field}");'
-                  .format(node=node_expr, field=field.name)
+                  'Assign ({node}, {node}.{field}, "{field_name}");'
+                  .format(node=node_expr,
+                          field=field.name, field_name=field.original_name)
                   for field in astnode.get_user_fields(
                       include_inherited=False)
                   if field.type.is_logic_var_type
