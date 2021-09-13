@@ -1,18 +1,20 @@
-import sys
 import libkaleidoscopelang as lkl
+import sys
+
 
 class ExecutionError(Exception):
     def __init__(self, sloc_range, message):
         self.sloc_range = sloc_range
         self.message = message
 
+
 class Interpreter(object):
     # Mapping: enumerators for the Operator type -> callables to perform the
     # operations themselves.
-    BINOPS = {lkl.OperatorPlus:  lambda x, y: x + y,
+    BINOPS = {lkl.OperatorPlus: lambda x, y: x + y,
               lkl.OperatorMinus: lambda x, y: x - y,
-              lkl.OperatorMult:  lambda x, y: x * y,
-              lkl.OperatorDiv:   lambda x, y: x / y}
+              lkl.OperatorMult: lambda x, y: x * y,
+              lkl.OperatorDiv: lambda x, y: x / y}
 
     def __init__(self):
         # Mapping: function name -> FunctionNode instance
@@ -32,12 +34,12 @@ class Interpreter(object):
                 )
 
             elif isinstance(node, lkl.Expr):
-                print (self.evaluate(node))
+                print(self.evaluate(node))
 
             else:
                 # There should be no other kind of node at top-level
                 assert False
-                
+
     # Method for the Interpreter class
     def evaluate(self, node, env=None):
         if env is None:
@@ -92,17 +94,19 @@ class Interpreter(object):
             # There should be no other kind of node in expressions
             assert False
 
+
 def print_error(filename, sloc_range, message):
     line = sloc_range.start.line
     column = sloc_range.start.column
-    print ('In {}, line {}:'.format(filename, line), file=sys.stderr)
+    print('In {}, line {}:'.format(filename, line), file=sys.stderr)
     with open(filename) as f:
         # Get the corresponding line in the source file and display it
         for _ in range(sloc_range.start.line - 1):
             f.readline()
-        print ('  {}'.format(f.readline().rstrip()), file=sys.stderr)
-        print ('  {}^'.format(' ' * (column - 1)), file=sys.stderr)
-    print ('Error: {}'.format(message), file=sys.stderr)
+        print('  {}'.format(f.readline().rstrip()), file=sys.stderr)
+        print('  {}^'.format(' ' * (column - 1)), file=sys.stderr)
+    print('Error: {}'.format(message), file=sys.stderr)
+
 
 def execute(filename):
     ctx = lkl.AnalysisContext()
@@ -116,5 +120,6 @@ def execute(filename):
     except ExecutionError as exc:
         print_error(filename, exc.sloc_range, exc.message)
         sys.exit(1)
+
 
 execute(sys.argv[1])
