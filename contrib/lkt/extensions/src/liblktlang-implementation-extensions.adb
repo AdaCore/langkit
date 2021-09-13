@@ -36,7 +36,12 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin struct Char {}" & ASCII.LF &
      "@builtin struct String " &
      "implements Sized, Indexable[Char], Iterator[Char] {}" & ASCII.LF &
+     "@builtin class LexicalEnv {" & ASCII.LF &
+     "    @builtin fun get(symbol : Symbol): Array[Node]" & ASCII.LF &
+     "}" & ASCII.LF &
      "@builtin class Node {" & ASCII.LF &
+     "    @builtin @property fun parent(): Node" & ASCII.LF &
+     "    @builtin fun node_env(): LexicalEnv" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin trait TokenNode {" & ASCII.LF &
      "    @builtin @property fun symbol(): Symbol" & ASCII.LF &
