@@ -88,6 +88,3 @@ test.lkt:13:66: error: Cannot find entity `self` in this scope
 12 | @invalid fun test_astlist_indexing(a: ASTList[String]): String = self(12)
    |                                                                  ^^^^    
 
-Expr <CallExpr test.lkt:13:66-13:74>
-     has type <StructDecl prelude: "String">
-

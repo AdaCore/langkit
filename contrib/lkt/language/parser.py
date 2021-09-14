@@ -1933,10 +1933,21 @@ class FunDecl(UserValDecl):
     call_scope = Property(Entity.children_env)
 
     @langkit_property()
+    def is_property():
+        """
+        Returns whether this function decl defines a property or not.
+
+        A property is a function that has the @property annotation and has no
+        parameters. As a result of this annotation, it will be callable without
+        parens.
+        """
+        return Entity.full_decl.has_annotation('property')
+
+    @langkit_property()
     def get_type(no_inference=(T.Bool, False)):
         ignore(no_inference)
         return If(
-            Entity.full_decl.has_annotation('property'),
+            Entity.is_property,
 
             Entity.return_type.designated_type,
 
@@ -2509,20 +2520,50 @@ class CallExpr(Expr):
     @langkit_property(public=True)
     def called_decl():
         """
-        Return the declaration that is called by this call expression.
+        Return the declaration that is called by this call expression, if there
+        is one that can be statically determined.
         """
-        refd_decl = Var(Entity.name.referenced_decl.then(
-            lambda sr: sr.result_ref
+
+        # We use this to resolve formals rather than just the type of the
+        # ``name`` of the callexpr, for two language features:
+        #
+        # * Generic functions: We need to statically resolve them in order to
+        #   allow inference in the implicit instantiation.
+        #
+        # * Named parameters: Since function types don't contain parameter
+        #   names, if we want to allow named parameters we need to statically
+        #   resolve the target of the call when possible.
+
+        refd_decl = Var(If(
+
+            # If the name of this callexpr is a callexpr itself, there cannot
+            # be a statically known referenced decl, since whatever is
+            # referenced is the result.
+            Not(Entity.name.is_a(CallExpr)),
+
+            Entity.name.referenced_decl.then(
+                lambda sr: sr.result_ref
+            ).then(lambda decl: If(
+                decl.cast(T.FunDecl)._.is_property, No(T.Decl.entity), decl
+            )),
+
+            No(T.Decl.entity)
         ))
 
-        # Implement special resolution for calls to objects via __call__
+        # Implement special resolution for calls to objects via __call__.
+        # NOTE: We do this resolution here because in case where the object is
+        # statically resolvable, the __call__ method might have keyword
+        # arguments, see comment above.
         called_decl = Var(
             refd_decl.then(lambda refd_decl: refd_decl.match(
+
                 # Don't try to look for __call__ on function decls
                 lambda _=FunDecl: refd_decl,
+
                 lambda v=BaseValDecl:
                 v._.get_type._.get_fun('__call__')
                 .then(lambda a: a, default_val=refd_decl),
+
                 lambda _: refd_decl,
             ))
         )
@@ -2543,11 +2584,25 @@ class CallExpr(Expr):
     @langkit_property()
     def expr_context_free_type():
         return Entity.called_decl.then(
+            # First case, we have a statically resolvable called decl: Use it
+            # to determine the context free type of this expression.
+            # TODO: it's not clear we actually need this branch: we could
+            # determine the type from the type of name in all cases?
             lambda rd: rd.match(
                 lambda fd=T.FunDecl: fd.return_type.designated_type,
                 lambda td=T.TypeDecl: td,
                 lambda _:
                 PropertyError(T.TypeDecl.entity, "should not happen"),
+            )
+        )._or(
+            # Second case, we don't have a statically resolvable called decl:
+            # just rely on the type of the ``name``.
+            Entity.name.expr_context_free_type.then(
+                lambda t: t.match(
+                    lambda ft=FunctionType: ft.return_type.as_entity,
+                    lambda t=TypeDecl:
+                    t.get_fun('__call__')._.return_type.designated_type,
+                )
             )
         )
 
@@ -2558,6 +2613,7 @@ class CallExpr(Expr):
         called object.
         """
         return Entity.called_decl.then(
+            # Case where the called decl is known statically
             lambda cd: cd.match(
                 lambda fd=T.FunDecl: fd.args.map(
                     lambda p: p.cast_or_raise(T.ComponentDecl).to_formal_param,
@@ -2567,6 +2623,9 @@ class CallExpr(Expr):
                 lambda _:
                 PropertyError(T.FormalParam.array, "Should not happen")
             ),
+
+            # Case where there is no statically known declaration, so we base
+            # the resolution of formals on the callable type of the name.
             default_val=Entity.called_object_type.match(
                 lambda ft=T.FunctionType: ft.args.map(
                     lambda a: FormalParam.new(

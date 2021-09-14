@@ -1,0 +1,19 @@
+class MyCallable {
+    fun __call__(a: Int): Bool
+}
+
+class RecursiveCallable {
+    fun __call__(a: Int): RecursiveCallable
+}
+
+class A {
+    @property
+    fun pouet(): (Int) -> Bool
+
+    fun callable_array(): Array[MyCallable]
+
+    fun test(): Bool = self.pouet(12)
+    fun test2(): Bool = MyCallable()(12)
+    fun test3(): Bool = self.callable_array()(12)(12)
+    fun test4(): RecursiveCallable = RecursiveCallable()(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)(12)
+}
