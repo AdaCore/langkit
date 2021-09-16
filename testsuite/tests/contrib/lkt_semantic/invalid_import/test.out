@@ -1,0 +1,6 @@
+Resolving test.lkt
+==================
+test.lkt:1:1: error: cannot find invalid_import
+0 | import invalid_import
+  | ^^^^^^^^^^^^^^^^^^^^^
+
