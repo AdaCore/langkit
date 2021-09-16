@@ -507,6 +507,14 @@ class Import(LKNode):
         """
         return Self.internal_fetch_referenced_unit(Self.name.text)
 
+    @langkit_property(return_type=T.SemanticResult.array)
+    def check_correctness_pre():
+        return If(
+            Self.referenced_unit.root.is_null,
+            Entity.error(S("cannot find ").concat(Self.name.text)).singleton,
+            No(T.SemanticResult.array)
+        )
+
     env_spec = EnvSpec(
         do(Self.referenced_unit)
     )
