@@ -1,7 +1,7 @@
 Resolving test.lkt
 ==================
 Id   <RefId "Node" test.lkt:1:18-1:22>
-     references <ClassDecl "Node" __prelude:27:10-30:2>
+     references <ClassDecl "Node" __prelude:30:10-34:2>
 
 Id   <RefId "RootNode" test.lkt:2:19-2:27>
      references <ClassDecl "RootNode" test.lkt:1:1-1:25>
