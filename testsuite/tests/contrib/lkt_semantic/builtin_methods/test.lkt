@@ -10,4 +10,6 @@ class Name : Node implements TokenNode {
 
     fun analysis_unit_node (): Node = node.unit().root
 
+    fun first_node (): Node = node.node_env().get_first(node.symbol)
+
 }
