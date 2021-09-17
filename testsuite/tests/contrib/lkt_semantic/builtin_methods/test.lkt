@@ -14,4 +14,6 @@ class Name : Node implements TokenNode {
 
     fun env_node (): Node = node.node_env().env_node()
 
+    fun children_env (): LexicalEnv = node.children_env()
+
 }
