@@ -35,7 +35,9 @@ package body Liblktlang.Implementation.Extensions is
      "}" & ASCII.LF &
      "@builtin struct Char {}" & ASCII.LF &
      "@builtin struct String " &
-     "implements Sized, Indexable[Char], Iterator[Char] {}" & ASCII.LF &
+     "implements Sized, Indexable[Char], Iterator[Char] {" & ASCII.LF &
+     "    @builtin @property fun to_symbol(): Symbol" & ASCII.LF &
+     "}" & ASCII.LF &
      "@builtin class LogicalVar {" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin class Equation {" & ASCII.LF &

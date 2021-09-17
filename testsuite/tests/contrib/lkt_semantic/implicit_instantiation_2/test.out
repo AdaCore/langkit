@@ -49,7 +49,7 @@ Id   <RefId "Array" test.lkt:17:33-17:38>
      references <GenericDecl "Array" __prelude:18:10-19:2>
 
 Id   <RefId "String" test.lkt:17:39-17:45>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "ints" test.lkt:17:49-17:53>
      references <FunArgDecl "ints" test.lkt:17:14-17:30>
@@ -64,7 +64,7 @@ Id   <RefId "convert_int" test.lkt:17:65-17:76>
      references <GenericDecl "convert_int" test.lkt:11:1-11:41>
 
 Id   <RefId "String" test.lkt:17:77-17:83>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Expr <GenericInstantiation test.lkt:17:65-17:84>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -76,7 +76,7 @@ Expr <RefId "i" test.lkt:17:85-17:86>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:17:65-17:87>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 
 Expr <LambdaExpr test.lkt:17:58-17:87>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -94,7 +94,7 @@ Id   <RefId "Array" test.lkt:20:39-20:44>
      references <GenericDecl "Array" __prelude:18:10-19:2>
 
 Id   <RefId "String" test.lkt:20:45-20:51>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "ints" test.lkt:21:5-21:9>
      references <FunArgDecl "ints" test.lkt:20:20-20:36>
@@ -109,7 +109,7 @@ Id   <RefId "convert_int" test.lkt:22:16-22:27>
      references <GenericDecl "convert_int" test.lkt:11:1-11:41>
 
 Id   <RefId "String" test.lkt:22:28-22:34>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Expr <GenericInstantiation test.lkt:22:16-22:35>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -121,7 +121,7 @@ Expr <RefId "i" test.lkt:22:36-22:37>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:22:16-22:38>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 
 Expr <LambdaExpr test.lkt:22:9-22:38>
      has type <FunctionType "(Int) -> String" __prelude>

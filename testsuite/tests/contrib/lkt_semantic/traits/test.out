@@ -22,7 +22,7 @@ Id   <RefId "Vec" test.lkt:15:11-15:14>
      references <GenericDecl "Vec" test.lkt:12:1-13:2>
 
 Id   <RefId "String" test.lkt:15:15-15:21>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Expr <NullLit test.lkt:15:25-15:29>
      has type <InstantiatedGenericType "Vec[String]" test.lkt:12:1-13:2>
@@ -49,7 +49,7 @@ Expr <CallExpr test.lkt:16:24-16:36>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "String" test.lkt:19:16-19:22>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "vec" test.lkt:19:25-19:28>
      references <ValDecl "vec" test.lkt:15:1-15:29>
@@ -61,5 +61,5 @@ Expr <NumLit test.lkt:19:29-19:30>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:19:25-19:31>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 
