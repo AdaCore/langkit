@@ -4,7 +4,7 @@ Id   <RefId "ASTList" test.lkt:3:28-3:35>
      references <GenericDecl "ASTList" __prelude:20:10-21:2>
 
 Id   <RefId "String" test.lkt:3:36-3:42>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "Int" test.lkt:3:46-3:49>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -31,7 +31,7 @@ Id   <RefId "Array" test.lkt:4:26-4:31>
      references <GenericDecl "Array" __prelude:18:10-19:2>
 
 Id   <RefId "String" test.lkt:4:32-4:38>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "Int" test.lkt:4:42-4:45>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -58,10 +58,10 @@ Id   <RefId "ASTList" test.lkt:5:33-5:40>
      references <GenericDecl "ASTList" __prelude:20:10-21:2>
 
 Id   <RefId "String" test.lkt:5:41-5:47>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "String" test.lkt:5:51-5:57>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "self" test.lkt:5:60-5:64>
      references <FunArgDecl "self" test.lkt:5:27-5:48>
@@ -73,21 +73,21 @@ Expr <NumLit test.lkt:5:65-5:67>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:5:60-5:68>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "ASTList" test.lkt:13:39-13:46>
      references <GenericDecl "ASTList" __prelude:20:10-21:2>
 
 Id   <RefId "String" test.lkt:13:47-13:53>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "String" test.lkt:13:57-13:63>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 test.lkt:13:66: error: Cannot find entity `self` in this scope
 12 | @invalid fun test_astlist_indexing(a: ASTList[String]): String = self(12)
    |                                                                  ^^^^    
 
 Expr <CallExpr test.lkt:13:66-13:74>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 

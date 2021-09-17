@@ -34,13 +34,13 @@ Id   <RefId "T" test.lkt:10:45-10:46>
      references <GenericFormalTypeDecl "T" test.lkt:10:10-10:11>
 
 Id   <RefId "String" test.lkt:13:29-13:35>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "convert_int" test.lkt:13:38-13:49>
      references <GenericDecl "convert_int" test.lkt:7:1-7:41>
 
 Id   <RefId "String" test.lkt:13:50-13:56>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Expr <GenericInstantiation test.lkt:13:38-13:57>
      has type <FunctionType "(Int) -> String" __prelude>
@@ -49,7 +49,7 @@ Expr <NumLit test.lkt:13:58-13:60>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:13:38-13:61>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "Int" test.lkt:14:31-14:34>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -178,7 +178,7 @@ Expr <ErrorOnNull test.lkt:25:34-25:62>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "String" test.lkt:31:20-31:26>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "convert_int" test.lkt:31:29-31:40>
      references <GenericDecl "convert_int" test.lkt:7:1-7:41>
@@ -187,7 +187,7 @@ Expr <NumLit test.lkt:31:41-31:43>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Expr <CallExpr test.lkt:31:29-31:44>
-     has type <StructDecl "String" __prelude:23:10-23:76>
+     has type <StructDecl "String" __prelude:23:10-25:2>
 
 Id   <RefId "Int" test.lkt:36:22-36:25>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -286,7 +286,7 @@ Id   <RefId "Int" test.lkt:58:48-58:51>
      references <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "String" test.lkt:58:53-58:59>
-     references <StructDecl "String" __prelude:23:10-23:76>
+     references <StructDecl "String" __prelude:23:10-25:2>
 
 test.lkt:58:63: error: Cannot instantiate callee: cannot unify `Array[T]` with `Dummy[Int, String]`
 57 | @invalid fun test_invalid_singleton_3(): Dummy[Int, String] = singleton("lol")
