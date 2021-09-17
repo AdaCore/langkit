@@ -18,4 +18,7 @@ class Name : Node implements TokenNode {
 
     fun to_symbol (s : String): Symbol = s.to_symbol
 
+    fun parent_nodes (): Array[Node] = node.parents()
+    fun parent_nodes (): Array[Node] = node.parents(with_self=false)
+
 }
