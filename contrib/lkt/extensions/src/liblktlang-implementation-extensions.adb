@@ -43,6 +43,7 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin class LexicalEnv {" & ASCII.LF &
      "    @builtin fun get(symbol : Symbol): Array[Node]" & ASCII.LF &
      "    @builtin fun get_first(symbol : Symbol): Node" & ASCII.LF &
+     "    @builtin fun env_node(): Node" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin class AnalysisUnit {" & ASCII.LF &
      "    @builtin @property fun root(): Node" & ASCII.LF &
