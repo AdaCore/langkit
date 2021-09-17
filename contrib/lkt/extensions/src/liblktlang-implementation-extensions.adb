@@ -29,6 +29,7 @@ package body Liblktlang.Implementation.Extensions is
      "}" & ASCII.LF &
      "@builtin generic[T] struct Array " &
      "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &
+     "    @builtin @property fun to_iterator(): Iterator[T]" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin generic[T] struct ASTList " &
      "implements Sized, Indexable[T], Iterator[T] {" & ASCII.LF &

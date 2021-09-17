@@ -338,7 +338,7 @@ Expr <CallExpr test.lkt:47:56-47:66>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "Array" test.lkt:48:34-48:39>
-     references <GenericDecl "Array" __prelude:18:10-19:2>
+     references <GenericDecl "Array" __prelude:18:10-20:2>
 
 Id   <RefId "Int" test.lkt:48:40-48:43>
      references <StructDecl "Int" __prelude:1:10-1:23>
@@ -350,7 +350,7 @@ Id   <RefId "arg" test.lkt:48:53-48:56>
      references <FunArgDecl "arg" test.lkt:48:29-48:44>
 
 Expr <RefId "arg" test.lkt:48:53-48:56>
-     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-19:2>
+     has type <InstantiatedGenericType "Array[Int]" __prelude:18:10-20:2>
 
 Expr <NumLit test.lkt:48:58-48:60>
      has type <StructDecl "Int" __prelude:1:10-1:23>

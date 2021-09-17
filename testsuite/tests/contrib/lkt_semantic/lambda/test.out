@@ -114,10 +114,10 @@ Expr <NumLit test.lkt:16:24-16:26>
      has type <StructDecl "Int" __prelude:1:10-1:23>
 
 Id   <RefId "String" test.lkt:16:33-16:39>
-     references <StructDecl "String" __prelude:23:10-25:2>
+     references <StructDecl "String" __prelude:24:10-26:2>
 
 Id   <RefId "String" test.lkt:16:45-16:51>
-     references <StructDecl "String" __prelude:23:10-25:2>
+     references <StructDecl "String" __prelude:24:10-26:2>
 
 Id   <RefId "Int" test.lkt:16:54-16:57>
      references <StructDecl "Int" __prelude:1:10-1:23>
