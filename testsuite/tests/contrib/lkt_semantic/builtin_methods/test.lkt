@@ -12,4 +12,6 @@ class Name : Node implements TokenNode {
 
     fun first_node (): Node = node.node_env().get_first(node.symbol)
 
+    fun env_node (): Node = node.node_env().env_node()
+
 }
