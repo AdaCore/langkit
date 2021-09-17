@@ -51,6 +51,7 @@ package body Liblktlang.Implementation.Extensions is
      "@builtin class Node {" & ASCII.LF &
      "    @builtin @property fun parent(): Node" & ASCII.LF &
      "    @builtin fun node_env(): LexicalEnv" & ASCII.LF &
+     "    @builtin fun children_env(): LexicalEnv" & ASCII.LF &
      "    @builtin fun unit(): AnalysisUnit" & ASCII.LF &
      "}" & ASCII.LF &
      "@builtin trait TokenNode {" & ASCII.LF &
