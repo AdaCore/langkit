@@ -12,7 +12,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class ArgSpec : FooNode {
@@ -24,10 +24,10 @@ class CallExpr : FooNode {
     @parse_field name : Identifier
     @parse_field args : ASTList[Expr]
 
-    @lazy args_env : LexicalEnv =
+    @lazy args_env : LexicalEnv[FooNode] =
     DynamicLexicalEnv(BareCallExpr.args_assocs_getter)
 
-    @lazy arg_exprs_env : LexicalEnv =
+    @lazy arg_exprs_env : LexicalEnv[FooNode] =
     DynamicLexicalEnv(BareCallExpr.arg_exprs_assocs_getter, assoc_resolver=BareExpr.resolve)
 
     ## For each argument, associate its name to the expression passed in this

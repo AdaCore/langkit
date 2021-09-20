@@ -18,7 +18,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Def : FooNode {
@@ -46,17 +46,17 @@ class Ref : Atom {
     @export fun dummy (): Array[FooNode] =
     node.referenced_env().get(node.name.symbol)
 
-    fun referenced_env (): LexicalEnv = null
+    fun referenced_env (): LexicalEnv[FooNode] = null
 }
 
 class MiddleRef : Ref {
 
-    fun referenced_env (): LexicalEnv = null
+    fun referenced_env (): LexicalEnv[FooNode] = null
 }
 
 class DerivedRef : MiddleRef {
 
-    fun referenced_env (): LexicalEnv =
+    fun referenced_env (): LexicalEnv[FooNode] =
     node.unit().root.node_env().get_first(node.name.symbol).children_env()
 }
 

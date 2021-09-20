@@ -1,13 +1,16 @@
 Resolving test.lkt
 ==================
-Id   <RefId "Node" test.lkt:1:18-1:22>
-     references <ClassDecl prelude: "Node">
+Id   <RefId "Node" test.lkt:1:27-1:31>
+     references <GenericDecl prelude: "Node">
+
+Id   <RefId "RootNode" test.lkt:1:32-1:40>
+     references <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
 Id   <RefId "RootNode" test.lkt:2:19-2:27>
-     references <ClassDecl "RootNode" test.lkt:1:1-1:25>
+     references <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
 Id   <RefId "RootNode" test.lkt:4:5-4:13>
-     references <ClassDecl "RootNode" test.lkt:1:1-1:25>
+     references <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
 Id   <RefId "ChildNode" test.lkt:5:5-5:14>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
@@ -16,7 +19,7 @@ Id   <RefId "a" test.lkt:5:17-5:18>
      references <FieldDecl "a" test.lkt:4:1-4:13>
 
 Expr <RefId "a" test.lkt:5:17-5:18>
-     has type <ClassDecl "RootNode" test.lkt:1:1-1:25>
+     has type <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
 Id   <RefId "ChildNode" test.lkt:5:22-5:31>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
@@ -31,7 +34,7 @@ Id   <RefId "a" test.lkt:6:20-6:21>
      references <FieldDecl "a" test.lkt:4:1-4:13>
 
 Expr <RefId "a" test.lkt:6:20-6:21>
-     has type <ClassDecl "RootNode" test.lkt:1:1-1:25>
+     has type <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
 Id   <RefId "ChildNode" test.lkt:6:25-6:34>
      references <ClassDecl "ChildNode" test.lkt:2:1-2:30>
@@ -47,7 +50,7 @@ Id   <RefId "a" test.lkt:7:20-7:21>
      references <FieldDecl "a" test.lkt:4:1-4:13>
 
 Expr <RefId "a" test.lkt:7:20-7:21>
-     has type <ClassDecl "RootNode" test.lkt:1:1-1:25>
+     has type <ClassDecl "RootNode" test.lkt:1:1-1:44>
 
 Id   <RefId "Int" test.lkt:7:25-7:28>
      references <StructDecl prelude: "Int">

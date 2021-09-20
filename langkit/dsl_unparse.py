@@ -1286,6 +1286,7 @@ def emit_field(field):
 
 def type_name(type):
     from langkit.compiled_types import ASTNodeType, resolve_type
+    from langkit.compile_context import get_context
 
     type = resolve_type(type)
 
@@ -1315,6 +1316,11 @@ def type_name(type):
         return "{}.node".format(type.dsl_name)
     elif type.is_character_type:
         return 'Char'
+    elif type.is_lexical_env_type or type.is_analysis_unit_type:
+        return "{}[{}]".format(type.dsl_name,
+                               type_name(get_context().root_grammar_class))
+
+        return "".format
     else:
         return type.dsl_name
 
@@ -1350,7 +1356,7 @@ def emit_node_type(node_type):
         builtin_properties = node_type.builtin_properties()
 
         if node_type.is_root_node:
-            base_name = "Node"
+            traits.append(f'Node[{type_name(node_type)}]')
 
         abstract_qual = "@abstract " if node_type.abstract else ""
 

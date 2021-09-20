@@ -10,12 +10,13 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
     fun env_struct (): EnvStruct =
     EnvStruct(env=node.children_env().env_orphan())
 
-    fun env_array (): Array[LexicalEnv] = [node.children_env().env_orphan()]
+    fun env_array (): Array[LexicalEnv[FooNode]] =
+    [node.children_env().env_orphan()]
 }
 
 class Decl : FooNode {
@@ -44,5 +45,5 @@ class Ref : FooNode {
 }
 
 struct EnvStruct {
-    env : LexicalEnv
+    env : LexicalEnv[FooNode]
 }

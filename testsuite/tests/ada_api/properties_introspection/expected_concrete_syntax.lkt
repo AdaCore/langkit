@@ -11,7 +11,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
     @export fun id_bool (id : Bool): Bool = id
 
@@ -25,7 +25,7 @@ grammar foo_grammar {
 
     @export fun id_sym (id : Symbol): Symbol = id
 
-    @export fun id_unit (id : AnalysisUnit): AnalysisUnit = id
+    @export fun id_unit (id : AnalysisUnit[FooNode]): AnalysisUnit[FooNode] = id
 
     @export fun id_root_node (id : FooNode): FooNode = id
 

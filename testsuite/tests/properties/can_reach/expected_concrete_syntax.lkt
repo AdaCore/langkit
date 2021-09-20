@@ -5,7 +5,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
     @export fun can_reach (n : FooNode, from_node : FooNode): Bool =
     n.node.can_reach(from_node.node)

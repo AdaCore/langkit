@@ -15,7 +15,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class DummySyntheticNode : FooNode {
@@ -33,7 +33,7 @@ class ForeignDecl : FooNode {
 
     @abstract fun simple_name (): SimpleId
 
-    @abstract fun resolve (base_env : LexicalEnv): Scope
+    @abstract fun resolve (base_env : LexicalEnv[FooNode]): Scope
 }
 
 class ScopedId : Id {
@@ -42,7 +42,7 @@ class ScopedId : Id {
 
     fun simple_name (): SimpleId = node.name
 
-    fun resolve (base_env : LexicalEnv): Scope =
+    fun resolve (base_env : LexicalEnv[FooNode]): Scope =
     node.scope.resolve(base_env).children_env().get_first(node.name.symbol).node.as[Scope]
 }
 
@@ -50,7 +50,7 @@ class SimpleId : Id implements TokenNode {
 
     fun simple_name (): SimpleId = node
 
-    fun resolve (base_env : LexicalEnv): Scope =
+    fun resolve (base_env : LexicalEnv[FooNode]): Scope =
     base_env.get_first(node.symbol).node.as[Scope]
 }
 

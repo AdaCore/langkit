@@ -18,7 +18,7 @@ enum DeclKind {
     case func, var
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 
     @export fun identity (k : DeclKind): DeclKind = k
 }

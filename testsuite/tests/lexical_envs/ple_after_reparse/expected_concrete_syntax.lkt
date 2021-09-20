@@ -10,7 +10,7 @@ grammar foo_grammar {
 
 }
 
-@abstract class FooNode : Node {
+@abstract class FooNode implements Node[FooNode] {
 }
 
 class Dep : FooNode {
@@ -23,9 +23,9 @@ class Dep : FooNode {
 
     @export @abstract fun suffix_symbol (): Symbol
 
-    @abstract fun referenced_unit_or_error (or_error : Bool): AnalysisUnit
+    @abstract fun referenced_unit_or_error (or_error : Bool): AnalysisUnit[FooNode]
 
-    @export fun referenced_unit (): AnalysisUnit =
+    @export fun referenced_unit (): AnalysisUnit[FooNode] =
     node.referenced_unit_or_error(false)
 
     fun scope_fqn (): String = match node {

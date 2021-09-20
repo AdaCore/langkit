@@ -149,7 +149,7 @@ class LKNode(ASTNode):
         return Self.root_get(entity_name).cast_or_raise(T.GenericDecl)
 
     node_type = Property(
-        Self.get_builtin_type('Node'), public=True,
+        Self.get_builtin_gen_decl('Node'), public=True,
         doc="Unit method. Return the Node base class."
     )
 
